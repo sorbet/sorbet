@@ -15,7 +15,7 @@ find ./test/testdata/ -iname "*.rb"|grep -v disable|xargs -n 1 -I % cp % fuzz_co
 
 mkdir -p fuzz_crashers/original
 
-command -v llvm_symbolizer >/dev/null 2>&1 || { echo 'will need llvm_symbolizer' ; exit 1; }
+command -v llvm-symbolizer >/dev/null 2>&1 || { echo 'will need llvm-symbolizer' ; exit 1; }
 
 # fuzz
 nice ./bazel-bin/test/fuzz/fuzz_dash_e -use_value_profile=1 -only_ascii=1 -dict=test/fuzz/ruby.dict -artifact_prefix=fuzz_crashers/original/ fuzz_corpus/ --stress-incremental-resolver

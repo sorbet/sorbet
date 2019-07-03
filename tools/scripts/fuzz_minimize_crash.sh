@@ -56,7 +56,7 @@ mkdir -p "${dir}/../../fuzz_crashers/min/"
 PATH=$PATH:$(pwd)/bazel-sorbet/external/llvm_toolchain/bin/
 export PATH
 
-command -v llvm_symbolizer >/dev/null 2>&1 || { echo 'will need llvm_symbolizer' ; exit 1; }
+command -v llvm-symbolizer >/dev/null 2>&1 || { echo 'will need llvm-symbolizer' ; exit 1; }
 
 (
     cd "$dir"/../..
