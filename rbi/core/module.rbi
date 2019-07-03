@@ -132,7 +132,16 @@ class Module < Object
     )
     .returns(T.untyped)
   end
-  def class_eval(arg0, filename=T.unsafe(nil), lineno=T.unsafe(nil)); end
+  sig do
+    type_parameters(:U).params(
+        blk: T.proc
+              .bind(T.untyped)
+              .params(m: T.untyped)
+              .returns(T.type_parameter(:U))
+    )
+    .returns(T.type_parameter(:U))
+  end
+  def class_eval(arg0, filename=T.unsafe(nil), lineno=T.unsafe(nil), &blk); end
 
   sig do
     params(
@@ -354,7 +363,16 @@ class Module < Object
     )
     .returns(T.untyped)
   end
-  def module_eval(arg0, filename=T.unsafe(nil), lineno=T.unsafe(nil)); end
+  sig do
+    type_parameters(:U).params(
+        blk: T.proc
+              .bind(T.untyped)
+              .params(m: T.untyped)
+              .returns(T.type_parameter(:U))
+    )
+    .returns(T.type_parameter(:U))
+  end
+  def module_eval(arg0, filename=T.unsafe(nil), lineno=T.unsafe(nil), &blk); end
 
   sig do
     params(
