@@ -123,7 +123,7 @@ public:
             s->args.emplace_back(std::move(rhs));
             return lhs;
         } else if (auto *seq = cast_tree<ast::InsSeq>(lhs.get())) {
-            // the LHS might be a sequence, which means that it's the result of a safe navigation9 operator, like
+            // the LHS might be a sequence, which means that it's the result of a safe navigation operator, like
             //   { $t = x; if $t == nil then nil else $t.y=() }
             // in which case we just need to dril down into the else-case of the condition and add the rhs to the send
             //   { $t = x; if $t == nil then nil else $t.y=(rhs)
