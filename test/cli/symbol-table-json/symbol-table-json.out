@@ -37,7 +37,7 @@ No errors! Great job.
    ]
   },
   {
-   "id": 10930,
+   "id": <redacted>,
    "name": {
     "kind": "CONSTANT",
     "name": "A"
@@ -46,7 +46,7 @@ No errors! Great job.
    "superClass": 6
   },
   {
-   "id": 10931,
+   "id": <redacted>,
    "name": {
     "kind": "UNIQUE",
     "name": "\u003cClass:A\u003e"
@@ -55,7 +55,7 @@ No errors! Great job.
    "superClass": 96,
    "children": [
     {
-     "id": 10932,
+     "id": <redacted>,
      "name": {
       "kind": "UTF8",
       "name": "\u003cstatic-init\u003e"
@@ -74,7 +74,7 @@ No errors! Great job.
    ]
   },
   {
-   "id": 10933,
+   "id": <redacted>,
    "name": {
     "kind": "CONSTANT",
     "name": "B"
