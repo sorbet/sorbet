@@ -152,11 +152,16 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     core::MutableContext ctx(gs, core::Symbols::root());
     // Parser
     vector<core::FileRef> files;
+    constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
     {
         core::UnfreezeFileTable fileTableAccess(gs);
 
         for (auto &sourceFile : test.sourceFiles) {
-            files.emplace_back(gs.enterFile(test.sourceFileContents[test.folder + sourceFile]));
+            auto fref = gs.enterFile(test.sourceFileContents[test.folder + sourceFile]);
+            if (FileOps::getFileName(sourceFile) == whitelistedTypedNoneTest) {
+                fref.data(gs).strictLevel = core::StrictLevel::False;
+            }
+            files.emplace_back(fref);
         }
     }
     vector<ast::ParsedFile> trees;
@@ -165,10 +170,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<core::ErrorRegion> errs;
     for (auto file : files) {
         errs.emplace_back(gs, file);
-        if (file.data(ctx).source().find("# typed:") == string::npos) {
+
+        if (FileOps::getFileName(file.data(ctx).path()) != whitelistedTypedNoneTest &&
+            file.data(ctx).source().find("# typed:") == string::npos) {
             ADD_FAILURE_AT(file.data(gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
         }
-
         unique_ptr<parser::Node> nodes;
         {
             core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
@@ -457,7 +463,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     errorQueue->drainAllErrors();
 
     TEST_COUT << "errors OK" << '\n';
-}
+} // namespace sorbet::test
 
 bool isTestMessage(const LSPMessage &msg) {
     return msg.isNotification() && msg.method() == LSPMethod::SorbetTypecheckRunInfo;

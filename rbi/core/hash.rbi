@@ -177,13 +177,13 @@ class Hash < Object
   sig {returns(Hash)}
   sig do
     params(
-        default: Object,
+        default: BasicObject,
     )
     .returns(Hash)
   end
   sig do
     params(
-        blk: T.proc.params(hash: Hash, key: Object).returns(Object)
+        blk: T.proc.params(hash: Hash, key: BasicObject).returns(BasicObject)
     )
     .void
   end

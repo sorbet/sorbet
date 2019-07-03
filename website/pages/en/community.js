@@ -126,6 +126,12 @@ class Index extends React.Component {
                   description:
                     'A tool to generate RBIs from YARD documentation',
                 },
+                {
+                  title: 'sorbet-progress',
+                  link: 'https://github.com/jaredbeck/sorbet-progress',
+                  description:
+                    'Measure your progress as you adopt Sorbet, stay motivated!',
+                },
               ]}
             />
             <p>
