@@ -3,7 +3,6 @@
 
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
-#include "common/FileOps.h"
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "main/autogen/autogen.h"
@@ -678,101 +677,6 @@ vector<string> ParsedFile::listAllClasses(core::Context ctx) {
     }
 
     return out;
-}
-
-optional<Subclasses::Map> ParsedFile::listAllSubclasses(core::Context ctx, const vector<string> &absolutePathsToIgnore,
-                                                        const vector<string> &relativePathsToIgnore) {
-    // We prepend "/" to `path` to mimic how `isFileIgnored` gets called elsewhere
-    if (sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absolutePathsToIgnore, relativePathsToIgnore)) {
-        return nullopt;
-    }
-
-    Subclasses::Map out;
-
-    for (const Reference &ref : refs) {
-        DefinitionRef defn = ref.parent_of;
-
-        if (!defn.exists()) {
-            continue;
-        }
-
-        // Get fully-qualified parent name as string
-        string parentName =
-            fmt::format("{}", fmt::map_join(ref.resolved, "::", [&ctx](const core::NameRef &nm) -> string {
-                            return nm.data(ctx)->show(ctx);
-                        }));
-
-        // Add child class to the set identified by its parent
-        string childName =
-            fmt::format("{}", fmt::map_join(showFullName(ctx, defn), "::", [&ctx](const core::NameRef &nm) -> string {
-                            return nm.data(ctx)->show(ctx);
-                        }));
-
-        out[parentName].insert(make_pair(childName, defn.data(*this).type));
-    }
-
-    return out;
-}
-
-// Generate all descendants of a parent class
-// Recursively walks `childMap`, which stores the IMMEDIATE children of subclassed class.
-void Subclasses::descendantsOf(const Subclasses::Map &childMap, const string &parentName, Subclasses::Entries &out) {
-    if (!childMap.count(parentName)) {
-        return;
-    }
-    const Subclasses::Entries &children = childMap.at(parentName);
-
-    out.insert(children.begin(), children.end());
-    for (const Subclasses::Entry &child : children) {
-        Subclasses::descendantsOf(childMap, child.first, out);
-    }
-}
-
-void Subclasses::maybeInsertChild(const string &parentName, const Subclasses::Entries &children, Subclasses::Map &out) {
-    if (parentName.empty()) {
-        // Child < NonexistentParent
-        return;
-    }
-    out[parentName].insert(children.begin(), children.end());
-}
-
-// Manually patch the child map to account for inheritance that happens at runtime `self.included`
-// Please do not add to this list.
-// TODO(gwu) This shouldn't be public--hide this behind a new public method that realmain.cc calls
-void Subclasses::patchChildMap(Subclasses::Map &childMap) {
-    childMap["Opus::SafeMachine"].insert(childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].begin(),
-                                         childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].end());
-
-    childMap["Chalk::SafeMachine"].insert(childMap["Opus::SafeMachine"].begin(), childMap["Opus::SafeMachine"].end());
-
-    childMap["Chalk::ODM::Model"].insert(make_pair("Chalk::ODM::Private::Lock", autogen::Definition::Type::Class));
-}
-
-vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendantsMap,
-                                                const vector<string> &parentNames) {
-    vector<string> descendantsMapSerialized;
-
-    for (const string &parentName : parentNames) {
-        if (!descendantsMap.count(parentName)) {
-            continue;
-        }
-
-        descendantsMapSerialized.emplace_back(parentName);
-
-        vector<string> serializedChildren;
-        for (const Subclasses::Entry &entry : descendantsMap.at(parentName)) {
-            if (entry.second != autogen::Definition::Type::Class) {
-                continue;
-            }
-            serializedChildren.emplace_back(fmt::format(" {}", entry.first));
-        }
-
-        fast_sort(serializedChildren);
-        descendantsMapSerialized.insert(descendantsMapSerialized.end(), make_move_iterator(serializedChildren.begin()),
-                                        make_move_iterator(serializedChildren.end()));
-    }
-
-    return descendantsMapSerialized;
 }
 
 } // namespace sorbet::autogen

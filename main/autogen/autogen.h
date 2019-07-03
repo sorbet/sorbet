@@ -1,3 +1,5 @@
+#ifndef AUTOGEN_H
+#define AUTOGEN_H
 #include "ast/ast.h"
 
 namespace sorbet::autogen {
@@ -71,21 +73,9 @@ struct Reference {
     DefinitionRef parent_of;
 };
 
-class Subclasses final {
-public:
-    typedef std::pair<std::string, Definition::Type> Entry;
-    typedef UnorderedSet<Entry> Entries;
-    typedef UnorderedMap<std::string, Entries> Map;
-
-    static void maybeInsertChild(const std::string &parentName, const Subclasses::Entries &children,
-                                 Subclasses::Map &out);
-    static void patchChildMap(Subclasses::Map &childMap);
-    static void descendantsOf(const Subclasses::Map &childMap, const std::string &parent, Subclasses::Entries &out);
-    static std::vector<std::string> serializeSubclassMap(const Subclasses::Map &descendantsMap,
-                                                         const std::vector<std::string> &parentNames);
-};
-
 struct ParsedFile {
+    friend class MsgpackWriter;
+
     ast::ParsedFile tree;
     u4 cksum;
     std::string path;
@@ -95,14 +85,8 @@ struct ParsedFile {
 
     std::string toString(core::Context ctx);
     std::string toMsgpack(core::Context ctx, int version);
-    std::vector<std::string> listAllClasses(core::Context ctx);
-    std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx,
-                                                     const std::vector<std::string> &absolutePathsToIgnore,
-                                                     const std::vector<std::string> &relativePathsToIgnore);
-
-private:
     std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id);
-    friend class MsgpackWriter;
+    std::vector<std::string> listAllClasses(core::Context ctx);
 };
 
 class Autogen final {
@@ -111,3 +95,4 @@ public:
     Autogen() = delete;
 };
 } // namespace sorbet::autogen
+#endif // AUTOGEN_H

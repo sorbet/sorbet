@@ -14,6 +14,7 @@
 #include "core/lsp/QueryResponse.h"
 #include "core/serialize/serialize.h"
 #include "main/autogen/autogen.h"
+#include "main/autogen/subclasses.h"
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
@@ -152,6 +153,7 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
     return core::Loc(file, start, end);
 }
 
+// TODO(gwu) move to autogen.h
 struct AutogenResult {
     struct Serialized {
         // Selectively populated based on print options
@@ -204,8 +206,9 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                 }
                 if (opts.print.AutogenSubclasses.enabled) {
                     Timer timeit(logger, "autogenSubclasses");
-                    serialized.subclasses = pf.listAllSubclasses(ctx, opts.autogenSubclassesAbsoluteIgnorePatterns,
-                                                                 opts.autogenSubclassesRelativeIgnorePatterns);
+                    serialized.subclasses =
+                        autogen::Subclasses::listAllSubclasses(ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                                                               opts.autogenSubclassesRelativeIgnorePatterns);
                 }
                 out.prints.emplace_back(make_pair(idx, serialized));
             }
@@ -261,22 +264,11 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
             }
         }
 
-        autogen::Subclasses::patchChildMap(childMap);
-
-        // Generate descendants for each passed-in superclass
-        fast_sort(opts.autogenSubclassesParents);
-        autogen::Subclasses::Map descendantsMap;
-        for (const string &parentName : opts.autogenSubclassesParents) {
-            autogen::Subclasses::Entries descendants;
-            autogen::Subclasses::descendantsOf(childMap, parentName, descendants);
-            descendantsMap.emplace(parentName, descendants);
-        }
-
-        vector<string> descendantsMapSerialized =
-            autogen::Subclasses::serializeSubclassMap(descendantsMap, opts.autogenSubclassesParents);
+        vector<string> serializedDescendantsMap =
+            autogen::Subclasses::genDescendantsMap(childMap, opts.autogenSubclassesParents);
 
         opts.print.AutogenSubclasses.fmt(
-            "{}\n", fmt::join(descendantsMapSerialized.begin(), descendantsMapSerialized.end(), "\n"));
+            "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
     }
 } // namespace sorbet::realmain
 
