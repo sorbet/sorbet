@@ -72,11 +72,25 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
     files.emplace_back(fref.data(*gs).deepCopy(*gs));
     return runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), files);
 }
+
 LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) {
     Timer timeit(logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<shared_ptr<core::File>> files;
-    return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), files, true);
+    const core::NameHash symNameHash(*gs, sym.data(*gs)->name.data(*gs));
+    // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
+    // TODO: Possible to avoid the `deepCopy` here?
+    int i = -1;
+    for (auto &hash : globalStateHashes) {
+        i++;
+        const auto &usedNames = hash.names.usages;
+        if (std::find(usedNames.begin(), usedNames.end(), symNameHash) != usedNames.end()) {
+            auto ref = core::FileRef(i);
+            files.emplace_back(ref.data(*gs).deepCopy(*gs));
+        }
+    }
+
+    return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), files, false);
 }
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,

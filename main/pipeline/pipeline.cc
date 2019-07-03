@@ -1018,17 +1018,33 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
     }
 }
 
-class AllSendsCollector {
+class AllNamesCollector {
 public:
     core::UsageHash acc;
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
         acc.usages.emplace_back(ctx.state, original->fun.data(ctx));
         return original;
     }
+
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
+        acc.usages.emplace_back(ctx.state, original->symbol.data(ctx)->name.data(ctx));
+        return original;
+    }
+
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
+        acc.usages.emplace_back(ctx.state, original->symbol.data(ctx)->name.data(ctx));
+        return original;
+    }
+
+    unique_ptr<ast::UnresolvedConstantLit>
+    postTransformUnresolvedConstantLit(core::Context ctx, unique_ptr<ast::UnresolvedConstantLit> original) {
+        acc.usages.emplace_back(ctx.state, original->cnst.data(ctx));
+        return original;
+    }
 };
 
-core::UsageHash getAllSends(const core::GlobalState &gs, unique_ptr<ast::Expression> &tree) {
-    AllSendsCollector collector;
+core::UsageHash getAllNames(const core::GlobalState &gs, unique_ptr<ast::Expression> &tree) {
+    AllNamesCollector collector;
     tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root()), collector, move(tree));
     fast_sort(collector.acc.usages);
     collector.acc.usages.resize(std::distance(collector.acc.usages.begin(),
@@ -1061,11 +1077,11 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
             return {move(invalid), {}};
         }
     }
-    auto allSends = getAllSends(*lgs, single[0].tree);
+    auto allNames = getAllNames(*lgs, single[0].tree);
     auto workers = WorkerPool::create(0, lgs->tracer());
     pipeline::resolve(lgs, move(single), emptyOpts, *workers, true);
 
-    return {move(*lgs->hash()), move(allSends)};
+    return {move(*lgs->hash()), move(allNames)};
 }
 
 } // namespace sorbet::realmain::pipeline

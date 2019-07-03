@@ -50,7 +50,7 @@ struct UsageHash {
 
 struct FileHash {
     GlobalStateHash definitions;
-    UsageHash usages;
+    UsageHash names;
 };
 
 }; // namespace sorbet::core
