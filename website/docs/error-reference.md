@@ -91,7 +91,7 @@ There are multiple definitions for a method. Having multiple definitions for a
 method is problematic, because it can make a codebase's behavior dependent on
 the order in which files are loaded.
 
-The only way to silence this error currently is to make the offending file as
+The only way to silence this error currently is to mark the offending file as
 `# typed: false`.
 
 ## 4015
