@@ -120,10 +120,24 @@ public:
     static std::unique_ptr<Expression> Assign(core::Loc loc, std::unique_ptr<Expression> lhs,
                                               std::unique_ptr<Expression> rhs) {
         if (auto *s = cast_tree<ast::Send>(lhs.get())) {
+            // the LHS might be a send of the form x.y=(), in which case we add the RHS to the arguments list and get
+            // x.y=(rhs)
             s->args.emplace_back(std::move(rhs));
             return lhs;
+        } else if (auto *seq = cast_tree<ast::InsSeq>(lhs.get())) {
+            // the LHS might be a sequence, which means that it's the result of a safe navigation operator, like
+            //   { $t = x; if $t == nil then nil else $t.y=() }
+            // in which case we just need to dril down into the else-case of the condition and add the rhs to the send
+            //   { $t = x; if $t == nil then nil else $t.y=(rhs)
+            if (auto *cond = cast_tree<ast::If>(seq->expr.get())) {
+                if (auto *s = cast_tree<ast::Send>(cond->elsep.get())) {
+                    s->args.emplace_back(std::move(rhs));
+                    return lhs;
+                }
+            }
         }
 
+        // otherwise, just assign to it!
         return std::make_unique<ast::Assign>(loc, std::move(lhs), std::move(rhs));
     }
 
