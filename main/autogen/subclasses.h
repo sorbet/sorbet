@@ -12,8 +12,8 @@ public:
     typedef UnorderedMap<std::string, Entries> Map;
 
     static std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx, ParsedFile &pf,
-                                                            const std::vector<std::string> &absolutePathsToIgnore,
-                                                            const std::vector<std::string> &relativePathsToIgnore);
+                                                            const std::vector<std::string> &absoluteIgnorePatterns,
+                                                            const std::vector<std::string> &relativeIgnorePatterns);
 
     static void maybeInsertChild(const std::string &parentName, const Subclasses::Entries &children,
                                  Subclasses::Map &out);
@@ -24,6 +24,8 @@ public:
 
 private:
     static void patchChildMap(Subclasses::Map &childMap);
+    static bool isFileIgnored(const std::string &path, const std::vector<std::string> &absoluteIgnorePatterns,
+                              const std::vector<std::string> &relativeIgnorePatterns);
 };
 
 } // namespace sorbet::autogen

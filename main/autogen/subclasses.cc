@@ -4,11 +4,37 @@
 using namespace std;
 namespace sorbet::autogen {
 
+// Analogue of sorbet::FileOps::isFileIgnored that doesn't take a basePath, since
+// we don't need one here, and using FileOps' version meant passing some weird,
+// hard-to-understand arguments to mimic how other callers use it.
+bool Subclasses::isFileIgnored(const std::string &path, const std::vector<std::string> &absoluteIgnorePatterns,
+                               const std::vector<std::string> &relativeIgnorePatterns) {
+    for (auto &p : absoluteIgnorePatterns) {
+        if (path.substr(0, p.length()) == p && sorbet::FileOps::matchIsFolderOrFile(path, p, 0)) {
+            return true;
+        }
+    }
+    for (auto &p : relativeIgnorePatterns) {
+        // See if /pattern is in string, and that it matches a whole folder or file name.
+        int pos = 0;
+        while (true) {
+            pos = path.find(p, pos);
+            if (pos == string_view::npos) {
+                break;
+            } else if (sorbet::FileOps::matchIsFolderOrFile(path, p, pos)) {
+                return true;
+            }
+            pos += p.length();
+        }
+    }
+    return false;
+};
+
 optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, ParsedFile &pf,
-                                                        const vector<string> &absolutePathsToIgnore,
-                                                        const vector<string> &relativePathsToIgnore) {
-    // We prepend "/" to `path` to mimic how `isFileIgnored` gets called elsewhere
-    if (sorbet::FileOps::isFileIgnored("", fmt::format("/{}", pf.path), absolutePathsToIgnore, relativePathsToIgnore)) {
+                                                        const vector<string> &absoluteIgnorePatterns,
+                                                        const vector<string> &relativeIgnorePatterns) {
+    // Prepend "/" because absoluteIgnorePatterns and relativeIgnorePatterns are always "/"-prefixed
+    if (isFileIgnored(fmt::format("/{}", pf.path), absoluteIgnorePatterns, relativeIgnorePatterns)) {
         return nullopt;
     }
 

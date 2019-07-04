@@ -161,7 +161,7 @@ optional<string> sorbet::FileOps::readLineFromFd(int fd, string &buffer, int tim
 
 // Verifies that next character after the match is '/' (indicating a folder match) or end of string (indicating a file
 // match).
-bool matchIsFolderOrFile(string_view path, string_view ignorePattern, const int pos) {
+bool sorbet::FileOps::matchIsFolderOrFile(string_view path, string_view ignorePattern, const int pos) {
     const int endPos = pos + ignorePattern.length();
     return endPos == path.length() || path.at(endPos) == '/';
 }
