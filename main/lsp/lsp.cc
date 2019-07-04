@@ -83,8 +83,10 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalStat
     int i = -1;
     for (auto &hash : globalStateHashes) {
         i++;
-        const auto &usedNames = hash.names.usages;
-        if (std::find(usedNames.begin(), usedNames.end(), symNameHash) != usedNames.end()) {
+        const auto &usedSends = hash.usages.sends;
+        const auto &usedConstants = hash.usages.constants;
+        if (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
+            std::find(usedConstants.begin(), usedConstants.end(), symNameHash) != usedConstants.end()) {
             auto ref = core::FileRef(i);
             files.emplace_back(ref.data(*gs).deepCopy(*gs));
         }

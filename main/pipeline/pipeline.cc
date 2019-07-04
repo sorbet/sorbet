@@ -1022,23 +1022,23 @@ class AllNamesCollector {
 public:
     core::UsageHash acc;
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        acc.usages.emplace_back(ctx.state, original->fun.data(ctx));
+        acc.sends.emplace_back(ctx.state, original->fun.data(ctx));
         return original;
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
-        acc.usages.emplace_back(ctx.state, original->symbol.data(ctx)->name.data(ctx));
+        acc.constants.emplace_back(ctx.state, original->symbol.data(ctx)->name.data(ctx));
         return original;
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
-        acc.usages.emplace_back(ctx.state, original->symbol.data(ctx)->name.data(ctx));
+        acc.constants.emplace_back(ctx.state, original->symbol.data(ctx)->name.data(ctx));
         return original;
     }
 
     unique_ptr<ast::UnresolvedConstantLit>
     postTransformUnresolvedConstantLit(core::Context ctx, unique_ptr<ast::UnresolvedConstantLit> original) {
-        acc.usages.emplace_back(ctx.state, original->cnst.data(ctx));
+        acc.constants.emplace_back(ctx.state, original->cnst.data(ctx));
         return original;
     }
 };
@@ -1046,9 +1046,8 @@ public:
 core::UsageHash getAllNames(const core::GlobalState &gs, unique_ptr<ast::Expression> &tree) {
     AllNamesCollector collector;
     tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root()), collector, move(tree));
-    fast_sort(collector.acc.usages);
-    collector.acc.usages.resize(std::distance(collector.acc.usages.begin(),
-                                              std::unique(collector.acc.usages.begin(), collector.acc.usages.end())));
+    core::sortAndDedupe(collector.acc.sends);
+    core::sortAndDedupe(collector.acc.constants);
     return move(collector.acc);
 };
 

@@ -10,4 +10,9 @@ u4 incZero(u4 a) {
 NameHash::NameHash(const GlobalState &gs, const NameData &nm) : _hashValue(incZero(_hash(nm->shortName(gs)))){};
 NameHash::NameHash(const GlobalState &gs, const Name &nm) : _hashValue(incZero(_hash(nm.shortName(gs)))){};
 
+void sortAndDedupe(std::vector<core::NameHash> &hashes) {
+    fast_sort(hashes);
+    hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
+}
+
 } // namespace sorbet::core

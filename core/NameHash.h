@@ -44,13 +44,17 @@ struct GlobalStateHash {
     UnorderedMap<NameHash, u4> methodHashes;
 };
 
+/** Sorts an array of NameHashes and removes duplicates. */
+void sortAndDedupe(std::vector<core::NameHash> &hashes);
+
 struct UsageHash {
-    std::vector<core::NameHash> usages;
+    std::vector<core::NameHash> sends;
+    std::vector<core::NameHash> constants;
 };
 
 struct FileHash {
     GlobalStateHash definitions;
-    UsageHash names;
+    UsageHash usages;
 };
 
 }; // namespace sorbet::core
