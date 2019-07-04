@@ -91,7 +91,7 @@ chmod 600 "$HOME/.gem/credentials"
 
 if [ "$dryrun" = "" ]; then
   # push the sorbet-static gems first, in case they fail. We don't want to end
-  # up in a weird state where 'sorbet' is an requires a pinned version of
+  # up in a weird state where 'sorbet' requires a pinned version of
   # sorbet-static, but the sorbet-static gem push failed.
   #
   # (By failure here, we mean that RubyGems.org 502'd for some reason.)
