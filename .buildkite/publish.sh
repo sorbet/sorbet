@@ -90,7 +90,19 @@ printf -- $'---\n:rubygems_api_key: %s\n' "$RUBY_GEMS_API_KEY" > "$HOME/.gem/cre
 chmod 600 "$HOME/.gem/credentials"
 
 if [ "$dryrun" = "" ]; then
+  # push the sorbet-static gems first, in case they fail. We don't want to end
+  # up in a weird state where 'sorbet' is an requires a pinned version of
+  # sorbet-static, but the sorbet-static gem push failed.
+  #
+  # (By failure here, we mean that RubyGems.org 502'd for some reason.)
+  for gem_archive in _out_/gems/sorbet-static*.gem; do
+    gem push "$gem_archive"
+  done
+
   for gem_archive in _out_/gems/*.gem; do
+    if [[ "$gem_archive" == *sorbet-static* ]]; then
+      continue
+    fi
     gem push "$gem_archive"
   done
 fi
