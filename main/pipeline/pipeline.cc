@@ -869,6 +869,7 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
                                                        f.file.data(*gs).sourceType);
                 gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
                 unique_ptr<KeyValueStore> kvstore;
+                f.file.data(*gs).strictLevel = decideStrictLevel(*gs, f.file, opts);
                 auto reIndexed = indexOne(opts, *gs, f.file, kvstore);
                 vector<ast::ParsedFile> toBeReResolved;
                 toBeReResolved.emplace_back(move(reIndexed));
