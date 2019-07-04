@@ -95,16 +95,12 @@ if [ "$dryrun" = "" ]; then
   # sorbet-static, but the sorbet-static gem push failed.
   #
   # (By failure here, we mean that RubyGems.org 502'd for some reason.)
-  for gem_archive in _out_/gems/sorbet-static*.gem; do
+  for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
     gem push "$gem_archive"
   done
 
-  for gem_archive in _out_/gems/*.gem; do
-    if [[ "$gem_archive" == *sorbet-static* ]]; then
-      continue
-    fi
-    gem push "$gem_archive"
-  done
+  gem push "_out_/gems/sorbet-runtime-$release_version.gem"
+  gem push "_out_/gems/sorbet-$release_version.gem"
 fi
 
 echo "--- making a github release"
