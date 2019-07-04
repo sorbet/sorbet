@@ -67,10 +67,11 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
 // Generate all descendants of a parent class
 // Recursively walks `childMap`, which stores the IMMEDIATE children of subclassed class.
 void Subclasses::descendantsOf(const Subclasses::Map &childMap, const string &parentName, Subclasses::Entries &out) {
-    if (!childMap.count(parentName)) {
+    auto fnd = childMap.find(parentName);
+    if (fnd == childMap.end()) {
         return;
     }
-    const Subclasses::Entries &children = childMap.at(parentName);
+    const Subclasses::Entries children = fnd->second;
 
     out.insert(children.begin(), children.end());
     for (const auto &[name, _type] : children) {
@@ -103,14 +104,16 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
     vector<string> descendantsMapSerialized;
 
     for (const string &parentName : parentNames) {
-        if (!descendantsMap.count(parentName)) {
+        auto fnd = descendantsMap.find(parentName);
+        if (fnd == descendantsMap.end()) {
             continue;
         }
+        const Subclasses::Entries children = fnd->second;
 
         descendantsMapSerialized.emplace_back(parentName);
 
         vector<string> serializedChildren;
-        for (const auto &[name, type] : descendantsMap.at(parentName)) {
+        for (const auto &[name, type] : children) {
             if (type != autogen::Definition::Type::Class) {
                 continue;
             }
