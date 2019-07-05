@@ -33,7 +33,7 @@ snapshot_tests(
             "partial/webmock",
             "partial/partially-sigged",
 
-            # native extensions don't build
+            # TODO(jez) native extensions don't build
             "partial/codecov",
             "partial/rails-double-require",
         ],

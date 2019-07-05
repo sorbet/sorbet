@@ -108,7 +108,7 @@ cp -r "${test_dir}/src" "$actual"
   ln -s "$GEMS_LOC" "vendor/cache"
 
   info "├─ Testing 'bundle exec which ruby'"
-  if bundle exec which ruby ; then
+  if bundle exec which ruby; then
     info "├─ success"
   else 
     error "└─ failure"
