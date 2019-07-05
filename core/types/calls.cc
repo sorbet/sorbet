@@ -867,13 +867,11 @@ TypePtr AliasType::getCallArguments(Context ctx, NameRef name) {
 DispatchResult MetaType::dispatchCall(Context ctx, DispatchArgs args) {
     switch (args.name._id) {
         case Names::new_()._id: {
-            auto res =
-                DispatchResult(wrapped, args.selfType, Symbols::Class().data(ctx)->findMember(ctx, Names::new_()));
             auto innerArgs = DispatchArgs{Names::initialize(), args.locs, args.args, wrapped, wrapped, args.block};
-            auto inner = wrapped->dispatchCall(ctx, innerArgs);
-            res.components.insert(res.components.end(), make_move_iterator(inner.components.begin()),
-                                  make_move_iterator(inner.components.end()));
-            return res;
+            auto original = wrapped->dispatchCall(ctx, innerArgs);
+            original.returnType = wrapped;
+            original.main.sendTp = wrapped;
+            return original;
         }
         default:
             return ProxyType::dispatchCall(ctx, args);
@@ -900,22 +898,22 @@ namespace {
 
 class T_untyped : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
-        return Types::untypedUntracked();
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        res.returnType = Types::untypedUntracked();
     }
 } T_untyped;
 
 class T_must : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         if (args.args.empty()) {
-            return nullptr;
+            return;
         }
         if (!args.args[0]->type->isFullyDefined()) {
             if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::BareTypeUsage)) {
                 e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type->show(ctx));
             }
-            return nullptr;
+            return;
         }
         auto ret = Types::approximateSubtract(ctx, args.args[0]->type, Types::nilClass());
         if (ret == args.args[0]->type) {
@@ -923,98 +921,99 @@ public:
                 e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type->show(ctx));
             }
         }
-        return ret;
+        res.returnType = move(ret);
     }
 } T_must;
 
 class T_any : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         if (args.args.empty()) {
-            return Types::untypedUntracked();
+            return;
         }
 
-        TypePtr res = Types::bottom();
+        TypePtr ret = Types::bottom();
         auto i = -1;
         for (auto &arg : args.args) {
             i++;
             auto ty = unwrapType(ctx, args.locs.args[i], arg->type);
-            res = Types::any(ctx, res, ty);
+            ret = Types::any(ctx, ret, ty);
         }
 
-        return make_type<MetaType>(res);
+        res.returnType = make_type<MetaType>(move(ret));
     }
 } T_any;
 
 class T_all : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         if (args.args.empty()) {
-            return Types::untypedUntracked();
+            return;
         }
 
-        TypePtr res = Types::top();
+        TypePtr ret = Types::top();
         auto i = -1;
         for (auto &arg : args.args) {
             i++;
             auto ty = unwrapType(ctx, args.locs.args[i], arg->type);
-            res = Types::all(ctx, res, ty);
+            ret = Types::all(ctx, ret, ty);
         }
 
-        return make_type<MetaType>(res);
+        res.returnType = make_type<MetaType>(move(ret));
     }
 } T_all;
 
 class T_revealType : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         if (args.args.size() != 1) {
-            return Types::untypedUntracked();
+            return;
         }
 
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::RevealType)) {
             e.setHeader("Revealed type: `{}`", args.args[0]->type->showWithMoreInfo(ctx));
             e.addErrorSection(ErrorSection("From:", args.args[0]->origins2Explanations(ctx)));
         }
-        return args.args[0]->type;
+        res.returnType = args.args[0]->type;
     }
 } T_revealType;
 
 class T_nilable : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         if (args.args.size() != 1) {
-            return Types::untypedUntracked();
+            return;
         }
 
-        return make_type<MetaType>(
+        res.returnType = make_type<MetaType>(
             Types::any(ctx, unwrapType(ctx, args.locs.args[0], args.args[0]->type), Types::nilClass()));
     }
 } T_nilable;
 
 class T_proc : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         // NOTE: real validation done during infer
-        return Types::declBuilderForProcsSingletonClass();
+        res.returnType = Types::declBuilderForProcsSingletonClass();
     }
 } T_proc;
 
 class Object_class : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         SymbolRef self = unwrapSymbol(thisType);
         auto singleton = self.data(ctx)->lookupSingletonClass(ctx);
         if (singleton.exists()) {
-            return make_type<ClassType>(singleton);
+            res.returnType = make_type<ClassType>(singleton);
+        } else {
+            res.returnType = Types::classClass();
         }
-        return Types::classClass();
     }
 } Object_class;
 
 class Class_new : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         SymbolRef self = unwrapSymbol(thisType);
 
         auto attachedClass = self.data(ctx)->attachedClass(ctx);
@@ -1024,40 +1023,32 @@ public:
                 // calling .new on a Class will yield some sort of Object
                 attachedClass = Symbols::Object();
             } else {
-                return nullptr;
+                return;
             }
         }
         auto instanceTy = attachedClass.data(ctx)->externalType(ctx);
         DispatchArgs innerArgs{Names::initialize(), args.locs, args.args, instanceTy, instanceTy, args.block};
         auto dispatched = instanceTy->dispatchCall(ctx, innerArgs);
 
-        // This dispatch call will set return type in linkType to result of initialize.
-        // Need to override it
-        if (args.block) {
-            args.block->sendTp = instanceTy;
+        for (auto &err : res.main.errors) {
+            dispatched.main.errors.emplace_back(std::move(err));
         }
-
-        // TODO(nelhage): Arguably apply() should also return a DispatchResult
-        // and we should pass these errors up to the caller.
-        for (auto &comp : dispatched.components) {
-            for (auto &err : comp.errors) {
-                ctx.state._error(std::move(err));
-            }
-        }
-        return instanceTy;
+        res.returnType = instanceTy;
+        res.main = move(dispatched.main);
+        res.main.sendTp = instanceTy;
     }
 } Class_new;
 
 class T_Generic_squareBrackets : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         SymbolRef attachedClass;
 
         SymbolRef self = unwrapSymbol(thisType);
         attachedClass = self.data(ctx)->attachedClass(ctx);
 
         if (!attachedClass.exists()) {
-            return nullptr;
+            return;
         }
 
         if (attachedClass == Symbols::T_Array()) {
@@ -1079,7 +1070,7 @@ public:
             arity = 2;
         }
         if (attachedClass.data(ctx)->typeMembers().empty()) {
-            return nullptr;
+            return;
         }
 
         if (args.args.size() != arity) {
@@ -1108,13 +1099,13 @@ public:
             }
         }
 
-        return make_type<MetaType>(make_type<AppliedType>(attachedClass, targs));
+        res.returnType = make_type<MetaType>(make_type<AppliedType>(attachedClass, move(targs)));
     }
 } T_Generic_squareBrackets;
 
 class Magic_buildHash : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         ENFORCE(args.args.size() % 2 == 0);
 
         vector<TypePtr> keys;
@@ -1124,21 +1115,23 @@ public:
         for (int i = 0; i < args.args.size(); i += 2) {
             auto *key = cast_type<LiteralType>(args.args[i]->type.get());
             if (key == nullptr) {
-                return Types::hashOfUntyped();
+                res.returnType = Types::hashOfUntyped();
+                return;
             }
 
             keys.emplace_back(args.args[i]->type);
             values.emplace_back(args.args[i + 1]->type);
         }
-        return make_type<ShapeType>(Types::hashOfUntyped(), keys, values);
+        res.returnType = make_type<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
     }
 } Magic_buildHash;
 
 class Magic_buildArray : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         if (args.args.empty()) {
-            return Types::arrayOfUntyped();
+            res.returnType = Types::arrayOfUntyped();
+            return;
         }
         vector<TypePtr> elems;
         elems.reserve(args.args.size());
@@ -1155,22 +1148,21 @@ public:
 
         auto tuple = TupleType::build(ctx, elems);
         if (isType) {
-            return make_type<MetaType>(tuple);
-        } else {
-            return tuple;
+            tuple = make_type<MetaType>(move(tuple));
         }
+        res.returnType = move(tuple);
     }
 } Magic_buildArray;
 
 class Magic_expandSplat : public IntrinsicMethod {
-    static TypePtr expandArray(Context ctx, const TypePtr &type, int expandTo, core::TypeConstraint &constr) {
+    static TypePtr expandArray(Context ctx, const TypePtr &type, int expandTo) {
         if (auto *ot = cast_type<OrType>(type.get())) {
-            return Types::any(ctx, expandArray(ctx, ot->left, expandTo, constr),
-                              expandArray(ctx, ot->right, expandTo, constr));
+            return Types::any(ctx, expandArray(ctx, ot->left, expandTo), expandArray(ctx, ot->right, expandTo));
         }
 
         auto *tuple = cast_type<TupleType>(type.get());
-        if (tuple == nullptr && core::Types::approximate(ctx, type, constr)->derivesFrom(ctx, Symbols::Array())) {
+        if (tuple == nullptr && core::Types::approximate(ctx, type, core::TypeConstraint::EmptyFrozenConstraint)
+                                    ->derivesFrom(ctx, Symbols::Array())) {
             // If this is an array and not a tuple, just pass it through. We
             // can't say anything about the elements.
             return type;
@@ -1189,20 +1181,22 @@ class Magic_expandSplat : public IntrinsicMethod {
     }
 
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         if (args.args.size() != 3) {
-            return Types::arrayOfUntyped();
+            res.returnType = Types::arrayOfUntyped();
+            return;
         }
         auto val = args.args.front()->type;
         auto *beforeLit = cast_type<LiteralType>(args.args[1]->type.get());
         auto *afterLit = cast_type<LiteralType>(args.args[2]->type.get());
         if (!(beforeLit->underlying()->derivesFrom(ctx, Symbols::Integer()) &&
               afterLit->underlying()->derivesFrom(ctx, Symbols::Integer()))) {
-            return Types::untypedUntracked();
+            res.returnType = Types::untypedUntracked();
+            return;
         }
         int before = (int)beforeLit->value;
         int after = (int)afterLit->value;
-        return expandArray(ctx, val, before + after, args.constraint());
+        res.returnType = expandArray(ctx, val, before + after);
     }
 } Magic_expandSplat;
 
@@ -1229,33 +1223,35 @@ private:
     }
 
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         if (args.args.size() != 3) {
-            return core::Types::untypedUntracked();
+            return;
         }
         auto &receiver = args.args[0];
         if (receiver->type->isUntyped()) {
-            return receiver->type;
+            res.returnType = receiver->type;
+            return;
         }
 
         if (!receiver->type->isFullyDefined()) {
-            return core::Types::untypedUntracked();
+            return;
         }
 
         auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
         if (!lit || !lit->derivesFrom(ctx, Symbols::Symbol())) {
-            return core::Types::untypedUntracked();
+            return;
         }
         NameRef fn(ctx.state, (u4)lit->value);
         if (args.args[2]->type->isUntyped()) {
-            return args.args[2]->type;
+            res.returnType = args.args[2]->type;
+            return;
         }
         auto *tuple = cast_type<TupleType>(args.args[2]->type.get());
         if (tuple == nullptr) {
             if (auto e = ctx.state.beginError(args.locs.args[2], core::errors::Infer::UntypedSplat)) {
                 e.setHeader("Splats are only supported where the size of the array is known statically");
             }
-            return Types::untypedUntracked();
+            return;
         }
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
@@ -1265,12 +1261,18 @@ public:
         CallLocs sendLocs{args.locs.call, args.locs.args[0], sendArgLocs};
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, args.block};
         auto dispatched = receiver->type->dispatchCall(ctx, innerArgs);
-        for (auto &comp : dispatched.components) {
-            for (auto &err : comp.errors) {
-                ctx.state._error(std::move(err));
-            }
+        for (auto &err : dispatched.main.errors) {
+            res.main.errors.emplace_back(std::move(err));
         }
-        return dispatched.returnType;
+
+        // TODO: this should merge constrains from `res` and `dispatched` instead
+        if ((dispatched.main.constr == nullptr) || dispatched.main.constr->isEmpty()) {
+            dispatched.main.constr = move(res.main.constr);
+        }
+        res.main = move(dispatched.main);
+
+        res.returnType = dispatched.returnType;
+        return;
     }
 } Magic_callWithSplat;
 
@@ -1296,10 +1298,8 @@ private:
         CallLocs sendLocs{callLoc, receiverLoc, sendArgLocs};
         DispatchArgs innerArgs{to_proc, sendLocs, sendArgs, nonNilBlockType, nonNilBlockType, nullptr};
         auto dispatched = nonNilBlockType->dispatchCall(ctx, innerArgs);
-        for (auto &comp : dispatched.components) {
-            for (auto &err : comp.errors) {
-                ctx.state._error(std::move(err));
-            }
+        for (auto &err : dispatched.main.errors) {
+            ctx.state._error(std::move(err));
         }
 
         if (typeIsNilable) {
@@ -1349,33 +1349,29 @@ private:
         }));
     }
 
-    static TypePtr simulateCall(Context ctx, const TypeAndOrigins *receiver, DispatchArgs innerArgs,
-                                shared_ptr<SendAndBlockLink> link, TypePtr passedInBlockType, Loc callLoc,
-                                Loc blockLoc) {
+    static void simulateCall(Context ctx, const TypeAndOrigins *receiver, DispatchArgs innerArgs,
+                             shared_ptr<SendAndBlockLink> link, TypePtr passedInBlockType, Loc callLoc, Loc blockLoc,
+                             DispatchResult &res) {
         auto dispatched = receiver->type->dispatchCall(ctx, innerArgs);
-        for (auto &comp : dispatched.components) {
-            for (auto &err : comp.errors) {
-                ctx.state._error(std::move(err));
-            }
+        for (auto &err : dispatched.main.errors) {
+            res.main.errors.emplace_back(std::move(err));
         }
         // We use isSubTypeUnderConstraint here with a TypeConstraint, so that we discover the correct generic bounds
         // as we do the subtyping check.
-        TypeConstraint *constr = link->constr.get();
-        if (link->blockPreType &&
-            !Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, link->blockPreType)) {
+        auto &constr = dispatched.main.constr;
+        auto &blockPreType = dispatched.main.blockPreType;
+        if (blockPreType && !Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, blockPreType)) {
             ClassType *passedInProcClass = cast_type<ClassType>(passedInBlockType.get());
-            auto nonNilableBlockType = Types::dropSubtypesOf(ctx, link->blockPreType, Symbols::NilClass());
+            auto nonNilableBlockType = Types::dropSubtypesOf(ctx, blockPreType, Symbols::NilClass());
             if (passedInProcClass && passedInProcClass->symbol == Symbols::Proc() &&
                 Types::isSubType(ctx, nonNilableBlockType, passedInBlockType)) {
                 // If a block of unknown arity is passed in, but the function was declared with a known arity,
                 // raise an error in strict mode.
                 // This could occur, for example, when using Method#to_proc, since we type it as returning a `Proc`.
                 if (auto e = ctx.state.beginError(blockLoc, errors::Infer::ProcArityUnknown)) {
-                    e.setHeader("Cannot use a `{}` with unknown arity as a `{}`", "Proc",
-                                link->blockPreType->show(ctx));
-                    if (dispatched.components.size() == 1) {
-                        Magic_callWithBlock::showLocationOfArgDefn(ctx, e, link->blockPreType,
-                                                                   dispatched.components[0]);
+                    e.setHeader("Cannot use a `{}` with unknown arity as a `{}`", "Proc", blockPreType->show(ctx));
+                    if (!dispatched.secondary) {
+                        Magic_callWithBlock::showLocationOfArgDefn(ctx, e, blockPreType, dispatched.main);
                     }
                 }
 
@@ -1388,50 +1384,49 @@ private:
                     passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, targs);
                 }
             } else if (auto e = ctx.state.beginError(blockLoc, errors::Infer::MethodArgumentMismatch)) {
-                e.setHeader("Expected `{}` but found `{}` for block argument", link->blockPreType->show(ctx),
+                e.setHeader("Expected `{}` but found `{}` for block argument", blockPreType->show(ctx),
                             passedInBlockType->show(ctx));
-                if (dispatched.components.size() == 1) {
-                    Magic_callWithBlock::showLocationOfArgDefn(ctx, e, link->blockPreType, dispatched.components[0]);
+                if (!dispatched.secondary) {
+                    Magic_callWithBlock::showLocationOfArgDefn(ctx, e, blockPreType, dispatched.main);
                 }
             }
         }
 
-        for (auto &dispatchComp : dispatched.components) {
-            if (!dispatchComp.method.exists()) {
-                continue;
-            }
+        {
+            auto it = &dispatched;
+            while (it != nullptr) {
+                if (it->main.method.exists() && !it->main.method.data(ctx)->isClass()) {
+                    const auto &methodArgs = it->main.method.data(ctx)->arguments();
+                    ENFORCE(!methodArgs.empty());
+                    const auto &bspec = methodArgs.back();
+                    ENFORCE(bspec.flags.isBlock);
 
-            if (dispatchComp.method.data(ctx)->isClass()) {
-                continue;
-            }
-
-            const auto &methodArgs = dispatchComp.method.data(ctx)->arguments();
-            ENFORCE(!methodArgs.empty());
-            const auto &bspec = methodArgs.back();
-            ENFORCE(bspec.flags.isBlock);
-
-            auto bspecType = bspec.type;
-            if (bspecType) {
-                // This subtype check is here to discover the correct generic bounds.
-                Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, bspecType);
+                    auto bspecType = bspec.type;
+                    if (bspecType) {
+                        // This subtype check is here to discover the correct generic bounds.
+                        Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, bspecType);
+                    }
+                }
+                it = it->secondary.get();
             }
         }
-
-        if (!constr->solve(ctx)) {
-            if (auto e = ctx.state.beginError(callLoc, errors::Infer::GenericMethodConstaintUnsolved)) {
-                e.setHeader("Could not find valid instantiation of type parameters");
+        if (constr) {
+            if (!constr->solve(ctx)) {
+                if (auto e = ctx.state.beginError(callLoc, errors::Infer::GenericMethodConstaintUnsolved)) {
+                    e.setHeader("Could not find valid instantiation of type parameters");
+                }
+                res.returnType = core::Types::untypedUntracked();
             }
-            return core::Types::untypedUntracked();
-        }
 
-        if (!constr->isEmpty() && constr->isSolved()) {
-            dispatched.returnType = Types::instantiate(ctx, dispatched.returnType, *(constr));
+            if (!constr->isEmpty() && constr->isSolved()) {
+                dispatched.returnType = Types::instantiate(ctx, dispatched.returnType, *(constr));
+            }
         }
-        return dispatched.returnType;
+        res.returnType = dispatched.returnType;
     }
 
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         // args[0] is the receiver
         // args[1] is the method
         // args[2] is the block
@@ -1439,27 +1434,28 @@ public:
         // equivalent to (args[0]).args[1](*args[3..], &args[2])
 
         if (args.args.size() < 3) {
-            return core::Types::untypedUntracked();
+            return;
         }
         auto &receiver = args.args[0];
         if (receiver->type->isUntyped()) {
-            return receiver->type;
+            res.returnType = receiver->type;
+            return;
         }
 
         if (!receiver->type->isFullyDefined()) {
-            return core::Types::untypedUntracked();
+            return;
         }
 
         if (core::cast_type<core::TypeVar>(args.args[2]->type.get())) {
             if (auto e = ctx.state.beginError(args.locs.args[2], core::errors::Infer::GenericPassedAsBlock)) {
                 e.setHeader("Passing generics as block arguments is not supported");
             }
-            return Types::untypedUntracked();
+            return;
         }
 
         auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
         if (!lit || !lit->derivesFrom(ctx, Symbols::Symbol())) {
-            return core::Types::untypedUntracked();
+            return;
         }
         NameRef fn(ctx.state, (u4)lit->value);
 
@@ -1480,56 +1476,59 @@ public:
             Magic_callWithBlock::typeToProc(ctx, args.args[2]->type, args.locs.call, args.locs.args[2]);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
+        res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
 
-        return Magic_callWithBlock::simulateCall(ctx, receiver, innerArgs, link, finalBlockType, args.locs.args[2],
-                                                 args.locs.call);
+        Magic_callWithBlock::simulateCall(ctx, receiver, innerArgs, link, finalBlockType, args.locs.args[2],
+                                          args.locs.call, res);
     }
 } Magic_callWithBlock;
 
 class Magic_callWithSplatAndBlock : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         // args[0] is the receiver
         // args[1] is the method
         // args[2] are the splat arguments
         // args[3] is the block
 
         if (args.args.size() != 4) {
-            return core::Types::untypedUntracked();
+            return;
         }
         auto &receiver = args.args[0];
         if (receiver->type->isUntyped()) {
-            return receiver->type;
+            res.returnType = receiver->type;
+            return;
         }
 
         if (!receiver->type->isFullyDefined()) {
-            return core::Types::untypedUntracked();
+            return;
         }
 
         auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
         if (!lit || !lit->derivesFrom(ctx, Symbols::Symbol())) {
-            return core::Types::untypedUntracked();
+            return;
         }
         NameRef fn(ctx.state, (u4)lit->value);
 
         if (args.args[2]->type->isUntyped()) {
-            return args.args[2]->type;
+            res.returnType = args.args[2]->type;
+            return;
         }
         auto *tuple = cast_type<TupleType>(args.args[2]->type.get());
         if (tuple == nullptr) {
             if (auto e = ctx.state.beginError(args.locs.args[2], core::errors::Infer::UntypedSplat)) {
                 e.setHeader("Splats are only supported where the size of the array is known statically");
             }
-            return Types::untypedUntracked();
+            return;
         }
 
         if (core::cast_type<core::TypeVar>(args.args[3]->type.get())) {
             if (auto e = ctx.state.beginError(args.locs.args[3], core::errors::Infer::GenericPassedAsBlock)) {
                 e.setHeader("Passing generics as block arguments is not supported");
             }
-            return Types::untypedUntracked();
+            return;
         }
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
@@ -1542,49 +1541,50 @@ public:
             Magic_callWithBlock::typeToProc(ctx, args.args[3]->type, args.locs.call, args.locs.args[3]);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
+        res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
 
-        return Magic_callWithBlock::simulateCall(ctx, receiver, innerArgs, link, finalBlockType, args.locs.args[3],
-                                                 args.locs.call);
+        Magic_callWithBlock::simulateCall(ctx, receiver, innerArgs, link, finalBlockType, args.locs.args[3],
+                                          args.locs.call, res);
     }
 } Magic_callWithSplatAndBlock;
 
 class DeclBuilderForProcs_void : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         // NOTE: real validation done in infer
-        return Types::declBuilderForProcsSingletonClass();
+        res.returnType = Types::declBuilderForProcsSingletonClass();
     }
 } DeclBuilderForProcs_void;
 
 class DeclBuilderForProcs_returns : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         // NOTE: real validation done in infer
-        return Types::declBuilderForProcsSingletonClass();
+        res.returnType = Types::declBuilderForProcsSingletonClass();
     }
 } DeclBuilderForProcs_returns;
 
 class DeclBuilderForProcs_params : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         // NOTE: real validation done in infer
-        return Types::declBuilderForProcsSingletonClass();
+        res.returnType = Types::declBuilderForProcsSingletonClass();
     }
 } DeclBuilderForProcs_params;
 
 class DeclBuilderForProcs_bind : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         // NOTE: real validation done in infer
-        return Types::declBuilderForProcsSingletonClass();
+        res.returnType = Types::declBuilderForProcsSingletonClass();
     }
 } DeclBuilderForProcs_bind;
 
 class Tuple_squareBrackets : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         auto *tuple = cast_type<TupleType>(thisType);
         ENFORCE(tuple);
         LiteralType *lit = nullptr;
@@ -1592,7 +1592,7 @@ public:
             lit = cast_type<LiteralType>(args.args.front()->type.get());
         }
         if (!lit || !lit->underlying()->derivesFrom(ctx, Symbols::Integer())) {
-            return nullptr;
+            return;
         }
 
         auto idx = lit->value;
@@ -1600,70 +1600,74 @@ public:
             idx = tuple->elems.size() + idx;
         }
         if (idx >= tuple->elems.size()) {
-            return Types::nilClass();
+            res.returnType = Types::nilClass();
+        } else {
+            res.returnType = tuple->elems[idx];
         }
-        return tuple->elems[idx];
     }
 } Tuple_squareBrackets;
 
 class Tuple_last : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         auto *tuple = cast_type<TupleType>(thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
-            return nullptr;
+            return;
         }
         if (tuple->elems.empty()) {
-            return Types::nilClass();
+            res.returnType = Types::nilClass();
+        } else {
+            res.returnType = tuple->elems.back();
         }
-        return tuple->elems.back();
     }
 } Tuple_last;
 
 class Tuple_first : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         auto *tuple = cast_type<TupleType>(thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
-            return nullptr;
+            return;
         }
         if (tuple->elems.empty()) {
-            return Types::nilClass();
+            res.returnType = Types::nilClass();
+        } else {
+            res.returnType = tuple->elems.front();
         }
-        return tuple->elems.front();
     }
 } Tuple_first;
 
 class Tuple_minMax : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         auto *tuple = cast_type<TupleType>(thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
-            return nullptr;
+            return;
         }
         if (tuple->elems.empty()) {
-            return Types::nilClass();
+            res.returnType = Types::nilClass();
+        } else {
+            res.returnType = tuple->elementType();
         }
-        return tuple->elementType();
     }
 } Tuple_minMax;
 
 class Tuple_to_a : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
-        return args.selfType;
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        res.returnType = args.selfType;
     }
 } Tuple_to_a;
 
 class Tuple_concat : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         vector<TypePtr> elems;
         auto *tuple = cast_type<TupleType>(thisType);
         ENFORCE(tuple);
@@ -1672,16 +1676,16 @@ public:
             if (auto *tuple = cast_type<TupleType>(elem->type.get())) {
                 elems.insert(elems.end(), tuple->elems.begin(), tuple->elems.end());
             } else {
-                return nullptr;
+                return;
             }
         }
-        return TupleType::build(ctx, std::move(elems));
+        res.returnType = TupleType::build(ctx, std::move(elems));
     }
 } Tuple_concat;
 
 class Shape_merge : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         auto *shape = cast_type<ShapeType>(thisType);
         ENFORCE(shape);
         ShapeType *rhs = nullptr;
@@ -1689,7 +1693,7 @@ public:
             rhs = cast_type<ShapeType>(args.args.front()->type.get());
         }
         if (rhs == nullptr || args.block != nullptr || args.args.size() > 1) {
-            return nullptr;
+            return;
         }
 
         auto keys = shape->keys;
@@ -1707,7 +1711,7 @@ public:
             }
         }
 
-        return make_type<ShapeType>(Types::hashOfUntyped(), std::move(keys), std::move(values));
+        res.returnType = make_type<ShapeType>(Types::hashOfUntyped(), std::move(keys), std::move(values));
     }
 } Shape_merge;
 
@@ -1748,7 +1752,7 @@ class Array_flatten : public IntrinsicMethod {
     }
 
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         TypePtr element;
         if (auto *ap = cast_type<AppliedType>(thisType)) {
@@ -1773,7 +1777,7 @@ public:
                 if (auto e = ctx.state.beginError(argLoc, core::errors::Infer::ExpectedLiteralType)) {
                     e.setHeader("You must pass an Integer literal to specify a depth with Array#flatten");
                 }
-                return Types::untypedUntracked();
+                return;
             }
             ENFORCE(lt->literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
 
@@ -1787,13 +1791,13 @@ public:
             ENFORCE(args.args.empty(), "Array#flatten passed too many args: {}", args.args.size());
         }
 
-        return Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element, depth));
+        res.returnType = Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element, depth));
     }
 } Array_flatten;
 
 class Array_compact : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         TypePtr element;
         if (auto *ap = cast_type<AppliedType>(thisType)) {
             ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
@@ -1805,31 +1809,32 @@ public:
             ENFORCE(false, "Array#compact on unexpected type: {}", args.selfType->show(ctx));
         }
         auto ret = Types::approximateSubtract(ctx, element, Types::nilClass());
-        return Types::arrayOf(ctx, ret);
+        res.returnType = Types::arrayOf(ctx, ret);
     }
 } Array_compact;
 
 class Kernel_proc : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         if (args.block == nullptr) {
-            return core::Types::untypedUntracked();
+            return;
         }
 
         std::optional<int> numberOfPositionalBlockParams = args.block->fixedArity();
         if (!numberOfPositionalBlockParams || *numberOfPositionalBlockParams > core::Symbols::MAX_PROC_ARITY) {
-            return core::Types::procClass();
+            res.returnType = core::Types::procClass();
+            return;
         }
         vector<core::TypePtr> targs(*numberOfPositionalBlockParams + 1, core::Types::untypedUntracked());
         auto procClass = core::Symbols::Proc(*numberOfPositionalBlockParams);
-        return make_type<core::AppliedType>(procClass, targs);
+        res.returnType = make_type<core::AppliedType>(procClass, move(targs));
     }
 } Kernel_proc;
 
 class enumerable_to_h : public IntrinsicMethod {
 public:
     // Forward Enumerable.to_h to RubyType.enumerable_to_h[self]
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         auto hash = make_type<ClassType>(core::Symbols::Sorbet_Private_Static().data(ctx)->lookupSingletonClass(ctx));
         InlinedVector<Loc, 2> argLocs{args.locs.receiver};
         CallLocs locs{
@@ -1844,38 +1849,40 @@ public:
             core::Names::enumerable_to_h(), locs, innerArgs, hash, hash, nullptr,
         };
         auto dispatched = hash->dispatchCall(ctx, dispatch);
-        for (auto &comp : dispatched.components) {
-            for (auto &err : comp.errors) {
-                ctx.state._error(std::move(err));
-            }
+        for (auto &err : dispatched.main.errors) {
+            res.main.errors.emplace_back(std::move(err));
         }
-        return dispatched.returnType;
+        res.returnType = move(dispatched.returnType);
     }
 } enumerable_to_h;
 
 // statically determine things like `Integer === 3` to be true
 class Module_tripleEq : public IntrinsicMethod {
 public:
-    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 1, "Module.=== takes 1 argument on rhs, got {}", args.args.size());
         auto rhs = args.args[0]->type;
         if (rhs->isUntyped()) {
-            return rhs;
+            res.returnType = rhs;
+            return;
         }
         auto rc = Types::getRepresentedClass(ctx, thisType);
         // in most cases, thisType is T.class_of(rc). see test/testdata/class_not_class_of.rb for an edge case.
         if (rc == core::Symbols::noSymbol()) {
-            return Types::Boolean();
+            res.returnType = Types::Boolean();
+            return;
         }
         auto lhs = rc.data(ctx)->externalType(ctx);
         ENFORCE(!lhs->isUntyped(), "lhs of Module.=== must be typed");
         if (Types::isSubType(ctx, rhs, lhs)) {
-            return Types::trueClass();
+            res.returnType = Types::trueClass();
+            return;
         }
         if (Types::glb(ctx, rhs, lhs)->isBottom()) {
-            return Types::falseClass();
+            res.returnType = Types::falseClass();
+            return;
         }
-        return Types::Boolean();
+        res.returnType = Types::Boolean();
     }
 } Module_tripleEq;
 

@@ -27,7 +27,7 @@ class SerializerImpl;
 }
 class IntrinsicMethod {
 public:
-    virtual TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const = 0;
+    virtual void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const = 0;
 };
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
