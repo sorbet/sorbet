@@ -337,7 +337,7 @@ module Opus::Types::Test
             ex = assert_raises do
               Class.new do
                 extend T::Sig
-                sig {void.on_failure(notify: 'me')}
+                sig {void.on_failure(:soft, notify: 'me')}
                 def self.foo; end; foo
               end
             end
@@ -372,7 +372,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).on_failure(notify: 'me').on_failure(notify: 'you')}
+            sig {returns(Integer).on_failure(:soft, notify: 'me').on_failure(:soft, notify: 'you')}
             def self.foo; end; foo
           end
         end
@@ -383,7 +383,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(NilClass).on_failure(notify: 'me').checked(:never)}
+            sig {returns(NilClass).on_failure(:soft, notify: 'me').checked(:never)}
             def self.foo; end; foo
           end
         end
@@ -393,7 +393,7 @@ module Opus::Types::Test
       it 'allows .on_failure and then .checked(:tests)' do
         Class.new do
           extend T::Sig
-          sig {returns(NilClass).on_failure(notify: 'me').checked(:tests)}
+          sig {returns(NilClass).on_failure(:soft, notify: 'me').checked(:tests)}
           def self.foo; end; foo
         end
         pass
@@ -402,7 +402,7 @@ module Opus::Types::Test
       it 'allows .on_failure and then .checked(:always)' do
         Class.new do
           extend T::Sig
-          sig {returns(NilClass).on_failure(notify: 'me').checked(:always)}
+          sig {returns(NilClass).on_failure(:soft, notify: 'me').checked(:always)}
           def self.foo; end; foo
         end
         pass
@@ -412,7 +412,8 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(NilClass).checked(:never).on_failure(notify: 'me')}
+            # We explicitly need to test that this ordering raises a certain error
+            sig {returns(NilClass).checked(:never).on_failure(:soft, notify: 'me')} # rubocop:disable PrisonGuard/SigBuilderOrder
             def self.foo; end; foo
           end
         end
@@ -422,7 +423,8 @@ module Opus::Types::Test
       it 'allows .checked(:tests) and then .on_failure' do
         Class.new do
           extend T::Sig
-          sig {returns(NilClass).checked(:tests).on_failure(notify: 'me')}
+          # We explicitly need to test that this ordering does not raise an error
+          sig {returns(NilClass).checked(:tests).on_failure(:soft, notify: 'me')} # rubocop:disable PrisonGuard/SigBuilderOrder
           def self.foo; end; foo
         end
       end
@@ -430,7 +432,8 @@ module Opus::Types::Test
       it 'allows .checked(:always) and then .on_failure' do
         Class.new do
           extend T::Sig
-          sig {returns(NilClass).checked(:always).on_failure(notify: 'me')}
+          # We explicitly need to test that this ordering does not raise an error
+          sig {returns(NilClass).checked(:always).on_failure(:soft, notify: 'me')} # rubocop:disable PrisonGuard/SigBuilderOrder
           def self.foo; end; foo
         end
       end
@@ -450,7 +453,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {generated.returns(Integer).on_failure(notify: '')}
+            sig {generated.returns(Integer).on_failure(:soft, notify: '')}
             def self.foo; end; foo
           end
         end
