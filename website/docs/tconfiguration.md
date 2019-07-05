@@ -78,7 +78,7 @@ end
 
 ## Errors from invalid sigs
 
-Method signatures that build correctly can still be invalid. For exmaple, a sig
+Method signatures that build correctly can still be invalid. For example, a sig
 marked `override` must actually override a method. Same for `abstract` methods.
 When overriding a parent sig, the variance must match on the input and output
 types. If a sig that built correctly is invalid in anyway, this error handler
