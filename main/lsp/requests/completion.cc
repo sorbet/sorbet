@@ -210,8 +210,8 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
             auto resp = move(queryResponses[0]);
 
             if (auto sendResp = resp->isSend()) {
-                auto pattern = sendResp->name.data(*gs)->shortName(*gs);
-                auto receiverType = sendResp->receiver.type;
+                auto pattern = sendResp->callerSideName.data(*gs)->shortName(*gs);
+                auto receiverType = sendResp->dispatchResult->main.receiver;
                 logger->debug("Looking for method similar to {}", pattern);
                 UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
                     findSimilarMethodsIn(*gs, receiverType, pattern);
@@ -229,8 +229,8 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
                 for (auto &entry : methodsSorted) {
                     if (entry.second[0].exists()) {
                         fast_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                        items.push_back(
-                            getCompletionItem(*gs, entry.second[0], sendResp->receiver.type, sendResp->constraint));
+                        items.push_back(getCompletionItem(*gs, entry.second[0], receiverType,
+                                                          sendResp->dispatchResult->main.constr));
                     }
                 }
             } else if (auto identResp = resp->isIdent()) {

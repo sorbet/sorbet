@@ -6,16 +6,20 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &retType,
-                             const core::DispatchResult::ComponentVec &dispatchComponents,
+                             const core::DispatchResult &dispatchResult,
                              const unique_ptr<core::TypeConstraint> &constraint) {
     string contents = "";
-    for (auto &dispatchComponent : dispatchComponents) {
+    auto start = &dispatchResult;
+    ;
+    while (start != nullptr) {
+        auto &dispatchComponent = start->main;
         if (dispatchComponent.method.exists()) {
             if (!contents.empty()) {
                 contents += " ";
             }
             contents += methodDetail(gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint);
         }
+        start = start->secondary.get();
     }
     return contents;
 }
@@ -45,23 +49,16 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
 
         auto resp = move(queryResponses[0]);
         if (auto sendResp = resp->isSend()) {
-            if (sendResp->dispatchComponents.empty()) {
-                response->error = make_unique<ResponseError>(
-                    (int)LSPErrorCodes::InvalidParams,
-                    "Did not find any dispatchComponents for a SEND QueryResponse in textDocument/hover");
-                return LSPResult::make(move(gs), move(response));
-            }
-            auto retType = sendResp->retType.type;
-            auto &constraint = sendResp->constraint;
+            auto retType = sendResp->dispatchResult->returnType;
+            auto &constraint = sendResp->dispatchResult->main.constr;
             if (constraint) {
                 retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
             }
             response->result = make_unique<Hover>(formatRubyCode(
-                clientHoverMarkupKind, methodSignatureString(*gs, retType, sendResp->dispatchComponents, constraint)));
+                clientHoverMarkupKind, methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint)));
         } else if (auto defResp = resp->isDefinition()) {
-            response->result = make_unique<Hover>(
-                formatRubyCode(clientHoverMarkupKind, methodSignatureString(*gs, defResp->retType.type,
-                                                                            defResp->dispatchComponents, nullptr)));
+            response->result = make_unique<Hover>(formatRubyCode(
+                clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr)));
         } else {
             response->result =
                 make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs)));

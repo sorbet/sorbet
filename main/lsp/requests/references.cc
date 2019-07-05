@@ -28,8 +28,8 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
             auto resp = move(queryResponses[0]);
 
             if (auto constResp = resp->isConstant()) {
-                if (!constResp->dispatchComponents.empty()) {
-                    auto symRef = constResp->dispatchComponents[0].method;
+                if (constResp->symbol.exists()) {
+                    auto symRef = constResp->symbol;
                     auto run2 = setupLSPQueryBySymbol(move(gs), symRef);
                     gs = move(run2.gs);
                     vector<unique_ptr<Location>> result;

@@ -196,8 +196,9 @@ core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, cor
     if (!resultType) {
         resultType = core::Types::untypedUntracked();
     }
-
-    resultType = core::Types::replaceSelfType(ctx, resultType, receiver); // instantiate self types
+    if (receiver) {
+        resultType = core::Types::replaceSelfType(ctx, resultType, receiver); // instantiate self types
+    }
     if (constr) {
         resultType = core::Types::instantiate(ctx, resultType, *constr); // instantiate generic methods
     }
