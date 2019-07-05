@@ -20,9 +20,7 @@ class B < A
 end
 
 def no_sig(&blk) # error: This function does not have a `sig`
-  # this error only happens in strict mode, since SigSuggestion only runs in strict mode,
-  # which then passes in generics to try to guess argument types
-  foo(*[1], &blk) # error: Passing generics as block arguments is not supported
+  foo(*[1], &blk)
 end
 
 sig {params(a: Integer, blk: T.nilable(T.proc.returns(String))).void}
