@@ -41,7 +41,7 @@ public:
     // returns true if was successfully solved
     bool solve(Context ctx);
     TypePtr getInstantiation(SymbolRef) const;
-    std::shared_ptr<TypeConstraint> deepCopy() const;
+    std::unique_ptr<TypeConstraint> deepCopy() const;
     InlinedVector<SymbolRef, 4> getDomain() const;
     static TypeConstraint EmptyFrozenConstraint;
     std::string toString(Context ctx) const;
