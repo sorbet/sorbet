@@ -126,7 +126,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
-                                                      const shared_ptr<core::TypeConstraint> &constraint) {
+                                                      const unique_ptr<core::TypeConstraint> &constraint) {
     ENFORCE(what.exists());
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
     auto resultType = what.data(gs)->resultType;

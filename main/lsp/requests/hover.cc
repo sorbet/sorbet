@@ -7,7 +7,7 @@ namespace sorbet::realmain::lsp {
 
 string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &retType,
                              const core::DispatchResult::ComponentVec &dispatchComponents,
-                             const shared_ptr<core::TypeConstraint> &constraint) {
+                             const unique_ptr<core::TypeConstraint> &constraint) {
     string contents = "";
     for (auto &dispatchComponent : dispatchComponents) {
         if (dispatchComponent.method.exists()) {
