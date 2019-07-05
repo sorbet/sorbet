@@ -108,12 +108,15 @@ vector<unique_ptr<ast::Expression>> Delegate::replaceDSL(core::MutableContext ct
             methodName = lit->asSymbol(ctx);
         }
         // sig {params(arg0: T.untyped).returns(T.untyped)}
-        // def $methodName(*arg0); end
+        // def $methodName(*arg0, &blk); end
+        ast::MethodDef::ARGS_store args;
+        args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
+        args.emplace_back(std::make_unique<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
+
         methodStubs.push_back(ast::MK::Sig1(loc, ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
                                             ast::MK::Untyped(loc)));
-        methodStubs.push_back(ast::MK::Method1(loc, loc, methodName,
-                                               ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())),
-                                               ast::MK::EmptyTree(), ast::MethodDef::DSLSynthesized));
+        methodStubs.push_back(ast::MK::Method(loc, loc, methodName, std::move(args), ast::MK::EmptyTree(),
+                                              ast::MethodDef::DSLSynthesized));
     }
 
     return methodStubs;
