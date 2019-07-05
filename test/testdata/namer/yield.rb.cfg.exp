@@ -78,7 +78,7 @@ subgraph "cluster_::Main#blockyield" {
     "bb::Main#blockyield_1" [shape = parallelogram];
 
     "bb::Main#blockyield_0" [
-        label = "block[id=0]()\l<self>: Main = cast(<self>: NilClass, Main);\l<blk>: T.untyped = load_arg(<blk>)\l<block-pre-call-temp>$4: T.untyped = <self>: Main.yielder()\l<selfRestore>$5: Main = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Main = cast(<self>: NilClass, Main);\l<blk>: T.untyped = load_arg(<blk>)\l<block-pre-call-temp>$4: Sorbet::Private::Static::Void = <self>: Main.yielder()\l<selfRestore>$5: Main = <self>\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_0" -> "bb::Main#blockyield_2" [style="bold"];
@@ -113,7 +113,7 @@ subgraph "cluster_::Main#main" {
     "bb::Main#main_1" [shape = parallelogram];
 
     "bb::Main#main_0" [
-        label = "block[id=0]()\l<self>: Main = cast(<self>: NilClass, Main);\l<block-pre-call-temp>$5: T.proc.params(arg0: T.untyped).returns(T.untyped) = <self>: Main.lambda()\l<selfRestore>$6: Main = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Main = cast(<self>: NilClass, Main);\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: Main.lambda()\l<selfRestore>$6: Main = <self>\l<unconditional>\l"
     ];
 
     "bb::Main#main_0" -> "bb::Main#main_2" [style="bold"];

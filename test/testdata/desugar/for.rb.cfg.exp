@@ -78,7 +78,7 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_1" [shape = parallelogram];
 
     "bb::<Class:Main>#main_0" [
-        label = "block[id=0]()\l@a$121: T.untyped = alias <C <undeclared-field-stub>>\l@@b$125: T.untyped = alias <C <undeclared-field-stub>>\l$c$129: T.untyped = alias $c\l<self>: T.class_of(Main) = cast(<self>: NilClass, T.class_of(Main));\l<statTemp>$4: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$5: T.untyped = <statTemp>$4: T.class_of(A).each()\l<selfRestore>$6: T.class_of(Main) = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l@a$121: T.untyped = alias <C <undeclared-field-stub>>\l@@b$125: T.untyped = alias <C <undeclared-field-stub>>\l$c$129: T.untyped = alias $c\l<self>: T.class_of(Main) = cast(<self>: NilClass, T.class_of(Main));\l<statTemp>$4: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <statTemp>$4: T.class_of(A).each()\l<selfRestore>$6: T.class_of(Main) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_0" -> "bb::<Class:Main>#main_2" [style="bold"];
@@ -95,7 +95,7 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_2" -> "bb::<Class:Main>#main_3" [style="tapered"];
 
     "bb::<Class:Main>#main_3" [
-        label = "block[id=3](<selfRestore>$6: T.class_of(Main), @a$121: T.untyped, @@b$125: T.untyped, $c$129: T.untyped)\l<statTemp>$3: T.untyped = Solve<each>\l<self>: T.class_of(Main) = <selfRestore>$6\l<statTemp>$25: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$26: T.untyped = <statTemp>$25: T.class_of(A).each()\l<selfRestore>$27: T.class_of(Main) = <self>\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$6: T.class_of(Main), @a$121: T.untyped, @@b$125: T.untyped, $c$129: T.untyped)\l<statTemp>$3: T.untyped = Solve<each>\l<self>: T.class_of(Main) = <selfRestore>$6\l<statTemp>$25: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$26: Sorbet::Private::Static::Void = <statTemp>$25: T.class_of(A).each()\l<selfRestore>$27: T.class_of(Main) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_3" -> "bb::<Class:Main>#main_6" [style="bold"];
@@ -112,7 +112,7 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_6" -> "bb::<Class:Main>#main_7" [style="tapered"];
 
     "bb::<Class:Main>#main_7" [
-        label = "block[id=7](<selfRestore>$27: T.class_of(Main), @a$121: T.untyped, @@b$125: T.untyped, $c$129: T.untyped)\l<statTemp>$24: T.untyped = Solve<each>\l<self>: T.class_of(Main) = <selfRestore>$27\l<statTemp>$47: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$48: T.untyped = <statTemp>$47: T.class_of(A).each()\l<selfRestore>$49: T.class_of(Main) = <self>\l<unconditional>\l"
+        label = "block[id=7](<selfRestore>$27: T.class_of(Main), @a$121: T.untyped, @@b$125: T.untyped, $c$129: T.untyped)\l<statTemp>$24: T.untyped = Solve<each>\l<self>: T.class_of(Main) = <selfRestore>$27\l<statTemp>$47: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$48: Sorbet::Private::Static::Void = <statTemp>$47: T.class_of(A).each()\l<selfRestore>$49: T.class_of(Main) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_7" -> "bb::<Class:Main>#main_10" [style="bold"];
@@ -129,7 +129,7 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_10" -> "bb::<Class:Main>#main_11" [style="tapered"];
 
     "bb::<Class:Main>#main_11" [
-        label = "block[id=11](<selfRestore>$49: T.class_of(Main), @a$121: T.untyped, @@b$125: T.untyped, $c$129: T.untyped)\l<statTemp>$46: T.untyped = Solve<each>\l<self>: T.class_of(Main) = <selfRestore>$49\l<statTemp>$75: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$76: T.untyped = <statTemp>$75: T.class_of(A).each()\l<selfRestore>$77: T.class_of(Main) = <self>\l<unconditional>\l"
+        label = "block[id=11](<selfRestore>$49: T.class_of(Main), @a$121: T.untyped, @@b$125: T.untyped, $c$129: T.untyped)\l<statTemp>$46: T.untyped = Solve<each>\l<self>: T.class_of(Main) = <selfRestore>$49\l<statTemp>$75: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$76: Sorbet::Private::Static::Void = <statTemp>$75: T.class_of(A).each()\l<selfRestore>$77: T.class_of(Main) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_11" -> "bb::<Class:Main>#main_14" [style="bold"];
@@ -146,7 +146,7 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_14" -> "bb::<Class:Main>#main_15" [style="tapered"];
 
     "bb::<Class:Main>#main_15" [
-        label = "block[id=15](<selfRestore>$77: T.class_of(Main), @a$121: T.untyped, @@b$125: T.untyped, $c$129: T.untyped)\l<statTemp>$74: T.untyped = Solve<each>\l<self>: T.class_of(Main) = <selfRestore>$77\l<statTemp>$105: String(\"main\") = \"main\"\l<statTemp>$103: NilClass = <self>: T.class_of(Main).puts(<statTemp>$105: String(\"main\"))\l<statTemp>$107: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$108: T.untyped = <statTemp>$107: T.class_of(A).each()\l<selfRestore>$109: T.class_of(Main) = <self>\l<unconditional>\l"
+        label = "block[id=15](<selfRestore>$77: T.class_of(Main), @a$121: T.untyped, @@b$125: T.untyped, $c$129: T.untyped)\l<statTemp>$74: T.untyped = Solve<each>\l<self>: T.class_of(Main) = <selfRestore>$77\l<statTemp>$105: String(\"main\") = \"main\"\l<statTemp>$103: NilClass = <self>: T.class_of(Main).puts(<statTemp>$105: String(\"main\"))\l<statTemp>$107: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$108: Sorbet::Private::Static::Void = <statTemp>$107: T.class_of(A).each()\l<selfRestore>$109: T.class_of(Main) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_15" -> "bb::<Class:Main>#main_18" [style="bold"];
@@ -163,7 +163,7 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_18" -> "bb::<Class:Main>#main_19" [style="tapered"];
 
     "bb::<Class:Main>#main_19" [
-        label = "block[id=19](<selfRestore>$109: T.class_of(Main), @a$121: T.untyped, @@b$125: T.untyped, $c$129: T.untyped)\l<statTemp>$106: T.untyped = Solve<each>\l<self>: T.class_of(Main) = <selfRestore>$109\l<statTemp>$161: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$162: T.untyped = <statTemp>$161: T.class_of(A).each()\l<selfRestore>$163: T.class_of(Main) = <self>\l<unconditional>\l"
+        label = "block[id=19](<selfRestore>$109: T.class_of(Main), @a$121: T.untyped, @@b$125: T.untyped, $c$129: T.untyped)\l<statTemp>$106: T.untyped = Solve<each>\l<self>: T.class_of(Main) = <selfRestore>$109\l<statTemp>$161: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$162: Sorbet::Private::Static::Void = <statTemp>$161: T.class_of(A).each()\l<selfRestore>$163: T.class_of(Main) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_19" -> "bb::<Class:Main>#main_22" [style="bold"];

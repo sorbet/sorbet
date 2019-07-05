@@ -30,7 +30,7 @@ subgraph "cluster_::Test#normalize_params" {
     "bb::Test#normalize_params_3" -> "bb::Test#normalize_params_5" [style="tapered"];
 
     "bb::Test#normalize_params_4" [
-        label = "block[id=4](<self>: Test, v: T::Array[T.untyped])\l<block-pre-call-temp>$14: T::Array[U] = v: T::Array[T.untyped].map()\l<selfRestore>$15: Test = <self>\l<unconditional>\l"
+        label = "block[id=4](<self>: Test, v: T::Array[T.untyped])\l<block-pre-call-temp>$14: Sorbet::Private::Static::Void = v: T::Array[T.untyped].map()\l<selfRestore>$15: Test = <self>\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_4" -> "bb::Test#normalize_params_6" [style="bold"];

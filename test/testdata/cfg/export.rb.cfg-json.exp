@@ -1385,7 +1385,7 @@
       "unique_name": "\u003cblock-pre-call-temp\u003e$16",
       "type": {
        "kind": "CLASS",
-       "class_full_name": "Integer"
+       "class_full_name": "Sorbet::Private::Static::Void"
       }
      },
      "instruction": {

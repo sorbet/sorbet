@@ -166,7 +166,7 @@ subgraph "cluster_::Use#shouldRemoveSelfTemp" {
     "bb::Use#shouldRemoveSelfTemp_1" [shape = parallelogram];
 
     "bb::Use#shouldRemoveSelfTemp_0" [
-        label = "block[id=0]()\l<self>: Use = cast(<self>: NilClass, Use);\l<block-pre-call-temp>$4: T.untyped = <self>: Use.only_on_Use()\l<selfRestore>$5: Use = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Use = cast(<self>: NilClass, Use);\l<block-pre-call-temp>$4: Sorbet::Private::Static::Void = <self>: Use.only_on_Use()\l<selfRestore>$5: Use = <self>\l<unconditional>\l"
     ];
 
     "bb::Use#shouldRemoveSelfTemp_0" -> "bb::Use#shouldRemoveSelfTemp_2" [style="bold"];
