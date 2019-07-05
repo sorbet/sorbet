@@ -78,6 +78,9 @@ def _snapshot_test(test_path):
             "$(location {})".format(actual),
             test_path,
         ],
+
+        # NOTE: this is manual to avoid being caught with `//...`
+        tags = ["manual"],
     )
 
     res["test_name"] = test_name
@@ -102,12 +105,17 @@ def _snapshot_test(test_path):
                 test_path,
             ],
 
+            # Don't run this rule remotely, or in the sandbox
+            local = True,
+
             # NOTE: these tags cause this test to be skipped by `bazel test //...`,
-            # and not run in the sandbox.
+            # and not run in the sandbox:
+            # 
+            # "manual"   - don't include this rule in `bazel test //...`
+            # "external" - unconditionally execute this rule
             tags = [
                 "manual",
                 "external",
-                "local",
             ],
         )
 
