@@ -74,26 +74,6 @@ module T::Utils
     T::Private::Methods.run_all_sig_blocks
   end
 
-  # This can be called in a wholesome test to make sure all the `sig`s are well
-  # formed.
-  def self.validate_sigs
-    exceptions = []
-    run_all_sig_blocks
-    ObjectSpace.each_object(Module) do |mod| # rubocop:disable PrisonGuard/NoDynamicConstAccess
-      begin
-        T::Private::Abstract::Validate.validate_subclass(mod)
-        if T::AbstractUtils.abstract_module?(mod)
-          T::Private::Abstract::Validate.validate_abstract_module(mod)
-        end
-      rescue => e
-        exceptions << e
-      end
-    end
-    if !exceptions.empty?
-      raise "#{exceptions.count} exception thrown during validation:\n\n#{exceptions.map(&:message).sort.join("\n\n")}"
-    end
-  end
-
   # Give a type which is a subclass of T::Types::Base, determines if the type is a simple nilable type (union of NilClass and something else).
   # If so, returns the T::Types::Base of the something else. Otherwise, returns nil.
   def self.unwrap_nilable(type)
