@@ -88,12 +88,11 @@ DispatchResult ShapeType::dispatchCall(Context ctx, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(ctx)->findMember(ctx, args.name);
     if (method.exists() && method.data(ctx)->intrinsic != nullptr) {
-        auto result = method.data(ctx)->intrinsic->apply(ctx, args, this);
-        if (result != nullptr) {
-            DispatchResult::ComponentVec components(1);
-            components.front().receiver = args.selfType;
-            components.front().method = method;
-            return DispatchResult{result, std::move(components)};
+        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchResult res{nullptr, std::move(comp)};
+        method.data(ctx)->intrinsic->apply(ctx, args, this, res);
+        if (res.returnType != nullptr) {
+            return res;
         }
     }
     return ProxyType::dispatchCall(ctx, args);
@@ -103,12 +102,11 @@ DispatchResult TupleType::dispatchCall(Context ctx, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(ctx)->findMember(ctx, args.name);
     if (method.exists() && method.data(ctx)->intrinsic != nullptr) {
-        auto result = method.data(ctx)->intrinsic->apply(ctx, args, this);
-        if (result != nullptr) {
-            DispatchResult::ComponentVec components(1);
-            components.front().receiver = args.selfType;
-            components.front().method = method;
-            return DispatchResult{result, std::move(components)};
+        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchResult res{nullptr, std::move(comp)};
+        method.data(ctx)->intrinsic->apply(ctx, args, this, res);
+        if (res.returnType != nullptr) {
+            return res;
         }
     }
     return ProxyType::dispatchCall(ctx, args);
@@ -438,7 +436,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0,
                                 args.args.size());
-                    result.components.front().errors.emplace_back(e.build());
+                    result.main.errors.emplace_back(e.build());
                 }
             }
             return result;
@@ -499,7 +497,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                                             attached.data(ctx)->showFullName(ctx))));
                 }
             }
-            result.components.front().errors.emplace_back(e.build());
+            result.main.errors.emplace_back(e.build());
         }
         return result;
     }
@@ -510,14 +508,14 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                            : mayBeOverloaded;
 
     DispatchResult result;
-    result.components.emplace_back(DispatchComponent{args.selfType, method, vector<unique_ptr<Error>>()});
+    auto &component = result.main;
+    component.receiver = args.selfType;
+    component.method = method;
 
     const SymbolData data = method.data(ctx);
-    unique_ptr<TypeConstraint> maybeConstraint;
+    unique_ptr<TypeConstraint> &maybeConstraint = result.main.constr;
     TypeConstraint *constr;
-    if (args.block) {
-        constr = args.block->constr.get();
-    } else if (data->isGenericMethod()) {
+    if (args.block || data->isGenericMethod()) {
         maybeConstraint = make_unique<TypeConstraint>();
         constr = maybeConstraint.get();
     } else {
@@ -556,7 +554,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         auto offset = ait - args.args.begin();
         if (auto e = matchArgType(ctx, *constr, args.locs.call, args.locs.receiver, symbol, method, *arg, spec,
                                   args.selfType, targs, args.locs.args[offset], args.args.size() == 1)) {
-            result.components.front().errors.emplace_back(std::move(e));
+            result.main.errors.emplace_back(std::move(e));
         }
 
         if (!spec.flags.isRepeated) {
@@ -587,7 +585,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                         core::ErrorSection("Hint: if you want to allow any type as an argument, use `T.untyped`"));
                 }
 
-                result.components.front().errors.emplace_back(e.build());
+                result.main.errors.emplace_back(e.build());
             }
         }
     }
@@ -635,7 +633,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                         tpe.type = hash->values[offset];
                         if (auto e = matchArgType(ctx, *constr, args.locs.call, args.locs.receiver, symbol, method, tpe,
                                                   spec, args.selfType, targs, Loc::none())) {
-                            result.components.front().errors.emplace_back(std::move(e));
+                            result.main.errors.emplace_back(std::move(e));
                         }
                     }
                     break;
@@ -650,7 +648,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
                         if (auto e = missingArg(ctx, args.locs.call, args.locs.receiver, method, spec)) {
-                            result.components.front().errors.emplace_back(std::move(e));
+                            result.main.errors.emplace_back(std::move(e));
                         }
                     }
                     continue;
@@ -662,7 +660,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 tpe.type = hash->values[offset];
                 if (auto e = matchArgType(ctx, *constr, args.locs.call, args.locs.receiver, symbol, method, tpe, spec,
                                           args.selfType, targs, Loc::none())) {
-                    result.components.front().errors.emplace_back(std::move(e));
+                    result.main.errors.emplace_back(std::move(e));
                 }
             }
             for (auto &keyType : hash->keys) {
@@ -676,7 +674,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.show(ctx),
                                 data->show(ctx));
-                    result.components.front().errors.emplace_back(e.build());
+                    result.main.errors.emplace_back(e.build());
                 }
             }
         } else if (hashArgType->derivesFrom(ctx, Symbols::Hash())) {
@@ -685,7 +683,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword arguments");
                 e.addErrorSection(ErrorSection("Got " + hashArgType->show(ctx) + " originating from:",
                                                hashArg->origins2Explanations(ctx)));
-                result.components.front().errors.emplace_back(e.build());
+                result.main.errors.emplace_back(e.build());
             }
         }
     }
@@ -697,7 +695,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 continue;
             }
             if (auto e = missingArg(ctx, args.locs.call, args.locs.receiver, method, spec)) {
-                result.components.front().errors.emplace_back(std::move(e));
+                result.main.errors.emplace_back(std::move(e));
             }
         }
     }
@@ -735,7 +733,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                                    data->show(ctx), firstKeyword->argumentName(ctx));
                 }
             }
-            result.components.front().errors.emplace_back(e.build());
+            result.main.errors.emplace_back(e.build());
         }
     }
 
@@ -749,18 +747,24 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             blockType = Types::untyped(ctx, method);
         }
 
-        args.block->returnTp = Types::getProcReturnType(ctx, blockType);
+        component.blockReturnType = Types::getProcReturnType(ctx, blockType);
         blockType = constr->isSolved() ? Types::instantiate(ctx, blockType, *constr)
                                        : Types::approximate(ctx, blockType, *constr);
-
-        args.block->blockPreType = blockType;
-        args.block->blockSpec = bspec.deepCopy();
+        component.blockPreType = blockType;
+        component.blockSpec = bspec.deepCopy();
     }
 
-    TypePtr resultType = nullptr;
+    TypePtr &resultType = result.returnType;
 
     if (method.data(ctx)->intrinsic != nullptr) {
-        resultType = method.data(ctx)->intrinsic->apply(ctx, args, thisType);
+        method.data(ctx)->intrinsic->apply(ctx, args, thisType, result);
+        // the call could have overriden constraint
+        if (result.main.constr || constr != &core::TypeConstraint::EmptyFrozenConstraint) {
+            constr = result.main.constr.get();
+        }
+        if (constr == nullptr) {
+            constr = &core::TypeConstraint::EmptyFrozenConstraint;
+        }
     }
 
     if (resultType == nullptr) {
@@ -780,7 +784,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         if (!constr->solve(ctx)) {
             if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::GenericMethodConstaintUnsolved)) {
                 e.setHeader("Could not find valid instantiation of type parameters");
-                result.components.front().errors.emplace_back(e.build());
+                result.main.errors.emplace_back(e.build());
             }
         }
         ENFORCE(!data->arguments().empty(), "Every method should at least have a block arg.");
@@ -790,7 +794,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", args.name.show(ctx));
                 e.addErrorLine(method.data(ctx)->loc(), "defined here");
-                result.components.front().errors.emplace_back(e.build());
+                result.main.errors.emplace_back(e.build());
             }
         }
     }
@@ -803,9 +807,8 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     resultType = Types::replaceSelfType(ctx, resultType, args.selfType);
 
     if (args.block != nullptr) {
-        args.block->sendTp = resultType;
+        component.sendTp = resultType;
     }
-    result.returnType = std::move(resultType);
     return result;
 }
 
