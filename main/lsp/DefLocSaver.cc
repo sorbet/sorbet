@@ -38,14 +38,10 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
             }
         }
 
-        core::DispatchComponent dispatchComponent;
-        core::DispatchResult::ComponentVec dispatchComponents;
-        dispatchComponent.method = methodDef->symbol;
-        dispatchComponents.emplace_back(std::move(dispatchComponent));
         tp.type = symbolData->resultType;
         tp.origins.emplace_back(methodDef->declLoc);
         core::lsp::QueryResponse::pushQueryResponse(
-            ctx, core::lsp::DefinitionResponse(std::move(dispatchComponents), methodDef->declLoc, methodDef->name, tp));
+            ctx, core::lsp::DefinitionResponse(methodDef->symbol, methodDef->declLoc, methodDef->name, tp));
     }
 
     return methodDef;
