@@ -1,7 +1,9 @@
 #ifndef SORBET_TYPECONSTRAINT_H
 #define SORBET_TYPECONSTRAINT_H
 
-#include "Types.h"
+#include "core/Context.h"
+#include "core/SymbolRef.h"
+#include "core/TypePtr.h"
 namespace sorbet::core {
 
 class TypeConstraint {
