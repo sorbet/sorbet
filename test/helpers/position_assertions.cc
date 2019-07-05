@@ -505,6 +505,8 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
                         // Should never happen.
                         ADD_FAILURE()
                             << "Error in test runner: identical locations weren't reported as subsets of one another.";
+                        expectedLocationsIt++;
+                        actualLocationsIt++;
                         break;
                 }
             }
