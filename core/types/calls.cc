@@ -47,28 +47,35 @@ DispatchResult TypeVar::dispatchCall(Context ctx, DispatchArgs args) {
     Exception::raise("should never happen");
 }
 
+bool allComponentsPresent(DispatchResult &res) {
+    if (!res.main.method.exists()) {
+        return false;
+    }
+    if (!res.secondary || res.secondaryKind == DispatchResult::Combinator::AND) {
+        return true;
+    }
+    return allComponentsPresent(*res.secondary);
+}
+
 DispatchResult AndType::dispatchCall(Context ctx, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "andtype");
     auto leftRet = left->dispatchCall(ctx, args);
     auto rightRet = right->dispatchCall(ctx, args);
 
     // If either side is missing the method, dispatch to the other.
-    auto leftOk = absl::c_all_of(leftRet.components, [&](auto &comp) { return comp.method.exists(); });
-    auto rightOk = absl::c_all_of(rightRet.components, [&](auto &comp) { return comp.method.exists(); });
+    auto leftOk = allComponentsPresent(leftRet);
+    auto rightOk = allComponentsPresent(rightRet);
     if (leftOk && !rightOk) {
         return leftRet;
     }
     if (rightOk && !leftOk) {
         return rightRet;
     }
+    DispatchResult ret{Types::all(ctx, leftRet.returnType, rightRet.returnType), move(leftRet.main),
+                       make_unique<DispatchResult>(move(rightRet)),
 
-    DispatchResult::ComponentVec components = std::move(leftRet.components);
-    components.insert(components.end(), make_move_iterator(rightRet.components.begin()),
-                      make_move_iterator(rightRet.components.end()));
-    DispatchResult ret{
-        Types::all(ctx, leftRet.returnType, rightRet.returnType),
-        std::move(components),
-    };
+                       DispatchResult::Combinator::AND};
+
     return ret;
 }
 
