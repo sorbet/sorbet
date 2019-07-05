@@ -126,7 +126,6 @@ cp -r "${test_dir}/src" "$actual"
   # Passing --local to never consult rubygems.org
   # Passing --no-prune to not delete unused gems in vendor/cache
   info "├─ Installing dependencies to vendor/bundle"
-  bundle config --local path vendor/bundle
   bundle install --local --no-prune
 
   info "├─ Checking installation"
