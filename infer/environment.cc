@@ -718,11 +718,11 @@ core::TypePtr flattenArrays(core::Context ctx, core::TypePtr type) {
     return result;
 }
 
-core::TypePtr flatmapHack(core::Context ctx, const shared_ptr<core::SendAndBlockLink> &link, core::TypePtr returnType) {
-    if (link->fun != core::Names::flatMap()) {
+core::TypePtr flatmapHack(core::Context ctx, core::TypePtr receiver, core::TypePtr returnType, core::NameRef fun) {
+    if (fun != core::Names::flatMap()) {
         return returnType;
     }
-    if (!link->receiver->derivesFrom(ctx, core::Symbols::Enumerable())) {
+    if (!receiver->derivesFrom(ctx, core::Symbols::Enumerable())) {
         return returnType;
     }
 
@@ -754,10 +754,6 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
 
                 const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, send->recv);
                 if (send->link) {
-                    send->link->receiver = recvType.type;
-                    send->link->returnTp = core::Types::untypedUntracked();
-                    send->link->blockPreType = core::Types::untypedUntracked();
-                    send->link->sendTp = core::Types::untypedUntracked();
                     checkFullyDefined = false;
                 }
                 core::CallLocs locs{
@@ -768,22 +764,40 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 core::DispatchArgs dispatchArgs{send->fun, locs, args, recvType.type, recvType.type, send->link};
                 auto dispatched = recvType.type->dispatchCall(ctx, dispatchArgs);
 
-                histogramInc("dispatchCall.components", dispatched.components.size());
-                tp.type = dispatched.returnType;
-                for (auto &comp : dispatched.components) {
-                    for (auto &err : comp.errors) {
+                auto it = &dispatched;
+                while (it != nullptr) {
+                    for (auto &err : it->main.errors) {
                         ctx.state._error(std::move(err));
                     }
-                    lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(comp.method);
+                    lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(it->main.method);
+                    it = it->secondary.get();
                 }
-
+                shared_ptr<core::DispatchResult> retainedResult;
+                if (send->link) {
+                    // this type should never be used, thus we put a useless type
+                    tp.type = core::Types::void_();
+                } else {
+                    tp.type = dispatched.returnType;
+                }
+                if (send->link || lspQueryMatch) {
+                    retainedResult = make_shared<core::DispatchResult>(std::move(dispatched));
+                }
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(std::move(dispatched.components),
-                                                     send->link ? send->link->constr : nullptr, bind.loc, send->fun,
-                                                     recvType, tp));
+                        ctx, core::lsp::SendResponse(bind.loc, retainedResult, send->fun));
                 }
+                if (send->link) {
+                    // This should eventually become ENFORCEs but currently they are wrong
+                    if (!retainedResult->main.blockReturnType) {
+                        retainedResult->main.blockReturnType = core::Types::untyped(ctx, retainedResult->main.method);
+                    }
+                    if (!retainedResult->main.blockPreType) {
+                        retainedResult->main.blockPreType = core::Types::untyped(ctx, retainedResult->main.method);
+                    }
+                    ENFORCE(retainedResult->main.sendTp);
 
+                    send->link->result = move(retainedResult);
+                }
                 tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::Ident *i) {
@@ -832,23 +846,26 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 }
 
                 if (lspQueryMatch) {
-                    core::DispatchResult::ComponentVec components;
-                    components.emplace_back(core::DispatchComponent{tp.type, symbol, {}});
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx,
-                        core::lsp::ConstantResponse(ctx.owner, std::move(components), bind.loc, data->name, tp, tp));
+                        ctx, core::lsp::ConstantResponse(ctx.owner, symbol, bind.loc, data->name, tp, tp));
                 }
                 pinnedTypes[bind.bind.variable] = tp;
             },
             [&](cfg::SolveConstraint *i) {
-                if (!i->link->constr->solve(ctx)) {
+                if (i->link->result->main.constr && !i->link->result->main.constr->solve(ctx)) {
                     if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::GenericMethodConstaintUnsolved)) {
                         e.setHeader("Could not find valid instantiation of type parameters");
                     }
                 }
 
-                auto type = core::Types::instantiate(ctx, i->link->sendTp, *i->link->constr);
-                type = flatmapHack(ctx, i->link, type);
+                core::TypePtr type;
+                if (i->link->result->main.constr) {
+                    // TODO: this should repeat the same dance with Or and And components that dispatchCall does
+                    type = core::Types::instantiate(ctx, i->link->result->main.sendTp, *i->link->result->main.constr);
+                } else {
+                    type = i->link->result->returnType;
+                }
+                type = flatmapHack(ctx, i->link->result->main.receiver, type, i->link->fun);
                 tp.type = std::move(type);
                 tp.origins.emplace_back(bind.loc);
             },
@@ -871,7 +888,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::LoadYieldParams *insn) {
-                auto &procType = insn->link->blockPreType;
+                ENFORCE(insn->link);
+                ENFORCE(insn->link->result);
+                ENFORCE(insn->link->result->main.blockPreType);
+                auto &procType = insn->link->result->main.blockPreType;
                 auto params = procType->getCallArguments(ctx, core::Names::call());
 
                 // A multi-arg proc, if provided a single arg which is an array,
@@ -917,14 +937,21 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
             },
             [&](cfg::BlockReturn *i) {
                 ENFORCE(i->link);
-                ENFORCE(i->link->returnTp != nullptr);
+                ENFORCE(i->link->result->main.blockReturnType != nullptr);
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->what);
-                auto expectedType = i->link->returnTp;
+                auto expectedType = i->link->result->main.blockReturnType;
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
                     expectedType = core::Types::untypedUntracked();
                 }
-                if (!core::Types::isSubTypeUnderConstraint(ctx, *i->link->constr, typeAndOrigin.type, expectedType)) {
+                bool isSubtype;
+                if (i->link->result->main.constr) {
+                    isSubtype = core::Types::isSubTypeUnderConstraint(ctx, *i->link->result->main.constr,
+                                                                      typeAndOrigin.type, expectedType);
+                } else {
+                    isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType);
+                }
+                if (!isSubtype) {
                     // TODO(nelhage): We should somehow report location
                     // information about the `send` and/or the
                     // definition of the block type
@@ -955,8 +982,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::LoadSelf *l) {
-                if (l->link->blockSpec.rebind.exists()) {
-                    tp.type = l->link->blockSpec.rebind.data(ctx)->externalType(ctx);
+                ENFORCE(l->link);
+                if (l->link->result->main.blockSpec.rebind.exists()) {
+                    tp.type = l->link->result->main.blockSpec.rebind.data(ctx)->externalType(ctx);
                     tp.origins.emplace_back(bind.loc);
 
                 } else {
@@ -1076,7 +1104,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                                     // this is a restoration of `self` variable.
                                     // our current analysis isn't smart enogh to see that it's safe to do this by
                                     // construction either https://github.com/sorbet/sorbet/issues/222 or
-                                    // https://github.com/sorbet/sorbet/issues/224 should allow us to remove this case
+                                    // https://github.com/sorbet/sorbet/issues/224 should allow us to remove this
+                                    // case
                                     break;
                                 }
                             }
