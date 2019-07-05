@@ -740,11 +740,7 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags)
-    : fun(fun), argFlags(argFlags), constr(make_shared<TypeConstraint>()) {}
-SendAndBlockLink::SendAndBlockLink(const SendAndBlockLink &orig)
-    : receiver(orig.receiver), fun(orig.fun), argFlags(orig.argFlags), constr(orig.constr), returnTp(orig.returnTp),
-      blockPreType(orig.blockPreType), blockSpec(orig.blockSpec.deepCopy()), sendTp(orig.sendTp) {}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags) : argFlags(argFlags), fun(fun) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;
@@ -849,12 +845,4 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
 DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) {
     return DispatchArgs{name, locs, args, newSelfRef, fullType, block};
 }
-
-core::TypeConstraint &DispatchArgs::constraint() {
-    if (!block || !block->constr) {
-        return core::TypeConstraint::EmptyFrozenConstraint;
-    }
-    return *block->constr;
-}
-
 } // namespace sorbet::core
