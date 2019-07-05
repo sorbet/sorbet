@@ -45,3 +45,11 @@ class IgnoredUsages
   delegate :foo, :bar, to: :@hi, prefix: true # error: Method `delegate` does not exist
   delegate :foo, :bar, to: '', prefix: true # error: Method `delegate` does not exist
 end
+
+class EnumerableUsage
+  include Enumerable
+
+  Elem = type_member
+
+  delegate :each, to: :foo
+end
