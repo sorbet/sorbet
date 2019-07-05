@@ -23,7 +23,7 @@ WorkerPoolImpl::WorkerPoolImpl(int size, spd::logger &logger) : size(size), logg
         for (int i = 0; i < size; i++) {
             auto &last = threadQueues.emplace_back(make_unique<Queue>());
             auto *ptr = last.get();
-            auto threadIdleName = absl::StrCat("idle", i);
+            auto threadIdleName = absl::StrCat("idle", i + 1);
             optional<int> pinToCore;
             if (pinThreads) {
                 pinToCore = i;
