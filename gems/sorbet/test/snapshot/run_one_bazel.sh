@@ -109,8 +109,11 @@ cp -r "${test_dir}/src" "$actual"
 
   # Setup the vendor/cache directory to include all gems required for any test
   info "├─ Setting up vendor/cache"
-  mkdir vendor
-  ln -s "$GEMS_LOC" "vendor/cache"
+
+  # NOTE: using "mkdir -p" just in case this is run outside of the sandbox
+  # (like when --spawn_strategy=standalone is passed)
+  mkdir -p vendor
+  ln -sf "$GEMS_LOC" "vendor/cache"
 
   ruby_loc=$(bundle exec which ruby)
   if [[ "$ruby_loc" == "$RUBY_WRAPPER_LOC" ]] ; then
