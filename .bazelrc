@@ -99,12 +99,10 @@ build:release-sanitized-mac --define jemalloc=false
 ## Configuration used to to as much testing as possible in CI
 ##
 build:test-sanitized-linux --config=release-sanitized-linux --config=dbg --nostamp --define release=false
-test:test-sanitized-linux --config=release-sanitized-linux --config=dbg --nostamp --define release=false
 test:test-sanitized-linux --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 test:test-sanitized-linux --test_env="ASAN_OPTIONS=detect_leaks=0"
 
 build:test-sanitized-mac --config=release-sanitized-mac --config=dbg --nostamp --define release=false
-test:test-sanitized-mac --config=release-sanitized-mac --config=dbg --nostamp --define release=false
 test:test-sanitized-mac --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 
 build:reduce-intermediate-file-size --copt=-g0 --linkopt=-g0 # used by buildfarm to have less debug information on disk
@@ -114,12 +112,10 @@ build:reduce-intermediate-file-size --copt=-fno-standalone-debug --linkopt=-fno-
 build:reduce-intermediate-file-size --config=shared-libs
 
 build:buildfarm --curses=no --config=reduce-intermediate-file-size
-test:buildfarm --curses=no --config=reduce-intermediate-file-size
+test:buildfarm --curses=no
 test:buildfarm --test_output=errors
 build:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
-test:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
 build:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm
-test:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm
 
 build:travis --config=test-sanitized-linux
 build:travis --curses=no
@@ -179,14 +175,11 @@ build:ubsan --copt=-DHAS_SANITIZER
 
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
 build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
-test:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
 build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
 build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
 build:sanitize-linux --config=sanitize
-test:sanitize-linux --config=sanitize
 
 build:sanitize-mac --config=sanitize
-test:sanitize-mac --config=sanitize
 
 build:tsan --copt=-fsanitize=thread
 build:tsan --linkopt=-fsanitize=thread
