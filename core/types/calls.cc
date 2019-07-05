@@ -29,13 +29,8 @@ DispatchResult OrType::dispatchCall(Context ctx, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "ortype");
     auto leftRet = left->dispatchCall(ctx, args.withSelfRef(left));
     auto rightRet = right->dispatchCall(ctx, args.withSelfRef(right));
-    DispatchResult::ComponentVec components = std::move(leftRet.components);
-    components.insert(components.end(), make_move_iterator(rightRet.components.begin()),
-                      make_move_iterator(rightRet.components.end()));
-    DispatchResult ret{
-        Types::any(ctx, leftRet.returnType, rightRet.returnType),
-        std::move(components),
-    };
+    DispatchResult ret{Types::any(ctx, leftRet.returnType, rightRet.returnType), move(leftRet.main),
+                       make_unique<DispatchResult>(move(rightRet)), DispatchResult::Combinator::OR};
     return ret;
 }
 
