@@ -235,6 +235,7 @@ public:
                 auto origName = klass->symbol.data(ctx)->name;
                 ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx)->name);
                 klass->symbol = ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx)->owner, origName);
+                klass->symbol.data(ctx)->setIsModule(isModule);
 
                 auto oldSymCount = ctx.state.symbolsUsed();
                 auto newSignleton =
