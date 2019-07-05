@@ -110,7 +110,7 @@ def _snapshot_test(test_path):
 
             # NOTE: these tags cause this test to be skipped by `bazel test //...`,
             # and not run in the sandbox:
-            # 
+            #
             # "manual"   - don't include this rule in `bazel test //...`
             # "external" - unconditionally execute this rule
             tags = [

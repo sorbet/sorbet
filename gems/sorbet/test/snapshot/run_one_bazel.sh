@@ -159,7 +159,6 @@ cp -r "${test_dir}/src" "$actual"
     "err.log"
 
   info "├─ Fixing up out.log"
-  out_filtered="$(mktemp)"
   sed -i.bak \
     -e 's/with [0-9]* modules and [0-9]* aliases/with X modules and Y aliases/' \
     -e "s,${TMPDIR}[^ ]*/\([^/]*\),<tmp>/\1,g" \
