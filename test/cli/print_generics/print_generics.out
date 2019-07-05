@@ -47,7 +47,7 @@ test/cli/print_generics/print_generics.rb:25: This function does not have a `sig
     25 |def gaz(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:25: Insert `sig {params(x: T.untyped).void}
+    test/cli/print_generics/print_generics.rb:25: Insert `sig {params(x: T.untyped).returns(T::Enumerator[Integer])}
 `
     25 |def gaz(x)
         ^
