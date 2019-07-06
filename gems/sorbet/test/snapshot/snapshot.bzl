@@ -54,6 +54,9 @@ def _snapshot_test(test_path):
         ),
         outs = [actual],
 
+        # ensure that this rule isn't caught in //...
+        tags = ["manual"],
+
         # NOTE: this redirects stdout/stderr to a log, and only outputs on
         # failure.
         cmd =
