@@ -127,10 +127,11 @@ test:travis --curses=no
 test:travis --test_output=errors
 
 # this is a variant of buildfarm that doen't specify -Os or any sanitizer flags
-build:buildfarm-ruby --config=forcedebug
 build:buildfarm-ruby --curses=no
 build:buildfarm-ruby --define jemalloc=false
 build:buildfarm-ruby --copt=-O2
+build:buildfarm-ruby --config=forcedebug
+build:buildfarm-ruby --config=reduce-intermediate-file-size-base
 test:buildfarm-ruby --curses=no --test_output=errors
 
 ##
