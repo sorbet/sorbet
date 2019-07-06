@@ -34,6 +34,7 @@ echo "--- uploading test results"
 rm -rf _tmp_
 mkdir -p _tmp_/log/junit/
 
+# TODO: does this query omit the snapshot tests?
 ./bazel query 'tests(//...) except attr("tags", "manual", //...)' | while read -r line; do
     path="${line/://}"
     path="${path#//}"
