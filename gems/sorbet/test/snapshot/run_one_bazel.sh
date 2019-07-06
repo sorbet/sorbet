@@ -101,6 +101,12 @@ info "├─ sorbet --version: $("$SRB_SORBET_EXE" --version)"
 actual="${test_dir}/actual"
 cp -r "${test_dir}/src" "$actual"
 
+cleanup() {
+  rm -rf $actual
+}
+
+trap cleanup EXIT
+
 
 # ----- Run the test -----
 
