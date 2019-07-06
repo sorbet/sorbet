@@ -202,3 +202,8 @@ Opus::Require.autoload_map(Object, {
 
 --- missing output directory
 --print=autogen-autoloader requires an output path to be specified
+
+--- in-place writes
+inplace-output
+inplace-output/Foo.rb
+inplace-output/root.rb

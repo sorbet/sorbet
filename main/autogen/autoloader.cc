@@ -141,21 +141,7 @@ core::NameRef DefTree::name() const {
     return nameParts.back();
 }
 
-void DefTree::writeAutoloads(core::Context ctx, const AutoloaderConfig &alCfg, std::string path) {
-    string name = root() ? "root" : this->name().show(ctx);
-    FileOps::write(join(path, fmt::format("{}.rb", name)), renderAutoloadSrc(ctx, alCfg));
-    if (!children.empty()) {
-        auto subdir = join(path, root() ? "" : name);
-        if (!root()) {
-            FileOps::createDir(subdir);
-        }
-        for (auto &[_, child] : children) {
-            child->writeAutoloads(ctx, alCfg, subdir);
-        }
-    }
-}
-
-string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alCfg) {
+string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alCfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", alCfg.preamble);
 
@@ -186,7 +172,7 @@ string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alC
                            [ctx](const auto &pair) { return make_pair(pair.first, pair.first.show(ctx)); });
             fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
             for (const auto &pair : childNames) {
-                fmt::format_to(buf, "  {}: \"autoloader/{}\",\n", pair.second, children[pair.first]->path(ctx));
+                fmt::format_to(buf, "  {}: \"autoloader/{}\",\n", pair.second, children.at(pair.first)->path(ctx));
             }
             fmt::format_to(buf, "}})\n", fullName);
         }
@@ -198,7 +184,7 @@ string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alC
     return to_string(buf);
 }
 
-void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::memory_buffer &buf) {
+void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::memory_buffer &buf) const {
     if (root() || !hasDef()) {
         return;
     }
@@ -217,7 +203,7 @@ void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::me
     }
 }
 
-void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_buffer &buf) {
+void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_buffer &buf) const {
     if (hasDef() && definitionType(ctx) == Definition::Class) {
         fmt::format_to(buf, "\nclass {}", fullName);
         auto &def = definition(ctx);
@@ -232,12 +218,12 @@ void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_bu
     fmt::format_to(buf, "\nend\n");
 }
 
-string DefTree::path(core::Context ctx) {
+string DefTree::path(core::Context ctx) const {
     auto toPath = [&](const auto &fr) -> string { return fr.show(ctx); };
     return fmt::format("{}.rb", fmt::map_join(nameParts, "/", toPath));
 }
 
-Definition::Type DefTree::definitionType(core::Context ctx) {
+Definition::Type DefTree::definitionType(core::Context ctx) const {
     if (!hasDef()) {
         return Definition::Module;
     }
@@ -248,7 +234,7 @@ bool DefTree::hasDef() const {
     return !(namedDefs.empty() && nonBehaviorDefs.empty());
 }
 
-NamedDefinition &DefTree::definition(core::Context ctx) {
+const NamedDefinition &DefTree::definition(core::Context ctx) const {
     if (!namedDefs.empty()) {
         ENFORCE(namedDefs.size() == 1, "Cannot determine definitions for '{}' (size={})", fullName(ctx),
                 namedDefs.size());
@@ -327,6 +313,36 @@ void DefTreeBuilder::collapseSameFileDefs(core::Context ctx, const AutoloaderCon
             collapseSameFileDefs(ctx, alCfg, *child);
         } else {
             root.children.erase(it);
+        }
+    }
+}
+
+void AutoloadWriter::writeAutoloads(core::Context ctx, const AutoloaderConfig &alCfg, const std::string &path,
+                                    const DefTree &root) {
+    UnorderedSet<string> toDelete; // Remove from this set as we write files
+    if (FileOps::exists(path)) {
+        vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
+        toDelete.insert(make_move_iterator(existingFiles.begin()), make_move_iterator(existingFiles.end()));
+    }
+    write(ctx, alCfg, path, toDelete, root);
+    for (const auto &file : toDelete) {
+        FileOps::removeFile(file);
+    }
+}
+
+void AutoloadWriter::write(core::Context ctx, const AutoloaderConfig &alCfg, const std::string &path,
+                           UnorderedSet<std::string> &toDelete, const DefTree &node) {
+    string name = node.root() ? "root" : node.name().show(ctx);
+    string filePath = join(path, fmt::format("{}.rb", name));
+    FileOps::write(filePath, node.renderAutoloadSrc(ctx, alCfg));
+    toDelete.erase(filePath);
+    if (!node.children.empty()) {
+        auto subdir = join(path, node.root() ? "" : name);
+        if (!node.root()) {
+            FileOps::createDir(subdir);
+        }
+        for (auto &[_, child] : node.children) {
+            write(ctx, alCfg, subdir, toDelete, *child);
         }
     }
 }
