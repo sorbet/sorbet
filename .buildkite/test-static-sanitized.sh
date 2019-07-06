@@ -25,7 +25,7 @@ err=0
 
 # NOTE: running ruby/gem/srb testing without the sanitized flags
 ./bazel test @ruby_2_4_3//... @gems//... //gems/sorbet/test/snapshot \
-  --config=buildfarm-ruby --test_summary=terse || err=$?
+  --config=buildfarm-ruby || err=$?
 
 ./bazel test //... $CONFIG_OPTS --test_summary=terse || err=$?
 
