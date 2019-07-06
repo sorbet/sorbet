@@ -249,7 +249,7 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
         }
         {
             Timer timeit(logger, "autogenAutoloaderWrite");
-            root.writeAutoloads(ctx, autoloaderCfg, opts.print.AutogenAutoloader.outputPath, logger);
+            root.writeAutoloads(ctx, autoloaderCfg, opts.print.AutogenAutoloader.outputPath);
         }
     }
 
@@ -445,7 +445,6 @@ int realmain(int argc, char *argv[]) {
                 }
                 indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed), *workers);
                 autoloaderCfg = autogen::AutoloaderConfig::enterConfig(*gs, opts.autoloaderConfig);
-                // autoloaderCfg.enterNames(*gs);
             }
 
             runAutogen(ctx, opts, autoloaderCfg, *workers, indexed);
