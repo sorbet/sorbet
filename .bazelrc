@@ -130,7 +130,9 @@ test:travis --test_output=errors
 build:buildfarm-ruby --curses=no
 build:buildfarm-ruby --define jemalloc=false
 build:buildfarm-ruby --copt=-O2
-build:buildfarm-ruby --config=dbg
+# this includes --spawn_strategy=standalone --genrule_strategy=standalone, which
+# seems to break the snapshot tests
+# build:buildfarm-ruby --config=dbg 
 build:buildfarm-ruby --nostamp
 build:buildfarm-ruby --define release=false
 build:buildfarm-ruby --config=forcedebug
