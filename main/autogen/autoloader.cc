@@ -118,13 +118,11 @@ core::FileRef DefTree::file() const {
     return ref;
 }
 
-static const core::FileRef EMPTY_FILE;
-
 bool DefTree::hasDifferentFile(core::FileRef file) const {
     bool res = false;
     auto visit = [&](const DefTree &node) -> bool {
         auto f = node.file();
-        if (file != f && f != EMPTY_FILE) {
+        if (file != f && f.exists()) {
             res = true;
             return false;
         }
@@ -161,13 +159,13 @@ string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alC
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", alCfg.preamble);
 
-    core::FileRef definingFile = EMPTY_FILE;
+    core::FileRef definingFile;
     if (!namedDefs.empty()) {
         definingFile = file();
     } else if (children.empty() && hasDef()) {
         definingFile = file();
     }
-    if (definingFile != EMPTY_FILE) {
+    if (definingFile.exists()) {
         requires(ctx, alCfg, buf);
     }
 
@@ -194,7 +192,7 @@ string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alC
         }
     }
 
-    if (definingFile != EMPTY_FILE) {
+    if (definingFile.exists()) {
         fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\")\n", fullName, definingFile.data(ctx).path());
     }
     return to_string(buf);
@@ -315,7 +313,7 @@ DefTree DefTreeBuilder::merge(DefTree lhs, DefTree rhs) {
 }
 
 void DefTreeBuilder::collapseSameFileDefs(core::Context ctx, const AutoloaderConfig &alCfg, DefTree &root) {
-    core::FileRef definingFile = EMPTY_FILE;
+    core::FileRef definingFile;
     if (!root.namedDefs.empty()) {
         definingFile = root.file();
     }
