@@ -15,12 +15,12 @@ sh_binary(
         "@gems//gems",
         "@ruby_2_4_3//:ruby",
     ],
+    # NOTE: ensure that this rule isn't caught in //...
+    tags = ["manual"],
     deps = [
         ":logging",
         "@bazel_tools//tools/bash/runfiles",
     ],
-    # NOTE: ensure that this rule isn't caught in //...
-    tags = ["manual"],
 )
 
 snapshot_tests(
