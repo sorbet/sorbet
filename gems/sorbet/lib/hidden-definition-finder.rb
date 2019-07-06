@@ -117,6 +117,14 @@ class Sorbet::Private::HiddenMethodFinder
     raise "Your source can't be read by Sorbet.\nYou can try `find . -type f | xargs -L 1 -t bundle exec srb tc --no-config --error-white-list 1000` and hopefully the last file it is processing before it dies is the culprit.\nIf not, maybe the errors in this file will help: #{SOURCE_CONSTANTS_ERR}" if File.read(SOURCE_CONSTANTS).empty?
 
     puts "Printing #{TMP_RBI}'s symbol table into #{RBI_CONSTANTS}"
+
+    additional_error_blacklist = []
+    if Object.const_defined?(:RUBY_ENGINE) and RUBY_ENGINE == 'jruby'
+      # Some JRuby types have different parent classes than the ones the RBIs included
+      # with Sorbet.
+      additional_error_blacklist << '--error-black-list=5012'
+    end
+
     io = IO.popen(
       [
         File.realpath("#{__dir__}/../bin/srb"),
@@ -132,7 +140,8 @@ class Sorbet::Private::HiddenMethodFinder
         '--error-black-list=4012',
         # Invalid nesting is ok because we don't generate all the intermediate
         # namespaces for aliases
-        '--error-black-list=4015',
+        '--error-black-list=4015'
+      ] + additional_error_blacklist + [
         '--stdout-hup-hack',
         '--silence-dev-message',
         '--no-error-count',
