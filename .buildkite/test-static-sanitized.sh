@@ -30,12 +30,6 @@ err=0
 
 ./bazel test //... $CONFIG_OPTS --test_summary=terse || err=$?
 
-echo "----- build dir -----"
-
-ls
-
-echo "----- end build dir -----"
-
 echo "--- uploading test results"
 
 rm -rf _tmp_
