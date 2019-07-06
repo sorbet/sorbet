@@ -17,11 +17,15 @@ def snapshot_tests(name = "snapshot", update_name = "update", tests = []):
     native.test_suite(
         name = name,
         tests = test_rules,
+        # NOTE: ensure that this rule isn't caught in //...
+        tags = ["manual"],
     )
 
     native.test_suite(
         name = update_name,
         tests = update_rules,
+        # NOTE: ensure that this rule isn't caught in //...
+        tags = ["manual"],
     )
 
 def _snapshot_test(test_path):
@@ -54,7 +58,7 @@ def _snapshot_test(test_path):
         ),
         outs = [actual],
 
-        # ensure that this rule isn't caught in //...
+        # NOTE: this is manual to avoid being caught with `//...`
         tags = ["manual"],
 
         # NOTE: this redirects stdout/stderr to a log, and only outputs on

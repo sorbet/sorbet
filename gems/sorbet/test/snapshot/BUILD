@@ -19,6 +19,8 @@ sh_binary(
         ":logging",
         "@bazel_tools//tools/bash/runfiles",
     ],
+    # NOTE: ensure that this rule isn't caught in //...
+    tags = ["manual"],
 )
 
 snapshot_tests(
