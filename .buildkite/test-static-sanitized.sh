@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
+set -x
 
 unameOut="$(uname -s)"
 case "${unameOut}" in
