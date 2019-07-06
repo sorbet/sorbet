@@ -14,6 +14,7 @@ public:
     static void write(std::string_view filename, const std::vector<sorbet::u1> &data);
     static void append(std::string_view filename, std::string_view text);
     static void write(std::string_view filename, std::string_view text);
+    static bool writeIfDifferent(std::string_view filename, std::string_view text);
     static void createDir(std::string_view path);
     static void removeFile(std::string_view path);
     /**

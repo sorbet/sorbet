@@ -83,6 +83,14 @@ void sorbet::FileOps::write(string_view filename, string_view text) {
     throw sorbet::FileNotFoundException();
 }
 
+bool sorbet::FileOps::writeIfDifferent(string_view filename, string_view text) {
+    if (!exists(filename) || text != read(filename)) {
+        write(filename, text);
+        return true;
+    }
+    return false;
+}
+
 void sorbet::FileOps::append(string_view filename, string_view text) {
     FILE *fp = std::fopen(string(filename).c_str(), "a");
     if (fp) {
