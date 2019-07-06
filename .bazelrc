@@ -206,8 +206,8 @@ build:size --copt=-Os --config=lto
 # See https://github.com/bazelbuild/bazel/issues/2537
 build:debugsymbols --copt=-g3 --copt=-fstandalone-debug --copt=-DDEBUG_SYMBOLS --copt=-glldb
 build:debugsymbols --linkopt=-g3 --linkopt=-fstandalone-debug --linkopt=-DDEBUG_SYMBOLS --linkopt=-glldb
-# build:debugsymbols --spawn_strategy=standalone
-# build:debugsymbols --genrule_strategy=standalone
+build:debugsymbols --spawn_strategy=standalone
+build:debugsymbols --genrule_strategy=standalone
 
 build --strip=never
 
