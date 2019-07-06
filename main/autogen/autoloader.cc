@@ -62,15 +62,22 @@ NamedDefinition NamedDefinition::fromDef(core::Context ctx, ParsedFile &parsedFi
             parsedFile.tree.file};
 }
 
-void DefTree::show(core::Context ctx, int level) {
+void showHelper(core::Context ctx, fmt::memory_buffer &buf, const DefTree &node, int level) {
     auto fileRefToString = [&](const NamedDefinition &nd) -> string_view { return nd.fileRef.data(ctx).path(); };
-    fmt::print("{} [{}]\n", name().show(ctx), fmt::map_join(namedDefs, ", ", fileRefToString));
-    for (auto &[name, tree] : children) {
+    fmt::format_to(buf, "{} [{}]\n", node.root() ? "<ROOT>" : node.name().show(ctx),
+                   fmt::map_join(node.namedDefs, ", ", fileRefToString));
+    for (const auto &[name, tree] : node.children) {
         for (int i = 0; i < level; ++i) {
-            fmt::print("  ");
+            fmt::format_to(buf, "  ");
         }
-        tree->show(ctx, level + 1);
+        showHelper(ctx, buf, *tree, level + 1);
     }
+}
+
+string DefTree::show(core::Context ctx, int level) {
+    fmt::memory_buffer buf;
+    showHelper(ctx, buf, *this, 0);
+    return to_string(buf);
 }
 
 string DefTree::fullName(core::Context ctx) const {
@@ -136,23 +143,21 @@ core::NameRef DefTree::name() const {
     return nameParts.back();
 }
 
-void DefTree::writeAutoloads(core::Context ctx, const AutoloaderConfig &alCfg, std::string path,
-                             shared_ptr<spdlog::logger> logger) {
+void DefTree::writeAutoloads(core::Context ctx, const AutoloaderConfig &alCfg, std::string path) {
     string name = root() ? "root" : this->name().show(ctx);
-    FileOps::write(join(path, fmt::format("{}.rb", name)), autoloads(ctx, alCfg, logger));
+    FileOps::write(join(path, fmt::format("{}.rb", name)), renderAutoloadSrc(ctx, alCfg));
     if (!children.empty()) {
         auto subdir = join(path, root() ? "" : name);
         if (!root()) {
             FileOps::createDir(subdir);
         }
         for (auto &[_, child] : children) {
-            child->writeAutoloads(ctx, alCfg, subdir, logger);
+            child->writeAutoloads(ctx, alCfg, subdir);
         }
     }
 }
 
-string DefTree::autoloads(core::Context ctx, const AutoloaderConfig &alCfg, shared_ptr<spdlog::logger> logger) {
-    Timer timeit(logger, "autogenAutoloaderAutoloads");
+string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alCfg) {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", alCfg.preamble);
 
