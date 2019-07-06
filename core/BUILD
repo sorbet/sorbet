@@ -18,6 +18,10 @@ cc_library(
     hdrs = [
         "GlobalSubstitution.h",
         "core.h",
+        # required by /main/lsp/lsp.h
+        "Context.h",
+        "ErrorQueue.h",
+        "NameHash.h",
     ] + glob(["errors/*.h"]) + glob(["lsp/*.h"]),
     linkstatic = select({
         "//tools/config:linkshared": 0,
