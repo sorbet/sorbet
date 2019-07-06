@@ -21,7 +21,24 @@ for file in $(find output -type f | sort); do
   cat "$file"
 done
 
+
 echo
 echo "--- missing output directory"
+set +e
 main/sorbet --silence-dev-message --stop-after=namer -p autogen-autoloader \
   test/cli/autogen-autoloader/scripts/baz.rb 2>&1
+set -e
+
+
+echo
+echo "--- in-place writes"
+rm -rf inplace-output
+mkdir -p inplace-output
+touch inplace-output/delete_me.rb # Expect this to be deleted from the output
+
+main/sorbet --silence-dev-message --stop-after=namer \
+  -p autogen-autoloader:inplace-output \
+  --autogen-autoloader-modules=Foo \
+  test/cli/autogen-autoloader/inplace.rb
+
+find inplace-output | sort

@@ -60,12 +60,11 @@ public:
 
     bool root() const;
     core::NameRef name() const;
-    std::string path(core::Context ctx);
+    std::string path(core::Context ctx) const;
     std::string show(core::Context ctx, int level = 0); // Render the entire tree
     std::string fullName(core::Context) const;
 
-    void writeAutoloads(core::Context ctx, const AutoloaderConfig &, std::string path);
-    std::string renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &);
+    std::string renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &) const;
 
     DefTree() = default;
     DefTree(const DefTree &) = delete;
@@ -75,12 +74,12 @@ public:
 
 private:
     core::FileRef file() const;
-    void predeclare(core::Context ctx, std::string_view fullName, fmt::memory_buffer &buf);
-    void requires(core::Context ctx, const AutoloaderConfig &, fmt::memory_buffer &buf);
+    void predeclare(core::Context ctx, std::string_view fullName, fmt::memory_buffer &buf) const;
+    void requires(core::Context ctx, const AutoloaderConfig &, fmt::memory_buffer &buf) const;
     bool hasDifferentFile(core::FileRef) const;
     bool hasDef() const;
-    NamedDefinition &definition(core::Context);
-    Definition::Type definitionType(core::Context);
+    const NamedDefinition &definition(core::Context) const;
+    Definition::Type definitionType(core::Context) const;
 
     friend class DefTreeBuilder;
 };
@@ -94,6 +93,16 @@ public:
 
     static DefTree merge(DefTree lhs, DefTree rhs);
     static void collapseSameFileDefs(core::Context, const AutoloaderConfig &, DefTree &root);
+};
+
+class AutoloadWriter {
+public:
+    static void writeAutoloads(core::Context ctx, const AutoloaderConfig &, const std::string &path,
+                               const DefTree &root);
+
+private:
+    static void write(core::Context ctx, const AutoloaderConfig &, const std::string &path,
+                      UnorderedSet<std::string> &toDelete, const DefTree &node);
 };
 
 } // namespace sorbet::autogen

@@ -249,7 +249,7 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
         }
         {
             Timer timeit(logger, "autogenAutoloaderWrite");
-            root.writeAutoloads(ctx, autoloaderCfg, opts.print.AutogenAutoloader.outputPath);
+            autogen::AutoloadWriter::writeAutoloads(ctx, autoloaderCfg, opts.print.AutogenAutoloader.outputPath, root);
         }
     }
 
