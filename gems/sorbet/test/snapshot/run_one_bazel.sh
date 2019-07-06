@@ -102,7 +102,7 @@ actual="${test_dir}/actual"
 cp -r "${test_dir}/src" "$actual"
 
 cleanup() {
-  rm -rf $actual
+  rm -rf "$actual"
 }
 
 trap cleanup EXIT
