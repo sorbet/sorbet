@@ -334,7 +334,7 @@ void AutoloadWriter::write(core::Context ctx, const AutoloaderConfig &alCfg, con
                            UnorderedSet<std::string> &toDelete, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(ctx);
     string filePath = join(path, fmt::format("{}.rb", name));
-    FileOps::write(filePath, node.renderAutoloadSrc(ctx, alCfg));
+    FileOps::writeIfDifferent(filePath, node.renderAutoloadSrc(ctx, alCfg));
     toDelete.erase(filePath);
     if (!node.children.empty()) {
         auto subdir = join(path, node.root() ? "" : name);
