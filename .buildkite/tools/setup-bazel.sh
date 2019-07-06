@@ -12,7 +12,6 @@ function finish {
   ./bazel shutdown
   rm .bazelrc.local
 }
-trap finish EXIT
 
 mkdir -p "/usr/local/var/bazelcache/output-bases/${JOB_NAME}" /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
 {
