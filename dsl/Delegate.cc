@@ -107,13 +107,25 @@ vector<unique_ptr<ast::Expression>> Delegate::replaceDSL(core::MutableContext ct
         } else {
             methodName = lit->asSymbol(ctx);
         }
-        // sig {params(arg0: T.untyped).returns(T.untyped)}
-        // def $methodName(*arg0); end
-        methodStubs.push_back(ast::MK::Sig1(loc, ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
-                                            ast::MK::Untyped(loc)));
-        methodStubs.push_back(ast::MK::Method1(loc, loc, methodName,
-                                               ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())),
-                                               ast::MK::EmptyTree(), ast::MethodDef::DSLSynthesized));
+        // sig {params(arg0: T.untyped, blk: Proc).returns(T.untyped)}
+        ast::Hash::ENTRY_store paramsKeys;
+        paramsKeys.emplace_back(ast::MK::Symbol(loc, core::Names::arg0()));
+        paramsKeys.emplace_back(ast::MK::Symbol(loc, core::Names::blkArg()));
+
+        ast::Hash::ENTRY_store paramsValues;
+        paramsValues.emplace_back(ast::MK::Untyped(loc));
+        paramsValues.emplace_back(ast::MK::Nilable(loc, ast::MK::Constant(loc, core::Symbols::Proc())));
+
+        methodStubs.push_back(ast::MK::Sig(loc, ast::MK::Hash(loc, std::move(paramsKeys), std::move(paramsValues)),
+                                           ast::MK::Untyped(loc)));
+
+        // def $methodName(*arg0, &blk); end
+        ast::MethodDef::ARGS_store args;
+        args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
+        args.emplace_back(std::make_unique<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
+
+        methodStubs.push_back(ast::MK::Method(loc, loc, methodName, std::move(args), ast::MK::EmptyTree(),
+                                              ast::MethodDef::DSLSynthesized));
     }
 
     return methodStubs;
