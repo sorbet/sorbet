@@ -6,6 +6,7 @@
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
+#include <iostream>
 
 using namespace std;
 
@@ -85,9 +86,14 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalStat
         i++;
         const auto &usedSends = hash.usages.sends;
         const auto &usedConstants = hash.usages.constants;
-        if (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
-            std::find(usedConstants.begin(), usedConstants.end(), symNameHash) != usedConstants.end()) {
-            auto ref = core::FileRef(i);
+        auto ref = core::FileRef(i);
+
+        const bool fileIsValid = ref.exists() && ref.data(*gs).sourceType == core::File::Type::Normal;
+        if (fileIsValid &&
+            (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
+             std::find(usedConstants.begin(), usedConstants.end(), symNameHash) != usedConstants.end())) {
+            cout << "EMPLACING BACK FOR " << sym.data(*gs)->name.data(*gs)->toString(*gs) << " " << ref.data(*gs).path()
+                 << "\n";
             files.emplace_back(ref.data(*gs).deepCopy(*gs));
         }
     }

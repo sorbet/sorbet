@@ -1026,13 +1026,34 @@ public:
         return original;
     }
 
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
-        acc.constants.emplace_back(ctx.state, original->symbol.data(ctx)->name.data(ctx));
+    unique_ptr<ast::MethodDef> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
+        acc.constants.emplace_back(ctx.state, original->name.data(ctx.state));
         return original;
     }
 
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
+    unique_ptr<ast::ClassDef> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
         acc.constants.emplace_back(ctx.state, original->symbol.data(ctx)->name.data(ctx));
+        original->name->showRaw(ctx.state);
+
+        auto *constLit = ast::cast_tree<ast::UnresolvedConstantLit>(original->name.get());
+        if (constLit) {
+            acc.constants.emplace_back(ctx.state, constLit->cnst.data(ctx));
+        }
+
+        for (auto &ancst : original->ancestors) {
+            auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(ancst.get());
+            if (cnst) {
+                acc.constants.emplace_back(ctx.state, cnst->cnst.data(ctx));
+            }
+        }
+
+        for (auto &ancst : original->singletonAncestors) {
+            auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(ancst.get());
+            if (cnst) {
+                acc.constants.emplace_back(ctx.state, cnst->cnst.data(ctx));
+            }
+        }
+
         return original;
     }
 

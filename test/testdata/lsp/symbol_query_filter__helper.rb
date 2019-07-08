@@ -10,6 +10,14 @@ class SecondClass
 # ^ def: five
 end
 
+module HelperMethods
+     # ^ def: HelperMethods
+  def helper_method
+    # ^ def: helper_method
+    3
+  end
+end
+
 Foo.new.isFoo
 # ^ usage: Foo
       # ^ usage: isFoo

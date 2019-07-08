@@ -16,5 +16,15 @@ class Foo < AbstractFoo
   end
 end
 
+class SomeModule
+  include HelperMethods
+        # ^ usage: HelperMethods
+
+  def some_instance_method
+    helper_method
+  # ^ usage: helper_method
+  end
+end
+
 SecondClass::FIVE
            # ^ usage: five
