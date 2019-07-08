@@ -146,7 +146,7 @@ void tryApplyLocalVarSaver(const core::GlobalState &gs, vector<ast::ParsedFile> 
 }
 
 void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &indexedCopies) {
-    if (gs.lspQuery.kind != core::lsp::Query::Kind::LOC) {
+    if (gs.lspQuery.kind != core::lsp::Query::Kind::LOC && gs.lspQuery.kind != core::lsp::Query::Kind::SYMBOL) {
         return;
     }
     for (auto &t : indexedCopies) {

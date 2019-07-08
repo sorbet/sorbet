@@ -92,6 +92,17 @@ unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Lo
     }
     return make_unique<Location>(uri, loc2Range(gs, loc));
 }
+
+vector<unique_ptr<Location>>
+LSPLoop::extractLocations(const core::GlobalState &gs,
+                          const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
+                          vector<unique_ptr<Location>> locations) {
+    for (auto &q : queryResponses) {
+        addLocIfExists(gs, locations, q->getLoc());
+    }
+    return locations;
+}
+
 bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (!sym.exists() || sym == core::Symbols::root()) {
         return true;

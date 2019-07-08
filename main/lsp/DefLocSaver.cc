@@ -9,7 +9,7 @@ namespace sorbet::realmain::lsp {
 unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx,
                                                                unique_ptr<ast::MethodDef> methodDef) {
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-    bool lspQueryMatch = lspQuery.matchesLoc(methodDef->declLoc);
+    bool lspQueryMatch = lspQuery.matchesLoc(methodDef->declLoc) || lspQuery.matchesSymbol(methodDef->symbol);
 
     if (lspQueryMatch) {
         // Query matches against the method definition as a whole.
