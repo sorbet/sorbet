@@ -1,13 +1,13 @@
 # typed: true
 
-class A
+module A
   extend T::Sig
   extend T::Helpers
   extend T::Generic
 
   abstract!
 
-  In = type_member(:in) # error: Classes can only have invariant type members
+  In = type_member(:in)
   Out = type_member(:out)
 
   # should pass: the parameters are used correctly
