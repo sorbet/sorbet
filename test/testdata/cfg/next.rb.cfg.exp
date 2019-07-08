@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<arrayTemp>$4: Integer(1) = 1\l<magic>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$3: [Integer(1)] = <magic>$5: T.class_of(<Magic>).<build-array>(<arrayTemp>$4: Integer(1))\l<block-pre-call-temp>$6: T::Array[U] = <statTemp>$3: [Integer(1)].map()\l<selfRestore>$7: Object = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<arrayTemp>$4: Integer(1) = 1\l<magic>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$3: [Integer(1)] = <magic>$5: T.class_of(<Magic>).<build-array>(<arrayTemp>$4: Integer(1))\l<block-pre-call-temp>$6: Sorbet::Private::Static::Void = <statTemp>$3: [Integer(1)].map()\l<selfRestore>$7: Object = <self>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];

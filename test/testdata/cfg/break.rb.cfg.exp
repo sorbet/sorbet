@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<arrayTemp>$5: Integer(1) = 1\l<arrayTemp>$6: Integer(2) = 2\l<magic>$7: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$4: [Integer(1), Integer(2)] = <magic>$7: T.class_of(<Magic>).<build-array>(<arrayTemp>$5: Integer(1), <arrayTemp>$6: Integer(2))\l<block-pre-call-temp>$8: T::Array[U] = <statTemp>$4: [Integer(1), Integer(2)].map()\l<selfRestore>$9: Object = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<arrayTemp>$5: Integer(1) = 1\l<arrayTemp>$6: Integer(2) = 2\l<magic>$7: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$4: [Integer(1), Integer(2)] = <magic>$7: T.class_of(<Magic>).<build-array>(<arrayTemp>$5: Integer(1), <arrayTemp>$6: Integer(2))\l<block-pre-call-temp>$8: Sorbet::Private::Static::Void = <statTemp>$4: [Integer(1), Integer(2)].map()\l<selfRestore>$9: Object = <self>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
@@ -81,7 +81,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_3" [
-        label = "block[id=3](<selfRestore>$10: T.class_of(<root>))\l<statTemp>$7: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(<root>) = <selfRestore>$10\l<block-pre-call-temp>$32: String = <self>: T.class_of(<root>).bar()\l<selfRestore>$33: T.class_of(<root>) = <self>\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$10: T.class_of(<root>))\l<statTemp>$7: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(<root>) = <selfRestore>$10\l<block-pre-call-temp>$32: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).bar()\l<selfRestore>$33: T.class_of(<root>) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_3" -> "bb::<Class:<root>>#<static-init>_6" [style="bold"];
@@ -103,7 +103,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_7" -> "bb::<Class:<root>>#<static-init>_8" [style="bold"];
     "bb::<Class:<root>>#<static-init>_8" [
-        label = "block[id=8](<selfRestore>$33: T.class_of(<root>), a: T.any(String, Integer))\l<self>: T.class_of(<root>) = <selfRestore>$33\l<statTemp>$45: T.class_of(T) = alias <C T>\l<statTemp>$44: T.any(String, Integer) = <statTemp>$45: T.class_of(T).reveal_type(a: T.any(String, Integer))\l<block-pre-call-temp>$49: String = <self>: T.class_of(<root>).bar()\l<selfRestore>$50: T.class_of(<root>) = <self>\l<unconditional>\l"
+        label = "block[id=8](<selfRestore>$33: T.class_of(<root>), a: T.any(String, Integer))\l<self>: T.class_of(<root>) = <selfRestore>$33\l<statTemp>$45: T.class_of(T) = alias <C T>\l<statTemp>$44: T.any(String, Integer) = <statTemp>$45: T.class_of(T).reveal_type(a: T.any(String, Integer))\l<block-pre-call-temp>$49: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).bar()\l<selfRestore>$50: T.class_of(<root>) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_8" -> "bb::<Class:<root>>#<static-init>_12" [style="bold"];

@@ -10,20 +10,17 @@ class TypeConstraint;
 
 class SendResponse final {
 public:
-    SendResponse(core::DispatchResult::ComponentVec dispatchComponents,
-                 std::shared_ptr<core::TypeConstraint> constraint, core::Loc termLoc, core::NameRef name,
-                 core::TypeAndOrigins receiver, core::TypeAndOrigins retType);
-    core::DispatchResult::ComponentVec dispatchComponents;
-    const std::shared_ptr<core::TypeConstraint> constraint;
+    SendResponse(core::Loc termLoc, std::shared_ptr<core::DispatchResult> dispatchResult, core::NameRef callerSideName)
+        : dispatchResult(std::move(dispatchResult)), callerSideName(callerSideName), termLoc(termLoc){};
+    const std::shared_ptr<core::DispatchResult> dispatchResult;
+    const core::NameRef callerSideName;
     const core::Loc termLoc;
-    const core::NameRef name;
-    const core::TypeAndOrigins receiver;
-    const core::TypeAndOrigins retType;
 };
 
 class IdentResponse final {
 public:
-    IdentResponse(core::SymbolRef owner, core::Loc termLoc, core::LocalVariable variable, core::TypeAndOrigins retType);
+    IdentResponse(core::SymbolRef owner, core::Loc termLoc, core::LocalVariable variable, core::TypeAndOrigins retType)
+        : owner(owner), termLoc(termLoc), variable(variable), retType(std::move(retType)){};
     const core::SymbolRef owner;
     const core::Loc termLoc;
     const core::LocalVariable variable;
@@ -32,7 +29,8 @@ public:
 
 class LiteralResponse final {
 public:
-    LiteralResponse(core::SymbolRef owner, core::Loc termLoc, core::TypeAndOrigins retType);
+    LiteralResponse(core::SymbolRef owner, core::Loc termLoc, core::TypeAndOrigins retType)
+        : owner(owner), termLoc(termLoc), retType(std::move(retType)){};
     const core::SymbolRef owner;
     const core::Loc termLoc;
     const core::TypeAndOrigins retType;
@@ -40,21 +38,21 @@ public:
 
 class ConstantResponse final {
 public:
-    ConstantResponse(core::SymbolRef owner, core::DispatchResult::ComponentVec dispatchComponents, core::Loc termLoc,
-                     core::NameRef name, core::TypeAndOrigins receiver, core::TypeAndOrigins retType);
+    ConstantResponse(core::SymbolRef owner, core::SymbolRef symbol, core::Loc termLoc, core::NameRef name,
+                     core::TypeAndOrigins receiver, core::TypeAndOrigins retType)
+        : owner(owner), symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
     const core::SymbolRef owner;
-    core::DispatchResult::ComponentVec dispatchComponents;
+    const core::SymbolRef symbol;
     const core::Loc termLoc;
     const core::NameRef name;
-    const core::TypeAndOrigins receiver;
     const core::TypeAndOrigins retType;
 };
 
 class DefinitionResponse final {
 public:
-    DefinitionResponse(core::DispatchResult::ComponentVec dispatchComponents, core::Loc termLoc, core::NameRef name,
-                       core::TypeAndOrigins retType);
-    core::DispatchResult::ComponentVec dispatchComponents;
+    DefinitionResponse(core::SymbolRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
+        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
+    const core::SymbolRef symbol;
     const core::Loc termLoc;
     const core::NameRef name;
     const core::TypeAndOrigins retType;
@@ -115,10 +113,10 @@ public:
     core::TypePtr getRetType() const;
 
     /**
-     * Returns dispatch components associated with this response, if any.
-     * If none, returns an empty vector.
+     * Returns a reference to this response's TypeAndOrigins, if it has any.
+     * If response is of a type without TypeAndOrigins, it throws an exception.
      */
-    const core::DispatchResult::ComponentVec &getDispatchComponents() const;
+    const core::TypeAndOrigins &getTypeAndOrigins() const;
 };
 
 } // namespace sorbet::core::lsp

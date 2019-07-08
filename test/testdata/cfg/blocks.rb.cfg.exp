@@ -6,7 +6,7 @@ subgraph "cluster_::BlockTest#blockPass" {
     "bb::BlockTest#blockPass_1" [shape = parallelogram];
 
     "bb::BlockTest#blockPass_0" [
-        label = "block[id=0]()\l<self>: BlockTest = cast(<self>: NilClass, BlockTest);\l<statTemp>$4: Integer(1) = 1\l<statTemp>$5: Integer(2) = 2\l<statTemp>$6: Integer(3) = 3\l<block-pre-call-temp>$7: T.untyped = <self>: BlockTest.foo(<statTemp>$4: Integer(1), <statTemp>$5: Integer(2), <statTemp>$6: Integer(3))\l<selfRestore>$8: BlockTest = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: BlockTest = cast(<self>: NilClass, BlockTest);\l<statTemp>$4: Integer(1) = 1\l<statTemp>$5: Integer(2) = 2\l<statTemp>$6: Integer(3) = 3\l<block-pre-call-temp>$7: Sorbet::Private::Static::Void = <self>: BlockTest.foo(<statTemp>$4: Integer(1), <statTemp>$5: Integer(2), <statTemp>$6: Integer(3))\l<selfRestore>$8: BlockTest = <self>\l<unconditional>\l"
     ];
 
     "bb::BlockTest#blockPass_0" -> "bb::BlockTest#blockPass_2" [style="bold"];

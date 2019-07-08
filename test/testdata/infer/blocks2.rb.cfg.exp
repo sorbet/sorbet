@@ -24,7 +24,7 @@ subgraph "cluster_::Foo#baz" {
     "bb::Foo#baz_1" [shape = parallelogram];
 
     "bb::Foo#baz_0" [
-        label = "block[id=0]()\l<self>: Foo = cast(<self>: NilClass, Foo);\l<block-pre-call-temp>$4: T.untyped = <self>: Foo.bar()\l<selfRestore>$5: Foo = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: Foo = cast(<self>: NilClass, Foo);\l<block-pre-call-temp>$4: Sorbet::Private::Static::Void = <self>: Foo.bar()\l<selfRestore>$5: Foo = <self>\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_0" -> "bb::Foo#baz_2" [style="bold"];

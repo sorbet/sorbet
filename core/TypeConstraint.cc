@@ -138,9 +138,9 @@ TypePtr TypeConstraint::getInstantiation(SymbolRef sym) const {
     return findSolution(sym);
 }
 
-shared_ptr<TypeConstraint> TypeConstraint::deepCopy() const {
+unique_ptr<TypeConstraint> TypeConstraint::deepCopy() const {
     ENFORCE(!wasSolved);
-    auto res = make_shared<TypeConstraint>();
+    auto res = make_unique<TypeConstraint>();
     res->lowerBounds = this->lowerBounds;
     res->upperBounds = this->upperBounds;
     return res;

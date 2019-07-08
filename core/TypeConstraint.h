@@ -1,7 +1,9 @@
 #ifndef SORBET_TYPECONSTRAINT_H
 #define SORBET_TYPECONSTRAINT_H
 
-#include "Types.h"
+#include "core/Context.h"
+#include "core/SymbolRef.h"
+#include "core/TypePtr.h"
 namespace sorbet::core {
 
 class TypeConstraint {
@@ -39,7 +41,7 @@ public:
     // returns true if was successfully solved
     bool solve(Context ctx);
     TypePtr getInstantiation(SymbolRef) const;
-    std::shared_ptr<TypeConstraint> deepCopy() const;
+    std::unique_ptr<TypeConstraint> deepCopy() const;
     InlinedVector<SymbolRef, 4> getDomain() const;
     static TypeConstraint EmptyFrozenConstraint;
     std::string toString(Context ctx) const;

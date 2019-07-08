@@ -30,17 +30,20 @@ LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs
         if (!queryResponses.empty()) {
             auto resp = move(queryResponses[0]);
 
-            if (auto identResp = resp->isIdent()) {
-                for (auto &originLoc : identResp->retType.origins) {
+            if (resp->isIdent() || resp->isConstant() || resp->isLiteral()) {
+                auto retType = resp->getTypeAndOrigins();
+                for (auto &originLoc : retType.origins) {
                     addLocIfExists(*gs, result, originLoc);
                 }
             } else if (auto defResp = resp->isDefinition()) {
                 result.push_back(loc2Location(*gs, defResp->termLoc));
-            } else {
-                for (auto &component : resp->getDispatchComponents()) {
-                    if (component.method.exists() && !component.receiver->isUntyped()) {
-                        addLocIfExists(*gs, result, component.method.data(*gs)->loc());
+            } else if (auto sendResp = resp->isSend()) {
+                auto start = sendResp->dispatchResult.get();
+                while (start != nullptr) {
+                    if (start->main.method.exists() && !start->main.receiver->isUntyped()) {
+                        addLocIfExists(*gs, result, start->main.method.data(*gs)->loc());
                     }
+                    start = start->secondary.get();
                 }
             }
         }

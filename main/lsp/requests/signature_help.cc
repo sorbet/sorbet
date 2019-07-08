@@ -33,7 +33,9 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
         if (i != args.size() - 1) {
             methodDocumentation += ", ";
         }
-        parameter->documentation = getResultType(gs, arg.type, method, resp.receiver.type, resp.constraint)->show(gs);
+        parameter->documentation =
+            getResultType(gs, arg.type, method, resp.dispatchResult->main.receiver, resp.dispatchResult->main.constr)
+                ->show(gs);
         parameters.push_back(move(parameter));
         i += 1;
     }
@@ -85,7 +87,7 @@ LSPResult LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, con
                 // 2nd arg)
                 activeParameter = numberCommas;
 
-                auto firstDispatchComponentMethod = sendResp->dispatchComponents.front().method;
+                auto firstDispatchComponentMethod = sendResp->dispatchResult->main.method;
 
                 addSignatureHelpItem(*gs, firstDispatchComponentMethod, signatures, *sendResp, numberCommas);
             }

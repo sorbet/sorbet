@@ -100,68 +100,15 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTSig(core::Context ctx, 
 }
 
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
-    // The high level idea is the following: we will use a covariant type parameter to extract the type from dispatch
-    // logic
-    auto constr = make_shared<core::TypeConstraint>();
-    vector<core::ArgInfo::ArgFlags> argFlags;
-    argFlags.emplace_back().isRepeated = true;
-    auto linkCopy = send.link ? send.link->duplicate() : make_shared<core::SendAndBlockLink>(send.fun, move(argFlags));
-
-    auto probeTypeSym =
-        core::Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant();
-    InlinedVector<core::SymbolRef, 4> domainTemp;
-    InlinedVector<pair<core::SymbolRef, core::TypePtr>, 4> solutions;
-    domainTemp.emplace_back(probeTypeSym);
-    if (send.link && send.link->constr) {
-        for (auto domainSym : send.link->constr->getDomain()) {
-            domainTemp.emplace_back(domainSym);
-            solutions.emplace_back(make_pair(domainSym, send.link->constr->getInstantiation(domainSym)));
-        }
-    }
-
-    auto probe = probeTypeSym.data(ctx)->resultType;
-    constr->defineDomain(ctx, domainTemp);
-    for (auto &pair : solutions) {
-        auto tparam = pair.first.data(ctx)->resultType;
-        core::Types::isSubTypeUnderConstraint(ctx, *constr, tparam, pair.second);
-        core::Types::isSubTypeUnderConstraint(ctx, *constr, pair.second, tparam);
-    }
-
-    linkCopy->constr = constr;
-
-    core::CallLocs locs{
-        send.receiverLoc,
-        send.receiverLoc,
-        send.argLocs,
-    };
-    InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> typeAndOriginsOwner;
-    InlinedVector<const core::TypeAndOrigins *, 2> args;
-
-    args.reserve(send.args.size());
-    int i = -1;
-    for (cfg::VariableUseSite &arg : send.args) {
-        i++;
-        core::TypePtr type;
-        if (i != argId) {
-            type = arg.type;
-        } else {
-            type = probe;
-        }
-        auto &t = typeAndOriginsOwner.emplace_back(make_unique<core::TypeAndOrigins>());
-        t->type = type;
-        t->origins.emplace_back(core::Loc::none());
-        args.emplace_back(t.get());
-    }
-    core::DispatchArgs dispatchArgs{send.fun, locs, args, send.recv.type, send.recv.type, linkCopy};
-
-    send.recv.type->dispatchCall(ctx, dispatchArgs);
-    if (!constr->isSolved()) {
-        constr->solve(ctx);
-    }
-    if (!constr->isSolved()) {
+    const auto &args = component.method.data(ctx)->arguments();
+    if (argId >= args.size()) {
         return nullptr;
     }
-    return constr->getInstantiation(probeTypeSym);
+    const auto &to = args[argId].type;
+    if (!to || !to->isFullyDefined()) {
+        return nullptr;
+    }
+    return to;
 }
 
 void extractSendArgumentKnowledge(core::Context ctx, core::Loc bindLoc, cfg::Send *snd,
@@ -197,8 +144,9 @@ void extractSendArgumentKnowledge(core::Context ctx, core::Loc bindLoc, cfg::Sen
             continue;
         }
         core::TypePtr thisType;
-        for (auto &component : dispatchInfo.components) {
-            auto argType = extractArgType(ctx, *snd, component, i);
+        auto iter = &dispatchInfo;
+        while (iter != nullptr) {
+            auto argType = extractArgType(ctx, *snd, iter->main, i);
             if (argType && !argType->isUntyped()) {
                 if (!thisType) {
                     thisType = argType;
@@ -207,6 +155,8 @@ void extractSendArgumentKnowledge(core::Context ctx, core::Loc bindLoc, cfg::Sen
                     thisType = core::Types::lub(ctx, thisType, argType);
                 }
             }
+
+            iter = iter->secondary.get();
         }
         if (!thisType) {
             continue;

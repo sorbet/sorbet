@@ -3,6 +3,7 @@
 #include "common/common.h"
 #include "common/typecase.h"
 #include "core/Context.h"
+#include "core/GlobalState.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
@@ -19,6 +20,18 @@ template class std::vector<sorbet::core::Loc>;
 namespace sorbet::core {
 
 using namespace std;
+
+TypePtr Types::dispatchCallWithoutBlock(Context ctx, const TypePtr &recv, DispatchArgs args) {
+    auto dispatched = recv->dispatchCall(ctx, move(args));
+    auto link = &dispatched;
+    while (link != nullptr) {
+        for (auto &err : link->main.errors) {
+            ctx.state._error(move(err));
+        }
+        link = link->secondary.get();
+    }
+    return move(dispatched.returnType);
+}
 
 TypePtr::TypePtr(shared_ptr<Type> &&store) : store(move(store)){};
 
@@ -740,11 +753,7 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags)
-    : fun(fun), argFlags(argFlags), constr(make_shared<TypeConstraint>()) {}
-SendAndBlockLink::SendAndBlockLink(const SendAndBlockLink &orig)
-    : receiver(orig.receiver), fun(orig.fun), argFlags(orig.argFlags), constr(orig.constr), returnTp(orig.returnTp),
-      blockPreType(orig.blockPreType), blockSpec(orig.blockSpec.deepCopy()), sendTp(orig.sendTp) {}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags) : argFlags(argFlags), fun(fun) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;
@@ -849,12 +858,4 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
 DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) {
     return DispatchArgs{name, locs, args, newSelfRef, fullType, block};
 }
-
-core::TypeConstraint &DispatchArgs::constraint() {
-    if (!block || !block->constr) {
-        return core::TypeConstraint::EmptyFrozenConstraint;
-    }
-    return *block->constr;
-}
-
 } // namespace sorbet::core
