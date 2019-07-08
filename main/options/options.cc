@@ -256,7 +256,7 @@ cxxopts::Options buildOptions() {
     // Used to populate default options.
     Options empty;
 
-    cxxopts::Options options("sorbet", "Typechecker for Ruby");
+    cxxopts::Options options("srb", "Typechecker for Ruby");
 
     // Common user options in order of use
     options.add_options()("e", "Parse an inline ruby string",
