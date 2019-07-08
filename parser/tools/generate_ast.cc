@@ -821,7 +821,6 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    fmt::format_to(buf, \", {}\", " << arg.name << ");\n";
                 break;
             case Loc:
-                // quiet the compiler; we skip Loc fields above
                 continue;
         }
     }
