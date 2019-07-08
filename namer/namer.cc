@@ -334,6 +334,13 @@ public:
                 }
             }
         }
+        if (!klass->singletonAncestors.empty()) {
+            for (auto &sanc : klass->singletonAncestors) {
+                if (shouldLeaveAncestorForIDE(sanc)) {
+                    klass->rhs.emplace_back(ast::MK::KeepForIDE(sanc->deepCopy()));
+                }
+            }
+        }
         ast::InsSeq::STATS_store ideSeqs;
         if (ast::isa_tree<ast::ConstantLit>(klass->name.get())) {
             ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->name->deepCopy()));
