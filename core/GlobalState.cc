@@ -1211,6 +1211,9 @@ void GlobalState::_error(unique_ptr<Error> error) const {
         loc.file().data(*this).minErrorLevel_ = min(loc.file().data(*this).minErrorLevel_, error->what.minLevel);
     }
 
+    if (shouldReportErrorOn(loc, error->what)) {
+        prodHistogramAdd("error", error->what.code, 1);
+    }
     errorQueue->pushError(*this, move(error));
 }
 
@@ -1219,15 +1222,11 @@ bool GlobalState::hadCriticalError() const {
 }
 
 ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
-    bool reportForFile = shouldReportErrorOn(loc, what);
-    if (reportForFile) {
-        prodHistogramAdd("error", what.code, 1);
-    }
     if (what == errors::Internal::InternalError) {
         Exception::failInFuzzer();
     }
     bool report = (what == errors::Internal::InternalError) || (what == errors::Internal::FileNotFound) ||
-                  (reportForFile && !this->silenceErrors);
+        (shouldReportErrorOn(loc, what) && !this->silenceErrors);
     return ErrorBuilder(*this, report, loc, what);
 }
 
