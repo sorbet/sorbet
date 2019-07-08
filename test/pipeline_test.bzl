@@ -58,15 +58,13 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
             tags = tags + extra_tags,
         )
 
-    if enabled_tests:
-        native.test_suite(
-            name = suite_name,
-            tests = enabled_tests,
-        )
+    native.test_suite(
+        name = suite_name,
+        tests = enabled_tests,
+    )
 
-    if disabled_tests:
-        native.test_suite(
-            name = "{}_disabled".format(suite_name),
-            tests = disabled_tests,
-            tags = ["manual"],
-        )
+    native.test_suite(
+        name = "{}_disabled".format(suite_name),
+        tests = disabled_tests,
+        tags = ["manual"],
+    )
