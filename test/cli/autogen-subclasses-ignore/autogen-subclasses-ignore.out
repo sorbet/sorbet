@@ -1,6 +1,6 @@
---- autogen-subclasses-ignore ---
-Chalk::ODM::Model
- Chalk::ODM::Private::Lock
-Opus::Mixin
+--- autogen-subclasses-ignore-relative ---
 Opus::Parent
-Opus::SafeMachine
+ Opus::Child
+
+--- autogen-subclasses-ignore-absolute ---
+Opus::Parent
