@@ -451,65 +451,31 @@ module Kernel
     params(
         initial: T.any(Integer, Float, Rational, BigDecimal, String),
         digits: Integer,
-        exception: TrueClass
+        exception: T::Boolean
     )
     .returns(BigDecimal)
   end
-  sig do
-    params(
-        initial: T.any(Integer, Float, Rational, BigDecimal, String),
-        digits: Integer,
-        exception: FalseClass
-    )
-    .returns(T.nilable(BigDecimal))
-  end
   def BigDecimal(initial, digits=0, exception: true); end
+  # As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
+  # means the non-nilable return value is technically incorrect, but it seemed like the least worst option given that
+  # 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
 
   sig do
     params(
         x: T.any(Numeric, String),
         y: T.any(Numeric, String),
-        exception: TrueClass
+        exception: T::Boolean
     )
     .returns(Complex)
   end
-  sig do
-    params(
-        x: T.any(Numeric, String),
-        y: T.any(Numeric, String),
-        exception: FalseClass
-    )
-    .returns(T.nilable(Complex))
-  end
-  sig do
-    params(
-        x: String,
-        exception: TrueClass
-    )
-    .returns(Complex)
-  end
-  sig do
-    params(
-        x: String,
-        exception: FalseClass
-    )
-    .returns(T.nilable(Complex))
-  end
-  def Complex(x, y=T.unsafe(nil), exception: false); end
+  def Complex(x, y=T.unsafe(nil), exception: true); end
 
   sig do
     params(
         x: T.any(Numeric, String),
-        exception: TrueClass
+        exception: T::Boolean
     )
     .returns(Float)
-  end
-  sig do
-    params(
-        x: T.any(Numeric, String),
-        exception: FalseClass
-    )
-    .returns(T.nilable(Float))
   end
   def Float(x, exception: true); end
 
@@ -525,49 +491,19 @@ module Kernel
     params(
         arg: T.any(Numeric, String),
         base: Integer,
-        exception: TrueClass
+        exception: T::Boolean
     )
     .returns(Integer)
-  end
-  sig do
-    params(
-        arg: T.any(Numeric, String),
-        base: Integer,
-        exception: FalseClass
-    )
-    .returns(T.nilable(Integer))
   end
   def Integer(arg, base=T.unsafe(nil), exception: true); end
 
   sig do
     params(
-        x: T.any(Numeric, String),
+        x: T.any(Numeric, String, Object),
         y: T.any(Numeric, String),
-        exception: TrueClass
+        exception: T::Boolean
     )
     .returns(Rational)
-  end
-  sig do
-    params(
-        x: T.any(Numeric, String),
-        y: T.any(Numeric, String),
-        exception: FalseClass
-    )
-    .returns(T.nilable(Rational))
-  end
-  sig do
-    params(
-        x: Object,
-        exception: TrueClass,
-    )
-    .returns(Rational)
-  end
-  sig do
-    params(
-        x: Object,
-        exception: FalseClass,
-    )
-    .returns(T.nilable(Rational))
   end
   def Rational(x, y=T.unsafe(nil), exception: true); end
 
