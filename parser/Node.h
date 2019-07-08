@@ -16,7 +16,7 @@ public:
         return toStringWithTabs(gs);
     }
     virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0) = 0;
-    virtual std::string toRuby(const core::GlobalState &gs, int tabs = 0) = 0;
+    virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
     core::Loc loc;
 
@@ -26,8 +26,8 @@ protected:
                    int tabs) const;
     void printNodeJSON(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
                        int tabs) const;
-    void printNodeRuby(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
-                       int tabs) const;
+    void printNodeWhitequark(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
+                             int tabs) const;
 };
 
 template <class To> To *cast_node(Node *what) {

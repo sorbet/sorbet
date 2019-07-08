@@ -42,7 +42,7 @@ private:
 struct Printers {
     PrinterConfig ParseTree;
     PrinterConfig ParseTreeJson;
-    PrinterConfig ParseTreeRuby;
+    PrinterConfig ParseTreeWhitequark;
     PrinterConfig Desugared;
     PrinterConfig DesugaredRaw;
     PrinterConfig DSLTree;

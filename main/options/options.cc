@@ -27,7 +27,7 @@ struct PrintOptions {
 const vector<PrintOptions> print_options({
     {"parse-tree", &Printers::ParseTree},
     {"parse-tree-json", &Printers::ParseTreeJson},
-    {"parse-tree-ruby", &Printers::ParseTreeRuby},
+    {"parse-tree-whitequark", &Printers::ParseTreeWhitequark},
     {"ast", &Printers::Desugared},
     {"ast-raw", &Printers::DesugaredRaw},
     {"dsl-tree", &Printers::DSLTree},
@@ -81,7 +81,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
     return vector<reference_wrapper<PrinterConfig>>({
         ParseTree,
         ParseTreeJson,
-        ParseTreeRuby,
+        ParseTreeWhitequark,
         Desugared,
         DesugaredRaw,
         DSLTree,

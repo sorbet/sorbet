@@ -35,10 +35,10 @@ void Node::printNodeJSON(fmt::memory_buffer &to, const unique_ptr<Node> &node, c
     }
 }
 
-void Node::printNodeRuby(fmt::memory_buffer &to, const unique_ptr<Node> &node, const core::GlobalState &gs,
-                         int tabs) const {
+void Node::printNodeWhitequark(fmt::memory_buffer &to, const unique_ptr<Node> &node, const core::GlobalState &gs,
+                               int tabs) const {
     if (node) {
-        fmt::format_to(to, "{}", node->toRuby(gs, tabs));
+        fmt::format_to(to, "{}", node->toWhitequark(gs, tabs));
     } else {
         fmt::format_to(to, "nil");
     }

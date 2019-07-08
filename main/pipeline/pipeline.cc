@@ -123,8 +123,8 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     if (print.ParseTreeJson.enabled) {
         print.ParseTreeJson.fmt("{}\n", nodes->toJSON(gs, 0));
     }
-    if (print.ParseTreeRuby.enabled) {
-        print.ParseTreeRuby.fmt("{}\n", nodes->toRuby(gs, 0));
+    if (print.ParseTreeWhitequark.enabled) {
+        print.ParseTreeWhitequark.fmt("{}\n", nodes->toWhitequark(gs, 0));
     }
     return nodes;
 }
