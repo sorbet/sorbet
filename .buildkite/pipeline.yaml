@@ -63,14 +63,6 @@ steps:
     <<: *elastic
   - wait: ~
 
-# Test Sorbet Gem Phase - Its own phase because it relies on the gem build built
-    # TODO(jez) Test on linux
-  - label: ":mac: test-sorbet-gem.sh"
-    command: .buildkite/test-sorbet-gem.sh
-    agents:
-      os: mac
-  - wait: ~
-
 # Deploy Phase - Send the artifacts to the world
   - label: ":linux: publish.sh"
     command: .buildkite/publish.sh
