@@ -468,7 +468,7 @@ module Kernel
     )
     .returns(Complex)
   end
-  def Complex(x, y=T.unsafe(nil), exception: true); end
+  def Complex(x, y=T.unsafe(nil), exception: false); end
 
   sig do
     params(
