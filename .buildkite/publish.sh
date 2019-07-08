@@ -86,6 +86,7 @@ git checkout -f "$current_rev"
 
 echo "--- publishing gems to RubyGems.org"
 
+mkdir -p "$HOME/.gem"
 printf -- $'---\n:rubygems_api_key: %s\n' "$RUBY_GEMS_API_KEY" > "$HOME/.gem/credentials"
 chmod 600 "$HOME/.gem/credentials"
 
