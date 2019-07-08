@@ -459,6 +459,7 @@ module Kernel
   # As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
   # means the non-nilable return value is technically incorrect, but it seemed like the least worst option given that
   # 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
+  # see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   sig do
     params(
@@ -469,6 +470,10 @@ module Kernel
     .returns(Complex)
   end
   def Complex(x, y=T.unsafe(nil), exception: false); end
+  # As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
+  # means the non-nilable return value is technically incorrect, but it seemed like the least worst option given that
+  # 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
+  # see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   sig do
     params(
@@ -478,6 +483,10 @@ module Kernel
     .returns(Float)
   end
   def Float(x, exception: true); end
+  # As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
+  # means the non-nilable return value is technically incorrect, but it seemed like the least worst option given that
+  # 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
+  # see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   sig do
     type_parameters(:K ,:V).params(
@@ -496,6 +505,10 @@ module Kernel
     .returns(Integer)
   end
   def Integer(arg, base=T.unsafe(nil), exception: true); end
+  # As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
+  # means the non-nilable return value is technically incorrect, but it seemed like the least worst option given that
+  # 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
+  # see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   sig do
     params(
@@ -506,6 +519,10 @@ module Kernel
     .returns(Rational)
   end
   def Rational(x, y=T.unsafe(nil), exception: true); end
+  # As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
+  # means the non-nilable return value is technically incorrect, but it seemed like the least worst option given that
+  # 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
+  # see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   sig do
     params(
