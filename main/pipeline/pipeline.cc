@@ -1040,14 +1040,8 @@ public:
             acc.constants.emplace_back(ctx.state, constLit->cnst.data(ctx));
         }
 
+        // Grab names of superclasses. (N.B. `include` and `extend` are captured as ConstantLits.)
         for (auto &ancst : original->ancestors) {
-            auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(ancst.get());
-            if (cnst) {
-                acc.constants.emplace_back(ctx.state, cnst->cnst.data(ctx));
-            }
-        }
-
-        for (auto &ancst : original->singletonAncestors) {
             auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(ancst.get());
             if (cnst) {
                 acc.constants.emplace_back(ctx.state, cnst->cnst.data(ctx));

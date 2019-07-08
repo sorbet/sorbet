@@ -18,6 +18,10 @@ module HelperMethods
   end
 end
 
+module StaticHelperMethods
+     # ^ def: StaticHelperMethods
+end
+
 Foo.new.isFoo
 # ^ usage: Foo
       # ^ usage: isFoo

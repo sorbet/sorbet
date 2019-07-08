@@ -19,6 +19,8 @@ end
 class SomeModule
   include HelperMethods
         # ^ usage: HelperMethods
+  extend StaticHelperMethods
+       # ^ usage: StaticHelperMethods
 
   def some_instance_method
     helper_method
