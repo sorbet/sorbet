@@ -788,10 +788,6 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << "    fmt::format_to(buf, \"s(:" << node.whitequarkName << "\");" << '\n';
     // Generate fields
     for (auto &arg : node.fields) {
-        if (arg.type == Loc) {
-            continue;
-        }
-
         switch (arg.type) {
             case Name:
                 out << "    fmt::format_to(buf, \", :\" + JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
@@ -826,8 +822,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case Loc:
                 // quiet the compiler; we skip Loc fields above
-                abort();
-                break;
+                continue;
         }
     }
 
