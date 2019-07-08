@@ -18,5 +18,8 @@
   },
   "dependencies": {
     "classnames": "^2.2.6"
+  },
+  "resolutions": {
+    "**/underscore.string": "^3.3.5"
   }
 }
