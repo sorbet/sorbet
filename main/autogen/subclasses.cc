@@ -30,6 +30,7 @@ bool Subclasses::isFileIgnored(const std::string &path, const std::vector<std::s
     return false;
 };
 
+// Get all subclasses defined in a particular ParsedFile
 optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, ParsedFile &pf,
                                                         const vector<string> &absoluteIgnorePatterns,
                                                         const vector<string> &relativeIgnorePatterns) {
@@ -112,6 +113,7 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
 
         vector<string> serializedChildren;
         for (const auto &[name, type] : children) {
+            // Ignore Modules
             if (type != autogen::Definition::Type::Class) {
                 continue;
             }
@@ -126,6 +128,17 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
     return descendantsMapSerialized;
 }
 
+// Generate a list of strings representing the descendants of a given list of parent classes
+//
+// e.g.
+// Parent1
+//  Child1
+// Parent2
+//  Child2
+//  Child3
+//
+// This effectively replaces pay-server's `DescendantsMap` in `InheritedClassesStep` with a much
+// faster implementation.
 vector<string> Subclasses::genDescendantsMap(Subclasses::Map &childMap, vector<string> &parentNames) {
     Subclasses::patchChildMap(childMap);
 
