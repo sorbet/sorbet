@@ -366,7 +366,7 @@ void AutoloadWriter::write(core::Context ctx, const AutoloaderConfig &alCfg, con
     toDelete.erase(filePath);
     if (!node.children.empty()) {
         auto subdir = join(path, node.root() ? "" : name);
-        if (!node.root()) {
+        if (!node.root() && !FileOps::dirExists(subdir)) {
             FileOps::createDir(subdir);
         }
         for (auto &[_, child] : node.children) {

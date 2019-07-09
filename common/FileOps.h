@@ -15,6 +15,7 @@ public:
     static void append(std::string_view filename, std::string_view text);
     static void write(std::string_view filename, std::string_view text);
     static bool writeIfDifferent(std::string_view filename, std::string_view text);
+    static bool dirExists(std::string_view path);
     static void createDir(std::string_view path);
     static void removeFile(std::string_view path);
     /**

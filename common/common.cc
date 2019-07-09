@@ -59,9 +59,14 @@ void sorbet::FileOps::write(string_view filename, const vector<sorbet::u1> &data
     throw sorbet::FileNotFoundException();
 }
 
+bool sorbet::FileOps::dirExists(string_view path) {
+    struct stat buffer;
+    return stat((string(path)).c_str(), &buffer) == 0 && S_ISDIR(buffer.st_mode);
+}
+
 void sorbet::FileOps::createDir(string_view path) {
     auto err = mkdir(string(path).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    if (err && errno != EEXIST) {
+    if (err) {
         throw sorbet::CreateDirException(fmt::format("Error in createDir('{}'): {}", path, errno));
     }
 }
