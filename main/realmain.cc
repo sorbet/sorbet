@@ -229,7 +229,7 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
         merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
         if (opts.print.AutogenAutoloader.enabled) {
             Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
-            root = autogen::DefTreeBuilder::merge(move(root), move(*out.defTree));
+            root = autogen::DefTreeBuilder::merge(ctx, move(root), move(*out.defTree));
         }
     }
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
