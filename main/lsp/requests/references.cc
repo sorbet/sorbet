@@ -45,11 +45,9 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
             } else if (auto identResp = resp->isIdent()) {
                 auto loc = identResp->owner.data(*gs)->loc();
                 if (loc.exists()) {
-                    std::vector<std::shared_ptr<core::File>> files;
-                    files.emplace_back(loc.file().data(*gs).deepCopy(*gs));
                     auto run2 =
                         runLSPQuery(move(gs), core::lsp::Query::createVarQuery(identResp->owner, identResp->variable),
-                                    files, false);
+                                    {loc.file()});
                     gs = move(run2.gs);
                     response->result = extractLocations(*gs, run2.responses);
                 }

@@ -224,7 +224,8 @@ bool LSPLoop::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFiles
 }
 
 LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
-                                           vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
+                                           const vector<shared_ptr<core::File>> &changedFiles,
+                                           const vector<core::FileRef> &filesForQuery) {
     auto finalGs = move(gs);
     // We assume finalGs is a copy of initialGS, which has had the inferencer & resolver run.
     ENFORCE(finalGs->lspTypecheckCount > 0,
@@ -232,7 +233,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
     logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
 
     bool takeFastPath = false;
-    vector<core::FileRef> subset;
+    vector<core::FileRef> subset(filesForQuery);
     vector<core::NameHash> changedHashes;
     {
         Timer timeit(logger, "fast_path_decision");
@@ -271,29 +272,23 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
 
     if (takeFastPath) {
         Timer timeit(logger, "fast_path");
-        if (allFiles) {
-            subset.clear();
-            for (int i = 1; i < finalGs->filesUsed(); i++) {
-                core::FileRef fref(i);
-                if (fref.data(*finalGs).sourceType == core::File::Type::Normal) {
-                    subset.emplace_back(core::FileRef(i));
-                }
-            }
-        } else {
-            int i = -1;
-            for (auto &oldHash : globalStateHashes) {
-                i++;
-                vector<core::NameHash> intersection;
-                std::set_intersection(changedHashes.begin(), changedHashes.end(), oldHash.usages.sends.begin(),
-                                      oldHash.usages.sends.end(), std::back_inserter(intersection));
-                if (!intersection.empty()) {
-                    auto ref = core::FileRef(i);
-                    logger->debug("Added {} to update set as used a changed method",
-                                  !ref.exists() ? "" : ref.data(*finalGs).path());
-                    subset.emplace_back(ref);
-                }
+        int i = -1;
+        for (auto &oldHash : globalStateHashes) {
+            i++;
+            vector<core::NameHash> intersection;
+            std::set_intersection(changedHashes.begin(), changedHashes.end(), oldHash.usages.sends.begin(),
+                                  oldHash.usages.sends.end(), std::back_inserter(intersection));
+            if (!intersection.empty()) {
+                auto ref = core::FileRef(i);
+                logger->debug("Added {} to update set as used a changed method",
+                              !ref.exists() ? "" : ref.data(*finalGs).path());
+                subset.emplace_back(ref);
             }
         }
+        // Remove any duplicate files.
+        fast_sort(subset);
+        subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
+
         prodCategoryCounterInc("lsp.updates", "fastpath");
         logger->debug("Taking fast path");
         ENFORCE(initialGS->errorQueue->isEmpty());
