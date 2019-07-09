@@ -24,6 +24,55 @@ class BigDecimal < Numeric
   SIGN_POSITIVE_INFINITE = T.let(T.unsafe(nil), Integer)
   SIGN_POSITIVE_ZERO = T.let(T.unsafe(nil), Integer)
 
+  # internal method, here for completeness
+  sig {params(p1: T.untyped).returns(T.untyped)}
+  def self._load(p1); end
+
+  sig {returns(Integer)}
+  def self.double_fig; end
+
+  sig {params(digits: Integer).returns(Integer)}
+  def self.limit(digits=0); end
+
+  # `mode` can be one of:
+  #   BigDecimal::EXCEPTION_ALL
+  #   BigDecimal::EXCEPTION_INFINITY
+  #   BigDecimal::EXCEPTION_NaN
+  #   BigDecimal::EXCEPTION_OVERFLOW
+  #   BigDecimal::EXCEPTION_UNDERFLOW
+  #   BigDecimal::EXCEPTION_ZERODIVIDE
+  #   BigDecimal::ROUND_MODE
+  # @see https://ruby-doc.org/stdlib-2.6.3/libdoc/bigdecimal/rdoc/BigDecimal.html#method-c-mode
+  sig do
+    params(
+      mode: Integer,
+      value: T.any(FalseClass, Integer, Symbol, TrueClass)
+    )
+    .returns(Integer)
+  end
+  def self.mode(mode, value); end
+
+  sig do
+    type_parameters(:U)
+    .params(blk: T.proc.returns(T.type_parameter(:U)))
+    .returns(T.type_parameter(:U))
+  end
+  def self.save_exception_mode(&blk); end
+
+  sig do
+    type_parameters(:U)
+    .params(blk: T.proc.returns(T.type_parameter(:U)))
+    .returns(T.type_parameter(:U))
+  end
+  def self.save_limit(&blk); end
+
+  sig do
+    type_parameters(:U)
+    .params(blk: T.proc.returns(T.type_parameter(:U)))
+    .returns(T.type_parameter(:U))
+  end
+  def self.save_rounding_mode(&blk); end
+
   sig do
     params(
       initial: T.any(Integer, Float, Rational, BigDecimal, String),
@@ -670,8 +719,8 @@ class BigDecimal < Numeric
   sig {returns(Rational)}
   def to_r(); end
 
-  sig {returns(String)}
-  def to_s(); end
+  sig {params(s: T.any(Integer, String)).returns(String)}
+  def to_s(s=''); end
 
   sig {returns(Integer)}
   sig do
