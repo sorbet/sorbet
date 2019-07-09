@@ -51,8 +51,16 @@ begin
     end
   end
   class ::B<<C B>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
     def self.newer<newer>(<blk>)
       <self>.new()
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      ::Sorbet::Private::Static.keep_for_ide(::MM)
     end
   end
   class ::C<<C C>> < (::A)

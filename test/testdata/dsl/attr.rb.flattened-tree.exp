@@ -84,6 +84,7 @@ begin
         <self>.sig() do ||
           <self>.returns(::String)
         end
+        ::Sorbet::Private::Static.keep_for_ide(::T::Sig)
         <emptyTree>
       end
     end
