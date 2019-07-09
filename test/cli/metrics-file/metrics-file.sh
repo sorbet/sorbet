@@ -35,4 +35,4 @@ main/sorbet --silence-dev-message \
             --metrics-file=metrics5.json \
             test/cli/metrics-file/with-error-branching.rb 2>&1
 
-grep -A1 "\"ruby_typer.unknown..infer.methods_typechecked.no_errors\"" metrics5.json
+grep -A1 "\"ruby_typer.unknown..error.total\"" metrics5.json || echo "No error metrics reported."
