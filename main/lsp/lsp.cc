@@ -77,7 +77,6 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalStat
     vector<core::FileRef> frefs;
     const core::NameHash symNameHash(*gs, sym.data(*gs)->name.data(*gs));
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
-    // TODO: Possible to avoid the `deepCopy` here?
     int i = -1;
     for (auto &hash : globalStateHashes) {
         i++;
