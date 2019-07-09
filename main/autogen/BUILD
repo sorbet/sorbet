@@ -2,7 +2,7 @@ cc_library(
     name = "autogen",
     srcs = [
         "autogen.cc",
-        "subclasses.cc"
+        "subclasses.cc",
     ],
     hdrs = [
         "autogen.h",
