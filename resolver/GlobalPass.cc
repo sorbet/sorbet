@@ -132,23 +132,6 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
             resolveTypeMember(gs, mixin, tp, sym, typeAliases);
         }
     }
-
-    if (sym.data(gs)->isClassClass()) {
-        for (core::SymbolRef tp : sym.data(gs)->typeMembers()) {
-            auto myVariance = tp.data(gs)->variance();
-            if (myVariance != core::Variance::Invariant) {
-                auto loc = tp.data(gs)->loc();
-                if (!loc.file().data(gs).isPayload()) {
-                    if (auto e = gs.beginError(loc, core::errors::Resolver::VariantTypeMemberInClass)) {
-                        e.setHeader("Classes can only have invariant type members");
-                    }
-                    return;
-                }
-            }
-        }
-    }
-
-    // TODO: this will be the right moment to implement checks for correct locations of co&contra variant types.
 }
 
 }; // namespace
