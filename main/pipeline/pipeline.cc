@@ -1031,21 +1031,23 @@ public:
         return original;
     }
 
+    void handleUnresolvedConstantLit(core::Context ctx, ast::UnresolvedConstantLit *expr) {
+        while (expr) {
+            acc.constants.emplace_back(ctx.state, expr->cnst.data(ctx));
+            // Handle references to 'Foo' in 'Foo::Bar'.
+            expr = ast::cast_tree<ast::UnresolvedConstantLit>(expr->scope.get());
+        }
+    }
+
     unique_ptr<ast::ClassDef> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
         acc.constants.emplace_back(ctx.state, original->symbol.data(ctx)->name.data(ctx));
         original->name->showRaw(ctx.state);
 
-        auto *constLit = ast::cast_tree<ast::UnresolvedConstantLit>(original->name.get());
-        if (constLit) {
-            acc.constants.emplace_back(ctx.state, constLit->cnst.data(ctx));
-        }
+        handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(original->name.get()));
 
         // Grab names of superclasses. (N.B. `include` and `extend` are captured as ConstantLits.)
         for (auto &ancst : original->ancestors) {
-            auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(ancst.get());
-            if (cnst) {
-                acc.constants.emplace_back(ctx.state, cnst->cnst.data(ctx));
-            }
+            handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(ancst.get()));
         }
 
         return original;
@@ -1053,7 +1055,7 @@ public:
 
     unique_ptr<ast::UnresolvedConstantLit>
     postTransformUnresolvedConstantLit(core::Context ctx, unique_ptr<ast::UnresolvedConstantLit> original) {
-        acc.constants.emplace_back(ctx.state, original->cnst.data(ctx));
+        handleUnresolvedConstantLit(ctx, original.get());
         return original;
     }
 };

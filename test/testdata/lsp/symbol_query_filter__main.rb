@@ -16,7 +16,7 @@ class Foo < AbstractFoo
   end
 end
 
-class SomeModule
+class SomeClass
   include HelperMethods
         # ^ usage: HelperMethods
   extend StaticHelperMethods
@@ -29,4 +29,17 @@ class SomeModule
 end
 
 SecondClass::FIVE
+# ^ usage: SecondClass
            # ^ usage: five
+
+module AModule::SubModule
+     # ^ usage: AModule
+end
+
+class SomeClass < AnotherModule::NestedModule
+                # ^ usage: AnotherModule
+  extend AnotherModule2::NestedModule
+       # ^ usage: AnotherModule2
+  include AnotherModule3::NestedModule
+        # ^ usage: AnotherModule3
+end
