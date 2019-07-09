@@ -153,7 +153,6 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
     return core::Loc(file, start, end);
 }
 
-// TODO(gwu) move to autogen.h
 struct AutogenResult {
     struct Serialized {
         // Selectively populated based on print options

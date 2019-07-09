@@ -88,7 +88,6 @@ optional<Subclasses::Entries> Subclasses::descendantsOf(const Subclasses::Map &c
 
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`
 // Please do not add to this list.
-// TODO(gwu) This shouldn't be public--hide this behind a new public method that realmain.cc calls
 void Subclasses::patchChildMap(Subclasses::Map &childMap) {
     childMap["Opus::SafeMachine"].insert(childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].begin(),
                                          childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].end());
