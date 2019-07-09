@@ -1211,9 +1211,6 @@ void GlobalState::_error(unique_ptr<Error> error) const {
         loc.file().data(*this).minErrorLevel_ = min(loc.file().data(*this).minErrorLevel_, error->what.minLevel);
     }
 
-    if (shouldReportErrorOn(loc, error->what)) {
-        prodHistogramAdd("error", error->what.code, 1);
-    }
     errorQueue->pushError(*this, move(error));
 }
 
