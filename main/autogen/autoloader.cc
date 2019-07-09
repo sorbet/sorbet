@@ -128,7 +128,7 @@ core::FileRef DefTree::file() const {
     if (!namedDefs.empty()) {
         // TODO what if there are more than one?
         ref = namedDefs[0].fileRef;
-    } else if (nonBehaviorDef == nullptr) {
+    } else if (nonBehaviorDef != nullptr) {
         ref = nonBehaviorDef->fileRef;
     }
     return ref;
@@ -321,7 +321,7 @@ void DefTreeBuilder::updateNonBehaviorDef(core::Context ctx, DefTree &node, Name
         // need to continue tracking it.
         return;
     }
-    if (!node.nonBehaviorDef || NamedDefinition::preferredTo(ctx, ndef, *node.nonBehaviorDef)) {
+    if ((node.nonBehaviorDef == nullptr) || NamedDefinition::preferredTo(ctx, ndef, *node.nonBehaviorDef)) {
         node.nonBehaviorDef = make_unique<NamedDefinition>(move(ndef));
     }
 }
