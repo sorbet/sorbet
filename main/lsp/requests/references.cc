@@ -43,11 +43,16 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
                     response->result = extractLocations(*gs, run2.responses);
                 }
             } else if (auto identResp = resp->isIdent()) {
-                std::vector<std::shared_ptr<core::File>> files;
-                auto run2 = runLSPQuery(
-                    move(gs), core::lsp::Query::createVarQuery(identResp->owner, identResp->variable), files, true);
-                gs = move(run2.gs);
-                response->result = extractLocations(*gs, run2.responses);
+                auto loc = identResp->owner.data(*gs)->loc();
+                if (loc.exists()) {
+                    std::vector<std::shared_ptr<core::File>> files;
+                    files.emplace_back(loc.file().data(*gs).deepCopy(*gs));
+                    auto run2 =
+                        runLSPQuery(move(gs), core::lsp::Query::createVarQuery(identResp->owner, identResp->variable),
+                                    files, false);
+                    gs = move(run2.gs);
+                    response->result = extractLocations(*gs, run2.responses);
+                }
             } else if (auto sendResp = resp->isSend()) {
                 auto start = sendResp->dispatchResult.get();
                 vector<unique_ptr<Location>> locations;
