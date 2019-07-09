@@ -1063,8 +1063,8 @@ public:
 core::UsageHash getAllNames(const core::GlobalState &gs, unique_ptr<ast::Expression> &tree) {
     AllNamesCollector collector;
     tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root()), collector, move(tree));
-    core::sortAndDedupe(collector.acc.sends);
-    core::sortAndDedupe(collector.acc.constants);
+    core::NameHash::sortAndDedupe(collector.acc.sends);
+    core::NameHash::sortAndDedupe(collector.acc.constants);
     return move(collector.acc);
 };
 

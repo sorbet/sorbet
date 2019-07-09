@@ -7,6 +7,9 @@ class NameData;
 class GlobalState;
 class NameHash {
 public:
+    /** Sorts an array of NameHashes and removes duplicates. */
+    static void sortAndDedupe(std::vector<core::NameHash> &hashes);
+
     NameHash(const GlobalState &gs, const NameData &nm);
     NameHash(const GlobalState &gs, const Name &nm);
     inline bool isDefined() const {
@@ -43,9 +46,6 @@ struct GlobalStateHash {
     u4 hierarchyHash = HASH_STATE_NOT_COMPUTED;
     UnorderedMap<NameHash, u4> methodHashes;
 };
-
-/** Sorts an array of NameHashes and removes duplicates. */
-void sortAndDedupe(std::vector<core::NameHash> &hashes);
 
 struct UsageHash {
     std::vector<core::NameHash> sends;

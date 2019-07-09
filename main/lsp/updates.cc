@@ -266,7 +266,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
                 }
                 globalStateHashes[fref.id()] = hashes[i];
             }
-            core::sortAndDedupe(changedHashes);
+            core::NameHash::sortAndDedupe(changedHashes);
         }
     }
 
