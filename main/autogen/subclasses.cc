@@ -85,14 +85,6 @@ optional<Subclasses::Entries> Subclasses::descendantsOf(const Subclasses::Map &c
     return out;
 }
 
-void Subclasses::maybeInsertChild(const string &parentName, const Subclasses::Entries &children, Subclasses::Map &out) {
-    if (parentName.empty()) {
-        // Child < NonexistentParent
-        return;
-    }
-    out[parentName].insert(children.begin(), children.end());
-}
-
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`
 // Please do not add to this list.
 // TODO(gwu) This shouldn't be public--hide this behind a new public method that realmain.cc calls

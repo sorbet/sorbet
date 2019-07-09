@@ -261,7 +261,9 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
             }
 
             for (const auto &[parentName, children] : *el.second.subclasses) {
-                autogen::Subclasses::maybeInsertChild(parentName, children, childMap);
+                if (!parentName.empty()) {
+                    childMap[parentName].insert(children.begin(), children.end());
+                }
             }
         }
 

@@ -14,9 +14,6 @@ public:
     static std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx, ParsedFile &pf,
                                                             const std::vector<std::string> &absoluteIgnorePatterns,
                                                             const std::vector<std::string> &relativeIgnorePatterns);
-
-    static void maybeInsertChild(const std::string &parentName, const Subclasses::Entries &children,
-                                 Subclasses::Map &out);
     static std::vector<std::string> serializeSubclassMap(const Subclasses::Map &descendantsMap,
                                                          const std::vector<std::string> &parentNames);
     static std::vector<std::string> genDescendantsMap(Subclasses::Map &childMap, std::vector<std::string> &parentNames);
