@@ -5,7 +5,7 @@ module A
   extend T::Helpers
   extend T::Generic
 
-  abstract!
+  interface!
 
   In = type_member(:in)
   Out = type_member(:out)
@@ -17,7 +17,7 @@ module A
   # should pass: the parameters are used correctly, and the block argument swaps
   # the polarity of the type members
   sig {abstract.params(key: In, blk: T.proc.params(arg: Out).returns(In)).returns(Out)}
-  def lookup(key, &blk); end
+  def lookup_blk(key, &blk); end
 
   # should fail: the contravariant type key is returned
   sig {abstract.returns(In)}
