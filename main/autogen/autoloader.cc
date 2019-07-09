@@ -128,7 +128,7 @@ core::FileRef DefTree::file() const {
     if (!namedDefs.empty()) {
         // TODO what if there are more than one?
         ref = namedDefs[0].fileRef;
-    } else if (nonBehaviorDef) {
+    } else if (nonBehaviorDef == nullptr) {
         ref = nonBehaviorDef->fileRef;
     }
     return ref;
@@ -247,7 +247,7 @@ Definition::Type DefTree::definitionType(core::Context ctx) const {
 }
 
 bool DefTree::hasDef() const {
-    return nonBehaviorDef || !namedDefs.empty();
+    return (nonBehaviorDef != nullptr) || !namedDefs.empty();
 }
 
 const NamedDefinition &DefTree::definition(core::Context ctx) const {
@@ -256,7 +256,7 @@ const NamedDefinition &DefTree::definition(core::Context ctx) const {
                 namedDefs.size());
         return namedDefs[0];
     } else {
-        ENFORCE(nonBehaviorDef, "Could not find any definitions for '{}'", fullName(ctx));
+        ENFORCE(nonBehaviorDef != nullptr, "Could not find any definitions for '{}'", fullName(ctx));
         return *nonBehaviorDef;
     }
 }
