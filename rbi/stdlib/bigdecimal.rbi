@@ -719,8 +719,8 @@ class BigDecimal < Numeric
   sig {returns(Rational)}
   def to_r(); end
 
-  sig {returns(String)}
-  def to_s(); end
+  sig {params(s: T.any(Integer, String)).returns(String)}
+  def to_s(s=''); end
 
   sig {returns(Integer)}
   sig do
