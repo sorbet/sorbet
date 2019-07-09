@@ -13,6 +13,9 @@ void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQu
             if (error->error->isSilenced) {
                 continue;
             }
+
+            prodHistogramAdd("error", error->error->what.code, 1);
+
             auto &out = error->error->isCritical() ? critical : nonCritical;
             if (out.size() != 0) {
                 fmt::format_to(out, "\n\n");
