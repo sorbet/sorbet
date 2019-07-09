@@ -256,6 +256,7 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         autogen::Subclasses::Map childMap;
         for (const auto &el : merged) {
             if (!el.second.subclasses) {
+                // File doesn't define any Child < Parent relationships
                 continue;
             }
 

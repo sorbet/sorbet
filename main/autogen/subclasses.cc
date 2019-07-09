@@ -39,11 +39,11 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
     }
 
     Subclasses::Map out;
-
     for (const Reference &ref : pf.refs) {
         DefinitionRef defn = ref.parent_of;
-
         if (!defn.exists()) {
+            // This is just a random constant reference and doesn't
+            // define a Child < Parent relationship.
             continue;
         }
 
@@ -66,17 +66,23 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
 
 // Generate all descendants of a parent class
 // Recursively walks `childMap`, which stores the IMMEDIATE children of subclassed class.
-void Subclasses::descendantsOf(const Subclasses::Map &childMap, const string &parentName, Subclasses::Entries &out) {
+optional<Subclasses::Entries> Subclasses::descendantsOf(const Subclasses::Map &childMap, const string &parentName) {
     auto fnd = childMap.find(parentName);
     if (fnd == childMap.end()) {
-        return;
+        return nullopt;
     }
     const Subclasses::Entries children = fnd->second;
 
+    Subclasses::Entries out;
     out.insert(children.begin(), children.end());
     for (const auto &[name, _type] : children) {
-        Subclasses::descendantsOf(childMap, name, out);
+        auto descendants = Subclasses::descendantsOf(childMap, name);
+        if (descendants) {
+            out.insert(descendants->begin(), descendants->end());
+        }
     }
+
+    return out;
 }
 
 void Subclasses::maybeInsertChild(const string &parentName, const Subclasses::Entries &children, Subclasses::Map &out) {
@@ -135,9 +141,19 @@ vector<string> Subclasses::genDescendantsMap(Subclasses::Map &childMap, vector<s
     fast_sort(parentNames);
     Subclasses::Map descendantsMap;
     for (const string &parentName : parentNames) {
-        Subclasses::Entries descendants;
-        Subclasses::descendantsOf(childMap, parentName, descendants);
-        descendantsMap.emplace(parentName, descendants);
+        // Skip parents that the user asked for but which don't
+        // exist or are never subclassed.
+        auto fnd = childMap.find(parentName);
+        if (fnd == childMap.end()) {
+            continue;
+        }
+
+        auto descendants = Subclasses::descendantsOf(childMap, parentName);
+        if (!descendants) {
+            descendantsMap[parentName];
+        }
+
+        descendantsMap.emplace(parentName, *descendants);
     }
 
     return Subclasses::serializeSubclassMap(descendantsMap, parentNames);

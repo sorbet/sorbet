@@ -17,7 +17,6 @@ public:
 
     static void maybeInsertChild(const std::string &parentName, const Subclasses::Entries &children,
                                  Subclasses::Map &out);
-    static void descendantsOf(const Subclasses::Map &childMap, const std::string &parent, Subclasses::Entries &out);
     static std::vector<std::string> serializeSubclassMap(const Subclasses::Map &descendantsMap,
                                                          const std::vector<std::string> &parentNames);
     static std::vector<std::string> genDescendantsMap(Subclasses::Map &childMap, std::vector<std::string> &parentNames);
@@ -26,6 +25,7 @@ private:
     static void patchChildMap(Subclasses::Map &childMap);
     static bool isFileIgnored(const std::string &path, const std::vector<std::string> &absoluteIgnorePatterns,
                               const std::vector<std::string> &relativeIgnorePatterns);
+    static std::optional<Entries> descendantsOf(const Subclasses::Map &childMap, const std::string &parents);
 };
 
 } // namespace sorbet::autogen
