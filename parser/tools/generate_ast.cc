@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -21,182 +22,585 @@ struct FieldDef {
 
 struct NodeDef {
     string name;
+    string whitequarkName;
     vector<FieldDef> fields;
 };
 
 NodeDef nodes[] = {
     // alias bar foo
-    {"Alias", vector<FieldDef>({{"from", Node}, {"to", Node}})},
+    {
+        "Alias",
+        "alias",
+        vector<FieldDef>({{"from", Node}, {"to", Node}}),
+    },
     // logical and
-    {"And", vector<FieldDef>({{"left", Node}, {"right", Node}})},
+    {
+        "And",
+        "and",
+        vector<FieldDef>({{"left", Node}, {"right", Node}}),
+    },
     // &&=
-    {"AndAsgn", vector<FieldDef>({{"left", Node}, {"right", Node}})},
-    // Wraps every single definition of argument for methods and blocks
-    {"Arg", vector<FieldDef>({{"name", Name}})},
+    {
+        "AndAsgn",
+        "and_asgn",
+        vector<FieldDef>({{"left", Node}, {"right", Node}}),
+    },
+    // Required positional argument
+    {
+        "Arg",
+        "arg",
+        vector<FieldDef>({{"name", Name}}),
+    },
     // Wraps block arg, method arg, and send arg
-    {"Args", vector<FieldDef>({{"args", NodeVec}})},
+    {
+        "Args",
+        "args",
+        vector<FieldDef>({{"args", NodeVec}}),
+    },
     // inline array with elements
-    {"Array", vector<FieldDef>({{"elts", NodeVec}})},
+    {
+        "Array",
+        "array",
+        vector<FieldDef>({{"elts", NodeVec}}),
+    },
     // Used for $`, $& etc magic regex globals
-    {"Backref", vector<FieldDef>({{"name", Name}})},
-    {"Assign", vector<FieldDef>({{"lhs", Node}, {"rhs", Node}})},
+    {
+        "Backref",
+        "backref",
+        vector<FieldDef>({{"name", Name}}),
+    },
+    {
+        "Assign",
+        "assign",
+        vector<FieldDef>({{"lhs", Node}, {"rhs", Node}}),
+    },
     // wraps any set of statements implicitly grouped by syntax (e.g. def, class bodies)
-    {"Begin", vector<FieldDef>({{"stmts", NodeVec}})},
+    {
+        "Begin",
+        "begin",
+        vector<FieldDef>({{"stmts", NodeVec}}),
+    },
     // Node is always a send, which is previous call, args is arguments of body
-    {"Block", vector<FieldDef>({{"send", Node}, {"args", Node}, {"body", Node}})},
+    {
+        "Block",
+        "block",
+        vector<FieldDef>({{"send", Node}, {"args", Node}, {"body", Node}}),
+    },
     // Wraps a `&foo` argument in an argument list
-    {"Blockarg", vector<FieldDef>({{"name", Name}})},
+    {
+        "Blockarg",
+        "blockarg",
+        vector<FieldDef>({{"name", Name}}),
+    },
     //  e.g. map(&:token)
-    {"BlockPass", vector<FieldDef>({{"block", Node}})},
+    {
+        "BlockPass",
+        "block_pass",
+        vector<FieldDef>({{"block", Node}}),
+    },
     // `break` keyword
-    {"Break", vector<FieldDef>({{"exprs", NodeVec}})},
+    {
+        "Break",
+        "break",
+        vector<FieldDef>({{"exprs", NodeVec}}),
+    },
     // case statement; whens is a list of (when cond expr) nodes
-    {"Case", vector<FieldDef>({{"condition", Node}, {"whens", NodeVec}, {"else_", Node}})},
+    {
+        "Case",
+        "case",
+        vector<FieldDef>({{"condition", Node}, {"whens", NodeVec}, {"else_", Node}}),
+    },
     // appears in the `scope` of a `::Constant` `Const` node
-    {"Cbase", vector<FieldDef>()},
+    {
+        "Cbase",
+        "cbase",
+        vector<FieldDef>(),
+    },
     // superclass is Null if empty superclass, body is Begin if multiple statements
-    {"Class", vector<FieldDef>({{"declLoc", Loc}, {"name", Node}, {"superclass", Node}, {"body", Node}})},
-    {"Complex", vector<FieldDef>({{"value", String}})},
+    {
+        "Class",
+        "class",
+        vector<FieldDef>({{"declLoc", Loc}, {"name", Node}, {"superclass", Node}, {"body", Node}}),
+    },
+    // complex number literal like "42i"
+    {
+        "Complex",
+        "complex",
+        vector<FieldDef>({{"value", String}}),
+    },
     // Used as path to Select, scope is Null for end of specified list
-    {"Const", vector<FieldDef>({{"scope", Node}, {"name", Name}})},
+    {
+        "Const",
+        "const",
+        vector<FieldDef>({{"scope", Node}, {"name", Name}}),
+    },
     // Used inside a `Mlhs` if a constant is part of multiple assignment
-    {"ConstLhs", vector<FieldDef>({{"scope", Node}, {"name", Name}})},
+    {
+        "ConstLhs",
+        "casgn",
+        vector<FieldDef>({{"scope", Node}, {"name", Name}}),
+    },
     // &. "conditional-send"/safe-navigation operator
-    {"CSend", vector<FieldDef>({{"receiver", Node}, {"method", Name}, {"args", NodeVec}})},
+    {
+        "CSend",
+        "csend",
+        vector<FieldDef>({{"receiver", Node}, {"method", Name}, {"args", NodeVec}}),
+    },
     // @@foo class variable
-    {"CVar", vector<FieldDef>({{"name", Name}})},
+    {
+        "CVar",
+        "cvar",
+        vector<FieldDef>({{"name", Name}}),
+    },
     // @@foo class variable in the lhs of an Mlhs
-    {"CVarLhs", vector<FieldDef>({{"name", Name}})},
+    {
+        "CVarLhs",
+        "cvasgn",
+        vector<FieldDef>({{"name", Name}}),
+    },
     // args may be NULL, body does not have to be a block.
-    {"DefMethod", vector<FieldDef>({{"declLoc", Loc}, {"name", Name}, {"args", Node}, {"body", Node}})},
+    {
+        "DefMethod",
+        "def",
+        vector<FieldDef>({{"declLoc", Loc}, {"name", Name}, {"args", Node}, {"body", Node}}),
+    },
     // defined?() built-in pseudo-function
-    {"Defined", vector<FieldDef>({{"value", Node}})},
+    {
+        "Defined",
+        "defined?",
+        vector<FieldDef>({{"value", Node}}),
+    },
     // def <expr>.name singleton-class method def
-    {"DefS", vector<FieldDef>({{"declLoc", Loc}, {"singleton", Node}, {"name", Name}, {"args", Node}, {"body", Node}})},
-    // string interpolation, all nodes are concatenated in a single string
-    {"DString", vector<FieldDef>({{"nodes", NodeVec}})},
-    // symbol interoplation, :"foo#{bar}"
-    {"DSymbol", vector<FieldDef>({{"nodes", NodeVec}})},
+    {
+        "DefS",
+        "defs",
+        vector<FieldDef>({{"declLoc", Loc}, {"singleton", Node}, {"name", Name}, {"args", Node}, {"body", Node}}),
+    },
+    // string with an interpolation, all nodes are concatenated in a single string
+    {
+        "DString",
+        "dstr",
+        vector<FieldDef>({{"nodes", NodeVec}}),
+    },
+    // symbol with an interpolation, :"foo#{bar}"
+    {
+        "DSymbol",
+        "dsym",
+        vector<FieldDef>({{"nodes", NodeVec}}),
+    },
     // ... flip-flop operator inside a conditional
-    {"EFlipflop", vector<FieldDef>({{"left", Node}, {"right", Node}})},
+    {
+        "EFlipflop",
+        "eflipflop",
+        vector<FieldDef>({{"left", Node}, {"right", Node}}),
+    },
     // __ENCODING__
-    {"EncodingLiteral", vector<FieldDef>()},
-    {"Ensure", vector<FieldDef>({{"body", Node}, {"ensure", Node}})},
-    {"ERange", vector<FieldDef>({{"from", Node}, {"to", Node}})},
-    {"False", vector<FieldDef>()},
+    {
+        "EncodingLiteral",
+        "__ENCODING__",
+        vector<FieldDef>(),
+    },
+    // "ensure" keyword
+    {
+        "Ensure",
+        "ensure",
+        vector<FieldDef>({{"body", Node}, {"ensure", Node}}),
+    },
+    // Exclusive range 1...3
+    {
+        "ERange",
+        "erange",
+        vector<FieldDef>({{"from", Node}, {"to", Node}}),
+    },
+    // "false" keyword
+    {
+        "False",
+        "false",
+        vector<FieldDef>(),
+    },
     // __FILE__
-    {"FileLiteral", vector<FieldDef>()},
+    {
+        "FileLiteral",
+        "__FILE__",
+        vector<FieldDef>(),
+    },
     // For loop
-    {"For", vector<FieldDef>({{"vars", Node}, {"expr", Node}, {"body", Node}})},
-    {"Float", vector<FieldDef>({{"val", String}})},
+    {
+        "For",
+        "for",
+        vector<FieldDef>({{"vars", Node}, {"expr", Node}, {"body", Node}}),
+    },
+    // float literal like "1.2"
+    {
+        "Float",
+        "float",
+        vector<FieldDef>({{"val", String}}),
+    },
     // Global variable ($foo)
-    {"GVar", vector<FieldDef>({{"name", Name}})},
+    {
+        "GVar",
+        "gvar",
+        vector<FieldDef>({{"name", Name}}),
+    },
     // Global variable in the lhs of an mlhs
-    {"GVarLhs", vector<FieldDef>({{"name", Name}})},
-    // entries are `Pair`s,
-    {"Hash", vector<FieldDef>({{"pairs", NodeVec}})},
-    // Bareword identifier (foo); I *think* should only exist transiently while parsing
-    {"Ident", vector<FieldDef>({{"name", Name}})},
-    {"If", vector<FieldDef>({{"condition", Node}, {"then_", Node}, {"else_", Node}})},
+    {
+        "GVarLhs",
+        "gvasgn",
+        vector<FieldDef>({{"name", Name}}),
+    },
+    // Hash literal, entries are `Pair`s,
+    {
+        "Hash",
+        "hash",
+        vector<FieldDef>({{"pairs", NodeVec}}),
+    },
+    // Bareword identifier (foo); should only exist transiently while parsing
+    {
+        "Ident",
+        "UNUSED_ident",
+        vector<FieldDef>({{"name", Name}}),
+    },
+    {
+        "If",
+        "if",
+        vector<FieldDef>({{"condition", Node}, {"then_", Node}, {"else_", Node}}),
+    },
     // .. flip-flop operator inside a conditional
-    {"IFlipflop", vector<FieldDef>({{"left", Node}, {"right", Node}})},
+    {
+        "IFlipflop",
+        "iflipflop",
+        vector<FieldDef>({{"left", Node}, {"right", Node}}),
+    },
     // inclusive range. Subnodes need not be integers nor literals
-    {"IRange", vector<FieldDef>({{"from", Node}, {"to", Node}})},
-    {"Integer", vector<FieldDef>({{"val", String}})},
+    {
+        "IRange",
+        "irange",
+        vector<FieldDef>({{"from", Node}, {"to", Node}}),
+    },
+    {
+        "Integer",
+        "int",
+        vector<FieldDef>({{"val", String}}),
+    },
     // instance variable reference
-    {"IVar", vector<FieldDef>({{"name", Name}})},
+    {
+        "IVar",
+        "ivar",
+        vector<FieldDef>({{"name", Name}}),
+    },
     // @rules in `@rules, invalid_rules = ...`
-    {"IVarLhs", vector<FieldDef>({{"name", Name}})},
+    {
+        "IVarLhs",
+        "ivasgn",
+        vector<FieldDef>({{"name", Name}}),
+    },
     // Required keyword argument inside an (args)
-    {"Kwarg", vector<FieldDef>({{"name", Name}})},
-    // explicit `begin` keyword. Is there a difference between explicit and implicit one?
-    {"Kwbegin", vector<FieldDef>({{"stmts", NodeVec}})},
-    // optional arg with default value provided
-    {"Kwoptarg", vector<FieldDef>({{"name", Name}, {"nameLoc", Loc}, {"default_", Node}})},
+    {
+        "Kwarg",
+        "kwarg",
+        vector<FieldDef>({{"name", Name}}),
+    },
+    // explicit `begin` keyword.
+    // `kwbegin` is emitted _only_ for post-while and post-until loops
+    // because they act differently
+    {
+        "Kwbegin",
+        "kwbegin",
+        vector<FieldDef>({{"stmts", NodeVec}}),
+    },
+    // optional keyword arg with default value provided
+    {
+        "Kwoptarg",
+        "kwoptarg",
+        vector<FieldDef>({{"name", Name}, {"nameLoc", Loc}, {"default_", Node}}),
+    },
     // **kwargs arg
-    {"Kwrestarg", vector<FieldDef>({{"name", Name}})},
+    {
+        "Kwrestarg",
+        "kwrestarg",
+        vector<FieldDef>({{"name", Name}}),
+    },
     // **foo splat
-    {"Kwsplat", vector<FieldDef>({{"expr", Node}})},
-    {"LineLiteral", vector<FieldDef>()},
+    {
+        "Kwsplat",
+        "kwsplat",
+        vector<FieldDef>({{"expr", Node}}),
+    },
+    {
+        "LineLiteral",
+        "__LINE__",
+        vector<FieldDef>(),
+    },
     // local variable referense
-    {"LVar", vector<FieldDef>({{"name", Name}})},
-    {"LVarAsgn", vector<FieldDef>({{"name", Name}, {"expr", Node}})},
+    {
+        "LVar",
+        "lvar",
+        vector<FieldDef>({{"name", Name}}),
+    },
+    {
+        "LVarAsgn",
+        "lvasgn",
+        vector<FieldDef>({{"name", Name}, {"expr", Node}}),
+    },
     // invalid_rules in `@rules, invalid_rules = ...`
-    {"LVarLhs", vector<FieldDef>({{"name", Name}})},
+    {
+        "LVarLhs",
+        "lvar",
+        vector<FieldDef>({{"name", Name}}),
+    },
     // [regex literal] =~ value; autovivifies local vars from match grops
-    {"MatchAsgn", vector<FieldDef>({{"regex", Node}, {"expr", Node}})},
+    {
+        "MatchAsgn",
+        "match_with_lvasgn",
+        vector<FieldDef>({{"regex", Node}, {"expr", Node}}),
+    },
     // /foo/ regex literal inside an `if`; implicitly matches against $_
-    {"MatchCurLine", vector<FieldDef>({{"cond", Node}})},
+    {
+        "MatchCurLine",
+        "match_current_line",
+        vector<FieldDef>({{"cond", Node}}),
+    },
     // multiple left hand sides: `@rules, invalid_rules = ...`
-    {"Masgn", vector<FieldDef>({{"lhs", Node}, {"rhs", Node}})},
+    {
+        "Masgn",
+        "masgn",
+        vector<FieldDef>({{"lhs", Node}, {"rhs", Node}}),
+    },
     // multiple left hand sides: `@rules, invalid_rules = ...`
-    {"Mlhs", vector<FieldDef>({{"exprs", NodeVec}})},
-    {"Module", vector<FieldDef>({{"declLoc", Loc}, {"name", Node}, {"body", Node}})},
+    {
+        "Mlhs",
+        "mlhs",
+        vector<FieldDef>({{"exprs", NodeVec}}),
+    },
+    {
+        "Module",
+        "module",
+        vector<FieldDef>({{"declLoc", Loc}, {"name", Node}, {"body", Node}}),
+    },
     // next(args); `next` is like `return` but for blocks
-    {"Next", vector<FieldDef>({{"exprs", NodeVec}})},
-    {"Nil", vector<FieldDef>()},
+    {
+        "Next",
+        "next",
+        vector<FieldDef>({{"exprs", NodeVec}}),
+    },
+    {
+        "Nil",
+        "nil",
+        vector<FieldDef>(),
+    },
     // $1, $2, etc
-    {"NthRef", vector<FieldDef>({{"ref", Uint}})},
+    {
+        "NthRef",
+        "nth_ref",
+        vector<FieldDef>({{"ref", Uint}}),
+    },
     // foo += 6 for += and other ops
-    {"OpAsgn", vector<FieldDef>({{"left", Node}, {"op", Name}, {"right", Node}})},
+    {
+        "OpAsgn",
+        "op_asgn",
+        vector<FieldDef>({{"left", Node}, {"op", Name}, {"right", Node}}),
+    },
     // logical or
-    {"Or", vector<FieldDef>({{"left", Node}, {"right", Node}})},
+    {
+        "Or",
+        "or",
+        vector<FieldDef>({{"left", Node}, {"right", Node}}),
+    },
     // foo ||= bar
-    {"OrAsgn", vector<FieldDef>({{"left", Node}, {"right", Node}})},
-    // optional argument inside an (args) list
-    {"Optarg", vector<FieldDef>({{"name", Name}, {"nameLoc", Loc}, {"default_", Node}})},
+    {
+        "OrAsgn",
+        "or_asgn",
+        vector<FieldDef>({{"left", Node}, {"right", Node}}),
+    },
+    // optional positional argument inside an (args) list
+    {
+        "Optarg",
+        "optarg",
+        vector<FieldDef>({{"name", Name}, {"nameLoc", Loc}, {"default_", Node}}),
+    },
     // entries of Hash
-    {"Pair", vector<FieldDef>({{"key", Node}, {"value", Node}})},
+    {
+        "Pair",
+        "pair",
+        vector<FieldDef>({{"key", Node}, {"value", Node}}),
+    },
     // END {...}
-    {"Postexe", vector<FieldDef>({{"body", Node}})},
+    {
+        "Postexe",
+        "postexe",
+        vector<FieldDef>({{"body", Node}}),
+    },
     // BEGIN{...}
-    {"Preexe", vector<FieldDef>({{"body", Node}})},
-    // wraps the sole argument of a 1-arg block for some reason
-    {"Procarg0", vector<FieldDef>({{"arg", Node}})},
-    //
-    {"Rational", vector<FieldDef>({{"val", String}})},
+    {
+        "Preexe",
+        "preexe",
+        vector<FieldDef>({{"body", Node}}),
+    },
+    // wraps the sole argument of a 1-arg block
+    // because there's a diffence between m {|a|} and m{|a,|}
+    {
+        "Procarg0",
+        "procarg0",
+        vector<FieldDef>({{"arg", Node}}),
+    },
+    // rational number literal like "42r"
+    {
+        "Rational",
+        "rational",
+        vector<FieldDef>({{"val", String}}),
+    },
     // `redo` keyword
-    {"Redo", vector<FieldDef>()},
+    {
+        "Redo",
+        "redo",
+        vector<FieldDef>(),
+    },
     // regular expression; string interpolation in body is flattened into the array
-    {"Regexp", vector<FieldDef>({{"regex", NodeVec}, {"opts", Node}})},
+    {
+        "Regexp",
+        "regexp",
+        vector<FieldDef>({{"regex", NodeVec}, {"opts", Node}}),
+    },
     // opts of regexp
-    {"Regopt", vector<FieldDef>({{"opts", String}})},
+    {
+        "Regopt",
+        "regopt",
+        vector<FieldDef>({{"opts", String}}),
+    },
     // body of a rescue
-    {"Resbody", vector<FieldDef>({{"exception", Node}, {"var", Node}, {"body", Node}})},
+    {
+        "Resbody",
+        "resbody",
+        vector<FieldDef>({{"exception", Node}, {"var", Node}, {"body", Node}}),
+    },
     // begin; ..; rescue; end; rescue is an array of Resbody
-    {"Rescue", vector<FieldDef>({{"body", Node}, {"rescue", NodeVec}, {"else_", Node}})},
+    {
+        "Rescue",
+        "rescue",
+        vector<FieldDef>({{"body", Node}, {"rescue", NodeVec}, {"else_", Node}}),
+    },
     // *arg argument inside an (args)
-    {"Restarg", vector<FieldDef>({{"name", Name}, {"nameLoc", Loc}})},
+    {
+        "Restarg",
+        "restarg",
+        vector<FieldDef>({{"name", Name}, {"nameLoc", Loc}}),
+    },
     // `retry` keyword
-    {"Retry", vector<FieldDef>()},
+    {
+        "Retry",
+        "retry",
+        vector<FieldDef>(),
+    },
     // `return` keyword
-    {"Return", vector<FieldDef>({{"exprs", NodeVec}})},
+    {
+        "Return",
+        "return",
+        vector<FieldDef>({{"exprs", NodeVec}}),
+    },
     // class << expr; body; end;
-    {"SClass", vector<FieldDef>({{"declLoc", Loc}, {"expr", Node}, {"body", Node}})},
-    {"Self", vector<FieldDef>()},
+    {
+        "SClass",
+        "sclass",
+        vector<FieldDef>({{"declLoc", Loc}, {"expr", Node}, {"body", Node}}),
+    },
+    {
+        "Self",
+        "self",
+        vector<FieldDef>(),
+    },
     // invocation
-    {"Send", vector<FieldDef>({{"receiver", Node}, {"method", Name}, {"args", NodeVec}})},
-    // not used in gerald.rb ???
-    {"Shadowarg", vector<FieldDef>({{"name", Name}})},
+    {
+        "Send",
+        "send",
+        vector<FieldDef>({{"receiver", Node}, {"method", Name}, {"args", NodeVec}}),
+    },
+    // m { |;shadowarg| }
+    {
+        "Shadowarg",
+        "shadowarg",
+        vector<FieldDef>({{"name", Name}}),
+    },
     // *foo splat operator
-    {"Splat", vector<FieldDef>({{"var", Node}})},
-    {"SplatLhs", vector<FieldDef>({{"var", Node}})},
+    {
+        "Splat",
+        "splat",
+        vector<FieldDef>({{"var", Node}}),
+    },
+    {
+        "SplatLhs",
+        "splat_lhs",
+        vector<FieldDef>({{"var", Node}}),
+    },
     // string literal
-    {"String", vector<FieldDef>({{"val", Name}})},
-    {"Super", vector<FieldDef>({{"args", NodeVec}})},
+    {
+        "String",
+        "str",
+        vector<FieldDef>({{"val", Name}}),
+    },
+    {
+        "Super",
+        "super",
+        vector<FieldDef>({{"args", NodeVec}}),
+    },
     // symbol literal
-    {"Symbol", vector<FieldDef>({{"val", Name}})},
-    {"True", vector<FieldDef>()},
-    {"Undef", vector<FieldDef>({{"exprs", NodeVec}})},
-    {"Until", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
-    {"UntilPost", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
-    {"When", vector<FieldDef>({{"patterns", NodeVec}, {"body", Node}})},
-    {"While", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
-    // is there a non-syntactic difference in behaviour between post and non-post while?
-    {"WhilePost", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
-    {"XString", vector<FieldDef>({{"nodes", NodeVec}})},
-    {"Yield", vector<FieldDef>({{"exprs", NodeVec}})},
-    {"ZSuper", vector<FieldDef>()},
+    {
+        "Symbol",
+        "symbol",
+        vector<FieldDef>({{"val", Name}}),
+    },
+    {
+        "True",
+        "true",
+        vector<FieldDef>(),
+    },
+    // "undef" keyword
+    {
+        "Undef",
+        "undef",
+        vector<FieldDef>({{"exprs", NodeVec}}),
+    },
+    {
+        "Until",
+        "until",
+        vector<FieldDef>({{"cond", Node}, {"body", Node}}),
+    },
+    {
+        "UntilPost",
+        "until_post",
+        vector<FieldDef>({{"cond", Node}, {"body", Node}}),
+    },
+    {
+        "When",
+        "when",
+        vector<FieldDef>({{"patterns", NodeVec}, {"body", Node}}),
+    },
+    {
+        "While",
+        "while",
+        vector<FieldDef>({{"cond", Node}, {"body", Node}}),
+    },
+    // There's a difference between while_post and while loops:
+    // while_post runs the body of the loop at least once.
+    {
+        "WhilePost",
+        "while_post",
+        vector<FieldDef>({{"cond", Node}, {"body", Node}}),
+    },
+    {
+        "XString",
+        "xstr",
+        vector<FieldDef>({{"nodes", NodeVec}}),
+    },
+    {
+        "Yield",
+        "yield",
+        vector<FieldDef>({{"exprs", NodeVec}}),
+    },
+    {
+        "ZSuper",
+        "zsuper",
+        vector<FieldDef>(),
+    },
 };
 
 string fieldType(FieldType arg) {
@@ -251,6 +655,7 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     out << '\n';
     out << "  virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
     out << "  virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
     out << "  virtual std::string nodeName();" << '\n';
 
     out << "};" << '\n';
@@ -307,6 +712,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << "  }" << '\n';
     out << '\n';
 
+    // toJSON
     out << "  std::string " << node.name << "::toJSON(const core::GlobalState &gs, int tabs) {" << '\n'
         << "    fmt::memory_buffer buf;" << '\n';
     out << "    fmt::format_to(buf,  \"{{\\n\");\n";
@@ -374,6 +780,54 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << "    fmt::format_to(buf,  \"}}\");\n";
     out << "    return to_string(buf);\n";
     out << "  }" << '\n';
+    out << '\n';
+
+    // toWhitequark
+    out << "  std::string " << node.name << "::toWhitequark(const core::GlobalState &gs, int tabs) {" << '\n'
+        << "    fmt::memory_buffer buf;" << '\n';
+    out << "    fmt::format_to(buf, \"s(:" << node.whitequarkName << "\");" << '\n';
+    // Generate fields
+    for (auto &arg : node.fields) {
+        switch (arg.type) {
+            case Name:
+                out << "    fmt::format_to(buf, \", :\" + JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
+                break;
+            case Node:
+                out << "    fmt::format_to(buf, \",\");\n";
+                out << "    if (" << arg.name << ") {\n";
+                out << "     fmt::format_to(buf, \"\\n\");\n";
+                out << "     printTabs(buf, tabs + 1);" << '\n';
+                out << "     printNodeWhitequark(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "    } else {\n";
+                out << "      fmt::format_to(buf, \" nil\");\n";
+                out << "    }\n";
+                break;
+            case NodeVec:
+                out << "    for (auto &&a: " << arg.name << ") {\n";
+                out << "      fmt::format_to(buf, \",\");\n";
+                out << "      if (a) {\n";
+                out << "        fmt::format_to(buf, \"\\n\");\n";
+                out << "        printTabs(buf, tabs + 1);" << '\n';
+                out << "        printNodeWhitequark(buf, a, gs, tabs + 1);\n";
+                out << "      } else {\n";
+                out << "        fmt::format_to(buf, \" nil\");\n";
+                out << "      }\n";
+                out << "    }\n";
+                break;
+            case String:
+                out << "    fmt::format_to(buf, \", \\\"{}\\\"\", " << arg.name << ");\n";
+                break;
+            case Uint:
+                out << "    fmt::format_to(buf, \", {}\", " << arg.name << ");\n";
+                break;
+            case Loc:
+                continue;
+        }
+    }
+
+    out << "    fmt::format_to(buf, \")\");";
+    out << "    return to_string(buf);\n"
+        << "  }\n";
     out << '\n';
 }
 
