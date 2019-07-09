@@ -49,3 +49,15 @@ module AnotherModule3
   module NestedModule
   end
 end
+
+class WillGetAliased
+    # ^ def: WillGetAliased
+  extend T::Sig
+
+  sig {params(a: AliasForClass).returns(AliasForClass)}
+                # ^ usage: AliasForClass
+                                      # ^ usage: AliasForClass
+  def foo(a)
+    a
+  end
+end
