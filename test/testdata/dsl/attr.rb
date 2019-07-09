@@ -20,7 +20,7 @@ class TestAttr
   sig {returns(String)}
   attr_reader :v3 # error: Use of undeclared variable
 
-  attr_writer :v4, :v5 # error: This function does not have a `sig`
+  attr_writer :v4, :v5 # error-with-dupes: This function does not have a `sig`
 #              ^^        error: Use of undeclared variable `@v4`
 #                   ^^   error: Use of undeclared variable `@v5`
 end

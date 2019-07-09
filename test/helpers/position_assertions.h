@@ -95,9 +95,10 @@ public:
                          std::string errorPrefix = "");
 
     const std::string message;
+    const bool matchesDuplicateErrors;
 
     ErrorAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                   std::string_view message);
+                   std::string_view message, bool matchesDuplicateErrors);
 
     std::string toString() const override;
 

@@ -8,25 +8,25 @@ def f(s); end
 sig {params(s: U60).void} # current resolution limit is 30, but because we're iterative we sometimes can resolve past it.
 def f_long(s); end
 
-U0 = Integer # error: Too many alias expansions
-U1 = U0 # error: Too many alias expansions
-U2 = U1 # error: Too many alias expansions
-U3 = U2 # error: Too many alias expansions
-U4 = U3 # error: Too many alias expansions
-U5 = U4 # error: Too many alias expansions
-U6 = U5 # error: Too many alias expansions
-U7 = U6 # error: Too many alias expansions
-U8 = U7 # error: Too many alias expansions
-U9 = U8 # error: Too many alias expansions
-U10 = U9 # error: Too many alias expansions
-U11 = U10 # error: Too many alias expansions
-U12 = U11 # error: Too many alias expansions
-U13 = U12 # error: Too many alias expansions
-U14 = U13 # error: Too many alias expansions
-U15 = U14 # error: Too many alias expansions
-U16 = U15 # error: Too many alias expansions
-U17 = U16 # error: Too many alias expansions
-U18 = U17 # error: Too many alias expansions
+U0 = Integer # error-with-dupes: Too many alias expansions
+U1 = U0 # error-with-dupes: Too many alias expansions
+U2 = U1 # error-with-dupes: Too many alias expansions
+U3 = U2 # error-with-dupes: Too many alias expansions
+U4 = U3 # error-with-dupes: Too many alias expansions
+U5 = U4 # error-with-dupes: Too many alias expansions
+U6 = U5 # error-with-dupes: Too many alias expansions
+U7 = U6 # error-with-dupes: Too many alias expansions
+U8 = U7 # error-with-dupes: Too many alias expansions
+U9 = U8 # error-with-dupes: Too many alias expansions
+U10 = U9 # error-with-dupes: Too many alias expansions
+U11 = U10 # error-with-dupes: Too many alias expansions
+U12 = U11 # error-with-dupes: Too many alias expansions
+U13 = U12 # error-with-dupes: Too many alias expansions
+U14 = U13 # error-with-dupes: Too many alias expansions
+U15 = U14 # error-with-dupes: Too many alias expansions
+U16 = U15 # error-with-dupes: Too many alias expansions
+U17 = U16 # error-with-dupes: Too many alias expansions
+U18 = U17 # error-with-dupes: Too many alias expansions
 U19 = U18
 U20 = U19
 U21 = U20

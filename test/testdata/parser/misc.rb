@@ -109,8 +109,8 @@ def optfoo(x=1, *y); end
 # pair and pair_quoted
 {x => y, "foo": 1}
 
-BEGIN{foo} # error: Unsupported node type `Preexe`
-END{bar} # error: Unsupported node type `Postexe`
+BEGIN{foo} # error-with-dupes: Unsupported node type `Preexe`
+END{bar} # error-with-dupes: Unsupported node type `Postexe`
 
 # rationals
 4r
