@@ -58,8 +58,25 @@ NamedDefinition NamedDefinition::fromDef(core::Context ctx, ParsedFile &parsedFi
             parentName = parentRef.name;
         }
     }
-    return {def.data(parsedFile), parsedFile.showFullName(ctx, def), parentName, parsedFile.requires,
-            parsedFile.tree.file};
+    const auto &pathStr = parsedFile.tree.file.data(ctx).path();
+    u4 pathDepth = count(pathStr.begin(), pathStr.end(), '/'); // Pre-compute for comparison
+    return {def.data(parsedFile), parsedFile.showFullName(ctx, def),
+            parentName,           parsedFile.requires,
+            parsedFile.tree.file, pathDepth};
+}
+
+bool NamedDefinition::preferredTo(core::Context ctx, const NamedDefinition &lhs, const NamedDefinition &rhs) {
+    ENFORCE(lhs.nameParts == rhs.nameParts, "Can only compare definitions with same name");
+    // Load defs with a parent name first since others will tend to depend on them.
+    // Secondarily, the same idea for defs with less nesting in their path.
+    // Finally, sort alphabetically by path to break any ties.
+    if (lhs.parentName.empty() != rhs.parentName.empty()) {
+        return rhs.parentName.empty();
+    }
+    if (lhs.pathDepth != rhs.pathDepth) {
+        return lhs.pathDepth < rhs.pathDepth;
+    }
+    return lhs.fileRef.data(ctx).path() < rhs.fileRef.data(ctx).path();
 }
 
 void showHelper(core::Context ctx, fmt::memory_buffer &buf, const DefTree &node, int level) {
@@ -111,9 +128,8 @@ core::FileRef DefTree::file() const {
     if (!namedDefs.empty()) {
         // TODO what if there are more than one?
         ref = namedDefs[0].fileRef;
-    } else if (!nonBehaviorDefs.empty()) {
-        // TODO this lacks sorting from `definition_sort_key`
-        ref = nonBehaviorDefs[0].fileRef;
+    } else if (nonBehaviorDef) {
+        ref = nonBehaviorDef->fileRef;
     }
     return ref;
 }
@@ -231,7 +247,7 @@ Definition::Type DefTree::definitionType(core::Context ctx) const {
 }
 
 bool DefTree::hasDef() const {
-    return !(namedDefs.empty() && nonBehaviorDefs.empty());
+    return nonBehaviorDef || !namedDefs.empty();
 }
 
 const NamedDefinition &DefTree::definition(core::Context ctx) const {
@@ -240,8 +256,8 @@ const NamedDefinition &DefTree::definition(core::Context ctx) const {
                 namedDefs.size());
         return namedDefs[0];
     } else {
-        ENFORCE(!nonBehaviorDefs.empty(), "Could not find any defintions for '{}'", fullName(ctx));
-        return nonBehaviorDefs[0];
+        ENFORCE(nonBehaviorDef, "Could not find any definitions for '{}'", fullName(ctx));
+        return *nonBehaviorDef;
     }
 }
 
@@ -259,7 +275,7 @@ void DefTreeBuilder::addParsedFileDefinitions(core::Context ctx, const Autoloade
     }
 }
 
-void DefTreeBuilder::addSingleDef(core::Context, const AutoloaderConfig &alCfg, std::unique_ptr<DefTree> &root,
+void DefTreeBuilder::addSingleDef(core::Context ctx, const AutoloaderConfig &alCfg, std::unique_ptr<DefTree> &root,
                                   NamedDefinition ndef) {
     if (!alCfg.include(ndef)) {
         return;
@@ -277,25 +293,37 @@ void DefTreeBuilder::addSingleDef(core::Context, const AutoloaderConfig &alCfg, 
     if (ndef.def.defines_behavior) {
         node->namedDefs.emplace_back(move(ndef));
     } else {
-        node->nonBehaviorDefs.emplace_back(move(ndef));
+        updateNonBehaviorDef(ctx, *node, move(ndef));
     }
 }
 
-DefTree DefTreeBuilder::merge(DefTree lhs, DefTree rhs) {
+DefTree DefTreeBuilder::merge(core::Context ctx, DefTree lhs, DefTree rhs) {
     ENFORCE(lhs.nameParts == rhs.nameParts, "Name mismatch for DefTreeBuilder::merge");
     lhs.namedDefs.insert(lhs.namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
                          make_move_iterator(rhs.namedDefs.end()));
-    lhs.nonBehaviorDefs.insert(lhs.nonBehaviorDefs.end(), make_move_iterator(rhs.nonBehaviorDefs.begin()),
-                               make_move_iterator(rhs.nonBehaviorDefs.end()));
+    if (rhs.nonBehaviorDef) {
+        updateNonBehaviorDef(ctx, lhs, move(*rhs.nonBehaviorDef.get()));
+    }
     for (auto &[rname, rchild] : rhs.children) {
         auto lchild = lhs.children.find(rname);
         if (lchild == lhs.children.end()) {
             lhs.children[rname] = move(rchild);
         } else {
-            lhs.children[rname] = make_unique<DefTree>(merge(move(*lchild->second), move(*rchild)));
+            lhs.children[rname] = make_unique<DefTree>(merge(ctx, move(*lchild->second), move(*rchild)));
         }
     }
     return lhs;
+}
+
+void DefTreeBuilder::updateNonBehaviorDef(core::Context ctx, DefTree &node, NamedDefinition ndef) {
+    if (!node.namedDefs.empty()) {
+        // Non behavior-defining definitions do not matter for nodes that have behavior. There is no
+        // need to continue tracking it.
+        return;
+    }
+    if (!node.nonBehaviorDef || NamedDefinition::preferredTo(ctx, ndef, *node.nonBehaviorDef)) {
+        node.nonBehaviorDef = make_unique<NamedDefinition>(move(ndef));
+    }
 }
 
 void DefTreeBuilder::collapseSameFileDefs(core::Context ctx, const AutoloaderConfig &alCfg, DefTree &root) {

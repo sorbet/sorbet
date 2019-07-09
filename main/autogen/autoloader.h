@@ -37,12 +37,14 @@ struct AutoloaderConfig {
 
 struct NamedDefinition {
     static NamedDefinition fromDef(core::Context, ParsedFile &, DefinitionRef);
+    static bool preferredTo(core::Context, const NamedDefinition &lhs, const NamedDefinition &rhs);
 
     Definition def;
     std::vector<core::NameRef> nameParts;
     std::vector<core::NameRef> parentName;
     std::vector<core::NameRef> requires;
     core::FileRef fileRef;
+    u4 pathDepth;
 
     NamedDefinition() = default;
     NamedDefinition(const NamedDefinition &) = delete;
@@ -54,8 +56,14 @@ struct NamedDefinition {
 class DefTree {
 public:
     UnorderedMap<core::NameRef, std::unique_ptr<DefTree>> children;
+
+    // For definitions that define behavior we enforce that it is only from a single code location.
+    // However some nodes may represent a name that is used in many places but where none define
+    // behavior (e.g. a module that is only used for namespacing). In that case, deterministically
+    // pick a single file to use for the definition based on NamedDefinition::preferredTo precedence
+    // rules.
     std::vector<NamedDefinition> namedDefs;
-    std::vector<NamedDefinition> nonBehaviorDefs;
+    std::unique_ptr<NamedDefinition> nonBehaviorDef;
     std::vector<core::NameRef> nameParts;
 
     bool root() const;
@@ -91,8 +99,11 @@ public:
                                          ParsedFile &);
     static void addSingleDef(core::Context, const AutoloaderConfig &, std::unique_ptr<DefTree> &root, NamedDefinition);
 
-    static DefTree merge(DefTree lhs, DefTree rhs);
+    static DefTree merge(core::Context, DefTree lhs, DefTree rhs);
     static void collapseSameFileDefs(core::Context, const AutoloaderConfig &, DefTree &root);
+
+private:
+    static void updateNonBehaviorDef(core::Context, DefTree &node, NamedDefinition ndef);
 };
 
 class AutoloadWriter {
