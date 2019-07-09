@@ -89,7 +89,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_3" [
-        label = "block[id=3](<selfRestore>$21: T.class_of(<root>))\l<statTemp>$18: Sorbet::Private::Static::Void = Solve<sig>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$21: T.class_of(<root>))\l<statTemp>$18: Sorbet::Private::Static::Void = Solve<sig>\l<statTemp>$36: T.class_of(Sorbet::Private::Static) = alias <C Static>\lkeep_for_ide$38: T.class_of(T) = alias <C T>\l<statTemp>$37: T.class_of(T::Sig) = alias <C Sig>\l<statTemp>$35: Sorbet::Private::Static::Void = <statTemp>$36: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$37: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_3" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -98,6 +98,24 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     ];
 
     "bb::<Class:<root>>#<static-init>_5" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
+}
+
+subgraph "cluster_::<Class:Base>#<static-init>" {
+    label = "::<Class:Base>#<static-init>";
+    color = blue;
+    "bb::<Class:Base>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Base>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:Base>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(Base)[T.class_of(Base)::Klass] = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Base>> $1>\l  targs = [\l    <C <U Klass>> = SelfTypeParam(<S <C <U Base>> $1><C <U Klass>>)\l  ]\l});\l<statTemp>$3: T.class_of(Sorbet::Private::Static) = alias <C Static>\lkeep_for_ide$5: T.class_of(T) = alias <C T>\l<statTemp>$4: T.class_of(T::Generic) = alias <C Generic>\l<returnMethodTemp>$2: Sorbet::Private::Static::Void = <statTemp>$3: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$4: T.class_of(T::Generic))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Sorbet::Private::Static::Void\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Base>#<static-init>_0" -> "bb::<Class:Base>#<static-init>_1" [style="bold"];
+    "bb::<Class:Base>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Base>#<static-init>_1" -> "bb::<Class:Base>#<static-init>_1" [style="bold"];
 }
 
 subgraph "cluster_::<Class:Concrete>#<static-init>" {

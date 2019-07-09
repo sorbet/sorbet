@@ -115,8 +115,12 @@ begin
     end
 
     def self.<static-init><<static-init>>(<blk>)
-      <self>.sig() do ||
-        <self>.params({:"f" => ::Integer}).returns(::Integer)
+      begin
+        <self>.sig() do ||
+          <self>.params({:"f" => ::Integer}).returns(::Integer)
+        end
+        ::Sorbet::Private::Static.keep_for_ide(::T::Sig)
+        <emptyTree>
       end
     end
   end

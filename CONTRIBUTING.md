@@ -43,7 +43,7 @@ Documentation improvements are very welcome. The source of [stripe.dev/sorbet](h
 
 # PR review policy for maintainers
 * Typically we try to turn around reviews within two business days.
-* It is generally expected that at lease a single maintainer should review every PR.
+* It is generally expected that at least a single maintainer should review every PR.
 * If there is a question on who should review a PR please discuss in Slack.
 * Anyone is welcome to review any PR that they want, whether they are a maintainer or not.
 * As PR's are merged, they are tested against Stripe internal codebase and are pushed in squashed form to GitHub.

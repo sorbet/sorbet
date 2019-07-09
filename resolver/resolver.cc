@@ -527,7 +527,20 @@ public:
         }
 
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
-        if (send != nullptr && send->fun == core::Names::typeAlias() && send->args.size() == 1) {
+        if (send != nullptr && send->fun == core::Names::typeAlias()) {
+            if (send->args.size() == 0) {
+                // if we have an invalid (i.e. nullary) call to TypeAlias, then we'll treat it as a type alias for
+                // Untyped and report an error here: otherwise, we end up in a state at the end of constant resolution
+                // that won't match our expected invariants (and in fact will fail our sanity checks)
+                auto temporaryUntyped = ast::MK::Untyped(asgn->lhs.get()->loc);
+                send->args.emplace_back(std::move(temporaryUntyped));
+
+                // because we're synthesizing a fake "untyped" here and actually adding it to the AST, we won't report
+                // an arity mismatch for `T.untyped` in the future, so report the arity mismatch now
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeAlias)) {
+                    e.setHeader("No argument given to `{}`", "T.type_alias");
+                }
+            }
             auto typeAliasItem = TypeAliasResolutionItem{id->symbol, send->args[0].get()};
             this->todoTypeAliases_.emplace_back(std::move(typeAliasItem));
 

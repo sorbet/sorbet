@@ -1,10 +1,22 @@
 # typed: true
 module Bar
+     # ^ def: Bar
   CONST = 2
   # ^ def: CONST
   
-  def self.meth(x)
-    x
+  class Steel
+      # ^ def: Steel
+    def meth(y)
+      # ^ def: meth
+      y
+    end
+
+    def self.meth(x)
+           # ^ def: self_meth
+                # ^ def: x
+      x
+    # ^ usage: x
+    end
   end
 end
                 
@@ -21,15 +33,27 @@ local3 = localer + local + 2
         # ^ usage: localer
                    # ^ usage: local
 const_to_local = Bar::CONST;
+               # ^ usage: Bar
                      # ^ usage: CONST
 const_add = Bar::CONST + local
+          # ^ usage: Bar
                  # ^ usage: CONST
                          # ^ usage: local
 const_add_reverse = local + Bar::CONST
                    # ^ usage: local
+                          # ^ usage: Bar
                                  # ^ usage: CONST
 
-Bar.meth(local)
-        # ^ usage: local
+Bar::Steel.meth(local)
+# ^ usage: Bar
+   # ^ usage: Steel
+         # ^ usage: self_meth
+              # ^ usage: local
 puts(Bar::CONST)
+   # ^ usage: Bar
           # ^ usage: CONST
+
+Bar::Steel.new.meth(10)
+# ^ usage: Bar
+   # ^ usage: Steel
+             # ^ usage: meth

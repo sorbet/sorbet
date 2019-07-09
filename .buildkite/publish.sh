@@ -86,13 +86,22 @@ git checkout -f "$current_rev"
 
 echo "--- publishing gems to RubyGems.org"
 
+mkdir -p "$HOME/.gem"
 printf -- $'---\n:rubygems_api_key: %s\n' "$RUBY_GEMS_API_KEY" > "$HOME/.gem/credentials"
 chmod 600 "$HOME/.gem/credentials"
 
 if [ "$dryrun" = "" ]; then
-  for gem_archive in _out_/gems/*.gem; do
+  # push the sorbet-static gems first, in case they fail. We don't want to end
+  # up in a weird state where 'sorbet' requires a pinned version of
+  # sorbet-static, but the sorbet-static gem push failed.
+  #
+  # (By failure here, we mean that RubyGems.org 502'd for some reason.)
+  for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
     gem push "$gem_archive"
   done
+
+  gem push "_out_/gems/sorbet-runtime-$release_version.gem"
+  gem push "_out_/gems/sorbet-$release_version.gem"
 fi
 
 echo "--- making a github release"
