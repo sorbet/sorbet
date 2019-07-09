@@ -171,7 +171,8 @@ class LSPLoop {
                          const std::vector<core::FileHash> &hashes) const;
     /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */
     TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs,
-                             std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
+                             const std::vector<std::shared_ptr<core::File>> &changedFiles,
+                             const std::vector<core::FileRef> &filesForQuery = {});
 
     LSPResult pushDiagnostics(TypecheckRun run);
 
@@ -190,7 +191,7 @@ class LSPLoop {
      * */
     std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef);
     TypecheckRun runLSPQuery(std::unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
-                             std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
+                             const std::vector<core::FileRef> &filesToQuery);
     std::variant<LSPLoop::TypecheckRun, std::pair<std::unique_ptr<ResponseError>, std::unique_ptr<core::GlobalState>>>
     setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri, const Position &pos,
                        const LSPMethod forMethod, bool errorIfFileIsUntyped);
