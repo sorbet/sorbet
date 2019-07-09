@@ -147,6 +147,10 @@ class LSPLoop {
 
     std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc);
     void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc);
+    std::vector<std::unique_ptr<Location>>
+    extractLocations(const core::GlobalState &gs,
+                     const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses,
+                     std::vector<std::unique_ptr<Location>> locations = {});
 
     core::FileRef updateFile(const std::shared_ptr<core::File> &file);
     /** Invalidate all currently cached trees and re-index them from file system.

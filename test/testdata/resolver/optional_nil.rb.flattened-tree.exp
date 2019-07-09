@@ -53,6 +53,7 @@ begin
         <self>.sig() do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
+        ::Sorbet::Private::Static.keep_for_ide(::T::Sig)
         <emptyTree>
       end
     end
