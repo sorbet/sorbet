@@ -8,6 +8,7 @@ end
 
 class Opus::Parent; end
 class Opus::IgnoredParent; end # Subclassed, but not included in --autogen-subclasses-parent
+class Opus::NeverSubclassed; end # Included in --autogen-subclasses-parent, but never subclassed
 
 module Opus::Mixin; end
 
