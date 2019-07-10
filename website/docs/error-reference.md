@@ -252,7 +252,7 @@ end
 
 ## 5011
 
-A class inherits from itself either directly or through a inheritance chain.
+A class inherits from itself either directly or through an inheritance chain.
 
 ```ruby
 class A < A; end
@@ -554,6 +554,33 @@ This error indicates a call to a method we believe does not exist (a la Ruby's
       def foo; Kernel.puts 'hello'; end
     end
     ```
+
+## 7004
+
+This error indicates that a method has been called with incorrect parameters.
+There are a few cases where this can occur:
+
+- Too many parameters
+- Not enough parameters
+- Trying to pass parameters that don't exist
+- Missing required parameters
+- Positional parameters used when the method expects named parameters, and vice
+  versa
+
+```ruby
+def foo(x: nil); end
+
+foo(1) # error
+foo(y: 1) # error
+foo(x: 1) # ok
+foo() # ok
+
+def bar(x:); end
+
+bar() # error
+bar(1) # error
+bar(x: 1) # ok
+```
 
 ## 7006
 
