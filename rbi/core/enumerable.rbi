@@ -273,9 +273,12 @@ module Enumerable
   def max(arg0=T.unsafe(nil), &blk); end
 
   sig {returns(T::Enumerator[Elem])}
+  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  # signatures. In reality, it should be recursively defined as an Array of elements of
+  # the same T.any
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(Comparable),
+        blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
     )
     .returns(T.nilable(Elem))
   end
@@ -285,10 +288,13 @@ module Enumerable
     )
     .returns(T::Enumerator[Elem])
   end
+  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  # signatures. In reality, it should be recursively defined as an Array of elements of
+  # the same T.any
   sig do
     params(
         arg0: Integer,
-        blk: T.proc.params(arg0: Elem).returns(Comparable),
+        blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
     )
     .returns(T::Array[Elem])
   end
@@ -317,9 +323,12 @@ module Enumerable
   def min(arg0=T.unsafe(nil), &blk); end
 
   sig {returns(T::Enumerator[Elem])}
+  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  # signatures. In reality, it should be recursively defined as an Array of elements of
+  # the same T.any
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(Comparable),
+        blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
     )
     .returns(T.nilable(Elem))
   end
@@ -329,10 +338,13 @@ module Enumerable
     )
     .returns(T::Enumerator[Elem])
   end
+  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  # signatures. In reality, it should be recursively defined as an Array of elements of
+  # the same T.any
   sig do
     params(
         arg0: Integer,
-        blk: T.proc.params(arg0: Elem).returns(Comparable),
+        blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
     )
     .returns(T::Array[Elem])
   end
@@ -348,9 +360,12 @@ module Enumerable
   def minmax(&blk); end
 
   sig {returns([T.nilable(Elem), T.nilable(Elem)])}
+  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  # signatures. In reality, it should be recursively defined as an Array of elements of
+  # the same T.any
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(Comparable),
+        blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
     )
     .returns(T::Enumerator[Elem])
   end
@@ -409,10 +424,12 @@ module Enumerable
     .returns(T::Array[Elem])
   end
   def sort(&blk); end
-
+  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  # signatures. In reality, it should be recursively defined as an Array of elements of
+  # the same T.any
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+        blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
     )
     .returns(T::Array[Elem])
   end
