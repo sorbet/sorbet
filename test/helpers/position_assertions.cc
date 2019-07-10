@@ -570,7 +570,9 @@ void reportMissingError(const string &filename, const ErrorAssertion &assertion,
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
                            string_view errorPrefix) {
     ADD_FAILURE_AT(filename.c_str(), diagnostic.range->start->line + 1) << fmt::format(
-        "{}Found unexpected error:\n{}", errorPrefix,
+        "{}Found unexpected error:\n{}\nNote: If there is already an assertion for this error, then this is a "
+        "duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is expected.",
+        errorPrefix,
         prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message)));
 }
 

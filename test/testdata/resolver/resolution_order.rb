@@ -8,7 +8,7 @@
 A::AB::BC
 
 class HasError
-  include D::DA::DOES_NOT_EXIST # error: Unable to resolve constant
+  include D::DA::DOES_NOT_EXIST # error-with-dupes: Unable to resolve constant
 end
 
 class IsGood
