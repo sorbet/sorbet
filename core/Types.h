@@ -683,10 +683,10 @@ struct DispatchResult {
     Combinator secondaryKind;
 
     DispatchResult() = default;
-    DispatchResult(TypePtr returnType, TypePtr recieverType, core::SymbolRef method)
+    DispatchResult(TypePtr returnType, TypePtr receiverType, core::SymbolRef method)
         : returnType(returnType),
           main(DispatchComponent{
-              recieverType, method, {}, std::move(returnType), nullptr, nullptr, ArgInfo{}, nullptr}){};
+              receiverType, method, {}, std::move(returnType), nullptr, nullptr, ArgInfo{}, nullptr}){};
     DispatchResult(TypePtr returnType, DispatchComponent comp)
         : returnType(std::move(returnType)), main(std::move(comp)){};
     DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,
