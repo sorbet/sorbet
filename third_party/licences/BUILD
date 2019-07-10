@@ -1,12 +1,12 @@
 licenses(["notice"])
 
 cc_library(
-    name = "licences",
+    name = "licenses",
     srcs = [
-        "licences.cc",
+        "licenses.cc",
     ],
     hdrs = [
-        "licences.h",
+        "licenses.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
@@ -16,7 +16,7 @@ cc_library(
 )
 
 filegroup(
-    name = "licence_files",
+    name = "license_files",
     srcs = glob(
         ["*.txt"],
     ),
@@ -24,8 +24,8 @@ filegroup(
 )
 
 cc_binary(
-    name = "generate_licences",
-    srcs = ["tools/generate_licences.cc"],
+    name = "generate_licenses",
+    srcs = ["tools/generate_licenses.cc"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -36,14 +36,14 @@ cc_binary(
 
 genrule(
     name = "generate_text_payload_cc",
-    srcs = ["licence_files"],
+    srcs = ["license_files"],
     outs = [
-        "licences.cc",
+        "licenses.cc",
     ],
-    cmd = "$(location :generate_licences) $(location licences.cc) $(locations licence_files) && \
-    $(location //tools:clang-format) -i $(location licences.cc)",
+    cmd = "$(location :generate_licenses) $(location licenses.cc) $(locations license_files) && \
+    $(location //tools:clang-format) -i $(location licenses.cc)",
     tools = [
-        ":generate_licences",
+        ":generate_licenses",
         "//tools:clang-format",
     ],
 )

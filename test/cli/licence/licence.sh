@@ -1,3 +1,3 @@
 #!/bin/bash
 
-main/sorbet --licence 2>&1
+main/sorbet --license 2>&1
