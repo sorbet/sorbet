@@ -35,14 +35,14 @@ vector<unique_ptr<ast::Expression>> Mattr::replaceDSL(core::MutableContext ctx, 
     bool doReaders = false;
     bool doWriters = false;
     bool doPredicates = false;
-    if (send->fun == core::Names::mattr_reader() || send->fun == core::Names::cattr_reader()) {
+    if (send->fun == core::Names::mattrReader() || send->fun == core::Names::cattrReader()) {
         doReaders = true;
-    } else if (send->fun == core::Names::mattr_writer() || send->fun == core::Names::cattr_writer()) {
+    } else if (send->fun == core::Names::mattrWriter() || send->fun == core::Names::cattrWriter()) {
         doWriters = true;
-    } else if (send->fun == core::Names::mattr_accessor() || send->fun == core::Names::cattr_accessor()) {
+    } else if (send->fun == core::Names::mattrAccessor() || send->fun == core::Names::cattrAccessor()) {
         doReaders = true;
         doWriters = true;
-    } else if (classDefKind == ast::Class && send->fun == core::Names::class_attribute()) {
+    } else if (classDefKind == ast::Class && send->fun == core::Names::classAtribute()) {
         doReaders = true;
         doWriters = true;
         doPredicates = true;
@@ -63,16 +63,16 @@ vector<unique_ptr<ast::Expression>> Mattr::replaceDSL(core::MutableContext ctx, 
         for (int i = 0; i < options->keys.size(); i++) {
             auto key = options->keys[i].get();
             auto value = options->values[i].get();
-            if (literalSymbolEqual(ctx, key, core::Names::instance_reader()) && isLiteralFalse(ctx, value)) {
+            if (literalSymbolEqual(ctx, key, core::Names::instanceReader()) && isLiteralFalse(ctx, value)) {
                 instanceReader = false;
             }
-            if (literalSymbolEqual(ctx, key, core::Names::instance_writer()) && isLiteralFalse(ctx, value)) {
+            if (literalSymbolEqual(ctx, key, core::Names::instanceWriter()) && isLiteralFalse(ctx, value)) {
                 instanceWriter = false;
             }
-            if (literalSymbolEqual(ctx, key, core::Names::instance_predicate()) && isLiteralFalse(ctx, value)) {
+            if (literalSymbolEqual(ctx, key, core::Names::instancePredicate()) && isLiteralFalse(ctx, value)) {
                 instancePredicate = false;
             }
-            if (literalSymbolEqual(ctx, key, core::Names::instance_accessor()) && isLiteralFalse(ctx, value)) {
+            if (literalSymbolEqual(ctx, key, core::Names::instanceAccessor()) && isLiteralFalse(ctx, value)) {
                 instanceReader = false;
                 instanceWriter = false;
             }
