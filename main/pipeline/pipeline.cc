@@ -1061,6 +1061,14 @@ public:
         handleUnresolvedConstantLit(ctx, original.get());
         return original;
     }
+
+    unique_ptr<ast::UnresolvedIdent> postTransformUnresolvedIdent(core::Context ctx,
+                                                                  unique_ptr<ast::UnresolvedIdent> id) {
+        if (id->kind != ast::UnresolvedIdent::Local) {
+            acc.constants.emplace_back(ctx.state, id->name.data(ctx));
+        }
+        return id;
+    }
 };
 
 core::UsageHash getAllNames(const core::GlobalState &gs, unique_ptr<ast::Expression> &tree) {
