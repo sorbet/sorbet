@@ -1877,7 +1877,9 @@ public:
 class Module_tripleEq : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
-        ENFORCE(args.args.size() == 1, "Module.=== takes 1 argument on rhs, got {}", args.args.size());
+        if (args.args.size() != 1) {
+            return;
+        }
         auto rhs = args.args[0]->type;
         if (rhs->isUntyped()) {
             res.returnType = rhs;
