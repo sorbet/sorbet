@@ -50,7 +50,7 @@ class BigDecimal < Numeric
     )
     .returns(Integer)
   end
-  def self.mode(mode, value); end
+  def self.mode(mode, value=T.unsafe(nil)); end
 
   sig do
     type_parameters(:U)
