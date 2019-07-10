@@ -10,7 +10,8 @@ namespace sorbet::autogen {
 bool Subclasses::isFileIgnored(const std::string &path, const std::vector<std::string> &absoluteIgnorePatterns,
                                const std::vector<std::string> &relativeIgnorePatterns) {
     for (auto &p : absoluteIgnorePatterns) {
-        if (path.substr(0, p.length()) == p && sorbet::FileOps::matchIsFolderOrFile(path, p, 0)) {
+        if (path.substr(0, p.length()) == p &&
+            (sorbet::FileOps::isFile(path, p, 0) || sorbet::FileOps::isFolder(path, p, 0))) {
             return true;
         }
     }
@@ -21,7 +22,7 @@ bool Subclasses::isFileIgnored(const std::string &path, const std::vector<std::s
             pos = path.find(p, pos);
             if (pos == string_view::npos) {
                 break;
-            } else if (sorbet::FileOps::matchIsFolderOrFile(path, p, pos)) {
+            } else if (sorbet::FileOps::isFile(path, p, pos) || sorbet::FileOps::isFolder(path, p, pos)) {
                 return true;
             }
             pos += p.length();
