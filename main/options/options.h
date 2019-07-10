@@ -18,6 +18,7 @@ class PrinterConfig {
 public:
     bool enabled = false;
     std::string outputPath;
+    bool supportsFlush = false;
 
     void print(const std::string_view &contents) const;
     template <typename... Args> void fmt(const std::string &msg, const Args &... args) const {
@@ -74,11 +75,13 @@ struct Printers {
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
     PrinterConfig AutogenClasslist;
+    PrinterConfig AutogenAutoloader;
     PrinterConfig AutogenSubclasses;
     PrinterConfig PluginGeneratedCode;
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
+    bool isAutogen() const;
 };
 
 enum Phase {
@@ -93,8 +96,21 @@ enum Phase {
     INFERENCER,
 };
 
+struct AutoloaderConfig {
+    // Top-level modules to include in autoloader output
+    std::vector<std::string> modules;
+    std::string rootDir;
+    std::string preamble;
+    std::vector<std::string> requireExcludes;
+    std::vector<std::vector<std::string>> sameFileModules;
+
+    std::vector<std::string> absoluteIgnorePatterns;
+    std::vector<std::string> relativeIgnorePatterns;
+};
+
 struct Options {
     Printers print;
+    AutoloaderConfig autoloaderConfig;
     Phase stopAfterPhase = Phase::INFERENCER;
     bool noStdlib = false;
 

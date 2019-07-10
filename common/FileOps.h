@@ -16,6 +16,10 @@ public:
     static void write(std::string_view filename, const std::vector<sorbet::u1> &data);
     static void append(std::string_view filename, std::string_view text);
     static void write(std::string_view filename, std::string_view text);
+    static bool writeIfDifferent(std::string_view filename, std::string_view text);
+    static bool dirExists(std::string_view path);
+    static void createDir(std::string_view path);
+    static void removeFile(std::string_view path);
     /**
      * Returns a list of all files in the given directory. Returns paths that include the path to directory.
      * Throws FileNotFoundException if path does not exist, and FileNotDirException if path is not a directory.

@@ -59,6 +59,25 @@ void sorbet::FileOps::write(string_view filename, const vector<sorbet::u1> &data
     throw sorbet::FileNotFoundException();
 }
 
+bool sorbet::FileOps::dirExists(string_view path) {
+    struct stat buffer;
+    return stat((string(path)).c_str(), &buffer) == 0 && S_ISDIR(buffer.st_mode);
+}
+
+void sorbet::FileOps::createDir(string_view path) {
+    auto err = mkdir(string(path).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if (err) {
+        throw sorbet::CreateDirException(fmt::format("Error in createDir('{}'): {}", path, errno));
+    }
+}
+
+void sorbet::FileOps::removeFile(string_view path) {
+    auto err = remove(string(path).c_str());
+    if (err) {
+        throw sorbet::RemoveFileException(fmt::format("Error in removeFile('{}'): {}", path, errno));
+    }
+}
+
 void sorbet::FileOps::write(string_view filename, string_view text) {
     FILE *fp = std::fopen(string(filename).c_str(), "w");
     if (fp) {
@@ -67,6 +86,14 @@ void sorbet::FileOps::write(string_view filename, string_view text) {
         return;
     }
     throw sorbet::FileNotFoundException();
+}
+
+bool sorbet::FileOps::writeIfDifferent(string_view filename, string_view text) {
+    if (!exists(filename) || text != read(filename)) {
+        write(filename, text);
+        return true;
+    }
+    return false;
 }
 
 void sorbet::FileOps::append(string_view filename, string_view text) {

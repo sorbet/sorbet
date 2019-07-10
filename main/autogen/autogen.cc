@@ -1,11 +1,14 @@
 // has to go first because it violates our poisons
 #include "msgpack.hpp"
 
+#include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/FileOps.h"
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "main/autogen/autogen.h"
+#include "main/autogen/autoloader.h"
 
 #include "CRC.h"
 

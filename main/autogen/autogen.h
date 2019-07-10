@@ -1,6 +1,8 @@
 #ifndef AUTOGEN_H
 #define AUTOGEN_H
+
 #include "ast/ast.h"
+#include "main/options/options.h"
 
 namespace sorbet::autogen {
 
@@ -9,6 +11,10 @@ const u4 NONE_ID = (u4)-1;
 struct ParsedFile;
 struct Reference;
 struct Definition;
+
+struct AutoloaderConfig;
+struct NamedDefinition;
+class DefTree;
 
 struct DefinitionRef {
     u4 _id;
@@ -94,5 +100,6 @@ public:
     static ParsedFile generate(core::Context ctx, ast::ParsedFile tree);
     Autogen() = delete;
 };
+
 } // namespace sorbet::autogen
 #endif // AUTOGEN_H
