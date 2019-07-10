@@ -5,6 +5,8 @@
 
 #include "absl/algorithm/container.h"
 
+#include "variance.h"
+
 using namespace std;
 
 namespace sorbet::definition_validator {
@@ -284,6 +286,7 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
+        variance::validateMethodVariance(ctx, methodDef->symbol);
         validateOverriding(ctx.state, methodDef->symbol);
         return methodDef;
     }
