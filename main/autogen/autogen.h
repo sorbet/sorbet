@@ -1,5 +1,5 @@
-#ifndef RUBY_TYPER_AUTOGEN_H
-#define RUBY_TYPER_AUTOGEN_H
+#ifndef AUTOGEN_H
+#define AUTOGEN_H
 
 #include "ast/ast.h"
 #include "main/options/options.h"
@@ -80,6 +80,8 @@ struct Reference {
 };
 
 struct ParsedFile {
+    friend class MsgpackWriter;
+
     ast::ParsedFile tree;
     u4 cksum;
     std::string path;
@@ -89,12 +91,8 @@ struct ParsedFile {
 
     std::string toString(core::Context ctx);
     std::string toMsgpack(core::Context ctx, int version);
-    void classlist(core::Context ctx, std::vector<std::string> &out);
-
-private:
     std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id);
-    friend class MsgpackWriter;
-    friend struct NamedDefinition;
+    std::vector<std::string> listAllClasses(core::Context ctx);
 };
 
 class Autogen final {
@@ -104,4 +102,4 @@ public:
 };
 
 } // namespace sorbet::autogen
-#endif // RUBY_TYPER_AUTOGEN_H
+#endif // AUTOGEN_H

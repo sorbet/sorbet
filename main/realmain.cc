@@ -15,6 +15,7 @@
 #include "core/serialize/serialize.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
+#include "main/autogen/subclasses.h"
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
@@ -159,6 +160,7 @@ struct AutogenResult {
         string strval;
         string msgpack;
         vector<string> classlist;
+        optional<autogen::Subclasses::Map> subclasses;
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
@@ -202,7 +204,13 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
                 }
                 if (opts.print.AutogenClasslist.enabled) {
                     Timer timeit(logger, "autogenClasslist");
-                    pf.classlist(ctx, serialized.classlist);
+                    serialized.classlist = pf.listAllClasses(ctx);
+                }
+                if (opts.print.AutogenSubclasses.enabled) {
+                    Timer timeit(logger, "autogenSubclasses");
+                    serialized.subclasses =
+                        autogen::Subclasses::listAllSubclasses(ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                                                               opts.autogenSubclassesRelativeIgnorePatterns);
                 }
                 if (opts.print.AutogenAutoloader.enabled) {
                     Timer timeit(logger, "autogenNamedDefs");
@@ -263,6 +271,30 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
         fast_sort(mergedClasslist);
         auto last = unique(mergedClasslist.begin(), mergedClasslist.end());
         opts.print.AutogenClasslist.fmt("{}\n", fmt::join(mergedClasslist.begin(), last, "\n"));
+    }
+    if (opts.print.AutogenSubclasses.enabled) {
+        Timer timeit(logger, "autogenSubclassesPrint");
+
+        // Merge the {Parent: Set{Child1, Child2}} maps from each thread
+        autogen::Subclasses::Map childMap;
+        for (const auto &el : merged) {
+            if (!el.second.subclasses) {
+                // File doesn't define any Child < Parent relationships
+                continue;
+            }
+
+            for (const auto &[parentName, children] : *el.second.subclasses) {
+                if (!parentName.empty()) {
+                    childMap[parentName].insert(children.begin(), children.end());
+                }
+            }
+        }
+
+        vector<string> serializedDescendantsMap =
+            autogen::Subclasses::genDescendantsMap(childMap, opts.autogenSubclassesParents);
+
+        opts.print.AutogenSubclasses.fmt(
+            "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
     }
 } // namespace sorbet::realmain
 

@@ -29,6 +29,7 @@ struct PrintOptions {
 const vector<PrintOptions> print_options({
     {"parse-tree", &Printers::ParseTree},
     {"parse-tree-json", &Printers::ParseTreeJson},
+    {"parse-tree-whitequark", &Printers::ParseTreeWhitequark},
     {"ast", &Printers::Desugared},
     {"ast-raw", &Printers::DesugaredRaw},
     {"dsl-tree", &Printers::DSLTree},
@@ -56,6 +57,7 @@ const vector<PrintOptions> print_options({
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
     {"autogen-classlist", &Printers::AutogenClasslist, true},
     {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
+    {"autogen-subclasses", &Printers::AutogenSubclasses, true},
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
@@ -83,6 +85,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
     return vector<reference_wrapper<PrinterConfig>>({
         ParseTree,
         ParseTreeJson,
+        ParseTreeWhitequark,
         Desugared,
         DesugaredRaw,
         DSLTree,
@@ -109,12 +112,14 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         AutogenMsgPack,
         AutogenClasslist,
         AutogenAutoloader,
+        AutogenSubclasses,
         PluginGeneratedCode,
     });
 }
 
 bool Printers::isAutogen() const {
-    return Autogen.enabled || AutogenMsgPack.enabled || AutogenClasslist.enabled || AutogenAutoloader.enabled;
+    return Autogen.enabled || AutogenMsgPack.enabled || AutogenClasslist.enabled || AutogenSubclasses.enabled ||
+           AutogenAutoloader.enabled;
 }
 
 struct StopAfterOptions {
@@ -367,6 +372,13 @@ cxxopts::Options buildOptions() {
                                     cxxopts::value<string>()->default_value(empty.errorUrlBase), "url-base");
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
+    options.add_options("dev")("autogen-subclasses-parent",
+                               "Parent classes for which generate a list of subclasses. "
+                               "This option must be used in conjunction with -p autogen-subclasses",
+                               cxxopts::value<vector<string>>(), "string");
+    options.add_options("dev")("autogen-subclasses-ignore",
+                               "Like --ignore, but it only affects `-p autogen-subclasses`.",
+                               cxxopts::value<vector<string>>(), "string");
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
@@ -657,10 +669,33 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
         opts.watchmanPath = raw["watchman-path"].as<string>();
+        // Certain features only need certain passes
         if (opts.print.isAutogen() && (opts.stopAfterPhase != Phase::NAMER)) {
-            logger->error("-p autogen{} must also include --stop-after=namer",
-                          opts.print.AutogenMsgPack.enabled ? "-msgpack" : "");
+            logger->error(
+                "-p autogen{-msgpack,-classlist,-subclasses,-autoloader} must also include --stop-after=namer");
             throw EarlyReturnWithCode(1);
+        }
+
+        if (raw.count("autogen-subclasses-parent")) {
+            if (!opts.print.AutogenSubclasses.enabled) {
+                logger->error("autogen-subclasses-parent must be used with -p autogen-subclasses");
+                throw EarlyReturnWithCode(1);
+            }
+            for (string parentClassName : raw["autogen-subclasses-parent"].as<vector<string>>()) {
+                opts.autogenSubclassesParents.emplace_back(parentClassName);
+            }
+        }
+
+        if (raw.count("autogen-subclasses-ignore") > 0) {
+            auto rawIgnorePatterns = raw["autogen-subclasses-ignore"].as<vector<string>>();
+            for (auto &p : rawIgnorePatterns) {
+                string_view pNormalized = stripTrailingSlashes(p);
+                if (p.at(0) == '/') {
+                    opts.autogenSubclassesAbsoluteIgnorePatterns.emplace_back(pNormalized);
+                } else {
+                    opts.autogenSubclassesRelativeIgnorePatterns.emplace_back(fmt::format("/{}", pNormalized));
+                }
+            }
         }
 
         opts.noErrorCount = raw["no-error-count"].as<bool>();

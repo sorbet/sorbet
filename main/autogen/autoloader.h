@@ -1,6 +1,5 @@
-#ifndef RUBY_TYPER_AUTOGEN_AUTOLOADER_H
-#define RUBY_TYPER_AUTOGEN_AUTOLOADER_H
-
+#ifndef AUTOGEN_AUTOLOADER_H
+#define AUTOGEN_AUTOLOADER_H
 #include "ast/ast.h"
 #include "main/autogen/autogen.h"
 #include "main/options/options.h"
@@ -117,4 +116,4 @@ private:
 };
 
 } // namespace sorbet::autogen
-#endif // RUBY_TYPER_AUTOGEN_AUTOLOADER_H
+#endif // AUTOGEN_AUTOLOADER_H

@@ -186,11 +186,16 @@ optional<string> sorbet::FileOps::readLineFromFd(int fd, string &buffer, int tim
     }
 }
 
-// Verifies that next character after the match is '/' (indicating a folder match) or end of string (indicating a file
-// match).
-bool matchIsFolderOrFile(string_view path, string_view ignorePattern, const int pos) {
+// Verifies that a matching pattern occurs at the end of the matched path
+bool sorbet::FileOps::isFile(string_view path, string_view ignorePattern, const int pos) {
     const int endPos = pos + ignorePattern.length();
-    return endPos == path.length() || path.at(endPos) == '/';
+    return endPos == path.length();
+}
+
+// Verifies that a matching pattern is followed by a "/" in the matched path
+bool sorbet::FileOps::isFolder(string_view path, string_view ignorePattern, const int pos) {
+    const int endPos = pos + ignorePattern.length();
+    return path.at(endPos) == '/';
 }
 
 // Simple, naive implementation of regexp-free ignore rules.
@@ -201,7 +206,8 @@ bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
     // Note: relative_path always includes a leading /
     string_view relative_path = filePath.substr(basePath.length());
     for (auto &p : absoluteIgnorePatterns) {
-        if (relative_path.substr(0, p.length()) == p && matchIsFolderOrFile(relative_path, p, 0)) {
+        if (relative_path.substr(0, p.length()) == p &&
+            (isFile(relative_path, p, 0) || isFolder(relative_path, p, 0))) {
             return true;
         }
     }
@@ -212,7 +218,7 @@ bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
             pos = relative_path.find(p, pos);
             if (pos == string_view::npos) {
                 break;
-            } else if (matchIsFolderOrFile(relative_path, p, pos)) {
+            } else if (isFile(relative_path, p, pos) || isFolder(relative_path, p, pos)) {
                 return true;
             }
             pos += p.length();
