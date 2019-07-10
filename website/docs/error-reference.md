@@ -228,7 +228,7 @@ end
 
 ## 5011
 
-A class inherits from itself either directly or through a inheritance chain.
+A class inherits from itself either directly or through an inheritance chain.
 
 ```ruby
 class A < A; end
