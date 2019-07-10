@@ -106,6 +106,26 @@ module T::Private::Methods
     @signatures_by_method[key]
   end
 
+  # a module A such that:
+  #   if A is included or extended by a module B,
+  #   then we want B to have the hooks installed on itself
+  # should extend this module.
+  module VirallyInstallHooks
+    def included(arg)
+      super(arg)
+      if arg.is_a?(Module)
+        ::T::Private::Methods.install_hooks(arg)
+      end
+    end
+
+    def extended(arg)
+      super(arg)
+      if arg.is_a?(Module)
+        ::T::Private::Methods.install_hooks(arg)
+      end
+    end
+  end
+
   # Only public because it needs to get called below inside the replace_method blocks below.
   def self._on_method_added(hook_mod, method_name, is_singleton_method: false)
     current_declaration = T::Private::DeclState.current.active_declaration
