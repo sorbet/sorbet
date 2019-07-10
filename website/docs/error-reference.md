@@ -108,7 +108,7 @@ class Main
 end
 ```
 
-You can fix this by removing the second type member:
+You can fix this by removing the second definition of the type member:
 
 ```ruby
 class Main
