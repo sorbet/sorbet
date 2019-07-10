@@ -168,9 +168,11 @@ unique_ptr<Expression> Send::_deepCopy(const Expression *avoid, bool root) const
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
-    return make_unique<Send>(loc, recv->_deepCopy(avoid), fun, deepCopyVec(avoid, args),
-                             block == nullptr ? nullptr
-                                              : unique_ptr<Block>(cast_tree<Block>(block->_deepCopy(avoid).release())));
+    auto send = make_unique<Send>(
+        loc, recv->_deepCopy(avoid), fun, deepCopyVec(avoid, args),
+        block == nullptr ? nullptr : unique_ptr<Block>(cast_tree<Block>(block->_deepCopy(avoid).release())));
+    send->flags = flags;
+    return send;
 }
 
 unique_ptr<Expression> Cast::_deepCopy(const Expression *avoid, bool root) const {
