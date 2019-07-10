@@ -95,8 +95,8 @@ public:
                         return;
                     }
 
-                    // This one is also a little different: it gets the classDef
-                    nodes = Mattr::replaceDSL(ctx, send, classDef.get());
+                    // This one is also a little different: it gets the ClassDef kind
+                    nodes = Mattr::replaceDSL(ctx, send, classDef->kind);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;

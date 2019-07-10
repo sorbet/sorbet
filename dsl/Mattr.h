@@ -31,7 +31,7 @@ namespace sorbet::dsl {
 class Mattr final {
 public:
     static std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::MutableContext ctx, const ast::Send *send,
-                                                                    const ast::ClassDef *classDef);
+                                                                    ast::ClassDefKind classDefKind);
 
     Mattr() = delete;
 };

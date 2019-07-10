@@ -30,7 +30,7 @@ static void addInstanceCounterPart(vector<unique_ptr<ast::Expression>> &sink, co
 }
 
 vector<unique_ptr<ast::Expression>> Mattr::replaceDSL(core::MutableContext ctx, const ast::Send *send,
-                                                      const ast::ClassDef *classDef) {
+                                                      ast::ClassDefKind classDefKind) {
     vector<unique_ptr<ast::Expression>> empty;
     bool doReaders = false;
     bool doWriters = false;
@@ -42,7 +42,7 @@ vector<unique_ptr<ast::Expression>> Mattr::replaceDSL(core::MutableContext ctx, 
     } else if (send->fun == core::Names::mattr_accessor() || send->fun == core::Names::cattr_accessor()) {
         doReaders = true;
         doWriters = true;
-    } else if (classDef->kind == ast::Class && send->fun == core::Names::class_attribute()) {
+    } else if (classDefKind == ast::Class && send->fun == core::Names::class_attribute()) {
         doReaders = true;
         doWriters = true;
         doPredicates = true;
