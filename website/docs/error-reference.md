@@ -94,6 +94,30 @@ the order in which files are loaded.
 The only way to silence this error currently is to mark the offending file as
 `# typed: false`.
 
+## 4011
+
+There are multiple definitions for the same type member within a given class or
+module.
+
+```ruby
+class Main
+  extend T::Generic
+
+  Elem = type_member
+  Elem = type_member # error: Duplicate type member
+end
+```
+
+You can fix this by removing the second definition of the type member:
+
+```ruby
+class Main
+  extend T::Generic
+
+  Elem = type_member # ok
+end
+```
+
 ## 4015
 
 This error usually comes when a class or module is dynamically defined and
