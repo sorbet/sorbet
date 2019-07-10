@@ -1,3 +1,5 @@
+#ifndef AUTOGEN_H
+#define AUTOGEN_H
 #include "ast/ast.h"
 
 namespace sorbet::autogen {
@@ -72,6 +74,8 @@ struct Reference {
 };
 
 struct ParsedFile {
+    friend class MsgpackWriter;
+
     ast::ParsedFile tree;
     u4 cksum;
     std::string path;
@@ -81,11 +85,8 @@ struct ParsedFile {
 
     std::string toString(core::Context ctx);
     std::string toMsgpack(core::Context ctx, int version);
-    void classlist(core::Context ctx, std::vector<std::string> &out);
-
-private:
     std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id);
-    friend class MsgpackWriter;
+    std::vector<std::string> listAllClasses(core::Context ctx);
 };
 
 class Autogen final {
@@ -94,3 +95,4 @@ public:
     Autogen() = delete;
 };
 } // namespace sorbet::autogen
+#endif // AUTOGEN_H

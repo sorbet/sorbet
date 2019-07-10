@@ -119,7 +119,14 @@ Usage:
                                 missing-constants, flattened-tree,
                                 flattened-tree-raw, cfg, cfg-json, cfg-proto, autogen,
                                 autogen-msgpack, autogen-classlist,
-                                plugin-generated-code]
+                                autogen-subclasses, plugin-generated-code]
+      --autogen-subclasses-parent string
+                                Parent classes for which generate a list of
+                                subclasses. This option must be used in
+                                conjunction with -p autogen-subclasses
+      --autogen-subclasses-ignore string
+                                Like --ignore, but it only affects `-p
+                                autogen-subclasses`.
       --stop-after phase        Stop After: [init, parser, desugarer, dsl,
                                 local-vars, namer, resolver, cfg, inferencer]
                                 (default: inferencer)

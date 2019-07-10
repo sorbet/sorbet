@@ -74,6 +74,7 @@ struct Printers {
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
     PrinterConfig AutogenClasslist;
+    PrinterConfig AutogenSubclasses;
     PrinterConfig PluginGeneratedCode;
     // Ensure everything here is in PrinterConfig::printers().
 
@@ -161,6 +162,12 @@ struct Options {
     std::vector<std::string> relativeIgnorePatterns;
     // Contains the expanded list of all Ruby file inputs (rawInputFileNames + all Ruby files in rawInputDirNames)
     std::vector<std::string> inputFileNames;
+    // A list of parent classes to be used in `-p autogen-subclasses`
+    std::vector<std::string> autogenSubclassesParents;
+    // Ignore patterns beginning from the root of an input folder.
+    std::vector<std::string> autogenSubclassesAbsoluteIgnorePatterns;
+    // Ignore patterns that can occur anywhere in a file's path from an input folder.
+    std::vector<std::string> autogenSubclassesRelativeIgnorePatterns;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspGoToDefinitionEnabled = false;
     bool lspFindReferencesEnabled = false;
