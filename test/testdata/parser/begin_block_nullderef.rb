@@ -1,3 +1,3 @@
 # typed: true
 def s()else
-n # error: syntax error
+n # error-with-dupes: syntax error

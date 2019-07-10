@@ -1,3 +1,3 @@
 # typed: false
 
-alias $a $+ # error: Unsupported node type
+alias $a $+ # error-with-dupes: Unsupported node type

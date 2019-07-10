@@ -1,3 +1,3 @@
 # typed: false
-break 1 do # error: No body in block
+break 1 do # error-with-dupes: No body in block
 end

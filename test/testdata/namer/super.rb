@@ -1,2 +1,2 @@
 # typed: true
-super # error: `super` outside of method
+super # error-with-dupes: `super` outside of method
