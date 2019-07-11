@@ -1,5 +1,6 @@
 #include "common/common.h"
 #include "common/typecase.h"
+#include "core/GlobalState.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
@@ -1032,6 +1033,9 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const T
                 int i = 0;
                 while (indexes[j] != a1->klass.data(ctx)->typeMembers()[i]) {
                     i++;
+                    if (i >= a1->klass.data(ctx)->typeMembers().size()) {
+                        return result;
+                    }
                 }
 
                 ENFORCE(i < a1->klass.data(ctx)->typeMembers().size());
