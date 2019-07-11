@@ -38,6 +38,17 @@ private:
         }
     }
 
+    bool compatibleVariance(const core::Variance left, const core::Variance right) {
+        switch (left) {
+            case core::Variance::CoVariant:
+                return right != core::Variance::ContraVariant;
+            case core::Variance::Invariant:
+                return right == core::Variance::Invariant;
+            case core::Variance::ContraVariant:
+                return right != core::Variance::CoVariant;
+        }
+    }
+
     void validate(const core::Context ctx, const core::Variance variance, const core::TypePtr type) {
         typecase(
             type.get(), [&](core::LiteralType *lit) {},
@@ -52,6 +63,32 @@ private:
             [&](core::AndType *all) {
                 validate(ctx, variance, all->left);
                 validate(ctx, variance, all->right);
+            },
+
+            [&](core::TypeVar *tvar) {},
+
+            [&](core::SelfType *self) {},
+
+            [&](core::SelfTypeParam *sp) {},
+
+            [&](core::AliasType *alias) {
+                auto aliasData = alias->symbol.data(ctx);
+
+                // This can be introduced by `module_function`, which in its
+                // current implementation will alias an instance method as a
+                // class method.
+                if (aliasData->isMethod()) {
+                    // we should only see this happen when checking the return
+                    // type of a method alias.
+                    ENFORCE(variance == core::Variance::CoVariant);
+
+                    // TODO: it's not clear what should be done here, as any
+                    // type_member references would be invalid from this
+                    // context.
+                    return;
+                } else {
+                    Exception::raise("Unhandled type alias: {}", alias->toString(ctx));
+                }
             },
 
             [&](core::ShapeType *shape) {
@@ -94,7 +131,7 @@ private:
 
                 auto paramVariance = paramData->variance();
 
-                if (paramVariance != variance) {
+                if (!compatibleVariance(variance, paramVariance)) {
                     if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::InvalidVariance)) {
                         auto flavor =
                             paramData->owner.data(ctx)->isSingletonClass(ctx) ? "type_template" : "type_member";
