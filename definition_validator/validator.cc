@@ -286,7 +286,12 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
-        variance::validateMethodVariance(ctx, methodDef->symbol);
+
+        // only perform this check if there are type members in the 
+        if (!methodDef->symbol.data(ctx)->owner.data(ctx)->typeMembers().empty()) {
+            variance::validateMethodVariance(ctx, methodDef->symbol);
+        }
+
         validateOverriding(ctx.state, methodDef->symbol);
         return methodDef;
     }
