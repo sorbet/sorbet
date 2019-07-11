@@ -42,3 +42,15 @@ main/sorbet --silence-dev-message --stop-after=namer \
   test/cli/autogen-autoloader/inplace.rb
 
 find inplace-output | sort
+
+echo
+echo "--- strip-prefixes"
+rm -rf strip-output
+mkdir -p strip-output
+main/sorbet --silence-dev-message --stop-after=namer \
+  -p autogen-autoloader:strip-output \
+  --autogen-autoloader-modules=Foo \
+  --autogen-autoloader-strip-prefix test/cli/ \
+  test/cli/autogen-autoloader/inplace.rb
+
+cat strip-output/Foo.rb
