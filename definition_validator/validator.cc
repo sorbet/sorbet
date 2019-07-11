@@ -286,8 +286,10 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
-        // only perform this check if there are type members in the
-        if (!methodDef->symbol.data(ctx)->owner.data(ctx)->typeMembers().empty()) {
+        // Only perform this check if this isn't a module from the stdlib, and
+        // if there are type members in the owning context.
+        auto methodData = methodDef->symbol.data(ctx);
+        if (!methodData->loc().file().data(ctx).isStdlib() && !methodData->owner.data(ctx)->typeMembers().empty()) {
             variance::validateMethodVariance(ctx, methodDef->symbol);
         }
 
