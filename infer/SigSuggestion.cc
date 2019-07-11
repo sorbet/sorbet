@@ -100,6 +100,9 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTSig(core::Context ctx, 
 }
 
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
+    if (!component.method.exists()) {
+        return nullptr;
+    }
     const auto &args = component.method.data(ctx)->arguments();
     if (argId >= args.size()) {
         return nullptr;
