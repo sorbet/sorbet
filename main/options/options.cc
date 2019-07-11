@@ -564,7 +564,7 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
         }
     }
     cfg.preamble = raw["autogen-autoloader-preamble"].as<string>();
-    cfg.rootDir = raw["autogen-autoloader-root"].as<string>();
+    cfg.rootDir = stripTrailingSlashes(raw["autogen-autoloader-root"].as<string>());
     return true;
 }
 
