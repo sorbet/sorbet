@@ -1,3 +1,3 @@
 # typed: true
-def x.method # error: `def EXPRESSION.method` is only supported for `def self.method`
+def x.method # error-with-dupes: `def EXPRESSION.method` is only supported for `def self.method`
 end

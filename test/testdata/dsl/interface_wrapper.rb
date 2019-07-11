@@ -26,7 +26,7 @@ def testit
   wrap.other_method # error: does not exist
   wrap.some_method
 
-  Other.wrap_instance("hi", "there") # error: Wrong number of arguments
+  Other.wrap_instance("hi", "there") # error-with-dupes: Wrong number of arguments
   o = Other
-  o.wrap_instance("hi") # error: Unsupported wrap_instance() on a non-constant-literal
+  o.wrap_instance("hi") # error-with-dupes: Unsupported wrap_instance() on a non-constant-literal
 end

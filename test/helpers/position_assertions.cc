@@ -20,6 +20,7 @@ const UnorderedMap<
     string, function<shared_ptr<RangeAssertion>(string_view, unique_ptr<Range> &, int, string_view, string_view)>>
     assertionConstructors = {
         {"error", ErrorAssertion::make},
+        {"error-with-dupes", ErrorAssertion::make},
         {"usage", UsageAssertion::make},
         {"def", DefAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
@@ -155,16 +156,19 @@ int RangeAssertion::compare(string_view otherFilename, const Range &otherRange) 
     return rangeComparison(*range, otherRange);
 }
 
-ErrorAssertion::ErrorAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message)
-    : RangeAssertion(filename, range, assertionLine), message(message) {}
+ErrorAssertion::ErrorAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message,
+                               bool matchesDuplicateErrors)
+    : RangeAssertion(filename, range, assertionLine), message(message), matchesDuplicateErrors(matchesDuplicateErrors) {
+}
 
 shared_ptr<ErrorAssertion> ErrorAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                 string_view assertionContents, string_view assertionType) {
-    return make_shared<ErrorAssertion>(filename, range, assertionLine, assertionContents);
+    return make_shared<ErrorAssertion>(filename, range, assertionLine, assertionContents,
+                                       assertionType == "error-with-dupes");
 }
 
 string ErrorAssertion::toString() const {
-    return fmt::format("error: {}", message);
+    return fmt::format("{}: {}", (matchesDuplicateErrors ? "error-with-dupes" : "error"), message);
 }
 
 bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
@@ -566,13 +570,10 @@ void reportMissingError(const string &filename, const ErrorAssertion &assertion,
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
                            string_view errorPrefix) {
     ADD_FAILURE_AT(filename.c_str(), diagnostic.range->start->line + 1) << fmt::format(
-        "{}Found unexpected error:\n{}", errorPrefix,
+        "{}Found unexpected error:\n{}\nNote: If there is already an assertion for this error, then this is a "
+        "duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is expected.",
+        errorPrefix,
         prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message)));
-}
-
-/** Returns true if a and b are different Diagnostic objects but have the same range and message. */
-bool isDuplicateDiagnostic(const Diagnostic *a, const Diagnostic *b) {
-    return a != b && rangeComparison(*a->range, *b->range) == 0 && a->message == b->message;
 }
 
 string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
@@ -592,6 +593,11 @@ string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceF
         auto lineView = file->getLine(line + 1);
         return string(lineView.begin(), lineView.end());
     }
+}
+
+bool isDuplicateDiagnostic(string_view filename, ErrorAssertion *assertion, const Diagnostic &d) {
+    return assertion && assertion->matchesDuplicateErrors && assertion->compare(filename, *d.range) == 0 &&
+           d.message.find(assertion->message) != string::npos;
 }
 
 bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
@@ -620,20 +626,19 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
         });
 
         auto diagnosticsIt = diagnostics.begin();
-        auto *lastDiagnostic = diagnosticsIt == diagnostics.end() ? nullptr : (*diagnosticsIt).get();
+        ErrorAssertion *lastAssertion = nullptr;
 
         while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
             // See if the ranges match.
             auto &diagnostic = *diagnosticsIt;
             auto &assertion = *assertionsIt;
 
-            // TODO: Remove duplicate diagnostics for parity with old runner.
-            // Remove this check when ruby types team fixes duplicate diagnostics.
-            if (isDuplicateDiagnostic(lastDiagnostic, diagnostic.get())) {
+            if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
                 diagnosticsIt++;
                 continue;
+            } else {
+                lastAssertion = nullptr;
             }
-            lastDiagnostic = diagnostic.get();
 
             switch (assertion->compare(filename, *diagnostic->range)) {
                 case 1: {
@@ -664,6 +669,8 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
                                                errorPrefix) &&
                               success;
                     // We've 'consumed' the diagnostic and assertion.
+                    // Save assertion in case it matches multiple diagnostics.
+                    lastAssertion = assertion.get();
                     diagnosticsIt++;
                     assertionsIt++;
                     break;
@@ -673,15 +680,13 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
 
         while (diagnosticsIt != diagnostics.end()) {
             // We had more diagnostics than error assertions.
-            // Drain dupes.
-            // TODO: Remove when ruby types team fixes duplicate diagnostics; see note above.
-            if (!isDuplicateDiagnostic(lastDiagnostic, (*diagnosticsIt).get())) {
-                auto &diagnostic = *diagnosticsIt;
+            auto &diagnostic = *diagnosticsIt;
+            if (!isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
                 reportUnexpectedError(filename, *diagnostic,
                                       getSourceLine(files, filename, diagnostic->range->start->line), errorPrefix);
                 success = false;
+                lastAssertion = nullptr;
             }
-            lastDiagnostic = (*diagnosticsIt).get();
             diagnosticsIt++;
         }
     }

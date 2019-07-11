@@ -1,4 +1,4 @@
 # typed: true
-module Model # error: module definition in method body
-  def a-b; end # error: unexpected token
+module Model # error-with-dupes: module definition in method body
+  def a-b; end # error-with-dupes: unexpected token
 end
