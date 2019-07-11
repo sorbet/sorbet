@@ -736,197 +736,17 @@ class OptionParser
     def message(); end
   end
 
-  class AmbiguousOption < OptionParser::ParseError
-    sig { params(args: T.untyped).void }
-    def initialize(*args); end
+  class AmbiguousOption < OptionParser::ParseError; end
 
-    sig { returns(T.untyped) }
-    def args(); end
+  class NeedlessArgument < OptionParser::ParseError; end
 
-    sig { params(value: T.untyped).returns(T.untyped) }
-    def reason=(value); end
+  class MissingArgument < OptionParser::ParseError; end
 
-    sig { params(argv: T.untyped).returns(T.untyped) }
-    def recover(argv); end
+  class InvalidOption < OptionParser::ParseError; end
 
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def self.filter_backtrace(array); end
+  class InvalidArgument < OptionParser::ParseError; end
 
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def set_backtrace(array); end
-
-    sig { params(opt: T.untyped, eq: T.untyped).returns(T.untyped) }
-    def set_option(opt, eq); end
-
-    sig { returns(T.untyped) }
-    def reason(); end
-
-    sig { returns(T.untyped) }
-    def inspect(); end
-
-    sig { returns(T.untyped) }
-    def message(); end
-  end
-
-  class NeedlessArgument < OptionParser::ParseError
-    sig { params(args: T.untyped).void }
-    def initialize(*args); end
-
-    sig { returns(T.untyped) }
-    def args(); end
-
-    sig { params(value: T.untyped).returns(T.untyped) }
-    def reason=(value); end
-
-    sig { params(argv: T.untyped).returns(T.untyped) }
-    def recover(argv); end
-
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def self.filter_backtrace(array); end
-
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def set_backtrace(array); end
-
-    sig { params(opt: T.untyped, eq: T.untyped).returns(T.untyped) }
-    def set_option(opt, eq); end
-
-    sig { returns(T.untyped) }
-    def reason(); end
-
-    sig { returns(T.untyped) }
-    def inspect(); end
-
-    sig { returns(T.untyped) }
-    def message(); end
-  end
-
-  class MissingArgument < OptionParser::ParseError
-    sig { params(args: T.untyped).void }
-    def initialize(*args); end
-
-    sig { returns(T.untyped) }
-    def args(); end
-
-    sig { params(value: T.untyped).returns(T.untyped) }
-    def reason=(value); end
-
-    sig { params(argv: T.untyped).returns(T.untyped) }
-    def recover(argv); end
-
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def self.filter_backtrace(array); end
-
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def set_backtrace(array); end
-
-    sig { params(opt: T.untyped, eq: T.untyped).returns(T.untyped) }
-    def set_option(opt, eq); end
-
-    sig { returns(T.untyped) }
-    def reason(); end
-
-    sig { returns(T.untyped) }
-    def inspect(); end
-
-    sig { returns(T.untyped) }
-    def message(); end
-  end
-
-  class InvalidOption < OptionParser::ParseError
-    sig { params(args: T.untyped).void }
-    def initialize(*args); end
-
-    sig { returns(T.untyped) }
-    def args(); end
-
-    sig { params(value: T.untyped).returns(T.untyped) }
-    def reason=(value); end
-
-    sig { params(argv: T.untyped).returns(T.untyped) }
-    def recover(argv); end
-
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def self.filter_backtrace(array); end
-
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def set_backtrace(array); end
-
-    sig { params(opt: T.untyped, eq: T.untyped).returns(T.untyped) }
-    def set_option(opt, eq); end
-
-    sig { returns(T.untyped) }
-    def reason(); end
-
-    sig { returns(T.untyped) }
-    def inspect(); end
-
-    sig { returns(T.untyped) }
-    def message(); end
-  end
-
-  class InvalidArgument < OptionParser::ParseError
-    sig { params(args: T.untyped).void }
-    def initialize(*args); end
-
-    sig { returns(T.untyped) }
-    def args(); end
-
-    sig { params(value: T.untyped).returns(T.untyped) }
-    def reason=(value); end
-
-    sig { params(argv: T.untyped).returns(T.untyped) }
-    def recover(argv); end
-
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def self.filter_backtrace(array); end
-
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def set_backtrace(array); end
-
-    sig { params(opt: T.untyped, eq: T.untyped).returns(T.untyped) }
-    def set_option(opt, eq); end
-
-    sig { returns(T.untyped) }
-    def reason(); end
-
-    sig { returns(T.untyped) }
-    def inspect(); end
-
-    sig { returns(T.untyped) }
-    def message(); end
-  end
-
-  class AmbiguousArgument < OptionParser::InvalidArgument
-    sig { params(args: T.untyped).void }
-    def initialize(*args); end
-
-    sig { returns(T.untyped) }
-    def args(); end
-
-    sig { params(value: T.untyped).returns(T.untyped) }
-    def reason=(value); end
-
-    sig { params(argv: T.untyped).returns(T.untyped) }
-    def recover(argv); end
-
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def self.filter_backtrace(array); end
-
-    sig { params(array: T.untyped).returns(T.untyped) }
-    def set_backtrace(array); end
-
-    sig { params(opt: T.untyped, eq: T.untyped).returns(T.untyped) }
-    def set_option(opt, eq); end
-
-    sig { returns(T.untyped) }
-    def reason(); end
-
-    sig { returns(T.untyped) }
-    def inspect(); end
-
-    sig { returns(T.untyped) }
-    def message(); end
-  end
+  class AmbiguousArgument < OptionParser::InvalidArgument; end
 
   module Arguable
     sig { params(opt: T.untyped).returns(T.untyped) }
@@ -954,6 +774,5 @@ class OptionParser
     def initialize(*args); end
   end
 
-  module Acceptables
-  end
+  module Acceptables; end
 end
