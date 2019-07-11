@@ -51,9 +51,15 @@ private:
 
     void validate(const core::Context ctx, const core::Variance variance, const core::TypePtr type) {
         typecase(
-            type.get(), [&](core::LiteralType *lit) {},
+            type.get(), [&](core::ClassType *klass) {},
 
-            [&](core::ClassType *klass) {},
+            [&](core::LiteralType *lit) {},
+
+            [&](core::SelfType *self) {},
+
+            [&](core::SelfTypeParam *sp) {},
+
+            [&](core::TypeVar *tvar) {},
 
             [&](core::OrType *any) {
                 validate(ctx, variance, any->left);
@@ -64,12 +70,6 @@ private:
                 validate(ctx, variance, all->left);
                 validate(ctx, variance, all->right);
             },
-
-            [&](core::TypeVar *tvar) {},
-
-            [&](core::SelfType *self) {},
-
-            [&](core::SelfTypeParam *sp) {},
 
             [&](core::AliasType *alias) {
                 auto aliasData = alias->symbol.data(ctx);
@@ -149,7 +149,9 @@ private:
 
             [&](core::MetaType *mt) { validate(ctx, variance, mt->wrapped); },
 
-            [&](core::Type *skipped) { Exception::raise("skipped type {}", skipped->toString(ctx)); });
+            [&](core::Type *skipped) {
+                Exception::raise("Unhandled type during variance checking: {}", skipped->toString(ctx));
+            });
     }
 
 public:
