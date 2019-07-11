@@ -6,6 +6,17 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
+pair<unique_ptr<core::GlobalState>, vector<unique_ptr<Location>>>
+LSPLoop::getReferencesToSymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef symbol,
+                               vector<unique_ptr<Location>> locations) {
+    if (symbol.exists()) {
+        auto run2 = setupLSPQueryBySymbol(move(gs), symbol);
+        gs = move(run2.gs);
+        locations = extractLocations(*gs, run2.responses, move(locations));
+    }
+    return make_pair(move(gs), move(locations));
+}
+
 LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                 const ReferenceParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
@@ -31,17 +42,9 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
             auto resp = move(queryResponses[0]);
             // N.B.: Ignores literals.
             if (auto constResp = resp->isConstant()) {
-                if (constResp->symbol.exists()) {
-                    auto run2 = setupLSPQueryBySymbol(move(gs), constResp->symbol);
-                    gs = move(run2.gs);
-                    response->result = extractLocations(*gs, run2.responses);
-                }
+                tie(gs, response->result) = getReferencesToSymbol(move(gs), constResp->symbol);
             } else if (auto defResp = resp->isDefinition()) {
-                if (defResp->symbol.exists()) {
-                    auto run2 = setupLSPQueryBySymbol(move(gs), defResp->symbol);
-                    gs = move(run2.gs);
-                    response->result = extractLocations(*gs, run2.responses);
-                }
+                tie(gs, response->result) = getReferencesToSymbol(move(gs), defResp->symbol);
             } else if (auto identResp = resp->isIdent()) {
                 auto loc = identResp->owner.data(*gs)->loc();
                 if (loc.exists()) {
@@ -56,9 +59,7 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
                 vector<unique_ptr<Location>> locations;
                 while (start != nullptr) {
                     if (start->main.method.exists() && !start->main.receiver->isUntyped()) {
-                        auto run2 = setupLSPQueryBySymbol(move(gs), start->main.method);
-                        gs = move(run2.gs);
-                        locations = extractLocations(*gs, run2.responses, move(locations));
+                        tie(gs, locations) = getReferencesToSymbol(move(gs), start->main.method, move(locations));
                     }
                     start = start->secondary.get();
                 }

@@ -61,3 +61,12 @@ class WillGetAliased
     a
   end
 end
+
+class DefinesInstanceAndClassVars
+  @@some_class_var = T.let("h", String)
+  # ^ def: some_class_var
+  def initialize
+    @some_ivar = T.let(10, Integer)
+   # ^ def: some_ivar
+  end
+end

@@ -27,14 +27,12 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
             auto &argType = argTypes[i];
             auto *localExp = ast::MK::arg2Local(arg.get());
             // localExp should never be null, but guard against the possibility.
-            if (localExp) {
-                if (lspQuery.matchesLoc(localExp->loc)) {
-                    tp.type = argType.type;
-                    tp.origins.emplace_back(localExp->loc);
-                    core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::IdentResponse(methodDef->symbol, localExp->loc, localExp->localVariable, tp));
-                    return methodDef;
-                }
+            if (localExp && lspQuery.matchesLoc(localExp->loc)) {
+                tp.type = argType.type;
+                tp.origins.emplace_back(localExp->loc);
+                core::lsp::QueryResponse::pushQueryResponse(
+                    ctx, core::lsp::IdentResponse(methodDef->symbol, localExp->loc, localExp->localVariable, tp));
+                return methodDef;
             }
         }
 
@@ -45,6 +43,35 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
     }
 
     return methodDef;
+}
+
+unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core::Context ctx,
+                                                                           unique_ptr<ast::UnresolvedIdent> id) {
+    if (id->kind == ast::UnresolvedIdent::Instance || id->kind == ast::UnresolvedIdent::Class) {
+        core::SymbolRef klass;
+        // Logic cargo culted from `global2Local` in `walker_build.cc`.
+        if (id->kind == ast::UnresolvedIdent::Instance) {
+            ENFORCE(ctx.owner.data(ctx)->isMethod());
+            klass = ctx.owner.data(ctx)->owner;
+        } else {
+            // Class var.
+            klass = ctx.owner.data(ctx)->enclosingClass(ctx);
+            while (klass.data(ctx)->attachedClass(ctx).exists()) {
+                klass = klass.data(ctx)->attachedClass(ctx);
+            }
+        }
+
+        auto sym = klass.data(ctx)->findMemberTransitive(ctx, id->name);
+        const core::lsp::Query &lspQuery = ctx.state.lspQuery;
+        if (sym.exists() && (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(id->loc))) {
+            core::TypeAndOrigins tp;
+            tp.type = sym.data(ctx.state)->resultType;
+            tp.origins.emplace_back(sym.data(ctx.state)->loc());
+            core::lsp::QueryResponse::pushQueryResponse(
+                ctx, core::lsp::ConstantResponse(klass, sym, id->loc, id->name, tp, tp));
+        }
+    }
+    return id;
 }
 
 } // namespace sorbet::realmain::lsp

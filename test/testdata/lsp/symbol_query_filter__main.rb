@@ -47,3 +47,15 @@ end
 AliasForClass = T.type_alias(WillGetAliased)
 # ^ def: AliasForClass
                            # ^ usage: WillGetAliased
+
+class InheritsClassAndIvars < DefinesInstanceAndClassVars
+  def references_vars
+    if @some_ivar < 3
+      # ^ usage: some_ivar
+      @@some_class_var
+      # ^ usage: some_class_var
+    else
+      ""
+    end
+  end
+end
