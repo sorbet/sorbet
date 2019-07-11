@@ -1,6 +1,5 @@
 #include "common/common.h"
 #include "common/typecase.h"
-#include "core/GlobalState.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
