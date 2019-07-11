@@ -333,6 +333,26 @@ module T::Configuration
     @scalar_types || @default_scalar_types
   end
 
+  # Temporarily disable ruby warnings while executing the given block. This is
+  # useful when doing something that would normally cause a warning to be
+  # emitted in Ruby verbose mode ($VERBOSE = true).
+  #
+  # @yield
+  #
+  def self.without_ruby_warnings
+    if $VERBOSE
+      begin
+        original_verbose = $VERBOSE
+        $VERBOSE = false
+        yield
+      ensure
+        $VERBOSE = original_verbose
+      end
+    else
+      yield
+    end
+  end
+
 
   private_class_method def self.validate_lambda_given!(value)
     if !value.nil? && !value.respond_to?(:call)

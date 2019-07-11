@@ -35,9 +35,11 @@ module T::Private::Methods::CallValidation
     elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
       create_validator_method(mod, original_method, method_sig, original_visibility)
     else
-      # get all the shims out of the way and put back the original method
-      mod.send(:define_method, method_sig.method_name, original_method)
-      mod.send(original_visibility, method_sig.method_name)
+      T::Configuration.without_ruby_warnings do
+        # get all the shims out of the way and put back the original method
+        mod.send(:define_method, method_sig.method_name, original_method)
+        mod.send(original_visibility, method_sig.method_name)
+      end
     end
     # Return the newly created method (or the original one if we didn't replace it)
     mod.instance_method(method_sig.method_name)
@@ -167,12 +169,14 @@ module T::Private::Methods::CallValidation
     has_simple_method_types =  all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
     has_simple_procedure_types = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
 
-    if has_fixed_arity && has_simple_method_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
-      create_validator_method_fast(mod, original_method, method_sig)
-    elsif has_fixed_arity && has_simple_procedure_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
-      create_validator_procedure_fast(mod, original_method, method_sig)
-    else
-      create_validator_slow(mod, original_method, method_sig)
+    T::Configuration.without_ruby_warnings do
+      if has_fixed_arity && has_simple_method_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+        create_validator_method_fast(mod, original_method, method_sig)
+      elsif has_fixed_arity && has_simple_procedure_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+        create_validator_procedure_fast(mod, original_method, method_sig)
+      else
+        create_validator_slow(mod, original_method, method_sig)
+      end
     end
     mod.send(original_visibility, method_sig.method_name)
   end
