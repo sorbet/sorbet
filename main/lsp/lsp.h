@@ -165,7 +165,7 @@ class LSPLoop {
         bool tookFastPath;
     };
     /** Conservatively rerun entire pipeline without caching any trees */
-    TypecheckRun runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles);
+    TypecheckRun runSlowPath();
     /** Returns `true` if the given changes can run on the fast path. */
     bool canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
                          const std::vector<core::FileHash> &hashes) const;

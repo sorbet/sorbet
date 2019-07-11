@@ -156,18 +156,12 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
     }
 }
 
-LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles) {
+LSPLoop::TypecheckRun LSPLoop::runSlowPath() {
     ShowOperation slowPathOp(*this, "SlowPath", "Typechecking...");
     Timer timeit(logger, "slow_path");
     ENFORCE(initialGS->errorQueue->isEmpty());
     prodCategoryCounterInc("lsp.updates", "slowpath");
     logger->debug("Taking slow path");
-
-    core::UnfreezeFileTable fileTableAccess(*initialGS);
-    indexed.reserve(indexed.size() + changedFiles.size());
-    for (auto &t : changedFiles) {
-        updateFile(t);
-    }
 
     vector<ast::ParsedFile> indexedCopies;
     for (const auto &tree : indexed) {
@@ -233,7 +227,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
     logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
 
     bool takeFastPath = false;
-    vector<core::FileRef> subset(filesForQuery);
+    vector<core::FileRef> subset;
     vector<core::NameHash> changedHashes;
     {
         Timer timeit(logger, "fast_path_decision");
@@ -295,10 +289,16 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
         vector<ast::ParsedFile> updatedIndexed;
         for (auto &f : subset) {
             auto t = pipeline::indexOne(opts, *finalGs, f, kvstore);
-            int id = t.file.id();
+            const int id = t.file.id();
             indexed[id] = move(t);
             updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), indexed[id].file});
         }
+
+        for (auto &f : filesForQuery) {
+            const int id = f.id();
+            updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), indexed[id].file});
+        }
+        subset.insert(subset.end(), filesForQuery.begin(), filesForQuery.end());
 
         auto resolved = pipeline::incrementalResolve(*finalGs, move(updatedIndexed), opts);
         tryApplyDefLocSaver(*finalGs, resolved);
@@ -308,7 +308,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
         finalGs->lspTypecheckCount++;
         return TypecheckRun{move(out.first), move(subset), move(out.second), move(finalGs), true};
     } else {
-        return runSlowPath(changedFiles);
+        return runSlowPath();
     }
 }
 } // namespace sorbet::realmain::lsp
