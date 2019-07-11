@@ -100,9 +100,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTSig(core::Context ctx, 
 }
 
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
-    if (!component.method.exists()) {
-        return nullptr;
-    }
+    ENFORCE(component.method.exists());
     const auto &args = component.method.data(ctx)->arguments();
     if (argId >= args.size()) {
         return nullptr;
@@ -148,7 +146,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::Loc bindLoc, cfg::Sen
         }
         core::TypePtr thisType;
         auto iter = &dispatchInfo;
-        while (iter != nullptr) {
+        while (iter != nullptr && iter->main.method.exists()) {
             auto argType = extractArgType(ctx, *snd, iter->main, i);
             if (argType && !argType->isUntyped()) {
                 if (!thisType) {
