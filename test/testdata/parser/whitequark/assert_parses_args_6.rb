@@ -1,3 +1,3 @@
 # typed: true
 
-def f ((*r)); end # error: Unsupported rest args in destructure
+def f ((*r)); end # error-with-dupes: Unsupported rest args in destructure

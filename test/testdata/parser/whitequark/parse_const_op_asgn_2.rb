@@ -1,3 +1,3 @@
 # typed: true
 
-B::A += 1 # error: Constant reassignment is not supported
+B::A += 1 # error-with-dupes: Constant reassignment is not supported

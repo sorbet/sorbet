@@ -14,6 +14,8 @@
 #include "core/lsp/QueryResponse.h"
 #include "core/serialize/serialize.h"
 #include "main/autogen/autogen.h"
+#include "main/autogen/autoloader.h"
+#include "main/autogen/subclasses.h"
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
@@ -158,12 +160,15 @@ struct AutogenResult {
         string strval;
         string msgpack;
         vector<string> classlist;
+        optional<autogen::Subclasses::Map> subclasses;
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
+    unique_ptr<autogen::DefTree> defTree = make_unique<autogen::DefTree>();
 };
 
-void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+void runAutogen(core::Context ctx, options::Options &opts, const autogen::AutoloaderConfig &autoloaderCfg,
+                WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
     Timer timeit(logger, "autogen");
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
@@ -172,7 +177,7 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         fileq->push(move(i), 1);
     }
 
-    workers.multiplexJob("runAutogen", [&ctx, &opts, &indexed, fileq, resultq]() {
+    workers.multiplexJob("runAutogen", [&ctx, &opts, &indexed, &autoloaderCfg, fileq, resultq]() {
         AutogenResult out;
         int n = 0;
         {
@@ -199,8 +204,19 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                 }
                 if (opts.print.AutogenClasslist.enabled) {
                     Timer timeit(logger, "autogenClasslist");
-                    pf.classlist(ctx, serialized.classlist);
+                    serialized.classlist = pf.listAllClasses(ctx);
                 }
+                if (opts.print.AutogenSubclasses.enabled) {
+                    Timer timeit(logger, "autogenSubclasses");
+                    serialized.subclasses =
+                        autogen::Subclasses::listAllSubclasses(ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                                                               opts.autogenSubclassesRelativeIgnorePatterns);
+                }
+                if (opts.print.AutogenAutoloader.enabled) {
+                    Timer timeit(logger, "autogenNamedDefs");
+                    autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf);
+                }
+
                 out.prints.emplace_back(make_pair(idx, serialized));
             }
         }
@@ -209,6 +225,7 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         resultq->push(move(out), n);
     });
 
+    autogen::DefTree root;
     AutogenResult out;
     vector<pair<int, AutogenResult::Serialized>> merged;
     for (auto res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger); !res.done();
@@ -218,6 +235,10 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         }
         counterConsume(move(out.counters));
         merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
+        if (opts.print.AutogenAutoloader.enabled) {
+            Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
+            root = autogen::DefTreeBuilder::merge(ctx, move(root), move(*out.defTree));
+        }
     }
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
 
@@ -229,6 +250,17 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
             opts.print.AutogenMsgPack.print(elem.second.msgpack);
         }
     }
+    if (opts.print.AutogenAutoloader.enabled) {
+        {
+            Timer timeit(logger, "autogenAutoloaderPrune");
+            autogen::DefTreeBuilder::collapseSameFileDefs(ctx, autoloaderCfg, root);
+        }
+        {
+            Timer timeit(logger, "autogenAutoloaderWrite");
+            autogen::AutoloadWriter::writeAutoloads(ctx, autoloaderCfg, opts.print.AutogenAutoloader.outputPath, root);
+        }
+    }
+
     if (opts.print.AutogenClasslist.enabled) {
         Timer timeit(logger, "autogenClasslistPrint");
         vector<string> mergedClasslist;
@@ -239,6 +271,30 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         fast_sort(mergedClasslist);
         auto last = unique(mergedClasslist.begin(), mergedClasslist.end());
         opts.print.AutogenClasslist.fmt("{}\n", fmt::join(mergedClasslist.begin(), last, "\n"));
+    }
+    if (opts.print.AutogenSubclasses.enabled) {
+        Timer timeit(logger, "autogenSubclassesPrint");
+
+        // Merge the {Parent: Set{Child1, Child2}} maps from each thread
+        autogen::Subclasses::Map childMap;
+        for (const auto &el : merged) {
+            if (!el.second.subclasses) {
+                // File doesn't define any Child < Parent relationships
+                continue;
+            }
+
+            for (const auto &[parentName, children] : *el.second.subclasses) {
+                if (!parentName.empty()) {
+                    childMap[parentName].insert(children.begin(), children.end());
+                }
+            }
+        }
+
+        vector<string> serializedDescendantsMap =
+            autogen::Subclasses::genDescendantsMap(childMap, opts.autogenSubclassesParents);
+
+        opts.print.AutogenSubclasses.fmt(
+            "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
     }
 } // namespace sorbet::realmain
 
@@ -343,7 +399,7 @@ int realmain(int argc, char *argv[]) {
     if (opts.suggestRuntimeProfiledType) {
         gs->suggestRuntimeProfiledType = true;
     }
-    if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled) {
+    if (opts.print.isAutogen()) {
         gs->runningUnderAutogen = true;
     }
     if (opts.censorRawLocsWithinPayload) {
@@ -412,6 +468,7 @@ int realmain(int argc, char *argv[]) {
             core::MutableContext ctx(*gs, core::Symbols::root());
 
             indexed = pipeline::name(*gs, move(indexed), opts);
+            autogen::AutoloaderConfig autoloaderCfg;
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);
                 core::UnfreezeSymbolTable symbolAccess(*gs);
@@ -422,9 +479,10 @@ int realmain(int argc, char *argv[]) {
                     errs.emplace_back(*gs, file);
                 }
                 indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed), *workers);
+                autoloaderCfg = autogen::AutoloaderConfig::enterConfig(*gs, opts.autoloaderConfig);
             }
 
-            runAutogen(ctx, opts, *workers, indexed);
+            runAutogen(ctx, opts, autoloaderCfg, *workers, indexed);
         } else {
             indexed = pipeline::resolve(gs, move(indexed), opts, *workers);
             indexed = pipeline::typecheck(gs, move(indexed), opts, *workers);

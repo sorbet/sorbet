@@ -1,2 +1,2 @@
 # typed: false
-__ENCODING__ # error: Unsupported node type `EncodingLiteral`
+__ENCODING__ # error-with-dupes: Unsupported node type `EncodingLiteral`

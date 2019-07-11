@@ -1,4 +1,8 @@
+#ifndef AUTOGEN_H
+#define AUTOGEN_H
+
 #include "ast/ast.h"
+#include "main/options/options.h"
 
 namespace sorbet::autogen {
 
@@ -7,6 +11,10 @@ const u4 NONE_ID = (u4)-1;
 struct ParsedFile;
 struct Reference;
 struct Definition;
+
+struct AutoloaderConfig;
+struct NamedDefinition;
+class DefTree;
 
 struct DefinitionRef {
     u4 _id;
@@ -72,6 +80,8 @@ struct Reference {
 };
 
 struct ParsedFile {
+    friend class MsgpackWriter;
+
     ast::ParsedFile tree;
     u4 cksum;
     std::string path;
@@ -81,11 +91,8 @@ struct ParsedFile {
 
     std::string toString(core::Context ctx);
     std::string toMsgpack(core::Context ctx, int version);
-    void classlist(core::Context ctx, std::vector<std::string> &out);
-
-private:
     std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id);
-    friend class MsgpackWriter;
+    std::vector<std::string> listAllClasses(core::Context ctx);
 };
 
 class Autogen final {
@@ -93,4 +100,6 @@ public:
     static ParsedFile generate(core::Context ctx, ast::ParsedFile tree);
     Autogen() = delete;
 };
+
 } // namespace sorbet::autogen
+#endif // AUTOGEN_H

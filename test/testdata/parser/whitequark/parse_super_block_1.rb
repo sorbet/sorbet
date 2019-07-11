@@ -1,3 +1,3 @@
 # typed: true
 
-super do end # error: `super` outside of method
+super do end # error-with-dupes: `super` outside of method

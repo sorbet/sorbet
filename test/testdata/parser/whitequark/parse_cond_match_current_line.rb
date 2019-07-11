@@ -1,3 +1,3 @@
 # typed: true
 
-if /wat/; end # error: Unsupported node type
+if /wat/; end # error-with-dupes: Unsupported node type

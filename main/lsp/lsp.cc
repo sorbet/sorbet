@@ -30,7 +30,7 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
 }
 
 LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
-                                           vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
+                                           const vector<core::FileRef> &filesToQuery) {
     ENFORCE(gs->lspQuery.isEmpty());
     ENFORCE(initialGS->lspQuery.isEmpty());
     ENFORCE(!q.isEmpty());
@@ -38,7 +38,7 @@ LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, con
 
     // TODO(jvilk): If this throws, then we'll want to reset `lspQuery` on `initialGS`.
     // If throwing is common, then we need some way to *not* throw away `gs`.
-    auto rv = tryFastPath(move(gs), changedFiles, allFiles);
+    auto rv = tryFastPath(move(gs), {}, filesToQuery);
     rv.gs->lspQuery = initialGS->lspQuery = core::lsp::Query::noQuery();
     return rv;
 }
@@ -68,15 +68,31 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
                          move(gs));
     }
 
-    vector<shared_ptr<core::File>> files;
-    files.emplace_back(fref.data(*gs).deepCopy(*gs));
-    return runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), files);
+    return runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), {fref});
 }
+
 LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) {
     Timer timeit(logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
-    vector<shared_ptr<core::File>> files;
-    return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), files, true);
+    vector<core::FileRef> frefs;
+    const core::NameHash symNameHash(*gs, sym.data(*gs)->name.data(*gs));
+    // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
+    int i = -1;
+    for (auto &hash : globalStateHashes) {
+        i++;
+        const auto &usedSends = hash.usages.sends;
+        const auto &usedConstants = hash.usages.constants;
+        auto ref = core::FileRef(i);
+
+        const bool fileIsValid = ref.exists() && ref.data(*gs).sourceType == core::File::Type::Normal;
+        if (fileIsValid &&
+            (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
+             std::find(usedConstants.begin(), usedConstants.end(), symNameHash) != usedConstants.end())) {
+            frefs.emplace_back(ref);
+        }
+    }
+
+    return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,

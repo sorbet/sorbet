@@ -7,6 +7,9 @@ class NameData;
 class GlobalState;
 class NameHash {
 public:
+    /** Sorts an array of NameHashes and removes duplicates. */
+    static void sortAndDedupe(std::vector<core::NameHash> &hashes);
+
     NameHash(const GlobalState &gs, const NameData &nm);
     NameHash(const GlobalState &gs, const Name &nm);
     inline bool isDefined() const {
@@ -45,7 +48,8 @@ struct GlobalStateHash {
 };
 
 struct UsageHash {
-    std::vector<core::NameHash> usages;
+    std::vector<core::NameHash> sends;
+    std::vector<core::NameHash> constants;
 };
 
 struct FileHash {
