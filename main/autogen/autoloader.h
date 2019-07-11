@@ -18,6 +18,7 @@ struct AutoloaderConfig {
     // Should definitions in this namespace be collapsed into their
     // parent if they all are from the same file?
     bool sameFileCollapsable(const std::vector<core::NameRef> &module) const;
+    std::string_view normalizePath(core::Context ctx, core::FileRef file) const;
 
     std::string rootDir;
     std::string preamble;
@@ -26,6 +27,7 @@ struct AutoloaderConfig {
     UnorderedSet<std::vector<core::NameRef>> nonCollapsableModuleNames;
     std::vector<std::string> absoluteIgnorePatterns;
     std::vector<std::string> relativeIgnorePatterns;
+    std::vector<std::string> stripPrefixes;
 
     AutoloaderConfig() = default;
     AutoloaderConfig(const AutoloaderConfig &) = delete;
