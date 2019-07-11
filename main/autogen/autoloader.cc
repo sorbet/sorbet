@@ -199,7 +199,8 @@ string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alC
                            [ctx](const auto &pair) { return make_pair(pair.first, pair.first.show(ctx)); });
             fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
             for (const auto &pair : childNames) {
-                fmt::format_to(buf, "  {}: \"autoloader/{}\",\n", pair.second, children.at(pair.first)->path(ctx));
+                fmt::format_to(buf, "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
+                               children.at(pair.first)->path(ctx));
             }
             fmt::format_to(buf, "}})\n", fullName);
         }
