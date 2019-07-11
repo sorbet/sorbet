@@ -93,6 +93,26 @@ unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Lo
     return make_unique<Location>(uri, loc2Range(gs, loc));
 }
 
+int cmpPositions(const Position &a, const Position &b) {
+    const int line = a.line - b.line;
+    if (line != 0) {
+        return line;
+    }
+    return a.character - b.character;
+}
+
+int cmpLocations(const Location &a, const Location &b) {
+    const int fileCmp = a.uri.compare(b.uri);
+    if (fileCmp != 0) {
+        return fileCmp;
+    }
+    const int startCmp = cmpPositions(*a.range->start, *b.range->start);
+    if (startCmp != 0) {
+        return startCmp;
+    }
+    return cmpPositions(*a.range->end, *b.range->end);
+}
+
 vector<unique_ptr<Location>>
 LSPLoop::extractLocations(const core::GlobalState &gs,
                           const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
@@ -100,6 +120,15 @@ LSPLoop::extractLocations(const core::GlobalState &gs,
     for (auto &q : queryResponses) {
         addLocIfExists(gs, locations, q->getLoc());
     }
+    // Dedupe locations
+    fast_sort(locations, [](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
+        return cmpLocations(*a, *b) < 0;
+    });
+    locations.resize(std::distance(
+        locations.begin(), std::unique(locations.begin(), locations.end(),
+                                       [](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
+                                           return cmpLocations(*a, *b) == 0;
+                                       })));
     return locations;
 }
 

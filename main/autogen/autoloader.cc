@@ -26,6 +26,16 @@ bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) 
     return nonCollapsableModuleNames.find(module) == nonCollapsableModuleNames.end();
 }
 
+string_view AutoloaderConfig::normalizePath(core::Context ctx, core::FileRef file) const {
+    auto path = file.data(ctx).path();
+    for (const auto &prefix : stripPrefixes) {
+        if (absl::StartsWith(path, prefix)) {
+            return path.substr(prefix.size());
+        }
+    }
+    return path;
+}
+
 AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const realmain::options::AutoloaderConfig &cfg) {
     AutoloaderConfig out;
     out.rootDir = cfg.rootDir;
@@ -45,6 +55,7 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     }
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
+    out.stripPrefixes = cfg.stripPrefixes;
     return out;
 }
 
@@ -188,14 +199,16 @@ string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alC
                            [ctx](const auto &pair) { return make_pair(pair.first, pair.first.show(ctx)); });
             fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
             for (const auto &pair : childNames) {
-                fmt::format_to(buf, "  {}: \"autoloader/{}\",\n", pair.second, children.at(pair.first)->path(ctx));
+                fmt::format_to(buf, "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
+                               children.at(pair.first)->path(ctx));
             }
             fmt::format_to(buf, "}})\n", fullName);
         }
     }
 
     if (definingFile.exists()) {
-        fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\")\n", fullName, definingFile.data(ctx).path());
+        fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\")\n", fullName,
+                       alCfg.normalizePath(ctx, definingFile));
     }
     return to_string(buf);
 }

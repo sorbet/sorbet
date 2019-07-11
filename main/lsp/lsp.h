@@ -202,6 +202,9 @@ class LSPLoop {
                                                const DocumentSymbolParams &params);
     LSPResult handleWorkspaceSymbols(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                      const WorkspaceSymbolParams &params);
+    std::pair<std::unique_ptr<core::GlobalState>, std::vector<std::unique_ptr<Location>>>
+    getReferencesToSymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol,
+                          std::vector<std::unique_ptr<Location>> locations = {});
     LSPResult handleTextDocumentReferences(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const ReferenceParams &params);
     LSPResult handleTextDocumentDefinition(std::unique_ptr<core::GlobalState> gs, const MessageId &id,

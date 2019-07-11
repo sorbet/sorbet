@@ -207,3 +207,17 @@ Opus::Require.autoload_map(Object, {
 inplace-output
 inplace-output/Foo.rb
 inplace-output/root.rb
+
+--- strip-prefixes and root rename
+
+
+Opus::Require.autoload_map(Object, {
+  Foo: "my-autoloader/Foo.rb",
+})
+
+Opus::Require.on_autoload('Foo')
+
+module Foo
+end
+
+Opus::Require.for_autoload(Foo, "autogen-autoloader/inplace.rb")
