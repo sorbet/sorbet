@@ -146,14 +146,16 @@ void extractSendArgumentKnowledge(core::Context ctx, core::Loc bindLoc, cfg::Sen
         }
         core::TypePtr thisType;
         auto iter = &dispatchInfo;
-        while (iter != nullptr && iter->main.method.exists()) {
-            auto argType = extractArgType(ctx, *snd, iter->main, i);
-            if (argType && !argType->isUntyped()) {
-                if (!thisType) {
-                    thisType = argType;
-                } else {
-                    // 'or' together every dispatch component for _this_ usage site
-                    thisType = core::Types::lub(ctx, thisType, argType);
+        while (iter != nullptr) {
+            if (iter->main.method.exists()) {
+                auto argType = extractArgType(ctx, *snd, iter->main, i);
+                if (argType && !argType->isUntyped()) {
+                    if (!thisType) {
+                        thisType = argType;
+                    } else {
+                        // 'or' together every dispatch component for _this_ usage site
+                        thisType = core::Types::lub(ctx, thisType, argType);
+                    }
                 }
             }
 
