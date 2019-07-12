@@ -352,7 +352,11 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
     auto &fileData = file.data(gs);
 
     core::StrictLevel level;
-    auto fnd = opts.strictnessOverrides.find(string(fileData.path()));
+    string filePath = string(fileData.path());
+    if (filePath.find("/") != 0 && filePath.find("./") != 0) {
+        filePath.insert(0, "./");
+    }
+    auto fnd = opts.strictnessOverrides.find(filePath);
     if (fnd != opts.strictnessOverrides.end()) {
         if (fnd->second == fileData.originalSigil) {
             core::ErrorRegion errs(gs, file);
