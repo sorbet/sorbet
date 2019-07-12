@@ -34,31 +34,31 @@ const Polarity negatePolarity(const Polarity polarity) {
     }
 }
 
+string showVariance(const core::Variance variance) {
+    switch (variance) {
+        case core::Variance::CoVariant:
+            return ":out";
+        case core::Variance::Invariant:
+            return ":invariant";
+        case core::Variance::ContraVariant:
+            return ":in";
+    }
+}
+
+bool hasCompatibleVariance(const Polarity polarity, const core::Variance argVariance) {
+    switch (polarity) {
+        case Polarity::Positive:
+            return argVariance != core::Variance::ContraVariant;
+        case Polarity::Negative:
+            return argVariance != core::Variance::CoVariant;
+    }
+}
+
 class VarianceValidator {
 private:
     const core::Loc loc;
 
     VarianceValidator(const core::Loc loc) : loc(loc) {}
-
-    string showVariance(const core::Variance variance) {
-        switch (variance) {
-            case core::Variance::CoVariant:
-                return ":out";
-            case core::Variance::Invariant:
-                return ":invariant";
-            case core::Variance::ContraVariant:
-                return ":in";
-        }
-    }
-
-    bool hasCompatibleVariance(const Polarity polarity, const core::Variance argVariance) {
-        switch (polarity) {
-            case Polarity::Positive:
-                return argVariance != core::Variance::ContraVariant;
-            case Polarity::Negative:
-                return argVariance != core::Variance::CoVariant;
-        }
-    }
 
     void validate(const core::Context ctx, const Polarity polarity, const core::TypePtr type) {
         typecase(
