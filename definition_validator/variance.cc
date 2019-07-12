@@ -83,22 +83,15 @@ private:
             },
 
             [&](core::AliasType *alias) {
-                auto aliasData = alias->symbol.data(ctx);
+                auto aliasSym = alias->symbol;
 
                 // This can be introduced by `module_function`, which in its
                 // current implementation will alias an instance method as a
                 // class method.
-                if (aliasData->isMethod()) {
-                    // we should only see this happen when checking the return
-                    // type of a method alias.
-                    ENFORCE(polarity == Polarity::Positive);
-
-                    // TODO: it's not clear what should be done here, as any
-                    // type_member references would be invalid from this
-                    // context.
-                    return;
+                if (aliasSym.data(ctx)->isMethod()) {
+                    validateMethod(ctx, polarity, aliasSym);
                 } else {
-                    Exception::raise("Unhandled type alias: {}", alias->toString(ctx));
+                    Exception::raise("Unexpected type alias: {}", alias->toString(ctx));
                 }
             },
 
@@ -161,10 +154,8 @@ private:
                 }
             },
 
-            [&](core::MetaType *mt) { validate(ctx, polarity, mt->wrapped); },
-
             [&](core::Type *skipped) {
-                Exception::raise("Unhandled type during variance checking: {}", skipped->toString(ctx));
+                Exception::raise("Unexpected type in variance checking: {}", skipped->toString(ctx));
             });
     }
 
@@ -174,21 +165,31 @@ public:
         VarianceValidator validator(loc);
         return validator.validate(ctx, polarity, type);
     }
+
+    // Variance checking, parameterized on the external polarity of the method
+    // context.
+    static void validateMethod(const core::Context ctx, const Polarity polarity, const core::SymbolRef method) {
+        auto methodData = method.data(ctx);
+
+        // Negate the polarity for checking arguments in a ContraVariant
+        // context.
+        const Polarity negated = negatePolarity(polarity);
+
+        for (auto &arg : methodData->arguments()) {
+            if (arg.type != nullptr) {
+                validatePolarity(arg.loc, ctx, negated, arg.type);
+            }
+        }
+
+        if (methodData->resultType != nullptr) {
+            validatePolarity(methodData->loc(), ctx, polarity, methodData->resultType);
+        }
+    }
 };
 
 // Validates uses of type members according to their variance.
 void validateMethodVariance(const core::Context ctx, const core::SymbolRef method) {
-    auto methodData = method.data(ctx);
-
-    for (auto &arg : methodData->arguments()) {
-        if (arg.type != nullptr) {
-            VarianceValidator::validatePolarity(arg.loc, ctx, Polarity::Negative, arg.type);
-        }
-    }
-
-    if (methodData->resultType != nullptr) {
-        VarianceValidator::validatePolarity(methodData->loc(), ctx, Polarity::Positive, methodData->resultType);
-    }
+    VarianceValidator::validateMethod(ctx, Polarity::Positive, method);
 }
 
 } // namespace sorbet::definition_validator::variance
