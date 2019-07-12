@@ -82,19 +82,6 @@ private:
                 validate(ctx, polarity, all->right);
             },
 
-            [&](core::AliasType *alias) {
-                auto aliasSym = alias->symbol;
-
-                // This can be introduced by `module_function`, which in its
-                // current implementation will alias an instance method as a
-                // class method.
-                if (aliasSym.data(ctx)->isMethod()) {
-                    validateMethod(ctx, polarity, aliasSym);
-                } else {
-                    Exception::raise("Unexpected type alias: {}", alias->toString(ctx));
-                }
-            },
-
             [&](core::ShapeType *shape) {
                 for (auto value : shape->values) {
                     validate(ctx, polarity, value);
@@ -151,6 +138,19 @@ private:
                         e.addErrorLine(paramData->loc(), "`{}` `{}` defined here as `{}`", flavor, paramName,
                                        showVariance(paramVariance));
                     }
+                }
+            },
+
+            [&](core::AliasType *alias) {
+                auto aliasSym = alias->symbol.data(ctx)->dealias();
+
+                // This can be introduced by `module_function`, which in its
+                // current implementation will alias an instance method as a
+                // class method.
+                if (aliasSym.data(ctx)->isMethod()) {
+                    validateMethod(ctx, polarity, aliasSym);
+                } else {
+                    Exception::raise("Unexpected type alias: {}", alias->toString(ctx));
                 }
             },
 
