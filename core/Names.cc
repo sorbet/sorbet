@@ -243,6 +243,14 @@ string NameRef::show(const GlobalState &gs) const {
     return data(gs)->show(gs);
 }
 
+NameRef NameRef::originalName(const GlobalState &gs) const {
+    auto name = *this;
+    while (name.data(gs)->kind == UNIQUE) {
+        name = name.data(gs)->unique.original;
+    }
+    return name;
+}
+
 NameRef NameRef::addEq(GlobalState &gs) const {
     auto name = this->data(gs);
     ENFORCE(name->kind == UTF8, "addEq over non-utf8 name");

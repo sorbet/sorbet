@@ -97,6 +97,8 @@ public:
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
 
+    NameRef originalName(const GlobalState &gs) const;
+
     void enforceCorrectGlobalState(const GlobalState &gs) const;
     void sanityCheckSubstitution(const GlobalSubstitution &subst) const;
 
