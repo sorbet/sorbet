@@ -1,5 +1,9 @@
 # typed: true
 # disable-fast-path: true
+class CovariantNotAllowed
+  Elem = type_member(:in) # error: can only have invariant type members
+end
+
 class Invalids
   Exp = type_member(1+1) # error: Invalid param, must be a :symbol
   Baz = type_member(:baz) # error: Invalid variance kind, only `:out` and `:in` are supported
