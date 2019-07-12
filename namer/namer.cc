@@ -703,7 +703,7 @@ public:
         }
 
         auto members = onSymbol.data(ctx)->typeMembers();
-        auto it = absl::c_find_if(members, [&](auto mem) { return mem.data(ctx)->name == typeName->cnst; });
+        auto it = absl::c_find_if(members, [&](auto mem) { return mem.data(ctx)->name.originalName(ctx) == typeName->cnst.originalName(ctx); });
         if (it != members.end() && !(it->data(ctx)->loc() == asgn->loc || it->data(ctx)->loc().isTombStoned(ctx))) {
             if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
