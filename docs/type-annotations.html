@@ -108,7 +108,7 @@ the following example, despite the fact that Sorbet knows that <code>x</code> ha
 <code>Integer</code>, it still treats <code>@x</code> as <code>T.untyped</code> without an explicit type
 annotation:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
-  sig {param(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> Integer).void}
+  sig {params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> Integer).void}
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(x, y)</span></span>
     @x = x
     @y = T.let(y, Integer)
