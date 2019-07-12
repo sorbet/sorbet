@@ -169,14 +169,10 @@ private:
     }
 
 public:
-    static void validateCoVariant(const core::Loc loc, const core::Context ctx, const core::TypePtr type) {
+    static void validatePolarity(const core::Loc loc, const core::Context ctx, const Polarity polarity,
+                                 const core::TypePtr type) {
         VarianceValidator validator(loc);
-        return validator.validate(ctx, Polarity::Positive, type);
-    }
-
-    static void validateContraVariant(const core::Loc loc, const core::Context ctx, const core::TypePtr type) {
-        VarianceValidator validator(loc);
-        return validator.validate(ctx, Polarity::Negative, type);
+        return validator.validate(ctx, polarity, type);
     }
 };
 
@@ -186,12 +182,12 @@ void validateMethodVariance(const core::Context ctx, const core::SymbolRef metho
 
     for (auto &arg : methodData->arguments()) {
         if (arg.type != nullptr) {
-            VarianceValidator::validateContraVariant(arg.loc, ctx, arg.type);
+            VarianceValidator::validatePolarity(arg.loc, ctx, Polarity::Negative, arg.type);
         }
     }
 
     if (methodData->resultType != nullptr) {
-        VarianceValidator::validateCoVariant(methodData->loc(), ctx, methodData->resultType);
+        VarianceValidator::validatePolarity(methodData->loc(), ctx, Polarity::Positive, methodData->resultType);
     }
 }
 
