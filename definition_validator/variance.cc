@@ -4,11 +4,35 @@
 #include "core/core.h"
 #include "core/errors/resolver.h"
 
-#include "variance.h"
+#include "definition_validator/variance.h"
 
 using namespace std;
 
 namespace sorbet::definition_validator::variance {
+
+enum class Polarity {
+    Positive = 1,
+    Negative = -1,
+};
+
+// Show a Polarity using the same in/out notation as Variance.
+string showPolarity(const Polarity polarity) {
+    switch (polarity) {
+        case Polarity::Positive:
+            return ":out";
+        case Polarity::Negative:
+            return ":in";
+    }
+}
+
+const Polarity negatePolarity(const Polarity polarity) {
+    switch (polarity) {
+        case Polarity::Positive:
+            return Polarity::Negative;
+        case Polarity::Negative:
+            return Polarity::Positive;
+    }
+}
 
 class VarianceValidator {
 private:
@@ -38,18 +62,16 @@ private:
         }
     }
 
-    bool compatibleVariance(const core::Variance left, const core::Variance right) {
-        switch (left) {
-            case core::Variance::CoVariant:
-                return right != core::Variance::ContraVariant;
-            case core::Variance::Invariant:
-                return right == core::Variance::Invariant;
-            case core::Variance::ContraVariant:
-                return right != core::Variance::CoVariant;
+    bool hasCompatibleVariance(const Polarity polarity, const core::Variance argVariance) {
+        switch (polarity) {
+            case Polarity::Positive:
+                return argVariance != core::Variance::ContraVariant;
+            case Polarity::Negative:
+                return argVariance != core::Variance::CoVariant;
         }
     }
 
-    void validate(const core::Context ctx, const core::Variance variance, const core::TypePtr type) {
+    void validate(const core::Context ctx, const Polarity polarity, const core::TypePtr type) {
         typecase(
             type.get(), [&](core::ClassType *klass) {},
 
@@ -62,13 +84,13 @@ private:
             [&](core::TypeVar *tvar) {},
 
             [&](core::OrType *any) {
-                validate(ctx, variance, any->left);
-                validate(ctx, variance, any->right);
+                validate(ctx, polarity, any->left);
+                validate(ctx, polarity, any->right);
             },
 
             [&](core::AndType *all) {
-                validate(ctx, variance, all->left);
-                validate(ctx, variance, all->right);
+                validate(ctx, polarity, all->left);
+                validate(ctx, polarity, all->right);
             },
 
             [&](core::AliasType *alias) {
@@ -80,7 +102,7 @@ private:
                 if (aliasData->isMethod()) {
                     // we should only see this happen when checking the return
                     // type of a method alias.
-                    ENFORCE(variance == core::Variance::CoVariant);
+                    ENFORCE(polarity == Polarity::Positive);
 
                     // TODO: it's not clear what should be done here, as any
                     // type_member references would be invalid from this
@@ -93,13 +115,13 @@ private:
 
             [&](core::ShapeType *shape) {
                 for (auto value : shape->values) {
-                    validate(ctx, variance, value);
+                    validate(ctx, polarity, value);
                 }
             },
 
             [&](core::TupleType *tuple) {
                 for (auto value : tuple->elems) {
-                    validate(ctx, variance, value);
+                    validate(ctx, polarity, value);
                 }
             },
 
@@ -114,12 +136,15 @@ private:
                     auto memberVariance = members[i].data(ctx)->variance();
                     auto typeArg = params[i];
 
-                    // Invert the variance when the type_member was defined as
-                    // contravariant (:in).
-                    const core::Variance checkedVariance =
-                        (variance == core::Variance::ContraVariant) ? invertVariance(memberVariance) : memberVariance;
+                    // The polarity used to check the parameter is negated
+                    // when the parameter is defined as ContraVariant, for
+                    // example:
+                    //
+                    // -(-a -> +b) -> +c === (+a -> -b) -> + c
+                    const Polarity paramPolarity =
+                        (memberVariance == core::Variance::ContraVariant) ? negatePolarity(polarity) : polarity;
 
-                    validate(ctx, checkedVariance, typeArg);
+                    validate(ctx, paramPolarity, typeArg);
                 }
             },
 
@@ -131,7 +156,7 @@ private:
 
                 auto paramVariance = paramData->variance();
 
-                if (!compatibleVariance(variance, paramVariance)) {
+                if (!hasCompatibleVariance(polarity, paramVariance)) {
                     if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::InvalidVariance)) {
                         auto flavor =
                             paramData->owner.data(ctx)->isSingletonClass(ctx) ? "type_template" : "type_member";
@@ -139,7 +164,7 @@ private:
                         auto paramName = paramData->name.data(ctx)->show(ctx);
 
                         e.setHeader("`{}` `{}` was defined as `{}` but is used in an `{}` context", flavor, paramName,
-                                    showVariance(paramVariance), showVariance(variance));
+                                    showVariance(paramVariance), showPolarity(polarity));
 
                         e.addErrorLine(paramData->loc(), "`{}` `{}` defined here as `{}`", flavor, paramName,
                                        showVariance(paramVariance));
@@ -147,7 +172,7 @@ private:
                 }
             },
 
-            [&](core::MetaType *mt) { validate(ctx, variance, mt->wrapped); },
+            [&](core::MetaType *mt) { validate(ctx, polarity, mt->wrapped); },
 
             [&](core::Type *skipped) {
                 Exception::raise("Unhandled type during variance checking: {}", skipped->toString(ctx));
@@ -157,12 +182,12 @@ private:
 public:
     static void validateCoVariant(const core::Loc loc, const core::Context ctx, const core::TypePtr type) {
         VarianceValidator validator(loc);
-        return validator.validate(ctx, core::Variance::CoVariant, type);
+        return validator.validate(ctx, Polarity::Positive, type);
     }
 
     static void validateContraVariant(const core::Loc loc, const core::Context ctx, const core::TypePtr type) {
         VarianceValidator validator(loc);
-        return validator.validate(ctx, core::Variance::ContraVariant, type);
+        return validator.validate(ctx, Polarity::Negative, type);
     }
 };
 

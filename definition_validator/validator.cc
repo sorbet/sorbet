@@ -5,7 +5,7 @@
 
 #include "absl/algorithm/container.h"
 
-#include "variance.h"
+#include "definition_validator/variance.h"
 
 using namespace std;
 
@@ -192,27 +192,6 @@ class ValidateWalk {
 private:
     UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
 
-    struct GenericFrame {
-        bool isStdlib = false;
-        bool hasTypeTemplates = false;
-        bool hasTypeMembers = false;
-    };
-
-    vector<GenericFrame> genericContext;
-
-    void pushGenericContext(const core::GlobalState &gs, const core::SymbolRef sym, const core::SymbolRef singleton) {
-        auto symData = sym.data(gs);
-
-        GenericFrame &frame = genericContext.emplace_back();
-        frame.isStdlib = symData->loc().file().data(gs).isStdlib();
-        frame.hasTypeTemplates = singleton != core::Symbols::noSymbol() && !singleton.data(gs)->typeMembers().empty();
-        frame.hasTypeMembers = !symData->typeMembers().empty();
-    }
-
-    void popGenericContext() {
-        genericContext.pop_back();
-    }
-
     const vector<core::SymbolRef> &getAbstractMethods(const core::GlobalState &gs, core::SymbolRef klass) {
         vector<core::SymbolRef> abstract;
         auto ent = abstractCache.find(klass);
@@ -303,22 +282,19 @@ public:
         validateTStructNotGrandparent(ctx.state, sym);
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         validateAbstract(ctx.state, singleton);
-        pushGenericContext(ctx, sym, singleton);
-        return classDef;
-    }
-
-    unique_ptr<ast::ClassDef> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        popGenericContext();
         return classDef;
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
+        auto methodData = methodDef->symbol.data(ctx);
+        auto ownerData = methodData->owner.data(ctx);
+
         // Only perform this check if this isn't a module from the stdlib, and
         // if there are type members in the owning context.
-        auto methodData = methodDef->symbol.data(ctx);
-        auto isSelfMethod = methodData->owner.data(ctx)->isSingletonClass(ctx);
-        auto &frame = genericContext.back();
-        if (!frame.isStdlib && ((!isSelfMethod && frame.hasTypeMembers) || (isSelfMethod && frame.hasTypeTemplates))) {
+        // NOTE: We're skipping variance checks on the stdlib right now, as
+        // Array and Hash are defined with their parameters as covariant, and as
+        // a result most of their methods would fail this check.
+        if (!methodData->loc().file().data(ctx).isStdlib() && !ownerData->typeMembers().empty()) {
             variance::validateMethodVariance(ctx, methodDef->symbol);
         }
 
