@@ -40,17 +40,6 @@ private:
 
     VarianceValidator(const core::Loc loc) : loc(loc) {}
 
-    core::Variance invertVariance(const core::Variance variance) {
-        switch (variance) {
-            case core::Variance::CoVariant:
-                return core::Variance::ContraVariant;
-            case core::Variance::Invariant:
-                return core::Variance::Invariant;
-            case core::Variance::ContraVariant:
-                return core::Variance::CoVariant;
-        }
-    }
-
     string showVariance(const core::Variance variance) {
         switch (variance) {
             case core::Variance::CoVariant:
