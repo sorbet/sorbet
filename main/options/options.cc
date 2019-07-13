@@ -175,7 +175,8 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
                                 if (file.IsScalar()) {
                                     string key = file.as<string>();
                                     if (key.size() > 2 && !(key[0] == '/' || (key[0] == '.' && key[1] == '/'))) {
-                                        logger->error("All relative file names in \"{}\" should start with ./", fileName);
+                                        logger->error("All relative file names in \"{}\" should start with ./",
+                                                      fileName);
                                         throw EarlyReturnWithCode(1);
                                     }
                                     result[key] = level;
