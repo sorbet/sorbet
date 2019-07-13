@@ -1,11 +1,7 @@
 --- autogen-subclasses ---
-Chalk::ODM::Model
- Chalk::ODM::Private::Lock
 Opus::Mixin
  Opus::Mixed
  Opus::MixedDescendant
 Opus::Parent
  Opus::Child
  Opus::DupChild
-Opus::SafeMachine
- FooSafeMachine

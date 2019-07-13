@@ -92,10 +92,6 @@ optional<Subclasses::Entries> Subclasses::descendantsOf(const Subclasses::Map &c
 void Subclasses::patchChildMap(Subclasses::Map &childMap) {
     childMap["Opus::SafeMachine"].insert(childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].begin(),
                                          childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].end());
-
-    childMap["Chalk::SafeMachine"].insert(childMap["Opus::SafeMachine"].begin(), childMap["Opus::SafeMachine"].end());
-
-    childMap["Chalk::ODM::Model"].insert(make_pair("Chalk::ODM::Private::Lock", autogen::Definition::Type::Class));
 }
 
 vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendantsMap,
