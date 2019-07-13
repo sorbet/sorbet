@@ -63,7 +63,7 @@ annotation:
 
 ```ruby
 class Foo
-  sig {param(x: Integer, y: Integer).void}
+  sig {params(x: Integer, y: Integer).void}
   def initialize(x, y)
     @x = x
     @y = T.let(y, Integer)
