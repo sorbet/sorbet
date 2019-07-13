@@ -353,7 +353,8 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
 
     core::StrictLevel level;
     string filePath = string(fileData.path());
-    if (filePath.find("/") != 0 && filePath.find("./") != 0) {
+    // make sure all relative file paths start with ./
+    if (filePath.size() > 2 && !(filePath[0] == '/' || (filePath[0] == '.' && filePath[1] == '/'))) {
         filePath.insert(0, "./");
     }
     auto fnd = opts.strictnessOverrides.find(filePath);
