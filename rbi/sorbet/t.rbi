@@ -104,8 +104,8 @@ end
 
 class T::InexactStruct
   def initialize(rules={}); end
-  def prop(name, type, rules={}); end
-  def const(name, type, rules={}); end
+  def self.prop(name, type, rules={}); end
+  def self.const(name, type, rules={}); end
 end
 class T::Struct < T::InexactStruct; end
 
