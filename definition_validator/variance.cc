@@ -12,6 +12,7 @@ namespace sorbet::definition_validator::variance {
 
 enum class Polarity {
     Positive = 1,
+    Neutral = 0,
     Negative = -1,
 };
 
@@ -20,6 +21,8 @@ string showPolarity(const Polarity polarity) {
     switch (polarity) {
         case Polarity::Positive:
             return ":out";
+        case Polarity::Neutral:
+            return ":invariant";
         case Polarity::Negative:
             return ":in";
     }
@@ -29,6 +32,8 @@ const Polarity negatePolarity(const Polarity polarity) {
     switch (polarity) {
         case Polarity::Positive:
             return Polarity::Negative;
+        case Polarity::Neutral:
+            return Polarity::Neutral;
         case Polarity::Negative:
             return Polarity::Positive;
     }
@@ -49,6 +54,8 @@ bool hasCompatibleVariance(const Polarity polarity, const core::Variance argVari
     switch (polarity) {
         case Polarity::Positive:
             return argVariance != core::Variance::ContraVariant;
+        case Polarity::Neutral:
+            return true;
         case Polarity::Negative:
             return argVariance != core::Variance::CoVariant;
     }
@@ -110,8 +117,18 @@ private:
                     // example:
                     //
                     // -(-a -> +b) -> +c === (+a -> -b) -> + c
-                    const Polarity paramPolarity =
-                        (memberVariance == core::Variance::ContraVariant) ? negatePolarity(polarity) : polarity;
+                    Polarity paramPolarity;
+                    switch (memberVariance) {
+                        case core::Variance::ContraVariant:
+                            paramPolarity = negatePolarity(polarity);
+                            break;
+                        case core::Variance::Invariant:
+                            paramPolarity = Polarity::Neutral;
+                            break;
+                        case core::Variance::CoVariant:
+                            paramPolarity = polarity;
+                            break;
+                    }
 
                     validate(ctx, paramPolarity, typeArg);
                 }
