@@ -184,8 +184,8 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
         if (!method.data(gs)->isOverride() && method.data(gs)->hasSig() && overridenMethod.data(gs)->isOverridable() &&
             overridenMethod.data(gs)->hasSig()) {
             if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::UndeclaredOverride)) {
-                e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`", method.data(gs)->show(gs),
-                            overridenMethod.data(gs)->show(gs), ".override");
+                e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
+                            method.data(gs)->show(gs), overridenMethod.data(gs)->show(gs), ".override");
                 e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
             }
         }
