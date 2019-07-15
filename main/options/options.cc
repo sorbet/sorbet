@@ -174,7 +174,7 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
                             for (const auto &file : child.second) {
                                 if (file.IsScalar()) {
                                     string key = file.as<string>();
-                                    if (key.size() > 2 && !(key[0] == '/' || (key[0] == '.' && key[1] == '/'))) {
+                                    if (!absl::StartsWith(key, "/") && !absl::StartsWith(key, "./")) {
                                         logger->error("All relative file names in \"{}\" should start with ./",
                                                       fileName);
                                         throw EarlyReturnWithCode(1);
