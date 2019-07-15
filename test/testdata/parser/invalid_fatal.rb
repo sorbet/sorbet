@@ -1,2 +1,2 @@
 # typed: true
-"\xg3" # error: Parse Fatal: invalid hex escape
+"\xg3" # error-with-dupes: Parse Fatal: invalid hex escape

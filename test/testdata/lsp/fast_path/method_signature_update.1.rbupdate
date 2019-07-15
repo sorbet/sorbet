@@ -1,0 +1,12 @@
+# typed: true
+class A
+  extend T::Sig
+
+  # Change 'String' to 'Integer'
+  sig {params(x: Integer).returns(Integer)}
+  def bar(x)
+    x.to_s # error: Returning value that does not conform to method result type
+  end
+end
+
+j = T.let(A.new.bar(10), String) # error: Argument does not have asserted type `String`

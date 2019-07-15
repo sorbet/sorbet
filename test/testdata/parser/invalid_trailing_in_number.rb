@@ -1,2 +1,2 @@
 # typed: true
-0_ # error: Parse Error: trailing `_` in number
+0_ # error-with-dupes: Parse Error: trailing `_` in number

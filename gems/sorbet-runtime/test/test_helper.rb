@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# Ideally we might run tests with warnings enabled, but currently this triggers
+# a number of uninitialized instance variable warnings.
+# $VERBOSE = true
+
 require 'minitest/autorun'
 require 'minitest/spec'
 require 'mocha/minitest'

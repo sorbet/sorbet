@@ -107,6 +107,21 @@ sup {
 }
 
 /*
+ * To avoid squashing non-square logos
+ */
+.productShowcaseSection .logos img {
+  height: 110px;
+  width: auto;
+}
+
+@media only screen and (max-width: 735px) {
+  .productShowcaseSection .logos img {
+    height: 64px;
+    width: auto;
+  }
+}
+
+/*
  * Lets us stack the images + captions in a column.
  */
 .productShowcaseSection .link {

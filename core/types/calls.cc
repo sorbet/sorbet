@@ -1046,6 +1046,7 @@ public:
         for (auto &err : res.main.errors) {
             dispatched.main.errors.emplace_back(std::move(err));
         }
+        res.main.errors.clear();
         res.returnType = instanceTy;
         res.main = move(dispatched.main);
         res.main.sendTp = instanceTy;
@@ -1277,6 +1278,7 @@ public:
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
         }
+        dispatched.main.errors.clear();
 
         // TODO: this should merge constrains from `res` and `dispatched` instead
         if ((dispatched.main.constr == nullptr) || dispatched.main.constr->isEmpty()) {
@@ -1369,6 +1371,7 @@ private:
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
         }
+        dispatched.main.errors.clear();
         // We use isSubTypeUnderConstraint here with a TypeConstraint, so that we discover the correct generic bounds
         // as we do the subtyping check.
         auto &constr = dispatched.main.constr;
@@ -1865,6 +1868,7 @@ public:
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
         }
+        dispatched.main.errors.clear();
         res.returnType = move(dispatched.returnType);
     }
 } enumerable_to_h;
@@ -1873,7 +1877,9 @@ public:
 class Module_tripleEq : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
-        ENFORCE(args.args.size() == 1, "Module.=== takes 1 argument on rhs, got {}", args.args.size());
+        if (args.args.size() != 1) {
+            return;
+        }
         auto rhs = args.args[0]->type;
         if (rhs->isUntyped()) {
             res.returnType = rhs;

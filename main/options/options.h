@@ -18,6 +18,7 @@ class PrinterConfig {
 public:
     bool enabled = false;
     std::string outputPath;
+    bool supportsFlush = false;
 
     void print(const std::string_view &contents) const;
     template <typename... Args> void fmt(const std::string &msg, const Args &... args) const {
@@ -42,6 +43,7 @@ private:
 struct Printers {
     PrinterConfig ParseTree;
     PrinterConfig ParseTreeJson;
+    PrinterConfig ParseTreeWhitequark;
     PrinterConfig Desugared;
     PrinterConfig DesugaredRaw;
     PrinterConfig DSLTree;
@@ -73,10 +75,13 @@ struct Printers {
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
     PrinterConfig AutogenClasslist;
+    PrinterConfig AutogenAutoloader;
+    PrinterConfig AutogenSubclasses;
     PrinterConfig PluginGeneratedCode;
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
+    bool isAutogen() const;
 };
 
 enum Phase {
@@ -91,8 +96,22 @@ enum Phase {
     INFERENCER,
 };
 
+struct AutoloaderConfig {
+    // Top-level modules to include in autoloader output
+    std::vector<std::string> modules;
+    std::string rootDir;
+    std::string preamble;
+    std::vector<std::string> requireExcludes;
+    std::vector<std::vector<std::string>> sameFileModules;
+    std::vector<std::string> stripPrefixes;
+
+    std::vector<std::string> absoluteIgnorePatterns;
+    std::vector<std::string> relativeIgnorePatterns;
+};
+
 struct Options {
     Printers print;
+    AutoloaderConfig autoloaderConfig;
     Phase stopAfterPhase = Phase::INFERENCER;
     bool noStdlib = false;
 
@@ -160,6 +179,12 @@ struct Options {
     std::vector<std::string> relativeIgnorePatterns;
     // Contains the expanded list of all Ruby file inputs (rawInputFileNames + all Ruby files in rawInputDirNames)
     std::vector<std::string> inputFileNames;
+    // A list of parent classes to be used in `-p autogen-subclasses`
+    std::vector<std::string> autogenSubclassesParents;
+    // Ignore patterns beginning from the root of an input folder.
+    std::vector<std::string> autogenSubclassesAbsoluteIgnorePatterns;
+    // Ignore patterns that can occur anywhere in a file's path from an input folder.
+    std::vector<std::string> autogenSubclassesRelativeIgnorePatterns;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspGoToDefinitionEnabled = false;
     bool lspFindReferencesEnabled = false;

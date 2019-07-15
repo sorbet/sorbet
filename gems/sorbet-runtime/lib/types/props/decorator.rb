@@ -485,18 +485,20 @@ class T::Props::Decorator
 
   sig {params(name: Symbol, rules: Rules).void}
   private def define_getter_and_setter(name, rules)
-    if rules[:immutable]
-      @class.send(:define_method, "#{name}=") do |_x|
-        raise T::Props::ImmutableProp.new("#{self.class}##{name} cannot be modified after creation.")
+    T::Configuration.without_ruby_warnings do
+      if rules[:immutable]
+        @class.send(:define_method, "#{name}=") do |_x|
+          raise T::Props::ImmutableProp.new("#{self.class}##{name} cannot be modified after creation.")
+        end
+      else
+        @class.send(:define_method, "#{name}=") do |x|
+          self.class.decorator.prop_set(self, name, x, rules)
+        end
       end
-    else
-      @class.send(:define_method, "#{name}=") do |x|
-        self.class.decorator.prop_set(self, name, x, rules)
-      end
-    end
 
-    @class.send(:define_method, name) do
-      self.class.decorator.prop_get(self, name, rules)
+      @class.send(:define_method, name) do
+        self.class.decorator.prop_get(self, name, rules)
+      end
     end
   end
 

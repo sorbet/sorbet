@@ -5,6 +5,8 @@
 
 #include "absl/algorithm/container.h"
 
+#include "definition_validator/variance.h"
+
 using namespace std;
 
 namespace sorbet::definition_validator {
@@ -284,6 +286,18 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
+        auto methodData = methodDef->symbol.data(ctx);
+        auto ownerData = methodData->owner.data(ctx);
+
+        // Only perform this check if this isn't a module from the stdlib, and
+        // if there are type members in the owning context.
+        // NOTE: We're skipping variance checks on the stdlib right now, as
+        // Array and Hash are defined with their parameters as covariant, and as
+        // a result most of their methods would fail this check.
+        if (!methodData->loc().file().data(ctx).isStdlib() && !ownerData->typeMembers().empty()) {
+            variance::validateMethodVariance(ctx, methodDef->symbol);
+        }
+
         validateOverriding(ctx.state, methodDef->symbol);
         return methodDef;
     }

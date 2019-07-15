@@ -1,5 +1,5 @@
 # typed: true
-class A < B # error: Unable to resolve constant `B`
+class A < B # error-with-dupes: Unable to resolve constant `B`
   module C
   end
   module B

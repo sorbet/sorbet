@@ -32,5 +32,7 @@ begin
     def baz<baz>(w, <blk>)
       w
     end
+
+    ::Sorbet::Private::Static.keep_for_ide(<emptyTree>::<C T>::<C Sig>)
   end
 end

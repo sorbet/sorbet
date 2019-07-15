@@ -1,11 +1,14 @@
 // has to go first because it violates our poisons
 #include "msgpack.hpp"
 
+#include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/FileOps.h"
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "main/autogen/autogen.h"
+#include "main/autogen/autoloader.h"
 
 #include "CRC.h"
 
@@ -663,15 +666,20 @@ string ParsedFile::toMsgpack(core::Context ctx, int version) {
     return write.pack(ctx, *this);
 }
 
-void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
-    auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
+vector<string> ParsedFile::listAllClasses(core::Context ctx) {
+    vector<string> out;
+
     for (auto &def : defs) {
         if (def.type != Definition::Class) {
             continue;
         }
-        auto names = showFullName(ctx, def.id);
-        out.emplace_back(fmt::format("{}", fmt::map_join(names, "::", nameToString)));
+        vector<core::NameRef> names = showFullName(ctx, def.id);
+        out.emplace_back(fmt::format("{}", fmt::map_join(names, "::", [&ctx](const core::NameRef &nm) -> string_view {
+                                         return nm.data(ctx)->shortName(ctx);
+                                     })));
     }
+
+    return out;
 }
 
 } // namespace sorbet::autogen

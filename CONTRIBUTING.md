@@ -20,7 +20,7 @@ We welcome contributions from the community. This doc describes the process to c
 * We currently provide binary packages available via [releases page](https://github.com/sorbet/sorbet/releases).
 
 # Writing Documentation
-Documentation improvements are very welcome. The source of [stripe.dev/sorbet](http://stripe.github.io/sorbet/) is located in website/ in the tree.
+Documentation improvements are very welcome. The source of [sorbet.org](https://sorbet.org) is located in website/ in the tree.
 
 # Testing
 * Our CI runs all tests with [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) and [ASan](https://clang.llvm.org/docs/AddressSanitizer.html). You can run them locally by passing `--config=sanitize` when running tests

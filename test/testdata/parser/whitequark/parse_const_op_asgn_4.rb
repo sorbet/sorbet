@@ -1,3 +1,3 @@
 # typed: true
 
-def x; ::A ||= 1; end # error: Constant reassignment is not supported
+def x; ::A ||= 1; end # error-with-dupes: Constant reassignment is not supported
