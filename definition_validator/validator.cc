@@ -182,9 +182,11 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
             }
         }
         auto isRBI = absl::c_any_of(method.data(gs)->locs(), [&](auto &loc) { return loc.file().data(gs).isRBI(); });
-        if (!method.data(gs)->isOverride() && method.data(gs)->hasSig() && overridenMethod.data(gs)->isOverridable() && overridenMethod.data(gs)->hasSig() && !isRBI) {
+        if (!method.data(gs)->isOverride() && method.data(gs)->hasSig() && overridenMethod.data(gs)->isOverridable() &&
+            overridenMethod.data(gs)->hasSig() && !isRBI) {
             if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::UndeclaredOverride)) {
-                e.setHeader("Method `{}` overrides `{}` but is not declared with `{}`", method.data(gs)->show(gs), overridenMethod.data(gs)->show(gs), ".override");
+                e.setHeader("Method `{}` overrides `{}` but is not declared with `{}`", method.data(gs)->show(gs),
+                            overridenMethod.data(gs)->show(gs), ".override");
                 e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
             }
         }
