@@ -1,4 +1,20 @@
 begin
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$109>(<blk>)
+      begin
+        begin
+          ::Sorbet::Private::Static.keep_for_ide(::T1)
+          <emptyTree>
+        end
+        ::T2 = ::T1
+        <emptyTree>
+      end
+    end
+  end
+  class ::T1<<C T1>> < (::<todo sym>)  end
+  <emptyTree>
+end
+begin
   ::Sorbet::Private::Static.keep_for_ide(::TestSig)
   class ::TestSig<<C TestSig>> < (::<todo sym>)
     <emptyTree>
@@ -15,21 +31,5 @@ begin
       end
     end
   end
-  <emptyTree>
-end
-begin
-  class <emptyTree><<C <root>>> < ()
-    def self.<static-init><<static-init>$109>(<blk>)
-      begin
-        begin
-          ::Sorbet::Private::Static.keep_for_ide(::T1)
-          <emptyTree>
-        end
-        ::T2 = ::T1
-        <emptyTree>
-      end
-    end
-  end
-  class ::T1<<C T1>> < (::<todo sym>)  end
   <emptyTree>
 end
