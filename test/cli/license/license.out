@@ -1,4 +1,4 @@
-Sorbet typechecker is licenced under Apache License Version 2.0.
+Sorbet typechecker is licensed under Apache License Version 2.0.
 
 Sorbet is built on top of:
 Abseil Common Libraries (C++), available at https://github.com/abseil/abseil-cpp.

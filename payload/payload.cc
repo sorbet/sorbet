@@ -37,6 +37,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
     const u1 *const nameTablePayload = getNameTablePayload;
     if (nameTablePayload == nullptr) {
         gs->initEmpty();
+        gs->ensureCleanStrings = true;
         Timer timeit(gs->tracer(), "read_global_state.source");
 
         vector<core::FileRef> payloadFiles;
@@ -52,6 +53,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
         auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer());
         auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, *workers, kvstore);
         realmain::pipeline::resolve(gs, move(indexed), emptyOpts, *workers); // result is thrown away
+        gs->ensureCleanStrings = false;
     } else {
         Timer timeit(gs->tracer(), "read_global_state.binary");
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);

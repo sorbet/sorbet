@@ -12,7 +12,7 @@
 #include "main/options/options.h"
 #include "options.h"
 #include "sys/stat.h"
-#include "third_party/licences/licences.h"
+#include "third_party/licenses/licenses.h"
 #include "version/version.h"
 
 namespace spd = spdlog;
@@ -173,7 +173,13 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
                         case YAML::NodeType::Sequence:
                             for (const auto &file : child.second) {
                                 if (file.IsScalar()) {
-                                    result[file.as<string>()] = level;
+                                    string key = file.as<string>();
+                                    if (!absl::StartsWith(key, "/") && !absl::StartsWith(key, "./")) {
+                                        logger->error("All relative file names in \"{}\" should start with ./",
+                                                      fileName);
+                                        throw EarlyReturnWithCode(1);
+                                    }
+                                    result[key] = level;
                                 } else {
                                     logger->error("Cannot parse strictness override format. Invalid file name.");
                                     throw EarlyReturnWithCode(1);
@@ -315,7 +321,7 @@ cxxopts::Options buildOptions() {
         "suggest-runtime-profiled",
         "When suggesting signatures in `typed: strict` mode, suggest `::T::Utils::RuntimeProfiled`");
     options.add_options("advanced")("P,progress", "Draw progressbar");
-    options.add_options("advanced")("licence", "Show licence");
+    options.add_options("advanced")("license", "Show license");
     options.add_options("advanced")("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
                                     "{always,never,[auto]}");
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
@@ -724,10 +730,10 @@ void readOptions(Options &opts, int argc, char *argv[],
             fmt::print("Sorbet typechecker {}\n", Version::full_version_string);
             throw EarlyReturnWithCode(0);
         }
-        if (raw["licence"].as<bool>()) {
+        if (raw["license"].as<bool>()) {
             fmt::print(
-                "Sorbet typechecker is licenced under Apache License Version 2.0.\n\nSorbet is built on top of:\n{}",
-                fmt::map_join(third_party::licences::all(), "\n\n", [](const auto &pair) { return pair.second; }));
+                "Sorbet typechecker is licensed under Apache License Version 2.0.\n\nSorbet is built on top of:\n{}",
+                fmt::map_join(third_party::licenses::all(), "\n\n", [](const auto &pair) { return pair.second; }));
             throw EarlyReturnWithCode(0);
         }
 

@@ -33,9 +33,14 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     prop :prop2, Integer, ifunset: 42
     prop :shadowed, String
 
+    orig_verbose = $VERBOSE
+    $VERBOSE = false
+
     def shadowed
       "I can't let you see that"
     end
+
+    $VERBOSE = orig_verbose
   end
 
   class SubProps

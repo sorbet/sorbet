@@ -23,9 +23,9 @@ string sourceName2DepName(string sourceName) {
     return (string) absl::StripPrefix(sourceName, ".txt");
 }
 
-void emitLicences(vector<string> sourceFileNames, ostream &out) {
-    out << "#include\"third_party/licences/licences.h\"\nusing namespace std;\n";
-    out << "namespace sorbet::third_party::licences {" << '\n';
+void emitlicenses(vector<string> sourceFileNames, ostream &out) {
+    out << "#include\"third_party/licenses/licenses.h\"\nusing namespace std;\n";
+    out << "namespace sorbet::third_party::licenses {" << '\n';
     for (auto &file : sourceFileNames) {
         out << "  string_view " + sourceName2funcName(file) << "() {" << '\n';
         out << "  return \"" + absl::CEscape(sorbet::FileOps::read(file.c_str())) + "\"sv;" << '\n' << "}" << '\n';
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
             sourceFileNames.emplace_back(argv[i]);
         }
 
-        emitLicences(sourceFileNames, outfile);
+        emitlicenses(sourceFileNames, outfile);
     }
 
     return 0;

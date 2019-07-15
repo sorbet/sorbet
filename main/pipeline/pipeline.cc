@@ -4,6 +4,7 @@
 
 #include "ProgressIndicator.h"
 #include "absl/strings/escaping.h" // BytesToHexString
+#include "absl/strings/match.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
@@ -352,7 +353,12 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
     auto &fileData = file.data(gs);
 
     core::StrictLevel level;
-    auto fnd = opts.strictnessOverrides.find(string(fileData.path()));
+    string filePath = string(fileData.path());
+    // make sure all relative file paths start with ./
+    if (!absl::StartsWith(filePath, "/") && !absl::StartsWith(filePath, "./")) {
+        filePath.insert(0, "./");
+    }
+    auto fnd = opts.strictnessOverrides.find(filePath);
     if (fnd != opts.strictnessOverrides.end()) {
         if (fnd->second == fileData.originalSigil) {
             core::ErrorRegion errs(gs, file);

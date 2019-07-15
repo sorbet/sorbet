@@ -36,4 +36,30 @@ class Opus::Types::Test::SigTest < Critic::Unit::UnitTest
     end
     assert_match(/undefined method `sig' for/, e.message)
   end
+
+  # Enable $VERBOSE and redirect stderr to a string for the duration of the
+  # passed block.
+  def fake_stderr_with_warnings
+    original_stderr = $stderr
+    original_verbose = $VERBOSE
+    $stderr = StringIO.new
+    $VERBOSE = true
+    yield
+    $stderr.string
+  ensure
+    $stderr = original_stderr
+    $VERBOSE = original_verbose
+  end
+
+  it 'does not emit warnings when overriding methods' do
+    output = fake_stderr_with_warnings do
+      Class.new do
+        extend T::Sig
+        sig {void}
+        def foo; end
+      end
+    end
+
+    assert_equal(output, '')
+  end
 end

@@ -506,8 +506,6 @@ void GlobalState::initEmpty() {
     freezeSymbolTable();
     freezeFileTable();
     sanityCheck();
-
-    isInitialized = true;
 }
 
 void GlobalState::installIntrinsics() {
@@ -717,7 +715,7 @@ ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRe
 }
 
 string_view GlobalState::enterString(string_view nm) {
-    DEBUG_ONLY(if (isInitialized) {
+    DEBUG_ONLY(if (ensureCleanStrings) {
         if (nm != "<" && nm != "<<" && nm != "<=" && nm != "<=>" && nm != ">" && nm != ">>" && nm != ">=") {
             ENFORCE(nm.find("<") == string::npos);
             ENFORCE(nm.find(">") == string::npos);
@@ -1142,7 +1140,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->silenceErrors = this->silenceErrors;
     result->autocorrect = this->autocorrect;
     result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
-    result->isInitialized = this->isInitialized;
+    result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorRawLocsWithinPayload = this->censorRawLocsWithinPayload;
 

@@ -147,8 +147,6 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
             }
         }
     }
-
-    // TODO: this will be the right moment to implement checks for correct locations of co&contra variant types.
 }
 
 }; // namespace
