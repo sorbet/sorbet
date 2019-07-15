@@ -116,12 +116,14 @@ FileRef::FileRef(unsigned int id) : _id(id) {
 }
 
 const File &FileRef::data(const GlobalState &gs) const {
+    ENFORCE(gs.files[_id]);
     ENFORCE(gs.files[_id]->sourceType != File::TombStone);
     ENFORCE(gs.files[_id]->sourceType != File::NotYetRead);
     return dataAllowingUnsafe(gs);
 }
 
 File &FileRef::data(GlobalState &gs) const {
+    ENFORCE(gs.files[_id]);
     ENFORCE(gs.files[_id]->sourceType != File::TombStone);
     ENFORCE(gs.files[_id]->sourceType != File::NotYetRead);
     return dataAllowingUnsafe(gs);
