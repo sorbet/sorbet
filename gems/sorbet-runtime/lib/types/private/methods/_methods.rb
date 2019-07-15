@@ -16,7 +16,7 @@ module T::Private::Methods
     install_hooks(mod)
 
     if T::Private::DeclState.current.active_declaration
-      T::Private::DeclState.current.active_declaration = nil
+      T::Private::DeclState.current.reset!
       raise "You called sig twice without declaring a method inbetween"
     end
 
