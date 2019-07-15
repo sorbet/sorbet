@@ -1,4 +1,4 @@
-# typed: strong
+# typed: __STDLIB_INTERNAL
 
 class Object < BasicObject
   include Kernel
