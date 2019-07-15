@@ -7,4 +7,3 @@ class Sorbet
   def self.sig(&blk)
   end
 end
-

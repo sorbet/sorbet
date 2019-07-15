@@ -55,4 +55,3 @@ module T
     def self.[](type); end
   end
 end
-
