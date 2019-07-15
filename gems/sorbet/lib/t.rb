@@ -12,7 +12,7 @@
 module T
   module Sig
     module WithoutRuntime
-      def self.sig(&blk); end
+      def self.sig(arg=nil, &blk); end
     end
   end
 
