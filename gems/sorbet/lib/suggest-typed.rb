@@ -10,13 +10,13 @@ class Sorbet::Private::SuggestTyped
 
   def self.main
     count = 0
-    while count < 100
+    while count < 50
       count += 1
       if suggest_typed
         return true
       end
     end
-    puts "Adding `typed:` sigils did not converge after 100 tries."
+    puts "Adding `typed:` sigils did not converge after 50 tries."
     false
   end
 
