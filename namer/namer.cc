@@ -742,20 +742,42 @@ public:
                     i++;
                     auto key = ast::cast_tree<ast::Literal>(keyExpr.get());
                     core::NameRef name;
-                    if (key != nullptr && key->isSymbol(ctx) && key->asSymbol(ctx) == core::Names::fixed()) {
-                        // Leave it in the tree for the resolver to chew on.
-                        sym.data(ctx)->setFixed();
+                    if (key != nullptr && key->isSymbol(ctx)) {
+                        switch (key->asSymbol(ctx)._id) {
+                            case core::Names::fixed()._id:
+                                // Leave it in the tree for the resolver to chew on.
+                                sym.data(ctx)->setFixed();
 
-                        // TODO(nelhage): This creates an order
-                        // dependency in the resolver. See RUBYPLAT-520
-                        sym.data(ctx)->resultType = core::Types::untyped(ctx, sym);
+                                // TODO(nelhage): This creates an order
+                                // dependency in the resolver. See RUBYPLAT-520
+                                sym.data(ctx)->resultType = core::Types::untyped(ctx, sym);
 
-                        asgn->lhs = ast::MK::Constant(asgn->lhs->loc, sym);
-                        return asgn;
+                                asgn->lhs = ast::MK::Constant(asgn->lhs->loc, sym);
+                                continue;
+
+                            // intentionally falling through here
+                            case core::Names::lower()._id:
+                            case core::Names::upper()._id:
+                                sym.data(ctx)->setBounded();
+                                break;
+                        }
                     }
                 }
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Missing required param :fixed");
+
+                const bool fixed = sym.data(ctx)->isFixed();
+                const bool bounded = sym.data(ctx)->isBounded();
+                // one of :fixed or bounds were provided
+                if (fixed != bounded) {
+                    return asgn;
+                } else if (fixed) {
+                    // both :fixed and bounds were specified
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Type member is defined with bounds and `{}`", ":fixed");
+                    }
+                } else {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Missing required param :fixed");
+                    }
                 }
             }
         }

@@ -148,6 +148,8 @@ NameDef names[] = {
     {"contravariant", "in"},
     {"invariant", "<invariant>"},
     {"fixed"},
+    {"lower"},
+    {"upper"},
 
     {"prop"},
     {"token_prop"},

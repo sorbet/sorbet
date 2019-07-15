@@ -1305,7 +1305,7 @@ public:
         }
 
         if (data->isTypeMember()) {
-            ENFORCE(data->isFixed());
+            ENFORCE(data->isFixed() || data->isBounded());
             auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
             ENFORCE(send->recv->isSelfReference());
             ENFORCE(send->fun == core::Names::typeMember() || send->fun == core::Names::typeTemplate());
