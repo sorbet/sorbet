@@ -149,7 +149,12 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string Loc::showRaw(const GlobalState &gs) const {
-    auto path = file().data(gs).path();
+    string_view path;
+    if (file().exists()) {
+        path = file().data(gs).path();
+    } else {
+        path = "???"sv;
+    }
     if (!exists()) {
         return fmt::format("Loc {{file={} start=??? end=???}}", path);
     }

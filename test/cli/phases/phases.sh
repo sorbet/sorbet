@@ -16,6 +16,7 @@ done
 echo "--- checking diff ---"
 diff -r out fileout | sort
 
+echo "--- checking crashes ---"
 # Makes sure all these options don't crash us
 for p in symbol-table-json symbol-table-full symbol-table-full-raw symbol-table-full-json cfg-proto; do
     main/sorbet --silence-dev-message -p "$p" -e '1' > /dev/null
@@ -24,3 +25,4 @@ done
 for p in init parser desugarer dsl namer resolver cfg inferencer; do
     main/sorbet --silence-dev-message --stop-after $p -e '1'
 done
+echo "--- checking crashes end ---"
