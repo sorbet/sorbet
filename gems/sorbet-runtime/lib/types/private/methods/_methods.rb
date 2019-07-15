@@ -326,8 +326,13 @@ module T::Private::Methods
     original_singleton_method.bind(attached).call(:singleton_method_added)
   end
 
+  # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
+  private_class_method def self.method_owner_and_name_to_key(owner, name)
+    "#{owner.object_id}##{name}"
+  end
+
   private_class_method def self.method_to_key(method)
-    "#{method.owner.object_id}##{method.name}"
+    method_owner_and_name_to_key(method.owner, method.name)
   end
 
   private_class_method def self.key_to_method(key)
