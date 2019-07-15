@@ -11,6 +11,7 @@ class T::Private::DeclState
   end
 
   attr_accessor :active_declaration
+  attr_accessor :skip_next_on_method_added
 
   def reset!
     self.active_declaration = nil
