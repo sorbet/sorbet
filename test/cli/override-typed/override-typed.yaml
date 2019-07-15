@@ -1,2 +1,2 @@
 true:
- - 'test/cli/override-typed/override-typed.rb'
+ - './test/cli/override-typed/override-typed.rb'

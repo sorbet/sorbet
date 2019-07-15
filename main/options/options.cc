@@ -173,7 +173,13 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
                         case YAML::NodeType::Sequence:
                             for (const auto &file : child.second) {
                                 if (file.IsScalar()) {
-                                    result[file.as<string>()] = level;
+                                    string key = file.as<string>();
+                                    if (!absl::StartsWith(key, "/") && !absl::StartsWith(key, "./")) {
+                                        logger->error("All relative file names in \"{}\" should start with ./",
+                                                      fileName);
+                                        throw EarlyReturnWithCode(1);
+                                    }
+                                    result[key] = level;
                                 } else {
                                     logger->error("Cannot parse strictness override format. Invalid file name.");
                                     throw EarlyReturnWithCode(1);
