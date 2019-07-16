@@ -202,8 +202,8 @@ private:
         auto superclass = klass.data(gs)->superClass();
         if (superclass.exists()) {
             auto &superclassMethods = getAbstractMethods(gs, superclass);
-            // TODO(nelhage): This code coud go quadratic or even exponential given
-            // pathological arrangments of interfaces and abstract methods. Switch
+            // TODO(nelhage): This code could go quadratic or even exponential given
+            // pathological arrangements of interfaces and abstract methods. Switch
             // to a better data structure if that is ever a problem.
             abstract.insert(abstract.end(), superclassMethods.begin(), superclassMethods.end());
         }
