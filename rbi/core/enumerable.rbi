@@ -566,6 +566,6 @@ module Enumerable
   sig {returns(T::Array[Elem])}
   def to_a(); end
 
-  sig { returns(T::Enumerator::Lazy[Elem])}
+  sig { returns(Enumerator::Lazy[Elem])}
   def lazy(); end
 end
