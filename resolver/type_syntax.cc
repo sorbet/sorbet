@@ -101,6 +101,13 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
     }
     ENFORCE(!sends.empty());
 
+    for (auto &arg : sigSend->args) {
+        auto lit = ast::cast_tree<ast::Literal>(arg.get());
+        if (lit != nullptr && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::final()) {
+            sig.seen.final = true;
+        }
+    }
+
     for (auto &send : sends) {
         ast::Send *tsend = send;
         // extract type parameters early
@@ -277,9 +284,6 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 case core::Names::overridable()._id:
                     sig.seen.overridable = true;
-                    break;
-                case core::Names::final()._id:
-                    sig.seen.final = true;
                     break;
                 case core::Names::returns()._id: {
                     sig.seen.returns = true;
