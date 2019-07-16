@@ -275,6 +275,25 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     assert_equal(2, m.calls)
   end
 
+  it "calls an exotic user-defined included" do
+    m2 = Module.new do
+      def self.included(arg)
+        arg.include(Module.new do
+          extend T::Sig
+          sig(:final) {void}
+          def foo; end
+        end)
+      end
+    end
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        include m2
+        def foo; end
+      end
+    end
+    assert_includes(err.message, "was declared as final and cannot be overridden")
+  end
+
   it "forbids overriding through many levels of include" do
     m1 = Module.new do
       extend T::Sig
