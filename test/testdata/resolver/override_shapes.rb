@@ -153,5 +153,5 @@ class NoOverride < Base
       params(req: Object, opt: Object, kwreq: Object, kwopt: Object, blk: Proc)
       .returns(Object)
   end
-  def foo(req, opt=nil, kwreq:, kwopt: nil, &blk); end # error: Method `NoOverride#foo` overrides `Base#foo` but is not declared with `.override`
+  def foo(req, opt=nil, kwreq:, kwopt: nil, &blk); end # error: Method `NoOverride#foo` overrides an overridable method `Base#foo` but is not declared with `.override`
 end
