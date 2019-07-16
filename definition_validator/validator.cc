@@ -176,8 +176,9 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     for (const auto &overridenMethod : overridenMethods) {
         if (overridenMethod.data(gs)->isFinalMethod()) {
             if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::OverridesFinal)) {
-                e.setHeader("Method overrides a final method `{}`", overridenMethod.data(gs)->show(gs));
-                e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
+                e.setHeader("`{}` was declared as final and cannot be overridden by `{}`",
+                            overridenMethod.data(gs)->show(gs), method.data(gs)->show(gs));
+                e.addErrorLine(overridenMethod.data(gs)->loc(), "original method defined here");
             }
         }
         auto isRBI = absl::c_any_of(method.data(gs)->locs(), [&](auto &loc) { return loc.file().data(gs).isRBI(); });
