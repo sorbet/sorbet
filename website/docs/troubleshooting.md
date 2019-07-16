@@ -210,11 +210,24 @@ class A
 end
 ```
 
-## Alternatives to `T.unsafe`
+### `T.cast`: a safer alternative to `T.unsafe`
 
 `T.unsafe` is maximally unsafe. It forces Sorbet to forget all type information
 statically---sometimes this is more power than we need. For the cases where we
 the programmer know of an invariant that isn't currently expressed in the type
 system, [`T.cast`](type-assertions#tcast) is a good middle-ground.
 
-<!-- TODO(jez) Document .on_failure / .checked once API is stable. -->
+### Runtime escape hatches
+
+Both `T.unsafe` and `T.cast` are escape hatches from Sorbet's static checks.
+They don't silence any runtime exceptions that would be raised for type errors.
+
+There are also escape hatches for the runtime. These escape hatches are
+documented elsewhere. See
+
+- [Enabling Runtime Checks](runtime.md), which has docs on how to configure and
+  opt out of certain runtime checks.
+
+- [Runtime Configuration](tconfiguration.md), which has docs on how to write
+  low-level configuration handlers that intercept any exceptions that the
+  runtime could raise.
