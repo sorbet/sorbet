@@ -119,14 +119,14 @@ module T::Private::Methods
     @signatures_by_method[key]
   end
 
-  # when mod includes a module with instance methods method_names, ensure there is zero intersection between the final
-  # instance methods of mod and method_names. so, for every m in method_names, check if there is already a method
-  # defined on one of ancestors with the same name that is final.
-  def self._check_final_ancestors(mod, ancestors, method_names)
+  # when target includes a module with instance methods source_method_names, ensure there is zero intersection between
+  # the final instance methods of target and source_method_names. so, for every m in source_method_names, check if there
+  # is already a method defined on one of target_ancestors with the same name that is final.
+  def self._check_final_ancestors(target, target_ancestors, source_method_names)
     # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
     # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
-    ancestors.reverse_each do |ancestor|
-      method_names.each do |method_name|
+    target_ancestors.reverse_each do |ancestor|
+      source_method_names.each do |method_name|
         # the usage of method_owner_and_name_to_key(ancestor, method_name) instead of
         # method_to_key(ancestor.instance_method(method_name)) is not (just) an optimization, but also required for
         # correctness, since ancestor.method_defined?(method_name) may return true even if method_name is not defined
@@ -134,7 +134,7 @@ module T::Private::Methods
         if ancestor.method_defined?(method_name) && final_method?(method_owner_and_name_to_key(ancestor, method_name))
           raise(
             "`#{ancestor.name}##{method_name}` was declared as final and cannot be " +
-            (mod == ancestor ? "redefined" : "overridden in `#{mod.name}`")
+            (target == ancestor ? "redefined" : "overridden in `#{target.name}`")
           )
         end
       end
@@ -359,15 +359,15 @@ module T::Private::Methods
     end
   end
 
-  # the module adder is adding the methods from the module getting_added to itself. we need to check that for all
-  # instance methods M on getting_added, M is not defined on any of adder's ancestors.
-  def self._included_extended_impl(adder, adder_ancestors, getting_added)
-    if !module_with_final?(adder) && !module_with_final?(getting_added)
+  # the module target is adding the methods from the module source to itself. we need to check that for all instance
+  # methods M on source, M is not defined on any of target's ancestors.
+  def self._included_extended_impl(target, target_ancestors, source)
+    if !module_with_final?(target) && !module_with_final?(source)
       return
     end
-    add_module_with_final(adder)
-    install_hooks(adder)
-    _check_final_ancestors(adder, adder_ancestors - getting_added.ancestors, getting_added.instance_methods)
+    add_module_with_final(target)
+    install_hooks(target)
+    _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
   end
 
   def self.enable_final_checks_for_include_extend
