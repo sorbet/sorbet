@@ -59,7 +59,6 @@ gemfile_lock_deps(
             "partial/stack_master",
             "partial/stupidedi",
             "partial/typed-ignore",
-            "partial/webmock",
             "total/empty",
         ]
     ],

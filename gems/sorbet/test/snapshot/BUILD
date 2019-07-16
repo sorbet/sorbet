@@ -33,7 +33,6 @@ snapshot_tests(
         exclude = [
             # TODO(jez) openssl is missing
             "partial/webmock",
-            "partial/partially-sigged",
 
             # TODO(jez) native extensions don't build
             "partial/codecov",
