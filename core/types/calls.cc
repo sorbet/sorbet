@@ -372,7 +372,7 @@ bool extendsTHelpers(core::Context ctx, core::SymbolRef enclosingClass) {
 }
 
 /**
- * Make an autocorrection for adding `extends T::Helpers`, when needed.
+ * Make an autocorrection for adding `extend T::Helpers`, when needed.
  */
 optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context ctx, const Type *thisType,
                                                                  const Loc &call) {

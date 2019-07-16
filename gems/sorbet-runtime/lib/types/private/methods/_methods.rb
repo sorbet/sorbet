@@ -6,23 +6,36 @@ module T::Private::Methods
   @signatures_by_method = {}
   @sig_wrappers = {}
   @sigs_that_raised = {}
+  # the info about whether a method is final is not stored in a DeclBuilder nor a Signature, but instead right here.
+  # this is because final checks are special:
+  # - they are done possibly before any sig block has run.
+  # - they are done even if the method being defined doesn't have a sig.
+  @final_methods = Set.new
+  # if a module directly defines a final method, or includes, extends, or inherits from a module which does so, then it
+  # should be in this set.
+  @modules_with_final = Set.new
+  @old_included_extended = nil
 
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
 
-  DeclarationBlock = Struct.new(:mod, :loc, :blk)
+  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final)
 
-  def self.declare_sig(mod, &blk)
+  def self.declare_sig(mod, arg, &blk)
     install_hooks(mod)
 
     if T::Private::DeclState.current.active_declaration
-      T::Private::DeclState.current.active_declaration = nil
+      T::Private::DeclState.current.reset!
       raise "You called sig twice without declaring a method inbetween"
+    end
+
+    if !arg.nil? && arg != :final
+      raise "Invalid argument to `sig`: #{arg}"
     end
 
     loc = caller_locations(2, 1).first
 
-    T::Private::DeclState.current.active_declaration = DeclarationBlock.new(mod, loc, blk)
+    T::Private::DeclState.current.active_declaration = DeclarationBlock.new(mod, loc, blk, arg == :final)
 
     nil
   end
@@ -106,14 +119,59 @@ module T::Private::Methods
     @signatures_by_method[key]
   end
 
+  # when target includes a module with instance methods source_method_names, ensure there is zero intersection between
+  # the final instance methods of target and source_method_names. so, for every m in source_method_names, check if there
+  # is already a method defined on one of target_ancestors with the same name that is final.
+  def self._check_final_ancestors(target, target_ancestors, source_method_names)
+    # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
+    # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
+    target_ancestors.reverse_each do |ancestor|
+      source_method_names.each do |method_name|
+        # the usage of method_owner_and_name_to_key(ancestor, method_name) instead of
+        # method_to_key(ancestor.instance_method(method_name)) is not (just) an optimization, but also required for
+        # correctness, since ancestor.method_defined?(method_name) may return true even if method_name is not defined
+        # directly on ancestor but instead an ancestor of ancestor.
+        if ancestor.method_defined?(method_name) && final_method?(method_owner_and_name_to_key(ancestor, method_name))
+          raise(
+            "`#{ancestor.name}##{method_name}` was declared as final and cannot be " +
+            (target == ancestor ? "redefined" : "overridden in `#{target.name}`")
+          )
+        end
+      end
+    end
+  end
+
+  private_class_method def self.add_final_method(method_key)
+    @final_methods.add(method_key)
+  end
+
+  private_class_method def self.final_method?(method_key)
+    @final_methods.include?(method_key)
+  end
+
+  def self.add_module_with_final(mod)
+    @modules_with_final.add(mod)
+  end
+
+  private_class_method def self.module_with_final?(mod)
+    @modules_with_final.include?(mod)
+  end
+
   # Only public because it needs to get called below inside the replace_method blocks below.
   def self._on_method_added(hook_mod, method_name, is_singleton_method: false)
-    current_declaration = T::Private::DeclState.current.active_declaration
-    return if !current_declaration
-    T::Private::DeclState.current.reset!
+    if T::Private::DeclState.current.skip_next_on_method_added
+      T::Private::DeclState.current.skip_next_on_method_added = false
+      return
+    end
 
+    current_declaration = T::Private::DeclState.current.active_declaration
     mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
     original_method = mod.instance_method(method_name)
+
+    _check_final_ancestors(mod, mod.ancestors, [method_name])
+
+    return if current_declaration.nil?
+    T::Private::DeclState.current.reset!
 
     sig_block = lambda do
       T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
@@ -161,15 +219,16 @@ module T::Private::Methods
     end
 
     new_method = mod.instance_method(method_name)
-    @sig_wrappers[method_to_key(new_method)] = sig_block
+    key = method_to_key(new_method)
+    @sig_wrappers[key] = sig_block
+    if current_declaration.final
+      add_final_method(key)
+      add_module_with_final(mod)
+    end
   end
 
   def self.sig_error(loc, message)
-    raise(
-      ArgumentError.new(
-        "#{loc.path}:#{loc.lineno}: Error interpreting `sig`:\n  #{message}\n\n"
-      )
-    )
+    raise(ArgumentError.new("#{loc.path}:#{loc.lineno}: Error interpreting `sig`:\n  #{message}\n\n"))
   end
 
   # Executes the `sig` block, and converts the resulting Declaration
@@ -300,6 +359,38 @@ module T::Private::Methods
     end
   end
 
+  # the module target is adding the methods from the module source to itself. we need to check that for all instance
+  # methods M on source, M is not defined on any of target's ancestors.
+  def self._included_extended_impl(target, target_ancestors, source)
+    if !module_with_final?(target) && !module_with_final?(source)
+      return
+    end
+    add_module_with_final(target)
+    install_hooks(target)
+    _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
+  end
+
+  def self.set_final_checks_for_include_extend(enable)
+    is_enabled = @old_included_extended != nil
+    if enable == is_enabled
+      return
+    end
+    if is_enabled
+      @old_included_extended.each(&:restore)
+      @old_included_extended = nil
+    else
+      old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
+        old_included.bind(self).call(arg)
+        ::T::Private::Methods._included_extended_impl(arg, arg.ancestors, self)
+      end
+      old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
+        old_extended.bind(self).call(arg)
+        ::T::Private::Methods._included_extended_impl(arg, arg.singleton_class.ancestors, self)
+      end
+      @old_included_extended = [old_included, old_extended]
+    end
+  end
+
   def self.install_hooks(mod)
     return if @installed_hooks.include?(mod)
     @installed_hooks << mod
@@ -330,8 +421,13 @@ module T::Private::Methods
     original_singleton_method.bind(attached).call(:singleton_method_added)
   end
 
+  # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
+  private_class_method def self.method_owner_and_name_to_key(owner, name)
+    "#{owner.object_id}##{name}"
+  end
+
   private_class_method def self.method_to_key(method)
-    "#{method.owner.object_id}##{method.name}"
+    method_owner_and_name_to_key(method.owner, method.name)
   end
 
   private_class_method def self.key_to_method(key)
