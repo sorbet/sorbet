@@ -766,6 +766,14 @@ public:
 
                 const bool fixed = sym.data(ctx)->isFixed();
                 const bool bounded = sym.data(ctx)->isBounded();
+
+                // For now, bounded type members are not supported
+                if (bounded) {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Only `{}` type members are supported", ":fixed");
+                    }
+                }
+
                 // one of :fixed or bounds were provided
                 if (fixed != bounded) {
                     return asgn;

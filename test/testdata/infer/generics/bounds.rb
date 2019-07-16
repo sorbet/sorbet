@@ -10,6 +10,7 @@ class A1
 
   X = type_member(fixed: Cat, lower: Persian, upper: Animal)
     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Type member is defined with bounds and `:fixed`
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Only `:fixed` type members are supported
 end
 
 class A2
@@ -19,6 +20,15 @@ class A2
   # This should allow instantiations of this variable as any of Animal, Cat, or
   # Persian.
   X = type_member(lower: Persian, upper: Animal)
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Only `:fixed` type members are supported
+end
+
+module M
+  extend T::Sig
+  extend T::Generic
+
+  X = type_member(lower: Persian, upper: Animal)
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Only `:fixed` type members are supported
 end
 
 class Test
