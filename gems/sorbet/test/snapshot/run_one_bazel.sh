@@ -97,7 +97,7 @@ SORBET_TYPED_REV="$(rlocation com_stripe_ruby_typer/gems/sorbet/test/snapshot/so
 SRB_SORBET_TYPED_REVISION="$(<"$SORBET_TYPED_REV")"
 export SRB_SORBET_TYPED_REVISION
 
-if [ -z "$SRB_SORBET_TYPED_REVISION" ]; then
+if [ "$SRB_SORBET_TYPED_REVISION" = "" ]; then
   error "└─ empty sorbet-typed revision from: ${SORBET_TYPED_REV}"
   exit 1
 else
