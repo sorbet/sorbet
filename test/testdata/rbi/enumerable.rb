@@ -18,4 +18,4 @@
 [1, 3, 20].minmax_by {|n| [n.to_s, [1, 2]]}
 [1, 3, 20].sort_by {|n| [n.to_s, [1, 2]]}
 
-T.assert_type!([1].lazy, ::Enumerator::Lazy[Integer])
+T.assert_type!([1].lazy, Enumerator::Lazy[Integer])
