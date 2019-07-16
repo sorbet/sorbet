@@ -10,13 +10,31 @@ class Sorbet::Private::SuggestTyped
 
   def self.main
     count = 0
-    while count < 50
+    while count < 100
       count += 1
       if suggest_typed
         return true
       end
+
+      if count == 50
+        puts "Adding `typed:` sigils did not converge after 50 tries."
+        STDOUT.write("Would you like to continue anyway? [Y/n] ")
+        if STDIN.isatty && STDOUT.isatty
+          begin
+            input = STDIN.gets&.strip
+            if input.nil? || (input != '' && input != 'y' && input != 'Y')
+              return false
+            end
+          rescue Interrupt
+            return false
+          end
+        else
+          puts "Not running interactively, continuing."
+        end
+      end
     end
-    puts "Adding `typed:` sigils did not converge after 50 tries."
+
+    puts "Adding `typed:` sigils did not converge after 100 tries."
     false
   end
 
