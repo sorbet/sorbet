@@ -94,11 +94,44 @@ type annotations:
 - Our production observability and monitoring catch bad sigs **early**, before
   they propagate false assumptions throughout a codebase.
 
+To drive these points home, let's look at a concrete example:
+
+```ruby
+# typed: true
+require 'sorbet-runtime'
+
+class Example
+  extend T::Sig
+
+  def self.some_untyped_method
+    nil
+  end
+
+  sig {params(x: Integer).returns(Integer)}
+  def self.add_one(x)
+    x + 1
+  end
+end
+
+Example.add_one(Example.some_untyped_method)
+```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Arequire%20'sorbet-runtime'%0A%0Aclass%20Example%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20def%20self.some_untyped_method%0A%20%20%20%20nil%0A%20%20end%0A%0A%20%20sig%20%7Bparams(x%3A%20Integer).returns(Integer)%7D%0A%20%20def%20self.add_one(x)%0A%20%20%20%20x%20%2B%201%0A%20%20end%0Aend%0A%0AExample.add_one(Example.some_untyped_method)">→
+View on sorbet.run</a>
+
+In this example, `srb tc` reports that there were **no errors statically**. But
+if we were to run this code with `ruby`, `some_untyped_method` would return
+`nil`, we'd try to add `1` to it, and Ruby would raise a NoMethodError for `+`.
+By adding a `sig` to `add_one`, the Sorbet runtime will raise an exception
+before even starting to execute the method. This makes typing errors from
+untyped code manifest early and loudly and right at the source, rather than
+silently, long after a sig was added, and far removed from this line of code.
+
 Most people are _either_ familiar with a completely typed language (Java, Go,
 etc.) or a completely untyped language like Ruby; a
-[gradual type system](gradual.md) can be very foreign at first, including these
-runtime checks. But it's precisely these runtime checks that make it easier to
-drive adoption of types in the long run.
+[gradual type system](gradual.md) can be very foreign at first. Including these
+runtime checks by default protects typed code from untyped code, making it
+easier to drive adoption of types in the long run.
 
 ## Changing the runtime behavior
 
@@ -195,9 +228,10 @@ For more on the various `T::Configuration` handlers, see
 
 ## `.checked`: Whether to check in the first place
 
-> **Careful!** Opting out of runtime checks opts out of significant safety
-> checks Sorbet relies on when making claims about a codebase statically. Only
-> disable the runtime when you're aware of the tradeoffs.
+> **Careful!** Opting out of runtime checks can significantly degrade the
+> trustworthiness of type signatures. Only disable the runtime after
+> understanding the tradeoffs. See [Gradual Type Checking](gradual.md) to learn
+> more.
 
 In our examples above with `.on_failure`, every method call had the runtime type
 checks run to determine whether the `T::Configuration` handler should be called
@@ -208,15 +242,15 @@ checks are usually very small.
 But in some cases, especially when calling certain methods in tight loops or
 other latency-sensitive paths, the overhead of even doing the checks (regardless
 of what happens on failure) is prohibitively expensive. To handle these cases,
-Sorbet `.checked(...)` which declares in what environments a sig should be
-checked:
+Sorbet offers `.checked(...)` which declares in what environments a sig should
+be checked:
 
 ```ruby
 # (1) Runtime checks always run.
 sig {params(xs: T::Array[String]).void.checked(:always)}
 
 # (2) Runtime checks only run in "tests" (see below).
-# In non-tests, the sig is **only** has no runtime overhead.
+# In non-tests, this sig specifically has no runtime overhead.
 sig {params(xs: T::Array[String]).void.checked(:tests)}
 
 # (3) Never runs the runtime checks. Careful!
