@@ -17,10 +17,21 @@ module T::Configuration
     T::Private::RuntimeLevels.enable_checking_in_tests
   end
 
-  # Announce to Sorbet that we would like the final checks to be done when including and extending modules. If this is
-  # not called, then, for example, if you have a module A which defines a final method named M, and then A includes a
-  # module B which also defines a method named M, then the runtime will not issue an error about redefining a final
-  # method.
+  # Announce to Sorbet that we would like the final checks to be done when
+  # including and extending modules. Iff this is not called, then the following
+  # example will not raise an error.
+  #
+  # ```ruby
+  # module M
+  #   extend T::Sig
+  #   sig(:final) {void}
+  #   def foo; end
+  # end
+  # class C
+  #   include M
+  #   def foo; end
+  # end
+  # ```
   def self.enable_final_checks_for_include_extend
     T::Private::Methods.enable_final_checks_for_include_extend
   end
