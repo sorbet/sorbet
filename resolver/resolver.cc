@@ -902,7 +902,7 @@ private:
             if (isKwd && !isReq) {
                 seenOptional = true;
             } else if (isKwd && seenOptional && isReq) {
-                if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
+                if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadParameterOrdering)) {
                     e.setHeader("Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
                                 "sig", treeArgName.show(ctx));
                     e.addErrorLine(exprLoc, "Signature");
@@ -955,7 +955,7 @@ private:
                 auto sname = spec.name.show(ctx);
                 auto dname = param->localVariable._name.show(ctx);
                 if (sname != dname) {
-                    if (auto e = ctx.state.beginError(param->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    if (auto e = ctx.state.beginError(param->loc, core::errors::Resolver::BadParameterOrdering)) {
                         e.setHeader("Bad parameter ordering for `{}`, expected `{}` instead", dname, sname);
                         e.addErrorLine(spec.loc, "Expected index in signature:");
                     }
