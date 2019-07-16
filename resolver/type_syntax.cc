@@ -44,7 +44,8 @@ bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
     if (send->block.get() == nullptr) {
         return false;
     }
-    if (!send->args.empty()) {
+    auto nargs = send->args.size();
+    if (nargs != 0 && nargs != 1) {
         return false;
     }
 
