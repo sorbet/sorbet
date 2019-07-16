@@ -12,7 +12,7 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <S <C <U TestSelf>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=20:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
   class <C <U TestSelfGeneric>>[<C <U Elem>>] < <C <U Object>> () @ Loc {file=test/testdata/resolver/self.rb start=23:1 end=23:22}
-    type-member(=) <C <U TestSelfGeneric>><C <U Elem>> @ Loc {file=test/testdata/resolver/self.rb start=27:3 end=27:21}
+    type-member(=) <C <U TestSelfGeneric>><C <U Elem>> -> LambdaParam(<C <U TestSelfGeneric>><C <U Elem>>, lower=T.untyped, upper=T.untyped) @ Loc {file=test/testdata/resolver/self.rb start=27:3 end=27:21}
     method <C <U TestSelfGeneric>><U good1> (s, <blk>) -> AppliedType {
       klass = <C <U TestSelfGeneric>>
       targs = [

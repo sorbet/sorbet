@@ -10,7 +10,8 @@ class Invalids
   Mama = type_member("mama") # error: Invalid param, must be a :symbol
   One = type_member(1) # error: Invalid param, must be a :symbol
   ArrOne = type_member([1]) # error: Invalid param, must be a :symbol
-  BadArg = type_member(junk: 1) # error: Missing required param :fixed
+  BadArg = type_member(junk: 1)
+         # ^^^^^^^^^^^^^^^^^^^^ error: Missing required param `fixed`
 end
 
 

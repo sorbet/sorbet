@@ -657,7 +657,8 @@ bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return und.derivesFrom(gs, klass);
 }
 
-LambdaParam::LambdaParam(const SymbolRef definition) : definition(definition) {
+LambdaParam::LambdaParam(const SymbolRef definition, TypePtr lowerBound, TypePtr upperBound)
+    : definition(definition), lowerBound(lowerBound), upperBound(upperBound) {
     categoryCounterInc("types.allocated", "lambdatypeparam");
 }
 

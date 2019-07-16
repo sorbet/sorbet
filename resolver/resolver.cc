@@ -322,8 +322,9 @@ private:
         if (isFullyResolved(ctx, job.rhs)) {
             auto allowSelfType = true;
             auto allowRebind = false;
+            auto allowTypeMember = true;
             job.lhs.data(ctx)->resultType = TypeSyntax::getResultType(
-                ctx, *(job.rhs), ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, job.lhs});
+                ctx, *(job.rhs), ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, job.lhs});
             return true;
         }
 
@@ -1039,8 +1040,10 @@ private:
             for (auto sig : lastSigs) {
                 auto allowSelfType = true;
                 auto allowRebind = false;
-                TypeSyntax::parseSig(ctx, sig, nullptr,
-                                     TypeSyntaxArgs{allowSelfType, allowRebind, core::Symbols::untyped()});
+                auto allowTypeMember = true;
+                TypeSyntax::parseSig(
+                    ctx, sig, nullptr,
+                    TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::untyped()});
             }
 
             if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -1163,9 +1166,10 @@ private:
                     while (i < lastSigs.size()) {
                         auto allowSelfType = true;
                         auto allowRebind = false;
-                        auto sig =
-                            TypeSyntax::parseSig(ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]),
-                                                 nullptr, TypeSyntaxArgs{allowSelfType, allowRebind, mdef->symbol});
+                        auto allowTypeMember = true;
+                        auto sig = TypeSyntax::parseSig(
+                            ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]), nullptr,
+                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef->symbol});
                         core::SymbolRef overloadSym;
                         if (isOverloaded) {
                             vector<int> argsToKeep;
@@ -1375,7 +1379,6 @@ public:
         }
 
         if (data->isTypeMember()) {
-            ENFORCE(data->isFixed() || data->isBounded());
             auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
             ENFORCE(send->recv->isSelfReference());
             ENFORCE(send->fun == core::Names::typeMember() || send->fun == core::Names::typeTemplate());
@@ -1388,18 +1391,96 @@ public:
                 Exception::raise("Wrong arg count");
             }
 
+            auto *memberType = core::cast_type<core::LambdaParam>(data->resultType.get());
+            ENFORCE(memberType != nullptr);
+
+            auto lowerBound = core::Types::bottom();
+            auto upperBound = core::Types::bottom();
+
+            // NOTE: the resultType is set back in the namer to be a LambdaParam
+            // with `T.untyped` for its bounds. We fix that here by setting the
+            // bounds to top and bottom.
+            memberType->lowerBound = core::Types::bottom();
+            memberType->upperBound = core::Types::top();
+
+            core::LambdaParam *parentType = nullptr;
+            auto parentMember = data->owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
+            if (parentMember.exists()) {
+                parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType.get());
+                ENFORCE(parentType != nullptr);
+            }
+
+            // Initialize the upper/lower bounds according to definition in the
+            // super class.
+            if (parentType != nullptr) {
+                memberType->lowerBound = parentType->lowerBound;
+                memberType->upperBound = parentType->upperBound;
+            }
+
             auto *hash = ast::cast_tree<ast::Hash>(send->args[arg].get());
             if (hash) {
                 int i = -1;
+                bool boundsChanged = false;
                 for (auto &keyExpr : hash->keys) {
                     i++;
                     auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
-                    if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
+                    if (lit && lit->isSymbol(ctx)) {
                         ParsedSig emptySig;
                         auto allowSelfType = true;
                         auto allowRebind = false;
-                        data->resultType = TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig,
-                                                                     TypeSyntaxArgs{allowSelfType, allowRebind, sym});
+                        auto allowTypeMember = false;
+                        core::TypePtr resTy =
+                            TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig,
+                                                      TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, sym});
+
+                        switch (lit->asSymbol(ctx)._id) {
+                            case core::Names::fixed()._id:
+                                boundsChanged = true;
+                                memberType->lowerBound = resTy;
+                                memberType->upperBound = resTy;
+                                break;
+
+                            case core::Names::lower()._id:
+                                boundsChanged = true;
+                                memberType->lowerBound = resTy;
+                                break;
+
+                            case core::Names::upper()._id:
+                                boundsChanged = true;
+                                memberType->upperBound = resTy;
+                                break;
+                        }
+                    }
+                }
+
+                // If the parent bounds exist and new bounds were set, validate
+                // the new bounds against those of the parent.
+                // NOTE: these errors could be better for cases involving
+                // `fixed`.
+                if (boundsChanged && parentType != nullptr) {
+                    if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound)) {
+                        if (auto e =
+                                ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                            e.setHeader("parent lower bound `{}` is not a subtype of lower bound `{}`",
+                                        parentType->lowerBound->show(ctx), memberType->lowerBound->show(ctx));
+                        }
+                    }
+                    if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound)) {
+                        if (auto e =
+                                ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                            e.setHeader("upper bound `{}` is not a subtype of parent upper bound `{}`",
+                                        memberType->upperBound->show(ctx), parentType->upperBound->show(ctx));
+                        }
+                    }
+                }
+
+                // Ensure that the new lower bound is a subtype of the upper
+                // bound. This will be a no-op in the case that the type member
+                // is fixed.
+                if (boundsChanged && !core::Types::isSubType(ctx, memberType->lowerBound, memberType->upperBound)) {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeMemberBounds)) {
+                        e.setHeader("`{}` is not a subtype of `{}`", memberType->lowerBound->show(ctx),
+                                    memberType->upperBound->show(ctx));
                     }
                 }
             }
@@ -1474,9 +1555,10 @@ public:
                     ParsedSig emptySig;
                     auto allowSelfType = true;
                     auto allowRebind = false;
+                    auto allowTypeMember = true;
                     auto type = TypeSyntax::getResultType(
                         ctx.withOwner(ownerClass), *(send->args[1]), emptySig,
-                        TypeSyntaxArgs{allowSelfType, allowRebind, core::Symbols::noSymbol()});
+                        TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::noSymbol()});
                     return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }

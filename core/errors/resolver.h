@@ -56,6 +56,8 @@ constexpr ErrorClass FinalModuleNonFinalMethod{5048, StrictLevel::False};
 constexpr ErrorClass BadParameterOrdering{5049, StrictLevel::False};
 constexpr ErrorClass SealedAncestor{5050, StrictLevel::False};
 constexpr ErrorClass UndeclaredOverride{5051, StrictLevel::True};
+constexpr ErrorClass InvalidTypeMemberBounds{5052, StrictLevel::False};
+constexpr ErrorClass ParentTypeBoundsMismatch{5053, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif
