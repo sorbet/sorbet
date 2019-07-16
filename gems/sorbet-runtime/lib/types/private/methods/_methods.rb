@@ -121,7 +121,7 @@ module T::Private::Methods
 
   # when mod includes a module with instance methods method_names, ensure there is zero intersection between the final
   # instance methods of mod and method_names. so, for every m in method_names, check if there is already a method
-  # defined on one of mod's ancestors with the same name that is final.
+  # defined on one of ancestors with the same name that is final.
   def self._check_final_ancestors(mod, ancestors, method_names)
     # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
     # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
