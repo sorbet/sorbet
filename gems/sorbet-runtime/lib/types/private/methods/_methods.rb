@@ -14,7 +14,7 @@ module T::Private::Methods
   # if a module directly defines a final method, or includes, extends, or inherits from a module which does so, then it
   # should be in this set.
   @modules_with_final = Set.new
-  @enabled_final_checks_for_include_extend = false
+  @old_included_extended = nil
 
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
@@ -370,18 +370,24 @@ module T::Private::Methods
     _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
   end
 
-  def self.enable_final_checks_for_include_extend
-    if @enabled_final_checks_for_include_extend
+  def self.set_final_checks_for_include_extend(enable)
+    is_enabled = @old_included_extended != nil
+    if enable == is_enabled
       return
     end
-    @enabled_final_checks_for_include_extend = true
-    old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
-      old_included.bind(self).call(arg)
-      ::T::Private::Methods._included_extended_impl(arg, arg.ancestors, self)
-    end
-    old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
-      old_extended.bind(self).call(arg)
-      ::T::Private::Methods._included_extended_impl(arg, arg.singleton_class.ancestors, self)
+    if is_enabled
+      @old_included_extended.each(&:restore)
+      @old_included_extended = nil
+    else
+      old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
+        old_included.bind(self).call(arg)
+        ::T::Private::Methods._included_extended_impl(arg, arg.ancestors, self)
+      end
+      old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
+        old_extended.bind(self).call(arg)
+        ::T::Private::Methods._included_extended_impl(arg, arg.singleton_class.ancestors, self)
+      end
+      @old_included_extended = [old_included, old_extended]
     end
   end
 

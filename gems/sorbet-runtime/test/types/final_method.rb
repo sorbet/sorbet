@@ -8,6 +8,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
 
   after do
     T::Private::DeclState.current.reset!
+    T::Configuration.reset_final_checks_for_include_extend
   end
 
   it "allows declaring an instance method as final" do

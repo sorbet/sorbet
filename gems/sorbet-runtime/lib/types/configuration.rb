@@ -17,7 +17,7 @@ module T::Configuration
     T::Private::RuntimeLevels.enable_checking_in_tests
   end
 
-  # Announce to Sorbet that we would like the final checks to be done when
+  # Announce to Sorbet that we would like the final checks to be enabled when
   # including and extending modules. Iff this is not called, then the following
   # example will not raise an error.
   #
@@ -33,7 +33,13 @@ module T::Configuration
   # end
   # ```
   def self.enable_final_checks_for_include_extend
-    T::Private::Methods.enable_final_checks_for_include_extend
+    T::Private::Methods.set_final_checks_for_include_extend(true)
+  end
+
+  # Undo the effects of a previous call to
+  # `enable_final_checks_for_include_extend`.
+  def self.reset_final_checks_for_include_extend
+    T::Private::Methods.set_final_checks_for_include_extend(false)
   end
 
   # Configure the default checked level for a sig with no explicit `.checked`
