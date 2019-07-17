@@ -4,8 +4,8 @@ title: Enabling Runtime Checks
 ---
 
 As we've mentioned before, Sorbet is a [gradual](gradual.md) system: it can be
-turned on and off at will. This means the predications `srb` makes statically
-can be wrong.
+turned on and off at will. This means the predictions `srb` makes statically can
+be wrong.
 
 That's why Sorbet also uses **runtime checks**: even if a static prediction was
 wrong, it will get checked during runtime, making things fail loudly and

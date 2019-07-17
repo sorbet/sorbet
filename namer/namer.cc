@@ -666,6 +666,14 @@ public:
             }
             return make_unique<ast::EmptyTree>();
         }
+        if (ctx.owner == core::Symbols::root()) {
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
+                e.setHeader("`{}` cannot be used at the top-level", "type_member");
+            }
+            auto send =
+                ast::MK::Send1(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(), ast::MK::Untyped(asgn->loc));
+            return handleAssignment(ctx, make_unique<ast::Assign>(asgn->loc, std::move(asgn->lhs), std::move(send)));
+        }
 
         auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
         if (!send->args.empty()) {
@@ -673,7 +681,10 @@ public:
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many args in type definition");
                 }
-                return make_unique<ast::EmptyTree>();
+                auto send = ast::MK::Send1(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(),
+                                           ast::MK::Untyped(asgn->loc));
+                return handleAssignment(ctx,
+                                        make_unique<ast::Assign>(asgn->loc, std::move(asgn->lhs), std::move(send)));
             }
 
             auto lit = ast::cast_tree<ast::Literal>(send->args[0].get());
@@ -792,6 +803,23 @@ public:
         return make_unique<ast::EmptyTree>();
     }
 
+    unique_ptr<ast::Expression> handleAssignment(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
+        auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
+        auto ret = fillAssign(ctx, std::move(asgn));
+        if (send->fun == core::Names::typeAlias()) {
+            auto id = ast::cast_tree<ast::ConstantLit>(ret->lhs.get());
+            ENFORCE(id != nullptr, "fillAssign did not make lhs into a ConstantLit");
+
+            auto sym = id->symbol;
+            ENFORCE(sym.exists(), "fillAssign did not make symbol for ConstantLit");
+
+            if (sym.data(ctx)->isStaticField()) {
+                sym.data(ctx)->setTypeAlias();
+            }
+        }
+        return ret;
+    }
+
     unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         if (lhs == nullptr) {
@@ -804,19 +832,7 @@ public:
         }
 
         if (!send->recv->isSelfReference()) {
-            auto ret = fillAssign(ctx, std::move(asgn));
-            if (send->fun == core::Names::typeAlias()) {
-                auto id = ast::cast_tree<ast::ConstantLit>(ret->lhs.get());
-                ENFORCE(id != nullptr, "fillAssign did not make lhs into a ConstantLit");
-
-                auto sym = id->symbol;
-                ENFORCE(sym.exists(), "fillAssign did not make symbol for ConstantLit");
-
-                if (sym.data(ctx)->isStaticField()) {
-                    sym.data(ctx)->setTypeAlias();
-                }
-            }
-            return ret;
+            return handleAssignment(ctx, std::move(asgn));
         }
 
         auto *typeName = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
