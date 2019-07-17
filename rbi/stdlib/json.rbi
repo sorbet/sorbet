@@ -378,6 +378,329 @@ class JSON::GenericObject < OpenStruct
   def self.load(source, proc=T.unsafe(nil), opts=T.unsafe(nil)); end
 end
 
+module JSON::Ext
+end
+
+module JSON::Ext::Generator
+end
+
+module JSON::Ext::Generator::GeneratorMethods
+end
+
+module JSON::Ext::Generator::GeneratorMethods::Array
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def to_json(*_); end
+end
+
+module JSON::Ext::Generator::GeneratorMethods::FalseClass
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def to_json(*_); end
+end
+
+module JSON::Ext::Generator::GeneratorMethods::Float
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def to_json(*_); end
+end
+
+module JSON::Ext::Generator::GeneratorMethods::Hash
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def to_json(*_); end
+end
+
+module JSON::Ext::Generator::GeneratorMethods::Integer
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def to_json(*_); end
+end
+
+module JSON::Ext::Generator::GeneratorMethods::NilClass
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def to_json(*_); end
+end
+
+module JSON::Ext::Generator::GeneratorMethods::Object
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def to_json(*_); end
+end
+
+module JSON::Ext::Generator::GeneratorMethods::String
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def to_json(*_); end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def to_json_raw(*_); end
+
+  sig do
+    returns(::Hash)
+  end
+  def to_json_raw_object; end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .void
+  end
+  def self.included(_); end
+end
+
+module JSON::Ext::Generator::GeneratorMethods::String::Extend
+  sig do
+    params(
+      _: ::Hash
+    )
+    .returns(::String)
+  end
+  def json_create(_); end
+end
+
+module JSON::Ext::Generator::GeneratorMethods::TrueClass
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def to_json(*_); end
+end
+
+class JSON::Ext::Generator::State
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .void
+  end
+  def initialize(*_); end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def [](_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def []=(_, _); end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def allow_nan?; end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def array_nl; end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def array_nl=(_); end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def ascii_only?; end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def buffer_initial_length; end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def buffer_initial_length=(_); end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def check_circular?; end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def configure(_); end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def depth; end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def depth=(_); end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def generate(_); end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def indent; end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def indent=(_); end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def max_nesting; end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def max_nesting=(_); end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def merge(_); end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def object_nl; end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def object_nl=(_); end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def space; end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def space=(_); end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def space_before; end
+
+  sig do
+    params(
+      _: ::T.untyped
+    )
+    .returns(::T.untyped)
+  end
+  def space_before=(_); end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def to_h; end
+
+  sig do
+    returns(::T.untyped)
+  end
+  def to_hash; end
+end
+
+class JSON::Ext::Parser
+  sig do
+    returns(::T.untyped)
+  end
+  def parse; end
+
+  sig do
+    returns(::String)
+  end
+  def source; end
+end
+
+
 class JSON::JSONError < StandardError
   sig do
     params(
