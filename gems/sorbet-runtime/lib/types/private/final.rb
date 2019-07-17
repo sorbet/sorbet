@@ -28,11 +28,11 @@ module T::Private::Final
   end
 
   def self.final_module?(mod)
-    mod.instance_variable_defined?(:@sorbet_final_module) # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
+    mod.instance_variable_defined?(:@sorbet_final_module)
   end
 
   private_class_method def self.mark_as_final_module(mod)
-    mod.instance_variable_set(:@sorbet_final_module, true) # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
+    mod.instance_variable_set(:@sorbet_final_module, true)
     T::Private::Methods.add_module_with_final(mod)
   end
 end
