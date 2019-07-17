@@ -23,7 +23,7 @@ module T::Private::Final
 
   def self.declare(mod)
     if !mod.is_a?(Module)
-      raise "#{mod.name} is not a class, module or method and cannot be declared as final"
+      raise "#{mod.name} is not a class or module and cannot be declared as final with `final!`"
     end
     if final_module?(mod)
       raise "#{mod.name} was already declared as final and cannot be re-declared as final"
