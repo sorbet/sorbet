@@ -56,3 +56,50 @@ test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Method `
      110 |B = e
               ^
 Errors: 4
+----- test/cli/incremental-resolver/expect-failures/multiple_sigs.rb ---------------------
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:2: Parse Error: unexpected token: syntax error https://srb.help/2001
+     2 |2sig {}
+         ^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:2: Unused type annotation. No method def before next annotation https://srb.help/5040
+     2 |2sig {}
+         ^^^^^^
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Type annotation that will be used instead
+     3 |sig{}
+        ^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:2: To use `sig`, this file must declare an explicit `# typed:` sigil (found: none). If you're not sure which one to use, start with `# typed: false` https://srb.help/5038
+     2 |2sig {}
+         ^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:2: Malformed `sig`: No return type specified. Specify one with .returns() https://srb.help/5003
+     2 |2sig {}
+         ^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Malformed `sig`: No return type specified. Specify one with .returns() https://srb.help/5003
+     3 |sig{}
+        ^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:37: Parse Error: unexpected token: syntax error https://srb.help/2001
+    37 |2sig {}
+         ^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:37: Unused type annotation. No method def before next annotation https://srb.help/5040
+    37 |2sig {}
+         ^^^^^^
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:38: Type annotation that will be used instead
+    38 |sig{}
+        ^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:37: To use `sig`, this file must declare an explicit `# typed:` sigil (found: none). If you're not sure which one to use, start with `# typed: false` https://srb.help/5038
+    37 |2sig {}
+         ^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:37: Malformed `sig`: No return type specified. Specify one with .returns() https://srb.help/5003
+    37 |2sig {}
+         ^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:38: Malformed `sig`: No return type specified. Specify one with .returns() https://srb.help/5003
+    38 |sig{}
+        ^^^^^
+Errors: 10
