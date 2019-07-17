@@ -2,6 +2,13 @@
 # typed: false
 
 module T::Private::Final
+  module NoInherit
+    def inherited(arg)
+      super(arg)
+      raise "#{self.name} was declared as final and cannot be inherited"
+    end
+  end
+
   def self.declare(mod)
     if !mod.is_a?(Module)
       raise "#{mod.name} is not a module or method and cannot be declared as final"
@@ -13,10 +20,7 @@ module T::Private::Final
       raise "#{mod.name} was already declared as abstract and cannot be declared as final"
     end
     if mod.is_a?(Class)
-      orig_inherited = T::Private::ClassUtils.replace_method(mod.singleton_class, :inherited) do |arg|
-        orig_inherited.bind(self).call(arg)
-        raise "#{mod.name} was declared as final and cannot be inherited from"
-      end
+      mod.extend(NoInherit)
     end
     mark_as_final_module(mod)
     mark_as_final_module(mod.singleton_class)
