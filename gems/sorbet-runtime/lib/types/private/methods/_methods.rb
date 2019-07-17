@@ -166,22 +166,14 @@ module T::Private::Methods
 
     current_declaration = T::Private::DeclState.current.active_declaration
     mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
-    current_mod_final = T::Private::Final.final_module?(mod)
     original_method = mod.instance_method(method_name)
 
-    if !current_declaration.nil? && current_declaration.final && current_mod_final
-      raise "`#{mod.name}` was declared as final and its method `#{method_name}` " \
-        "cannot also be explicitly declared as final (it is implicitly final)"
+    if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
+      raise "`#{mod.name}` was declared as final but its method `#{method_name}` was not declared as final"
     end
     _check_final_ancestors(mod, mod.ancestors, [method_name])
 
-    if current_declaration.nil?
-      if current_mod_final
-        add_final_method(method_to_key(original_method))
-        add_module_with_final(mod)
-      end
-      return
-    end
+    return if current_declaration.nil?
     T::Private::DeclState.current.reset!
 
     sig_block = lambda do
@@ -232,7 +224,7 @@ module T::Private::Methods
     new_method = mod.instance_method(method_name)
     key = method_to_key(new_method)
     @sig_wrappers[key] = sig_block
-    if current_declaration.final || current_mod_final
+    if current_declaration.final
       add_final_method(key)
       add_module_with_final(mod)
     end
