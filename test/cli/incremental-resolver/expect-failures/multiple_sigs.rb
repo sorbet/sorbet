@@ -1,6 +1,7 @@
+# typed: true
 def z
-2sig {}
-sig{}
-def-f
-end
+  sig {void}
+  sig {void}
+  def-f
+  end
 end

@@ -57,49 +57,46 @@ test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Method `
               ^
 Errors: 4
 ----- test/cli/incremental-resolver/expect-failures/multiple_sigs.rb ---------------------
-test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:2: Parse Error: unexpected token: syntax error https://srb.help/2001
-     2 |2sig {}
-         ^^^
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Unused type annotation. No method def before next annotation https://srb.help/5040
+     3 |  sig {void}
+          ^^^^^^^^^^
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:4: Type annotation that will be used instead
+     4 |  sig {void}
+          ^^^^^^^^^^
 
-test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:2: Unused type annotation. No method def before next annotation https://srb.help/5040
-     2 |2sig {}
-         ^^^^^^
-    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Type annotation that will be used instead
-     3 |sig{}
-        ^^^^^
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:5: Malformed `sig`. Type not specified for argument `f` https://srb.help/5003
+     5 |  def-f
+              ^
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Signature
+     3 |  sig {void}
+          ^^^^^^^^^^
 
-test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:2: To use `sig`, this file must declare an explicit `# typed:` sigil (found: none). If you're not sure which one to use, start with `# typed: false` https://srb.help/5038
-     2 |2sig {}
-         ^^^^^^
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Unused type annotation. No method def before next annotation https://srb.help/5040
+    68 |  sig {void}
+          ^^^^^^^^^^
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Type annotation that will be used instead
+    69 |  sig {void}
+          ^^^^^^^^^^
 
-test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:2: Malformed `sig`: No return type specified. Specify one with .returns() https://srb.help/5003
-     2 |2sig {}
-         ^^^^^^
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `sig` does not exist on `Object` https://srb.help/7003
+    68 |  sig {void}
+          ^^^^^^^^^^
 
-test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Malformed `sig`: No return type specified. Specify one with .returns() https://srb.help/5003
-     3 |sig{}
-        ^^^^^
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `void` does not exist on `Object` https://srb.help/7003
+    68 |  sig {void}
+               ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L647: Did you mean: `Kernel#load`?
+     647 |  def load(filename, arg0=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:37: Parse Error: unexpected token: syntax error https://srb.help/2001
-    37 |2sig {}
-         ^^^
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `sig` does not exist on `Object` https://srb.help/7003
+    69 |  sig {void}
+          ^^^^^^^^^^
 
-test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:37: Unused type annotation. No method def before next annotation https://srb.help/5040
-    37 |2sig {}
-         ^^^^^^
-    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:38: Type annotation that will be used instead
-    38 |sig{}
-        ^^^^^
-
-test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:37: To use `sig`, this file must declare an explicit `# typed:` sigil (found: none). If you're not sure which one to use, start with `# typed: false` https://srb.help/5038
-    37 |2sig {}
-         ^^^^^^
-
-test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:37: Malformed `sig`: No return type specified. Specify one with .returns() https://srb.help/5003
-    37 |2sig {}
-         ^^^^^^
-
-test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:38: Malformed `sig`: No return type specified. Specify one with .returns() https://srb.help/5003
-    38 |sig{}
-        ^^^^^
-Errors: 10
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `void` does not exist on `Object` https://srb.help/7003
+    69 |  sig {void}
+               ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L647: Did you mean: `Kernel#load`?
+     647 |  def load(filename, arg0=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 7
