@@ -36,6 +36,32 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
     assert_includes(err.message, "was declared as final and cannot be inherited")
   end
 
+  it "forbids including a final module" do
+    m = Module.new do
+      extend T::Helpers
+      final!
+    end
+    err = assert_raises(RuntimeError) do
+      Module.new do
+        include m
+      end
+    end
+    assert_includes(err.message, "was declared as final and cannot be included")
+  end
+
+  it "forbids extending a final module" do
+    m = Module.new do
+      extend T::Helpers
+      final!
+    end
+    err = assert_raises(RuntimeError) do
+      Module.new do
+        extend m
+      end
+    end
+    assert_includes(err.message, "was declared as final and cannot be extended")
+  end
+
   it "allows declaring a module as final and its method as final" do
     Module.new do
       extend T::Helpers
