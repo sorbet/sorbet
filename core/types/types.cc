@@ -663,11 +663,8 @@ SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition
 }
 
 bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    // This only ever gets called in bad situations when we haven't instantiated a LambdaParam as either a SelfTypeParam
-    // (within the body of a generic class) or a specific type (after having instantiated the class with specific
-    // parameters and/or T.untyped.) However, those errors are captured elsewhere, so here we can follow the same
-    // behavior as SelfTypeParam and return 'false'.
-    return false;
+    Exception::raise(
+        "LambdaParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
