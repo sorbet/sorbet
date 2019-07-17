@@ -666,6 +666,12 @@ public:
             }
             return make_unique<ast::EmptyTree>();
         }
+        if (ctx.owner == core::Symbols::root()) {
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
+                e.setHeader("`{}` cannot be used outside of a class declaration", "type_member");
+            }
+            return make_unique<ast::EmptyTree>();
+        }
 
         auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
         if (!send->args.empty()) {
