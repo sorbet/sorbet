@@ -411,6 +411,9 @@ module T::Private::Methods
 
   private_class_method def self.install_singleton_method_added_hook(singleton_klass)
     attached = nil
+    # this prevents the final checks from triggering about singleton_method_added not being a final method even if the
+    # module is final.
+    T::Private::DeclState.current.skip_next_on_method_added = true
     original_singleton_method = T::Private::ClassUtils.replace_method(singleton_klass, :singleton_method_added) do |name|
       attached = self
       T::Private::Methods._on_method_added(self, name, is_singleton_method: true)
