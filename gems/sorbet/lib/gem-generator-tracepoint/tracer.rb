@@ -101,7 +101,7 @@ module Sorbet::Private
       def self.pre_cache_module_methods
         ObjectSpace.each_object(Module) do |mod_|
           mod = T.cast(mod_, Module)
-          @modules[Sorbet::Private::RealStdlib.real_object_id(mod)] = (mod.instance_methods(false) + mod.private_instance_methods(false)).to_set
+          @modules[Sorbet::Private::RealStdlib.real_object_id(mod)] = (Sorbet::Private::RealStdlib.real_instance_methods(mod, false) + Sorbet::Private::RealStdlib.real_private_instance_methods(mod, false)).to_set
         end
       end
 
