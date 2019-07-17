@@ -9,6 +9,18 @@ module T::Private::Final
     end
   end
 
+  module NoIncludeExtend
+    def included(arg)
+      super(arg)
+      raise "#{self.name} was declared as final and cannot be included"
+    end
+
+    def extended(arg)
+      super(arg)
+      raise "#{self.name} was declared as final and cannot be extended"
+    end
+  end
+
   def self.declare(mod)
     if !mod.is_a?(Module)
       raise "#{mod.name} is not a module or method and cannot be declared as final"
@@ -19,9 +31,7 @@ module T::Private::Final
     if T::AbstractUtils.abstract_module?(mod)
       raise "#{mod.name} was already declared as abstract and cannot be declared as final"
     end
-    if mod.is_a?(Class)
-      mod.extend(NoInherit)
-    end
+    mod.extend(mod.is_a?(Class) ? NoInherit : NoIncludeExtend)
     mark_as_final_module(mod)
     mark_as_final_module(mod.singleton_class)
     T::Private::Methods.install_hooks(mod)
