@@ -185,6 +185,8 @@ module T::Private::Methods
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
     new_method = nil
+    # this prevents us from running the final checks twice for every method def.
+    T::Private::DeclState.current.skip_next_on_method_added = true
     T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
       if !T::Private::Methods.has_sig_block_for_method(new_method)
         # This should only happen if the user used alias_method to grab a handle
