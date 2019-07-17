@@ -279,9 +279,9 @@ private:
 public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         auto sym = classDef->symbol;
-        validateAbstract(ctx.state, sym);
-        validateTStructNotGrandparent(ctx.state, sym);
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
+        validateTStructNotGrandparent(ctx.state, sym);
+        validateAbstract(ctx.state, sym);
         validateAbstract(ctx.state, singleton);
         return classDef;
     }
