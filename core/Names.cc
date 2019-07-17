@@ -70,7 +70,11 @@ string Name::showRaw(const GlobalState &gs) const {
                     kind = "R";
                     break;
             }
-            return fmt::format("<{} {} ${}>", kind, this->unique.original.data(gs)->showRaw(gs), this->unique.num);
+            if (gs.censorRawLocsWithinPayload && this->unique.original == core::Names::staticInit()) {
+                return fmt::format("<{} {} ${}>", kind, this->unique.original.data(gs)->showRaw(gs), "CENSORED");
+            } else {
+                return fmt::format("<{} {} ${}>", kind, this->unique.original.data(gs)->showRaw(gs), this->unique.num);
+            }
         }
         case CONSTANT:
             return fmt::format("<C {}>", this->cnst.original.showRaw(gs));
