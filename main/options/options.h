@@ -152,8 +152,8 @@ struct Options {
     bool enableCounters = false;
     std::vector<std::string> someCounters;
     std::string errorUrlBase = "https://srb.help/";
-    std::vector<int> errorCodeWhiteList;
-    std::vector<int> errorCodeBlackList;
+    std::set<int> errorCodeWhiteList;
+    std::set<int> errorCodeBlackList;
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 
