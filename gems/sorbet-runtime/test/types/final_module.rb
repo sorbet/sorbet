@@ -62,7 +62,17 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
     assert_includes(err.message, "was declared as final and cannot be extended")
   end
 
-  it "allows declaring a module as final and its method as final" do
+  it "allows declaring a module as final and its instance method as final" do
+    Module.new do
+      extend T::Helpers
+      final!
+      extend T::Sig
+      sig(:final) {void}
+      def foo; end
+    end
+  end
+
+  it "allows declaring a module as final and its class method as final" do
     Module.new do
       extend T::Helpers
       final!
@@ -72,7 +82,20 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
     end
   end
 
-  it "forbids declaring a module as final but not its method as final" do
+  it "forbids declaring a module as final but not its instance method as final" do
+    err = assert_raises(RuntimeError) do
+      Module.new do
+        extend T::Helpers
+        final!
+        extend T::Sig
+        def foo; end
+      end
+    end
+    assert_includes(err.message, "was declared as final but its method")
+    assert_includes(err.message, "was not declared as final")
+  end
+
+  it "forbids declaring a module as final but not its class method as final" do
     err = assert_raises(RuntimeError) do
       Module.new do
         extend T::Helpers
