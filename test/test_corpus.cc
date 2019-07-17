@@ -806,7 +806,7 @@ string rbFile2BaseTestName(string rbFileName) {
 vector<Expectations> listDir(const char *name) {
     vector<Expectations> result;
 
-    vector<string> names = sorbet::FileOps::listFilesInDir(name, {".rb", ".rbupdate", ".exp"}, false, {}, {});
+    vector<string> names = sorbet::FileOps::listFilesInDir(name, {".rb", ".rbi", ".rbupdate", ".exp"}, false, {}, {});
     const int prefixLen = strnlen(name, 1024) + 1;
     // Trim off the input directory from the name.
     transform(names.begin(), names.end(), names.begin(),
@@ -815,7 +815,7 @@ vector<Expectations> listDir(const char *name) {
 
     Expectations current;
     for (auto &s : names) {
-        if (absl::EndsWith(s, ".rb")) {
+        if (absl::EndsWith(s, ".rb") || absl::EndsWith(s, ".rbi")) {
             auto basename = rbFile2BaseTestName(s);
             if (basename != s) {
                 if (basename == current.basename) {

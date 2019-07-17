@@ -9,6 +9,7 @@ sh_binary(
     name = "run_one_bazel",
     srcs = ["run_one_bazel.sh"],
     data = [
+        "sorbet-typed.rev",
         "//main:sorbet",
         "@gems//bundler",
         "@gems//bundler:bundle",
@@ -31,12 +32,20 @@ snapshot_tests(
             "total/*",
         ],
         exclude = [
-            # TODO(jez) openssl is missing
-            "partial/webmock",
-            "partial/partially-sigged",
+            # These tests can't currently run under bazel,
+            # and can't be written another way.
 
-            # TODO(jez) native extensions don't build
+            # Requires openssl, which doesn't work in bazel.
+            # Can't be rewritten because it's testing gem_loader.
+            "partial/webmock",
+
+            # Requires native extensions. Tests gem_loader for codecov.
             "partial/codecov",
+
+            # Requires native extensions.
+            # Can't be rewritten, because it's essentially an integration test
+            # that a certain private Rails API gives us back absolute vs
+            # relative paths.
             "partial/rails-double-require",
         ],
 

@@ -16,7 +16,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
     tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String}
 
     for path in all_paths:
-        if path.endswith(".rb"):
+        if path.endswith(".rb") or path.endswith(".rbi"):
             prefix = dropExtension(basename(path).partition("__")[0])
             test_name = dirname(path) + "/" + prefix
 
