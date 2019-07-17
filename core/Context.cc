@@ -25,14 +25,15 @@ SymbolRef MutableContext::selfClass() {
     return data->enclosingClass(this->state);
 }
 
-bool Context::permitOverloadDefinitions() const {
+bool Context::permitOverloadDefinitions(FileRef sigLoc) const {
     if (!owner.exists()) {
         return false;
     }
     for (auto loc : owner.data(*this)->locs()) {
         auto &file = loc.file().data(*this);
         constexpr string_view whitelistedTest = "overloads_test.rb"sv;
-        if (((file.isPayload() || file.isStdlib()) && owner != Symbols::root()) ||
+        if (((file.isPayload() || file.isStdlib()) && owner != Symbols::root() &&
+             (owner != Symbols::Object() || sigLoc.data(*this).isStdlib())) ||
             FileOps::getFileName(file.path()) == whitelistedTest) {
             return true;
         }
@@ -40,9 +41,9 @@ bool Context::permitOverloadDefinitions() const {
     return false;
 }
 
-bool MutableContext::permitOverloadDefinitions() const {
+bool MutableContext::permitOverloadDefinitions(FileRef sigLoc) const {
     Context self(*this);
-    return self.permitOverloadDefinitions();
+    return self.permitOverloadDefinitions(sigLoc);
 }
 
 Context::Context(const MutableContext &other) noexcept : state(other.state), owner(other.owner) {}

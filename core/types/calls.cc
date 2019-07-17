@@ -200,7 +200,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType, vector<TypePtr> &targs,
                         bool hasBlock) {
     counterInc("calls.overloaded_invocations");
-    ENFORCE(ctx.permitOverloadDefinitions(), "overload not permitted here");
+    ENFORCE(ctx.permitOverloadDefinitions(primary.data(ctx)->loc().file()), "overload not permitted here");
     SymbolRef fallback = primary;
     vector<SymbolRef> allCandidates;
 
