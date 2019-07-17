@@ -148,6 +148,6 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
         final!
       end
     end
-    assert_includes(err.message, "is not a module or method and cannot be declared as final")
+    assert_includes(err.message, "is not a class, module or method and cannot be declared as final")
   end
 end
