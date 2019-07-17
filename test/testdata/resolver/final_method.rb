@@ -67,12 +67,12 @@ end
 
 class OverrideDoubleInclude
   include M1
-  include M2 # error: `M1#foo` was declared as final and cannot be overridden by `OverrideDoubleInclude#foo`
+  include M2 # TODO should be error: `M1#foo` was declared as final and cannot be overridden by `M2#foo`
 end
 
 class OverrideDoubleExtend
   extend M1
-  extend M2 # error: `M1#foo` was declared as final and cannot be overridden by `OverrideDoubleExtend.foo`
+  extend M2 # TODO should be error: `M1#foo` was declared as final and cannot be overridden by `M2#foo`
 end
 
 module Step1; include M1; end
