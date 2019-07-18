@@ -468,6 +468,21 @@ class String < Object
   end
   def match(arg0, arg1=T.unsafe(nil)); end
 
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+    )
+    .returns(T::Boolean)
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: Integer,
+    )
+    .returns(T::Boolean)
+  end
+  def match?(arg0, arg1=T.unsafe(nil)); end
+
   sig {returns(String)}
   def next(); end
 
