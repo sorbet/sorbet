@@ -1,4 +1,5 @@
 #include "resolver/type_syntax.h"
+#include "absl/strings/str_join.h"
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
@@ -557,16 +558,30 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 result.type = maybeAliased.data(ctx)->resultType;
                 return;
             }
-            // TODO: reduce this^^^ set.
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
             if (sym.data(ctx)->isClass()) {
-                bool silenceGenericError = sym == core::Symbols::Hash() || sym == core::Symbols::Array() ||
-                                           sym == core::Symbols::Set() || sym == core::Symbols::Range() ||
-                                           sym == core::Symbols::Enumerable() || sym == core::Symbols::Enumerator();
-                if (sym.data(ctx)->typeArity(ctx) > 0 && !silenceGenericError) {
-                    if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (sym.data(ctx)->typeArity(ctx) > 0) {
+                    // This set **should not** grow over time.
+                    bool isStdlibWhitelisted = sym == core::Symbols::Hash() || sym == core::Symbols::Array() ||
+                                               sym == core::Symbols::Set() || sym == core::Symbols::Range() ||
+                                               sym == core::Symbols::Enumerable() || sym == core::Symbols::Enumerator();
+                    auto level = isStdlibWhitelisted ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
+                                                     : core::errors::Resolver::GenericClassWithoutTypeArgs;
+                    if (auto e = ctx.state.beginError(i->loc, level)) {
                         e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
-                                    maybeAliased.show(ctx));
+                                    sym.show(ctx));
+                        if (sym == core::Symbols::Hash()) {
+                            // Hash is special because it has arity 3 but you're only supposed to write the first 2
+                            e.addAutocorrect(core::AutocorrectSuggestion(
+                                i->loc, fmt::format("T::{}[T.untyped, T.untyped]", i->loc.source(ctx))));
+                        } else if (isStdlibWhitelisted) {
+                            vector<string> untypeds;
+                            for (int i = 0; i < sym.data(ctx)->typeArity(ctx); i++) {
+                                untypeds.emplace_back("T.untyped");
+                            }
+                            e.addAutocorrect(core::AutocorrectSuggestion(
+                                i->loc, fmt::format("T::{}[{}]", i->loc.source(ctx), absl::StrJoin(untypeds, ", "))));
+                        }
                     }
                 }
                 if (sym == core::Symbols::StubModule()) {
