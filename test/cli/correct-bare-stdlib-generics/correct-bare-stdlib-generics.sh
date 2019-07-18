@@ -16,4 +16,4 @@ echo
 cat correct-bare-stdlib-generics.rb
 
 rm correct-bare-stdlib-generics.rb
-rm "$tmp"
+rm -r "$tmp"
