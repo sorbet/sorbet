@@ -247,7 +247,7 @@ class Hash < Object
     )
     .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
   end
-  def merge(arg0, &blk); end
+  def merge(*arg0, &blk); end
 
   sig do
     params(

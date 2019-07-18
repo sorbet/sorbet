@@ -24,3 +24,5 @@ T.assert_type!(
   my_hash.fetch("doesnt_exist", "foo"),
   String
 )
+
+{a: 1}.merge({b: 2}, {c: 3})
