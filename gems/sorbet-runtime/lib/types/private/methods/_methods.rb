@@ -128,6 +128,9 @@ module T::Private::Methods
   # the final instance methods of target and source_method_names. so, for every m in source_method_names, check if there
   # is already a method defined on one of target_ancestors with the same name that is final.
   def self._check_final_ancestors(target, target_ancestors, source_method_names)
+    if !module_with_final?(target)
+      return
+    end
     # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
     # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
     target_ancestors.reverse_each do |ancestor|
