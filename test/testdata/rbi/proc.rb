@@ -1,3 +1,3 @@
-# typed: strong
+# typed: true
 
 -> (x) { x }[123]
