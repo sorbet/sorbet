@@ -52,7 +52,6 @@ NameDef names[] = {
     {"defined_p", "defined?"},
     {"undef"},
     {"each"},
-    {"underscore", "_"},
 
     // used in CFG for temporaries
     {"whileTemp", "<whileTemp>"},

@@ -1,4 +1,5 @@
 #include "local_vars.h"
+#include "absl/strings/match.h"
 #include "ast/treemap/treemap.h"
 #include "common/typecase.h"
 #include "core/core.h"
@@ -72,7 +73,7 @@ class LocalNameInserter {
             arg.release();
             auto named = nameArg(move(refExpImpl));
             for (auto &prev : namedArgs) {
-                if (prev.name == named.name && prev.name != core::Names::underscore()) {
+                if (prev.name == named.name && !absl::StartsWith(prev.name.data(ctx)->shortName(ctx), "_")) {
                     if (auto e = ctx.state.beginError(named.loc, core::errors::Namer::RepeatedArgument)) {
                         auto frame = scopeStack.back();
                         e.setHeader("Duplicated argument name `{}`", named.name.show(ctx));
