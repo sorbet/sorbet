@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=test/testdata/dsl/prop.rb start=2:1 end=147:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $106> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=147:4}
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/dsl/prop.rb start=2:1 end=147:4}
       argument <blk><block> @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
   class <C <U AdvancedODM>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=37:1 end=37:18}
     class <C <U AdvancedODM>><C <U Mutator>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/prop.rb start=52:5 end=52:68}
