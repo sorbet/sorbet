@@ -5,10 +5,10 @@ rm -rf out fileout
 mkdir -p out fileout
 
 # Make sure these options don't change output
-for p in parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw index-tree index-tree-raw symbol-table symbol-table-raw name-tree name-tree-raw resolve-tree resolve-tree-raw file-table-json cfg cfg-json; do
+for p in parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw index-tree index-tree-raw symbol-table symbol-table-raw name-tree name-tree-raw resolve-tree resolve-tree-raw cfg cfg-json; do
     echo "--- $p start ---"
-    main/sorbet --silence-dev-message --censor-for-symbol-table-exp -p "$p" -e '1' | tee "out/$p"
-    main/sorbet --silence-dev-message --censor-for-symbol-table-exp -p "$p:fileout/$p" -e '1' > /dev/null
+    main/sorbet --silence-dev-message --censor-for-snapshot-tests -p "$p" -e '1' | tee "out/$p"
+    main/sorbet --silence-dev-message --censor-for-snapshot-tests -p "$p:fileout/$p" -e '1' > /dev/null
     echo "--- $p end ---"
 done
 
