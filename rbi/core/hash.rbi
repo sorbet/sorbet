@@ -235,13 +235,13 @@ class Hash < Object
   def member?(arg0); end
 
   sig do
-    type_parameters(:A, :B).params(
+    type_parameters(:A ,:B).params(
         arg0: T::Hash[T.type_parameter(:A), T.type_parameter(:B)],
     )
     .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
   end
   sig do
-    type_parameters(:A, :B).params(
+    type_parameters(:A ,:B).params(
         arg0: T::Hash[T.type_parameter(:A), T.type_parameter(:B)],
         blk: T.proc.params(arg0: K, arg1: V, arg2: T.type_parameter(:B)).returns(T.any(V, T.type_parameter(:B))),
     )
