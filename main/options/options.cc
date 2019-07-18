@@ -398,7 +398,7 @@ cxxopts::Options buildOptions() {
                                "Force incremental updates to discover resolver & namer bugs");
     options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
-    options.add_options("dev")("censor-raw-locs-within-payload",
+    options.add_options("dev")("censor-for-symbol-table-exp",
                                "When printing raw location information, don't show line numbers");
     options.add_options("dev")("error-white-list",
                                "Error code to whitelist into reporting. "
@@ -758,7 +758,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
-        opts.censorRawLocsWithinPayload = raw["censor-raw-locs-within-payload"].as<bool>();
+        opts.censorForSymbolTableExp = raw["censor-for-symbol-table-exp"].as<bool>();
         opts.statsdHost = raw["statsd-host"].as<string>();
         opts.statsdPort = raw["statsd-port"].as<int>();
         opts.statsdPrefix = raw["statsd-prefix"].as<string>();
