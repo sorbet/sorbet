@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=test/testdata/resolver/resolve_through_alias.rb start=3:1 end=11:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $106> (<blk>) @ Loc {file=test/testdata/resolver/resolve_through_alias.rb start=3:1 end=11:4}
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/resolve_through_alias.rb start=3:1 end=11:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolve_through_alias.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/resolve_through_alias.rb start=8:1 end=8:8}
     static-field <C <U A>><C <U N>> -> AliasType { symbol = <C <U NS>> } @ Loc {file=test/testdata/resolver/resolve_through_alias.rb start=9:3 end=9:4}
