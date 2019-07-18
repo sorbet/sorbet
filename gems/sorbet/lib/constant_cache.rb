@@ -51,6 +51,18 @@ class Sorbet::Private::ConstantLookupCache
     'Sequel::UnbindDuplicate',
     'Sequel::Unbinder',
     'YARD::Parser::Ruby::Legacy::RipperParser',
+    'Java::ComHeadiusRacc::Cparse::CparseParams::NEVER',
+    'Java::ComHeadiusRacc::Cparse::CparseParams::UNDEF',
+    'Java::ComHeadiusRacc::Cparse::Parser::NEVER',
+    'Java::ComHeadiusRacc::Cparse::Parser::UNDEF',
+    'Java::OrgJruby::RubyBasicObject::NEVER',
+    'Java::OrgJruby::RubyBasicObject::UNDEF',
+    'Java::OrgJruby::RubyClass::NEVER',
+    'Java::OrgJruby::RubyClass::UNDEF',
+    'Java::OrgJruby::RubyModule::NEVER',
+    'Java::OrgJruby::RubyModule::UNDEF',
+    'Java::OrgJruby::RubyObject::NEVER',
+    'Java::OrgJruby::RubyObject::UNDEF',
   ].freeze
 
   def initialize

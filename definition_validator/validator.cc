@@ -176,8 +176,9 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     for (const auto &overridenMethod : overridenMethods) {
         if (overridenMethod.data(gs)->isFinalMethod()) {
             if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::OverridesFinal)) {
-                e.setHeader("Method overrides a final method `{}`", overridenMethod.data(gs)->show(gs));
-                e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
+                e.setHeader("`{}` was declared as final and cannot be overridden by `{}`",
+                            overridenMethod.data(gs)->show(gs), method.data(gs)->show(gs));
+                e.addErrorLine(overridenMethod.data(gs)->loc(), "original method defined here");
             }
         }
         auto isRBI = absl::c_any_of(method.data(gs)->locs(), [&](auto &loc) { return loc.file().data(gs).isRBI(); });
@@ -202,8 +203,8 @@ private:
         auto superclass = klass.data(gs)->superClass();
         if (superclass.exists()) {
             auto &superclassMethods = getAbstractMethods(gs, superclass);
-            // TODO(nelhage): This code coud go quadratic or even exponential given
-            // pathological arrangments of interfaces and abstract methods. Switch
+            // TODO(nelhage): This code could go quadratic or even exponential given
+            // pathological arrangements of interfaces and abstract methods. Switch
             // to a better data structure if that is ever a problem.
             abstract.insert(abstract.end(), superclassMethods.begin(), superclassMethods.end());
         }
@@ -278,9 +279,9 @@ private:
 public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         auto sym = classDef->symbol;
-        validateAbstract(ctx.state, sym);
-        validateTStructNotGrandparent(ctx.state, sym);
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
+        validateTStructNotGrandparent(ctx.state, sym);
+        validateAbstract(ctx.state, sym);
         validateAbstract(ctx.state, singleton);
         return classDef;
     }

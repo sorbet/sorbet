@@ -1026,7 +1026,7 @@ private:
             [&](ast::Send *send) {
                 if (TypeSyntax::isSig(ctx, send)) {
                     if (!lastSigs.empty()) {
-                        if (!ctx.permitOverloadDefinitions()) {
+                        if (!ctx.permitOverloadDefinitions(send->loc.file())) {
                             if (auto e = ctx.state.beginError(lastSigs[0]->loc,
                                                               core::errors::Resolver::OverloadNotAllowed)) {
                                 e.setHeader("Unused type annotation. No method def before next annotation");
@@ -1077,7 +1077,7 @@ private:
                         }
                     }
 
-                    bool isOverloaded = lastSigs.size() > 1 && ctx.permitOverloadDefinitions();
+                    bool isOverloaded = lastSigs.size() > 1 && ctx.permitOverloadDefinitions(loc.file());
                     auto originalName = mdef->symbol.data(ctx)->name;
                     if (isOverloaded) {
                         ctx.state.mangleRenameSymbol(mdef->symbol, originalName);

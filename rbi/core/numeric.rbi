@@ -249,33 +249,20 @@ class Numeric < Object
 
   sig do
     params(
-        arg0: Numeric,
+        limit: T.nilable(Numeric),
+        step: Numeric,
         blk: T.proc.params(arg0: Numeric).returns(BasicObject),
     )
     .returns(Numeric)
   end
   sig do
     params(
-        arg0: Numeric,
+        limit: T.nilable(Numeric),
+        step: Numeric,
     )
     .returns(T::Enumerator[Numeric])
   end
-  sig do
-    params(
-        arg0: Numeric,
-        arg1: Numeric,
-        blk: T.proc.params(arg0: Numeric).returns(BasicObject),
-    )
-    .returns(Numeric)
-  end
-  sig do
-    params(
-        arg0: Numeric,
-        arg1: Numeric,
-    )
-    .returns(T::Enumerator[Numeric])
-  end
-  def step(arg0, arg1=T.unsafe(nil), &blk); end
+  def step(limit=nil, step=1, &blk); end
 
   sig {returns(Complex)}
   def to_c(); end

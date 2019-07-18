@@ -15,6 +15,13 @@ class Boom
   EXPOSION = 1
 end
 
+module MethodsForSingletonClass
+  def ancestors
+    raise "You need to use Sorbet::Private::RealStdlib here"
+  end
+end
+Sorbet::Private::RealStdlib.real_singleton_class(Boom).extend(MethodsForSingletonClass)
+
 class A < Boom
 end
 class B

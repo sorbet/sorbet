@@ -16,6 +16,10 @@ module T::Helpers
     Private::Abstract::Declare.declare_abstract(self, type: :interface)
   end
 
+  def final!
+    Private::Final.declare(self)
+  end
+
   # Causes a mixin to also mix in class methods from the named module.
   #
   # Nearly equivalent to

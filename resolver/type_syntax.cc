@@ -44,7 +44,8 @@ bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
     if (send->block.get() == nullptr) {
         return false;
     }
-    if (!send->args.empty()) {
+    auto nargs = send->args.size();
+    if (nargs != 0 && nargs != 1) {
         return false;
     }
 
@@ -53,7 +54,7 @@ bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
         return true;
     }
 
-    // Sorbet.sig
+    // T::Sig::WithoutRuntime
     auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
     if (recv && recv->symbol == core::Symbols::T_Sig_WithoutRuntime()) {
         return true;
@@ -99,6 +100,13 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
         }
     }
     ENFORCE(!sends.empty());
+
+    for (auto &arg : sigSend->args) {
+        auto lit = ast::cast_tree<ast::Literal>(arg.get());
+        if (lit != nullptr && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::final()) {
+            sig.seen.final = true;
+        }
+    }
 
     for (auto &send : sends) {
         ast::Send *tsend = send;
@@ -276,9 +284,6 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 case core::Names::overridable()._id:
                     sig.seen.overridable = true;
-                    break;
-                case core::Names::final()._id:
-                    sig.seen.final = true;
                     break;
                 case core::Names::returns()._id: {
                     sig.seen.returns = true;

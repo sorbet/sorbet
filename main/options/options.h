@@ -137,7 +137,7 @@ struct Options {
     bool waitForDebugger = false;
     bool skipDSLPasses = false;
     bool suggestRuntimeProfiledType = false;
-    bool censorRawLocsWithinPayload = false;
+    bool censorForSymbolTableExp = false;
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
@@ -152,8 +152,8 @@ struct Options {
     bool enableCounters = false;
     std::vector<std::string> someCounters;
     std::string errorUrlBase = "https://srb.help/";
-    std::vector<int> errorCodeWhiteList;
-    std::vector<int> errorCodeBlackList;
+    std::set<int> errorCodeWhiteList;
+    std::set<int> errorCodeBlackList;
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 

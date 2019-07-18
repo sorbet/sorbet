@@ -398,7 +398,7 @@ cxxopts::Options buildOptions() {
                                "Force incremental updates to discover resolver & namer bugs");
     options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
-    options.add_options("dev")("censor-raw-locs-within-payload",
+    options.add_options("dev")("censor-for-symbol-table-exp",
                                "When printing raw location information, don't show line numbers");
     options.add_options("dev")("error-white-list",
                                "Error code to whitelist into reporting. "
@@ -758,7 +758,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
-        opts.censorRawLocsWithinPayload = raw["censor-raw-locs-within-payload"].as<bool>();
+        opts.censorForSymbolTableExp = raw["censor-for-symbol-table-exp"].as<bool>();
         opts.statsdHost = raw["statsd-host"].as<string>();
         opts.statsdPort = raw["statsd-port"].as<int>();
         opts.statsdPrefix = raw["statsd-prefix"].as<string>();
@@ -780,14 +780,16 @@ void readOptions(Options &opts, int argc, char *argv[],
         extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         if (raw.count("error-white-list") > 0) {
-            opts.errorCodeWhiteList = raw["error-white-list"].as<vector<int>>();
+            auto rawList = raw["error-white-list"].as<vector<int>>();
+            opts.errorCodeWhiteList = set<int>(rawList.begin(), rawList.end());
         }
         if (raw.count("error-black-list") > 0) {
             if (raw.count("error-white-list") > 0) {
                 logger->error("You can't pass both `{}` and `{}`", "--error-black-list", "--error-white-list");
                 throw EarlyReturnWithCode(1);
             }
-            opts.errorCodeBlackList = raw["error-black-list"].as<vector<int>>();
+            auto rawList = raw["error-black-list"].as<vector<int>>();
+            opts.errorCodeBlackList = set<int>(rawList.begin(), rawList.end());
         }
         if (sorbet::debug_mode) {
             opts.suggestSig = raw["suggest-sig"].as<bool>();
@@ -810,14 +812,14 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
 
         if (opts.suggestTyped) {
-            if (opts.errorCodeWhiteList != vector<int>{core::errors::Infer::SuggestTyped.code} &&
+            if (opts.errorCodeWhiteList != set<int>{core::errors::Infer::SuggestTyped.code} &&
                 raw["typed"].as<string>() != "strict") {
                 logger->error(
                     "--suggest-typed must also include `{}`",
                     fmt::format("{}{}", "--typed=strict --error-white-list=", core::errors::Infer::SuggestTyped.code));
                 throw EarlyReturnWithCode(1);
             }
-            if (opts.errorCodeWhiteList != vector<int>{core::errors::Infer::SuggestTyped.code}) {
+            if (opts.errorCodeWhiteList != set<int>{core::errors::Infer::SuggestTyped.code}) {
                 logger->error("--suggest-typed must also include `{}`",
                               fmt::format("{}{}", "--error-white-list=", core::errors::Infer::SuggestTyped.code));
                 throw EarlyReturnWithCode(1);

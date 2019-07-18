@@ -76,7 +76,8 @@ class Sorbet::Private::Serialize
       end
       ret << "  include ::#{ancestor_name}\n"
     end
-    Sorbet::Private::RealStdlib.real_singleton_class(klass).ancestors.each do |ancestor|
+    singleton_class = Sorbet::Private::RealStdlib.real_singleton_class(klass)
+    Sorbet::Private::RealStdlib.real_ancestors(singleton_class).each do |ancestor|
       next if ancestor == Sorbet::Private::RealStdlib.real_singleton_class(klass)
       break if superclass && ancestor == Sorbet::Private::RealStdlib.real_singleton_class(superclass)
       break if ancestor == Module

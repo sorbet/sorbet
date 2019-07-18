@@ -171,3 +171,15 @@ class Sorbet::Private::Static::ReturnTypeInference
     # it's used in infer for return type inference.
     end
 end
+
+# Type alias for file-like objects. Many, but not all, file-like
+# types in the Ruby stdlib are descendants of IO. These include
+# pipes and sockets. These descendants are intentionally omitted
+# here.
+::Sorbet::Private::Static::IOLike = T.type_alias(
+  T.any(
+    IO,
+    StringIO,
+    Tempfile
+  )
+)
