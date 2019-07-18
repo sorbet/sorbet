@@ -70,7 +70,7 @@ string Name::showRaw(const GlobalState &gs) const {
                     kind = "R";
                     break;
             }
-            if (gs.censorForSymbolTableExp && this->unique.uniqueNameKind == UniqueNameKind::Namer &&
+            if (gs.censorForSnapshotTests && this->unique.uniqueNameKind == UniqueNameKind::Namer &&
                 this->unique.original == core::Names::staticInit()) {
                 return fmt::format("<{} {} ${}>", kind, this->unique.original.data(gs)->showRaw(gs), "CENSORED");
             } else {

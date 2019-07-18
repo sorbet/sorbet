@@ -402,8 +402,8 @@ int realmain(int argc, char *argv[]) {
     if (opts.print.isAutogen()) {
         gs->runningUnderAutogen = true;
     }
-    if (opts.censorForSymbolTableExp) {
-        gs->censorForSymbolTableExp = true;
+    if (opts.censorForSnapshotTests) {
+        gs->censorForSnapshotTests = true;
     }
     if (opts.reserveMemKiB > 0) {
         gs->reserveMemory(opts.reserveMemKiB);
