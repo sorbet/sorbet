@@ -560,8 +560,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
             bool silenceGenericError =
                 maybeAliased == core::Symbols::Hash() || maybeAliased == core::Symbols::Array() ||
                 maybeAliased == core::Symbols::Set() || maybeAliased == core::Symbols::Range() ||
-                maybeAliased == core::Symbols::Enumerable() || maybeAliased == core::Symbols::Enumerator() ||
-                maybeAliased == core::Symbols::File();
+                maybeAliased == core::Symbols::Enumerable() || maybeAliased == core::Symbols::Enumerator();
             // TODO: reduce this^^^ set.
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
             if (sym.data(ctx)->isClass()) {
