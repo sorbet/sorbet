@@ -557,13 +557,12 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 result.type = maybeAliased.data(ctx)->resultType;
                 return;
             }
-            bool silenceGenericError =
-                maybeAliased == core::Symbols::Hash() || maybeAliased == core::Symbols::Array() ||
-                maybeAliased == core::Symbols::Set() || maybeAliased == core::Symbols::Range() ||
-                maybeAliased == core::Symbols::Enumerable() || maybeAliased == core::Symbols::Enumerator();
             // TODO: reduce this^^^ set.
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
             if (sym.data(ctx)->isClass()) {
+                bool silenceGenericError = sym == core::Symbols::Hash() || sym == core::Symbols::Array() ||
+                                           sym == core::Symbols::Set() || sym == core::Symbols::Range() ||
+                                           sym == core::Symbols::Enumerable() || sym == core::Symbols::Enumerator();
                 if (sym.data(ctx)->typeArity(ctx) > 0 && !silenceGenericError) {
                     if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                         e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
