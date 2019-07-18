@@ -32,14 +32,14 @@ module T::Configuration
   #   def foo; end
   # end
   # ```
-  def self.enable_final_checks_for_include_extend
-    T::Private::Methods.set_final_checks_for_include_extend(true)
+  def self.enable_final_checks_on_hooks
+    T::Private::Methods.set_final_checks_on_hooks(true)
   end
 
   # Undo the effects of a previous call to
-  # `enable_final_checks_for_include_extend`.
-  def self.reset_final_checks_for_include_extend
-    T::Private::Methods.set_final_checks_for_include_extend(false)
+  # `enable_final_checks_on_hooks`.
+  def self.reset_final_checks_on_hooks
+    T::Private::Methods.set_final_checks_on_hooks(false)
   end
 
   # Configure the default checked level for a sig with no explicit `.checked`

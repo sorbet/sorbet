@@ -17,7 +17,7 @@ module T::Private::Methods
   # - includes an module-with-final
   # - extends an module-with-final
   @modules_with_final = Set.new
-  @old_included_extended = nil
+  @old_hooks = nil
 
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
@@ -369,7 +369,7 @@ module T::Private::Methods
 
   # the module target is adding the methods from the module source to itself. we need to check that for all instance
   # methods M on source, M is not defined on any of target's ancestors.
-  def self._included_extended_impl(target, target_ancestors, source)
+  def self._hook_impl(target, target_ancestors, source)
     if !module_with_final?(target) && !module_with_final?(source)
       return
     end
@@ -378,24 +378,24 @@ module T::Private::Methods
     _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
   end
 
-  def self.set_final_checks_for_include_extend(enable)
-    is_enabled = @old_included_extended != nil
+  def self.set_final_checks_on_hooks(enable)
+    is_enabled = @old_hooks != nil
     if enable == is_enabled
       return
     end
     if is_enabled
-      @old_included_extended.each(&:restore)
-      @old_included_extended = nil
+      @old_hooks.each(&:restore)
+      @old_hooks = nil
     else
       old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
         old_included.bind(self).call(arg)
-        ::T::Private::Methods._included_extended_impl(arg, arg.ancestors, self)
+        ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
       end
       old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
         old_extended.bind(self).call(arg)
-        ::T::Private::Methods._included_extended_impl(arg, arg.singleton_class.ancestors, self)
+        ::T::Private::Methods._hook_impl(arg, arg.singleton_class.ancestors, self)
       end
-      @old_included_extended = [old_included, old_extended]
+      @old_hooks = [old_included, old_extended]
     end
   end
 
