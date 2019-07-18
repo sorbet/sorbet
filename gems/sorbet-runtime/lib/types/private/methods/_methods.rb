@@ -11,11 +11,13 @@ module T::Private::Methods
   # - they are done possibly before any sig block has run.
   # - they are done even if the method being defined doesn't have a sig.
   @final_methods = Set.new
-  # a module-with-final is a module for which at least one of the following is true:
+  # a non-singleton is a module for which at least one of the following is true:
   # - is declared final
   # - defines a method that is declared final
-  # - includes an module-with-final
-  # - extends an module-with-final
+  # - includes an non-singleton
+  # - extends an non-singleton
+  # a singleton is the singleton_class of a non-singleton.
+  # modules_with_final is the set of singletons and non-singletons.
   @modules_with_final = Set.new
   @old_hooks = nil
 
@@ -154,6 +156,7 @@ module T::Private::Methods
 
   def self.add_module_with_final(mod)
     @modules_with_final.add(mod)
+    @modules_with_final.add(mod.singleton_class)
   end
 
   private_class_method def self.module_with_final?(mod)
