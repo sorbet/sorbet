@@ -89,8 +89,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
             Timer timeit(logger, "initial_index");
             reIndexFromFileSystem();
-            vector<shared_ptr<core::File>> changedFiles;
-            LSPResult result = pushDiagnostics(runSlowPath(move(changedFiles)));
+            LSPResult result = pushDiagnostics(runSlowPath());
             ENFORCE(result.gs);
             if (!disableFastPath) {
                 ShowOperation stateHashOp(*this, "GlobalStateHash", "Finishing initialization...");
