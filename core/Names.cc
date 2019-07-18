@@ -94,7 +94,12 @@ string Name::toString(const GlobalState &gs) const {
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
                 return absl::StrCat(this->unique.original.data(gs)->show(gs), " (overload.", this->unique.num, ")");
             }
-            return fmt::format("{}${}", this->unique.original.data(gs)->show(gs), this->unique.num);
+            if (gs.censorForSnapshotTests && this->unique.uniqueNameKind == UniqueNameKind::Namer &&
+                this->unique.original == core::Names::staticInit()) {
+                return fmt::format("{}${}", this->unique.original.data(gs)->show(gs), "CENSORED");
+            } else {
+                return fmt::format("{}${}", this->unique.original.data(gs)->show(gs), this->unique.num);
+            }
         case CONSTANT:
             return fmt::format("<C {}>", this->cnst.original.toString(gs));
         default:
