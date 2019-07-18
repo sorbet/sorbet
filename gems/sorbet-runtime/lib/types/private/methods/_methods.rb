@@ -11,8 +11,11 @@ module T::Private::Methods
   # - they are done possibly before any sig block has run.
   # - they are done even if the method being defined doesn't have a sig.
   @final_methods = Set.new
-  # if a module directly defines a final method, or includes, extends, or inherits from a module which does so, then it
-  # should be in this set.
+  # a module-with-final is a module for which at least one of the following is true:
+  # - is declared final
+  # - defines a method that is declared final
+  # - includes an module-with-final
+  # - extends an module-with-final
   @modules_with_final = Set.new
   @old_included_extended = nil
 
