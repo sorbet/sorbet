@@ -1,6 +1,6 @@
 begin
   class <emptyTree><<C <root>>> < ()
-    def self.<static-init><<static-init>$106>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
           ::Sorbet::Private::Static.keep_for_ide(::Outer1)
