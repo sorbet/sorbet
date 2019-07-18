@@ -171,6 +171,8 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath() {
     }
 
     auto finalGs = initialGS->deepCopy(true);
+    // Discard indexed trees from old version of finalGS.
+    indexedFinalGS.clear();
     auto resolved = pipeline::resolve(finalGs, move(indexedCopies), opts, workers, skipConfigatron);
     tryApplyDefLocSaver(*finalGs, resolved);
     tryApplyLocalVarSaver(*finalGs, resolved);
@@ -290,13 +292,15 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
         for (auto &f : subset) {
             auto t = pipeline::indexOne(opts, *finalGs, f, kvstore);
             const int id = t.file.id();
-            indexed[id] = move(t);
-            updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), indexed[id].file});
+            indexedFinalGS[id] = move(t);
+            updatedIndexed.emplace_back(ast::ParsedFile{indexedFinalGS[id].tree->deepCopy(), indexedFinalGS[id].file});
         }
 
         for (auto &f : filesForQuery) {
             const int id = f.id();
-            updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), indexed[id].file});
+            const auto it = indexedFinalGS.find(id);
+            const auto &parsedFile = it == indexedFinalGS.end() ? indexed[id] : it->second;
+            updatedIndexed.emplace_back(ast::ParsedFile{parsedFile.tree->deepCopy(), parsedFile.file});
         }
         subset.insert(subset.end(), filesForQuery.begin(), filesForQuery.end());
 
