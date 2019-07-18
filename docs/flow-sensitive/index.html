@@ -161,7 +161,8 @@ method call in a <strong>temporary variable</strong>:</p>
 <pre><code class="hljs css language-ruby">tmp = maybe_int
 y = tmp.<span class="hljs-literal">nil</span>? &amp;&amp; (<span class="hljs-number">2</span> * tmp)
 </code></pre>
-<p><a href="https://sorbet.run/#extend%20T%253A%253ASig%0A%0Asig%20%7Breturns(T.nilable(Integer))%7D%0Adef%20maybe_int%253B%201%253B%20end%0A%0A%2523%20Problem%253A%0Ax%20%253D%20maybe_int.nil%253F%20%2526%2526%20(2%20*%20maybe_int)%0A%0A%2523%20%5E%20this%20is%20essentially%253A%0A%2523%20x%20%253D%20maybe_int().nil%253F%20%2526%2526%20(2%20*%20maybe_int())%0A%0A%2523%20Solution%253A%0Atmp%20%253D%20maybe_int%0Ay%20%253D%20tmp.nil%253F%20%2526%2526%20(2%20*%20tmp)">→ View full example on sorbet.run</a></p>
+<p><a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Breturns(T.nilable(Integer))%7D%0Adef%20maybe_int%3B%201%3B%20end%0A%0A%23%20Problem%3A%0Ax%20%3D%20maybe_int.nil%3F%20%26%26%20(2%20*%20maybe_int)%0A%0A%23%20%5E%20this%20is%20essentially%3A%0A%23%20x%20%3D%20maybe_int().nil%3F%20%26%26%20(2%20*%20maybe_int())%0A%0A%23%20Solution%3A%0Atmp%20%3D%20maybe_int%0Ay%20%3D%20tmp.nil%3F%20%26%26%20(2%20*%20tmp)">→
+View full example on sorbet.run</a></p>
 <blockquote>
 <p><strong>Note</strong>: Many Ruby constructs that look like local variables are actually
 method calls without parens! Specifically, watch out for <code>attr_reader</code> and
