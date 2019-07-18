@@ -20,6 +20,7 @@ constexpr ErrorClass DynamicConstant{4014, StrictLevel::False};
 constexpr ErrorClass InvalidClassOwner{4015, StrictLevel::False};
 constexpr ErrorClass RootTypeMember{4016, StrictLevel::False};
 constexpr ErrorClass DynamicConstantAssignment{4017, StrictLevel::False};
+constexpr ErrorClass RepeatedArgument{4018, StrictLevel::False};
 } // namespace sorbet::core::errors::Namer
 
 #endif
