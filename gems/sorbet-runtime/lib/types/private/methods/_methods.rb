@@ -19,6 +19,9 @@ module T::Private::Methods
   # a singleton is the singleton_class of a non-singleton.
   # modules_with_final is the set of singletons and non-singletons.
   @modules_with_final = Set.new
+  # this stores the old [included, extended] hooks for Module and inherited hook for Class that we override when
+  # enabling final checks for when those hooks are called. the 'hooks' here don't have anything to do with the 'hooks'
+  # in installed_hooks.
   @old_hooks = nil
 
   ARG_NOT_PROVIDED = Object.new
