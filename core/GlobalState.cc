@@ -697,11 +697,6 @@ ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRe
     ENFORCE(name.exists(), "entering symbol with non-existing name");
     SymbolData ownerScope = owner.dataAllowingNone(*this);
 
-    for (auto &arg : ownerScope->arguments()) {
-        if (arg.name == name) {
-            return arg;
-        }
-    }
     auto &store = ownerScope->arguments().emplace_back();
 
     ENFORCE(!symbolTableFrozen);
