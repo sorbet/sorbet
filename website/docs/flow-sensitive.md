@@ -127,7 +127,8 @@ tmp = maybe_int
 y = tmp.nil? && (2 * tmp)
 ```
 
-[→ View full example on sorbet.run](<https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Breturns(T.nilable(Integer))%7D%0Adef%20maybe_int%3B%201%3B%20end%0A%0A%23%20Problem%3A%0Ax%20%3D%20maybe_int.nil%3F%20%26%26%20(2%20*%20maybe_int)%0A%0A%23%20%5E%20this%20is%20essentially%3A%0A%23%20x%20%3D%20maybe_int().nil%3F%20%26%26%20(2%20*%20maybe_int())%0A%0A%23%20Solution%3A%0Atmp%20%3D%20maybe_int%0Ay%20%3D%20tmp.nil%3F%20%26%26%20(2%20*%20tmp)>)
+<a href="https://sorbet.run/#extend%20T%3A%3ASig%0A%0Asig%20%7Breturns(T.nilable(Integer))%7D%0Adef%20maybe_int%3B%201%3B%20end%0A%0A%23%20Problem%3A%0Ax%20%3D%20maybe_int.nil%3F%20%26%26%20(2%20*%20maybe_int)%0A%0A%23%20%5E%20this%20is%20essentially%3A%0A%23%20x%20%3D%20maybe_int().nil%3F%20%26%26%20(2%20*%20maybe_int())%0A%0A%23%20Solution%3A%0Atmp%20%3D%20maybe_int%0Ay%20%3D%20tmp.nil%3F%20%26%26%20(2%20*%20tmp)">→
+View full example on sorbet.run</a>
 
 > **Note**: Many Ruby constructs that look like local variables are actually
 > method calls without parens! Specifically, watch out for `attr_reader` and
