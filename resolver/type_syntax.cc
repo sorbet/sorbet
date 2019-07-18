@@ -54,7 +54,7 @@ bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
         return true;
     }
 
-    // Sorbet.sig
+    // T::Sig::WithoutRuntime
     auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
     if (recv && recv->symbol == core::Symbols::T_Sig_WithoutRuntime()) {
         return true;
