@@ -39,11 +39,29 @@ class Sorbet::Private::RequireEverything
     Sorbet::Private::GemLoader.require_all_gems
   end
 
+  def self.ignore_paths
+    sorbet_config=File.open('sorbet/config').read
+    sorbet_config.gsub!(/\r\n?/, "\n")
+    ignore_matcher = %r{^--ignore=(.*)$}
+    ignore_paths = Set.new
+    sorbet_config.each_line do |line|
+      match = ignore_matcher.match(line)
+      if match
+        ignore_paths << match[1]
+      end
+    end
+    ignore_paths
+  end
+
+  def self.abs_paths
+    abs_paths = Dir.glob("#{Dir.pwd}/**/*.rb")
+    abs_paths.reject{|ap| ignore_paths.detect{|ip| File.fnmatch(ip, ap)}}
+  end
+
   def self.require_all_files
     excluded_paths = Set.new
     excluded_paths += excluded_rails_files if rails?
 
-    abs_paths = Dir.glob("#{Dir.pwd}/**/*.rb")
     errors = []
     abs_paths.each_with_index do |abs_path, i|
       # Executable files are likely not meant to be required.
