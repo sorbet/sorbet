@@ -34,6 +34,7 @@ module T::Private::Final
     mod.extend(mod.is_a?(Class) ? NoInherit : NoIncludeExtend)
     mark_as_final_module(mod)
     mark_as_final_module(mod.singleton_class)
+    T::Private::Methods.add_module_with_final(mod)
     T::Private::Methods.install_hooks(mod)
   end
 
@@ -43,6 +44,5 @@ module T::Private::Final
 
   private_class_method def self.mark_as_final_module(mod)
     mod.instance_variable_set(:@sorbet_final_module, true)
-    T::Private::Methods.add_module_with_final(mod)
   end
 end
