@@ -217,13 +217,13 @@ statically---sometimes this is more power than we need. For the cases where we
 the programmer know of an invariant that isn't currently expressed in the type
 system, [`T.cast`](type-assertions#tcast) is a good middle-ground.
 
-### Runtime escape hatches
+### Changing when runtime exceptions are raised
 
-Both `T.unsafe` and `T.cast` are escape hatches from Sorbet's static checks.
-They don't silence any runtime exceptions that would be raised for type errors.
+Both `T.unsafe` and `T.cast` relax Sorbet's static checks. They don't silence
+any exceptions that would be raised for type errors at runtime.
 
-There are also escape hatches for the runtime. These escape hatches are
-documented elsewhere. See
+There are also ways to change the runtime behavior; these escape hatches are
+documented elsewhere. See:
 
 - [Enabling Runtime Checks](runtime.md), which has docs on how to configure and
   opt out of certain runtime checks.

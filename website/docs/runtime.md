@@ -223,8 +223,11 @@ sig {params(argv: T::Array[String]).void.on_failure(:raise)}
 With this `T::Configuration` handler, the default is to log, and we can use
 `.on_failure` to opt specific sigs into raising on failure.
 
-For more on the various `T::Configuration` handlers, see
-[Runtime Configuration](tconfiguration.md).
+We haven't depicted it here, but the `T::Configuration` handler will get an
+array of every argument that was provided to `.on_failure` for this
+sig—specifically there's no restriction that `.on_failure` must be given only
+one arg nor that the arg is a Symbol. For more on the various `T::Configuration`
+handlers, see [Runtime Configuration](tconfiguration.md).
 
 ## `.checked`: Whether to check in the first place
 
@@ -265,7 +268,9 @@ T::Configuration.default_checked_level = :tests
 ```
 
 Writing this will make it so that any sig which does not have a `.checked(...)`
-call in it will behave as if the user had written `.checked(:tests)`.
+call in it will behave as if the user had written `.checked(:tests)`. To prevent
+accidental misuse, `sorbet-runtime` will require that this setting is changed
+before any `sig` is evaluated at runtime.
 
 **Note**: For `.checked(:tests)` to work correctly, checking in tests must be
 enabled in every entry point into the tests. To declare that a certain entry
