@@ -40,11 +40,12 @@ class Sorbet::Private::RequireEverything
   end
 
   def self.ignore_paths
-    sorbet_config=File.open('sorbet/config').read
-    sorbet_config.gsub!(/\r\n?/, "\n")
-    ignore_matcher = %r{^--ignore=(.*)$}
     ignore_paths = Set.new
-    sorbet_config.each_line do |line|
+    return ignore_paths unless File.exist?('sorbet/config')
+    config = File.open('sorbet/config').read
+    config.gsub!(/\r\n?/, "\n")
+    ignore_matcher = %r{^--ignore=(.*)$}
+    config.each_line do |line|
       match = ignore_matcher.match(line)
       if match
         ignore_paths << match[1]
