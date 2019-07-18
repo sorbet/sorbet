@@ -400,7 +400,11 @@ module T::Private::Methods
         old_extended.bind(self).call(arg)
         ::T::Private::Methods._hook_impl(arg, arg.singleton_class.ancestors, self)
       end
-      @old_hooks = [old_included, old_extended]
+      old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited) do |arg|
+        old_inherited.bind(self).call(arg)
+        ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
+      end
+      @old_hooks = [old_included, old_extended, old_inherited]
     end
   end
 
