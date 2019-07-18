@@ -78,11 +78,8 @@ to Stripe’s Ruby codebase.</p>
 <blockquote>
 <p><strong>Note</strong>: Think carefully before disabling runtime checks!</p>
 </blockquote>
-<p>There are four configuration hooks that can be set in the runtime.</p>
-<blockquote>
-<p><strong>Note</strong>: These docs are incomplete. For complete usage information, refer to
-the YARD documentation for the <code>sorbet-runtime</code> gem.</p>
-</blockquote>
+<p>These docs are somewhat low-level. For a higher-level description of how to
+change Sorbet’s runtime, see <a href="/docs/runtime">Enabling Runtime Checks</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="errors-from-inline-type-assertions"></a><a href="#errors-from-inline-type-assertions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Errors from inline type assertions</h2>
 <p>There are four kinds of <a href="/docs/type-assertions">inline type assertions</a>:</p>
 <ul>
@@ -107,7 +104,21 @@ types or return types don’t match the actual value present at runtime, use thi
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>The default error handler is to raise an error.</p>
-<!-- TODO(jez) Document .on_failure / .checked once API is stable. -->
+<p>The example handler above does the same thing for every method. One thing which
+can be useful is to pass custom metadata to the <code>call_validation</code> handler, which
+can be done with <code>.on_failure</code>:</p>
+<pre><code class="hljs css language-ruby">T::Configuration.call_validation_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|signature, opts|</span>
+  <span class="hljs-keyword">if</span> signature.on_failure
+    puts <span class="hljs-string">"Metadata: <span class="hljs-subst">#{signature.on_failure}</span>"</span>
+  <span class="hljs-keyword">end</span>
+  raise TypeError.new(opts[<span class="hljs-symbol">:pretty_message</span>])
+<span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">x:</span> Integer).void.on_failure(<span class="hljs-symbol">:hello</span>, <span class="hljs-symbol">:world</span>)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
+</code></pre>
+<p>When the <code>call_validation_error_handler</code> is called this time, it will be passed
+all the args that were given to <code>on_failure</code> for the specific sig that failed.</p>
 <h2><a class="anchor" aria-hidden="true" id="errors-from-invalid-sig-procs"></a><a href="#errors-from-invalid-sig-procs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Errors from invalid sig procs</h2>
 <p>We <a href="/docs/sigs">write sigs</a> using valid Ruby syntax. The body of the proc passed to
 a sig is executed (lazily, on first method call) to compute an in-memory data

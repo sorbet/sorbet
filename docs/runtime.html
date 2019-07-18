@@ -69,7 +69,7 @@ turned on and off at will. This means the predictions <code>srb</code> makes sta
 be wrong.</p>
 <p>That’s why Sorbet also uses <strong>runtime checks</strong>: even if a static prediction was
 wrong, it will get checked during runtime, making things fail loudly and
-immediately, rather than silently and asynchronously.</p>
+immediately, rather than silently and after the fact.</p>
 <p>In this doc we’ll answer:</p>
 <ul>
 <li>What’s the runtime effect of adding a <code>sig</code> to a method?</li>
@@ -89,8 +89,6 @@ that:</p>
 <li>returns what the original method returned<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></li>
 </ul>
 <!-- prettier-ignore-start -->
-<p>The case for <code>.void</code> in a <code>sig</code> is slightly different. See
-<a href="/docs/sigs#returns-void-annotating-return-types">the docs for void</a>.</p>
 <!-- prettier-ignore-end -->
 <p>For example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
@@ -140,38 +138,181 @@ type annotations:</p>
 <li>Our production observability and monitoring catch bad sigs <strong>early</strong>, before
 they propagate false assumptions throughout a codebase.</li>
 </ul>
+<p>To drive these points home, let’s look at a concrete example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+<span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Example</span></span>
+  extend T::Sig
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">some_untyped_method</span></span>
+    <span class="hljs-literal">nil</span>
+  <span class="hljs-keyword">end</span>
+
+  sig {params(<span class="hljs-symbol">x:</span> Integer).returns(Integer)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">add_one</span><span class="hljs-params">(x)</span></span>
+    x + <span class="hljs-number">1</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+Example.add_one(Example.some_untyped_method)
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Arequire%20'sorbet-runtime'%0A%0Aclass%20Example%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20def%20self.some_untyped_method%0A%20%20%20%20nil%0A%20%20end%0A%0A%20%20sig%20%7Bparams(x%3A%20Integer).returns(Integer)%7D%0A%20%20def%20self.add_one(x)%0A%20%20%20%20x%20%2B%201%0A%20%20end%0Aend%0A%0AExample.add_one(Example.some_untyped_method)">→
+View on sorbet.run</a></p>
+<p>In this example, <code>srb tc</code> reports that there were <strong>no errors statically</strong>. But
+if we were to run this code with <code>ruby</code>, <code>some_untyped_method</code> would return
+<code>nil</code>, we’d try to add <code>1</code> to it, and Ruby would raise a NoMethodError for <code>+</code>.
+By adding a <code>sig</code> to <code>add_one</code>, the Sorbet runtime will raise an exception
+before even starting to execute the method. This makes typing errors from
+untyped code manifest early and loudly and right at the source, rather than
+silently, long after a sig was added, and far removed from this line of code.</p>
 <p>Most people are <em>either</em> familiar with a completely typed language (Java, Go,
 etc.) or a completely untyped language like Ruby; a
-<a href="/docs/gradual">gradual type system</a> can be very foreign at first, including these
-runtime checks. But it’s precisely these runtime checks that make it easier to
-drive adoption of types in the long run.</p>
-<h2><a class="anchor" aria-hidden="true" id="disabling-runtime-checks"></a><a href="#disabling-runtime-checks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Disabling runtime checks</h2>
-<p>Sometimes runtime checks don’t make sense. There are two main reasons why</p>
-<ol>
-<li><p>For particularly hot method calls, we might not have the performance budget
-to wrap a method in <code>sig</code> checks.</p></li>
-<li><p>For the purposes of convincing an people to adopt Sorbet widely, we might
-have to make the compromise that adopting Sorbet doesn’t affect the runtime
-behavior of the code.</p></li>
-</ol>
-<!-- TODO(jez) Document .on_failure / .checked once API is stable. -->
-<p>It’s possible to change the runtime behavior by defining callbacks. See
-<a href="/docs/tconfiguration">Runtime Configuration</a> for more about what callbacks are
-available and how to register them.</p>
+<a href="/docs/gradual">gradual type system</a> can be very foreign at first. Including these
+runtime checks by default protects typed code from untyped code, making it
+easier to drive adoption of types in the long run.</p>
+<h2><a class="anchor" aria-hidden="true" id="changing-the-runtime-behavior"></a><a href="#changing-the-runtime-behavior" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Changing the runtime behavior</h2>
+<p>While having runtime checks is the default, it’s possible to change the behavior
+of the runtime system via configuration settings. These configuration settings
+live in under the <code>T::Configuration</code> module within the <code>sorbet-runtime</code> gem.</p>
+<p>There are two main ways to change Sorbet’s runtime:</p>
+<ul>
+<li><p><strong>When</strong> the runtime checks fail, what to do in response.</p>
+<p>To change this, we use <code>.on_failure</code> in a method signature.</p></li>
+<li><p><strong>Whether</strong> the runtime checks run in the first place.</p>
+<p>To change this, we use <code>.checked</code> in a method signature.</p></li>
+</ul>
+<p>In the next sections, we’ll give some examples of how to use both.</p>
+<h2><a class="anchor" aria-hidden="true" id="on_failure-changing-what-happens-on-runtime-errors"></a><a href="#on_failure-changing-what-happens-on-runtime-errors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>.on_failure</code>: Changing what happens on runtime errors</h2>
+<p>By adding <code>.on_failure(...)</code> to a sig and registering a <code>T::Configuration</code>
+callback, we can change what happens when a sig check fails. For example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
+
+<span class="hljs-comment"># (1) Register call_validation_error_handler callback.</span>
+<span class="hljs-comment"># This runs every time a method with a sig fails to type check at runtime.</span>
+T::Configuration.call_validation_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|signature, opts|</span>
+  <span class="hljs-comment">#                                                     ┌──┐</span>
+  <span class="hljs-keyword">if</span> signature.on_failure &amp;&amp; signature.on_failure[<span class="hljs-number">0</span>] == <span class="hljs-symbol">:log</span>
+    puts opts[<span class="hljs-symbol">:pretty_message</span>]
+  <span class="hljs-keyword">else</span>
+    raise TypeError.new(opts[<span class="hljs-symbol">:pretty_message</span>])
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span></span>
+  extend T::Sig
+
+  <span class="hljs-comment"># (2) Use .on_failure in the sig for a method</span>
+  <span class="hljs-comment">#                                       ┌───────────────┐</span>
+  sig {params(<span class="hljs-symbol">argv:</span> T::Array[String]).void.on_failure(<span class="hljs-symbol">:log</span>)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span><span class="hljs-params">(argv)</span></span>
+    puts argv
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># (3) When we call main incorrectly, it will print</span>
+<span class="hljs-comment"># with puts instead of raise an exception.</span>
+Main.main(<span class="hljs-number">42</span>)
+
+<span class="hljs-comment"># Output:</span>
+<span class="hljs-comment"># ❯ ruby example.rb</span>
+<span class="hljs-comment"># Parameter 'argv': Expected type T::Array[String], got type Integer with value 42</span>
+<span class="hljs-comment"># Caller: example.rb:25</span>
+<span class="hljs-comment"># Definition: example.rb:18</span>
+<span class="hljs-comment"># 42</span>
+</code></pre>
+<p>We defined our own meaning for <code>.on_failure</code> with <code>T::Configuration</code>. Without
+doing this, <code>.on_failure</code> has no effect. Because of this, <code>.on_failure</code> can be
+completely customized within any codebase to change what it means to fail. For
+example at Stripe, we use <code>.on_failure</code> to attach team ownership information to
+a failure.</p>
+<p>The <code>T::Configuration</code> handler we wrote branches on whether <code>.on_failure</code> was
+provided, which means the logging behavior is opt in. This is nice because it
+means the default behavior is still to make problems with types fail loudly and
+early, rather than silently as a log. If we wanted, we could have inverted this:</p>
+<pre><code class="hljs css language-ruby">T::Configuration.call_validation_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|signature, opts|</span>
+  <span class="hljs-comment">#                                                     ┌────┐</span>
+  <span class="hljs-keyword">if</span> signature.on_failure &amp;&amp; signature.on_failure[<span class="hljs-number">0</span>] == <span class="hljs-symbol">:raise</span>
+    raise TypeError.new(opts[<span class="hljs-symbol">:pretty_message</span>])
+  <span class="hljs-keyword">else</span>
+    puts opts[<span class="hljs-symbol">:pretty_message</span>]
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># ...</span>
+
+<span class="hljs-comment">#                                       ┌─────────────────┐</span>
+sig {params(<span class="hljs-symbol">argv:</span> T::Array[String]).void.on_failure(<span class="hljs-symbol">:raise</span>)}
+</code></pre>
+<p>With this <code>T::Configuration</code> handler, the default is to log, and we can use
+<code>.on_failure</code> to opt specific sigs into raising on failure.</p>
+<p>We haven’t depicted it here, but the <code>T::Configuration</code> handler will get an
+array of every argument that was provided to <code>.on_failure</code> for this
+sig—specifically there’s no restriction that <code>.on_failure</code> must be given only
+one arg nor that the arg is a Symbol. For more on the various <code>T::Configuration</code>
+handlers, see <a href="/docs/tconfiguration">Runtime Configuration</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="checked-whether-to-check-in-the-first-place"></a><a href="#checked-whether-to-check-in-the-first-place" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>.checked</code>: Whether to check in the first place</h2>
+<blockquote>
+<p><strong>Careful!</strong> Opting out of runtime checks can significantly degrade the
+trustworthiness of type signatures. Only disable the runtime after
+understanding the tradeoffs. See <a href="/docs/gradual">Gradual Type Checking</a> to learn
+more.</p>
+</blockquote>
+<p>In our examples above with <code>.on_failure</code>, every method call had the runtime type
+checks run to determine whether the <code>T::Configuration</code> handler should be called
+in the first place. This comes with an overhead, and we carefully audit and
+monitor the performance of <code>sorbet-runtime</code> as a result. The overhead of these
+checks are usually very small.</p>
+<p>But in some cases, especially when calling certain methods in tight loops or
+other latency-sensitive paths, the overhead of even doing the checks (regardless
+of what happens on failure) is prohibitively expensive. To handle these cases,
+Sorbet offers <code>.checked(...)</code> which declares in what environments a sig should
+be checked:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) Runtime checks always run.</span>
+sig {params(<span class="hljs-symbol">xs:</span> T::Array[String]).void.checked(<span class="hljs-symbol">:always</span>)}
+
+<span class="hljs-comment"># (2) Runtime checks only run in "tests" (see below).</span>
+<span class="hljs-comment"># In non-tests, this sig specifically has no runtime overhead.</span>
+sig {params(<span class="hljs-symbol">xs:</span> T::Array[String]).void.checked(<span class="hljs-symbol">:tests</span>)}
+
+<span class="hljs-comment"># (3) Never runs the runtime checks. Careful!</span>
+sig {params(<span class="hljs-symbol">xs:</span> T::Array[String]).void.checked(<span class="hljs-symbol">:never</span>)}
+</code></pre>
+<p>If <code>.checked(...)</code> is omitted on a sig, the default is <code>.checked(:always)</code>. The
+default checked level can also be configured. For example:</p>
+<pre><code class="hljs css language-ruby">T::Configuration.default_checked_level = <span class="hljs-symbol">:tests</span>
+</code></pre>
+<p>Writing this will make it so that any sig which does not have a <code>.checked(...)</code>
+call in it will behave as if the user had written <code>.checked(:tests)</code>. To prevent
+accidental misuse, <code>sorbet-runtime</code> will require that this setting is changed
+before any <code>sig</code> is evaluated at runtime.</p>
+<p><strong>Note</strong>: For <code>.checked(:tests)</code> to work correctly, checking in tests must be
+enabled in every entry point into the tests. To declare that a certain entry
+point is a test, run:</p>
+<pre><code class="hljs css language-ruby">T::Configuration.enable_checking_for_sigs_marked_checked_tests
+</code></pre>
+<p>For example, this should probably be placed as the first line of any <code>rake test</code>
+target, as well as any other entrypoint to a project’s tests. If this line is
+absent, <code>.checked(:tests)</code> sigs behave as if they had been <code>.checked(:never)</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="what-s-next"></a><a href="#what-s-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
 <ul>
 <li><p><a href="/docs/sigs">Signatures</a></p>
 <p>Method signatures are the primary way that we add static and dynamic type
 checking in our code. Learn the available syntax advanced features of
 signatures.</p></li>
+<li><p><a href="/docs/tconfiguration">Runtime Configuration</a></p>
+<p>Learn how to change or disable Sorbet’s runtime type checks via settings and
+callbacks.</p></li>
 </ul>
 <hr class="footnotes-sep">
 <section class="footnotes">
 <ol class="footnotes-list">
-<li id="fn1"  class="footnote-item"> <a href="#fnref1" class="footnote-backref">↩</a></li>
+<li id="fn1"  class="footnote-item"><p>The case for <code>.void</code> in a <code>sig</code> is slightly different. See <a href="/docs/sigs#returns-void-annotating-return-types">the docs
+for void</a>. <a href="#fnref1" class="footnote-backref">↩</a></p>
+</li>
 </ol>
 </section>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/static"><span class="arrow-prev">← </span><span>Enabling Static Checks</span></a><a class="docs-next button" href="/docs/rbi"><span>RBI Files</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#runtime-checked-sig-s">Runtime-checked <code>sig</code>s</a></li><li><a href="#why-have-runtime-checks">Why have runtime checks?</a></li><li><a href="#disabling-runtime-checks">Disabling runtime checks</a></li><li><a href="#what-s-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/static"><span class="arrow-prev">← </span><span>Enabling Static Checks</span></a><a class="docs-next button" href="/docs/rbi"><span>RBI Files</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#runtime-checked-sig-s">Runtime-checked <code>sig</code>s</a></li><li><a href="#why-have-runtime-checks">Why have runtime checks?</a></li><li><a href="#changing-the-runtime-behavior">Changing the runtime behavior</a></li><li><a href="#on_failure-changing-what-happens-on-runtime-errors"><code>.on_failure</code>: Changing what happens on runtime errors</a></li><li><a href="#checked-whether-to-check-in-the-first-place"><code>.checked</code>: Whether to check in the first place</a></li><li><a href="#what-s-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
