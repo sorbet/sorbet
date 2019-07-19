@@ -646,7 +646,7 @@ module Kernel
   end
   def load(filename, arg0=T.unsafe(nil)); end
 
-  sig {params(blk: T.proc.params.returns(T.untyped)).returns(T.untyped)}
+  sig {params(blk: T.proc.params.returns(T.untyped)).returns(T.noreturn)}
   sig {returns(T::Enumerator[T.untyped])}
   def loop(&blk); end
 

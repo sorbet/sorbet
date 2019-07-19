@@ -158,7 +158,7 @@ string Loc::showRaw(const GlobalState &gs) const {
     if (!exists()) {
         return fmt::format("Loc {{file={} start=??? end=???}}", path);
     }
-    if (absl::StartsWith(path, "https://github.com/sorbet/sorbet/tree/master/rbi/") && gs.censorForSymbolTableExp) {
+    if (absl::StartsWith(path, "https://github.com/sorbet/sorbet/tree/master/rbi/") && gs.censorForSnapshotTests) {
         // This is so that changing RBIs doesn't mean invalidating every symbol-table exp test.
         return fmt::format("Loc {{file={} start=removed end=removed}}", path);
     }

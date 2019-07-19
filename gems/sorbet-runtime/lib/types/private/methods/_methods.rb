@@ -11,10 +11,18 @@ module T::Private::Methods
   # - they are done possibly before any sig block has run.
   # - they are done even if the method being defined doesn't have a sig.
   @final_methods = Set.new
-  # if a module directly defines a final method, or includes, extends, or inherits from a module which does so, then it
-  # should be in this set.
+  # a non-singleton is a module for which at least one of the following is true:
+  # - is declared final
+  # - defines a method that is declared final
+  # - includes an non-singleton
+  # - extends an non-singleton
+  # a singleton is the singleton_class of a non-singleton.
+  # modules_with_final is the set of singletons and non-singletons.
   @modules_with_final = Set.new
-  @old_included_extended = nil
+  # this stores the old [included, extended] hooks for Module and inherited hook for Class that we override when
+  # enabling final checks for when those hooks are called. the 'hooks' here don't have anything to do with the 'hooks'
+  # in installed_hooks.
+  @old_hooks = nil
 
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
@@ -123,6 +131,9 @@ module T::Private::Methods
   # the final instance methods of target and source_method_names. so, for every m in source_method_names, check if there
   # is already a method defined on one of target_ancestors with the same name that is final.
   def self._check_final_ancestors(target, target_ancestors, source_method_names)
+    if !module_with_final?(target)
+      return
+    end
     # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
     # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
     target_ancestors.reverse_each do |ancestor|
@@ -151,6 +162,7 @@ module T::Private::Methods
 
   def self.add_module_with_final(mod)
     @modules_with_final.add(mod)
+    @modules_with_final.add(mod.singleton_class)
   end
 
   private_class_method def self.module_with_final?(mod)
@@ -228,7 +240,9 @@ module T::Private::Methods
     @sig_wrappers[key] = sig_block
     if current_declaration.final
       add_final_method(key)
-      add_module_with_final(mod)
+      # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
+      # final. change this to mod to see some final_method tests fail.
+      add_module_with_final(hook_mod)
     end
   end
 
@@ -366,7 +380,7 @@ module T::Private::Methods
 
   # the module target is adding the methods from the module source to itself. we need to check that for all instance
   # methods M on source, M is not defined on any of target's ancestors.
-  def self._included_extended_impl(target, target_ancestors, source)
+  def self._hook_impl(target, target_ancestors, source)
     if !module_with_final?(target) && !module_with_final?(source)
       return
     end
@@ -375,24 +389,28 @@ module T::Private::Methods
     _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
   end
 
-  def self.set_final_checks_for_include_extend(enable)
-    is_enabled = @old_included_extended != nil
+  def self.set_final_checks_on_hooks(enable)
+    is_enabled = @old_hooks != nil
     if enable == is_enabled
       return
     end
     if is_enabled
-      @old_included_extended.each(&:restore)
-      @old_included_extended = nil
+      @old_hooks.each(&:restore)
+      @old_hooks = nil
     else
       old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
         old_included.bind(self).call(arg)
-        ::T::Private::Methods._included_extended_impl(arg, arg.ancestors, self)
+        ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
       end
       old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
         old_extended.bind(self).call(arg)
-        ::T::Private::Methods._included_extended_impl(arg, arg.singleton_class.ancestors, self)
+        ::T::Private::Methods._hook_impl(arg, arg.singleton_class.ancestors, self)
       end
-      @old_included_extended = [old_included, old_extended]
+      old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited) do |arg|
+        old_inherited.bind(self).call(arg)
+        ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
+      end
+      @old_hooks = [old_included, old_extended, old_inherited]
     end
   end
 

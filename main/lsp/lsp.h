@@ -78,8 +78,10 @@ class LSPLoop {
         ~ShowOperation();
     };
 
-    /** Trees that have been indexed and can be reused between different runs */
+    /** Trees that have been indexed (with initialGS) and can be reused between different runs */
     std::vector<ast::ParsedFile> indexed;
+    /** Trees that have been indexed (with finalGS) and can be reused between different runs */
+    UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
     /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
     std::vector<core::FileHash> globalStateHashes;
     /** List of files that have had errors in last run*/
@@ -165,7 +167,7 @@ class LSPLoop {
         bool tookFastPath;
     };
     /** Conservatively rerun entire pipeline without caching any trees */
-    TypecheckRun runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles);
+    TypecheckRun runSlowPath();
     /** Returns `true` if the given changes can run on the fast path. */
     bool canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
                          const std::vector<core::FileHash> &hashes) const;

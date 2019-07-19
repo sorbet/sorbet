@@ -17,6 +17,14 @@ class Proc < Object
 
   sig do
     params(
+        arg0: BasicObject,
+    )
+    .returns(T.untyped)
+  end
+  def [](*arg0); end
+
+  sig do
+    params(
         arity: Integer,
     )
     .returns(Proc)

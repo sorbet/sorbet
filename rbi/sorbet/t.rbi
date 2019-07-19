@@ -103,11 +103,73 @@ end
 module T::CFGExport
 end
 
-class T::InexactStruct
-  def initialize(rules={}); end
-  def self.prop(name, type, rules={}); end
-  def self.const(name, type, rules={}); end
-end
-class T::Struct < T::InexactStruct; end
-
 T::Boolean = T.type_alias(T.any(TrueClass, FalseClass))
+
+module T::Configuration
+  def self.call_validation_error_handler(signature, opts); end
+  def self.call_validation_error_handler=(value); end
+  def self.default_checked_level=(default_checked_level); end
+  def self.enable_checking_for_sigs_marked_checked_tests; end
+  def self.enable_final_checks_for_include_extend; end
+  def self.reset_final_checks_for_include_extend; end
+  def self.hard_assert_handler(str, extra); end
+  def self.hard_assert_handler=(value); end
+  def self.inline_type_error_handler(error); end
+  def self.inline_type_error_handler=(value); end
+  def self.log_info_handler(str, extra); end
+  def self.log_info_handler=(value); end
+  def self.scalar_types; end
+  def self.scalar_types=(values); end
+  def self.sig_builder_error_handler(error, location); end
+  def self.sig_builder_error_handler=(value); end
+  def self.sig_validation_error_handler(error, opts); end
+  def self.sig_validation_error_handler=(value); end
+  def self.soft_assert_handler(str, extra); end
+  def self.soft_assert_handler=(value); end
+end
+
+module T::Profile
+  def self.reset; end
+  def self.typecheck_count_estimate; end
+  def self.typecheck_duration; end
+  def self.typecheck_duration=(arg0); end
+  def self.typecheck_duration_estimate; end
+  def self.typecheck_sample_attempts; end
+  def self.typecheck_sample_attempts=(arg0); end
+  def self.typecheck_samples; end
+  def self.typecheck_samples=(arg0); end
+end
+
+module T::Utils
+  def self.arity(method); end
+  def self.coerce(val); end
+  def self.run_all_sig_blocks; end
+  def self.signature_for_instance_method(mod, method_name); end
+  def self.unwrap_nilable(type); end
+  def self.wrap_method_with_call_validation_if_needed(mod, method_sig, original_method); end
+
+  # only one caller; delete
+  def self.methods_excluding_object(mod); end
+  # only one caller; delete
+  def self.register_forwarder(from_method, to_method, remove_first_param: nil); end
+end
+
+class T::Utils::RuntimeProfiled
+end
+
+module T::AbstractUtils
+  def self.abstract_method?(method); end
+  def self.abstract_methods_for(mod); end
+  def self.abstract_module?(mod); end
+  def self.declared_abstract_methods_for(mod); end
+end
+
+class T::InterfaceWrapper
+  def self.dynamic_cast(obj, mod); end
+end
+
+module T::Utils::Nilable
+  def self.get_type_info(prop_type); end
+  def self.get_underlying_type(prop_type); end
+  def self.get_underlying_type_object(prop_type); end
+end

@@ -1,7 +1,7 @@
 class <emptyTree><<C <root>>> < ()
   <emptyTree>
 
-  def self.<static-init><<static-init>$106>(<blk>)
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
     <self>.foobar() do ||
       <emptyTree>
     end

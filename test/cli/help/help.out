@@ -164,7 +164,7 @@ Usage:
       --simulate-crash          Crash on start
       --silence-dev-message     Silence "You are running a development build"
                                 message
-      --censor-for-symbol-table-exp
+      --censor-for-snapshot-tests
                                 When printing raw location information, don't
                                 show line numbers
       --error-white-list errorCode
