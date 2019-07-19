@@ -48,7 +48,7 @@ class Sorbet::Private::RequireEverything
     config.each_line do |line|
       match = ignore_matcher.match(line)
       if match
-        ignore_paths << match[1]
+        ignore_paths << Regexp.new(match[1])
       end
     end
     ignore_paths
@@ -56,7 +56,7 @@ class Sorbet::Private::RequireEverything
 
   def self.abs_paths
     abs_paths = Dir.glob("#{Dir.pwd}/**/*.rb")
-    abs_paths.reject{|ap| ignore_paths.detect{|ip| File.fnmatch(ip, ap)}}
+    abs_paths.reject{|ap| ignore_paths.detect{|ip| ip.match(ap)}}
   end
 
   def self.require_all_files
