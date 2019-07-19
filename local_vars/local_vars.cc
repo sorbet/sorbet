@@ -75,6 +75,7 @@ class LocalNameInserter {
             for (auto &prev : namedArgs) {
                 if (prev.name == named.name && !absl::StartsWith(prev.name.data(ctx)->shortName(ctx), "_")) {
                     if (auto e = ctx.state.beginError(named.loc, core::errors::Namer::RepeatedArgument)) {
+                        ENFORCE(!scopeStack.empty());
                         auto frame = scopeStack.back();
                         e.setHeader("Duplicated argument name `{}`", named.name.show(ctx));
                         if (frame.insideMethod) {
@@ -82,6 +83,7 @@ class LocalNameInserter {
                         } else if (frame.insideBlock) {
                             e.addErrorLine(frame.loc, "In argument list of block");
                         }
+                        ENFORCE(frame.insideMethod || frame.insideBlock);
                     }
                     break;
                 }
