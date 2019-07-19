@@ -53,6 +53,12 @@ class Sorbet::Private::RequireEverything
       # While this isn't a perfect heuristic for these things, it's pretty good.
       next if File.executable?(abs_path)
       next if excluded_paths.include?(abs_path)
+
+      # Skip db/schema.rb, as requiring it can wipe the database. This is left
+      # out of exclude_rails_files, as it is possible to use the packages that
+      # generate it without using the whole rails ecosystem.
+      next if /db\/schema.rb$/.match(abs_path)
+
       next if /^# +typed: +ignore$/.match(File.read(abs_path).scrub)
 
       begin
