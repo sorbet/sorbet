@@ -346,6 +346,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       end
       m.foo
     end
-    assert_includes(err.message, "The syntax for declaring a method final is `sig(:final) {[...]}`, not `sig {final.[...]}`")
+    assert_includes(err.message, "The syntax for declaring a method final is `sig(:final) {...}`, not `sig {final. ...}`")
   end
 end

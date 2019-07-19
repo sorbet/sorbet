@@ -327,8 +327,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                 case core::Names::final_()._id:
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         reportedInvalidMethod = true;
-                        e.setHeader("The syntax for declaring a method final is `sig(:final) {{[...]}}`, not `sig "
-                                    "{{final.[...]}}`");
+                        e.setHeader("The syntax for declaring a method final is `sig(:final) {{...}}`, not `sig "
+                                    "{{final. ...}}`");
                     }
                     break;
                 default:

@@ -154,7 +154,7 @@ module T::Private::Methods
 
     def final
       check_live!
-      raise BuilderError.new("The syntax for declaring a method final is `sig(:final) {[...]}`, not `sig {final.[...]}`")
+      raise BuilderError.new("The syntax for declaring a method final is `sig(:final) {...}`, not `sig {final. ...}`")
     end
 
     def override(allow_incompatible: false)
