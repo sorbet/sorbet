@@ -230,6 +230,13 @@ private:
             }
             job.out->symbol = resolved;
             return;
+        } else if (resolved.exists() && resolved.data(ctx)->isClassClass()) {
+            // this can happen when we try to resolve a constant through a type alias which was itself not
+            // well-formed. If we've gotten here, we already have shown reasonable error messages to the user, so just
+            // make sure we can continue gracefully by stubbing in an untyped
+            resolved.data(ctx)->resultType = core::Types::untyped(ctx, resolved);
+            job.out->symbol = resolved;
+            return;
         }
         ENFORCE(!resolved.exists());
 
