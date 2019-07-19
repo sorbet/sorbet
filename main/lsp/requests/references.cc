@@ -30,8 +30,8 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
     ShowOperation op(*this, "References", "Finding all references...");
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.references");
 
-    auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
-                                     LSPMethod::TextDocumentCompletion, false);
+    auto result =
+        setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentCompletion);
     if (auto run1 = get_if<TypecheckRun>(&result)) {
         gs = move(run1->gs);
         // An explicit null indicates that we don't support this request (or that nothing was at the location).
@@ -39,13 +39,19 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
         response->result = variant<JSONNullObject, vector<unique_ptr<Location>>>(JSONNullObject());
         auto &queryResponses = run1->responses;
         if (!queryResponses.empty()) {
+            const bool fileIsTyped =
+                uri2FileRef(params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
             // N.B.: Ignores literals.
+            // If file is untyped, only supports find reference requests from constants and class definitions.
             if (auto constResp = resp->isConstant()) {
                 tie(gs, response->result) = getReferencesToSymbol(move(gs), constResp->symbol);
             } else if (auto defResp = resp->isDefinition()) {
-                tie(gs, response->result) = getReferencesToSymbol(move(gs), defResp->symbol);
-            } else if (auto identResp = resp->isIdent()) {
+                if (fileIsTyped || defResp->symbol.data(*gs)->isClass()) {
+                    tie(gs, response->result) = getReferencesToSymbol(move(gs), defResp->symbol);
+                }
+            } else if (fileIsTyped && resp->isIdent()) {
+                auto identResp = resp->isIdent();
                 auto loc = identResp->owner.data(*gs)->loc();
                 if (loc.exists()) {
                     auto run2 =
@@ -54,7 +60,8 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
                     gs = move(run2.gs);
                     response->result = extractLocations(*gs, run2.responses);
                 }
-            } else if (auto sendResp = resp->isSend()) {
+            } else if (fileIsTyped && resp->isSend()) {
+                auto sendResp = resp->isSend();
                 auto start = sendResp->dispatchResult.get();
                 vector<unique_ptr<Location>> locations;
                 while (start != nullptr) {
