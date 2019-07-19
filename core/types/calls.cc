@@ -1804,7 +1804,7 @@ public:
                 depth = INT64_MAX;
             }
         } else {
-            ENFORCE(args.args.empty(), "Array#flatten passed too many args: {}", args.args.size());
+            return;
         }
 
         res.returnType = Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element, depth));
