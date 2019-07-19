@@ -104,7 +104,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
 
     for (auto &arg : sigSend->args) {
         auto lit = ast::cast_tree<ast::Literal>(arg.get());
-        if (lit != nullptr && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::final()) {
+        if (lit != nullptr && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::final_()) {
             sig.seen.final = true;
         }
     }
