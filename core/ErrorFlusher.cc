@@ -6,8 +6,7 @@ using namespace std;
 
 namespace sorbet::core {
 
-void ErrorFlusher::flushErrors(const GlobalState &gs, spdlog::logger &logger,
-                               vector<unique_ptr<ErrorQueueMessage>> errors) {
+void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQueueMessage>> errors) {
     fmt::memory_buffer critical, nonCritical;
     for (auto &error : errors) {
         if (error->kind == ErrorQueueMessage::Kind::Error) {
@@ -21,7 +20,7 @@ void ErrorFlusher::flushErrors(const GlobalState &gs, spdlog::logger &logger,
             if (out.size() != 0) {
                 fmt::format_to(out, "\n\n");
             }
-            fmt::format_to(out, "{}", error->error->toString(gs));
+            fmt::format_to(out, "{}", error->text);
 
             for (auto &autocorrect : error->error->autocorrects) {
                 autocorrects.emplace_back(move(autocorrect));
