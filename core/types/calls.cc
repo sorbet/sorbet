@@ -1804,6 +1804,8 @@ public:
                 depth = INT64_MAX;
             }
         } else {
+            // If our arity is off, then calls.cc will report an error due to mismatch with the RBI elsewhere, so we
+            // don't need to do anything special here
             return;
         }
 
