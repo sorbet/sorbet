@@ -11,7 +11,6 @@ class A
 
   [].each do
     B = 1
-  # ^^^^^ error: Dynamic constant assignment
     B
   end
 end
