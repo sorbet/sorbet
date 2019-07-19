@@ -7,6 +7,10 @@ class MyTest
         outside_method
     end
 
+    it "allows constants inside of IT" do
+      CONST = 10
+    end
+
     describe "some inner tests" do
         def inside_method
         end
