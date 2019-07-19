@@ -99,7 +99,7 @@ NameDef names[] = {
     // Sig builders
     {"bind"},
     {"params"},
-    {"final"},
+    {"final_", "final"},
     {"returns"},
     {"void_", "void"},
     {"checked"},

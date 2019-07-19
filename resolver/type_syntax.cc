@@ -104,7 +104,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
 
     for (auto &arg : sigSend->args) {
         auto lit = ast::cast_tree<ast::Literal>(arg.get());
-        if (lit != nullptr && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::final()) {
+        if (lit != nullptr && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::final_()) {
             sig.seen.final = true;
         }
     }
@@ -323,6 +323,13 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 case core::Names::generated()._id:
                     sig.seen.generated = true;
+                    break;
+                case core::Names::final_()._id:
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        reportedInvalidMethod = true;
+                        e.setHeader("The syntax for declaring a method final is `sig(:final) {{...}}`, not `sig "
+                                    "{{final. ...}}`");
+                    }
                     break;
                 default:
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
