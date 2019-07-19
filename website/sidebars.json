@@ -40,6 +40,9 @@
       "abstract",
       "override-checking",
       "intersection-types"
+    ],
+    "Experimental Features": [
+      "metaprogramming-plugins"
     ]
   },
   "talks": {
