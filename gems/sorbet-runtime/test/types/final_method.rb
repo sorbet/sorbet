@@ -3,12 +3,12 @@ require_relative '../test_helper'
 
 class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   before do
-    T::Configuration.enable_final_checks_for_include_extend
+    T::Configuration.enable_final_checks_on_hooks
   end
 
   after do
     T::Private::DeclState.current.reset!
-    T::Configuration.reset_final_checks_for_include_extend
+    T::Configuration.reset_final_checks_on_hooks
   end
 
   it "allows declaring an instance method as final" do

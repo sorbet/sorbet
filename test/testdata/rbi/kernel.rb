@@ -16,11 +16,14 @@ T.assert_type!(Rational('1/1', 2, exception: true), Rational)
 
 # make sure we don't regress and mark `loop` as returning `nil`
 x = loop {break 1}
+T.assert_type!(x, Integer)
 if x
   puts x + 1
-else
-  puts x
 end
 
 define_singleton_method(:foo) { puts '' }
 define_singleton_method('foo') { puts '' }
+
+y = loop do
+end
+puts y # error: This code is unreachable
