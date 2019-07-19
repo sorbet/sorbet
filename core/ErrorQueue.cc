@@ -51,7 +51,7 @@ vector<unique_ptr<core::Error>> ErrorQueue::drainAllErrors() {
     return move(drainWithQueryResponses().first);
 }
 
-void ErrorQueue::flushErrors(bool all) {
+void ErrorQueue::flushErrors(const GlobalState &gs, bool all) {
     checkOwned();
     if (ignoreFlushes) {
         return;
@@ -64,7 +64,7 @@ void ErrorQueue::flushErrors(bool all) {
     } else {
         errors = drainFlushed();
     }
-    errorFlusher.flushErrors(logger, move(errors));
+    errorFlusher.flushErrors(gs, logger, move(errors));
 }
 
 void ErrorQueue::flushErrorCount() {
@@ -82,7 +82,6 @@ void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> 
     core::ErrorQueueMessage msg;
     msg.kind = core::ErrorQueueMessage::Kind::Error;
     msg.whatFile = error->loc.file();
-    msg.text = error->toString(gs);
     msg.error = move(error);
     this->queue.push(move(msg), 1);
 }

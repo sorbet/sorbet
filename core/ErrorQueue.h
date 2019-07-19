@@ -43,7 +43,7 @@ public:
     /** Extract all errors. This discards all query responses currently present in error Queue */
     std::vector<std::unique_ptr<core::Error>> drainAllErrors();
 
-    void flushErrors(bool all = false);
+    void flushErrors(const GlobalState &gs, bool all = false);
     void flushErrorCount();
     void flushAutocorrects(const GlobalState &gs, FileSystem &fs);
 };

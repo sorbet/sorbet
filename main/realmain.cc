@@ -511,7 +511,7 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        gs->errorQueue->flushErrors(true);
+        gs->errorQueue->flushErrors(*gs, true);
 
         if (!opts.noErrorCount) {
             gs->errorQueue->flushErrorCount();

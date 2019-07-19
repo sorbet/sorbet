@@ -520,7 +520,7 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
             }
             progress.reportProgress(input->doneEstimate());
-            ret.gs->errorQueue->flushErrors();
+            ret.gs->errorQueue->flushErrors(*ret.gs);
         }
     }
     return ret;
@@ -744,7 +744,7 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
                     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
                     tree = namer::Namer::run(ctx, move(tree));
                 }
-                gs.errorQueue->flushErrors();
+                gs.errorQueue->flushErrors(gs);
                 namingProgress.reportProgress(i);
                 i++;
             } catch (SorbetException &) {
@@ -894,7 +894,7 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         }
     }
 
-    gs->errorQueue->flushErrors();
+    gs->errorQueue->flushErrors(*gs);
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
             if (opts.print.ResolveTree.enabled) {
@@ -972,7 +972,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                                                 make_move_iterator(threadResult.trees.end()));
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
-                    gs->errorQueue->flushErrors();
+                    gs->errorQueue->flushErrors(*gs);
                 }
             }
         }
