@@ -981,9 +981,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i->what.variable);
 
                 if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
-                    e.setHeader("Control flow reached `{}`. Missing cases for `{}`", "T.impossible",
+                    e.setHeader("Control flow reached `{}` but didn't handle case for `{}`", "T.impossible",
                                 typeAndOrigin.type->show(ctx));
-                    e.addErrorSection(core::ErrorSection("From:", typeAndOrigin.origins2Explanations(ctx)));
+                    e.addErrorSection(core::ErrorSection("Handled cases:", typeAndOrigin.origins2Explanations(ctx)));
                 }
 
                 tp.type = core::Types::bottom();

@@ -36,6 +36,27 @@ def forgotten_two_cases(x)
   end
 end
 
+sig {params(x: T.any(String, T::Array[Integer])).void}
+def missing_case_with_generic(x)
+  case x
+  when Array
+    puts x
+  else
+    # TODO(jez) design better error messages; include type in all these error assertions
+    T.impossible(x) # error: Control flow reached `T.impossible`
+  end
+end
+
+sig {params(x: T.any(T::Array[String], T::Array[Integer])).void}
+def ok_when_generic_cases_overlap(x)
+  case x
+  when Array
+    puts x
+  else
+    T.impossible(x)
+  end
+end
+
 sig {params(x: T.any(Integer, String)).void}
 def dead_code_before(x)
   case x
