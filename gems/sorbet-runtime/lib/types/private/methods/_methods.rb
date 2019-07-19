@@ -240,8 +240,8 @@ module T::Private::Methods
     @sig_wrappers[key] = sig_block
     if current_declaration.final
       add_final_method(key)
-      # use hook_mod, not mod, because for example, we want class C to be marked as having final if we define def C.foo
-      # as final. change this to mod to see >1 final_method tests fail.
+      # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
+      # final. change this to mod to see some final_method tests fail.
       add_module_with_final(hook_mod)
     end
   end
