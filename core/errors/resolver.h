@@ -49,6 +49,8 @@ constexpr ErrorClass SubclassingNotAllowed{5041, StrictLevel::False};
 constexpr ErrorClass NonPublicAbstract{5042, StrictLevel::True};
 constexpr ErrorClass InvalidTypeAlias{5043, StrictLevel::False};
 constexpr ErrorClass InvalidVariance{5044, StrictLevel::True};
+constexpr ErrorClass GenericClassWithoutTypeArgs{5045, StrictLevel::False};
+constexpr ErrorClass GenericClassWithoutTypeArgsStdlib{5046, StrictLevel::Strict};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

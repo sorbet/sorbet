@@ -17,4 +17,4 @@ echo
 cat autocorrect-private.rb
 
 rm autocorrect-private.rb
-rm "$tmp"
+rm -rf "$tmp"
