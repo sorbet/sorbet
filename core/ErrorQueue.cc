@@ -81,6 +81,7 @@ void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> 
     msg.whatFile = error->loc.file();
     if (!error->isSilenced) {
         this->nonSilencedErrorCount.fetch_add(1);
+        // Serializing errors is expensive, so we only serialize them if the error isn't silenced.
         msg.text = error->toString(gs);
     }
     msg.error = move(error);
