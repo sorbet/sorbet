@@ -1,0 +1,191 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Metaprogramming plugins · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Warning&lt;/strong&gt;: This feature is experimental and has known limitations. It may&lt;/p&gt;
+&lt;/blockquote&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Metaprogramming plugins · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Warning&lt;/strong&gt;: This feature is experimental and has known limitations. It may&lt;/p&gt;
+&lt;/blockquote&gt;
+"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Experimental Features</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">Typed Structs</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/docs/metaprogramming-plugins">Metaprogramming plugins</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/metaprogramming-plugins.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Metaprogramming plugins</h1></header><article><div><span><blockquote>
+<p><strong>Warning</strong>: This feature is experimental and has known limitations. It may
+not work as expected and may change without notice.</p>
+</blockquote>
+<p>In Ruby, it is possible to dynamically define methods. Consider the following
+example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># metaprogramming.rb</span>
+<span class="hljs-comment"># typed: true</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Metaprogramming</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">macro</span><span class="hljs-params">(name)</span></span>
+    define_method(<span class="hljs-string">"<span class="hljs-subst">#{name}</span>_time"</span>) { name }
+  <span class="hljs-keyword">end</span>
+
+  macro(<span class="hljs-symbol">:bed</span>)
+  macro(<span class="hljs-symbol">:fun</span>)
+<span class="hljs-keyword">end</span>
+
+hello = Metaprogramming.new
+hello.bed_time <span class="hljs-comment"># error: Method `bed_time` does not exist on Metaprogramming</span>
+hello.fun_time <span class="hljs-comment"># error: Method `fun_time` does not exist on Metaprogramming</span>
+</code></pre>
+<p>Sorbet rejects this script since Sorbet cannot understand calls to
+<code>define_method</code> or other similar metaprogramming facilities.</p>
+<p>Sorbet has a plugin system for handling metaprogramming patterns similar to the
+one shown in this example. Specifically, we can write a plugin to teach Sorbet
+what the method <code>macro</code> does.</p>
+<p>Here is a plugin for <code>macro</code> in the example above:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># macro_plugin.rb</span>
+
+<span class="hljs-comment"># Sorbet calls this plugin with command line arguments similar to the following:</span>
+<span class="hljs-comment"># ruby --class Metaprogramming --method macro --source macro(:bed)</span>
+<span class="hljs-comment"># we only care about the source here, so we use ARGV[5]</span>
+source = ARGV[<span class="hljs-number">5</span>]
+/macro\(<span class="hljs-symbol">:</span>(.*)\)/.match(source) <span class="hljs-keyword">do</span> <span class="hljs-params">|match_data|</span>
+  puts <span class="hljs-string">"def <span class="hljs-subst">#{match_data[<span class="hljs-number">1</span>]}</span>_time; end"</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>We then use a YAML file to tell Sorbet about this plugin.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment"># triggers.yaml</span>
+
+<span class="hljs-attr">ruby_extra_args:</span>
+  <span class="hljs-comment"># These options are forwarded to Ruby</span>
+<span class="hljs-bullet">  -</span> <span class="hljs-string">'--disable-gems'</span> <span class="hljs-comment"># This option speeds up Ruby boot time. Use it if you don't need gems</span>
+<span class="hljs-attr">triggers:</span>
+<span class="hljs-attr">  macro:</span> <span class="hljs-string">macro_plugin.rb</span> <span class="hljs-comment"># This tells Sorbet to run macro.rb when it sees a call to `macro`</span>
+</code></pre>
+<p>Let’s run Sorbet on our initial example again, this time with our new plugin
+enabled:</p>
+<pre><code class="hljs css language-shell">❯ srb tc --dsl-plugins triggers.yaml metaprogramming.rb
+No errors! Great job.
+</code></pre>
+<p>Sorbet executed our plugin and took into consideration its output. Method
+definitions generated by our plugin fixed the error we saw initially.</p>
+<h2><a class="anchor" aria-hidden="true" id="debugging-plugins"></a><a href="#debugging-plugins" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Debugging plugins</h2>
+<p>We can ask Sorbet to print out the output of all plugin calls using
+<code>--print plugin-generated-code</code>:</p>
+<pre><code class="hljs css language-shell">❯ srb tc --print plugin-generated-code --dsl-plugins triggers.yaml metaprogramming.rb
+<span class="hljs-meta">#</span><span class="bash"> Path: <span class="hljs-string">"metaprogramming.rb//plugin-generated|0"</span>:</span>
+class Metaprogramming;
+def bed_time; end
+end;
+<span class="hljs-meta">#</span><span class="bash"> Path: <span class="hljs-string">"metaprogramming.rb//plugin-generated|1"</span>:</span>
+class Metaprogramming;
+def fun_time; end
+end;
+No errors! Great job.
+</code></pre>
+<p>Anything printed to <code>$stderr</code> within a plugin will show up in the terminal when
+<code>srb tc</code> runs.</p>
+<h2><a class="anchor" aria-hidden="true" id="caveats"></a><a href="#caveats" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Caveats</h2>
+<ul>
+<li>Sorbet decides which plugin to call using method names only. This might be a
+problem if different metaprogramming methods use the same name, have similar
+usages, but behave differently. To illustrate, using the configuration above,
+the following calls <code>macro_plugin.rb</code> twice but results in an error.</li>
+</ul>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Metaprogramming</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">macro</span><span class="hljs-params">(name)</span></span>
+    define_method(<span class="hljs-string">"<span class="hljs-subst">#{name}</span>_time"</span>) { name }
+  <span class="hljs-keyword">end</span>
+
+  macro(<span class="hljs-symbol">:fun</span>)
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DifferentMetaprogramming</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">macro</span><span class="hljs-params">(name)</span></span>
+    define_method(<span class="hljs-symbol">:different_macro</span>) { name }
+  <span class="hljs-keyword">end</span>
+
+  macro(<span class="hljs-symbol">:not_so_fun</span>)
+<span class="hljs-keyword">end</span>
+
+DifferentMetaprogramming.new.different_macro <span class="hljs-comment"># error: Method `different_macro` does not exist</span>
+</code></pre>
+<ul>
+<li>The plugin system spawns many instances of Ruby and is very slow because of
+it.</li>
+<li><code>--cache-dir</code> does not play well with the plugin system. On cached runs,
+Sorbet behaves as if there were no plugins specified.</li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/intersection-types"><span class="arrow-prev">← </span><span>Intersection Types</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#debugging-plugins">Debugging plugins</a></li><li><a href="#caveats">Caveats</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'fa1ec885ab70787d636759b88e509b92',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
