@@ -620,7 +620,7 @@ public:
     unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         // forbid dynamic constant definition
         if (!ctx.owner.data(ctx)->isClass()) {
-            if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::DynamicConstant)) {
+            if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::DynamicConstantAssignment)) {
                 e.setHeader("Dynamic constant assignment");
             }
         }
