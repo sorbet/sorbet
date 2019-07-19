@@ -61,6 +61,9 @@ module T
   def self.must(arg); end
 
   def self.coerce(type); end
+
+  sig {params(x: BasicObject).returns(T.noreturn)}
+  def self.impossible(x); end
 end
 
 module T::Generic

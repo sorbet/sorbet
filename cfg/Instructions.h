@@ -187,6 +187,18 @@ public:
 };
 CheckSize(Cast, 64, 8);
 
+class TImpossible final : public Instruction {
+public:
+    VariableUseSite what;
+
+    TImpossible(core::LocalVariable what) : what(what) {
+        categoryCounterInc("cfg", "timpossible");
+    }
+
+    virtual std::string toString(core::Context ctx);
+};
+// CheckSize(Cast, 40, 8);
+
 } // namespace sorbet::cfg
 
 #endif // SORBET_CFG_H

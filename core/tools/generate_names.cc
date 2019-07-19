@@ -129,6 +129,7 @@ NameDef names[] = {
     {"declareAbstract", "abstract!"},
     {"declareFinal", "final!"},
     {"revealType", "reveal_type"},
+    {"impossible"},
     // end T keywords
 
     // Ruby DSL methods which we understand

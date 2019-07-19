@@ -263,6 +263,23 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Send *s) {
                 core::LocalVariable recv;
 
+                if (s->fun == core::Names::impossible()) {
+                    if (auto cnst = ast::cast_tree<ast::ConstantLit>(s->recv.get())) {
+                        if (cnst->symbol == core::Symbols::T()) {
+                            if (s->args.size() == 1) {
+                                auto temp = cctx.newTemporary(core::Names::statTemp());
+                                current = walk(cctx.withTarget(temp), s->args[0].get(), current);
+                                current->exprs.emplace_back(cctx.target, s->loc, make_unique<TImpossible>(temp));
+                                ret = current;
+                                return;
+                            } else {
+                                // TODO(jez) user-visible error
+                                Exception::raise("nope");
+                            }
+                        }
+                    }
+                }
+
                 recv = cctx.newTemporary(core::Names::statTemp());
                 current = walk(cctx.withTarget(recv), s->recv.get(), current);
 

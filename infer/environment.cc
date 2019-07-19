@@ -977,6 +977,18 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                                                                 core::lsp::LiteralResponse(ctx.owner, bind.loc, tp));
                 }
             },
+            [&](cfg::TImpossible *i) {
+                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i->what.variable);
+
+                if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
+                    e.setHeader("Control flow reached `{}`. Missing cases for `{}`", "T.impossible",
+                                typeAndOrigin.type->show(ctx));
+                    e.addErrorSection(core::ErrorSection("From:", typeAndOrigin.origins2Explanations(ctx)));
+                }
+
+                tp.type = core::Types::bottom();
+                tp.origins.emplace_back(bind.loc);
+            },
             [&](cfg::Unanalyzable *i) {
                 tp.type = core::Types::untypedUntracked();
                 tp.origins.emplace_back(bind.loc);
