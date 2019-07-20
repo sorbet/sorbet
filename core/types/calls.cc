@@ -1804,7 +1804,9 @@ public:
                 depth = INT64_MAX;
             }
         } else {
-            ENFORCE(args.args.empty(), "Array#flatten passed too many args: {}", args.args.size());
+            // If our arity is off, then calls.cc will report an error due to mismatch with the RBI elsewhere, so we
+            // don't need to do anything special here
+            return;
         }
 
         res.returnType = Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element, depth));

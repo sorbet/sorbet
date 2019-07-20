@@ -20,7 +20,8 @@ void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQu
             if (out.size() != 0) {
                 fmt::format_to(out, "\n\n");
             }
-            fmt::format_to(out, "{}", error->text);
+            ENFORCE(error->text.has_value());
+            fmt::format_to(out, "{}", error->text.value_or(""));
 
             for (auto &autocorrect : error->error->autocorrects) {
                 autocorrects.emplace_back(move(autocorrect));
