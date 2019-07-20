@@ -25,6 +25,21 @@ def forgotten_case(x)
   end
 end
 
+sig {params(x: T.any(Integer, String)).void}
+def got_all_cases_but_untyped(x)
+  y = T.unsafe(x)
+  case y
+  when Integer
+    puts y
+  when String
+    puts y
+  else
+    # TODO(jez) design better error messages; include type in all these error assertions
+    # TODO(jez) might want to make this error message better
+    T.impossible(y) # error: Control flow reached `T.impossible`
+  end
+end
+
 sig {params(x: T.any(Integer, String, T::Array[Integer])).void}
 def forgotten_two_cases(x)
   case x
@@ -117,6 +132,23 @@ def missing_case_with_isa(x)
     puts x
   else
     # TODO(jez) Type in error message here
+    T.impossible(x) # error: Control flow reached `T.impossible`
+  end
+end
+
+sig {params(x: Integer).void}
+def enforce_something_is_always_non_nil(x)
+  if !x.nil?
+    puts x
+  else
+    T.impossible(x)
+  end
+end
+
+sig {params(x: Integer).void}
+def error_when_predicate_always_true(x)
+  if !x.nil?
+    puts 1 # not a dead code error, because it's always true!
     T.impossible(x) # error: Control flow reached `T.impossible`
   end
 end
