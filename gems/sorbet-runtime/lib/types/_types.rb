@@ -195,6 +195,17 @@ module T
     value
   end
 
+  # A way to ask Sorbet to prove that a certain branch of control flow never
+  # happens. Commonly used to assert that a case or if statement exhausts all
+  # possible cases.
+  def self.impossible(value)
+    begin
+      raise TypeError.new("Control flow reached T.impossible. Got value: #{value}")
+    rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
+      T::Private::ErrorHandler.handle_inline_type_error(e)
+    end
+  end
+
   ### Generic classes ###
 
   module Array
