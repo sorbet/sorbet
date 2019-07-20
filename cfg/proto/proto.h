@@ -13,9 +13,7 @@ public:
     static com::stripe::rubytyper::LocalVariable toProto(const core::GlobalState &gs, const VariableUseSite &vus);
     static com::stripe::rubytyper::LocalVariable toProto(const core::GlobalState &gs, const core::LocalVariable &var);
 
-    static com::stripe::rubytyper::Instruction toProto(const core::GlobalState &gs, const Instruction *inst);
-
-    static com::stripe::rubytyper::Binding toProto(const core::GlobalState &gs, const Binding &bnd);
+    static std::vector<com::stripe::rubytyper::Binding> toProto(const core::GlobalState &gs, const Binding &bnd);
 
     static com::stripe::rubytyper::Block::BlockExit toProto(const core::GlobalState &gs, const BlockExit &ex);
     static com::stripe::rubytyper::Block toProto(const core::GlobalState &gs, const BasicBlock &bb);

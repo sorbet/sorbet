@@ -79,6 +79,7 @@ NameDef names[] = {
     {"finalReturn", "<finalReturn>"},
     {"cfgAlias", "<cfgAlias>"},
     {"magic", "<magic>"},
+    {"tConstTemp", "<tConstTemp>"},
     // end CFG temporaries
 
     {"include"},
