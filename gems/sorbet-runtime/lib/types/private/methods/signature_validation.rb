@@ -4,6 +4,7 @@
 module T::Private::Methods::SignatureValidation
   Methods = T::Private::Methods
   Modes = Methods::Modes
+  TypeVariable = T::Types::TypeVariable
 
   def self.validate(signature)
     if signature.method_name == :initialize && signature.method.owner.is_a?(Class)
@@ -187,6 +188,8 @@ module T::Private::Methods::SignatureValidation
     # arg types must be contravariant
     super_signature.arg_types.zip(signature.arg_types).each_with_index do |((_super_name, super_type), (name, type)), index|
       if !super_type.subtype_of?(type)
+        # rely on the static checker for generic types
+        next if TypeVariable === type || TypeVariable === super_type
         raise "Incompatible type for arg ##{index + 1} (`#{name}`) in #{mode_noun} of method " \
               "`#{signature.method_name}`:\n" \
               "* Base: `#{super_type}` (in #{method_loc_str(super_signature.method)})\n" \
@@ -199,6 +202,7 @@ module T::Private::Methods::SignatureValidation
     super_signature.kwarg_types.each do |name, super_type|
       type = signature.kwarg_types[name]
       if !super_type.subtype_of?(type)
+        next if TypeVariable === type || TypeVariable === super_type
         raise "Incompatible type for arg `#{name}` in #{mode_noun} of method `#{signature.method_name}`:\n" \
               "* Base: `#{super_type}` (in #{method_loc_str(super_signature.method)})\n" \
               "* #{mode_noun.capitalize}: `#{type}` (in #{method_loc_str(signature.method)})\n" \
@@ -208,10 +212,12 @@ module T::Private::Methods::SignatureValidation
 
     # return types must be covariant
     if !signature.return_type.subtype_of?(super_signature.return_type)
-      raise "Incompatible return type in #{mode_noun} of method `#{signature.method_name}`:\n" \
-            "* Base: `#{super_signature.return_type}` (in #{method_loc_str(super_signature.method)})\n" \
-            "* #{mode_noun.capitalize}: `#{signature.return_type}` (in #{method_loc_str(signature.method)})\n" \
-            "(The types must be covariant.)"
+      unless TypeVariable === signature.return_type || TypeVariable === super_signature.return_type
+        raise "Incompatible return type in #{mode_noun} of method `#{signature.method_name}`:\n" \
+              "* Base: `#{super_signature.return_type}` (in #{method_loc_str(super_signature.method)})\n" \
+              "* #{mode_noun.capitalize}: `#{signature.return_type}` (in #{method_loc_str(signature.method)})\n" \
+              "(The types must be covariant.)"
+      end
     end
   end
 
