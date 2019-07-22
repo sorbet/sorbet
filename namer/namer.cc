@@ -238,9 +238,9 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
 
                 auto oldSymCount = ctx.state.symbolsUsed();
-                auto newSignleton =
+                auto newSingleton =
                     klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-                ENFORCE(newSignleton._id >= oldSymCount,
+                ENFORCE(newSingleton._id >= oldSymCount,
                         "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             } else if (klass->symbol.data(ctx)->isClassModuleSet() &&
                        isModule != klass->symbol.data(ctx)->isClassModule()) {
