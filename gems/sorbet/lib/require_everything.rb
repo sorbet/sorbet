@@ -43,7 +43,7 @@ class Sorbet::Private::RequireEverything
     excluded_paths = Set.new
     excluded_paths += excluded_rails_files if rails?
 
-    abs_paths = Dir.glob("#{Dir.pwd}/**/*.rb")
+    abs_paths = rb_file_paths
     errors = []
     abs_paths.each_with_index do |abs_path, i|
       # Executable files are likely not meant to be required.
@@ -105,6 +105,41 @@ class Sorbet::Private::RequireEverything
   end
 
   private
+
+  def self.rb_file_paths
+    srb_path = __FILE__
+    matcher = %r{^(.*/gems/)sorbet-([.\d]*)/*}
+    match = matcher.match(srb_path)
+
+    unless match
+      raise "Could not match with sorbet at #{srb_path}"
+    end
+
+    gem_path = match[1]
+    version_number = match[2]
+
+    glob = gem_path + "/sorbet-static-#{version_number}*/libexec/sorbet"
+    unless Dir[glob].any?
+      raise "Could not find sorbet-static executable for sorbet at #{srb_path}"
+    end
+
+    # Should be only one of these per-version
+    sorbet_exec = Dir[glob].first
+    output = `#{sorbet_exec} -p file-table-json --stop-after=parser`
+    # This returns a hash with structure:
+    # { files:
+    #   [
+    #     {
+    #       "strict": ["Ignore"|"False"|"True"|"Strict"|"Strong"],
+    #       "path": "./path/to/file",
+    #       ...
+    #     }
+    #     ...
+    #   ]
+    # }
+    parsed = JSON.parse(output)
+    parsed['files'].reject{|file| file["strict"] == "Ignore"}.filter{|file| File.file?(file["path"])}.map{|file| File.expand_path(file["path"])}
+  end
 
   def self.excluded_rails_files
     excluded_paths = Set.new
