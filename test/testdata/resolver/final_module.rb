@@ -49,15 +49,3 @@ module FinalModuleWithNoFinalMethods
   def foo; end # error: `FinalModuleWithNoFinalMethods` was declared as final but its method `foo` was not declared as final
   def self.bar; end # error: `FinalModuleWithNoFinalMethods` was declared as final but its method `bar` was not declared as final
 end
-
-class AbstractFinal
-  extend T::Helpers
-  abstract!
-  final! # error: `AbstractFinal` was already declared as abstract and cannot be declared as final
-end
-
-class FinalAbstract
-  extend T::Helpers
-  final!
-  abstract! # error: `FinalAbstract` was already declared as final and cannot be declared as abstract
-end

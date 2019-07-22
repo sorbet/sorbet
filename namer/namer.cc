@@ -268,22 +268,10 @@ public:
         if (send->fun == core::Names::declareFinal()) {
             klass->symbol.data(ctx)->setClassFinal();
             klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassFinal();
-            if (klass->symbol.data(ctx)->isClassAbstract()) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::AbstractFinal)) {
-                    e.setHeader("`{}` was already declared as abstract and cannot be declared as final",
-                                klass->symbol.data(ctx)->show(ctx));
-                }
-            }
         }
         if (send->fun == core::Names::declareInterface() || send->fun == core::Names::declareAbstract()) {
             klass->symbol.data(ctx)->setClassAbstract();
             klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
-            if (klass->symbol.data(ctx)->isClassFinal()) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::AbstractFinal)) {
-                    e.setHeader("`{}` was already declared as final and cannot be declared as abstract",
-                                klass->symbol.data(ctx)->show(ctx));
-                }
-            }
         }
         if (send->fun == core::Names::declareInterface()) {
             klass->symbol.data(ctx)->setClassInterface();
