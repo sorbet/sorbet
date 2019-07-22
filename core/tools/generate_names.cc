@@ -127,6 +127,7 @@ NameDef names[] = {
     {"must"},
     {"declareInterface", "interface!"},
     {"declareAbstract", "abstract!"},
+    {"declareFinal", "final!"},
     {"revealType", "reveal_type"},
     // end T keywords
 

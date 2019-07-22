@@ -265,6 +265,10 @@ public:
         if (send == nullptr) {
             return false;
         }
+        if (send->fun == core::Names::declareFinal()) {
+            klass->symbol.data(ctx)->setClassFinal();
+            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassFinal();
+        }
         if (send->fun == core::Names::declareInterface() || send->fun == core::Names::declareAbstract()) {
             klass->symbol.data(ctx)->setClassAbstract();
             klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
