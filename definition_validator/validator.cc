@@ -221,7 +221,7 @@ void validateFinalAncestorHelper(const core::GlobalState &gs, const core::Symbol
             continue;
         }
         if (auto e = gs.beginError(getAncestorLoc(gs, classDef, mixin), core::errors::Resolver::FinalAncestor)) {
-            e.setHeader("`{}` was declared as final and cannot be {} by `{}`", mixin.data(gs)->show(gs), verb,
+            e.setHeader("`{}` was declared as final and cannot be {} in `{}`", mixin.data(gs)->show(gs), verb,
                         errMsgClassData->show(gs));
             e.addErrorLine(mixin.data(gs)->loc(), "`{}` defined here", mixin.data(gs)->show(gs));
         }

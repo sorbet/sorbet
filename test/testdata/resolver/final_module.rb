@@ -18,19 +18,19 @@ end
 module BadInclude
   include NonFinalModule
   extend NonFinalModule
-  include FinalModule # error: `FinalModule` was declared as final and cannot be included by `BadInclude`
+  include FinalModule # error: `FinalModule` was declared as final and cannot be included in `BadInclude`
 end
 
 module BadExtend
   include NonFinalModule
   extend NonFinalModule
-  extend FinalModule # error: `FinalModule` was declared as final and cannot be extended by `BadExtend`
+  extend FinalModule # error: `FinalModule` was declared as final and cannot be extended in `BadExtend`
 end
 
 AliasFinalModule = FinalModule
 
 module BadAliasInclude
-  include AliasFinalModule # error: `FinalModule` was declared as final and cannot be included by `BadAliasInclude`
+  include AliasFinalModule # error: `FinalModule` was declared as final and cannot be included in `BadAliasInclude`
 end
 
 module FinalModuleWithFinalMethods
