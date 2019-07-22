@@ -271,7 +271,6 @@ public:
         }
         if (send->fun == core::Names::declareInterface()) {
             klass->symbol.data(ctx)->setClassInterface();
-
             if (klass->kind == ast::Class) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
