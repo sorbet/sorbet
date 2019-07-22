@@ -213,52 +213,52 @@ core::Loc getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef *const
     return classDef->loc;
 }
 
-void validateFinalAncestorHelper(const core::GlobalState &gs, const core::SymbolData classData,
-                                 const ast::ClassDef *const classDef, const core::SymbolData errMsgClassData,
+void validateFinalAncestorHelper(const core::GlobalState &gs, const core::SymbolRef klass,
+                                 const ast::ClassDef *const classDef, const core::SymbolRef errMsgClass,
                                  const std::string verb) {
-    for (const auto &mixin : classData->mixins()) {
+    for (const auto &mixin : klass.data(gs)->mixins()) {
         if (!mixin.data(gs)->isClassFinal()) {
             continue;
         }
         if (auto e = gs.beginError(getAncestorLoc(gs, classDef, mixin), core::errors::Resolver::FinalAncestor)) {
             e.setHeader("`{}` was declared as final and cannot be {} in `{}`", mixin.data(gs)->show(gs), verb,
-                        errMsgClassData->show(gs));
+                        errMsgClass.data(gs)->show(gs));
             e.addErrorLine(mixin.data(gs)->loc(), "`{}` defined here", mixin.data(gs)->show(gs));
         }
     }
 }
 
-void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolData classData,
-                               const core::SymbolData errMsgClassData) {
-    if (!classData->isClassFinal()) {
+void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRef klass,
+                               const core::SymbolRef errMsgClass) {
+    if (!klass.data(gs)->isClassFinal()) {
         return;
     }
-    for (const auto mem : classData->members()) {
+    for (const auto mem : klass.data(gs)->members()) {
         const auto memData = mem.second.data(gs);
         if (!memData->isMethod() || memData->name == core::Names::staticInit() || memData->isFinalMethod()) {
             continue;
         }
         if (auto e = gs.beginError(memData->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
-                        errMsgClassData->show(gs), memData->name.show(gs));
+                        errMsgClass.data(gs)->show(gs), memData->name.show(gs));
         }
     }
 }
 
-void validateFinal(const core::GlobalState &gs, const core::SymbolData classData, const ast::ClassDef *const classDef) {
-    const auto superClass = classData->superClass();
+void validateFinal(const core::GlobalState &gs, const core::SymbolRef klass, const ast::ClassDef *const classDef) {
+    const auto superClass = klass.data(gs)->superClass();
     if (superClass.exists() && superClass.data(gs)->isClassFinal()) {
         if (auto e = gs.beginError(getAncestorLoc(gs, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
             e.setHeader("`{}` was declared as final and cannot be inherited by `{}`", superClass.data(gs)->show(gs),
-                        classData->show(gs));
+                        klass.data(gs)->show(gs));
             e.addErrorLine(superClass.data(gs)->loc(), "`{}` defined here", superClass.data(gs)->show(gs));
         }
     }
-    validateFinalAncestorHelper(gs, classData, classDef, classData, "included");
-    validateFinalMethodHelper(gs, classData, classData);
-    const auto singletonData = classData->lookupSingletonClass(gs).data(gs);
-    validateFinalAncestorHelper(gs, singletonData, classDef, classData, "extended");
-    validateFinalMethodHelper(gs, singletonData, classData);
+    validateFinalAncestorHelper(gs, klass, classDef, klass, "included");
+    validateFinalMethodHelper(gs, klass, klass);
+    const auto singleton = klass.data(gs)->lookupSingletonClass(gs);
+    validateFinalAncestorHelper(gs, singleton, classDef, klass, "extended");
+    validateFinalMethodHelper(gs, singleton, klass);
 }
 
 class ValidateWalk {
@@ -355,7 +355,7 @@ public:
         validateTStructNotGrandparent(ctx.state, sym);
         validateAbstract(ctx.state, sym);
         validateAbstract(ctx.state, singleton);
-        validateFinal(ctx.state, sym.data(ctx), classDef.get());
+        validateFinal(ctx.state, sym, classDef.get());
         return classDef;
     }
 
