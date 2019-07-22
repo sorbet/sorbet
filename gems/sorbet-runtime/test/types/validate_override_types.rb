@@ -170,6 +170,38 @@ module Opus::Types::Test
       end
     end
 
+    it 'incorrectly raises when the child class overrides T::Array[C] with a concrete type' do
+      module AbstractGenericModule
+        extend T::Generic
+        extend T::Sig
+        interface!
+
+        C = type_member
+        sig {abstract.returns(T::Array[C])}
+        def hi; end
+      end
+
+      class AbstractImplementor
+        extend T::Generic
+        extend T::Sig
+        include AbstractGenericModule
+
+        C = type_member(fixed: String)
+
+        sig {implementation.returns(T::Array[String])}
+        def hi
+          []
+        end
+      end
+
+      err = assert_raises(RuntimeError) do
+        AbstractImplementor.new.hi
+      end
+
+      # this is wrong! AbstractImplementor `hi` is implemented correctly.
+      assert_includes(err.message, "Incompatible return type in implementation of method `hi`")
+    end
+
     it "raises if a positional param type is covariant" do
       klass = Class.new(FailureBase) do
         extend T::Sig
