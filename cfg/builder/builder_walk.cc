@@ -269,7 +269,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                             if (s->args.size() == 1) {
                                 auto temp = cctx.newTemporary(core::Names::statTemp());
                                 current = walk(cctx.withTarget(temp), s->args[0].get(), current);
-                                current->exprs.emplace_back(cctx.target, s->loc, make_unique<TImpossible>(temp));
+                                current->exprs.emplace_back(cctx.target, s->loc, make_unique<TAbsurd>(temp));
                                 ret = current;
                                 return;
                             } else {

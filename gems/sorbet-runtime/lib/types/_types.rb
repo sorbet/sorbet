@@ -200,7 +200,7 @@ module T
   # possible cases.
   def self.impossible(value)
     begin
-      raise TypeError.new("Control flow reached T.impossible. Got value: #{value}")
+      raise TypeError.new("Control flow reached T.absurd. Got value: #{value}")
     rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
       T::Private::ErrorHandler.handle_inline_type_error(e)
     end

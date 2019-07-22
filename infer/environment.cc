@@ -977,11 +977,11 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                                                                 core::lsp::LiteralResponse(ctx.owner, bind.loc, tp));
                 }
             },
-            [&](cfg::TImpossible *i) {
+            [&](cfg::TAbsurd *i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i->what.variable);
 
                 if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
-                    e.setHeader("Control flow reached `{}` but didn't handle case for `{}`", "T.impossible",
+                    e.setHeader("Control flow reached `{}` but didn't handle case for `{}`", "T.absurd",
                                 typeAndOrigin.type->show(ctx));
                     e.addErrorSection(core::ErrorSection("Handled cases:", typeAndOrigin.origins2Explanations(ctx)));
                 }

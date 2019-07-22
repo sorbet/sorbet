@@ -10,7 +10,7 @@ def normal_usage(x)
   when String
     puts x
   else
-    T.impossible(x)
+    T.absurd(x)
   end
 end
 
@@ -21,7 +21,7 @@ def forgotten_case(x)
     puts x
   else
     # TODO(jez) design better error messages; include type in all these error assertions
-    T.impossible(x) # error: Control flow reached `T.impossible`
+    T.absurd(x) # error: Control flow reached `T.absurd`
   end
 end
 
@@ -36,7 +36,7 @@ def got_all_cases_but_untyped(x)
   else
     # TODO(jez) design better error messages; include type in all these error assertions
     # TODO(jez) might want to make this error message better
-    T.impossible(y) # error: Control flow reached `T.impossible`
+    T.absurd(y) # error: Control flow reached `T.absurd`
   end
 end
 
@@ -47,7 +47,7 @@ def forgotten_two_cases(x)
     puts x
   else
     # TODO(jez) design better error messages; include type in all these error assertions
-    T.impossible(x) # error: Control flow reached `T.impossible`
+    T.absurd(x) # error: Control flow reached `T.absurd`
   end
 end
 
@@ -58,7 +58,7 @@ def missing_case_with_generic(x)
     puts x
   else
     # TODO(jez) design better error messages; include type in all these error assertions
-    T.impossible(x) # error: Control flow reached `T.impossible`
+    T.absurd(x) # error: Control flow reached `T.absurd`
   end
 end
 
@@ -68,7 +68,7 @@ def ok_when_generic_cases_overlap(x)
   when Array
     puts x
   else
-    T.impossible(x)
+    T.absurd(x)
   end
 end
 
@@ -81,7 +81,7 @@ def dead_code_before(x)
     puts x
   else
     puts 1 # error: This code is unreachable
-    T.impossible(x)
+    T.absurd(x)
   end
 end
 
@@ -93,7 +93,7 @@ def dead_code_after(x)
   when String
     puts x
   else
-    T.impossible(x)
+    T.absurd(x)
     puts 1 # error: This code is unreachable
   end
 end
@@ -111,7 +111,7 @@ def cant_alias_local_variables(x)
     # with it, and couldn't see a simple solution that avoided emitting one.
     y = x
     #   ^ error: This code is unreachable
-    T.impossible(y)
+    T.absurd(y)
   end
 end
 
@@ -122,7 +122,7 @@ def normal_usage_with_isa(x)
   elsif x.is_a?(String)
     puts x
   else
-    T.impossible(x)
+    T.absurd(x)
   end
 end
 
@@ -132,7 +132,7 @@ def missing_case_with_isa(x)
     puts x
   else
     # TODO(jez) Type in error message here
-    T.impossible(x) # error: Control flow reached `T.impossible`
+    T.absurd(x) # error: Control flow reached `T.absurd`
   end
 end
 
@@ -141,7 +141,7 @@ def enforce_something_is_always_non_nil(x)
   if !x.nil?
     puts x
   else
-    T.impossible(x)
+    T.absurd(x)
   end
 end
 
@@ -149,23 +149,23 @@ sig {params(x: Integer).void}
 def error_when_predicate_always_true(x)
   if !x.nil?
     puts 1 # not a dead code error, because it's always true!
-    T.impossible(x) # error: Control flow reached `T.impossible`
+    T.absurd(x) # error: Control flow reached `T.absurd`
   end
 end
 
 # --- trying to subvert normal usage ------------------------------------------
 
 def only_impossible_1
-  T.impossible(T.let(T.unsafe(nil), T.noreturn)) # error: This code is unreachable
+  T.absurd(T.let(T.unsafe(nil), T.noreturn)) # error: This code is unreachable
 end
 
 def only_impossible_2
   temp1 = T.let(T.unsafe(nil), T.noreturn)
-  T.impossible(temp1) # error: This code is unreachable
+  T.absurd(temp1) # error: This code is unreachable
 end
 
 sig {params(x: T.noreturn).returns(T.noreturn)}
 def cant_call_only_impossible(x)
-  T.impossible(x) # error: This code is unreachable
+  T.absurd(x) # error: This code is unreachable
 end
 

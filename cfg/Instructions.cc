@@ -123,8 +123,8 @@ string Cast::toString(core::Context ctx) {
     return fmt::format("cast({}, {});", this->value.toString(ctx), this->type->toString(ctx));
 }
 
-string TImpossible::toString(core::Context ctx) {
-    return fmt::format("T.impossible({})", this->what.toString(ctx));
+string TAbsurd::toString(core::Context ctx) {
+    return fmt::format("T.absurd({})", this->what.toString(ctx));
 }
 
 string VariableUseSite::toString(core::Context ctx) const {

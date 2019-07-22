@@ -144,21 +144,21 @@ suggest-sig.rb:79: This function does not have a `sig` https://srb.help/7017
 suggest-sig.rb:85: This code is unreachable https://srb.help/7006
     85 |  if true || qux || blah
                      ^^^
-    suggest-sig.rb:85: To assert that a branch can never happen, use `T.impossible(...)`
+    suggest-sig.rb:85: To assert that a branch can never happen, use `T.absurd(...)`
     85 |  if true || qux || blah
                      ^^^
 
 suggest-sig.rb:85: This code is unreachable https://srb.help/7006
     85 |  if true || qux || blah
                             ^^^^
-    suggest-sig.rb:85: To assert that a branch can never happen, use `T.impossible(...)`
+    suggest-sig.rb:85: To assert that a branch can never happen, use `T.absurd(...)`
     85 |  if true || qux || blah
                             ^^^^
 
 suggest-sig.rb:88: This code is unreachable https://srb.help/7006
     88 |    takesString(x)
             ^^^^^^^^^^^^^^
-    suggest-sig.rb:88: To assert that a branch can never happen, use `T.impossible(...)`
+    suggest-sig.rb:88: To assert that a branch can never happen, use `T.absurd(...)`
     88 |    takesString(x)
             ^^^^^^^^^^^^^^
 

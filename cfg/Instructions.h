@@ -187,11 +187,11 @@ public:
 };
 CheckSize(Cast, 64, 8);
 
-class TImpossible final : public Instruction {
+class TAbsurd final : public Instruction {
 public:
     VariableUseSite what;
 
-    TImpossible(core::LocalVariable what) : what(what) {
+    TAbsurd(core::LocalVariable what) : what(what) {
         categoryCounterInc("cfg", "timpossible");
     }
 

@@ -66,7 +66,7 @@ vector<com::stripe::rubytyper::Binding> Proto::toProto(const core::GlobalState &
 
             *protos.back().mutable_instruction() = instr;
         },
-        [&](const TImpossible *i) {
+        [&](const TAbsurd *i) {
             com::stripe::rubytyper::Binding aliasBinding;
             *aliasBinding.mutable_location() = core::Proto::toProto(gs, bnd.loc);
 
