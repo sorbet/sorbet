@@ -105,30 +105,13 @@ class Sorbet::Private::RequireEverything
   private
 
   def self.rb_file_paths
-    srb_path = __FILE__
-    matcher = %r{^(.*/gems/)sorbet-([.\d]*)/*}
-    match = matcher.match(srb_path)
-
-    unless match
-      raise "Could not match with sorbet at #{srb_path}"
-    end
-
-    gem_path = match[1]
-    version_number = match[2]
-
-    glob = gem_path + "/sorbet-static-#{version_number}*/libexec/sorbet"
-    unless Dir[glob].any?
-      raise "Could not find sorbet-static executable for sorbet at #{srb_path}"
-    end
-
-    # Should be only one of these per-version
-    sorbet_exec = Dir[glob].first
-    output = `#{sorbet_exec} -p file-table-json --stop-after=parser`
+    sorbet_exec = File.realpath("#{__dir__}/../bin/srb")
+    output = `#{sorbet_exec} tc -p file-table-json --stop-after=parser`
     # This returns a hash with structure:
     # { files:
     #   [
     #     {
-    #       "strict": ["Ignore"|"False"|"True"|"Strict"|"Strong"],
+    #       "strict": ["Ignore"|"False"|"True"|"Strict"|"Strong"|"Stdlib"],
     #       "path": "./path/to/file",
     #       ...
     #     }
@@ -136,7 +119,10 @@ class Sorbet::Private::RequireEverything
     #   ]
     # }
     parsed = JSON.parse(output)
-    parsed['files'].reject{|file| file["strict"] == "Ignore"}.filter{|file| File.file?(file["path"])}.map{|file| File.expand_path(file["path"])}
+    parsed['files']
+      .reject{|file| ["Ignore", "Stdlib"].include?(file["strict"])}
+      .filter{|file| File.file?(file["path"])} # Some files have https:// paths. We ignore those here.
+      .map{|file| File.expand_path(file["path"])} # Requires absolute path
   end
 
   def self.excluded_rails_files
