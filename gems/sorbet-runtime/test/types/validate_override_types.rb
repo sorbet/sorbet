@@ -96,11 +96,11 @@ module Opus::Types::Test
         GenericReturnSub[NilClass].new.foo(SubFoo1.new, kw: SubFoo2.new)
       end
 
-      it "fails when the return type is Array[Elem]" do
+      it "fails when the return type is T::Array[Elem]" do
         class GenericReturnArrayElemSub < SuccessBase
           extend T::Generic
           Elem = type_member
-          sig {override.params(pos: SubFoo1, kw: SubFoo2).returns(Array[Elem])}
+          sig {override.params(pos: SubFoo1, kw: SubFoo2).returns(T::Array[Elem])}
           def foo(pos, kw:); end
         end
 
