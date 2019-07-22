@@ -189,7 +189,7 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     }
 }
 
-core::Loc getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef *const classDef,
+core::Loc getAncestorLoc(const core::GlobalState &gs, const unique_ptr<ast::ClassDef> &classDef,
                          const core::SymbolRef ancestor) {
     for (const auto &anc : classDef->ancestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
@@ -214,7 +214,7 @@ core::Loc getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef *const
 }
 
 void validateFinalAncestorHelper(const core::GlobalState &gs, const core::SymbolRef klass,
-                                 const ast::ClassDef *const classDef, const core::SymbolRef errMsgClass,
+                                 const unique_ptr<ast::ClassDef> &classDef, const core::SymbolRef errMsgClass,
                                  const std::string verb) {
     for (const auto &mixin : klass.data(gs)->mixins()) {
         if (!mixin.data(gs)->isClassFinal()) {
@@ -245,7 +245,8 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
     }
 }
 
-void validateFinal(const core::GlobalState &gs, const core::SymbolRef klass, const ast::ClassDef *const classDef) {
+void validateFinal(const core::GlobalState &gs, const core::SymbolRef klass,
+                   const unique_ptr<ast::ClassDef> &classDef) {
     const auto superClass = klass.data(gs)->superClass();
     if (superClass.exists() && superClass.data(gs)->isClassFinal()) {
         if (auto e = gs.beginError(getAncestorLoc(gs, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
@@ -355,7 +356,7 @@ public:
         validateTStructNotGrandparent(ctx.state, sym);
         validateAbstract(ctx.state, sym);
         validateAbstract(ctx.state, singleton);
-        validateFinal(ctx.state, sym, classDef.get());
+        validateFinal(ctx.state, sym, classDef);
         return classDef;
     }
 
