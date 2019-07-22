@@ -59,8 +59,6 @@ class Sorbet::Private::RequireEverything
       # generate it without using the whole rails ecosystem.
       next if /db\/schema.rb$/.match(abs_path)
 
-      next if /^# +typed: +ignore$/.match(File.read(abs_path).scrub)
-
       begin
         my_require(abs_path, i+1, abs_paths.size)
       rescue LoadError, NoMethodError, SyntaxError
