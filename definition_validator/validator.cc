@@ -228,6 +228,23 @@ void validateFinalAncestorHelper(const core::GlobalState &gs, const core::Symbol
     }
 }
 
+void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolData classData,
+                               const core::SymbolData errMsgClassData) {
+    if (!classData->isClassFinal()) {
+        return;
+    }
+    for (const auto mem : classData->members()) {
+        const auto memData = mem.second.data(gs);
+        if (!memData->isMethod() || memData->name == core::Names::staticInit() || memData->isFinalMethod()) {
+            continue;
+        }
+        if (auto e = gs.beginError(memData->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
+            e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
+                        errMsgClassData->show(gs), memData->name.show(gs));
+        }
+    }
+}
+
 void validateFinal(const core::GlobalState &gs, const core::SymbolData classData, const ast::ClassDef *const classDef) {
     const auto superClass = classData->superClass();
     if (superClass.exists() && superClass.data(gs)->isClassFinal()) {
@@ -238,8 +255,10 @@ void validateFinal(const core::GlobalState &gs, const core::SymbolData classData
         }
     }
     validateFinalAncestorHelper(gs, classData, classDef, classData, "included");
+    validateFinalMethodHelper(gs, classData, classData);
     const auto singletonData = classData->lookupSingletonClass(gs).data(gs);
     validateFinalAncestorHelper(gs, singletonData, classDef, classData, "extended");
+    validateFinalMethodHelper(gs, singletonData, classData);
 }
 
 class ValidateWalk {
