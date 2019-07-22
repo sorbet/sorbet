@@ -215,7 +215,7 @@ core::Loc getAncestorLoc(const core::GlobalState &gs, const unique_ptr<ast::Clas
 
 void validateFinalAncestorHelper(const core::GlobalState &gs, const core::SymbolRef klass,
                                  const unique_ptr<ast::ClassDef> &classDef, const core::SymbolRef errMsgClass,
-                                 const std::string verb) {
+                                 const string_view verb) {
     for (const auto &mixin : klass.data(gs)->mixins()) {
         if (!mixin.data(gs)->isClassFinal()) {
             continue;
