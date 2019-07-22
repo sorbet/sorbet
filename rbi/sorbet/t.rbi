@@ -63,7 +63,7 @@ module T
   def self.coerce(type); end
 
   sig {params(value: BasicObject).returns(T.noreturn)}
-  def self.impossible(value); end
+  def self.absurd(value); end
 end
 
 module T::Generic
