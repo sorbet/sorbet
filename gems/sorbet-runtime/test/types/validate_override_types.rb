@@ -95,6 +95,21 @@ module Opus::Types::Test
 
         GenericReturnSub[NilClass].new.foo(SubFoo1.new, kw: SubFoo2.new)
       end
+
+      it "fails when the return type is Array[Elem]" do
+        class GenericReturnArrayElemSub < SuccessBase
+          extend T::Generic
+          Elem = type_member
+          sig {override.params(pos: SubFoo1, kw: SubFoo2).returns(Array[Elem])}
+          def foo(pos, kw:); end
+        end
+
+        err = assert_raises(RuntimeError) do
+          GenericReturnArrayElemSub[NilClass].new.foo(SubFoo1.new, kw: SubFoo2.new)
+        end
+
+        assert_includes(err.message, "Incompatible return type in override of method `foo`")
+      end
     end
 
     describe "overriding when a type member is in the base class method signature" do
