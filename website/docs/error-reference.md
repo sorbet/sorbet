@@ -386,6 +386,41 @@ See [5014](#5014). 5036 is the same error as [5014](#5014) but slightly modified
 to allow more common Ruby idioms to pass by in `# typed: true` (5036 is only
 reported in `# typed: strict`).
 
+## 5047
+
+A class or module tried to inherit, include, or extend a final class or module.
+
+```ruby
+class Final
+  extend T::Helpers
+  final!
+end
+
+class Bad < Final; end # error
+```
+
+## 5048
+
+A class or module was declared as final, but a method in the class or module was
+not explicitly declared as final with a final `sig`.
+
+```ruby
+class C
+  extend T::Helpers
+  final!
+
+  def no_sig; end # error
+
+  extend T::Sig
+
+  sig {void}
+  def non_final_sig; end # error
+
+  sig(:final) {void}
+  def final_sig; end # good
+end
+```
+
 ## 6002
 
 In `# typed: strict` files, Sorbet requires that all instance and class
