@@ -55,7 +55,6 @@ class Sorbet::Private::Serialize
     end
     superclass_str = !superclass_str || superclass_str.empty? ? '' : " < #{superclass_str}"
     ret << (Sorbet::Private::RealStdlib.real_is_a?(klass, Class) ? "class #{class_name}#{superclass_str}\n" : "module #{class_name}\n")
-    ret << "  extend ::T::Sig\n"
 
     # We don't use .included_modules since that also has all the aweful things
     # that are mixed into Object. This way we at least have a delimiter before
