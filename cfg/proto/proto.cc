@@ -91,7 +91,7 @@ vector<com::stripe::rubytyper::Binding> Proto::toProto(const core::GlobalState &
             com::stripe::rubytyper::Instruction send;
             send.set_kind(com::stripe::rubytyper::Instruction::SEND);
             *send.mutable_send()->mutable_receiver() = local;
-            send.mutable_send()->set_method(core::Names::impossible().show(gs));
+            send.mutable_send()->set_method(core::Names::absurd().show(gs));
             *send.mutable_send()->add_arguments() = toProto(gs, i->what);
             *sendBinding.mutable_instruction() = send;
 

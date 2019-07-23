@@ -263,7 +263,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Send *s) {
                 core::LocalVariable recv;
 
-                if (s->fun == core::Names::impossible()) {
+                if (s->fun == core::Names::absurd()) {
                     if (auto cnst = ast::cast_tree<ast::ConstantLit>(s->recv.get())) {
                         if (cnst->symbol == core::Symbols::T()) {
                             if (s->args.size() == 1) {
