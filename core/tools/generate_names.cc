@@ -79,6 +79,7 @@ NameDef names[] = {
     {"finalReturn", "<finalReturn>"},
     {"cfgAlias", "<cfgAlias>"},
     {"magic", "<magic>"},
+    {"tConstTemp", "<tConstTemp>"},
     // end CFG temporaries
 
     {"include"},
@@ -129,6 +130,7 @@ NameDef names[] = {
     {"declareAbstract", "abstract!"},
     {"declareFinal", "final!"},
     {"revealType", "reveal_type"},
+    {"absurd"},
     // end T keywords
 
     // Ruby DSL methods which we understand

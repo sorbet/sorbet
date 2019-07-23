@@ -144,8 +144,12 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (expr.value->isSynthetic) {
                         continue;
                     }
+                    if (cfg::isa_instruction<cfg::TAbsurd>(expr.value.get())) {
+                        continue;
+                    }
                     if (auto e = ctx.state.beginError(expr.loc, core::errors::Infer::DeadBranchInferencer)) {
                         e.setHeader("This code is unreachable");
+                        e.addErrorLine(expr.loc, "To assert that a branch can never happen, use `{}`", "T.absurd(...)");
                     }
                     break;
                 }
@@ -185,7 +189,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             } else if (current.isDead && !bind.value->isSynthetic) {
                 if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
                     e.setHeader("This code is unreachable");
-                    e.addErrorLine(madeBlockDead, "This expression can never be computed");
+                    e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");
                 }
                 break;
             }
