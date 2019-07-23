@@ -173,11 +173,11 @@ module T::Private::Methods
   def self._on_method_added(hook_mod, method_name, is_singleton_method: false)
     current_declaration = T::Private::DeclState.current.active_declaration
     mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
-    original_method = mod.instance_method(method_name)
 
     return if current_declaration.nil?
     T::Private::DeclState.current.reset!
 
+    original_method = mod.instance_method(method_name)
     sig_block = lambda do
       T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
     end
