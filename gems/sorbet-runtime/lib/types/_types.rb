@@ -199,8 +199,15 @@ module T
   # happens. Commonly used to assert that a case or if statement exhausts all
   # possible cases.
   def self.absurd(value)
+    msg = "Control flow reached T.absurd."
+
+    case value
+    when Kernel
+      msg += " Got value: #{value}"
+    end
+
     begin
-      raise TypeError.new("Control flow reached T.absurd. Got value: #{value}")
+      raise TypeError.new(msg)
     rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
       T::Private::ErrorHandler.handle_inline_type_error(e)
     end
