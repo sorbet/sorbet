@@ -164,3 +164,24 @@ def cant_call_only_impossible(x)
   T.absurd(x) # error: This code is unreachable
 end
 
+# --- incorrect usage ---------------------------------------------------------
+
+sig {params(x: Integer).void}
+def not_enough_args(x)
+  T.absurd if x.nil? # error: `T.absurd` expects exactly one argument but got `0`
+end
+
+sig {params(x: Integer).void}
+def too_many_args(x)
+  T.absurd(nil, nil) if x.nil? # error: `T.absurd` expects exactly one argument but got `2`
+end
+
+sig {params(x: Integer).void}
+def too_many_args_with_keyword_arg(x)
+  T.absurd(nil, x: nil) if x.nil? # error: `T.absurd` expects exactly one argument but got `2`
+end
+
+sig {params(x: Integer).void}
+def only_keyword_arg(x)
+  T.absurd(x: nil) if x.nil? # error: Control flow could reach `T.absurd` because the type `{x: NilClass}` wasn't handled
+end
