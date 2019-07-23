@@ -196,7 +196,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     end
   end
 
-  it 'calls original singleton_method_added when registering hooks' do
+  it "calls a user-defined singleton_method_added when registering hooks" do
     klass = Class.new do
       class << self
         def singleton_method_added(name)
