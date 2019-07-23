@@ -1,6 +1,7 @@
 // have to be included first as they violate our poisons
 #include "cfg/proto/proto.h"
 
+#include "absl/container/inlined_vector.h"
 #include "common/typecase.h"
 #include "core/proto/proto.h"
 
