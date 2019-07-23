@@ -20,6 +20,7 @@ module Opus::Types::Test
         end
         assert_equal(ex.message, 'Called custom handler')
       ensure
+        T::Configuration.inline_type_error_handler = nil
       end
     end
   end
