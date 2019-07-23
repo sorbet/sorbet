@@ -174,7 +174,9 @@ module T::Private::Methods
     current_declaration = T::Private::DeclState.current.active_declaration
     mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
 
-    return if current_declaration.nil?
+    if current_declaration.nil?
+      return
+    end
     T::Private::DeclState.current.reset!
 
     original_method = mod.instance_method(method_name)
