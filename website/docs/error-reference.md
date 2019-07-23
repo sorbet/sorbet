@@ -778,6 +778,14 @@ end
 # ---------------------------------------------
 ```
 
+## 7026
+
+Sorbet detected that it was possible for `T.absurd` to be reached. This usually
+means that something that was meant to cover all possible cases of a union type
+did not cover all the cases.
+
+See [Exhaustiveness Checking](exhaustiveness.md) for more information.
+
 [report an issue]: https://github.com/sorbet/sorbet/issues
 
 <script src="/js/error-reference.js"></script>
