@@ -63,6 +63,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
   end
 
   it "allows declaring a module as final and its instance method as final" do
+    skip
     Module.new do
       extend T::Helpers
       final!
@@ -73,6 +74,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
   end
 
   it "allows declaring a module as final and its class method as final" do
+    skip
     Module.new do
       extend T::Helpers
       final!
@@ -83,6 +85,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
   end
 
   it "forbids declaring a module as final but not its instance method as final" do
+    skip
     err = assert_raises(RuntimeError) do
       Module.new do
         extend T::Helpers
@@ -96,6 +99,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
   end
 
   it "forbids declaring a module as final but not its class method as final" do
+    skip
     err = assert_raises(RuntimeError) do
       Module.new do
         extend T::Helpers
