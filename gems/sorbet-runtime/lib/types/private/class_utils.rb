@@ -97,8 +97,8 @@ module T::Private::ClassUtils
     overwritten = original_owner == mod
     T::Configuration.without_ruby_warnings do
       mod.send(:define_method, name, &blk) # rubocop:disable PrisonGuard/UsePublicSend
-      mod.send(original_visibility, name) # rubocop:disable PrisonGuard/UsePublicSend
     end
+    mod.send(original_visibility, name) # rubocop:disable PrisonGuard/UsePublicSend
     new_method = mod.instance_method(name)
 
     ReplacedMethod.new(mod, original_method, new_method, overwritten, original_visibility)
