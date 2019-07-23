@@ -173,8 +173,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     core::Types::isSubType(cctx.ctx, cctx.inWhat.symbol.data(cctx.ctx)->resultType,
                                            core::Types::void_())) {
                     if (auto e = cctx.ctx.state.beginError(a->loc, core::errors::CFG::ReturnExprVoid)) {
-                        e.setHeader("`{}` returns `void` but contains an explicit `return <expression>`",
-                                    cctx.inWhat.symbol.data(cctx.ctx)->show(cctx.ctx));
+                        e.setHeader("`{}` has return type `{}` but explicitly returns an expression",
+                                    cctx.inWhat.symbol.data(cctx.ctx)->show(cctx.ctx), "void");
                     }
                 }
                 core::LocalVariable retSym = cctx.newTemporary(core::Names::returnTemp());
