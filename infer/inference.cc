@@ -149,8 +149,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     }
                     if (auto e = ctx.state.beginError(expr.loc, core::errors::Infer::DeadBranchInferencer)) {
                         e.setHeader("This code is unreachable");
-                        e.addErrorLine(expr.loc, "To assert that a branch can never happen, use `{}`",
-                                       "T.absurd(...)");
+                        e.addErrorLine(expr.loc, "To assert that a branch can never happen, use `{}`", "T.absurd(...)");
                     }
                     break;
                 }

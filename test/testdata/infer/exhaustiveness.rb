@@ -20,8 +20,7 @@ def forgotten_case(x)
   when Integer
     puts x
   else
-    # TODO(jez) design better error messages; include type in all these error assertions
-    T.absurd(x) # error: Control flow reached `T.absurd`
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end
 
@@ -34,9 +33,7 @@ def got_all_cases_but_untyped(x)
   when String
     puts y
   else
-    # TODO(jez) design better error messages; include type in all these error assertions
-    # TODO(jez) might want to make this error message better
-    T.absurd(y) # error: Control flow reached `T.absurd`
+    T.absurd(y) # error: Control flow could reach `T.absurd` because argument was `T.untyped`
   end
 end
 
@@ -46,8 +43,7 @@ def forgotten_two_cases(x)
   when Integer
     puts x
   else
-    # TODO(jez) design better error messages; include type in all these error assertions
-    T.absurd(x) # error: Control flow reached `T.absurd`
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `T.any(String, T::Array[Integer])` wasn't handled
   end
 end
 
@@ -57,8 +53,7 @@ def missing_case_with_generic(x)
   when Array
     puts x
   else
-    # TODO(jez) design better error messages; include type in all these error assertions
-    T.absurd(x) # error: Control flow reached `T.absurd`
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end
 
@@ -131,8 +126,7 @@ def missing_case_with_isa(x)
   if x.is_a?(Integer)
     puts x
   else
-    # TODO(jez) Type in error message here
-    T.absurd(x) # error: Control flow reached `T.absurd`
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end
 
@@ -149,7 +143,8 @@ sig {params(x: Integer).void}
 def error_when_predicate_always_true(x)
   if !x.nil?
     puts 1 # not a dead code error, because it's always true!
-    T.absurd(x) # error: Control flow reached `T.absurd`
+    # This is a strange error message given the test case.
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `Integer` wasn't handled
   end
 end
 

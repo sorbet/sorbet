@@ -981,9 +981,13 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i->what.variable);
 
                 if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
-                    e.setHeader("Control flow reached `{}` but didn't handle case for `{}`", "T.absurd",
-                                typeAndOrigin.type->show(ctx));
-                    e.addErrorSection(core::ErrorSection("Handled cases:", typeAndOrigin.origins2Explanations(ctx)));
+                    if (typeAndOrigin.type->isUntyped()) {
+                        e.setHeader("Control flow could reach `{}` because argument was `{}`", "T.absurd", "T.untyped");
+                    } else {
+                        e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled", "T.absurd",
+                                    typeAndOrigin.type->show(ctx));
+                    }
+                    e.addErrorSection(core::ErrorSection("Originating from:", typeAndOrigin.origins2Explanations(ctx)));
                 }
 
                 tp.type = core::Types::bottom();
