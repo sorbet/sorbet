@@ -20,4 +20,9 @@ class C
   def explicit_return_expr_no_sig
     return 3
   end
+
+  sig {returns(T.untyped)}
+  def explicit_return_expr_t_untyped
+    return 3
+  end
 end
