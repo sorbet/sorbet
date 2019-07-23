@@ -225,6 +225,28 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     )
   end
 
+  it "allows custom hooks" do
+    parent = Class.new do
+      extend T::Sig
+      sig {params(method: Symbol).void}
+      def self.method_added(method)
+        super(method)
+      end
+      def self.singleton_method_added(method)
+        super(method)
+      end
+    end
+    Class.new(parent) do
+      extend T::Sig
+      sig {void}
+      def a; end
+      sig {void}
+      def b; end
+      sig {void}
+      def c; end
+    end
+  end
+
   it "does not make sig available to attached class" do
     assert_raises(NoMethodError) do
       Class.new do
