@@ -395,6 +395,18 @@ For how to fix, see [Type Annotations](type-annotations.md).
 
 See also: [5028](#5028), [7017](#7017).
 
+## 6003
+
+A method was marked as returning `void`, but its body contained an explicit
+`return <expression>`.
+
+```rb
+sig {void}
+def foo
+  return 3 # error
+end
+```
+
 ## 7001
 
 Sorbet does not allow reassigning a variable to a different type within a loop

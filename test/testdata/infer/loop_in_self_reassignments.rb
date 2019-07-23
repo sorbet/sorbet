@@ -4,7 +4,7 @@ class Repro
   def api_sections
   end
 
-  sig {void}
+  sig {returns(T.untyped)}
   def get_repro()
     api_sections.each do
       return api_sections.map {1}

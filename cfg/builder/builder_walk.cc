@@ -169,6 +169,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                  */
             },
             [&](ast::Return *a) {
+                if (!ast::isa_tree<ast::EmptyTree>(a->expr.get()) &&
+                    cctx.inWhat.symbol.data(cctx.ctx)->resultType != nullptr &&
+                    !cctx.inWhat.symbol.data(cctx.ctx)->resultType->isUntyped() &&
+                    core::Types::isSubType(cctx.ctx, cctx.inWhat.symbol.data(cctx.ctx)->resultType,
+                                           core::Types::void_())) {
+                    if (auto e = cctx.ctx.state.beginError(a->loc, core::errors::CFG::ReturnExprVoid)) {
+                        e.setHeader("`{}` has return type `{}` but explicitly returns an expression",
+                                    cctx.inWhat.symbol.data(cctx.ctx)->show(cctx.ctx), "void");
+                    }
+                }
                 core::LocalVariable retSym = cctx.newTemporary(core::Names::returnTemp());
                 auto cont = walk(cctx.withTarget(retSym), a->expr.get(), current);
                 cont->exprs.emplace_back(cctx.target, a->loc, make_unique<Return>(retSym)); // dead assign.
