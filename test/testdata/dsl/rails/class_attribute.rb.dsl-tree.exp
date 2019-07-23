@@ -1,0 +1,327 @@
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C GoodUsages><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def read_write_predicate<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def self.read_write_predicate<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def read_write_predicate=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def self.read_write_predicate=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T::<C Boolean>)
+    end
+
+    def read_write_predicate?<<C <todo sym>>>(&<blk>)
+      false
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T::<C Boolean>)
+    end
+
+    def self.read_write_predicate?<<C <todo sym>>>(&<blk>)
+      false
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def foo<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def self.foo<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def foo=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def self.foo=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T::<C Boolean>)
+    end
+
+    def foo?<<C <todo sym>>>(&<blk>)
+      false
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T::<C Boolean>)
+    end
+
+    def self.foo?<<C <todo sym>>>(&<blk>)
+      false
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def self.no_instance<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def self.no_instance=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T::<C Boolean>)
+    end
+
+    def self.no_instance?<<C <todo sym>>>(&<blk>)
+      false
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def self.no_instance_reader<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def no_instance_reader=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def self.no_instance_reader=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T::<C Boolean>)
+    end
+
+    def self.no_instance_reader?<<C <todo sym>>>(&<blk>)
+      false
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def no_instance_writer<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def self.no_instance_writer<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def self.no_instance_writer=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T::<C Boolean>)
+    end
+
+    def no_instance_writer?<<C <todo sym>>>(&<blk>)
+      false
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T::<C Boolean>)
+    end
+
+    def self.no_instance_writer?<<C <todo sym>>>(&<blk>)
+      false
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def bar<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def self.bar<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def bar=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def self.bar=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def no_predicate<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def self.no_predicate<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def no_predicate=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def self.no_predicate=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig() do ||
+      <self>.void()
+    end
+
+    def usages<<C <todo sym>>>(&<blk>)
+      begin
+        <self>.read_write_predicate()
+        <self>.read_write_predicate?()
+        <self>.read_write_predicate=(1)
+        <self>.no_instance()
+        <self>.no_instance?()
+        <self>.no_instance=(1)
+        <self>.no_instance_reader()
+        <self>.no_instance_reader?()
+        <self>.no_instance_reader=(1)
+        <self>.no_instance_writer()
+        <self>.no_instance_writer?()
+        <self>.no_instance_writer=(1)
+        <self>.no_predicate()
+        <self>.no_predicate?()
+        <self>.no_predicate=(1)
+      end
+    end
+
+    <self>.read_write_predicate()
+
+    <self>.read_write_predicate?()
+
+    <self>.read_write_predicate=(1)
+
+    <self>.no_instance()
+
+    <self>.no_instance?()
+
+    <self>.no_instance=(1)
+
+    <self>.no_instance_reader()
+
+    <self>.no_instance_reader?()
+
+    <self>.no_instance_reader=(1)
+
+    <self>.no_instance_writer()
+
+    <self>.no_instance_writer?()
+
+    <self>.no_instance_writer=(1)
+
+    <self>.no_predicate()
+
+    <self>.no_predicate?()
+
+    <self>.no_predicate=(1)
+  end
+
+  class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)
+    <self>.class_attribute()
+
+    <self>.class_attribute({:"instance_accessor" => false})
+
+    <self>.class_attribute("foo")
+  end
+
+  module <emptyTree>::<C NotAvailableInModule><<C <todo sym>>> < ()
+    <self>.class_attribute(:"foo", :"bar")
+  end
+end
