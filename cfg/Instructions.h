@@ -197,7 +197,7 @@ public:
 
     virtual std::string toString(core::Context ctx);
 };
-// CheckSize(Cast, 40, 8);
+CheckSize(TAbsurd, 40, 8);
 
 } // namespace sorbet::cfg
 
