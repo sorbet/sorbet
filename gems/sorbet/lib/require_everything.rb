@@ -121,8 +121,10 @@ class Sorbet::Private::RequireEverything
     parsed = JSON.parse(output)
     parsed['files']
       .reject{|file| ["Ignore", "Stdlib"].include?(file["strict"])}
-      .select{|file| File.file?(file["path"])} # Some files have https:// paths. We ignore those here.
-      .map{|file| File.expand_path(file["path"])} # Requires absolute path
+      .map{|file| file["path"]}
+      .select{|path| File.file?(path)} # Some files have https:// paths. We ignore those here.
+      .select{|path| /.rb$/.match(path)}
+      .map{|path| File.expand_path(path)} # Requires absolute path
   end
 
   def self.excluded_rails_files
