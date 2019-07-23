@@ -3,12 +3,15 @@ id: exhaustiveness
 title: Exhaustiveness Checking
 ---
 
-**Exhaustiveness checking** is a feature of a language where the type checker
-guarantees that the programmer has covered all cases. It can be super useful at
-catching pesky edge cases before they become bugs, and Sorbet supports it as a
-first class feature.
+> **Note**: Sorbet does not currently have first-class support for
+> exhaustiveness checks. This feature is planned, but has not yet been
+> implemented. Here we document a current workaround.
 
-<!-- Using [Flow-Sensitive Typing](flow-sensitive.md), [Union Types](union-types.md), and [Type Assertions](type-assertions.md) we can approximate exhaustiveness checking. -->
+Using [Flow-Sensitive Typing](flow-sensitive.md), [Union Types](union-types.md),
+and [Type Assertions](type-assertions.md) we can approximate exhaustiveness
+checking. **Exhaustiveness checking** is a feature of a language where the type
+checker guarantees that the programmer has covered all cases. It can be super
+useful at catching pesky edge cases before they become bugs!
 
 ## tl;dr
 
@@ -23,21 +26,33 @@ class A; end
 class B; end
 class C; end
 
-# (1) Define a type alias as a union type of A, B, or C
 AorBorC = T.type_alias(T.any(A, B, C))
 
+def do_a(a); puts 'Got an A!'; end
+def do_b(b); puts 'Got a B!'; end
+def do_c(c); puts 'Got a C!'; end
+
+# (1) We have a union type of A, B, or C
 sig {params(x: AorBorC).void}
 def foo(x)
-  # (2) Use flow-sensitivity to cover each case separately
+  # (2) We use flow-sensitivity to cover each case separately
   case x
   when A
     # To re-iterate: within this branch, Sorbet knows x is an A
     T.reveal_type(x) # Revealed type: `A`
+
+    do_a(x)
+
   when B
-    T.reveal_type(x) # Revealed type: `B`
+    do_b(x)
+
   else
-    # (3) Use T.absurd to ask Sorbet to error when there missing cases.
-    T.absurd(x) # error: didn't handle case for `C`
+    # (3) Use a type assertion to require that x MUST be C
+    T.let(x, C)
+    #        ^ If the type of x ever widens to include other types,
+    #          sorbet will report an error here.
+
+    do_c(x)
   end
 end
 ```
@@ -117,7 +132,8 @@ actually do something with it!
 error. It lets us catch the problem statically before causing all sorts of
 problems down the line.
 
-We can enable exhaustivness checking in Sorbet using `T.absurd(...)`:
+We can enable exhaustivness checking in Sorbet using a
+[type assertion](type-assertions.md):
 
 ```ruby
 sig {params(x: T.any(A, B, C)).void}
@@ -125,53 +141,59 @@ def foo(x)
   case x
   when A
     do_a(x)
-  when B
-    do_b(x)
   else
-    # We're not handling all the cases, so Sorbet will report an error:
-    T.absurd(x) # error: didn't handle case for `C`
+    T.let(x, B) # error: Argument does not have accepted type: `B`
+                #        Got: `T.any(B, C)`
+    do_b(x)
   end
 end
 ```
 
 In this case, Sorbet is telling us that by the time we got to the else case, we
 were missing a case: both `B` and `C` needed to be handled, but we were only
-handling `B`. `T.absurd` should be the same variable that the `case` statement
-discriminates on.
+handling `B`.
 
-And as one last tip, we can use [Type Aliases](type-aliases.md) to give a name
-to `T.any(A, B, C)` and reuse it throughout our codebase. This means we can
-update the alias in one place, instead of at every individual method!
+Putting everything together, this is what our final program looks like. It
+handles all the cases, and prevents against other people from forgetting to
+handle any new cases that get added.
 
 ```ruby
-AorBorC = T.type_alias(T.any(A, B, C))
+# typed: true
+extend T::Sig
 
-sig {params(x: AorBorC).void}
+class A; end
+class B; end
+class C; end
+
+def do_a(a); puts 'Got an A!'; end
+def do_b(b); puts 'Got a B!'; end
+def do_c(c); puts 'Got a C!'; end
+
+# (1) We have a union type of A, B, or C
+sig {params(x: T.any(A, B, C)).void}
 def foo(x)
-  # ...
+  # (2) We use flow-sensitivity to cover each case separately
+  case x
+  when A
+    # To re-iterate: within this branch, Sorbet knows x is an A
+    T.reveal_type(x) # Revealed type: `A`
+
+    do_a(x)
+
+  when B
+    do_b(x)
+
+  else
+    # (3) Use a type assertion to require that x MUST be C
+    T.let(x, C)
+    #        ^ If the type of x ever widens to include other types,
+    #          sorbet will report an error here.
+
+    do_c(x)
+  end
 end
 ```
 
-## Notes
-
-1.  Given all the above, it should be clear that exhaustiveness checks are
-    **opt-in**, i.e., not the default. This is primarily to make it easier to
-    adopt Sorbet in existing projects. That being said, it's still possible that
-    a future version of Sorbet will have exhaustiveness checks enabled by
-    default, with a way to opt out of checking them.
-
-1.  `T.absurd(...)` is implemented both statically and at runtime. Statically
-    Sorbet will report an error, and at runtime Sorbet will raise an exception.
-
-1.  Sorbet will error statically if the condition to a case statement using
-    `T.absurd` is `T.untyped`. This prevents against losing exhaustiveness
-    checking due to a change in the code that weakens static type information.
-
-1.  Exhaustiveness checks are powered by Sorbet's
-    [Flow-Sensitive Typing](flow-sensitive.md) constructs. Specifically, this is
-    also a valid use of `T.absurd`:
-
-    ```ruby
-    # Will error if `x` ever becomes nilable or untyped due to a refactoring
-    T.absurd(x) if x.nil?
-    ```
+> **Tip**: We can use [Type Aliases](type-aliases.md) to give a name to
+> `T.any(A, B, C)` and reuse it throughout our codebase. This means we can
+> update the alias in one place, instead of at every individual method!
