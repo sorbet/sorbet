@@ -3,6 +3,7 @@
 // have to go first as they violate our poisons
 #include "proto/CFG.pb.h"
 
+#include "absl/container/inlined_vector.h"
 #include "cfg/CFG.h"
 
 namespace sorbet::cfg {
@@ -13,7 +14,7 @@ public:
     static com::stripe::rubytyper::LocalVariable toProto(const core::GlobalState &gs, const VariableUseSite &vus);
     static com::stripe::rubytyper::LocalVariable toProto(const core::GlobalState &gs, const core::LocalVariable &var);
 
-    static std::vector<com::stripe::rubytyper::Binding> toProto(const core::GlobalState &gs, const Binding &bnd);
+    static InlinedVector<com::stripe::rubytyper::Binding, 1> toProto(const core::GlobalState &gs, const Binding &bnd);
 
     static com::stripe::rubytyper::Block::BlockExit toProto(const core::GlobalState &gs, const BlockExit &ex);
     static com::stripe::rubytyper::Block toProto(const core::GlobalState &gs, const BasicBlock &bb);

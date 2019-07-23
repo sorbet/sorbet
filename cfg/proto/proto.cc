@@ -1,7 +1,6 @@
 // have to be included first as they violate our poisons
 #include "cfg/proto/proto.h"
 
-#include "absl/container/inlined_vector.h"
 #include "common/typecase.h"
 #include "core/proto/proto.h"
 
@@ -24,7 +23,7 @@ com::stripe::rubytyper::LocalVariable Proto::toProto(const core::GlobalState &gs
 }
 
 InlinedVector<com::stripe::rubytyper::Binding, 1> Proto::toProto(const core::GlobalState &gs, const Binding &bnd) {
-    vector<com::stripe::rubytyper::Binding> protos;
+    InlinedVector<com::stripe::rubytyper::Binding, 1> protos;
     typecase(
         bnd.value.get(),
         [&](const Ident *i) {
