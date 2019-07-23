@@ -16,4 +16,8 @@ class C
   def explicit_return_nothing
     return
   end
+
+  def explicit_return_expr_no_sig
+    return 3
+  end
 end
