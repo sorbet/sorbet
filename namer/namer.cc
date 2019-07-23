@@ -238,9 +238,9 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
 
                 auto oldSymCount = ctx.state.symbolsUsed();
-                auto newSignleton =
+                auto newSingleton =
                     klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-                ENFORCE(newSignleton._id >= oldSymCount,
+                ENFORCE(newSingleton._id >= oldSymCount,
                         "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             } else if (klass->symbol.data(ctx)->isClassModuleSet() &&
                        isModule != klass->symbol.data(ctx)->isClassModule()) {
@@ -265,16 +265,16 @@ public:
         if (send == nullptr) {
             return false;
         }
-        if (send->fun != core::Names::declareInterface() && send->fun != core::Names::declareAbstract()) {
-            return false;
+        if (send->fun == core::Names::declareFinal()) {
+            klass->symbol.data(ctx)->setClassFinal();
+            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassFinal();
         }
-
-        klass->symbol.data(ctx)->setClassAbstract();
-        klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
-
+        if (send->fun == core::Names::declareInterface() || send->fun == core::Names::declareAbstract()) {
+            klass->symbol.data(ctx)->setClassAbstract();
+            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
+        }
         if (send->fun == core::Names::declareInterface()) {
             klass->symbol.data(ctx)->setClassInterface();
-
             if (klass->kind == ast::Class) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
@@ -618,7 +618,14 @@ public:
     }
 
     unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
-        // TODO(nelhage): forbid dynamic constant definition
+        // forbid dynamic constant definition
+        auto ownerData = ctx.owner.data(ctx);
+        if (!ownerData->isClass() && !ownerData->isDSLSynthesized()) {
+            if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::DynamicConstantAssignment)) {
+                e.setHeader("Dynamic constant assignment");
+            }
+        }
+
         auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         ENFORCE(lhs);
         core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs->scope);

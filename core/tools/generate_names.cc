@@ -99,7 +99,7 @@ NameDef names[] = {
     // Sig builders
     {"bind"},
     {"params"},
-    {"final"},
+    {"final_", "final"},
     {"returns"},
     {"void_", "void"},
     {"checked"},
@@ -127,6 +127,7 @@ NameDef names[] = {
     {"must"},
     {"declareInterface", "interface!"},
     {"declareAbstract", "abstract!"},
+    {"declareFinal", "final!"},
     {"revealType", "reveal_type"},
     // end T keywords
 
@@ -181,6 +182,18 @@ NameDef names[] = {
 
     {"prefix"},
     {"to"},
+
+    {"mattrAccessor", "mattr_accessor"},
+    {"mattrReader", "mattr_reader"},
+    {"mattrWriter", "mattr_writer"},
+    {"cattrAccessor", "cattr_accessor"},
+    {"cattrReader", "cattr_reader"},
+    {"cattrWriter", "cattr_writer"},
+    {"instanceReader", "instance_reader"},
+    {"instanceWriter", "instance_writer"},
+    {"instanceAccessor", "instance_accessor"},
+    {"instancePredicate", "instance_predicate"},
+    {"classAtribute", "class_attribute"},
 
     {"describe"},
     {"it"},
@@ -319,6 +332,7 @@ NameDef names[] = {
     {"Proc", "Proc", true},
     {"TrueClass", "TrueClass", true},
     {"FalseClass", "FalseClass", true},
+    {"Boolean", "Boolean", true},
     {"NilClass", "NilClass", true},
     {"Class", "Class", true},
     {"Module", "Module", true},

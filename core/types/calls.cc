@@ -462,9 +462,10 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx)->show(ctx), thisStr);
 
-                // catch the special case of `interface!` or `abstract!` and
+                // catch the special case of `interface!` or `abstract!` or `final!` and
                 // suggest adding `extend T::Helpers`.
-                if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract()) {
+                if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
+                    args.name == core::Names::declareFinal()) {
                     if (auto suggestion = maybeSuggestExtendTHelpers(ctx, thisType, args.locs.call)) {
                         e.addAutocorrect(std::move(*suggestion));
                     }
@@ -1804,7 +1805,9 @@ public:
                 depth = INT64_MAX;
             }
         } else {
-            ENFORCE(args.args.empty(), "Array#flatten passed too many args: {}", args.args.size());
+            // If our arity is off, then calls.cc will report an error due to mismatch with the RBI elsewhere, so we
+            // don't need to do anything special here
+            return;
         }
 
         res.returnType = Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element, depth));

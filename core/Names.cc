@@ -260,6 +260,13 @@ NameRef NameRef::addEq(GlobalState &gs) const {
     return gs.enterNameUTF8(nameEq);
 }
 
+NameRef NameRef::addQuestion(GlobalState &gs) const {
+    auto name = this->data(gs);
+    ENFORCE(name->kind == UTF8, "addQuestion over non-utf8 name");
+    string nameEq = absl::StrCat(name->raw.utf8, "?");
+    return gs.enterNameUTF8(nameEq);
+}
+
 NameRef NameRef::addAt(GlobalState &gs) const {
     auto name = this->data(gs);
     ENFORCE(name->kind == UTF8, "addAt over non-utf8 name");

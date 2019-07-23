@@ -1,12 +1,21 @@
 test/cli/error-url/error-url.rb:4: Unable to resolve constant `MissingConstant` https://example.com/errors/?error=5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparser.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
+     743 |  class MissingArgument < OptionParser::ParseError; end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1
 test/cli/error-url/error-url.rb:4: Unable to resolve constant `MissingConstant` https://example.com/error/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparser.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
+     743 |  class MissingArgument < OptionParser::ParseError; end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1
 test/cli/error-url/error-url.rb:4: Unable to resolve constant `MissingConstant` https://example.com/error#5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparser.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
+     743 |  class MissingArgument < OptionParser::ParseError; end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1
