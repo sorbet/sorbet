@@ -238,9 +238,9 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
 
                 auto oldSymCount = ctx.state.symbolsUsed();
-                auto newSignleton =
+                auto newSingleton =
                     klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-                ENFORCE(newSignleton._id >= oldSymCount,
+                ENFORCE(newSingleton._id >= oldSymCount,
                         "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             } else if (klass->symbol.data(ctx)->isClassModuleSet() &&
                        isModule != klass->symbol.data(ctx)->isClassModule()) {
@@ -265,16 +265,16 @@ public:
         if (send == nullptr) {
             return false;
         }
-        if (send->fun != core::Names::declareInterface() && send->fun != core::Names::declareAbstract()) {
-            return false;
+        if (send->fun == core::Names::declareFinal()) {
+            klass->symbol.data(ctx)->setClassFinal();
+            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassFinal();
         }
-
-        klass->symbol.data(ctx)->setClassAbstract();
-        klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
-
+        if (send->fun == core::Names::declareInterface() || send->fun == core::Names::declareAbstract()) {
+            klass->symbol.data(ctx)->setClassAbstract();
+            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
+        }
         if (send->fun == core::Names::declareInterface()) {
             klass->symbol.data(ctx)->setClassInterface();
-
             if (klass->kind == ast::Class) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
