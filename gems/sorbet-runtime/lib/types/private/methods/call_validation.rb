@@ -170,6 +170,7 @@ module T::Private::Methods::CallValidation
     has_simple_procedure_types = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
 
     T::Configuration.without_ruby_warnings do
+      T::Private::DeclState.current.skip_on_method_added = true
       if has_fixed_arity && has_simple_method_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
         create_validator_method_fast(mod, original_method, method_sig)
       elsif has_fixed_arity && has_simple_procedure_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
@@ -177,6 +178,7 @@ module T::Private::Methods::CallValidation
       else
         create_validator_slow(mod, original_method, method_sig)
       end
+      T::Private::DeclState.current.skip_on_method_added = false
     end
     mod.send(original_visibility, method_sig.method_name)
   end
