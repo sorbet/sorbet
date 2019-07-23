@@ -60,6 +60,7 @@ gemfile_lock_deps(
             "partial/typed-ignore",
             "partial/webmock",
             "total/empty",
+            "total/sorbet-runtime",
         ]
     ],
 )

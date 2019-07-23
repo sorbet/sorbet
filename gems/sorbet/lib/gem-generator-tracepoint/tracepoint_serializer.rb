@@ -107,6 +107,9 @@ module Sorbet::Private
           # everyone to the same version of bundler in tests and in CI.
           # There is an RBI for bundler in sorbet-typed.
           next if gem[:gem] == 'bundler'
+          # We ignore sorbet-runtime because because we write the RBI for it into our payload.
+          # For some reason, runtime reflection generates methods with incorrect arities.
+          next if gem[:gem] == 'sorbet-runtime'
 
           gem_class_defs[gem] ||= {}
           defined.each do |item|
