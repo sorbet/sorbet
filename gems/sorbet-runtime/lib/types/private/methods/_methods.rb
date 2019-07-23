@@ -187,7 +187,6 @@ module T::Private::Methods
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
     new_method = nil
-    # this prevents us from running the final checks twice for every method def.
     T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
       if !T::Private::Methods.has_sig_block_for_method(new_method)
         # This should only happen if the user used alias_method to grab a handle
@@ -420,8 +419,6 @@ module T::Private::Methods
 
   private_class_method def self.install_singleton_method_added_hook(singleton_klass)
     attached = nil
-    # this prevents the final checks from triggering about singleton_method_added not being a final method even if the
-    # module is final.
     original_singleton_method = T::Private::ClassUtils.replace_method(singleton_klass, :singleton_method_added) do |name|
       attached = self
       T::Private::Methods._on_method_added(self, name, is_singleton_method: true)
