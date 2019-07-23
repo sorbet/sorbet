@@ -163,7 +163,6 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
-    T::Private::DeclState.current.skip_next_on_method_added = true
     has_fixed_arity = method_sig.kwarg_types.empty? && !method_sig.has_rest && !method_sig.has_keyrest &&
       original_method.parameters.all? {|(kind, _name)| kind == :req}
     all_args_are_simple = method_sig.arg_types.all? {|_name, type| type.is_a?(T::Types::Simple)}
