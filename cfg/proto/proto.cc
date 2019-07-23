@@ -22,7 +22,7 @@ com::stripe::rubytyper::LocalVariable Proto::toProto(const core::GlobalState &gs
     return proto;
 }
 
-vector<com::stripe::rubytyper::Binding> Proto::toProto(const core::GlobalState &gs, const Binding &bnd) {
+InlinedVector<com::stripe::rubytyper::Binding, 1> Proto::toProto(const core::GlobalState &gs, const Binding &bnd) {
     vector<com::stripe::rubytyper::Binding> protos;
     typecase(
         bnd.value.get(),
