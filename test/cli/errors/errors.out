@@ -1,7 +1,7 @@
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https://srb.help/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparser.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparse.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
      743 |  class MissingArgument < OptionParser::ParseError; end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -51,7 +51,7 @@ Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https://srb.help/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparser.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparse.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
      743 |  class MissingArgument < OptionParser::ParseError; end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -101,7 +101,7 @@ Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https://srb.help/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparser.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparse.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
      743 |  class MissingArgument < OptionParser::ParseError; end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

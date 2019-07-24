@@ -218,8 +218,8 @@ class OptionParser
     sig {params(key: T.untyped, icase: T.untyped, pat: T.untyped).returns(T.untyped)}
     def complete(key, icase = false, pat = nil); end
 
-    sig {params(opt: T.untyped, val: T.untyped).returns(T.untyped)}
-    def convert(opt = nil, val = nil); end
+    sig {params(opt: T.untyped, val: T.untyped, _: T.untyped).returns(T.untyped)}
+    def convert(opt = nil, val = nil, *_); end
   end
 
   class OptionMap < Hash
@@ -313,8 +313,8 @@ class OptionParser
       sig {params(arg: T.untyped, argv: T.untyped).returns(T.untyped)}
       def parse(arg, argv); end
 
-      sig {returns(T.untyped)}
-      def self.incompatible_argument_styles(); end
+      sig {params(_: T.untyped).returns(T.untyped)}
+      def self.incompatible_argument_styles(*_); end
 
       sig {returns(T.untyped)}
       def self.pattern(); end
