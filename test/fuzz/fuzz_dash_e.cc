@@ -33,7 +33,6 @@ unique_ptr<core::GlobalState> buildInitialGlobalState() {
     logger->trace("Doing on-start initialization");
 
     payload::createInitialGlobalState(gs, *opts, kvstore);
-    gs->runningUnderFuzzer = true;
     return gs;
 }
 
