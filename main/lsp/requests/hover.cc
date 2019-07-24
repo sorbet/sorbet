@@ -66,6 +66,9 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 auto singletonClass = data->lookupSingletonClass(*gs);
                 ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                 type = singletonClass.data(*gs)->externalType(*gs);
+            } else if (data->isTypeAlias()) {
+                ENFORCE(data->resultType.get() != nullptr);
+                type = core::make_type<core::MetaType>(data->resultType);
             }
             response->result = make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, type->showWithMoreInfo(*gs)));
         } else {
