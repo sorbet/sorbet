@@ -45,7 +45,7 @@ LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, con
 
 variant<LSPLoop::TypecheckRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
 LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
-                            const LSPMethod forMethod) {
+                            const LSPMethod forMethod, bool errorIfFileIsUntyped) {
     Timer timeit(logger, "setupLSPQueryByLoc");
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {
@@ -53,6 +53,12 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
                                                     fmt::format("Did not find file at uri {} in {}", uri,
                                                                 convertLSPMethodToString(forMethod))),
                          move(gs));
+    }
+
+    if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::True) {
+        logger->info("Ignoring request on untyped file `{}`", uri);
+        // Act as if the query returned no results.
+        return TypecheckRun{{}, {}, {}, move(gs), true};
     }
 
     auto loc = lspPos2Loc(fref, pos, *gs);

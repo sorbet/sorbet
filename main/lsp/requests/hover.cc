@@ -37,7 +37,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.hover");
 
     auto result =
-        setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover);
+        setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover, true);
     if (auto run = get_if<TypecheckRun>(&result)) {
         gs = move(run->gs);
         auto &queryResponses = run->responses;
