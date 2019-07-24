@@ -43,9 +43,7 @@ public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        // Run inferencer on untyped files if a query is active.
-        if ((m->loc.file().data(ctx).strictLevel < core::StrictLevel::True && ctx.state.lspQuery.isEmpty()) ||
-            m->symbol.data(ctx)->isOverloaded()) {
+        if (m->loc.file().data(ctx).strictLevel < core::StrictLevel::True || m->symbol.data(ctx)->isOverloaded()) {
             return m;
         }
         auto &print = opts.print;

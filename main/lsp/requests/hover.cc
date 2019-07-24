@@ -59,6 +59,15 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
         } else if (auto defResp = resp->isDefinition()) {
             response->result = make_unique<Hover>(formatRubyCode(
                 clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr)));
+        } else if (auto constResp = resp->isConstant()) {
+            const auto &data = constResp->symbol.data(*gs);
+            auto type = constResp->retType.type;
+            if (data->isClass()) {
+                auto singletonClass = data->lookupSingletonClass(*gs);
+                ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
+                type = singletonClass.data(*gs)->externalType(*gs);
+            }
+            response->result = make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, type->showWithMoreInfo(*gs)));
         } else {
             response->result =
                 make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs)));
