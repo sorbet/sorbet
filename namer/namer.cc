@@ -90,6 +90,9 @@ class NameInserter {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
         auto &argInfo = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, name);
+        if (pos >= ctx.owner.data(ctx)->arguments().size()) {
+            ctx.owner.data(ctx)->arguments().emplace_back(argInfo.deepCopy());
+        }
         unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
 
         if (parsedArg.default_) {
