@@ -260,6 +260,11 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
 vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState &gs, NameRef name,
                                                                int betterThan) const {
     vector<Symbol::FuzzySearchResult> res;
+    // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
+    if (gs.runningUnderFuzzer) {
+        return res;
+    }
+
     if (name.data(gs)->kind == NameKind::UTF8) {
         auto sym = findMemberFuzzyMatchUTF8(gs, name, betterThan);
         if (sym.symbol.exists()) {
