@@ -261,6 +261,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
                                                                int betterThan) const {
     vector<Symbol::FuzzySearchResult> res;
     // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
+    // N.B.: There are benefits to running this method under the fuzzer; we have found bugs in this method before
+    // via fuzzing (e.g. https://github.com/sorbet/sorbet/issues/128).
     if (fuzz_mode) {
         return res;
     }
