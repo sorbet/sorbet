@@ -30,8 +30,8 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
     ShowOperation op(*this, "References", "Finding all references...");
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.references");
 
-    auto result =
-        setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentCompletion);
+    auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
+                                     LSPMethod::TextDocumentCompletion, false);
     if (auto run1 = get_if<TypecheckRun>(&result)) {
         gs = move(run1->gs);
         // An explicit null indicates that we don't support this request (or that nothing was at the location).

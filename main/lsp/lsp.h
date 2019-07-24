@@ -196,7 +196,7 @@ class LSPLoop {
                              const std::vector<core::FileRef> &filesToQuery);
     std::variant<LSPLoop::TypecheckRun, std::pair<std::unique_ptr<ResponseError>, std::unique_ptr<core::GlobalState>>>
     setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri, const Position &pos,
-                       const LSPMethod forMethod, bool errorIfFileIsUntyped = false);
+                       const LSPMethod forMethod, bool errorIfFileIsUntyped = true);
     TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol);
     LSPResult handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                       const TextDocumentPositionParams &params);

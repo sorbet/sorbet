@@ -37,7 +37,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.hover");
 
     auto result =
-        setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover, true);
+        setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover);
     if (auto run = get_if<TypecheckRun>(&result)) {
         gs = move(run->gs);
         auto &queryResponses = run->responses;
@@ -67,8 +67,9 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                 type = singletonClass.data(*gs)->externalType(*gs);
             } else if (data->isTypeAlias()) {
-                ENFORCE(data->resultType.get() != nullptr);
-                type = core::make_type<core::MetaType>(data->resultType);
+                // By wrapping the type in `MetaType`, we display a type alias of `Foo` as `<Type: Foo>` rather than
+                // `Foo`.
+                type = core::make_type<core::MetaType>(type);
             }
             response->result = make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, type->showWithMoreInfo(*gs)));
         } else {
