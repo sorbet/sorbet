@@ -1,9 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Exhaustiveness Checking · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: Sorbet does not currently have first-class support for&lt;/p&gt;
-&lt;/blockquote&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Exhaustiveness Checking · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: Sorbet does not currently have first-class support for&lt;/p&gt;
-&lt;/blockquote&gt;
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Exhaustiveness Checking · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;&lt;strong&gt;Exhaustiveness checking&lt;/strong&gt; is a feature of a language where the type checker&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Exhaustiveness Checking · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;&lt;strong&gt;Exhaustiveness checking&lt;/strong&gt; is a feature of a language where the type checker&lt;/p&gt;
 "/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
               (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -68,16 +64,11 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/exhaustiveness.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Exhaustiveness Checking</h1></header><article><div><span><blockquote>
-<p><strong>Note</strong>: Sorbet does not currently have first-class support for
-exhaustiveness checks. This feature is planned, but has not yet been
-implemented. Here we document a current workaround.</p>
-</blockquote>
-<p>Using <a href="/docs/flow-sensitive">Flow-Sensitive Typing</a>, <a href="/docs/union-types">Union Types</a>,
-and <a href="/docs/type-assertions">Type Assertions</a> we can approximate exhaustiveness
-checking. <strong>Exhaustiveness checking</strong> is a feature of a language where the type
-checker guarantees that the programmer has covered all cases. It can be super
-useful at catching pesky edge cases before they become bugs!</p>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/exhaustiveness.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Exhaustiveness Checking</h1></header><article><div><span><p><strong>Exhaustiveness checking</strong> is a feature of a language where the type checker
+guarantees that the programmer has covered all cases. It can be super useful at
+catching pesky edge cases before they become bugs, and Sorbet supports it as a
+first class feature.</p>
+<!-- Using [Flow-Sensitive Typing](/docs/flow-sensitive), [Union Types](/docs/union-types), and [Type Assertions](/docs/type-assertions) we can approximate exhaustiveness checking. -->
 <h2><a class="anchor" aria-hidden="true" id="tl-dr"></a><a href="#tl-dr" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>tl;dr</h2>
 <p>If you already know what exhaustiveness checking is, you might just want to see
 the end result:</p>
@@ -88,33 +79,21 @@ extend T::Sig
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span>;</span> <span class="hljs-keyword">end</span>
 
+<span class="hljs-comment"># (1) Define a type alias as a union type of A, B, or C</span>
 AorBorC = T.type_alias(T.any(A, B, C))
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_a</span><span class="hljs-params">(a)</span></span>; puts <span class="hljs-string">'Got an A!'</span>; <span class="hljs-keyword">end</span>
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_b</span><span class="hljs-params">(b)</span></span>; puts <span class="hljs-string">'Got a B!'</span>; <span class="hljs-keyword">end</span>
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_c</span><span class="hljs-params">(c)</span></span>; puts <span class="hljs-string">'Got a C!'</span>; <span class="hljs-keyword">end</span>
-
-<span class="hljs-comment"># (1) We have a union type of A, B, or C</span>
 sig {params(<span class="hljs-symbol">x:</span> AorBorC).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
-  <span class="hljs-comment"># (2) We use flow-sensitivity to cover each case separately</span>
+  <span class="hljs-comment"># (2) Use flow-sensitivity to cover each case separately</span>
   <span class="hljs-keyword">case</span> x
   <span class="hljs-keyword">when</span> A
     <span class="hljs-comment"># To re-iterate: within this branch, Sorbet knows x is an A</span>
     T.reveal_type(x) <span class="hljs-comment"># Revealed type: `A`</span>
-
-    do_a(x)
-
   <span class="hljs-keyword">when</span> B
-    do_b(x)
-
+    T.reveal_type(x) <span class="hljs-comment"># Revealed type: `B`</span>
   <span class="hljs-keyword">else</span>
-    <span class="hljs-comment"># (3) Use a type assertion to require that x MUST be C</span>
-    T.let(x, C)
-    <span class="hljs-comment">#        ^ If the type of x ever widens to include other types,</span>
-    <span class="hljs-comment">#          sorbet will report an error here.</span>
-
-    do_c(x)
+    <span class="hljs-comment"># (3) Use T.absurd to ask Sorbet to error when there missing cases.</span>
+    T.absurd(x) <span class="hljs-comment"># error: didn't handle case for `C`</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
@@ -179,67 +158,54 @@ actually do something with it!</p>
 <p><strong>Exhaustiveness checking</strong> is a feature that turns this kind of bug into a type
 error. It lets us catch the problem statically before causing all sorts of
 problems down the line.</p>
-<p>We can enable exhaustivness checking in Sorbet using a
-<a href="/docs/type-assertions">type assertion</a>:</p>
+<p>We can enable exhaustivness checking in Sorbet using <code>T.absurd(...)</code>:</p>
 <pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> T.any(A, B, C)).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   <span class="hljs-keyword">case</span> x
   <span class="hljs-keyword">when</span> A
     do_a(x)
-  <span class="hljs-keyword">else</span>
-    T.let(x, B) <span class="hljs-comment"># error: Argument does not have accepted type: `B`</span>
-                <span class="hljs-comment">#        Got: `T.any(B, C)`</span>
+  <span class="hljs-keyword">when</span> B
     do_b(x)
+  <span class="hljs-keyword">else</span>
+    <span class="hljs-comment"># We're not handling all the cases, so Sorbet will report an error:</span>
+    T.absurd(x) <span class="hljs-comment"># error: didn't handle case for `C`</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>In this case, Sorbet is telling us that by the time we got to the else case, we
 were missing a case: both <code>B</code> and <code>C</code> needed to be handled, but we were only
-handling <code>B</code>.</p>
-<p>Putting everything together, this is what our final program looks like. It
-handles all the cases, and prevents against other people from forgetting to
-handle any new cases that get added.</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
-extend T::Sig
+handling <code>B</code>. <code>T.absurd</code> should be the same variable that the <code>case</code> statement
+discriminates on.</p>
+<p>And as one last tip, we can use <a href="/docs/type-aliases">Type Aliases</a> to give a name
+to <code>T.any(A, B, C)</code> and reuse it throughout our codebase. This means we can
+update the alias in one place, instead of at every individual method!</p>
+<pre><code class="hljs css language-ruby">AorBorC = T.type_alias(T.any(A, B, C))
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span>;</span> <span class="hljs-keyword">end</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span>;</span> <span class="hljs-keyword">end</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span>;</span> <span class="hljs-keyword">end</span>
-
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_a</span><span class="hljs-params">(a)</span></span>; puts <span class="hljs-string">'Got an A!'</span>; <span class="hljs-keyword">end</span>
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_b</span><span class="hljs-params">(b)</span></span>; puts <span class="hljs-string">'Got a B!'</span>; <span class="hljs-keyword">end</span>
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_c</span><span class="hljs-params">(c)</span></span>; puts <span class="hljs-string">'Got a C!'</span>; <span class="hljs-keyword">end</span>
-
-<span class="hljs-comment"># (1) We have a union type of A, B, or C</span>
-sig {params(<span class="hljs-symbol">x:</span> T.any(A, B, C)).void}
+sig {params(<span class="hljs-symbol">x:</span> AorBorC).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
-  <span class="hljs-comment"># (2) We use flow-sensitivity to cover each case separately</span>
-  <span class="hljs-keyword">case</span> x
-  <span class="hljs-keyword">when</span> A
-    <span class="hljs-comment"># To re-iterate: within this branch, Sorbet knows x is an A</span>
-    T.reveal_type(x) <span class="hljs-comment"># Revealed type: `A`</span>
-
-    do_a(x)
-
-  <span class="hljs-keyword">when</span> B
-    do_b(x)
-
-  <span class="hljs-keyword">else</span>
-    <span class="hljs-comment"># (3) Use a type assertion to require that x MUST be C</span>
-    T.let(x, C)
-    <span class="hljs-comment">#        ^ If the type of x ever widens to include other types,</span>
-    <span class="hljs-comment">#          sorbet will report an error here.</span>
-
-    do_c(x)
-  <span class="hljs-keyword">end</span>
+  <span class="hljs-comment"># ...</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<blockquote>
-<p><strong>Tip</strong>: We can use <a href="/docs/type-aliases">Type Aliases</a> to give a name to
-<code>T.any(A, B, C)</code> and reuse it throughout our codebase. This means we can
-update the alias in one place, instead of at every individual method!</p>
-</blockquote>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/flow-sensitive"><span class="arrow-prev">← </span><span>Flow Sensitivity</span></a><a class="docs-next button" href="/docs/tuples"><span>Tuples</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#tl-dr">tl;dr</a></li><li><a href="#example">Example</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<h2><a class="anchor" aria-hidden="true" id="notes"></a><a href="#notes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Notes</h2>
+<ol>
+<li><p>Given all the above, it should be clear that exhaustiveness checks are
+<strong>opt-in</strong>, i.e., not the default. This is primarily to make it easier to
+adopt Sorbet in existing projects. That being said, it’s still possible that
+a future version of Sorbet will have exhaustiveness checks enabled by
+default, with a way to opt out of checking them.</p></li>
+<li><p><code>T.absurd(...)</code> is implemented both statically and at runtime. Statically
+Sorbet will report an error, and at runtime Sorbet will raise an exception.</p></li>
+<li><p>Sorbet will error statically if the condition to a case statement using
+<code>T.absurd</code> is <code>T.untyped</code>. This prevents against losing exhaustiveness
+checking due to a change in the code that weakens static type information.</p></li>
+<li><p>Exhaustiveness checks are powered by Sorbet’s
+<a href="/docs/flow-sensitive">Flow-Sensitive Typing</a> constructs. Specifically, this is
+also a valid use of <code>T.absurd</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># Will error if `x` ever becomes nilable or untyped due to a refactoring</span>
+T.absurd(x) <span class="hljs-keyword">if</span> x.<span class="hljs-literal">nil</span>?
+</code></pre></li>
+</ol>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/flow-sensitive"><span class="arrow-prev">← </span><span>Flow Sensitivity</span></a><a class="docs-next button" href="/docs/tuples"><span>Tuples</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#tl-dr">tl;dr</a></li><li><a href="#example">Example</a></li><li><a href="#notes">Notes</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
