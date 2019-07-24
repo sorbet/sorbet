@@ -426,14 +426,18 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
 
     ENFORCE(!methodSymbol.data(ctx)->arguments().empty(), "There should always be at least one arg (the block arg).");
     bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments().size() == 1 &&
-                                methodSymbol.data(ctx)->arguments()[0].name == core::Names::blkArg();
+                                methodSymbol.data(ctx)->arguments()[0].isSyntheticBlockArgument();
 
     if (!onlyArgumentIsBlkArg) {
         fmt::format_to(ss, "params(");
 
         bool first = true;
         for (auto &argSym : methodSymbol.data(ctx)->arguments()) {
-            if (argSym.name == core::Names::blkArg()) {
+            // WARNING: This is doing raw string equality--don't cargo cult this!
+            // You almost certainly want to compare NameRef's for equality instead.
+            // We need to compare strings here because we're running with a frozen global state
+            // (and thus can't take the string that we get from `argumentName` and enter it as a name).
+            if (argSym.argumentName(ctx) == core::Names::blkArg().show(ctx)) {
                 // Never write "<blk>: ..." in the params of a generated sig, because this doesn't parse.
                 // (We add a block argument to every method if it doesn't mention one.)
                 continue;
