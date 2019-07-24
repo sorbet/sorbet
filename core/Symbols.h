@@ -75,6 +75,7 @@ public:
         static constexpr u4 CLASS_ABSTRACT = 0x0000'0040;
         static constexpr u4 CLASS_INTERFACE = 0x0000'0080;
         static constexpr u4 CLASS_LINEARIZATION_COMPUTED = 0x0000'0100;
+        static constexpr u4 CLASS_FINAL = 0x0000'0200;
 
         // Method flags
         static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
@@ -304,6 +305,11 @@ public:
         return (flags & Symbol::Flags::CLASS_LINEARIZATION_COMPUTED) != 0;
     }
 
+    inline bool isClassFinal() const {
+        ENFORCE(isClass());
+        return (flags & Symbol::Flags::CLASS_FINAL) != 0;
+    }
+
     inline void setClass() {
         ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
         flags = flags | Symbol::Flags::CLASS;
@@ -457,6 +463,11 @@ public:
     inline void setClassLinearizationComputed() {
         ENFORCE(isClass());
         flags |= Symbol::Flags::CLASS_LINEARIZATION_COMPUTED;
+    }
+
+    inline void setClassFinal() {
+        ENFORCE(isClass());
+        flags |= Symbol::Flags::CLASS_FINAL;
     }
 
     inline void setTypeAlias() {

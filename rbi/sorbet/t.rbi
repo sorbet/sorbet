@@ -61,6 +61,9 @@ module T
   def self.must(arg); end
 
   def self.coerce(type); end
+
+  sig {params(value: BasicObject).returns(T.noreturn)}
+  def self.absurd(value); end
 end
 
 module T::Generic
@@ -110,8 +113,8 @@ module T::Configuration
   def self.call_validation_error_handler=(value); end
   def self.default_checked_level=(default_checked_level); end
   def self.enable_checking_for_sigs_marked_checked_tests; end
-  def self.enable_final_checks_for_include_extend; end
-  def self.reset_final_checks_for_include_extend; end
+  def self.enable_final_checks_on_hooks; end
+  def self.reset_final_checks_on_hooks; end
   def self.hard_assert_handler(str, extra); end
   def self.hard_assert_handler=(value); end
   def self.inline_type_error_handler(error); end

@@ -445,7 +445,7 @@ public:
 
     static const int PRIVATE_OK = 1 << 0;
     static const int DSL_SYNTHESIZED = 1 << 1;
-    u4 flags = 0;
+    u4 flags;
 
     std::unique_ptr<Expression> recv;
 
@@ -455,7 +455,7 @@ public:
     std::unique_ptr<Block> block; // null if no block passed
 
     Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store args,
-         std::unique_ptr<Block> block = nullptr);
+         std::unique_ptr<Block> block = nullptr, u4 flags = 0);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

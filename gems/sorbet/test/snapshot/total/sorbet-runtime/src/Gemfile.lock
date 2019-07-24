@@ -1,0 +1,13 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    sorbet-runtime (0.4.4488)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  sorbet-runtime
+
+BUNDLED WITH
+   2.0.1

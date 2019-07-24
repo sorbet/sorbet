@@ -1,6 +1,9 @@
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https://srb.help/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparser.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
+     743 |  class MissingArgument < OptionParser::ParseError; end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/errors/errors.rb:14: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     14 |    raise arg # raise is defined by stdlib
@@ -48,6 +51,9 @@ Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https://srb.help/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparser.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
+     743 |  class MissingArgument < OptionParser::ParseError; end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/errors/errors.rb:14: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     14 |    raise arg # raise is defined by stdlib
@@ -95,6 +101,9 @@ Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` https://srb.help/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/optparser.rbi#L743: Did you mean: `OptionParser::MissingArgument`?
+     743 |  class MissingArgument < OptionParser::ParseError; end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/errors/errors.rb:14: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     14 |    raise arg # raise is defined by stdlib
