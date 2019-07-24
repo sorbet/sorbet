@@ -12,7 +12,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "allows declaring an instance method as final" do
-    skip
     Class.new do
       extend T::Sig
       sig(:final) {void}
@@ -21,7 +20,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "allows declaring a class method as final" do
-    skip
     Class.new do
       extend T::Sig
       sig(:final) {void}
@@ -30,7 +28,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids redefining a final instance method with a final sig" do
-    skip
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
@@ -44,7 +41,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids redefining a final class method with a final sig" do
-    skip
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
@@ -58,7 +54,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids redefining a final instance method with a regular sig" do
-    skip
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
@@ -72,7 +67,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids redefining a final class method with a regular sig" do
-    skip
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
@@ -86,7 +80,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids redefining a final instance method with no sig" do
-    skip
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
@@ -99,7 +92,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids redefining a final class method with no sig" do
-    skip
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
@@ -112,7 +104,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "allows redefining a regular instance method to be final" do
-    skip
     Class.new do
       extend T::Sig
       def foo; end
@@ -122,7 +113,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "allows redefining a regular class method to be final" do
-    skip
     Class.new do
       extend T::Sig
       def self.foo; end
@@ -132,7 +122,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids overriding a final instance method" do
-    skip
     c = Class.new do
       extend T::Sig
       sig(:final) {void}
@@ -147,7 +136,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids overriding a final class method" do
-    skip
     c = Class.new do
       extend T::Sig
       sig(:final) {void}
@@ -162,7 +150,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids overriding a final method from an included module" do
-    skip
     m = Module.new do
       extend T::Sig
       sig(:final) {void}
@@ -178,7 +165,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids overriding a final method from an extended module" do
-    skip
     m = Module.new do
       extend T::Sig
       sig(:final) {void}
@@ -194,7 +180,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids overriding a final method by including two modules" do
-    skip
     m1 = Module.new do
       extend T::Sig
       sig(:final) {void}
@@ -212,7 +197,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids overriding a final method by extending two modules" do
-    skip
     m1 = Module.new do
       extend T::Sig
       sig(:final) {void}
@@ -230,7 +214,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "allows calling final methods" do
-    skip
     m = Module.new do
       extend T::Sig
       sig(:final) {void}
@@ -249,7 +232,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "calls a user-defined included" do
-    skip
     m = Module.new do
       @calls = 0
       extend T::Sig
@@ -272,7 +254,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "calls a user-defined extended" do
-    skip
     m = Module.new do
       @calls = 0
       extend T::Sig
@@ -295,7 +276,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "calls an exotic user-defined included" do
-    skip
     m2 = Module.new do
       def self.included(arg)
         arg.include(Module.new do
@@ -315,7 +295,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids overriding through many levels of include" do
-    skip
     m1 = Module.new do
       extend T::Sig
       sig(:final) {void}
@@ -337,7 +316,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "allows including modules again" do
-    skip
     m1 = Module.new do
       extend T::Sig
       sig(:final) {void}
@@ -349,7 +327,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "allows extending modules again" do
-    skip
     m1 = Module.new do
       extend T::Sig
       sig(:final) {void}
@@ -361,7 +338,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "has a good error if you use the wrong syntax" do
-    skip
     err = assert_raises(ArgumentError) do
       m = Module.new do
         extend T::Sig
