@@ -192,7 +192,7 @@ public:
     VariableUseSite what;
 
     TAbsurd(core::LocalVariable what) : what(what) {
-        categoryCounterInc("cfg", "timpossible");
+        categoryCounterInc("cfg", "tabsurd");
     }
 
     virtual std::string toString(core::Context ctx);
