@@ -59,6 +59,9 @@ gem build sorbet.gemspec
 # way that the `sorbet-static` libexec/ folder is discovered. Most tests should
 # be possible to be written as normal snapshot tests.
 
+# TODO(jez) It's not clear to me why we need these here for the tests to run.
+# We should investigate how to not need these dependencies, because `srb init`
+# doesn't depend on them except in development.
 rbenv exec gem install minitest mocha
 
 rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static
