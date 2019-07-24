@@ -52,7 +52,8 @@ gem build sorbet.gemspec
   if [[ "mac" == "$platform" ]]; then
   rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-universal-darwin-18.gem
   else
-  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-x86_64-linux.gem
+    rbenv exec gem install minitest
+    rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-x86_64-linux.gem
   fi
   rbenv exec gem install sorbet-*.gem
 
