@@ -261,7 +261,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
                                                                int betterThan) const {
     vector<Symbol::FuzzySearchResult> res;
     // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
-    if (gs.runningUnderFuzzer) {
+    if (fuzz_mode) {
         return res;
     }
 

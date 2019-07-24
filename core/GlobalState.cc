@@ -1138,7 +1138,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     auto result = make_unique<GlobalState>(this->errorQueue);
 
     result->silenceErrors = this->silenceErrors;
-    result->runningUnderFuzzer = this->runningUnderFuzzer;
     result->autocorrect = this->autocorrect;
     result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
     result->ensureCleanStrings = this->ensureCleanStrings;
