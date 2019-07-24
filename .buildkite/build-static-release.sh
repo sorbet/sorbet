@@ -62,7 +62,8 @@ gem build sorbet.gemspec
 # TODO(jez) It's not clear to me why we need these here for the tests to run.
 # We should investigate how to not need these dependencies, because `srb init`
 # doesn't depend on them except in development.
-rbenv exec gem install minitest mocha
+
+rbenv exec gem uninstall --all --executables --ignore-dependencies minitest mocha
 
 rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static
 trap 'rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static' EXIT
@@ -74,14 +75,15 @@ else
 fi
 rbenv exec gem install sorbet-*.gem
 
-mkdir -p srb-init-smoke-test
+smoke_test_dir="$(mktemp -d)"
+# Explicitly want this string to expand eagerly.
+# shellcheck disable=SC2064
+trap "rm -rf '$smoke_test_dir'" EXIT
+
 (
-  cd srb-init-smoke-test
-  SRB_YES=1 rbenv exec srb init
-  rbenv exec srb tc -e 'puts 1'
-
-  rm -rf sorbet/
-
+  # Make sure we're in a totally separate tree, otherwise a Gemfile from a
+  # parent folder will affect this test.
+  cd "$smoke_test_dir"
   touch Gemfile
   SRB_YES=1 rbenv exec srb init
   rbenv exec srb tc -e 'puts 1'
