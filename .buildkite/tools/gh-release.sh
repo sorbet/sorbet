@@ -43,6 +43,10 @@ fi
 
 [ "$2" != "" ] || (usage; exit 1);
 
+if ! command file &> /dev/null; then
+  echo "This script requires the 'file' command, but it was not in PATH"
+fi
+
 REPO="$1"
 shift
 
