@@ -192,16 +192,18 @@ private:
         }
         ast::Expression *resolvedScope = c->scope.get();
         if (auto *id = ast::cast_tree<ast::ConstantLit>(resolvedScope)) {
+            if (!id->symbol.exists()) {
+                id->symbol =resolveConstant(ctx, nesting, id->original);
+                if (!id->symbol.exists()) {
+                    return core::Symbols::noSymbol();
+                }
+            }
             auto sym = id->symbol;
             if (sym.exists() && sym.data(ctx)->isTypeAlias()) {
                 if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
                 }
                 return core::Symbols::untyped();
-            }
-            if (!id->symbol.exists()) {
-                // TODO: try to resolve if not resolved.
-                return core::Symbols::noSymbol();
             }
             core::SymbolRef resolved = id->symbol.data(ctx)->dealias(ctx);
             core::SymbolRef result = resolved.data(ctx)->findMember(ctx, c->cnst);
@@ -228,13 +230,6 @@ private:
                 resolved.data(ctx)->resultType =
                     core::Types::untyped(ctx, resolved); // <<-- This is the reason this takes a MutableContext
             }
-            job.out->symbol = resolved;
-            return;
-        } else if (resolved.exists() && resolved.data(ctx)->isClassClass()) {
-            // this can happen when we try to resolve a constant through a type alias which was itself not
-            // well-formed. If we've gotten here, we already have shown reasonable error messages to the user, so just
-            // make sure we can continue gracefully by stubbing in an untyped
-            resolved.data(ctx)->resultType = core::Types::untyped(ctx, resolved);
             job.out->symbol = resolved;
             return;
         }
