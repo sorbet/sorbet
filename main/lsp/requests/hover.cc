@@ -66,7 +66,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 auto singletonClass = data->lookupSingletonClass(*gs);
                 ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                 type = singletonClass.data(*gs)->externalType(*gs);
-            } else if (data->isTypeAlias()) {
+            } else if (data->isStaticField() && data->isTypeAlias()) {
                 // By wrapping the type in `MetaType`, we display a type alias of `Foo` as `<Type: Foo>` rather than
                 // `Foo`.
                 type = core::make_type<core::MetaType>(type);
