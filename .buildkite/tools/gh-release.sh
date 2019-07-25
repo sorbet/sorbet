@@ -82,9 +82,10 @@ response=$(
 
 upload_url="$(echo "$response" | jq -r .upload_url | sed -e "s/{?name,label}//")"
 
+content_type="Content-Type:$(file --mime-type -b "${asset}")"
 for asset in $ASSETS; do
   curl --netrc \
-       --header "Content-Type:$(file --mime-type -b "${asset}")" \
+       --header "$content_type" \
        --data-binary "@$asset" \
        "$upload_url?name=$asset"
 done
