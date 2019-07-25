@@ -80,6 +80,8 @@ smoke_test_dir="$(mktemp -d)"
 # shellcheck disable=SC2064
 trap "rm -rf '$smoke_test_dir'" EXIT
 
+cp ../../.ruby-version "$smoke_test_dir"
+
 (
   # Make sure we're in a totally separate tree, otherwise a Gemfile from a
   # parent folder will affect this test.
