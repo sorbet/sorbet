@@ -594,6 +594,11 @@ don't usually expect that some branch of code is never taken; usually dead code
 errors come from simple typos or misunderstandings about how Ruby works. In
 particular: the only two "falsy" values in Ruby are `nil` and `false`.
 
+Note if you intend for code to be dead because you've exhausted all the cases
+and are trying to raise in the default case, use `T.absurd` to assert that a
+case analysis is exhaustive. See [Exhaustiveness Checking](exhaustiveness.md)
+for more information.
+
 Sometimes, dead code errors can be hard to track down. The best way to pinpoint
 the cause of a dead code error is to wrap variables or expressions in
 `T.reveal_type(...)` to validate the assumptions that a piece of code is making.
@@ -777,6 +782,14 @@ def bar(&blk)
 end
 # ---------------------------------------------
 ```
+
+## 7026
+
+Sorbet detected that it was possible for `T.absurd` to be reached. This usually
+means that something that was meant to cover all possible cases of a union type
+did not cover all the cases.
+
+See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
 

@@ -150,17 +150,17 @@ end
 
 # --- trying to subvert normal usage ------------------------------------------
 
-def only_impossible_1
+def only_absurd_1
   T.absurd(T.let(T.unsafe(nil), T.noreturn)) # error: This code is unreachable
 end
 
-def only_impossible_2
+def only_absurd_2
   temp1 = T.let(T.unsafe(nil), T.noreturn)
   T.absurd(temp1) # error: This code is unreachable
 end
 
 sig {params(x: T.noreturn).returns(T.noreturn)}
-def cant_call_only_impossible(x)
+def cant_call_only_absurd(x)
   T.absurd(x) # error: This code is unreachable
 end
 

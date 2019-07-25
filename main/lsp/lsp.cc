@@ -60,6 +60,7 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
         // Act as if the query returned no results.
         return TypecheckRun{{}, {}, {}, move(gs), true};
     }
+
     auto loc = lspPos2Loc(fref, pos, *gs);
     if (!loc) {
         return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
