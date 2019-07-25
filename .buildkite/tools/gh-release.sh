@@ -45,6 +45,7 @@ fi
 
 if ! command file &> /dev/null; then
   echo "This script requires the 'file' command, but it was not in PATH"
+  exit 1
 fi
 
 REPO="$1"
