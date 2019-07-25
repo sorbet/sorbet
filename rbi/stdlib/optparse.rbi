@@ -58,7 +58,13 @@ class OptionParser
   def banner=(value); end
 
   sig {params(value: T.untyped).returns(T.untyped)}
+  def set_banner(value); end
+
+  sig {params(value: T.untyped).returns(T.untyped)}
   def program_name=(value); end
+
+  sig {params(value: T.untyped).returns(T.untyped)}
+  def set_program_name(value); end
 
   sig {returns(T.untyped)}
   def summary_width(); end
@@ -66,11 +72,17 @@ class OptionParser
   sig {params(value: T.untyped).returns(T.untyped)}
   def summary_width=(value); end
 
+  sig {params(value: T.untyped).returns(T.untyped)}
+  def set_summary_width(value); end
+
   sig {returns(T.untyped)}
   def summary_indent(); end
 
   sig {params(value: T.untyped).returns(T.untyped)}
   def summary_indent=(value); end
+
+  sig {params(value: T.untyped).returns(T.untyped)}
+  def set_summary_indent(value); end
 
   sig {returns(T.untyped)}
   def default_argv(); end
@@ -83,11 +95,6 @@ class OptionParser
 
   sig {returns(T.untyped)}
   def program_name(); end
-
-  alias set_banner banner=
-  alias set_program_name program_name=
-  alias set_summary_width summary_width=
-  alias set_summary_indent summary_indent=
 
   sig {params(value: T.untyped).returns(T.untyped)}
   def version=(value); end
@@ -148,23 +155,26 @@ class OptionParser
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def define(*opts, &block); end
 
-  alias def_option define
+  sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
+  def def_option(*opts, &block); end
 
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def on(*opts, &block); end
 
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def define_head(*opts, &block); end
-  
-  alias def_head_option define_head
+
+  sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
+  def def_head_option(*opts, &block); end
 
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def on_head(*opts, &block); end
 
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def define_tail(*opts, &block); end
-  
-  alias def_tail_option define_tail
+
+  sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
+  def def_tail_option(*opts, &block); end
 
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def on_tail(*opts, &block); end
