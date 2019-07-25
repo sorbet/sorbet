@@ -199,8 +199,8 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
 
-    auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
-                                     LSPMethod::TextDocumentCompletion, false);
+    auto result =
+        setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentCompletion);
 
     if (auto run = get_if<TypecheckRun>(&result)) {
         gs = move(run->gs);

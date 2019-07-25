@@ -22,22 +22,26 @@ LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.definition");
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
-                                     LSPMethod::TextDocumentDefinition, true);
+                                     LSPMethod::TextDocumentDefinition, false);
     if (auto run = get_if<TypecheckRun>(&result)) {
         gs = move(run->gs);
         auto &queryResponses = run->responses;
         vector<unique_ptr<Location>> result;
         if (!queryResponses.empty()) {
+            const bool fileIsTyped =
+                uri2FileRef(params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
 
-            if (resp->isIdent() || resp->isConstant() || resp->isLiteral()) {
+            // Only support go-to-definition on constants in untyped files.
+            if (resp->isConstant() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
                 auto retType = resp->getTypeAndOrigins();
                 for (auto &originLoc : retType.origins) {
                     addLocIfExists(*gs, result, originLoc);
                 }
-            } else if (auto defResp = resp->isDefinition()) {
-                result.push_back(loc2Location(*gs, defResp->termLoc));
-            } else if (auto sendResp = resp->isSend()) {
+            } else if (fileIsTyped && resp->isDefinition()) {
+                result.push_back(loc2Location(*gs, resp->isDefinition()->termLoc));
+            } else if (fileIsTyped && resp->isSend()) {
+                auto sendResp = resp->isSend();
                 auto start = sendResp->dispatchResult.get();
                 while (start != nullptr) {
                     if (start->main.method.exists() && !start->main.receiver->isUntyped()) {
@@ -47,7 +51,6 @@ LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs
                 }
             }
         }
-
         response->result = move(result);
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
         // An error happened while setting up the query.

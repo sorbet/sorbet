@@ -815,7 +815,6 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
             },
             [&](cfg::Alias *a) {
                 core::SymbolRef symbol = a->what.data(ctx)->dealias(ctx);
-                lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(symbol);
                 const auto &data = symbol.data(ctx);
                 if (data->isClass()) {
                     auto singletonClass = data->lookupSingletonClass(ctx);
@@ -845,10 +844,6 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                     Exception::notImplemented();
                 }
 
-                if (lspQueryMatch) {
-                    core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::ConstantResponse(ctx.owner, symbol, bind.loc, data->name, tp, tp));
-                }
                 pinnedTypes[bind.bind.variable] = tp;
             },
             [&](cfg::SolveConstraint *i) {

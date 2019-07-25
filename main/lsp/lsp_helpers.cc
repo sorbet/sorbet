@@ -118,7 +118,14 @@ LSPLoop::extractLocations(const core::GlobalState &gs,
                           const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
                           vector<unique_ptr<Location>> locations) {
     for (auto &q : queryResponses) {
-        addLocIfExists(gs, locations, q->getLoc());
+        core::Loc loc = q->getLoc();
+        if (loc.exists() && loc.file().exists()) {
+            auto fileIsTyped = loc.file().data(gs).strictLevel >= core::StrictLevel::True;
+            // If file is untyped, only support responses involving constants and definitions.
+            if (fileIsTyped || q->isConstant() || q->isDefinition()) {
+                addLocIfExists(gs, locations, loc);
+            }
+        }
     }
     // Dedupe locations
     fast_sort(locations, [](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool {
