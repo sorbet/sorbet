@@ -1,7 +1,7 @@
 begin
   ::Sorbet::Private::Static.keep_for_ide(::A)
   class ::A<<C A>> < (::<todo sym>)
-    def take_arguments<take_arguments>(a, b, c, d, e, f, &g)
+    def take_arguments<take_arguments>(a, b, c, d, e, f, g)
       begin
         [a, b, c, d, e, f, g]
         h = 1
