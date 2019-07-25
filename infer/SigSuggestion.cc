@@ -437,7 +437,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
             // You almost certainly want to compare NameRef's for equality instead.
             // We need to compare strings here because we're running with a frozen global state
             // (and thus can't take the string that we get from `argumentName` and enter it as a name).
-            if (argSym.argumentName(ctx) == core::Names::blkArg().show(ctx)) {
+            if (argSym.argumentName(ctx) == core::Names::blkArg().data(ctx)->shortName(ctx)) {
                 // Never write "<blk>: ..." in the params of a generated sig, because this doesn't parse.
                 // (We add a block argument to every method if it doesn't mention one.)
                 continue;

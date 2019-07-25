@@ -725,12 +725,7 @@ string ArgInfo::argumentName(const GlobalState &gs) const {
     } else {
         // positional arg
         if (loc.exists()) {
-            auto src = loc.source(gs);
-            if (flags.isBlock && src.size() > 0 && src[0] == '&') {
-                return src.substr(1);
-            } else {
-                return src;
-            }
+            return loc.source(gs);
         } else {
             return (string)name.data(gs)->shortName(gs);
         }
