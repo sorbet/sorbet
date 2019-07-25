@@ -103,7 +103,7 @@ class Sorbet::Private::Serialize
       begin
         value = klass.const_get(const_sym)
       rescue LoadError, NameError, RuntimeError, ArgumentError => err
-        ret << "# Got #{err} when trying to get class constant symbol #{class_name}::#{const_sym}\n"
+        ret << "# Got #{err.class} when trying to get class constant symbol #{class_name}::#{const_sym}\n"
         next
       end
       # next if !Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeVariable)
@@ -117,7 +117,7 @@ class Sorbet::Private::Serialize
       begin
         value = klass.const_get(const_sym, false)
       rescue LoadError, NameError, RuntimeError, ArgumentError => err
-        ret << "# Got #{err} when trying to get class constant symbol #{class_name}::#{const_sym}_\n"
+        ret << "# Got #{err.class} when trying to get class constant symbol #{class_name}::#{const_sym}_\n"
         next
       end
       next if Sorbet::Private::RealStdlib.real_is_a?(value, Module)
