@@ -169,6 +169,10 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             serverCap->hoverProvider = true;
             serverCap->referencesProvider = opts.lspFindReferencesEnabled;
 
+            auto codeActionProvider = make_unique<CodeActionOptions>();
+            codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix};
+            serverCap->codeActionProvider = move(codeActionProvider);
+
             if (opts.lspSignatureHelpEnabled) {
                 auto sigHelpProvider = make_unique<SignatureHelpOptions>();
                 sigHelpProvider->triggerCharacters = {"(", ","};
