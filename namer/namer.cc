@@ -97,7 +97,8 @@ class NameInserter {
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many
         // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
         if (ctx.owner.data(ctx)->arguments().size() == pos) {
-            ctx.owner.data(ctx)->arguments().emplace_back(argInfo.deepCopy());
+            auto argCopy = argInfo.deepCopy();
+            ctx.owner.data(ctx)->arguments().emplace_back(std::move(argCopy));
         }
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
         // from enterMethodArgumentSymbol
