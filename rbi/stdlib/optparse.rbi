@@ -1,5 +1,20 @@
 # typed: __STDLIB_INTERNAL
 class OptionParser
+  ArgumentStyle = T.let(nil, T.untyped)
+  COMPSYS_HEADER = T.let(nil, T.untyped)
+  DecimalInteger = T.let(nil, T.untyped)
+  DecimalNumeric = T.let(nil, T.untyped)
+  DefaultList = T.let(nil, T.untyped)
+  NO_ARGUMENT = T.let(nil, T.untyped)
+  NoArgument = T.let(nil, T.untyped)
+  OPTIONAL_ARGUMENT = T.let(nil, T.untyped)
+  OctalInteger = T.let(nil, T.untyped)
+  Officious = T.let(nil, T.untyped)
+  OptionalArgument = T.let(nil, T.untyped)
+  REQUIRED_ARGUMENT = T.let(nil, T.untyped)
+  RequiredArgument = T.let(nil, T.untyped)
+  SPLAT_PROC = T.let(nil, T.untyped)
+
   sig {params(to: T.untyped, name: T.untyped).returns(T.untyped)}
   def compsys(to, name = File.basename($0)); end
 
@@ -69,6 +84,11 @@ class OptionParser
   sig {returns(T.untyped)}
   def program_name(); end
 
+  alias set_banner banner=
+  alias set_program_name program_name=
+  alias set_summary_width summary_width=
+  alias set_summary_indent summary_indent=
+
   sig {params(value: T.untyped).returns(T.untyped)}
   def version=(value); end
 
@@ -128,17 +148,23 @@ class OptionParser
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def define(*opts, &block); end
 
+  alias def_option define
+
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def on(*opts, &block); end
 
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def define_head(*opts, &block); end
+  
+  alias def_head_option define_head
 
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def on_head(*opts, &block); end
 
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def define_tail(*opts, &block); end
+  
+  alias def_tail_option define_tail
 
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def on_tail(*opts, &block); end
@@ -705,6 +731,8 @@ class OptionParser
   end
 
   class ParseError < RuntimeError
+    Reason = T.let(nil, T.untyped)
+
     sig {params(args: T.untyped).void}
     def initialize(*args); end
 
@@ -736,17 +764,29 @@ class OptionParser
     def message(); end
   end
 
-  class AmbiguousOption < OptionParser::ParseError; end
+  class AmbiguousOption < OptionParser::ParseError
+    Reason = T.let(nil, T.untyped)
+  end
 
-  class NeedlessArgument < OptionParser::ParseError; end
+  class NeedlessArgument < OptionParser::ParseError
+    Reason = T.let(nil, T.untyped)
+  end
 
-  class MissingArgument < OptionParser::ParseError; end
+  class MissingArgument < OptionParser::ParseError
+    Reason = T.let(nil, T.untyped)
+  end
 
-  class InvalidOption < OptionParser::ParseError; end
+  class InvalidOption < OptionParser::ParseError
+    Reason = T.let(nil, T.untyped)
+  end
 
-  class InvalidArgument < OptionParser::ParseError; end
+  class InvalidArgument < OptionParser::ParseError
+    Reason = T.let(nil, T.untyped)
+  end
 
-  class AmbiguousArgument < OptionParser::InvalidArgument; end
+  class AmbiguousArgument < OptionParser::InvalidArgument
+    Reason = T.let(nil, T.untyped)
+  end
 
   module Arguable
     sig {params(opt: T.untyped).returns(T.untyped)}
@@ -774,5 +814,11 @@ class OptionParser
     def initialize(*args); end
   end
 
-  module Acceptables; end
+  module Acceptables
+    DecimalInteger = T.let(nil, T.untyped)
+    DecimalNumeric = T.let(nil, T.untyped)
+    OctalInteger = T.let(nil, T.untyped)
+  end
 end
+
+OptParse = OptionParser
