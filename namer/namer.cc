@@ -96,9 +96,10 @@ class NameInserter {
         // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many
         // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
-        if (ctx.owner.data(ctx)->arguments().size() == pos) {
-            auto argCopy = argInfo.deepCopy();
-            ctx.owner.data(ctx)->arguments().emplace_back(std::move(argCopy));
+        if (ctx.owner.dataAllowingNone(ctx)->arguments().size() == pos) {
+          ctx.owner.dataAllowingNone(ctx)->arguments().emplace_back(argInfo.deepCopy());
+          auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
+          return move(localExpr);
         }
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
         // from enterMethodArgumentSymbol
