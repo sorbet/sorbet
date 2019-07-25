@@ -97,9 +97,9 @@ class NameInserter {
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many
         // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
         if (ctx.owner.dataAllowingNone(ctx)->arguments().size() == pos) {
-          ctx.owner.dataAllowingNone(ctx)->arguments().emplace_back(argInfo.deepCopy());
-          auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
-          return move(localExpr);
+            ctx.owner.dataAllowingNone(ctx)->arguments().emplace_back(argInfo.deepCopy());
+            auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
+            return move(localExpr);
         }
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
         // from enterMethodArgumentSymbol
