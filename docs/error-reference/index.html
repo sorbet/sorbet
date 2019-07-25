@@ -495,6 +495,10 @@ also whether any given branch could be executed at all.</p>
 don’t usually expect that some branch of code is never taken; usually dead code
 errors come from simple typos or misunderstandings about how Ruby works. In
 particular: the only two “falsy” values in Ruby are <code>nil</code> and <code>false</code>.</p>
+<p>Note if you intend for code to be dead because you’ve exhausted all the cases
+and are trying to raise in the default case, use <code>T.absurd</code> to assert that a
+case analysis is exhaustive. See <a href="/docs/exhaustiveness">Exhaustiveness Checking</a>
+for more information.</p>
 <p>Sometimes, dead code errors can be hard to track down. The best way to pinpoint
 the cause of a dead code error is to wrap variables or expressions in
 <code>T.reveal_type(...)</code> to validate the assumptions that a piece of code is making.
