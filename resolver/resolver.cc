@@ -193,7 +193,7 @@ private:
         ast::Expression *resolvedScope = c->scope.get();
         if (auto *id = ast::cast_tree<ast::ConstantLit>(resolvedScope)) {
             if (!id->symbol.exists()) {
-                id->symbol =resolveConstant(ctx, nesting, id->original);
+                id->symbol = resolveConstant(ctx, nesting, id->original);
                 if (!id->symbol.exists()) {
                     return core::Symbols::noSymbol();
                 }
