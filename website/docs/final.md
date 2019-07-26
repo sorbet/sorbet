@@ -160,3 +160,27 @@ usage.
 If these checks are enabled, any classes or modules that define their own
 `included`, `extended`, or `inherited` hooks should take care to always call
 `super`.
+
+If these checks are not enabled, then some but not all of the runtime checks for
+final will be run. For instance, in the following example, we violate the
+requirements of final, but the violation is not a runtime error because we did
+not call `T::Configuration.enable_final_checks_on_hooks`:
+
+```ruby
+module M
+  extend T::Sig
+  sig(:final) {returns(Integer)}
+  def foo; 1; end
+end
+
+class C
+  include M
+  def foo; 2; end
+end
+
+puts C.new.foo
+```
+
+At runtime, this does not raise and prints 2, showing that we have violated the
+guarantees of final. This is why we strongly recommend calling
+`T::Configuration.enable_final_checks_on_hooks` before using final.
