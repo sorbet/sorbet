@@ -352,7 +352,13 @@ module T::Private::Methods
   private_class_method def self.run_sig_block_for_key(key)
     blk = @sig_wrappers[key]
     if !blk
-      raise "No `sig` wrapper for #{key_to_method(key)}"
+      sig = @signatures_by_method[key]
+      if sig
+        # We already ran the sig block, perhaps in another thread.
+        return sig
+      else
+        raise "No `sig` wrapper for #{key_to_method(key)}"
+      end
     end
 
     begin
