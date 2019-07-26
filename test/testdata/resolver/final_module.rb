@@ -75,7 +75,7 @@ module ModuleWithClass
 end
 
 class ModuleWithClassOkay < ModuleWithClass::C; end
-class ModuleWithClassBad; include ModuleWithClass; end # error: `ModuleWithClass` was declared as final and cannot be included in `ModuleWithClassBad`
+class ModuleWithClassBad; include ModuleWithClass; end # error-with-dupes: `ModuleWithClass` was declared as final and cannot be included in `ModuleWithClassBad`
 
 module ModuleWithModule
   extend T::Helpers
@@ -84,4 +84,4 @@ module ModuleWithModule
 end
 
 class ModuleWithModuleOkay; include ModuleWithModule::M; end
-class ModuleWithModuleBad; include ModuleWithModule; end # error: `ModuleWithModule` was declared as final and cannot be included in `ModuleWithModuleBad`
+class ModuleWithModuleBad; include ModuleWithModule; end # error-with-dupes: `ModuleWithModule` was declared as final and cannot be included in `ModuleWithModuleBad`
