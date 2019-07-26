@@ -102,8 +102,8 @@ class Sorbet::Private::Serialize
       next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym)
-      rescue LoadError, NameError, RuntimeError, ArgumentError
-        ret << "# Failed to load #{class_name}::#{const_sym}\n"
+      rescue LoadError, NameError, RuntimeError, ArgumentError => err
+        ret << "# Got #{err.class} when trying to get class constant symbol #{class_name}::#{const_sym}\n"
         next
       end
       # next if !Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeVariable)
@@ -116,8 +116,8 @@ class Sorbet::Private::Serialize
       next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym, false)
-      rescue LoadError, NameError, RuntimeError, ArgumentError
-        ret << "# Failed to load #{class_name}::#{const_sym}\n"
+      rescue LoadError, NameError, RuntimeError, ArgumentError => err
+        ret << "# Got #{err.class} when trying to get class constant symbol #{class_name}::#{const_sym}_\n"
         next
       end
       next if Sorbet::Private::RealStdlib.real_is_a?(value, Module)
