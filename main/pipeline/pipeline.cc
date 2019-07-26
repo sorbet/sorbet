@@ -852,6 +852,7 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
             what = resolver::Resolver::run(ctx, move(what), workers);
         }
         if (opts.stressIncrementalResolver) {
+            auto symbolsBefore = gs->symbolsUsed();
             for (auto &f : what) {
                 // Shift contents of file past current file's EOF, re-run incrementalResolve, assert that no locations
                 // appear before file's old EOF.
@@ -869,6 +870,7 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
                 ENFORCE(reresolved.size() == 1);
                 f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
             }
+            ENFORCE(symbolsBefore == gs->symbolsUsed(), "Stressing the incremental resolver should not add any new symbols");
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
