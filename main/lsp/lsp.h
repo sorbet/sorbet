@@ -147,7 +147,8 @@ class LSPLoop {
     /* Send the given message to client */
     void sendMessage(const LSPMessage &msg);
 
-    std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc);
+    std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc,
+                                           bool useDataLinksForPayload = false);
     void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc);
     std::vector<std::unique_ptr<Location>>
     extractLocations(const core::GlobalState &gs,

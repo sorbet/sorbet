@@ -6,7 +6,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Location>> &locs, core::Loc loc) {
     if (loc.file().exists()) {
-        locs.push_back(loc2Location(gs, loc));
+        locs.push_back(loc2Location(gs, loc, true));
     }
 }
 
@@ -39,7 +39,7 @@ LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs
                     addLocIfExists(*gs, result, originLoc);
                 }
             } else if (fileIsTyped && resp->isDefinition()) {
-                result.push_back(loc2Location(*gs, resp->isDefinition()->termLoc));
+                result.push_back(loc2Location(*gs, resp->isDefinition()->termLoc, true));
             } else if (fileIsTyped && resp->isSend()) {
                 auto sendResp = resp->isSend();
                 auto start = sendResp->dispatchResult.get();

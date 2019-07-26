@@ -1,3 +1,4 @@
+#include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "lsp.h"
@@ -66,27 +67,31 @@ unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
     return make_unique<Range>(move(start), move(end));
 }
 
-unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) {
+unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc, bool useDataLinksForPayload) {
     string uri;
     if (!loc.file().exists()) {
         uri = localName2Remote("???");
     } else {
         auto &messageFile = loc.file().data(gs);
-        if (messageFile.sourceType == core::File::Type::Payload) {
-            // This is hacky because VSCode appends #4,3 (or whatever the position is of the
-            // error) to the uri before it shows it in the UI since this is the format that
-            // VSCode uses to denote which location to jump to. However, if you append #L4
-            // to the end of the uri, this will work on github (it will ignore the #4,3)
-            //
-            // As an example, in VSCode, on hover you might see
-            //
-            // string.rbi(18,7): Method `+` has specified type of argument `arg0` as `String`
-            //
-            // When you click on the link, in the browser it appears as
-            // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
-            // but shows you the same thing as
-            // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
-            uri = fmt::format("{}#L{}", messageFile.path(), loc.position(gs).first.line);
+        if (messageFile.isPayload()) {
+            if (useDataLinksForPayload) {
+                uri = fmt::format("data:text/plain;base64,{}", absl::Base64Escape(loc.file().data(gs).source()));
+            } else {
+                // This is hacky because VSCode appends #4,3 (or whatever the position is of the
+                // error) to the uri before it shows it in the UI since this is the format that
+                // VSCode uses to denote which location to jump to. However, if you append #L4
+                // to the end of the uri, this will work on github (it will ignore the #4,3)
+                //
+                // As an example, in VSCode, on hover you might see
+                //
+                // string.rbi(18,7): Method `+` has specified type of argument `arg0` as `String`
+                //
+                // When you click on the link, in the browser it appears as
+                // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
+                // but shows you the same thing as
+                // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
+                uri = fmt::format("{}#L{}", messageFile.path(), loc.position(gs).first.line);
+            }
         } else {
             uri = fileRef2Uri(gs, loc.file());
         }
