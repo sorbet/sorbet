@@ -54,6 +54,7 @@ constexpr ErrorClass GenericClassWithoutTypeArgsStdlib{5046, StrictLevel::Strict
 constexpr ErrorClass FinalAncestor{5047, StrictLevel::True};
 constexpr ErrorClass FinalModuleNonFinalMethod{5048, StrictLevel::True};
 constexpr ErrorClass BadParameterOrdering{5049, StrictLevel::False};
+constexpr ErrorClass SealedAncestor{5050, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

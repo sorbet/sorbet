@@ -76,6 +76,7 @@ public:
         static constexpr u4 CLASS_INTERFACE = 0x0000'0080;
         static constexpr u4 CLASS_LINEARIZATION_COMPUTED = 0x0000'0100;
         static constexpr u4 CLASS_FINAL = 0x0000'0200;
+        static constexpr u4 CLASS_SEALED = 0x0000'0400;
 
         // Method flags
         static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
@@ -310,6 +311,11 @@ public:
         return (flags & Symbol::Flags::CLASS_FINAL) != 0;
     }
 
+    inline bool isClassSealed() const {
+        ENFORCE(isClass());
+        return (flags & Symbol::Flags::CLASS_SEALED) != 0;
+    }
+
     inline void setClass() {
         ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
         flags = flags | Symbol::Flags::CLASS;
@@ -470,6 +476,11 @@ public:
         flags |= Symbol::Flags::CLASS_FINAL;
     }
 
+    inline void setClassSealed() {
+        ENFORCE(isClass());
+        flags |= Symbol::Flags::CLASS_SEALED;
+    }
+
     inline void setTypeAlias() {
         ENFORCE(isStaticField());
         flags |= Symbol::Flags::STATIC_FIELD_TYPE_ALIAS;
@@ -535,6 +546,10 @@ public:
     SymbolRef attachedClass(const GlobalState &gs) const;
 
     SymbolRef topAttachedClass(const GlobalState &gs) const;
+
+    void recordSealedSubclass(MutableContext ctx, SymbolRef subclass);
+    const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
+    TypePtr sealedSubclasses(const Context ctx) const;
 
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const;
 

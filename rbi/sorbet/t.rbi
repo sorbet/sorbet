@@ -81,6 +81,7 @@ module T::Helpers
   def abstract!;  end
   def interface!; end
   def final!; end
+  def sealed!; end
   def mixes_in_class_methods(mod); end
 end
 

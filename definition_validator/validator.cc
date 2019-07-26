@@ -262,6 +262,52 @@ void validateFinal(const core::GlobalState &gs, const core::SymbolRef klass,
     validateFinalMethodHelper(gs, singleton, klass);
 }
 
+void validateSealedAncestorHelper(const core::GlobalState &gs, const core::SymbolRef klass,
+                                  const unique_ptr<ast::ClassDef> &classDef, const core::SymbolRef errMsgClass,
+                                  const string_view verb) {
+    auto klassFile = klass.data(gs)->loc().file();
+    for (const auto &mixin : klass.data(gs)->mixins()) {
+        if (!mixin.data(gs)->isClassSealed()) {
+            continue;
+        }
+        // Statically, we allow including / extending in any file that adds a loc to sealedLocs.
+        // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
+        if (absl::c_any_of(mixin.data(gs)->sealedLocs(gs), [klassFile](auto loc) { return loc.file() == klassFile; })) {
+            continue;
+        }
+        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, mixin), core::errors::Resolver::SealedAncestor)) {
+            e.setHeader("`{}` is sealed and cannot be {} in `{}`", mixin.data(gs)->show(gs), verb,
+                        errMsgClass.data(gs)->show(gs));
+            for (auto loc : mixin.data(gs)->sealedLocs(gs)) {
+                e.addErrorLine(loc, "`{}` was marked sealed and can only be {} in this file", mixin.data(gs)->show(gs),
+                               verb);
+            }
+        }
+    }
+}
+
+void validateSealed(const core::GlobalState &gs, const core::SymbolRef klass,
+                    const unique_ptr<ast::ClassDef> &classDef) {
+    const auto superClass = klass.data(gs)->superClass();
+    // Statically, we allow a subclass in any file that adds a loc to sealedLocs.
+    // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
+    auto file = klass.data(gs)->loc().file();
+    if (superClass.exists() && superClass.data(gs)->isClassSealed() &&
+        !absl::c_any_of(superClass.data(gs)->sealedLocs(gs), [file](auto loc) { return loc.file() == file; })) {
+        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
+            e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.data(gs)->show(gs),
+                        klass.data(gs)->show(gs));
+            for (auto loc : superClass.data(gs)->sealedLocs(gs)) {
+                e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
+                               superClass.data(gs)->show(gs));
+            }
+        }
+    }
+    validateSealedAncestorHelper(gs, klass, classDef, klass, "included");
+    const auto singleton = klass.data(gs)->lookupSingletonClass(gs);
+    validateSealedAncestorHelper(gs, singleton, classDef, klass, "extended");
+}
+
 class ValidateWalk {
 private:
     UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
@@ -357,6 +403,7 @@ public:
         validateAbstract(ctx.state, sym);
         validateAbstract(ctx.state, singleton);
         validateFinal(ctx.state, sym, classDef);
+        validateSealed(ctx.state, sym, classDef);
         return classDef;
     }
 
