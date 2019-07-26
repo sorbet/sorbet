@@ -12,6 +12,7 @@
 <url> <loc>https://sorbet.org/docs/error-reference</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/error-reference" /> </url>
 <url> <loc>https://sorbet.org/docs/exhaustiveness</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/exhaustiveness" /> </url>
 <url> <loc>https://sorbet.org/docs/faq</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/faq" /> </url>
+<url> <loc>https://sorbet.org/docs/final</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/final" /> </url>
 <url> <loc>https://sorbet.org/docs/flow-sensitive</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/flow-sensitive" /> </url>
 <url> <loc>https://sorbet.org/docs/gradual</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/gradual" /> </url>
 <url> <loc>https://sorbet.org/docs/intersection-types</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/intersection-types" /> </url>
