@@ -17,11 +17,11 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     auto run = tryFastPath(move(gs), {}, files);
     for (auto &e : run.errors) {
         if (!e->isSilenced && e->loc.file() == file && !e->autocorrects.empty() &&
-            loc2Range(*gs, e->loc) == params.range) {
+            loc2Range(*run.gs, e->loc) == params.range) {
             vector<unique_ptr<TextEdit>> edits;
             edits.reserve(e->autocorrects.size());
             for (auto &a : e->autocorrects) {
-                edits.emplace_back(make_unique<TextEdit>(loc2Range(*gs, a.loc), a.replacement));
+                edits.emplace_back(make_unique<TextEdit>(loc2Range(*run.gs, a.loc), a.replacement));
             }
 
             vector<unique_ptr<TextDocumentEdit>> documentEdits;
