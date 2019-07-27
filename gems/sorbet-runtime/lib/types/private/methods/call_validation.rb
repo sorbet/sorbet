@@ -1162,7 +1162,7 @@ module T::Private::Methods::CallValidation
       "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n" \
       "Definition: #{definition_file}:#{definition_line}"
 
-    T::Private::ErrorHandler.handle_call_validation_error(
+    T::Configuration.call_validation_error_handler(
       method_sig,
       message: error_message,
       pretty_message: pretty_message,
