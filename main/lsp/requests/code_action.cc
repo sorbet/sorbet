@@ -16,8 +16,16 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     vector<core::FileRef> files = {file};
     auto run = tryFastPath(move(gs), {}, files);
     for (auto &e : run.errors) {
-        if (!e->isSilenced && e->loc.file() == file && !e->autocorrects.empty() &&
-            loc2Range(*run.gs, e->loc) == params.range) {
+        if (!e->isSilenced && e->loc.file() == file && !e->autocorrects.empty()) {
+            auto errorRange = loc2Range(*run.gs, e->loc);
+            // TODO(sushain): there must be a better way to do this?
+            if (errorRange->start->character != params.range->start->character ||
+                errorRange->start->line != params.range->start->line ||
+                errorRange->end->character != params.range->end->character ||
+                errorRange->end->line != params.range->end->line) {
+                continue;
+            }
+
             vector<unique_ptr<TextEdit>> edits;
             edits.reserve(e->autocorrects.size());
             for (auto &a : e->autocorrects) {
@@ -41,6 +49,6 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
 
     response->result = move(result);
 
-    return LSPResult::make(move(gs), move(response));
+    return LSPResult::make(move(run.gs), move(response));
 }
 } // namespace sorbet::realmain::lsp
