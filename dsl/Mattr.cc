@@ -42,7 +42,7 @@ vector<unique_ptr<ast::Expression>> Mattr::replaceDSL(core::MutableContext ctx, 
     } else if (send->fun == core::Names::mattrAccessor() || send->fun == core::Names::cattrAccessor()) {
         doReaders = true;
         doWriters = true;
-    } else if (classDefKind == ast::Class && send->fun == core::Names::classAtribute()) {
+    } else if (classDefKind == ast::Class && send->fun == core::Names::classAttribute()) {
         doReaders = true;
         doWriters = true;
         doPredicates = true;
