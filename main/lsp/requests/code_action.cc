@@ -24,13 +24,11 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
                 edits.emplace_back(make_unique<TextEdit>(loc2Range(*gs, a.loc), a.replacement));
             }
 
-            auto version = make_unique<VersionedTextDocumentIdentifier>(params.textDocument->uri, JSONNullObject());
-            auto documentEdit = make_unique<TextDocumentEdit>(move(version), move(edits));
+            vector<unique_ptr<TextDocumentEdit>> documentEdits;
+            documentEdits.emplace_back(make_unique<TextDocumentEdit>(
+                make_unique<VersionedTextDocumentIdentifier>(params.textDocument->uri, JSONNullObject()), move(edits)));
 
             auto workspaceEdit = make_unique<WorkspaceEdit>();
-
-            vector<unique_ptr<TextDocumentEdit>> documentEdits;
-            documentEdits.emplace_back(move(documentEdit));
             workspaceEdit->documentChanges = move(documentEdits);
 
             auto action = make_unique<CodeAction>(e->header);
