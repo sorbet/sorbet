@@ -202,6 +202,9 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         } else if (method == LSPMethod::TextDocumentCompletion) {
             auto &params = get<unique_ptr<CompletionParams>>(rawParams);
             return handleTextDocumentCompletion(move(gs), id, *params);
+        } else if (method == LSPMethod::TextDocumentCodeAction) {
+            auto &params = get<unique_ptr<TextDocumentCodeActionParams>>(rawParams);
+            return handleTextDocumentCodeAction(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentSignatureHelp) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
             return handleTextSignatureHelp(move(gs), id, *params);

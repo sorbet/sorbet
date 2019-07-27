@@ -1038,6 +1038,14 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                  },
                                  classTypes);
 
+    auto TextDocumentCodeActionParams = makeObject("TextDocumentCodeActionParams",
+                                                   {
+                                                       makeField("textDocument", TextDocumentIdentifier),
+                                                       makeField("range", Range),
+                                                       makeField("context", CodeActionContext),
+                                                   },
+                                                   classTypes);
+
     auto CodeActionRegistrationOptions =
         makeObject("CodeActionRegistrationOptions",
                    {
@@ -1299,30 +1307,31 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     // All others are ignored.
     auto LSPMethod = makeStrEnum("LSPMethod",
                                  {
+                                     "__PAUSE__",
+                                     "__RESUME__",
                                      "$/cancelRequest",
+                                     "exit",
                                      "initialize",
                                      "initialized",
                                      "shutdown",
-                                     "exit",
-                                     "textDocument/publishDiagnostics",
-                                     "textDocument/didOpen",
+                                     "sorbet/error",
+                                     "sorbet/showOperation",
+                                     "sorbet/typecheckRunInfo",
+                                     "sorbet/watchmanFileChange",
+                                     "sorbet/workspaceEdit",
+                                     "textDocument/codeAction",
+                                     "textDocument/completion",
+                                     "textDocument/definition",
                                      "textDocument/didChange",
                                      "textDocument/didClose",
+                                     "textDocument/didOpen",
                                      "textDocument/documentSymbol",
-                                     "textDocument/definition",
                                      "textDocument/hover",
-                                     "textDocument/completion",
+                                     "textDocument/publishDiagnostics",
                                      "textDocument/references",
                                      "textDocument/signatureHelp",
-                                     "workspace/symbol",
                                      "window/showMessage",
-                                     "__PAUSE__",
-                                     "__RESUME__",
-                                     "sorbet/watchmanFileChange",
-                                     "sorbet/showOperation",
-                                     "sorbet/error",
-                                     "sorbet/workspaceEdit",
-                                     "sorbet/typecheckRunInfo",
+                                     "workspace/symbol",
                                  },
                                  enumTypes);
 
@@ -1337,6 +1346,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/completion", CompletionParams},
                                                 {"textDocument/references", ReferenceParams},
                                                 {"textDocument/signatureHelp", TextDocumentPositionParams},
+                                                {"textDocument/codeAction", TextDocumentCodeActionParams},
                                                 {"workspace/symbol", WorkspaceSymbolParams},
                                                 {"sorbet/error", SorbetErrorParams},
                                             });

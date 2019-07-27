@@ -213,6 +213,8 @@ class LSPLoop {
                                            const TextDocumentPositionParams &params);
     LSPResult handleTextDocumentCompletion(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const CompletionParams &params);
+    LSPResult handleTextDocumentCodeAction(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                           const TextDocumentCodeActionParams &params);
     std::unique_ptr<CompletionItem> getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
                                                       const std::unique_ptr<core::TypeConstraint> &constraint);
