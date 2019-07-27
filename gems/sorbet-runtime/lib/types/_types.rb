@@ -184,7 +184,7 @@ module T
     begin
       raise TypeError.new("Passed `nil` into T.must")
     rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-      T::Private::ErrorHandler.handle_inline_type_error(e)
+      T::Configuration.inline_type_error_handler(e)
     end
   end
 
@@ -209,7 +209,7 @@ module T
     begin
       raise TypeError.new(msg)
     rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-      T::Private::ErrorHandler.handle_inline_type_error(e)
+      T::Configuration.inline_type_error_handler(e)
     end
   end
 
