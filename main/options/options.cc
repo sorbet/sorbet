@@ -844,7 +844,7 @@ void readOptions(Options &opts, int argc, char *argv[],
             opts.dslRubyExtraArgs = std::move(dslConfig.rubyExtraArgs);
         }
     } catch (cxxopts::OptionParseException &e) {
-        logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
+        logger->info("{}. To see all available options pass `--help`.", e.what());
         throw EarlyReturnWithCode(1);
     }
 }

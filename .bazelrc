@@ -14,7 +14,6 @@ common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 ##  Custom toolchain.
 ##
 build --crosstool_top=@llvm_toolchain//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
-test --crosstool_top=@llvm_toolchain//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
 
 ##
 ##  Common build options across all build configurations
@@ -234,7 +233,6 @@ build:webasm-darwin --crosstool_top=//tools/toolchain/webasm-darwin --config=web
 # Use --cpu as a differentiator.
 build:webasm --cpu=webasm --spawn_strategy=standalone --genrule_strategy=standalone --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
 build:webasm --define release=true
-build:webasm --config=versioned
 build:webasm --compilation_mode=opt
 build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
 build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3

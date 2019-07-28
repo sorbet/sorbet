@@ -195,7 +195,7 @@ NameDef names[] = {
     {"instanceWriter", "instance_writer"},
     {"instanceAccessor", "instance_accessor"},
     {"instancePredicate", "instance_predicate"},
-    {"classAtribute", "class_attribute"},
+    {"classAttribute", "class_attribute"},
 
     {"describe"},
     {"it"},
