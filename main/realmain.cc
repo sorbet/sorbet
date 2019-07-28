@@ -1,6 +1,5 @@
 #ifdef SORBET_REALMAIN_MIN
 // minimal build to speedup compilation. Remove extra features
-#define FULL_BUILD_ONLY(X) false; // do nothing
 #else
 #define FULL_BUILD_ONLY(X) X;
 #include "core/proto/proto.h" // has to be included first as it violates our poisons
