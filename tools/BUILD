@@ -40,6 +40,7 @@ compilation_database(
         "//payload/binary:empty",
         "//main:sorbet",
         "//payload:payload",
+        "//main:realmain-orig",
         "//infer:infer_test",
         "//emscripten:main",
         "//payload/text:empty",
