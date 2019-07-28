@@ -7,17 +7,17 @@ class Method < Object
   sig {params(args: T.untyped).returns(T.untyped)}
   def call(*args);end
 
-  sig {params(_: T.untyped).returns(T.untyped)}
-  def <<(_); end
+  sig {params(g: T.untyped).returns(T.untyped)}
+  def <<(g); end
 
-  sig {params(_: T.untyped).returns(T.untyped)}
-  def ===(*_); end
+  sig {params(obj: T.untyped).returns(T.untyped)}
+  def ===(*obj); end
 
-  sig {params(_: T.untyped).returns(T.untyped)}
-  def >>(_); end
+  sig {params(g: T.untyped).returns(T.untyped)}
+  def >>(g); end
 
-  sig {params(_: T.untyped).returns(T.untyped)}
-  def [](*_); end
+  sig {params(args: T.untyped).returns(T.untyped)}
+  def [](*args); end
 
   sig {returns(Integer)}
   def arity; end
@@ -25,8 +25,8 @@ class Method < Object
   sig {returns(Method)}
   def clone; end
 
-  sig {params(_: T.untyped).returns(T.untyped)}
-  def curry(*_); end
+  sig {params(args: T.untyped).returns(T.untyped)}
+  def curry(*args); end
 
   sig {returns(Symbol)}
   def name; end
