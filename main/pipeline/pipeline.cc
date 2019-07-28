@@ -1,7 +1,14 @@
+#ifdef SORBET_REALMAIN_MIN
+// minimal build to speedup compilation. Remove extra features
+#else
 // has to go first, as it violates poisons
+#include "cfg/proto/proto.h"
 #include "core/proto/proto.h"
+#include "namer/configatron/configatron.h"
+#include "plugin/Plugins.h"
+#include "plugin/SubprocessTextPlugin.h"
 #include <sstream>
-
+#endif
 #include "ProgressIndicator.h"
 #include "absl/strings/escaping.h" // BytesToHexString
 #include "absl/strings/match.h"
@@ -10,7 +17,6 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
-#include "cfg/proto/proto.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
@@ -24,12 +30,9 @@
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
-#include "namer/configatron/configatron.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "pipeline.h"
-#include "plugin/Plugins.h"
-#include "plugin/SubprocessTextPlugin.h"
 #include "resolver/resolver.h"
 
 using namespace std;
@@ -56,6 +59,7 @@ public:
         if (print.CFG.enabled) {
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
+#ifndef SORBET_REALMAIN_MIN
         if ((print.CFGJson.enabled || print.CFGProto.enabled) && cfg->shouldExport(ctx.state)) {
             auto proto = cfg::Proto::toProto(ctx.state, *cfg);
             if (print.CFGJson.enabled) {
@@ -67,6 +71,7 @@ public:
                 print.CFGProto.print(buf);
             }
         }
+#endif
         return m;
     }
 };
@@ -247,15 +252,18 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyPluginFile(file);
             }
+
+#ifndef SORBET_REALMAIN_MIN
             {
                 Timer timeit(gs.tracer(), "plugins_text");
                 core::MutableContext ctx(gs, core::Symbols::root());
                 core::ErrorRegion errs(gs, file);
+
                 auto [pluginTree, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(tree));
                 tree = move(pluginTree);
                 resultPluginFiles = move(pluginFiles);
             }
-
+#endif
             if (!opts.skipDSLPasses) {
                 tree = runDSL(gs, file, move(tree));
             }
@@ -723,9 +731,11 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
                              bool skipConfigatron) {
     Timer timeit(gs.tracer(), "name");
     if (!skipConfigatron) {
+#ifndef SORBET_REALMAIN_MIN
         core::UnfreezeNameTable nameTableAccess(gs);     // creates names from config
         core::UnfreezeSymbolTable symbolTableAccess(gs); // creates methods for them
         namer::configatron::fillInFromFileSystem(gs, opts.configatronDirs, opts.configatronFiles);
+#endif
     }
 
     {
@@ -983,6 +993,8 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         if (opts.print.SymbolTableRaw.enabled) {
             opts.print.SymbolTableRaw.fmt("{}\n", gs->showRaw());
         }
+
+#ifndef SORBET_REALMAIN_MIN
         if (opts.print.SymbolTableJson.enabled) {
             auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
             if (opts.print.SymbolTableJson.outputPath.empty()) {
@@ -1003,12 +1015,15 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                 opts.print.SymbolTableJson.print(buf.str());
             }
         }
+#endif
         if (opts.print.SymbolTableFull.enabled) {
             opts.print.SymbolTableFull.fmt("{}\n", gs->toStringFull());
         }
         if (opts.print.SymbolTableFullRaw.enabled) {
             opts.print.SymbolTableFullRaw.fmt("{}\n", gs->showRawFull());
         }
+
+#ifndef SORBET_REALMAIN_MIN
         if (opts.print.FileTableJson.enabled) {
             auto files = core::Proto::filesToProto(*gs);
             if (opts.print.FileTableJson.outputPath.empty()) {
@@ -1022,7 +1037,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         if (opts.print.PluginGeneratedCode.enabled) {
             plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
         }
-
+#endif
         return typecheck_result;
     }
 }
