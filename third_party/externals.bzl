@@ -10,6 +10,7 @@ def externals():
         name = "com_google_googletest",
         remote = "https://github.com/google/googletest.git",
         commit = "9518a57428ae0a7ed450c1361768e84a2a38af5a",
+        shallow_since = "1547838363 -0500",
     )
 
     http_archive(
@@ -26,6 +27,7 @@ def externals():
         remote = "https://github.com/gabime/spdlog.git",
         commit = "a7148b718ea2fabb8387cb90aee9bf448da63e65",  # v1.3.1
         build_file = "//third_party:spdlog.BUILD",
+        shallow_since = "1547806387 +0200",
     )
 
     # proto_library, cc_proto_library, and java_proto_library rules implicitly
@@ -43,6 +45,7 @@ def externals():
         remote = "https://github.com/google/libprotobuf-mutator.git",
         commit = "3d1ea5f9eb5fc90f9f8e28447541929482cfb049",
         build_file = "//third_party:libprotobuf-mutator.BUILD",
+        shallow_since = "1549313935 -0800",
     )
 
     new_git_repository(
@@ -50,6 +53,7 @@ def externals():
         remote = "https://github.com/DarkDimius/lmdb.git",
         commit = "15a9c2604e3401593110ddf6c9e2e16a4b28e68e",
         build_file = "//third_party:lmdb.BUILD",
+        shallow_since = "1539245726 -0700",
     )
 
     new_git_repository(
@@ -57,6 +61,7 @@ def externals():
         remote = "https://github.com/Tencent/rapidjson.git",
         commit = "01950eb7acec78818d68b762efc869bba2420d82",
         build_file = "//third_party:rapidjson.BUILD",
+        shallow_since = "1555291518 +0800",
     )
 
     new_git_repository(
@@ -64,6 +69,7 @@ def externals():
         remote = "https://github.com/inikep/lizard.git",
         commit = "dda3b335e92ecd5caceccc9c577b39dd4e3c9950",
         build_file = "//third_party:lizard.BUILD",
+        shallow_since = "1552038096 +0100",
     )
 
     new_git_repository(
@@ -71,6 +77,7 @@ def externals():
         remote = "https://github.com/orlp/pdqsort.git",
         commit = "08879029ab8dcb80a70142acb709e3df02de5d37",
         build_file = "//third_party:pdqsort.BUILD",
+        shallow_since = "1524162080 +0200",
     )
 
     new_git_repository(
@@ -78,6 +85,7 @@ def externals():
         remote = "https://github.com/jemalloc/jemalloc.git",
         commit = "b0b3e49a54ec29e32636f4577d9d5a896d67fd20",  # 5.2.0
         build_file = "//third_party:jemalloc.BUILD",
+        shallow_since = "1554252642 -0700",
     )
 
     native.new_local_repository(
@@ -91,6 +99,7 @@ def externals():
         remote = "https://github.com/cameron314/concurrentqueue.git",
         commit = "dea078cf5b6e742cd67a0d725e36f872feca4de4",
         build_file = "//third_party:concurrentqueue.BUILD",
+        shallow_since = "1547235167 -0500",
     )
 
     new_git_repository(
@@ -98,6 +107,7 @@ def externals():
         remote = "https://github.com/romanbsd/statsd-c-client.git",
         commit = "0caa5ef05d6a786bb4695394534a7182a3c94427",
         build_file = "//third_party:statsd.BUILD",
+        shallow_since = "1520851215 +0200",
     )
 
     new_git_repository(
@@ -105,6 +115,7 @@ def externals():
         remote = "https://github.com/jarro2783/cxxopts.git",
         commit = "e34676f73e49eeff30cb101f1c5ba8806fbe6773",
         build_file = "//third_party:cxxopts.BUILD",
+        shallow_since = "1557700395 +1000",
     )
 
     http_archive(
@@ -119,6 +130,7 @@ def externals():
         name = "com_google_absl",
         remote = "https://github.com/abseil/abseil-cpp.git",
         commit = "d65e19dfcd8697076f68598c0131c6930cdcd74d",
+        shallow_since = "1561428275 -0400",
     )
 
     new_git_repository(
@@ -130,6 +142,7 @@ def externals():
 package(default_visibility = ["//visibility:public"])
 """
         ),
+        shallow_since = "1541620420 -0800",
     )
 
     native.new_local_repository(
@@ -144,18 +157,21 @@ package(default_visibility = ["//visibility:public"])
         name = "com_grail_bazel_toolchain",
         remote = "https://github.com/DarkDimius/bazel-toolchain.git",
         commit = "fc345f29d7a2b5dd431be006b36be1b3d3936987",
+        shallow_since = "1561409079 -0700",
     )
 
     git_repository(
         name = "io_bazel_rules_go",
         remote = "https://github.com/bazelbuild/rules_go.git",
         commit = "153c823428660f14b6e028cc71086833e445b2da",
+        shallow_since = "1545156968 -0500",
     )
 
     git_repository(
         name = "com_github_bazelbuild_buildtools",
         remote = "https://github.com/bazelbuild/buildifier.git",
         commit = "8a1359dc25add12a6e724f6a2bded60fbc23d08a",
+        shallow_since = "1537534502 +0200",
     )
 
     # optimized version of blake2 hashing algorithm
@@ -164,6 +180,7 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/BLAKE2/libb2",
         commit = "7feb2bb35dfe89750fba62bcd909409e995af754",
         build_file = "//third_party:libb2.BUILD",
+        shallow_since = "1531310625 +0100",
     )
 
     # portable reference implementation of blake2
@@ -172,6 +189,7 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/BLAKE2/BLAKE2",
         commit = "320c325437539ae91091ce62efec1913cd8093c2",
         build_file = "//third_party:blake2.BUILD",
+        shallow_since = "1531310717 +0100",
     )
 
     new_git_repository(
@@ -179,6 +197,7 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/msgpack/msgpack-c",
         commit = "9389912eaf4358e2ad1621b3995b5b26cd6703f3",
         build_file = "//third_party:msgpack.BUILD",
+        shallow_since = "1557663135 +0900",
     )
 
     new_git_repository(
@@ -186,6 +205,7 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/d-bahr/CRCpp.git",
         commit = "534c1d8c5517cfbb0a0f1ff0d9ec4c8b8ffd78e2",
         build_file = "//third_party:crcpp.BUILD",
+        shallow_since = "1557307551 -0700",
     )
 
     http_archive(
@@ -216,18 +236,21 @@ package(default_visibility = ["//visibility:public"])
         name = "io_bazel_rules_ragel",
         remote = "https://github.com/jmillikin/rules_ragel.git",
         commit = "5723d752a53dd8e25eb4509f3ed869196a06cb2a",
+        shallow_since = "1547960305 -0800",
     )
 
     git_repository(
         name = "io_bazel_rules_bison",
         remote = "https://github.com/jmillikin/rules_bison.git",
         commit = "3809da0cea172c320f1fb7cd94bcb9be97897b14",
+        shallow_since = "1549513081 -0800",
     )
 
     git_repository(
         name = "io_bazel_rules_m4",
         remote = "https://github.com/jmillikin/rules_m4",
         commit = "ae19f8df57f680c6dbad4887e162ca17ee97a13e",
+        shallow_since = "1549512390 -0800",
     )
 
     new_git_repository(
@@ -235,6 +258,7 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/arun11299/cpp-subprocess.git",
         commit = "de5f791d0457ffa866c371f16a3a53228515bb9a",
         build_file = "//third_party:cpp_subprocess.BUILD",
+        shallow_since = "1552288452 +0530",
     )
 
     http_archive(
