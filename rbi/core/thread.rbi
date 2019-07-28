@@ -251,7 +251,7 @@ class Thread::Queue < Object
 end
 
 class Thread::SizedQueue < Thread::Queue
-  sig {params(obj: T.untyped).returns(T.untyped)}
+  sig {params(args: T.untyped).returns(T.untyped)}
   def <<(*args); end
 
   sig {params(args: T.untyped).returns(T.untyped)}
