@@ -1,3 +1,7 @@
+# If gem is missing here, we'll still be able to build it.
+# the known downsides of not including gems here are:
+#  - bazel will print the "sha" for unknown gems when running(that's how these were collected)
+#  - bazel will sometimes redownload them(as it uses those sha's for invalidation)
 KNOWN_GEM_SHA265 = {
     "codecov-0.1.14": "3c955c6bd656b47760d7208112f85a6620d8f5b473c5f54e44f3cdd7107e3dbc",
     "docile-1.3.1": "27d87e90c70e10ec4ca8fd33bcd668251ce514cb9d60ee8c75500d65e78fa211",
