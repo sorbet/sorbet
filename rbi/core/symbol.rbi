@@ -102,7 +102,7 @@ class Symbol < Object
   sig do
     params(
         args: T.untyped
-    ).return(T.untyped)
+    ).returns(T.untyped)
   end
   def match?(*args); end
 
