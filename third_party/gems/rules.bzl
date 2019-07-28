@@ -1,4 +1,5 @@
 load("//third_party/gems:gemfile.bzl", _parse_gemfile_lock = "parse_gemfile_lock")
+load("//third_party/gems:known_gems.bzl", "get_known_gem_sha256")
 
 def _label_to_path(label):
     """
@@ -220,11 +221,11 @@ def _impl(repo_ctx):
             package_name = _format_package(dep)
 
             if gems_to_fetch.get(package_name) == None:
-                gems_to_fetch[package_name] = ""
-
-                # there is a gem present in a Gemfile.lock that wasn't mentioned
-                # in gems, so we know that the `gems` attr need to be fixed
-                fetched = True
+                gems_to_fetch[package_name] = get_known_gem_sha256(package_name, "")
+                if gems_to_fetch.get(package_name, "") == "":
+                    # there is a gem present in a Gemfile.lock that wasn't mentioned
+                    # in gems, so we know that the `gems` attr need to be fixed
+                    fetched = True
 
     # fetch all the gems
     known_shas = {}
