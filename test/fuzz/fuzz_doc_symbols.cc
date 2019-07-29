@@ -10,7 +10,7 @@
 auto console = spdlog::stdout_logger_mt("console");
 auto typeErrors = spdlog::stdout_logger_mt("typeErrors");
 
-std::unique_ptr<sorbet::core::GlobalState> mkInitialGlobalState() {
+std::unique_ptr<sorbet::core::GlobalState> mkGlobalState() {
     const auto rootPath = "/tmp";
     sorbet::realmain::options::Options opts;
     opts.fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
