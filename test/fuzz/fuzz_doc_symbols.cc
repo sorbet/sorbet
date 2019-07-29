@@ -34,6 +34,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     const auto opts = mkOpts();
     static const auto commonGs = mkGlobalState(opts, kvstore);
     std::unique_ptr<sorbet::core::GlobalState> gs;
+    // TODO why?
     { gs = commonGs->deepCopy(true); }
     std::string inputData((const char *)data, size);
     std::vector<sorbet::ast::ParsedFile> indexed;
