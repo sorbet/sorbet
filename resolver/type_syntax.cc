@@ -579,15 +579,13 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                                     sym.show(ctx));
                         if (sym == core::Symbols::Hash()) {
                             // Hash is special because it has arity 3 but you're only supposed to write the first 2
-                            e.addAutocorrect(core::AutocorrectSuggestion(
-                                i->loc, fmt::format("T::{}[T.untyped, T.untyped]", i->loc.source(ctx))));
+                            e.replaceWith(i->loc, "T::{}[T.untyped, T.untyped]", i->loc.source(ctx));
                         } else if (isStdlibWhitelisted) {
                             vector<string> untypeds;
                             for (int i = 0; i < sym.data(ctx)->typeArity(ctx); i++) {
                                 untypeds.emplace_back("T.untyped");
                             }
-                            e.addAutocorrect(core::AutocorrectSuggestion(
-                                i->loc, fmt::format("T::{}[{}]", i->loc.source(ctx), absl::StrJoin(untypeds, ", "))));
+                            e.replaceWith(i->loc, "T::{}[{}]", i->loc.source(ctx), absl::StrJoin(untypeds, ", "));
                         }
                     }
                 }
