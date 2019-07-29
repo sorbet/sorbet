@@ -320,7 +320,8 @@ private:
             return true;
         }
         if (isFullyResolved(ctx, job.rhs)) {
-            job.lhs.data(ctx)->resultType = TypeSyntax::getResultType(ctx, *(job.rhs), ParsedSig{}, true, job.lhs);
+            job.lhs.data(ctx)->resultType =
+                TypeSyntax::getResultType(ctx, *(job.rhs), ParsedSig{}, TypeSyntaxArgs::forGetResultType(job.lhs));
             return true;
         }
 
@@ -1016,7 +1017,7 @@ private:
             // These sigs won't have been parsed, as there was no methods to
             // attach them to -- parse them here manually to force any errors.
             for (auto sig : lastSigs) {
-                TypeSyntax::parseSig(ctx, sig, nullptr, true, core::Symbols::untyped());
+                TypeSyntax::parseSig(ctx, sig, nullptr, TypeSyntaxArgs::forParseSig(core::Symbols::untyped()));
             }
 
             if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -1138,7 +1139,7 @@ private:
 
                     while (i < lastSigs.size()) {
                         auto sig = TypeSyntax::parseSig(ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]),
-                                                        nullptr, true, mdef->symbol);
+                                                        nullptr, TypeSyntaxArgs::forParseSig(mdef->symbol));
                         core::SymbolRef overloadSym;
                         if (isOverloaded) {
                             vector<int> argsToKeep;
@@ -1368,7 +1369,8 @@ public:
                     auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
                     if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
                         ParsedSig emptySig;
-                        data->resultType = TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig, false, sym);
+                        data->resultType = TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig,
+                                                                     TypeSyntaxArgs::forGetResultType(sym));
                     }
                 }
             }
@@ -1434,8 +1436,8 @@ public:
 
                     auto expr = std::move(send->args[0]);
                     ParsedSig emptySig;
-                    auto type = TypeSyntax::getResultType(ctx.withOwner(ownerClass), *(send->args[1]), emptySig, false,
-                                                          core::Symbols::noSymbol());
+                    auto type = TypeSyntax::getResultType(ctx.withOwner(ownerClass), *(send->args[1]), emptySig,
+                                                          TypeSyntaxArgs::forGetResultType(core::Symbols::noSymbol()));
                     return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }
