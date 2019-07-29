@@ -10,7 +10,7 @@
 auto console = spdlog::stdout_logger_mt("console");
 auto typeErrors = spdlog::stdout_logger_mt("typeErrors");
 
-extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
+std::unique_ptr<sorbet::core::GlobalState> mkInitialGlobalState() {
     const auto rootPath = "/tmp";
     sorbet::realmain::options::Options opts;
     opts.fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
@@ -18,6 +18,10 @@ extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
         (std::make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console)));
     std::unique_ptr<sorbet::KeyValueStore> kvstore;
     sorbet::payload::createInitialGlobalState(gs, opts, kvstore);
+    return gs;
+}
+
+extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
     return 0;
 }
 
