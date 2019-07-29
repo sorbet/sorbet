@@ -32,6 +32,8 @@ extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t size) {
     std::unique_ptr<sorbet::KeyValueStore> kvstore;
     const auto opts = mkOpts();
-    const auto gs = mkGlobalState(opts, kvstore);
+    const auto commonGs = mkGlobalState(opts, kvstore);
+    std::unique_ptr<sorbet::core::GlobalState> gs;
+    { gs = commonGs->deepCopy(true); }
     return 0;
 }
