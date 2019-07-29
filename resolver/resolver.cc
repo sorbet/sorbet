@@ -1144,7 +1144,7 @@ private:
 
                     while (i < lastSigs.size()) {
                         auto allowSelfType = true;
-                        auto allowRebind = true;
+                        auto allowRebind = false;
                         auto sig =
                             TypeSyntax::parseSig(ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]),
                                                  nullptr, TypeSyntaxArgs{allowSelfType, allowRebind, mdef->symbol});
