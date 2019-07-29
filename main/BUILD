@@ -45,7 +45,7 @@ cc_binary(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "realmain",
+        "realmain-orig",
         "//payload:text",
     ],
 )
@@ -68,6 +68,27 @@ cc_library(
         "//core/proto",
         "//main/autogen",
         "//main/lsp",
+        "//main/options",
+        "//main/pipeline",
+        "//payload:interface",
+    ],
+)
+
+cc_library(
+    name = "realmain-orig",
+    srcs = [
+        "realmain.cc",
+        "realmain.h",
+    ],
+    defines = ["SORBET_REALMAIN_MIN"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ast",
+        "//core",
         "//main/options",
         "//main/pipeline",
         "//payload:interface",

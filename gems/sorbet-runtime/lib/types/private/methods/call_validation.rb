@@ -163,7 +163,6 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
-    T::Private::DeclState.current.skip_next_on_method_added = true
     has_fixed_arity = method_sig.kwarg_types.empty? && !method_sig.has_rest && !method_sig.has_keyrest &&
       original_method.parameters.all? {|(kind, _name)| kind == :req}
     all_args_are_simple = method_sig.arg_types.all? {|_name, type| type.is_a?(T::Types::Simple)}
@@ -171,6 +170,7 @@ module T::Private::Methods::CallValidation
     has_simple_procedure_types = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
 
     T::Configuration.without_ruby_warnings do
+      T::Private::DeclState.current.skip_on_method_added = true
       if has_fixed_arity && has_simple_method_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
         create_validator_method_fast(mod, original_method, method_sig)
       elsif has_fixed_arity && has_simple_procedure_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
@@ -178,6 +178,7 @@ module T::Private::Methods::CallValidation
       else
         create_validator_slow(mod, original_method, method_sig)
       end
+      T::Private::DeclState.current.skip_on_method_added = false
     end
     mod.send(original_visibility, method_sig.method_name)
   end
@@ -1161,7 +1162,7 @@ module T::Private::Methods::CallValidation
       "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n" \
       "Definition: #{definition_file}:#{definition_line}"
 
-    T::Private::ErrorHandler.handle_call_validation_error(
+    T::Configuration.call_validation_error_handler(
       method_sig,
       message: error_message,
       pretty_message: pretty_message,

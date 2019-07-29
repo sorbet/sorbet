@@ -350,13 +350,14 @@ public:
     }
 
     unique_ptr<Node> blockarg(const token *amper, const token *name) {
-        core::Loc loc = tokLoc(amper);
+        core::Loc loc;
         core::NameRef nm;
 
         if (name != nullptr) {
-            loc = loc.join(tokLoc(name));
+            loc = tokLoc(name);
             nm = gs_.enterNameUTF8(name->string());
         } else {
+            loc = tokLoc(amper);
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
         }
         return make_unique<Blockarg>(loc, nm);

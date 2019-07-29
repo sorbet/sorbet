@@ -79,6 +79,7 @@ NameDef names[] = {
     {"finalReturn", "<finalReturn>"},
     {"cfgAlias", "<cfgAlias>"},
     {"magic", "<magic>"},
+    {"tConstTemp", "<tConstTemp>"},
     // end CFG temporaries
 
     {"include"},
@@ -127,7 +128,9 @@ NameDef names[] = {
     {"must"},
     {"declareInterface", "interface!"},
     {"declareAbstract", "abstract!"},
+    {"declareFinal", "final!"},
     {"revealType", "reveal_type"},
+    {"absurd"},
     // end T keywords
 
     // Ruby DSL methods which we understand
@@ -181,6 +184,18 @@ NameDef names[] = {
 
     {"prefix"},
     {"to"},
+
+    {"mattrAccessor", "mattr_accessor"},
+    {"mattrReader", "mattr_reader"},
+    {"mattrWriter", "mattr_writer"},
+    {"cattrAccessor", "cattr_accessor"},
+    {"cattrReader", "cattr_reader"},
+    {"cattrWriter", "cattr_writer"},
+    {"instanceReader", "instance_reader"},
+    {"instanceWriter", "instance_writer"},
+    {"instanceAccessor", "instance_accessor"},
+    {"instancePredicate", "instance_predicate"},
+    {"classAttribute", "class_attribute"},
 
     {"describe"},
     {"it"},
@@ -319,6 +334,7 @@ NameDef names[] = {
     {"Proc", "Proc", true},
     {"TrueClass", "TrueClass", true},
     {"FalseClass", "FalseClass", true},
+    {"Boolean", "Boolean", true},
     {"NilClass", "NilClass", true},
     {"Class", "Class", true},
     {"Module", "Module", true},

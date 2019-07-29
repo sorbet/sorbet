@@ -7,6 +7,7 @@
 #include "dsl/DSLBuilder.h"
 #include "dsl/Delegate.h"
 #include "dsl/InterfaceWrapper.h"
+#include "dsl/Mattr.h"
 #include "dsl/Minitest.h"
 #include "dsl/MixinEncryptedProp.h"
 #include "dsl/OpusEnum.h"
@@ -89,6 +90,13 @@ public:
 
                     // This one is different: it gets an extra prevStat argument.
                     nodes = AttrReader::replaceDSL(ctx, send, prevStat);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    // This one is also a little different: it gets the ClassDef kind
+                    nodes = Mattr::replaceDSL(ctx, send, classDef->kind);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;

@@ -74,4 +74,30 @@ unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core:
     return id;
 }
 
+void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery, core::SymbolRef symbol) {
+    // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
+    while (lit && symbol.exists() && lit->original) {
+        if (lspQuery.matchesLoc(lit->loc) || lspQuery.matchesSymbol(symbol)) {
+            core::TypeAndOrigins tp;
+            auto resultType = symbol.data(ctx.state)->resultType;
+            tp.type = resultType != nullptr ? resultType : core::Types::untyped(ctx, symbol);
+            tp.origins.emplace_back(symbol.data(ctx.state)->loc());
+            core::lsp::QueryResponse::pushQueryResponse(
+                ctx, core::lsp::ConstantResponse(ctx.owner, symbol, lit->loc, symbol.data(ctx)->name, tp, tp));
+        }
+        lit = ast::cast_tree<ast::ConstantLit>(lit->original->scope.get());
+        if (lit) {
+            symbol = lit->symbol.data(ctx)->dealias(ctx);
+        }
+    }
+}
+
+unique_ptr<ast::ConstantLit> DefLocSaver::postTransformConstantLit(core::Context ctx,
+                                                                   unique_ptr<ast::ConstantLit> lit) {
+    const core::lsp::Query &lspQuery = ctx.state.lspQuery;
+    auto symbol = lit->symbol.data(ctx)->dealias(ctx);
+    matchesQuery(ctx, lit.get(), lspQuery, symbol);
+    return lit;
+}
+
 } // namespace sorbet::realmain::lsp

@@ -263,6 +263,26 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Send *s) {
                 core::LocalVariable recv;
 
+                if (s->fun == core::Names::absurd()) {
+                    if (auto cnst = ast::cast_tree<ast::ConstantLit>(s->recv.get())) {
+                        if (cnst->symbol == core::Symbols::T()) {
+                            if (s->args.size() == 1) {
+                                auto temp = cctx.newTemporary(core::Names::statTemp());
+                                current = walk(cctx.withTarget(temp), s->args[0].get(), current);
+                                current->exprs.emplace_back(cctx.target, s->loc, make_unique<TAbsurd>(temp));
+                            } else {
+                                if (auto e = cctx.ctx.state.beginError(s->loc, core::errors::CFG::MalformedTAbsurd)) {
+                                    e.setHeader("`{}` expects exactly one argument but got `{}`", "T.absurd",
+                                                s->args.size());
+                                }
+                            }
+
+                            ret = current;
+                            return;
+                        }
+                    }
+                }
+
                 recv = cctx.newTemporary(core::Names::statTemp());
                 current = walk(cctx.withTarget(recv), s->recv.get(), current);
 

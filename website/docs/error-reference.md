@@ -386,6 +386,41 @@ See [5014](#5014). 5036 is the same error as [5014](#5014) but slightly modified
 to allow more common Ruby idioms to pass by in `# typed: true` (5036 is only
 reported in `# typed: strict`).
 
+## 5047
+
+A class or module tried to inherit, include, or extend a final class or module.
+
+```ruby
+class Final
+  extend T::Helpers
+  final!
+end
+
+class Bad < Final; end # error
+```
+
+## 5048
+
+A class or module was declared as final, but a method in the class or module was
+not explicitly declared as final with a final `sig`.
+
+```ruby
+class C
+  extend T::Helpers
+  final!
+
+  def no_sig; end # error
+
+  extend T::Sig
+
+  sig {void}
+  def non_final_sig; end # error
+
+  sig(:final) {void}
+  def final_sig; end # good
+end
+```
+
 ## 6002
 
 In `# typed: strict` files, Sorbet requires that all instance and class
@@ -594,6 +629,11 @@ don't usually expect that some branch of code is never taken; usually dead code
 errors come from simple typos or misunderstandings about how Ruby works. In
 particular: the only two "falsy" values in Ruby are `nil` and `false`.
 
+Note if you intend for code to be dead because you've exhausted all the cases
+and are trying to raise in the default case, use `T.absurd` to assert that a
+case analysis is exhaustive. See [Exhaustiveness Checking](exhaustiveness.md)
+for more information.
+
 Sometimes, dead code errors can be hard to track down. The best way to pinpoint
 the cause of a dead code error is to wrap variables or expressions in
 `T.reveal_type(...)` to validate the assumptions that a piece of code is making.
@@ -777,6 +817,14 @@ def bar(&blk)
 end
 # ---------------------------------------------
 ```
+
+## 7026
+
+Sorbet detected that it was possible for `T.absurd` to be reached. This usually
+means that something that was meant to cover all possible cases of a union type
+did not cover all the cases.
+
+See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
 

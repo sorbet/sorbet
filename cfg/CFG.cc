@@ -63,6 +63,8 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
                     blockReads.insert(arg.variable);
                     blockReadsAndWrites.insert(arg.variable);
                 }
+            } else if (auto *v = cast_instruction<TAbsurd>(bind.value.get())) {
+                blockReads.insert(v->what.variable);
             } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
                 blockReads.insert(v->what.variable);
                 blockReadsAndWrites.insert(v->what.variable);

@@ -171,23 +171,24 @@ module T::Private::Methods
 
   # Only public because it needs to get called below inside the replace_method blocks below.
   def self._on_method_added(hook_mod, method_name, is_singleton_method: false)
-    if T::Private::DeclState.current.skip_next_on_method_added
-      T::Private::DeclState.current.skip_next_on_method_added = false
+    if T::Private::DeclState.current.skip_on_method_added
       return
     end
 
     current_declaration = T::Private::DeclState.current.active_declaration
     mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
-    original_method = mod.instance_method(method_name)
 
     if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
       raise "`#{mod.name}` was declared as final but its method `#{method_name}` was not declared as final"
     end
     _check_final_ancestors(mod, mod.ancestors, [method_name])
 
-    return if current_declaration.nil?
+    if current_declaration.nil?
+      return
+    end
     T::Private::DeclState.current.reset!
 
+    original_method = mod.instance_method(method_name)
     sig_block = lambda do
       T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
     end
@@ -197,8 +198,6 @@ module T::Private::Methods
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
     new_method = nil
-    # this prevents us from running the final checks twice for every method def.
-    T::Private::DeclState.current.skip_next_on_method_added = true
     T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
       if !T::Private::Methods.has_sig_block_for_method(new_method)
         # This should only happen if the user used alias_method to grab a handle
@@ -257,7 +256,7 @@ module T::Private::Methods
       begin
         run_builder(declaration_block)
       rescue DeclBuilder::BuilderError => e
-        T::Private::ErrorHandler.handle_sig_builder_error(e, declaration_block.loc)
+        T::Configuration.sig_builder_error_handler(e, declaration_block.loc)
         nil
       end
 
@@ -313,7 +312,7 @@ module T::Private::Methods
       super_method = original_method&.super_method
       super_signature = signature_for_method(super_method) if super_method
 
-      T::Private::ErrorHandler.handle_sig_validation_error(
+      T::Configuration.sig_validation_error_handler(
         e,
         method: original_method,
         declaration: current_declaration,
@@ -431,9 +430,6 @@ module T::Private::Methods
 
   private_class_method def self.install_singleton_method_added_hook(singleton_klass)
     attached = nil
-    # this prevents the final checks from triggering about singleton_method_added not being a final method even if the
-    # module is final.
-    T::Private::DeclState.current.skip_next_on_method_added = true
     original_singleton_method = T::Private::ClassUtils.replace_method(singleton_klass, :singleton_method_added) do |name|
       attached = self
       T::Private::Methods._on_method_added(self, name, is_singleton_method: true)

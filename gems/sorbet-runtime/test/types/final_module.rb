@@ -150,4 +150,52 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
     end
     assert_includes(err.message, "is not a class or module and cannot be declared as final with `final!`")
   end
+
+  it "allows a non-final class in a final class" do
+    inner = nil
+    outer = Class.new do
+      extend T::Helpers
+      final!
+      inner = Class.new
+    end
+    Class.new(inner)
+    err = assert_raises(RuntimeError) { Class.new(outer) }
+    assert_includes(err.message, "was declared as final")
+  end
+
+  it "allows a non-final class in a final module" do
+    inner = nil
+    outer = Module.new do
+      extend T::Helpers
+      final!
+      inner = Class.new
+    end
+    Class.new(inner)
+    err = assert_raises(RuntimeError) { Class.new.include(outer) }
+    assert_includes(err.message, "was declared as final")
+  end
+
+  it "allows a non-final module in a final class" do
+    inner = nil
+    outer = Class.new do
+      extend T::Helpers
+      final!
+      inner = Module.new
+    end
+    Class.new.include(inner)
+    err = assert_raises(RuntimeError) { Class.new(outer) }
+    assert_includes(err.message, "was declared as final")
+  end
+
+  it "allows a non-final module in a final module" do
+    inner = nil
+    outer = Module.new do
+      extend T::Helpers
+      final!
+      inner = Module.new
+    end
+    Class.new.include(inner)
+    err = assert_raises(RuntimeError) { Class.new.include(outer) }
+    assert_includes(err.message, "was declared as final")
+  end
 end

@@ -320,7 +320,10 @@ private:
             return true;
         }
         if (isFullyResolved(ctx, job.rhs)) {
-            job.lhs.data(ctx)->resultType = TypeSyntax::getResultType(ctx, *(job.rhs), ParsedSig{}, true, job.lhs);
+            auto allowSelfType = true;
+            auto allowRebind = false;
+            job.lhs.data(ctx)->resultType = TypeSyntax::getResultType(
+                ctx, *(job.rhs), ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, job.lhs});
             return true;
         }
 
@@ -877,8 +880,17 @@ private:
         if (sig.seen.bind) {
             method.data(ctx)->setReBind(sig.bind);
         }
-        auto methodInfo = method.data(ctx);
 
+        // Get the parameters order from the signature
+        vector<ParsedSig::ArgSpec> sigParams;
+        for (auto &spec : sig.argTypes) {
+            sigParams.push_back(spec);
+        }
+
+        vector<ast::Local *> defParams; // Parameters order from the method declaration
+        bool seenOptional = false;
+
+        auto methodInfo = method.data(ctx);
         methodInfo->resultType = sig.returns;
         int i = -1;
         for (auto &arg : methodInfo->arguments()) {
@@ -886,6 +898,22 @@ private:
             const auto local = getArgLocal(ctx, arg, mdef, i, isOverloaded);
             auto treeArgName = local->localVariable._name;
             ENFORCE(local != nullptr);
+
+            // Check that optional keyword parameters are after all the required ones
+            bool isKwd = arg.flags.isKeyword;
+            bool isReq = !arg.flags.isBlock && !arg.flags.isRepeated && !arg.flags.isDefault;
+            if (isKwd && !isReq) {
+                seenOptional = true;
+            } else if (isKwd && seenOptional && isReq) {
+                if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadParameterOrdering)) {
+                    e.setHeader("Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
+                                "sig", treeArgName.show(ctx));
+                    e.addErrorLine(exprLoc, "Signature");
+                }
+            }
+
+            defParams.push_back(local);
+
             auto spec = absl::c_find_if(sig.argTypes, [&](const auto &spec) { return spec.name == treeArgName; });
 
             if (spec != sig.argTypes.end()) {
@@ -919,6 +947,23 @@ private:
         for (auto spec : sig.argTypes) {
             if (auto e = ctx.state.beginError(spec.loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unknown argument name `{}`", spec.name.show(ctx));
+            }
+        }
+
+        // Check params ordering match between signature and definition
+        if (sig.argTypes.empty()) {
+            int j = 0;
+            for (auto spec : sigParams) {
+                auto param = defParams[j];
+                auto sname = spec.name.show(ctx);
+                auto dname = param->localVariable._name.show(ctx);
+                if (sname != dname) {
+                    if (auto e = ctx.state.beginError(param->loc, core::errors::Resolver::BadParameterOrdering)) {
+                        e.setHeader("Bad parameter ordering for `{}`, expected `{}` instead", dname, sname);
+                        e.addErrorLine(spec.loc, "Expected index in signature:");
+                    }
+                }
+                j++;
             }
         }
     }
@@ -974,7 +1019,10 @@ private:
             // These sigs won't have been parsed, as there was no methods to
             // attach them to -- parse them here manually to force any errors.
             for (auto sig : lastSigs) {
-                TypeSyntax::parseSig(ctx, sig, nullptr, true, core::Symbols::untyped());
+                auto allowSelfType = true;
+                auto allowRebind = false;
+                TypeSyntax::parseSig(ctx, sig, nullptr,
+                                     TypeSyntaxArgs{allowSelfType, allowRebind, core::Symbols::untyped()});
             }
 
             if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -1095,8 +1143,11 @@ private:
                     }
 
                     while (i < lastSigs.size()) {
-                        auto sig = TypeSyntax::parseSig(ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]),
-                                                        nullptr, true, mdef->symbol);
+                        auto allowSelfType = true;
+                        auto allowRebind = false;
+                        auto sig =
+                            TypeSyntax::parseSig(ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]),
+                                                 nullptr, TypeSyntaxArgs{allowSelfType, allowRebind, mdef->symbol});
                         core::SymbolRef overloadSym;
                         if (isOverloaded) {
                             vector<int> argsToKeep;
@@ -1326,7 +1377,10 @@ public:
                     auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
                     if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
                         ParsedSig emptySig;
-                        data->resultType = TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig, false, sym);
+                        auto allowSelfType = true;
+                        auto allowRebind = false;
+                        data->resultType = TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig,
+                                                                     TypeSyntaxArgs{allowSelfType, allowRebind, sym});
                     }
                 }
             }
@@ -1392,8 +1446,11 @@ public:
 
                     auto expr = std::move(send->args[0]);
                     ParsedSig emptySig;
-                    auto type = TypeSyntax::getResultType(ctx.withOwner(ownerClass), *(send->args[1]), emptySig, false,
-                                                          core::Symbols::noSymbol());
+                    auto allowSelfType = true;
+                    auto allowRebind = false;
+                    auto type = TypeSyntax::getResultType(
+                        ctx.withOwner(ownerClass), *(send->args[1]), emptySig,
+                        TypeSyntaxArgs{allowSelfType, allowRebind, core::Symbols::noSymbol()});
                     return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }

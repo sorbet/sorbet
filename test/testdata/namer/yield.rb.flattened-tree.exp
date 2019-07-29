@@ -29,14 +29,14 @@ begin
       end
     end
 
-    def blockpass<blockpass>(&blk)
+    def blockpass<blockpass>(blk)
       begin
         a = blk.call(1)
         blk.call(a)
       end
     end
 
-    def mixed<mixed>(&blk)
+    def mixed<mixed>(blk)
       begin
         a = blk.call(1)
         blk.call(a)

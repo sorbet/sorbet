@@ -189,6 +189,79 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
     }
 }
 
+core::Loc getAncestorLoc(const core::GlobalState &gs, const unique_ptr<ast::ClassDef> &classDef,
+                         const core::SymbolRef ancestor) {
+    for (const auto &anc : classDef->ancestors) {
+        const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
+        if (ancConst == nullptr) {
+            continue;
+        }
+        if (ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+            return anc->loc;
+        }
+    }
+    for (const auto &anc : classDef->singletonAncestors) {
+        const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
+        if (ancConst == nullptr) {
+            continue;
+        }
+        if (ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+            return anc->loc;
+        }
+    }
+    // give up
+    return classDef->loc;
+}
+
+void validateFinalAncestorHelper(const core::GlobalState &gs, const core::SymbolRef klass,
+                                 const unique_ptr<ast::ClassDef> &classDef, const core::SymbolRef errMsgClass,
+                                 const string_view verb) {
+    for (const auto &mixin : klass.data(gs)->mixins()) {
+        if (!mixin.data(gs)->isClassFinal()) {
+            continue;
+        }
+        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, mixin), core::errors::Resolver::FinalAncestor)) {
+            e.setHeader("`{}` was declared as final and cannot be {} in `{}`", mixin.data(gs)->show(gs), verb,
+                        errMsgClass.data(gs)->show(gs));
+            e.addErrorLine(mixin.data(gs)->loc(), "`{}` defined here", mixin.data(gs)->show(gs));
+        }
+    }
+}
+
+void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRef klass,
+                               const core::SymbolRef errMsgClass) {
+    if (!klass.data(gs)->isClassFinal()) {
+        return;
+    }
+    for (const auto mem : klass.data(gs)->members()) {
+        const auto memData = mem.second.data(gs);
+        if (!memData->isMethod() || memData->name == core::Names::staticInit() || memData->isFinalMethod()) {
+            continue;
+        }
+        if (auto e = gs.beginError(memData->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
+            e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
+                        errMsgClass.data(gs)->show(gs), memData->name.show(gs));
+        }
+    }
+}
+
+void validateFinal(const core::GlobalState &gs, const core::SymbolRef klass,
+                   const unique_ptr<ast::ClassDef> &classDef) {
+    const auto superClass = klass.data(gs)->superClass();
+    if (superClass.exists() && superClass.data(gs)->isClassFinal()) {
+        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
+            e.setHeader("`{}` was declared as final and cannot be inherited by `{}`", superClass.data(gs)->show(gs),
+                        klass.data(gs)->show(gs));
+            e.addErrorLine(superClass.data(gs)->loc(), "`{}` defined here", superClass.data(gs)->show(gs));
+        }
+    }
+    validateFinalAncestorHelper(gs, klass, classDef, klass, "included");
+    validateFinalMethodHelper(gs, klass, klass);
+    const auto singleton = klass.data(gs)->lookupSingletonClass(gs);
+    validateFinalAncestorHelper(gs, singleton, classDef, klass, "extended");
+    validateFinalMethodHelper(gs, singleton, klass);
+}
+
 class ValidateWalk {
 private:
     UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
@@ -283,6 +356,7 @@ public:
         validateTStructNotGrandparent(ctx.state, sym);
         validateAbstract(ctx.state, sym);
         validateAbstract(ctx.state, singleton);
+        validateFinal(ctx.state, sym, classDef);
         return classDef;
     }
 

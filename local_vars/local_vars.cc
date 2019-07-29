@@ -1,4 +1,5 @@
 #include "local_vars.h"
+#include "absl/strings/match.h"
 #include "ast/treemap/treemap.h"
 #include "common/typecase.h"
 #include "core/core.h"
@@ -61,8 +62,9 @@ class LocalNameInserter {
         return named;
     }
 
-    vector<NamedArg> nameArgs(ast::MethodDef::ARGS_store &methodArgs) {
+    vector<NamedArg> nameArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &methodArgs) {
         vector<NamedArg> namedArgs;
+        UnorderedSet<core::NameRef> nameSet;
         for (auto &arg : methodArgs) {
             auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
             if (!refExp) {
@@ -70,7 +72,22 @@ class LocalNameInserter {
             }
             unique_ptr<ast::Reference> refExpImpl(refExp);
             arg.release();
-            namedArgs.emplace_back(nameArg(move(refExpImpl)));
+            auto named = nameArg(move(refExpImpl));
+            if (nameSet.contains(named.name) && !absl::StartsWith(named.name.data(ctx)->shortName(ctx), "_")) {
+                if (auto e = ctx.state.beginError(named.loc, core::errors::Namer::RepeatedArgument)) {
+                    ENFORCE(!scopeStack.empty());
+                    auto frame = scopeStack.back();
+                    e.setHeader("Duplicated argument name `{}`", named.name.show(ctx));
+                    if (frame.insideMethod) {
+                        e.addErrorLine(frame.loc, "In argument list of method");
+                    } else if (frame.insideBlock) {
+                        e.addErrorLine(frame.loc, "In argument list of block");
+                    }
+                    ENFORCE(frame.insideMethod || frame.insideBlock);
+                }
+            }
+            nameSet.insert(named.name);
+            namedArgs.emplace_back(move(named));
         }
 
         return namedArgs;
@@ -79,14 +96,16 @@ class LocalNameInserter {
     struct LocalFrame {
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
         vector<core::LocalVariable> args;
+        core::Loc loc;
         std::optional<u4> oldBlockCounter = nullopt;
         u4 localId = 0;
         bool insideBlock = false;
         bool insideMethod = false;
     };
 
-    LocalFrame &pushBlockFrame(bool insideMethod) {
+    LocalFrame &pushBlockFrame(core::Loc loc, bool insideMethod) {
         auto &frame = scopeStack.emplace_back();
+        frame.loc = loc;
         frame.localId = blockCounter;
         frame.insideBlock = true;
         frame.insideMethod = insideMethod;
@@ -94,23 +113,25 @@ class LocalNameInserter {
         return frame;
     }
 
-    LocalFrame &enterBlock() {
+    LocalFrame &enterBlock(core::Loc loc) {
         // NOTE: the base-case for this being a valid initialization is setup by
         // the `create()` static method.
-        return pushBlockFrame(scopeStack.back().insideMethod);
+        return pushBlockFrame(loc, scopeStack.back().insideMethod);
     }
 
-    LocalFrame &enterMethod() {
+    LocalFrame &enterMethod(core::Loc loc) {
         auto &frame = scopeStack.emplace_back();
+        frame.loc = loc;
         frame.oldBlockCounter = blockCounter;
         frame.insideMethod = true;
         blockCounter = 1;
         return frame;
     }
 
-    LocalFrame &enterClass() {
+    LocalFrame &enterClass(core::Loc loc) {
         auto &frame = scopeStack.emplace_back();
         frame.oldBlockCounter = blockCounter;
+        frame.loc = loc;
         blockCounter = 1;
         return frame;
     }
@@ -174,7 +195,7 @@ class LocalNameInserter {
 
 public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
-        enterClass();
+        enterClass(klass->declLoc);
         return klass;
     }
 
@@ -184,9 +205,9 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-        enterMethod();
+        enterMethod(method->declLoc);
 
-        method->args = fillInArgs(nameArgs(method->args));
+        method->args = fillInArgs(nameArgs(ctx, method->args));
         return method;
     }
 
@@ -214,7 +235,7 @@ public:
 
     unique_ptr<ast::Block> preTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
         auto outerArgs = scopeStack.back().args;
-        auto &frame = enterBlock();
+        auto &frame = enterBlock(blk->loc);
         frame.args = std::move(outerArgs);
         auto &parent = *(scopeStack.end() - 2);
 
@@ -225,7 +246,7 @@ public:
 
         // If any of our arguments shadow our parent, fillInArgs will overwrite
         // them in `frame.locals`
-        blk->args = fillInArgs(nameArgs(blk->args));
+        blk->args = fillInArgs(nameArgs(ctx, blk->args));
 
         return blk;
     }
@@ -254,7 +275,7 @@ private:
     LocalNameInserter() {
         // Setup a block frame that's outside of a method context as the base of
         // the scope stack.
-        pushBlockFrame(false);
+        pushBlockFrame(core::Loc::none(), false);
     }
 };
 

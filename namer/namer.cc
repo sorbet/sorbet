@@ -89,7 +89,23 @@ class NameInserter {
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
+        // we know right now that pos >= arguments().size() because otherwise we would have hit the early return at the
+        // beginning of this method
         auto &argInfo = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, name);
+        // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
+        // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
+        // identical). We know that we need to match the arity of the function as written, so if we don't have as many
+        // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
+        if (ctx.owner.dataAllowingNone(ctx)->arguments().size() == pos) {
+            auto argCopy = argInfo.deepCopy();
+            argCopy.name = ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, argInfo.name, pos + 1);
+            ctx.owner.dataAllowingNone(ctx)->arguments().emplace_back(move(argCopy));
+            auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
+            return move(localExpr);
+        }
+        // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
+        // from enterMethodArgumentSymbol
+        ENFORCE(ctx.owner.data(ctx)->arguments().size() >= pos + 1);
         unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
 
         if (parsedArg.default_) {
@@ -238,9 +254,9 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
 
                 auto oldSymCount = ctx.state.symbolsUsed();
-                auto newSignleton =
+                auto newSingleton =
                     klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-                ENFORCE(newSignleton._id >= oldSymCount,
+                ENFORCE(newSingleton._id >= oldSymCount,
                         "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             } else if (klass->symbol.data(ctx)->isClassModuleSet() &&
                        isModule != klass->symbol.data(ctx)->isClassModule()) {
@@ -265,16 +281,16 @@ public:
         if (send == nullptr) {
             return false;
         }
-        if (send->fun != core::Names::declareInterface() && send->fun != core::Names::declareAbstract()) {
-            return false;
+        if (send->fun == core::Names::declareFinal()) {
+            klass->symbol.data(ctx)->setClassFinal();
+            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassFinal();
         }
-
-        klass->symbol.data(ctx)->setClassAbstract();
-        klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
-
+        if (send->fun == core::Names::declareInterface() || send->fun == core::Names::declareAbstract()) {
+            klass->symbol.data(ctx)->setClassAbstract();
+            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
+        }
         if (send->fun == core::Names::declareInterface()) {
             klass->symbol.data(ctx)->setClassInterface();
-
             if (klass->kind == ast::Class) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
