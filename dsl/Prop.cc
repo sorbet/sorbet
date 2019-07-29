@@ -397,8 +397,7 @@ void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
                 continue;
             }
             auto loc = prop.loc;
-            auto arg = ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name));
-            args.emplace_back(std::move(arg));
+            args.emplace_back(ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)));
             sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
             sigVals.emplace_back(std::move(prop.type));
         }
@@ -408,9 +407,8 @@ void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
                 continue;
             }
             auto loc = prop.loc;
-            auto arg = ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)),
-                                            std::move(*(prop.default_)));
-            args.emplace_back(std::move(arg));
+            args.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)),
+                                                   std::move(*(prop.default_))));
             sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
             sigVals.emplace_back(std::move(prop.type));
         }
