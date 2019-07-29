@@ -15,6 +15,7 @@ extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
     std::unique_ptr<sorbet::core::GlobalState> gs = std::make_unique<sorbet::core::GlobalState>(
         (std::make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console)));
     sorbet::realmain::options::Options opts;
+    std::unique_ptr<sorbet::KeyValueStore> kvstore;
     return 0;
 }
 
