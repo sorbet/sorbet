@@ -2,6 +2,7 @@
 // ^ Include first because it violates linting rules.
 
 #include "absl/strings/str_split.h"
+#include "common/FileOps.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
 #include <regex>
@@ -875,14 +876,58 @@ string HoverAssertion::toString() const {
 shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view filename, unique_ptr<Range> &range,
                                                                     int assertionLine, string_view assertionContents,
                                                                     string_view assertionType) {
-    return make_shared<ApplyCodeActionAssertion>(filename, range, assertionLine, assertionContents, assertionContents);
+    static const regex titleVersionRegex(R"(^\[(\w+)\]\s+(.*?)$)");
+
+    smatch matches;
+    string assertionContentsString = string(assertionContents);
+    if (regex_search(assertionContentsString, matches, titleVersionRegex)) {
+        string version = matches[1].str();
+        string title = matches[2].str();
+        return make_shared<ApplyCodeActionAssertion>(filename, range, assertionLine, title, version);
+    }
+
+    ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
+        << fmt::format("Found improperly formatted apply-code-action assertion. Expected apply-code-action "
+                       "[version] code-action-title");
+    return nullptr;
 }
 ApplyCodeActionAssertion::ApplyCodeActionAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    string_view title, string_view version)
     : RangeAssertion(filename, range, assertionLine), title(string(title)), version(string(version)) {}
 
 string ApplyCodeActionAssertion::toString() const {
-    return fmt::format("apply-code-action: {} {}", version, title);
+    return fmt::format("apply-code-action: [{}] {}", version, title);
+}
+
+void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                                     unique_ptr<CodeAction> &codeAction, string_view testName, string_view fileUri) {
+    auto expectedUpdatedFilePath = fmt::format("{}.{}.rbedited", testName, version);
+    auto expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
+    auto it = sourceFileContents.find(filename);
+    if (it == sourceFileContents.end()) {
+        ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
+    } else {
+        auto &file = it->second;
+        for (auto &c : *codeAction->edit.value()->documentChanges) {
+            string actualEditedFileContents = string(file->source());
+            // TODO(sushain): support multi-file edits
+            EXPECT_EQ(c->textDocument->uri, fileUri);
+            // TODO(sushain): this doesn't really work with multiple edits
+            for (auto &e : c->edits) {
+                core::Loc::Detail reqPos;
+                reqPos.line = e->range->start->line + 1;
+                reqPos.column = e->range->start->character + 1;
+                auto startOffset = core::Loc::pos2Offset(*file, reqPos);
+
+                reqPos.line = e->range->end->line + 1;
+                reqPos.column = e->range->end->character + 1;
+                auto endOffset = core::Loc::pos2Offset(*file, reqPos);
+
+                actualEditedFileContents.replace(startOffset, endOffset - startOffset, e->newText);
+            }
+            EXPECT_EQ(actualEditedFileContents, expectedEditedFileContents);
+        }
+    }
 }
 
 } // namespace sorbet::test

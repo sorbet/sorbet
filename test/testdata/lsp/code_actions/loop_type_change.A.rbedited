@@ -1,6 +1,6 @@
 # typed: true
 
-x = nil
+x = T.let(nil, T.nilable(Integer))
 
 1.times { x = 42 }
             # ^^ error: Changing the type of a variable in a loop is not permitted

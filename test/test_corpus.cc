@@ -517,8 +517,8 @@ string codeActionsToString(const variant<JSONNullObject, vector<unique_ptr<CodeA
     if (get_if<JSONNullObject>(&codeActionResult)) {
         return "null";
     } else {
-        auto &symbols = get<vector<unique_ptr<CodeAction>>>(codeActionResult);
-        return fmt::format("{}", fmt::map_join(symbols.begin(), symbols.end(), ", ",
+        auto &actions = get<vector<unique_ptr<CodeAction>>>(codeActionResult);
+        return fmt::format("{}", fmt::map_join(actions.begin(), actions.end(), ", ",
                                                [](const auto &sym) -> string { return sym->toJSON(); }));
     }
 }
@@ -616,45 +616,79 @@ TEST_P(LSPTest, All) {
     auto codeActionExpectation = test.expectations.find("code-actions");
     if (codeActionExpectation != test.expectations.end()) {
         ASSERT_EQ(filenames.size(), 1) << "code-actions only works with tests that have a single file.";
-        // TODO(sushain): get this range dynamically
-        // TODO(sushain): include diagnostics in context (just ask for the diags via LSP?)
-        vector<unique_ptr<Diagnostic>> diagnostics;
-        auto params = make_unique<TextDocumentCodeActionParams>(
-            make_unique<TextDocumentIdentifier>(testFileUris[*filenames.begin()]),
-            make_unique<Range>(make_unique<Position>(4, 14), make_unique<Position>(4, 16)),
-            make_unique<CodeActionContext>(move(diagnostics)));
-        auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
-        auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(req)));
-        EXPECT_EQ(responses.size(), 1) << "Did not receive a response for a codeAction request.";
 
-        if (responses.size() == 1) {
-            auto &msg = responses.at(0);
-            EXPECT_TRUE(msg->isResponse());
-            if (msg->isResponse()) {
-                auto &response = msg->asResponse();
-                ASSERT_TRUE(response.result) << "Code action request returned error: " << msg->toJSON();
-                auto &receivedCodeActionResponse =
-                    get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
+        auto errors = RangeAssertion::getErrorAssertions(assertions);
 
-                auto expectedCodeActionsPath = test.folder + codeActionExpectation->second;
-                auto expected = LSPMessage::fromClient(FileOps::read(expectedCodeActionsPath.c_str()));
-                auto &expectedResp = expected->asResponse();
-                auto &expectedCodeActionResponse =
-                    get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*expectedResp.result);
+        vector<shared_ptr<ApplyCodeActionAssertion>> applyCodeActionAssertions;
+        for (auto &assertion : assertions) {
+            if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
+                applyCodeActionAssertions.push_back(applyCodeActionAssertion);
+            }
+        }
 
-                EXPECT_EQ(codeActionsToString(receivedCodeActionResponse),
-                          codeActionsToString(expectedCodeActionResponse))
-                    << "Mismatch on: " << expectedCodeActionsPath;
+        // Request code actions for each error.
+        for (auto &error : errors) {
+            vector<unique_ptr<Diagnostic>> diagnostics;
+            auto fileUri = testFileUris[*filenames.begin()];
+            // TODO(sushain): stop manually copying these over
+            auto params = make_unique<TextDocumentCodeActionParams>(
+                make_unique<TextDocumentIdentifier>(fileUri),
+                make_unique<Range>(make_unique<Position>(error->range->start->line, error->range->start->character),
+                                   make_unique<Position>(error->range->end->line, error->range->end->character)),
+                make_unique<CodeActionContext>(move(diagnostics)));
+            auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
+            auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(req)));
+            EXPECT_EQ(responses.size(), 1) << "Did not receive a response for a codeAction request.";
 
-                // TODO(sushain): now apply the actions
-                // TODO(sushain): now verify that the new file matches .rbedited
+            if (responses.size() == 1) {
+                auto &msg = responses.at(0);
+                EXPECT_TRUE(msg->isResponse());
+                if (msg->isResponse()) {
+                    auto &response = msg->asResponse();
+                    ASSERT_TRUE(response.result) << "Code action request returned error: " << msg->toJSON();
+                    auto &receivedCodeActionResponse =
+                        get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
+
+                    auto expectedCodeActionsPath = test.folder + codeActionExpectation->second;
+                    auto expected = LSPMessage::fromClient(FileOps::read(expectedCodeActionsPath.c_str()));
+                    auto &expectedResp = expected->asResponse();
+                    auto &expectedCodeActionResponse =
+                        get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*expectedResp.result);
+
+                    // Verify that the code action response matches our expectation.
+                    EXPECT_EQ(codeActionsToString(receivedCodeActionResponse),
+                              codeActionsToString(expectedCodeActionResponse))
+                        << "Mismatch on: " << expectedCodeActionsPath;
+
+                    if (!get_if<JSONNullObject>(&receivedCodeActionResponse)) {
+                        auto &receivedCodeActions = get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse);
+                        UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
+                        for (auto &codeAction : receivedCodeActions) {
+                            receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
+                        }
+
+                        // TODO(sushain): remove the assertions as we apply them and verify at the end that none remain
+                        // Check any corresponding code action assertions, i.e. verify that they apply correctly.
+                        for (auto &applyCodeActionAssertion : applyCodeActionAssertions) {
+                            if (cmpRanges(*applyCodeActionAssertion->range, *error->range)) {
+                                auto it = receivedCodeActionsByTitle.find(applyCodeActionAssertion->title);
+                                EXPECT_TRUE(it != receivedCodeActionsByTitle.end());
+                                if (it != receivedCodeActionsByTitle.end()) {
+                                    auto codeAction = move(it->second);
+                                    applyCodeActionAssertion->check(test.sourceFileContents, codeAction, test.testName,
+                                                                    fileUri);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
-    // TODO(sushain): test all the autocorrects
-    // TODO(sushain): test multiple autocorrects at the same time
-    // TODO(sushain): test choosing one of multiple autocorrects (?)
+    // TODO(sushain): test all (?) the autocorrects sorbet supports
+    // TODO(sushain): test multiple autocorrect options
+    // TODO(sushain): test multiple errors
 
     // Usage and def assertions
     {
