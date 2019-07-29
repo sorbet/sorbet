@@ -93,7 +93,7 @@ annotations for:
 
 It may seem counterintuitive that Sorbet does _not_ require type annotations in
 a file marked `# typed: true`, but this is an intentional part of Sorbet's
-implementation of [gradual typing](gradual-typing.md). In the `# typed: true`
+implementation of [gradual typing](gradual.md). In the `# typed: true`
 strictness level, unannotated methods, instance variables, and constants are
 assumed to be `T.untyped`. This allows a programmer to write untyped or
 partially-typed definitions while still benefitting from type checking when
