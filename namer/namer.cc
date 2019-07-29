@@ -98,7 +98,7 @@ class NameInserter {
         // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
         if (ctx.owner.dataAllowingNone(ctx)->arguments().size() == pos) {
             auto argCopy = argInfo.deepCopy();
-            argCopy.name = ctx.state.freshNameUnique(core::UniqueNameKind::KeywordArg, argInfo.name, pos + 1);
+            argCopy.name = ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, argInfo.name, pos + 1);
             ctx.owner.dataAllowingNone(ctx)->arguments().emplace_back(move(argCopy));
             auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
             return move(localExpr);
