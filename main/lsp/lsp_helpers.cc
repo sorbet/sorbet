@@ -50,6 +50,7 @@ string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
         return localName2Remote(string(file.data(gs).path()));
     }
 }
+
 unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
     unique_ptr<Position> start;
     unique_ptr<Position> end;
@@ -111,6 +112,11 @@ int cmpLocations(const Location &a, const Location &b) {
         return startCmp;
     }
     return cmpPositions(*a.range->end, *b.range->end);
+}
+
+bool cmpRanges(const Range &a, const Range &b) {
+    return a.start->character == b.start->character && a.start->line == b.start->line &&
+           a.end->character == b.end->character && a.end->line == b.end->line;
 }
 
 vector<unique_ptr<Location>>

@@ -281,6 +281,7 @@ core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, cor
                             core::TypePtr receiver, const std::unique_ptr<core::TypeConstraint> &constr);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef);
 std::unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc);
+bool cmpRanges(const Range &a, const Range &b);
 
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPLOOP_H
