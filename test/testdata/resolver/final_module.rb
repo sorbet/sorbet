@@ -1,4 +1,4 @@
-# typed: true
+# typed: false
 
 class FinalClass
   extend T::Helpers
