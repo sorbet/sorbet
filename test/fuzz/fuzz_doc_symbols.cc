@@ -33,21 +33,25 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     std::unique_ptr<sorbet::KeyValueStore> kvstore;
     const auto opts = mkOpts();
     static const auto commonGs = mkGlobalState(opts, kvstore);
-    std::unique_ptr<sorbet::core::GlobalState> gs;
+
     // TODO why?
+    std::unique_ptr<sorbet::core::GlobalState> gs;
     { gs = commonGs->deepCopy(true); }
-    std::string inputData((const char *)data, size);
-    std::vector<sorbet::ast::ParsedFile> indexed;
+
     std::vector<sorbet::core::FileRef> inputFiles;
+    std::string inputData((const char *)data, size);
     {
         sorbet::core::UnfreezeFileTable fileTableAccess(*gs);
         auto file = gs->enterFile(std::string("fuzz.rb"), inputData);
         inputFiles.emplace_back(file);
         file.data(*gs).strictLevel = sorbet::core::StrictLevel::True;
     }
+
     static const auto workers = sorbet::WorkerPool::create(0, *console);
+    std::vector<sorbet::ast::ParsedFile> indexed;
     indexed = sorbet::realmain::pipeline::index(gs, inputFiles, opts, *workers, kvstore);
     indexed = sorbet::realmain::pipeline::resolve(gs, std::move(indexed), opts, *workers);
     indexed = sorbet::realmain::pipeline::typecheck(gs, std::move(indexed), opts, *workers);
+
     return 0;
 }
