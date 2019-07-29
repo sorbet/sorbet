@@ -320,7 +320,10 @@ private:
             return true;
         }
         if (isFullyResolved(ctx, job.rhs)) {
-            job.lhs.data(ctx)->resultType = TypeSyntax::getResultType(ctx, *(job.rhs), ParsedSig{}, true, job.lhs);
+            auto allowSelfType = true;
+            auto allowRebind = false;
+            job.lhs.data(ctx)->resultType = TypeSyntax::getResultType(
+                ctx, *(job.rhs), ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, job.lhs});
             return true;
         }
 
@@ -1016,7 +1019,10 @@ private:
             // These sigs won't have been parsed, as there was no methods to
             // attach them to -- parse them here manually to force any errors.
             for (auto sig : lastSigs) {
-                TypeSyntax::parseSig(ctx, sig, nullptr, true, core::Symbols::untyped());
+                auto allowSelfType = true;
+                auto allowRebind = false;
+                TypeSyntax::parseSig(ctx, sig, nullptr,
+                                     TypeSyntaxArgs{allowSelfType, allowRebind, core::Symbols::untyped()});
             }
 
             if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -1137,8 +1143,11 @@ private:
                     }
 
                     while (i < lastSigs.size()) {
-                        auto sig = TypeSyntax::parseSig(ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]),
-                                                        nullptr, true, mdef->symbol);
+                        auto allowSelfType = true;
+                        auto allowRebind = false;
+                        auto sig =
+                            TypeSyntax::parseSig(ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]),
+                                                 nullptr, TypeSyntaxArgs{allowSelfType, allowRebind, mdef->symbol});
                         core::SymbolRef overloadSym;
                         if (isOverloaded) {
                             vector<int> argsToKeep;
@@ -1368,7 +1377,10 @@ public:
                     auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
                     if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
                         ParsedSig emptySig;
-                        data->resultType = TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig, false, sym);
+                        auto allowSelfType = true;
+                        auto allowRebind = false;
+                        data->resultType = TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig,
+                                                                     TypeSyntaxArgs{allowSelfType, allowRebind, sym});
                     }
                 }
             }
@@ -1434,8 +1446,11 @@ public:
 
                     auto expr = std::move(send->args[0]);
                     ParsedSig emptySig;
-                    auto type = TypeSyntax::getResultType(ctx.withOwner(ownerClass), *(send->args[1]), emptySig, false,
-                                                          core::Symbols::noSymbol());
+                    auto allowSelfType = true;
+                    auto allowRebind = false;
+                    auto type = TypeSyntax::getResultType(
+                        ctx.withOwner(ownerClass), *(send->args[1]), emptySig,
+                        TypeSyntaxArgs{allowSelfType, allowRebind, core::Symbols::noSymbol()});
                     return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }

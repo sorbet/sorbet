@@ -47,20 +47,38 @@ struct ParsedSig {
     const TypeArgSpec &findTypeArgByName(core::NameRef name) const;
 };
 
+struct TypeSyntaxArgs {
+    bool allowSelfType = false;
+    bool allowRebind = false;
+    core::SymbolRef untypedBlame;
+
+    TypeSyntaxArgs withoutRebind() const {
+        return TypeSyntaxArgs{allowSelfType, false, untypedBlame};
+    }
+
+    TypeSyntaxArgs withRebind() const {
+        return TypeSyntaxArgs{allowSelfType, true, untypedBlame};
+    }
+
+    TypeSyntaxArgs withoutSelfType() const {
+        return TypeSyntaxArgs{false, allowRebind, untypedBlame};
+    }
+};
+
 class TypeSyntax {
 public:
     static bool isSig(core::Context ctx, ast::Send *send);
-    static ParsedSig parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent, bool allowSelfType,
-                              core::SymbolRef untypedBlame);
+    static ParsedSig parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent,
+                              const TypeSyntaxArgs &args);
 
     struct ResultType {
         core::TypePtr type;
         core::SymbolRef rebind;
     };
     static ResultType getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &,
-                                           bool allowSelfType, bool allowRebind, core::SymbolRef untypedBlame);
+                                           const TypeSyntaxArgs &args);
     static core::TypePtr getResultType(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &,
-                                       bool allowSelfType, core::SymbolRef untypedBlame);
+                                       const TypeSyntaxArgs &args);
 
     TypeSyntax() = delete;
 };
