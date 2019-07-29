@@ -1,7 +1,11 @@
+#include "spdlog/sinks/stdout_sinks.h"
 #include "test/helpers/MockFileSystem.h"
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+
+auto console = spdlog::stdout_logger_mt("console");
+auto typeErrors = spdlog::stdout_logger_mt("typeErrors");
 
 extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
     const auto rootPath = "/tmp";
