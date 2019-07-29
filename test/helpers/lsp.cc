@@ -183,7 +183,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     EXPECT_FALSE(capabilities.documentHighlightProvider.has_value());
     EXPECT_TRUE(capabilities.documentSymbolProvider.value_or(false));
     EXPECT_TRUE(capabilities.workspaceSymbolProvider.value_or(false));
-    EXPECT_FALSE(capabilities.codeActionProvider.has_value());
+    EXPECT_TRUE(capabilities.codeActionProvider.has_value());
     EXPECT_FALSE(capabilities.codeLensProvider.has_value());
     EXPECT_FALSE(capabilities.documentFormattingProvider.has_value());
     EXPECT_FALSE(capabilities.documentRangeFormattingProvider.has_value());

@@ -1,0 +1,6 @@
+# typed: true
+
+x = T.let(nil, T.nilable(Integer))
+
+1.times { x = 42 }
+

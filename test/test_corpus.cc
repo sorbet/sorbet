@@ -105,10 +105,11 @@ public:
     }
 };
 
-UnorderedSet<string> knownExpectations = {
-    "parse-tree",     "parse-tree-json",    "ast",       "ast-raw",       "dsl-tree",     "dsl-tree-raw",
-    "symbol-table",   "symbol-table-raw",   "name-tree", "name-tree-raw", "resolve-tree", "resolve-tree-raw",
-    "flattened-tree", "flattened-tree-raw", "cfg",       "cfg-json",      "autogen",      "document-symbols"};
+UnorderedSet<string> knownExpectations = {"parse-tree",     "parse-tree-json",    "ast",          "ast-raw",
+                                          "dsl-tree",       "dsl-tree-raw",       "symbol-table", "symbol-table-raw",
+                                          "name-tree",      "name-tree-raw",      "resolve-tree", "resolve-tree-raw",
+                                          "flattened-tree", "flattened-tree-raw", "cfg",          "cfg-json",
+                                          "autogen",        "document-symbols",   "code-actions"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -512,6 +513,16 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
+string codeActionsToString(const variant<JSONNullObject, vector<unique_ptr<CodeAction>>> &codeActionResult) {
+    if (get_if<JSONNullObject>(&codeActionResult)) {
+        return "null";
+    } else {
+        auto &symbols = get<vector<unique_ptr<CodeAction>>>(codeActionResult);
+        return fmt::format("{}", fmt::map_join(symbols.begin(), symbols.end(), ", ",
+                                               [](const auto &sym) -> string { return sym->toJSON(); }));
+    }
+}
+
 TEST_P(LSPTest, All) {
     string rootPath = "/Users/jvilk/stripe/pay-server";
     string rootUri = fmt::format("file://{}", rootPath);
@@ -600,6 +611,51 @@ TEST_P(LSPTest, All) {
             }
         }
     }
+
+    // Quick fix code action
+    auto codeActionExpectation = test.expectations.find("code-actions");
+    if (codeActionExpectation != test.expectations.end()) {
+        ASSERT_EQ(filenames.size(), 1) << "code-actions only works with tests that have a single file.";
+        // TODO(sushain): get this range dynamically
+        // TODO(sushain): include diagnostics in context (just ask for the diags via LSP?)
+        vector<unique_ptr<Diagnostic>> diagnostics;
+        auto params = make_unique<TextDocumentCodeActionParams>(
+            make_unique<TextDocumentIdentifier>(testFileUris[*filenames.begin()]),
+            make_unique<Range>(make_unique<Position>(4, 14), make_unique<Position>(4, 16)),
+            make_unique<CodeActionContext>(move(diagnostics)));
+        auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
+        auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(req)));
+        EXPECT_EQ(responses.size(), 1) << "Did not receive a response for a codeAction request.";
+
+        if (responses.size() == 1) {
+            auto &msg = responses.at(0);
+            EXPECT_TRUE(msg->isResponse());
+            if (msg->isResponse()) {
+                auto &response = msg->asResponse();
+                ASSERT_TRUE(response.result) << "Code action request returned error: " << msg->toJSON();
+                auto &receivedCodeActionResponse =
+                    get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
+
+                auto expectedCodeActionsPath = test.folder + codeActionExpectation->second;
+                auto expected = LSPMessage::fromClient(FileOps::read(expectedCodeActionsPath.c_str()));
+                auto &expectedResp = expected->asResponse();
+                auto &expectedCodeActionResponse =
+                    get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*expectedResp.result);
+
+                // Simple string comparison, just like other *.exp files.
+                EXPECT_EQ(codeActionsToString(receivedCodeActionResponse),
+                          codeActionsToString(expectedCodeActionResponse))
+                    << "Mismatch on: " << expectedCodeActionsPath;
+
+                // TODO(sushain): now apply the actions
+                // TODO(sushain): now verify that the new file matches .rbedited
+            }
+        }
+    }
+
+    // TODO(sushain): test all the autocorrects
+    // TODO(sushain): test multiple autocorrects at the same time
+    // TODO(sushain): test choosing one of multiple autocorrects (?)
 
     // Usage and def assertions
     {
