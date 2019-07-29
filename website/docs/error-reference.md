@@ -10,7 +10,7 @@ sidebar_label: Error Reference
 }
 </style>
 
-<div class="is-hidden" id="missing-doc-for-error-code-box">
+<div class="is-hidden red" id="missing-doc-for-error-code-box">
 
 > **Heads up**: There aren't any docs yet for <span id="missing-error-code">this
 > error code</span>. If you have suggestions for what would have helped you
