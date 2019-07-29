@@ -38,7 +38,7 @@ cc_binary(
     ],
 )
 
-cc_binary(
+cc_test(
     name = "fuzz_doc_symbols",
     srcs = [
         "fuzz_doc_symbols.cc",
