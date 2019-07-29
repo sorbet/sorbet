@@ -1,4 +1,5 @@
 #include "core/Unfreeze.h"
+#include "main/lsp/wrapper.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
 #include "spdlog/sinks/stdout_sinks.h"
@@ -31,12 +32,14 @@ extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t size) {
     std::unique_ptr<sorbet::KeyValueStore> kvstore;
-    const auto opts = mkOpts();
+    auto opts = mkOpts();
     static const auto commonGs = mkGlobalState(opts, kvstore);
 
     // TODO why?
     std::unique_ptr<sorbet::core::GlobalState> gs;
     { gs = commonGs->deepCopy(true); }
+
+    const auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(gs, opts, console, false);
 
     std::vector<sorbet::core::FileRef> inputFiles;
     std::string inputData((const char *)data, size);
