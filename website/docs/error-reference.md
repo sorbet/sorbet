@@ -12,6 +12,8 @@ sidebar_label: Error Reference
 
 <div class="is-hidden red" id="missing-doc-for-error-code-box">
 
+<a class="anchor" aria-hidden="true" id="missing-doc-for-error-code-scroll"></a>
+
 > **Heads up**: There aren't any docs yet for <span id="missing-error-code">this
 > error code</span>. If you have suggestions for what would have helped you
 > solve this problem, click the "Edit" button above to contribute! Otherwise,
