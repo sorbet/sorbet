@@ -6,3 +6,23 @@ sig {returns(String)}
 def direct_return
   T.must(T.let("", T.nilable(String)))
 end
+
+sig {params(x: T.nilable(String)).returns(String)}
+def return_arg(x)
+  T.must(x)
+end
+
+sig {params(x: T.nilable(String)).returns(String)}
+def return_uninitialized(x)
+  if T.unsafe(nil)
+    a = ""
+  end
+  T.must(a)
+end
+
+sig {params(x: T.nilable(String)).returns(String)}
+T.must(def implicit_return(x)
+  if T.unsafe(nil)
+    ""
+  end
+end)
