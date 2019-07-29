@@ -52,27 +52,16 @@ struct TypeSyntaxArgs {
     bool allowRebind = false;
     core::SymbolRef untypedBlame;
 
-    TypeSyntaxArgs(const bool allowSelfType, const bool allowRebind, core::SymbolRef untypedBlame)
-        : allowSelfType(allowSelfType), allowRebind(allowRebind), untypedBlame(untypedBlame) {}
-
-    static TypeSyntaxArgs forGetResultType(core::SymbolRef untypedBlame) {
-        return TypeSyntaxArgs(true, false, untypedBlame);
-    }
-
-    static TypeSyntaxArgs forParseSig(core::SymbolRef untypedBlame) {
-        return TypeSyntaxArgs(true, false, untypedBlame);
-    }
-
-    TypeSyntaxArgs noRebind() const {
-        return TypeSyntaxArgs(allowSelfType, false, untypedBlame);
+    TypeSyntaxArgs withoutRebind() const {
+        return TypeSyntaxArgs{allowSelfType, false, untypedBlame};
     }
 
     TypeSyntaxArgs withRebind() const {
-        return TypeSyntaxArgs(allowSelfType, true, untypedBlame);
+        return TypeSyntaxArgs{allowSelfType, true, untypedBlame};
     }
 
-    TypeSyntaxArgs noSelfType() const {
-        return TypeSyntaxArgs(false, allowRebind, untypedBlame);
+    TypeSyntaxArgs withoutSelfType() const {
+        return TypeSyntaxArgs{false, allowRebind, untypedBlame};
     }
 };
 

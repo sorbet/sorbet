@@ -512,7 +512,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
 
 core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, ast::Expression &expr,
                                         const ParsedSig &sigBeingParsed, const TypeSyntaxArgs &args) {
-    return getResultTypeAndBind(ctx, expr, sigBeingParsed, args.noRebind()).type;
+    return getResultTypeAndBind(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
 }
 
 TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr,
@@ -527,7 +527,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
         [&](ast::Array *arr) {
             vector<core::TypePtr> elems;
             for (auto &el : arr->elems) {
-                elems.emplace_back(getResultType(ctx, *el, sigBeingParsed, args.noSelfType()));
+                elems.emplace_back(getResultType(ctx, *el, sigBeingParsed, args.withoutSelfType()));
             }
             result.type = core::TupleType::build(ctx, elems);
         },
@@ -537,7 +537,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
 
             for (auto &ktree : hash->keys) {
                 auto &vtree = hash->values[&ktree - &hash->keys.front()];
-                auto val = getResultType(ctx, *vtree, sigBeingParsed, args.noSelfType());
+                auto val = getResultType(ctx, *vtree, sigBeingParsed, args.withoutSelfType());
                 auto lit = ast::cast_tree<ast::Literal>(ktree.get());
                 if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
                     ENFORCE(core::cast_type<core::LiteralType>(lit->value.get()));
@@ -659,7 +659,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
         },
         [&](ast::Send *s) {
             if (isTProc(ctx, s)) {
-                auto sig = parseSig(ctx, s, &sigBeingParsed, args.noSelfType());
+                auto sig = parseSig(ctx, s, &sigBeingParsed, args.withoutSelfType());
                 if (sig.bind.exists()) {
                     if (!args.allowRebind) {
                         if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -740,7 +740,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(arg->loc);
                 ty.type = core::make_type<core::MetaType>(
-                    TypeSyntax::getResultType(ctx, *arg, sigBeingParsed, args.noSelfType()));
+                    TypeSyntax::getResultType(ctx, *arg, sigBeingParsed, args.withoutSelfType()));
                 holders.emplace_back(make_unique<core::TypeAndOrigins>(move(ty)));
                 targs.emplace_back(holders.back().get());
                 argLocs.emplace_back(arg->loc);
