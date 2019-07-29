@@ -46,6 +46,7 @@ cc_test(
     tags = ["manual"],
     visibility = ["//tools:__pkg__"],
     deps = [
+        "//test/helpers",
     ],
 )
 

@@ -1,7 +1,11 @@
+#include "test/helpers/MockFileSystem.h"
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 
 extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
+    const auto rootPath = "/tmp";
+    const auto fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
     return 0;
 }
 
