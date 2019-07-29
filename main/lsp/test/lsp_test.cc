@@ -39,6 +39,12 @@ const string file_string = "# typed: true\n"
                            "    def weirdindent\n"
                            "      1\n"
                            "    end\n"
+                           "\n"
+                           "    # This is a method with documentation above its sig block.\n"
+                           "    sig {returns(Integer)}\n"
+                           "    def typed_function_that_returns_integer\n"
+                           "      1\n"
+                           "    end\n"
                            "end\n";
 string_view file = string_view(file_string);
 
@@ -73,6 +79,11 @@ TEST(FindDocumentationTest, Constant) { // NOLINT
     int position = file.find("ZZZZZZ");
     optional<string> b = findDocumentation(file, position);
     ASSERT_EQ(*b, " This is the documentation for a constant.\n This is the second line for a constant.\n");
+}
+TEST(FindDocumentationTest, DocumentationAboveSig) { // NOLINT
+    int position = file.find("typed_function_that_returns_integer");
+    optional<string> b = findDocumentation(file, position);
+    ASSERT_EQ(*b, " This is a method with documentation above its sig block.");
 }
 
 } // namespace sorbet::realmain::lsp::test
