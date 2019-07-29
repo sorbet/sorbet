@@ -927,6 +927,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                         e.addErrorSection(
                             core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
                                                typeAndOrigin.origins2Explanations(ctx)));
+                        auto withoutNil =
+                            core::Types::approximateSubtract(ctx, typeAndOrigin.type, core::Types::nilClass());
+                        bool withoutNilIsSubtype = core::Types::isSubType(ctx, withoutNil, methodReturnType);
+                        if (!withoutNil->isBottom() && withoutNilIsSubtype) {
+                            e.replaceWith(bind.loc, "T.must({})", bind.loc.source(ctx));
+                        }
                     }
                 }
             },
