@@ -642,7 +642,6 @@ TEST_P(LSPTest, All) {
                 auto &expectedCodeActionResponse =
                     get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*expectedResp.result);
 
-                // Simple string comparison, just like other *.exp files.
                 EXPECT_EQ(codeActionsToString(receivedCodeActionResponse),
                           codeActionsToString(expectedCodeActionResponse))
                     << "Mismatch on: " << expectedCodeActionsPath;

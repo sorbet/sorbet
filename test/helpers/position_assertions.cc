@@ -27,6 +27,7 @@ const UnorderedMap<
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
+        {"apply-code-action", ApplyCodeActionAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -869,6 +870,19 @@ void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
 
 string HoverAssertion::toString() const {
     return fmt::format("hover: {}", message);
+}
+
+shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                                    int assertionLine, string_view assertionContents,
+                                                                    string_view assertionType) {
+    return make_shared<ApplyCodeActionAssertion>(filename, range, assertionLine, assertionContents, assertionContents);
+}
+ApplyCodeActionAssertion::ApplyCodeActionAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                   string_view title, string_view version)
+    : RangeAssertion(filename, range, assertionLine), title(string(title)), version(string(version)) {}
+
+string ApplyCodeActionAssertion::toString() const {
+    return fmt::format("apply-code-action: {} {}", version, title);
 }
 
 } // namespace sorbet::test
