@@ -38,6 +38,17 @@ cc_binary(
     ],
 )
 
+cc_binary(
+    name = "fuzz_doc_symbols",
+    srcs = [
+        "fuzz_doc_symbols.cc",
+    ],
+    tags = ["manual"],
+    visibility = ["//tools:__pkg__"],
+    deps = [
+    ],
+)
+
 load("@com_google_protobuf//:protobuf.bzl", "cc_proto_library")
 
 cc_proto_library(
