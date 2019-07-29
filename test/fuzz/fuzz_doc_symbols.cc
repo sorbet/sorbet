@@ -17,10 +17,10 @@ sorbet::realmain::options::Options mkOpts() {
     return opts;
 }
 
-std::unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain::options::Options &opts) {
+std::unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain::options::Options &opts,
+                                                         std::unique_ptr<sorbet::KeyValueStore> &kvstore) {
     std::unique_ptr<sorbet::core::GlobalState> gs = std::make_unique<sorbet::core::GlobalState>(
         (std::make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console)));
-    std::unique_ptr<sorbet::KeyValueStore> kvstore;
     sorbet::payload::createInitialGlobalState(gs, opts, kvstore);
     return gs;
 }
@@ -30,7 +30,8 @@ extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t size) {
+    std::unique_ptr<sorbet::KeyValueStore> kvstore;
     const auto opts = mkOpts();
-    const auto gs = mkGlobalState(opts);
+    const auto gs = mkGlobalState(opts, kvstore);
     return 0;
 }
