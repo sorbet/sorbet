@@ -48,6 +48,7 @@ cc_test(
     deps = [
         "//core",
         "//main/pipeline",
+        "//payload",
         "//test/helpers",
     ],
 )

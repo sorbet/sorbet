@@ -1,5 +1,6 @@
 #include "core/Unfreeze.h"
 #include "main/pipeline/pipeline.h"
+#include "payload/payload.h"
 #include "spdlog/sinks/stdout_sinks.h"
 #include "test/helpers/MockFileSystem.h"
 #include <cstddef>
@@ -16,6 +17,7 @@ extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
         (std::make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console)));
     sorbet::realmain::options::Options opts;
     std::unique_ptr<sorbet::KeyValueStore> kvstore;
+    sorbet::payload::createInitialGlobalState(gs, opts, kvstore);
     return 0;
 }
 
