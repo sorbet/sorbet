@@ -889,7 +889,7 @@ shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view 
 
     ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
         << fmt::format("Found improperly formatted apply-code-action assertion. Expected apply-code-action "
-                       "[version] code-action-title");
+                       "[version] code-action-title.");
     return nullptr;
 }
 ApplyCodeActionAssertion::ApplyCodeActionAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
@@ -903,7 +903,15 @@ string ApplyCodeActionAssertion::toString() const {
 void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                                      unique_ptr<CodeAction> &codeAction, string_view testName, string_view fileUri) {
     auto expectedUpdatedFilePath = fmt::format("{}.{}.rbedited", testName, version);
-    auto expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
+    string expectedEditedFileContents;
+    try {
+        expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
+    } catch (FileNotFoundException e) {
+        ADD_FAILURE() << fmt::format("Missing {} which should contain test file after applying code actions.",
+                                     expectedUpdatedFilePath);
+        return;
+    }
+
     auto it = sourceFileContents.find(filename);
     if (it == sourceFileContents.end()) {
         ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
@@ -915,8 +923,16 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         string actualEditedFileContents = string(file->source());
         // TODO(sushain): support cross-file edits
         EXPECT_EQ(c->textDocument->uri, fileUri);
-        // N.B. This doesn't work with multiple edits but Sorbet currently only sends one for now.
-        EXPECT_EQ(c->edits.size(), 1) << "Recieved multiple edits for a single code action";
+
+        // First, sort the edits by increasing starting location and verify that none overlap.
+        fast_sort(c->edits, [](const auto &l, const auto &r) -> bool { return cmpRanges(*l->range, *r->range); });
+        for (u4 i = 1; i < c->edits.size(); i++) {
+            ASSERT_LT(cmpPositions(*c->edits[i - 1]->range->end, *c->edits[i]->range->start), 0)
+                << fmt::format("Edit {} overlaps edit {}.", c->edits[i - 1]->toJSON(), c->edits[i]->toJSON());
+        }
+
+        // Now, apply the edits in the reverse order so that the indices don't change.
+        reverse(c->edits.begin(), c->edits.end());
         for (auto &e : c->edits) {
             core::Loc::Detail reqPos;
             reqPos.line = e->range->start->line + 1;

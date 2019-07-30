@@ -281,6 +281,7 @@ core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, cor
                             core::TypePtr receiver, const std::unique_ptr<core::TypeConstraint> &constr);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef);
 std::unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc);
+int cmpPositions(const Position &a, const Position &b);
 int cmpRanges(const Range &a, const Range &b);
 
 } // namespace sorbet::realmain::lsp
