@@ -268,6 +268,17 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
             }
         }
+        if (!klass->declLoc.file().data(ctx).isRBI() && classDefinesBehavior(klass)) {
+            auto prevLoc = namerCtx->classBehaviorLocs.find(klass->symbol);
+            if (prevLoc == namerCtx->classBehaviorLocs.end()) {
+                namerCtx->classBehaviorLocs[klass->symbol] = klass->declLoc;
+            } else if (prevLoc->second.file() != klass->declLoc.file()) {
+                if (auto e = ctx.state.beginError(klass->declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
+                    e.setHeader("`{}` has behavior defined in multiple files", klass->symbol.data(ctx)->show(ctx));
+                    e.addErrorLine(prevLoc->second, "Previous definition");
+                }
+            }
+        }
         enterScope();
         return klass;
     }
@@ -889,13 +900,28 @@ public:
     }
 
 private:
+    shared_ptr<NamerCtx> namerCtx;
     NameInserter() {
+        namerCtx = make_shared<NamerCtx>();
+        enterScope();
+    }
+
+    NameInserter(shared_ptr<NamerCtx> namerCtx) : namerCtx(namerCtx) {
         enterScope();
     }
 };
 
 ast::ParsedFile Namer::run(core::MutableContext ctx, ast::ParsedFile tree) {
     NameInserter nameInserter;
+    tree.tree = ast::TreeMap::apply(ctx, nameInserter, std::move(tree.tree));
+    // This check is FAR too slow to run on large codebases, especially with sanitizers on.
+    // But it can be super useful to uncomment when debugging certain issues.
+    // ctx.state.sanityCheck();
+    return tree;
+}
+
+ast::ParsedFile Namer::run(core::MutableContext ctx, shared_ptr<NamerCtx> namerCtx, ast::ParsedFile tree) {
+    NameInserter nameInserter(namerCtx);
     tree.tree = ast::TreeMap::apply(ctx, nameInserter, std::move(tree.tree));
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.
     // But it can be super useful to uncomment when debugging certain issues.

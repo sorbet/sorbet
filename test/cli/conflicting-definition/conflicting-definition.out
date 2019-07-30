@@ -1,0 +1,7 @@
+test/cli/conflicting-definition/b.rb:1: `Foo` has behavior defined in multiple files https://srb.help/4018
+     1 |module Foo
+        ^^^^^^^^^^
+    test/cli/conflicting-definition/a.rb:1: Previous definition
+     1 |module Foo
+        ^^^^^^^^^^
+Errors: 1

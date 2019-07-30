@@ -741,6 +741,7 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
     {
         ProgressIndicator namingProgress(opts.showProgress, "Naming", what.size());
 
+        shared_ptr<namer::NamerCtx> namerCtx = make_shared<namer::NamerCtx>();
         int i = 0;
         for (auto &tree : what) {
             auto file = tree.file;
@@ -752,7 +753,7 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
                     core::ErrorRegion errs(gs, file);
                     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
                     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-                    tree = namer::Namer::run(ctx, move(tree));
+                    tree = namer::Namer::run(ctx, namerCtx, move(tree));
                 }
                 gs.errorQueue->flushErrors();
                 namingProgress.reportProgress(i);
