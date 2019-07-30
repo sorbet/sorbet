@@ -107,9 +107,8 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
     string documentation = "";
 
-    // iterate from the last
+    // Iterate from the last
     auto it = all_lines.rbegin();
-    // bool inside_sig_block = false;
     while (it != all_lines.rend()) {
         auto line = absl::StripAsciiWhitespace(*it);
 
@@ -131,16 +130,16 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             while (line = absl::StripAsciiWhitespace(*it),
                     // SOF
                     it != all_lines.rend()
-                    // valid start of sig block
+                    // Valid start of sig block
                     && !absl::StartsWith(line, "sig")
-                    // invalid end keyword
+                    // Invalid end keyword
                     && !absl::StartsWith(line, "end")) {
                 it++;
             }
             // We have either
-            // 1) reached the start of the file
-            // 2) found a valid sig start
-            // 3) found an invalid end keyword
+            // 1) Reached the start of the file
+            // 2) Found a valid sig start
+            // 3) Found an invalid end keyword
             if (it == all_lines.rend() || absl::StartsWith(line, "end")) {
                 break;
             } else {
