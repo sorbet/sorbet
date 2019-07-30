@@ -42,7 +42,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     std::unique_ptr<sorbet::core::GlobalState> gs;
     { gs = commonGs->deepCopy(true); }
 
-    // TODO move the gs?
     // TODO how to use opts and avoid another mkOpts()?
     auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(std::move(gs), mkOpts(), console, false);
 
