@@ -15,13 +15,10 @@ fi
 echo "building $what"
 bazel build "//test/fuzz:$what" --config=fuzz -c opt
 
-echo "setting env vars"
-export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
-export ASAN_OPTIONS="dedup_token_length=10"
-
 # normally we'd like to check to see if commands are around before running the script, but in this case, we want the
 # bazel build command to run before this check so that bazel can download itself.
 echo "checking for commands"
+export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
 if ! command -v llvm-symbolizer >/dev/null; then
   echo "fatal: command not found: llvm-symbolizer"
   exit 1
@@ -33,6 +30,7 @@ find test/testdata -iname "*.rb" | grep -v disable | xargs -n 1 -I % cp % fuzz_c
 mkdir -p fuzz_crashers/original
 
 echo "running"
+export ASAN_OPTIONS="dedup_token_length=10"
 nice "./bazel-bin/test/fuzz/$what" \
   -use_value_profile=1 \
   -only_ascii=1 \
