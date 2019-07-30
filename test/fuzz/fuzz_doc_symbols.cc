@@ -10,9 +10,9 @@
 
 const auto console = spdlog::stdout_logger_mt("console");
 const auto typeErrors = spdlog::stdout_logger_mt("typeErrors");
+const auto rootPath = "/tmp";
 
 sorbet::realmain::options::Options mkOpts() {
-    const auto rootPath = "/tmp";
     sorbet::realmain::options::Options opts;
     opts.fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
     return opts;
