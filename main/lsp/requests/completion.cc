@@ -128,7 +128,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             // Ensure current iterator is not pointing to an 'end'
             it++;
             while (line = absl::StripAsciiWhitespace(*it),
-                    // EOF
+                    // SOF
                     it != all_lines.rend()
                     // valid start of sig block
                     && !absl::StartsWith(line, "sig")
@@ -137,7 +137,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
                 it++;
             }
             // We have either
-            // 1) reached the end of the file
+            // 1) reached the start of the file
             // 2) found a valid sig start
             // 3) found an invalid end keyword
             if (it == all_lines.rend() || absl::StartsWith(line, "end")) {
