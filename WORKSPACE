@@ -51,6 +51,7 @@ gemfile_lock_deps(
             "partial/fake-rails",
             "partial/local_gem",
             "partial/non-utf-8-file",
+            "partial/rails6",
             "partial/rails-double-require",
             "partial/real_singleton_class",
             "partial/require_relative",

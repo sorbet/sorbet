@@ -10,6 +10,7 @@ source "gems/sorbet/test/snapshot/logging.sh"
 # ----- Option parsing -----
 
 test_name=$1
+archive_path=$2
 
 if [[ "${test_name}" =~ partial/* ]]; then
   is_partial=1
@@ -17,14 +18,15 @@ else
   is_partial=
 fi
 
-info "├─ test_name: ${test_name}"
-info "├─ is_partial: ${is_partial:-0}"
+info "├─ test_name:    ${test_name}"
+info "├─ archive_path: ${archive_path}"
+info "├─ is_partial:   ${is_partial:-0}"
 
 # ----- Environment setup -----
 
 repo_root=$PWD
 
-test_dir="${repo_root}/gems/sorbet/test/snapshot/$2"
+test_dir="${repo_root}/gems/sorbet/test/snapshot/${test_name}"
 
 # ----- Artifact validation -----
 
@@ -32,7 +34,7 @@ test_dir="${repo_root}/gems/sorbet/test/snapshot/$2"
   cd "$test_dir"
 
   info "├─ Extracting test artifacts"
-  tar -xvf actual.tar.gz
+  tar -xvf $(basename "${archive_path}")
 
   # ----- Check out.log -----
 

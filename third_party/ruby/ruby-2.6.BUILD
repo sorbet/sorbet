@@ -22,8 +22,8 @@ config_setting(
 
 # configuration variables ######################################################
 
-RUBY_VERSION = "2.4.3"
-RUBY_CORE_VERSION = "2.4.0"
+RUBY_VERSION = "2.6.3"
+RUBY_CORE_VERSION = "2.6.0"
 
 ARCH_LINUX = "x86_64-unknown-linux"
 ARCH_DARWIN = "x86_64-darwin18"
@@ -63,7 +63,7 @@ genrule(
         "template/*",
     ]),
     cmd = """
-CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) --enable-load-relative --without-gmp > /dev/null
+CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) --enable-load-relative --without-gmp --disable-jit-support > /dev/null
 find .ext -name config.h -type f -exec cp {} $(location include/ruby/config.h) \;
 cp config.status $(location config.status)
 """,
@@ -90,7 +90,7 @@ cc_library(
         "*.inc",
         "enc/*.h",
         "enc/trans/*.h",
-        "enc/unicode/9.0.0/*.h",
+        "enc/unicode/12.1.0/*.h",
     ]),
     hdrs = glob([
         "*.h",
@@ -101,7 +101,7 @@ cc_library(
     includes = [
         "enc",
         "enc/trans",
-        "enc/unicode/9.0.0",
+        "enc/unicode/12.1.0",
     ],
     visibility = [ "//visibility:private" ],
 )
@@ -125,6 +125,7 @@ RUBY_COPTS = [
     "-Wno-constant-logical-operand",
     "-Wno-parentheses",
     "-D_REENTRANT",
+    "-DNO_INITIAL_LOAD_PATH",
 
     # TODO: is this really necessary?
     "-Wno-string-plus-int",
@@ -133,6 +134,20 @@ RUBY_COPTS = [
     ":darwin": ["-D_DARWIN_C_SOURCE"],
 })
 
+
+# coroutine ####################################################################
+
+cc_library(
+    name = "coroutine/amd64",
+    srcs = [
+        "coroutine/amd64/Context.S",
+        "coroutine/amd64/Context.h",
+    ],
+    hdrs = [
+        "coroutine/amd64/Context.h",
+    ],
+    visibility = [ "//visibility:private" ],
+)
 
 
 # miniruby #####################################################################
@@ -168,6 +183,8 @@ cc_binary(
     data = [ ":miniruby_lib" ],
 
     srcs = [
+        "ast.c",
+        "addr2line.c",
         "main.c",
         "dmydln.c",
         "dmyext.c",
@@ -226,6 +243,7 @@ cc_binary(
         "thread.c",
         "time.c",
         "transcode.c",
+        "transient_heap.c",
         "util.c",
         "variable.c",
         "version.c",
@@ -244,7 +262,6 @@ cc_binary(
       ":linux": [
           "missing/strlcpy.c",
           "missing/strlcat.c",
-          "addr2line.c",
       ],
       ":darwin": [],
     }) + glob([
@@ -255,9 +272,10 @@ cc_binary(
         ":miniruby_private_headers",
         ":ruby_headers",
         ":ruby_private_headers",
+        ":coroutine/amd64",
     ],
 
-    copts = RUBY_COPTS + ["-DRUBY_EXPORT"],
+    copts = RUBY_COPTS + [ "-DRUBY_EXPORT" ],
 
     linkopts = select({
       ":linux": [
@@ -271,7 +289,7 @@ cc_binary(
       ],
     }),
 
-    includes = [ "include", "enc/unicode/9.0.0" ] + select({
+    includes = [ "include", "enc/unicode/12.1.0" ] + select({
       ":linux": ["missing"],
       ":darwin": []
     }),
@@ -310,7 +328,7 @@ $(location bin/miniruby) \
         -version=""" + RUBY_VERSION + """\
         -install_name=ruby \
         -so_name=ruby \
-        -unicode_version=9.0.0 \
+        -unicode_version=12.1.0 \
     > $@
 """,
 )
@@ -336,35 +354,34 @@ $(location bin/miniruby) \
         -version=""" + RUBY_VERSION + """\
         -install_name=ruby \
         -so_name=ruby \
-        -unicode_version=9.0.0 \
+        -unicode_version=12.1.0 \
     > $@
 """,
 )
 
 genrule(
-    name = "prelude",
+    name = "generate_prelude",
     srcs = [
         ":miniruby_lib",
         "bin/miniruby",
-        "lib/irb.rb",
+        "lib/erb.rb",
+        "tool/colorize.rb",
         "tool/generic_erb.rb",
         "tool/vpath.rb",
         "template/prelude.c.tmpl",
         "prelude.rb",
-        "enc/prelude.rb",
         "gem_prelude.rb",
     ],
     outs = [ "prelude.c" ],
     cmd = """
 $(location bin/miniruby) \
-    -I. \
-    -I $$(dirname $(location lib/irb.rb)) \
+    -I $$(dirname $(location lib/erb.rb)) \
+    -I $$(dirname $(location tool/vpath.rb)) \
     -I $$(dirname $(location prelude.rb)) \
     $(location tool/generic_erb.rb) \
-    -c -o $(location prelude.c) \
+    -o $@ \
     $(location template/prelude.c.tmpl) \
     $(location prelude.rb) \
-    $(location enc/prelude.rb) \
     $(location gem_prelude.rb)
 """,
 )
@@ -374,7 +391,7 @@ genrule(
     srcs = [ "bin/miniruby" ],
     outs = [ "verconf.h" ],
     cmd = """
-prefix="/ruby.runfiles/ruby_2_4_3"
+prefix="/ruby.runfiles/ruby_2_6_3"
 cat > $(location verconf.h) <<EOF
 #define RUBY_BASE_NAME                  "ruby"
 #define RUBY_VERSION_NAME               RUBY_BASE_NAME"-"RUBY_LIB_VERSION
@@ -408,6 +425,8 @@ cc_binary(
         "enc/unicode.c",
         "enc/utf_8.c",
 
+        "addr2line.c",
+        "ast.c",
         "main.c",
         "dln.c",
         "localeinit.c",
@@ -465,6 +484,7 @@ cc_binary(
         "thread.c",
         "time.c",
         "transcode.c",
+        "transient_heap.c",
         "util.c",
         "variable.c",
         "version.c",
@@ -478,7 +498,6 @@ cc_binary(
         ":linux": [
             "missing/strlcpy.c",
             "missing/strlcat.c",
-            "addr2line.c",
         ],
         ":darwin": [],
     }) + glob([
@@ -487,6 +506,7 @@ cc_binary(
 
     deps = [
         ":miniruby_private_headers",
+        ":coroutine/amd64",
         ":ruby_headers",
         ":ruby_private_headers",
         ":enc",
@@ -526,6 +546,7 @@ genrule(
     srcs = [
         ":miniruby_lib",
         "bin/miniruby",
+        "tool/colorize.rb",
         "tool/generic_erb.rb",
         "tool/vpath.rb",
         "enc/make_encmake.rb",
@@ -734,6 +755,7 @@ cc_library(
         "-DHAVE_RB_RATIONAL_DEN",
         "-DHAVE_RB_ARRAY_CONST_PTR",
         "-DHAVE_RB_SYM2STR",
+        "'-DRUBY_BIGDECIMAL_VERSION=\"1.4.1\"'",
     ],
     deps = [ ":ruby_headers" ],
     linkstatic = 1,
@@ -1184,14 +1206,17 @@ base_dir="\$$(dirname \$${BASH_SOURCE[0]})"
 
 # was this script invoked via 'bazel run"?
 if [ -d "\$$base_dir/ruby.runfiles" ]; then
-  base_dir="\$${base_dir}/ruby.runfiles/ruby_2_4_3"
-else
-  RUBYLIB="\$${base_dir}/lib/ruby/2.4.0/""" + ARCH + """\$${RUBYLIB:+:}\$${RUBYLIB:-}"
-  RUBYLIB="\$${base_dir}/lib/ruby/2.4.0:\$${RUBYLIB}"
-  export RUBYLIB
+  base_dir="\$${base_dir}/ruby.runfiles/ruby_2_6_3"
 fi
 
-exec "\$$base_dir/bin/ruby" "\$$@"
+RUBYLIB="\$${RUBYLIB:-}\$${RUBYLIB:+:}\$${base_dir}/lib/ruby/2.6.0/""" + ARCH + """"
+RUBYLIB="\$${RUBYLIB}:\$${base_dir}/lib/ruby/2.6.0"
+export RUBYLIB
+
+# TODO: Something is re-discovering the stdlib outside of the path provided by
+# RUBYLIB, and when the original is a symlink it causes stdlib files to be
+# loaded multiple times.
+exec "\$$base_dir/bin/ruby" -W0 "\$$@"
 EOF
     """,
 )
@@ -1244,12 +1269,13 @@ EOF
 
 sh_test(
     name = "smoke_test",
-    deps = [ ":ruby", "@bazel_tools//tools/bash/runfiles" ],
+    deps = [ "@bazel_tools//tools/bash/runfiles" ],
+    data = [ ":ruby" ],
     srcs = [ "smoke_test.sh" ],
     args = [ "$(location :ruby)" ],
 )
 
 test_suite(
-    name = "ruby-2.4",
+    name = "ruby-2.6",
     tests = [ ":smoke_test" ],
 )

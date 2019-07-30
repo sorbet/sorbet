@@ -87,15 +87,21 @@ def _setup_bundler(repo_ctx):
         type = "tar",
     )
 
-    # hard coded as 2.4.0 for now
-    site_ruby = "lib/ruby/site_ruby/2.4.0"
     site_bin = "bin"
+
+    # hard-coding ruby versions to support
+    ruby_versions = [ "2.4.0", "2.6.0" ]
+
+    site_ruby_glob = ", ".join([
+        "\"lib/ruby/site_ruby/{}/**/*.rb\"".format(version)
+        for version in ruby_versions
+    ])
 
     substitutions = {
         "{{workspace}}": repo_ctx.name,
         "{{bundler}}": bundler,
-        "{{site_ruby}}": site_ruby,
         "{{site_bin}}": site_bin,
+        "{{site_ruby_glob}}": site_ruby_glob,
     }
 
     repo_ctx.template(
@@ -105,7 +111,7 @@ def _setup_bundler(repo_ctx):
         substitutions = substitutions,
     )
 
-    repo_ctx.execute(["./setup_bundler.sh"])
+    repo_ctx.execute(["./setup_bundler.sh"] + ruby_versions)
 
     repo_ctx.template(
         "bundler/BUILD",

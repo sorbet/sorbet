@@ -15,6 +15,7 @@ sh_binary(
         "@gems//bundler:bundle",
         "@gems//gems",
         "@ruby_2_4_3//:ruby",
+        "@ruby_2_6_3//:ruby",
     ],
     # NOTE: ensure that this rule isn't caught in //...
     tags = ["manual"],
@@ -25,7 +26,7 @@ sh_binary(
 )
 
 snapshot_tests(
-    name = "snapshot",
+    ruby = "ruby_2_4_3",
     tests = glob(
         [
             "partial/*",
@@ -55,5 +56,53 @@ snapshot_tests(
         # We only want to match directories with this glob
         exclude_directories = 0,
     ),
-    update_name = "update",
+)
+
+snapshot_tests(
+    ruby = "ruby_2_6_3",
+    tests = glob(
+        [
+            "partial/*",
+            "total/*",
+        ],
+        exclude = [
+            # These tests can't currently run under bazel,
+            # and can't be written another way.
+
+            # Requires openssl, which doesn't work in bazel.
+            # Can't be rewritten because it's testing gem_loader.
+            "partial/webmock",
+
+            # Requires native extensions. Tests gem_loader for codecov.
+            "partial/codecov",
+
+            # Requires native extensions.
+            # Can't be rewritten, because it's essentially an integration test
+            # that a certain private Rails API gives us back absolute vs
+            # relative paths.
+            "partial/rails-double-require",
+
+            # Requires nokogiri, which builds a native extension
+            "partial/rails6",
+        ],
+
+        # We only want to match directories with this glob
+        exclude_directories = 0,
+    ),
+)
+
+test_suite(
+    name = "snapshot",
+    tests = [
+        ":snapshot-ruby_2_4_3",
+        ":snapshot-ruby_2_6_3",
+    ],
+)
+
+test_suite(
+    name = "update",
+    tests = [
+        ":update-ruby_2_4_3",
+        ":update-ruby_2_6_3",
+    ],
 )
