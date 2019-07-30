@@ -12,6 +12,11 @@ else
   exit 1
 fi
 
+echo "setting env vars"
+export PATH="$PATH:$(pwd)/bazel-sorbet/external/llvm_toolchain/bin"
+export ASAN_OPTIONS='dedup_token_length=10'
+
+echo "checking for commands"
 if ! command -v llvm-symbolizer >/dev/null; then
   echo "fatal: command not found: llvm-symbolizer"
   exit 1
@@ -19,8 +24,6 @@ fi
 
 echo "building $what"
 bazel build "//test/fuzz:$what" --config=fuzz -c opt
-export PATH="$PATH:$(pwd)/bazel-sorbet/external/llvm_toolchain/bin"
-export ASAN_OPTIONS='dedup_token_length=10'
 
 echo "setting up files"
 mkdir -p fuzz_corpus
