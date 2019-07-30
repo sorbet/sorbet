@@ -47,6 +47,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
 
     // TODO how to use opts and avoid another mkOpts()?
     auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(std::move(gs), mkOpts(), console, false);
+    lspWrapper.enableAllExperimentalFeatures();
 
     int nextId = 0;
     std::string contents((const char *)data, size);
