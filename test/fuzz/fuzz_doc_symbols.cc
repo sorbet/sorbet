@@ -4,6 +4,7 @@
 #include "payload/payload.h"
 #include "spdlog/sinks/stdout_sinks.h"
 #include "test/helpers/MockFileSystem.h"
+#include "test/helpers/lsp.h"
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -11,6 +12,7 @@
 const auto console = spdlog::stdout_logger_mt("console");
 const auto typeErrors = spdlog::stdout_logger_mt("typeErrors");
 const auto rootPath = "/tmp";
+const auto rootUri = fmt::format("file://{}", rootPath);
 
 sorbet::realmain::options::Options mkOpts() {
     sorbet::realmain::options::Options opts;
@@ -41,7 +43,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
 
     // TODO move the gs?
     // TODO how to use opts and avoid another mkOpts()?
-    const auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(std::move(gs), mkOpts(), console, false);
+    auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(std::move(gs), mkOpts(), console, false);
+
+    int nextId = 0;
+    // TODO ignore responses?
+    sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId);
 
     std::vector<sorbet::core::FileRef> inputFiles;
     std::string inputData((const char *)data, size);
