@@ -28,14 +28,14 @@ vector<unique_ptr<ast::Expression>> Private::replaceDSL(core::MutableContext ctx
             e.setHeader("Use `{}` to define private class methods", "private_class_method");
             auto beginPos = send->loc.beginPos();
             auto replacementLoc = core::Loc{send->loc.file(), beginPos, beginPos + 7};
-            e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, "private_class_method"));
+            e.replaceWith(replacementLoc, "private_class_method");
         }
     } else if (send->fun == core::Names::privateClassMethod() && !mdef->isSelf()) {
         if (auto e = ctx.state.beginError(send->loc, core::errors::DSL::PrivateMethodMismatch)) {
             e.setHeader("Use `{}` to define private instance methods", "private");
             auto beginPos = send->loc.beginPos();
             auto replacementLoc = core::Loc{send->loc.file(), beginPos, beginPos + 20};
-            e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, "private"));
+            e.replaceWith(replacementLoc, "private");
         }
     }
 

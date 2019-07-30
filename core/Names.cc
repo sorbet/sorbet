@@ -66,6 +66,9 @@ string Name::showRaw(const GlobalState &gs) const {
                 case UniqueNameKind::PositionalArg:
                     kind = "A";
                     break;
+                case UniqueNameKind::MangledKeywordArg:
+                    kind = "K";
+                    break;
                 case UniqueNameKind::ResolverMissingClass:
                     kind = "R";
                     break;

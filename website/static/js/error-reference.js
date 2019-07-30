@@ -14,4 +14,6 @@
 
   const box = document.getElementById('missing-doc-for-error-code-box');
   box.classList.toggle('is-hidden');
+
+  document.getElementById('missing-doc-for-error-code-scroll').scrollIntoView();
 })();

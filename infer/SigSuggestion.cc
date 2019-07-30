@@ -517,16 +517,16 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         }
     }
 
-    e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", to_string(ss), spaces)));
+    e.replaceWith(replacementLoc, "{}\n{}", to_string(ss), spaces);
 
     if (parentNeedsOverridable(ctx, methodSymbol, closestMethod)) {
         if (auto maybeOffset = startOfExistingReturn(ctx, closestMethod.data(ctx)->loc())) {
             auto offset = *maybeOffset;
             core::Loc overridableReturnLoc(closestMethod.data(ctx)->loc().file(), offset, offset);
             if (closestMethod.data(ctx)->hasGeneratedSig()) {
-                e.addAutocorrect(core::AutocorrectSuggestion(overridableReturnLoc, "overridable."));
+                e.replaceWith(overridableReturnLoc, "overridable.");
             } else {
-                e.addAutocorrect(core::AutocorrectSuggestion(overridableReturnLoc, "generated.overridable."));
+                e.replaceWith(overridableReturnLoc, "generated.overridable.");
             }
         }
     }
