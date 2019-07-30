@@ -8,8 +8,8 @@
 #include <cstdint>
 #include <memory>
 
-auto console = spdlog::stdout_logger_mt("console");
-auto typeErrors = spdlog::stdout_logger_mt("typeErrors");
+const auto console = spdlog::stdout_logger_mt("console");
+const auto typeErrors = spdlog::stdout_logger_mt("typeErrors");
 
 sorbet::realmain::options::Options mkOpts() {
     const auto rootPath = "/tmp";
