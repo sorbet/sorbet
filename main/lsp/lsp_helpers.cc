@@ -18,20 +18,12 @@ string LSPLoop::remoteName2Local(string_view uri) {
     if (*start == '/') {
         ++start;
     }
-    auto end = uri.end();
-    if (isSorbetURI) {
-        // Trim the data query parameter.
-        const auto idx = uri.find("?data=");
-        if (idx != string::npos) {
-            end = uri.data() + idx;
-        }
-    }
 
     // Special case: Folder is '' (current directory).
     if (rootPath.length() > 0) {
-        return absl::StrCat(rootPath, "/", string(start, end));
+        return absl::StrCat(rootPath, "/", string(start, uri.end()));
     } else {
-        return string(start, end);
+        return string(start, uri.end());
     }
 }
 
@@ -58,11 +50,11 @@ core::FileRef LSPLoop::uri2FileRef(string_view uri) {
     return initialGS->findFileByPath(needle);
 }
 
-// Embeds a file's information into a sorbet:// URI that encodes its path and full contents.
+// Embeds a file's information into a sorbet:// URI that encodes its path.
 // Used for files that are not available locally in the editor, like things in payload or directories available only on
 // the machine where Sorbet is running.
 string getSorbetURI(const core::File &file) {
-    return fmt::format("sorbet://{}?data={}", file.path(), absl::WebSafeBase64Escape(file.source()));
+    return fmt::format("sorbet://{}", file.path());
 }
 
 string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
