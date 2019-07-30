@@ -132,6 +132,12 @@ class Index extends React.Component {
                   description:
                     'Measure your progress as you adopt Sorbet, stay motivated!',
                 },
+                {
+                  title: 'Parlour',
+                  link: 'https://github.com/AaronC81/parlour',
+                  description:
+                    'A versatile RBI generator and plugin system'
+                },
               ]}
             />
             <p>
