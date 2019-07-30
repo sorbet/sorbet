@@ -83,7 +83,8 @@ TEST(FindDocumentationTest, Constant) { // NOLINT
 TEST(FindDocumentationTest, DocumentationAboveSig) { // NOLINT
     int position = file.find("typed_function_that_returns_integer");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, " This is a method with documentation above its sig block.");
+    cout << "b is " << *b << endl;
+    ASSERT_EQ(*b, " This is a method with documentation above its sig block.\n");
 }
 
 } // namespace sorbet::realmain::lsp::test
