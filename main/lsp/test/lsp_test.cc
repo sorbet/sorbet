@@ -40,9 +40,20 @@ const string file_string = "# typed: true\n"
                            "      1\n"
                            "    end\n"
                            "\n"
-                           "    # This is a method with documentation above its sig block.\n"
+                           "    # This is a method with documentation above its\n"
+                           "    # one-line sig block.\n"
                            "    sig {returns(Integer)}\n"
-                           "    def typed_function_that_returns_integer\n"
+                           "    def typed_function_with_one_line_sig_block\n"
+                           "      1\n"
+                           "    end\n"
+                           "\n"
+                           "    # This is a method with documentation above its\n"
+                           "    # multi-line sig block.\n"
+                           "    sig do\n"
+                           "      params(x: Integer)\n"
+                           "      .returns(Integer)\n"
+                           "    end\n"
+                           "    def typed_function_with_multi_line_sig_block\n"
                            "      1\n"
                            "    end\n"
                            "end\n";
@@ -80,11 +91,17 @@ TEST(FindDocumentationTest, Constant) { // NOLINT
     optional<string> b = findDocumentation(file, position);
     ASSERT_EQ(*b, " This is the documentation for a constant.\n This is the second line for a constant.\n");
 }
-TEST(FindDocumentationTest, DocumentationAboveSig) { // NOLINT
-    int position = file.find("typed_function_that_returns_integer");
+TEST(FindDocumentationTest, DocumentationAboveOneLineSig) { // NOLINT
+    int position = file.find("typed_function_with_one_line_sig_block");
     optional<string> b = findDocumentation(file, position);
     cout << "b is " << *b << endl;
-    ASSERT_EQ(*b, " This is a method with documentation above its sig block.\n");
+    ASSERT_EQ(*b, " This is a method with documentation above its\n one-line sig block.\n");
+}
+TEST(FindDocumentationTest, DocumentationAboveMultiLineSig) { // NOLINT
+    int position = file.find("typed_function_with_multi_line_sig_block");
+    optional<string> b = findDocumentation(file, position);
+    cout << "b is " << *b << endl;
+    ASSERT_EQ(*b, " This is a method with documentation above its\n multi-line sig block.\n");
 }
 
 } // namespace sorbet::realmain::lsp::test
