@@ -9,6 +9,7 @@
 #include "core/Names.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
+#include <map>
 
 #include "CRC.h"
 
@@ -31,63 +32,6 @@ class AutogenWalk {
     vector<ast::Send *> ignoring;
 
     UnorderedMap<ast::Expression *, ReferenceRef> refMap;
-
-    static bool ignoreChild(ast::Expression *expr) {
-        bool result = false;
-
-        typecase(
-            expr, [&](ast::Send *send) { result = (send->fun == core::Names::keepForIde()); },
-
-            [&](ast::EmptyTree *) { result = true; },
-
-            [&](ast::InsSeq *seq) {
-                result = absl::c_all_of(seq->stats, [](auto &child) { return ignoreChild(child.get()); }) &&
-                         ignoreChild(seq->expr.get());
-            },
-
-            [&](ast::Expression *klass) { result = false; });
-        return result;
-    }
-
-    static bool definesBehavior(ast::Expression *expr) {
-        if (ignoreChild(expr)) {
-            return false;
-        }
-        bool result = true;
-
-        typecase(
-            expr,
-
-            [&](ast::ClassDef *klass) {
-                auto *id = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
-                if (id && id->name == core::Names::singleton()) {
-                    // class << self; We consider this
-                    // behavior-defining. We could opt to recurse inside
-                    // the inner class, but we consider there to be no
-                    // valid use of `class << self` solely for namespacing,
-                    // so there's no need to support that use case.
-                    result = true;
-                } else {
-                    result = false;
-                }
-            },
-
-            [&](ast::Assign *asgn) {
-                if (ast::isa_tree<ast::ConstantLit>(asgn->lhs.get())) {
-                    result = false;
-                } else {
-                    result = true;
-                }
-            },
-
-            [&](ast::InsSeq *seq) {
-                result = absl::c_any_of(seq->stats, [](auto &child) { return definesBehavior(child.get()); }) ||
-                         definesBehavior(seq->expr.get());
-            },
-
-            [&](ast::Expression *klass) { result = true; });
-        return result;
-    }
 
     vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
         vector<core::NameRef> out;
@@ -133,23 +77,8 @@ public:
         } else {
             def.type = Definition::Module;
         }
-        def.is_empty = absl::c_all_of(original->rhs, [](auto &tree) { return ignoreChild(tree.get()); });
-        for (auto &ancst : original->ancestors) {
-            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
-            if (cnst && cnst->original != nullptr) {
-                def.defines_behavior = true;
-            }
-        }
-        for (auto &ancst : original->singletonAncestors) {
-            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
-            if (cnst && cnst->original != nullptr) {
-                def.defines_behavior = true;
-            }
-        }
-        if (!def.defines_behavior) {
-            def.defines_behavior =
-                absl::c_any_of(original->rhs, [](auto &tree) { return definesBehavior(tree.get()); });
-        }
+        def.is_empty = absl::c_all_of(original->rhs, [](auto &tree) { return sorbet::ast::ignoreChild(tree.get()); });
+        def.defines_behavior = sorbet::ast::classDefinesBehavior(original);
 
         // TODO: ref.parent_of, def.parent_ref
         // TODO: expression_range

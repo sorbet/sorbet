@@ -675,6 +675,11 @@ private:
  * Desugar string concatenation into series of .to_s calls and string concatenations
  */
 
+// TODO Find a better place for this
+bool classDefinesBehavior(std::unique_ptr<ast::ClassDef> &);
+bool ignoreChild(ast::Expression *expr);
+bool definesBehavior(ast::Expression *expr);
+
 } // namespace sorbet::ast
 
 #endif // SORBET_TREES_H
