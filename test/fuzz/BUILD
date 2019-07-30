@@ -47,8 +47,8 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//core",
-        "//main/pipeline",
         "//main/lsp",
+        "//main/pipeline",
         "//payload",
         "//test/helpers",
     ],
