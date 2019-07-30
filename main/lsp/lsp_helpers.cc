@@ -9,16 +9,28 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 string LSPLoop::remoteName2Local(string_view uri) {
-    ENFORCE(absl::StartsWith(uri, rootUri));
-    const char *start = uri.data() + rootUri.length();
+    constexpr string_view sorbetUri = "sorbet://";
+    const bool isSorbetURI = absl::StartsWith(sorbetUri, uri);
+    ENFORCE(absl::StartsWith(uri, rootUri) || (enableSorbetURIs && isSorbetURI));
+    const string_view root = isSorbetURI ? sorbetUri : rootUri;
+    const char *start = uri.data() + root.length();
     if (*start == '/') {
         ++start;
     }
+    auto end = uri.end();
+    if (isSorbetURI) {
+        // Trim the data query parameter.
+        const auto idx = uri.find("?data=");
+        if (idx != string::npos) {
+            end = uri.data() + idx;
+        }
+    }
+
     // Special case: Folder is '' (current directory).
     if (rootPath.length() > 0) {
-        return absl::StrCat(rootPath, "/", string(start, uri.end()));
+        return absl::StrCat(rootPath, "/", string(start, end));
     } else {
-        return string(start, uri.end());
+        return string(start, end);
     }
 }
 
@@ -45,12 +57,47 @@ core::FileRef LSPLoop::uri2FileRef(string_view uri) {
     return initialGS->findFileByPath(needle);
 }
 
+// Embeds a file's information into a sorbet:// URI that encodes its path and full contents.
+// Used for files that are not available locally in the editor, like things in payload or directories available only on
+// the machine where Sorbet is running.
+string getSorbetURI(const core::File &file) {
+    return fmt::format("sorbet://{}?data={}", file.path(), absl::WebSafeBase64Escape(file.source()));
+}
+
 string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
-    if (file.data(gs).sourceType == core::File::Type::Payload) {
-        return string(file.data(gs).path());
+    string uri;
+    if (!file.exists()) {
+        uri = localName2Remote("???");
     } else {
-        return localName2Remote(string(file.data(gs).path()));
+        auto &messageFile = file.data(gs);
+        if (messageFile.isPayload()) {
+            if (enableSorbetURIs) {
+                uri = getSorbetURI(messageFile);
+            } else {
+                // This is hacky because VSCode appends #4,3 (or whatever the position is of the
+                // error) to the uri before it shows it in the UI since this is the format that
+                // VSCode uses to denote which location to jump to. However, if you append #L4
+                // to the end of the uri, this will work on github (it will ignore the #4,3)
+                //
+                // As an example, in VSCode, on hover you might see
+                //
+                // string.rbi(18,7): Method `+` has specified type of argument `arg0` as `String`
+                //
+                // When you click on the link, in the browser it appears as
+                // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
+                // but shows you the same thing as
+                // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
+                uri = string(messageFile.path());
+            }
+        } else if (enableSorbetURIs &&
+                   FileOps::isFileIgnored(rootPath, messageFile.path(), opts.lspDirsNotOnClient, {})) {
+            // File is not available editor-side; send file data in sorbet:// URI.
+            uri = getSorbetURI(messageFile);
+        } else {
+            uri = localName2Remote(file.data(gs).path());
+        }
     }
+    return uri;
 }
 
 unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
@@ -68,45 +115,23 @@ unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
     return make_unique<Range>(move(start), move(end));
 }
 
-// Embeds a file's information into a sorbet:// URI that encodes its path and full contents.
-// Used for files that are not available locally in the editor, like things in payload or directories available only on
-// the machine where Sorbet is running.
-string getSorbetURI(const core::File &file) {
-    return fmt::format("sorbet://{}?data={}", file.path(), absl::WebSafeBase64Escape(file.source()));
-}
-
 unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc, bool useDataLinksForPayload) {
-    string uri;
-    if (!loc.file().exists()) {
-        uri = localName2Remote("???");
-    } else {
-        auto &messageFile = loc.file().data(gs);
-        if (messageFile.isPayload()) {
-            if (useDataLinksForPayload && enableSorbetURIs) {
-                uri = getSorbetURI(messageFile);
-            } else {
-                // This is hacky because VSCode appends #4,3 (or whatever the position is of the
-                // error) to the uri before it shows it in the UI since this is the format that
-                // VSCode uses to denote which location to jump to. However, if you append #L4
-                // to the end of the uri, this will work on github (it will ignore the #4,3)
-                //
-                // As an example, in VSCode, on hover you might see
-                //
-                // string.rbi(18,7): Method `+` has specified type of argument `arg0` as `String`
-                //
-                // When you click on the link, in the browser it appears as
-                // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
-                // but shows you the same thing as
-                // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
-                uri = fmt::format("{}#L{}", messageFile.path(), loc.position(gs).first.line);
-            }
-        } else if (enableSorbetURIs &&
-                   FileOps::isFileIgnored(rootPath, messageFile.path(), opts.lspDirsNotOnClient, {})) {
-            // File is not available editor-side; send file data in sorbet:// URI.
-            uri = getSorbetURI(messageFile);
-        } else {
-            uri = fileRef2Uri(gs, loc.file());
-        }
+    string uri = fileRef2Uri(gs, loc.file());
+    if (loc.file().data(gs).isPayload() && !enableSorbetURIs) {
+        // This is hacky because VSCode appends #4,3 (or whatever the position is of the
+        // error) to the uri before it shows it in the UI since this is the format that
+        // VSCode uses to denote which location to jump to. However, if you append #L4
+        // to the end of the uri, this will work on github (it will ignore the #4,3)
+        //
+        // As an example, in VSCode, on hover you might see
+        //
+        // string.rbi(18,7): Method `+` has specified type of argument `arg0` as `String`
+        //
+        // When you click on the link, in the browser it appears as
+        // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
+        // but shows you the same thing as
+        // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
+        uri = fmt::format("{}#L{}", uri, loc.position(gs).first.line);
     }
     return make_unique<Location>(uri, loc2Range(gs, loc));
 }
