@@ -49,5 +49,5 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     response->result = move(result);
 
     return LSPResult::make(move(run.gs), move(response));
-} // namespace sorbet::realmain::lsp
+}
 } // namespace sorbet::realmain::lsp

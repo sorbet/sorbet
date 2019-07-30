@@ -203,7 +203,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      // Need a variant that can discriminate based on a `kind` field and
                                      // the presence of that field. (TextDocumentEdit[] | (TextDocumentEdit | CreateFile
                                      // | RenameFile | DeleteFile)[]) makeField("documentChanges",
-                                     // makeOptional(makeArray(JSONAny))). The below is a subset of the true type.
+                                     // makeOptional(makeArray(JSONAny))). What follows is a subset of the true type.
                                      makeField("documentChanges", makeOptional(makeArray(TextDocumentEdit)))},
                                     classTypes);
 
@@ -1376,7 +1376,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             // (CodeAction | Command)[] | null
             // Sorbet only sends CodeAction[].
             {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction)})},
-            // TODO(sushain): the below are more correct but I can only get the above to work.
+            // TODO(sushain): the following are more correct but I can only get the above to work.
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(makeVariant({CodeAction, Command}))})},
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction), makeArray(Command)})},
             {"workspace/symbol", makeVariant({JSONNull, makeArray(SymbolInformation)})},
