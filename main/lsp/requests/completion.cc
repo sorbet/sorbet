@@ -109,6 +109,8 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
     // Iterate from the last
     auto it = all_lines.rbegin();
+    // Used to prevent multiple sig consecutive sig blocks
+    bool finished_sig_block = false;
     while (it != all_lines.rend()) {
         auto line = absl::StripAsciiWhitespace(*it);
 
@@ -118,12 +120,13 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
         }
 
         // Handle single-line sig block
-        else if (absl::StartsWith(line, "sig")) {
+        else if (!finished_sig_block && absl::StartsWith(line, "sig")) {
             // Do nothing for a one-line sig block
+            finished_sig_block = true;
         }
 
         // Handle multi-line sig block
-        else if (absl::StartsWith(line, "end")) {
+        else if (!finished_sig_block && absl::StartsWith(line, "end")) {
             // Ensure current iterator is not pointing to an 'end'
             it++;
             // ASSUMPTION: We either hit the start of file, `sig` or `end`
@@ -145,6 +148,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             } else {
                 // Reached a valid sig block. Move on to any possible documentation.
                 ENFORCE(absl::StartsWith(line, "sig"));
+                finished_sig_block = true;
             }
         }
 
