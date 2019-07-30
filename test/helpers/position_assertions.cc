@@ -25,6 +25,7 @@ const UnorderedMap<
         {"usage", UsageAssertion::make},
         {"def", DefAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
+        {"exhaustive-apply-code-action", BooleanPropertyAssertion::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},

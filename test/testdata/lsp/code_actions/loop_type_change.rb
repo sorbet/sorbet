@@ -1,4 +1,5 @@
 # typed: true
+# exhaustive-apply-code-action: true
 
 x = nil
 
