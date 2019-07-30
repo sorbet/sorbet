@@ -6,7 +6,11 @@ module T::Types
     # Technically we don't need these, but they are a nice api
     attr_reader :keys, :values
 
-    def initialize(keys:, values:)
+    def underlying_class
+      Hash
+    end
+
+      def initialize(keys:, values:)
       @keys = T::Utils.coerce(keys)
       @values = T::Utils.coerce(values)
       @type = T::Utils.coerce([keys, values])

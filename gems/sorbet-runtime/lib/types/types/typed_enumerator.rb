@@ -5,6 +5,10 @@ module T::Types
   class TypedEnumerator < TypedEnumerable
     attr_reader :type
 
+    def underlying_class
+      Enumerator
+    end
+
     # @override Base
     def name
       "T::Enumerator[#{@type.name}]"

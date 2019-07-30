@@ -5,6 +5,10 @@ module T::Types
   class TypedSet < TypedEnumerable
     attr_reader :type
 
+    def underlying_class
+      Hash
+    end
+
     # @override Base
     def name
       "T::Set[#{@type.name}]"

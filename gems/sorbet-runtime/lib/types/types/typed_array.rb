@@ -8,6 +8,10 @@ module T::Types
       "T::Array[#{@type.name}]"
     end
 
+    def underlying_class
+      Array
+    end
+
     # @override Base
     def valid?(obj)
       obj.is_a?(Array) && super
