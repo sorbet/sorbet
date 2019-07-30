@@ -178,11 +178,6 @@ module T::Private::Methods
     current_declaration = T::Private::DeclState.current.active_declaration
     mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
 
-    if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
-      raise "`#{mod.name}` was declared as final but its method `#{method_name}` was not declared as final"
-    end
-    _check_final_ancestors(mod, mod.ancestors, [method_name])
-
     if current_declaration.nil?
       return
     end
