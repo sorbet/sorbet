@@ -53,7 +53,17 @@ const string file_string = "# typed: true\n"
                            "      params(x: Integer)\n"
                            "      .returns(Integer)\n"
                            "    end\n"
-                           "    def typed_function_with_multi_line_sig_block\n"
+                           "    def multi_line_sig_block\n"
+                           "      1\n"
+                           "    end\n"
+                           "\n"
+                           "    # This is a method with documentation above its\n"
+                           "    # broken multi-line sig block. You shouldn't see this. \n"
+                           "    not_a_sig do \n"
+                           "      params(x: Integer)\n"
+                           "      .returns(Integer)\n"
+                           "    end\n"
+                           "    def broken_multi_line_sig_block\n"
                            "      1\n"
                            "    end\n"
                            "end\n";
@@ -91,15 +101,20 @@ TEST(FindDocumentationTest, Constant) { // NOLINT
     optional<string> b = findDocumentation(file, position);
     ASSERT_EQ(*b, " This is the documentation for a constant.\n This is the second line for a constant.\n");
 }
-TEST(FindDocumentationTest, AboveOneLineSig) { // NOLINT
+TEST(FindDocumentationTest, OneLineSig) { // NOLINT
     int position = file.find("one_line_sig_block");
     optional<string> b = findDocumentation(file, position);
     ASSERT_EQ(*b, " This is a method with documentation above its\n one-line sig block.\n");
 }
-TEST(FindDocumentationTest, AboveMultiLineSig) { // NOLINT
+TEST(FindDocumentationTest, MultiLineSig) { // NOLINT
     int position = file.find("multi_line_sig_block");
     optional<string> b = findDocumentation(file, position);
     ASSERT_EQ(*b, " This is a method with documentation above its\n multi-line sig block.\n");
+}
+TEST(FindDocumentationTest, BrokenMultiLineSig) { // NOLINT
+    int position = file.find("broken_multi_line_sig_block");
+    optional<string> b = findDocumentation(file, position);
+    ASSERT_TRUE(!b);
 }
 
 } // namespace sorbet::realmain::lsp::test
