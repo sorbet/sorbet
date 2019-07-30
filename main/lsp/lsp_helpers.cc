@@ -8,8 +8,9 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
+constexpr string_view sorbetUri = "sorbet://";
+
 string LSPLoop::remoteName2Local(string_view uri) {
-    constexpr string_view sorbetUri = "sorbet://";
     const bool isSorbetURI = absl::StartsWith(sorbetUri, uri);
     ENFORCE(absl::StartsWith(uri, rootUri) || (enableSorbetURIs && isSorbetURI));
     const string_view root = isSorbetURI ? sorbetUri : rootUri;
@@ -50,7 +51,7 @@ string LSPLoop::localName2Remote(string_view uri) {
 }
 
 core::FileRef LSPLoop::uri2FileRef(string_view uri) {
-    if (!absl::StartsWith(uri, rootUri)) {
+    if (!absl::StartsWith(uri, rootUri) && !absl::StartsWith(sorbetUri, uri)) {
         return core::FileRef();
     }
     auto needle = remoteName2Local(uri);

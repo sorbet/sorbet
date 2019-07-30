@@ -214,6 +214,15 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         } else if (method == LSPMethod::TextDocumentReferences) {
             auto &params = get<unique_ptr<ReferenceParams>>(rawParams);
             return handleTextDocumentReferences(move(gs), id, *params);
+        } else if (method == LSPMethod::SorbetReadFile) {
+            auto &params = get<unique_ptr<TextDocumentIdentifier>>(rawParams);
+            auto fref = uri2FileRef(params->uri);
+            string_view contents = "";
+            if (fref.exists()) {
+                contents = fref.data(*gs).source();
+            }
+            response->result = make_unique<TextDocumentItem>(params->uri, "ruby", 0, string(contents));
+            return LSPResult::make(move(gs), move(response));
         } else if (method == LSPMethod::Shutdown) {
             prodCategoryCounterInc("lsp.messages.processed", "shutdown");
             response->result = JSONNullObject();
