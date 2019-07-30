@@ -1037,14 +1037,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                  },
                                  classTypes);
 
-    auto TextDocumentCodeActionParams = makeObject("TextDocumentCodeActionParams",
-                                                   {
-                                                       makeField("textDocument", TextDocumentIdentifier),
-                                                       makeField("range", Range),
-                                                       makeField("context", CodeActionContext),
-                                                   },
-                                                   classTypes);
-
     auto CodeActionRegistrationOptions =
         makeObject("CodeActionRegistrationOptions",
                    {
@@ -1345,7 +1337,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/completion", CompletionParams},
                                                 {"textDocument/references", ReferenceParams},
                                                 {"textDocument/signatureHelp", TextDocumentPositionParams},
-                                                {"textDocument/codeAction", TextDocumentCodeActionParams},
+                                                {"textDocument/codeAction", CodeActionParams},
                                                 {"workspace/symbol", WorkspaceSymbolParams},
                                                 {"sorbet/error", SorbetErrorParams},
                                             });

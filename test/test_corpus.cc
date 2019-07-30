@@ -105,11 +105,10 @@ public:
     }
 };
 
-UnorderedSet<string> knownExpectations = {"parse-tree",     "parse-tree-json",    "ast",          "ast-raw",
-                                          "dsl-tree",       "dsl-tree-raw",       "symbol-table", "symbol-table-raw",
-                                          "name-tree",      "name-tree-raw",      "resolve-tree", "resolve-tree-raw",
-                                          "flattened-tree", "flattened-tree-raw", "cfg",          "cfg-json",
-                                          "autogen",        "document-symbols",   "code-actions"};
+UnorderedSet<string> knownExpectations = {
+    "parse-tree",     "parse-tree-json",    "ast",       "ast-raw",       "dsl-tree",     "dsl-tree-raw",
+    "symbol-table",   "symbol-table-raw",   "name-tree", "name-tree-raw", "resolve-tree", "resolve-tree-raw",
+    "flattened-tree", "flattened-tree-raw", "cfg",       "cfg-json",      "autogen",      "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -623,7 +622,7 @@ TEST_P(LSPTest, All) {
             vector<unique_ptr<Diagnostic>> diagnostics;
             auto fileUri = testFileUris[*filenames.begin()];
             // TODO(sushain): stop manually copying these over
-            auto params = make_unique<TextDocumentCodeActionParams>(
+            auto params = make_unique<CodeActionParams>(
                 make_unique<TextDocumentIdentifier>(fileUri),
                 make_unique<Range>(make_unique<Position>(error->range->start->line, error->range->start->character),
                                    make_unique<Position>(error->range->end->line, error->range->end->character)),
@@ -665,7 +664,7 @@ TEST_P(LSPTest, All) {
                         while (it != applyCodeActionAssertions.end()) {
                             auto codeActionAssertion = it->get();
                             // TODO(sushain): what if there are multiple errors on the same range?
-                            if (cmpRanges(*codeActionAssertion->range, *error->range)) {
+                            if (cmpRanges(*codeActionAssertion->range, *error->range) == 0) {
                                 auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
                                 EXPECT_NE(it2, receivedCodeActionsByTitle.end());
                                 if (it2 != receivedCodeActionsByTitle.end()) {

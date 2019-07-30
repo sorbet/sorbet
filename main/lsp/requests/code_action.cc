@@ -5,7 +5,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                const TextDocumentCodeActionParams &params) {
+                                                const CodeActionParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
     if (!opts.lspQuickFixEnabled) {
@@ -23,7 +23,7 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     auto run = tryFastPath(move(gs), {}, files);
     for (auto &e : run.errors) {
         if (!e->isSilenced && e->loc.file() == file && !e->autocorrects.empty() &&
-            cmpRanges(*loc2Range(*run.gs, e->loc), *params.range)) {
+            cmpRanges(*loc2Range(*run.gs, e->loc), *params.range) == 0) {
             vector<unique_ptr<TextEdit>> edits;
             edits.reserve(e->autocorrects.size());
             for (auto &a : e->autocorrects) {

@@ -907,27 +907,31 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
     auto it = sourceFileContents.find(filename);
     if (it == sourceFileContents.end()) {
         ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
-    } else {
-        auto &file = it->second;
-        for (auto &c : *codeAction->edit.value()->documentChanges) {
-            string actualEditedFileContents = string(file->source());
-            // TODO(sushain): support multi-file edits
-            EXPECT_EQ(c->textDocument->uri, fileUri);
-            // TODO(sushain): this doesn't really work with multiple edits
-            for (auto &e : c->edits) {
-                core::Loc::Detail reqPos;
-                reqPos.line = e->range->start->line + 1;
-                reqPos.column = e->range->start->character + 1;
-                auto startOffset = core::Loc::pos2Offset(*file, reqPos);
+        return;
+    }
 
-                reqPos.line = e->range->end->line + 1;
-                reqPos.column = e->range->end->character + 1;
-                auto endOffset = core::Loc::pos2Offset(*file, reqPos);
+    auto &file = it->second;
+    for (auto &c : *codeAction->edit.value()->documentChanges) {
+        string actualEditedFileContents = string(file->source());
+        // TODO(sushain): support cross-file edits
+        EXPECT_EQ(c->textDocument->uri, fileUri);
+        // N.B. This doesn't work with multiple edits but Sorbet currently only sends one for now.
+        EXPECT_EQ(c->edits.size(), 1) << "Recieved multiple edits for a single code action";
+        for (auto &e : c->edits) {
+            core::Loc::Detail reqPos;
+            reqPos.line = e->range->start->line + 1;
+            reqPos.column = e->range->start->character + 1;
+            auto startOffset = core::Loc::pos2Offset(*file, reqPos);
 
-                actualEditedFileContents.replace(startOffset, endOffset - startOffset, e->newText);
-            }
-            EXPECT_EQ(actualEditedFileContents, expectedEditedFileContents);
+            reqPos.line = e->range->end->line + 1;
+            reqPos.column = e->range->end->character + 1;
+            auto endOffset = core::Loc::pos2Offset(*file, reqPos);
+
+            actualEditedFileContents.replace(startOffset, endOffset - startOffset, e->newText);
         }
+        EXPECT_EQ(actualEditedFileContents, expectedEditedFileContents) << fmt::format(
+            "Invalid quick fix result. Expected edited result to be:\n{}\n...but actually resulted in:\n{}",
+            expectedEditedFileContents, actualEditedFileContents);
     }
 }
 

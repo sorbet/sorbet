@@ -114,9 +114,13 @@ int cmpLocations(const Location &a, const Location &b) {
     return cmpPositions(*a.range->end, *b.range->end);
 }
 
-bool cmpRanges(const Range &a, const Range &b) {
-    return a.start->character == b.start->character && a.start->line == b.start->line &&
-           a.end->character == b.end->character && a.end->line == b.end->line;
+int cmpRanges(const Range &a, const Range &b) {
+    const int cmpStart = cmpPositions(*a.start, *b.start);
+    if (cmpStart != 0) {
+        // One starts before the other.
+        return cmpStart;
+    }
+    return cmpPositions(*a.end, *b.end);
 }
 
 vector<unique_ptr<Location>>
