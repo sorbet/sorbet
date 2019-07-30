@@ -16,5 +16,15 @@ module T::Types
     def new(*args) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
       Array.new(*T.unsafe(args))
     end
+
+    class Untyped < TypedArray
+      def initialize
+        super(T.untyped)
+      end
+
+      def valid?(obj)
+        obj.is_a?(Array)
+      end
+    end
   end
 end

@@ -137,5 +137,15 @@ module T::Types
         self.class.new(type_from_instances(obj))
       end
     end
+
+    class Untyped < TypedEnumerable
+      def initialize
+        super(T.untyped)
+      end
+
+      def valid?(obj)
+        obj.is_a?(Enumerable)
+      end
+    end
   end
 end

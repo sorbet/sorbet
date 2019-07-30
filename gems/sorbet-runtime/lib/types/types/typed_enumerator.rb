@@ -18,5 +18,15 @@ module T::Types
     def new(*args, &blk) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
       T.unsafe(Enumerator).new(*args, &blk)
     end
+
+    class Untyped < TypedEnumerator
+      def initialize
+        super(T.untyped)
+      end
+
+      def valid?(obj)
+        obj.is_a?(Enumerator)
+      end
+    end
   end
 end

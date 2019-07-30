@@ -18,5 +18,15 @@ module T::Types
     def new(*args) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
       Set.new(*T.unsafe(args))
     end
+
+    class Untyped < TypedSet
+      def initialize
+        super(T.untyped)
+      end
+
+      def valid?(obj)
+        obj.is_a?(Set)
+      end
+    end
   end
 end
