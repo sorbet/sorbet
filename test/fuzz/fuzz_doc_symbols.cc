@@ -50,11 +50,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
         file.data(*gs).strictLevel = sorbet::core::StrictLevel::True;
     }
 
-    static const auto workers = sorbet::WorkerPool::create(0, *console);
-    std::vector<sorbet::ast::ParsedFile> indexed;
-    indexed = sorbet::realmain::pipeline::index(gs, inputFiles, opts, *workers, kvstore);
-    indexed = sorbet::realmain::pipeline::resolve(gs, std::move(indexed), opts, *workers);
-    indexed = sorbet::realmain::pipeline::typecheck(gs, std::move(indexed), opts, *workers);
-
     return 0;
 }
