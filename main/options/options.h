@@ -189,6 +189,7 @@ struct Options {
     bool lspGoToDefinitionEnabled = false;
     bool lspFindReferencesEnabled = false;
     bool lspAutocompleteEnabled = false;
+    bool lspQuickFixEnabled = false;
     bool lspWorkspaceSymbolsEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;

@@ -8,6 +8,12 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
                                                 const TextDocumentCodeActionParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
+    if (!opts.lspQuickFixEnabled) {
+        response->error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidRequest, "The `Quick Fix` LSP feature is experimental and disabled by default.");
+        return LSPResult::make(move(gs), move(response));
+    }
+
     vector<unique_ptr<CodeAction>> result;
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.codeAction");
