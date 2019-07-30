@@ -18,6 +18,7 @@ const auto rootUri = fmt::format("file://{}", rootPath);
 sorbet::realmain::options::Options mkOpts() {
     sorbet::realmain::options::Options opts;
     opts.fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
+    opts.lspDocumentSymbolEnabled = true;
     return opts;
 }
 
