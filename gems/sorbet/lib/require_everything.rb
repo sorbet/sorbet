@@ -43,7 +43,7 @@ class Sorbet::Private::RequireEverything
     excluded_paths = Set.new
     excluded_paths += excluded_rails_files if rails?
 
-    abs_paths = Dir.glob("#{Dir.pwd}/**/*.rb")
+    abs_paths = rb_file_paths
     errors = []
     abs_paths.each_with_index do |abs_path, i|
       # Executable files are likely not meant to be required.
@@ -58,8 +58,6 @@ class Sorbet::Private::RequireEverything
       # out of exclude_rails_files, as it is possible to use the packages that
       # generate it without using the whole rails ecosystem.
       next if /db\/schema.rb$/.match(abs_path)
-
-      next if /^# +typed: +ignore$/.match(File.read(abs_path).scrub)
 
       begin
         my_require(abs_path, i+1, abs_paths.size)
@@ -105,6 +103,37 @@ class Sorbet::Private::RequireEverything
   end
 
   private
+
+  def self.rb_file_paths
+    srb = File.realpath("#{__dir__}/../bin/srb")
+    output = IO.popen([
+      srb,
+      "tc",
+      "-p",
+      "file-table-json",
+      "--stop-after=parser",
+      "--silence-dev-message",
+      "--no-error-count",
+    ]) {|io| io.read}
+    # This returns a hash with structure:
+    # { files:
+    #   [
+    #     {
+    #       "strict": ["Ignore"|"False"|"True"|"Strict"|"Strong"|"Stdlib"],
+    #       "path": "./path/to/file",
+    #       ...
+    #     }
+    #     ...
+    #   ]
+    # }
+    parsed = JSON.parse(output)
+    parsed['files']
+      .reject{|file| ["Ignore", "Stdlib"].include?(file["strict"])}
+      .map{|file| file["path"]}
+      .select{|path| File.file?(path)} # Some files have https:// paths. We ignore those here.
+      .select{|path| /.rb$/.match(path)}
+      .map{|path| File.expand_path(path)} # Requires absolute path
+  end
 
   def self.excluded_rails_files
     excluded_paths = Set.new
