@@ -97,11 +97,30 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     auto preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
 
     int lastNewlineLoc = preDefinition.rfind('\n');
+    cout << "DEBUG: lastNewlineLoc is :" <<  lastNewlineLoc << endl;
     // if there is no '\n' in preDefinition, we're at the top of the file.
     if (lastNewlineLoc == preDefinition.npos) {
         return nullopt;
     }
+
+    // Skip lines until prevLine (might) contain documentation
     auto prevLine = preDefinition.substr(lastNewlineLoc, preDefinition.size() - lastNewlineLoc);
+    while (
+        (prevLine.find('#') == prevLine.npos)
+        &&
+        (prevLine.find("end") != prevLine.npos || prevLine.find("sig") != prevLine.npos)
+         ) {
+      cout << "DEBUG: prevLine is :" <<  prevLine << endl;
+        int prevNewlineLoc = preDefinition.rfind('\n', lastNewlineLoc - 1);
+        // if there is no '\n', we're at the top of the file, so just return documentation.
+        if (prevNewlineLoc == preDefinition.npos) {
+            break;
+        }
+        prevLine = preDefinition.substr(prevNewlineLoc, lastNewlineLoc - prevNewlineLoc);
+        lastNewlineLoc = prevNewlineLoc;
+    }
+      cout << "DEBUG: prevLine is :" <<  prevLine << endl;
+
     if (prevLine.find('#') == prevLine.npos) {
         return nullopt;
     }
