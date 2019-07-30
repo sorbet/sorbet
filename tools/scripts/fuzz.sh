@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -exuo pipefail
+set -euo pipefail
 
 what=""
 if [ "$#" -eq 0 ]; then
@@ -17,15 +17,17 @@ if ! command -v llvm-symbolizer >/dev/null; then
   exit 1
 fi
 
+echo "building $what"
 bazel build "//test/fuzz:$what" --config=fuzz -c opt
 export PATH="$PATH:$(pwd)/bazel-sorbet/external/llvm_toolchain/bin"
 export ASAN_OPTIONS='dedup_token_length=10'
 
+echo "setting up files"
 mkdir -p fuzz_corpus
 find test/testdata -iname "*.rb" | grep -v disable | xargs -n 1 -I % cp % fuzz_corpus
-
 mkdir -p fuzz_crashers/original
 
+echo "running"
 nice "./bazel-bin/test/fuzz/$what" \
   -use_value_profile=1 \
   -only_ascii=1 \
