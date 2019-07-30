@@ -1,5 +1,6 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_split.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
@@ -93,54 +94,76 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
 }
 
 optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
-    // everything in the file before the method definition.
+    // Everything in the file before the method definition.
     auto preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
 
-    int lastNewlineLoc = preDefinition.rfind('\n');
-    cout << "DEBUG: lastNewlineLoc is :" <<  lastNewlineLoc << endl;
-    // if there is no '\n' in preDefinition, we're at the top of the file.
-    if (lastNewlineLoc == preDefinition.npos) {
-        return nullopt;
-    }
+    // Get all the lines before it.
+    std::vector<std::string> all_lines = absl::StrSplit(preDefinition, '\n');
 
-    // Skip lines until prevLine (might) contain documentation
-    auto prevLine = preDefinition.substr(lastNewlineLoc, preDefinition.size() - lastNewlineLoc);
-    while (
-        (prevLine.find('#') == prevLine.npos)
-        &&
-        (prevLine.find("end") != prevLine.npos || prevLine.find("sig") != prevLine.npos)
-         ) {
-      cout << "DEBUG: prevLine is :" <<  prevLine << endl;
-        int prevNewlineLoc = preDefinition.rfind('\n', lastNewlineLoc - 1);
-        // if there is no '\n', we're at the top of the file, so just return documentation.
-        if (prevNewlineLoc == preDefinition.npos) {
-            break;
-        }
-        prevLine = preDefinition.substr(prevNewlineLoc, lastNewlineLoc - prevNewlineLoc);
-        lastNewlineLoc = prevNewlineLoc;
-    }
-      cout << "DEBUG: prevLine is :" <<  prevLine << endl;
-
-    if (prevLine.find('#') == prevLine.npos) {
+    // if there are no lines before the method definition, we're at the top of the file.
+    if (all_lines.empty()) {
         return nullopt;
     }
 
     string documentation = "";
-    // keep looking for previous newline locations, searching for lines with # in them.
-    while (prevLine.find('#') != prevLine.npos) {
-        documentation = absl::StrCat(prevLine.substr(prevLine.find('#') + 1, prevLine.size()), "\n", documentation);
-        int prevNewlineLoc = preDefinition.rfind('\n', lastNewlineLoc - 1);
-        // if there is no '\n', we're at the top of the file, so just return documentation.
-        if (prevNewlineLoc == preDefinition.npos) {
+
+    // iterate from the last
+    auto it = all_lines.rbegin();
+    // bool inside_sig_block = false;
+    while (it != all_lines.rend()) {
+        auto line = absl::StripAsciiWhitespace(*it);
+
+        // Short circuit when line is empty
+        if (line.empty()) {
             break;
         }
-        prevLine = preDefinition.substr(prevNewlineLoc, lastNewlineLoc - prevNewlineLoc);
-        lastNewlineLoc = prevNewlineLoc;
+
+        // Handle single-line sig block
+        else if (absl::StartsWith(line, "sig")) {
+            // Do nothing for a one-line sig block
+        }
+
+        // Handle multi-line sig block
+        else if (absl::StartsWith(line, "end")) {
+            // Ensure current iterator is not pointing to an 'end'
+            it++;
+            while (line = absl::StripAsciiWhitespace(*it),
+                    // EOF
+                    it != all_lines.rend()
+                    // valid start of sig block
+                    && !absl::StartsWith(line, "sig")
+                    // invalid end keyword
+                    && !absl::StartsWith(line, "end")) {
+                it++;
+            }
+            // We have either
+            // 1) reached the end of the file
+            // 2) found a valid sig start
+            // 3) found an invalid end keyword
+            if (it == all_lines.rend() || absl::StartsWith(line, "end")) {
+                break;
+            } else {
+                // Reached a valid sig block. Move on to any possible documentation.
+                ENFORCE(absl::StartsWith(line, "sig"));
+            }
+        }
+
+        // Handle a comment line. Do not count typing declarations.
+        else if (absl::StartsWith(line, "#") && !absl::StartsWith(line, "# typed:")) {
+            documentation = absl::StrCat(line.substr(line.find('#') + 1, line.size()), "\n", documentation);
+        }
+
+        // No other cases applied to this line, so stop looking.
+        else {
+            break;
+        }
+        it++;
     }
-    if (documentation.empty()) {
+
+    if (documentation.empty())
         return nullopt;
-    }
-    return documentation;
+    else
+        return documentation;
 }
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
