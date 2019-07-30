@@ -49,14 +49,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     // TODO ignore responses?
     sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId);
 
-    std::vector<sorbet::core::FileRef> inputFiles;
-    std::string inputData((const char *)data, size);
-    {
-        sorbet::core::UnfreezeFileTable fileTableAccess(*gs);
-        auto file = gs->enterFile(std::string("fuzz.rb"), inputData);
-        inputFiles.emplace_back(file);
-        file.data(*gs).strictLevel = sorbet::core::StrictLevel::True;
-    }
-
     return 0;
 }
