@@ -577,7 +577,7 @@ TEST_P(LSPTest, All) {
             make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(testFileUris[*filenames.begin()]));
         auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
         auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(req)));
-        EXPECT_EQ(responses.size(), 1) << "Did not receive a response for a documentSymbols request.";
+        EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a documentSymbols request.";
         if (responses.size() == 1) {
             auto &msg = responses.at(0);
             EXPECT_TRUE(msg->isResponse());
@@ -629,7 +629,7 @@ TEST_P(LSPTest, All) {
                 make_unique<CodeActionContext>(move(diagnostics)));
             auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
             auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(req)));
-            EXPECT_EQ(responses.size(), 1) << "Did not receive a response for a codeAction request.";
+            EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a codeAction request.";
 
             if (responses.size() == 1) {
                 auto &msg = responses.at(0);
@@ -666,7 +666,9 @@ TEST_P(LSPTest, All) {
                             // TODO(sushain): what if there are multiple errors on the same range?
                             if (cmpRanges(*codeActionAssertion->range, *error->range) == 0) {
                                 auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
-                                EXPECT_NE(it2, receivedCodeActionsByTitle.end());
+                                EXPECT_NE(it2, receivedCodeActionsByTitle.end()) << fmt::format(
+                                    "Did not receive code action matching assertion `{}` for error `{}`...",
+                                    codeActionAssertion->toString(), error->toString());
                                 if (it2 != receivedCodeActionsByTitle.end()) {
                                     auto codeAction = move(it2->second);
                                     codeActionAssertion->check(test.sourceFileContents, codeAction, test.testName,
@@ -680,14 +682,23 @@ TEST_P(LSPTest, All) {
                             ++it;
                         }
 
-                        EXPECT_TRUE(!exhaustiveApplyCodeAction ||
-                                    matchedCodeActionAssertions.size() == receivedCodeActionsByTitle.size())
-                            << fmt::format(
-                                   "Received {} code actions ({}) but only found {} apply-code-action assertions",
-                                   receivedCodeActions.size(),
-                                   fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(),
-                                                 ", ", [](const auto &action) -> string { return action.first; }),
-                                   applyCodeActionAssertions.size());
+                        if (exhaustiveApplyCodeAction) {
+                            if (matchedCodeActionAssertions.size() > receivedCodeActionsByTitle.size()) {
+                                ADD_FAILURE() << fmt::format("Found apply-code-action assertions without "
+                                                             "corresponding code actions from the server:\n{}",
+                                                             fmt::map_join(applyCodeActionAssertions.begin(),
+                                                                           applyCodeActionAssertions.end(), ", ",
+                                                                           [](const auto &assertion) -> string {
+                                                                               return assertion->toString();
+                                                                           }));
+                            } else if (matchedCodeActionAssertions.size() < receivedCodeActionsByTitle.size()) {
+                                ADD_FAILURE() << fmt::format(
+                                    "Received code actions without corresponding apply-code-action assertions:\n{}",
+                                    fmt::map_join(
+                                        receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
+                                        [](const auto &action) -> string { return action.second->toJSON(); }));
+                            }
+                        }
                     }
                 }
             }
@@ -696,8 +707,8 @@ TEST_P(LSPTest, All) {
         // We've already removed any code action assertions that matches a received code action assertion.
         // Any remaining are therefore extraneous.
         EXPECT_EQ(applyCodeActionAssertions.size(), 0)
-            << fmt::format("Found extraneous apply-code-action assertions: {}",
-                           fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
+            << fmt::format("Found extraneous apply-code-action assertions:\n{}",
+                           fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), "\n",
                                          [](const auto &assertion) -> string { return assertion->toString(); }));
     }
 
