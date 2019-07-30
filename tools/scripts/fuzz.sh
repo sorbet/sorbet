@@ -8,7 +8,7 @@ if [ "$#" -eq 0 ]; then
 elif [ "$#" -eq 1 ]; then
   what="$1"
 else
-  echo "usage: $0 <fuzz_target>"
+  echo "usage: $0 [<fuzz_target>]"
   exit 1
 fi
 
