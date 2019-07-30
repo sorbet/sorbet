@@ -268,7 +268,8 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
             }
         }
-        if (!klass->declLoc.file().data(ctx).isRBI() && classDefinesBehavior(klass)) {
+        if (klass->symbol != core::Symbols::root() && !klass->declLoc.file().data(ctx).isRBI() &&
+            classDefinesBehavior(klass)) {
             auto prevLoc = namerCtx->classBehaviorLocs.find(klass->symbol);
             if (prevLoc == namerCtx->classBehaviorLocs.end()) {
                 namerCtx->classBehaviorLocs[klass->symbol] = klass->declLoc;

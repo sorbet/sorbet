@@ -6,10 +6,9 @@
 namespace sorbet::namer {
 
 class NamerCtx final {
-    friend class NameInserter;
-
 private:
     UnorderedMap<core::SymbolRef, core::Loc> classBehaviorLocs;
+    friend class NameInserter;
 };
 
 class Namer final {

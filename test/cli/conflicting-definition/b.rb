@@ -1,3 +1,5 @@
+require 'y'
+
 module Foo
   true
 end
