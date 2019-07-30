@@ -28,6 +28,7 @@ std::unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain:
     auto gs = std::make_unique<sorbet::core::GlobalState>(
         (std::make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console)));
     sorbet::payload::createInitialGlobalState(gs, opts, kvstore);
+    gs->errorQueue->ignoreFlushes = true;
     return gs;
 }
 
