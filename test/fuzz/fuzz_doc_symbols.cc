@@ -50,6 +50,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
 
     int nextId = 0;
     std::string contents((const char *)data, size);
+    auto fileUri = sorbet::test::filePathToUri(rootUri, "file.rb");
 
     // TODO ignore responses?
 
@@ -57,13 +58,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
 
     lspWrapper.getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::NotificationMessage>(
         "2.0", sorbet::test::LSPMethod::TextDocumentDidOpen,
-        std::make_unique<sorbet::test::DidOpenTextDocumentParams>(std::make_unique<sorbet::test::TextDocumentItem>(
-            sorbet::test::filePathToUri(rootUri, "file.rb"), "ruby", 1, contents)))));
+        std::make_unique<sorbet::test::DidOpenTextDocumentParams>(
+            std::make_unique<sorbet::test::TextDocumentItem>(fileUri, "ruby", 1, contents)))));
 
     lspWrapper.getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::RequestMessage>(
         "2.0", nextId++, sorbet::test::LSPMethod::TextDocumentDocumentSymbol,
         std::make_unique<sorbet::test::DocumentSymbolParams>(
-            std::make_unique<sorbet::test::TextDocumentIdentifier>("file.rb")))));
+            std::make_unique<sorbet::test::TextDocumentIdentifier>(fileUri)))));
 
     return 0;
 }
