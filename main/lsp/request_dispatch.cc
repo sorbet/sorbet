@@ -169,12 +169,6 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             serverCap->hoverProvider = true;
             serverCap->referencesProvider = opts.lspFindReferencesEnabled;
 
-            if (opts.lspAutocompleteEnabled) {
-                auto completionProvider = make_unique<CompletionOptions>();
-                completionProvider->triggerCharacters = {"."};
-                serverCap->completionProvider = move(completionProvider);
-            }
-
             if (opts.lspQuickFixEnabled) {
                 auto codeActionProvider = make_unique<CodeActionOptions>();
                 codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix};
