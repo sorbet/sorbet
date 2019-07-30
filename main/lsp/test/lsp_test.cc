@@ -43,7 +43,7 @@ const string file_string = "# typed: true\n"
                            "    # This is a method with documentation above its\n"
                            "    # one-line sig block.\n"
                            "    sig {returns(Integer)}\n"
-                           "    def typed_function_with_one_line_sig_block\n"
+                           "    def one_line_sig_block\n"
                            "      1\n"
                            "    end\n"
                            "\n"
@@ -91,16 +91,14 @@ TEST(FindDocumentationTest, Constant) { // NOLINT
     optional<string> b = findDocumentation(file, position);
     ASSERT_EQ(*b, " This is the documentation for a constant.\n This is the second line for a constant.\n");
 }
-TEST(FindDocumentationTest, DocumentationAboveOneLineSig) { // NOLINT
-    int position = file.find("typed_function_with_one_line_sig_block");
+TEST(FindDocumentationTest, AboveOneLineSig) { // NOLINT
+    int position = file.find("one_line_sig_block");
     optional<string> b = findDocumentation(file, position);
-    cout << "b is " << *b << endl;
     ASSERT_EQ(*b, " This is a method with documentation above its\n one-line sig block.\n");
 }
-TEST(FindDocumentationTest, DocumentationAboveMultiLineSig) { // NOLINT
-    int position = file.find("typed_function_with_multi_line_sig_block");
+TEST(FindDocumentationTest, AboveMultiLineSig) { // NOLINT
+    int position = file.find("multi_line_sig_block");
     optional<string> b = findDocumentation(file, position);
-    cout << "b is " << *b << endl;
     ASSERT_EQ(*b, " This is a method with documentation above its\n multi-line sig block.\n");
 }
 
