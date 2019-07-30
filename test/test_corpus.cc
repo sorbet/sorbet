@@ -513,16 +513,6 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
-string codeActionsToString(const variant<JSONNullObject, vector<unique_ptr<CodeAction>>> &codeActionResult) {
-    if (get_if<JSONNullObject>(&codeActionResult)) {
-        return "null";
-    } else {
-        auto &actions = get<vector<unique_ptr<CodeAction>>>(codeActionResult);
-        return fmt::format("{}", fmt::map_join(actions.begin(), actions.end(), ", ",
-                                               [](const auto &sym) -> string { return sym->toJSON(); }));
-    }
-}
-
 TEST_P(LSPTest, All) {
     string rootPath = "/Users/jvilk/stripe/pay-server";
     string rootUri = fmt::format("file://{}", rootPath);
@@ -613,18 +603,20 @@ TEST_P(LSPTest, All) {
     }
 
     // Quick fix code action
-    auto codeActionExpectation = test.expectations.find("code-actions");
-    if (codeActionExpectation != test.expectations.end()) {
+    vector<shared_ptr<ApplyCodeActionAssertion>> applyCodeActionAssertions;
+    for (auto &assertion : assertions) {
+        if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
+            applyCodeActionAssertions.push_back(applyCodeActionAssertion);
+        }
+    }
+    bool exhaustiveApplyCodeAction =
+        BooleanPropertyAssertion::getValue("exhaustive-apply-code-action", assertions).value_or(false);
+
+    if (!applyCodeActionAssertions.empty() || exhaustiveApplyCodeAction) {
+        // TODO(sushain): test multi-file code actions
         ASSERT_EQ(filenames.size(), 1) << "code-actions only works with tests that have a single file.";
 
         auto errors = RangeAssertion::getErrorAssertions(assertions);
-
-        vector<shared_ptr<ApplyCodeActionAssertion>> applyCodeActionAssertions;
-        for (auto &assertion : assertions) {
-            if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
-                applyCodeActionAssertions.push_back(applyCodeActionAssertion);
-            }
-        }
 
         // Request code actions for each error.
         for (auto &error : errors) {
@@ -649,41 +641,65 @@ TEST_P(LSPTest, All) {
                     auto &receivedCodeActionResponse =
                         get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
 
-                    auto expectedCodeActionsPath = test.folder + codeActionExpectation->second;
-                    auto expected = LSPMessage::fromClient(FileOps::read(expectedCodeActionsPath.c_str()));
-                    auto &expectedResp = expected->asResponse();
-                    auto &expectedCodeActionResponse =
-                        get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*expectedResp.result);
-
-                    // Verify that the code action response matches our expectation.
-                    EXPECT_EQ(codeActionsToString(receivedCodeActionResponse),
-                              codeActionsToString(expectedCodeActionResponse))
-                        << "Mismatch on: " << expectedCodeActionsPath;
+                    EXPECT_FALSE(get_if<JSONNullObject>(&receivedCodeActionResponse));
 
                     if (!get_if<JSONNullObject>(&receivedCodeActionResponse)) {
-                        auto &receivedCodeActions = get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse);
                         UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
+                        auto &receivedCodeActions = get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse);
                         for (auto &codeAction : receivedCodeActions) {
-                            receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
-                        }
+                            bool codeActionTitleUnique =
+                                receivedCodeActionsByTitle.find(codeAction->title) == receivedCodeActionsByTitle.end();
+                            EXPECT_TRUE(codeActionTitleUnique)
+                                << "Found code action with duplicate title: " << codeAction->title;
 
-                        // TODO(sushain): remove the assertions as we apply them and verify at the end that none remain
-                        // Check any corresponding code action assertions, i.e. verify that they apply correctly.
-                        for (auto &applyCodeActionAssertion : applyCodeActionAssertions) {
-                            if (cmpRanges(*applyCodeActionAssertion->range, *error->range)) {
-                                auto it = receivedCodeActionsByTitle.find(applyCodeActionAssertion->title);
-                                EXPECT_TRUE(it != receivedCodeActionsByTitle.end());
-                                if (it != receivedCodeActionsByTitle.end()) {
-                                    auto codeAction = move(it->second);
-                                    applyCodeActionAssertion->check(test.sourceFileContents, codeAction, test.testName,
-                                                                    fileUri);
-                                }
+                            if (codeActionTitleUnique) {
+                                receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
                             }
                         }
+
+                        vector<shared_ptr<ApplyCodeActionAssertion>> matchedCodeActionAssertions;
+
+                        // Check any code action assertions for the same error range, i.e. verify that when applied,
+                        // they match the expectation.
+                        auto it = applyCodeActionAssertions.begin();
+                        while (it != applyCodeActionAssertions.end()) {
+                            auto codeActionAssertion = it->get();
+                            // TODO(sushain): what if there are multiple errors on the same range?
+                            if (cmpRanges(*codeActionAssertion->range, *error->range)) {
+                                auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
+                                EXPECT_NE(it2, receivedCodeActionsByTitle.end());
+                                if (it2 != receivedCodeActionsByTitle.end()) {
+                                    auto codeAction = move(it2->second);
+                                    codeActionAssertion->check(test.sourceFileContents, codeAction, test.testName,
+                                                               fileUri);
+                                    matchedCodeActionAssertions.emplace_back(*it);
+                                    it = applyCodeActionAssertions.erase(it);
+                                    continue;
+                                }
+                            }
+
+                            ++it;
+                        }
+
+                        EXPECT_TRUE(!exhaustiveApplyCodeAction ||
+                                    matchedCodeActionAssertions.size() == receivedCodeActionsByTitle.size())
+                            << fmt::format(
+                                   "Received {} code actions ({}) but only found {} apply-code-action assertions",
+                                   receivedCodeActions.size(),
+                                   fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(),
+                                                 ", ", [](const auto &action) -> string { return action.first; }),
+                                   applyCodeActionAssertions.size());
                     }
                 }
             }
         }
+
+        // We've already removed any code action assertions that matches a received code action assertion.
+        // Any remaining are therefore extraneous.
+        EXPECT_EQ(applyCodeActionAssertions.size(), 0)
+            << fmt::format("Found extraneous apply-code-action assertions: {}",
+                           fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
+                                         [](const auto &assertion) -> string { return assertion->toString(); }));
     }
 
     // TODO(sushain): test all (?) the autocorrects sorbet supports
