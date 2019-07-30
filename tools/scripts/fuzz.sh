@@ -14,7 +14,7 @@ fi
 
 echo "setting env vars"
 export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
-export ASAN_OPTIONS='dedup_token_length=10'
+export ASAN_OPTIONS="dedup_token_length=10"
 
 echo "checking for commands"
 if ! command -v llvm-symbolizer >/dev/null; then
