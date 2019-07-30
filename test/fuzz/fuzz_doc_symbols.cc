@@ -39,7 +39,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     std::unique_ptr<sorbet::core::GlobalState> gs;
     { gs = commonGs->deepCopy(true); }
 
-    const auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(gs, opts, console, false);
+    // TODO move the gs?
+    // TODO how to use opts and avoid another mkOpts()?
+    const auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(std::move(gs), mkOpts(), console, false);
 
     std::vector<sorbet::core::FileRef> inputFiles;
     std::string inputData((const char *)data, size);
