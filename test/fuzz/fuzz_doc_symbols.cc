@@ -19,6 +19,7 @@ sorbet::realmain::options::Options mkOpts() {
     sorbet::realmain::options::Options opts;
     opts.fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
     opts.lspDocumentSymbolEnabled = true;
+    opts.rawInputDirNames.emplace_back(rootPath);
     return opts;
 }
 
