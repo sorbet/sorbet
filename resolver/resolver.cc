@@ -433,8 +433,8 @@ private:
     }
 
     static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
-        auto ancestorSym = job.ancestor->symbol;
-        ENFORCE(ancestorSym.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
+        ENFORCE(job.ancestor->symbol.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
+        auto ancestorSym = job.ancestor->symbol.data(ctx)->dealias(ctx);
 
         if (!ancestorSym.data(ctx)->isClassSealed()) {
             return;
