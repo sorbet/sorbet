@@ -12,18 +12,20 @@ else
   exit 1
 fi
 
+echo "building $what"
+bazel build "//test/fuzz:$what" --config=fuzz -c opt
+
 echo "setting env vars"
 export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
 export ASAN_OPTIONS="dedup_token_length=10"
 
+# normally we'd like to check to see if commands are around before running the script, but in this case, we want the
+# bazel build command to run before this check so that bazel can download itself.
 echo "checking for commands"
 if ! command -v llvm-symbolizer >/dev/null; then
   echo "fatal: command not found: llvm-symbolizer"
   exit 1
 fi
-
-echo "building $what"
-bazel build "//test/fuzz:$what" --config=fuzz -c opt
 
 echo "setting up files"
 mkdir -p fuzz_corpus
