@@ -21,7 +21,7 @@ module T::Helpers
   end
 
   def sealed!
-    raise "TODO(jez) sealed is not implemented in the runtime yet."
+    Kernel.raise "TODO(jez) sealed is not implemented in the runtime yet."
   end
 
   # Causes a mixin to also mix in class methods from the named module.
