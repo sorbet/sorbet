@@ -352,6 +352,11 @@ cxxopts::Options buildOptions() {
         "matchs. Matches must be against whole folder and file names, so `foo` matches `/foo/bar.rb` and "
         "`/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.",
         cxxopts::value<vector<string>>(), "string");
+    options.add_options("advanced")(
+        "lsp-dirs-not-on-client",
+        "Directory prefixes that are not accessible editor-side. References to files in these directories will be sent "
+        "as sorbet:// URIs to clients that understand them.",
+        cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
 
@@ -658,6 +663,18 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.lspDocumentSymbolEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+
+        if (raw.count("lsp-dirs-not-on-client") > 0) {
+            auto lspDirsNotOnClient = raw["lsp-dirs-not-on-client"].as<vector<string>>();
+            // Convert all of these dirs into absolute ignore patterns that begin with '/'.
+            for (auto &dir : lspDirsNotOnClient) {
+                string pNormalized = dir;
+                if (dir.at(0) != '/') {
+                    pNormalized = '/' + dir;
+                }
+                opts.lspDirsNotOnClient.push_back(pNormalized);
+            }
+        }
 
         opts.cacheDir = raw["cache-dir"].as<string>();
         if (!extractPrinters(raw, opts, logger)) {

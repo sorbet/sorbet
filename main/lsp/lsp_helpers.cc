@@ -1,6 +1,7 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "common/FileOps.h"
 #include "lsp.h"
 
 using namespace std;
@@ -67,6 +68,13 @@ unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
     return make_unique<Range>(move(start), move(end));
 }
 
+// Embeds a file's information into a sorbet:// URI that encodes its path and full contents.
+// Used for files that are not available locally in the editor, like things in payload or directories available only on
+// the machine where Sorbet is running.
+string getSorbetURI(const core::File &file) {
+    return fmt::format("sorbet://{}?data={}", file.path(), absl::WebSafeBase64Escape(file.source()));
+}
+
 unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc, bool useDataLinksForPayload) {
     string uri;
     if (!loc.file().exists()) {
@@ -74,8 +82,8 @@ unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Lo
     } else {
         auto &messageFile = loc.file().data(gs);
         if (messageFile.isPayload()) {
-            if (useDataLinksForPayload) {
-                uri = fmt::format("data:text/plain;base64,{}", absl::Base64Escape(loc.file().data(gs).source()));
+            if (useDataLinksForPayload && enableSorbetURIs) {
+                uri = getSorbetURI(messageFile);
             } else {
                 // This is hacky because VSCode appends #4,3 (or whatever the position is of the
                 // error) to the uri before it shows it in the UI since this is the format that
@@ -92,6 +100,10 @@ unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Lo
                 // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
                 uri = fmt::format("{}#L{}", messageFile.path(), loc.position(gs).first.line);
             }
+        } else if (enableSorbetURIs &&
+                   FileOps::isFileIgnored(rootPath, messageFile.path(), opts.lspDirsNotOnClient, {})) {
+            // File is not available editor-side; send file data in sorbet:// URI.
+            uri = getSorbetURI(messageFile);
         } else {
             uri = fileRef2Uri(gs, loc.file());
         }

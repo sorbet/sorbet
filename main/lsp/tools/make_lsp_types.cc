@@ -1207,6 +1207,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
         makeObject("SorbetInitializationOptions",
                    {
                        makeField("supportsOperationNotifications", makeOptional(JSONBool)),
+                       makeField("supportsSorbetURIs", makeOptional(JSONBool)),
                        makeField("enableTypecheckInfo", makeOptional(JSONBool)),
                    },
                    classTypes);

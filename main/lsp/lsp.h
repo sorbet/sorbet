@@ -135,6 +135,10 @@ class LSPLoop {
      * `params.initializationOptions.supportsOperationNotifications` set to `true`.
      */
     bool enableOperationNotifications = false;
+    /**
+     * If true, then Sorbet will use sorbet:// URIs for files that are not stored on disk (e.g., payload files).
+     */
+    bool enableSorbetURIs = false;
     /** If true, then LSP sends metadata to the client every time it typechecks files. Used in tests. */
     bool enableTypecheckInfo = false;
     /**
