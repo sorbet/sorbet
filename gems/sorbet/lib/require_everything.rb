@@ -105,8 +105,16 @@ class Sorbet::Private::RequireEverything
   private
 
   def self.rb_file_paths
-    sorbet_exec = File.realpath("#{__dir__}/../bin/srb")
-    output = `#{sorbet_exec} tc -p file-table-json --stop-after=parser --silence-dev-message --no-error-count`
+    srb = File.realpath("#{__dir__}/../bin/srb")
+    output = IO.popen([
+      srb,
+      "tc",
+      "-p",
+      "file-table-json",
+      "--stop-after=parser",
+      "--silence-dev-message",
+      "--no-error-count",
+    ]) {|io| io.read}
     # This returns a hash with structure:
     # { files:
     #   [
