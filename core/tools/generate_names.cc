@@ -129,6 +129,7 @@ NameDef names[] = {
     {"declareInterface", "interface!"},
     {"declareAbstract", "abstract!"},
     {"declareFinal", "final!"},
+    {"declareSealed", "sealed!"},
     {"revealType", "reveal_type"},
     {"absurd"},
     // end T keywords
@@ -247,6 +248,10 @@ NameDef names[] = {
     // object"
     {"singleton", "<singleton class>"},
     {"attached", "<attached class>"},
+
+    // This behaves like the above two names, in the sense that we use a member
+    // on a class to lookup an associated symbol with some extra info.
+    {"sealedClassesList", "<sealedClassesList>"},
 
     // This name is used as a key in SymbolInfo::members to store the module
     // registered via the `mixes_in_class_method` name.
