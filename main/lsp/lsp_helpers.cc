@@ -11,7 +11,7 @@ namespace sorbet::realmain::lsp {
 constexpr string_view sorbetUri = "sorbet:";
 
 string LSPLoop::remoteName2Local(string_view uri) {
-    const bool isSorbetURI = absl::StartsWith(sorbetUri, uri);
+    const bool isSorbetURI = absl::StartsWith(uri, sorbetUri);
     ENFORCE(absl::StartsWith(uri, rootUri) || (enableSorbetURIs && isSorbetURI));
     const string_view root = isSorbetURI ? sorbetUri : rootUri;
     const char *start = uri.data() + root.length();
