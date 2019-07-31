@@ -35,7 +35,8 @@ class Foo
   # Docs above single-line sig
   sig {params(arg0: Integer).void}
   def typed_with_docs(arg0)
-    # ^ hover: ```ruby\n Docs above single-line sig\nsig {params(arg0: Integer).void}
+    # ^ hover: Docs above single-line sig
+    # ^ hover: sig {params(arg0: Integer).void}
     # TODO why is only this result formatted as ruby code?? (probably bug in findDocumentation)
     # TODO make hover accept multiline
   end

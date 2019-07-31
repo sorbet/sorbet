@@ -157,7 +157,12 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
         // Handle a comment line. Do not count typing declarations.
         else if (absl::StartsWith(line, "#") && !absl::StartsWith(line, "# typed:")) {
-            documentation = absl::StrCat(line.substr(line.find('#') + 1, line.size()), "\n", documentation);
+            // Account for whitespace before comment e.g
+            // # abc -> "abc"
+            // #abc -> "abc"
+            int skip_after_hash = absl::StartsWith(line, "# ") ? 2 : 1;
+
+            documentation = absl::StrCat(line.substr(line.find('#') + skip_after_hash, line.size()), "\n", documentation);
         }
 
         // No other cases applied to this line, so stop looking.
