@@ -1368,7 +1368,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             // (CodeAction | Command)[] | null
             // Sorbet only sends CodeAction[].
             {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction)})},
-            // TODO(sushain): the following are more correct but I can only get the above to work.
+            // TODO: the following are more correct but I can only get the above to work.
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(makeVariant({CodeAction, Command}))})},
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction), makeArray(Command)})},
             {"workspace/symbol", makeVariant({JSONNull, makeArray(SymbolInformation)})},

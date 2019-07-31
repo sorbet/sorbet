@@ -42,7 +42,8 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
             auto workspaceEdit = make_unique<WorkspaceEdit>();
             workspaceEdit->documentChanges = move(documentEdits);
 
-            // TODO(sushain): we need better headers
+            // TODO(sushain): improve headers, potentially by just using Insert... and Replace... with some special
+            // handling for multi-line edits
             auto action = make_unique<CodeAction>(e->header);
             action->kind = CodeActionKind::Quickfix;
             action->edit = move(workspaceEdit);
@@ -51,8 +52,9 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
         }
     }
 
-    // TODO(sushain): this isn't particularly robust but maybe it's good enough? Users will be confused by two actions
-    // with the same header anyway. Also, explain why this happens better.
+    // TODO(sushain): investigate where duplicates might happen and whether there is a better fix
+    // Remove any actions with the same header regardless of their actions since users cannot make an informed decision
+    // between two seemingly identical actions.
     fast_sort(result, [](const auto &l, const auto &r) -> bool { return l->title.compare(r->title) > 0; });
     auto last =
         unique(result.begin(), result.end(), [](const auto &l, const auto &r) -> bool { return l->title == r->title; });
