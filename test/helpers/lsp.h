@@ -39,9 +39,10 @@ bool assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage 
 std::optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMessage &notifMsg);
 
 /** Sends boilerplate initialization / initialized messages to start a new LSP session. */
-std::vector<std::unique_ptr<LSPMessage>> initializeLSP(std::string_view rootPath, std::string_view rootUri,
-                                                       LSPWrapper &lspWrapper, int &nextId,
-                                                       bool enableTypecheckInfo = false, bool supportsMarkdown = true);
+std::vector<std::unique_ptr<LSPMessage>>
+initializeLSP(std::string_view rootPath, std::string_view rootUri, LSPWrapper &lspWrapper, int &nextId,
+              bool enableTypecheckInfo = false, bool supportsMarkdown = true,
+              std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions = std::nullopt);
 
 } // namespace sorbet::test
 #endif // TEST_HELPERS_LSP_H

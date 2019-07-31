@@ -267,7 +267,8 @@ optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMess
 }
 
 vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view rootUri, LSPWrapper &lspWrapper,
-                                             int &nextId, bool enableTypecheckInfo, bool supportsMarkdown) {
+                                             int &nextId, bool enableTypecheckInfo, bool supportsMarkdown,
+                                             optional<unique_ptr<SorbetInitializationOptions>> initOptions) {
     // Reset next id.
     nextId = 0;
 
@@ -275,6 +276,7 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
     {
         auto initializeParams =
             makeInitializeParams(string(rootPath), string(rootUri), enableTypecheckInfo, supportsMarkdown);
+        initializeParams->initializationOptions = move(initOptions);
         LSPMessage message(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize, move(initializeParams)));
         auto responses = lspWrapper.getLSPResponsesFor(message);
 

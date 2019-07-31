@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 // ^ Violates linting rules, so include first.
 #include "ProtocolTest.h"
+#include "absl/strings/match.h"
 #include "common/common.h"
 #include "test/helpers/lsp.h"
 
@@ -420,6 +421,42 @@ TEST_F(ProtocolTest, RespectsHoverTextLimitations) {
     auto &contents = hover->contents;
     ASSERT_EQ(contents->kind, MarkupKind::Plaintext);
     ASSERT_EQ(contents->value, "Integer(1)");
+}
+
+// Tests that Sorbet returns sorbet: URIs for payload references, and that readFile works on them.
+TEST_F(ProtocolTest, SupportsGitHubSorbetURIs) {
+    const bool enableTypecheckInfo = false;
+    const bool supportsMarkdown = false;
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->supportsSorbetURIs = true;
+    auto initializeResponses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, enableTypecheckInfo,
+                                                           supportsMarkdown, move(initOptions));
+    updateDiagnostics(initializeResponses);
+    assertDiagnostics(move(initializeResponses), {});
+
+    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n[0,1,2,3].select {|x| x > 0}\n")), {});
+    auto defResponses = send(LSPMessage(make_unique<RequestMessage>(
+        "2.0", nextId++, LSPMethod::TextDocumentDefinition,
+        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(getUri("foo.rb")),
+                                                make_unique<Position>(1, 11)))));
+    ASSERT_EQ(defResponses.size(), 1);
+
+    auto &defResponse = defResponses.at(0);
+    ASSERT_TRUE(defResponse->isResponse());
+    auto &defResult = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*defResponse->asResponse().result);
+    auto &result = get<vector<unique_ptr<Location>>>(defResult);
+    ASSERT_EQ(result.size(), 1);
+    auto &loc = result.at(0);
+    ASSERT_TRUE(absl::StartsWith(loc->uri, "sorbet:https://github.com/"));
+
+    auto readFileResponses = send(LSPMessage(make_unique<RequestMessage>(
+        "2.0", nextId++, LSPMethod::SorbetReadFile, make_unique<TextDocumentIdentifier>(loc->uri))));
+    ASSERT_EQ(readFileResponses.size(), 1);
+    auto &readFileResponse = readFileResponses.at(0);
+    ASSERT_TRUE(readFileResponse->isResponse());
+    auto &readFileResult = get<unique_ptr<TextDocumentItem>>(*readFileResponse->asResponse().result);
+    // It should contain data.
+    ASSERT_FALSE(readFileResult->text.empty());
 }
 
 } // namespace sorbet::test::lsp
