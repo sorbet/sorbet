@@ -612,7 +612,6 @@ TEST_P(LSPTest, All) {
         BooleanPropertyAssertion::getValue("exhaustive-apply-code-action", assertions).value_or(false);
 
     if (!applyCodeActionAssertions.empty() || exhaustiveApplyCodeAction) {
-        // TODO(sushain): test multi-file code actions
         ASSERT_EQ(filenames.size(), 1) << "code-actions only works with tests that have a single file.";
 
         auto errors = RangeAssertion::getErrorAssertions(assertions);
@@ -621,7 +620,7 @@ TEST_P(LSPTest, All) {
         for (auto &error : errors) {
             vector<unique_ptr<Diagnostic>> diagnostics;
             auto fileUri = testFileUris[*filenames.begin()];
-            // TODO(sushain): stop manually copying these over
+            // Unfortunately there's no simpler way to copy the range (yet).
             auto params = make_unique<CodeActionParams>(
                 make_unique<TextDocumentIdentifier>(fileUri),
                 make_unique<Range>(make_unique<Position>(error->range->start->line, error->range->start->character),
@@ -713,8 +712,7 @@ TEST_P(LSPTest, All) {
     }
 
     // TODO(sushain): test all (?) the autocorrects sorbet supports
-    // TODO(sushain): test multiple autocorrect options
-    // TODO(sushain): test multiple errors
+    // TODO(sushain): test multiple errors with autocorrects
 
     // Usage and def assertions
     {

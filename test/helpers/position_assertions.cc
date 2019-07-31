@@ -921,8 +921,8 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
     auto &file = it->second;
     for (auto &c : *codeAction->edit.value()->documentChanges) {
         string actualEditedFileContents = string(file->source());
-        // TODO(sushain): support cross-file edits
-        EXPECT_EQ(c->textDocument->uri, fileUri);
+        EXPECT_EQ(c->textDocument->uri, fileUri)
+            << fmt::format("Requested code action for {}, but received edits in {}", fileUri, c->textDocument->uri);
 
         // First, sort the edits by increasing starting location and verify that none overlap.
         fast_sort(c->edits, [](const auto &l, const auto &r) -> bool { return cmpRanges(*l->range, *r->range); });
