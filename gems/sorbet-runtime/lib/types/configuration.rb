@@ -120,7 +120,7 @@ module T::Configuration
   end
 
   private_class_method def self.sig_builder_error_handler_default(error, location)
-    T::Private::Methods.sig_error(location, error.message)
+    raise ArgumentError.new("#{loc.path}:#{loc.lineno}: Error interpreting `sig`:\n  #{message}\n\n")
   end
 
   def self.sig_builder_error_handler(error, location)

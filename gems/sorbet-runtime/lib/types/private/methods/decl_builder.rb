@@ -238,6 +238,10 @@ module T::Private::Methods
     def finalize!
       check_live!
 
+      if decl.returns.equal?(ARG_NOT_PROVIDED)
+        raise BuilderError.new("You must provide a return type; use the `.returns` or `.void` builder methods.")
+      end
+
       if decl.bind.equal?(ARG_NOT_PROVIDED)
         decl.bind = nil
       end

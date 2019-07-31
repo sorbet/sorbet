@@ -289,10 +289,6 @@ module T::Private::Methods
               "class/module."
       end
 
-      if current_declaration.returns.equal?(ARG_NOT_PROVIDED)
-        sig_error(loc, "You must provide a return type; use the `.returns` or `.void` builder methods. Method: #{original_method}")
-      end
-
       signature = Signature.new(
         method: original_method,
         method_name: method_name,
