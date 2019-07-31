@@ -1493,7 +1493,7 @@ public:
             auto toName = args[1];
 
             auto owner = methodOwner(ctx);
-            core::SymbolRef toMethod = owner.data(ctx)->findMember(ctx, toName);
+            core::SymbolRef toMethod = owner.data(ctx)->findMemberTransitive(ctx, toName);
             if (!toMethod.exists()) {
                 if (auto e = ctx.state.beginError(send->args[1]->loc, core::errors::Resolver::BadAliasMethod)) {
                     e.setHeader("Can't make method alias from `{}` to non existing method `{}`", fromName.show(ctx),
