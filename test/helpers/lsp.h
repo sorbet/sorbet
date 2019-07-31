@@ -9,9 +9,10 @@ namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
 /** Creates the parameters to the `initialize` message, which advertises the client's capabilities. */
-std::unique_ptr<InitializeParams> makeInitializeParams(std::variant<std::string, JSONNullObject> rootPath,
-                                                       std::variant<std::string, JSONNullObject> rootUri,
-                                                       bool enableTypecheckInfo, bool supportsMarkdown);
+std::unique_ptr<InitializeParams>
+makeInitializeParams(std::variant<std::string, JSONNullObject> rootPath,
+                     std::variant<std::string, JSONNullObject> rootUri, bool supportsMarkdown,
+                     std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions);
 
 /** Create an LSPMessage containing a textDocument/definition request. */
 std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character);

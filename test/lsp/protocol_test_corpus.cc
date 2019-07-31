@@ -300,9 +300,9 @@ TEST_F(ProtocolTest, MonacoInitialization) {
     // Null is functionally equivalent to an empty rootUri. Manually reset rootUri before initializing.
     rootUri = "";
     const bool supportsMarkdown = true;
-    auto params =
-        make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize,
-                                    makeInitializeParams(JSONNullObject(), JSONNullObject(), supportsMarkdown));
+    auto params = make_unique<RequestMessage>(
+        "2.0", nextId++, LSPMethod::Initialize,
+        makeInitializeParams(JSONNullObject(), JSONNullObject(), supportsMarkdown, nullopt));
     auto responses = send(LSPMessage(move(params)));
     ASSERT_EQ(responses.size(), 1) << "Expected only a single response to the initialize request.";
     auto &respMsg = responses.at(0);
