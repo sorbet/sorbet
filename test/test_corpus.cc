@@ -712,7 +712,6 @@ TEST_P(LSPTest, All) {
     }
 
     // TODO(sushain): test all (?) the autocorrects sorbet supports
-    // TODO(sushain): test multiple errors with autocorrects
 
     // Usage and def assertions
     {
