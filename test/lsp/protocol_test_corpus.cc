@@ -299,11 +299,10 @@ TEST_F(ProtocolTest, EmptyRootUriInitialization) {
 TEST_F(ProtocolTest, MonacoInitialization) {
     // Null is functionally equivalent to an empty rootUri. Manually reset rootUri before initializing.
     rootUri = "";
-    const bool enableTypecheckInfo = false;
     const bool supportsMarkdown = true;
-    auto params = make_unique<RequestMessage>(
-        "2.0", nextId++, LSPMethod::Initialize,
-        makeInitializeParams(JSONNullObject(), JSONNullObject(), enableTypecheckInfo, supportsMarkdown));
+    auto params =
+        make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize,
+                                    makeInitializeParams(JSONNullObject(), JSONNullObject(), supportsMarkdown));
     auto responses = send(LSPMessage(move(params)));
     ASSERT_EQ(responses.size(), 1) << "Expected only a single response to the initialize request.";
     auto &respMsg = responses.at(0);
@@ -400,10 +399,8 @@ TEST_F(ProtocolTest, SilentlyIgnoresInvalidJSONMessages) {
 
 // If a client doesn't support markdown, send hover as plaintext.
 TEST_F(ProtocolTest, RespectsHoverTextLimitations) {
-    const bool enableTypecheckInfo = false;
     const bool supportsMarkdown = false;
-    auto initializeResponses =
-        sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, enableTypecheckInfo, supportsMarkdown);
+    auto initializeResponses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown);
     updateDiagnostics(initializeResponses);
     assertDiagnostics(move(initializeResponses), {});
 
@@ -425,13 +422,12 @@ TEST_F(ProtocolTest, RespectsHoverTextLimitations) {
 
 // Tests that Sorbet returns sorbet: URIs for payload references & files not on client, and that readFile works on them.
 TEST_F(ProtocolTest, SorbetURIsWork) {
-    const bool enableTypecheckInfo = false;
     const bool supportsMarkdown = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
     lspWrapper->opts.lspDirsNotOnClient.push_back("/folder");
-    auto initializeResponses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, enableTypecheckInfo,
-                                                           supportsMarkdown, move(initOptions));
+    auto initializeResponses =
+        sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown, move(initOptions));
     updateDiagnostics(initializeResponses);
     assertDiagnostics(move(initializeResponses), {});
 
