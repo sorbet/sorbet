@@ -1226,7 +1226,7 @@ private:
             [&](ast::Cast *cast) {
                 if (cast->cast != core::Names::let()) {
                     if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
-                        e.setHeader("Use T.let() to specify the type of constants");
+                        e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
                 }
                 result = cast->type;
@@ -1241,7 +1241,8 @@ private:
                     }
                 }
                 if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::ConstantMissingTypeAnnotation)) {
-                    e.setHeader("Constants must have type annotations with T.let() when specifying '# typed: strict'");
+                    e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
+                                "# typed: strict");
                 }
             });
         return result;
@@ -1266,7 +1267,7 @@ private:
             return false;
         } else if (cast->cast != core::Names::let()) {
             if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
-                e.setHeader("Use T.let() to specify the type of constants");
+                e.setHeader("Use `{}` to specify the type of constants", "T.let");
             }
         }
 
