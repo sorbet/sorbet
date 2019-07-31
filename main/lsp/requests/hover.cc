@@ -28,15 +28,15 @@ unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string sigString
     string content = "";
 
     if (docString.length() > 0) {
-        content += docString;
+        absl::StrAppend(&content, docString);
     }
 
     if (sigString.length() > 0) {
         // Add a newline if docString does not contain one
         if (content.length() > 0 && content.back() != '\n') {
-            content += "\n";
+            absl::StrAppend(&content, "\n");
         }
-        content += sigString;
+        absl::StrAppend(&content, sigString);
     }
 
     if (markupKind == MarkupKind::Markdown && content.length() > 0) {
