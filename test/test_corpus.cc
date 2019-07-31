@@ -658,33 +658,34 @@ TEST_P(LSPTest, All) {
                         u4 receivedCodeActionsCount = receivedCodeActionsByTitle.size();
                         vector<shared_ptr<ApplyCodeActionAssertion>> matchedCodeActionAssertions;
 
-                        // Check any code action assertions for the same error range, i.e. verify that when applied,
-                        // they match the expectation.
+                        // Test code action assertions matching the range of this error.
                         auto it = applyCodeActionAssertions.begin();
                         while (it != applyCodeActionAssertions.end()) {
                             auto codeActionAssertion = it->get();
-                            // TODO(sushain): what if there are multiple errors on the same range?
-                            if (cmpRanges(*codeActionAssertion->range, *error->range) == 0) {
-                                auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
-                                EXPECT_NE(it2, receivedCodeActionsByTitle.end()) << fmt::format(
-                                    "Did not receive code action matching assertion `{}` for error `{}`...",
-                                    codeActionAssertion->toString(), error->toString());
-                                if (it2 != receivedCodeActionsByTitle.end()) {
-                                    auto codeAction = move(it2->second);
-                                    codeActionAssertion->check(test.sourceFileContents, codeAction, test.testName,
-                                                               fileUri);
-
-                                    // Some bookkeeping to make surfacing errors re. extra/insufficient
-                                    // apply-code-action annotations easier.
-                                    receivedCodeActionsByTitle.erase(it2);
-                                    matchedCodeActionAssertions.emplace_back(*it);
-                                    it = applyCodeActionAssertions.erase(it);
-
-                                    continue;
-                                }
+                            if (cmpRanges(*codeActionAssertion->range, *error->range) != 0) {
+                                ++it;
+                                continue;
                             }
 
-                            ++it;
+                            // Ensure we received a code action matching the assertion.
+                            auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
+                            EXPECT_NE(it2, receivedCodeActionsByTitle.end())
+                                << fmt::format("Did not receive code action matching assertion `{}` for error `{}`...",
+                                               codeActionAssertion->toString(), error->toString());
+
+                            // Ensure that the received code action applies correctly.
+                            if (it2 != receivedCodeActionsByTitle.end()) {
+                                auto codeAction = move(it2->second);
+                                codeActionAssertion->check(test.sourceFileContents, codeAction, test.testName, fileUri);
+
+                                // Some bookkeeping to make surfacing errors re. extra/insufficient
+                                // apply-code-action annotations easier.
+                                receivedCodeActionsByTitle.erase(it2);
+                                matchedCodeActionAssertions.emplace_back(*it);
+                                it = applyCodeActionAssertions.erase(it);
+                            } else {
+                                ++it;
+                            }
                         }
 
                         if (exhaustiveApplyCodeAction) {
@@ -716,8 +717,6 @@ TEST_P(LSPTest, All) {
                            fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), "\n",
                                          [](const auto &assertion) -> string { return assertion->toString(); }));
     }
-
-    // TODO(sushain): test all (?) the autocorrects sorbet supports
 
     // Usage and def assertions
     {

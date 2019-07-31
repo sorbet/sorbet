@@ -24,6 +24,7 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
                                             core::File::Type::Normal));
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto run = tryFastPath(move(gs), files);
+
     for (auto &e : run.errors) {
         if (!e->isSilenced && e->loc.file() == file && !e->autocorrects.empty() &&
             cmpRanges(*loc2Range(*run.gs, e->loc), *params.range) == 0) {
