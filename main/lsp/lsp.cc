@@ -166,7 +166,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                 if (file.data(gs).sourceType == core::File::Type::Payload) {
                     uri = string(file.data(gs).path());
                 } else {
-                    uri = localName2Remote(file.data(gs).path());
+                    uri = fileRef2Uri(gs, file);
                 }
             }
 

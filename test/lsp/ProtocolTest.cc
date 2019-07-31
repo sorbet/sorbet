@@ -153,6 +153,31 @@ void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messa
     }
 }
 
+std::string ProtocolTest::readFile(std::string_view uri) {
+    auto readFileResponses = send(LSPMessage(make_unique<RequestMessage>(
+        "2.0", nextId++, LSPMethod::SorbetReadFile, make_unique<TextDocumentIdentifier>(string(uri)))));
+    EXPECT_EQ(readFileResponses.size(), 1);
+    if (readFileResponses.size() == 1) {
+        auto &readFileResponse = readFileResponses.at(0);
+        EXPECT_TRUE(readFileResponse->isResponse());
+        auto &readFileResult = get<unique_ptr<TextDocumentItem>>(*readFileResponse->asResponse().result);
+        return readFileResult->text;
+    }
+    return "";
+}
+
+vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, int line, int character) {
+    auto defResponses = send(*getDefinition(uri, line, character));
+    EXPECT_EQ(defResponses.size(), 1);
+    if (defResponses.size() == 1) {
+        auto &defResponse = defResponses.at(0);
+        EXPECT_TRUE(defResponse->isResponse());
+        auto &defResult = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*defResponse->asResponse().result);
+        return move(get<vector<unique_ptr<Location>>>(defResult));
+    }
+    return {};
+}
+
 void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected) {
     for (auto &msg : messages) {
         if (!assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg)) {

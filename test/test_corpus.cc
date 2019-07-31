@@ -524,7 +524,10 @@ TEST_P(LSPTest, All) {
 
     // Perform initialize / initialized handshake.
     {
-        auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true);
+        auto sorbetInitOptions = make_unique<SorbetInitializationOptions>();
+        sorbetInitOptions->enableTypecheckInfo = true;
+        auto initializedResponses =
+            initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true, move(sorbetInitOptions));
         EXPECT_EQ(0, countNonTestMessages(initializedResponses))
             << "Should not receive any response to 'initialized' message.";
     }

@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 // ^ Violates linting rules, so include first.
 #include "ProtocolTest.h"
+#include "absl/strings/match.h"
 #include "common/common.h"
 #include "test/helpers/lsp.h"
 
@@ -298,11 +299,10 @@ TEST_F(ProtocolTest, EmptyRootUriInitialization) {
 TEST_F(ProtocolTest, MonacoInitialization) {
     // Null is functionally equivalent to an empty rootUri. Manually reset rootUri before initializing.
     rootUri = "";
-    const bool enableTypecheckInfo = false;
     const bool supportsMarkdown = true;
     auto params = make_unique<RequestMessage>(
         "2.0", nextId++, LSPMethod::Initialize,
-        makeInitializeParams(JSONNullObject(), JSONNullObject(), enableTypecheckInfo, supportsMarkdown));
+        makeInitializeParams(JSONNullObject(), JSONNullObject(), supportsMarkdown, nullopt));
     auto responses = send(LSPMessage(move(params)));
     ASSERT_EQ(responses.size(), 1) << "Expected only a single response to the initialize request.";
     auto &respMsg = responses.at(0);
@@ -399,10 +399,8 @@ TEST_F(ProtocolTest, SilentlyIgnoresInvalidJSONMessages) {
 
 // If a client doesn't support markdown, send hover as plaintext.
 TEST_F(ProtocolTest, RespectsHoverTextLimitations) {
-    const bool enableTypecheckInfo = false;
     const bool supportsMarkdown = false;
-    auto initializeResponses =
-        sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, enableTypecheckInfo, supportsMarkdown);
+    auto initializeResponses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown);
     updateDiagnostics(initializeResponses);
     assertDiagnostics(move(initializeResponses), {});
 
@@ -420,6 +418,33 @@ TEST_F(ProtocolTest, RespectsHoverTextLimitations) {
     auto &contents = hover->contents;
     ASSERT_EQ(contents->kind, MarkupKind::Plaintext);
     ASSERT_EQ(contents->value, "Integer(1)");
+}
+
+// Tests that Sorbet returns sorbet: URIs for payload references & files not on client, and that readFile works on them.
+TEST_F(ProtocolTest, SorbetURIsWork) {
+    const bool supportsMarkdown = false;
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->supportsSorbetURIs = true;
+    lspWrapper->opts.lspDirsMissingFromClient.push_back("/folder");
+    auto initializeResponses =
+        sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown, move(initOptions));
+    updateDiagnostics(initializeResponses);
+    assertDiagnostics(move(initializeResponses), {});
+
+    string fileContents = "# typed: true\n[0,1,2,3].select {|x| x > 0}\ndef myMethod; end;\n";
+    assertDiagnostics(send(*openFile("folder/foo.rb", fileContents)), {});
+
+    auto selectDefinitions = getDefinitions("folder/foo.rb", 1, 11);
+    ASSERT_EQ(selectDefinitions.size(), 1);
+    auto &selectLoc = selectDefinitions.at(0);
+    ASSERT_TRUE(absl::StartsWith(selectLoc->uri, "sorbet:https://github.com/"));
+    ASSERT_FALSE(readFile(selectLoc->uri).empty());
+
+    auto myMethodDefinitions = getDefinitions("folder/foo.rb", 2, 5);
+    ASSERT_EQ(myMethodDefinitions.size(), 1);
+    auto &myMethodDefLoc = myMethodDefinitions.at(0);
+    ASSERT_EQ(myMethodDefLoc->uri, "sorbet:folder/foo.rb");
+    ASSERT_EQ(readFile(myMethodDefLoc->uri), fileContents);
 }
 
 } // namespace sorbet::test::lsp

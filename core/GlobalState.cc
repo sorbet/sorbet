@@ -1370,7 +1370,7 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     return result;
 }
 
-vector<shared_ptr<File>> GlobalState::getFiles() const {
+const vector<shared_ptr<File>> &GlobalState::getFiles() const {
     return files;
 }
 

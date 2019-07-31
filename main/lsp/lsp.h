@@ -135,6 +135,10 @@ class LSPLoop {
      * `params.initializationOptions.supportsOperationNotifications` set to `true`.
      */
     bool enableOperationNotifications = false;
+    /**
+     * If true, then Sorbet will use sorbet: URIs for files that are not stored on disk (e.g., payload files).
+     */
+    bool enableSorbetURIs = false;
     /** If true, then LSP sends metadata to the client every time it typechecks files. Used in tests. */
     bool enableTypecheckInfo = false;
     /**
@@ -185,7 +189,7 @@ class LSPLoop {
     core::FileRef uri2FileRef(std::string_view uri);
     std::string fileRef2Uri(const core::GlobalState &gs, core::FileRef);
     std::string remoteName2Local(std::string_view uri);
-    std::string localName2Remote(std::string_view uri);
+    std::string localName2Remote(std::string_view uri, bool useSorbetUri);
     std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs);
 
     /** Used to implement textDocument/documentSymbol

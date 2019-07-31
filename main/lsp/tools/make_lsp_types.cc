@@ -1207,6 +1207,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
         makeObject("SorbetInitializationOptions",
                    {
                        makeField("supportsOperationNotifications", makeOptional(JSONBool)),
+                       makeField("supportsSorbetURIs", makeOptional(JSONBool)),
                        makeField("enableTypecheckInfo", makeOptional(JSONBool)),
                    },
                    classTypes);
@@ -1306,6 +1307,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "initialized",
                                      "shutdown",
                                      "sorbet/error",
+                                     "sorbet/readFile",
                                      "sorbet/showOperation",
                                      "sorbet/typecheckRunInfo",
                                      "sorbet/watchmanFileChange",
@@ -1340,6 +1342,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/codeAction", CodeActionParams},
                                                 {"workspace/symbol", WorkspaceSymbolParams},
                                                 {"sorbet/error", SorbetErrorParams},
+                                                {"sorbet/readFile", TextDocumentIdentifier},
                                             });
     auto RequestMessage =
         makeObject("RequestMessage",
@@ -1373,6 +1376,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction), makeArray(Command)})},
             {"workspace/symbol", makeVariant({JSONNull, makeArray(SymbolInformation)})},
             {"sorbet/error", SorbetErrorParams},
+            {"sorbet/readFile", TextDocumentItem},
         });
     // N.B.: ResponseMessage.params must be optional, as it is not present when an error occurs.
     // N.B.: We add a 'requestMethod' field to response messages to make the discriminated union work.
