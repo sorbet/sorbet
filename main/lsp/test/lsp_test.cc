@@ -66,6 +66,13 @@ const string file_string = "# typed: true\n"
                            "    def broken_multi_line_sig_block\n"
                            "      1\n"
                            "    end\n"
+                           "\n"
+                           "    # Docs for consecutive_method_1. You shouldn't see this.\n"
+                           "    sig {}\n"
+                           "    def consecutive_method_1\n"
+                           "    end\n"
+                           "    def consecutive_method_2\n"
+                           "    end\n"
                            "end\n";
 string_view file = string_view(file_string);
 
@@ -113,6 +120,11 @@ TEST(FindDocumentationTest, MultiLineSig) { // NOLINT
 }
 TEST(FindDocumentationTest, BrokenMultiLineSig) { // NOLINT
     int position = file.find("broken_multi_line_sig_block");
+    optional<string> b = findDocumentation(file, position);
+    ASSERT_TRUE(!b);
+}
+TEST(FindDocumentationTest, ConsecutiveMethods) { // NOLINT
+    int position = file.find("consecutive_method_2");
     optional<string> b = findDocumentation(file, position);
     ASSERT_TRUE(!b);
 }
