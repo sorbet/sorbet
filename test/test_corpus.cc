@@ -655,6 +655,7 @@ TEST_P(LSPTest, All) {
                             }
                         }
 
+                        u4 receivedCodeActionsCount = receivedCodeActionsByTitle.size();
                         vector<shared_ptr<ApplyCodeActionAssertion>> matchedCodeActionAssertions;
 
                         // Check any code action assertions for the same error range, i.e. verify that when applied,
@@ -672,8 +673,13 @@ TEST_P(LSPTest, All) {
                                     auto codeAction = move(it2->second);
                                     codeActionAssertion->check(test.sourceFileContents, codeAction, test.testName,
                                                                fileUri);
+
+                                    // Some bookkeeping to make surfacing errors re. extra/insufficient
+                                    // apply-code-action annotations easier.
+                                    receivedCodeActionsByTitle.erase(it2);
                                     matchedCodeActionAssertions.emplace_back(*it);
                                     it = applyCodeActionAssertions.erase(it);
+
                                     continue;
                                 }
                             }
@@ -682,7 +688,7 @@ TEST_P(LSPTest, All) {
                         }
 
                         if (exhaustiveApplyCodeAction) {
-                            if (matchedCodeActionAssertions.size() > receivedCodeActionsByTitle.size()) {
+                            if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
                                 ADD_FAILURE() << fmt::format("Found apply-code-action assertions without "
                                                              "corresponding code actions from the server:\n{}",
                                                              fmt::map_join(applyCodeActionAssertions.begin(),
@@ -690,7 +696,7 @@ TEST_P(LSPTest, All) {
                                                                            [](const auto &assertion) -> string {
                                                                                return assertion->toString();
                                                                            }));
-                            } else if (matchedCodeActionAssertions.size() < receivedCodeActionsByTitle.size()) {
+                            } else if (matchedCodeActionAssertions.size() < receivedCodeActionsCount) {
                                 ADD_FAILURE() << fmt::format(
                                     "Received code actions without corresponding apply-code-action assertions:\n{}",
                                     fmt::map_join(

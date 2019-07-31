@@ -907,8 +907,8 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
     try {
         expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
     } catch (FileNotFoundException e) {
-        ADD_FAILURE() << fmt::format("Missing {} which should contain test file after applying code actions.",
-                                     expectedUpdatedFilePath);
+        ADD_FAILURE_AT(filename.c_str(), assertionLine + 1) << fmt::format(
+            "Missing {} which should contain test file after applying code actions.", expectedUpdatedFilePath);
         return;
     }
 
@@ -925,10 +925,12 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
             << fmt::format("Requested code action for {}, but received edits in {}", fileUri, c->textDocument->uri);
 
         // First, sort the edits by increasing starting location and verify that none overlap.
-        fast_sort(c->edits, [](const auto &l, const auto &r) -> bool { return cmpRanges(*l->range, *r->range); });
+        fast_sort(c->edits, [](const auto &l, const auto &r) -> bool { return cmpRanges(*l->range, *r->range) > 0; });
         for (u4 i = 1; i < c->edits.size(); i++) {
             ASSERT_LT(cmpPositions(*c->edits[i - 1]->range->end, *c->edits[i]->range->start), 0)
-                << fmt::format("Edit {} overlaps edit {}.", c->edits[i - 1]->toJSON(), c->edits[i]->toJSON());
+                << fmt::format("Received quick fix edit\n{}\nthat overlaps edit\n{}\nThe test runner does not support "
+                               "overlapping autocomplete edits, and it's likely that this is a bug.",
+                               c->edits[i - 1]->toJSON(), c->edits[i]->toJSON());
         }
 
         // Now, apply the edits in the reverse order so that the indices don't change.

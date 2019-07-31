@@ -20,10 +20,9 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
 
     core::FileRef file = uri2FileRef(params.textDocument->uri);
     vector<shared_ptr<core::File>> files;
-    // TODO(sushain): is there another way to do this? maybe a helper I'm missing?
     files.push_back(make_shared<core::File>(string(file.data(*gs).path()), string(file.data(*gs).source()),
                                             core::File::Type::Normal));
-    // TODO(sushain): why does tryFastPath(move(gs), {}, files) not work (when files is refs)?
+    // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto run = tryFastPath(move(gs), files);
     for (auto &e : run.errors) {
         if (!e->isSilenced && e->loc.file() == file && !e->autocorrects.empty() &&
@@ -34,6 +33,7 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
                 edits.emplace_back(make_unique<TextEdit>(loc2Range(*run.gs, a.loc), a.replacement));
             }
 
+            // TODO: Document version
             vector<unique_ptr<TextDocumentEdit>> documentEdits;
             documentEdits.emplace_back(make_unique<TextDocumentEdit>(
                 make_unique<VersionedTextDocumentIdentifier>(params.textDocument->uri, JSONNullObject()), move(edits)));
