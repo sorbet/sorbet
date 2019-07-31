@@ -390,6 +390,7 @@ public:
 
         if (klass->symbol != core::Symbols::root() && !klass->declLoc.file().data(ctx).isRBI() &&
             classDefinesBehavior(klass)) {
+            // TODO(dmitry) This won't find errors in fast-incremental mode.
             auto prevLoc = namerCtx->classBehaviorLocs.find(klass->symbol);
             if (prevLoc == namerCtx->classBehaviorLocs.end()) {
                 namerCtx->classBehaviorLocs[klass->symbol] = klass->declLoc;
