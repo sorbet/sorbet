@@ -144,8 +144,8 @@ module T::Private::Methods
         # directly on ancestor but instead an ancestor of ancestor.
         if ancestor.method_defined?(method_name) && final_method?(method_owner_and_name_to_key(ancestor, method_name))
           raise(
-            "`#{ancestor.name}##{method_name}` was declared as final and cannot be " +
-            (target == ancestor ? "redefined" : "overridden in `#{target.name}`")
+            "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
+            (target == ancestor ? "redefined" : "overridden in #{target}")
           )
         end
       end
@@ -179,7 +179,7 @@ module T::Private::Methods
     mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
 
     if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
-      raise "`#{mod.name}` was declared as final but its method `#{method_name}` was not declared as final"
+      raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
     _check_final_ancestors(mod, mod.ancestors, [method_name])
 
