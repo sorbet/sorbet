@@ -245,10 +245,6 @@ module T::Private::Methods
     end
   end
 
-  def self.sig_error(loc, message)
-    raise(ArgumentError.new("#{loc.path}:#{loc.lineno}: Error interpreting `sig`:\n  #{message}\n\n"))
-  end
-
   # Executes the `sig` block, and converts the resulting Declaration
   # to a Signature.
   def self.run_sig(hook_mod, method_name, original_method, declaration_block)
