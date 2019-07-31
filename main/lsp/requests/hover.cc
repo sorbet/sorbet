@@ -24,11 +24,25 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
     return contents;
 }
 
-unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string str) {
-    if (markupKind == MarkupKind::Markdown && str.length() > 0) {
-        str = fmt::format("```ruby\n{}\n```", str);
+unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string sigString, string docString) {
+    // TODO make the logic nice by joining.
+    string content = "";
+    if (docString.length() > 0) {
+        content += docString;
     }
-    return make_unique<MarkupContent>(markupKind, move(str));
+    // either '' or docstring
+    if (sigString.length() > 0) {
+        if (content.length() > 0) {
+            content += '\n';
+        }
+        // either '' or docString\n
+        content += sigString;
+        // either sigString or docString\nsigString
+    }
+    if (markupKind == MarkupKind::Markdown && content.length() > 0) {
+        content = fmt::format("```ruby\n{}\n```", content);
+    }
+    return make_unique<MarkupContent>(markupKind, move(content));
 }
 
 LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
