@@ -25,23 +25,24 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
 }
 
 unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string sigString, string docString) {
-    // TODO make the logic nice by joining.
     string content = "";
+
     if (docString.length() > 0) {
         content += docString;
     }
-    // either '' or docstring
+
     if (sigString.length() > 0) {
-        if (content.length() > 0) {
-            content += '\n';
+        // Add a newline if docString does not contain one
+        if (content.length() > 0 && content.back() != '\n') {
+            content += "\n";
         }
-        // either '' or docString\n
         content += sigString;
-        // either sigString or docString\nsigString
     }
+
     if (markupKind == MarkupKind::Markdown && content.length() > 0) {
         content = fmt::format("```ruby\n{}\n```", content);
     }
+
     return make_unique<MarkupContent>(markupKind, move(content));
 }
 
