@@ -355,7 +355,7 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")(
         "lsp-dirs-not-on-client",
         "Directory prefixes that are not accessible editor-side. References to files in these directories will be sent "
-        "as sorbet:// URIs to clients that understand them.",
+        "as sorbet: URIs to clients that understand them.",
         cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
