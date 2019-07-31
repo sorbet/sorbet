@@ -561,10 +561,12 @@ string UsageAssertion::toString() const {
 }
 
 void reportMissingError(const string &filename, const ErrorAssertion &assertion, string_view sourceLine,
-                        string_view errorPrefix) {
+                        string_view errorPrefix, bool missingDuplicate = false) {
+    auto coreMessage = missingDuplicate ? "Error was not duplicated" : "Did not find expected error";
+    auto messagePostfix = missingDuplicate ? "\nYou can fix this error by changing the assertion to `error:`." : "";
     ADD_FAILURE_AT(filename.c_str(), assertion.range->start->line + 1)
-        << fmt::format("{}Did not find expected error:\n{}", errorPrefix,
-                       prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()));
+        << fmt::format("{}{}:\n{}{}", errorPrefix, coreMessage,
+                       prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()), messagePostfix);
 }
 
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
@@ -627,6 +629,7 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
 
         auto diagnosticsIt = diagnostics.begin();
         ErrorAssertion *lastAssertion = nullptr;
+        bool lastAssertionMatchedDuplicate = false;
 
         while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
             // See if the ranges match.
@@ -635,8 +638,16 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
 
             if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
                 diagnosticsIt++;
+                lastAssertionMatchedDuplicate = true;
                 continue;
             } else {
+                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
+                    reportMissingError(lastAssertion->filename, *lastAssertion,
+                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
+                                       errorPrefix, true);
+                    success = false;
+                }
+                lastAssertionMatchedDuplicate = false;
                 lastAssertion = nullptr;
             }
 
@@ -681,11 +692,20 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
         while (diagnosticsIt != diagnostics.end()) {
             // We had more diagnostics than error assertions.
             auto &diagnostic = *diagnosticsIt;
-            if (!isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
+            if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
+                lastAssertionMatchedDuplicate = true;
+            } else {
                 reportUnexpectedError(filename, *diagnostic,
                                       getSourceLine(files, filename, diagnostic->range->start->line), errorPrefix);
                 success = false;
+
+                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
+                    reportMissingError(lastAssertion->filename, *lastAssertion,
+                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
+                                       errorPrefix, true);
+                }
                 lastAssertion = nullptr;
+                lastAssertionMatchedDuplicate = false;
             }
             diagnosticsIt++;
         }
@@ -700,7 +720,7 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
         assertionsIt++;
     }
     return success;
-}
+} // namespace sorbet::test
 
 shared_ptr<BooleanPropertyAssertion> BooleanPropertyAssertion::make(string_view filename, unique_ptr<Range> &range,
                                                                     int assertionLine, string_view assertionContents,
