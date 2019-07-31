@@ -126,7 +126,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
         else if (absl::StartsWith(line, "end")) {
             // Ensure current iterator is not pointing to an 'end'
             it++;
-            // ASSUMPTION: We either hit the start of file, `sig` or `end`
+            // ASSUMPTION: We either hit the start of file or a `sig do` or `end`
             while (line = absl::StripAsciiWhitespace(*it),
                     // SOF
                     it != all_lines.rend()
