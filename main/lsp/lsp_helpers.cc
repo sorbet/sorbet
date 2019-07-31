@@ -1,6 +1,7 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_replace.h"
 #include "common/FileOps.h"
 #include "lsp.h"
 
@@ -9,7 +10,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 constexpr string_view sorbetScheme = "sorbet:";
-constexpr string_view httpsScheme = "https:";
+constexpr string_view httpsScheme = "https";
 
 string LSPLoop::remoteName2Local(string_view uri) {
     const bool isSorbetURI = absl::StartsWith(uri, sorbetScheme);
@@ -21,10 +22,16 @@ string LSPLoop::remoteName2Local(string_view uri) {
     }
 
     string path = string(start, uri.end());
-    // Special case: Folder is '' (current directory) or file is `https://github.com/...` (payload RBIs)
-    if (rootPath.length() > 0 && !absl::StartsWith(path, httpsScheme)) {
+    // Note: May be `https://` or `https%3A//`. VS Code URLencodes the : in sorbet:https:// paths.
+    const bool isHttps = isSorbetURI && absl::StartsWith(path, httpsScheme) && path.length() > httpsScheme.length() &&
+                         (path[httpsScheme.length()] == ':' || path[httpsScheme.length()] == '%');
+    if (isHttps) {
+        // URL decode the :
+        return absl::StrReplaceAll(path, {{"%3A", ":"}});
+    } else if (rootPath.length() > 0) {
         return absl::StrCat(rootPath, "/", path);
     } else {
+        // Special case: Folder is '' (current directory)
         return path;
     }
 }
