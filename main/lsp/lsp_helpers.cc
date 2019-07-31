@@ -8,12 +8,12 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-constexpr string_view sorbetUri = "sorbet:";
+constexpr string_view sorbetScheme = "sorbet:";
 
 string LSPLoop::remoteName2Local(string_view uri) {
-    const bool isSorbetURI = absl::StartsWith(uri, sorbetUri);
+    const bool isSorbetURI = absl::StartsWith(uri, sorbetScheme);
     ENFORCE(absl::StartsWith(uri, rootUri) || (enableSorbetURIs && isSorbetURI));
-    const string_view root = isSorbetURI ? sorbetUri : rootUri;
+    const string_view root = isSorbetURI ? sorbetScheme : rootUri;
     const char *start = uri.data() + root.length();
     if (*start == '/') {
         ++start;
@@ -40,13 +40,13 @@ string LSPLoop::localName2Remote(string_view uri, bool useSorbetUri) {
     }
 
     if (useSorbetUri) {
-        return absl::StrCat(sorbetUri, relativeUri);
+        return absl::StrCat(sorbetScheme, relativeUri);
     }
     return absl::StrCat(rootUri, "/", relativeUri);
 }
 
 core::FileRef LSPLoop::uri2FileRef(string_view uri) {
-    if (!absl::StartsWith(uri, rootUri) && !absl::StartsWith(uri, sorbetUri)) {
+    if (!absl::StartsWith(uri, rootUri) && !absl::StartsWith(uri, sorbetScheme)) {
         return core::FileRef();
     }
     auto needle = remoteName2Local(uri);
@@ -61,7 +61,7 @@ string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
         auto &messageFile = file.data(gs);
         if (messageFile.isPayload()) {
             if (enableSorbetURIs) {
-                uri = absl::StrCat(sorbetUri, "/", messageFile.path());
+                uri = absl::StrCat(sorbetScheme, messageFile.path());
             } else {
                 // This is hacky because VSCode appends #4,3 (or whatever the position is of the
                 // error) to the uri before it shows it in the UI since this is the format that
@@ -104,7 +104,7 @@ unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
     return make_unique<Range>(move(start), move(end));
 }
 
-unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc, bool useDataLinksForPayload) {
+unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) {
     string uri = fileRef2Uri(gs, loc.file());
     if (loc.file().data(gs).isPayload() && !enableSorbetURIs) {
         // This is hacky because VSCode appends #4,3 (or whatever the position is of the
