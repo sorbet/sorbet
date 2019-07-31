@@ -140,12 +140,10 @@ TEST(FindDocumentationTest, ConsecutiveMethodsMultiLineSig) { // NOLINT
     optional<string> b = findDocumentation(file, position);
     ASSERT_TRUE(!b);
 }
-// TODO findDocumentation can't handle weird (but valid) one-line sig do; ...; end; blocks
-TEST(FindDocumentationTest, ConsecutiveMethodsOneLineSemicolonSig) { // NOLINT
+TEST(FindDocumentationTest, ConsecutiveMethodsBlockShorthandSig) { // NOLINT
     int position = file.find("consecutive_method_3");
     optional<string> b = findDocumentation(file, position);
-    // Should assert !b instead
-    ASSERT_TRUE(!!b);
+    ASSERT_TRUE(!b);
 }
 
 } // namespace sorbet::realmain::lsp::test
