@@ -131,7 +131,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
                     // SOF
                     it != all_lines.rend()
                     // Valid start of sig block
-                    && !absl::StartsWith(line, "sig")
+                    && !absl::StartsWith(line, "sig do")
                     // Invalid end keyword
                     && !absl::StartsWith(line, "end")) {
                 it++;
@@ -144,7 +144,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
                 break;
             } else {
                 // Reached a valid sig block. Move on to any possible documentation.
-                ENFORCE(absl::StartsWith(line, "sig"));
+                ENFORCE(absl::StartsWith(line, "sig do"));
             }
         }
 
