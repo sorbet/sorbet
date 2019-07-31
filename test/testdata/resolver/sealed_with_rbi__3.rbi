@@ -20,6 +20,6 @@ class C
 end
 
 class D
-  include M # error: `M` is sealed and cannot be included in `D`
+  include M # error-with-dupes: `M` is sealed and cannot be included in `D`
   def from_d; end
 end
