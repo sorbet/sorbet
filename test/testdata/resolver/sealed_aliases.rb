@@ -19,6 +19,6 @@ def foo(x)
   when C1
     T.reveal_type(x) # error: Revealed type: `Child1`
   else
-    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `Child1` wasn't handled
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `Child2` wasn't handled
   end
 end
