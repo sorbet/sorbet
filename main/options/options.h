@@ -187,7 +187,7 @@ struct Options {
     std::vector<std::string> autogenSubclassesRelativeIgnorePatterns;
     // List of directories not available editor-side. References to files in these directories should be sent via
     // sorbet: URIs to clients that support them.
-    std::vector<std::string> lspDirsNotOnClient;
+    std::vector<std::string> lspDirsMissingFromClient;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspGoToDefinitionEnabled = false;
     bool lspFindReferencesEnabled = false;

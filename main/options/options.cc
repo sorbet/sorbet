@@ -353,7 +353,7 @@ cxxopts::Options buildOptions() {
         "`/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.",
         cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")(
-        "lsp-dirs-not-on-client",
+        "lsp-directories-missing-from-client",
         "Directory prefixes that are not accessible editor-side. References to files in these directories will be sent "
         "as sorbet: URIs to clients that understand them.",
         cxxopts::value<vector<string>>(), "string");
@@ -664,15 +664,15 @@ void readOptions(Options &opts, int argc, char *argv[],
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
 
-        if (raw.count("lsp-dirs-not-on-client") > 0) {
-            auto lspDirsNotOnClient = raw["lsp-dirs-not-on-client"].as<vector<string>>();
+        if (raw.count("lsp-directories-missing-from-client") > 0) {
+            auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
             // Convert all of these dirs into absolute ignore patterns that begin with '/'.
-            for (auto &dir : lspDirsNotOnClient) {
+            for (auto &dir : lspDirsMissingFromClient) {
                 string pNormalized = dir;
                 if (dir.at(0) != '/') {
                     pNormalized = '/' + dir;
                 }
-                opts.lspDirsNotOnClient.push_back(pNormalized);
+                opts.lspDirsMissingFromClient.push_back(pNormalized);
             }
         }
 

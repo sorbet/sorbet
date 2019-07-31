@@ -14,7 +14,11 @@ constexpr string_view httpsScheme = "https";
 
 string LSPLoop::remoteName2Local(string_view uri) {
     const bool isSorbetURI = absl::StartsWith(uri, sorbetScheme);
-    ENFORCE(absl::StartsWith(uri, rootUri) || (enableSorbetURIs && isSorbetURI));
+    if (!absl::StartsWith(uri, rootUri) && !enableSorbetURIs && !isSorbetURI) {
+        logger->error("Unrecognized URI received from client: {}", uri);
+        return string(uri);
+    }
+
     const string_view root = isSorbetURI ? sorbetScheme : rootUri;
     const char *start = uri.data() + root.length();
     if (*start == '/') {
@@ -77,9 +81,9 @@ string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
         } else {
             // Tell localName2Remote to use a sorbet: URI if the file is not present on the client AND the client
             // supports sorbet: URIs
-            uri = localName2Remote(
-                file.data(gs).path(),
-                enableSorbetURIs && FileOps::isFileIgnored(rootPath, messageFile.path(), opts.lspDirsNotOnClient, {}));
+            uri = localName2Remote(file.data(gs).path(),
+                                   enableSorbetURIs && FileOps::isFileIgnored(rootPath, messageFile.path(),
+                                                                              opts.lspDirsMissingFromClient, {}));
         }
     }
     return uri;
