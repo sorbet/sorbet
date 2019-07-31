@@ -27,7 +27,7 @@ string LSPLoop::remoteName2Local(string_view uri) {
     }
 }
 
-string LSPLoop::localName2Remote(string_view uri) {
+string LSPLoop::localName2Remote(string_view uri, bool useSorbetUri) {
     ENFORCE(absl::StartsWith(uri, rootPath));
     string_view relativeUri = uri.substr(rootPath.length());
     if (relativeUri.at(0) == '/') {
@@ -39,7 +39,7 @@ string LSPLoop::localName2Remote(string_view uri) {
         return string(relativeUri);
     }
 
-    return absl::StrCat(rootUri, "/", relativeUri);
+    return absl::StrCat((useSorbetUri ? sorbetUri : rootUri), "/", relativeUri);
 }
 
 core::FileRef LSPLoop::uri2FileRef(string_view uri) {
@@ -50,22 +50,15 @@ core::FileRef LSPLoop::uri2FileRef(string_view uri) {
     return initialGS->findFileByPath(needle);
 }
 
-// Embeds a file's information into a sorbet:// URI that encodes its path.
-// Used for files that are not available locally in the editor, like things in payload or directories available only on
-// the machine where Sorbet is running.
-string getSorbetURI(const core::File &file) {
-    return fmt::format("sorbet://{}", file.path());
-}
-
 string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
     string uri;
     if (!file.exists()) {
-        uri = localName2Remote("???");
+        uri = localName2Remote("???", false);
     } else {
         auto &messageFile = file.data(gs);
         if (messageFile.isPayload()) {
             if (enableSorbetURIs) {
-                uri = getSorbetURI(messageFile);
+                uri = absl::StrCat(sorbetUri, "/", messageFile.path());
             } else {
                 // This is hacky because VSCode appends #4,3 (or whatever the position is of the
                 // error) to the uri before it shows it in the UI since this is the format that
@@ -82,16 +75,16 @@ string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
                 // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
                 uri = string(messageFile.path());
             }
-        } else if (enableSorbetURIs &&
-                   FileOps::isFileIgnored(rootPath, messageFile.path(), opts.lspDirsNotOnClient, {})) {
-            // File is not available editor-side; send file data in sorbet:// URI.
-            uri = getSorbetURI(messageFile);
         } else {
-            uri = localName2Remote(file.data(gs).path());
+            // Tell localName2Remote to use a sorbet:// URI if the file is not present on the client AND the client
+            // supports sorbet:// URIs
+            uri = localName2Remote(
+                file.data(gs).path(),
+                enableSorbetURIs && FileOps::isFileIgnored(rootPath, messageFile.path(), opts.lspDirsNotOnClient, {}));
         }
     }
     return uri;
-}
+} // namespace sorbet::realmain::lsp
 
 unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
     unique_ptr<Position> start;
