@@ -216,10 +216,6 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal(
       [
         :singleton_method_added,
-        :method_added,
-        # hook registration overwrites this method but it should
-        # still call the original defined above
-        :singleton_method_added,
         :post_hook,
       ],
       klass.instance_variable_get(:@called)

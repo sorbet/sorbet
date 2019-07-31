@@ -418,34 +418,30 @@ module T::Private::Methods
     end
   end
 
+  module MethodHooks
+    def method_added(name)
+      super(name)
+      ::T::Private::Methods._on_method_added(self, name, is_singleton_method: false)
+    end
+  end
+
+  module SingletonMethodHooks
+    def singleton_method_added(name)
+      super(name)
+      ::T::Private::Methods._on_method_added(self, name, is_singleton_method: true)
+    end
+  end
+
   def self.install_hooks(mod)
     return if @installed_hooks.include?(mod)
     @installed_hooks << mod
 
     if mod.singleton_class?
-      install_singleton_method_added_hook(mod)
+      mod.include(SingletonMethodHooks)
     else
-      original_method = T::Private::ClassUtils.replace_method(mod.singleton_class, :method_added) do |name|
-        T::Private::Methods._on_method_added(self, name)
-        original_method.bind(self).call(name)
-      end
+      mod.extend(MethodHooks)
     end
-    install_singleton_method_added_hook(mod.singleton_class)
-  end
-
-  private_class_method def self.install_singleton_method_added_hook(singleton_klass)
-    attached = nil
-    original_singleton_method = T::Private::ClassUtils.replace_method(singleton_klass, :singleton_method_added) do |name|
-      attached = self
-      T::Private::Methods._on_method_added(self, name, is_singleton_method: true)
-      # This will be nil when this gets called for the addition of this method itself. We
-      # call it below to compensate.
-      if original_singleton_method
-        original_singleton_method.bind(self).call(name)
-      end
-    end
-    # See the comment above
-    original_singleton_method.bind(attached).call(:singleton_method_added)
+    mod.extend(SingletonMethodHooks)
   end
 
   # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
