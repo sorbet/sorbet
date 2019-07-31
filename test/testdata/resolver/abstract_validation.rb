@@ -1,4 +1,6 @@
 # typed: true
+# Fast path causes duplicate errors.
+# disable-fast-path: true
 
 module AbstractMixin
   extend T::Sig
@@ -51,8 +53,8 @@ end
 
 # it fails if a concrete module doesn't implement abstract methods
   module M2
-# ^^^^^^^^^ error-with-dupes: Missing definition for abstract method `AbstractMixin#bar`
-# ^^^^^^^^^ error-with-dupes: Missing definition for abstract method `AbstractMixin#foo`
+# ^^^^^^^^^ error: Missing definition for abstract method `AbstractMixin#bar`
+# ^^^^^^^^^ error: Missing definition for abstract method `AbstractMixin#foo`
   extend T::Helpers
   include AbstractMixin
 end
