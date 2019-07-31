@@ -267,6 +267,9 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
 
     if (takeFastPath) {
         Timer timeit(logger, "fast_path");
+        // Drop any indexing errors produced during `updateFile`, as we are going to run indexing a second time with
+        // finalGS. (Note: Flushing is disabled in LSP mode, so we have to drain.)
+        errorQueue->drainWithQueryResponses();
         int i = -1;
         for (auto &oldHash : globalStateHashes) {
             i++;
