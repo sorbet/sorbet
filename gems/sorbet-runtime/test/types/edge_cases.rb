@@ -229,7 +229,6 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
   it "allows custom hooks" do
     parent = Class.new do
       extend T::Sig
-      sig {params(method: Symbol).void}
       def self.method_added(method)
         super(method)
       end

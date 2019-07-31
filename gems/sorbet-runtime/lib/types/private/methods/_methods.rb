@@ -188,6 +188,13 @@ module T::Private::Methods
     end
     T::Private::DeclState.current.reset!
 
+    if method_name == :method_added || method_name == :singleton_method_added
+      raise(
+        "Putting a `sig` on `#{method_name}` is not supported" +
+        " (sorbet-runtime uses this method internally to perform `sig` validation logic)"
+      )
+    end
+
     original_method = mod.instance_method(method_name)
     sig_block = lambda do
       T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
