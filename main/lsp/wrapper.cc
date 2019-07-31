@@ -98,6 +98,7 @@ void LSPWrapper::enableAllExperimentalFeatures() {
     enableExperimentalFeature(LSPExperimentalFeature::WorkspaceSymbols);
     enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
     enableExperimentalFeature(LSPExperimentalFeature::SignatureHelp);
+    enableExperimentalFeature(LSPExperimentalFeature::QuickFix);
 }
 
 void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
@@ -110,6 +111,9 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
             break;
         case LSPExperimentalFeature::Autocomplete:
             opts.lspAutocompleteEnabled = true;
+            break;
+        case LSPExperimentalFeature::QuickFix:
+            opts.lspQuickFixEnabled = true;
             break;
         case LSPExperimentalFeature::WorkspaceSymbols:
             opts.lspWorkspaceSymbolsEnabled = true;

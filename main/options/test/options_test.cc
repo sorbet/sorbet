@@ -68,6 +68,7 @@ TEST(OptionsTest, DefaultConstructorMatchesReadOptions) {
     EXPECT_EQ(empty.lspGoToDefinitionEnabled, opts.lspGoToDefinitionEnabled);
     EXPECT_EQ(empty.lspFindReferencesEnabled, opts.lspFindReferencesEnabled);
     EXPECT_EQ(empty.lspAutocompleteEnabled, opts.lspAutocompleteEnabled);
+    EXPECT_EQ(empty.lspQuickFixEnabled, opts.lspQuickFixEnabled);
     EXPECT_EQ(empty.lspWorkspaceSymbolsEnabled, opts.lspWorkspaceSymbolsEnabled);
     EXPECT_EQ(empty.lspDocumentSymbolEnabled, opts.lspDocumentSymbolEnabled);
     EXPECT_EQ(empty.lspSignatureHelpEnabled, opts.lspSignatureHelpEnabled);

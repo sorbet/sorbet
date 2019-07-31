@@ -343,6 +343,7 @@ cxxopts::Options buildOptions() {
                                     "Enable experimental LSP feature: Document Symbol");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
+    options.add_options("advanced")("enable-experimental-lsp-quick-fix", "Enable experimental LSP feature: Quick Fix");
     options.add_options("advanced")("enable-all-experimental-lsp-features", "Enable every experimental LSP feature.");
     options.add_options("advanced")(
         "ignore",
@@ -647,6 +648,7 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
+        opts.lspQuickFixEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-quick-fix"].as<bool>();
         opts.lspGoToDefinitionEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-go-to-definition"].as<bool>();
         opts.lspFindReferencesEnabled =

@@ -197,16 +197,15 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                  },
                                  classTypes);
 
-    auto WorkspaceEdit =
-        makeObject("WorkspaceEdit",
-                   {
-                       // Map type (string => TextEdit[]). Unused by sorbet currently.
-                       // makeField("changes", makeArray(JSONAny)),
-                       // Unused in Sorbet currently. Need a variant that can discriminate based on a `kind` field and
-                       // the presence of that field. (TextDocumentEdit[] | (TextDocumentEdit | CreateFile | RenameFile
-                       // | DeleteFile)[]) makeField("documentChanges", makeOptional(makeArray(JSONAny))),
-                   },
-                   classTypes);
+    auto WorkspaceEdit = makeObject("WorkspaceEdit",
+                                    {// Map type (string => TextEdit[]). Unused by sorbet currently.
+                                     // makeField("changes", makeArray(JSONAny)),
+                                     // Need a variant that can discriminate based on a `kind` field and
+                                     // the presence of that field. (TextDocumentEdit[] | (TextDocumentEdit | CreateFile
+                                     // | RenameFile | DeleteFile)[]) makeField("documentChanges",
+                                     // makeOptional(makeArray(JSONAny))). What follows is a subset of the true type.
+                                     makeField("documentChanges", makeOptional(makeArray(TextDocumentEdit)))},
+                                    classTypes);
 
     auto TextDocumentIdentifier = makeObject("TextDocumentIdentifier",
                                              {
@@ -1299,30 +1298,31 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     // All others are ignored.
     auto LSPMethod = makeStrEnum("LSPMethod",
                                  {
+                                     "__PAUSE__",
+                                     "__RESUME__",
                                      "$/cancelRequest",
+                                     "exit",
                                      "initialize",
                                      "initialized",
                                      "shutdown",
-                                     "exit",
-                                     "textDocument/publishDiagnostics",
-                                     "textDocument/didOpen",
+                                     "sorbet/error",
+                                     "sorbet/showOperation",
+                                     "sorbet/typecheckRunInfo",
+                                     "sorbet/watchmanFileChange",
+                                     "sorbet/workspaceEdit",
+                                     "textDocument/codeAction",
+                                     "textDocument/completion",
+                                     "textDocument/definition",
                                      "textDocument/didChange",
                                      "textDocument/didClose",
+                                     "textDocument/didOpen",
                                      "textDocument/documentSymbol",
-                                     "textDocument/definition",
                                      "textDocument/hover",
-                                     "textDocument/completion",
+                                     "textDocument/publishDiagnostics",
                                      "textDocument/references",
                                      "textDocument/signatureHelp",
-                                     "workspace/symbol",
                                      "window/showMessage",
-                                     "__PAUSE__",
-                                     "__RESUME__",
-                                     "sorbet/watchmanFileChange",
-                                     "sorbet/showOperation",
-                                     "sorbet/error",
-                                     "sorbet/workspaceEdit",
-                                     "sorbet/typecheckRunInfo",
+                                     "workspace/symbol",
                                  },
                                  enumTypes);
 
@@ -1337,6 +1337,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/completion", CompletionParams},
                                                 {"textDocument/references", ReferenceParams},
                                                 {"textDocument/signatureHelp", TextDocumentPositionParams},
+                                                {"textDocument/codeAction", CodeActionParams},
                                                 {"workspace/symbol", WorkspaceSymbolParams},
                                                 {"sorbet/error", SorbetErrorParams},
                                             });
@@ -1348,28 +1349,35 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto requestMethodField = makeField("requestMethod", LSPMethod);
     auto ResponseMessageResultType = makeDiscriminatedUnion(
-        requestMethodField, {
-                                {"initialize", InitializeResult},
-                                {"shutdown", JSONNull},
-                                // DocumentSymbol[] | SymbolInformation[] | null
-                                // Sorbet only uses DocumentSymbol[].
-                                {"textDocument/documentSymbol", makeVariant({JSONNull, makeArray(DocumentSymbol)})},
-                                // Location | Location[] | LocationLink[] | null
-                                // Sorbet only uses Location[].
-                                {"textDocument/definition", makeVariant({JSONNull, makeArray(Location)})},
-                                {"textDocument/hover", makeVariant({JSONNull, Hover})},
-                                // CompletionItem[] | CompletionList | null
-                                // Sorbet only sends CompletionList.
-                                {"textDocument/completion", CompletionList},
-                                {"textDocument/references", makeVariant({JSONNull, makeArray(Location)})},
-                                {"textDocument/signatureHelp", makeVariant({JSONNull, SignatureHelp})},
-                                {"workspace/symbol", makeVariant({JSONNull, makeArray(SymbolInformation)})},
-                                {"sorbet/error", SorbetErrorParams},
-                            });
+        requestMethodField,
+        {
+            {"initialize", InitializeResult},
+            {"shutdown", JSONNull},
+            // DocumentSymbol[] | SymbolInformation[] | null
+            // Sorbet only uses DocumentSymbol[].
+            {"textDocument/documentSymbol", makeVariant({JSONNull, makeArray(DocumentSymbol)})},
+            // Location | Location[] | LocationLink[] | null
+            // Sorbet only uses Location[].
+            {"textDocument/definition", makeVariant({JSONNull, makeArray(Location)})},
+            {"textDocument/hover", makeVariant({JSONNull, Hover})},
+            // CompletionItem[] | CompletionList | null
+            // Sorbet only sends CompletionList.
+            {"textDocument/completion", CompletionList},
+            {"textDocument/references", makeVariant({JSONNull, makeArray(Location)})},
+            {"textDocument/signatureHelp", makeVariant({JSONNull, SignatureHelp})},
+            // (CodeAction | Command)[] | null
+            // Sorbet only sends CodeAction[].
+            {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction)})},
+            // TODO: the following are more correct but I can only get the above to work.
+            // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(makeVariant({CodeAction, Command}))})},
+            // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction), makeArray(Command)})},
+            {"workspace/symbol", makeVariant({JSONNull, makeArray(SymbolInformation)})},
+            {"sorbet/error", SorbetErrorParams},
+        });
     // N.B.: ResponseMessage.params must be optional, as it is not present when an error occurs.
     // N.B.: We add a 'requestMethod' field to response messages to make the discriminated union work.
-    // Also note that we cannot name this field 'method', as it tricks clients into thinking it's a request rather than
-    // a response.
+    // Also note that we cannot name this field 'method', as it tricks clients into thinking it's a request
+    // rather than a response.
     auto ResponseMessage = makeObject("ResponseMessage",
                                       {makeField("jsonrpc", JSONRPCConstant),
                                        makeField("id", makeVariant({JSONInt, JSONString, JSONNull})),

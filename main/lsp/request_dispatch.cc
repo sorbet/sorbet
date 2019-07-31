@@ -169,6 +169,12 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             serverCap->hoverProvider = true;
             serverCap->referencesProvider = opts.lspFindReferencesEnabled;
 
+            if (opts.lspQuickFixEnabled) {
+                auto codeActionProvider = make_unique<CodeActionOptions>();
+                codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix};
+                serverCap->codeActionProvider = move(codeActionProvider);
+            }
+
             if (opts.lspSignatureHelpEnabled) {
                 auto sigHelpProvider = make_unique<SignatureHelpOptions>();
                 sigHelpProvider->triggerCharacters = {"(", ","};
@@ -198,6 +204,9 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         } else if (method == LSPMethod::TextDocumentCompletion) {
             auto &params = get<unique_ptr<CompletionParams>>(rawParams);
             return handleTextDocumentCompletion(move(gs), id, *params);
+        } else if (method == LSPMethod::TextDocumentCodeAction) {
+            auto &params = get<unique_ptr<CodeActionParams>>(rawParams);
+            return handleTextDocumentCodeAction(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentSignatureHelp) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
             return handleTextSignatureHelp(move(gs), id, *params);
