@@ -325,7 +325,6 @@ int realmain(int argc, char *argv[]) {
     while (opts.waitForDebugger && !stopInDebugger()) {
         // spin
     }
-    // TODO check for magical "stripe" flag, if not set suppress double-definition error
     if (opts.stdoutHUPHack) {
         startHUPMonitor();
     }
@@ -431,6 +430,10 @@ int realmain(int argc, char *argv[]) {
         gs->addDslPlugin(plugin.first, plugin.second);
     }
     gs->dslRubyExtraArgs = opts.dslRubyExtraArgs;
+    if (!opts.stripeMode) {
+        // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
+        gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+    }
 
     logger->trace("done building initial global state");
 

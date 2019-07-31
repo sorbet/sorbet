@@ -1,4 +1,4 @@
-require 'y'
+require 'y' # root level 'behavior' is ignored
 
 module Foo
    def meth1; end # Defines behavior

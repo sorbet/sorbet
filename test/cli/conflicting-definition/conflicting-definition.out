@@ -5,3 +5,5 @@ test/cli/conflicting-definition/b.rb:3: `Foo` has behavior defined in multiple f
      3 |module Foo
         ^^^^^^^^^^
 Errors: 1
+without --stripe-mode
+No errors! Great job.

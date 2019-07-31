@@ -1256,6 +1256,8 @@ bool definesBehavior(ast::Expression *expr) {
             result = absl::c_any_of(seq->stats, [](auto &child) { return definesBehavior(child.get()); }) ||
                      definesBehavior(seq->expr.get());
         },
+
+        // Ignore code synthesized by DSL pass.
         [&](ast::Send *send) { result = !send->isDSLSynthesized(); },
         [&](ast::MethodDef *methodDef) { result = !methodDef->isDSLSynthesized(); },
 
