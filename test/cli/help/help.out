@@ -103,7 +103,7 @@ Usage:
                                 be against whole folder and file names, so
                                 `foo` matches `/foo/bar.rb` and `/bar/foo/baz.rb`
                                 but not `/foo.rb` or `/foo2/bar.rb`.
-      --lsp-dirs-not-on-client string
+      --lsp-directories-missing-from-client string
                                 Directory prefixes that are not accessible
                                 editor-side. References to files in these
                                 directories will be sent as sorbet: URIs to clients
