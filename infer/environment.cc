@@ -450,12 +450,12 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         }
         auto &whoKnows = getKnowledge(local);
         const auto &recvType = send->recv.type;
-        core::SymbolRef klass = core::Types::getRepresentedClass(ctx, recvType.get());
-        if (klass.exists()) {
-            auto ty = klass.data(ctx)->externalType(ctx);
-            if (!ty->isUntyped()) {
-                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, ty);
-                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, ty);
+        core::SymbolRef representedClass = core::Types::getRepresentedClass(ctx, recvType.get());
+        if (representedClass.exists()) {
+            auto representedType = representedClass.data(ctx)->externalType(ctx);
+            if (!representedType->isUntyped()) {
+                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, representedType);
+                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, representedType);
             }
         }
         whoKnows.sanityCheck();
