@@ -21,7 +21,9 @@ def foo(x)
   case x
   when ChildGood1
   when ChildGood2
+  when ChildBad3
+    T.reveal_type(x) # error: Revealed type: `ChildBad3`
   else
-    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `T.any(ChildBad3, ChildBad4)` wasn't handled
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `ChildBad4` wasn't handled
   end
 end
