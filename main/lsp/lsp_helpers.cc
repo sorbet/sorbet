@@ -95,7 +95,7 @@ unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
 
 unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) {
     string uri = fileRef2Uri(gs, loc.file());
-    if (loc.file().data(gs).isPayload() && !enableSorbetURIs) {
+    if (loc.file().exists() && loc.file().data(gs).isPayload() && !enableSorbetURIs) {
         // This is hacky because VSCode appends #4,3 (or whatever the position is of the
         // error) to the uri before it shows it in the UI since this is the format that
         // VSCode uses to denote which location to jump to. However, if you append #L4
