@@ -932,6 +932,26 @@ module Opus::Types::Test
           # rubocop:enable PrisonGuard/UseOpusTypesShortcut
         end
       end
+
+      describe 'untyped containers' do
+        it 'untyped containers are subtypes of typed containers' do
+          assert_subtype(T::Array[T.untyped], T::Array[Integer])
+          assert_subtype(T::Array[T.untyped], T::Enumerable[Integer])
+          assert_subtype(T::Set[T.untyped], T::Enumerable[Integer])
+          assert_subtype(T::Set[T.untyped], T::Set[Integer])
+          assert_subtype(T::Hash[T.untyped, T.untyped], T::Hash[Integer, String])
+          assert_subtype(T::Enumerator[T.untyped], T::Enumerator[Integer])
+        end
+
+        it 'typed containers are subtypes of untyped containers' do
+          assert_subtype(T::Array[Integer], T::Array[T.untyped])
+          assert_subtype(T::Array[Integer], T::Enumerable[T.untyped])
+          assert_subtype(T::Set[Integer], T::Enumerable[T.untyped])
+          assert_subtype(T::Set[Integer], T::Set[T.untyped])
+          assert_subtype(T::Hash[Integer, String], T::Hash[T.untyped, T.untyped])
+          assert_subtype(T::Enumerator[Integer], T::Enumerator[T.untyped])
+        end
+      end
     end
 
     module TestGeneric1

@@ -12,6 +12,10 @@ module T::Types
       @type = T::Utils.coerce(type)
     end
 
+    def underlying_class
+      Enumerable
+    end
+
     # @override Base
     def name
       "T::Enumerable[#{@type.name}]"
@@ -68,7 +72,8 @@ module T::Types
 
     # @override Base
     private def subtype_of_single?(other)
-      if self.class <= other.class
+      if other.class <= TypedEnumerable &&
+         underlying_class <= other.underlying_class
         # Enumerables are covariant because they are read only
         #
         # Properly speaking, many Enumerable subtypes (e.g. Set)
@@ -135,6 +140,16 @@ module T::Types
         obj.class
       else
         self.class.new(type_from_instances(obj))
+      end
+    end
+
+    class Untyped < TypedEnumerable
+      def initialize
+        super(T.untyped)
+      end
+
+      def valid?(obj)
+        obj.is_a?(Enumerable)
       end
     end
   end
