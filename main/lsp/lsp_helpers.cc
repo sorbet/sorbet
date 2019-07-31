@@ -8,7 +8,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-constexpr string_view sorbetUri = "sorbet://";
+constexpr string_view sorbetUri = "sorbet:";
 
 string LSPLoop::remoteName2Local(string_view uri) {
     const bool isSorbetURI = absl::StartsWith(sorbetUri, uri);
@@ -76,8 +76,8 @@ string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
                 uri = string(messageFile.path());
             }
         } else {
-            // Tell localName2Remote to use a sorbet:// URI if the file is not present on the client AND the client
-            // supports sorbet:// URIs
+            // Tell localName2Remote to use a sorbet: URI if the file is not present on the client AND the client
+            // supports sorbet: URIs
             uri = localName2Remote(
                 file.data(gs).path(),
                 enableSorbetURIs && FileOps::isFileIgnored(rootPath, messageFile.path(), opts.lspDirsNotOnClient, {}));
