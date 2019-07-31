@@ -43,7 +43,7 @@ string LSPLoop::localName2Remote(string_view uri, bool useSorbetUri) {
 }
 
 core::FileRef LSPLoop::uri2FileRef(string_view uri) {
-    if (!absl::StartsWith(uri, rootUri) && !absl::StartsWith(sorbetUri, uri)) {
+    if (!absl::StartsWith(uri, rootUri) && !absl::StartsWith(uri, sorbetUri)) {
         return core::FileRef();
     }
     auto needle = remoteName2Local(uri);
