@@ -95,10 +95,10 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
 
 optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     // Everything in the file before the method definition.
-    auto preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
+    string_view preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
 
     // Get all the lines before it.
-    std::vector<std::string> all_lines = absl::StrSplit(preDefinition, '\n');
+    std::vector<string_view> all_lines = absl::StrSplit(preDefinition, '\n');
 
     // if there are no lines before the method definition, we're at the top of the file.
     if (all_lines.empty()) {
@@ -107,10 +107,9 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
     string documentation = "";
 
-    // Iterate from the last
-    auto it = all_lines.rbegin();
-    while (it != all_lines.rend()) {
-        auto line = absl::StripAsciiWhitespace(*it);
+    // Iterate from the last line, to the first line
+    for(auto it = all_lines.rbegin(); it != all_lines.rend(); it++) {
+        string_view line = absl::StripAsciiWhitespace(*it);
 
         // Short circuit when line is empty
         if (line.empty()) {
@@ -157,7 +156,6 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
         else {
             break;
         }
-        it++;
     }
 
     if (documentation.empty())
