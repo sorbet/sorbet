@@ -9,6 +9,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 constexpr string_view sorbetScheme = "sorbet:";
+constexpr string_view httpsScheme = "https:";
 
 string LSPLoop::remoteName2Local(string_view uri) {
     const bool isSorbetURI = absl::StartsWith(uri, sorbetScheme);
@@ -19,11 +20,12 @@ string LSPLoop::remoteName2Local(string_view uri) {
         ++start;
     }
 
-    // Special case: Folder is '' (current directory).
-    if (rootPath.length() > 0) {
-        return absl::StrCat(rootPath, "/", string(start, uri.end()));
+    string path = string(start, uri.end());
+    // Special case: Folder is '' (current directory) or file is `https://github.com/...` (payload RBIs)
+    if (rootPath.length() > 0 && !absl::StartsWith(path, httpsScheme)) {
+        return absl::StrCat(rootPath, "/", path);
     } else {
-        return string(start, uri.end());
+        return path;
     }
 }
 
