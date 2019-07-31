@@ -67,9 +67,19 @@ const string file_string = "# typed: true\n"
                            "      1\n"
                            "    end\n"
                            "\n"
-                           "    # Docs for consecutive_method_1. You shouldn't see this.\n"
+                           "    # Docs for some_first_method. You shouldn't see this.\n"
                            "    sig {}\n"
+                           "    def some_first_method\n"
+                           "    end\n"
                            "    def consecutive_method_1\n"
+                           "    end\n"
+                           "\n"
+                           "    # Docs for another_first_method. You shouldn't see this.\n"
+                           "    sig do\n"
+                           "      params(x: Integer)\n"
+                           "      .void\n"
+                           "    end\n"
+                           "    def another_first_method(x)\n"
                            "    end\n"
                            "    def consecutive_method_2\n"
                            "    end\n"
@@ -123,7 +133,12 @@ TEST(FindDocumentationTest, BrokenMultiLineSig) { // NOLINT
     optional<string> b = findDocumentation(file, position);
     ASSERT_TRUE(!b);
 }
-TEST(FindDocumentationTest, ConsecutiveMethods) { // NOLINT
+TEST(FindDocumentationTest, ConsecutiveMethodsOneLineSig) { // NOLINT
+    int position = file.find("consecutive_method_1");
+    optional<string> b = findDocumentation(file, position);
+    ASSERT_TRUE(!b);
+}
+TEST(FindDocumentationTest, ConsecutiveMethodsMultiLineSig) { // NOLINT
     int position = file.find("consecutive_method_2");
     optional<string> b = findDocumentation(file, position);
     ASSERT_TRUE(!b);
