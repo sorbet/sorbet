@@ -450,12 +450,24 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         }
         auto &whoKnows = getKnowledge(local);
         const auto &recvType = send->recv.type;
+
+        // `when` against class literal
         core::SymbolRef representedClass = core::Types::getRepresentedClass(ctx, recvType.get());
         if (representedClass.exists()) {
             auto representedType = representedClass.data(ctx)->externalType(ctx);
             if (!representedType->isUntyped()) {
                 whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, representedType);
                 whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, representedType);
+            }
+        }
+
+        // `when` against singleton
+        if (auto s = core::cast_type<core::ClassType>(recvType.get())) {
+            // check if s is a singleton. in this case we can learn that
+            // a failed comparison means that type test would also fail
+            if (isSingleton(ctx, s->symbol)) {
+                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, recvType);
+                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, recvType);
             }
         }
         whoKnows.sanityCheck();
