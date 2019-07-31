@@ -268,18 +268,6 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
             }
         }
-        if (klass->symbol != core::Symbols::root() && !klass->declLoc.file().data(ctx).isRBI() &&
-            classDefinesBehavior(klass)) {
-            auto prevLoc = namerCtx->classBehaviorLocs.find(klass->symbol);
-            if (prevLoc == namerCtx->classBehaviorLocs.end()) {
-                namerCtx->classBehaviorLocs[klass->symbol] = klass->declLoc;
-            } else if (prevLoc->second.file() != klass->declLoc.file()) {
-                if (auto e = ctx.state.beginError(klass->declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
-                    e.setHeader("`{}` has behavior defined in multiple files", klass->symbol.data(ctx)->show(ctx));
-                    e.addErrorLine(prevLoc->second, "Previous definition");
-                }
-            }
-        }
         enterScope();
         return klass;
     }
@@ -400,6 +388,18 @@ public:
             ctx.state.staticInitForClass(klass->symbol, klass->loc);
         }
 
+        if (klass->symbol != core::Symbols::root() && !klass->declLoc.file().data(ctx).isRBI() &&
+            classDefinesBehavior(klass)) {
+            auto prevLoc = namerCtx->classBehaviorLocs.find(klass->symbol);
+            if (prevLoc == namerCtx->classBehaviorLocs.end()) {
+                namerCtx->classBehaviorLocs[klass->symbol] = klass->declLoc;
+            } else if (prevLoc->second.file() != klass->declLoc.file()) {
+                if (auto e = ctx.state.beginError(klass->declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
+                    e.setHeader("`{}` has behavior defined in multiple files", klass->symbol.data(ctx)->show(ctx));
+                    e.addErrorLine(prevLoc->second, "Previous definition");
+                }
+            }
+        }
         return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
     }
 

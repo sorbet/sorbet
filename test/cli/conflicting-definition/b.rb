@@ -1,7 +1,12 @@
 require 'y'
 
 module Foo
-  true
+   def meth1; end # Defines behavior
 end
 
-module NoBehavior; end
+module Bar
+  # Constant assignment is not considered "defining behavior" for Bar
+  X = 1
+
+  module BarInner; end
+end
