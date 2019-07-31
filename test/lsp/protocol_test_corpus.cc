@@ -423,40 +423,32 @@ TEST_F(ProtocolTest, RespectsHoverTextLimitations) {
     ASSERT_EQ(contents->value, "Integer(1)");
 }
 
-// Tests that Sorbet returns sorbet: URIs for payload references, and that readFile works on them.
-TEST_F(ProtocolTest, SupportsGitHubSorbetURIs) {
+// Tests that Sorbet returns sorbet: URIs for payload references & files not on client, and that readFile works on them.
+TEST_F(ProtocolTest, SorbetURIsWork) {
     const bool enableTypecheckInfo = false;
     const bool supportsMarkdown = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
+    lspWrapper->opts.lspDirsNotOnClient.push_back("/folder");
     auto initializeResponses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, enableTypecheckInfo,
                                                            supportsMarkdown, move(initOptions));
     updateDiagnostics(initializeResponses);
     assertDiagnostics(move(initializeResponses), {});
 
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n[0,1,2,3].select {|x| x > 0}\n")), {});
-    auto defResponses = send(LSPMessage(make_unique<RequestMessage>(
-        "2.0", nextId++, LSPMethod::TextDocumentDefinition,
-        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(getUri("foo.rb")),
-                                                make_unique<Position>(1, 11)))));
-    ASSERT_EQ(defResponses.size(), 1);
+    string fileContents = "# typed: true\n[0,1,2,3].select {|x| x > 0}\ndef myMethod; end;\n";
+    assertDiagnostics(send(*openFile("folder/foo.rb", fileContents)), {});
 
-    auto &defResponse = defResponses.at(0);
-    ASSERT_TRUE(defResponse->isResponse());
-    auto &defResult = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*defResponse->asResponse().result);
-    auto &result = get<vector<unique_ptr<Location>>>(defResult);
-    ASSERT_EQ(result.size(), 1);
-    auto &loc = result.at(0);
-    ASSERT_TRUE(absl::StartsWith(loc->uri, "sorbet:https://github.com/"));
+    auto selectDefinitions = getDefinitions("folder/foo.rb", 1, 11);
+    ASSERT_EQ(selectDefinitions.size(), 1);
+    auto &selectLoc = selectDefinitions.at(0);
+    ASSERT_TRUE(absl::StartsWith(selectLoc->uri, "sorbet:https://github.com/"));
+    ASSERT_FALSE(readFile(selectLoc->uri).empty());
 
-    auto readFileResponses = send(LSPMessage(make_unique<RequestMessage>(
-        "2.0", nextId++, LSPMethod::SorbetReadFile, make_unique<TextDocumentIdentifier>(loc->uri))));
-    ASSERT_EQ(readFileResponses.size(), 1);
-    auto &readFileResponse = readFileResponses.at(0);
-    ASSERT_TRUE(readFileResponse->isResponse());
-    auto &readFileResult = get<unique_ptr<TextDocumentItem>>(*readFileResponse->asResponse().result);
-    // It should contain data.
-    ASSERT_FALSE(readFileResult->text.empty());
+    auto myMethodDefinitions = getDefinitions("folder/foo.rb", 2, 5);
+    ASSERT_EQ(myMethodDefinitions.size(), 1);
+    auto &myMethodDefLoc = myMethodDefinitions.at(0);
+    ASSERT_EQ(myMethodDefLoc->uri, "sorbet:folder/foo.rb");
+    ASSERT_EQ(readFile(myMethodDefLoc->uri), fileContents);
 }
 
 } // namespace sorbet::test::lsp
