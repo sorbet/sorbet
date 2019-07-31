@@ -65,19 +65,6 @@ string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
             if (enableSorbetURIs) {
                 uri = absl::StrCat(sorbetScheme, messageFile.path());
             } else {
-                // This is hacky because VSCode appends #4,3 (or whatever the position is of the
-                // error) to the uri before it shows it in the UI since this is the format that
-                // VSCode uses to denote which location to jump to. However, if you append #L4
-                // to the end of the uri, this will work on github (it will ignore the #4,3)
-                //
-                // As an example, in VSCode, on hover you might see
-                //
-                // string.rbi(18,7): Method `+` has specified type of argument `arg0` as `String`
-                //
-                // When you click on the link, in the browser it appears as
-                // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
-                // but shows you the same thing as
-                // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
                 uri = string(messageFile.path());
             }
         } else {
