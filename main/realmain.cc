@@ -432,7 +432,9 @@ int realmain(int argc, char *argv[]) {
     gs->dslRubyExtraArgs = opts.dslRubyExtraArgs;
     if (!opts.stripeMode) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
-        gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+        if (opts.errorCodeWhiteList.empty()) {
+            gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+        }
     }
 
     logger->trace("done building initial global state");
