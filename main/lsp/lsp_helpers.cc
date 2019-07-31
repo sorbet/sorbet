@@ -39,7 +39,10 @@ string LSPLoop::localName2Remote(string_view uri, bool useSorbetUri) {
         return string(relativeUri);
     }
 
-    return absl::StrCat((useSorbetUri ? sorbetUri : rootUri), "/", relativeUri);
+    if (useSorbetUri) {
+        return absl::StrCat(sorbetUri, relativeUri);
+    }
+    return absl::StrCat(rootUri, "/", relativeUri);
 }
 
 core::FileRef LSPLoop::uri2FileRef(string_view uri) {
