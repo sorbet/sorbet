@@ -20,13 +20,6 @@ LSPLoop::getReferencesToSymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef
 LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                 const ReferenceParams &params) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
-    if (!opts.lspFindReferencesEnabled) {
-        response->error =
-            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                       "The `Find References` LSP feature is experimental and disabled by default.");
-        return LSPResult::make(move(gs), move(response));
-    }
-
     ShowOperation op(*this, "References", "Finding all references...");
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.references");
 

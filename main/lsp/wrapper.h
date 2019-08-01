@@ -39,8 +39,6 @@ private:
 
 public:
     enum class LSPExperimentalFeature {
-        GoToDefinition = 2,
-        FindReferences = 3,
         Autocomplete = 4,
         WorkspaceSymbols = 5,
         DocumentSymbol = 6,
