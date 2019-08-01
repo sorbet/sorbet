@@ -245,10 +245,6 @@ module T::Private::Methods
     end
   end
 
-  def self.sig_error(loc, message)
-    raise(ArgumentError.new("#{loc.path}:#{loc.lineno}: Error interpreting `sig`:\n  #{message}\n\n"))
-  end
-
   # Executes the `sig` block, and converts the resulting Declaration
   # to a Signature.
   def self.run_sig(hook_mod, method_name, original_method, declaration_block)
@@ -287,10 +283,6 @@ module T::Private::Methods
               "last call to `sig` (#{current_declaration.mod}). Make sure each call " \
               "to `sig` is immediately followed by a method definition on the same " \
               "class/module."
-      end
-
-      if current_declaration.returns.equal?(ARG_NOT_PROVIDED)
-        sig_error(loc, "You must provide a return type; use the `.returns` or `.void` builder methods. Method: #{original_method}")
       end
 
       signature = Signature.new(
