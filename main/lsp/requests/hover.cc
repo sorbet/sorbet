@@ -24,7 +24,7 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
     return contents;
 }
 
-unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string sigString, string docString) {
+unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view sigString, string_view docString) {
     string content = "";
 
     if (docString.length() > 0) {
