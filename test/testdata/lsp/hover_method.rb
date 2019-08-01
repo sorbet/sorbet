@@ -41,6 +41,7 @@ class Foo
     # ^ hover: sig {params(arg0: Integer).void}
   end
 
+  # Some docs for qux
   sig {void}
   def qux
     typed_with_docs(1)
