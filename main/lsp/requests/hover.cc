@@ -69,7 +69,6 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
         optional<string> optionalDocumentation = findDocumentation(fref.data(*gs).source(), loc->beginPos());
         string documentation = optionalDocumentation.value_or("");
 
-
         auto resp = move(queryResponses[0]);
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
@@ -78,10 +77,12 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
             }
             response->result = make_unique<Hover>(formatRubyCode(
-                clientHoverMarkupKind, methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint), documentation));
+                clientHoverMarkupKind, methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint),
+                documentation));
         } else if (auto defResp = resp->isDefinition()) {
             response->result = make_unique<Hover>(formatRubyCode(
-                clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr), documentation));
+                clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr),
+                documentation));
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(*gs);
             auto type = constResp->retType.type;
@@ -94,10 +95,11 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 // `Foo`.
                 type = core::make_type<core::MetaType>(type);
             }
-            response->result = make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, type->showWithMoreInfo(*gs), documentation));
-        } else {
             response->result =
-                make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
+                make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, type->showWithMoreInfo(*gs), documentation));
+        } else {
+            response->result = make_unique<Hover>(
+                formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
         }
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
         // An error happened while setting up the query.
