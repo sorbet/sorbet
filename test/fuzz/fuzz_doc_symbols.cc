@@ -32,11 +32,7 @@ std::unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain:
     return gs;
 }
 
-extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
-    return 0;
-}
-
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t size) {
+sorbet::realmain::lsp::LSPWrapper mkLSPWrapper() {
     std::unique_ptr<sorbet::KeyValueStore> kvstore;
     auto opts = mkOpts();
     static const auto commonGs = mkGlobalState(opts, kvstore);
@@ -48,6 +44,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     // TODO how to use opts and avoid another mkOpts()?
     auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(std::move(gs), mkOpts(), console, false);
     lspWrapper.enableAllExperimentalFeatures();
+
+    return lspWrapper;
+}
+
+extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
+    return 0;
+}
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t size) {
+    auto lspWrapper = mkLSPWrapper();
 
     // TODO slow
     int nextId = 0;
