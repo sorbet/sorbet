@@ -902,21 +902,11 @@ public:
     }
 
 private:
+    UnorderedMap<core::SymbolRef, core::Loc> classBehaviorLocs;
     NameInserter() {
         enterScope();
     }
-
-    UnorderedMap<core::SymbolRef, core::Loc> classBehaviorLocs;
 };
-
-ast::ParsedFile Namer::run(core::MutableContext ctx, ast::ParsedFile tree) {
-    NameInserter nameInserter;
-    tree.tree = ast::TreeMap::apply(ctx, nameInserter, std::move(tree.tree));
-    // This check is FAR too slow to run on large codebases, especially with sanitizers on.
-    // But it can be super useful to uncomment when debugging certain issues.
-    // ctx.state.sanityCheck();
-    return tree;
-}
 
 std::vector<ast::ParsedFile> Namer::run(core::MutableContext ctx, std::vector<ast::ParsedFile> trees) {
     NameInserter nameInserter;

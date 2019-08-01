@@ -8,7 +8,6 @@ namespace sorbet::namer {
 class Namer final {
 public:
     static std::vector<ast::ParsedFile> run(core::MutableContext ctx, std::vector<ast::ParsedFile> trees);
-    static ast::ParsedFile run(core::MutableContext ctx, ast::ParsedFile tree); // TODO remove
 
     Namer() = delete;
 };
