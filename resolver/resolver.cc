@@ -432,6 +432,20 @@ private:
         return true;
     }
 
+    static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
+        ENFORCE(job.ancestor->symbol.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
+        auto ancestorSym = job.ancestor->symbol.data(ctx)->dealias(ctx);
+
+        if (!ancestorSym.data(ctx)->isClassSealed()) {
+            return;
+        }
+
+        // TODO(jez) Would it ever make sense to put an AppliedType into the union?
+        // TODO(jez) Do we want to make sure that the child class doesn't have any type members?
+
+        ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
+    }
+
     void transformAncestor(core::Context ctx, core::SymbolRef klass, unique_ptr<ast::Expression> &ancestor,
                            bool isSuperclass = false) {
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor.get())) {
@@ -708,7 +722,11 @@ public:
                 int origSize = todoAncestors.size();
                 auto it =
                     remove_if(todoAncestors.begin(), todoAncestors.end(), [ctx](AncestorResolutionItem &job) -> bool {
-                        return resolveAncestorJob(ctx, job, false);
+                        auto resolved = resolveAncestorJob(ctx, job, false);
+                        if (resolved) {
+                            tryRegisterSealedSubclass(ctx, job);
+                        }
+                        return resolved;
                     });
                 todoAncestors.erase(it, todoAncestors.end());
                 progress = (origSize != todoAncestors.size());
@@ -1226,7 +1244,7 @@ private:
             [&](ast::Cast *cast) {
                 if (cast->cast != core::Names::let()) {
                     if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
-                        e.setHeader("Use T.let() to specify the type of constants");
+                        e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
                 }
                 result = cast->type;
@@ -1241,7 +1259,8 @@ private:
                     }
                 }
                 if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::ConstantMissingTypeAnnotation)) {
-                    e.setHeader("Constants must have type annotations with T.let() when specifying '# typed: strict'");
+                    e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
+                                "# typed: strict");
                 }
             });
         return result;
@@ -1266,7 +1285,7 @@ private:
             return false;
         } else if (cast->cast != core::Names::let()) {
             if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
-                e.setHeader("Use T.let() to specify the type of constants");
+                e.setHeader("Use `{}` to specify the type of constants", "T.let");
             }
         }
 

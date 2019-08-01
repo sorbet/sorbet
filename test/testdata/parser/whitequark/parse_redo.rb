@@ -1,3 +1,3 @@
 # typed: true
 
-redo # error-with-dupes: Unsupported node type `Redo`
+redo # error: Unsupported node type `Redo`

@@ -135,6 +135,10 @@ class LSPLoop {
      * `params.initializationOptions.supportsOperationNotifications` set to `true`.
      */
     bool enableOperationNotifications = false;
+    /**
+     * If true, then Sorbet will use sorbet: URIs for files that are not stored on disk (e.g., payload files).
+     */
+    bool enableSorbetURIs = false;
     /** If true, then LSP sends metadata to the client every time it typechecks files. Used in tests. */
     bool enableTypecheckInfo = false;
     /**
@@ -185,7 +189,7 @@ class LSPLoop {
     core::FileRef uri2FileRef(std::string_view uri);
     std::string fileRef2Uri(const core::GlobalState &gs, core::FileRef);
     std::string remoteName2Local(std::string_view uri);
-    std::string localName2Remote(std::string_view uri);
+    std::string localName2Remote(std::string_view uri, bool useSorbetUri);
     std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs);
 
     /** Used to implement textDocument/documentSymbol
@@ -213,6 +217,8 @@ class LSPLoop {
                                            const TextDocumentPositionParams &params);
     LSPResult handleTextDocumentCompletion(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const CompletionParams &params);
+    LSPResult handleTextDocumentCodeAction(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                           const CodeActionParams &params);
     std::unique_ptr<CompletionItem> getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
                                                       const std::unique_ptr<core::TypeConstraint> &constraint);
@@ -279,6 +285,8 @@ core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, cor
                             core::TypePtr receiver, const std::unique_ptr<core::TypeConstraint> &constr);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef);
 std::unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc);
+int cmpPositions(const Position &a, const Position &b);
+int cmpRanges(const Range &a, const Range &b);
 
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPLOOP_H

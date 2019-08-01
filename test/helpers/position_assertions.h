@@ -206,5 +206,24 @@ public:
     std::string toString() const override;
 };
 
+// # ^^^ apply-code-action: [version] title
+class ApplyCodeActionAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<ApplyCodeActionAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                          int assertionLine, std::string_view assertionContents,
+                                                          std::string_view assertionType);
+
+    ApplyCodeActionAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                             std::string_view version, std::string_view title);
+
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+               std::unique_ptr<CodeAction> &codeAction, std::string_view testName, std::string_view fileUri);
+
+    const std::string title;
+    const std::string version;
+
+    std::string toString() const override;
+};
+
 } // namespace sorbet::test
 #endif // TEST_HELPERS_POSITION_ASSERTIONS_H

@@ -185,10 +185,14 @@ struct Options {
     std::vector<std::string> autogenSubclassesAbsoluteIgnorePatterns;
     // Ignore patterns that can occur anywhere in a file's path from an input folder.
     std::vector<std::string> autogenSubclassesRelativeIgnorePatterns;
+    // List of directories not available editor-side. References to files in these directories should be sent via
+    // sorbet: URIs to clients that support them.
+    std::vector<std::string> lspDirsMissingFromClient;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspGoToDefinitionEnabled = false;
     bool lspFindReferencesEnabled = false;
     bool lspAutocompleteEnabled = false;
+    bool lspQuickFixEnabled = false;
     bool lspWorkspaceSymbolsEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;

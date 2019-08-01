@@ -343,6 +343,7 @@ cxxopts::Options buildOptions() {
                                     "Enable experimental LSP feature: Document Symbol");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
+    options.add_options("advanced")("enable-experimental-lsp-quick-fix", "Enable experimental LSP feature: Quick Fix");
     options.add_options("advanced")("enable-all-experimental-lsp-features", "Enable every experimental LSP feature.");
     options.add_options("advanced")(
         "ignore",
@@ -350,6 +351,11 @@ cxxopts::Options buildOptions() {
         "Sorbet). Strings beginning with / match against the prefix of these relative paths; others are substring "
         "matchs. Matches must be against whole folder and file names, so `foo` matches `/foo/bar.rb` and "
         "`/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.",
+        cxxopts::value<vector<string>>(), "string");
+    options.add_options("advanced")(
+        "lsp-directories-missing-from-client",
+        "Directory prefixes that are not accessible editor-side. References to files in these directories will be sent "
+        "as sorbet: URIs to clients that understand them.",
         cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
@@ -647,6 +653,7 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
+        opts.lspQuickFixEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-quick-fix"].as<bool>();
         opts.lspGoToDefinitionEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-go-to-definition"].as<bool>();
         opts.lspFindReferencesEnabled =
@@ -656,6 +663,18 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.lspDocumentSymbolEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+
+        if (raw.count("lsp-directories-missing-from-client") > 0) {
+            auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
+            // Convert all of these dirs into absolute ignore patterns that begin with '/'.
+            for (auto &dir : lspDirsMissingFromClient) {
+                string pNormalized = dir;
+                if (dir.at(0) != '/') {
+                    pNormalized = '/' + dir;
+                }
+                opts.lspDirsMissingFromClient.push_back(pNormalized);
+            }
+        }
 
         opts.cacheDir = raw["cache-dir"].as<string>();
         if (!extractPrinters(raw, opts, logger)) {

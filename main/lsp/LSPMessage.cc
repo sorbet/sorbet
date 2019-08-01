@@ -138,6 +138,7 @@ bool LSPMessage::isDelayable() const {
         // Definition, reference, and workspace symbol requests are typically requested directly by the user, so we
         // shouldn't delay processing them.
         case LSPMethod::TextDocumentDefinition:
+        case LSPMethod::TextDocumentCodeAction:
         case LSPMethod::TextDocumentReferences:
         case LSPMethod::WorkspaceSymbol:
         // These requests involve a specific file location, and should never be delayed.
@@ -150,6 +151,8 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::TextDocumentDidClose:
         case LSPMethod::SorbetWorkspaceEdit:
         case LSPMethod::SorbetWatchmanFileChange:
+        // A file read. Should not be reordered with respect to file updates.
+        case LSPMethod::SorbetReadFile:
             return false;
         // VS Code requests document symbols automatically and in the background. It's OK to delay these requests.
         case LSPMethod::TextDocumentDocumentSymbol:

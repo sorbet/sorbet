@@ -1,6 +1,8 @@
 #include "common/Timer.h"
 #include "lsp.h"
 
+#include "absl/strings/match.h"
+
 using namespace std;
 
 namespace sorbet::realmain::lsp {
@@ -130,7 +132,11 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             prodCategoryCounterInc("lsp.messages.processed", "initialize");
             auto &params = get<unique_ptr<InitializeParams>>(rawParams);
             if (auto rootUriString = get_if<string>(&params->rootUri)) {
-                rootUri = *rootUriString;
+                if (absl::EndsWith(*rootUriString, "/")) {
+                    rootUri = rootUriString->substr(0, rootUriString->length() - 1);
+                } else {
+                    rootUri = *rootUriString;
+                }
             }
             clientCompletionItemSnippetSupport = false;
             clientHoverMarkupKind = MarkupKind::Plaintext;
@@ -159,6 +165,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
                 auto &initOptions = *params->initializationOptions;
                 enableOperationNotifications = initOptions->supportsOperationNotifications.value_or(false);
                 enableTypecheckInfo = initOptions->enableTypecheckInfo.value_or(false);
+                enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
             }
 
             auto serverCap = make_unique<ServerCapabilities>();
@@ -168,6 +175,12 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             serverCap->workspaceSymbolProvider = opts.lspWorkspaceSymbolsEnabled;
             serverCap->hoverProvider = true;
             serverCap->referencesProvider = opts.lspFindReferencesEnabled;
+
+            if (opts.lspQuickFixEnabled) {
+                auto codeActionProvider = make_unique<CodeActionOptions>();
+                codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix};
+                serverCap->codeActionProvider = move(codeActionProvider);
+            }
 
             if (opts.lspSignatureHelpEnabled) {
                 auto sigHelpProvider = make_unique<SignatureHelpOptions>();
@@ -198,12 +211,27 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         } else if (method == LSPMethod::TextDocumentCompletion) {
             auto &params = get<unique_ptr<CompletionParams>>(rawParams);
             return handleTextDocumentCompletion(move(gs), id, *params);
+        } else if (method == LSPMethod::TextDocumentCodeAction) {
+            auto &params = get<unique_ptr<CodeActionParams>>(rawParams);
+            return handleTextDocumentCodeAction(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentSignatureHelp) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
             return handleTextSignatureHelp(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentReferences) {
             auto &params = get<unique_ptr<ReferenceParams>>(rawParams);
             return handleTextDocumentReferences(move(gs), id, *params);
+        } else if (method == LSPMethod::SorbetReadFile) {
+            auto &params = get<unique_ptr<TextDocumentIdentifier>>(rawParams);
+            auto fref = uri2FileRef(params->uri);
+            if (fref.exists()) {
+                response->result =
+                    make_unique<TextDocumentItem>(params->uri, "ruby", 0, string(fref.data(*gs).source()));
+            } else {
+                response->error = make_unique<ResponseError>(
+                    (int)LSPErrorCodes::InvalidParams,
+                    fmt::format("Did not find file at uri {} in {}", params->uri, convertLSPMethodToString(method)));
+            }
+            return LSPResult::make(move(gs), move(response));
         } else if (method == LSPMethod::Shutdown) {
             prodCategoryCounterInc("lsp.messages.processed", "shutdown");
             response->result = JSONNullObject();

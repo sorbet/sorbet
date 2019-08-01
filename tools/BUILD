@@ -41,6 +41,7 @@ compilation_database(
         "//main:sorbet",
         "//payload:payload",
         "//main:realmain-orig",
+        "//main/pipeline:pipeline-orig",
         "//infer:infer_test",
         "//emscripten:main",
         "//payload/text:empty",

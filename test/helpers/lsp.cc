@@ -114,9 +114,9 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities(bo
     return capabilities;
 }
 
-unique_ptr<InitializeParams> makeInitializeParams(variant<string, JSONNullObject> rootPath,
-                                                  variant<string, JSONNullObject> rootUri, bool enableTypecheckInfo,
-                                                  bool supportsMarkdown) {
+unique_ptr<InitializeParams>
+makeInitializeParams(variant<string, JSONNullObject> rootPath, variant<string, JSONNullObject> rootUri,
+                     bool supportsMarkdown, std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions) {
     auto initializeParams = make_unique<InitializeParams>(rootPath, rootUri, make_unique<ClientCapabilities>());
     initializeParams->capabilities->workspace = makeWorkspaceClientCapabilities();
     initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities(supportsMarkdown);
@@ -132,9 +132,7 @@ unique_ptr<InitializeParams> makeInitializeParams(variant<string, JSONNullObject
     initializeParams->workspaceFolders =
         make_optional<variant<JSONNullObject, vector<unique_ptr<WorkspaceFolder>>>>(move(workspaceFolders));
 
-    auto sorbetInitParams = make_unique<SorbetInitializationOptions>();
-    sorbetInitParams->enableTypecheckInfo = enableTypecheckInfo;
-    initializeParams->initializationOptions = move(sorbetInitParams);
+    initializeParams->initializationOptions = move(initOptions);
     return initializeParams;
 }
 
@@ -183,7 +181,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     EXPECT_FALSE(capabilities.documentHighlightProvider.has_value());
     EXPECT_TRUE(capabilities.documentSymbolProvider.value_or(false));
     EXPECT_TRUE(capabilities.workspaceSymbolProvider.value_or(false));
-    EXPECT_FALSE(capabilities.codeActionProvider.has_value());
+    EXPECT_TRUE(capabilities.codeActionProvider.has_value());
     EXPECT_FALSE(capabilities.codeLensProvider.has_value());
     EXPECT_FALSE(capabilities.documentFormattingProvider.has_value());
     EXPECT_FALSE(capabilities.documentRangeFormattingProvider.has_value());
@@ -267,14 +265,15 @@ optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMess
 }
 
 vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view rootUri, LSPWrapper &lspWrapper,
-                                             int &nextId, bool enableTypecheckInfo, bool supportsMarkdown) {
+                                             int &nextId, bool supportsMarkdown,
+                                             optional<unique_ptr<SorbetInitializationOptions>> initOptions) {
     // Reset next id.
     nextId = 0;
 
     // Send 'initialize' message.
     {
         auto initializeParams =
-            makeInitializeParams(string(rootPath), string(rootUri), enableTypecheckInfo, supportsMarkdown);
+            makeInitializeParams(string(rootPath), string(rootUri), supportsMarkdown, move(initOptions));
         LSPMessage message(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize, move(initializeParams)));
         auto responses = lspWrapper.getLSPResponsesFor(message);
 

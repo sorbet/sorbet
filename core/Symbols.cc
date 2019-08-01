@@ -818,6 +818,70 @@ SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
     return classSymbol;
 }
 
+void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
+    ENFORCE(this->isClassSealed(), "Class is not marked sealed: {}", this->show(ctx));
+    ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
+    ENFORCE(subclass.data(ctx)->isClass(), "Sealed subclass {} must be class", subclass.show(ctx));
+
+    auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx);
+    auto sealedClassesList =
+        this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedClassesList());
+
+    auto data = sealedClassesList.data(ctx);
+    ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
+    auto appliedType = cast_type<AppliedType>(data->resultType.get());
+    ENFORCE(appliedType != nullptr, "sealedClassesList should always be AppliedType");
+    ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedClassesList should always be Array");
+    auto currentClasses = appliedType->targs[0];
+    // Abusing T.any to be list cons, with T.noreturn as the empty list.
+    // (Except it's not, because Types::lub is too smart, and drops the T.noreturn to prevent allocating a T.any)
+    appliedType->targs[0] = Types::any(ctx, currentClasses, make_type<ClassType>(classOfSubclass));
+}
+
+const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
+    ENFORCE(this->isClassSealed(), "Class is not marked sealed: {}", this->show(gs));
+    auto sealedClassesList = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedClassesList());
+    auto &result = sealedClassesList.data(gs)->locs();
+    ENFORCE(result.size() > 0);
+    return result;
+}
+
+TypePtr Symbol::sealedSubclasses(const Context ctx) const {
+    ENFORCE(this->isClassSealed(), "Class is not marked sealed: {}", this->show(ctx));
+
+    auto sealedClassesList =
+        this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedClassesList());
+
+    auto data = sealedClassesList.data(ctx);
+    ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
+    auto appliedType = cast_type<AppliedType>(data->resultType.get());
+    ENFORCE(appliedType != nullptr, "sealedClassesList should always be AppliedType");
+    ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedClassesList should always be Array");
+
+    auto currentClasses = appliedType->targs[0];
+    if (currentClasses->isBottom()) {
+        // Declared sealed parent class, but never saw any children.
+        return make_type<ClassType>(this->ref(ctx));
+    }
+
+    auto result = Types::bottom();
+    while (auto orType = cast_type<OrType>(currentClasses.get())) {
+        auto classType = cast_type<ClassType>(orType->right.get());
+        ENFORCE(classType != nullptr, "Something in sealedClassesList that's not a ClassType");
+        auto subclass = classType->symbol.data(ctx)->attachedClass(ctx);
+        ENFORCE(subclass.exists());
+        result = Types::any(ctx, make_type<ClassType>(subclass), result);
+        currentClasses = orType->left;
+    }
+    auto lastClassType = cast_type<ClassType>(currentClasses.get());
+    ENFORCE(lastClassType != nullptr, "Last element of sealedClassesList must be ClassType");
+    auto subclass = lastClassType->symbol.data(ctx)->attachedClass(ctx);
+    ENFORCE(subclass.exists());
+    result = Types::any(ctx, make_type<ClassType>(subclass), result);
+
+    return result;
+}
+
 SymbolRef Symbol::dealias(const GlobalState &gs, int depthLimit) const {
     if (auto alias = cast_type<AliasType>(resultType.get())) {
         if (depthLimit == 0) {

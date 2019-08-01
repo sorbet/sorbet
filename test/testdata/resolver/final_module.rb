@@ -1,4 +1,6 @@
 # typed: false
+# The fast path causes duplicate errors.
+# disable-fast-path: true
 
 class FinalClass
   extend T::Helpers
@@ -18,19 +20,19 @@ end
 module BadInclude
   include NonFinalModule
   extend NonFinalModule
-  include FinalModule # error-with-dupes: `FinalModule` was declared as final and cannot be included in `BadInclude`
+  include FinalModule # error: `FinalModule` was declared as final and cannot be included in `BadInclude`
 end
 
 module BadExtend
   include NonFinalModule
   extend NonFinalModule
-  extend FinalModule # error-with-dupes: `FinalModule` was declared as final and cannot be extended in `BadExtend`
+  extend FinalModule # error: `FinalModule` was declared as final and cannot be extended in `BadExtend`
 end
 
 AliasFinalModule = FinalModule
 
 module BadAliasInclude
-  include AliasFinalModule # error-with-dupes: `FinalModule` was declared as final and cannot be included in `BadAliasInclude`
+  include AliasFinalModule # error: `FinalModule` was declared as final and cannot be included in `BadAliasInclude`
 end
 
 module FinalModuleWithFinalMethods
@@ -75,7 +77,7 @@ module ModuleWithClass
 end
 
 class ModuleWithClassOkay < ModuleWithClass::C; end
-class ModuleWithClassBad; include ModuleWithClass; end # error-with-dupes: `ModuleWithClass` was declared as final and cannot be included in `ModuleWithClassBad`
+class ModuleWithClassBad; include ModuleWithClass; end # error: `ModuleWithClass` was declared as final and cannot be included in `ModuleWithClassBad`
 
 module ModuleWithModule
   extend T::Helpers
@@ -84,4 +86,4 @@ module ModuleWithModule
 end
 
 class ModuleWithModuleOkay; include ModuleWithModule::M; end
-class ModuleWithModuleBad; include ModuleWithModule; end # error-with-dupes: `ModuleWithModule` was declared as final and cannot be included in `ModuleWithModuleBad`
+class ModuleWithModuleBad; include ModuleWithModule; end # error: `ModuleWithModule` was declared as final and cannot be included in `ModuleWithModuleBad`

@@ -164,6 +164,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath() {
 
     vector<ast::ParsedFile> indexedCopies;
     for (const auto &tree : indexed) {
+        // Note: indexed entries for payload files don't have any contents.
         if (tree.tree) {
             indexedCopies.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
         }
@@ -267,6 +268,9 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
 
     if (takeFastPath) {
         Timer timeit(logger, "fast_path");
+        // Drop any indexing errors produced during `updateFile`, as we are going to run indexing a second time with
+        // finalGS. (Note: Flushing is disabled in LSP mode, so we have to drain.)
+        errorQueue->drainWithQueryResponses();
         int i = -1;
         for (auto &oldHash : globalStateHashes) {
             i++;
@@ -299,7 +303,9 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
             const int id = f.id();
             const auto it = indexedFinalGS.find(id);
             const auto &parsedFile = it == indexedFinalGS.end() ? indexed[id] : it->second;
-            updatedIndexed.emplace_back(ast::ParsedFile{parsedFile.tree->deepCopy(), parsedFile.file});
+            if (parsedFile.tree) {
+                updatedIndexed.emplace_back(ast::ParsedFile{parsedFile.tree->deepCopy(), parsedFile.file});
+            }
         }
         subset.insert(subset.end(), filesForQuery.begin(), filesForQuery.end());
 

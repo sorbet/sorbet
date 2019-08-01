@@ -1,26 +1,46 @@
+#include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_replace.h"
+#include "common/FileOps.h"
 #include "lsp.h"
 
 using namespace std;
 
 namespace sorbet::realmain::lsp {
 
+constexpr string_view sorbetScheme = "sorbet:";
+constexpr string_view httpsScheme = "https";
+
 string LSPLoop::remoteName2Local(string_view uri) {
-    ENFORCE(absl::StartsWith(uri, rootUri));
-    const char *start = uri.data() + rootUri.length();
+    const bool isSorbetURI = absl::StartsWith(uri, sorbetScheme);
+    if (!absl::StartsWith(uri, rootUri) && !enableSorbetURIs && !isSorbetURI) {
+        logger->error("Unrecognized URI received from client: {}", uri);
+        return string(uri);
+    }
+
+    const string_view root = isSorbetURI ? sorbetScheme : rootUri;
+    const char *start = uri.data() + root.length();
     if (*start == '/') {
         ++start;
     }
-    // Special case: Folder is '' (current directory).
-    if (rootPath.length() > 0) {
-        return absl::StrCat(rootPath, "/", string(start, uri.end()));
+
+    string path = string(start, uri.end());
+    // Note: May be `https://` or `https%3A//`. VS Code URLencodes the : in sorbet:https:// paths.
+    const bool isHttps = isSorbetURI && absl::StartsWith(path, httpsScheme) && path.length() > httpsScheme.length() &&
+                         (path[httpsScheme.length()] == ':' || path[httpsScheme.length()] == '%');
+    if (isHttps) {
+        // URL decode the :
+        return absl::StrReplaceAll(path, {{"%3A", ":"}});
+    } else if (rootPath.length() > 0) {
+        return absl::StrCat(rootPath, "/", path);
     } else {
-        return string(start, uri.end());
+        // Special case: Folder is '' (current directory)
+        return path;
     }
 }
 
-string LSPLoop::localName2Remote(string_view uri) {
+string LSPLoop::localName2Remote(string_view uri, bool useSorbetUri) {
     ENFORCE(absl::StartsWith(uri, rootPath));
     string_view relativeUri = uri.substr(rootPath.length());
     if (relativeUri.at(0) == '/') {
@@ -32,11 +52,14 @@ string LSPLoop::localName2Remote(string_view uri) {
         return string(relativeUri);
     }
 
+    if (useSorbetUri) {
+        return absl::StrCat(sorbetScheme, relativeUri);
+    }
     return absl::StrCat(rootUri, "/", relativeUri);
 }
 
 core::FileRef LSPLoop::uri2FileRef(string_view uri) {
-    if (!absl::StartsWith(uri, rootUri)) {
+    if (!absl::StartsWith(uri, rootUri) && !absl::StartsWith(uri, sorbetScheme)) {
         return core::FileRef();
     }
     auto needle = remoteName2Local(uri);
@@ -44,12 +67,28 @@ core::FileRef LSPLoop::uri2FileRef(string_view uri) {
 }
 
 string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
-    if (file.data(gs).sourceType == core::File::Type::Payload) {
-        return string(file.data(gs).path());
+    string uri;
+    if (!file.exists()) {
+        uri = localName2Remote("???", false);
     } else {
-        return localName2Remote(string(file.data(gs).path()));
+        auto &messageFile = file.data(gs);
+        if (messageFile.isPayload()) {
+            if (enableSorbetURIs) {
+                uri = absl::StrCat(sorbetScheme, messageFile.path());
+            } else {
+                uri = string(messageFile.path());
+            }
+        } else {
+            // Tell localName2Remote to use a sorbet: URI if the file is not present on the client AND the client
+            // supports sorbet: URIs
+            uri = localName2Remote(file.data(gs).path(),
+                                   enableSorbetURIs && FileOps::isFileIgnored(rootPath, messageFile.path(),
+                                                                              opts.lspDirsMissingFromClient, {}));
+        }
     }
-}
+    return uri;
+} // namespace sorbet::realmain::lsp
+
 unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
     unique_ptr<Position> start;
     unique_ptr<Position> end;
@@ -66,29 +105,22 @@ unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
 }
 
 unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) {
-    string uri;
-    if (!loc.file().exists()) {
-        uri = localName2Remote("???");
-    } else {
-        auto &messageFile = loc.file().data(gs);
-        if (messageFile.sourceType == core::File::Type::Payload) {
-            // This is hacky because VSCode appends #4,3 (or whatever the position is of the
-            // error) to the uri before it shows it in the UI since this is the format that
-            // VSCode uses to denote which location to jump to. However, if you append #L4
-            // to the end of the uri, this will work on github (it will ignore the #4,3)
-            //
-            // As an example, in VSCode, on hover you might see
-            //
-            // string.rbi(18,7): Method `+` has specified type of argument `arg0` as `String`
-            //
-            // When you click on the link, in the browser it appears as
-            // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
-            // but shows you the same thing as
-            // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
-            uri = fmt::format("{}#L{}", messageFile.path(), loc.position(gs).first.line);
-        } else {
-            uri = fileRef2Uri(gs, loc.file());
-        }
+    string uri = fileRef2Uri(gs, loc.file());
+    if (loc.file().exists() && loc.file().data(gs).isPayload() && !enableSorbetURIs) {
+        // This is hacky because VSCode appends #4,3 (or whatever the position is of the
+        // error) to the uri before it shows it in the UI since this is the format that
+        // VSCode uses to denote which location to jump to. However, if you append #L4
+        // to the end of the uri, this will work on github (it will ignore the #4,3)
+        //
+        // As an example, in VSCode, on hover you might see
+        //
+        // string.rbi(18,7): Method `+` has specified type of argument `arg0` as `String`
+        //
+        // When you click on the link, in the browser it appears as
+        // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
+        // but shows you the same thing as
+        // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
+        uri = fmt::format("{}#L{}", uri, loc.position(gs).first.line);
     }
     return make_unique<Location>(uri, loc2Range(gs, loc));
 }
@@ -111,6 +143,15 @@ int cmpLocations(const Location &a, const Location &b) {
         return startCmp;
     }
     return cmpPositions(*a.range->end, *b.range->end);
+}
+
+int cmpRanges(const Range &a, const Range &b) {
+    const int cmpStart = cmpPositions(*a.start, *b.start);
+    if (cmpStart != 0) {
+        // One starts before the other.
+        return cmpStart;
+    }
+    return cmpPositions(*a.end, *b.end);
 }
 
 vector<unique_ptr<Location>>

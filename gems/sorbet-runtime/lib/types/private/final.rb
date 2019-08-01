@@ -5,31 +5,31 @@ module T::Private::Final
   module NoInherit
     def inherited(arg)
       super(arg)
-      raise "#{self.name} was declared as final and cannot be inherited"
+      raise "#{self} was declared as final and cannot be inherited"
     end
   end
 
   module NoIncludeExtend
     def included(arg)
       super(arg)
-      raise "#{self.name} was declared as final and cannot be included"
+      raise "#{self} was declared as final and cannot be included"
     end
 
     def extended(arg)
       super(arg)
-      raise "#{self.name} was declared as final and cannot be extended"
+      raise "#{self} was declared as final and cannot be extended"
     end
   end
 
   def self.declare(mod)
     if !mod.is_a?(Module)
-      raise "#{mod.inspect} is not a class or module and cannot be declared as final with `final!`"
+      raise "#{mod} is not a class or module and cannot be declared as final with `final!`"
     end
     if final_module?(mod)
-      raise "#{mod.name} was already declared as final and cannot be re-declared as final"
+      raise "#{mod} was already declared as final and cannot be re-declared as final"
     end
     if T::AbstractUtils.abstract_module?(mod)
-      raise "#{mod.name} was already declared as abstract and cannot be declared as final"
+      raise "#{mod} was already declared as abstract and cannot be declared as final"
     end
     mod.extend(mod.is_a?(Class) ? NoInherit : NoIncludeExtend)
     mark_as_final_module(mod)

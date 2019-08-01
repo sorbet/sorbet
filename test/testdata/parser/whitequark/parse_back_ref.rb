@@ -1,3 +1,3 @@
 # typed: true
 
-$+ # error-with-dupes: Unsupported node type
+$+ # error: Unsupported node type

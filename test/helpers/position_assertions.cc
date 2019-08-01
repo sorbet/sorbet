@@ -2,6 +2,7 @@
 // ^ Include first because it violates linting rules.
 
 #include "absl/strings/str_split.h"
+#include "common/FileOps.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
 #include <regex>
@@ -24,9 +25,11 @@ const UnorderedMap<
         {"usage", UsageAssertion::make},
         {"def", DefAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
+        {"exhaustive-apply-code-action", BooleanPropertyAssertion::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
+        {"apply-code-action", ApplyCodeActionAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -561,10 +564,12 @@ string UsageAssertion::toString() const {
 }
 
 void reportMissingError(const string &filename, const ErrorAssertion &assertion, string_view sourceLine,
-                        string_view errorPrefix) {
+                        string_view errorPrefix, bool missingDuplicate = false) {
+    auto coreMessage = missingDuplicate ? "Error was not duplicated" : "Did not find expected error";
+    auto messagePostfix = missingDuplicate ? "\nYou can fix this error by changing the assertion to `error:`." : "";
     ADD_FAILURE_AT(filename.c_str(), assertion.range->start->line + 1)
-        << fmt::format("{}Did not find expected error:\n{}", errorPrefix,
-                       prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()));
+        << fmt::format("{}{}:\n{}{}", errorPrefix, coreMessage,
+                       prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()), messagePostfix);
 }
 
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
@@ -627,6 +632,7 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
 
         auto diagnosticsIt = diagnostics.begin();
         ErrorAssertion *lastAssertion = nullptr;
+        bool lastAssertionMatchedDuplicate = false;
 
         while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
             // See if the ranges match.
@@ -635,8 +641,16 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
 
             if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
                 diagnosticsIt++;
+                lastAssertionMatchedDuplicate = true;
                 continue;
             } else {
+                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
+                    reportMissingError(lastAssertion->filename, *lastAssertion,
+                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
+                                       errorPrefix, true);
+                    success = false;
+                }
+                lastAssertionMatchedDuplicate = false;
                 lastAssertion = nullptr;
             }
 
@@ -681,11 +695,20 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
         while (diagnosticsIt != diagnostics.end()) {
             // We had more diagnostics than error assertions.
             auto &diagnostic = *diagnosticsIt;
-            if (!isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
+            if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
+                lastAssertionMatchedDuplicate = true;
+            } else {
                 reportUnexpectedError(filename, *diagnostic,
                                       getSourceLine(files, filename, diagnostic->range->start->line), errorPrefix);
                 success = false;
+
+                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
+                    reportMissingError(lastAssertion->filename, *lastAssertion,
+                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
+                                       errorPrefix, true);
+                }
                 lastAssertion = nullptr;
+                lastAssertionMatchedDuplicate = false;
             }
             diagnosticsIt++;
         }
@@ -700,7 +723,7 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
         assertionsIt++;
     }
     return success;
-}
+} // namespace sorbet::test
 
 shared_ptr<BooleanPropertyAssertion> BooleanPropertyAssertion::make(string_view filename, unique_ptr<Range> &range,
                                                                     int assertionLine, string_view assertionContents,
@@ -715,7 +738,9 @@ optional<bool> BooleanPropertyAssertion::getValue(string_view type,
         << "Unrecognized boolean property assertion: " << type;
     for (auto &assertion : assertions) {
         if (auto boolAssertion = dynamic_pointer_cast<BooleanPropertyAssertion>(assertion)) {
-            return boolAssertion->value;
+            if (boolAssertion->assertionType == type) {
+                return boolAssertion->value;
+            }
         }
     }
     return nullopt;
@@ -849,6 +874,85 @@ void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
 
 string HoverAssertion::toString() const {
     return fmt::format("hover: {}", message);
+}
+
+shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                                    int assertionLine, string_view assertionContents,
+                                                                    string_view assertionType) {
+    static const regex titleVersionRegex(R"(^\[(\w+)\]\s+(.*?)$)");
+
+    smatch matches;
+    string assertionContentsString = string(assertionContents);
+    if (regex_search(assertionContentsString, matches, titleVersionRegex)) {
+        string version = matches[1].str();
+        string title = matches[2].str();
+        return make_shared<ApplyCodeActionAssertion>(filename, range, assertionLine, title, version);
+    }
+
+    ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
+        << fmt::format("Found improperly formatted apply-code-action assertion. Expected apply-code-action "
+                       "[version] code-action-title.");
+    return nullptr;
+}
+ApplyCodeActionAssertion::ApplyCodeActionAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                   string_view title, string_view version)
+    : RangeAssertion(filename, range, assertionLine), title(string(title)), version(string(version)) {}
+
+string ApplyCodeActionAssertion::toString() const {
+    return fmt::format("apply-code-action: [{}] {}", version, title);
+}
+
+void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                                     unique_ptr<CodeAction> &codeAction, string_view testName, string_view fileUri) {
+    auto expectedUpdatedFilePath = fmt::format("{}.{}.rbedited", testName, version);
+    string expectedEditedFileContents;
+    try {
+        expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
+    } catch (FileNotFoundException e) {
+        ADD_FAILURE_AT(filename.c_str(), assertionLine + 1) << fmt::format(
+            "Missing {} which should contain test file after applying code actions.", expectedUpdatedFilePath);
+        return;
+    }
+
+    auto it = sourceFileContents.find(filename);
+    if (it == sourceFileContents.end()) {
+        ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
+        return;
+    }
+
+    auto &file = it->second;
+    for (auto &c : *codeAction->edit.value()->documentChanges) {
+        string actualEditedFileContents = string(file->source());
+        EXPECT_EQ(c->textDocument->uri, fileUri)
+            << fmt::format("Requested code action for {}, but received edits in {}", fileUri, c->textDocument->uri);
+
+        // First, sort the edits by increasing starting location and verify that none overlap.
+        fast_sort(c->edits, [](const auto &l, const auto &r) -> bool { return cmpRanges(*l->range, *r->range) < 0; });
+        for (u4 i = 1; i < c->edits.size(); i++) {
+            ASSERT_LT(cmpPositions(*c->edits[i - 1]->range->end, *c->edits[i]->range->start), 0)
+                << fmt::format("Received quick fix edit\n{}\nthat overlaps edit\n{}\nThe test runner does not support "
+                               "overlapping autocomplete edits, and it's likely that this is a bug.",
+                               c->edits[i - 1]->toJSON(), c->edits[i]->toJSON());
+        }
+
+        // Now, apply the edits in the reverse order so that the indices don't change.
+        reverse(c->edits.begin(), c->edits.end());
+        for (auto &e : c->edits) {
+            core::Loc::Detail reqPos;
+            reqPos.line = e->range->start->line + 1;
+            reqPos.column = e->range->start->character + 1;
+            auto startOffset = core::Loc::pos2Offset(*file, reqPos);
+
+            reqPos.line = e->range->end->line + 1;
+            reqPos.column = e->range->end->character + 1;
+            auto endOffset = core::Loc::pos2Offset(*file, reqPos);
+
+            actualEditedFileContents.replace(startOffset, endOffset - startOffset, e->newText);
+        }
+        EXPECT_EQ(actualEditedFileContents, expectedEditedFileContents) << fmt::format(
+            "Invalid quick fix result. Expected edited result to be:\n{}\n...but actually resulted in:\n{}",
+            expectedEditedFileContents, actualEditedFileContents);
+    }
 }
 
 } // namespace sorbet::test
