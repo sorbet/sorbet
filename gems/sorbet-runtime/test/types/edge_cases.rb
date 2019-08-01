@@ -261,6 +261,32 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_raises(TypeError) { c1.new.bar }
   end
 
+  it "forbids adding a sig to method_added" do
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        extend T::Sig
+        sig {params(method: Symbol).void}
+        def self.method_added(method)
+          super(method)
+        end
+      end
+    end
+    assert_includes(err.message, "Putting a `sig` on `method_added` is not supported")
+  end
+
+  it "forbids adding a sig to singleton_method_added" do
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        extend T::Sig
+        sig {params(method: Symbol).void}
+        def self.singleton_method_added(method)
+          super(method)
+        end
+      end
+    end
+    assert_includes(err.message, "Putting a `sig` on `singleton_method_added` is not supported")
+  end
+
   it "does not make sig available to attached class" do
     assert_raises(NoMethodError) do
       Class.new do
