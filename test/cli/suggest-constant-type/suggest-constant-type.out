@@ -1,0 +1,55 @@
+suggest-constant-type.rb:3: Constants must have type annotations with `T.let` when specifying `# typed: strict` https://srb.help/5028
+     3 |A = 2 + 1 # works in simple cases
+            ^^^^^
+
+suggest-constant-type.rb:5: Constants must have type annotations with `T.let` when specifying `# typed: strict` https://srb.help/5028
+     5 |B1 = [1].sum # works with generics
+             ^^^^^^^
+
+suggest-constant-type.rb:6: Constants must have type annotations with `T.let` when specifying `# typed: strict` https://srb.help/5028
+     6 |B2 = [1].map{|x| x.to_s}
+             ^^^^^^^^^^^^^^^^^^^
+
+suggest-constant-type.rb:8: Constants must have type annotations with `T.let` when specifying `# typed: strict` https://srb.help/5028
+     8 |C = B1 + 1 # does only a single iteration at a time
+            ^^^^^^
+
+suggest-constant-type.rb:3: Suggested type: `Integer` https://srb.help/7027
+     3 |A = 2 + 1 # works in simple cases
+            ^^^^^
+  Autocorrect: Done
+    suggest-constant-type.rb:3: Replaced with `T.let(2 + 1, Integer)`
+     3 |A = 2 + 1 # works in simple cases
+            ^^^^^
+
+suggest-constant-type.rb:5: Suggested type: `Integer` https://srb.help/7027
+     5 |B1 = [1].sum # works with generics
+             ^^^^^^^
+  Autocorrect: Done
+    suggest-constant-type.rb:5: Replaced with `T.let([1].sum, Integer)`
+     5 |B1 = [1].sum # works with generics
+             ^^^^^^^
+
+suggest-constant-type.rb:6: Suggested type: `T::Array[String]` https://srb.help/7027
+     6 |B2 = [1].map{|x| x.to_s}
+             ^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-constant-type.rb:6: Replaced with `T.let([1].map{|x| x.to_s}, T::Array[String])`
+     6 |B2 = [1].map{|x| x.to_s}
+             ^^^^^^^^^^^^^^^^^^^
+Errors: 7
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+A = T.let(2 + 1, Integer) # works in simple cases
+
+B1 = T.let([1].sum, Integer) # works with generics
+B2 = T.let([1].map{|x| x.to_s}, T::Array[String])
+
+C = B1 + 1 # does only a single iteration at a time
+
+E = F # doesn't do forward references
+F = 0
+
