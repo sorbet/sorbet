@@ -111,6 +111,15 @@ class Array < Object
   end
   def []=(arg0, arg1, arg2=T.unsafe(nil)); end
 
+  # append is an alias of push
+  sig do
+    params(
+        arg0: Elem,
+    )
+    .returns(T::Array[Elem])
+  end
+  def append(*arg0); end
+
   sig do
     params(
         arg0: Elem,
@@ -230,6 +239,14 @@ class Array < Object
   end
   sig {returns(T::Enumerator[Elem])}
   def delete_if(&blk); end
+
+  sig do
+    params(
+        arrays: T::Array[T.untyped]
+    )
+    .returns(T::Array[T.untyped])
+  end
+  def difference(*arrays); end
 
   sig do
     params(
@@ -477,6 +494,15 @@ class Array < Object
   sig {returns(T.nilable(Elem))}
   def pop(arg0=T.unsafe(nil)); end
 
+  # prepend is an alias for unshift
+  sig do
+    params(
+        arg0: Elem,
+    )
+    .returns(T::Array[Elem])
+  end
+  def prepend(*arg0); end
+
   sig do
     type_parameters(:U).params(
         arg0: T::Array[T.type_parameter(:U)],
@@ -710,6 +736,14 @@ class Array < Object
 
   sig {returns(T::Array[Elem])}
   def transpose(); end
+
+  sig do
+    params(
+        arrays: T::Array[T.untyped]
+    )
+    .returns(T::Array[T.untyped])
+  end
+  def union(*arrays); end
 
   sig {returns(T::Array[Elem])}
   def uniq(); end
