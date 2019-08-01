@@ -25,30 +25,30 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto run = tryFastPath(move(gs), files);
 
-    for (auto &e : run.errors) {
-        if (!e->isSilenced && e->loc.file() == file && !e->autocorrects.empty() &&
-            cmpRanges(*loc2Range(*run.gs, e->loc), *params.range) == 0) {
-            vector<unique_ptr<TextEdit>> edits;
-            edits.reserve(e->autocorrects.size());
-            for (auto &a : e->autocorrects) {
-                edits.emplace_back(make_unique<TextEdit>(loc2Range(*run.gs, a.loc), a.replacement));
+    for (auto &error : run.errors) {
+        if (!error->isSilenced && error->loc.file() == file && !error->autocorrects.empty() &&
+            cmpRanges(*loc2Range(*run.gs, error->loc), *params.range) == 0) {
+            for (auto &autocorrect : error->autocorrects) {
+                vector<unique_ptr<TextEdit>> edits;
+                for (auto &edit : autocorrect.edits) {
+                    edits.emplace_back(make_unique<TextEdit>(loc2Range(*run.gs, edit.first), edit.second));
+                }
+
+                // TODO: Document version
+                vector<unique_ptr<TextDocumentEdit>> documentEdits;
+                documentEdits.emplace_back(make_unique<TextDocumentEdit>(
+                    make_unique<VersionedTextDocumentIdentifier>(params.textDocument->uri, JSONNullObject()),
+                    move(edits)));
+
+                auto workspaceEdit = make_unique<WorkspaceEdit>();
+                workspaceEdit->documentChanges = move(documentEdits);
+
+                auto action = make_unique<CodeAction>(autocorrect.message);
+                action->kind = CodeActionKind::Quickfix;
+                action->edit = move(workspaceEdit);
+
+                result.emplace_back(move(action));
             }
-
-            // TODO: Document version
-            vector<unique_ptr<TextDocumentEdit>> documentEdits;
-            documentEdits.emplace_back(make_unique<TextDocumentEdit>(
-                make_unique<VersionedTextDocumentIdentifier>(params.textDocument->uri, JSONNullObject()), move(edits)));
-
-            auto workspaceEdit = make_unique<WorkspaceEdit>();
-            workspaceEdit->documentChanges = move(documentEdits);
-
-            // TODO(sushain): improve headers, potentially by just using Insert... and Replace... with some special
-            // handling for multi-line edits
-            auto action = make_unique<CodeAction>(e->header);
-            action->kind = CodeActionKind::Quickfix;
-            action->edit = move(workspaceEdit);
-
-            result.emplace_back(move(action));
         }
     }
 

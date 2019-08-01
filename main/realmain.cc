@@ -521,7 +521,7 @@ int realmain(int argc, char *argv[]) {
                 if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
                     auto sigil = levelToSigil(minErrorLevel);
                     e.setHeader("You could add `# typed: {}`", sigil);
-                    e.replaceWith(loc, "# typed: {}\n", sigil);
+                    e.replaceWith(fmt::format("Add `typed: {}` sigil", sigil), loc, "# typed: {}\n", sigil);
                 }
             }
         }

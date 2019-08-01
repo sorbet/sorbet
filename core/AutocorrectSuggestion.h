@@ -6,10 +6,11 @@
 namespace sorbet::core {
 
 struct AutocorrectSuggestion {
-    core::Loc loc;
-    std::string replacement;
+    std::string message;
+    std::vector<std::pair<core::Loc, std::string>> edits;
 
-    AutocorrectSuggestion(Loc loc, std::string replacement) : loc(loc), replacement(replacement) {}
+    AutocorrectSuggestion(std::string message, std::vector<std::pair<core::Loc, std::string>> edits)
+        : message(message), edits(edits) {}
     static UnorderedMap<FileRef, std::string> apply(std::vector<AutocorrectSuggestion> autocorrects,
                                                     UnorderedMap<FileRef, std::string> sources);
 };
