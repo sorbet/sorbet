@@ -72,6 +72,9 @@ class MatchData < Object
   sig {returns(Integer)}
   def length(); end
 
+  sig {returns(T::Hash[String, T.nilable(String)])}
+  def named_captures(); end
+
   sig {returns(T::Array[String])}
   def names(); end
 
