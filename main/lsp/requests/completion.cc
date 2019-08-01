@@ -93,6 +93,14 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames, ", "), "${0}");
 }
 
+/**
+ * Retrieves the documentation above a symbol.
+ * - Assumes that valid ruby syntax is used.
+ * - Strips the first whitespace character from a comment e.g
+ *      # a comment
+ *      #a comment
+ *   are the same.
+ */
 optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     // Everything in the file before the method definition.
     string_view preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
