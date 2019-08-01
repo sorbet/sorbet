@@ -90,7 +90,7 @@ cc_library(
         "//ast",
         "//core",
         "//main/options",
-        "//main/pipeline",
+        "//main/pipeline:pipeline-orig",
         "//payload:interface",
     ],
 )
