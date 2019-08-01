@@ -73,11 +73,11 @@ module FileUtils
   end
   def self.touch(list, noop: nil, verbose: nil, mtime: nil, nocreate: nil); end
 
-  sig { params(dir: T.untyped, verbose: T.nilable(T::Boolean), block: T.untyped).returns(T.untyped) }
+  sig {params(dir: T.untyped, verbose: T.nilable(T::Boolean), block: T.untyped).returns(T.untyped)}
   def self.cd(dir, verbose: nil, &block); end
 
   # chdir is an alias of cd
-  sig { params(dir: T.untyped, verbose: T.nilable(T::Boolean), block: T.untyped).returns(T.untyped) }
+  sig {params(dir: T.untyped, verbose: T.nilable(T::Boolean), block: T.untyped).returns(T.untyped)}
   def self.chdir(dir, verbose: nil, &block); end
 
   sig do
@@ -124,24 +124,24 @@ module FileUtils
   end
   def self.chown_R(user, group, list, noop: nil, verbose: nil, force: nil); end
 
-  sig { params(opt: T.untyped).returns(T::Array[String]) }
+  sig {params(opt: T.untyped).returns(T::Array[String])}
   def self.collect_method(opt); end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def self.commands; end
 
-  sig { params(a: T.untyped, b: T.untyped).returns(T::Boolean) }
+  sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
   def self.compare_file(a, b); end
 
   # cmp is an alias of compare_file
-  sig { params(a: T.untyped, b: T.untyped).returns(T::Boolean) }
+  sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
   def self.cmp(a, b); end
 
   # identical? is an alias of compare_file
-  sig { params(a: T.untyped, b: T.untyped).returns(T::Boolean) }
+  sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
   def self.identical?(a, b); end
 
-  sig { params(a: T.untyped, b: T.untyped).returns(T::Boolean) }
+  sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
   def self.compare_stream(a, b); end
 
   sig do
@@ -188,7 +188,7 @@ module FileUtils
   end
   def self.copy_file(src, dest, preserve = false, dereference = true); end
 
-  sig { params(src: T.untyped, dest: T.untyped).returns(T.untyped) }
+  sig {params(src: T.untyped, dest: T.untyped).returns(T.untyped)}
   def self.copy_stream(src, dest); end
 
   sig do
@@ -203,7 +203,7 @@ module FileUtils
   end
   def self.cp_lr(src, dest, noop: nil, verbose: nil, dereference_root: true, remove_destination: false); end
 
-  sig { params(mid: T.untyped, opt: T.untyped).returns(T::Boolean) }
+  sig {params(mid: T.untyped, opt: T.untyped).returns(T::Boolean)}
   def self.have_option?(mid, opt); end
 
   sig do
@@ -321,32 +321,32 @@ module FileUtils
   end
   def self.move(src, dest, force: nil, noop: nil, verbose: nil, secure: nil); end
 
-  sig { returns(T::Array[String]) }
+  sig {returns(T::Array[String])}
   def self.options; end
 
-  sig { params(mid: T.untyped).returns(T::Array[String]) }
+  sig {params(mid: T.untyped).returns(T::Array[String])}
   def self.options_of(mid); end
 
-  sig { params(name: T.untyped).returns(T.untyped) }
+  sig {params(name: T.untyped).returns(T.untyped)}
   def self.private_module_function(name); end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def self.pwd; end
 
   # getwd is an alias of pwd
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def self.getwd; end
 
-  sig { params(path: T.untyped, force: T::Boolean).returns(T.untyped) }
+  sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
   def self.remove_dir(path, force = false); end
 
-  sig { params(path: T.untyped, force: T::Boolean).returns(T.untyped) }
+  sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
   def self.remove_entry(path, force = false); end
 
-  sig { params(path: T.untyped, force: T::Boolean).returns(T.untyped) }
+  sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
   def self.remove_entry_secure(path, force = false); end
 
-  sig { params(path: T.untyped, force: T::Boolean).returns(T.untyped) }
+  sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
   def self.remove_file(path, force = false); end
 
   sig do
@@ -370,11 +370,11 @@ module FileUtils
   end
   def self.remove(list, force: nil, noop: nil, verbose: nil); end
 
-  sig { params(list: T.untyped, noop: T.nilable(T::Boolean), verbose: T.nilable(T::Boolean)).returns(T.untyped) }
+  sig {params(list: T.untyped, noop: T.nilable(T::Boolean), verbose: T.nilable(T::Boolean)).returns(T.untyped)}
   def self.rm_f(list, noop: nil, verbose: nil); end
 
   # safe_unlink is an alias of rm_f
-  sig { params(list: T.untyped, noop: T.nilable(T::Boolean), verbose: T.nilable(T::Boolean)).returns(T.untyped) }
+  sig {params(list: T.untyped, noop: T.nilable(T::Boolean), verbose: T.nilable(T::Boolean)).returns(T.untyped)}
   def self.safe_unlink(list, noop: nil, verbose: nil); end
 
   sig do
@@ -408,7 +408,7 @@ module FileUtils
   end
   def self.rmdir(list, parents: nil, noop: nil, verbose: nil); end
 
-  sig { params(new: T.untyped, old_list: T.untyped).returns(T::Boolean) }
+  sig {params(new: T.untyped, old_list: T.untyped).returns(T::Boolean)}
   def self.uptodate?(new, old_list); end
 end
 
@@ -425,103 +425,103 @@ class FileUtils::Entry_ < Object
   SYSCASE = T.let(T.unsafe(nil), String)
   S_IF_DOOR = T.let(T.unsafe(nil), Integer)
 
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def blockdev?; end
 
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def chardev?; end
 
-  sig { params(mode: T.untyped).returns(T.untyped) }
+  sig {params(mode: T.untyped).returns(T.untyped)}
   def chmod(mode); end
 
-  sig { params(uid: T.untyped, gid: T.untyped).returns(T.untyped) }
+  sig {params(uid: T.untyped, gid: T.untyped).returns(T.untyped)}
   def chown(uid, gid); end
 
-  sig { params(dest: T.untyped).returns(T.untyped) }
+  sig {params(dest: T.untyped).returns(T.untyped)}
   def copy(dest); end
 
-  sig { params(dest: T.untyped).returns(T.untyped) }
+  sig {params(dest: T.untyped).returns(T.untyped)}
   def copy_file(dest); end
 
-  sig { params(path: T.untyped).returns(T.untyped) }
+  sig {params(path: T.untyped).returns(T.untyped)}
   def copy_metadata(path); end
 
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def dereference?; end
 
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def directory?; end
 
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def door?; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def entries; end
 
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def exist?; end
 
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def file?; end
 
-  sig { params(a: T.untyped, b: T.untyped, deref: T::Boolean).returns(T.untyped) }
+  sig {params(a: T.untyped, b: T.untyped, deref: T::Boolean).returns(T.untyped)}
   def initialize(a, b = nil, deref = false); end
 
-  sig { params(dest: T.untyped).returns(T.untyped) }
+  sig {params(dest: T.untyped).returns(T.untyped)}
   def link(dest); end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def lstat; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def lstat!; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def path; end
 
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def pipe?; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def platform_support; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def postorder_traverse; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def prefix; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def preorder_traverse; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def rel; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def remove; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def remove_dir1; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def remove_file; end
 
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def socket?; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def stat; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def stat!; end
 
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def symlink?; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def traverse; end
 
-  sig { params(pre: T.untyped, post: T.untyped).returns(T.untyped) }
+  sig {params(pre: T.untyped, post: T.untyped).returns(T.untyped)}
   def wrap_traverse(pre, post); end
 end
 
