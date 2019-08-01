@@ -92,8 +92,6 @@ int LSPWrapper::getTypecheckCount() const {
 }
 
 void LSPWrapper::enableAllExperimentalFeatures() {
-    enableExperimentalFeature(LSPExperimentalFeature::GoToDefinition);
-    enableExperimentalFeature(LSPExperimentalFeature::FindReferences);
     enableExperimentalFeature(LSPExperimentalFeature::Autocomplete);
     enableExperimentalFeature(LSPExperimentalFeature::WorkspaceSymbols);
     enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
@@ -103,12 +101,6 @@ void LSPWrapper::enableAllExperimentalFeatures() {
 
 void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
     switch (feature) {
-        case LSPExperimentalFeature::GoToDefinition:
-            opts.lspGoToDefinitionEnabled = true;
-            break;
-        case LSPExperimentalFeature::FindReferences:
-            opts.lspFindReferencesEnabled = true;
-            break;
         case LSPExperimentalFeature::Autocomplete:
             opts.lspAutocompleteEnabled = true;
             break;
