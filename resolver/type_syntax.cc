@@ -65,7 +65,7 @@ bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
 }
 
 ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
-                               const TypeSyntaxArgs &args) {
+                               TypeSyntaxArgs args) {
     ParsedSig sig;
 
     vector<ast::Send *> sends;
@@ -361,7 +361,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
 }
 
 core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, const ParsedSig &sig,
-                                   const TypeSyntaxArgs &args) {
+                                   TypeSyntaxArgs args) {
     switch (send->fun._id) {
         case core::Names::nilable()._id:
             if (send->args.size() != 1) {
@@ -511,12 +511,12 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
 }
 
 core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, ast::Expression &expr,
-                                        const ParsedSig &sigBeingParsed, const TypeSyntaxArgs &args) {
+                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     return getResultTypeAndBind(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
 }
 
 TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr,
-                                                        const ParsedSig &sigBeingParsed, const TypeSyntaxArgs &args) {
+                                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     // Ensure that we only check types from a class context
     auto ctxOwnerData = ctx.owner.data(ctx);
     ENFORCE(ctxOwnerData->isClass(), "getResultTypeAndBind wasn't called with a class owner");
