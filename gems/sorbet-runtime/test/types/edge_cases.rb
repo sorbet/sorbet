@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require_relative '../test_helper'
+require 'concurrent/atomic/cyclic_barrier'
 
 class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
   it 'can type ==' do
@@ -297,4 +298,26 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_match(/A previous invocation of #<UnboundMethod: /, e.message)
   end
 
+  it 'does not crash when two threads call the same wrapper' do
+    begin
+      barrier = Concurrent::CyclicBarrier.new(2)
+      mutex = Mutex.new
+      replaced = T::Private::ClassUtils.replace_method(T::Private::Methods.singleton_class, :run_sig_block_for_method) do |*args|
+        barrier.wait
+        mutex.synchronize { replaced.bind(T::Private::Methods).call(*args) }
+      end
+
+      klass = Class.new do
+        extend T::Sig
+        sig {void}
+        def self.hello; end
+      end
+
+      thread = Thread.new { klass.hello }
+      klass.hello
+    ensure
+      thread&.join
+      replaced&.restore
+    end
+  end
 end
