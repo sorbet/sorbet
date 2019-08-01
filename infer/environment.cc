@@ -415,32 +415,32 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             return;
         }
         auto &whoKnows = getKnowledge(local);
-        const auto &tp1 = send->args[0].type;
-        const auto &tp2 = send->recv.type;
+        const auto &argType = send->args[0].type;
+        const auto &recvType = send->recv.type;
 
         auto &truthy = send->fun == core::Names::eqeq() ? whoKnows.truthy : whoKnows.falsy;
         auto &falsy = send->fun == core::Names::eqeq() ? whoKnows.falsy : whoKnows.truthy;
 
-        ENFORCE(tp1.get() != nullptr);
-        ENFORCE(tp2.get() != nullptr);
-        if (!tp1->isUntyped()) {
-            truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, tp1);
+        ENFORCE(argType.get() != nullptr);
+        ENFORCE(recvType.get() != nullptr);
+        if (!argType->isUntyped()) {
+            truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, argType);
         }
-        if (!tp2->isUntyped()) {
-            truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, tp2);
+        if (!recvType->isUntyped()) {
+            truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, recvType);
         }
-        if (auto s = core::cast_type<core::ClassType>(tp1.get())) {
+        if (auto s = core::cast_type<core::ClassType>(argType.get())) {
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
             if (isSingleton(ctx, s->symbol)) {
-                falsy.mutate().noTypeTests.emplace_back(send->recv.variable, tp1);
+                falsy.mutate().noTypeTests.emplace_back(send->recv.variable, argType);
             }
         }
-        if (auto s = core::cast_type<core::ClassType>(tp2.get())) {
+        if (auto s = core::cast_type<core::ClassType>(recvType.get())) {
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
             if (isSingleton(ctx, s->symbol)) {
-                falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, tp2);
+                falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, recvType);
             }
         }
         whoKnows.sanityCheck();
@@ -450,12 +450,24 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         }
         auto &whoKnows = getKnowledge(local);
         const auto &recvType = send->recv.type;
-        core::SymbolRef klass = core::Types::getRepresentedClass(ctx, recvType.get());
-        if (klass.exists()) {
-            auto ty = klass.data(ctx)->externalType(ctx);
-            if (!ty->isUntyped()) {
-                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, ty);
-                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, ty);
+
+        // `when` against class literal
+        core::SymbolRef representedClass = core::Types::getRepresentedClass(ctx, recvType.get());
+        if (representedClass.exists()) {
+            auto representedType = representedClass.data(ctx)->externalType(ctx);
+            if (!representedType->isUntyped()) {
+                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, representedType);
+                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, representedType);
+            }
+        }
+
+        // `when` against singleton
+        if (auto s = core::cast_type<core::ClassType>(recvType.get())) {
+            // check if s is a singleton. in this case we can learn that
+            // a failed comparison means that type test would also fail
+            if (isSingleton(ctx, s->symbol)) {
+                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, recvType);
+                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, recvType);
             }
         }
         whoKnows.sanityCheck();
