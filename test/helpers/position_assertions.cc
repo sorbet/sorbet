@@ -738,7 +738,9 @@ optional<bool> BooleanPropertyAssertion::getValue(string_view type,
         << "Unrecognized boolean property assertion: " << type;
     for (auto &assertion : assertions) {
         if (auto boolAssertion = dynamic_pointer_cast<BooleanPropertyAssertion>(assertion)) {
-            return boolAssertion->value;
+            if (boolAssertion->assertionType == type) {
+                return boolAssertion->value;
+            }
         }
     }
     return nullopt;

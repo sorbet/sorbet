@@ -1,4 +1,5 @@
 # typed: false
+# disable-fast-path: true
 
 module Parent
   extend T::Helpers
