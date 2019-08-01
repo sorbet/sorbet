@@ -1,24 +1,25 @@
 #include "test/helpers/MockFileSystem.h"
 
-using namespace sorbet::test;
+using namespace std;
 
-MockFileSystem::MockFileSystem(std::string_view rootPath) : rootPath(std::string(rootPath)) {}
+namespace sorbet::test {
+MockFileSystem::MockFileSystem(string_view rootPath) : rootPath(string(rootPath)) {}
 
-std::string makeAbsolute(std::string_view rootPath, std::string_view path) {
+string makeAbsolute(string_view rootPath, string_view path) {
     if (path[0] == '/') {
-        return std::string(path);
+        return string(path);
     } else {
         return fmt::format("{}/{}", rootPath, path);
     }
 }
 
-void MockFileSystem::writeFiles(const std::vector<std::pair<std::string, std::string>> &initialFiles) {
+void MockFileSystem::writeFiles(const vector<pair<string, string>> &initialFiles) {
     for (auto &pair : initialFiles) {
         writeFile(pair.first, pair.second);
     }
 }
 
-std::string MockFileSystem::readFile(std::string_view path) const {
+string MockFileSystem::readFile(string_view path) const {
     auto file = contents.find(makeAbsolute(rootPath, path));
     if (file == contents.end()) {
         throw sorbet::FileNotFoundException();
@@ -27,11 +28,11 @@ std::string MockFileSystem::readFile(std::string_view path) const {
     }
 }
 
-void MockFileSystem::writeFile(std::string_view filename, std::string_view text) {
+void MockFileSystem::writeFile(string_view filename, string_view text) {
     contents[makeAbsolute(rootPath, filename)] = text;
 }
 
-void MockFileSystem::deleteFile(std::string_view filename) {
+void MockFileSystem::deleteFile(string_view filename) {
     auto file = contents.find(makeAbsolute(rootPath, filename));
     if (file == contents.end()) {
         throw sorbet::FileNotFoundException();
@@ -40,9 +41,9 @@ void MockFileSystem::deleteFile(std::string_view filename) {
     }
 }
 
-std::vector<std::string> MockFileSystem::listFilesInDir(std::string_view path,
-                                                        const UnorderedSet<std::string> &extensions, bool recursive,
-                                                        const std::vector<std::string> &absoluteIgnorePatterns,
-                                                        const std::vector<std::string> &relativeIgnorePatterns) const {
+vector<string> MockFileSystem::listFilesInDir(string_view path, const UnorderedSet<string> &extensions, bool recursive,
+                                              const vector<string> &absoluteIgnorePatterns,
+                                              const vector<string> &relativeIgnorePatterns) const {
     Exception::raise("Not implemented.");
 }
+} // namespace sorbet::test
