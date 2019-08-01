@@ -1,4 +1,5 @@
 # typed: false
+# disable-fast-path: true
 
 class ChildBad3
   include Parent # error: `Parent` is sealed and cannot be included in `ChildBad3`
