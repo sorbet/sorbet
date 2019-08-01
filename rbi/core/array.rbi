@@ -244,7 +244,7 @@ class Array < Object
     params(
         arrays: T::Array[T.untyped]
     )
-    .returns(T::Array[T.untyped])
+    .returns(T::Array[Elem])
   end
   def difference(*arrays); end
 
