@@ -40,6 +40,13 @@ class Foo
   end
 
   sig {void}
+  def qux
+    typed_with_docs(1)
+  # ^     ^       ^ hover: Docs above single-line sig
+  # ^     ^       ^ hover: sig {params(arg0: Integer).void}
+  end
+
+  sig {void}
   def no_args_and_void
   end
 
