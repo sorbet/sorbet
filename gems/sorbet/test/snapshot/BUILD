@@ -49,7 +49,7 @@ snapshot_tests(
             "partial/rails-double-require",
 
             # Requires ruby 2.6.
-            "partial/rails6"
+            "partial/rails6",
         ],
 
         # We only want to match directories with this glob
