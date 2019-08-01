@@ -32,6 +32,8 @@ std::unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain:
     return gs;
 }
 
+static int nextId = 0;
+
 sorbet::realmain::lsp::LSPWrapper mkLSPWrapper() {
     std::unique_ptr<sorbet::KeyValueStore> kvstore;
     auto opts = mkOpts();
@@ -45,6 +47,9 @@ sorbet::realmain::lsp::LSPWrapper mkLSPWrapper() {
     auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(std::move(gs), mkOpts(), console, false);
     lspWrapper.enableAllExperimentalFeatures();
 
+    // TODO slow
+    sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId);
+
     return lspWrapper;
 }
 
@@ -55,10 +60,6 @@ extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t size) {
-    // TODO slow
-    int nextId = 0;
-    sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId);
-
     std::string contents((const char *)data, size);
     auto fileUri = sorbet::test::filePathToUri(rootUri, "file.rb");
 
