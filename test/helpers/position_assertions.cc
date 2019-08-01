@@ -844,7 +844,7 @@ bool containsLine(string_view text, string_view line) {
     }
     const bool startsOnNewLine = pos == 0 || text.at(pos - 1) == '\n';
     const bool endsLine = pos + line.size() == text.size() || text.at(pos + line.size()) == '\n';
-    return startsOnNewLine && endsLine;
+    return (startsOnNewLine && endsLine) || containsLine(text.substr(pos + line.size()), line);
 }
 
 void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
