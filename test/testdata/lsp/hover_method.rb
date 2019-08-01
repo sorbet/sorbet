@@ -13,7 +13,9 @@ class Foo
 
   sig {params(a: String).void}
   def self.bar(a)
+         # ^ hover: ```ruby
          # ^ hover: sig {params(a: String).void}
+         # ^ hover: ```
   end
 
   sig {params(arg0: String).returns(Integer)}
