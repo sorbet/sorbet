@@ -676,9 +676,8 @@ private:
  */
 
 // TODO Find a better place for this
-bool classDefinesBehavior(std::unique_ptr<ast::ClassDef> &);
-bool ignoreChild(ast::Expression *expr);
-bool definesBehavior(ast::Expression *expr);
+bool classDefinesBehavior(const std::unique_ptr<ast::ClassDef> &);
+bool ignoreChild(const std::unique_ptr<ast::Expression> &);
 
 } // namespace sorbet::ast
 

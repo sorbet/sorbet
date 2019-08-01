@@ -1188,47 +1188,14 @@ string BlockArg::nodeName() {
     return "BlockArg";
 }
 
-bool classDefinesBehavior(unique_ptr<ast::ClassDef> &klass) {
-    for (auto &ancst : klass->ancestors) {
-        auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
-        if (cnst && cnst->original != nullptr) {
-            return true;
-        }
-    }
-    for (auto &ancst : klass->singletonAncestors) {
-        auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
-        if (cnst && cnst->original != nullptr) {
-            return true;
-        }
-    }
-    return absl::c_any_of(klass->rhs, [](auto &tree) { return definesBehavior(tree.get()); });
-}
-
-bool ignoreChild(ast::Expression *expr) {
-    bool result = false;
-
-    typecase(
-        expr, [&](ast::Send *send) { result = (send->fun == core::Names::keepForIde()); },
-
-        [&](ast::EmptyTree *) { result = true; },
-
-        [&](ast::InsSeq *seq) {
-            result = absl::c_all_of(seq->stats, [](auto &child) { return ignoreChild(child.get()); }) &&
-                     ignoreChild(seq->expr.get());
-        },
-
-        [&](ast::Expression *klass) { result = false; });
-    return result;
-}
-
-bool definesBehavior(ast::Expression *expr) {
+bool definesBehavior(const unique_ptr<ast::Expression> &expr) {
     if (ignoreChild(expr)) {
         return false;
     }
     bool result = true;
 
     typecase(
-        expr,
+        expr.get(),
 
         [&](ast::ClassDef *klass) {
             auto *id = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
@@ -1253,8 +1220,8 @@ bool definesBehavior(ast::Expression *expr) {
         },
 
         [&](ast::InsSeq *seq) {
-            result = absl::c_any_of(seq->stats, [](auto &child) { return definesBehavior(child.get()); }) ||
-                     definesBehavior(seq->expr.get());
+            result = absl::c_any_of(seq->stats, [](auto &child) { return definesBehavior(child); }) ||
+                     definesBehavior(seq->expr);
         },
 
         // Ignore code synthesized by DSL pass.
@@ -1262,6 +1229,41 @@ bool definesBehavior(ast::Expression *expr) {
         [&](ast::MethodDef *methodDef) { result = !methodDef->isDSLSynthesized(); },
 
         [&](ast::Expression *klass) { result = true; });
+    return result;
+}
+
+bool classDefinesBehavior(const unique_ptr<ast::ClassDef> &klass) {
+    for (auto &ancst : klass->ancestors) {
+        auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
+        if (cnst && cnst->original != nullptr) {
+            return true;
+        }
+    }
+    for (auto &ancst : klass->singletonAncestors) {
+        auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
+        if (cnst && cnst->original != nullptr) {
+            return true;
+        }
+    }
+    return absl::c_any_of(klass->rhs, [](auto &tree) { return definesBehavior(tree); });
+}
+
+bool ignoreChild(const unique_ptr<ast::Expression> &expr) {
+    bool result = false;
+
+    typecase(
+        expr.get(),
+
+        [&](ast::Send *send) { result = (send->fun == core::Names::keepForIde()); },
+
+        [&](ast::EmptyTree *) { result = true; },
+
+        [&](ast::InsSeq *seq) {
+            result =
+                absl::c_all_of(seq->stats, [](auto &child) { return ignoreChild(child); }) && ignoreChild(seq->expr);
+        },
+
+        [&](ast::Expression *klass) { result = false; });
     return result;
 }
 

@@ -9,7 +9,6 @@
 #include "core/Names.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
-#include <map>
 
 #include "CRC.h"
 
@@ -77,7 +76,7 @@ public:
         } else {
             def.type = Definition::Module;
         }
-        def.is_empty = absl::c_all_of(original->rhs, [](auto &tree) { return sorbet::ast::ignoreChild(tree.get()); });
+        def.is_empty = absl::c_all_of(original->rhs, [](auto &tree) { return sorbet::ast::ignoreChild(tree); });
         def.defines_behavior = sorbet::ast::classDefinesBehavior(original);
 
         // TODO: ref.parent_of, def.parent_ref
