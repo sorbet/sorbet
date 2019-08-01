@@ -49,14 +49,14 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(std::move(gs), mkOpts(), console, false);
     lspWrapper.enableAllExperimentalFeatures();
 
+    // TODO slow
     int nextId = 0;
+    sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId);
+
     std::string contents((const char *)data, size);
     auto fileUri = sorbet::test::filePathToUri(rootUri, "file.rb");
 
     // TODO ignore responses?
-
-    // TODO slow
-    sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId);
 
     lspWrapper.getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::NotificationMessage>(
         "2.0", sorbet::test::LSPMethod::TextDocumentDidOpen,
