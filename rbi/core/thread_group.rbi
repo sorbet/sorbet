@@ -1,7 +1,7 @@
 # typed: __STDLIB_INTERNAL
 
 class ThreadGroup < Object
-  Default = T.let(nil, T.untyped)
+  Default = T.let(T.unsafe(nil), ThreadGroup)
 
   sig {params(thread: Thread).returns(ThreadGroup)}
   def add(thread); end
