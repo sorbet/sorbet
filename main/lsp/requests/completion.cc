@@ -116,7 +116,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     string documentation = "";
 
     // Iterate from the last line, to the first line
-    for(auto it = all_lines.rbegin(); it != all_lines.rend(); it++) {
+    for (auto it = all_lines.rbegin(); it != all_lines.rend(); it++) {
         string_view line = absl::StripAsciiWhitespace(*it);
 
         // Short circuit when line is empty
@@ -135,12 +135,12 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             it++;
             // ASSUMPTION: We either hit the start of file, a `sig do` or an `end`
             while (line = absl::StripAsciiWhitespace(*it),
-                    // SOF
-                    it != all_lines.rend()
-                    // Start of sig block
-                    && !absl::StartsWith(line, "sig do")
-                    // Invalid end keyword
-                    && !absl::StartsWith(line, "end")) {
+                   // SOF
+                   it != all_lines.rend()
+                       // Start of sig block
+                       && !absl::StartsWith(line, "sig do")
+                       // Invalid end keyword
+                       && !absl::StartsWith(line, "end")) {
                 it++;
             }
             // We have either
@@ -170,7 +170,8 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             // #abc -> "abc"
             int skip_after_hash = absl::StartsWith(line, "# ") ? 2 : 1;
 
-            documentation = absl::StrCat(line.substr(line.find('#') + skip_after_hash, line.size()), "\n", documentation);
+            documentation =
+                absl::StrCat(line.substr(line.find('#') + skip_after_hash, line.size()), "\n", documentation);
         }
 
         // No other cases applied to this line, so stop looking.
