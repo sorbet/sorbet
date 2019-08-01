@@ -1,6 +1,8 @@
 #include "common/Timer.h"
 #include "lsp.h"
 
+#include "absl/strings/match.h"
+
 using namespace std;
 
 namespace sorbet::realmain::lsp {
@@ -130,7 +132,11 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             prodCategoryCounterInc("lsp.messages.processed", "initialize");
             auto &params = get<unique_ptr<InitializeParams>>(rawParams);
             if (auto rootUriString = get_if<string>(&params->rootUri)) {
-                rootUri = *rootUriString;
+                if (absl::EndsWith(*rootUriString, "/")) {
+                    rootUri = rootUriString->substr(0, rootUriString->length() - 1);
+                } else {
+                    rootUri = *rootUriString;
+                }
             }
             clientCompletionItemSnippetSupport = false;
             clientHoverMarkupKind = MarkupKind::Plaintext;
