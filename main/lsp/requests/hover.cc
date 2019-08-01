@@ -25,23 +25,30 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
 }
 
 unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view sigString, string_view docString) {
+    // Get rid of at most 1 trailing newline
+    if (docString.length() > 0 && docString.back() == '\n') {
+        docString.remove_suffix(1);
+    }
+    if (sigString.length() > 0 && sigString.back() == '\n') {
+        sigString.remove_suffix(1);
+    }
+
     string content = "";
 
-    if (docString.length() > 0) {
-        absl::StrAppend(&content, docString);
-    }
+    // Add docs
+    absl::StrAppend(&content, docString);
+    if (docString.length() > 0)
+        absl::StrAppend(&content, "\n");
 
-    if (sigString.length() > 0) {
-        // Add a newline if docString does not contain one
-        if (content.length() > 0 && content.back() != '\n') {
-            absl::StrAppend(&content, "\n");
-        }
-        absl::StrAppend(&content, sigString);
+    // Add sig
+    if (markupKind == MarkupKind::Markdown && sigString.length() > 0) {
+        sigString = fmt::format("```ruby\n{}\n```", sigString);
     }
+    absl::StrAppend(&content, sigString);
 
-    if (markupKind == MarkupKind::Markdown && content.length() > 0) {
-        content = fmt::format("```ruby\n{}\n```", content);
-    }
+    // Add newline at the end if needed
+    if (content.length() > 0 && content.back() == '\n')
+        absl::StrAppend(&content, "\n");
 
     return make_unique<MarkupContent>(markupKind, move(content));
 }
