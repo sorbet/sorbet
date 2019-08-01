@@ -216,10 +216,6 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal(
       [
         :singleton_method_added,
-        :method_added,
-        # hook registration overwrites this method but it should
-        # still call the original defined above
-        :singleton_method_added,
         :post_hook,
       ],
       klass.instance_variable_get(:@called)
@@ -229,7 +225,6 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
   it "allows custom hooks" do
     parent = Class.new do
       extend T::Sig
-      sig {params(method: Symbol).void}
       def self.method_added(method)
         super(method)
       end
@@ -246,6 +241,50 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       sig {void}
       def c; end
     end
+  end
+
+  it "still calls our hooks if the user supers up" do
+    c1 = Class.new do
+      extend T::Sig
+      sig {returns(Integer)}
+      def foo; 1; end
+      def self.method_added(method)
+        super(method)
+      end
+      def self.singleton_method_added(method)
+        super(method)
+      end
+      sig {returns(Integer)}
+      def bar; "bad"; end
+    end
+    assert_equal(1, c1.new.foo)
+    assert_raises(TypeError) { c1.new.bar }
+  end
+
+  it "forbids adding a sig to method_added" do
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        extend T::Sig
+        sig {params(method: Symbol).void}
+        def self.method_added(method)
+          super(method)
+        end
+      end
+    end
+    assert_includes(err.message, "Putting a `sig` on `method_added` is not supported")
+  end
+
+  it "forbids adding a sig to singleton_method_added" do
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        extend T::Sig
+        sig {params(method: Symbol).void}
+        def self.singleton_method_added(method)
+          super(method)
+        end
+      end
+    end
+    assert_includes(err.message, "Putting a `sig` on `singleton_method_added` is not supported")
   end
 
   it "does not make sig available to attached class" do

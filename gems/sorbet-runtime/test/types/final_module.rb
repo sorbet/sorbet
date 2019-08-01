@@ -196,4 +196,16 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) { Class.new.include(outer) }
     assert_match(/^#<Module:0x[0-9a-f]+> was declared as final and cannot be included$/, err.message)
   end
+
+  it "allows inheriting a class with hooks" do
+    parent = Class.new do
+      extend T::Sig
+      sig {void}
+      def foo; end
+    end
+    Class.new(parent) do
+      extend T::Helpers
+      final!
+    end
+  end
 end
