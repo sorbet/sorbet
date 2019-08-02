@@ -10,7 +10,7 @@ module T::Types
       Hash
     end
 
-      def initialize(keys:, values:)
+    def initialize(keys:, values:)
       @keys = T::Utils.coerce(keys)
       @values = T::Utils.coerce(values)
       @type = T::Utils.coerce([keys, values])
