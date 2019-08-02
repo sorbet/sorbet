@@ -146,19 +146,19 @@ public:
         return state == State::WillBuild;
     }
     void addErrorSection(ErrorSection &&section);
-    template <typename... Args> void addErrorLine(Loc loc, const std::string &msg, const Args &... args) {
+    template <typename... Args> void addErrorLine(Loc loc, std::string_view msg, const Args &... args) {
         std::string formatted = ErrorColors::format(msg, args...);
         addErrorSection(ErrorSection({ErrorLine(loc, formatted)}));
     }
 
-    template <typename... Args> void setHeader(const std::string &msg, const Args &... args) {
+    template <typename... Args> void setHeader(std::string_view msg, const Args &... args) {
         std::string formatted = ErrorColors::format(msg, args...);
         _setHeader(move(formatted));
     }
 
     void addAutocorrect(AutocorrectSuggestion &&autocorrect);
     template <typename... Args>
-    void replaceWith(const std::string &title, Loc loc, const std::string &replacement, const Args &... args) {
+    void replaceWith(const std::string &title, Loc loc, std::string_view replacement, const Args &... args) {
         std::string formatted = fmt::format(replacement, args...);
         addAutocorrect(AutocorrectSuggestion{title, {AutocorrectSuggestion::Edit{loc, move(formatted)}}});
     }

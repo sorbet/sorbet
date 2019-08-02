@@ -11,7 +11,7 @@ struct AutocorrectSuggestion {
         std::string replacement;
     };
 
-    std::string title;
+    const std::string title;
     std::vector<Edit> edits;
 
     AutocorrectSuggestion(std::string title, std::vector<Edit> edits) : title(title), edits(edits) {}
