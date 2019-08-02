@@ -16,9 +16,9 @@ class MyEnum < Opus::Enum
   Z = T.let(new, self)
 end
 
-T.reveal_type(MyEnum::X) # error: Revealed type: `MyEnum`
-T.reveal_type(MyEnum::Y) # error: Revealed type: `MyEnum`
-T.reveal_type(MyEnum::Z) # error: Revealed type: `MyEnum`
+T.reveal_type(MyEnum::X) # error: Revealed type: `MyEnum::X`
+T.reveal_type(MyEnum::Y) # error: Revealed type: `MyEnum::Y`
+T.reveal_type(MyEnum::Z) # error: Revealed type: `MyEnum::Z`
 
 class NotAnEnum
   X = new # error: Constants must have type annotations
