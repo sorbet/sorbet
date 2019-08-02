@@ -49,7 +49,8 @@ cc_test(
         "//core",
         "//main/lsp",
         "//main/pipeline",
-        "//payload",
+        "//payload/binary:empty",
+        "//payload/text:empty",
         "//test/helpers",
     ],
 )
