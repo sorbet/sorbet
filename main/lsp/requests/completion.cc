@@ -180,8 +180,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
         }
     }
 
-    reverse(documentation_lines.begin(), documentation_lines.end());
-    string documentation = absl::StrJoin(documentation_lines, "\n");
+    string documentation = absl::StrJoin(documentation_lines.rbegin(), documentation_lines.rend(), "\n");
     if (documentation.empty())
         return nullopt;
     else
