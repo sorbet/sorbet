@@ -66,7 +66,7 @@ public:
 
 template <typename... TArgs>[[noreturn]] bool Exception::raise(const TArgs &... args) {
     Exception::failInFuzzer();
-    std::string_view message = fmt::format(args...);
+    std::string message = fmt::format(args...);
 
     if (message.size() > 0) {
         fatalLogger->error("Exception::raise(): {}\n", message);
