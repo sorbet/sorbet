@@ -1576,8 +1576,7 @@ public:
         if (!ty->isUntyped()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
                 e.setHeader("Suggested type: `{}`", ty->show(ctx));
-                e.addAutocorrect(
-                    core::AutocorrectSuggestion{loc, fmt::format("T.let({}, {})", loc.source(ctx), ty->show(ctx))});
+                e.replaceWith(loc, "T.let({}, {})", loc.source(ctx), ty->show(ctx));
             }
         }
         res.returnType = move(ty);
