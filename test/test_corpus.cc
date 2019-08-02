@@ -604,7 +604,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
                 // Ensure that the received code action applies correctly.
                 if (it2 != receivedCodeActionsByTitle.end()) {
                     auto codeAction = move(it2->second);
-                    codeActionAssertion->check(test.sourceFileContents, codeAction, rootUri);
+                    codeActionAssertion->check(test.sourceFileContents, *codeAction.get(), rootUri);
 
                     // Some bookkeeping to make surfacing errors re. extra/insufficient
                     // apply-code-action annotations easier.

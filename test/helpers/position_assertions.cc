@@ -903,8 +903,8 @@ string ApplyCodeActionAssertion::toString() const {
 }
 
 void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                                     unique_ptr<CodeAction> &codeAction, std::string_view rootUri) {
-    for (auto &c : *codeAction->edit.value()->documentChanges) {
+                                     const CodeAction &codeAction, std::string_view rootUri) {
+    for (auto &c : *codeAction.edit.value()->documentChanges) {
         auto filename = uriToFilePath(rootUri, c->textDocument->uri);
         auto it = sourceFileContents.find(filename);
         if (it == sourceFileContents.end()) {

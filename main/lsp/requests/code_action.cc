@@ -25,6 +25,7 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto run = tryFastPath(move(gs), files);
 
+    auto loc = range2Loc(*run.gs, *params.range.get(), file);
     for (auto &error : run.errors) {
         if (!error->isSilenced && !error->autocorrects.empty()) {
             // We return code actions corresponding to any error that encloses the request's range. Matching request
@@ -32,7 +33,7 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
             // actions since it sends a 0 length range (i.e. the cursor). VSCode's request does include matching
             // diagnostics in the request context that could be used instead but this simpler approach should suffice
             // until proven otherwise.
-            if (!error->loc.contains(*range2Loc(*run.gs, *params.range.get(), file))) {
+            if (!error->loc.contains(*loc)) {
                 continue;
             }
 
