@@ -512,6 +512,134 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
+void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, UnorderedSet<string> &filenames,
+                             vector<shared_ptr<RangeAssertion>> &assertions, UnorderedMap<string, string> &testFileUris,
+                             string_view rootUri, int &nextId) {
+    UnorderedMap<string, vector<shared_ptr<ApplyCodeActionAssertion>>> applyCodeActionAssertionsByFilename;
+    for (auto &assertion : assertions) {
+        if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
+            applyCodeActionAssertionsByFilename[applyCodeActionAssertion->filename].push_back(applyCodeActionAssertion);
+        }
+    }
+
+    bool exhaustiveApplyCodeAction =
+        BooleanPropertyAssertion::getValue("exhaustive-apply-code-action", assertions).value_or(false);
+
+    if (applyCodeActionAssertionsByFilename.empty() && !exhaustiveApplyCodeAction) {
+        return;
+    }
+
+    auto errors = RangeAssertion::getErrorAssertions(assertions);
+    UnorderedMap<string, std::vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
+    for (auto &error : errors) {
+        errorsByFilename[error->filename].emplace_back(error);
+    }
+
+    for (auto &filename : filenames) {
+        auto applyCodeActionAssertions = applyCodeActionAssertionsByFilename[filename];
+
+        // Request code actions for each of this file's error.
+        for (auto &error : errorsByFilename[filename]) {
+            vector<unique_ptr<Diagnostic>> diagnostics;
+            auto fileUri = testFileUris[filename];
+            // Unfortunately there's no simpler way to copy the range (yet).
+            auto params = make_unique<CodeActionParams>(
+                make_unique<TextDocumentIdentifier>(fileUri),
+                make_unique<Range>(make_unique<Position>(error->range->start->line, error->range->start->character),
+                                   make_unique<Position>(error->range->end->line, error->range->end->character)),
+                make_unique<CodeActionContext>(move(diagnostics)));
+            auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
+            auto responses = lspWrapper.getLSPResponsesFor(LSPMessage(move(req)));
+            EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a codeAction request.";
+            if (responses.size() != 1) {
+                continue;
+            }
+
+            auto &msg = responses.at(0);
+            EXPECT_TRUE(msg->isResponse());
+            if (!msg->isResponse()) {
+                continue;
+            }
+
+            auto &response = msg->asResponse();
+            ASSERT_TRUE(response.result) << "Code action request returned error: " << msg->toJSON();
+            auto &receivedCodeActionResponse =
+                get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
+            EXPECT_FALSE(get_if<JSONNullObject>(&receivedCodeActionResponse));
+            if (get_if<JSONNullObject>(&receivedCodeActionResponse)) {
+                continue;
+            }
+
+            UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
+            auto &receivedCodeActions = get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse);
+            for (auto &codeAction : receivedCodeActions) {
+                bool codeActionTitleUnique =
+                    receivedCodeActionsByTitle.find(codeAction->title) == receivedCodeActionsByTitle.end();
+                EXPECT_TRUE(codeActionTitleUnique) << "Found code action with duplicate title: " << codeAction->title;
+
+                if (codeActionTitleUnique) {
+                    receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
+                }
+            }
+
+            u4 receivedCodeActionsCount = receivedCodeActionsByTitle.size();
+            vector<shared_ptr<ApplyCodeActionAssertion>> matchedCodeActionAssertions;
+
+            // Test code action assertions matching the range of this error.
+            auto it = applyCodeActionAssertions.begin();
+            while (it != applyCodeActionAssertions.end()) {
+                auto codeActionAssertion = it->get();
+                if (cmpRanges(*codeActionAssertion->range, *error->range) != 0) {
+                    ++it;
+                    continue;
+                }
+
+                // Ensure we received a code action matching the assertion.
+                auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
+                EXPECT_NE(it2, receivedCodeActionsByTitle.end())
+                    << fmt::format("Did not receive code action matching assertion `{}` for error `{}`...",
+                                   codeActionAssertion->toString(), error->toString());
+
+                // Ensure that the received code action applies correctly.
+                if (it2 != receivedCodeActionsByTitle.end()) {
+                    auto codeAction = move(it2->second);
+                    codeActionAssertion->check(test.sourceFileContents, codeAction, rootUri);
+
+                    // Some bookkeeping to make surfacing errors re. extra/insufficient
+                    // apply-code-action annotations easier.
+                    receivedCodeActionsByTitle.erase(it2);
+                    matchedCodeActionAssertions.emplace_back(*it);
+                    it = applyCodeActionAssertions.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+
+            if (exhaustiveApplyCodeAction) {
+                if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
+                    ADD_FAILURE() << fmt::format(
+                        "Found apply-code-action assertions without "
+                        "corresponding code actions from the server:\n{}",
+                        fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
+                                      [](const auto &assertion) -> string { return assertion->toString(); }));
+                } else if (matchedCodeActionAssertions.size() < receivedCodeActionsCount) {
+                    ADD_FAILURE() << fmt::format(
+                        "Received code actions without corresponding apply-code-action assertions:\n{}",
+                        fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
+                                      [](const auto &action) -> string { return action.second->toJSON(); }));
+                }
+            }
+        }
+
+        // We've already removed any code action assertions that matches a received code action assertion.
+        // Any remaining are therefore extraneous.
+        EXPECT_EQ(applyCodeActionAssertions.size(), 0)
+            << fmt::format("Found extraneous apply-code-action assertions:\n{}",
+                           fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), "\n",
+                                         [](const auto &assertion) -> string { return assertion->toString(); }));
+    }
+}
+
 TEST_P(LSPTest, All) {
     string rootPath = "/Users/jvilk/stripe/pay-server";
     string rootUri = fmt::format("file://{}", rootPath);
@@ -604,130 +732,7 @@ TEST_P(LSPTest, All) {
         }
     }
 
-    // Quick fix code action
-    UnorderedMap<string, vector<shared_ptr<ApplyCodeActionAssertion>>> applyCodeActionAssertionsByFilename;
-    for (auto &assertion : assertions) {
-        if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
-            applyCodeActionAssertionsByFilename[applyCodeActionAssertion->filename].push_back(applyCodeActionAssertion);
-        }
-    }
-
-    bool exhaustiveApplyCodeAction =
-        BooleanPropertyAssertion::getValue("exhaustive-apply-code-action", assertions).value_or(false);
-
-    if (!applyCodeActionAssertionsByFilename.empty() || exhaustiveApplyCodeAction) {
-        auto errors = RangeAssertion::getErrorAssertions(assertions);
-        UnorderedMap<string, std::vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
-        for (auto &error : errors) {
-            errorsByFilename[error->filename].emplace_back(error);
-        }
-
-        for (auto &filename : filenames) {
-            auto applyCodeActionAssertions = applyCodeActionAssertionsByFilename[filename];
-
-            // Request code actions for each of this file's error.
-            for (auto &error : errorsByFilename[filename]) {
-                vector<unique_ptr<Diagnostic>> diagnostics;
-                auto fileUri = testFileUris[filename];
-                // Unfortunately there's no simpler way to copy the range (yet).
-                auto params = make_unique<CodeActionParams>(
-                    make_unique<TextDocumentIdentifier>(fileUri),
-                    make_unique<Range>(make_unique<Position>(error->range->start->line, error->range->start->character),
-                                       make_unique<Position>(error->range->end->line, error->range->end->character)),
-                    make_unique<CodeActionContext>(move(diagnostics)));
-                auto req =
-                    make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
-                auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(req)));
-                EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a codeAction request.";
-
-                if (responses.size() == 1) {
-                    auto &msg = responses.at(0);
-                    EXPECT_TRUE(msg->isResponse());
-                    if (msg->isResponse()) {
-                        auto &response = msg->asResponse();
-                        ASSERT_TRUE(response.result) << "Code action request returned error: " << msg->toJSON();
-                        auto &receivedCodeActionResponse =
-                            get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
-
-                        EXPECT_FALSE(get_if<JSONNullObject>(&receivedCodeActionResponse));
-
-                        if (!get_if<JSONNullObject>(&receivedCodeActionResponse)) {
-                            UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
-                            auto &receivedCodeActions = get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse);
-                            for (auto &codeAction : receivedCodeActions) {
-                                bool codeActionTitleUnique = receivedCodeActionsByTitle.find(codeAction->title) ==
-                                                             receivedCodeActionsByTitle.end();
-                                EXPECT_TRUE(codeActionTitleUnique)
-                                    << "Found code action with duplicate title: " << codeAction->title;
-
-                                if (codeActionTitleUnique) {
-                                    receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
-                                }
-                            }
-
-                            u4 receivedCodeActionsCount = receivedCodeActionsByTitle.size();
-                            vector<shared_ptr<ApplyCodeActionAssertion>> matchedCodeActionAssertions;
-
-                            // Test code action assertions matching the range of this error.
-                            auto it = applyCodeActionAssertions.begin();
-                            while (it != applyCodeActionAssertions.end()) {
-                                auto codeActionAssertion = it->get();
-                                if (cmpRanges(*codeActionAssertion->range, *error->range) != 0) {
-                                    ++it;
-                                    continue;
-                                }
-
-                                // Ensure we received a code action matching the assertion.
-                                auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
-                                EXPECT_NE(it2, receivedCodeActionsByTitle.end()) << fmt::format(
-                                    "Did not receive code action matching assertion `{}` for error `{}`...",
-                                    codeActionAssertion->toString(), error->toString());
-
-                                // Ensure that the received code action applies correctly.
-                                if (it2 != receivedCodeActionsByTitle.end()) {
-                                    auto codeAction = move(it2->second);
-                                    codeActionAssertion->check(test.sourceFileContents, codeAction, rootUri);
-
-                                    // Some bookkeeping to make surfacing errors re. extra/insufficient
-                                    // apply-code-action annotations easier.
-                                    receivedCodeActionsByTitle.erase(it2);
-                                    matchedCodeActionAssertions.emplace_back(*it);
-                                    it = applyCodeActionAssertions.erase(it);
-                                } else {
-                                    ++it;
-                                }
-                            }
-
-                            if (exhaustiveApplyCodeAction) {
-                                if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
-                                    ADD_FAILURE() << fmt::format("Found apply-code-action assertions without "
-                                                                 "corresponding code actions from the server:\n{}",
-                                                                 fmt::map_join(applyCodeActionAssertions.begin(),
-                                                                               applyCodeActionAssertions.end(), ", ",
-                                                                               [](const auto &assertion) -> string {
-                                                                                   return assertion->toString();
-                                                                               }));
-                                } else if (matchedCodeActionAssertions.size() < receivedCodeActionsCount) {
-                                    ADD_FAILURE() << fmt::format(
-                                        "Received code actions without corresponding apply-code-action assertions:\n{}",
-                                        fmt::map_join(
-                                            receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
-                                            [](const auto &action) -> string { return action.second->toJSON(); }));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // We've already removed any code action assertions that matches a received code action assertion.
-            // Any remaining are therefore extraneous.
-            EXPECT_EQ(applyCodeActionAssertions.size(), 0)
-                << fmt::format("Found extraneous apply-code-action assertions:\n{}",
-                               fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), "\n",
-                                             [](const auto &assertion) -> string { return assertion->toString(); }));
-        }
-    }
+    testQuickFixCodeActions(*lspWrapper.get(), test, filenames, assertions, testFileUris, rootUri, nextId);
 
     // Usage and def assertions
     {
