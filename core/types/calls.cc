@@ -168,7 +168,7 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
         auto withoutNil = Types::approximateSubtract(ctx, argTpe.type, Types::nilClass());
         if (!withoutNil->isBottom() && Types::isSubTypeUnderConstraint(ctx, constr, withoutNil, expectedType)) {
             if (loc.exists()) {
-                e.replaceWith(loc, "T.must({})", loc.source(ctx));
+                e.replaceWith("Add `T.must`", loc, "T.must({})", loc.source(ctx));
             }
         }
         return e.build();
@@ -409,7 +409,9 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context c
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return core::AutocorrectSuggestion{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)};
+    return core::AutocorrectSuggestion{
+        "Add `extend T::Helpers`",
+        {core::AutocorrectSuggestion::Edit{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)}}};
 }
 
 // This implements Ruby's argument matching logic (assigning values passed to a
@@ -472,7 +474,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 }
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
-                e.replaceWith(args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
+                e.replaceWith("Add `T.must`", args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
             } else {
                 if (symbol.data(ctx)->isClassModule()) {
                     auto objMeth = core::Symbols::Object().data(ctx)->findMemberTransitive(ctx, args.name);
@@ -1576,7 +1578,8 @@ public:
         if (!ty->isUntyped()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
                 e.setHeader("Suggested type: `{}`", ty->show(ctx));
-                e.replaceWith(loc, "T.let({}, {})", loc.source(ctx), ty->show(ctx));
+                e.replaceWith(fmt::format("Initialize as `{}`", ty->show(ctx)), loc, "T.let({}, {})", loc.source(ctx),
+                              ty->show(ctx));
             }
         }
         res.returnType = move(ty);

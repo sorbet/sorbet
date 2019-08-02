@@ -25,30 +25,41 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto run = tryFastPath(move(gs), files);
 
-    for (auto &e : run.errors) {
-        if (!e->isSilenced && e->loc.file() == file && !e->autocorrects.empty() &&
-            cmpRanges(*loc2Range(*run.gs, e->loc), *params.range) == 0) {
-            vector<unique_ptr<TextEdit>> edits;
-            edits.reserve(e->autocorrects.size());
-            for (auto &a : e->autocorrects) {
-                edits.emplace_back(make_unique<TextEdit>(loc2Range(*run.gs, a.loc), a.replacement));
+    auto loc = range2Loc(*run.gs, *params.range.get(), file);
+    for (auto &error : run.errors) {
+        if (!error->isSilenced && !error->autocorrects.empty()) {
+            // We return code actions corresponding to any error that encloses the request's range. Matching request
+            // ranges against error ranges exactly prevents VSCode's quick fix shortcut (Cmd+.) from matching any
+            // actions since it sends a 0 length range (i.e. the cursor). VSCode's request does include matching
+            // diagnostics in the request context that could be used instead but this simpler approach should suffice
+            // until proven otherwise.
+            if (!error->loc.contains(*loc)) {
+                continue;
             }
 
-            // TODO: Document version
-            vector<unique_ptr<TextDocumentEdit>> documentEdits;
-            documentEdits.emplace_back(make_unique<TextDocumentEdit>(
-                make_unique<VersionedTextDocumentIdentifier>(params.textDocument->uri, JSONNullObject()), move(edits)));
+            for (auto &autocorrect : error->autocorrects) {
+                UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
+                for (auto &edit : autocorrect.edits) {
+                    editsByFile[fileRef2Uri(*run.gs, edit.loc.file())].emplace_back(
+                        make_unique<TextEdit>(loc2Range(*run.gs, edit.loc), edit.replacement));
+                }
 
-            auto workspaceEdit = make_unique<WorkspaceEdit>();
-            workspaceEdit->documentChanges = move(documentEdits);
+                vector<unique_ptr<TextDocumentEdit>> documentEdits;
+                for (auto &it : editsByFile) {
+                    // TODO: Document version
+                    documentEdits.emplace_back(make_unique<TextDocumentEdit>(
+                        make_unique<VersionedTextDocumentIdentifier>(it.first, JSONNullObject()), move(it.second)));
+                }
 
-            // TODO(sushain): improve headers, potentially by just using Insert... and Replace... with some special
-            // handling for multi-line edits
-            auto action = make_unique<CodeAction>(e->header);
-            action->kind = CodeActionKind::Quickfix;
-            action->edit = move(workspaceEdit);
+                auto workspaceEdit = make_unique<WorkspaceEdit>();
+                workspaceEdit->documentChanges = move(documentEdits);
 
-            result.emplace_back(move(action));
+                auto action = make_unique<CodeAction>(autocorrect.title);
+                action->kind = CodeActionKind::Quickfix;
+                action->edit = move(workspaceEdit);
+
+                result.emplace_back(move(action));
+            }
         }
     }
 

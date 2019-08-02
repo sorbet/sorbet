@@ -1149,8 +1149,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                                     // other source (e.g. a function argument)
                                     auto suggest =
                                         core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
-                                    e.replaceWith(cur.origins[0], "T.let({}, {})", cur.origins[0].source(ctx),
-                                                  suggest->show(ctx));
+                                    e.replaceWith(fmt::format("Initialize as `{}`", suggest->show(ctx)), cur.origins[0],
+                                                  "T.let({}, {})", cur.origins[0].source(ctx), suggest->show(ctx));
                                 } else {
                                     e.addErrorSection(
                                         core::ErrorSection("Original type from:", cur.origins2Explanations(ctx)));

@@ -64,7 +64,7 @@ bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
     return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig());
 }
 
-optional<core::AutocorrectSuggestion> maybeSuggestExtendTSig(core::Context ctx, core::SymbolRef methodSymbol) {
+optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::SymbolRef methodSymbol) {
     auto method = methodSymbol.data(ctx);
 
     auto enclosingClass = method->enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
@@ -96,7 +96,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTSig(core::Context ctx, 
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return core::AutocorrectSuggestion{nextLineLoc, fmt::format("{}extend T::Sig\n", prefix)};
+    return core::AutocorrectSuggestion::Edit{nextLineLoc, fmt::format("{}extend T::Sig\n", prefix)};
 }
 
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
@@ -517,23 +517,29 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         }
     }
 
-    e.replaceWith(replacementLoc, "{}\n{}", to_string(ss), spaces);
+    vector<core::AutocorrectSuggestion::Edit> edits;
+
+    string sig = to_string(ss);
+    edits.emplace_back(core::AutocorrectSuggestion::Edit{replacementLoc, fmt::format("{}\n{}", sig, spaces)});
 
     if (parentNeedsOverridable(ctx, methodSymbol, closestMethod)) {
         if (auto maybeOffset = startOfExistingReturn(ctx, closestMethod.data(ctx)->loc())) {
             auto offset = *maybeOffset;
             core::Loc overridableReturnLoc(closestMethod.data(ctx)->loc().file(), offset, offset);
             if (closestMethod.data(ctx)->hasGeneratedSig()) {
-                e.replaceWith(overridableReturnLoc, "overridable.");
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{overridableReturnLoc, "overridable."});
             } else {
-                e.replaceWith(overridableReturnLoc, "generated.overridable.");
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{overridableReturnLoc, "generated.overridable."});
             }
         }
     }
 
-    if (auto suggestion = maybeSuggestExtendTSig(ctx, methodSymbol)) {
-        e.addAutocorrect(std::move(*suggestion));
+    if (auto edit = maybeSuggestExtendTSig(ctx, methodSymbol)) {
+        edits.emplace_back(edit.value());
     }
+
+    e.addAutocorrect(core::AutocorrectSuggestion{fmt::format("Add `{}`", sig), edits});
+
     return true;
 }
 
