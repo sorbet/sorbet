@@ -48,7 +48,6 @@ cc_test(
     deps = [
         "//core",
         "//main/lsp",
-        "//main/pipeline",
         "//payload/binary:empty",
         "//payload/text:empty",
         "//test/helpers",
