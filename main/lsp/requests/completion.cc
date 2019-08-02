@@ -1,5 +1,6 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
@@ -113,7 +114,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
         return nullopt;
     }
 
-    string documentation = "";
+    std::vector<string_view> documentation_lines;
 
     // Iterate from the last line, to the first line
     for (auto it = all_lines.rbegin(); it != all_lines.rend(); it++) {
@@ -170,8 +171,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             // #abc -> "abc"
             int skip_after_hash = absl::StartsWith(line, "# ") ? 2 : 1;
 
-            documentation =
-                absl::StrCat(line.substr(line.find('#') + skip_after_hash, line.size()), "\n", documentation);
+            documentation_lines.push_back(line.substr(line.find('#') + skip_after_hash, line.size()));
         }
 
         // No other cases applied to this line, so stop looking.
@@ -180,6 +180,8 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
         }
     }
 
+    reverse(documentation_lines.begin(), documentation_lines.end());
+    string documentation = absl::StrJoin(documentation_lines, "\n");
     if (documentation.empty())
         return nullopt;
     else
