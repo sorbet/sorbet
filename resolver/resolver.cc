@@ -1382,15 +1382,6 @@ public:
             auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
             ENFORCE(send->recv->isSelfReference());
             ENFORCE(send->fun == core::Names::typeMember() || send->fun == core::Names::typeTemplate());
-            int arg;
-            if (send->args.size() == 1) {
-                arg = 0;
-            } else if (send->args.size() == 2) {
-                arg = 1;
-            } else {
-                Exception::raise("Wrong arg count");
-            }
-
             auto *memberType = core::cast_type<core::LambdaParam>(data->resultType.get());
             ENFORCE(memberType != nullptr);
 
@@ -1407,7 +1398,15 @@ public:
                 ENFORCE(parentType != nullptr);
             }
 
-            auto *hash = ast::cast_tree<ast::Hash>(send->args[arg].get());
+            // When no args are supplied, this implies that the upper and lower
+            // bounds of the type parameter are top and bottom.
+            ast::Hash *hash = nullptr;
+            if (send->args.size() == 1) {
+                hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+            } else if (send->args.size() == 2) {
+                hash = ast::cast_tree<ast::Hash>(send->args[1].get());
+            }
+
             if (hash) {
                 int i = -1;
                 for (auto &keyExpr : hash->keys) {

@@ -851,7 +851,7 @@ public:
             }
         }
 
-        return make_unique<ast::EmptyTree>();
+        return asgn;
     }
 
     unique_ptr<ast::Expression> handleAssignment(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {

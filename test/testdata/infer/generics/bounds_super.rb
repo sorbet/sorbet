@@ -35,3 +35,11 @@ class C2 < A
   T1 = type_member(lower: Serval, upper: Object)
      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `Object` is not a subtype of parent upper bound `Animal`
 end
+
+# should fail: the implicit bounds of top and bottom are too wide for T1
+class D1 < A
+  T1 = type_member
+     # ^^^^^^^^^^^ error: parent lower bound `Serval` is not a subtype of lower bound `T.noreturn`
+     # ^^^^^^^^^^^ error: upper bound `<any>` is not a subtype of parent upper bound `Animal`
+end
+
