@@ -559,6 +559,23 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 result.type = maybeAliased.data(ctx)->resultType;
                 return;
             }
+
+            // Only Opus::Enum singletons are allowed to be in type syntax because there is only one
+            // non-alias constant for an instance of a particular Opus::Enum--it was created with
+            // `new` and immediately assigned into a constant. Any further ConstantLits of this enum's
+            // type must be either class aliases (banned in type syntax) or type aliases.
+            //
+            // This is not the case for arbitrary singletons: MySingleton.instance can be called as many
+            // times as wanted, and assigned into different constants each time. As much as possible, we
+            // want there to be one name for every type; making an alias for a type should always be
+            // syntactically declared with T.type_alias.
+            if (auto resultType = core::cast_type<core::ClassType>(maybeAliased.data(ctx)->resultType.get())) {
+                if (resultType != nullptr &&
+                    resultType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum())) {
+                    result.type = maybeAliased.data(ctx)->resultType;
+                }
+            }
+
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
             if (sym.data(ctx)->isClass()) {
                 if (sym.data(ctx)->typeArity(ctx) > 0) {

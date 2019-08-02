@@ -279,6 +279,10 @@ void GlobalState::initEmpty() {
     id = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
     ENFORCE(id == Symbols::Singleton());
 
+    id = enterClassSymbol(Loc::none(), Symbols::Opus(), core::Names::Constants::Enum());
+    id.data(*this)->setIsModule(false);
+    ENFORCE(id == Symbols::OpusEnum());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
