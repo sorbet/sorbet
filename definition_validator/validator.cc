@@ -193,19 +193,13 @@ core::Loc getAncestorLoc(const core::GlobalState &gs, const unique_ptr<ast::Clas
                          const core::SymbolRef ancestor) {
     for (const auto &anc : classDef->ancestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
-        if (ancConst == nullptr) {
-            continue;
-        }
-        if (ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
             return anc->loc;
         }
     }
     for (const auto &anc : classDef->singletonAncestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
-        if (ancConst == nullptr) {
-            continue;
-        }
-        if (ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
             return anc->loc;
         }
     }
