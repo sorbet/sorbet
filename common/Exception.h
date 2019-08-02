@@ -52,20 +52,21 @@ public:
     static void printBacktrace() noexcept;
     static void failInFuzzer() noexcept;
 
-    [[noreturn]] static inline bool enforce_handler(std::string check, std::string file, int line)
+    [[noreturn]] static inline bool enforce_handler(std::string_view check, std::string_view file, int line)
         __attribute__((noreturn)) {
         enforce_handler(check, file, line, "(no message provided)");
     }
     template <typename... TArgs>
-    [[noreturn]] static inline bool enforce_handler(std::string check, std::string file, int line, std::string message,
-                                                    const TArgs &... args) __attribute__((noreturn)) {
+    [[noreturn]] static inline bool enforce_handler(std::string_view check, std::string_view file, int line,
+                                                    std::string_view message, const TArgs &... args)
+        __attribute__((noreturn)) {
         raise("{}:{} enforced condition {} has failed: {}", file, line, check, fmt::format(message, args...));
     }
 };
 
 template <typename... TArgs>[[noreturn]] bool Exception::raise(const TArgs &... args) {
     Exception::failInFuzzer();
-    std::string message = fmt::format(args...);
+    std::string_view message = fmt::format(args...);
 
     if (message.size() > 0) {
         fatalLogger->error("Exception::raise(): {}\n", message);
@@ -74,7 +75,7 @@ template <typename... TArgs>[[noreturn]] bool Exception::raise(const TArgs &... 
     }
     printBacktrace();
     stopInDebugger();
-    throw SorbetException(message);
+    throw SorbetException((std::string)message);
 }
 } // namespace sorbet
 #endif // SORBET_ERRO_H
