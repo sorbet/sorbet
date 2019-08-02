@@ -27,19 +27,19 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
 
 UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> autocorrects,
                                                            UnorderedMap<FileRef, string> sources) {
-    vector<pair<core::Loc, string>> edits;
+    vector<AutocorrectSuggestion::Edit> edits;
     for (auto &autocorrect : autocorrects) {
         move(autocorrect.edits.begin(), autocorrect.edits.end(), back_inserter(edits));
     }
 
     // Sort the locs backwards
-    auto compare = [](const pair<core::Loc, string> &left, const pair<core::Loc, string> &right) {
-        if (left.first.file() != right.first.file()) {
-            return left.first.file().id() > right.first.file().id();
+    auto compare = [](const AutocorrectSuggestion::Edit &left, const AutocorrectSuggestion::Edit &right) {
+        if (left.loc.file() != right.loc.file()) {
+            return left.loc.file().id() > right.loc.file().id();
         }
 
-        auto a = left.first.beginPos();
-        auto b = right.first.beginPos();
+        auto a = left.loc.beginPos();
+        auto b = right.loc.beginPos();
         if (a != b) {
             return a > b;
         }
@@ -51,8 +51,7 @@ UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSug
     UnorderedSet<Loc> seen; // used to make sure nothing overlaps
     UnorderedMap<FileRef, string> ret;
     for (auto &edit : edits) {
-        core::Loc loc = edit.first;
-        std::string_view replacement = edit.second;
+        core::Loc loc = edit.loc;
         if (!ret.count(loc.file())) {
             ret[loc.file()] = sources[loc.file()];
         }
@@ -64,7 +63,7 @@ UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSug
             continue;
         }
         seen.emplace(loc);
-        ret[loc.file()] = absl::StrCat(source.substr(0, start), replacement, source.substr(end, -1));
+        ret[loc.file()] = absl::StrCat(source.substr(0, start), edit.replacement, source.substr(end, -1));
     }
     return ret;
 }

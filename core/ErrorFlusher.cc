@@ -59,7 +59,7 @@ void ErrorFlusher::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
     UnorderedMap<FileRef, string> sources;
     for (auto &autocorrect : autocorrects) {
         for (auto &edit : autocorrect.edits) {
-            auto file = edit.first.file();
+            auto file = edit.loc.file();
             if (!sources.count(file)) {
                 sources[file] = fs.readFile(file.data(gs).path());
             }

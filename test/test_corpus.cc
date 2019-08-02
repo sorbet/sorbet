@@ -616,8 +616,6 @@ TEST_P(LSPTest, All) {
         BooleanPropertyAssertion::getValue("exhaustive-apply-code-action", assertions).value_or(false);
 
     if (!applyCodeActionAssertionsByFilename.empty() || exhaustiveApplyCodeAction) {
-        // ASSERT_EQ(filenames.size(), 1) << "code-actions only works with tests that have a single file.";
-
         auto errors = RangeAssertion::getErrorAssertions(assertions);
         UnorderedMap<string, std::vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
         for (auto &error : errors) {

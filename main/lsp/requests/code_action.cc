@@ -39,10 +39,8 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
             for (auto &autocorrect : error->autocorrects) {
                 UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
                 for (auto &edit : autocorrect.edits) {
-                    core::Loc loc = edit.first;
-                    string replacement = edit.second;
-                    editsByFile[fileRef2Uri(*run.gs, loc.file())].emplace_back(
-                        make_unique<TextEdit>(loc2Range(*run.gs, loc), replacement));
+                    editsByFile[fileRef2Uri(*run.gs, edit.loc.file())].emplace_back(
+                        make_unique<TextEdit>(loc2Range(*run.gs, edit.loc), edit.replacement));
                 }
 
                 vector<unique_ptr<TextDocumentEdit>> documentEdits;

@@ -64,7 +64,7 @@ bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
     return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig());
 }
 
-optional<pair<core::Loc, string>> maybeSuggestExtendTSig(core::Context ctx, core::SymbolRef methodSymbol) {
+optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::SymbolRef methodSymbol) {
     auto method = methodSymbol.data(ctx);
 
     auto enclosingClass = method->enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
@@ -96,7 +96,7 @@ optional<pair<core::Loc, string>> maybeSuggestExtendTSig(core::Context ctx, core
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return make_pair(nextLineLoc, fmt::format("{}extend T::Sig\n", prefix));
+    return core::AutocorrectSuggestion::Edit{nextLineLoc, fmt::format("{}extend T::Sig\n", prefix)};
 }
 
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
@@ -517,19 +517,19 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         }
     }
 
-    vector<pair<core::Loc, string>> edits;
+    vector<core::AutocorrectSuggestion::Edit> edits;
 
     string sig = to_string(ss);
-    edits.emplace_back(make_pair(replacementLoc, fmt::format("{}\n{}", sig, spaces)));
+    edits.emplace_back(core::AutocorrectSuggestion::Edit{replacementLoc, fmt::format("{}\n{}", sig, spaces)});
 
     if (parentNeedsOverridable(ctx, methodSymbol, closestMethod)) {
         if (auto maybeOffset = startOfExistingReturn(ctx, closestMethod.data(ctx)->loc())) {
             auto offset = *maybeOffset;
             core::Loc overridableReturnLoc(closestMethod.data(ctx)->loc().file(), offset, offset);
             if (closestMethod.data(ctx)->hasGeneratedSig()) {
-                edits.emplace_back(make_pair(overridableReturnLoc, "overridable."));
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{overridableReturnLoc, "overridable."});
             } else {
-                edits.emplace_back(make_pair(overridableReturnLoc, "generated.overridable."));
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{overridableReturnLoc, "generated.overridable."});
             }
         }
     }

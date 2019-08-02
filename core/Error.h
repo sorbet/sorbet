@@ -158,9 +158,9 @@ public:
 
     void addAutocorrect(AutocorrectSuggestion &&autocorrect);
     template <typename... Args>
-    void replaceWith(const std::string message, Loc loc, const std::string &replacement, const Args &... args) {
+    void replaceWith(const std::string title, Loc loc, const std::string &replacement, const Args &... args) {
         std::string formatted = fmt::format(replacement, args...);
-        addAutocorrect(AutocorrectSuggestion{message, {make_pair(loc, move(formatted))}});
+        addAutocorrect(AutocorrectSuggestion{title, {AutocorrectSuggestion::Edit{loc, move(formatted)}}});
     }
 
     // build() builds and returns the reported Error. Only valid if state ==

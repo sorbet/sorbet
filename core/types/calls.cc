@@ -409,8 +409,9 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context c
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return core::AutocorrectSuggestion{"Add `extend T::Helpers`",
-                                       {make_pair(nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix))}};
+    return core::AutocorrectSuggestion{
+        "Add `extend T::Helpers`",
+        {core::AutocorrectSuggestion::Edit{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)}}};
 }
 
 // This implements Ruby's argument matching logic (assigning values passed to a
