@@ -227,8 +227,8 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
     if (!klass.data(gs)->isClassFinal()) {
         return;
     }
-    for (const auto mem : klass.data(gs)->members()) {
-        const auto memData = mem.second.data(gs);
+    for (const auto [name, sym] : klass.data(gs)->members()) {
+        const auto memData = sym.data(gs);
         if (!memData->isMethod() || memData->name == core::Names::staticInit() || memData->isFinalMethod()) {
             continue;
         }
@@ -329,9 +329,9 @@ private:
 
         auto isAbstract = klass.data(gs)->isClassAbstract();
         if (isAbstract) {
-            for (auto mem : klass.data(gs)->members()) {
-                if (mem.second.data(gs)->isMethod() && mem.second.data(gs)->isAbstract()) {
-                    abstract.emplace_back(mem.second);
+            for (auto [name, sym] : klass.data(gs)->members()) {
+                if (sym.data(gs)->isMethod() && sym.data(gs)->isAbstract()) {
+                    abstract.emplace_back(sym);
                 }
             }
         }
