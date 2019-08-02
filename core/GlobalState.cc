@@ -521,9 +521,14 @@ void GlobalState::initEmpty() {
 
 void GlobalState::installIntrinsics() {
     for (auto &entry : intrinsicMethods) {
-        auto symbol = entry.symbol;
-        if (entry.singleton) {
-            symbol = symbol.data(*this)->singletonClass(*this);
+        SymbolRef symbol;
+        switch (entry.singleton) {
+            case Intrinsic::Kind::Instance:
+                symbol = entry.symbol;
+                break;
+            case Intrinsic::Kind::Singleton:
+                symbol = entry.symbol.data(*this)->singletonClass(*this);
+                break;
         }
         auto countBefore = symbolsUsed();
         SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);
