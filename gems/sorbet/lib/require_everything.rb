@@ -139,9 +139,7 @@ class Sorbet::Private::RequireEverything
     excluded_paths = Set.new
 
     # Exclude files that have already been loaded by rails
-    rails = Object.const_get(:Rails)
-    load_paths = rails.application.send(:_all_load_paths)
-    load_paths.each do |path|
+    self.rails_load_paths.each do |path|
       excluded_paths += Dir.glob("#{path}/**/*.rb")
     end
 
@@ -149,6 +147,20 @@ class Sorbet::Private::RequireEverything
     # can contain side-effects like monkey-patching that should
     # only be run once.
     excluded_paths += Dir.glob("#{Dir.pwd}/config/initializers/**/*.rb")
+  end
+
+  def self.rails_load_paths
+    rails = Object.const_get(:Rails)
+
+    # As per changes made to change the arity of this method:
+    # https://github.com/rails/rails/commit/b6e17b6a4b67ccc9fac5fe16741c3db720f00959
+    # This sets the `add_autoload_paths_to_load_path` parameter to `true` which will
+    # provide parity with older versions of Rails prior to the mentioned commit.
+    if Gem::Version.new(rails.version) >= Gem::Version.new('6.0.0.rc2')
+      rails.application.send(:_all_load_paths, true)
+    else
+      rails.application.send(:_all_load_paths)
+    end
   end
 
   def self.rails?

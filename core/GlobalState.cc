@@ -386,6 +386,17 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
+    // Synthesize <Magic>#<suggest-type>(arg: *T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::suggestType());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+    }
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
     // Synthesize <DeclBuilderForProcs>#<params>(args: Hash) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {
@@ -510,9 +521,14 @@ void GlobalState::initEmpty() {
 
 void GlobalState::installIntrinsics() {
     for (auto &entry : intrinsicMethods) {
-        auto symbol = entry.symbol;
-        if (entry.singleton) {
-            symbol = symbol.data(*this)->singletonClass(*this);
+        SymbolRef symbol;
+        switch (entry.singleton) {
+            case Intrinsic::Kind::Instance:
+                symbol = entry.symbol;
+                break;
+            case Intrinsic::Kind::Singleton:
+                symbol = entry.symbol.data(*this)->singletonClass(*this);
+                break;
         }
         auto countBefore = symbolsUsed();
         SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);

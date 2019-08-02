@@ -170,11 +170,11 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
 
             auto serverCap = make_unique<ServerCapabilities>();
             serverCap->textDocumentSync = TextDocumentSyncKind::Full;
-            serverCap->definitionProvider = opts.lspGoToDefinitionEnabled;
+            serverCap->definitionProvider = true;
             serverCap->documentSymbolProvider = opts.lspDocumentSymbolEnabled;
             serverCap->workspaceSymbolProvider = opts.lspWorkspaceSymbolsEnabled;
             serverCap->hoverProvider = true;
-            serverCap->referencesProvider = opts.lspFindReferencesEnabled;
+            serverCap->referencesProvider = true;
 
             if (opts.lspQuickFixEnabled) {
                 auto codeActionProvider = make_unique<CodeActionOptions>();

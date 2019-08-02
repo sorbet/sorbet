@@ -153,8 +153,12 @@ public:
 };
 
 struct Intrinsic {
+    enum class Kind : u1 {
+        Instance = 1,
+        Singleton = 2,
+    };
     const SymbolRef symbol;
-    const bool singleton;
+    const Kind singleton;
     const NameRef method;
     const IntrinsicMethod *impl;
 };

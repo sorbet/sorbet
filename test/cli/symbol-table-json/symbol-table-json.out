@@ -15,7 +15,7 @@ No errors! Great job.
     "name": "\u003cClass:\u003croot\u003e\u003e"
    },
    "kind": "CLASS",
-   "superClass": 96,
+   "superClass": 97,
    "children": [
     {
      "id": <redacted>,
@@ -52,7 +52,7 @@ No errors! Great job.
     "name": "\u003cClass:A\u003e"
    },
    "kind": "CLASS",
-   "superClass": 96,
+   "superClass": 97,
    "children": [
     {
      "id": <redacted>,

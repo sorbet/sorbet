@@ -331,10 +331,6 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("watchman-path",
                                     "Path to watchman executable. Defaults to using `watchman` on your PATH.",
                                     cxxopts::value<string>()->default_value(empty.watchmanPath));
-    options.add_options("advanced")("enable-experimental-lsp-go-to-definition",
-                                    "Enable experimental LSP feature: Go-to-definition");
-    options.add_options("advanced")("enable-experimental-lsp-find-references",
-                                    "Enable experimental LSP feature: Find References");
     options.add_options("advanced")("enable-experimental-lsp-autocomplete",
                                     "Enable experimental LSP feature: Autocomplete");
     options.add_options("advanced")("enable-experimental-lsp-workspace-symbols",
@@ -654,10 +650,6 @@ void readOptions(Options &opts, int argc, char *argv[],
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
         opts.lspQuickFixEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-quick-fix"].as<bool>();
-        opts.lspGoToDefinitionEnabled =
-            enableAllLSPFeatures || raw["enable-experimental-lsp-go-to-definition"].as<bool>();
-        opts.lspFindReferencesEnabled =
-            enableAllLSPFeatures || raw["enable-experimental-lsp-find-references"].as<bool>();
         opts.lspWorkspaceSymbolsEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-workspace-symbols"].as<bool>();
         opts.lspDocumentSymbolEnabled =
