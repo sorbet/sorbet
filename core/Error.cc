@@ -127,7 +127,7 @@ void ErrorBuilder::addErrorSection(ErrorSection &&section) {
 void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     ENFORCE(state == State::WillBuild);
     for (auto &edit : autocorrect.edits) {
-        u4 n = loc.endPos() - loc.beginPos();
+        u4 n = edit.loc.endPos() - edit.loc.beginPos();
         if (gs.autocorrect) {
             auto verb = n == 0 ? "Inserted" : "Replaced with";
             addErrorSection(
