@@ -903,28 +903,28 @@ string ApplyCodeActionAssertion::toString() const {
 }
 
 void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                                     unique_ptr<CodeAction> &codeAction, string_view testName, string_view fileUri) {
-    auto expectedUpdatedFilePath = fmt::format("{}.{}.rbedited", testName, version);
-    string expectedEditedFileContents;
-    try {
-        expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
-    } catch (FileNotFoundException e) {
-        ADD_FAILURE_AT(filename.c_str(), assertionLine + 1) << fmt::format(
-            "Missing {} which should contain test file after applying code actions.", expectedUpdatedFilePath);
-        return;
-    }
-
-    auto it = sourceFileContents.find(filename);
-    if (it == sourceFileContents.end()) {
-        ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
-        return;
-    }
-
-    auto &file = it->second;
+                                     unique_ptr<CodeAction> &codeAction, std::string_view rootUri) {
     for (auto &c : *codeAction->edit.value()->documentChanges) {
+        auto filename = uriToFilePath(rootUri, c->textDocument->uri);
+        auto it = sourceFileContents.find(filename);
+        if (it == sourceFileContents.end()) {
+            ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
+            return;
+        }
+        auto &file = it->second;
+
+        auto expectedUpdatedFilePath =
+            fmt::format("{}.{}.rbedited", filename.substr(0, filename.size() - strlen(".rb")), version);
+        string expectedEditedFileContents;
+        try {
+            expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
+        } catch (FileNotFoundException e) {
+            ADD_FAILURE_AT(filename.c_str(), assertionLine + 1) << fmt::format(
+                "Missing {} which should contain test file after applying code actions.", expectedUpdatedFilePath);
+            return;
+        }
+
         string actualEditedFileContents = string(file->source());
-        EXPECT_EQ(c->textDocument->uri, fileUri)
-            << fmt::format("Requested code action for {}, but received edits in {}", fileUri, c->textDocument->uri);
 
         // First, sort the edits by increasing starting location and verify that none overlap.
         fast_sort(c->edits, [](const auto &l, const auto &r) -> bool { return cmpRanges(*l->range, *r->range) < 0; });

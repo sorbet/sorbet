@@ -217,7 +217,7 @@ public:
                              std::string_view version, std::string_view title);
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-               std::unique_ptr<CodeAction> &codeAction, std::string_view testName, std::string_view fileUri);
+               std::unique_ptr<CodeAction> &codeAction, std::string_view rootUri);
 
     const std::string title;
     const std::string version;

@@ -522,7 +522,6 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     string sig = to_string(ss);
     edits.emplace_back(make_pair(replacementLoc, fmt::format("{}\n{}", sig, spaces)));
 
-    // TODO(sushain): test this cross-file
     if (parentNeedsOverridable(ctx, methodSymbol, closestMethod)) {
         if (auto maybeOffset = startOfExistingReturn(ctx, closestMethod.data(ctx)->loc())) {
             auto offset = *maybeOffset;

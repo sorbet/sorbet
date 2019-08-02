@@ -29,16 +29,20 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
         if (!error->isSilenced && error->loc.file() == file && !error->autocorrects.empty() &&
             cmpRanges(*loc2Range(*run.gs, error->loc), *params.range) == 0) {
             for (auto &autocorrect : error->autocorrects) {
-                vector<unique_ptr<TextEdit>> edits;
+                UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
                 for (auto &edit : autocorrect.edits) {
-                    edits.emplace_back(make_unique<TextEdit>(loc2Range(*run.gs, edit.first), edit.second));
+                    core::Loc loc = edit.first;
+                    string replacement = edit.second;
+                    editsByFile[fileRef2Uri(*run.gs, loc.file())].emplace_back(
+                        make_unique<TextEdit>(loc2Range(*run.gs, loc), replacement));
                 }
 
-                // TODO: Document version
                 vector<unique_ptr<TextDocumentEdit>> documentEdits;
-                documentEdits.emplace_back(make_unique<TextDocumentEdit>(
-                    make_unique<VersionedTextDocumentIdentifier>(params.textDocument->uri, JSONNullObject()),
-                    move(edits)));
+                for (auto &it : editsByFile) {
+                    // TODO: Document version
+                    documentEdits.emplace_back(make_unique<TextDocumentEdit>(
+                        make_unique<VersionedTextDocumentIdentifier>(it.first, JSONNullObject()), move(it.second)));
+                }
 
                 auto workspaceEdit = make_unique<WorkspaceEdit>();
                 workspaceEdit->documentChanges = move(documentEdits);
