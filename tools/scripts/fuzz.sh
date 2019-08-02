@@ -17,7 +17,6 @@ bazel build "//test/fuzz:$what" --config=fuzz -c opt
 
 # normally we'd like to check to see if commands are around before running the script, but in this case, we want the
 # bazel build command to run before this check so that bazel can download itself.
-echo "checking for commands"
 export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
 if ! command -v llvm-symbolizer >/dev/null; then
   echo "fatal: command not found: llvm-symbolizer"
