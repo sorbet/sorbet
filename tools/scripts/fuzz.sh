@@ -28,6 +28,7 @@ find test/testdata -iname "*.rb" | grep -v disable | xargs -n 1 -I % cp % fuzz_c
 mkdir -p fuzz_crashers/original
 
 echo "running"
+# use top 10 frames to tell different errors apart
 export ASAN_OPTIONS="dedup_token_length=10"
 nice "./bazel-bin/test/fuzz/$what" \
   -use_value_profile=1 \
