@@ -1,6 +1,4 @@
-#include "core/Unfreeze.h"
 #include "main/lsp/wrapper.h"
-#include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
 #include "spdlog/sinks/stdout_sinks.h"
 #include "test/helpers/MockFileSystem.h"
