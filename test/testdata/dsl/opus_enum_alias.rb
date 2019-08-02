@@ -22,9 +22,9 @@ AliasX = MyEnum::X
 # Type alias parsing happens in ResolveConstantsWalk, which is before
 # ResolveSignaturesWalk populates the resultType of static fields declared with
 # T.let.
-TypeAliasX = T.type_alias(MyEnum::X)
+TypeAliasX = T.type_alias(MyEnum::X) # error: Constant `MyEnum::X` is not a class or type alias
 
-sig {params(x: AliasX).void}
+sig {params(x: AliasX).void} # error: Constant `AliasX` is not a class or type alias
 def with_class_alias(x); end
 
 sig {params(x: TypeAliasX).void}
