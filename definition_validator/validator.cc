@@ -228,13 +228,13 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
         return;
     }
     for (const auto [name, sym] : klass.data(gs)->members()) {
-        const auto memData = sym.data(gs);
-        if (!memData->isMethod() || memData->name == core::Names::staticInit() || memData->isFinalMethod()) {
+        if (!sym.data(gs)->isMethod() || sym.data(gs)->name == core::Names::staticInit() ||
+            sym.data(gs)->isFinalMethod()) {
             continue;
         }
-        if (auto e = gs.beginError(memData->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
+        if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
-                        errMsgClass.data(gs)->show(gs), memData->name.show(gs));
+                        errMsgClass.data(gs)->show(gs), sym.data(gs)->name.show(gs));
         }
     }
 }
