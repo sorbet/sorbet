@@ -2,6 +2,7 @@
 #include "msgpack.hpp"
 
 #include "absl/strings/str_split.h"
+#include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
@@ -76,8 +77,9 @@ public:
         } else {
             def.type = Definition::Module;
         }
-        def.is_empty = absl::c_all_of(original->rhs, [](auto &tree) { return sorbet::ast::ignoreChild(tree); });
-        def.defines_behavior = sorbet::ast::classDefinesBehavior(original);
+        def.is_empty = absl::c_all_of(original->rhs,
+                                      [](auto &tree) { return sorbet::ast::BehaviorHelpers::checkEmptyDeep(tree); });
+        def.defines_behavior = sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(original);
 
         // TODO: ref.parent_of, def.parent_ref
         // TODO: expression_range

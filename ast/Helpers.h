@@ -371,6 +371,23 @@ public:
     }
 };
 
+class BehaviorHelpers final {
+public:
+    // Recursively check if all children of an expression are empty
+    static bool checkEmptyDeep(const std::unique_ptr<ast::Expression> &);
+
+    // Does a class/module definition define "behavior"? A class definition that only serves as a
+    // namespace for inner-definitions is not considered to have behavior.
+    //
+    // module A
+    //   CONST = true <-- Behavior on A::CONST (not A)
+    //   module B
+    //     def m; end <-- Behavior in A::B
+    //   end
+    // end
+    static bool checkClassDefinesBehavior(const std::unique_ptr<ast::ClassDef> &);
+};
+
 } // namespace sorbet::ast
 
 #endif // SORBET_TREES_H
