@@ -125,9 +125,9 @@ string Name::show(const GlobalState &gs) const {
             } else if (this->unique.uniqueNameKind == UniqueNameKind::MangleRename) {
                 return fmt::format("{}${}", this->unique.original.data(gs)->show(gs), this->unique.num);
             } else if (this->unique.uniqueNameKind == UniqueNameKind::OpusEnum) {
-                // Mentioning this explicitly for grepping: the entire goal of UniqueNameKind::OpusEnum is
-                // to have Name::show print the name as if on the original name, so that our OpusEnum
-                // DSL-synthesized class names are kept as an implementation detail.
+                // The entire goal of UniqueNameKind::OpusEnum is to have Name::show print the name as if on the
+                // original name, so that our OpusEnum DSL-synthesized class names are kept as an implementation detail.
+                // Thus, we fall through.
             }
             return this->unique.original.data(gs)->show(gs);
         case CONSTANT:
