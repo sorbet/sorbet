@@ -132,18 +132,15 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
         // Handle multi-line sig block
         else if (absl::StartsWith(line, "end")) {
-            // Ensure current iterator is not pointing to an 'end'
-            it++;
             // ASSUMPTION: We either hit the start of file, a `sig do` or an `end`
-            while (line = absl::StripAsciiWhitespace(*it),
-                   // SOF
-                   it != all_lines.rend()
-                       // Start of sig block
-                       && !absl::StartsWith(line, "sig do")
-                       // Invalid end keyword
-                       && !absl::StartsWith(line, "end")) {
+            do
                 it++;
-            }
+            while (it != all_lines.rend()
+                   // Start of sig block
+                   && !absl::StartsWith(line, "sig do")
+                   // Invalid end keyword
+                   && !absl::StartsWith(line, "end"));
+
             // We have either
             // 1) Reached the start of the file
             // 2) Found a `sig do`
