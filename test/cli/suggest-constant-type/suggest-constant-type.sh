@@ -13,7 +13,7 @@ echo
 echo --------------------------------------------------------------------------
 echo
 
-# Also cat the file, to make sure that 'extend' is only added once per class.
+# Also cat the file, to show how it looks in the end
 cat suggest-constant-type.rb
 
 rm suggest-constant-type.rb
