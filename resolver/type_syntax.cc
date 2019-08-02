@@ -570,8 +570,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
             // want there to be one name for every type; making an alias for a type should always be
             // syntactically declared with T.type_alias.
             if (auto resultType = core::cast_type<core::ClassType>(maybeAliased.data(ctx)->resultType.get())) {
-                if (resultType != nullptr &&
-                    resultType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum())) {
+                if (resultType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum())) {
                     result.type = maybeAliased.data(ctx)->resultType;
                     return;
                 }
