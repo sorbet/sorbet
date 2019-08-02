@@ -52,7 +52,7 @@ UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSug
     UnorderedMap<FileRef, string> ret;
     for (auto &edit : edits) {
         core::Loc loc = edit.first;
-        std::string replacement = edit.second;
+        std::string_view replacement = edit.second;
         if (!ret.count(loc.file())) {
             ret[loc.file()] = sources[loc.file()];
         }

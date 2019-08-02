@@ -104,6 +104,20 @@ unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
     return make_unique<Range>(move(start), move(end));
 }
 
+unique_ptr<core::Loc> range2Loc(const core::GlobalState &gs, const Range &range, core::FileRef file) {
+    ENFORCE(range.start->line >= 0);
+    ENFORCE(range.start->character >= 0);
+    ENFORCE(range.end->line >= 0);
+    ENFORCE(range.end->character >= 0);
+
+    auto start = core::Loc::pos2Offset(file.data(gs),
+                                       core::Loc::Detail{(u4)range.start->line + 1, (u4)range.start->character + 1});
+    auto end =
+        core::Loc::pos2Offset(file.data(gs), core::Loc::Detail{(u4)range.end->line + 1, (u4)range.end->character + 1});
+
+    return make_unique<core::Loc>(file, start, end);
+}
+
 unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) {
     string uri = fileRef2Uri(gs, loc.file());
     if (loc.file().exists() && loc.file().data(gs).isPayload() && !enableSorbetURIs) {
