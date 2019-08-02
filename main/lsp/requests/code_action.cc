@@ -26,8 +26,18 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     auto run = tryFastPath(move(gs), files);
 
     for (auto &error : run.errors) {
-        if (!error->isSilenced && error->loc.file() == file && !error->autocorrects.empty() &&
-            cmpRanges(*loc2Range(*run.gs, error->loc), *params.range) == 0) {
+        if (!error->isSilenced && error->loc.file() == file && !error->autocorrects.empty()) {
+            // We return code actions corresponding to any error that encloses the request's range. Matching request
+            // ranges against error ranges exactly prevents VSCode's quick fix shortcut (Cmd+.) from matching any
+            // actions since it sends a 0 length range (i.e. the cursor). VSCode's request does include matching
+            // diagnostics in the request context that could be used instead but this simpler approach should suffice
+            // until proven otherwise.
+            auto errorRange = loc2Range(*run.gs, error->loc);
+            if (!(cmpPositions(*errorRange->start, *params.range->start) <= 0 &&
+                  cmpPositions(*errorRange->end, *params.range->end) >= 0)) {
+                continue;
+            }
+
             for (auto &autocorrect : error->autocorrects) {
                 UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
                 for (auto &edit : autocorrect.edits) {
