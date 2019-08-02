@@ -332,8 +332,9 @@ void Environment::clearKnowledge(core::Context ctx, core::LocalVariable reassign
 }
 
 bool isSingleton(core::Context ctx, core::SymbolRef sym) {
-    // TODO: when we have support for enums, we should add them here.
-    return sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() || sym == core::Symbols::TrueClass();
+    return sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() ||
+           sym == core::Symbols::TrueClass() ||
+           (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->isClassFinal());
 }
 
 void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, const cfg::Send *send,

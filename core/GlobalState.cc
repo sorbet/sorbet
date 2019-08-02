@@ -276,6 +276,9 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct());
     ENFORCE(id == Symbols::T_Struct());
 
+    id = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
+    ENFORCE(id == Symbols::Singleton());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
