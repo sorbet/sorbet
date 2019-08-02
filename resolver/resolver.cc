@@ -1251,7 +1251,6 @@ private:
             },
             [&](ast::InsSeq *outer) { result = resolveConstantType(ctx, outer->expr, ofSym); },
             [&](ast::Expression *expr) {
-                result = core::Types::untyped(ctx, ofSym);
                 if (auto *send = ast::cast_tree<ast::Send>(expr)) {
                     if (send->fun == core::Names::typeAlias()) {
                         // short circuit if this is a type alias
@@ -1405,6 +1404,13 @@ public:
             }
         } else if (data->isStaticField() && data->resultType == nullptr) {
             data->resultType = resolveConstantType(ctx, asgn->rhs, sym);
+            if (data->resultType == nullptr) {
+                auto rhs = move(asgn->rhs);
+                auto loc = rhs->loc;
+                asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
+                                           core::Names::suggestType(), move(rhs));
+                data->resultType = core::Types::untyped(ctx, sym);
+            }
         }
 
         return asgn;

@@ -1567,6 +1567,22 @@ public:
     }
 } Magic_callWithSplatAndBlock;
 
+class Magic_suggestUntypedConstantType : public IntrinsicMethod {
+public:
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        ENFORCE(args.args.size() == 1);
+        auto ty = args.args.front()->type;
+        auto loc = args.locs.args[0];
+        if (!ty->isUntyped()) {
+            if (auto e = ctx.state.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
+                e.setHeader("Suggested type: `{}`", ty->show(ctx));
+                e.replaceWith(loc, "T.let({}, {})", loc.source(ctx), ty->show(ctx));
+            }
+        }
+        res.returnType = move(ty);
+    }
+} Magic_suggestUntypedConstantType;
+
 class DeclBuilderForProcs_void : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
@@ -1941,6 +1957,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::MagicSingleton(), Intrinsic::Kind::Instance, Names::callWithBlock(), &Magic_callWithBlock},
     {Symbols::MagicSingleton(), Intrinsic::Kind::Instance, Names::callWithSplatAndBlock(),
      &Magic_callWithSplatAndBlock},
+    {Symbols::MagicSingleton(), Intrinsic::Kind::Instance, Names::suggestType(), &Magic_suggestUntypedConstantType},
 
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::void_(), &DeclBuilderForProcs_void},
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::returns(),

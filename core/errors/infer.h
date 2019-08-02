@@ -31,5 +31,6 @@ constexpr ErrorClass ProcArityUnknown{7023, StrictLevel::Strict};
 constexpr ErrorClass GenericPassedAsBlock{7024, StrictLevel::True};
 constexpr ErrorClass AbstractClassInstantiated{7025, StrictLevel::True};
 constexpr ErrorClass NotExhaustive{7026, StrictLevel::True};
+constexpr ErrorClass UntypedConstantSuggestion{7027, StrictLevel::Strict};
 } // namespace sorbet::core::errors::Infer
 #endif

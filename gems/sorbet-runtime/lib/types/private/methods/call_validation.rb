@@ -37,7 +37,9 @@ module T::Private::Methods::CallValidation
     else
       T::Configuration.without_ruby_warnings do
         # get all the shims out of the way and put back the original method
+        T::Private::DeclState.current.skip_on_method_added = true
         mod.send(:define_method, method_sig.method_name, original_method)
+        T::Private::DeclState.current.skip_on_method_added = false
         mod.send(original_visibility, method_sig.method_name)
       end
     end
