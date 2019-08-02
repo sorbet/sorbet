@@ -61,8 +61,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     std::string contents((const char *)data, size);
     auto fileUri = sorbet::test::filePathToUri(rootUri, "file.rb");
 
-    // TODO ignore responses?
-
     lspWrapper.getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::NotificationMessage>(
         "2.0", sorbet::test::LSPMethod::TextDocumentDidOpen,
         std::make_unique<sorbet::test::DidOpenTextDocumentParams>(
