@@ -69,7 +69,7 @@ core::FileRef LSPLoop::uri2FileRef(string_view uri) {
 string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
     string uri;
     if (!file.exists()) {
-        uri = localName2Remote("???", false);
+        uri = "???";
     } else {
         auto &messageFile = file.data(gs);
         if (messageFile.isPayload()) {
