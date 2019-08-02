@@ -185,13 +185,15 @@ bool Name::isClassName(const GlobalState &gs) const {
         case UTF8:
             return false;
         case UNIQUE: {
-            return (this->unique.uniqueNameKind == Singleton || this->unique.uniqueNameKind == MangleRename) &&
+            return (this->unique.uniqueNameKind == Singleton || this->unique.uniqueNameKind == MangleRename ||
+                    this->unique.uniqueNameKind == OpusEnum) &&
                    this->unique.original.data(gs)->isClassName(gs);
         }
         case CONSTANT:
             ENFORCE(this->cnst.original.data(gs)->kind == UTF8 ||
                     this->cnst.original.data(gs)->kind == UNIQUE &&
-                        this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass);
+                        (this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                         this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::OpusEnum));
             return true;
         default:
             Exception::notImplemented();

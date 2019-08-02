@@ -573,6 +573,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 if (resultType != nullptr &&
                     resultType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum())) {
                     result.type = maybeAliased.data(ctx)->resultType;
+                    return;
                 }
             }
 

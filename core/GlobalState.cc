@@ -824,7 +824,8 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
     ENFORCE(original.data(*this)->kind == UTF8 ||
                 (original.data(*this)->kind == UNIQUE &&
-                 original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass),
+                 (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::OpusEnum)),
             "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(CONSTANT, original.id());

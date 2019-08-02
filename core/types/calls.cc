@@ -307,6 +307,12 @@ TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
         return metaType->wrapped;
     }
     if (auto *classType = cast_type<ClassType>(tp.get())) {
+        if (classType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum())) {
+            // Opus::Enum instances are allowed to stand for themselves in type syntax positions.
+            // See the note in type_syntax.cc regarding Opus::Enum.
+            return tp;
+        }
+
         SymbolRef attachedClass = classType->symbol.data(ctx)->attachedClass(ctx);
         if (!attachedClass.exists()) {
             if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {

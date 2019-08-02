@@ -84,7 +84,7 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
         }
     }
 
-    auto name = ctx.state.freshNameUnique(core::UniqueNameKind::OpusEnum, lhs->cnst, 1);
+    auto name = ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::OpusEnum, lhs->cnst, 1));
     auto classCnst = ast::MK::UnresolvedConstant(lhs->loc, ast::MK::EmptyTree(), name);
     ast::ClassDef::ANCESTORS_store parent;
     parent.emplace_back(klass->name->deepCopy());
