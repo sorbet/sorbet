@@ -35,11 +35,9 @@ sorbet::realmain::lsp::LSPWrapper mkLSPWrapper() {
     std::unique_ptr<sorbet::KeyValueStore> kvstore;
     auto opts = mkOpts();
     static const auto commonGs = mkGlobalState(opts, kvstore);
-
     // TODO how to use opts and avoid another mkOpts()?
     auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(commonGs->deepCopy(true), mkOpts(), console, false);
     lspWrapper.enableAllExperimentalFeatures();
-
     return lspWrapper;
 }
 
@@ -51,19 +49,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     auto lspWrapper = mkLSPWrapper();
     int nextId = 0;
     sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId);
-
     std::string contents((const char *)data, size);
     auto fileUri = sorbet::test::filePathToUri(rootUri, "file.rb");
-
     lspWrapper.getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::NotificationMessage>(
         "2.0", sorbet::test::LSPMethod::TextDocumentDidOpen,
         std::make_unique<sorbet::test::DidOpenTextDocumentParams>(
             std::make_unique<sorbet::test::TextDocumentItem>(fileUri, "ruby", 1, contents)))));
-
     lspWrapper.getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::RequestMessage>(
         "2.0", nextId++, sorbet::test::LSPMethod::TextDocumentDocumentSymbol,
         std::make_unique<sorbet::test::DocumentSymbolParams>(
             std::make_unique<sorbet::test::TextDocumentIdentifier>(fileUri)))));
-
     return 0;
 }
