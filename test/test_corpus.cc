@@ -589,7 +589,8 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
             auto it = applyCodeActionAssertions.begin();
             while (it != applyCodeActionAssertions.end()) {
                 auto codeActionAssertion = it->get();
-                if (cmpRanges(*codeActionAssertion->range, *error->range) != 0) {
+                if (!(cmpPositions(*error->range->start, *codeActionAssertion->range->start) <= 0 &&
+                      cmpPositions(*error->range->end, *codeActionAssertion->range->end) >= 0)) {
                     ++it;
                     continue;
                 }
