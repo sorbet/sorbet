@@ -211,7 +211,10 @@ pair<Loc, u4> Loc::findStartOfLine(const GlobalState &gs) const {
     u4 lineStart = Loc::pos2Offset(this->file().data(gs), {startDetail.line, 1});
     std::string_view lineView = this->file().data(gs).source().substr(lineStart);
 
-    u4 padding = lineView.find_first_not_of(" \t");
+    size_t padding = lineView.find_first_not_of(" \t");
+    if (padding == string::npos) {
+        padding = 0;
+    }
     u4 startOffset = lineStart + padding;
     return make_pair(Loc(this->file(), startOffset, startOffset), padding);
 }
