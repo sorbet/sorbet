@@ -235,6 +235,8 @@ NameDef names[] = {
     {"ActiveRecord", "ActiveRecord", true},
     {"Migration", "Migration", true},
     {"Compatibility", "Compatibility", true},
+
+    {"instance"},
     // end DSL methods
 
     // The next two names are used as keys in SymbolInfo::members to store
