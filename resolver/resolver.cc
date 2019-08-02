@@ -1445,15 +1445,13 @@ public:
             // `fixed`.
             if (parentType != nullptr) {
                 if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound)) {
-                    if (auto e =
-                            ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
                         e.setHeader("parent lower bound `{}` is not a subtype of lower bound `{}`",
                                     parentType->lowerBound->show(ctx), memberType->lowerBound->show(ctx));
                     }
                 }
                 if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound)) {
-                    if (auto e =
-                            ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
                         e.setHeader("upper bound `{}` is not a subtype of parent upper bound `{}`",
                                     memberType->upperBound->show(ctx), parentType->upperBound->show(ctx));
                     }
