@@ -15,6 +15,7 @@ compilation_database(
         "//test/lsp:protocol_test_corpus",
         "//test/fuzz:fuzz_hover",
         "//test/fuzz:proto",
+        "//test/fuzz:fuzz_doc_symbols",
         "//test/fuzz:fuzz_dash_e",
         "//test/fuzz:fuzz_dash_e_impl",
         "//test:test_corpus_sharded",
