@@ -75,7 +75,7 @@ template <typename... TArgs>[[noreturn]] bool Exception::raise(const TArgs &... 
     }
     printBacktrace();
     stopInDebugger();
-    throw SorbetException((std::string)message);
+    throw SorbetException(message);
 }
 } // namespace sorbet
 #endif // SORBET_ERRO_H
