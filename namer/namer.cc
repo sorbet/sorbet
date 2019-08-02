@@ -903,15 +903,13 @@ public:
 
 private:
     UnorderedMap<core::SymbolRef, core::Loc> classBehaviorLocs;
-    NameInserter() {
-        enterScope();
-    }
 };
 
 std::vector<ast::ParsedFile> Namer::run(core::MutableContext ctx, std::vector<ast::ParsedFile> trees) {
     NameInserter nameInserter;
     for (auto &tree : trees) {
         auto file = tree.file;
+        nameInserter.enterScope();
         try {
             ast::ParsedFile ast;
             {
@@ -926,6 +924,8 @@ std::vector<ast::ParsedFile> Namer::run(core::MutableContext ctx, std::vector<as
                 e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(ctx).path());
             }
         }
+        nameInserter.exitScope();
+        ENFORCE(nameInserter.scopeStack.empty());
     }
     return trees;
 }
