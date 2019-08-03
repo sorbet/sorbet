@@ -731,6 +731,7 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
         core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
         what = namer::Namer::run(ctx, move(what));
+        gs.errorQueue->flushErrors();
     }
     return what;
 }

@@ -917,7 +917,6 @@ std::vector<ast::ParsedFile> Namer::run(core::MutableContext ctx, std::vector<as
                 core::ErrorRegion errs(ctx.state, file);
                 tree.tree = ast::TreeMap::apply(ctx, nameInserter, std::move(tree.tree));
             }
-            ctx.state.errorQueue->flushErrors();
         } catch (SorbetException &) {
             Exception::failInFuzzer();
             if (auto e = ctx.state.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
