@@ -2,7 +2,9 @@
 extend T::Sig
 
 module Opus
-  class Enum; end
+  class Enum
+    extend T::Generic
+  end
 end
 
 class MyEnum < Opus::Enum

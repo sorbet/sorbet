@@ -4,6 +4,7 @@ extend T::Sig
 
 module Opus
   class Enum
+    extend T::Generic
     def initialize(x = nil)
     end
   end

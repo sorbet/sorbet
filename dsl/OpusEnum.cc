@@ -95,6 +95,11 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
     ast::ClassDef::ANCESTORS_store parent;
     parent.emplace_back(klass->name->deepCopy());
     ast::ClassDef::RHS_store classRhs;
+    classRhs.emplace_back(ast::MK::Assign(
+        stat->loc, ast::MK::UnresolvedConstant(stat->loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
+        ast::MK::Send1(
+            stat->loc, ast::MK::Self(stat->loc), core::Names::typeTemplate(),
+            ast::MK::Hash1(stat->loc, ast::MK::Symbol(stat->loc, core::Names::fixed()), ast::MK::Self(stat->loc)))));
     classRhs.emplace_back(ast::MK::Send1(stat->loc, ast::MK::Self(stat->loc), core::Names::include(),
                                          ast::MK::Constant(stat->loc, core::Symbols::Singleton())));
     classRhs.emplace_back(ast::MK::Send0(stat->loc, ast::MK::Self(stat->loc), core::Names::declareFinal()));

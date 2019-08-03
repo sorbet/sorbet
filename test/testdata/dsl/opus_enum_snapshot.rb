@@ -1,6 +1,7 @@
 # typed: true
 module Opus
   class Enum
+    extend T::Generic
     def initialize(x = nil)
     end
   end
