@@ -126,15 +126,17 @@ void ErrorBuilder::addErrorSection(ErrorSection &&section) {
 
 void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     ENFORCE(state == State::WillBuild);
-    u4 n = autocorrect.loc.endPos() - autocorrect.loc.beginPos();
-    if (gs.autocorrect) {
-        auto verb = n == 0 ? "Inserted" : "Replaced with";
-        addErrorSection(ErrorSection("Autocorrect: Done",
-                                     {ErrorLine::from(autocorrect.loc, "{} `{}`", verb, autocorrect.replacement)}));
-    } else {
-        auto verb = n == 0 ? "Insert" : "Replace with";
-        addErrorSection(ErrorSection("Autocorrect: Use `-a` to autocorrect",
-                                     {ErrorLine::from(autocorrect.loc, "{} `{}`", verb, autocorrect.replacement)}));
+    for (auto &edit : autocorrect.edits) {
+        u4 n = edit.loc.endPos() - edit.loc.beginPos();
+        if (gs.autocorrect) {
+            auto verb = n == 0 ? "Inserted" : "Replaced with";
+            addErrorSection(
+                ErrorSection("Autocorrect: Done", {ErrorLine::from(edit.loc, "{} `{}`", verb, edit.replacement)}));
+        } else {
+            auto verb = n == 0 ? "Insert" : "Replace with";
+            addErrorSection(ErrorSection("Autocorrect: Use `-a` to autocorrect",
+                                         {ErrorLine::from(edit.loc, "{} `{}`", verb, edit.replacement)}));
+        }
     }
     this->autocorrects.emplace_back(move(autocorrect));
 }

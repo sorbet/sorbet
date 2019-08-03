@@ -286,10 +286,9 @@ public:
             klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassFinal();
         }
         if (send->fun == core::Names::declareSealed()) {
-            auto classOfKlass = klass->symbol.data(ctx)->singletonClass(ctx);
             klass->symbol.data(ctx)->setClassSealed();
-            classOfKlass.data(ctx)->setClassSealed();
 
+            auto classOfKlass = klass->symbol.data(ctx)->singletonClass(ctx);
             auto sealedClassesList =
                 ctx.state.enterMethodSymbol(send->loc, classOfKlass, core::Names::sealedClassesList());
             auto &blkArg =

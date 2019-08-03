@@ -332,8 +332,9 @@ void Environment::clearKnowledge(core::Context ctx, core::LocalVariable reassign
 }
 
 bool isSingleton(core::Context ctx, core::SymbolRef sym) {
-    // TODO: when we have support for enums, we should add them here.
-    return sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() || sym == core::Symbols::TrueClass();
+    return sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() ||
+           sym == core::Symbols::TrueClass() ||
+           (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->isClassFinal());
 }
 
 void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, const cfg::Send *send,
@@ -1148,8 +1149,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                                     // other source (e.g. a function argument)
                                     auto suggest =
                                         core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
-                                    e.replaceWith(cur.origins[0], "T.let({}, {})", cur.origins[0].source(ctx),
-                                                  suggest->show(ctx));
+                                    e.replaceWith(fmt::format("Initialize as `{}`", suggest->show(ctx)), cur.origins[0],
+                                                  "T.let({}, {})", cur.origins[0].source(ctx), suggest->show(ctx));
                                 } else {
                                     e.addErrorSection(
                                         core::ErrorSection("Original type from:", cur.origins2Explanations(ctx)));

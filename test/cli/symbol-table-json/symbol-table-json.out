@@ -6,7 +6,7 @@ No errors! Great job.
   "name": "\u003croot\u003e"
  },
  "kind": "CLASS",
- "superClass": 6,
+ "id": <redacted>,
  "children": [
   {
    "id": <redacted>,
@@ -15,7 +15,7 @@ No errors! Great job.
     "name": "\u003cClass:\u003croot\u003e\u003e"
    },
    "kind": "CLASS",
-   "superClass": 97,
+   "id": <redacted>,
    "children": [
     {
      "id": <redacted>,
@@ -43,7 +43,7 @@ No errors! Great job.
     "name": "A"
    },
    "kind": "CLASS",
-   "superClass": 6
+   "id": <redacted>
   },
   {
    "id": <redacted>,
@@ -52,7 +52,7 @@ No errors! Great job.
     "name": "\u003cClass:A\u003e"
    },
    "kind": "CLASS",
-   "superClass": 97,
+   "id": <redacted>,
    "children": [
     {
      "id": <redacted>,

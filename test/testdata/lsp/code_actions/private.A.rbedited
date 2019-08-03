@@ -12,11 +12,11 @@ end
 class C
   private def foo; end
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Use `private` to define private instance methods
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [A] Use `private` to define private instance methods
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [A] Replace with `private`
 end
 
 class D
   private def self.foo; end
 # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Use `private_class_method` to define private class methods
-# ^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [B] Use `private_class_method` to define private class methods
+# ^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [B] Replace with `private_class_method`
 end
