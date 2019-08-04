@@ -14,6 +14,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "core/errors/infer.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 
 template class std::vector<std::pair<unsigned int, unsigned int>>;
 template class std::shared_ptr<sorbet::core::GlobalState>;
@@ -1198,6 +1199,9 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
         result->symbols.emplace_back(sym.deepCopy(*result, keepId));
     }
     result->pathPrefix = this->pathPrefix;
+    for (auto &semanticExtension : this->semanticExtensions) {
+        result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
+    }
     result->sanityCheck();
     {
         Timer timeit2(tracer(), "GlobalState::deepCopyOut");

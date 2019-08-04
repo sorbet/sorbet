@@ -11,6 +11,9 @@
 #include "core/lsp/Query.h"
 #include <memory>
 
+namespace sorbet::pipeline::semantic_extension {
+class SemanticExtension;
+}
 namespace sorbet::core {
 
 class Name;
@@ -185,6 +188,8 @@ public:
     void addDslPlugin(std::string_view method, std::string_view command);
     std::optional<std::string_view> findDslPlugin(NameRef method) const;
     bool hasAnyDslPlugin() const;
+
+    std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
 
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;

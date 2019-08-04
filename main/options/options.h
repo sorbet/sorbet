@@ -3,6 +3,7 @@
 #include "common/FileSystem.h"
 #include "common/common.h"
 #include "core/StrictLevel.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
 
 namespace sorbet::realmain::options {
@@ -215,8 +216,11 @@ struct Options {
     Options &operator=(Options &&) = delete;
 };
 
-void readOptions(Options &, int argc, char *argv[],
-                 std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
+void readOptions(
+    Options &, std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions,
+    int argc, char *argv[],
+    const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
+    std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
 
 void flushPrinters(Options &);
 } // namespace sorbet::realmain::options

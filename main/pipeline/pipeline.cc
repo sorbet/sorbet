@@ -30,6 +30,7 @@
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "pipeline.h"
@@ -56,6 +57,11 @@ public:
             return m;
         }
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+        if (cfg) {
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->typecheck(ctx.state, *cfg);
+            }
+        }
         if (print.CFG.enabled) {
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }

@@ -6,6 +6,7 @@
 #include "core/Hashing.h"
 #include "core/Types.h"
 #include "core/Unfreeze.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <algorithm>
 #include <string>
 
@@ -131,6 +132,10 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
             ENFORCE(substitute(from.symbols[i].name) == from.symbols[i].name);
             ENFORCE(from.symbols[i].name == to.symbols[i].name);
         }
+    }
+
+    for (auto &extension : to.semanticExtensions) {
+        extension->merge(from, to, *this);
     }
 
     to.sanityCheck();

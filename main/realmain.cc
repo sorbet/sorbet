@@ -321,7 +321,9 @@ int realmain(int argc, char *argv[]) {
     typeErrorsConsole->set_pattern("%v");
 
     options::Options opts;
-    options::readOptions(opts, argc, argv, logger);
+    auto extensionProviders = sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders();
+    vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
+    options::readOptions(opts, extensions, argc, argv, extensionProviders, logger);
     while (opts.waitForDebugger && !stopInDebugger()) {
         // spin
     }
@@ -392,6 +394,7 @@ int realmain(int argc, char *argv[]) {
         make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
     gs->pathPrefix = opts.pathPrefix;
     gs->errorUrlBase = opts.errorUrlBase;
+    gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
 
     logger->trace("building initial global state");

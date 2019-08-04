@@ -41,6 +41,7 @@ compilation_database(
         "//payload/binary:empty",
         "//main:sorbet",
         "//payload:payload",
+        "//main/pipeline/semantic_extension:none",
         "//main:realmain-orig",
         "//main/pipeline:pipeline-orig",
         "//infer:infer_test",
@@ -89,6 +90,7 @@ compilation_database(
         "//ast/treemap:treemap",
         "//ast:ast",
         "//core:core",
+        "//main/pipeline/semantic_extension:interface",
         "//common/concurrency:concurrency",
         "//common:common",
         # END compile_commands targets
