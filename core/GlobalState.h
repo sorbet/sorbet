@@ -9,11 +9,9 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/lsp/Query.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <memory>
 
-namespace sorbet::pipeline::semantic_extension {
-class SemanticExtension;
-}
 namespace sorbet::core {
 
 class Name;
