@@ -37,6 +37,7 @@ public:
     virtual void injectOptions(cxxopts::Options &) const = 0;
     virtual std::unique_ptr<SemanticExtension> readOptions(cxxopts::ParseResult &) const = 0;
     static std::vector<SemanticExtensionProvider *> getProviders();
+    virtual ~SemanticExtensionProvider() = 0;
 };
 } // namespace pipeline::semantic_extension
 } // namespace sorbet
