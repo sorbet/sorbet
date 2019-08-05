@@ -303,27 +303,15 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
 vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                                            const options::Options &opts) {
     try {
-        int i = 0;
-        Timer timeit(gs.tracer(), "incremental_naming");
-        for (auto &tree : what) {
-            auto file = tree.file;
-            try {
-                unique_ptr<ast::Expression> ast;
-                core::MutableContext ctx(gs, core::Symbols::root());
-                gs.tracer().trace("Naming: {}", file.data(gs).path());
-                core::ErrorRegion errs(gs, file);
-                core::UnfreezeSymbolTable symbolTable(gs);
-                core::UnfreezeNameTable nameTable(gs);
-                tree = sorbet::namer::Namer::run(ctx, move(tree));
-                i++;
-            } catch (SorbetException &) {
-                if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
-                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
-                }
-            }
+        core::MutableContext ctx(gs, core::Symbols::root());
+        {
+            Timer timeit(gs.tracer(), "incremental_naming");
+            core::UnfreezeSymbolTable symbolTable(gs);
+            core::UnfreezeNameTable nameTable(gs);
+
+            what = sorbet::namer::Namer::run(ctx, move(what));
         }
 
-        core::MutableContext ctx(gs, core::Symbols::root());
         {
             Timer timeit(gs.tracer(), "incremental_resolve");
             gs.tracer().trace("Resolving (incremental pass)...");
@@ -739,33 +727,12 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
     }
 
     {
-        ProgressIndicator namingProgress(opts.showProgress, "Naming", what.size());
-
-        int i = 0;
-        for (auto &tree : what) {
-            auto file = tree.file;
-            try {
-                ast::ParsedFile ast;
-                {
-                    core::MutableContext ctx(gs, core::Symbols::root());
-                    Timer timeit(gs.tracer(), "naming", {{"file", (string)file.data(gs).path()}});
-                    core::ErrorRegion errs(gs, file);
-                    core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-                    core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-                    tree = namer::Namer::run(ctx, move(tree));
-                }
-                gs.errorQueue->flushErrors();
-                namingProgress.reportProgress(i);
-                i++;
-            } catch (SorbetException &) {
-                Exception::failInFuzzer();
-                if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
-                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
-                }
-            }
-        }
+        core::MutableContext ctx(gs, core::Symbols::root());
+        core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+        core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+        what = namer::Namer::run(ctx, move(what));
+        gs.errorQueue->flushErrors();
     }
-
     return what;
 }
 class GatherUnresolvedConstantsWalk {
