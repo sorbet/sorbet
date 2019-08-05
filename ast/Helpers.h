@@ -373,7 +373,7 @@ public:
 
 class BehaviorHelpers final {
 public:
-    // Recursively check if all children of an expression are empty
+    // Recursively check if all children of an expression are EmptyTree's or InsSeq's that only contain EmptyTree's
     static bool checkEmptyDeep(const std::unique_ptr<ast::Expression> &);
 
     // Does a class/module definition define "behavior"? A class definition that only serves as a
