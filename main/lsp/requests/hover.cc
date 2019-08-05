@@ -77,6 +77,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
         auto resp = move(queryResponses[0]);
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
+            // main.method is <none> when calling .new on a class.
             auto methodDefLoc = sendResp->dispatchResult->main.method.data(*gs)->loc();
             auto &constraint = sendResp->dispatchResult->main.constr;
             if (constraint) {

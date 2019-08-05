@@ -1,4 +1,5 @@
 # typed: true
+# Documentation for Foo
 class Foo
   extend T::Sig
 
@@ -85,4 +86,12 @@ def main
 # ^ hover: T::Array[String]
           # ^ hover: sig {params(a: String, x: String).returns(T::Array[String])}
 
+  Foo
+ # ^ hover: T.class_of(Foo)
+ # ^ hover: Documentation for Foo
+
+  f = Foo.new
+# ^ hover: Foo
+# ^ hover: Documentation for Foo
+     # ^ hover: T.class_of(Foo)
 end
