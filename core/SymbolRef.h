@@ -388,6 +388,10 @@ public:
         return SymbolRef(nullptr, 78);
     }
 
+    static SymbolRef OpusEnum() {
+        return SymbolRef(nullptr, 79);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
