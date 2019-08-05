@@ -62,7 +62,7 @@ void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared
                                    disableFastPath);
 }
 
-LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath) {
+void LSPWrapper::instantiate(string_view rootPath, bool disableFastPath) {
     opts.rawInputDirNames.emplace_back(rootPath);
 
     // All of this stuff is ignored by LSP, but we need it to construct ErrorQueue/GlobalState.
@@ -82,6 +82,15 @@ LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath) {
         gs->suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
     }
     instantiate(std::move(gs), logger, disableFastPath);
+}
+
+LSPWrapper::LSPWrapper(options::Options &&options, std::string_view rootPath, bool disableFastPath)
+    : opts(std::move(options)) {
+    instantiate(rootPath, disableFastPath);
+}
+
+LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath) {
+    instantiate(rootPath, disableFastPath);
 }
 
 LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, options::Options &&options,
