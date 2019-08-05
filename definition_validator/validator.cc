@@ -193,19 +193,13 @@ core::Loc getAncestorLoc(const core::GlobalState &gs, const unique_ptr<ast::Clas
                          const core::SymbolRef ancestor) {
     for (const auto &anc : classDef->ancestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
-        if (ancConst == nullptr) {
-            continue;
-        }
-        if (ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
             return anc->loc;
         }
     }
     for (const auto &anc : classDef->singletonAncestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
-        if (ancConst == nullptr) {
-            continue;
-        }
-        if (ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
             return anc->loc;
         }
     }
@@ -233,14 +227,14 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
     if (!klass.data(gs)->isClassFinal()) {
         return;
     }
-    for (const auto mem : klass.data(gs)->members()) {
-        const auto memData = mem.second.data(gs);
-        if (!memData->isMethod() || memData->name == core::Names::staticInit() || memData->isFinalMethod()) {
+    for (const auto [name, sym] : klass.data(gs)->members()) {
+        if (!sym.exists() || !sym.data(gs)->isMethod() || sym.data(gs)->name == core::Names::staticInit() ||
+            sym.data(gs)->isFinalMethod()) {
             continue;
         }
-        if (auto e = gs.beginError(memData->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
+        if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
-                        errMsgClass.data(gs)->show(gs), memData->name.show(gs));
+                        errMsgClass.data(gs)->show(gs), sym.data(gs)->name.show(gs));
         }
     }
 }
@@ -335,9 +329,9 @@ private:
 
         auto isAbstract = klass.data(gs)->isClassAbstract();
         if (isAbstract) {
-            for (auto mem : klass.data(gs)->members()) {
-                if (mem.second.data(gs)->isMethod() && mem.second.data(gs)->isAbstract()) {
-                    abstract.emplace_back(mem.second);
+            for (auto [name, sym] : klass.data(gs)->members()) {
+                if (sym.exists() && sym.data(gs)->isMethod() && sym.data(gs)->isAbstract()) {
+                    abstract.emplace_back(sym);
                 }
             }
         }
