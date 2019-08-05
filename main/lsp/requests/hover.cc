@@ -81,12 +81,11 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             }
             response->result = make_unique<Hover>(formatRubyCode(
                 clientHoverMarkupKind, methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint),
-                findDocumentation(methodDefLoc.file().data(*gs).source(), methodDefLoc.beginPos()).value_or("")));
+                findDocumentation(methodDefLoc.file().data(*gs).source(), methodDefLoc.beginPos())));
         } else if (auto defResp = resp->isDefinition()) {
             response->result = make_unique<Hover>(formatRubyCode(
                 clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr),
-                findDocumentation(defResp->termLoc.file().data(*gs).source(), defResp->termLoc.beginPos())
-                    .value_or("")));
+                findDocumentation(defResp->termLoc.file().data(*gs).source(), defResp->termLoc.beginPos())));
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(*gs);
             auto type = constResp->retType.type;
@@ -101,8 +100,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             }
             response->result = make_unique<Hover>(formatRubyCode(
                 clientHoverMarkupKind, type->showWithMoreInfo(*gs),
-                findDocumentation(constResp->termLoc.file().data(*gs).source(), constResp->termLoc.beginPos())
-                    .value_or("")));
+                findDocumentation(constResp->termLoc.file().data(*gs).source(), constResp->termLoc.beginPos())));
         } else {
             response->result = make_unique<Hover>(
                 formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), ""));
