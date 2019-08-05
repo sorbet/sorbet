@@ -110,6 +110,10 @@ def main
   hash = Hash.new("default")
 # ^ hover: T::Hash[T.untyped, T.untyped]
 
+  foo = BigFoo::FOO_CONSTANT
+# ^ hover: Integer
+                # ^ hover: Integer(1)
+                # ^ hover: The docs for FOO_CONSTANT
   raise "error message"
 # ^ hover: sig {params(arg0: String).returns(T.noreturn)}
 end

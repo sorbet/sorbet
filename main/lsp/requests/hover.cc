@@ -74,7 +74,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
         auto resp = move(queryResponses[0]);
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
-            // main.method is <none> when calling .new on a class.
+            // TODO main.method is <none> when calling .new on a class.
             auto methodDefLoc = sendResp->dispatchResult->main.method.data(*gs)->loc();
             auto &constraint = sendResp->dispatchResult->main.constr;
             if (constraint) {
@@ -90,6 +90,8 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(*gs);
             auto type = constResp->retType.type;
+            // TOOD This constResp only has a reference to where the class is referred to. Can't seem to get to the
+            // definition directly using the properties from the response.
             if (data->isClass()) {
                 auto singletonClass = data->lookupSingletonClass(*gs);
                 ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");

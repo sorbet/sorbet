@@ -1,5 +1,4 @@
 # typed: true
-# Documentation for Foo
 class Foo
   extend T::Sig
 
@@ -88,10 +87,8 @@ def main
 
   Foo
  # ^ hover: T.class_of(Foo)
- # ^ hover: Documentation for Foo
 
   f = Foo.new
 # ^ hover: Foo
-# ^ hover: Documentation for Foo
      # ^ hover: T.class_of(Foo)
 end
