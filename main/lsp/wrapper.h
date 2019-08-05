@@ -36,7 +36,6 @@ private:
     /** Contains shared constructor logic. */
     void instantiate(std::unique_ptr<core::GlobalState> gs, const std::shared_ptr<spdlog::logger> &logger,
                      bool disableFastPath);
-    void instantiate(std::string_view rootPath, bool disableFastPath);
 
 public:
     enum class LSPExperimentalFeature {
