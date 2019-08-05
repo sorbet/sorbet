@@ -1,6 +1,14 @@
 # typed: true
 class BigFoo; extend T::Sig
     # ^ hover: T.class_of(BigFoo)
+
+# The docs for FOO_CONSTANT
+  FOO_CONSTANT = 1
+# ^^^^^^^^^^^^ The docs for FOO_CONSTANT
+# ^^^^^^^^^^^^ ```ruby
+# ^^^^^^^^^^^^ Integer
+# ^^^^^^^^^^^^ ```
+
   class LittleFoo1; extend T::Sig
   sig {params(num: Integer).returns(Integer)}
     def bar(num)
