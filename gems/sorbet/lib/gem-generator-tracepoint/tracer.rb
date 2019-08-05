@@ -20,7 +20,7 @@ module Sorbet::Private
       module ModuleOverride
         def include(mod, *smth)
           result = super
-          Sorbet::Private::GemGeneratorTracepoint::Tracer.module_included(mod, self)
+          Sorbet::Private::GemGeneratorTracepoint::Tracer.on_module_included(mod, self)
           result
         end
       end
@@ -29,7 +29,7 @@ module Sorbet::Private
       module ObjectOverride
         def extend(mod, *args)
           result = super
-          Sorbet::Private::GemGeneratorTracepoint::Tracer.module_extended(mod, self)
+          Sorbet::Private::GemGeneratorTracepoint::Tracer.on_module_extended(mod, self)
           result
         end
       end
@@ -38,7 +38,7 @@ module Sorbet::Private
       module ClassOverride
         def new(*)
           result = super
-          Sorbet::Private::GemGeneratorTracepoint::Tracer.module_created(result)
+          Sorbet::Private::GemGeneratorTracepoint::Tracer.on_module_created(result)
           result
         end
       end
@@ -48,19 +48,19 @@ module Sorbet::Private
         @delegate_classes[Sorbet::Private::RealStdlib.real_object_id(delegate)] = klass
       end
 
-      def self.module_created(mod)
+      def self.on_module_created(mod)
         add_to_context(type: :module, module: mod)
       end
 
-      def self.module_included(included, includer)
+      def self.on_module_included(included, includer)
         add_to_context(type: :include, module: includer, include: included)
       end
 
-      def self.module_extended(extended, extender)
+      def self.on_module_extended(extended, extender)
         add_to_context(type: :extend, module: extender, extend: extended)
       end
 
-      def self.method_added(mod, method, singleton)
+      def self.on_method_added(mod, method, singleton)
         add_to_context(type: :method, module: mod, method: method, singleton: singleton)
       end
 
@@ -115,7 +115,7 @@ module Sorbet::Private
 
       def self.install_tracepoints
         @class_tracepoint = TracePoint.new(:class) do |tp|
-          module_created(tp.self)
+          on_module_created(tp.self)
         end
         @c_call_tracepoint = TracePoint.new(:c_call) do |tp|
           case tp.method_id
@@ -158,7 +158,7 @@ module Sorbet::Private
               end
               set << added
 
-              method_added(tp.self, added, singleton)
+              on_method_added(tp.self, added, singleton)
             ensure
               tp.enable
             end
