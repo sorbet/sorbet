@@ -4,6 +4,7 @@
 module T::Types
   class Base
     def self.method_added(method_name)
+      super(method_name)
       # What is now `subtype_of_single?` used to be named `subtype_of?`. Make sure people don't
       # override the wrong thing.
       #
