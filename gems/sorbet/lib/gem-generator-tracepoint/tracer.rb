@@ -177,4 +177,3 @@ module Sorbet::Private
     end
   end
 end
-
