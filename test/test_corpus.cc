@@ -262,7 +262,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         {
             core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-            namedTree = testSerialize(gs, namer::Namer::run(ctx, move(localNamed)));
+            vector<ast::ParsedFile> vTmp;
+            vTmp.emplace_back(move(localNamed));
+            vTmp = namer::Namer::run(ctx, move(vTmp));
+            namedTree = testSerialize(gs, move(vTmp[0]));
         }
 
         expectation = test.expectations.find("name-tree");

@@ -355,6 +355,7 @@ cxxopts::Options buildOptions() {
         cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
+    options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
 
     options.add_options("advanced")(
         "autogen-autoloader-exclude-require",
@@ -788,6 +789,7 @@ void readOptions(Options &opts, int argc, char *argv[],
             }
             opts.autogenVersion = raw["autogen-version"].as<int>();
         }
+        opts.stripeMode = raw["stripe-mode"].as<bool>();
         extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         if (raw.count("error-white-list") > 0) {

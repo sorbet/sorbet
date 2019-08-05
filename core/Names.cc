@@ -72,6 +72,9 @@ string Name::showRaw(const GlobalState &gs) const {
                 case UniqueNameKind::ResolverMissingClass:
                     kind = "R";
                     break;
+                case UniqueNameKind::OpusEnum:
+                    kind = "E";
+                    break;
             }
             if (gs.censorForSnapshotTests && this->unique.uniqueNameKind == UniqueNameKind::Namer &&
                 this->unique.original == core::Names::staticInit()) {
@@ -121,6 +124,10 @@ string Name::show(const GlobalState &gs) const {
                 return absl::StrCat(this->unique.original.data(gs)->show(gs), " (overload.", this->unique.num, ")");
             } else if (this->unique.uniqueNameKind == UniqueNameKind::MangleRename) {
                 return fmt::format("{}${}", this->unique.original.data(gs)->show(gs), this->unique.num);
+            } else if (this->unique.uniqueNameKind == UniqueNameKind::OpusEnum) {
+                // The entire goal of UniqueNameKind::OpusEnum is to have Name::show print the name as if on the
+                // original name, so that our OpusEnum DSL-synthesized class names are kept as an implementation detail.
+                // Thus, we fall through.
             }
             return this->unique.original.data(gs)->show(gs);
         case CONSTANT:
@@ -178,13 +185,15 @@ bool Name::isClassName(const GlobalState &gs) const {
         case UTF8:
             return false;
         case UNIQUE: {
-            return (this->unique.uniqueNameKind == Singleton || this->unique.uniqueNameKind == MangleRename) &&
+            return (this->unique.uniqueNameKind == Singleton || this->unique.uniqueNameKind == MangleRename ||
+                    this->unique.uniqueNameKind == OpusEnum) &&
                    this->unique.original.data(gs)->isClassName(gs);
         }
         case CONSTANT:
             ENFORCE(this->cnst.original.data(gs)->kind == UTF8 ||
                     this->cnst.original.data(gs)->kind == UNIQUE &&
-                        this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass);
+                        (this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                         this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::OpusEnum));
             return true;
         default:
             Exception::notImplemented();

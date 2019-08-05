@@ -5,18 +5,39 @@
 namespace sorbet::dsl {
 
 /**
- * This class makes it easier to use Opus::Enum in `typed: strict` files:
+ * This class provides the following features for Opus::Enum:
+ *
+ * - no need to manually annotate constants in `T.let` for use in strict mode
+ * - support for exhaustiveness checks over enum values (by pretending that
+ *   Opus::Enum values are actually singleton instances of synthetic classes)
+ * - allows using Opus::Enum values in type signatures directly.
+ *
+ * Given:
  *
  *   class MyEnum < Opus::Enum
  *     X = new
  *     Y = new('y')
+ *     Z = T.let(new, Z)
  *   end
  *
- * becomes
+ * Outputs:
  *
  *   class MyEnum < Opus::Enum
- *     X = T.let(new, self)
- *     Y = T.let(new('y'), self)
+ *     extend T::Helpers
+ *     sealed!
+ *     abstract!
+ *
+ *     class X$1 < MyEnum; include Singleton; final!; end
+ *     X = T.let(X$1.instance, X$1)
+ *     new
+ *
+ *     class Y$1 < MyEnum; include Singleton; final!; end
+ *     Y = T.let(Y$1.instance, Y$1)
+ *     new('y')
+ *
+ *     class Z$1 < MyEnum; include Singleton; final!; end
+ *     Z = T.let(Z$1.instance, Z$1)
+ *     T.let(new, Z)
  *   end
  */
 class OpusEnum final {

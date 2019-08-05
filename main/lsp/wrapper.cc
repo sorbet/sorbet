@@ -1,4 +1,5 @@
 #include "wrapper.h"
+#include "core/errors/namer.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
 #include <iostream>
@@ -75,6 +76,11 @@ LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath) {
 
     // If we don't tell the errorQueue to ignore flushes, then we won't get diagnostic messages.
     gs->errorQueue->ignoreFlushes = true;
+    if (!opts.stripeMode) {
+        // Definitions in multiple locations interact poorly with autoloader this error is enforced
+        // in Stripe code.
+        gs->suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
+    }
     instantiate(std::move(gs), logger, disableFastPath);
 }
 
