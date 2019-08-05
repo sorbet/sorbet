@@ -213,6 +213,7 @@ pair<Loc, u4> Loc::findStartOfLine(const GlobalState &gs) const {
 
     size_t padding = lineView.find_first_not_of(" \t");
     if (padding == string::npos) {
+        // if this line didn't have a whitespace prefix, then don't add any padding to it, so startOffset = lineStart.
         padding = 0;
     }
     u4 startOffset = lineStart + padding;
