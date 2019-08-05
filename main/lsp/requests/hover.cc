@@ -24,7 +24,9 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
     return contents;
 }
 
-unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view sigString, string_view docString) {
+unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view sigString,
+                                         optional<string_view> optionalDocString) {
+    string_view docString = optionalDocString.value_or("");
     // Get rid of at most 1 trailing newline
     if (docString.length() > 0 && docString.back() == '\n') {
         docString.remove_suffix(1);
