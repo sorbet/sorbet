@@ -92,7 +92,8 @@ string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
 unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
     unique_ptr<Position> start;
     unique_ptr<Position> end;
-    if (!loc.file().exists()) {
+    if (!loc.exists()) {
+        // this will happen if e.g. we disable the stdlib (e.g. to speed up testing in fuzzers).
         start = make_unique<Position>(1, 1);
         end = make_unique<Position>(2, 0);
     } else {
