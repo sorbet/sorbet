@@ -199,8 +199,8 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                                     if (location == nullptr) {
                                         continue;
                                     }
-                                    relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
-                                        std::move(location), message));
+                                    relatedInformation.push_back(
+                                        make_unique<DiagnosticRelatedInformation>(std::move(location), message));
                                 }
                             }
                             // Add link to error documentation.
