@@ -931,15 +931,16 @@ public:
         if (args.args.empty()) {
             return;
         }
+        const auto loc = args.locs.call;
         if (!args.args[0]->type->isFullyDefined()) {
-            if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::BareTypeUsage)) {
+            if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type->show(ctx));
             }
             return;
         }
         auto ret = Types::approximateSubtract(ctx, args.args[0]->type, Types::nilClass());
         if (ret == args.args[0]->type) {
-            if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::InvalidCast)) {
+            if (auto e = ctx.state.beginError(loc, errors::Infer::InvalidCast)) {
                 e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type->show(ctx));
             }
         }
