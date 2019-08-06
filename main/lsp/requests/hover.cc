@@ -75,21 +75,33 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
         }
 
         auto resp = move(queryResponses[0]);
+
+        optional<string> documentation = nullopt;
+        if (
+                resp->isIdent() || 
+                resp->isLiteral() || 
+                resp->isConstant() || 
+                resp->isDefinition()) {
+            auto loc = resp->getTypeAndOrigins().origins[0];
+            documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
+        }
+
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
             // TODO main.method is <none> when calling .new on a class.
-            auto methodDefLoc = sendResp->dispatchResult->main.method.data(*gs)->loc();
+            auto loc = sendResp->dispatchResult->main.method.data(*gs)->loc();
+            documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
             auto &constraint = sendResp->dispatchResult->main.constr;
             if (constraint) {
                 retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
             }
             response->result = make_unique<Hover>(formatRubyCode(
                 clientHoverMarkupKind, methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint),
-                findDocumentation(methodDefLoc.file().data(*gs).source(), methodDefLoc.beginPos())));
+                documentation));
         } else if (auto defResp = resp->isDefinition()) {
             response->result = make_unique<Hover>(formatRubyCode(
                 clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr),
-                findDocumentation(defResp->termLoc.file().data(*gs).source(), defResp->termLoc.beginPos())));
+                documentation));
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(*gs);
             auto type = constResp->retType.type;
@@ -106,7 +118,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             }
             response->result = make_unique<Hover>(formatRubyCode(
                 clientHoverMarkupKind, type->showWithMoreInfo(*gs),
-                findDocumentation(constResp->termLoc.file().data(*gs).source(), constResp->termLoc.beginPos())));
+                documentation));
         } else {
             response->result = make_unique<Hover>(
                 formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), ""));
