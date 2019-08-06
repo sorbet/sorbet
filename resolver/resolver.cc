@@ -1206,6 +1206,7 @@ private:
                         if (auto e =
                                 ctx.state.beginError(mdef->rhs->loc, core::errors::Resolver::AbstractMethodWithBody)) {
                             e.setHeader("Abstract methods must not contain any code in their body");
+                            e.replaceWith("Delete the body", mdef->rhs->loc, "");
                         }
 
                         mdef->rhs = ast::MK::EmptyTree();
