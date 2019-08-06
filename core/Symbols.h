@@ -583,6 +583,11 @@ public:
     NameRef name;         // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
 
+    bool hasSig() const {
+        ENFORCE(isMethod());
+        return resultType != nullptr;
+    }
+
     UnorderedMap<NameRef, SymbolRef> members_;
     std::vector<ArgInfo> arguments_;
 
