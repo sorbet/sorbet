@@ -38,11 +38,8 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     auto kind = symbolRef2SymbolKind(gs, symRef);
     // TODO: this range should cover body. Currently it doesn't.
     auto range = loc2Range(gs, sym->loc());
-    if (range == nullptr) {
-        return nullptr;
-    }
     auto selectionRange = loc2Range(gs, sym->loc());
-    if (selectionRange == nullptr) {
+    if (range == nullptr || selectionRange == nullptr) {
         return nullptr;
     }
 
