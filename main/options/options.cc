@@ -271,7 +271,8 @@ DslConfiguration extractDslPlugins(string filePath, shared_ptr<spdlog::logger> l
     return {triggers, extractExtraSubprocessOptions(config, filePath, logger)};
 }
 
-cxxopts::Options buildOptions() {
+cxxopts::Options
+buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders) {
     // Used to populate default options.
     Options empty;
 
@@ -455,6 +456,10 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("metrics-repo", "Repo to report in metrics export",
                                cxxopts::value<string>()->default_value(empty.metricsRepo), "repo");
 
+    for (auto &provider : semanticExtensionProviders) {
+        provider->injectOptions(options);
+    }
+
     // Positional params
     options.parse_positional("files");
     options.positional_help("<path 1> <path 2> ...");
@@ -588,10 +593,13 @@ void addFilesFromDir(Options &opts, string_view dir) {
                                std::make_move_iterator(containedFiles.end()));
 }
 
-void readOptions(Options &opts, int argc, char *argv[],
+void readOptions(Options &opts,
+                 vector<unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions, int argc,
+                 char *argv[],
+                 const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     Timer timeit(*logger, "readOptions");
-    cxxopts::Options options = buildOptions();
+    cxxopts::Options options = buildOptions(semanticExtensionProviders);
     try {
         cxxopts::ParseResult raw = ConfigParser::parseConfig(logger, argc, argv, options);
         if (raw["simulate-crash"].as<bool>()) {
@@ -855,6 +863,13 @@ void readOptions(Options &opts, int argc, char *argv[],
             auto dslConfig = extractDslPlugins(raw["dsl-plugins"].as<string>(), logger);
             opts.dslPluginTriggers = std::move(dslConfig.triggers);
             opts.dslRubyExtraArgs = std::move(dslConfig.rubyExtraArgs);
+        }
+
+        for (auto &provider : semanticExtensionProviders) {
+            auto maybeExtension = provider->readOptions(raw);
+            if (maybeExtension) {
+                configuredExtensions.emplace_back(move(maybeExtension));
+            }
         }
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}. To see all available options pass `--help`.", e.what());

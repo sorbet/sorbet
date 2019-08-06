@@ -90,18 +90,14 @@ string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
 } // namespace sorbet::realmain::lsp
 
 unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
-    unique_ptr<Position> start;
-    unique_ptr<Position> end;
-    if (!loc.file().exists()) {
-        start = make_unique<Position>(1, 1);
-        end = make_unique<Position>(2, 0);
-    } else {
-        auto pair = loc.position(gs);
-        // All LSP numbers are zero-based, ours are 1-based.
-        start = make_unique<Position>(pair.first.line - 1, pair.first.column - 1);
-        end = make_unique<Position>(pair.second.line - 1, pair.second.column - 1);
+    if (!loc.exists()) {
+        // this will happen if e.g. we disable the stdlib (e.g. to speed up testing in fuzzers).
+        return nullptr;
     }
-    return make_unique<Range>(move(start), move(end));
+    auto pair = loc.position(gs);
+    // All LSP numbers are zero-based, ours are 1-based.
+    return make_unique<Range>(make_unique<Position>(pair.first.line - 1, pair.first.column - 1),
+                              make_unique<Position>(pair.second.line - 1, pair.second.column - 1));
 }
 
 unique_ptr<core::Loc> range2Loc(const core::GlobalState &gs, const Range &range, core::FileRef file) {
@@ -119,6 +115,10 @@ unique_ptr<core::Loc> range2Loc(const core::GlobalState &gs, const Range &range,
 }
 
 unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) {
+    auto range = loc2Range(gs, loc);
+    if (range == nullptr) {
+        return nullptr;
+    }
     string uri = fileRef2Uri(gs, loc.file());
     if (loc.file().exists() && loc.file().data(gs).isPayload() && !enableSorbetURIs) {
         // This is hacky because VSCode appends #4,3 (or whatever the position is of the
@@ -136,7 +136,7 @@ unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Lo
         // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
         uri = fmt::format("{}#L{}", uri, loc.position(gs).first.line);
     }
-    return make_unique<Location>(uri, loc2Range(gs, loc));
+    return make_unique<Location>(uri, std::move(range));
 }
 
 int cmpPositions(const Position &a, const Position &b) {

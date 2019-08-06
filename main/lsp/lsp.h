@@ -151,6 +151,7 @@ class LSPLoop {
     /* Send the given message to client */
     void sendMessage(const LSPMessage &msg);
 
+    // returns nullptr if this loc doesn't exist
     std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc);
     void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc);
     std::vector<std::unique_ptr<Location>>
@@ -284,6 +285,7 @@ std::string methodDetail(const core::GlobalState &gs, core::SymbolRef method, co
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const std::unique_ptr<core::TypeConstraint> &constr);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef);
+// returns nullptr if this loc doesn't exist
 std::unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc);
 std::unique_ptr<core::Loc> range2Loc(const core::GlobalState &gs, const Range &range, core::FileRef file);
 int cmpPositions(const Position &a, const Position &b);

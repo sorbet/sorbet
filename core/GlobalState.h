@@ -9,6 +9,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/lsp/Query.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <memory>
 
 namespace sorbet::core {
@@ -185,6 +186,8 @@ public:
     void addDslPlugin(std::string_view method, std::string_view command);
     std::optional<std::string_view> findDslPlugin(NameRef method) const;
     bool hasAnyDslPlugin() const;
+
+    std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
 
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;

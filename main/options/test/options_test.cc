@@ -7,12 +7,15 @@
 
 // Default constructor of options should produce the same default option values as readOptions.
 TEST(OptionsTest, DefaultConstructorMatchesReadOptions) {
+    std::vector<sorbet::pipeline::semantic_extension::SemanticExtensionProvider *> extensionProviders;
+    std::vector<std::unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
     sorbet::realmain::options::Options empty;
     sorbet::realmain::options::Options opts;
     const char *argv[] = {"sorbet", "-e", ""};
     auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
     auto logger = std::make_shared<spdlog::logger>("null", sink);
-    sorbet::realmain::options::readOptions(opts, std::size(argv), const_cast<char **>(argv), logger);
+    sorbet::realmain::options::readOptions(opts, extensions, std::size(argv), const_cast<char **>(argv),
+                                           extensionProviders, logger);
 
     // Check that both options objects have same field values.
     // NOTE: Add your field here if you add a new field to Options.

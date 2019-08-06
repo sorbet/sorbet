@@ -17,6 +17,7 @@
 #include "dsl/Rails.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 
 using namespace std;
 
@@ -58,7 +59,17 @@ public:
                 },
 
                 [&](ast::Send *send) {
-                    auto nodes = MixinEncryptedProp::replaceDSL(ctx, send);
+                    vector<unique_ptr<ast::Expression>> nodes;
+
+                    for (auto &extension : ctx.state.semanticExtensions) {
+                        nodes = extension->replaceDSL(ctx.state, send);
+                        if (!nodes.empty()) {
+                            replaceNodes[stat.get()] = std::move(nodes);
+                            return;
+                        }
+                    }
+
+                    nodes = MixinEncryptedProp::replaceDSL(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;

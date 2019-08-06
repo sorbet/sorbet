@@ -124,6 +124,9 @@ unique_ptr<Position> detailToPosition(const core::Loc::Detail &detail) {
 
 /** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
 unique_ptr<Diagnostic> errorToDiagnostic(core::GlobalState &gs, const core::Error &error) {
+    if (!error.loc.exists()) {
+        return nullptr;
+    }
     auto position = error.loc.position(gs);
     auto range = make_unique<Range>(detailToPosition(position.first), detailToPosition(position.second));
     return make_unique<Diagnostic>(move(range), error.header);
@@ -148,7 +151,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     core::GlobalState gs(errorQueue);
     gs.censorForSnapshotTests = true;
     auto workers = WorkerPool::create(0, gs.tracer());
-    core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+        gs.initEmpty();
+    } else {
+        core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+    }
     core::MutableContext ctx(gs, core::Symbols::root());
     // Parser
     vector<core::FileRef> files;
@@ -449,15 +458,17 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     // Check warnings and errors
     {
-        auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
-
         map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
         for (auto &error : errors) {
             if (error->isSilenced) {
                 continue;
             }
+            auto diag = errorToDiagnostic(gs, *error);
+            if (diag == nullptr) {
+                continue;
+            }
             auto path = error->loc.file().data(gs).path();
-            diagnostics[string(path.begin(), path.end())].push_back(errorToDiagnostic(gs, *error));
+            diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }

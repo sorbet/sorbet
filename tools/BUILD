@@ -47,6 +47,7 @@ compilation_database(
         "//emscripten:main",
         "//payload/text:empty",
         "//payload/binary:some",
+        "//main/pipeline/semantic_extension:none",
         "//main:realmain",
         "//main/lsp:lsp",
         "//payload:interface",
@@ -89,6 +90,7 @@ compilation_database(
         "//ast/treemap:treemap",
         "//ast:ast",
         "//core:core",
+        "//main/pipeline/semantic_extension:interface",
         "//common/concurrency:concurrency",
         "//common:common",
         # END compile_commands targets

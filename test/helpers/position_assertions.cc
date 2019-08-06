@@ -30,6 +30,7 @@ const UnorderedMap<
         {"assert-slow-path", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
         {"apply-code-action", ApplyCodeActionAssertion::make},
+        {"no-stdlib", BooleanPropertyAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
