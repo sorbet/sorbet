@@ -190,8 +190,9 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
                 e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
             }
         }
-        if (!method.data(gs)->isImplementation() && !method.data(gs)->isOverride() && method.data(gs)->hasSig() && overridenMethod.data(gs)->isAbstract() &&
-            overridenMethod.data(gs)->hasSig() && !method.data(gs)->isDSLSynthesized() && !isRBI) {
+        if (!method.data(gs)->isImplementation() && !method.data(gs)->isOverride() && method.data(gs)->hasSig() &&
+            overridenMethod.data(gs)->isAbstract() && overridenMethod.data(gs)->hasSig() &&
+            !method.data(gs)->isDSLSynthesized() && !isRBI) {
             if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
                             method.data(gs)->show(gs), overridenMethod.data(gs)->show(gs), ".implementation");
