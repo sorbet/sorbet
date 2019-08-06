@@ -31,7 +31,7 @@ T.reveal_type(MyEnum::Z) # error: Revealed type: `MyEnum::Z`
 
 class NotAnEnum
   X = new # error: Constants must have type annotations
-    # ^^^ error: Suggested type: `NotAnEnum`
+    # ^^^ error: Suggested type for constant without type annotation: `NotAnEnum`
   Y = T.let(new, self)
 end
 

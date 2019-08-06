@@ -1579,11 +1579,11 @@ class Magic_suggestUntypedConstantType : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 1);
-        auto ty = args.args.front()->type;
+        auto ty = core::Types::widen(ctx, args.args.front()->type);
         auto loc = args.locs.args[0];
         if (!ty->isUntyped()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
-                e.setHeader("Suggested type: `{}`", ty->show(ctx));
+                e.setHeader("Suggested type for constant without type annotation: `{}`", ty->show(ctx));
                 e.replaceWith(fmt::format("Initialize as `{}`", ty->show(ctx)), loc, "T.let({}, {})", loc.source(ctx),
                               ty->show(ctx));
             }
