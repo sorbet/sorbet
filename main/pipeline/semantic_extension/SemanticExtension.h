@@ -15,6 +15,7 @@ class GlobalSubstitution;
 
 namespace ast {
 class Send;
+class MethodDef;
 class Expression;
 } // namespace ast
 
@@ -25,7 +26,7 @@ class CFG;
 namespace pipeline::semantic_extension {
 class SemanticExtension {
 public:
-    virtual void typecheck(const core::GlobalState &, cfg::CFG &) const = 0;
+    virtual void typecheck(const core::GlobalState &, cfg::CFG &, std::unique_ptr<ast::MethodDef> &) const = 0;
     virtual std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::GlobalState &, ast::Send *) const = 0;
     virtual ~SemanticExtension() = 0;
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) = 0;

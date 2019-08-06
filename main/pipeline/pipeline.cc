@@ -59,7 +59,7 @@ public:
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
         if (cfg) {
             for (auto &extension : ctx.state.semanticExtensions) {
-                extension->typecheck(ctx.state, *cfg);
+                extension->typecheck(ctx.state, *cfg, m);
             }
         }
         if (print.CFG.enabled) {
