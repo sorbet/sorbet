@@ -5,8 +5,9 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Location>> &locs, core::Loc loc) {
-    if (loc.file().exists()) {
-        locs.push_back(loc2Location(gs, loc));
+    auto location = loc2Location(gs, loc);
+    if (location != nullptr) {
+        locs.push_back(std::move(location));
     }
 }
 
