@@ -9,4 +9,9 @@ class C
   def ret_nil
     nil
   end
+
+  sig {returns(Array[Integer])}
+  def ret_arr
+    []
+  end
 end
