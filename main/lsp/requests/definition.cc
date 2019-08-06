@@ -32,7 +32,7 @@ LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs
                     addLocIfExists(*gs, result, originLoc);
                 }
             } else if (fileIsTyped && resp->isDefinition()) {
-                result.push_back(loc2Location(*gs, resp->isDefinition()->termLoc));
+                addLocIfExists(*gs, result, resp->isDefinition()->termLoc);
             } else if (fileIsTyped && resp->isSend()) {
                 auto sendResp = resp->isSend();
                 auto start = sendResp->dispatchResult.get();
