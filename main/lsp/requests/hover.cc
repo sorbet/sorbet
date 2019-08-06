@@ -43,10 +43,14 @@ unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view sigS
         absl::StrAppend(&content, "\n");
 
     // Add sig
+    string formattedSigString = "";
     if (markupKind == MarkupKind::Markdown && sigString.length() > 0) {
-        sigString = fmt::format("```ruby\n{}\n```", sigString);
+        formattedSigString = fmt::format("```ruby\n{}\n```", sigString);
+        cout << "DBG new sigString: " << formattedSigString << endl;
+    } else {
+        absl::StrAppend(&formattedSigString, sigString);
     }
-    absl::StrAppend(&content, sigString);
+    absl::StrAppend(&content, formattedSigString);
 
     // Add newline at the end if needed
     if (content.length() > 0 && content.back() == '\n')
