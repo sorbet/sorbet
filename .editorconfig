@@ -1,0 +1,29 @@
+root = true
+
+[*]
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[Makefile]
+indent_style = tab
+
+[*.{c,h,cpp,hpp}]
+indent_size = 2
+
+[**.js]
+indent_style = space
+indent_size = 2
+
+[**.css]
+indent_style = tab
+indent_size = 2
+
+[**.rb]
+indent_style = space
+indent_size = 2
+
+[**.html]
+indent_style = tab
+indent_size = 2
