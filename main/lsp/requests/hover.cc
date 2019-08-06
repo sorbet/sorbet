@@ -46,7 +46,6 @@ unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view sigS
     string formattedSigString = "";
     if (markupKind == MarkupKind::Markdown && sigString.length() > 0) {
         formattedSigString = fmt::format("```ruby\n{}\n```", sigString);
-        cout << "DBG new sigString: " << formattedSigString << endl;
     } else {
         absl::StrAppend(&formattedSigString, sigString);
     }
