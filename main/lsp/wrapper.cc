@@ -1,4 +1,5 @@
 #include "wrapper.h"
+#include "core/errors/namer.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
 #include <iostream>
@@ -61,7 +62,8 @@ void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared
                                    disableFastPath);
 }
 
-LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath) {
+LSPWrapper::LSPWrapper(options::Options &&options, std::string_view rootPath, bool disableFastPath)
+    : opts(std::move(options)) {
     opts.rawInputDirNames.emplace_back(rootPath);
 
     // All of this stuff is ignored by LSP, but we need it to construct ErrorQueue/GlobalState.
@@ -75,8 +77,16 @@ LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath) {
 
     // If we don't tell the errorQueue to ignore flushes, then we won't get diagnostic messages.
     gs->errorQueue->ignoreFlushes = true;
+    if (!opts.stripeMode) {
+        // Definitions in multiple locations interact poorly with autoloader this error is enforced
+        // in Stripe code.
+        gs->suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
+    }
     instantiate(std::move(gs), logger, disableFastPath);
 }
+
+LSPWrapper::LSPWrapper(string_view rootPath, bool disableFastPath)
+    : LSPWrapper(options::Options(), rootPath, disableFastPath) {}
 
 LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, options::Options &&options,
                        const shared_ptr<spdlog::logger> &logger, bool disableFastPath)

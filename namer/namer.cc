@@ -387,6 +387,19 @@ public:
             ctx.state.staticInitForClass(klass->symbol, klass->loc);
         }
 
+        if (klass->symbol != core::Symbols::root() && !klass->declLoc.file().data(ctx).isRBI() &&
+            ast::BehaviorHelpers::checkClassDefinesBehavior(klass)) {
+            // TODO(dmitry) This won't find errors in fast-incremental mode.
+            auto prevLoc = classBehaviorLocs.find(klass->symbol);
+            if (prevLoc == classBehaviorLocs.end()) {
+                classBehaviorLocs[klass->symbol] = klass->declLoc;
+            } else if (prevLoc->second.file() != klass->declLoc.file()) {
+                if (auto e = ctx.state.beginError(klass->declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
+                    e.setHeader("`{}` has behavior defined in multiple files", klass->symbol.data(ctx)->show(ctx));
+                    e.addErrorLine(prevLoc->second, "Previous definition");
+                }
+            }
+        }
         return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
     }
 
@@ -888,18 +901,31 @@ public:
     }
 
 private:
-    NameInserter() {
-        enterScope();
-    }
+    UnorderedMap<core::SymbolRef, core::Loc> classBehaviorLocs;
 };
 
-ast::ParsedFile Namer::run(core::MutableContext ctx, ast::ParsedFile tree) {
+std::vector<ast::ParsedFile> Namer::run(core::MutableContext ctx, std::vector<ast::ParsedFile> trees) {
     NameInserter nameInserter;
-    tree.tree = ast::TreeMap::apply(ctx, nameInserter, std::move(tree.tree));
-    // This check is FAR too slow to run on large codebases, especially with sanitizers on.
-    // But it can be super useful to uncomment when debugging certain issues.
-    // ctx.state.sanityCheck();
-    return tree;
+    for (auto &tree : trees) {
+        auto file = tree.file;
+        nameInserter.enterScope();
+        try {
+            ast::ParsedFile ast;
+            {
+                Timer timeit(ctx.state.tracer(), "naming", {{"file", (string)file.data(ctx).path()}});
+                core::ErrorRegion errs(ctx.state, file);
+                tree.tree = ast::TreeMap::apply(ctx, nameInserter, std::move(tree.tree));
+            }
+        } catch (SorbetException &) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.state.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
+                e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(ctx).path());
+            }
+        }
+        nameInserter.exitScope();
+        ENFORCE(nameInserter.scopeStack.empty());
+    }
+    return trees;
 }
 
 }; // namespace sorbet::namer

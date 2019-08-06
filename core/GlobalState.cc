@@ -280,6 +280,10 @@ void GlobalState::initEmpty() {
     id = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
     ENFORCE(id == Symbols::Singleton());
 
+    id = enterClassSymbol(Loc::none(), Symbols::Opus(), core::Names::Constants::Enum());
+    id.data(*this)->setIsModule(false);
+    ENFORCE(id == Symbols::OpusEnum());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
@@ -821,7 +825,8 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
     ENFORCE(original.data(*this)->kind == UTF8 ||
                 (original.data(*this)->kind == UNIQUE &&
-                 original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass),
+                 (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::OpusEnum)),
             "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(CONSTANT, original.id());

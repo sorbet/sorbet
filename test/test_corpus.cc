@@ -148,7 +148,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     core::GlobalState gs(errorQueue);
     gs.censorForSnapshotTests = true;
     auto workers = WorkerPool::create(0, gs.tracer());
-    core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+        gs.initEmpty();
+    } else {
+        core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+    }
     core::MutableContext ctx(gs, core::Symbols::root());
     // Parser
     vector<core::FileRef> files;
@@ -262,7 +268,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         {
             core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-            namedTree = testSerialize(gs, namer::Namer::run(ctx, move(localNamed)));
+            vector<ast::ParsedFile> vTmp;
+            vTmp.emplace_back(move(localNamed));
+            vTmp = namer::Namer::run(ctx, move(vTmp));
+            namedTree = testSerialize(gs, move(vTmp[0]));
         }
 
         expectation = test.expectations.find("name-tree");
@@ -446,8 +455,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     // Check warnings and errors
     {
-        auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
-
         map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
         for (auto &error : errors) {
             if (error->isSilenced) {
