@@ -297,8 +297,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
 
                     auto nil = ast::cast_tree<ast::Literal>(send->args[0].get());
                     if (nil && nil->isNil(ctx)) {
-                        if (auto e = ctx.state.beginError(send->args[0]->loc,
-                                                          core::errors::Resolver::InvalidMethodSignature)) {
+                        const auto loc = send->args[0]->loc;
+                        if (auto e = ctx.state.beginError(loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("You probably meant .returns(NilClass)");
                         }
                         sig.returns = core::Types::nilClass();
