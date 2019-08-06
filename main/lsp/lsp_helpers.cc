@@ -96,9 +96,8 @@ unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
     }
     auto pair = loc.position(gs);
     // All LSP numbers are zero-based, ours are 1-based.
-    auto start = make_unique<Position>(pair.first.line - 1, pair.first.column - 1);
-    auto end = make_unique<Position>(pair.second.line - 1, pair.second.column - 1);
-    return make_unique<Range>(move(start), move(end));
+    return make_unique<Range>(make_unique<Position>(pair.first.line - 1, pair.first.column - 1),
+                              make_unique<Position>(pair.second.line - 1, pair.second.column - 1));
 }
 
 unique_ptr<core::Loc> range2Loc(const core::GlobalState &gs, const Range &range, core::FileRef file) {
