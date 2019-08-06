@@ -308,6 +308,7 @@ public:
             if (klass->kind == ast::Class) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
+                    e.replaceWith("Change `interface!` to `abstract!`", send->loc, "abstract!");
                 }
             }
         }
