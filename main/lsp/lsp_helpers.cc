@@ -136,7 +136,11 @@ unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Lo
         // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
         uri = fmt::format("{}#L{}", uri, loc.position(gs).first.line);
     }
-    return make_unique<Location>(uri, loc2Range(gs, loc));
+    auto range = loc2Range(gs, loc);
+    if (range == nullptr) {
+        return nullptr;
+    }
+    return make_unique<Location>(uri, std::move(range));
 }
 
 int cmpPositions(const Position &a, const Position &b) {

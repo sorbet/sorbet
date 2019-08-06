@@ -175,7 +175,11 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                 // diagnostics
                 if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
                     for (auto &e : errorsAccumulated[file]) {
-                        auto diagnostic = make_unique<Diagnostic>(loc2Range(gs, e->loc), e->header);
+                        auto range = loc2Range(gs, e->loc);
+                        if (range == nullptr) {
+                            continue;
+                        }
+                        auto diagnostic = make_unique<Diagnostic>(std::move(range), e->header);
                         diagnostic->code = e->what.code;
                         diagnostic->severity = DiagnosticSeverity::Error;
 
@@ -191,8 +195,12 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                                     } else {
                                         message = sectionHeader;
                                     }
+                                    auto location = loc2Location(gs, errorLine.loc);
+                                    if (location == nullptr) {
+                                        continue;
+                                    }
                                     relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
-                                        loc2Location(gs, errorLine.loc), message));
+                                        std::move(location), message));
                                 }
                             }
                             // Add link to error documentation.

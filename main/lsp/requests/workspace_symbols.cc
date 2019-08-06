@@ -12,8 +12,12 @@ unique_ptr<SymbolInformation> LSPLoop::symbolRef2SymbolInformation(const core::G
         return nullptr;
     }
 
+    auto location = loc2Location(gs, sym->loc());
+    if (location == nullptr) {
+        return nullptr;
+    }
     auto result = make_unique<SymbolInformation>(sym->name.show(gs), symbolRef2SymbolKind(gs, symRef),
-                                                 loc2Location(gs, sym->loc()));
+                                                 std::move(location));
     result->containerName = sym->owner.data(gs)->showFullName(gs);
     return result;
 }
