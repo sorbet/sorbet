@@ -300,6 +300,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                         const auto loc = send->args[0]->loc;
                         if (auto e = ctx.state.beginError(loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("You probably meant `.returns(NilClass)`");
+                            e.replaceWith("Replace with `NilClass`", loc, "NilClass");
                         }
                         sig.returns = core::Types::nilClass();
                         break;
