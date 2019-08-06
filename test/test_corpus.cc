@@ -124,6 +124,9 @@ unique_ptr<Position> detailToPosition(const core::Loc::Detail &detail) {
 
 /** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
 unique_ptr<Diagnostic> errorToDiagnostic(core::GlobalState &gs, const core::Error &error) {
+    if (!error.loc.exists()) {
+        return nullptr;
+    }
     auto position = error.loc.position(gs);
     auto range = make_unique<Range>(detailToPosition(position.first), detailToPosition(position.second));
     return make_unique<Diagnostic>(move(range), error.header);
@@ -460,8 +463,12 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             if (error->isSilenced) {
                 continue;
             }
+            auto diag = errorToDiagnostic(gs, *error);
+            if (diag == nullptr) {
+                continue;
+            }
             auto path = error->loc.file().data(gs).path();
-            diagnostics[string(path.begin(), path.end())].push_back(errorToDiagnostic(gs, *error));
+            diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
