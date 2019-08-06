@@ -299,7 +299,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     if (nil && nil->isNil(ctx)) {
                         const auto loc = send->args[0]->loc;
                         if (auto e = ctx.state.beginError(loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("You probably meant .returns(NilClass)");
+                            e.setHeader("You probably meant `.returns(NilClass)`");
                         }
                         sig.returns = core::Types::nilClass();
                         break;
