@@ -181,15 +181,23 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
                 e.addErrorLine(overridenMethod.data(gs)->loc(), "original method defined here");
             }
         }
+        auto isRBI = absl::c_any_of(method.data(gs)->locs(), [&](auto &loc) { return loc.file().data(gs).isRBI(); });
         if (!method.data(gs)->isOverride() && method.data(gs)->hasSig() && overridenMethod.data(gs)->isOverridable() &&
-            overridenMethod.data(gs)->hasSig() && !method.data(gs)->isDSLSynthesized()) {
+            overridenMethod.data(gs)->hasSig() && !method.data(gs)->isDSLSynthesized() && !isRBI) {
             if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
                             method.data(gs)->show(gs), overridenMethod.data(gs)->show(gs), ".override");
                 e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
             }
         }
-        auto isRBI = absl::c_any_of(method.data(gs)->locs(), [&](auto &loc) { return loc.file().data(gs).isRBI(); });
+        if (!method.data(gs)->isImplementation() && !method.data(gs)->isOverride() && method.data(gs)->hasSig() && overridenMethod.data(gs)->isAbstract() &&
+            overridenMethod.data(gs)->hasSig() && !method.data(gs)->isDSLSynthesized() && !isRBI) {
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::UndeclaredOverride)) {
+                e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
+                            method.data(gs)->show(gs), overridenMethod.data(gs)->show(gs), ".implementation");
+                e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
+            }
+        }
         if ((overridenMethod.data(gs)->isAbstract() || overridenMethod.data(gs)->isOverridable()) &&
             !method.data(gs)->isIncompatibleOverride() && !isRBI && !method.data(gs)->isDSLSynthesized()) {
             validateCompatibleOverride(gs, overridenMethod, method);
