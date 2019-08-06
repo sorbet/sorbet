@@ -94,8 +94,7 @@ unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
     unique_ptr<Position> end;
     if (!loc.exists()) {
         // this will happen if e.g. we disable the stdlib (e.g. to speed up testing in fuzzers).
-        start = make_unique<Position>(1, 1);
-        end = make_unique<Position>(2, 0);
+        return nullptr;
     } else {
         auto pair = loc.position(gs);
         // All LSP numbers are zero-based, ours are 1-based.
