@@ -119,6 +119,10 @@ unique_ptr<core::Loc> range2Loc(const core::GlobalState &gs, const Range &range,
 }
 
 unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) {
+    auto range = loc2Range(gs, loc);
+    if (range == nullptr) {
+        return nullptr;
+    }
     string uri = fileRef2Uri(gs, loc.file());
     if (loc.file().exists() && loc.file().data(gs).isPayload() && !enableSorbetURIs) {
         // This is hacky because VSCode appends #4,3 (or whatever the position is of the
@@ -135,10 +139,6 @@ unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Lo
         // but shows you the same thing as
         // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
         uri = fmt::format("{}#L{}", uri, loc.position(gs).first.line);
-    }
-    auto range = loc2Range(gs, loc);
-    if (range == nullptr) {
-        return nullptr;
     }
     return make_unique<Location>(uri, std::move(range));
 }
