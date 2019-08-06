@@ -836,7 +836,17 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                     tp.origins.emplace_back(symbol.data(ctx)->loc());
                 } else if (data->isField() || (data->isStaticField() && !data->isTypeAlias()) || data->isTypeMember()) {
                     if (data->resultType.get() != nullptr) {
-                        if (data->isField()) {
+                        if (data->isTypeMember()) {
+                            if (data->isFixed()) {
+                                // pick the upper bound here, as
+                                // isFixed() => lowerBound == upperBound.
+                                auto lambdaParam = core::cast_type<core::LambdaParam>(data->resultType.get());
+                                ENFORCE(lambdaParam != nullptr);
+                                tp.type = lambdaParam->upperBound;
+                            } else {
+                                tp.type = core::make_type<core::SelfTypeParam>(symbol);
+                            }
+                        } else if (data->isField()) {
                             tp.type = core::Types::resultTypeAsSeenFrom(
                                 ctx, symbol.data(ctx)->resultType, symbol.data(ctx)->owner,
                                 ctx.owner.data(ctx)->enclosingClass(ctx),

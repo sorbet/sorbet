@@ -781,6 +781,15 @@ public:
             ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
         }
         auto sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
+
+        // Ensure that every type member has a LambdaParam with bounds, but give
+        // both bounds as T.untyped. The reason for this is that the bounds will
+        // be fixed up in the resolver, but if the type is used out of order (as
+        // in test/testdata/todo/fixed_ordering.rb) `T.untyped` will be used for
+        // the value of the type, instead of `<any>`
+        auto untyped = core::Types::untyped(ctx, sym);
+        sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, untyped, untyped);
+
         if (isTypeTemplate) {
             auto context = ctx.owner.data(ctx)->enclosingClass(ctx);
             oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
@@ -800,6 +809,10 @@ public:
             auto *hash = ast::cast_tree<ast::Hash>(send->args.back().get());
             if (hash) {
                 int i = -1;
+
+                bool fixed = false;
+                bool bounded = false;
+
                 for (auto &keyExpr : hash->keys) {
                     i++;
                     auto key = ast::cast_tree<ast::Literal>(keyExpr.get());
@@ -807,51 +820,38 @@ public:
                     if (key != nullptr && key->isSymbol(ctx)) {
                         switch (key->asSymbol(ctx)._id) {
                             case core::Names::fixed()._id:
-                                // Leave it in the tree for the resolver to chew on.
                                 sym.data(ctx)->setFixed();
+                                fixed = true;
+                                break;
 
-                                // TODO(nelhage): This creates an order
-                                // dependency in the resolver. See RUBYPLAT-520
-                                sym.data(ctx)->resultType = core::Types::untyped(ctx, sym);
-
-                                asgn->lhs = ast::MK::Constant(asgn->lhs->loc, sym);
-                                continue;
-
-                            // intentionally falling through here
                             case core::Names::lower()._id:
                             case core::Names::upper()._id:
-                                sym.data(ctx)->setBounded();
+                                bounded = true;
                                 break;
                         }
                     }
                 }
 
-                const bool fixed = sym.data(ctx)->isFixed();
-                const bool bounded = sym.data(ctx)->isBounded();
-
-                // For now, bounded type members are not supported
-                if (bounded) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Only `{}` type members are supported", ":fixed");
-                    }
-                }
-
-                // one of :fixed or bounds were provided
+                // one of fixed or bounds were provided
                 if (fixed != bounded) {
+                    asgn->lhs = ast::MK::Constant(asgn->lhs->loc, sym);
+
+                    // Leave it in the tree for the resolver to chew on.
                     return asgn;
                 } else if (fixed) {
-                    // both :fixed and bounds were specified
+                    // both fixed and bounds were specified
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Type member is defined with bounds and `{}`", ":fixed");
+                        e.setHeader("Type member is defined with bounds and `{}`", "fixed");
                     }
                 } else {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Missing required param :fixed");
+                        e.setHeader("Missing required param `{}`", "fixed");
                     }
                 }
             }
         }
-        return make_unique<ast::EmptyTree>();
+
+        return asgn;
     }
 
     unique_ptr<ast::Expression> handleAssignment(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {

@@ -47,6 +47,8 @@ class IgnoredUsages
 end
 
 class EnumerableUsage
+  extend T::Generic
+
   include Enumerable
 
   Elem = type_member

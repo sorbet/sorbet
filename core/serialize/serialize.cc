@@ -317,6 +317,8 @@ void SerializerImpl::pickle(Pickler &p, Type *what) {
         p.putU4(alias->symbol._id);
     } else if (auto *lp = cast_type<LambdaParam>(what)) {
         p.putU4(8);
+        pickle(p, lp->lowerBound.get());
+        pickle(p, lp->upperBound.get());
         p.putU4(lp->definition._id);
     } else if (auto *at = cast_type<AppliedType>(what)) {
         p.putU4(9);
@@ -395,7 +397,9 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
         case 7:
             return make_type<AliasType>(SymbolRef(gs, p.getU4()));
         case 8: {
-            return make_type<LambdaParam>(SymbolRef(gs, p.getU4()));
+            auto lower = unpickleType(p, gs);
+            auto upper = unpickleType(p, gs);
+            return make_type<LambdaParam>(SymbolRef(gs, p.getU4()), lower, upper);
         }
         case 9: {
             SymbolRef klass(gs, p.getU4());

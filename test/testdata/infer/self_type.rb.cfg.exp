@@ -149,7 +149,7 @@ subgraph "cluster_::<Class:Generic>#<static-init>" {
     "bb::<Class:Generic>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Generic>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(Generic) = cast(<self>: NilClass, T.class_of(Generic));\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(Generic).sig()\l<selfRestore>$6: T.class_of(Generic) = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<C TM>$4: Generic::TM = alias <C TM>\l<self>: T.class_of(Generic) = cast(<self>: NilClass, T.class_of(Generic));\l<C TM>$4: T.untyped = <self>: T.class_of(Generic).type_member()\l<block-pre-call-temp>$8: Sorbet::Private::Static::Void = <self>: T.class_of(Generic).sig()\l<selfRestore>$9: T.class_of(Generic) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_0" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
@@ -159,19 +159,19 @@ subgraph "cluster_::<Class:Generic>#<static-init>" {
 
     "bb::<Class:Generic>#<static-init>_1" -> "bb::<Class:Generic>#<static-init>_1" [style="bold"];
     "bb::<Class:Generic>#<static-init>_2" [
-        label = "block[id=2](<self>: T.class_of(Generic), <selfRestore>$6: T.class_of(Generic))\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2](<self>: T.class_of(Generic), <selfRestore>$9: T.class_of(Generic))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_2" -> "bb::<Class:Generic>#<static-init>_5" [style="bold"];
     "bb::<Class:Generic>#<static-init>_2" -> "bb::<Class:Generic>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Generic>#<static-init>_3" [
-        label = "block[id=3](<selfRestore>$6: T.class_of(Generic))\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<sig>\l<statTemp>$17: T.class_of(Sorbet::Private::Static) = alias <C Static>\lkeep_for_ide$19: T.class_of(T) = alias <C T>\l<statTemp>$18: T.class_of(T::Generic) = alias <C Generic>\l<statTemp>$16: Sorbet::Private::Static::Void = <statTemp>$17: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$18: T.class_of(T::Generic))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$9: T.class_of(Generic))\l<statTemp>$6: Sorbet::Private::Static::Void = Solve<sig>\l<statTemp>$20: T.class_of(Sorbet::Private::Static) = alias <C Static>\lkeep_for_ide$22: T.class_of(T) = alias <C T>\l<statTemp>$21: T.class_of(T::Generic) = alias <C Generic>\l<statTemp>$19: Sorbet::Private::Static::Void = <statTemp>$20: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$21: T.class_of(T::Generic))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_3" -> "bb::<Class:Generic>#<static-init>_1" [style="bold"];
     "bb::<Class:Generic>#<static-init>_5" [
-        label = "block[id=5](<self>: T.class_of(Generic), <selfRestore>$6: T.class_of(Generic))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<statTemp>$12: T.class_of(Generic) = alias <C Generic>\l<statTemp>$14: T.class_of(T) = alias <C T>\l<statTemp>$13: T.untyped = <statTemp>$14: T.class_of(T).self_type()\l<statTemp>$11: <Type: Generic[T.untyped]> = <statTemp>$12: T.class_of(Generic).[](<statTemp>$13: T.untyped)\l<blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: <Type: Generic[T.untyped]>)\l<blockReturnTemp>$15: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+        label = "block[id=5](<self>: T.class_of(Generic), <selfRestore>$9: T.class_of(Generic))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<statTemp>$15: T.class_of(Generic) = alias <C Generic>\l<statTemp>$17: T.class_of(T) = alias <C T>\l<statTemp>$16: T.untyped = <statTemp>$17: T.class_of(T).self_type()\l<statTemp>$14: <Type: Generic[T.untyped]> = <statTemp>$15: T.class_of(Generic).[](<statTemp>$16: T.untyped)\l<blockReturnTemp>$12: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$14: <Type: Generic[T.untyped]>)\l<blockReturnTemp>$18: T.noreturn = blockreturn<sig> <blockReturnTemp>$12: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_5" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
