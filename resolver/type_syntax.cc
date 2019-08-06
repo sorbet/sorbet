@@ -785,7 +785,9 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                     e.addErrorSection(
                         core::ErrorSection(core::ErrorColors::format("`{}` will not work in the runtime type system.",
                                                                      recvi->symbol.data(ctx)->show(ctx) + "[...]")));
-                    e.replaceWith("Use the correct syntax", recvi->loc, corrected.data(ctx)->show(ctx));
+                    e.replaceWith(fmt::format("Change `{}` to `{}`", recvi->symbol.data(ctx)->show(ctx),
+                                              corrected.data(ctx)->show(ctx)),
+                                  recvi->loc, "{}", corrected.data(ctx)->show(ctx));
                 }
                 result.type = core::Types::untypedUntracked();
                 return;
