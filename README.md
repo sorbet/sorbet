@@ -677,8 +677,7 @@ You are encouraged to play around with various clang-based tools which use the
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
 [CLion]: https://www.jetbrains.com/clion/
 [vscode-clangd]: https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd
-
-Here are some sample config setups:
+[eglot for emacs](https://github.com/joaotavora/eglot)
 
 - Vim
   - [rtags (vim-rtags)](https://github.com/jez/dotfiles/blob/dafe23c95fd908719bf477f189335bd1451bd8a7/vim/plug-settings.vim#L649-L676)
