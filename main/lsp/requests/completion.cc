@@ -126,7 +126,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
-                                                      const unique_ptr<core::TypeConstraint> &constraint) {
+                                                      const unique_ptr<core::TypeConstraint> &constraint) const {
     ENFORCE(what.exists());
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
     auto resultType = what.data(gs)->resultType;
@@ -167,7 +167,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
 }
 
 void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
-                                         vector<unique_ptr<CompletionItem>> &items) {
+                                         vector<unique_ptr<CompletionItem>> &items) const {
     if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
         auto pattern = c->symbol.data(gs)->name.data(gs)->shortName(gs);
         logger->debug("Looking for constant similar to {}", pattern);

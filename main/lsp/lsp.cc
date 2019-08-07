@@ -97,7 +97,7 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalStat
 }
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
-                                const unique_ptr<core::GlobalState> &currentGs) {
+                                const unique_ptr<core::GlobalState> &currentGs) const {
     if (initialized || forMethod == LSPMethod::Initialize || forMethod == LSPMethod::Initialized ||
         forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown || forMethod == LSPMethod::SorbetError) {
         return true;
@@ -226,7 +226,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
 
-bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
+bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) const {
     return !opts.statsdHost.empty() && (currentTime - lastMetricUpdateTime) > STATSD_INTERVAL;
 }
 
