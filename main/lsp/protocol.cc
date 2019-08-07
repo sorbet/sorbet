@@ -177,6 +177,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
         NotifyNotificationOnDestruction notify(initializedNotification);
         while (true) {
             unique_ptr<LSPMessage> msg;
+            bool hasMoreMessages;
             {
                 absl::MutexLock lck(&mtx);
                 Timer timeit(logger, "idle");
@@ -198,6 +199,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 }
                 msg = move(guardedState.pendingRequests.front());
                 guardedState.pendingRequests.pop_front();
+                hasMoreMessages = !guardedState.pendingRequests.empty();
             }
             prodCounterInc("lsp.messages.received");
             auto result = processRequest(move(gs), *msg);
@@ -220,6 +222,9 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                     }
                 }
                 sendCountersToStatsd(currentTime);
+            }
+            if (!hasMoreMessages) {
+                logger->flush();
             }
         }
     }
