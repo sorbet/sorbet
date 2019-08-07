@@ -5,9 +5,7 @@ class BigFoo; extend T::Sig
 # The docs for FOO_CONSTANT
   FOO_CONSTANT = 1
 # ^^^^^^^^^^^^ The docs for FOO_CONSTANT
-# ^^^^^^^^^^^^ ```ruby
 # ^^^^^^^^^^^^ Integer
-# ^^^^^^^^^^^^ ```
 
   class LittleFoo1; extend T::Sig
   sig {params(num: Integer).returns(Integer)}
@@ -64,6 +62,15 @@ class BigFoo; extend T::Sig
   sig { returns([Integer, String]) }
   def self.anotherFunc()
     [1, "hello"]
+  end
+
+  # Tests return markdown output
+  sig {void}
+  def tests_return_markdown
+    # ^^^^^^^^^^^^^^^^^^^^^ hover: Tests return markdown output
+    # ^^^^^^^^^^^^^^^^^^^^^ hover: ```ruby
+    # ^^^^^^^^^^^^^^^^^^^^^ hover: sig {void}
+    # ^^^^^^^^^^^^^^^^^^^^^ hover: ```
   end
 end
 
