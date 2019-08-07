@@ -110,7 +110,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 documentation));
         } else {
             response->result = make_unique<Hover>(
-                formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), ""));
+                formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
         }
     } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
         // An error happened while setting up the query.
