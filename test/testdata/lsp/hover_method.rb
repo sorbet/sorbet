@@ -92,4 +92,7 @@ def main
   f = Foo.new
 # ^ hover: Foo
      # ^ hover: T.class_of(Foo)
+  f.qux
+  # ^^^ hover: Some docs for qux
+  # ^^^ hover: sig {void}
 end
