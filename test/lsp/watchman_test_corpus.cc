@@ -59,6 +59,28 @@ TEST_F(ProtocolTest, IgnoresFileUpdatesWhileFileIsOpen) {
     assertDiagnostics(send(*closeFile("foo.rb")), {d});
 }
 
+// Ensures that Sorbet correctly remembers that a file is not open in the editor when it combines a file close event
+// with another type of file update.
+TEST_F(ProtocolTest, CorrectlyUpdatesFileOpenStatusWhenClosedCombinedWithOtherUpdates) {
+    assertDiagnostics(initializeLSP(), {});
+
+    ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
+    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
+    assertDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {d});
+
+    // Diagnostics should update now that we've opened the file in editor and it's empty.
+    assertDiagnostics(send(*openFile("foo.rb", "")), {});
+
+    // Close + add another update in one atomic action.
+    vector<unique_ptr<LSPMessage>> toSend;
+    toSend.push_back(closeFile("foo.rb"));
+    toSend.push_back(watchmanFileUpdate({"foo.rb"}));
+    assertDiagnostics(send(move(toSend)), {d});
+
+    // Ensure that Sorbet knows file is closed.
+    assertDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {d});
+}
+
 // If file closes and is not on disk, Sorbet clears diagnostics.
 TEST_F(ProtocolTest, HandlesClosedAndDeletedFile) {
     assertDiagnostics(initializeLSP(), {});
