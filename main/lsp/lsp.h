@@ -149,15 +149,15 @@ class LSPLoop {
     std::thread::id mainThreadId;
 
     /* Send the given message to client */
-    void sendMessage(const LSPMessage &msg);
+    void sendMessage(const LSPMessage &msg) const;
 
     // returns nullptr if this loc doesn't exist
-    std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc);
-    void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc);
+    std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc) const;
+    void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc) const;
     std::vector<std::unique_ptr<Location>>
     extractLocations(const core::GlobalState &gs,
                      const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses,
-                     std::vector<std::unique_ptr<Location>> locations = {});
+                     std::vector<std::unique_ptr<Location>> locations = {}) const;
 
     core::FileRef updateFile(const std::shared_ptr<core::File> &file);
     /** Invalidate all currently cached trees and re-index them from file system.
@@ -183,20 +183,20 @@ class LSPLoop {
 
     LSPResult pushDiagnostics(TypecheckRun run);
 
-    std::vector<core::FileHash> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
+    std::vector<core::FileHash> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
     bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg,
-                           const std::unique_ptr<core::GlobalState> &currentGs);
+                           const std::unique_ptr<core::GlobalState> &currentGs) const;
 
-    core::FileRef uri2FileRef(std::string_view uri);
-    std::string fileRef2Uri(const core::GlobalState &gs, core::FileRef);
-    std::string remoteName2Local(std::string_view uri);
-    std::string localName2Remote(std::string_view uri, bool useSorbetUri);
-    std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs);
+    core::FileRef uri2FileRef(std::string_view uri) const;
+    std::string fileRef2Uri(const core::GlobalState &gs, core::FileRef) const;
+    std::string remoteName2Local(std::string_view uri) const;
+    std::string localName2Remote(std::string_view uri, bool useSorbetUri) const;
+    std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) const;
 
     /** Used to implement textDocument/documentSymbol
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
-    std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef);
+    std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef) const;
     TypecheckRun runLSPQuery(std::unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
                              const std::vector<core::FileRef> &filesToQuery);
     std::variant<LSPLoop::TypecheckRun, std::pair<std::unique_ptr<ResponseError>, std::unique_ptr<core::GlobalState>>>
@@ -222,10 +222,10 @@ class LSPLoop {
                                            const CodeActionParams &params);
     std::unique_ptr<CompletionItem> getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
-                                                      const std::unique_ptr<core::TypeConstraint> &constraint);
+                                                      const std::unique_ptr<core::TypeConstraint> &constraint) const;
     void findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
-                                    std::vector<std::unique_ptr<CompletionItem>> &items);
-    void sendShowMessageNotification(MessageType messageType, std::string_view message);
+                                    std::vector<std::unique_ptr<CompletionItem>> &items) const;
+    void sendShowMessageNotification(MessageType messageType, std::string_view message) const;
     LSPResult handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                       const TextDocumentPositionParams &params);
     /**
@@ -260,7 +260,7 @@ class LSPLoop {
                                          UnorderedMap<std::string, std::string> &updates);
 
     /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
-    bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
+    bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime) const;
     /** Sends counters to statsd. */
     void sendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
 

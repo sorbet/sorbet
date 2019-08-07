@@ -12,7 +12,7 @@ namespace sorbet::realmain::lsp {
 constexpr string_view sorbetScheme = "sorbet:";
 constexpr string_view httpsScheme = "https";
 
-string LSPLoop::remoteName2Local(string_view uri) {
+string LSPLoop::remoteName2Local(string_view uri) const {
     const bool isSorbetURI = absl::StartsWith(uri, sorbetScheme);
     if (!absl::StartsWith(uri, rootUri) && !enableSorbetURIs && !isSorbetURI) {
         logger->error("Unrecognized URI received from client: {}", uri);
@@ -40,7 +40,7 @@ string LSPLoop::remoteName2Local(string_view uri) {
     }
 }
 
-string LSPLoop::localName2Remote(string_view uri, bool useSorbetUri) {
+string LSPLoop::localName2Remote(string_view uri, bool useSorbetUri) const {
     ENFORCE(absl::StartsWith(uri, rootPath));
     string_view relativeUri = uri.substr(rootPath.length());
     if (relativeUri.at(0) == '/') {
@@ -58,7 +58,7 @@ string LSPLoop::localName2Remote(string_view uri, bool useSorbetUri) {
     return absl::StrCat(rootUri, "/", relativeUri);
 }
 
-core::FileRef LSPLoop::uri2FileRef(string_view uri) {
+core::FileRef LSPLoop::uri2FileRef(string_view uri) const {
     if (!absl::StartsWith(uri, rootUri) && !absl::StartsWith(uri, sorbetScheme)) {
         return core::FileRef();
     }
@@ -66,7 +66,7 @@ core::FileRef LSPLoop::uri2FileRef(string_view uri) {
     return initialGS->findFileByPath(needle);
 }
 
-string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
+string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) const {
     string uri;
     if (!file.exists()) {
         uri = "???";
@@ -114,7 +114,7 @@ unique_ptr<core::Loc> range2Loc(const core::GlobalState &gs, const Range &range,
     return make_unique<core::Loc>(file, start, end);
 }
 
-unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) {
+unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) const {
     auto range = loc2Range(gs, loc);
     if (range == nullptr) {
         return nullptr;
@@ -171,7 +171,7 @@ int cmpRanges(const Range &a, const Range &b) {
 vector<unique_ptr<Location>>
 LSPLoop::extractLocations(const core::GlobalState &gs,
                           const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
-                          vector<unique_ptr<Location>> locations) {
+                          vector<unique_ptr<Location>> locations) const {
     for (auto &q : queryResponses) {
         core::Loc loc = q->getLoc();
         if (loc.exists() && loc.file().exists()) {

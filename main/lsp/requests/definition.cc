@@ -4,7 +4,7 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Location>> &locs, core::Loc loc) {
+void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Location>> &locs, core::Loc loc) const {
     auto location = loc2Location(gs, loc);
     if (location != nullptr) {
         locs.push_back(std::move(location));

@@ -422,7 +422,7 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
     }
 }
 
-void LSPLoop::sendShowMessageNotification(MessageType messageType, string_view message) {
+void LSPLoop::sendShowMessageNotification(MessageType messageType, string_view message) const {
     sendMessage(LSPMessage(make_unique<NotificationMessage>(
         "2.0", LSPMethod::WindowShowMessage, make_unique<ShowMessageParams>(messageType, string(message)))));
 }
@@ -441,7 +441,7 @@ bool isServerNotification(const LSPMethod method) {
     }
 }
 
-unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) {
+unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) const {
     core::Loc::Detail reqPos;
     reqPos.line = pos.line + 1;
     reqPos.column = pos.character + 1;
@@ -449,7 +449,7 @@ unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, const Position &po
     return make_unique<core::Loc>(core::Loc(fref, offset, offset));
 }
 
-void LSPLoop::sendMessage(const LSPMessage &msg) {
+void LSPLoop::sendMessage(const LSPMessage &msg) const {
     if (msg.isResponse()) {
         ENFORCE(msg.asResponse().result || msg.asResponse().error,
                 "A valid ResponseMessage must have a result or an error.");
