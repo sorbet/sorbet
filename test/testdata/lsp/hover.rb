@@ -19,7 +19,8 @@ class BigFoo; extend T::Sig
     sig {returns(Integer)}
     def bar
       a = BigFoo::LittleFoo1.new
-                      # ^ hover: T.class_of(BigFoo::LittleFoo1)
+                # ^^^^^^^^^^ hover: T.class_of(BigFoo::LittleFoo1)
+                # ^^^^^^^^^^ hover: The docs for LittleFoo1
       a.bar(1)
    # ^ hover: null
     # ^ hover: BigFoo::LittleFoo1
