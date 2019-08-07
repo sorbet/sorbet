@@ -179,6 +179,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     }
 
     string documentation = absl::StrJoin(documentation_lines.rbegin(), documentation_lines.rend(), "\n");
+    documentation = absl::StripTrailingAsciiWhitespace(documentation);
 
     // Ensure single newline
     while(documentation.length() > 0 && documentation.back() == '\n') documentation.pop_back();
