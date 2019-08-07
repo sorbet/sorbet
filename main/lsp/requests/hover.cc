@@ -1,5 +1,6 @@
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
+#include "absl/strings/ascii.h"
 
 using namespace std;
 
@@ -21,6 +22,8 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
         }
         start = start->secondary.get();
     }
+
+    contents = absl::StripTrailingAsciiWhitespace(contents);
     return contents;
 }
 
