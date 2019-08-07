@@ -64,17 +64,29 @@ class LSPLoop {
     };
 
     /**
+     * Encapsulates an update to LSP's file state.
+     */
+    struct FileUpdates {
+        std::vector<std::shared_ptr<core::File>> updatedFiles;
+        // Note: `string_view`s point to `string`s owned by `core::File`s in `updatedFiles`
+        std::vector<std::string_view> openedFiles;
+        std::vector<std::string_view> closedFiles;
+        std::vector<ast::ParsedFile> updatedFileIndexes;
+        std::vector<std::pair<std::string_view, core::FileHash>> updatedFileHashes;
+    };
+
+    /**
      * Object that uses the RAII pattern to notify the client when a *slow* operation
      * starts and ends. Is used to provide user feedback in the status line of VS Code.
      */
     class ShowOperation final {
     private:
-        LSPLoop &loop;
+        const LSPLoop &loop;
         const std::string operationName;
         const std::string description;
 
     public:
-        ShowOperation(LSPLoop &loop, std::string_view operationName, std::string_view description);
+        ShowOperation(const LSPLoop &loop, std::string_view operationName, std::string_view description);
         ~ShowOperation();
     };
 
@@ -159,7 +171,6 @@ class LSPLoop {
                      const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses,
                      std::vector<std::unique_ptr<Location>> locations = {}) const;
 
-    core::FileRef updateFile(const std::shared_ptr<core::File> &file);
     /** Invalidate all currently cached trees and re-index them from file system.
      * This runs code that is not considered performance critical and this is expected to be slow */
     void reIndexFromFileSystem();
@@ -169,18 +180,20 @@ class LSPLoop {
         std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
         // The global state, post-typechecking.
         std::unique_ptr<core::GlobalState> gs;
+        // The edit applied to `gs`.
+        std::optional<LSPLoop::FileUpdates> updates;
         bool tookFastPath;
     };
     /** Conservatively rerun entire pipeline without caching any trees */
-    TypecheckRun runSlowPath();
+    TypecheckRun runSlowPath(std::optional<FileUpdates> updates) const;
     /** Returns `true` if the given changes can run on the fast path. */
-    bool canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                         const std::vector<core::FileHash> &hashes) const;
+    bool canTakeFastPath(const FileUpdates &updates, const std::vector<core::FileHash> &hashes) const;
     /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */
-    TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs,
-                             const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                             const std::vector<core::FileRef> &filesForQuery = {});
-
+    TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs, std::optional<FileUpdates> updates,
+                             const std::vector<core::FileRef> &filesForQuery = {}) const;
+    /** Officially 'commits' the output of a `TypecheckRun` by updating the relevant state on LSPLoop and, if specified,
+     * sending diagnostics to the editor. */
+    LSPResult commitTypecheckRun(TypecheckRun run);
     LSPResult pushDiagnostics(TypecheckRun run);
 
     std::vector<core::FileHash> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
@@ -238,26 +251,34 @@ class LSPLoop {
 
     LSPResult processRequestInternal(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
 
+    // Distilled form of an update to a single file.
+    struct SorbetWorkspaceFileUpdate {
+        std::string contents;
+        bool newlyOpened;
+        bool newlyClosed;
+    };
     void preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,
-                                       UnorderedMap<std::string, std::string> &updates);
+                                       UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates) const;
     void preprocessSorbetWorkspaceEdit(const DidOpenTextDocumentParams &openParams,
-                                       UnorderedMap<std::string, std::string> &updates);
+                                       UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates) const;
     void preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &closeParams,
-                                       UnorderedMap<std::string, std::string> &updates);
+                                       UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates) const;
     void preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
-                                       UnorderedMap<std::string, std::string> &updates);
-    LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                        const DidChangeTextDocumentParams &changeParams);
-    LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                        const DidOpenTextDocumentParams &openParams);
-    LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                        const DidCloseTextDocumentParams &closeParams);
-    LSPResult handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
-                                        const WatchmanQueryResponse &queryResponse);
-    LSPResult handleSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
-                                         std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits);
-    LSPResult commitSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
-                                         UnorderedMap<std::string, std::string> &updates);
+                                       UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates) const;
+    TypecheckRun handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                           const DidChangeTextDocumentParams &changeParams) const;
+    TypecheckRun handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                           const DidOpenTextDocumentParams &openParams) const;
+    TypecheckRun handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                           const DidCloseTextDocumentParams &closeParams) const;
+    TypecheckRun handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
+                                           const WatchmanQueryResponse &queryResponse) const;
+    TypecheckRun handleSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
+                                            std::vector<std::unique_ptr<SorbetWorkspaceEdit>> &edits) const;
+    TypecheckRun commitSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs,
+                                            UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates) const;
+    static std::string_view getFileContents(UnorderedMap<std::string, LSPLoop::SorbetWorkspaceFileUpdate> &updates,
+                                            const core::GlobalState &initialGS, std::string_view path);
 
     /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
     bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime) const;

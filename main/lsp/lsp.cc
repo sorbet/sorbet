@@ -38,7 +38,7 @@ LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, con
 
     // TODO(jvilk): If this throws, then we'll want to reset `lspQuery` on `initialGS`.
     // If throwing is common, then we need some way to *not* throw away `gs`.
-    auto rv = tryFastPath(move(gs), {}, filesToQuery);
+    auto rv = tryFastPath(move(gs), nullopt, filesToQuery);
     rv.gs->lspQuery = initialGS->lspQuery = core::lsp::Query::noQuery();
     return rv;
 }
@@ -58,7 +58,7 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
     if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::True) {
         logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
-        return TypecheckRun{{}, {}, {}, move(gs), true};
+        return TypecheckRun{{}, {}, {}, move(gs), nullopt, true};
     }
 
     auto loc = lspPos2Loc(fref, pos, *gs);

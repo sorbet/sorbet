@@ -57,19 +57,23 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         auto &params = msg.asNotification().params;
         if (method == LSPMethod::TextDocumentDidChange) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didChange");
-            return handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidChangeTextDocumentParams>>(params));
+            return commitTypecheckRun(
+                handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidChangeTextDocumentParams>>(params)));
         }
         if (method == LSPMethod::TextDocumentDidOpen) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didOpen");
-            return handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidOpenTextDocumentParams>>(params));
+            return commitTypecheckRun(
+                handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidOpenTextDocumentParams>>(params)));
         }
         if (method == LSPMethod::TextDocumentDidClose) {
             prodCategoryCounterInc("lsp.messages.processed", "textDocument.didClose");
-            return handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidCloseTextDocumentParams>>(params));
+            return commitTypecheckRun(
+                handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidCloseTextDocumentParams>>(params)));
         }
         if (method == LSPMethod::SorbetWatchmanFileChange) {
             prodCategoryCounterInc("lsp.messages.processed", "sorbet/watchmanFileChange");
-            return handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<WatchmanQueryResponse>>(params));
+            return commitTypecheckRun(
+                handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<WatchmanQueryResponse>>(params)));
         }
         if (method == LSPMethod::SorbetWorkspaceEdit) {
             // Note: We increment `lsp.messages.processed` when the original requests were merged into this one.
@@ -85,13 +89,13 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             prodCounterAdd("lsp.messages.merged", (counts->textDocumentDidChange + counts->textDocumentDidOpen +
                                                    counts->textDocumentDidClose + counts->sorbetWatchmanFileChange) -
                                                       1);
-            return handleSorbetWorkspaceEdits(move(gs), edits);
+            return commitTypecheckRun(handleSorbetWorkspaceEdits(move(gs), edits));
         }
         if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
             Timer timeit(logger, "initial_index");
             reIndexFromFileSystem();
-            LSPResult result = pushDiagnostics(runSlowPath());
+            LSPResult result = pushDiagnostics(runSlowPath(nullopt));
             ENFORCE(result.gs);
             if (!disableFastPath) {
                 ShowOperation stateHashOp(*this, "GlobalStateHash", "Finishing initialization...");
