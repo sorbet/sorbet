@@ -113,7 +113,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 documentation));
         } else {
             response->result = make_unique<Hover>(
-                formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), ""));
+                formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
         }
     }
     return LSPResult::make(move(gs), move(response));
