@@ -70,8 +70,11 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 resp->isLiteral() || 
                 resp->isConstant() || 
                 resp->isDefinition()) {
-            auto loc = resp->getTypeAndOrigins().origins[0];
-            documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
+            auto origins = resp->getTypeAndOrigins().origins;
+            if (!origins.empty()) {
+                auto loc = origins[0];
+                documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
+            }
         }
 
         if (auto sendResp = resp->isSend()) {
