@@ -86,14 +86,14 @@ string_view file = string_view(file_string);
 TEST(FindDocumentationTest, OneLineDocumentation) { // NOLINT
     int position = file.find("abcde");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "This is an instance method with a standard line documentation");
+    ASSERT_EQ(*b, "This is an instance method with a standard line documentation\n");
 }
 
 TEST(FindDocumentationTest, MultiLineDocumentation) { // NOLINT
     int position = file.find("multidoc_instance");
     optional<string> b = findDocumentation(file, position);
     ASSERT_EQ(*b, "This is a multiline documented instance method.\nAll of the lines should be displayed in the "
-                  "docs.\nIncluding this one.");
+                  "docs.\nIncluding this one.\n");
 }
 TEST(FindDocumentationTest, SeparatedDocumentation) { // NOLINT
     int position = file.find("nodocs");
@@ -103,27 +103,27 @@ TEST(FindDocumentationTest, SeparatedDocumentation) { // NOLINT
 TEST(FindDocumentationTest, TopOfFile) { // NOLINT
     int position = file.find("B");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "this is a class.");
+    ASSERT_EQ(*b, "this is a class.\n");
 }
 TEST(FindDocumentationTest, DifferentIndentation) { // NOLINT
     int position = file.find("weirdindent");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "weird indentation\nis in this documentation.");
+    ASSERT_EQ(*b, "weird indentation\nis in this documentation.\n");
 }
 TEST(FindDocumentationTest, Constant) { // NOLINT
     int position = file.find("ZZZZZZ");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "This is the documentation for a constant.\nThis is the second line for a constant.");
+    ASSERT_EQ(*b, "This is the documentation for a constant.\nThis is the second line for a constant.\n");
 }
 TEST(FindDocumentationTest, OneLineSig) { // NOLINT
     int position = file.find("one_line_sig_block");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "This is a method with documentation above its\none-line sig block.");
+    ASSERT_EQ(*b, "This is a method with documentation above its\none-line sig block.\n");
 }
 TEST(FindDocumentationTest, MultiLineSig) { // NOLINT
     int position = file.find("multi_line_sig_block");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "This is a method with documentation above its\nmulti-line sig block.");
+    ASSERT_EQ(*b, "This is a method with documentation above its\nmulti-line sig block.\n");
 }
 TEST(FindDocumentationTest, BrokenMultiLineSig) { // NOLINT
     int position = file.find("broken_multi_line_sig_block");

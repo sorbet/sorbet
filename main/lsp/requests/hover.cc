@@ -25,22 +25,11 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
 }
 
 unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view sigString,
-                                         optional<string_view> optionalDocString) {
-    string_view docString = optionalDocString.value_or("");
-    // Get rid of at most 1 trailing newline
-    if (docString.length() > 0 && docString.back() == '\n') {
-        docString.remove_suffix(1);
-    }
-    if (sigString.length() > 0 && sigString.back() == '\n') {
-        sigString.remove_suffix(1);
-    }
-
+                                         optional<string_view> docString) {
     string content = "";
 
     // Add docs
-    absl::StrAppend(&content, docString);
-    if (docString.length() > 0)
-        absl::StrAppend(&content, "\n");
+    absl::StrAppend(&content, docString.value_or(""));
 
     // Add sig
     string formattedSigString = "";
@@ -50,10 +39,6 @@ unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view sigS
         absl::StrAppend(&formattedSigString, sigString);
     }
     absl::StrAppend(&content, formattedSigString);
-
-    // Add newline at the end if needed
-    if (content.length() > 0 && content.back() == '\n')
-        absl::StrAppend(&content, "\n");
 
     return make_unique<MarkupContent>(markupKind, move(content));
 }
