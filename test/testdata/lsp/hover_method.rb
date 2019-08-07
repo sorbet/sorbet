@@ -43,6 +43,8 @@ class Foo
   # Some docs for qux
   sig {void}
   def qux
+    # ^^^ hover: Some docs for qux
+    # ^^^ hover: sig {void}
     typed_with_docs(1)
   # ^ hover: Docs above single-line sig
   # ^ hover: sig {params(arg0: Integer).void}
