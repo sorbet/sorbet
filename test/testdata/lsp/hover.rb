@@ -1,4 +1,5 @@
 # typed: true
+# The docs for BigFoo
 class BigFoo; extend T::Sig
     # ^ hover: T.class_of(BigFoo)
 
@@ -11,6 +12,7 @@ class BigFoo; extend T::Sig
 # ^^^^^^^^^^^^^^^^^ hover: Docs for Bar#static_variable
 # ^^^^^^^^^^^^^^^^^ hover: String("asdf")
 
+  # The docs for LittleFoo1
   class LittleFoo1; extend T::Sig
   sig {params(num: Integer).returns(Integer)}
     def bar(num)
@@ -128,6 +130,8 @@ def main
   foo = BigFoo::FOO_CONSTANT
               # ^^^^^^^^^^^^ hover: Integer(1)
               # ^^^^^^^^^^^^ hover: The docs for FOO_CONSTANT
+      # ^^^^^^ hover: T.class_of(BigFoo)
+      # ^^^^^^ hover: The docs for BigFoo
   raise "error message"
 # ^ hover: sig {params(arg0: String).returns(T.noreturn)}
 end
