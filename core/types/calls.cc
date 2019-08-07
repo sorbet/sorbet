@@ -931,16 +931,19 @@ public:
         if (args.args.empty()) {
             return;
         }
+        const auto loc = args.locs.call;
         if (!args.args[0]->type->isFullyDefined()) {
-            if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::BareTypeUsage)) {
+            if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type->show(ctx));
             }
             return;
         }
         auto ret = Types::approximateSubtract(ctx, args.args[0]->type, Types::nilClass());
         if (ret == args.args[0]->type) {
-            if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::InvalidCast)) {
+            if (auto e = ctx.state.beginError(loc, errors::Infer::InvalidCast)) {
                 e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type->show(ctx));
+                const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
+                e.replaceWith("Remove the T.must", loc, locWithoutTMust.source(ctx));
             }
         }
         res.returnType = move(ret);
@@ -1109,10 +1112,47 @@ public:
         targs.reserve(attachedClass.data(ctx)->typeMembers().size());
         for (auto mem : attachedClass.data(ctx)->typeMembers()) {
             ++i;
-            if (mem.data(ctx)->isFixed()) {
-                targs.emplace_back(mem.data(ctx)->resultType);
+
+            auto memData = mem.data(ctx);
+
+            auto *memType = cast_type<LambdaParam>(memData->resultType.get());
+            ENFORCE(memType != nullptr);
+
+            if (memData->isFixed()) {
+                // Fixed args are implicitly applied, and won't consume type
+                // arguments from the list that's supplied.
+                targs.emplace_back(memType->upperBound);
             } else if (it != args.args.end()) {
-                targs.emplace_back(unwrapType(ctx, args.locs.args[it - args.args.begin()], (*it)->type));
+                auto loc = args.locs.args[it - args.args.begin()];
+                auto argType = unwrapType(ctx, loc, (*it)->type);
+                bool validBounds = true;
+
+                // Validate type parameter bounds.
+                if (!Types::isSubType(ctx, argType, memType->upperBound)) {
+                    validBounds = false;
+                    if (auto e = ctx.state.beginError(loc, errors::Infer::GenericTypeParamBoundMismatch)) {
+                        auto argStr = argType->show(ctx);
+                        e.setHeader("`{}` cannot be used for type member `{}`", argStr, memData->showFullName(ctx));
+                        e.addErrorLine(loc, "`{}` is not a subtype of `{}`", argStr, memType->upperBound->show(ctx));
+                    }
+                }
+
+                if (!Types::isSubType(ctx, memType->lowerBound, argType)) {
+                    validBounds = false;
+
+                    if (auto e = ctx.state.beginError(loc, errors::Infer::GenericTypeParamBoundMismatch)) {
+                        auto argStr = argType->show(ctx);
+                        e.setHeader("`{}` cannot be used for type member `{}`", argStr, memData->showFullName(ctx));
+                        e.addErrorLine(loc, "`{}` is not a subtype of `{}`", memType->lowerBound->show(ctx), argStr);
+                    }
+                }
+
+                if (validBounds) {
+                    targs.emplace_back(argType);
+                } else {
+                    targs.emplace_back(Types::untypedUntracked());
+                }
+
                 ++it;
             } else if (attachedClass == Symbols::Hash() && i == 2) {
                 auto tupleArgs = targs;
@@ -1579,11 +1619,11 @@ class Magic_suggestUntypedConstantType : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 1);
-        auto ty = args.args.front()->type;
+        auto ty = core::Types::widen(ctx, args.args.front()->type);
         auto loc = args.locs.args[0];
         if (!ty->isUntyped()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
-                e.setHeader("Suggested type: `{}`", ty->show(ctx));
+                e.setHeader("Suggested type for constant without type annotation: `{}`", ty->show(ctx));
                 e.replaceWith(fmt::format("Initialize as `{}`", ty->show(ctx)), loc, "T.let({}, {})", loc.source(ctx),
                               ty->show(ctx));
             }

@@ -6,7 +6,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 unique_ptr<SymbolInformation> LSPLoop::symbolRef2SymbolInformation(const core::GlobalState &gs,
-                                                                   core::SymbolRef symRef) {
+                                                                   core::SymbolRef symRef) const {
     auto sym = symRef.data(gs);
     if (!sym->loc().file().exists() || hideSymbol(gs, symRef)) {
         return nullptr;

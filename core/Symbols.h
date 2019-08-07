@@ -96,7 +96,6 @@ public:
         static constexpr u4 TYPE_INVARIANT = 0x0000'0020;
         static constexpr u4 TYPE_CONTRAVARIANT = 0x0000'0040;
         static constexpr u4 TYPE_FIXED = 0x0000'0080;
-        static constexpr u4 TYPE_BOUNDED = 0x0000'0100;
 
         // Static Field flags
         static constexpr u4 STATIC_FIELD_TYPE_ALIAS = 0x0000'0010;
@@ -243,11 +242,6 @@ public:
         return (flags & Symbol::Flags::TYPE_FIXED) != 0;
     }
 
-    inline bool isBounded() const {
-        ENFORCE(isTypeArgument() || isTypeMember());
-        return (flags & Symbol::Flags::TYPE_BOUNDED) != 0;
-    }
-
     Variance variance() const {
         if (isInvariant())
             return Variance::Invariant;
@@ -378,11 +372,6 @@ public:
     inline void setFixed() {
         ENFORCE(isTypeArgument() || isTypeMember());
         flags |= Symbol::Flags::TYPE_FIXED;
-    }
-
-    inline void setBounded() {
-        ENFORCE(isTypeArgument() || isTypeMember());
-        flags |= Symbol::Flags::TYPE_BOUNDED;
     }
 
     inline void setOverloaded() {
@@ -582,6 +571,11 @@ public:
     u4 uniqueCounter = 1; // used as a counter inside the namer
     NameRef name;         // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
+
+    bool hasSig() const {
+        ENFORCE(isMethod());
+        return resultType != nullptr;
+    }
 
     UnorderedMap<NameRef, SymbolRef> members_;
     std::vector<ArgInfo> arguments_;

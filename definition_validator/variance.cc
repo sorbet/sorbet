@@ -105,8 +105,9 @@ private:
                 auto members = app->klass.data(ctx)->typeMembers();
                 auto params = app->targs;
 
-                // We expect that types are fully saturated.
-                ENFORCE(members.size() == params.size());
+                ENFORCE(members.size() == params.size(),
+                        fmt::format("types should be fully saturated, but there are {} members and {} params",
+                                    members.size(), params.size()));
 
                 for (int i = 0; i < members.size(); ++i) {
                     auto memberVariance = members[i].data(ctx)->variance();

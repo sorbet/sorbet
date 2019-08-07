@@ -63,7 +63,7 @@ core::FileRef LSPLoop::updateFile(const shared_ptr<core::File> &file) {
     return fref;
 }
 
-vector<core::FileHash> LSPLoop::computeStateHashes(const vector<shared_ptr<core::File>> &files) {
+vector<core::FileHash> LSPLoop::computeStateHashes(const vector<shared_ptr<core::File>> &files) const {
     Timer timeit(logger, "computeStateHashes");
     vector<core::FileHash> res(files.size());
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
