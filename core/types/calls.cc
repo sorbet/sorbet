@@ -1999,14 +1999,13 @@ const vector<Intrinsic> intrinsicMethods{
 
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
 
-    {Symbols::MagicSingleton(), Intrinsic::Kind::Instance, Names::buildHash(), &Magic_buildHash},
-    {Symbols::MagicSingleton(), Intrinsic::Kind::Instance, Names::buildArray(), &Magic_buildArray},
-    {Symbols::MagicSingleton(), Intrinsic::Kind::Instance, Names::expandSplat(), &Magic_expandSplat},
-    {Symbols::MagicSingleton(), Intrinsic::Kind::Instance, Names::callWithSplat(), &Magic_callWithSplat},
-    {Symbols::MagicSingleton(), Intrinsic::Kind::Instance, Names::callWithBlock(), &Magic_callWithBlock},
-    {Symbols::MagicSingleton(), Intrinsic::Kind::Instance, Names::callWithSplatAndBlock(),
-     &Magic_callWithSplatAndBlock},
-    {Symbols::MagicSingleton(), Intrinsic::Kind::Instance, Names::suggestType(), &Magic_suggestUntypedConstantType},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHash},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
 
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::void_(), &DeclBuilderForProcs_void},
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::returns(),
