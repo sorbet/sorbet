@@ -5,7 +5,7 @@ class BigFoo; extend T::Sig
 # The docs for FOO_CONSTANT
   FOO_CONSTANT = 1
 # ^^^^^^^^^^^^ The docs for FOO_CONSTANT
-# ^^^^^^^^^^^^ Integer
+# ^^^^^^^^^^^^ Integer(1)
 
   class LittleFoo1; extend T::Sig
   sig {params(num: Integer).returns(Integer)}
@@ -118,9 +118,8 @@ def main
 # ^ hover: T::Hash[T.untyped, T.untyped]
 
   foo = BigFoo::FOO_CONSTANT
-# ^ hover: Integer
-                # ^ hover: Integer(1)
-                # ^ hover: The docs for FOO_CONSTANT
+              # ^^^^^^^^^^^^ hover: Integer(1)
+              # ^^^^^^^^^^^^ hover: The docs for FOO_CONSTANT
   raise "error message"
 # ^ hover: sig {params(arg0: String).returns(T.noreturn)}
 end
