@@ -11,6 +11,7 @@ class Foo
    # ^ hover: sig {params(arg0: String).returns(Integer)}
   end
 
+  # Docs for static bar
   sig {params(a: String).void}
   def self.bar(a)
          # ^ hover: sig {params(a: String).void}
@@ -83,8 +84,10 @@ def main
 # ^ hover: T::Array[String]
           # ^ hover: sig {params(a: String, x: String).returns(T::Array[String])}
 
-  Foo
- # ^ hover: T.class_of(Foo)
+  Foo.bar('')
+# ^^^ hover: T.class_of(Foo)
+    # ^^^ hover: Docs for static bar
+    # ^^^ hover: sig {params(a: String).void}
 
   f = Foo.new
 # ^ hover: Foo
