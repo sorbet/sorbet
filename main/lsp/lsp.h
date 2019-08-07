@@ -185,12 +185,14 @@ class LSPLoop {
         bool tookFastPath;
     };
     /** Conservatively rerun entire pipeline without caching any trees */
-    TypecheckRun runSlowPath(std::optional<FileUpdates> updates) const;
+    TypecheckRun runSlowPath(std::optional<FileUpdates> updates,
+                             const core::lsp::Query &q = core::lsp::Query::noQuery()) const;
     /** Returns `true` if the given changes can run on the fast path. */
     bool canTakeFastPath(const FileUpdates &updates, const std::vector<core::FileHash> &hashes) const;
     /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */
     TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs, std::optional<FileUpdates> updates,
-                             const std::vector<core::FileRef> &filesForQuery = {}) const;
+                             const std::vector<core::FileRef> &filesForQuery = {},
+                             const core::lsp::Query &q = core::lsp::Query::noQuery()) const;
     /** Officially 'commits' the output of a `TypecheckRun` by updating the relevant state on LSPLoop and, if specified,
      * sending diagnostics to the editor. */
     LSPResult commitTypecheckRun(TypecheckRun run);
@@ -210,29 +212,27 @@ class LSPLoop {
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
     std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef) const;
-    TypecheckRun runLSPQuery(std::unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
-                             const std::vector<core::FileRef> &filesToQuery);
     std::variant<LSPLoop::TypecheckRun, std::pair<std::unique_ptr<ResponseError>, std::unique_ptr<core::GlobalState>>>
     setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri, const Position &pos,
-                       const LSPMethod forMethod, bool errorIfFileIsUntyped = true);
-    TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol);
+                       const LSPMethod forMethod, bool errorIfFileIsUntyped = true) const;
+    TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol) const;
     LSPResult handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                      const TextDocumentPositionParams &params);
+                                      const TextDocumentPositionParams &params) const;
     LSPResult handleTextDocumentDocumentSymbol(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                               const DocumentSymbolParams &params);
+                                               const DocumentSymbolParams &params) const;
     LSPResult handleWorkspaceSymbols(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                     const WorkspaceSymbolParams &params);
+                                     const WorkspaceSymbolParams &params) const;
     std::pair<std::unique_ptr<core::GlobalState>, std::vector<std::unique_ptr<Location>>>
     getReferencesToSymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol,
-                          std::vector<std::unique_ptr<Location>> locations = {});
+                          std::vector<std::unique_ptr<Location>> locations = {}) const;
     LSPResult handleTextDocumentReferences(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                           const ReferenceParams &params);
+                                           const ReferenceParams &params) const;
     LSPResult handleTextDocumentDefinition(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                           const TextDocumentPositionParams &params);
+                                           const TextDocumentPositionParams &params) const;
     LSPResult handleTextDocumentCompletion(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                           const CompletionParams &params);
+                                           const CompletionParams &params) const;
     LSPResult handleTextDocumentCodeAction(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                           const CodeActionParams &params);
+                                           const CodeActionParams &params) const;
     std::unique_ptr<CompletionItem> getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
                                                       const std::unique_ptr<core::TypeConstraint> &constraint) const;
@@ -240,7 +240,7 @@ class LSPLoop {
                                     std::vector<std::unique_ptr<CompletionItem>> &items) const;
     void sendShowMessageNotification(MessageType messageType, std::string_view message) const;
     LSPResult handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                      const TextDocumentPositionParams &params);
+                                      const TextDocumentPositionParams &params) const;
     /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.
      * Merges changes to the same document + Watchman filesystem updates, and processes pause/ignore requests.

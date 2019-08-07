@@ -29,23 +29,9 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
     rootPath = opts.rawInputDirNames.at(0);
 }
 
-LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
-                                           const vector<core::FileRef> &filesToQuery) {
-    ENFORCE(gs->lspQuery.isEmpty());
-    ENFORCE(initialGS->lspQuery.isEmpty());
-    ENFORCE(!q.isEmpty());
-    initialGS->lspQuery = gs->lspQuery = q;
-
-    // TODO(jvilk): If this throws, then we'll want to reset `lspQuery` on `initialGS`.
-    // If throwing is common, then we need some way to *not* throw away `gs`.
-    auto rv = tryFastPath(move(gs), nullopt, filesToQuery);
-    rv.gs->lspQuery = initialGS->lspQuery = core::lsp::Query::noQuery();
-    return rv;
-}
-
 variant<LSPLoop::TypecheckRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
 LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
-                            const LSPMethod forMethod, bool errorIfFileIsUntyped) {
+                            const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
     Timer timeit(logger, "setupLSPQueryByLoc");
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {
@@ -69,10 +55,10 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
                          move(gs));
     }
 
-    return runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), {fref});
+    return tryFastPath(move(gs), nullopt, {fref}, core::lsp::Query::createLocQuery(*loc.get()));
 }
 
-LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) {
+LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) const {
     Timer timeit(logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<core::FileRef> frefs;
@@ -93,7 +79,7 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalStat
         }
     }
 
-    return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), frefs);
+    return tryFastPath(move(gs), nullopt, frefs, core::lsp::Query::createSymbolQuery(sym));
 }
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,

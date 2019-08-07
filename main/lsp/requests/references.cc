@@ -8,7 +8,7 @@ namespace sorbet::realmain::lsp {
 
 pair<unique_ptr<core::GlobalState>, vector<unique_ptr<Location>>>
 LSPLoop::getReferencesToSymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef symbol,
-                               vector<unique_ptr<Location>> locations) {
+                               vector<unique_ptr<Location>> locations) const {
     if (symbol.exists()) {
         auto run2 = setupLSPQueryBySymbol(move(gs), symbol);
         gs = move(run2.gs);
@@ -18,7 +18,7 @@ LSPLoop::getReferencesToSymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef
 }
 
 LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                const ReferenceParams &params) {
+                                                const ReferenceParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
     ShowOperation op(*this, "References", "Finding all references...");
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.references");
@@ -47,9 +47,8 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
                 auto identResp = resp->isIdent();
                 auto loc = identResp->owner.data(*gs)->loc();
                 if (loc.exists()) {
-                    auto run2 =
-                        runLSPQuery(move(gs), core::lsp::Query::createVarQuery(identResp->owner, identResp->variable),
-                                    {loc.file()});
+                    auto run2 = tryFastPath(move(gs), nullopt, {loc.file()},
+                                            core::lsp::Query::createVarQuery(identResp->owner, identResp->variable));
                     gs = move(run2.gs);
                     response->result = extractLocations(*gs, run2.responses);
                 }

@@ -32,7 +32,7 @@ unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string str) {
 }
 
 LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                           const TextDocumentPositionParams &params) {
+                                           const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.hover");
 

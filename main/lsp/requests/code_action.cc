@@ -5,7 +5,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                const CodeActionParams &params) {
+                                                const CodeActionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
     if (!opts.lspQuickFixEnabled) {

@@ -200,7 +200,7 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
     }
 }
 
-LSPLoop::TypecheckRun LSPLoop::runSlowPath(std::optional<FileUpdates> updates) const {
+LSPLoop::TypecheckRun LSPLoop::runSlowPath(std::optional<FileUpdates> updates, const core::lsp::Query &q) const {
     ShowOperation slowPathOp(*this, "SlowPath", "Typechecking...");
     Timer timeit(logger, "slow_path");
     ENFORCE(initialGS->errorQueue->isEmpty());
@@ -234,6 +234,8 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(std::optional<FileUpdates> updates) c
         }
     }
 
+    ENFORCE(finalGS->lspQuery.isEmpty());
+    finalGS->lspQuery = q;
     auto resolved = pipeline::resolve(finalGS, move(indexedCopies), opts, workers, skipConfigatron);
     tryApplyDefLocSaver(*finalGS, resolved);
     tryApplyLocalVarSaver(*finalGS, resolved);
@@ -245,6 +247,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(std::optional<FileUpdates> updates) c
     pipeline::typecheck(finalGS, move(resolved), opts, workers);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
     finalGS->lspTypecheckCount++;
+    finalGS->lspQuery = core::lsp::Query::noQuery();
     return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGS), move(updates), false};
 }
 
@@ -280,7 +283,8 @@ bool LSPLoop::canTakeFastPath(const FileUpdates &updates, const vector<core::Fil
 }
 
 LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs, std::optional<FileUpdates> maybeUpdates,
-                                           const vector<core::FileRef> &filesForQuery) const {
+                                           const vector<core::FileRef> &filesForQuery,
+                                           const core::lsp::Query &q) const {
     auto finalGs = move(gs);
     // We assume finalGs is a copy of initialGS, which has had the inferencer & resolver run.
     ENFORCE(finalGs->lspTypecheckCount > 0,
@@ -363,12 +367,15 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs, std
         }
         subset.insert(subset.end(), filesForQuery.begin(), filesForQuery.end());
 
+        ENFORCE(finalGs->lspQuery.isEmpty());
+        finalGs->lspQuery = q;
         auto resolved = pipeline::incrementalResolve(*finalGs, move(updatedIndexed), opts);
         tryApplyDefLocSaver(*finalGs, resolved);
         tryApplyLocalVarSaver(*finalGs, resolved);
         pipeline::typecheck(finalGs, move(resolved), opts, workers);
         auto out = initialGS->errorQueue->drainWithQueryResponses();
         finalGs->lspTypecheckCount++;
+        finalGs->lspQuery = core::lsp::Query::noQuery();
         return TypecheckRun{move(out.first), move(subset), move(out.second), move(finalGs), move(maybeUpdates), true};
     } else {
         return runSlowPath(move(maybeUpdates));
