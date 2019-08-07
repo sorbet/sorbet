@@ -99,8 +99,6 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(*gs);
             auto type = constResp->retType.type;
-            // TOOD This constResp only has a reference to where the class is referred to. Can't seem to get to the
-            // definition directly using the properties from the response.
             if (data->isClass()) {
                 auto singletonClass = data->lookupSingletonClass(*gs);
                 ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
