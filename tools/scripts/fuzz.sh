@@ -8,9 +8,9 @@ cd "../.."
 if [ "$#" -lt 1 ]; then
 cat <<EOF
 usage:
-  $0 <fuzz_target> [<options>]
+  $0 <target> [<options>]
 
-example fuzz_target:
+example target:
   fuzz_dash_e
   fuzz_doc_symbols
   fuzz_hover
@@ -21,11 +21,11 @@ EOF
 exit 1
 fi
 
-fuzz_target="$1"
+target="$1"
 shift
 
-echo "building $fuzz_target"
-bazel build "//test/fuzz:$fuzz_target" --config=fuzz -c opt
+echo "building $target"
+bazel build "//test/fuzz:$target" --config=fuzz -c opt
 
 # we want the bazel build command to run before this check so that bazel can download itself.
 export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
@@ -43,7 +43,7 @@ mkdir -p fuzz_crashers/original
 export ASAN_OPTIONS="dedup_token_length=10"
 
 echo "running"
-nice "./bazel-bin/test/fuzz/$fuzz_target" \
+nice "./bazel-bin/test/fuzz/$target" \
   -only_ascii=1 \
   -dict=test/fuzz/ruby.dict \
   -artifact_prefix=fuzz_crashers/original/ \

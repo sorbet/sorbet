@@ -8,9 +8,9 @@ cd "../.."
 if [ "$#" -lt 1 ]; then
 cat <<EOF
 usage:
-  $0 <fuzz_target> [<options>]
+  $0 <target> [<options>]
 
-example fuzz_target:
+example target:
   fuzz_dash_e
   fuzz_doc_symbols
   fuzz_hover
@@ -21,11 +21,11 @@ EOF
 exit 1
 fi
 
-fuzz_target="$1"
+target="$1"
 shift
 
-echo "building $fuzz_target"
-bazel build "//test/fuzz:$fuzz_target" --config=fuzz -c opt
+echo "building $target"
+bazel build "//test/fuzz:$target" --config=fuzz -c opt
 
 echo "making command file"
 cmds="$(mktemp)"
