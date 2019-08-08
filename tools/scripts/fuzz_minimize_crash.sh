@@ -8,12 +8,15 @@ cd "../.."
 if [ "$#" -lt 1 ]; then
 cat <<EOF
 usage:
-  $0 <fuzz_target> <crasher>
+  $0 <fuzz_target> <crasher> [<options>]
 
 example fuzz_target:
   fuzz_dash_e
   fuzz_doc_symbols
   fuzz_hover
+
+example options:
+  --stress-incremental-resolver
 EOF
 exit 1
 fi
@@ -22,8 +25,6 @@ fuzz_target="$1"
 shift
 crasher="$1"
 shift
-
-FUZZ_ARG="--stress-incremental-resolver" # to run incremental resolver
 
 mkdir -p fuzz_crashers/fixed/min fuzz_crashers/fixed/original fuzz_crashers/min
 
@@ -47,7 +48,7 @@ if [ -f "$output_file" ]; then
   cp "$output_file" "$crash_full_path"
 fi
 
-if "./bazel-bin/test/fuzz/$fuzz_target" "$crash_full_path" "$FUZZ_ARG"; then
+if "./bazel-bin/test/fuzz/$fuzz_target" "$crash_full_path" "$@"; then
   echo "already fixed"
   mv "$crash_full_path" "fuzz_crashers/fixed/original/$file_arg"
   exit
@@ -84,7 +85,7 @@ export ASAN_OPTIONS="dedup_token_length=10"
   -minimize_crash=1 \
   "$crash_full_path" \
   -exact_artifact_path=fuzz_crashers/min/"$file_arg" \
-  "$FUZZ_ARG" \
+  "$@" \
   &
 
 child=$!
