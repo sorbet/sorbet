@@ -42,16 +42,16 @@ if "bazel-bin/test/fuzz/fuzz_dash_e" "${crash_full_path}" ${FUZZ_ARG}; then
   exit 0
 fi
 
-interrupted=false
+cancelled=false
 
 handle_INT() {
   kill -INT "$child" 2>/dev/null
-  interrupted=true
+  cancelled=true
 }
 
 handle_TERM() {
   kill -TERM "$child" 2>/dev/null
-  interrupted=true
+  cancelled=true
 }
 
 trap handle_INT SIGINT
@@ -81,6 +81,8 @@ export ASAN_OPTIONS="dedup_token_length=10"
 child=$!
 wait "$child"
 
-if ! "$interrupted"; then
+if "$cancelled"; then
+  echo "cancelled"
+else
   mv "$output_file" "$output_file.done"
 fi
