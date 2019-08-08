@@ -42,16 +42,16 @@ if "bazel-bin/test/fuzz/fuzz_dash_e" "${crash_full_path}" ${FUZZ_ARG}; then
   exit 0
 fi
 
-interrupted=
+interrupted=false
 
 handle_INT() {
   kill -INT "$child" 2>/dev/null
-  interrupted=1
+  interrupted=true
 }
 
 handle_TERM() {
   kill -TERM "$child" 2>/dev/null
-  interrupted=1
+  interrupted=true
 }
 
 trap handle_INT SIGINT
@@ -70,6 +70,6 @@ command -v llvm-symbolizer >/dev/null 2>&1 || { echo 'will need llvm-symbolizer'
 child=$!
 wait "$child"
 
-if [ -z "$interrupted" ]; then
+if ! "$interrupted"; then
   mv "$output_file" "$output_file.done"
 fi
