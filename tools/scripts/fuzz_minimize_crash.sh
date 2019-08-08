@@ -22,11 +22,13 @@ mkdir -p fuzz_crashers/fixed/min fuzz_crashers/fixed/original fuzz_crashers/min
 file_arg="$(basename "$crasher")"
 crash_full_path="$(realpath "$crasher")"
 output_file="fuzz_crashers/min/$file_arg"
-if [ -f "$output_file.done" ]; then
+done_file="$output_file.done"
+
+if [ -f "$done_file" ]; then
   echo "already minimized"
-  if "bazel-bin/test/fuzz/fuzz_dash_e" "$output_file.done"; then
+  if "bazel-bin/test/fuzz/fuzz_dash_e" "$done_file"; then
     echo "already fixed"
-    mv "$output_file.done" "fuzz_crashers/fixed/min/$file_arg"
+    mv "$done_file" "fuzz_crashers/fixed/min/$file_arg"
   fi
   exit 0
 fi
@@ -82,5 +84,5 @@ wait "$child"
 if "$cancelled"; then
   echo "cancelled"
 else
-  mv "$output_file" "$output_file.done"
+  mv "$output_file" "$done_file"
 fi
