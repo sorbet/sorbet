@@ -18,11 +18,11 @@ EOF
 exit 1
 fi
 
-what="$1"
+fuzz_target="$1"
 shift
 
-echo "building $what"
-bazel build "//test/fuzz:$what" --config=fuzz -c opt
+echo "building $fuzz_target"
+bazel build "//test/fuzz:$fuzz_target" --config=fuzz -c opt
 
 echo "making command file"
 cmds="$(mktemp)"

@@ -21,11 +21,11 @@ EOF
 exit 1
 fi
 
-what="$1"
+fuzz_target="$1"
 shift
 
-echo "building $what"
-bazel build "//test/fuzz:$what" --config=fuzz -c opt
+echo "building $fuzz_target"
+bazel build "//test/fuzz:$fuzz_target" --config=fuzz -c opt
 
 # we want the bazel build command to run before this check so that bazel can download itself.
 export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
@@ -43,7 +43,7 @@ mkdir -p fuzz_crashers/original
 export ASAN_OPTIONS="dedup_token_length=10"
 
 echo "running"
-nice "./bazel-bin/test/fuzz/$what" \
+nice "./bazel-bin/test/fuzz/$fuzz_target" \
   -only_ascii=1 \
   -dict=test/fuzz/ruby.dict \
   -artifact_prefix=fuzz_crashers/original/ \
