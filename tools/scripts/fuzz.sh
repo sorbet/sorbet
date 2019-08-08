@@ -27,12 +27,17 @@ mkdir -p fuzz_corpus
 find test/testdata -iname "*.rb" | grep -v disable | xargs -n 1 -I % cp % fuzz_corpus
 mkdir -p fuzz_crashers/original
 
-echo "running"
 # use top 10 frames to tell different errors apart
 export ASAN_OPTIONS="dedup_token_length=10"
+# set FUZZ_ARGS to a space-delimited list of other args to pass to the fuzzer, for instance
+# --stress-incremental-resolver. by default it is empty.
+FUZZ_ARGS="${FUZZ_ARGS:-}"
+
+echo "running with FUZZ_ARGS: $FUZZ_ARGS"
 nice "./bazel-bin/test/fuzz/$what" \
   -use_value_profile=1 \
   -only_ascii=1 \
   -dict=test/fuzz/ruby.dict \
   -artifact_prefix=fuzz_crashers/original/ \
-  fuzz_corpus
+  fuzz_corpus \
+  $FUZZ_ARGS
