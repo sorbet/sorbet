@@ -26,7 +26,7 @@ done_file="$output_file.done"
 
 if [ -f "$done_file" ]; then
   echo "already minimized"
-  if "bazel-bin/test/fuzz/fuzz_dash_e" "$done_file"; then
+  if "./bazel-bin/test/fuzz/fuzz_dash_e" "$done_file"; then
     echo "already fixed"
     mv "$done_file" "fuzz_crashers/fixed/min/$file_arg"
   fi
@@ -39,7 +39,7 @@ if [ -f "$output_file" ]; then
   cp "$output_file" "$crash_full_path"
 fi
 
-if "bazel-bin/test/fuzz/fuzz_dash_e" "$crash_full_path" "$FUZZ_ARG"; then
+if "./bazel-bin/test/fuzz/fuzz_dash_e" "$crash_full_path" "$FUZZ_ARG"; then
   echo "already fixed"
   mv "$crash_full_path" "fuzz_crashers/fixed/original/$file_arg"
   exit
