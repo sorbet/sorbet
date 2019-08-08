@@ -81,6 +81,7 @@ fi
 export ASAN_OPTIONS="dedup_token_length=10"
 
 # start a backgrounded command that we'll monitor
+echo "$crasher: running"
 nice "./bazel-bin/test/fuzz/$target" \
   -dict=test/fuzz/ruby.dict \
   -minimize_crash=1 \
@@ -96,4 +97,5 @@ if "$cancelled"; then
   echo "$crasher: cancelled"
 else
   mv "$output_file" "$done_file"
+  echo "$crasher: done"
 fi
