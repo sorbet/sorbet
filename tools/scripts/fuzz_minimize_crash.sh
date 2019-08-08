@@ -33,22 +33,22 @@ output_file="fuzz_crashers/min/$crasher_name"
 done_file="$output_file.done"
 
 if [ -f "$done_file" ]; then
-  echo "already minimized"
+  echo "$crasher: already minimized"
   if "./bazel-bin/test/fuzz/$target" "$done_file"; then
-    echo "already fixed"
+    echo "$crasher: already fixed"
     mv "$done_file" "fuzz_crashers/fixed/min/$crasher_name"
   fi
   exit
 fi
 
 if [ -f "$output_file" ]; then
-  echo "reusing previous minimized state"
+  echo "$crasher: reusing previous minimized state"
   crasher="$(mktemp)"
   cp "$output_file" "$crasher"
 fi
 
 if "./bazel-bin/test/fuzz/$target" "$crasher" "$@"; then
-  echo "already fixed"
+  echo "$crasher: already fixed"
   mv "$crasher" "fuzz_crashers/fixed/original/$crasher_name"
   exit
 fi
@@ -91,7 +91,7 @@ child=$!
 wait "$child"
 
 if "$cancelled"; then
-  echo "cancelled"
+  echo "$crasher: cancelled"
 else
   mv "$output_file" "$done_file"
 fi
