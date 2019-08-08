@@ -45,11 +45,11 @@ extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t size) {
+    auto fileUri = sorbet::test::filePathToUri(rootUri, "file.rb");
+    std::string contents((const char *)data, size);
     auto lspWrapper = mkLSPWrapper();
     int nextId = 0;
     sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId);
-    std::string contents((const char *)data, size);
-    auto fileUri = sorbet::test::filePathToUri(rootUri, "file.rb");
     lspWrapper.getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::NotificationMessage>(
         "2.0", sorbet::test::LSPMethod::TextDocumentDidOpen,
         std::make_unique<sorbet::test::DidOpenTextDocumentParams>(
