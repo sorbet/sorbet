@@ -29,7 +29,6 @@ shift
 mkdir -p fuzz_crashers/fixed/min fuzz_crashers/fixed/original fuzz_crashers/min
 
 file_arg="$(basename "$crasher")"
-crash_full_path="$(realpath "$crasher")"
 output_file="fuzz_crashers/min/$file_arg"
 done_file="$output_file.done"
 
@@ -44,13 +43,13 @@ fi
 
 if [ -f "$output_file" ]; then
   echo "Reusing previous minimized state"
-  crash_full_path="$(mktemp)"
-  cp "$output_file" "$crash_full_path"
+  crasher="$(mktemp)"
+  cp "$output_file" "$crasher"
 fi
 
-if "./bazel-bin/test/fuzz/$target" "$crash_full_path" "$@"; then
+if "./bazel-bin/test/fuzz/$target" "$crasher" "$@"; then
   echo "already fixed"
-  mv "$crash_full_path" "fuzz_crashers/fixed/original/$file_arg"
+  mv "$crasher" "fuzz_crashers/fixed/original/$file_arg"
   exit
 fi
 
@@ -83,7 +82,7 @@ export ASAN_OPTIONS="dedup_token_length=10"
   -use_value_profile=1 \
   -dict=test/fuzz/ruby.dict \
   -minimize_crash=1 \
-  "$crash_full_path" \
+  "$crasher" \
   -exact_artifact_path=fuzz_crashers/min/"$file_arg" \
   "$@" \
   &
