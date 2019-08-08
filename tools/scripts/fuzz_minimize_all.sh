@@ -29,6 +29,7 @@ bazel build "//test/fuzz:$target" --config=fuzz -c opt
 
 echo "making command file"
 cmds="$(mktemp)"
+trap "rm '$cmds'" EXIT
 for f in fuzz_crashers/original/crash-*; do
   # this breaks if any of the extra args in $*, or $target, or $f, contain spaces. for instance if this script was
   # called like this: $0 fuzz_dash_e --extra-opt 'foo bar'
@@ -37,4 +38,3 @@ done
 
 echo "running in parallel"
 parallel --joblog - <"$cmds"
-rm "$cmds"
