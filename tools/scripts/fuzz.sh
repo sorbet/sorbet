@@ -34,7 +34,7 @@ if ! command -v llvm-symbolizer >/dev/null; then
   exit 1
 fi
 
-echo "setting up files"
+echo "setting up fuzz_corpus"
 mkdir -p fuzz_corpus
 find test/testdata -iname "*.rb" | grep -v disable | xargs -n 1 -I % cp % fuzz_corpus
 mkdir -p fuzz_crashers/original
