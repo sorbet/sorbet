@@ -35,7 +35,6 @@ FUZZ_ARGS="${FUZZ_ARGS:---}"
 
 echo "running with FUZZ_ARGS: $FUZZ_ARGS"
 nice "./bazel-bin/test/fuzz/$what" \
-  -use_value_profile=1 \
   -only_ascii=1 \
   -dict=test/fuzz/ruby.dict \
   -artifact_prefix=fuzz_crashers/original/ \
