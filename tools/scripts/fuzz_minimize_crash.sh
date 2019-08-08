@@ -44,14 +44,12 @@ fi
 
 interrupted=
 
-handler_int()
-{
+handler_int() {
   kill -INT "$child" 2>/dev/null
   interrupted=1
 }
 
-handler_term()
-{
+handler_term() {
   kill -TERM "$child" 2>/dev/null
   interrupted=1
 }
