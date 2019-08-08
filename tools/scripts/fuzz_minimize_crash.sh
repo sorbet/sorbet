@@ -82,9 +82,9 @@ export ASAN_OPTIONS="dedup_token_length=10"
   -use_value_profile=1 \
   -dict=test/fuzz/ruby.dict \
   -minimize_crash=1 \
-  "$crasher" \
   -exact_artifact_path="$output_file" \
   "$@" \
+  "$crasher" \
   &
 
 child=$!
