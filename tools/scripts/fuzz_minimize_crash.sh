@@ -81,7 +81,7 @@ fi
 export ASAN_OPTIONS="dedup_token_length=10"
 
 # start a backgrounded command that we'll monitor
-"./bazel-bin/test/fuzz/$target" \
+nice "./bazel-bin/test/fuzz/$target" \
   -dict=test/fuzz/ruby.dict \
   -minimize_crash=1 \
   -exact_artifact_path="$output_file" \

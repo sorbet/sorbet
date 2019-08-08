@@ -43,7 +43,7 @@ mkdir -p fuzz_crashers/original
 export ASAN_OPTIONS="dedup_token_length=10"
 
 echo "running"
-"./bazel-bin/test/fuzz/$target" \
+nice "./bazel-bin/test/fuzz/$target" \
   -only_ascii=1 \
   -dict=test/fuzz/ruby.dict \
   -artifact_prefix=fuzz_crashers/original/ \
