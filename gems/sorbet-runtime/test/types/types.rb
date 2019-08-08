@@ -186,6 +186,10 @@ module Opus::Types::Test
       end
     end
 
+    class MyEnum
+      include Enumerable
+    end
+
     describe "TypedArray" do
       it 'fails if value is not an array' do
         type = T::Array[Integer]
@@ -267,6 +271,14 @@ module Opus::Types::Test
         msg = type.error_message_for_obj({foo: 17})
         assert_equal(
           "Expected type T::Array[Symbol], got T::Hash[Symbol, Integer]",
+          msg)
+      end
+
+      it 'gives the right error when passed an Enum' do
+        type = T::Array[Integer]
+        msg = type.error_message_for_obj(MyEnum.new)
+        assert_equal(
+          "Expected type T::Array[Integer], got Opus::Types::Test::TypesTest::MyEnum",
           msg)
       end
 
