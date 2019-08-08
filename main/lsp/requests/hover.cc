@@ -68,11 +68,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
         auto resp = move(queryResponses[0]);
 
         optional<string> documentation = nullopt;
-        if (
-                resp->isIdent() || 
-                resp->isLiteral() || 
-                resp->isConstant() || 
-                resp->isDefinition()) {
+        if (resp->isConstant() || resp->isDefinition()) {
             auto origins = resp->getTypeAndOrigins().origins;
             if (!origins.empty()) {
                 auto loc = origins[0];
