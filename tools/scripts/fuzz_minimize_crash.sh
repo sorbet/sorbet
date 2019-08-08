@@ -58,10 +58,12 @@ trap handle_INT SIGINT
 trap handle_TERM SIGTERM
 
 mkdir -p "fuzz_crashers/min/"
-PATH=$PATH:$(pwd)/bazel-sorbet/external/llvm_toolchain/bin/
-export PATH
 
-command -v llvm-symbolizer >/dev/null 2>&1 || { echo 'will need llvm-symbolizer' ; exit 1; }
+export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
+if ! command -v llvm-symbolizer >/dev/null; then
+  echo "fatal: command not found: llvm-symbolizer"
+  exit 1
+fi
 
 (
   ASAN_OPTIONS=dedup_token_length=10 ./bazel-bin/test/fuzz/fuzz_dash_e -use_value_profile=1 -dict=test/fuzz/ruby.dict -minimize_crash=1 "$crash_full_path" -exact_artifact_path=fuzz_crashers/min/"$file_arg" ${FUZZ_ARG}
