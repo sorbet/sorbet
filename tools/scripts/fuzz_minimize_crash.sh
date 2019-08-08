@@ -44,18 +44,18 @@ fi
 
 interrupted=
 
-handler_int() {
+handle_INT() {
   kill -INT "$child" 2>/dev/null
   interrupted=1
 }
 
-handler_term() {
+handle_TERM() {
   kill -TERM "$child" 2>/dev/null
   interrupted=1
 }
 
-trap handler_int SIGINT
-trap handler_term SIGTERM
+trap handle_INT SIGINT
+trap handle_TERM SIGTERM
 
 mkdir -p "fuzz_crashers/min/"
 PATH=$PATH:$(pwd)/bazel-sorbet/external/llvm_toolchain/bin/
