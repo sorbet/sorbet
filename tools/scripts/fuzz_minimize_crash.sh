@@ -36,9 +36,9 @@ if [ -f "$output_file" ]; then
   cp "$output_file" "$crash_full_path"
 fi
 
-if "bazel-bin/test/fuzz/fuzz_dash_e" "${crash_full_path}" "$FUZZ_ARG"; then
+if "bazel-bin/test/fuzz/fuzz_dash_e" "$crash_full_path" "$FUZZ_ARG"; then
   echo "already fixed"
-  mv "${crash_full_path}" "fuzz_crashers/fixed/original/$file_arg"
+  mv "$crash_full_path" "fuzz_crashers/fixed/original/$file_arg"
   exit 0
 fi
 
