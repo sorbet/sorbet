@@ -35,7 +35,7 @@ fi
 
 if [ -f "$output_file" ]; then
   echo "Reusing previous minimized state"
-  crash_full_path=$(mktemp)
+  crash_full_path="$(mktemp)"
   cp "$output_file" "$crash_full_path"
 fi
 
