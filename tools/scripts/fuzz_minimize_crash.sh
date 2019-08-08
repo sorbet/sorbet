@@ -5,8 +5,12 @@ cd "$(dirname "$0")"
 cd "../.."
 # we're now at the root of the repo.
 
-if (( $# != 1 )); then
-    echo "Illegal number of parameters. Need a single file to minimize"
+if [ "$#" -lt 1 ]; then
+cat <<EOF
+usage:
+  $0 <crasher>
+EOF
+exit 1
 fi
 
 FUZZ_ARG="--stress-incremental-resolver" # to run incremental resolver
