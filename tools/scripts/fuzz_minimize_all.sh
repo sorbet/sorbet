@@ -8,12 +8,15 @@ cd "../.."
 if [ "$#" -eq 0 ]; then
 cat <<EOF
 usage:
-  $0 <fuzz_target>
+  $0 <fuzz_target> [<options>]
 
 example fuzz_target:
   fuzz_dash_e
   fuzz_doc_symbols
   fuzz_hover
+
+example options:
+  --stress-incremental-resolver
 EOF
 exit 1
 fi
@@ -27,7 +30,9 @@ bazel build "//test/fuzz:$fuzz_target" --config=fuzz -c opt
 echo "making command file"
 cmds="$(mktemp)"
 for f in fuzz_crashers/original/crash-*; do
-  echo "tools/scripts/fuzz_minimize_crash.sh '$f' 2>/dev/null" >>"$cmds"
+  # this breaks if any of the extra args in $@ have spaces, for instance if this script was called like this:
+  # $0 fuzz_dash_e --extra-opt 'foo bar'
+  echo "tools/scripts/fuzz_minimize_crash.sh $f $* 2>/dev/null" >>"$cmds"
 done
 
 echo "running in parallel"
