@@ -1483,13 +1483,11 @@ public:
 
         auto sym = id->symbol;
         auto data = sym.data(ctx);
-        if (data->isTypeAlias()) {
+        if (data->isTypeAlias() || data->isTypeMember()) {
             return asgn;
         }
 
-        if (data->isTypeMember()) {
-            return asgn;
-        } else if (data->isStaticField() && data->resultType == nullptr) {
+        if (data->isStaticField() && data->resultType == nullptr) {
             data->resultType = resolveConstantType(ctx, asgn->rhs, sym);
             if (data->resultType == nullptr) {
                 auto rhs = move(asgn->rhs);
