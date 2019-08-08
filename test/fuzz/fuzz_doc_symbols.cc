@@ -12,7 +12,8 @@ const auto console = spdlog::stdout_logger_mt("console");
 const auto typeErrors = spdlog::stdout_logger_mt("typeErrors");
 const auto rootPath = "/tmp";
 const auto rootUri = fmt::format("file://{}", rootPath);
-const auto fileUri = sorbet::test::filePathToUri(rootUri, "file.rb");
+const auto fileName = "file.rb";
+const auto fileUri = sorbet::test::filePathToUri(rootUri, fileName);
 
 sorbet::realmain::options::Options mkOpts() {
     sorbet::realmain::options::Options opts;
