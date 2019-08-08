@@ -29,7 +29,7 @@ bazel build "//test/fuzz:$target" --config=fuzz -c opt
 
 echo "making command file"
 cmds="$(mktemp)"
-trap "rm '$cmds'" EXIT
+trap 'rm "$cmds"' EXIT
 
 # https://stackoverflow.com/questions/2937407
 if ! compgen -G "fuzz_crashers/original/crash-*" >/dev/null; then
