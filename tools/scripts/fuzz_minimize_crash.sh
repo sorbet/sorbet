@@ -14,6 +14,7 @@ exit 1
 fi
 
 crasher="$1"
+shift
 
 FUZZ_ARG="--stress-incremental-resolver" # to run incremental resolver
 
