@@ -1,3 +1,5 @@
 No errors! Great job.
 should not cache erroring trees
-No errors! Great job.
+     1 |puts("hi".)
+                  ^
+Errors: 1
