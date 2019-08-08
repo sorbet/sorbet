@@ -32,7 +32,7 @@ cmds="$(mktemp)"
 for f in fuzz_crashers/original/crash-*; do
   # this breaks if any of the extra args in $@ have spaces, for instance if this script was called like this:
   # $0 fuzz_dash_e --extra-opt 'foo bar'
-  echo "tools/scripts/fuzz_minimize_crash.sh $f $* 2>/dev/null" >>"$cmds"
+  echo "tools/scripts/fuzz_minimize_crash.sh $target $f $* 2>/dev/null" >>"$cmds"
 done
 
 echo "running in parallel"
