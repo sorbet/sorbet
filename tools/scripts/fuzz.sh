@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 cd "../.."
 # we're now at the root of the repo.
 
-if [ "$#" -eq 0 ]; then
+if [ "$#" -lt 1 ]; then
 cat <<EOF
 usage:
   $0 <fuzz_target> [<options>]
