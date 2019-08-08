@@ -72,15 +72,22 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             auto origins = resp->getTypeAndOrigins().origins;
             if (!origins.empty()) {
                 auto loc = origins[0];
-                documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
+                if (loc.exists()) {
+                    documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
+                }
             }
         }
 
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
             // TODO main.method is <none> when calling .new on a class.
-            auto loc = sendResp->dispatchResult->main.method.data(*gs)->loc();
-            documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
+            auto start = sendResp->dispatchResult.get();
+            if (start != nullptr && start->main.method.exists() && !start->main.receiver->isUntyped()) {
+                auto loc = start->main.method.data(*gs)->loc();
+                if (loc.exists()) {
+                    documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
+                }
+            }
             auto &constraint = sendResp->dispatchResult->main.constr;
             if (constraint) {
                 retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
