@@ -181,7 +181,7 @@ class LSPLoop {
         std::unique_ptr<core::GlobalState> gs;
         // The edit applied to `gs`.
         LSPLoop::FileUpdates updates;
-        bool tookFastPath;
+        bool tookFastPath = false;
     };
     /** Conservatively rerun entire pipeline without caching any trees */
     TypecheckRun runSlowPath(FileUpdates updates, const core::lsp::Query &q = core::lsp::Query::noQuery()) const;
