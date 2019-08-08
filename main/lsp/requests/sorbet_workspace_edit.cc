@@ -128,9 +128,7 @@ LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
         }
         return tryFastPath(move(gs), move(fileUpdates));
     } else {
-        TypecheckRun emptyRun;
-        emptyRun.gs = move(gs);
-        return emptyRun;
+        return TypecheckRun{{}, {}, {}, move(gs), {}, true};
     }
 }
 
