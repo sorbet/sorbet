@@ -32,3 +32,4 @@ done
 
 echo "running in parallel"
 parallel --joblog - < "$cmds"
+rm "$cmds"
