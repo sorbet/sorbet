@@ -42,7 +42,7 @@ if [ -f "$done_file" ]; then
 fi
 
 if [ -f "$output_file" ]; then
-  echo "Reusing previous minimized state"
+  echo "reusing previous minimized state"
   crasher="$(mktemp)"
   cp "$output_file" "$crasher"
 fi
