@@ -96,6 +96,7 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
 
 /**
  * Retrieves the documentation above a symbol.
+ * - Returned documentation has one trailing newline (if it exists)
  * - Assumes that valid ruby syntax is used.
  * - Strips the first whitespace character from a comment e.g
  *      # a comment
@@ -181,13 +182,11 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     string documentation = absl::StrJoin(documentation_lines.rbegin(), documentation_lines.rend(), "\n");
     documentation = absl::StripTrailingAsciiWhitespace(documentation);
 
-    // Ensure single newline
-    while(documentation.length() > 0 && documentation.back() == '\n') documentation.pop_back();
-    if (documentation.length() > 0) documentation.append("\n");
-
     if (documentation.empty())
         return nullopt;
     else
+        // Ensure single newline for non-empty documentation
+        documentation.append("\n");
         return documentation;
 }
 
