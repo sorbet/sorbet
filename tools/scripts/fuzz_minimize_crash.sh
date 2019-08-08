@@ -15,6 +15,9 @@ example target:
   fuzz_doc_symbols
   fuzz_hover
 
+example crasher:
+  fuzz_crashers/original/crash-[...]
+
 example options:
   --stress-incremental-resolver
 EOF
