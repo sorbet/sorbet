@@ -38,5 +38,5 @@ nice "./bazel-bin/test/fuzz/$what" \
   -only_ascii=1 \
   -dict=test/fuzz/ruby.dict \
   -artifact_prefix=fuzz_crashers/original/ \
-  fuzz_corpus \
-  "$FUZZ_ARGS"
+  "$FUZZ_ARGS" \
+  fuzz_corpus
