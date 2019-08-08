@@ -12,12 +12,12 @@ input_src=(
   $(find 'fuzz_crashers/original' -name "crash-*" | sort)
 )
 
-COMMAND_FILE=$(mktemp)
+cmds="$(mktemp)"
 
 for this_src in "${input_src[@]}" DUMMY; do
   if [[ ! "$this_src" == DUMMY ]]; then
-    echo "./tools/scripts/fuzz_minimize_crash.sh \"$this_src\" 2>/dev/null" >> "$COMMAND_FILE"
+    echo "./tools/scripts/fuzz_minimize_crash.sh \"$this_src\" 2>/dev/null" >> "$cmds"
   fi
 done
 
-parallel --joblog - < "$COMMAND_FILE"
+parallel --joblog - < "$cmds"
