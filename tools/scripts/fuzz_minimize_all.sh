@@ -5,7 +5,23 @@ cd "$(dirname "$0")"
 cd "../.."
 # we're now at the root of the repo.
 
-bazel build //test/fuzz:fuzz_dash_e --config=fuzz -c opt
+if [ "$#" -eq 0 ]; then
+cat <<EOF
+usage:
+  $0 <fuzz_target>
+
+example fuzz_target:
+  fuzz_dash_e
+  fuzz_doc_symbols
+  fuzz_hover
+EOF
+exit 1
+fi
+
+what="$1"
+shift
+
+bazel build "//test/fuzz:$what" --config=fuzz -c opt
 
 cmds="$(mktemp)"
 
