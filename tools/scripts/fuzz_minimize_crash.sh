@@ -30,7 +30,7 @@ if [ -f "$done_file" ]; then
     echo "already fixed"
     mv "$done_file" "fuzz_crashers/fixed/min/$file_arg"
   fi
-  exit 0
+  exit
 fi
 if [ -f "$output_file" ]; then
   echo "Reusing previous minimized state"
@@ -41,7 +41,7 @@ fi
 if "bazel-bin/test/fuzz/fuzz_dash_e" "$crash_full_path" "$FUZZ_ARG"; then
   echo "already fixed"
   mv "$crash_full_path" "fuzz_crashers/fixed/original/$file_arg"
-  exit 0
+  exit
 fi
 
 cancelled=false
