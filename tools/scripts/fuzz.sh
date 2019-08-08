@@ -42,7 +42,7 @@ mkdir -p fuzz_crashers/original
 # use top 10 frames to tell different errors apart
 export ASAN_OPTIONS="dedup_token_length=10"
 
-echo "running with args: '$@'"
+echo "running"
 nice "./bazel-bin/test/fuzz/$what" \
   -only_ascii=1 \
   -dict=test/fuzz/ruby.dict \
