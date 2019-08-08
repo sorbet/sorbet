@@ -1,6 +1,9 @@
 #!/bin/bash
 
 set -exuo pipefail
+cd "$(dirname "$0")"
+cd "../.."
+# we're now at the root of the repo.
 
 bazel build //test/fuzz:fuzz_dash_e --config=fuzz -c opt
 
