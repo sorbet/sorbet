@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -exuo pipefail
+set -euo pipefail
 cd "$(dirname "$0")"
 cd "../.."
 # we're now at the root of the repo.
