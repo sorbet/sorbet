@@ -27,9 +27,9 @@ bazel build "//test/fuzz:$what" --config=fuzz -c opt
 echo "making command file"
 cmds="$(mktemp)"
 for f in fuzz_crashers/original/crash-*; do
-  echo "./tools/scripts/fuzz_minimize_crash.sh '$f' 2>/dev/null" >> "$cmds"
+  echo "tools/scripts/fuzz_minimize_crash.sh '$f' 2>/dev/null" >>"$cmds"
 done
 
 echo "running in parallel"
-parallel --joblog - < "$cmds"
+parallel --joblog - <"$cmds"
 rm "$cmds"
