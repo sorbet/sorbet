@@ -822,6 +822,115 @@ public:
     }
 };
 
+class ResolveTypeParamsWalk {
+public:
+    unique_ptr<ast::Assign> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
+        auto *id = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
+        if (id == nullptr || !id->symbol.exists()) {
+            return asgn;
+        }
+
+        auto sym = id->symbol;
+        auto data = sym.data(ctx);
+        if (data->isTypeAlias()) {
+            return asgn;
+        }
+
+        if (data->isTypeMember()) {
+            auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
+            ENFORCE(send->recv->isSelfReference());
+            ENFORCE(send->fun == core::Names::typeMember() || send->fun == core::Names::typeTemplate());
+            auto *memberType = core::cast_type<core::LambdaParam>(data->resultType.get());
+            ENFORCE(memberType != nullptr);
+
+            // NOTE: the resultType is set back in the namer to be a LambdaParam
+            // with `T.untyped` for its bounds. We fix that here by setting the
+            // bounds to top and bottom.
+            memberType->lowerBound = core::Types::bottom();
+            memberType->upperBound = core::Types::top();
+
+            core::LambdaParam *parentType = nullptr;
+            auto parentMember = data->owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
+            if (parentMember.exists()) {
+                parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType.get());
+                ENFORCE(parentType != nullptr);
+            }
+
+            // When no args are supplied, this implies that the upper and lower
+            // bounds of the type parameter are top and bottom.
+            ast::Hash *hash = nullptr;
+            if (send->args.size() == 1) {
+                hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+            } else if (send->args.size() == 2) {
+                hash = ast::cast_tree<ast::Hash>(send->args[1].get());
+            }
+
+            if (hash) {
+                int i = -1;
+                for (auto &keyExpr : hash->keys) {
+                    i++;
+                    auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
+                    if (lit && lit->isSymbol(ctx)) {
+                        ParsedSig emptySig;
+                        auto allowSelfType = true;
+                        auto allowRebind = false;
+                        auto allowTypeMember = false;
+                        core::TypePtr resTy =
+                            TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig,
+                                                      TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, sym});
+
+                        switch (lit->asSymbol(ctx)._id) {
+                            case core::Names::fixed()._id:
+                                memberType->lowerBound = resTy;
+                                memberType->upperBound = resTy;
+                                break;
+
+                            case core::Names::lower()._id:
+                                memberType->lowerBound = resTy;
+                                break;
+
+                            case core::Names::upper()._id:
+                                memberType->upperBound = resTy;
+                                break;
+                        }
+                    }
+                }
+            }
+
+            // If the parent bounds existis, validate the new bounds against
+            // those of the parent.
+            // NOTE: these errors could be better for cases involving
+            // `fixed`.
+            if (parentType != nullptr) {
+                if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound)) {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                        e.setHeader("parent lower bound `{}` is not a subtype of lower bound `{}`",
+                                    parentType->lowerBound->show(ctx), memberType->lowerBound->show(ctx));
+                    }
+                }
+                if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound)) {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                        e.setHeader("upper bound `{}` is not a subtype of parent upper bound `{}`",
+                                    memberType->upperBound->show(ctx), parentType->upperBound->show(ctx));
+                    }
+                }
+            }
+
+            // Ensure that the new lower bound is a subtype of the upper
+            // bound. This will be a no-op in the case that the type member
+            // is fixed.
+            if (!core::Types::isSubType(ctx, memberType->lowerBound, memberType->upperBound)) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeMemberBounds)) {
+                    e.setHeader("`{}` is not a subtype of `{}`", memberType->lowerBound->show(ctx),
+                                memberType->upperBound->show(ctx));
+                }
+            }
+        }
+
+        return asgn;
+    }
+};
+
 class ResolveSignaturesWalk {
 private:
     std::vector<int> nestedBlockCounts;
@@ -1374,101 +1483,11 @@ public:
 
         auto sym = id->symbol;
         auto data = sym.data(ctx);
-        if (data->isTypeAlias()) {
+        if (data->isTypeAlias() || data->isTypeMember()) {
             return asgn;
         }
 
-        if (data->isTypeMember()) {
-            auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
-            ENFORCE(send->recv->isSelfReference());
-            ENFORCE(send->fun == core::Names::typeMember() || send->fun == core::Names::typeTemplate());
-            auto *memberType = core::cast_type<core::LambdaParam>(data->resultType.get());
-            ENFORCE(memberType != nullptr);
-
-            // NOTE: the resultType is set back in the namer to be a LambdaParam
-            // with `T.untyped` for its bounds. We fix that here by setting the
-            // bounds to top and bottom.
-            memberType->lowerBound = core::Types::bottom();
-            memberType->upperBound = core::Types::top();
-
-            core::LambdaParam *parentType = nullptr;
-            auto parentMember = data->owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
-            if (parentMember.exists()) {
-                parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType.get());
-                ENFORCE(parentType != nullptr);
-            }
-
-            // When no args are supplied, this implies that the upper and lower
-            // bounds of the type parameter are top and bottom.
-            ast::Hash *hash = nullptr;
-            if (send->args.size() == 1) {
-                hash = ast::cast_tree<ast::Hash>(send->args[0].get());
-            } else if (send->args.size() == 2) {
-                hash = ast::cast_tree<ast::Hash>(send->args[1].get());
-            }
-
-            if (hash) {
-                int i = -1;
-                for (auto &keyExpr : hash->keys) {
-                    i++;
-                    auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
-                    if (lit && lit->isSymbol(ctx)) {
-                        ParsedSig emptySig;
-                        auto allowSelfType = true;
-                        auto allowRebind = false;
-                        auto allowTypeMember = false;
-                        core::TypePtr resTy =
-                            TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig,
-                                                      TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, sym});
-
-                        switch (lit->asSymbol(ctx)._id) {
-                            case core::Names::fixed()._id:
-                                memberType->lowerBound = resTy;
-                                memberType->upperBound = resTy;
-                                break;
-
-                            case core::Names::lower()._id:
-                                memberType->lowerBound = resTy;
-                                break;
-
-                            case core::Names::upper()._id:
-                                memberType->upperBound = resTy;
-                                break;
-                        }
-                    }
-                }
-            }
-
-            // If the parent bounds existis, validate the new bounds against
-            // those of the parent.
-            // NOTE: these errors could be better for cases involving
-            // `fixed`.
-            if (parentType != nullptr) {
-                if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound)) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
-                        e.setHeader("parent lower bound `{}` is not a subtype of lower bound `{}`",
-                                    parentType->lowerBound->show(ctx), memberType->lowerBound->show(ctx));
-                    }
-                }
-                if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound)) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
-                        e.setHeader("upper bound `{}` is not a subtype of parent upper bound `{}`",
-                                    memberType->upperBound->show(ctx), parentType->upperBound->show(ctx));
-                    }
-                }
-            }
-
-            // Ensure that the new lower bound is a subtype of the upper
-            // bound. This will be a no-op in the case that the type member
-            // is fixed.
-            if (!core::Types::isSubType(ctx, memberType->lowerBound, memberType->upperBound)) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeMemberBounds)) {
-                    e.setHeader("`{}` is not a subtype of `{}`", memberType->lowerBound->show(ctx),
-                                memberType->upperBound->show(ctx));
-                }
-            }
-
-        } else if (data->isStaticField() && data->resultType == nullptr) {
+        if (data->isStaticField() && data->resultType == nullptr) {
             data->resultType = resolveConstantType(ctx, asgn->rhs, sym);
             if (data->resultType == nullptr) {
                 auto rhs = move(asgn->rhs);
@@ -1717,8 +1736,19 @@ vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::Pars
     finalizeAncestors(ctx.state);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     finalizeSymbols(ctx.state);
+    trees = resolveTypeParams(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
+
+    return trees;
+}
+
+vector<ast::ParsedFile> Resolver::resolveTypeParams(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
+    ResolveTypeParamsWalk sigs;
+    Timer timeit(ctx.state.errorQueue->logger, "resolver.type_params");
+    for (auto &tree : trees) {
+        tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
+    }
 
     return trees;
 }
@@ -1756,6 +1786,7 @@ vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector
     auto workers = WorkerPool::create(0, ctx.state.tracer());
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), *workers);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
+    trees = resolveTypeParams(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.
