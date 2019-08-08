@@ -22,18 +22,18 @@ sorbet::realmain::options::Options mkOpts() {
 }
 
 std::unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain::options::Options &opts,
-                                                         std::unique_ptr<sorbet::KeyValueStore> &kvstore) {
+                                                         std::unique_ptr<sorbet::KeyValueStore> &kvStore) {
     auto gs = std::make_unique<sorbet::core::GlobalState>(
         (std::make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console)));
-    sorbet::payload::createInitialGlobalState(gs, opts, kvstore);
+    sorbet::payload::createInitialGlobalState(gs, opts, kvStore);
     gs->errorQueue->ignoreFlushes = true;
     return gs;
 }
 
 sorbet::realmain::lsp::LSPWrapper mkLSPWrapper() {
-    std::unique_ptr<sorbet::KeyValueStore> kvstore;
+    std::unique_ptr<sorbet::KeyValueStore> kvStore;
     auto opts = mkOpts();
-    static const auto commonGs = mkGlobalState(opts, kvstore);
+    static const auto commonGs = mkGlobalState(opts, kvStore);
     // TODO how to use opts and avoid another mkOpts()?
     auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(commonGs->deepCopy(true), mkOpts(), console, true);
     lspWrapper.enableAllExperimentalFeatures();
