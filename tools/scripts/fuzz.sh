@@ -5,15 +5,24 @@ cd "$(dirname "$0")"
 cd "../.."
 # we're now at the root of the repo.
 
-what=""
 if [ "$#" -eq 0 ]; then
-  what="fuzz_dash_e"
-elif [ "$#" -eq 1 ]; then
-  what="$1"
-else
-  echo "usage: $0 [<fuzz_target>]"
-  exit 1
+cat <<EOF
+usage:
+  $0 <fuzz_target> [<options>]
+
+example fuzz_target:
+  fuzz_dash_e
+  fuzz_doc_symbols
+  fuzz_hover
+
+example options:
+  --stress-incremental-resolver
+EOF
+exit 1
 fi
+
+what="$1"
+shift
 
 echo "building $what"
 bazel build "//test/fuzz:$what" --config=fuzz -c opt
