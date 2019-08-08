@@ -28,15 +28,15 @@ shift
 
 mkdir -p fuzz_crashers/fixed/min fuzz_crashers/fixed/original fuzz_crashers/min
 
-file_arg="$(basename "$crasher")"
-output_file="fuzz_crashers/min/$file_arg"
+crasher_name="$(basename "$crasher")"
+output_file="fuzz_crashers/min/$crasher_name"
 done_file="$output_file.done"
 
 if [ -f "$done_file" ]; then
   echo "already minimized"
   if "./bazel-bin/test/fuzz/$target" "$done_file"; then
     echo "already fixed"
-    mv "$done_file" "fuzz_crashers/fixed/min/$file_arg"
+    mv "$done_file" "fuzz_crashers/fixed/min/$crasher_name"
   fi
   exit
 fi
@@ -49,7 +49,7 @@ fi
 
 if "./bazel-bin/test/fuzz/$target" "$crasher" "$@"; then
   echo "already fixed"
-  mv "$crasher" "fuzz_crashers/fixed/original/$file_arg"
+  mv "$crasher" "fuzz_crashers/fixed/original/$crasher_name"
   exit
 fi
 
@@ -83,7 +83,7 @@ export ASAN_OPTIONS="dedup_token_length=10"
   -dict=test/fuzz/ruby.dict \
   -minimize_crash=1 \
   "$crasher" \
-  -exact_artifact_path=fuzz_crashers/min/"$file_arg" \
+  -exact_artifact_path=fuzz_crashers/min/"$crasher_name" \
   "$@" \
   &
 
