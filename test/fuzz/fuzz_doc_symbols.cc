@@ -35,7 +35,7 @@ sorbet::realmain::lsp::LSPWrapper mkLSPWrapper() {
     auto opts = mkOpts();
     static const auto commonGs = mkGlobalState(opts, kvstore);
     // TODO how to use opts and avoid another mkOpts()?
-    auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(commonGs->deepCopy(true), mkOpts(), console, false);
+    auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(commonGs->deepCopy(true), mkOpts(), console, true);
     lspWrapper.enableAllExperimentalFeatures();
     return lspWrapper;
 }
