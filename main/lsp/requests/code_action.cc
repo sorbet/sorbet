@@ -19,9 +19,9 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.codeAction");
 
     core::FileRef file = uri2FileRef(params.textDocument->uri);
-    optional<FileUpdates> updates(FileUpdates{});
-    (*updates).updatedFiles.push_back(make_shared<core::File>(
-        string(file.data(*gs).path()), string(file.data(*gs).source()), core::File::Type::Normal));
+    FileUpdates updates;
+    updates.updatedFiles.push_back(make_shared<core::File>(string(file.data(*gs).path()),
+                                                           string(file.data(*gs).source()), core::File::Type::Normal));
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto run = tryFastPath(move(gs), move(updates));
 

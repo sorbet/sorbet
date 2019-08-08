@@ -68,9 +68,8 @@ class LSPLoop {
      */
     struct FileUpdates {
         std::vector<std::shared_ptr<core::File>> updatedFiles;
-        // Note: `string_view`s point to `string`s owned by `core::File`s in `updatedFiles`
-        std::vector<std::string_view> openedFiles;
-        std::vector<std::string_view> closedFiles;
+        std::vector<std::string> openedFiles;
+        std::vector<std::string> closedFiles;
         std::vector<ast::ParsedFile> updatedFileIndexes;
         std::vector<std::pair<std::string_view, core::FileHash>> updatedFileHashes;
     };
@@ -181,16 +180,15 @@ class LSPLoop {
         // The global state, post-typechecking.
         std::unique_ptr<core::GlobalState> gs;
         // The edit applied to `gs`.
-        std::optional<LSPLoop::FileUpdates> updates;
+        LSPLoop::FileUpdates updates;
         bool tookFastPath;
     };
     /** Conservatively rerun entire pipeline without caching any trees */
-    TypecheckRun runSlowPath(std::optional<FileUpdates> updates,
-                             const core::lsp::Query &q = core::lsp::Query::noQuery()) const;
+    TypecheckRun runSlowPath(FileUpdates updates, const core::lsp::Query &q = core::lsp::Query::noQuery()) const;
     /** Returns `true` if the given changes can run on the fast path. */
     bool canTakeFastPath(const FileUpdates &updates, const std::vector<core::FileHash> &hashes) const;
     /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */
-    TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs, std::optional<FileUpdates> updates,
+    TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs, FileUpdates updates,
                              const std::vector<core::FileRef> &filesForQuery = {},
                              const core::lsp::Query &q = core::lsp::Query::noQuery()) const;
     /** Officially 'commits' the output of a `TypecheckRun` by updating the relevant state on LSPLoop and, if specified,

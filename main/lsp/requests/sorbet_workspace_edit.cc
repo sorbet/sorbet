@@ -113,21 +113,20 @@ LSPLoop::TypecheckRun
 LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
                                     UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
     if (!updates.empty()) {
-        optional<FileUpdates> maybeFileUpdates(FileUpdates{});
-        auto &fileUpdates = maybeFileUpdates.value();
+        FileUpdates fileUpdates;
         fileUpdates.updatedFiles.reserve(updates.size());
         for (auto &update : updates) {
             auto file =
                 make_shared<core::File>(string(update.first), move(update.second.contents), core::File::Type::Normal);
             if (update.second.newlyClosed) {
-                fileUpdates.closedFiles.push_back(file->path());
+                fileUpdates.closedFiles.push_back(string(file->path()));
             }
             if (update.second.newlyOpened) {
-                fileUpdates.openedFiles.push_back(file->path());
+                fileUpdates.openedFiles.push_back(string(file->path()));
             }
             fileUpdates.updatedFiles.push_back(move(file));
         }
-        return tryFastPath(move(gs), move(maybeFileUpdates));
+        return tryFastPath(move(gs), move(fileUpdates));
     } else {
         TypecheckRun emptyRun;
         emptyRun.gs = move(gs);

@@ -47,7 +47,7 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
                 auto identResp = resp->isIdent();
                 auto loc = identResp->owner.data(*gs)->loc();
                 if (loc.exists()) {
-                    auto run2 = tryFastPath(move(gs), nullopt, {loc.file()},
+                    auto run2 = tryFastPath(move(gs), {}, {loc.file()},
                                             core::lsp::Query::createVarQuery(identResp->owner, identResp->variable));
                     gs = move(run2.gs);
                     response->result = extractLocations(*gs, run2.responses);

@@ -44,7 +44,7 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
     if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::True) {
         logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
-        return TypecheckRun{{}, {}, {}, move(gs), nullopt, true};
+        return TypecheckRun{{}, {}, {}, move(gs), {}, true};
     }
 
     auto loc = lspPos2Loc(fref, pos, *gs);
@@ -55,7 +55,7 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
                          move(gs));
     }
 
-    return tryFastPath(move(gs), nullopt, {fref}, core::lsp::Query::createLocQuery(*loc.get()));
+    return tryFastPath(move(gs), {}, {fref}, core::lsp::Query::createLocQuery(*loc.get()));
 }
 
 LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) const {
@@ -79,7 +79,7 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalStat
         }
     }
 
-    return tryFastPath(move(gs), nullopt, frefs, core::lsp::Query::createSymbolQuery(sym));
+    return tryFastPath(move(gs), {}, frefs, core::lsp::Query::createSymbolQuery(sym));
 }
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
