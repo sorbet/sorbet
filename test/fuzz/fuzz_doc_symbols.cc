@@ -12,6 +12,7 @@ const auto console = spdlog::stdout_logger_mt("console");
 const auto typeErrors = spdlog::stdout_logger_mt("typeErrors");
 const auto rootPath = "/tmp";
 const auto rootUri = fmt::format("file://{}", rootPath);
+const auto fileUri = sorbet::test::filePathToUri(rootUri, "file.rb");
 
 sorbet::realmain::options::Options mkOpts() {
     sorbet::realmain::options::Options opts;
@@ -45,7 +46,6 @@ extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t size) {
-    auto fileUri = sorbet::test::filePathToUri(rootUri, "file.rb");
     std::string contents((const char *)data, size);
     auto lspWrapper = mkLSPWrapper();
     int nextId = 0;
