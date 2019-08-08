@@ -17,7 +17,7 @@ crasher="$1"
 
 FUZZ_ARG="--stress-incremental-resolver" # to run incremental resolver
 
-mkdir -p fuzz_crashers/fixed/min fuzz_crashers/fixed/original
+mkdir -p fuzz_crashers/fixed/min fuzz_crashers/fixed/original fuzz_crashers/min
 
 file_arg="$(basename "$crasher")"
 crash_full_path="$(realpath "$crasher")"
@@ -56,8 +56,6 @@ handle_TERM() {
 
 trap handle_INT SIGINT
 trap handle_TERM SIGTERM
-
-mkdir -p "fuzz_crashers/min/"
 
 export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
 if ! command -v llvm-symbolizer >/dev/null; then
