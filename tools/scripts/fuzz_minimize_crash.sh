@@ -87,7 +87,7 @@ export ASAN_OPTIONS="dedup_token_length=10"
   "$crasher" \
   &
 
-child=$!
+child="$!"
 wait "$child"
 
 if "$cancelled"; then
