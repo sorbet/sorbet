@@ -1,6 +1,9 @@
 #!/bin/bash
 
 set -euo pipefail
+cd "$(dirname "$0")"
+cd "../.."
+# we're now at the root of the repo.
 
 what=""
 if [ "$#" -eq 0 ]; then
