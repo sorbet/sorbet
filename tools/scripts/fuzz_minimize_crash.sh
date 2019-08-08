@@ -32,6 +32,7 @@ if [ -f "$done_file" ]; then
   fi
   exit
 fi
+
 if [ -f "$output_file" ]; then
   echo "Reusing previous minimized state"
   crash_full_path=$(mktemp)
