@@ -17,7 +17,7 @@ crasher="$1"
 
 FUZZ_ARG="--stress-incremental-resolver" # to run incremental resolver
 
-mkdir -p "fuzz_crashers/fixed/min/" "fuzz_crashers/fixed/original/"
+mkdir -p fuzz_crashers/fixed/min fuzz_crashers/fixed/original
 
 file_arg="$(basename "$crasher")"
 crash_full_path="$(realpath "$crasher")"
