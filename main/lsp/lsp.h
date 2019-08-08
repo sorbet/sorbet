@@ -55,10 +55,10 @@ class LSPLoop {
     /** Used to store the state of LSPLoop's internal request queue.  */
     struct QueueState {
         std::deque<std::unique_ptr<LSPMessage>> pendingRequests;
-        bool terminate;
-        bool paused;
-        int requestCounter;
-        int errorCode;
+        bool terminate = false;
+        bool paused = false;
+        int requestCounter = 0;
+        int errorCode = 0;
         // Counters collected from worker threads.
         CounterState counters;
     };
@@ -125,7 +125,7 @@ class LSPLoop {
     /** What hover markup should we send to the client? */
     MarkupKind clientHoverMarkupKind = MarkupKind::Plaintext;
     /** Input file descriptor; used by runLSP to receive LSP messages */
-    int inputFd;
+    int inputFd = 0;
     /** Output stream; used by LSP to output messages */
     std::ostream &outputStream;
     /** If true, LSPLoop will skip configatron during type checking */
@@ -251,9 +251,9 @@ class LSPLoop {
 
     // Distilled form of an update to a single file.
     struct SorbetWorkspaceFileUpdate {
-        std::string contents;
-        bool newlyOpened;
-        bool newlyClosed;
+        std::string contents = "";
+        bool newlyOpened = false;
+        bool newlyClosed = false;
     };
     void preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,
                                        UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates) const;
