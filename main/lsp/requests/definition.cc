@@ -12,7 +12,7 @@ void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Loca
 }
 
 LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                const TextDocumentPositionParams &params) {
+                                                const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDefinition);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.definition");
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,

@@ -5,7 +5,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                const CodeActionParams &params) {
+                                                const CodeActionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
     if (!opts.lspQuickFixEnabled) {
@@ -19,11 +19,11 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.codeAction");
 
     core::FileRef file = uri2FileRef(params.textDocument->uri);
-    vector<shared_ptr<core::File>> files;
-    files.push_back(make_shared<core::File>(string(file.data(*gs).path()), string(file.data(*gs).source()),
-                                            core::File::Type::Normal));
+    FileUpdates updates;
+    updates.updatedFiles.push_back(make_shared<core::File>(string(file.data(*gs).path()),
+                                                           string(file.data(*gs).source()), core::File::Type::Normal));
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
-    auto run = tryFastPath(move(gs), files);
+    auto run = tryFastPath(move(gs), move(updates));
 
     auto loc = range2Loc(*run.gs, *params.range.get(), file);
     for (auto &error : run.errors) {
