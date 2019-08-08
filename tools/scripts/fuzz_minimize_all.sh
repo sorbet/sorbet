@@ -7,14 +7,9 @@ cd "../.."
 
 bazel build //test/fuzz:fuzz_dash_e --config=fuzz -c opt
 
-# shellcheck disable=SC2207
-input_src=(
-  $(find 'fuzz_crashers/original' -name "crash-*" | sort)
-)
-
 cmds="$(mktemp)"
 
-for this_src in "${input_src[@]}" DUMMY; do
+for this_src in fuzz_crashers/original/crash-* DUMMY; do
   if [[ ! "$this_src" == DUMMY ]]; then
     echo "./tools/scripts/fuzz_minimize_crash.sh \"$this_src\" 2>/dev/null" >> "$cmds"
   fi
