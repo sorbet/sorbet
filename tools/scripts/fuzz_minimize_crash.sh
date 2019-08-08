@@ -8,11 +8,18 @@ cd "../.."
 if [ "$#" -lt 1 ]; then
 cat <<EOF
 usage:
-  $0 <crasher>
+  $0 <fuzz_target> <crasher>
+
+example fuzz_target:
+  fuzz_dash_e
+  fuzz_doc_symbols
+  fuzz_hover
 EOF
 exit 1
 fi
 
+fuzz_target="$1"
+shift
 crasher="$1"
 shift
 
@@ -27,7 +34,7 @@ done_file="$output_file.done"
 
 if [ -f "$done_file" ]; then
   echo "already minimized"
-  if "./bazel-bin/test/fuzz/fuzz_dash_e" "$done_file"; then
+  if "./bazel-bin/test/fuzz/$fuzz_target" "$done_file"; then
     echo "already fixed"
     mv "$done_file" "fuzz_crashers/fixed/min/$file_arg"
   fi
@@ -40,7 +47,7 @@ if [ -f "$output_file" ]; then
   cp "$output_file" "$crash_full_path"
 fi
 
-if "./bazel-bin/test/fuzz/fuzz_dash_e" "$crash_full_path" "$FUZZ_ARG"; then
+if "./bazel-bin/test/fuzz/$fuzz_target" "$crash_full_path" "$FUZZ_ARG"; then
   echo "already fixed"
   mv "$crash_full_path" "fuzz_crashers/fixed/original/$file_arg"
   exit
@@ -71,7 +78,7 @@ fi
 export ASAN_OPTIONS="dedup_token_length=10"
 
 # start a backgrounded command that we'll monitor
-"./bazel-bin/test/fuzz/fuzz_dash_e" \
+"./bazel-bin/test/fuzz/$fuzz_target" \
   -use_value_profile=1 \
   -dict=test/fuzz/ruby.dict \
   -minimize_crash=1 \
