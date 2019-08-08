@@ -13,12 +13,14 @@ EOF
 exit 1
 fi
 
+crasher="$1"
+
 FUZZ_ARG="--stress-incremental-resolver" # to run incremental resolver
 
 mkdir -p "fuzz_crashers/fixed/min/" "fuzz_crashers/fixed/original/"
 
-file_arg="$(basename "$1")"
-crash_full_path="$(realpath "$1")"
+file_arg="$(basename "$crasher")"
+crash_full_path="$(realpath "$crasher")"
 output_file="fuzz_crashers/min/${file_arg}"
 if [ -f "${output_file}.done" ]; then
     echo "already minimized"
