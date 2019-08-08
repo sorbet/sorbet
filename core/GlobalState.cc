@@ -1347,7 +1347,7 @@ unique_ptr<GlobalState> GlobalState::replaceFile(unique_ptr<GlobalState> inWhat,
     return inWhat;
 }
 
-FileRef GlobalState::findFileByPath(string_view path) {
+FileRef GlobalState::findFileByPath(string_view path) const {
     auto fnd = fileRefByPath.find(string(path));
     if (fnd != fileRefByPath.end()) {
         return fnd->second;

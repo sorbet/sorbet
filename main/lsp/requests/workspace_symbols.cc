@@ -23,7 +23,7 @@ unique_ptr<SymbolInformation> LSPLoop::symbolRef2SymbolInformation(const core::G
 }
 
 LSPResult LSPLoop::handleWorkspaceSymbols(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                          const WorkspaceSymbolParams &params) {
+                                          const WorkspaceSymbolParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::WorkspaceSymbol);
     if (!opts.lspWorkspaceSymbolsEnabled) {
         response->error =

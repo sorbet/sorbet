@@ -48,7 +48,7 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
 }
 
 LSPResult LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                           const TextDocumentPositionParams &params) {
+                                           const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentSignatureHelp);
     if (!opts.lspSignatureHelpEnabled) {
         response->error =

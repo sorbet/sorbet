@@ -188,7 +188,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
 }
 
 LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                const CompletionParams &params) {
+                                                const CompletionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     if (!opts.lspAutocompleteEnabled) {
         response->error =

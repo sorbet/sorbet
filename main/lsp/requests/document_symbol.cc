@@ -68,7 +68,7 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 }
 
 LSPResult LSPLoop::handleTextDocumentDocumentSymbol(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                    const DocumentSymbolParams &params) {
+                                                    const DocumentSymbolParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
     if (!opts.lspDocumentSymbolEnabled) {
         response->error =
