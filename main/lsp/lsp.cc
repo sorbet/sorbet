@@ -29,7 +29,7 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
     rootPath = opts.rawInputDirNames.at(0);
 }
 
-variant<LSPLoop::TypecheckRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
+variant<LSPLoop::QueryRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
 LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
                             const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
     Timer timeit(logger, "setupLSPQueryByLoc");
@@ -44,7 +44,7 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
     if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::True) {
         logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
-        return TypecheckRun{{}, {}, {}, move(gs), {}, true};
+        return QueryRun{move(gs), {}};
     }
 
     auto loc = lspPos2Loc(fref, pos, *gs);
@@ -55,10 +55,10 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
                          move(gs));
     }
 
-    return tryFastPath(move(gs), {}, {fref}, core::lsp::Query::createLocQuery(*loc.get()));
+    return runQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), {fref});
 }
 
-LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) const {
+LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) const {
     Timer timeit(logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<core::FileRef> frefs;
@@ -79,7 +79,7 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalStat
         }
     }
 
-    return tryFastPath(move(gs), {}, frefs, core::lsp::Query::createSymbolQuery(sym));
+    return runQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,

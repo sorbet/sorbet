@@ -38,7 +38,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
 
     auto result =
         setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover);
-    if (auto run = get_if<TypecheckRun>(&result)) {
+    if (auto run = get_if<QueryRun>(&result)) {
         gs = move(run->gs);
         auto &queryResponses = run->responses;
         if (queryResponses.empty()) {

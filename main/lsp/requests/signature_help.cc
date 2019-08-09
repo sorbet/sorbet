@@ -60,7 +60,7 @@ LSPResult LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, con
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.signatureHelp");
     auto result =
         setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentSignatureHelp);
-    if (auto run = get_if<TypecheckRun>(&result)) {
+    if (auto run = get_if<QueryRun>(&result)) {
         gs = move(run->gs);
         auto &queryResponses = run->responses;
         int activeParameter = -1;

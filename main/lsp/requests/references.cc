@@ -25,7 +25,7 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
 
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
                                      LSPMethod::TextDocumentCompletion, false);
-    if (auto run1 = get_if<TypecheckRun>(&result)) {
+    if (auto run1 = get_if<QueryRun>(&result)) {
         gs = move(run1->gs);
         // An explicit null indicates that we don't support this request (or that nothing was at the location).
         // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
@@ -47,8 +47,9 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
                 auto identResp = resp->isIdent();
                 auto loc = identResp->owner.data(*gs)->loc();
                 if (loc.exists()) {
-                    auto run2 = tryFastPath(move(gs), {}, {loc.file()},
-                                            core::lsp::Query::createVarQuery(identResp->owner, identResp->variable));
+                    auto run2 =
+                        runQuery(move(gs), core::lsp::Query::createVarQuery(identResp->owner, identResp->variable),
+                                 {loc.file()});
                     gs = move(run2.gs);
                     response->result = extractLocations(*gs, run2.responses);
                 }
