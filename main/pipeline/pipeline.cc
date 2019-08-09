@@ -114,7 +114,7 @@ void cacheTrees(core::GlobalState &gs, unique_ptr<KeyValueStore> &kvstore, vecto
         return;
     }
     for (auto &tree : trees) {
-        if (tree.file.data(gs).cachedParseTree) {
+        if (tree.file.data(gs).cachedParseTree || tree.file.data(gs).hasParseErrors) {
             continue;
         }
         string fileHashKey = fileKey(gs, tree.file);

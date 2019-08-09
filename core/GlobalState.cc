@@ -1248,9 +1248,7 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     if (what == errors::Internal::InternalError) {
         Exception::failInFuzzer();
     }
-    bool report = (what == errors::Internal::InternalError) || (what == errors::Internal::FileNotFound) ||
-                  (shouldReportErrorOn(loc, what) && !this->silenceErrors);
-    return ErrorBuilder(*this, report, loc, what);
+    return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
 }
 
 void GlobalState::suppressErrorClass(int code) {
@@ -1286,12 +1284,15 @@ bool GlobalState::hasAnyDslPlugin() const {
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
+    if (what.minLevel == StrictLevel::Internal) {
+        return true;
+    }
+    if (this->silenceErrors) {
+        return false;
+    }
     StrictLevel level = StrictLevel::Strong;
     if (loc.file().exists()) {
         level = loc.file().data(*this).strictLevel;
-    }
-    if (what.code == errors::Internal::InternalError.code) {
-        return true;
     }
     if (suppressedErrorClasses.count(what.code) != 0) {
         return false;
