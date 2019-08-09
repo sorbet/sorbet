@@ -7,18 +7,16 @@ class BigFoo; extend T::Sig
   FOO_CONSTANT = 1
 # ^^^^^^^^^^^^ The docs for FOO_CONSTANT
 # ^^^^^^^^^^^^ Integer(1)
+
   # Docs for Bar#static_variable
-  @@static_variable = 'asdf'
-# ^^^^^^^^^^^^^^^^^ hover: Docs for Bar#static_variable
-# ^^^^^^^^^^^^^^^^^ hover: String("asdf")
+  @@static_variable = T.let('asdf', String)
+#   ^^^^^^^^^^^^^^^ hover: Docs for Bar#static_variable
+#   ^^^^^^^^^^^^^^^ hover: String
 
   # The docs for LittleFoo1
   class LittleFoo1; extend T::Sig
   sig {params(num: Integer).returns(Integer)}
     def bar(num)
-      @@static_variable
-      # TODO this hover fails? I'm not sure how inherited static variables work.
-      # core/Files.cc:126 enforced condition gs.files[_id] has failed
       3 + num
     # ^ hover: Integer(3)
     end
@@ -41,8 +39,10 @@ class BigFoo; extend T::Sig
   def self.bar(num1, num2)
               # ^ hover: Integer
                    # ^ hover: String
-    4 + num1 + num2.to_i
+    4 + num1 + num2.to_i + @@static_variable.length
            # ^ hover: sig {params(arg0: Integer).returns(Integer)}
+                           # ^^^^^^^^^^^^^^^ hover: Docs for Bar#static_variable
+                           # ^^^^^^^^^^^^^^^ hover: String
   end
 
   sig {generated.void}
