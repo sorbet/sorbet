@@ -15,7 +15,9 @@ class BigFoo; extend T::Sig
 
   # The docs for LittleFoo1
   class LittleFoo1; extend T::Sig
-  sig {params(num: Integer).returns(Integer)}
+    def initialize
+    end
+    sig {params(num: Integer).returns(Integer)}
     def bar(num)
       3 + num
     # ^ hover: Integer(3)
@@ -127,11 +129,16 @@ def main
   hash = Hash.new("default")
 # ^ hover: T::Hash[T.untyped, T.untyped]
 
-  foo = BigFoo::FOO_CONSTANT
+  boo = BigFoo::FOO_CONSTANT
               # ^^^^^^^^^^^^ hover: Integer(1)
               # ^^^^^^^^^^^^ hover: The docs for FOO_CONSTANT
       # ^^^^^^ hover: T.class_of(BigFoo)
       # ^^^^^^ hover: The docs for BigFoo
+  # TODO .new only works if we definte `initialize`
+  foo = BigFoo.new
+             # ^^^ hover: (nothing)
+  hoo = BigFoo::LittleFoo1.new
+                         # ^^^ hover: sig {returns(T::Hash[T.untyped, T.untyped])}
   raise "error message"
 # ^ hover: sig {params(arg0: String).returns(T.noreturn)}
 end
