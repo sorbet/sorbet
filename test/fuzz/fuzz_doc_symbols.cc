@@ -54,9 +54,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     auto lspWrapper = mkLSPWrapper(contents);
     int nextId = 0;
     sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId);
-    lspWrapper.getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::RequestMessage>(
-        "2.0", nextId++, sorbet::test::LSPMethod::TextDocumentDocumentSymbol,
-        std::make_unique<sorbet::test::DocumentSymbolParams>(
-            std::make_unique<sorbet::test::TextDocumentIdentifier>(fileUri)))));
+    const auto responses =
+        lspWrapper.getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::RequestMessage>(
+            "2.0", nextId++, sorbet::test::LSPMethod::TextDocumentDocumentSymbol,
+            std::make_unique<sorbet::test::DocumentSymbolParams>(
+                std::make_unique<sorbet::test::TextDocumentIdentifier>(fileUri)))));
+    sorbet::fatalLogger->info("num responses: {}", responses.size());
     return 0;
 }
