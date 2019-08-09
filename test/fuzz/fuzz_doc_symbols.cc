@@ -53,7 +53,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     std::string contents((const char *)data, size);
     auto lspWrapper = mkLSPWrapper(contents);
     int nextId = 0;
-    ENFORCE(sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId).size() == 0);
+    sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId);
     ENFORCE(lspWrapper
                 .getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::RequestMessage>(
                     "2.0", nextId++, sorbet::test::LSPMethod::TextDocumentDocumentSymbol,
