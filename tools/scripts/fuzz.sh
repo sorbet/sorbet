@@ -5,12 +5,12 @@ cd "$(dirname "$0")"
 cd "../.."
 # we're now at the root of the repo.
 
-if [ "$#" -eq 0 ]; then
+if [ "$#" -lt 1 ]; then
 cat <<EOF
 usage:
-  $0 <fuzz_target> [<options>]
+  $0 <target> [<options>]
 
-example fuzz_target:
+example target:
   fuzz_dash_e
   fuzz_doc_symbols
   fuzz_hover
@@ -21,11 +21,11 @@ EOF
 exit 1
 fi
 
-what="$1"
+target="$1"
 shift
 
-echo "building $what"
-bazel build "//test/fuzz:$what" --config=fuzz -c opt
+echo "building $target"
+bazel build "//test/fuzz:$target" --config=fuzz -c opt
 
 # we want the bazel build command to run before this check so that bazel can download itself.
 export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
@@ -34,7 +34,7 @@ if ! command -v llvm-symbolizer >/dev/null; then
   exit 1
 fi
 
-echo "setting up files"
+echo "setting up fuzz_corpus"
 mkdir -p fuzz_corpus
 find test/testdata -iname "*.rb" | grep -v disable | xargs -n 1 -I % cp % fuzz_corpus
 mkdir -p fuzz_crashers/original
@@ -43,7 +43,7 @@ mkdir -p fuzz_crashers/original
 export ASAN_OPTIONS="dedup_token_length=10"
 
 echo "running"
-nice "./bazel-bin/test/fuzz/$what" \
+nice "./bazel-bin/test/fuzz/$target" \
   -only_ascii=1 \
   -dict=test/fuzz/ruby.dict \
   -artifact_prefix=fuzz_crashers/original/ \
