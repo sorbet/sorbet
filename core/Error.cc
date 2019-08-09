@@ -141,7 +141,7 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     this->autocorrects.emplace_back(move(autocorrect));
 }
 
-// This will sometimes be bypassed in lieue of just calling build() so put your
+// This will sometimes be bypassed in lieu of just calling build() so put your
 // logic in build() instead.
 ErrorBuilder::~ErrorBuilder() {
     if (state == State::DidBuild) {
