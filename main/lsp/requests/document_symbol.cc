@@ -84,6 +84,7 @@ LSPResult LSPLoop::handleTextDocumentDocumentSymbol(unique_ptr<core::GlobalState
     for (u4 idx = 1; idx < gs->symbolsUsed(); idx++) {
         core::SymbolRef ref(gs.get(), idx);
         if (!hideSymbol(*gs, ref) &&
+            // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
             (ref.data(*gs)->owner.data(*gs)->loc().file() != fref || ref.data(*gs)->owner == core::Symbols::root())) {
             for (auto definitionLocation : ref.data(*gs)->locs()) {
                 if (definitionLocation.file() == fref) {
