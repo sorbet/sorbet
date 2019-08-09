@@ -43,6 +43,7 @@ mkdir -p fuzz_crashers/original
 export ASAN_OPTIONS="dedup_token_length=10"
 
 echo "running"
+# use nice to run with decreased priority.
 nice "./bazel-bin/test/fuzz/$target" \
   -only_ascii=1 \
   -dict=test/fuzz/ruby.dict \
