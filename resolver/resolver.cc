@@ -855,12 +855,10 @@ public:
                 if (parentMember.data(ctx)->isTypeMember()) {
                     parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType.get());
                     ENFORCE(parentType != nullptr);
-                } else {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
-                        const auto parentShow = parentMember.data(ctx)->show(ctx);
-                        e.setHeader("`{}` is a type member but `{}` is not a type member", data->show(ctx), parentShow);
-                        e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` definition", parentShow);
-                    }
+                } else if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                    const auto parentShow = parentMember.data(ctx)->show(ctx);
+                    e.setHeader("`{}` is a type member but `{}` is not a type member", data->show(ctx), parentShow);
+                    e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` definition", parentShow);
                 }
             }
 
