@@ -245,7 +245,8 @@ public:
             bool isModule = klass->kind == ast::ClassDefKind::Module;
             if (!klass->symbol.data(ctx)->isClass()) {
                 // we might have already mangled the class symbol, so see if we have a symbol that is a class already
-                auto klassSymbol = ctx.state.lookupClassSymbol(klass->symbol.data(ctx)->owner, klass->symbol.data(ctx)->name);
+                auto klassSymbol =
+                    ctx.state.lookupClassSymbol(klass->symbol.data(ctx)->owner, klass->symbol.data(ctx)->name);
                 if (klassSymbol.exists()) {
                     klass->symbol = klassSymbol;
                 } else {
@@ -255,7 +256,8 @@ public:
                     }
                     auto origName = klass->symbol.data(ctx)->name;
                     ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx)->name);
-                    klass->symbol = ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx)->owner, origName);
+                    klass->symbol =
+                        ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx)->owner, origName);
                     klass->symbol.data(ctx)->setIsModule(isModule);
 
                     auto oldSymCount = ctx.state.symbolsUsed();
