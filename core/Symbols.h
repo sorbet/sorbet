@@ -540,7 +540,16 @@ public:
     const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
     TypePtr sealedSubclasses(const Context ctx) const;
 
-    SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const;
+    // if dealiasing fails here, then we return Untyped instead
+    SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const {
+        return dealiasWithDefault(gs, depthLimit, Symbols::untyped());
+    }
+    // if dealiasing fails here, then we return a bad alias method stub instead
+    SymbolRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const {
+        return dealiasWithDefault(gs, depthLimit, core::Symbols::Sorbet_Private_Static_badAliasMethodStub());
+    }
+
+    SymbolRef dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const;
 
     bool ignoreInHashing(const GlobalState &gs) const;
 
