@@ -70,6 +70,19 @@ public:
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     ArgInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
 
+    SymbolRef lookupSymbol(SymbolRef owner, NameRef name) {
+        return lookupSymbolWithFlags(owner, name, 0);
+    }
+    SymbolRef lookupClassSymbol(SymbolRef owner, NameRef name) {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS);
+    }
+    SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
+    }
+    SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
+    }
+
     SymbolRef staticInitForFile(Loc loc);
     SymbolRef staticInitForClass(SymbolRef klass, Loc loc);
 
@@ -225,6 +238,8 @@ private:
 
     SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo()._id, bool isModule = false);
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
+
+    SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;
 
     SymbolRef getTopLevelClassSymbol(NameRef name);
 
