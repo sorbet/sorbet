@@ -74,6 +74,13 @@ class Foo
   # ^ hover: T::Array[String]
     x
   end
+
+  sig{void}
+  # Docs are below the sig
+  def docs_below_sig
+    # ^^^^^^^^^^^^^^ hover: Docs are below the sig
+    # ^^^^^^^^^^^^^^ hover: sig {void}
+  end
 end
 
 def main
