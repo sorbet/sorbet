@@ -1284,10 +1284,7 @@ bool GlobalState::hasAnyDslPlugin() const {
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
-    if (what == errors::Internal::InternalError) {
-        return true;
-    }
-    if (what == errors::Internal::FileNotFound) {
+    if (what.minLevel == StrictLevel::Internal) {
         return true;
     }
     if (this->silenceErrors) {
@@ -1296,9 +1293,6 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     StrictLevel level = StrictLevel::Strong;
     if (loc.file().exists()) {
         level = loc.file().data(*this).strictLevel;
-    }
-    if (what.code == errors::Internal::InternalError.code) {
-        return true;
     }
     if (suppressedErrorClasses.count(what.code) != 0) {
         return false;
