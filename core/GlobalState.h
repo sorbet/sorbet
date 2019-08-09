@@ -91,7 +91,7 @@ public:
 
     NameRef enterNameUTF8(std::string_view nm);
 
-    NameRef getNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const;
+    NameRef lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const;
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num);
 
     NameRef enterNameConstant(NameRef original);

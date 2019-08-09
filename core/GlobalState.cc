@@ -597,8 +597,8 @@ SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 f
         if ((res->second.data(*this)->flags & flags) == flags) {
             return res->second;
         }
-        lookupName = getNameUnique(UniqueNameKind::MangleRename, name, unique);
-        if (lookupName == core::Names::empty()) {
+        lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
+        if (!lookupName.exists()) {
             break;
         }
         res = ownerScope->members().find(lookupName);
@@ -941,7 +941,7 @@ void GlobalState::expandNames(int growBy) {
     namesByHash.swap(new_namesByHash);
 }
 
-NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const {
+NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const {
     ENFORCE(num > 0, "num == 0, name overflow");
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
     unsigned int hashTableSize = namesByHash.size();
@@ -964,7 +964,7 @@ NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef origin
         bucketId = (bucketId + probeCount) & mask;
         probeCount++;
     }
-    return core::Names::empty();
+    return core::NameRef::noName();
 }
 
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) {
@@ -1460,7 +1460,7 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
 }
 
 SymbolRef GlobalState::lookupStaticInitForFile(Loc loc) const {
-    auto nm = getNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
+    auto nm = lookupNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto ref = core::Symbols::rootSingleton().data(*this)->findMember(*this, nm);
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", loc.toString(*this));
     return ref;
