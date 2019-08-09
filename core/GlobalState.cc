@@ -592,7 +592,8 @@ SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 f
     NameRef lookupName = name;
     u2 unique = 1;
     auto res = ownerScope->members().find(lookupName);
-    while (res != ownerScope->members().end() && res->second.exists()) {
+    while (res != ownerScope->members().end()) {
+        ENFORCE(res->second.exists());
         if ((res->second.data(*this)->flags & flags) == flags) {
             return res->second;
         }
