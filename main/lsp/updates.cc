@@ -377,12 +377,14 @@ LSPLoop::QueryRun LSPLoop::runQuery(unique_ptr<core::GlobalState> gs, const core
     }
 
     ENFORCE(gs->lspQuery.isEmpty());
+    gs->lspQuery = q;
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), opts);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
     pipeline::typecheck(gs, move(resolved), opts, workers);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
+    gs->lspQuery = core::lsp::Query::noQuery();
     return QueryRun{move(gs), move(out.second)};
 }
 } // namespace sorbet::realmain::lsp
