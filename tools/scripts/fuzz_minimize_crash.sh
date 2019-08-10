@@ -26,7 +26,8 @@ fi
 
 target="$1"
 shift
-crasher="$1"
+# this realpath is needed when running this script under parallel.
+crasher="$(realpath "$1")"
 shift
 
 mkdir -p fuzz_crashers/fixed/min fuzz_crashers/fixed/original fuzz_crashers/min
@@ -82,7 +83,8 @@ export ASAN_OPTIONS="dedup_token_length=10"
 
 # start a backgrounded command that we'll monitor
 echo "$crasher: running"
-nice "./bazel-bin/test/fuzz/$target" \
+# this should not use nice, even though in fuzz.sh we use nice
+"./bazel-bin/test/fuzz/$target" \
   -dict=test/fuzz/ruby.dict \
   -minimize_crash=1 \
   -exact_artifact_path="$output_file" \
