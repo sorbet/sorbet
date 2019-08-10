@@ -191,7 +191,7 @@ class LSPLoop {
     /** Returns `true` if the given changes can run on the fast path. */
     bool canTakeFastPath(const FileUpdates &updates, const std::vector<core::FileHash> &hashes) const;
     /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */
-    TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs, FileUpdates updates) const;
+    TypecheckRun runTypechecking(std::unique_ptr<core::GlobalState> gs, FileUpdates updates) const;
     QueryRun runQuery(std::unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
                       const std::vector<core::FileRef> &filesForQuery) const;
     /** Officially 'commits' the output of a `TypecheckRun` by updating the relevant state on LSPLoop and, if specified,

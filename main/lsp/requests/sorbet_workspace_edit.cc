@@ -126,7 +126,7 @@ LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
             }
             fileUpdates.updatedFiles.push_back(move(file));
         }
-        return tryFastPath(move(gs), move(fileUpdates));
+        return runTypechecking(move(gs), move(fileUpdates));
     } else {
         return TypecheckRun{{}, {}, move(gs), {}, true};
     }

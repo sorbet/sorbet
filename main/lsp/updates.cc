@@ -276,7 +276,7 @@ bool LSPLoop::canTakeFastPath(const FileUpdates &updates, const vector<core::Fil
     return true;
 }
 
-LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs, FileUpdates updates) const {
+LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs, FileUpdates updates) const {
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
     ENFORCE(gs->lspTypecheckCount > 0,
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
