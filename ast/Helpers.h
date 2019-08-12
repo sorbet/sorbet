@@ -364,7 +364,7 @@ public:
                 [&](class KeywordArg *kw) { arg = kw->expr.get(); },
                 [&](class OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *blk) { arg = blk->expr.get(); },
                 [&](ShadowArg *shadow) { arg = shadow->expr.get(); },
-                // ENFORCES are last so that we don't pay the price of casting in the happy path.
+                // ENFORCES are last so that we don't pay the price of casting in the fast path.
                 [&](UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
                 [&](Expression *expr) { ENFORCE(false, "Unexpected node type in argument position."); });
         }
