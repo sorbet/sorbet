@@ -34,7 +34,7 @@ test_dir="${repo_root}/gems/sorbet/test/snapshot/${test_name}"
   cd "$test_dir"
 
   info "├─ Extracting test artifacts"
-  tar -xvf $(basename "${archive_path}")
+  tar -xvf "$(basename "${archive_path}")"
 
   # ----- Check out.log -----
 

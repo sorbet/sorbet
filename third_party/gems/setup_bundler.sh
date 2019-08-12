@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-ruby_versions="$@"
+ruby_versions=("$@")
 
 cd "{{bundler}}"
 
@@ -15,7 +15,7 @@ pushd extracted
   rm -f data.tar.gz metadata.gz checksums.yaml.gz
 popd
 
-for RUBY_VERSION in $ruby_versions; do
+for RUBY_VERSION in "${ruby_versions[@]}"; do
   TARGET="lib/ruby/site_ruby/${RUBY_VERSION}"
   mkdir -p "$TARGET"
   cp -a extracted/lib/* "$TARGET"
