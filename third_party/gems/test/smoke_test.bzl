@@ -1,4 +1,3 @@
-
 def smoke_tests(versions):
     for version in versions:
         native.sh_test(
