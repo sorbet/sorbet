@@ -273,6 +273,7 @@ cc_binary(
         ":ruby_headers",
         ":ruby_private_headers",
         ":coroutine/amd64",
+        "@zlib//:zlib",
     ],
 
     copts = RUBY_COPTS + [ "-DRUBY_EXPORT" ],
@@ -281,6 +282,7 @@ cc_binary(
       ":linux": [
         "-lpthread",
         "-lcrypt",
+        "-lrt",
       ],
       ":darwin": [
         "-framework",
@@ -523,8 +525,9 @@ cc_binary(
         ":ext/digest",
         ":ext/psych",
         ":ext/strscan",
+        "@zlib//:zlib",
     ] + select({
-        ":linux": [":ruby_crypt"],
+        ":linux": [":ruby_crypt", "-lrt"],
         ":darwin": [],
     }),
 
