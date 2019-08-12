@@ -247,7 +247,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(FileUpdates updates) const {
 
 bool LSPLoop::canTakeFastPath(const FileUpdates &updates, const vector<core::FileHash> &hashes) const {
     if (disableFastPath) {
-        logger->debug("Taking sad path because happy path is disabled.");
+        logger->debug("Taking slow path because happy path is disabled.");
         return false;
     }
     auto &changedFiles = updates.updatedFiles;
@@ -260,14 +260,14 @@ bool LSPLoop::canTakeFastPath(const FileUpdates &updates, const vector<core::Fil
             ++i;
             auto fref = initialGS->findFileByPath(f->path());
             if (!fref.exists()) {
-                logger->debug("Taking sad path because {} is a new file", f->path());
+                logger->debug("Taking slow path because {} is a new file", f->path());
                 return false;
             } else {
                 auto &oldHash = globalStateHashes[fref.id()];
                 ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
                 if (hashes[i].definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
                     hashes[i].definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
-                    logger->debug("Taking sad path because {} has changed definitions", f->path());
+                    logger->debug("Taking slow path because {} has changed definitions", f->path());
                     return false;
                 }
             }
