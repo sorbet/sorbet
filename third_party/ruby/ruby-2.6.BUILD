@@ -527,12 +527,12 @@ cc_binary(
         ":ext/strscan",
         "@zlib//:zlib",
     ] + select({
-        ":linux": [":ruby_crypt", "-lrt"],
+        ":linux": [":ruby_crypt"],
         ":darwin": [],
     }),
 
     linkopts = select({
-        ":linux": ["-lpthread"],
+        ":linux": ["-lpthread", "-lrt"],
         ":darwin": [
             "-framework",
             "Foundation",
