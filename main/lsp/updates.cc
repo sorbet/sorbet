@@ -314,47 +314,46 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
         core::NameHash::sortAndDedupe(changedHashes);
     }
 
-    if (takeFastPath) {
-        Timer timeit(logger, "fast_path");
-        int i = -1;
-        for (auto &oldHash : globalStateHashes) {
-            i++;
-            vector<core::NameHash> intersection;
-            std::set_intersection(changedHashes.begin(), changedHashes.end(), oldHash.usages.sends.begin(),
-                                  oldHash.usages.sends.end(), std::back_inserter(intersection));
-            if (!intersection.empty()) {
-                auto ref = core::FileRef(i);
-                logger->debug("Added {} to update set as used a changed method",
-                              !ref.exists() ? "" : ref.data(*gs).path());
-                subset.emplace_back(ref);
-            }
-        }
-        // Remove any duplicate files.
-        fast_sort(subset);
-        subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
-
-        prodCategoryCounterInc("lsp.updates", "fastpath");
-        logger->debug("Taking fast path");
-        ENFORCE(initialGS->errorQueue->isEmpty());
-        vector<ast::ParsedFile> updatedIndexed;
-        for (auto &f : subset) {
-            unique_ptr<KeyValueStore> kvstore; // nullptr
-            // TODO: Thread through kvstore.
-            ENFORCE(this->kvstore == nullptr);
-            auto t = pipeline::indexOne(opts, *gs, f, kvstore);
-            updatedIndexed.emplace_back(ast::ParsedFile{t.tree->deepCopy(), t.file});
-            updates.updatedFileIndexes.push_back(move(t));
-        }
-
-        ENFORCE(gs->lspQuery.isEmpty());
-        auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), opts);
-        pipeline::typecheck(gs, move(resolved), opts, workers);
-        auto out = initialGS->errorQueue->drainWithQueryResponses();
-        gs->lspTypecheckCount++;
-        return TypecheckRun{move(out.first), move(subset), move(gs), move(updates), true};
-    } else {
+    if (!takeFastPath) {
         return runSlowPath(move(updates));
     }
+
+    Timer timeit(logger, "fast_path");
+    int i = -1;
+    for (auto &oldHash : globalStateHashes) {
+        i++;
+        vector<core::NameHash> intersection;
+        std::set_intersection(changedHashes.begin(), changedHashes.end(), oldHash.usages.sends.begin(),
+                              oldHash.usages.sends.end(), std::back_inserter(intersection));
+        if (!intersection.empty()) {
+            auto ref = core::FileRef(i);
+            logger->debug("Added {} to update set as used a changed method", !ref.exists() ? "" : ref.data(*gs).path());
+            subset.emplace_back(ref);
+        }
+    }
+    // Remove any duplicate files.
+    fast_sort(subset);
+    subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
+
+    prodCategoryCounterInc("lsp.updates", "fastpath");
+    logger->debug("Taking fast path");
+    ENFORCE(initialGS->errorQueue->isEmpty());
+    vector<ast::ParsedFile> updatedIndexed;
+    for (auto &f : subset) {
+        unique_ptr<KeyValueStore> kvstore; // nullptr
+        // TODO: Thread through kvstore.
+        ENFORCE(this->kvstore == nullptr);
+        auto t = pipeline::indexOne(opts, *gs, f, kvstore);
+        updatedIndexed.emplace_back(ast::ParsedFile{t.tree->deepCopy(), t.file});
+        updates.updatedFileIndexes.push_back(move(t));
+    }
+
+    ENFORCE(gs->lspQuery.isEmpty());
+    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), opts);
+    pipeline::typecheck(gs, move(resolved), opts, workers);
+    auto out = initialGS->errorQueue->drainWithQueryResponses();
+    gs->lspTypecheckCount++;
+    return TypecheckRun{move(out.first), move(subset), move(gs), move(updates), true};
 }
 
 LSPLoop::QueryRun LSPLoop::runQuery(unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
