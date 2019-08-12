@@ -1615,9 +1615,9 @@ public:
             }
 
             core::SymbolRef fromMethod = owner.data(ctx)->findMemberNoDealias(ctx, fromName);
-            if (fromMethod.exists() && fromMethod.data(ctx)->dealias(ctx) != toMethod) {
+            if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::BadAliasMethod)) {
-                    auto dealiased = fromMethod.data(ctx)->dealias(ctx);
+                    auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
                     if (fromMethod == dealiased) {
                         e.setHeader("Redefining the existing method `{}` as a method alias",
                                     fromMethod.data(ctx)->show(ctx));
