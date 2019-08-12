@@ -388,6 +388,20 @@ See [5014](#5014). 5036 is the same error as [5014](#5014) but slightly modified
 to allow more common Ruby idioms to pass by in `# typed: true` (5036 is only
 reported in `# typed: strict`).
 
+## 5041
+
+Sorbet does not allow inheriting from a class which inherits from `T::Struct`.
+
+```ruby
+class S < T::Struct
+  prop :foo, Integer
+end
+
+class Bad < S; end # error
+```
+
+In the future, this error may be subsumed by [5047](#5047).
+
 ## 5047
 
 A class or module tried to inherit, include, or extend a final class or module.
