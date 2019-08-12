@@ -33,7 +33,7 @@ info "├─ test_dir: $test_dir"
 
   # ----- Unpack the results archive -----
   info "├─ Unpacking test archive"
-  tar -xvf actual.tar.gz
+  tar -xvf "$(basename "${archive_path}")"
 
 
   # ----- Update sorbet/ -----
