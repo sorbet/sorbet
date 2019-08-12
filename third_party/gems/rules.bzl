@@ -90,7 +90,7 @@ def _setup_bundler(repo_ctx):
     site_bin = "bin"
 
     # hard-coding ruby versions to support
-    ruby_versions = [ "2.4.0", "2.6.0" ]
+    ruby_versions = ["2.4.0", "2.6.0"]
 
     site_ruby_glob = ", ".join([
         "\"lib/ruby/site_ruby/{}/**/*.rb\"".format(version)
