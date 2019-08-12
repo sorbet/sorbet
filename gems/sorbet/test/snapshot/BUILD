@@ -97,6 +97,9 @@ test_suite(
         ":snapshot-ruby_2_4_3",
         ":snapshot-ruby_2_6_3",
     ],
+
+    # NOTE: this is manual to avoid being caught with `//...`
+    tags = ["manual"],
 )
 
 test_suite(
@@ -105,4 +108,7 @@ test_suite(
         ":update-ruby_2_4_3",
         ":update-ruby_2_6_3",
     ],
+
+    # NOTE: this is manual to avoid being caught with `//...`
+    tags = ["manual"],
 )
