@@ -198,7 +198,7 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
     }
 }
 
-LSPLoop::TypecheckRun LSPLoop::runSlowPath(FileUpdates updates, const core::lsp::Query &q) const {
+LSPLoop::TypecheckRun LSPLoop::runSlowPath(FileUpdates updates) const {
     ShowOperation slowPathOp(*this, "SlowPath", "Typechecking...");
     Timer timeit(logger, "slow_path");
     ENFORCE(initialGS->errorQueue->isEmpty());
@@ -232,10 +232,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(FileUpdates updates, const core::lsp:
     }
 
     ENFORCE(finalGS->lspQuery.isEmpty());
-    finalGS->lspQuery = q;
     auto resolved = pipeline::resolve(finalGS, move(indexedCopies), opts, workers, skipConfigatron);
-    tryApplyDefLocSaver(*finalGS, resolved);
-    tryApplyLocalVarSaver(*finalGS, resolved);
     vector<core::FileRef> affectedFiles;
     for (auto &tree : resolved) {
         ENFORCE(tree.file.exists());
@@ -245,7 +242,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(FileUpdates updates, const core::lsp:
     auto out = initialGS->errorQueue->drainWithQueryResponses();
     finalGS->lspTypecheckCount++;
     finalGS->lspQuery = core::lsp::Query::noQuery();
-    return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGS), move(updates), false};
+    return TypecheckRun{move(out.first), move(affectedFiles), move(finalGS), move(updates), false};
 }
 
 bool LSPLoop::canTakeFastPath(const FileUpdates &updates, const vector<core::FileHash> &hashes) const {
@@ -279,12 +276,9 @@ bool LSPLoop::canTakeFastPath(const FileUpdates &updates, const vector<core::Fil
     return true;
 }
 
-LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs, FileUpdates updates,
-                                           const vector<core::FileRef> &filesForQuery,
-                                           const core::lsp::Query &q) const {
-    auto finalGs = move(gs);
-    // We assume finalGs is a copy of initialGS, which has had the inferencer & resolver run.
-    ENFORCE(finalGs->lspTypecheckCount > 0,
+LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs, FileUpdates updates) const {
+    // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
+    ENFORCE(gs->lspTypecheckCount > 0,
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
 
     bool takeFastPath = false;
@@ -311,7 +305,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs, Fil
                         changedHashes.emplace_back(p.first);
                     }
                 }
-                finalGs = core::GlobalState::replaceFile(move(finalGs), fref, f);
+                gs = core::GlobalState::replaceFile(move(gs), fref, f);
                 subset.emplace_back(fref);
             }
             // Note: We may not have an id yet for this file if it is brand new, so we store hashes with their paths.
@@ -331,7 +325,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs, Fil
             if (!intersection.empty()) {
                 auto ref = core::FileRef(i);
                 logger->debug("Added {} to update set as used a changed method",
-                              !ref.exists() ? "" : ref.data(*finalGs).path());
+                              !ref.exists() ? "" : ref.data(*gs).path());
                 subset.emplace_back(ref);
             }
         }
@@ -347,33 +341,50 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs, Fil
             unique_ptr<KeyValueStore> kvstore; // nullptr
             // TODO: Thread through kvstore.
             ENFORCE(this->kvstore == nullptr);
-            auto t = pipeline::indexOne(opts, *finalGs, f, kvstore);
+            auto t = pipeline::indexOne(opts, *gs, f, kvstore);
             updatedIndexed.emplace_back(ast::ParsedFile{t.tree->deepCopy(), t.file});
             updates.updatedFileIndexes.push_back(move(t));
         }
 
-        for (auto &f : filesForQuery) {
-            const int id = f.id();
-            const auto it = indexedFinalGS.find(id);
-            const auto &parsedFile = it == indexedFinalGS.end() ? indexed[id] : it->second;
-            if (parsedFile.tree) {
-                updatedIndexed.emplace_back(ast::ParsedFile{parsedFile.tree->deepCopy(), parsedFile.file});
-            }
-        }
-        subset.insert(subset.end(), filesForQuery.begin(), filesForQuery.end());
-
-        ENFORCE(finalGs->lspQuery.isEmpty());
-        finalGs->lspQuery = q;
-        auto resolved = pipeline::incrementalResolve(*finalGs, move(updatedIndexed), opts);
-        tryApplyDefLocSaver(*finalGs, resolved);
-        tryApplyLocalVarSaver(*finalGs, resolved);
-        pipeline::typecheck(finalGs, move(resolved), opts, workers);
+        ENFORCE(gs->lspQuery.isEmpty());
+        auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), opts);
+        pipeline::typecheck(gs, move(resolved), opts, workers);
         auto out = initialGS->errorQueue->drainWithQueryResponses();
-        finalGs->lspTypecheckCount++;
-        finalGs->lspQuery = core::lsp::Query::noQuery();
-        return TypecheckRun{move(out.first), move(subset), move(out.second), move(finalGs), move(updates), true};
+        gs->lspTypecheckCount++;
+        return TypecheckRun{move(out.first), move(subset), move(gs), move(updates), true};
     } else {
         return runSlowPath(move(updates));
     }
+}
+
+LSPLoop::QueryRun LSPLoop::runQuery(unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
+                                    const vector<core::FileRef> &filesForQuery) const {
+    // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
+    ENFORCE(gs->lspTypecheckCount > 0,
+            "Tried to run a query with a GlobalState object that never had inferencer and resolver runs.");
+
+    Timer timeit(logger, "query");
+    prodCategoryCounterInc("lsp.updates", "query");
+    ENFORCE(initialGS->errorQueue->isEmpty());
+    vector<ast::ParsedFile> updatedIndexed;
+    for (auto &f : filesForQuery) {
+        const int id = f.id();
+        const auto it = indexedFinalGS.find(id);
+        const auto &parsedFile = it == indexedFinalGS.end() ? indexed[id] : it->second;
+        if (parsedFile.tree) {
+            updatedIndexed.emplace_back(ast::ParsedFile{parsedFile.tree->deepCopy(), parsedFile.file});
+        }
+    }
+
+    ENFORCE(gs->lspQuery.isEmpty());
+    gs->lspQuery = q;
+    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), opts);
+    tryApplyDefLocSaver(*gs, resolved);
+    tryApplyLocalVarSaver(*gs, resolved);
+    pipeline::typecheck(gs, move(resolved), opts, workers);
+    auto out = initialGS->errorQueue->drainWithQueryResponses();
+    gs->lspTypecheckCount++;
+    gs->lspQuery = core::lsp::Query::noQuery();
+    return QueryRun{move(gs), move(out.second)};
 }
 } // namespace sorbet::realmain::lsp

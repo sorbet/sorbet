@@ -17,9 +17,12 @@ LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.definition");
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
                                      LSPMethod::TextDocumentDefinition, false);
-    if (auto run = get_if<TypecheckRun>(&result)) {
-        gs = move(run->gs);
-        auto &queryResponses = run->responses;
+    gs = move(result.gs);
+    if (result.error) {
+        // An error happened while setting up the query.
+        response->error = move(result.error);
+    } else {
+        auto &queryResponses = result.responses;
         vector<unique_ptr<Location>> result;
         if (!queryResponses.empty()) {
             const bool fileIsTyped =
@@ -46,13 +49,6 @@ LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs
             }
         }
         response->result = move(result);
-    } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
-        // An error happened while setting up the query.
-        response->error = move(error->first);
-        gs = move(error->second);
-    } else {
-        // Should never happen, but satisfy the compiler.
-        ENFORCE(false, "Internal error: setupLSPQueryByLoc returned invalid value.");
     }
     return LSPResult::make(move(gs), move(response));
 }

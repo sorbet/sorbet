@@ -201,10 +201,13 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
 
     auto result =
         setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentCompletion);
+    gs = move(result.gs);
 
-    if (auto run = get_if<TypecheckRun>(&result)) {
-        gs = move(run->gs);
-        auto &queryResponses = run->responses;
+    if (result.error) {
+        // An error happened while setting up the query.
+        response->error = move(result.error);
+    } else {
+        auto &queryResponses = result.responses;
         vector<unique_ptr<CompletionItem>> items;
         if (!queryResponses.empty()) {
             auto resp = move(queryResponses[0]);
@@ -240,13 +243,6 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
             }
         }
         response->result = make_unique<CompletionList>(false, move(items));
-    } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
-        // An error happened while setting up the query.
-        response->error = move(error->first);
-        gs = move(error->second);
-    } else {
-        // Should never happen, but satisfy the compiler.
-        ENFORCE(false, "Internal error: setupLSPQueryByLoc returned invalid value.");
     }
     return LSPResult::make(move(gs), move(response));
 }

@@ -176,21 +176,29 @@ class LSPLoop {
     struct TypecheckRun {
         std::vector<std::unique_ptr<core::Error>> errors;
         std::vector<core::FileRef> filesTypechecked;
-        std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
         // The global state, post-typechecking.
         std::unique_ptr<core::GlobalState> gs;
         // The edit applied to `gs`.
         LSPLoop::FileUpdates updates;
         bool tookFastPath = false;
     };
+    struct QueryRun {
+        std::unique_ptr<core::GlobalState> gs;
+        std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
+        // (Optional) Error that occurred during the query that you can pass on to the client.
+        std::unique_ptr<ResponseError> error = nullptr;
+    };
+
     /** Conservatively rerun entire pipeline without caching any trees */
-    TypecheckRun runSlowPath(FileUpdates updates, const core::lsp::Query &q = core::lsp::Query::noQuery()) const;
+    TypecheckRun runSlowPath(FileUpdates updates) const;
     /** Returns `true` if the given changes can run on the fast path. */
     bool canTakeFastPath(const FileUpdates &updates, const std::vector<core::FileHash> &hashes) const;
-    /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */
-    TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs, FileUpdates updates,
-                             const std::vector<core::FileRef> &filesForQuery = {},
-                             const core::lsp::Query &q = core::lsp::Query::noQuery()) const;
+    /** Applies conservative heuristics to see if we can run incremental typechecking on the update. If not, it bails
+     * out and takes slow path. */
+    TypecheckRun runTypechecking(std::unique_ptr<core::GlobalState> gs, FileUpdates updates) const;
+    /** Runs the provided query against the given files, and returns matches. */
+    QueryRun runQuery(std::unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
+                      const std::vector<core::FileRef> &filesForQuery) const;
     /** Officially 'commits' the output of a `TypecheckRun` by updating the relevant state on LSPLoop and, if specified,
      * sending diagnostics to the editor. */
     LSPResult commitTypecheckRun(TypecheckRun run);
@@ -210,10 +218,10 @@ class LSPLoop {
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
     std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef) const;
-    std::variant<LSPLoop::TypecheckRun, std::pair<std::unique_ptr<ResponseError>, std::unique_ptr<core::GlobalState>>>
-    setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri, const Position &pos,
-                       const LSPMethod forMethod, bool errorIfFileIsUntyped = true) const;
-    TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol) const;
+    LSPLoop::QueryRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri,
+                                         const Position &pos, const LSPMethod forMethod,
+                                         bool errorIfFileIsUntyped = true) const;
+    QueryRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol) const;
     LSPResult handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                       const TextDocumentPositionParams &params) const;
     LSPResult handleTextDocumentDocumentSymbol(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
