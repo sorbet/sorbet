@@ -247,11 +247,11 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(FileUpdates updates) const {
 
 bool LSPLoop::canTakeFastPath(const FileUpdates &updates, const vector<core::FileHash> &hashes) const {
     if (disableFastPath) {
-        logger->debug("Taking slow path because happy path is disabled.");
+        logger->debug("Taking slow path because fast path is disabled.");
         return false;
     }
     auto &changedFiles = updates.updatedFiles;
-    logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
+    logger->debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
 
     ENFORCE(changedFiles.size() == hashes.size());
     int i = -1;
@@ -287,7 +287,7 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
     {
         Timer timeit(logger, "fast_path_decision");
         auto hashes = computeStateHashes(updates.updatedFiles);
-        logger->debug("Trying to see if happy path is available after {} file changes", updates.updatedFiles.size());
+        logger->debug("Trying to see if fast path is available after {} file changes", updates.updatedFiles.size());
         ENFORCE(updates.updatedFiles.size() == hashes.size());
         takeFastPath = canTakeFastPath(updates, hashes);
 
