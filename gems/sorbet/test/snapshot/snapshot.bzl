@@ -87,10 +87,10 @@ def _snapshot_test(test_path, ruby):
             "{}/expected/**/*".format(test_path),
             "{}/gems/**/*".format(test_path),
         ]),
-        deps = [":logging"],
+        deps = [":logging", ":validate_utils"],
         args = [
-            test_path,
             "$(location {})".format(actual),
+            test_path,
         ],
 
         # NOTE: this is manual to avoid being caught with `//...`
@@ -111,11 +111,10 @@ def _snapshot_test(test_path, ruby):
         native.sh_test(
             name = update_name,
             data = [actual] + expected,
-            deps = [":logging"],
+            deps = [":logging", ":validate_utils"],
             srcs = ["update_one_bazel.sh"],
             args = [
                 "$(location {})".format(actual),
-                "$(location {}/expected)".format(test_path),
                 test_path,
             ],
 

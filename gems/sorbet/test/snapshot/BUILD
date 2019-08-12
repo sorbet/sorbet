@@ -5,6 +5,12 @@ sh_library(
     srcs = ["logging.sh"],
 )
 
+sh_library(
+    name = "validate_utils",
+    srcs = ["validate_utils.sh"],
+    deps = [":logging"],
+)
+
 sh_binary(
     name = "run_one_bazel",
     srcs = ["run_one_bazel.sh"],
