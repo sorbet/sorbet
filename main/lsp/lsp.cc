@@ -29,16 +29,15 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
     rootPath = opts.rawInputDirNames.at(0);
 }
 
-variant<LSPLoop::QueryRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
-LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
-                            const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
+LSPLoop::QueryRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
+                                              const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
     Timer timeit(logger, "setupLSPQueryByLoc");
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {
-        return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
-                                                    fmt::format("Did not find file at uri {} in {}", uri,
-                                                                convertLSPMethodToString(forMethod))),
-                         move(gs));
+        auto error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidParams,
+            fmt::format("Did not find file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
+        return LSPLoop::QueryRun{move(gs), {}, move(error)};
     }
 
     if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::True) {
@@ -49,10 +48,10 @@ LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, c
 
     auto loc = lspPos2Loc(fref, pos, *gs);
     if (!loc) {
-        return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
-                                                    fmt::format("Did not find location at uri {} in {}", uri,
-                                                                convertLSPMethodToString(forMethod))),
-                         move(gs));
+        auto error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidParams,
+            fmt::format("Did not find location at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
+        return LSPLoop::QueryRun{move(gs), {}, move(error)};
     }
 
     return runQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), {fref});

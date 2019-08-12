@@ -185,7 +185,10 @@ class LSPLoop {
     struct QueryRun {
         std::unique_ptr<core::GlobalState> gs;
         std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
+        // (Optional) Error that occurred during the query that you can pass on to the client.
+        std::unique_ptr<ResponseError> error = nullptr;
     };
+
     /** Conservatively rerun entire pipeline without caching any trees */
     TypecheckRun runSlowPath(FileUpdates updates) const;
     /** Returns `true` if the given changes can run on the fast path. */
@@ -215,9 +218,9 @@ class LSPLoop {
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
     std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef) const;
-    std::variant<LSPLoop::QueryRun, std::pair<std::unique_ptr<ResponseError>, std::unique_ptr<core::GlobalState>>>
-    setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri, const Position &pos,
-                       const LSPMethod forMethod, bool errorIfFileIsUntyped = true) const;
+    LSPLoop::QueryRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri,
+                                         const Position &pos, const LSPMethod forMethod,
+                                         bool errorIfFileIsUntyped = true) const;
     QueryRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol) const;
     LSPResult handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                       const TextDocumentPositionParams &params) const;
