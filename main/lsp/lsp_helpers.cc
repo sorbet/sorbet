@@ -205,6 +205,11 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (data->isClass() && data->superClass() == core::Symbols::StubModule()) {
         return true;
     }
+    // static-init for a class
+    if (data->name == core::Names::staticInit()) {
+        return true;
+    }
+    // static-init for a file
     if (data->name.data(gs)->kind == core::NameKind::UNIQUE &&
         data->name.data(gs)->unique.original == core::Names::staticInit()) {
         return true;
