@@ -93,22 +93,22 @@ snapshot_tests(
 
 test_suite(
     name = "snapshot",
+
+    # NOTE: this is manual to avoid being caught with `//...`
+    tags = ["manual"],
     tests = [
         ":snapshot-ruby_2_4_3",
         ":snapshot-ruby_2_6_3",
     ],
-
-    # NOTE: this is manual to avoid being caught with `//...`
-    tags = ["manual"],
 )
 
 test_suite(
     name = "update",
+
+    # NOTE: this is manual to avoid being caught with `//...`
+    tags = ["manual"],
     tests = [
         ":update-ruby_2_4_3",
         ":update-ruby_2_6_3",
     ],
-
-    # NOTE: this is manual to avoid being caught with `//...`
-    tags = ["manual"],
 )
