@@ -1,7 +1,8 @@
 #!/bin/bash
+
 set -e
 
-COMMAND_FILE=$(mktemp)
+COMMAND_FILE="$(mktemp)"
 trap 'rm -f "$COMMAND_FILE"' EXIT
 
 passes=(
