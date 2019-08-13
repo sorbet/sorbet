@@ -128,6 +128,11 @@ change it!
 
 [→ internals.md](docs/internals.md)
 
+There is also a talk online that describes Sorbet's high-level architecture and
+the reasons why it's fast:
+
+[→ Fast type checking for Ruby](https://sorbet.org/docs/talks/jvm-ls-2019)
+
 
 ## Building Sorbet
 

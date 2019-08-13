@@ -50,7 +50,9 @@
     "Talks": [
       "talks/ruby-kaigi-2018",
       "talks/strange-loop-2018",
-      "talks/ruby-kaigi-2019"
+      "talks/ruby-kaigi-2019",
+      "talks/curry-on-2019",
+      "talks/jvm-ls-2019"
     ]
   },
   "legal": { "Legal": [ "legal/trademark-policy" ] }
