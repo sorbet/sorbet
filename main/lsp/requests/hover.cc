@@ -26,7 +26,7 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
     return contents;
 }
 
-unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view typeString,
+unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typeString,
                                          optional<string_view> docString) {
     string content = "";
 
@@ -91,11 +91,11 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             if (constraint) {
                 retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
             }
-            response->result = make_unique<Hover>(formatRubyCode(
+            response->result = make_unique<Hover>(formatHoverText(
                 clientHoverMarkupKind, methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint),
                 documentation));
         } else if (auto defResp = resp->isDefinition()) {
-            response->result = make_unique<Hover>(formatRubyCode(
+            response->result = make_unique<Hover>(formatHoverText(
                 clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr),
                 documentation));
         } else if (auto constResp = resp->isConstant()) {
@@ -110,12 +110,12 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 // `Foo`.
                 type = core::make_type<core::MetaType>(type);
             }
-            response->result = make_unique<Hover>(formatRubyCode(
+            response->result = make_unique<Hover>(formatHoverText(
                 clientHoverMarkupKind, type->showWithMoreInfo(*gs),
                 documentation));
         } else {
             response->result = make_unique<Hover>(
-                formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
+                formatHoverText(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
         }
     }
     return LSPResult::make(move(gs), move(response));
