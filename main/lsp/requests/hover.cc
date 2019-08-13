@@ -1,6 +1,6 @@
+#include "absl/strings/ascii.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
-#include "absl/strings/ascii.h"
 
 using namespace std;
 
@@ -27,7 +27,7 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
 }
 
 unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typeString,
-                                         optional<string_view> docString) {
+                                          optional<string_view> docString) {
     string content = "";
 
     // Add docs
@@ -109,9 +109,8 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 // `Foo`.
                 type = core::make_type<core::MetaType>(type);
             }
-            response->result = make_unique<Hover>(formatHoverText(
-                clientHoverMarkupKind, type->showWithMoreInfo(*gs),
-                documentation));
+            response->result =
+                make_unique<Hover>(formatHoverText(clientHoverMarkupKind, type->showWithMoreInfo(*gs), documentation));
         } else {
             response->result = make_unique<Hover>(
                 formatHoverText(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
