@@ -227,6 +227,8 @@ bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view
     return fnd != string_view::npos;
 }
 
+const int multilineCutoff = 4;
+
 string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
                     const unique_ptr<core::TypeConstraint> &constraint) {
     ENFORCE(method.exists());
@@ -282,14 +284,25 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
     }
 
     string flagString = "";
-    if (!flags.empty()) {
-        flagString = fmt::format("{}.", fmt::join(flags, "."));
-    }
     string paramsString = "";
-    if (!typeAndArgNames.empty()) {
-        paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
+    if (typeAndArgNames.size() > multilineCutoff) {
+        if (!flags.empty()) {
+            flagString = fmt::format("  {}.\n", fmt::join(flags, ".\n  "));
+        }
+        if (!typeAndArgNames.empty()) {
+            paramsString = fmt::format("  params(\n    {}\n  ).\n", fmt::join(typeAndArgNames, ",\n    "));
+        }
+        return fmt::format("{}{} do\n{}{}  {}\nend", accessFlagString, sigCall, flagString, paramsString,
+                           methodReturnType);
+    } else {
+        if (!flags.empty()) {
+            flagString = fmt::format("{}.", fmt::join(flags, "."));
+        }
+        if (!typeAndArgNames.empty()) {
+            paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
+        }
+        return fmt::format("{}{} {{{}{}{}}}", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
     }
-    return fmt::format("{}{} {{{}{}{}}}", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
