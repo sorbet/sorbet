@@ -24,9 +24,9 @@ end
 module M
   extend T::Sig
 
-	# should not appear, since no let
-	@@nope = "doesn't work"
-	# should appear, since yes let
+  # should not appear, since no let
+  @@nope = "doesn't work"
+  # should appear, since yes let
   @@greeting = T.let("hello", String)
 
   sig {params(x: String).returns(String)}
@@ -51,9 +51,9 @@ class Parent
       second: Integer,
       third: Integer,
       fourth: Integer,
-			fifth: Integer,
+      fifth: Integer,
     ).
-		returns(Integer)
+    returns(Integer)
   end
   def sum_many(first, second, third, fourth, fifth)
   end
