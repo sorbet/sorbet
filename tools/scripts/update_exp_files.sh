@@ -4,7 +4,26 @@ set -e
 COMMAND_FILE=$(mktemp)
 trap 'rm -f "$COMMAND_FILE"' EXIT
 
-passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw symbol-table symbol-table-raw name-tree name-tree-raw resolve-tree resolve-tree-raw cfg cfg-json flattened-tree flattened-tree-raw autogen document-symbols)
+passes=(
+  parse-tree
+  parse-tree-json
+  ast
+  ast-raw
+  dsl-tree
+  dsl-tree-raw
+  symbol-table
+  symbol-table-raw
+  name-tree
+  name-tree-raw
+  resolve-tree
+  resolve-tree-raw
+  cfg
+  cfg-json
+  flattened-tree
+  flattened-tree-raw
+  autogen
+  document-symbols
+)
 
 bazel build \
   //gems/sorbet/test/snapshot:update \
