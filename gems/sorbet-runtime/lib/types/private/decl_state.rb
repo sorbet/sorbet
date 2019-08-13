@@ -17,13 +17,14 @@ class T::Private::DeclState
     self.active_declaration = nil
   end
 
-  def self.without_on_method_added
+  def without_on_method_added
     begin
-      old_value = current.skip_on_method_added
-      current.skip_on_method_added = true
+      # explicit 'self' is needed here
+      old_value = self.skip_on_method_added
+      self.skip_on_method_added = true
       yield
     ensure
-      current.skip_on_method_added = old_value
+      self.skip_on_method_added = old_value
     end
   end
 end

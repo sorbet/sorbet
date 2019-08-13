@@ -96,7 +96,7 @@ module T::Private::ClassUtils
 
     overwritten = original_owner == mod
     T::Configuration.without_ruby_warnings do
-      T::Private::DeclState.without_on_method_added do
+      T::Private::DeclState.current.without_on_method_added do
         mod.send(:define_method, name, &blk) # rubocop:disable PrisonGuard/UsePublicSend
       end
     end
