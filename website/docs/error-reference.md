@@ -400,6 +400,11 @@ end
 class Bad < S; end # error
 ```
 
+This limitation exists because, in order to generate a static type for
+`initialize` for a struct, we need to know all of the `prop`s that are declared
+on this struct. By disallowing inheritance of structs, we can know that all of
+the props declared on this struct were syntactically present in the class body.
+
 ## 5047
 
 A class or module tried to inherit, include, or extend a final class or module.
