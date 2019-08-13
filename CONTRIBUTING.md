@@ -6,7 +6,7 @@ We welcome contributions from the community. This doc describes the process to c
   GitHub issue.
 * A "major feature" is defined as any change that is > 100 LOC altered (not including tests), or
   changes any user-facing behavior. We will use the GitHub issue to discuss the feature and come to
-  agreement. This is to prevent your time being wasted, as well as ours
+  agreement. This is to prevent your time being wasted, as well as ours.
 * Small patches and bug fixes don't need prior communication.
 * Some good tasks to get started with are [available in the issue tracker](https://github.com/sorbet/sorbet/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
 
@@ -23,7 +23,7 @@ We welcome contributions from the community. This doc describes the process to c
 Documentation improvements are very welcome. The source of [sorbet.org](https://sorbet.org) is located in website/ in the tree.
 
 # Testing
-* Our CI runs all tests with [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) and [ASan](https://clang.llvm.org/docs/AddressSanitizer.html). You can run them locally by passing `--config=sanitize` when running tests
+* Our CI runs all tests with [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) and [ASan](https://clang.llvm.org/docs/AddressSanitizer.html). You can run them locally by passing `--config=sanitize` when running tests.
 * We expect all assumptions made when writing code to be spelled explicitly via `ENFORCE(myAssumption);` statements.
 * Some characteristics of good tests:
     * includes comments: what is being tested and why?
