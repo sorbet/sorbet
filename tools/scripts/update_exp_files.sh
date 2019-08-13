@@ -55,9 +55,19 @@ for this_src in "${rb_src[@]}" DUMMY; do
       fi
       if [ -e "$candidate" ]; then
         if [ "$pass" = "document-symbols" ]; then
-          echo bazel-bin/test/print_document_symbols "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
+          echo bazel-bin/test/print_document_symbols \
+            "${srcs[@]}" \
+            \> "$candidate" \
+            2\>/dev/null \
+            >>"$COMMAND_FILE"
         else
-          echo bazel-bin/main/sorbet --silence-dev-message  --suppress-non-critical --censor-for-snapshot-tests --print "$pass" --max-threads 0 "${args[@]}" "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
+          echo bazel-bin/main/sorbet \
+            --silence-dev-message --suppress-non-critical --censor-for-snapshot-tests \
+            --print "$pass" --max-threads 0 \
+            "${args[@]}" "${srcs[@]}" \
+            \> "$candidate" \
+            2\>/dev/null \
+            >>"$COMMAND_FILE"
         fi
       fi
     done
