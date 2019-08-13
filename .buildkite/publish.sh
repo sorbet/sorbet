@@ -19,7 +19,7 @@ fi
 
 git_commit_count=$(git rev-list --count HEAD)
 prefix="0.4"
-release_version="0.4.${git_commit_count}"
+release_version="$prefix.${git_commit_count}"
 long_release_version="${release_version}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
 
 echo "--- Dowloading artifacts"
@@ -84,6 +84,35 @@ else
 fi
 git checkout -f "$current_rev"
 
+echo "--- making a github release"
+echo releasing "${long_release_version}"
+git tag -f "${long_release_version}"
+if [ "$dryrun" = "" ]; then
+    git push origin "${long_release_version}"
+fi
+
+mkdir release
+cp -R _out_/* release/
+mv release/gems/* release
+rmdir release/gems
+rm release/website/website.tar.bz2
+rmdir release/website
+rm release/webasm/sorbet-wasm.tar
+rmdir release/webasm
+
+pushd release
+files=()
+while IFS='' read -r line; do files+=("$line"); done < <(find . -type f | sed 's#^./##')
+release_notes="To use Sorbet add this line to your Gemfile:
+\`\`\`
+gem 'sorbet', '$release_version', :group => :development
+gem 'sorbet-runtime', '$release_version'
+\`\`\`"
+if [ "$dryrun" = "" ]; then
+    echo "$release_notes" | ../.buildkite/tools/gh-release.sh sorbet/sorbet "${long_release_version}" -- "${files[@]}"
+fi
+popd
+
 echo "--- publishing gems to RubyGems.org"
 
 mkdir -p "$HOME/.gem"
@@ -128,30 +157,3 @@ if [ "$dryrun" = "" ]; then
   with_backoff gem push "_out_/gems/sorbet-$release_version.gem"
 fi
 
-echo "--- making a github release"
-echo releasing "${long_release_version}"
-git tag -f "${long_release_version}"
-if [ "$dryrun" = "" ]; then
-    git push origin "${long_release_version}"
-fi
-
-mkdir release
-cp -R _out_/* release/
-mv release/gems/* release
-rmdir release/gems
-rm release/website/website.tar.bz2
-rmdir release/website
-rm release/webasm/sorbet-wasm.tar
-rmdir release/webasm
-
-pushd release
-files=()
-while IFS='' read -r line; do files+=("$line"); done < <(find . -type f | sed 's#^./##')
-release_notes="To use Sorbet add this line to your Gemfile:
-\`\`\`
-gem 'sorbet', '$prefix.$git_commit_count'
-\`\`\`"
-if [ "$dryrun" = "" ]; then
-    echo "$release_notes" | ../.buildkite/tools/gh-release.sh sorbet/sorbet "${long_release_version}" -- "${files[@]}"
-fi
-popd
