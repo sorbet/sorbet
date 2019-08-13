@@ -79,7 +79,6 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
 
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
-            // TODO main.method is <none> when calling .new on a class.
             auto start = sendResp->dispatchResult.get();
             if (start != nullptr && start->main.method.exists() && !start->main.receiver->isUntyped()) {
                 auto loc = start->main.method.data(*gs)->loc();
