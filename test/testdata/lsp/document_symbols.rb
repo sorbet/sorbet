@@ -40,5 +40,40 @@ module M
   end
 end
 
+class Parent
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+  sig do
+    abstract.
+    params(
+      a: Integer,
+      b: Integer,
+      c: Integer,
+      d: Integer
+    )
+    .returns(Integer)
+  end
+  def sum_four(a, b, c, d)
+    a + b + c + d
+  end
+end
+
+class Child < Parent
+  sig do
+    implementation.
+    params(
+      a: Integer,
+      b: Integer,
+      c: Integer,
+      d: Integer
+    ).
+    returns(Integer)
+  end
+  def sum_four(a, b, c, d)
+    a + b + c + d
+  end
+end
+
 class BigDecimal
 end
