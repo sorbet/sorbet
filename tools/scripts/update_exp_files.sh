@@ -53,7 +53,9 @@ for this_src in "${rb_src[@]}" DUMMY; do
       if [ "$pass" = "autogen" ]; then
         args=("--stop-after=namer --skip-dsl-passes")
       fi
-      if [ -e "$candidate" ]; then
+      if ! [ -e "$candidate" ]; then
+        continue
+      fi
         if [ "$pass" = "document-symbols" ]; then
           echo bazel-bin/test/print_document_symbols \
             "${srcs[@]}" \
@@ -69,7 +71,6 @@ for this_src in "${rb_src[@]}" DUMMY; do
             2\>/dev/null \
             >>"$COMMAND_FILE"
         fi
-      fi
     done
   fi
 
