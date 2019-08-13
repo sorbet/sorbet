@@ -55,7 +55,6 @@ class Parent
     .returns(Integer)
   end
   def sum_four(a, b, c, d)
-    a + b + c + d
   end
 end
 
