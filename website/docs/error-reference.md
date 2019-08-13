@@ -405,6 +405,41 @@ This limitation exists because, in order to generate a static type for
 on this struct. By disallowing inheritance of structs, we can know that all of
 the props declared on this struct were syntactically present in the class body.
 
+One common situation where inheritance may be desired is when a parent struct
+declares some common props, and children structs declare their own props.
+
+```ruby
+class Parent < T::Struct
+  prop :foo, Integer
+end
+
+class ChildOne < Parent # error
+  prop :bar, String
+end
+
+class ChildTwo < Parent # error
+  prop :quz, Symbol
+end
+```
+
+We can restructure the code to use composition instead of inheritance.
+
+```ruby
+class Common < T::Struct
+  prop :foo, Integer
+end
+
+class ChildOne < T::Struct
+  prop :common, Common
+  prop :bar, String
+end
+
+class ChildTwo < T::Struct
+  prop :common, Common
+  prop :quz, Symbol
+end
+```
+
 ## 5047
 
 A class or module tried to inherit, include, or extend a final class or module.
