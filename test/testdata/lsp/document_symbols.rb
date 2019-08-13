@@ -76,5 +76,12 @@ class Child < Parent
   end
 end
 
-class BigDecimal
+class OuterClass
+  class InnerClass; end
+  module InnerModule; end
+end
+
+class OuterModule
+  class InnerClass; end
+  module InnerModule; end
 end
