@@ -12,7 +12,7 @@ class Exception < Object
   sig {returns(T.nilable(T::Array[String]))}
   def backtrace(); end
 
-  sig {returns(T::Array[Thread::Backtrace::Location])}
+  sig {returns(T.nilable(T::Array[Thread::Backtrace::Location]))}
   def backtrace_locations(); end
 
   sig {returns(T.nilable(Exception))}
