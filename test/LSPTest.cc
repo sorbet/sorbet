@@ -10,19 +10,12 @@ using namespace std;
 
 void LSPTest::SetUp() {
     test = GetParam();
-    lspWrapper = make_unique<LSPWrapper>("", fastpathDisabled);
-    lspWrapper->enableAllExperimentalFeatures();
     parseTestFile();
-}
 
-bool LSPTest::fastpathDisabled = false;
-
-void LSPTest::parseTestFile() {
-    for (auto &sourceFile : test.sourceFiles) {
-        filenames.insert(test.folder + sourceFile);
-    }
-
-    assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    realmain::options::Options opts;
+    opts.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
+    lspWrapper = make_unique<LSPWrapper>(move(opts), "", fastpathDisabled);
+    lspWrapper->enableAllExperimentalFeatures();
 
     if (test.expectations.find("autogen") != test.expectations.end()) {
         // When autogen is enabled, skip DSL passes...
@@ -37,6 +30,16 @@ void LSPTest::parseTestFile() {
             lspWrapper->opts.stopAfterPhase = realmain::options::Phase::NAMER;
         }
     }
+}
+
+bool LSPTest::fastpathDisabled = false;
+
+void LSPTest::parseTestFile() {
+    for (auto &sourceFile : test.sourceFiles) {
+        filenames.insert(test.folder + sourceFile);
+    }
+
+    assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 }
 
 } // namespace sorbet::test

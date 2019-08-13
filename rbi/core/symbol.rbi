@@ -62,6 +62,14 @@ class Symbol < Object
   end
   def casecmp(other); end
 
+  sig do
+    params(
+        other: Symbol,
+    )
+    .returns(T.nilable(T::Boolean))
+  end
+  def casecmp?(other); end
+
   sig {returns(Symbol)}
   def downcase(); end
 
@@ -90,6 +98,16 @@ class Symbol < Object
     .returns(T.nilable(Integer))
   end
   def match(obj); end
+
+  sig do
+    params(
+        args: T.untyped
+    ).returns(T.untyped)
+  end
+  def match?(*args); end
+
+  sig {returns(Symbol)}
+  def next(); end
 
   sig {returns(Symbol)}
   def succ(); end

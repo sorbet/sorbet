@@ -30,6 +30,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "realmain",
+        "//main/pipeline/semantic_extension:none",
         "//payload",
     ],
 )
@@ -46,6 +47,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "realmain-orig",
+        "//main/pipeline/semantic_extension:none",
         "//payload:text",
     ],
 )
@@ -90,7 +92,7 @@ cc_library(
         "//ast",
         "//core",
         "//main/options",
-        "//main/pipeline",
+        "//main/pipeline:pipeline-orig",
         "//payload:interface",
     ],
 )

@@ -14,6 +14,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "core/errors/infer.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 
 template class std::vector<std::pair<unsigned int, unsigned int>>;
 template class std::shared_ptr<sorbet::core::GlobalState>;
@@ -276,6 +277,13 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct());
     ENFORCE(id == Symbols::T_Struct());
 
+    id = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
+    ENFORCE(id == Symbols::Singleton());
+
+    id = enterClassSymbol(Loc::none(), Symbols::Opus(), core::Names::Constants::Enum());
+    id.data(*this)->setIsModule(false);
+    ENFORCE(id == Symbols::OpusEnum());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
@@ -380,6 +388,17 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.type = Types::untyped(*this, method);
         arg.flags.isRepeated = true;
+    }
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    // Synthesize <Magic>#<suggest-type>(arg: *T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::suggestType());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
     }
     method.data(*this)->resultType = Types::untyped(*this, method);
     {
@@ -510,9 +529,14 @@ void GlobalState::initEmpty() {
 
 void GlobalState::installIntrinsics() {
     for (auto &entry : intrinsicMethods) {
-        auto symbol = entry.symbol;
-        if (entry.singleton) {
-            symbol = symbol.data(*this)->singletonClass(*this);
+        SymbolRef symbol;
+        switch (entry.singleton) {
+            case Intrinsic::Kind::Instance:
+                symbol = entry.symbol;
+                break;
+            case Intrinsic::Kind::Singleton:
+                symbol = entry.symbol.data(*this)->singletonClass(*this);
+                break;
         }
         auto countBefore = symbolsUsed();
         SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);
@@ -801,7 +825,8 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
     ENFORCE(original.data(*this)->kind == UTF8 ||
                 (original.data(*this)->kind == UNIQUE &&
-                 original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass),
+                 (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::OpusEnum)),
             "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(CONSTANT, original.id());
@@ -1179,6 +1204,9 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
         result->symbols.emplace_back(sym.deepCopy(*result, keepId));
     }
     result->pathPrefix = this->pathPrefix;
+    for (auto &semanticExtension : this->semanticExtensions) {
+        result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
+    }
     result->sanityCheck();
     {
         Timer timeit2(tracer(), "GlobalState::deepCopyOut");
@@ -1220,9 +1248,7 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     if (what == errors::Internal::InternalError) {
         Exception::failInFuzzer();
     }
-    bool report = (what == errors::Internal::InternalError) || (what == errors::Internal::FileNotFound) ||
-                  (shouldReportErrorOn(loc, what) && !this->silenceErrors);
-    return ErrorBuilder(*this, report, loc, what);
+    return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
 }
 
 void GlobalState::suppressErrorClass(int code) {
@@ -1258,12 +1284,15 @@ bool GlobalState::hasAnyDslPlugin() const {
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
+    if (what.minLevel == StrictLevel::Internal) {
+        return true;
+    }
+    if (this->silenceErrors) {
+        return false;
+    }
     StrictLevel level = StrictLevel::Strong;
     if (loc.file().exists()) {
         level = loc.file().data(*this).strictLevel;
-    }
-    if (what.code == errors::Internal::InternalError.code) {
-        return true;
     }
     if (suppressedErrorClasses.count(what.code) != 0) {
         return false;
@@ -1319,7 +1348,7 @@ unique_ptr<GlobalState> GlobalState::replaceFile(unique_ptr<GlobalState> inWhat,
     return inWhat;
 }
 
-FileRef GlobalState::findFileByPath(string_view path) {
+FileRef GlobalState::findFileByPath(string_view path) const {
     auto fnd = fileRefByPath.find(string(path));
     if (fnd != fileRefByPath.end()) {
         return fnd->second;
@@ -1370,7 +1399,7 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     return result;
 }
 
-vector<shared_ptr<File>> GlobalState::getFiles() const {
+const vector<shared_ptr<File>> &GlobalState::getFiles() const {
     return files;
 }
 

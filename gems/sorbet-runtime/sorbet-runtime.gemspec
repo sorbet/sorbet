@@ -13,4 +13,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'minitest', '~> 5.11'
   s.add_development_dependency 'mocha', '~> 1.7'
   s.add_development_dependency 'rake'
+  # for reproducing race conditions in tests
+  s.add_development_dependency 'concurrent-ruby', '~> 1.1.5'
 end

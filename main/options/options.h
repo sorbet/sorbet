@@ -3,6 +3,7 @@
 #include "common/FileSystem.h"
 #include "common/common.h"
 #include "core/StrictLevel.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
 
 namespace sorbet::realmain::options {
@@ -141,6 +142,7 @@ struct Options {
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
+    bool stripeMode = false;
     std::string typedSource = "";
     std::string cacheDir = "";
     std::vector<std::string> configatronDirs;
@@ -185,10 +187,12 @@ struct Options {
     std::vector<std::string> autogenSubclassesAbsoluteIgnorePatterns;
     // Ignore patterns that can occur anywhere in a file's path from an input folder.
     std::vector<std::string> autogenSubclassesRelativeIgnorePatterns;
+    // List of directories not available editor-side. References to files in these directories should be sent via
+    // sorbet: URIs to clients that support them.
+    std::vector<std::string> lspDirsMissingFromClient;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
-    bool lspGoToDefinitionEnabled = false;
-    bool lspFindReferencesEnabled = false;
     bool lspAutocompleteEnabled = false;
+    bool lspQuickFixEnabled = false;
     bool lspWorkspaceSymbolsEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;
@@ -213,8 +217,11 @@ struct Options {
     Options &operator=(Options &&) = delete;
 };
 
-void readOptions(Options &, int argc, char *argv[],
-                 std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
+void readOptions(
+    Options &, std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions,
+    int argc, char *argv[],
+    const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
+    std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
 
 void flushPrinters(Options &);
 } // namespace sorbet::realmain::options

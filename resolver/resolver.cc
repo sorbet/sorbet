@@ -320,7 +320,11 @@ private:
             return true;
         }
         if (isFullyResolved(ctx, job.rhs)) {
-            job.lhs.data(ctx)->resultType = TypeSyntax::getResultType(ctx, *(job.rhs), ParsedSig{}, true, job.lhs);
+            auto allowSelfType = true;
+            auto allowRebind = false;
+            auto allowTypeMember = true;
+            job.lhs.data(ctx)->resultType = TypeSyntax::getResultType(
+                ctx, *(job.rhs), ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, job.lhs});
             return true;
         }
 
@@ -338,7 +342,7 @@ private:
             if (auto e = ctx.state.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
                 e.setHeader("Reassigning a type alias is not allowed");
                 e.addErrorLine(rhsData->loc(), "Originally defined here");
-                e.replaceWith(it.rhs->loc, "T.type_alias({})", it.rhs->loc.source(ctx));
+                e.replaceWith("Declare as type alias", it.rhs->loc, "T.type_alias({})", it.rhs->loc.source(ctx));
             }
             it.lhs.data(ctx)->resultType = core::Types::untypedUntracked();
             return true;
@@ -427,6 +431,20 @@ private:
         }
 
         return true;
+    }
+
+    static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
+        ENFORCE(job.ancestor->symbol.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
+        auto ancestorSym = job.ancestor->symbol.data(ctx)->dealias(ctx);
+
+        if (!ancestorSym.data(ctx)->isClassSealed()) {
+            return;
+        }
+
+        // TODO(jez) Would it ever make sense to put an AppliedType into the union?
+        // TODO(jez) Do we want to make sure that the child class doesn't have any type members?
+
+        ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
     }
 
     void transformAncestor(core::Context ctx, core::SymbolRef klass, unique_ptr<ast::Expression> &ancestor,
@@ -705,7 +723,11 @@ public:
                 int origSize = todoAncestors.size();
                 auto it =
                     remove_if(todoAncestors.begin(), todoAncestors.end(), [ctx](AncestorResolutionItem &job) -> bool {
-                        return resolveAncestorJob(ctx, job, false);
+                        auto resolved = resolveAncestorJob(ctx, job, false);
+                        if (resolved) {
+                            tryRegisterSealedSubclass(ctx, job);
+                        }
+                        return resolved;
                     });
                 todoAncestors.erase(it, todoAncestors.end());
                 progress = (origSize != todoAncestors.size());
@@ -797,6 +819,121 @@ public:
         }
 
         return trees;
+    }
+};
+
+class ResolveTypeParamsWalk {
+public:
+    unique_ptr<ast::Assign> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
+        auto *id = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
+        if (id == nullptr || !id->symbol.exists()) {
+            return asgn;
+        }
+
+        auto sym = id->symbol;
+        auto data = sym.data(ctx);
+        if (data->isTypeAlias()) {
+            return asgn;
+        }
+
+        if (data->isTypeMember()) {
+            auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
+            ENFORCE(send->recv->isSelfReference());
+            ENFORCE(send->fun == core::Names::typeMember() || send->fun == core::Names::typeTemplate());
+            auto *memberType = core::cast_type<core::LambdaParam>(data->resultType.get());
+            ENFORCE(memberType != nullptr);
+
+            // NOTE: the resultType is set back in the namer to be a LambdaParam
+            // with `T.untyped` for its bounds. We fix that here by setting the
+            // bounds to top and bottom.
+            memberType->lowerBound = core::Types::bottom();
+            memberType->upperBound = core::Types::top();
+
+            core::LambdaParam *parentType = nullptr;
+            auto parentMember = data->owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
+            if (parentMember.exists()) {
+                if (parentMember.data(ctx)->isTypeMember()) {
+                    parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType.get());
+                    ENFORCE(parentType != nullptr);
+                } else if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                    const auto parentShow = parentMember.data(ctx)->show(ctx);
+                    e.setHeader("`{}` is a type member but `{}` is not a type member", data->show(ctx), parentShow);
+                    e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` definition", parentShow);
+                }
+            }
+
+            // When no args are supplied, this implies that the upper and lower
+            // bounds of the type parameter are top and bottom.
+            ast::Hash *hash = nullptr;
+            if (send->args.size() == 1) {
+                hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+            } else if (send->args.size() == 2) {
+                hash = ast::cast_tree<ast::Hash>(send->args[1].get());
+            }
+
+            if (hash) {
+                int i = -1;
+                for (auto &keyExpr : hash->keys) {
+                    i++;
+                    auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
+                    if (lit && lit->isSymbol(ctx)) {
+                        ParsedSig emptySig;
+                        auto allowSelfType = true;
+                        auto allowRebind = false;
+                        auto allowTypeMember = false;
+                        core::TypePtr resTy =
+                            TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig,
+                                                      TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, sym});
+
+                        switch (lit->asSymbol(ctx)._id) {
+                            case core::Names::fixed()._id:
+                                memberType->lowerBound = resTy;
+                                memberType->upperBound = resTy;
+                                break;
+
+                            case core::Names::lower()._id:
+                                memberType->lowerBound = resTy;
+                                break;
+
+                            case core::Names::upper()._id:
+                                memberType->upperBound = resTy;
+                                break;
+                        }
+                    }
+                }
+            }
+
+            // If the parent bounds existis, validate the new bounds against
+            // those of the parent.
+            // NOTE: these errors could be better for cases involving
+            // `fixed`.
+            if (parentType != nullptr) {
+                if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound)) {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                        e.setHeader("parent lower bound `{}` is not a subtype of lower bound `{}`",
+                                    parentType->lowerBound->show(ctx), memberType->lowerBound->show(ctx));
+                    }
+                }
+                if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound)) {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                        e.setHeader("upper bound `{}` is not a subtype of parent upper bound `{}`",
+                                    memberType->upperBound->show(ctx), parentType->upperBound->show(ctx));
+                    }
+                }
+            }
+
+            // Ensure that the new lower bound is a subtype of the upper
+            // bound. This will be a no-op in the case that the type member
+            // is fixed.
+            if (!core::Types::isSubType(ctx, memberType->lowerBound, memberType->upperBound)) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeMemberBounds)) {
+                    e.setHeader("`{}` is not a subtype of `{}`", memberType->lowerBound->show(ctx),
+                                memberType->upperBound->show(ctx));
+                }
+            }
+        }
+
+        return asgn;
     }
 };
 
@@ -1016,7 +1153,12 @@ private:
             // These sigs won't have been parsed, as there was no methods to
             // attach them to -- parse them here manually to force any errors.
             for (auto sig : lastSigs) {
-                TypeSyntax::parseSig(ctx, sig, nullptr, true, core::Symbols::untyped());
+                auto allowSelfType = true;
+                auto allowRebind = false;
+                auto allowTypeMember = true;
+                TypeSyntax::parseSig(
+                    ctx, sig, nullptr,
+                    TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::untyped()});
             }
 
             if (auto e = ctx.state.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -1137,8 +1279,12 @@ private:
                     }
 
                     while (i < lastSigs.size()) {
-                        auto sig = TypeSyntax::parseSig(ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]),
-                                                        nullptr, true, mdef->symbol);
+                        auto allowSelfType = true;
+                        auto allowRebind = false;
+                        auto allowTypeMember = true;
+                        auto sig = TypeSyntax::parseSig(
+                            ctx.withOwner(sigOwner), ast::cast_tree<ast::Send>(lastSigs[i]), nullptr,
+                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef->symbol});
                         core::SymbolRef overloadSym;
                         if (isOverloaded) {
                             vector<int> argsToKeep;
@@ -1179,6 +1325,7 @@ private:
                         if (auto e =
                                 ctx.state.beginError(mdef->rhs->loc, core::errors::Resolver::AbstractMethodWithBody)) {
                             e.setHeader("Abstract methods must not contain any code in their body");
+                            e.replaceWith("Delete the body", mdef->rhs->loc, "");
                         }
 
                         mdef->rhs = ast::MK::EmptyTree();
@@ -1217,14 +1364,13 @@ private:
             [&](ast::Cast *cast) {
                 if (cast->cast != core::Names::let()) {
                     if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
-                        e.setHeader("Use T.let() to specify the type of constants");
+                        e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
                 }
                 result = cast->type;
             },
             [&](ast::InsSeq *outer) { result = resolveConstantType(ctx, outer->expr, ofSym); },
             [&](ast::Expression *expr) {
-                result = core::Types::untyped(ctx, ofSym);
                 if (auto *send = ast::cast_tree<ast::Send>(expr)) {
                     if (send->fun == core::Names::typeAlias()) {
                         // short circuit if this is a type alias
@@ -1232,7 +1378,8 @@ private:
                     }
                 }
                 if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::ConstantMissingTypeAnnotation)) {
-                    e.setHeader("Constants must have type annotations with T.let() when specifying '# typed: strict'");
+                    e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
+                                "# typed: strict");
                 }
             });
         return result;
@@ -1257,7 +1404,7 @@ private:
             return false;
         } else if (cast->cast != core::Names::let()) {
             if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
-                e.setHeader("Use T.let() to specify the type of constants");
+                e.setHeader("Use `{}` to specify the type of constants", "T.let");
             }
         }
 
@@ -1342,38 +1489,19 @@ public:
 
         auto sym = id->symbol;
         auto data = sym.data(ctx);
-        if (data->isTypeAlias()) {
+        if (data->isTypeAlias() || data->isTypeMember()) {
             return asgn;
         }
 
-        if (data->isTypeMember()) {
-            ENFORCE(data->isFixed() || data->isBounded());
-            auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
-            ENFORCE(send->recv->isSelfReference());
-            ENFORCE(send->fun == core::Names::typeMember() || send->fun == core::Names::typeTemplate());
-            int arg;
-            if (send->args.size() == 1) {
-                arg = 0;
-            } else if (send->args.size() == 2) {
-                arg = 1;
-            } else {
-                Exception::raise("Wrong arg count");
-            }
-
-            auto *hash = ast::cast_tree<ast::Hash>(send->args[arg].get());
-            if (hash) {
-                int i = -1;
-                for (auto &keyExpr : hash->keys) {
-                    i++;
-                    auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
-                    if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
-                        ParsedSig emptySig;
-                        data->resultType = TypeSyntax::getResultType(ctx, *(hash->values[i]), emptySig, false, sym);
-                    }
-                }
-            }
-        } else if (data->isStaticField() && data->resultType == nullptr) {
+        if (data->isStaticField() && data->resultType == nullptr) {
             data->resultType = resolveConstantType(ctx, asgn->rhs, sym);
+            if (data->resultType == nullptr) {
+                auto rhs = move(asgn->rhs);
+                auto loc = rhs->loc;
+                asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
+                                           core::Names::suggestType(), move(rhs));
+                data->resultType = core::Types::untyped(ctx, sym);
+            }
         }
 
         return asgn;
@@ -1434,8 +1562,12 @@ public:
 
                     auto expr = std::move(send->args[0]);
                     ParsedSig emptySig;
-                    auto type = TypeSyntax::getResultType(ctx.withOwner(ownerClass), *(send->args[1]), emptySig, false,
-                                                          core::Symbols::noSymbol());
+                    auto allowSelfType = true;
+                    auto allowRebind = false;
+                    auto allowTypeMember = true;
+                    auto type = TypeSyntax::getResultType(
+                        ctx.withOwner(ownerClass), *(send->args[1]), emptySig,
+                        TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::noSymbol()});
                     return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }
@@ -1610,8 +1742,19 @@ vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::Pars
     finalizeAncestors(ctx.state);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     finalizeSymbols(ctx.state);
+    trees = resolveTypeParams(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
+
+    return trees;
+}
+
+vector<ast::ParsedFile> Resolver::resolveTypeParams(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
+    ResolveTypeParamsWalk sigs;
+    Timer timeit(ctx.state.errorQueue->logger, "resolver.type_params");
+    for (auto &tree : trees) {
+        tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
+    }
 
     return trees;
 }
@@ -1649,6 +1792,7 @@ vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector
     auto workers = WorkerPool::create(0, ctx.state.tracer());
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), *workers);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
+    trees = resolveTypeParams(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.

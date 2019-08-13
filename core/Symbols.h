@@ -76,6 +76,7 @@ public:
         static constexpr u4 CLASS_INTERFACE = 0x0000'0080;
         static constexpr u4 CLASS_LINEARIZATION_COMPUTED = 0x0000'0100;
         static constexpr u4 CLASS_FINAL = 0x0000'0200;
+        static constexpr u4 CLASS_SEALED = 0x0000'0400;
 
         // Method flags
         static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
@@ -95,7 +96,6 @@ public:
         static constexpr u4 TYPE_INVARIANT = 0x0000'0020;
         static constexpr u4 TYPE_CONTRAVARIANT = 0x0000'0040;
         static constexpr u4 TYPE_FIXED = 0x0000'0080;
-        static constexpr u4 TYPE_BOUNDED = 0x0000'0100;
 
         // Static Field flags
         static constexpr u4 STATIC_FIELD_TYPE_ALIAS = 0x0000'0010;
@@ -242,11 +242,6 @@ public:
         return (flags & Symbol::Flags::TYPE_FIXED) != 0;
     }
 
-    inline bool isBounded() const {
-        ENFORCE(isTypeArgument() || isTypeMember());
-        return (flags & Symbol::Flags::TYPE_BOUNDED) != 0;
-    }
-
     Variance variance() const {
         if (isInvariant())
             return Variance::Invariant;
@@ -308,6 +303,11 @@ public:
     inline bool isClassFinal() const {
         ENFORCE(isClass());
         return (flags & Symbol::Flags::CLASS_FINAL) != 0;
+    }
+
+    inline bool isClassSealed() const {
+        ENFORCE(isClass());
+        return (flags & Symbol::Flags::CLASS_SEALED) != 0;
     }
 
     inline void setClass() {
@@ -372,11 +372,6 @@ public:
     inline void setFixed() {
         ENFORCE(isTypeArgument() || isTypeMember());
         flags |= Symbol::Flags::TYPE_FIXED;
-    }
-
-    inline void setBounded() {
-        ENFORCE(isTypeArgument() || isTypeMember());
-        flags |= Symbol::Flags::TYPE_BOUNDED;
     }
 
     inline void setOverloaded() {
@@ -470,6 +465,11 @@ public:
         flags |= Symbol::Flags::CLASS_FINAL;
     }
 
+    inline void setClassSealed() {
+        ENFORCE(isClass());
+        flags |= Symbol::Flags::CLASS_SEALED;
+    }
+
     inline void setTypeAlias() {
         ENFORCE(isStaticField());
         flags |= Symbol::Flags::STATIC_FIELD_TYPE_ALIAS;
@@ -536,6 +536,10 @@ public:
 
     SymbolRef topAttachedClass(const GlobalState &gs) const;
 
+    void recordSealedSubclass(MutableContext ctx, SymbolRef subclass);
+    const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
+    TypePtr sealedSubclasses(const Context ctx) const;
+
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const;
 
     bool ignoreInHashing(const GlobalState &gs) const;
@@ -567,6 +571,11 @@ public:
     u4 uniqueCounter = 1; // used as a counter inside the namer
     NameRef name;         // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
+
+    bool hasSig() const {
+        ENFORCE(isMethod());
+        return resultType != nullptr;
+    }
 
     UnorderedMap<NameRef, SymbolRef> members_;
     std::vector<ArgInfo> arguments_;

@@ -175,6 +175,7 @@ unique_ptr<Expression> validateRBIBody(DesugarContext dctx, unique_ptr<Expressio
         if (!isIVarAssign(body.get())) {
             if (auto e = dctx.ctx.state.beginError(body->loc, core::errors::Desugar::CodeInRBI)) {
                 e.setHeader("RBI methods must not have code");
+                e.replaceWith("Delete the body", body->loc, "");
             }
         }
     } else if (auto inseq = cast_tree<InsSeq>(body.get())) {
@@ -182,17 +183,20 @@ unique_ptr<Expression> validateRBIBody(DesugarContext dctx, unique_ptr<Expressio
             if (!isIVarAssign(stat.get())) {
                 if (auto e = dctx.ctx.state.beginError(stat->loc, core::errors::Desugar::CodeInRBI)) {
                     e.setHeader("RBI methods must not have code");
+                    e.replaceWith("Delete the body", body->loc, "");
                 }
             }
         }
         if (!isIVarAssign(inseq->expr.get())) {
             if (auto e = dctx.ctx.state.beginError(inseq->expr->loc, core::errors::Desugar::CodeInRBI)) {
                 e.setHeader("RBI methods must not have code");
+                e.replaceWith("Delete the body", body->loc, "");
             }
         }
     } else {
         if (auto e = dctx.ctx.state.beginError(body->loc, core::errors::Desugar::CodeInRBI)) {
             e.setHeader("RBI methods must not have code");
+            e.replaceWith("Delete the body", body->loc, "");
         }
     }
     return body;

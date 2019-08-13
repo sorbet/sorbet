@@ -1,53 +1,10 @@
 #include "test/lsp/ProtocolTest.h"
+#include "test/helpers/MockFileSystem.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
 
 namespace sorbet::test::lsp {
 using namespace std;
-
-MockFileSystem::MockFileSystem(std::string_view rootPath) : rootPath(string(rootPath)) {}
-
-string makeAbsolute(string_view rootPath, string_view path) {
-    if (path[0] == '/') {
-        return string(path);
-    } else {
-        return fmt::format("{}/{}", rootPath, path);
-    }
-}
-
-void MockFileSystem::writeFiles(const vector<pair<string, string>> &initialFiles) {
-    for (auto &pair : initialFiles) {
-        writeFile(pair.first, pair.second);
-    }
-}
-
-string MockFileSystem::readFile(string_view path) const {
-    auto file = contents.find(makeAbsolute(rootPath, path));
-    if (file == contents.end()) {
-        throw FileNotFoundException();
-    } else {
-        return file->second;
-    }
-}
-
-void MockFileSystem::writeFile(string_view filename, string_view text) {
-    contents[makeAbsolute(rootPath, filename)] = text;
-}
-
-void MockFileSystem::deleteFile(string_view filename) {
-    auto file = contents.find(makeAbsolute(rootPath, filename));
-    if (file == contents.end()) {
-        throw FileNotFoundException();
-    } else {
-        contents.erase(file);
-    }
-}
-
-vector<string> MockFileSystem::listFilesInDir(string_view path, const UnorderedSet<string> &extensions, bool recursive,
-                                              const std::vector<std::string> &absoluteIgnorePatterns,
-                                              const std::vector<std::string> &relativeIgnorePatterns) const {
-    Exception::raise("Not implemented.");
-}
 
 void ProtocolTest::SetUp() {
     rootPath = "/Users/jvilk/stripe/pay-server";
@@ -194,6 +151,31 @@ void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messa
             }
         }
     }
+}
+
+std::string ProtocolTest::readFile(std::string_view uri) {
+    auto readFileResponses = send(LSPMessage(make_unique<RequestMessage>(
+        "2.0", nextId++, LSPMethod::SorbetReadFile, make_unique<TextDocumentIdentifier>(string(uri)))));
+    EXPECT_EQ(readFileResponses.size(), 1);
+    if (readFileResponses.size() == 1) {
+        auto &readFileResponse = readFileResponses.at(0);
+        EXPECT_TRUE(readFileResponse->isResponse());
+        auto &readFileResult = get<unique_ptr<TextDocumentItem>>(*readFileResponse->asResponse().result);
+        return readFileResult->text;
+    }
+    return "";
+}
+
+vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, int line, int character) {
+    auto defResponses = send(*getDefinition(uri, line, character));
+    EXPECT_EQ(defResponses.size(), 1);
+    if (defResponses.size() == 1) {
+        auto &defResponse = defResponses.at(0);
+        EXPECT_TRUE(defResponse->isResponse());
+        auto &defResult = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*defResponse->asResponse().result);
+        return move(get<vector<unique_ptr<Location>>>(defResult));
+    }
+    return {};
 }
 
 void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected) {

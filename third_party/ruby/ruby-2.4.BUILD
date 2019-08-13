@@ -374,7 +374,7 @@ genrule(
     srcs = [ "bin/miniruby" ],
     outs = [ "verconf.h" ],
     cmd = """
-prefix=$$(dirname $(location bin/miniruby))
+prefix="/ruby.runfiles/ruby_2_4_3"
 cat > $(location verconf.h) <<EOF
 #define RUBY_BASE_NAME                  "ruby"
 #define RUBY_VERSION_NAME               RUBY_BASE_NAME"-"RUBY_LIB_VERSION
@@ -1185,13 +1185,11 @@ base_dir="\$$(dirname \$${BASH_SOURCE[0]})"
 # was this script invoked via 'bazel run"?
 if [ -d "\$$base_dir/ruby.runfiles" ]; then
   base_dir="\$${base_dir}/ruby.runfiles/ruby_2_4_3"
+else
+  RUBYLIB="\$${base_dir}/lib/ruby/2.4.0/""" + ARCH + """\$${RUBYLIB:+:}\$${RUBYLIB:-}"
+  RUBYLIB="\$${base_dir}/lib/ruby/2.4.0:\$${RUBYLIB}"
+  export RUBYLIB
 fi
-
-PREFIX="\$${base_dir}/""" + LIB_PREFIX + """"
-
-RUBYLIB="\$${RUBYLIB:-}:\$${PREFIX}:\$${PREFIX}/""" + ARCH + """"
-
-export RUBYLIB
 
 exec "\$$base_dir/bin/ruby" "\$$@"
 EOF

@@ -1,6 +1,9 @@
 load("//third_party/gems:gemfile.bzl", _parse_gemfile_lock = "parse_gemfile_lock")
 load("//third_party/gems:known_gems.bzl", "get_known_gem_sha256")
 
+# hard-coding ruby versions to support
+RUBY_VERSIONS = ["2.4.0", "2.6.0"]
+
 def _label_to_path(label):
     """
     Given a Label, turn it into a path by keeping the directory part of the
@@ -87,15 +90,18 @@ def _setup_bundler(repo_ctx):
         type = "tar",
     )
 
-    # hard coded as 2.4.0 for now
-    site_ruby = "lib/ruby/site_ruby/2.4.0"
     site_bin = "bin"
+
+    site_ruby_glob = ", ".join([
+        "\"lib/ruby/site_ruby/{}/**/*.rb\"".format(version)
+        for version in RUBY_VERSIONS
+    ])
 
     substitutions = {
         "{{workspace}}": repo_ctx.name,
         "{{bundler}}": bundler,
-        "{{site_ruby}}": site_ruby,
         "{{site_bin}}": site_bin,
+        "{{site_ruby_glob}}": site_ruby_glob,
     }
 
     repo_ctx.template(
@@ -105,7 +111,7 @@ def _setup_bundler(repo_ctx):
         substitutions = substitutions,
     )
 
-    repo_ctx.execute(["./setup_bundler.sh"])
+    repo_ctx.execute(["./setup_bundler.sh"] + RUBY_VERSIONS)
 
     repo_ctx.template(
         "bundler/BUILD",
@@ -168,6 +174,12 @@ def _setup_tests(repo_ctx):
         output = "test/vendor/cache/cantor-1.2.1.gem",
         url = "https://rubygems.org/downloads/cantor-1.2.1.gem",
         sha256 = "f9c2c3d2ff23f07908990a891d4d4d53e6ad157f3fe8194ce06332fa4037d8bb",
+    )
+
+    repo_ctx.template(
+        "test/smoke_test.bzl",
+        Label("//third_party/gems:test/smoke_test.bzl"),
+        executable = False,
     )
 
     repo_ctx.template(

@@ -172,8 +172,11 @@ TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass)
             }
         },
         [&](ClassType *c) {
+            auto cdata = c->symbol.data(ctx);
             if (c->isUntyped()) {
                 result = from;
+            } else if (cdata->isClassSealed() && (cdata->isClassAbstract() || cdata->isClassModule())) {
+                result = dropSubtypesOf(ctx, cdata->sealedSubclasses(ctx), klass);
             } else if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
                 result = Types::bottom();
             } else {
@@ -654,7 +657,8 @@ bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return und.derivesFrom(gs, klass);
 }
 
-LambdaParam::LambdaParam(const SymbolRef definition) : definition(definition) {
+LambdaParam::LambdaParam(const SymbolRef definition, TypePtr lowerBound, TypePtr upperBound)
+    : definition(definition), lowerBound(lowerBound), upperBound(upperBound) {
     categoryCounterInc("types.allocated", "lambdatypeparam");
 }
 

@@ -129,6 +129,7 @@ NameDef names[] = {
     {"declareInterface", "interface!"},
     {"declareAbstract", "abstract!"},
     {"declareFinal", "final!"},
+    {"declareSealed", "sealed!"},
     {"revealType", "reveal_type"},
     {"absurd"},
     // end T keywords
@@ -234,6 +235,8 @@ NameDef names[] = {
     {"ActiveRecord", "ActiveRecord", true},
     {"Migration", "Migration", true},
     {"Compatibility", "Compatibility", true},
+
+    {"instance"},
     // end DSL methods
 
     // The next two names are used as keys in SymbolInfo::members to store
@@ -247,6 +250,10 @@ NameDef names[] = {
     // object"
     {"singleton", "<singleton class>"},
     {"attached", "<attached class>"},
+
+    // This behaves like the above two names, in the sense that we use a member
+    // on a class to lookup an associated symbol with some extra info.
+    {"sealedClassesList", "<sealedClassesList>"},
 
     // This name is used as a key in SymbolInfo::members to store the module
     // registered via the `mixes_in_class_method` name.
@@ -281,6 +288,7 @@ NameDef names[] = {
     {"buildArray", "<build-array>"},
     {"splat", "<splat>"},
     {"expandSplat", "<expand-splat>"},
+    {"suggestType", "<suggest-type>"},
     {"arg0"},
     {"arg1"},
     {"arg2"},
@@ -393,6 +401,7 @@ NameDef names[] = {
     {"Protocol", "Protocol", true},
     {"CFGExport", "CFGExport", true},
     {"WithoutRuntime", "WithoutRuntime", true},
+    {"Singleton", "Singleton", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

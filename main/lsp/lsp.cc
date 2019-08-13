@@ -29,50 +29,35 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
     rootPath = opts.rawInputDirNames.at(0);
 }
 
-LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
-                                           const vector<core::FileRef> &filesToQuery) {
-    ENFORCE(gs->lspQuery.isEmpty());
-    ENFORCE(initialGS->lspQuery.isEmpty());
-    ENFORCE(!q.isEmpty());
-    initialGS->lspQuery = gs->lspQuery = q;
-
-    // TODO(jvilk): If this throws, then we'll want to reset `lspQuery` on `initialGS`.
-    // If throwing is common, then we need some way to *not* throw away `gs`.
-    auto rv = tryFastPath(move(gs), {}, filesToQuery);
-    rv.gs->lspQuery = initialGS->lspQuery = core::lsp::Query::noQuery();
-    return rv;
-}
-
-variant<LSPLoop::TypecheckRun, pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>
-LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
-                            const LSPMethod forMethod, bool errorIfFileIsUntyped) {
+LSPLoop::QueryRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
+                                              const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
     Timer timeit(logger, "setupLSPQueryByLoc");
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {
-        return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
-                                                    fmt::format("Did not find file at uri {} in {}", uri,
-                                                                convertLSPMethodToString(forMethod))),
-                         move(gs));
+        auto error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidParams,
+            fmt::format("Did not find file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
+        return LSPLoop::QueryRun{move(gs), {}, move(error)};
     }
 
     if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::True) {
         logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
-        return TypecheckRun{{}, {}, {}, move(gs), true};
+        return QueryRun{move(gs), {}};
     }
 
     auto loc = lspPos2Loc(fref, pos, *gs);
     if (!loc) {
-        return make_pair(make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
-                                                    fmt::format("Did not find location at uri {} in {}", uri,
-                                                                convertLSPMethodToString(forMethod))),
-                         move(gs));
+        auto error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidParams,
+            fmt::format("Did not find location at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
+        return LSPLoop::QueryRun{move(gs), {}, move(error)};
     }
 
-    return runLSPQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), {fref});
+    return runQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), {fref});
 }
 
-LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) {
+LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) const {
     Timer timeit(logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<core::FileRef> frefs;
@@ -93,11 +78,11 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalStat
         }
     }
 
-    return runLSPQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), frefs);
+    return runQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
-                                const unique_ptr<core::GlobalState> &currentGs) {
+                                const unique_ptr<core::GlobalState> &currentGs) const {
     if (initialized || forMethod == LSPMethod::Initialize || forMethod == LSPMethod::Initialized ||
         forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown || forMethod == LSPMethod::SorbetError) {
         return true;
@@ -166,7 +151,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                 if (file.data(gs).sourceType == core::File::Type::Payload) {
                     uri = string(file.data(gs).path());
                 } else {
-                    uri = localName2Remote(file.data(gs).path());
+                    uri = fileRef2Uri(gs, file);
                 }
             }
 
@@ -175,7 +160,11 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                 // diagnostics
                 if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
                     for (auto &e : errorsAccumulated[file]) {
-                        auto diagnostic = make_unique<Diagnostic>(loc2Range(gs, e->loc), e->header);
+                        auto range = loc2Range(gs, e->loc);
+                        if (range == nullptr) {
+                            continue;
+                        }
+                        auto diagnostic = make_unique<Diagnostic>(std::move(range), e->header);
                         diagnostic->code = e->what.code;
                         diagnostic->severity = DiagnosticSeverity::Error;
 
@@ -191,8 +180,12 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                                     } else {
                                         message = sectionHeader;
                                     }
-                                    relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
-                                        loc2Location(gs, errorLine.loc), message));
+                                    auto location = loc2Location(gs, errorLine.loc);
+                                    if (location == nullptr) {
+                                        continue;
+                                    }
+                                    relatedInformation.push_back(
+                                        make_unique<DiagnosticRelatedInformation>(std::move(location), message));
                                 }
                             }
                             // Add link to error documentation.
@@ -218,7 +211,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
 
-bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
+bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) const {
     return !opts.statsdHost.empty() && (currentTime - lastMetricUpdateTime) > STATSD_INTERVAL;
 }
 

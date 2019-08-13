@@ -321,7 +321,9 @@ int realmain(int argc, char *argv[]) {
     typeErrorsConsole->set_pattern("%v");
 
     options::Options opts;
-    options::readOptions(opts, argc, argv, logger);
+    auto extensionProviders = sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders();
+    vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
+    options::readOptions(opts, extensions, argc, argv, extensionProviders, logger);
     while (opts.waitForDebugger && !stopInDebugger()) {
         // spin
     }
@@ -392,6 +394,7 @@ int realmain(int argc, char *argv[]) {
         make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
     gs->pathPrefix = opts.pathPrefix;
     gs->errorUrlBase = opts.errorUrlBase;
+    gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
 
     logger->trace("building initial global state");
@@ -430,6 +433,12 @@ int realmain(int argc, char *argv[]) {
         gs->addDslPlugin(plugin.first, plugin.second);
     }
     gs->dslRubyExtraArgs = opts.dslRubyExtraArgs;
+    if (!opts.stripeMode) {
+        // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
+        if (opts.errorCodeWhiteList.empty()) {
+            gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+        }
+    }
 
     logger->trace("done building initial global state");
 
@@ -521,7 +530,7 @@ int realmain(int argc, char *argv[]) {
                 if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
                     auto sigil = levelToSigil(minErrorLevel);
                     e.setHeader("You could add `# typed: {}`", sigil);
-                    e.addAutocorrect(core::AutocorrectSuggestion(loc, fmt::format("# typed: {}\n", sigil)));
+                    e.replaceWith(fmt::format("Add `typed: {}` sigil", sigil), loc, "# typed: {}\n", sigil);
                 }
             }
         }

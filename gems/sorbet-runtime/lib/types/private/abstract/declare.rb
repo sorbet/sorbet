@@ -7,10 +7,10 @@ module T::Private::Abstract::Declare
 
   def self.declare_abstract(mod, type:)
     if AbstractUtils.abstract_module?(mod)
-      raise "#{mod.name} is already declared as abstract"
+      raise "#{mod} is already declared as abstract"
     end
     if T::Private::Final.final_module?(mod)
-      raise "#{mod.name} was already declared as final and cannot be declared as abstract"
+      raise "#{mod} was already declared as final and cannot be declared as abstract"
     end
 
     Abstract::Data.set(mod, :can_have_abstract_methods, true)

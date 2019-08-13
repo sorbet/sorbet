@@ -58,9 +58,11 @@ void ErrorFlusher::flushErrorCount(spdlog::logger &logger, int count) {
 void ErrorFlusher::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
     UnorderedMap<FileRef, string> sources;
     for (auto &autocorrect : autocorrects) {
-        auto file = autocorrect.loc.file();
-        if (!sources.count(file)) {
-            sources[file] = fs.readFile(file.data(gs).path());
+        for (auto &edit : autocorrect.edits) {
+            auto file = edit.loc.file();
+            if (!sources.count(file)) {
+                sources[file] = fs.readFile(file.data(gs).path());
+            }
         }
     }
 

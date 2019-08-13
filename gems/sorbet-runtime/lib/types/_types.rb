@@ -217,25 +217,41 @@ module T
 
   module Array
     def self.[](type)
-      T::Types::TypedArray.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedArray::Untyped.new
+      else
+        T::Types::TypedArray.new(type)
+      end
     end
   end
 
   module Hash
     def self.[](keys, values)
-      T::Types::TypedHash.new(keys: keys, values: values)
+      if keys.is_a?(T::Types::Untyped) && values.is_a?(T::Types::Untyped)
+        T::Types::TypedHash::Untyped.new
+      else
+        T::Types::TypedHash.new(keys: keys, values: values)
+      end
     end
   end
 
   module Enumerable
     def self.[](type)
-      T::Types::TypedEnumerable.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedEnumerable::Untyped.new
+      else
+        T::Types::TypedEnumerable.new(type)
+      end
     end
   end
 
   module Enumerator
     def self.[](type)
-      T::Types::TypedEnumerator.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedEnumerator::Untyped.new
+      else
+        T::Types::TypedEnumerator.new(type)
+      end
     end
   end
 
@@ -247,7 +263,11 @@ module T
 
   module Set
     def self.[](type)
-      T::Types::TypedSet.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedSet::Untyped.new
+      else
+        T::Types::TypedSet.new(type)
+      end
     end
   end
 

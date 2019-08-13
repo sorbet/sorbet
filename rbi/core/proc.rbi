@@ -35,7 +35,7 @@ class Proc < Object
   def hash(); end
 
   sig {returns(T::Boolean)}
-  def lambda(); end
+  def lambda?(); end
 
   sig {returns(T::Array[[Symbol, Symbol]])}
   def parameters(); end

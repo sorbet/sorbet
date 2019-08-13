@@ -168,7 +168,7 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
         auto withoutNil = Types::approximateSubtract(ctx, argTpe.type, Types::nilClass());
         if (!withoutNil->isBottom() && Types::isSubTypeUnderConstraint(ctx, constr, withoutNil, expectedType)) {
             if (loc.exists()) {
-                e.replaceWith(loc, "T.must({})", loc.source(ctx));
+                e.replaceWith("Add `T.must`", loc, "T.must({})", loc.source(ctx));
             }
         }
         return e.build();
@@ -307,6 +307,12 @@ TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
         return metaType->wrapped;
     }
     if (auto *classType = cast_type<ClassType>(tp.get())) {
+        if (classType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum())) {
+            // Opus::Enum instances are allowed to stand for themselves in type syntax positions.
+            // See the note in type_syntax.cc regarding Opus::Enum.
+            return tp;
+        }
+
         SymbolRef attachedClass = classType->symbol.data(ctx)->attachedClass(ctx);
         if (!attachedClass.exists()) {
             if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
@@ -409,7 +415,9 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context c
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return core::AutocorrectSuggestion{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)};
+    return core::AutocorrectSuggestion{
+        "Add `extend T::Helpers`",
+        {core::AutocorrectSuggestion::Edit{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)}}};
 }
 
 // This implements Ruby's argument matching logic (assigning values passed to a
@@ -462,17 +470,17 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx)->show(ctx), thisStr);
 
-                // catch the special case of `interface!` or `abstract!` or `final!` and
+                // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
                 // suggest adding `extend T::Helpers`.
                 if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
-                    args.name == core::Names::declareFinal()) {
+                    args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed()) {
                     if (auto suggestion = maybeSuggestExtendTHelpers(ctx, thisType, args.locs.call)) {
                         e.addAutocorrect(std::move(*suggestion));
                     }
                 }
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
-                e.replaceWith(args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
+                e.replaceWith("Add `T.must`", args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
             } else {
                 if (symbol.data(ctx)->isClassModule()) {
                     auto objMeth = core::Symbols::Object().data(ctx)->findMemberTransitive(ctx, args.name);
@@ -923,16 +931,19 @@ public:
         if (args.args.empty()) {
             return;
         }
+        const auto loc = args.locs.call;
         if (!args.args[0]->type->isFullyDefined()) {
-            if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::BareTypeUsage)) {
+            if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type->show(ctx));
             }
             return;
         }
         auto ret = Types::approximateSubtract(ctx, args.args[0]->type, Types::nilClass());
         if (ret == args.args[0]->type) {
-            if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::InvalidCast)) {
+            if (auto e = ctx.state.beginError(loc, errors::Infer::InvalidCast)) {
                 e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type->show(ctx));
+                const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
+                e.replaceWith("Remove the T.must", loc, locWithoutTMust.source(ctx));
             }
         }
         res.returnType = move(ret);
@@ -1101,10 +1112,47 @@ public:
         targs.reserve(attachedClass.data(ctx)->typeMembers().size());
         for (auto mem : attachedClass.data(ctx)->typeMembers()) {
             ++i;
-            if (mem.data(ctx)->isFixed()) {
-                targs.emplace_back(mem.data(ctx)->resultType);
+
+            auto memData = mem.data(ctx);
+
+            auto *memType = cast_type<LambdaParam>(memData->resultType.get());
+            ENFORCE(memType != nullptr);
+
+            if (memData->isFixed()) {
+                // Fixed args are implicitly applied, and won't consume type
+                // arguments from the list that's supplied.
+                targs.emplace_back(memType->upperBound);
             } else if (it != args.args.end()) {
-                targs.emplace_back(unwrapType(ctx, args.locs.args[it - args.args.begin()], (*it)->type));
+                auto loc = args.locs.args[it - args.args.begin()];
+                auto argType = unwrapType(ctx, loc, (*it)->type);
+                bool validBounds = true;
+
+                // Validate type parameter bounds.
+                if (!Types::isSubType(ctx, argType, memType->upperBound)) {
+                    validBounds = false;
+                    if (auto e = ctx.state.beginError(loc, errors::Infer::GenericTypeParamBoundMismatch)) {
+                        auto argStr = argType->show(ctx);
+                        e.setHeader("`{}` cannot be used for type member `{}`", argStr, memData->showFullName(ctx));
+                        e.addErrorLine(loc, "`{}` is not a subtype of `{}`", argStr, memType->upperBound->show(ctx));
+                    }
+                }
+
+                if (!Types::isSubType(ctx, memType->lowerBound, argType)) {
+                    validBounds = false;
+
+                    if (auto e = ctx.state.beginError(loc, errors::Infer::GenericTypeParamBoundMismatch)) {
+                        auto argStr = argType->show(ctx);
+                        e.setHeader("`{}` cannot be used for type member `{}`", argStr, memData->showFullName(ctx));
+                        e.addErrorLine(loc, "`{}` is not a subtype of `{}`", memType->lowerBound->show(ctx), argStr);
+                    }
+                }
+
+                if (validBounds) {
+                    targs.emplace_back(argType);
+                } else {
+                    targs.emplace_back(Types::untypedUntracked());
+                }
+
                 ++it;
             } else if (attachedClass == Symbols::Hash() && i == 2) {
                 auto tupleArgs = targs;
@@ -1567,6 +1615,23 @@ public:
     }
 } Magic_callWithSplatAndBlock;
 
+class Magic_suggestUntypedConstantType : public IntrinsicMethod {
+public:
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        ENFORCE(args.args.size() == 1);
+        auto ty = core::Types::widen(ctx, args.args.front()->type);
+        auto loc = args.locs.args[0];
+        if (!ty->isUntyped()) {
+            if (auto e = ctx.state.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
+                e.setHeader("Suggested type for constant without type annotation: `{}`", ty->show(ctx));
+                e.replaceWith(fmt::format("Initialize as `{}`", ty->show(ctx)), loc, "T.let({}, {})", loc.source(ctx),
+                              ty->show(ctx));
+            }
+        }
+        res.returnType = move(ty);
+    }
+} Magic_suggestUntypedConstantType;
+
 class DeclBuilderForProcs_void : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
@@ -1911,60 +1976,62 @@ public:
 } // namespace
 
 const vector<Intrinsic> intrinsicMethods{
-    {Symbols::T(), true, Names::untyped(), &T_untyped},
-    {Symbols::T(), true, Names::must(), &T_must},
-    {Symbols::T(), true, Names::all(), &T_all},
-    {Symbols::T(), true, Names::any(), &T_any},
-    {Symbols::T(), true, Names::nilable(), &T_nilable},
-    {Symbols::T(), true, Names::revealType(), &T_revealType},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::untyped(), &T_untyped},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::must(), &T_must},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::all(), &T_all},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::any(), &T_any},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::nilable(), &T_nilable},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::revealType(), &T_revealType},
 
-    {Symbols::T(), true, Names::proc(), &T_proc},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::proc(), &T_proc},
 
-    {Symbols::T_Generic(), false, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Generic(), Intrinsic::Kind::Instance, Names::squareBrackets(), &T_Generic_squareBrackets},
 
-    {Symbols::T_Array(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::T_Hash(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::T_Enumerable(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::T_Enumerator(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::T_Range(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::T_Set(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Array(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Hash(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Enumerable(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Enumerator(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
-    {Symbols::Object(), false, Names::class_(), &Object_class},
-    {Symbols::Object(), false, Names::singletonClass(), &Object_class},
+    {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
+    {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
 
-    {Symbols::Class(), false, Names::new_(), &Class_new},
+    {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
 
-    {Symbols::MagicSingleton(), false, Names::buildHash(), &Magic_buildHash},
-    {Symbols::MagicSingleton(), false, Names::buildArray(), &Magic_buildArray},
-    {Symbols::MagicSingleton(), false, Names::expandSplat(), &Magic_expandSplat},
-    {Symbols::MagicSingleton(), false, Names::callWithSplat(), &Magic_callWithSplat},
-    {Symbols::MagicSingleton(), false, Names::callWithBlock(), &Magic_callWithBlock},
-    {Symbols::MagicSingleton(), false, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHash},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
 
-    {Symbols::DeclBuilderForProcsSingleton(), false, Names::void_(), &DeclBuilderForProcs_void},
-    {Symbols::DeclBuilderForProcsSingleton(), false, Names::returns(), &DeclBuilderForProcs_returns},
-    {Symbols::DeclBuilderForProcsSingleton(), false, Names::params(), &DeclBuilderForProcs_params},
-    {Symbols::DeclBuilderForProcsSingleton(), false, Names::bind(), &DeclBuilderForProcs_bind},
+    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::void_(), &DeclBuilderForProcs_void},
+    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::returns(),
+     &DeclBuilderForProcs_returns},
+    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::params(), &DeclBuilderForProcs_params},
+    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::bind(), &DeclBuilderForProcs_bind},
 
-    {Symbols::Tuple(), false, Names::squareBrackets(), &Tuple_squareBrackets},
-    {Symbols::Tuple(), false, Names::first(), &Tuple_first},
-    {Symbols::Tuple(), false, Names::last(), &Tuple_last},
-    {Symbols::Tuple(), false, Names::min(), &Tuple_minMax},
-    {Symbols::Tuple(), false, Names::max(), &Tuple_minMax},
-    {Symbols::Tuple(), false, Names::to_a(), &Tuple_to_a},
-    {Symbols::Tuple(), false, Names::concat(), &Tuple_concat},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Tuple_squareBrackets},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::first(), &Tuple_first},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::last(), &Tuple_last},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::min(), &Tuple_minMax},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::max(), &Tuple_minMax},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::to_a(), &Tuple_to_a},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
 
-    {Symbols::Shape(), false, Names::merge(), &Shape_merge},
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
 
-    {Symbols::Array(), false, Names::flatten(), &Array_flatten},
-    {Symbols::Array(), false, Names::compact(), &Array_compact},
+    {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
+    {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
 
-    {Symbols::Kernel(), false, Names::proc(), &Kernel_proc},
-    {Symbols::Kernel(), false, Names::lambda(), &Kernel_proc},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
 
-    {Symbols::Enumerable(), false, Names::to_h(), &enumerable_to_h},
+    {Symbols::Enumerable(), Intrinsic::Kind::Instance, Names::to_h(), &enumerable_to_h},
 
-    {Symbols::Module(), false, Names::tripleEq(), &Module_tripleEq},
+    {Symbols::Module(), Intrinsic::Kind::Instance, Names::tripleEq(), &Module_tripleEq},
 };
 
 } // namespace sorbet::core

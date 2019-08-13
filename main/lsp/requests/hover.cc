@@ -46,15 +46,18 @@ unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typ
 }
 
 LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                           const TextDocumentPositionParams &params) {
+                                           const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.hover");
 
     auto result =
         setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover);
-    if (auto run = get_if<TypecheckRun>(&result)) {
-        gs = move(run->gs);
-        auto &queryResponses = run->responses;
+    gs = move(result.gs);
+    if (result.error) {
+        // An error happened while setting up the query.
+        response->error = move(result.error);
+    } else {
+        auto &queryResponses = result.responses;
         if (queryResponses.empty()) {
             // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
             response->result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
@@ -113,13 +116,6 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             response->result = make_unique<Hover>(
                 formatHoverText(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
         }
-    } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
-        // An error happened while setting up the query.
-        response->error = move(error->first);
-        gs = move(error->second);
-    } else {
-        // Should never happen, but satisfy the compiler.
-        ENFORCE(false, "Internal error: setupLSPQueryByLoc returned invalid value.");
     }
     return LSPResult::make(move(gs), move(response));
 }

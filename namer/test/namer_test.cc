@@ -53,6 +53,12 @@ ast::ParsedFile hello_world(core::GlobalState &gs) {
     return getTree(gs, "def hello_world; end");
 }
 
+vector<ast::ParsedFile> runNamer(core::MutableContext ctx, ast::ParsedFile tree) {
+    vector<ast::ParsedFile> v;
+    v.emplace_back(move(tree));
+    return namer::Namer::run(ctx, move(v));
+}
+
 TEST_F(NamerFixture, HelloWorld) { // NOLINT
     auto ctx = getCtx();
     auto tree = hello_world(ctx);
@@ -60,7 +66,7 @@ TEST_F(NamerFixture, HelloWorld) { // NOLINT
         auto localTree = sorbet::local_vars::LocalVars::run(ctx, move(tree));
         sorbet::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
-        namer::Namer::run(ctx, move(localTree));
+        runNamer(ctx, move(localTree));
     }
 
     const auto &objectScope = core::Symbols::Object().data(ctx);
@@ -79,12 +85,12 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
     auto baseNames = ctx.state.namesUsed();
 
     auto tree = hello_world(ctx);
-    ast::ParsedFile newtree;
+    vector<ast::ParsedFile> trees;
     {
         auto localTree = sorbet::local_vars::LocalVars::run(ctx, move(tree));
         sorbet::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
-        newtree = namer::Namer::run(ctx, move(localTree));
+        trees = runNamer(ctx, move(localTree));
     }
     auto helloWorldMethod = 1;
     auto staticInit = 1;
@@ -94,7 +100,7 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
     ASSERT_EQ(baseNames + 2, ctx.state.namesUsed());
 
     // Run it again and get the same numbers
-    namer::Namer::run(ctx, move(newtree));
+    namer::Namer::run(ctx, move(trees));
     ASSERT_EQ(baseSymbols + extraSymbols, ctx.state.symbolsUsed());
     ASSERT_EQ(baseNames + 2, ctx.state.namesUsed());
 }
@@ -106,7 +112,7 @@ TEST_F(NamerFixture, NameClass) { // NOLINT
         auto localTree = sorbet::local_vars::LocalVars::run(ctx, move(tree));
         sorbet::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
-        namer::Namer::run(ctx, move(localTree));
+        runNamer(ctx, move(localTree));
     }
     const auto &rootScope =
         core::Symbols::root().data(ctx)->findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
@@ -124,7 +130,7 @@ TEST_F(NamerFixture, InsideClass) { // NOLINT
         auto localTree = sorbet::local_vars::LocalVars::run(ctx, move(tree));
         sorbet::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
-        namer::Namer::run(ctx, move(localTree));
+        runNamer(ctx, move(localTree));
     }
     const auto &rootScope =
         core::Symbols::root().data(ctx)->findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);

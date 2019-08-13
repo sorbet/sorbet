@@ -144,8 +144,8 @@ module T::Private::Methods
         # directly on ancestor but instead an ancestor of ancestor.
         if ancestor.method_defined?(method_name) && final_method?(method_owner_and_name_to_key(ancestor, method_name))
           raise(
-            "`#{ancestor.name}##{method_name}` was declared as final and cannot be " +
-            (target == ancestor ? "redefined" : "overridden in `#{target.name}`")
+            "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
+            (target == ancestor ? "redefined" : "overridden in #{target}")
           )
         end
       end
@@ -179,7 +179,7 @@ module T::Private::Methods
     mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
 
     if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
-      raise "`#{mod.name}` was declared as final but its method `#{method_name}` was not declared as final"
+      raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
     _check_final_ancestors(mod, mod.ancestors, [method_name])
 
@@ -187,6 +187,13 @@ module T::Private::Methods
       return
     end
     T::Private::DeclState.current.reset!
+
+    if method_name == :method_added || method_name == :singleton_method_added
+      raise(
+        "Putting a `sig` on `#{method_name}` is not supported" +
+        " (sorbet-runtime uses this method internally to perform `sig` validation logic)"
+      )
+    end
 
     original_method = mod.instance_method(method_name)
     sig_block = lambda do
@@ -245,10 +252,6 @@ module T::Private::Methods
     end
   end
 
-  def self.sig_error(loc, message)
-    raise(ArgumentError.new("#{loc.path}:#{loc.lineno}: Error interpreting `sig`:\n  #{message}\n\n"))
-  end
-
   # Executes the `sig` block, and converts the resulting Declaration
   # to a Signature.
   def self.run_sig(hook_mod, method_name, original_method, declaration_block)
@@ -287,10 +290,6 @@ module T::Private::Methods
               "last call to `sig` (#{current_declaration.mod}). Make sure each call " \
               "to `sig` is immediately followed by a method definition on the same " \
               "class/module."
-      end
-
-      if current_declaration.returns.equal?(ARG_NOT_PROVIDED)
-        sig_error(loc, "You must provide a return type; use the `.returns` or `.void` builder methods. Method: #{original_method}")
       end
 
       signature = Signature.new(
@@ -352,7 +351,13 @@ module T::Private::Methods
   private_class_method def self.run_sig_block_for_key(key)
     blk = @sig_wrappers[key]
     if !blk
-      raise "No `sig` wrapper for #{key_to_method(key)}"
+      sig = @signatures_by_method[key]
+      if sig
+        # We already ran the sig block, perhaps in another thread.
+        return sig
+      else
+        raise "No `sig` wrapper for #{key_to_method(key)}"
+      end
     end
 
     begin
@@ -413,34 +418,30 @@ module T::Private::Methods
     end
   end
 
+  module MethodHooks
+    def method_added(name)
+      super(name)
+      ::T::Private::Methods._on_method_added(self, name, is_singleton_method: false)
+    end
+  end
+
+  module SingletonMethodHooks
+    def singleton_method_added(name)
+      super(name)
+      ::T::Private::Methods._on_method_added(self, name, is_singleton_method: true)
+    end
+  end
+
   def self.install_hooks(mod)
     return if @installed_hooks.include?(mod)
     @installed_hooks << mod
 
     if mod.singleton_class?
-      install_singleton_method_added_hook(mod)
+      mod.include(SingletonMethodHooks)
     else
-      original_method = T::Private::ClassUtils.replace_method(mod.singleton_class, :method_added) do |name|
-        T::Private::Methods._on_method_added(self, name)
-        original_method.bind(self).call(name)
-      end
+      mod.extend(MethodHooks)
     end
-    install_singleton_method_added_hook(mod.singleton_class)
-  end
-
-  private_class_method def self.install_singleton_method_added_hook(singleton_klass)
-    attached = nil
-    original_singleton_method = T::Private::ClassUtils.replace_method(singleton_klass, :singleton_method_added) do |name|
-      attached = self
-      T::Private::Methods._on_method_added(self, name, is_singleton_method: true)
-      # This will be nil when this gets called for the addition of this method itself. We
-      # call it below to compensate.
-      if original_singleton_method
-        original_singleton_method.bind(self).call(name)
-      end
-    end
-    # See the comment above
-    original_singleton_method.bind(attached).call(:singleton_method_added)
+    mod.extend(SingletonMethodHooks)
   end
 
   # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.

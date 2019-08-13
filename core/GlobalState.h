@@ -9,6 +9,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/lsp/Query.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <memory>
 
 namespace sorbet::core {
@@ -90,7 +91,7 @@ public:
     static std::unique_ptr<GlobalState> replaceFile(std::unique_ptr<GlobalState> inWhat, FileRef whatFile,
                                                     const std::shared_ptr<File> &withWhat);
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
-    FileRef findFileByPath(std::string_view path);
+    FileRef findFileByPath(std::string_view path) const;
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
     spdlog::logger &tracer() const;
@@ -173,7 +174,7 @@ public:
     void trace(std::string_view msg) const;
 
     std::unique_ptr<GlobalStateHash> hash() const;
-    std::vector<std::shared_ptr<File>> getFiles() const;
+    const std::vector<std::shared_ptr<File>> &getFiles() const;
 
     // Contains a string to be used as the base of the error URL.
     // The error code is appended to this string.
@@ -185,6 +186,8 @@ public:
     void addDslPlugin(std::string_view method, std::string_view command);
     std::optional<std::string_view> findDslPlugin(NameRef method) const;
     bool hasAnyDslPlugin() const;
+
+    std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
 
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;

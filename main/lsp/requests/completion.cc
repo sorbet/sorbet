@@ -191,7 +191,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
-                                                      const unique_ptr<core::TypeConstraint> &constraint) {
+                                                      const unique_ptr<core::TypeConstraint> &constraint) const {
     ENFORCE(what.exists());
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
     auto resultType = what.data(gs)->resultType;
@@ -232,7 +232,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
 }
 
 void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
-                                         vector<unique_ptr<CompletionItem>> &items) {
+                                         vector<unique_ptr<CompletionItem>> &items) const {
     if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
         auto pattern = c->symbol.data(gs)->name.data(gs)->shortName(gs);
         logger->debug("Looking for constant similar to {}", pattern);
@@ -253,7 +253,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
 }
 
 LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                const CompletionParams &params) {
+                                                const CompletionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     if (!opts.lspAutocompleteEnabled) {
         response->error =
@@ -266,10 +266,13 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
 
     auto result =
         setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentCompletion);
+    gs = move(result.gs);
 
-    if (auto run = get_if<TypecheckRun>(&result)) {
-        gs = move(run->gs);
-        auto &queryResponses = run->responses;
+    if (result.error) {
+        // An error happened while setting up the query.
+        response->error = move(result.error);
+    } else {
+        auto &queryResponses = result.responses;
         vector<unique_ptr<CompletionItem>> items;
         if (!queryResponses.empty()) {
             auto resp = move(queryResponses[0]);
@@ -305,13 +308,6 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
             }
         }
         response->result = make_unique<CompletionList>(false, move(items));
-    } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
-        // An error happened while setting up the query.
-        response->error = move(error->first);
-        gs = move(error->second);
-    } else {
-        // Should never happen, but satisfy the compiler.
-        ENFORCE(false, "Internal error: setupLSPQueryByLoc returned invalid value.");
     }
     return LSPResult::make(move(gs), move(response));
 }
