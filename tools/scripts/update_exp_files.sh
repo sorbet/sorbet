@@ -46,7 +46,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
     continue
   fi
 
-  if [ "$basename" ]; then
+  if [ -n "$basename" ]; then
     for pass in "${passes[@]}"; do
       candidate="$basename.$pass.exp"
       args=()
