@@ -2,6 +2,10 @@
 
 set -e
 
+cd "$(dirname "$0")"
+cd ../..
+# we are now at the repo root.
+
 COMMAND_FILE="$(mktemp)"
 trap 'rm -f "$COMMAND_FILE"' EXIT
 
