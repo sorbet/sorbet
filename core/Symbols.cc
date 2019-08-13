@@ -890,7 +890,7 @@ TypePtr Symbol::sealedSubclasses(const Context ctx) const {
     return result;
 }
 
-SymbolRef Symbol::dealias(const GlobalState &gs, int depthLimit) const {
+SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {
     if (auto alias = cast_type<AliasType>(resultType.get())) {
         if (depthLimit == 0) {
             if (auto e = gs.beginError(loc(), errors::Internal::CyclicReferenceError)) {
@@ -898,9 +898,9 @@ SymbolRef Symbol::dealias(const GlobalState &gs, int depthLimit) const {
                             "expansion would have been to {}",
                             showFullName(gs), alias->symbol.data(gs)->showFullName(gs));
             }
-            return Symbols::untyped();
+            return def;
         }
-        return alias->symbol.data(gs)->dealias(gs, depthLimit - 1);
+        return alias->symbol.data(gs)->dealiasWithDefault(gs, depthLimit - 1, def);
     }
     return this->ref(gs);
 }
