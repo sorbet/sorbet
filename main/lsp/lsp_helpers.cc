@@ -245,9 +245,13 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
     vector<string> flags;
     const core::SymbolData &sym = method.data(gs);
     string accessFlagString = "";
+    string sigCall = "sig";
     if (sym->isMethod()) {
         if (sym->hasGeneratedSig()) {
             flags.emplace_back("generated");
+        }
+        if (sym->isFinalMethod()) {
+            sigCall = "sig(:final)";
         }
         if (sym->isAbstract()) {
             flags.emplace_back("abstract");
@@ -285,7 +289,7 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
     if (!typeAndArgNames.empty()) {
         paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
     }
-    return fmt::format("{}sig {{{}{}{}}}", accessFlagString, flagString, paramsString, methodReturnType);
+    return fmt::format("{}{} {{{}{}{}}}", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
