@@ -3,6 +3,10 @@
 # This tests that the bundler wrapper produced by the `@gems` package is able to
 # install a gem, and provide an environment with that gem in scope.
 
+# This is the name of a ruby bazel package, specified in
+# //third_party/externals.bzl
+ruby_package=$1
+
 # --- begin runfiles.bash initialization ---
 # Copy-pasted from Bazel's Bash runfiles library https://github.com/bazelbuild/bazel/blob/defd737761be2b154908646121de47c30434ed51/tools/bash/runfiles/runfiles.bash
 set -euo pipefail
@@ -30,6 +34,11 @@ fi
 
 # put bundle in the path
 PATH="$(dirname "$(rlocation "{{workspace}}/bundler/bundle")"):$PATH"
+
+# put ruby in the path
+RUBY_BIN="$(rlocation "$ruby_package/ruby")"
+PATH="$(dirname "$RUBY_BIN"):$PATH"
+
 export PATH
 
 # bundle requires $HOME
@@ -38,7 +47,6 @@ export HOME
 
 # ensure that bundle works
 bundle --help
-
 
 cp "$(rlocation "{{workspace}}/test/Gemfile")" .
 

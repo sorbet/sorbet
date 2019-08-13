@@ -25,12 +25,15 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
 
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
                                      LSPMethod::TextDocumentCompletion, false);
-    if (auto run1 = get_if<TypecheckRun>(&result)) {
-        gs = move(run1->gs);
+    gs = move(result.gs);
+    if (result.error) {
+        // An error happened while setting up the query.
+        response->error = move(result.error);
+    } else {
         // An explicit null indicates that we don't support this request (or that nothing was at the location).
         // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
         response->result = variant<JSONNullObject, vector<unique_ptr<Location>>>(JSONNullObject());
-        auto &queryResponses = run1->responses;
+        auto &queryResponses = result.responses;
         if (!queryResponses.empty()) {
             const bool fileIsTyped =
                 uri2FileRef(params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
@@ -47,8 +50,9 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
                 auto identResp = resp->isIdent();
                 auto loc = identResp->owner.data(*gs)->loc();
                 if (loc.exists()) {
-                    auto run2 = tryFastPath(move(gs), {}, {loc.file()},
-                                            core::lsp::Query::createVarQuery(identResp->owner, identResp->variable));
+                    auto run2 =
+                        runQuery(move(gs), core::lsp::Query::createVarQuery(identResp->owner, identResp->variable),
+                                 {loc.file()});
                     gs = move(run2.gs);
                     response->result = extractLocations(*gs, run2.responses);
                 }
@@ -65,13 +69,6 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
                 response->result = move(locations);
             }
         }
-    } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
-        // An error happened while setting up the query.
-        response->error = move(error->first);
-        gs = move(error->second);
-    } else {
-        // Should never happen, but satisfy the compiler.
-        ENFORCE(false, "Internal error: setupLSPQueryByLoc returned invalid value.");
     }
     return LSPResult::make(move(gs), move(response));
 }

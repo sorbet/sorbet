@@ -4,7 +4,7 @@ filegroup(
     srcs = [
         "{{site_bin}}/bundle",
         "{{site_bin}}/bundler",
-    ] + glob([ "{{site_ruby}}/**/*.rb" ]),
+    ] + glob([ {{site_ruby_glob}} ]),
     visibility = [ "//visibility:public" ],
 )
 
