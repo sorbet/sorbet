@@ -134,7 +134,8 @@ def main
               # ^^^^^^^^^^^^ hover: The docs for FOO_CONSTANT
       # ^^^^^^ hover: T.class_of(BigFoo)
       # ^^^^^^ hover: The docs for BigFoo
-  # TODO .new only works if we definte `initialize`
+
+  # .new only works if we definte `initialize`
   foo = BigFoo.new
              # ^^^ hover: (nothing)
   hoo = BigFoo::LittleFoo1.new
