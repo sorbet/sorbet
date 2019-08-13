@@ -149,18 +149,17 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             // 3) Found an invalid end keyword
             if (it == all_lines.rend() || absl::StartsWith(line, "end")) {
                 break;
-            } else {
-                // Reached a sig block.
-                ENFORCE(absl::StartsWith(line, "sig do"));
+            } 
 
-                // Stop looking if this is a single-line block e.g `sig do; <block>; end`
-                string_view after_sig_do = line.substr(strlen("sig do"));
-                after_sig_do = absl::StripAsciiWhitespace(after_sig_do);
-                if (absl::StartsWith(after_sig_do, ";") && absl::EndsWith(after_sig_do, "end")) {
-                    break;
-                }
-                // Else, this is a valid sig block. Move on to any possible documentation.
+            // Reached a sig block.
+            ENFORCE(absl::StartsWith(line, "sig do"));
+
+            // Stop looking if this is a single-line block e.g `sig do; <block>; end`
+            if (absl::StartsWith(line, "sig do;") && absl::EndsWith(line, "end")) {
+                break;
             }
+
+            // Else, this is a valid sig block. Move on to any possible documentation.
         }
 
         // Handle a comment line. Do not count typing declarations.
