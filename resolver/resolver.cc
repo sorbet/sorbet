@@ -1507,7 +1507,7 @@ public:
                                            core::Names::suggestType(), move(rhs));
                 data->resultType = core::Types::untyped(ctx, sym);
             }
-        } else {
+        } else if (data->isStaticField()) {
             // we might have already resolved this constant but we want to make sure to still report some errors if
             // those errors come up
             resolveConstantType(ctx, asgn->rhs, sym);
