@@ -34,13 +34,13 @@ unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typ
     absl::StrAppend(&content, docString.value_or(""));
 
     // Add sig
-    string formattedSigString = "";
+    string formattedTypeString = "";
     if (markupKind == MarkupKind::Markdown && typeString.length() > 0) {
-        formattedSigString = fmt::format("```ruby\n{}\n```", typeString);
+        formattedTypeString = fmt::format("```ruby\n{}\n```", typeString);
     } else {
-        absl::StrAppend(&formattedSigString, typeString);
+        absl::StrAppend(&formattedTypeString, typeString);
     }
-    absl::StrAppend(&content, formattedSigString);
+    absl::StrAppend(&content, formattedTypeString);
 
     return make_unique<MarkupContent>(markupKind, move(content));
 }
