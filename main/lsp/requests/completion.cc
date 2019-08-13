@@ -138,10 +138,10 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
                 it++;
                 line = absl::StripAsciiWhitespace(*it);
             } while (it != all_lines.rend()
-                    // Start of sig block
-                    && !absl::StartsWith(line, "sig do")
-                    // Invalid end keyword
-                    && !absl::StartsWith(line, "end"));
+                     // Start of sig block
+                     && !absl::StartsWith(line, "sig do")
+                     // Invalid end keyword
+                     && !absl::StartsWith(line, "end"));
 
             // We have either
             // 1) Reached the start of the file
@@ -149,7 +149,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             // 3) Found an invalid end keyword
             if (it == all_lines.rend() || absl::StartsWith(line, "end")) {
                 break;
-            } 
+            }
 
             // Reached a sig block.
             ENFORCE(absl::StartsWith(line, "sig do"));
@@ -183,10 +183,11 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
     if (documentation.empty())
         return nullopt;
-    else
+    else {
         // Ensure single newline for non-empty documentation
         documentation.append("\n");
         return documentation;
+    }
 }
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
