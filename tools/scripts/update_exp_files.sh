@@ -47,7 +47,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
   fi
 
   if [ "$basename" ]; then
-    for pass in "${passes[@]}" ; do
+    for pass in "${passes[@]}"; do
       candidate="$basename.$pass.exp"
       args=()
       if [ "$pass" = "autogen" ]; then
