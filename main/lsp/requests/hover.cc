@@ -26,7 +26,7 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
     return contents;
 }
 
-unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view sigString,
+unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view typeString,
                                          optional<string_view> docString) {
     string content = "";
 
@@ -35,10 +35,10 @@ unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string_view sigS
 
     // Add sig
     string formattedSigString = "";
-    if (markupKind == MarkupKind::Markdown && sigString.length() > 0) {
-        formattedSigString = fmt::format("```ruby\n{}\n```", sigString);
+    if (markupKind == MarkupKind::Markdown && typeString.length() > 0) {
+        formattedSigString = fmt::format("```ruby\n{}\n```", typeString);
     } else {
-        absl::StrAppend(&formattedSigString, sigString);
+        absl::StrAppend(&formattedSigString, typeString);
     }
     absl::StrAppend(&content, formattedSigString);
 
