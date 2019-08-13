@@ -227,7 +227,8 @@ bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view
     return fnd != string_view::npos;
 }
 
-const int multilineCutoff = 4;
+// iff a sig has more than this many parameters, then print it as a multi-line sig.
+constexpr int MULTI_LINE_CUTOFF = 4;
 
 string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
                     const unique_ptr<core::TypeConstraint> &constraint) {
@@ -285,7 +286,7 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
 
     string flagString = "";
     string paramsString = "";
-    if (typeAndArgNames.size() > multilineCutoff) {
+    if (typeAndArgNames.size() > MULTI_LINE_CUTOFF) {
         if (!flags.empty()) {
             flagString = fmt::format("  {}.\n", fmt::join(flags, ".\n  "));
         }
