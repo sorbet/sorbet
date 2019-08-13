@@ -400,8 +400,6 @@ end
 class Bad < S; end # error
 ```
 
-In the future, this error may be subsumed by [5047](#5047).
-
 ## 5047
 
 A class or module tried to inherit, include, or extend a final class or module.
