@@ -40,7 +40,7 @@ basename=
 srcs=()
 
 for this_src in "${rb_src[@]}" DUMMY; do
-  this_base=${this_src%__*}
+  this_base="${this_src%__*}"
   if [ "$this_base" = "$basename" ]; then
     srcs=("${srcs[@]}" "$this_src")
     continue
