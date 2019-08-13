@@ -20,6 +20,8 @@ module T::Utils
       T::Range[T.untyped]
     elsif val.is_a?(Module)
       T::Types::Simple.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
+    elsif defined?(::Opus) && defined?(::Opus::Enum) && val.is_a?(::Opus::Enum)
+      T::Types::OpusEnum.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
     elsif val.is_a?(::Array)
       T::Types::FixedArray.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
     elsif val.is_a?(::Hash)
