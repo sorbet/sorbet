@@ -38,7 +38,7 @@ module T::Private::Methods::CallValidation
       T::Configuration.without_ruby_warnings do
         # get all the shims out of the way and put back the original method
         T::Private::DeclState.without_on_method_added do
-        mod.send(:define_method, method_sig.method_name, original_method)
+          mod.send(:define_method, method_sig.method_name, original_method)
         end
         mod.send(original_visibility, method_sig.method_name)
       end
@@ -173,13 +173,13 @@ module T::Private::Methods::CallValidation
 
     T::Configuration.without_ruby_warnings do
       T::Private::DeclState.without_on_method_added do
-      if has_fixed_arity && has_simple_method_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
-        create_validator_method_fast(mod, original_method, method_sig)
-      elsif has_fixed_arity && has_simple_procedure_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
-        create_validator_procedure_fast(mod, original_method, method_sig)
-      else
-        create_validator_slow(mod, original_method, method_sig)
-      end
+        if has_fixed_arity && has_simple_method_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+          create_validator_method_fast(mod, original_method, method_sig)
+        elsif has_fixed_arity && has_simple_procedure_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+          create_validator_procedure_fast(mod, original_method, method_sig)
+        else
+          create_validator_slow(mod, original_method, method_sig)
+        end
       end
     end
     mod.send(original_visibility, method_sig.method_name)
