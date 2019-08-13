@@ -121,11 +121,11 @@ if [ "$dryrun" = "" ]; then
   #
   # (By failure here, we mean that RubyGems.org 502'd for some reason.)
   for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
-    with_backoff gem push "$gem_archive"
+    with_backoff gem push --verbose "$gem_archive"
   done
 
-  with_backoff gem push "_out_/gems/sorbet-runtime-$release_version.gem"
-  with_backoff gem push "_out_/gems/sorbet-$release_version.gem"
+  with_backoff gem push --verbose "_out_/gems/sorbet-runtime-$release_version.gem"
+  with_backoff gem push --verbose "_out_/gems/sorbet-$release_version.gem"
 fi
 
 echo "--- making a github release"
