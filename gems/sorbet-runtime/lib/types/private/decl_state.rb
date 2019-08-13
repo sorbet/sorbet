@@ -25,6 +25,5 @@ class T::Private::DeclState
     ensure
       current.skip_on_method_added = old_value
     end
-    nil
   end
 end
