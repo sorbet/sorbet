@@ -9,7 +9,7 @@ class Exception < Object
   end
   def ==(arg0); end
 
-  sig {returns(T::Array[String])}
+  sig {returns(T.nilable(T::Array[String]))}
   def backtrace(); end
 
   sig {returns(T::Array[Thread::Backtrace::Location])}
