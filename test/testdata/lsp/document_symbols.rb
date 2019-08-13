@@ -47,14 +47,15 @@ class Parent
   sig do
     abstract.
     params(
-      a: Integer,
-      b: Integer,
-      c: Integer,
-      d: Integer
-    )
-    .returns(Integer)
+      first: Integer,
+      second: Integer,
+      third: Integer,
+      fourth: Integer,
+			fifth: Integer,
+    ).
+		returns(Integer)
   end
-  def sum_four(a, b, c, d)
+  def sum_many(first, second, third, fourth, fifth)
   end
 end
 
@@ -62,15 +63,16 @@ class Child < Parent
   sig do
     implementation.
     params(
-      a: Integer,
-      b: Integer,
-      c: Integer,
-      d: Integer
+      first: Integer,
+      second: Integer,
+      third: Integer,
+      fourth: Integer,
+      fifth: Integer,
     ).
     returns(Integer)
   end
-  def sum_four(a, b, c, d)
-    a + b + c + d
+  def sum_many(first, second, third, fourth, fifth)
+    first + second + third + fourth + fifth
   end
 end
 
