@@ -25,6 +25,12 @@ class Integer < Numeric
     )
     .returns(BigDecimal)
   end
+  sig do
+    params(
+        arg0: T.any(Integer, Float),
+    )
+    .returns(T.any(Integer, Float))
+  end
   def %(arg0); end
 
   sig do
@@ -64,6 +70,12 @@ class Integer < Numeric
         arg0: Complex,
     )
     .returns(Complex)
+  end
+  sig do
+    params(
+        arg0: T.any(Integer, Float),
+    )
+    .returns(T.any(Integer, Float))
   end
   def *(arg0); end
 
@@ -129,6 +141,12 @@ class Integer < Numeric
     )
     .returns(Complex)
   end
+  sig do
+    params(
+        arg0: T.any(Integer, Float),
+    )
+    .returns(T.any(Integer, Float))
+  end
   def +(arg0); end
 
   sig {returns(Integer)}
@@ -164,6 +182,12 @@ class Integer < Numeric
     )
     .returns(Complex)
   end
+  sig do
+    params(
+        arg0: T.any(Integer, Float),
+    )
+    .returns(T.any(Integer, Float))
+  end
   def -(arg0); end
 
   sig {returns(Integer)}
@@ -198,6 +222,12 @@ class Integer < Numeric
         arg0: Complex,
     )
     .returns(Complex)
+  end
+  sig do
+    params(
+        arg0: T.any(Integer, Float),
+    )
+    .returns(T.any(Integer, Float))
   end
   def /(arg0); end
 
