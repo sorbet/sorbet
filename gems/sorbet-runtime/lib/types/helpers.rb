@@ -21,7 +21,7 @@ module T::Helpers
   end
 
   def sealed!
-    Kernel.raise "TODO(jez) sealed is not implemented in the runtime yet."
+    Private::Sealed.declare(self, Kernel.caller(1..1)&.first&.split(':')&.first)
   end
 
   # Causes a mixin to also mix in class methods from the named module.
