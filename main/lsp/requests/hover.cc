@@ -28,21 +28,15 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
 
 unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typeString,
                                           optional<string_view> docString) {
-    string content = "";
-
-    // Add docs
-    absl::StrAppend(&content, docString.value_or(""));
-
-    // Add sig
-    string formattedTypeString = "";
+    // format typeString
+    string formattedTypeString;
     if (markupKind == MarkupKind::Markdown && typeString.length() > 0) {
         formattedTypeString = fmt::format("```ruby\n{}\n```", typeString);
     } else {
         absl::StrAppend(&formattedTypeString, typeString);
     }
-    absl::StrAppend(&content, formattedTypeString);
 
-    return make_unique<MarkupContent>(markupKind, move(content));
+    return make_unique<MarkupContent>(markupKind, move(absl::StrCat(docString.value_or(""), formattedTypeString)));
 }
 
 LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
