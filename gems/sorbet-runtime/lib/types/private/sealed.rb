@@ -46,15 +46,15 @@ module T::Private::Sealed
   end
 
   def self.validate_inheritance(this_line, parent, verb)
-      this_file = this_line&.split(':').first
-      decl_file = parent.instance_variable_get(:@sorbet_sealed_module_decl_file)
+    this_file = this_line&.split(':').first
+    decl_file = parent.instance_variable_get(:@sorbet_sealed_module_decl_file)
 
-      if !this_file || !decl_file
-        raise "Couldn't determine enough file information for checking sealed modules"
-      end
+    if !this_file || !decl_file
+      raise "Couldn't determine enough file information for checking sealed modules"
+    end
 
-      if !this_file.start_with?(decl_file)
-        raise "#{parent} was declared sealed and can only be #{verb} in #{decl_file}, not #{this_file}"
-      end
+    if !this_file.start_with?(decl_file)
+      raise "#{parent} was declared sealed and can only be #{verb} in #{decl_file}, not #{this_file}"
+    end
   end
 end
