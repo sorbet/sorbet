@@ -136,12 +136,12 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             // ASSUMPTION: We either hit the start of file, a `sig do` or an `end`
             it++;
             while (
-                    // SOF
-                    it != all_lines.rend()
-                    // Start of sig block
-                    && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig do")
-                    // Invalid end keyword
-                    && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "end")) {
+                // SOF
+                it != all_lines.rend()
+                // Start of sig block
+                && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig do")
+                // Invalid end keyword
+                && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "end")) {
                 it++;
             };
 
