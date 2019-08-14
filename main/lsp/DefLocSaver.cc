@@ -51,7 +51,7 @@ unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core:
         return id;
     }
     core::SymbolRef klass;
-    // Logic cargo culted from `global2Local` in `walker_build.cc`.
+    // Logic cargo culted from `global2Local` in `builder_walk.cc`.
     if (id->kind == ast::UnresolvedIdent::Instance) {
         ENFORCE(ctx.owner.data(ctx)->isMethod());
         klass = ctx.owner.data(ctx)->owner;
