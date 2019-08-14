@@ -47,7 +47,10 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
 
 unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core::Context ctx,
                                                                            unique_ptr<ast::UnresolvedIdent> id) {
-    if (id->kind == ast::UnresolvedIdent::Instance || id->kind == ast::UnresolvedIdent::Class) {
+    if (id->kind != ast::UnresolvedIdent::Instance && id->kind != ast::UnresolvedIdent::Class) {
+        return id;
+    }
+    if (true) {
         core::SymbolRef klass;
         // Logic cargo culted from `global2Local` in `walker_build.cc`.
         if (id->kind == ast::UnresolvedIdent::Instance) {
