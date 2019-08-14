@@ -288,12 +288,12 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
     string paramsString = "";
     if (typeAndArgNames.size() > MULTI_LINE_CUTOFF) {
         if (!flags.empty()) {
-            flagString = fmt::format("  {}.\n", fmt::join(flags, ".\n  "));
+            flagString = fmt::format("{}\n  .", fmt::join(flags, "\n  ."));
         }
         if (!typeAndArgNames.empty()) {
-            paramsString = fmt::format("  params(\n    {}\n  ).\n", fmt::join(typeAndArgNames, ",\n    "));
+            paramsString = fmt::format("params(\n    {}\n  )\n  .", fmt::join(typeAndArgNames, ",\n    "));
         }
-        return fmt::format("{}{} do\n{}{}  {}\nend", accessFlagString, sigCall, flagString, paramsString,
+        return fmt::format("{}{} do\n  {}{}{}\nend", accessFlagString, sigCall, flagString, paramsString,
                            methodReturnType);
     } else {
         if (!flags.empty()) {

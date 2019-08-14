@@ -45,15 +45,15 @@ class Parent
   extend T::Helpers
   abstract!
   sig do
-    abstract.
-    params(
+    abstract
+    .params(
       first: Integer,
       second: Integer,
       third: Integer,
       fourth: Integer,
       fifth: Integer,
-    ).
-    returns(Integer)
+    )
+    .returns(Integer)
   end
   def sum_many(first, second, third, fourth, fifth)
   end
@@ -62,15 +62,15 @@ end
 class Child < Parent
   extend T::Sig
   sig do
-    implementation.
-    params(
+    implementation
+    .params(
       first: Integer,
       second: Integer,
       third: Integer,
       fourth: Integer,
       fifth: Integer,
-    ).
-    returns(Integer)
+    )
+    .returns(Integer)
   end
   def sum_many(first, second, third, fourth, fifth)
     first + second + third + fourth + fifth
