@@ -6,7 +6,7 @@ module T::Private::Sealed
     def inherited(other)
       super
 
-      this_line = caller.find {|line| !line.match(/in `inherited'/)}
+      this_line = Kernel.caller.find {|line| !line.match(/in `inherited'/)}
       this_file = this_line&.split(':').first
       decl_file = self.instance_variable_get(:@sorbet_module_decl_file)
 
@@ -23,7 +23,7 @@ module T::Private::Sealed
   module NoIncludeExtend
     def included(other)
       super
-      this_line = caller.find {|line| !line.match(/in `included'/)}
+      this_line = Kernel.caller.find {|line| !line.match(/in `included'/)}
       this_file = this_line&.split(':').first
       decl_file = self.instance_variable_get(:@sorbet_module_decl_file)
 
@@ -38,7 +38,7 @@ module T::Private::Sealed
 
     def extended(other)
       super
-      this_line = caller.find {|line| !line.match(/in `extended'/)}
+      this_line = Kernel.caller.find {|line| !line.match(/in `extended'/)}
       this_file = this_line&.split(':').first
       decl_file = self.instance_variable_get(:@sorbet_module_decl_file)
 

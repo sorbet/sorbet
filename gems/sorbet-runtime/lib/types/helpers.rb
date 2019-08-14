@@ -21,7 +21,7 @@ module T::Helpers
   end
 
   def sealed!
-    Private::Sealed.declare(self, caller(1..1).first&.split(':')&.first)
+    Private::Sealed.declare(self, Kernel.caller(1..1).first&.split(':')&.first)
   end
 
   # Causes a mixin to also mix in class methods from the named module.
