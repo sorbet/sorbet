@@ -297,15 +297,15 @@ public:
             klass->symbol.data(ctx)->setClassSealed();
 
             auto classOfKlass = klass->symbol.data(ctx)->singletonClass(ctx);
-            auto sealedClassesList =
-                ctx.state.enterMethodSymbol(send->loc, classOfKlass, core::Names::sealedClassesList());
+            auto sealedSubclasses =
+                ctx.state.enterMethodSymbol(send->loc, classOfKlass, core::Names::sealedSubclasses());
             auto &blkArg =
-                ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedClassesList, core::Names::blkArg());
+                ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
             blkArg.flags.isBlock = true;
 
             // T.noreturn here represents the zero-length list of subclasses of this sealed class.
             // We will use T.any to record subclasses when they're resolved.
-            sealedClassesList.data(ctx)->resultType = core::Types::arrayOf(ctx, core::Types::bottom());
+            sealedSubclasses.data(ctx)->resultType = core::Types::arrayOf(ctx, core::Types::bottom());
         }
         if (send->fun == core::Names::declareInterface() || send->fun == core::Names::declareAbstract()) {
             klass->symbol.data(ctx)->setClassAbstract();

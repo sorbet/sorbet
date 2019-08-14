@@ -253,7 +253,7 @@ NameDef names[] = {
 
     // This behaves like the above two names, in the sense that we use a member
     // on a class to lookup an associated symbol with some extra info.
-    {"sealedClassesList", "<sealedClassesList>"},
+    {"sealedSubclasses", "sealed_subclasses"},
 
     // This name is used as a key in SymbolInfo::members to store the module
     // registered via the `mixes_in_class_method` name.
