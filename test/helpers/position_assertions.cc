@@ -838,7 +838,7 @@ string_view hoverToString(variant<JSONNullObject, unique_ptr<Hover>> &hoverResul
 
 // Returns `true` if `line` matches a full line of text in `text`.
 bool containsLine(string_view text, string_view line) {
-    for(int pos = text.find(line); pos != string::npos; pos = text.find(line, pos+1)) {
+    for (int pos = text.find(line); pos != string::npos; pos = text.find(line, pos + 1)) {
         const bool startsOnNewLine = pos == 0 || text.at(pos - 1) == '\n';
         const bool endsLine = pos + line.size() == text.size() || text.at(pos + line.size()) == '\n';
         if (startsOnNewLine && endsLine) {
