@@ -139,7 +139,7 @@ def main
   foo = BigFoo.new
              # ^^^ hover: (nothing)
   hoo = BigFoo::LittleFoo1.new
-                         # ^^^ hover: sig {returns(T::Hash[T.untyped, T.untyped])}
+                         # ^^^ hover: sig {returns(BigFoo::LittleFoo1)}
   raise "error message"
 # ^ hover: sig {params(arg0: String).returns(T.noreturn)}
 end
