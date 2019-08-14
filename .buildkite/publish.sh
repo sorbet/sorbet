@@ -2,6 +2,7 @@
 
 set -euo pipefail
 if [ "schedule" == "${BUILDKITE_SOURCE}" ]; then
+  echo "Skipping publish, because this is a scheduled build."
   exit 0
 fi
 
@@ -112,48 +113,4 @@ if [ "$dryrun" = "" ]; then
     echo "$release_notes" | ../.buildkite/tools/gh-release.sh sorbet/sorbet "${long_release_version}" -- "${files[@]}"
 fi
 popd
-
-echo "--- publishing gems to RubyGems.org"
-
-mkdir -p "$HOME/.gem"
-printf -- $'---\n:rubygems_api_key: %s\n' "$RUBY_GEMS_API_KEY" > "$HOME/.gem/credentials"
-chmod 600 "$HOME/.gem/credentials"
-
-# https://stackoverflow.com/a/8351489
-with_backoff() {
-  local attempts=5
-  local timeout=1 # doubles each failure
-
-  local attempt=0
-  while true; do
-    attempt=$(( attempt + 1 ))
-    echo "Attempt $attempt"
-    if "$@"; then
-      return 0
-    fi
-
-    if (( attempt >= attempts )); then
-      echo "'$1' failed $attempts times. Quitting." 1>&2
-      exit 1
-    fi
-
-    echo "'$1' failed. Retrying in ${timeout}s..." 1>&2
-    sleep $timeout
-    timeout=$(( timeout * 2 ))
-  done
-}
-
-if [ "$dryrun" = "" ] && [ "${PUBLISH_TO_RUBYGEMS:-}" != "" ]; then
-  # push the sorbet-static gems first, in case they fail. We don't want to end
-  # up in a weird state where 'sorbet' requires a pinned version of
-  # sorbet-static, but the sorbet-static gem push failed.
-  #
-  # (By failure here, we mean that RubyGems.org 502'd for some reason.)
-  for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
-    with_backoff gem push --verbose "$gem_archive"
-  done
-
-  with_backoff gem push --verbose "_out_/gems/sorbet-runtime-$release_version.gem"
-  with_backoff gem push --verbose "_out_/gems/sorbet-$release_version.gem"
-fi
 
