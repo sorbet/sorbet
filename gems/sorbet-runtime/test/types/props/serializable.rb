@@ -98,7 +98,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'does not call the constructor' do
-      MySerializable.any_instance.expects(:initialize).never
+      MySerializable.any_instance.expects(:new).never
       MySerializable.from_hash({})
     end
   end
