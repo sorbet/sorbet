@@ -2,7 +2,7 @@
 
 set -euo pipefail
 if [ "schedule" == "${BUILDKITE_SOURCE}" ]; then
-  echo "Skipping publish, becuse this is a scheduled build."
+  echo "Skipping publish, because this is a scheduled build."
   exit 0
 fi
 
