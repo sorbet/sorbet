@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 task :test do
-  Dir.glob('./test/**/*.rb').each(&method(:require))
+  Dir.glob('./test/**/*.rb').reject {|path| path.match(/^.\/test\/types\/sealed_module\//)}.each(&method(:require))
 end
