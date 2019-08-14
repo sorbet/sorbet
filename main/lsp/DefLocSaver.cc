@@ -50,29 +50,27 @@ unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core:
     if (id->kind != ast::UnresolvedIdent::Instance && id->kind != ast::UnresolvedIdent::Class) {
         return id;
     }
-    if (true) {
-        core::SymbolRef klass;
-        // Logic cargo culted from `global2Local` in `walker_build.cc`.
-        if (id->kind == ast::UnresolvedIdent::Instance) {
-            ENFORCE(ctx.owner.data(ctx)->isMethod());
-            klass = ctx.owner.data(ctx)->owner;
-        } else {
-            // Class var.
-            klass = ctx.owner.data(ctx)->enclosingClass(ctx);
-            while (klass.data(ctx)->attachedClass(ctx).exists()) {
-                klass = klass.data(ctx)->attachedClass(ctx);
-            }
+    core::SymbolRef klass;
+    // Logic cargo culted from `global2Local` in `walker_build.cc`.
+    if (id->kind == ast::UnresolvedIdent::Instance) {
+        ENFORCE(ctx.owner.data(ctx)->isMethod());
+        klass = ctx.owner.data(ctx)->owner;
+    } else {
+        // Class var.
+        klass = ctx.owner.data(ctx)->enclosingClass(ctx);
+        while (klass.data(ctx)->attachedClass(ctx).exists()) {
+            klass = klass.data(ctx)->attachedClass(ctx);
         }
+    }
 
-        auto sym = klass.data(ctx)->findMemberTransitive(ctx, id->name);
-        const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-        if (sym.exists() && (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(id->loc))) {
-            core::TypeAndOrigins tp;
-            tp.type = sym.data(ctx.state)->resultType;
-            tp.origins.emplace_back(sym.data(ctx.state)->loc());
-            core::lsp::QueryResponse::pushQueryResponse(
-                ctx, core::lsp::ConstantResponse(klass, sym, id->loc, id->name, tp, tp));
-        }
+    auto sym = klass.data(ctx)->findMemberTransitive(ctx, id->name);
+    const core::lsp::Query &lspQuery = ctx.state.lspQuery;
+    if (sym.exists() && (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(id->loc))) {
+        core::TypeAndOrigins tp;
+        tp.type = sym.data(ctx.state)->resultType;
+        tp.origins.emplace_back(sym.data(ctx.state)->loc());
+        core::lsp::QueryResponse::pushQueryResponse(ctx,
+                                                    core::lsp::ConstantResponse(klass, sym, id->loc, id->name, tp, tp));
     }
     return id;
 }
