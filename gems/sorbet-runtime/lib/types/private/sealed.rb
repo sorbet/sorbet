@@ -5,50 +5,22 @@ module T::Private::Sealed
   module NoInherit
     def inherited(other)
       super
-
-      this_line = Kernel.caller.find {|line| !line.match(/in `inherited'/)}
-      this_file = this_line&.split(':').first
-      decl_file = self.instance_variable_get(:@sorbet_sealed_module_decl_file)
-
-      if !this_file || !decl_file
-        raise "Couldn't determine enough file information for checking sealed classes"
-      end
-
-      if !this_file.start_with?(decl_file)
-        raise "#{self} was declared sealed and can only be inherited in #{decl_file}, not #{this_file}"
-      end
+      this_line = Kernel.caller.find {|line| !line.match(/in `inherited'$/)}
+      T::Private::Sealed.validate_inheritance(this_line, self, 'inherited')
     end
   end
 
   module NoIncludeExtend
     def included(other)
       super
-      this_line = Kernel.caller.find {|line| !line.match(/in `included'/)}
-      this_file = this_line&.split(':').first
-      decl_file = self.instance_variable_get(:@sorbet_sealed_module_decl_file)
-
-      if !this_file || !decl_file
-        raise "Couldn't determine enough file information for checking sealed modules"
-      end
-
-      if !this_file.start_with?(decl_file)
-        raise "#{self} was declared sealed and can only be included in #{decl_file}, not #{this_file}"
-      end
+      this_line = Kernel.caller.find {|line| !line.match(/in `included'$/)}
+      T::Private::Sealed.validate_inheritance(this_line, self, 'included')
     end
 
     def extended(other)
       super
-      this_line = Kernel.caller.find {|line| !line.match(/in `extended'/)}
-      this_file = this_line&.split(':').first
-      decl_file = self.instance_variable_get(:@sorbet_sealed_module_decl_file)
-
-      if !this_file || !decl_file
-        raise "Couldn't determine enough file information for checking sealed modules"
-      end
-
-      if !this_file.start_with?(decl_file)
-        raise "#{self} was declared sealed and can only be extended in #{decl_file}, not #{this_file}"
-      end
+      this_line = Kernel.caller.find {|line| !line.match(/in `extended'$/)}
+      T::Private::Sealed.validate_inheritance(this_line, self, 'extended')
     end
   end
 
@@ -71,5 +43,18 @@ module T::Private::Sealed
 
   def self.sealed_module?(mod)
     mod.instance_variable_defined?(:@sorbet_sealed_module_decl_file)
+  end
+
+  def self.validate_inheritance(this_line, parent, verb)
+      this_file = this_line&.split(':').first
+      decl_file = parent.instance_variable_get(:@sorbet_sealed_module_decl_file)
+
+      if !this_file || !decl_file
+        raise "Couldn't determine enough file information for checking sealed modules"
+      end
+
+      if !this_file.start_with?(decl_file)
+        raise "#{parent} was declared sealed and can only be #{verb} in #{decl_file}, not #{this_file}"
+      end
   end
 end
