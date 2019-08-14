@@ -8,7 +8,7 @@ module T::Private::Sealed
 
       this_line = Kernel.caller.find {|line| !line.match(/in `inherited'/)}
       this_file = this_line&.split(':').first
-      decl_file = self.instance_variable_get(:@sorbet_module_decl_file)
+      decl_file = self.instance_variable_get(:@sorbet_sealed_module_decl_file)
 
       if !this_file || !decl_file
         raise "Couldn't determine enough file information for checking sealed classes"
@@ -25,7 +25,7 @@ module T::Private::Sealed
       super
       this_line = Kernel.caller.find {|line| !line.match(/in `included'/)}
       this_file = this_line&.split(':').first
-      decl_file = self.instance_variable_get(:@sorbet_module_decl_file)
+      decl_file = self.instance_variable_get(:@sorbet_sealed_module_decl_file)
 
       if !this_file || !decl_file
         raise "Couldn't determine enough file information for checking sealed modules"
@@ -40,7 +40,7 @@ module T::Private::Sealed
       super
       this_line = Kernel.caller.find {|line| !line.match(/in `extended'/)}
       this_file = this_line&.split(':').first
-      decl_file = self.instance_variable_get(:@sorbet_module_decl_file)
+      decl_file = self.instance_variable_get(:@sorbet_sealed_module_decl_file)
 
       if !this_file || !decl_file
         raise "Couldn't determine enough file information for checking sealed modules"
@@ -66,10 +66,10 @@ module T::Private::Sealed
     if !decl_file
       raise "Couldn't determine declaration file for sealed class."
     end
-    mod.instance_variable_set(:@sorbet_module_decl_file, decl_file)
+    mod.instance_variable_set(:@sorbet_sealed_module_decl_file, decl_file)
   end
 
   def self.sealed_module?(mod)
-    mod.instance_variable_defined?(:@sorbet_module_decl_file)
+    mod.instance_variable_defined?(:@sorbet_sealed_module_decl_file)
   end
 end
