@@ -2,7 +2,6 @@ module Opus::Types::Test::SealedModuleSandbox
   class AbstractParent
     extend T::Helpers
 
-    abstract!
     sealed!
   end
 

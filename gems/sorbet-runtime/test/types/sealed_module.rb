@@ -140,4 +140,20 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
     end
     assert_match(/is not a class or module and cannot be declared `sealed!`$/, err.message)
   end
+
+  it "finds the right file names with classes that are abstract! & sealed!" do
+    # This test used to not work because both abstract! and sealed! change the inherited hook,
+    # which adds extra lines to the backtrace (via super).
+    require_relative './sealed_module/sealed_abstract__1.rb'
+
+    err = assert_raises(RuntimeError) do
+      require_relative './sealed_module/sealed_abstract__2.rb'
+    end
+    assert_match(/was declared sealed and can only be inherited in/, err.message)
+
+    err = assert_raises(RuntimeError) do
+      require_relative './sealed_module/sealed_abstract__3.rb'
+    end
+    assert_match(/was declared sealed and can only be inherited in/, err.message)
+  end
 end
