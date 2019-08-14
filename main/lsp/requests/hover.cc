@@ -36,7 +36,8 @@ unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typ
         absl::StrAppend(&formattedTypeString, typeString);
     }
 
-    return make_unique<MarkupContent>(markupKind, move(absl::StrCat(docString.value_or(""), formattedTypeString)));
+    string content = absl::StrCat(docString.value_or(""), formattedTypeString);
+    return make_unique<MarkupContent>(markupKind, move(content));
 }
 
 LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
