@@ -380,7 +380,7 @@ LSPLoop::QueryRun LSPLoop::runQuery(unique_ptr<core::GlobalState> gs, const core
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), opts);
     // pipeline::typecheck must be run before tryApplyDefLocSaver, because pipeline::typecheck runs flatten, which
     // introduces the invariant that ivars defined directly on a class are put into <static-init>.
-    pipeline::typecheck(gs, move(resolved), opts, workers);
+    resolved = pipeline::typecheck(gs, move(resolved), opts, workers);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
