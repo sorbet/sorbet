@@ -613,8 +613,8 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subproce
     class ::Kick::<Class:Down> < ::Module () @ test/cli/subprocess-plugin/multi6.rb:4
       method ::Kick::<Class:Down>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi6.rb:4
         argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi6.rb start=??? end=???}
-    method ::Kick#baz (<blk>) @ test/cli/subprocess-plugin/multi6.rb//plugin-generated|0.rbi:2
-      argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi6.rb//plugin-generated|0.rbi start=??? end=???}
+    method ::Kick#baz (<blk>) -> Integer @ test/cli/subprocess-plugin/multi6.rb//plugin-generated|0.rbi:3
+      argument <blk><block> -> T.untyped @ Loc {file=test/cli/subprocess-plugin/multi6.rb//plugin-generated|0.rbi start=??? end=???}
   class ::<Class:Kick> < ::<Class:Object> () @ test/cli/subprocess-plugin/multi6.rb:3
     method ::<Class:Kick>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi6.rb:3
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi6.rb start=??? end=???}
