@@ -87,9 +87,7 @@ model them statically.</p>
 <p>This is basically the same as having written code like this:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyStruct</span> &lt; T::Struct</span>
   sig {params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> String, <span class="hljs-symbol">z:</span> Float).void}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(<span class="hljs-symbol">x:</span>, <span class="hljs-symbol">y:</span> <span class="hljs-literal">nil</span>, <span class="hljs-symbol">z:</span> <span class="hljs-number">0</span>.<span class="hljs-number">5</span>)</span></span>
-    ...
-  <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(<span class="hljs-symbol">x:</span>, <span class="hljs-symbol">y:</span> <span class="hljs-literal">nil</span>, <span class="hljs-symbol">z:</span> <span class="hljs-number">0</span>.<span class="hljs-number">5</span>)</span></span>; ...; <span class="hljs-keyword">end</span>
 
   sig {returns(Integer)}
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">x</span>;</span> ...; <span class="hljs-keyword">end</span>
