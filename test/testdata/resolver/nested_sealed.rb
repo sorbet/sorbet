@@ -58,7 +58,6 @@ def nested_inheritance_nested_case(x)
   when Ok
     T.reveal_type(x) # error: Revealed type: `Ok`
   when Error
-    T.reveal_type(x) # error: Revealed type: `Error`
     case x
     when Bad1
       T.reveal_type(x) # error: Revealed type: `Bad1`
