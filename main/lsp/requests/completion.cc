@@ -172,7 +172,14 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             // #abc -> "abc"
             int skip_after_hash = absl::StartsWith(line, "# ") ? 2 : 1;
 
-            documentation_lines.push_back(line.substr(line.find('#') + skip_after_hash));
+            string_view comment = line.substr(line.find('#') + skip_after_hash);
+
+            // Account for yarddoc lines by inserting an extra newline right before
+            if (absl::StartsWith(comment, '@')) {
+                documentation_lines.push_back(string_view());
+            }
+
+            documentation_lines.push_back(comment);
         }
 
         // No other cases applied to this line, so stop looking.
