@@ -22,8 +22,8 @@ public:
     bool supportsFlush = false;
 
     void print(const std::string_view &contents) const;
-    template <typename... Args> void fmt(const std::string &msg, const Args &... args) const {
-        print(fmt::format(msg, args...));
+    template <typename... Args> void fmt(const ConstExprStr msg, const Args &... args) const {
+        print(fmt::format(msg.str, args...));
     }
     void flush();
 
