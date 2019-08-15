@@ -943,7 +943,7 @@ public:
             if (auto e = ctx.state.beginError(loc, errors::Infer::InvalidCast)) {
                 e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type->show(ctx));
                 const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
-                e.replaceWith("Remove the T.must", loc, locWithoutTMust.source(ctx));
+                e.replaceWith("Remove the T.must", loc, "{}", locWithoutTMust.source(ctx));
             }
         }
         res.returnType = move(ret);
