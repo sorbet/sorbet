@@ -193,6 +193,9 @@ the static checks (they are only caught by the runtime checks):
 1.  When a method is redefined, as in:
 
     ```ruby
+    # typed: true
+    T::Configuration.enable_final_checks_on_hooks
+
     module Bad
       extend T::Sig
       sig(:final) {void}
@@ -204,6 +207,9 @@ the static checks (they are only caught by the runtime checks):
 1.  When a method is overridden via including two conflicting modules, as in:
 
     ```ruby
+    # typed: true
+    T::Configuration.enable_final_checks_on_hooks
+
     module A
       extend T::Sig
       sig(:final) {void}
