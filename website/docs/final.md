@@ -184,3 +184,40 @@ puts C.new.foo
 At runtime, this does not raise and prints 2, showing that we have violated the
 guarantees of final. This is why we strongly recommend calling
 `T::Configuration.enable_final_checks_on_hooks` before using final.
+
+## Limitations of the statics
+
+The following violations of the semantics of "final" are currently not caught by
+the static checks (they are only caught by the runtime checks):
+
+1.  When a method is redefined, as in:
+
+    ```ruby
+    module Bad
+      extend T::Sig
+      sig(:final) {void}
+      def foo; end
+      def foo; end
+    end
+    ```
+
+1.  When a method is overridden via including two conflicting modules, as in:
+
+    ```ruby
+    module A
+      extend T::Sig
+      sig(:final) {void}
+      def foo; end
+    end
+
+    module B
+      extend T::Sig
+      sig(:final) {void}
+      def foo; end
+    end
+
+    module Bad
+      include A
+      include B
+    end
+    ```
