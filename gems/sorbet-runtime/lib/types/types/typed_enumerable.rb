@@ -140,7 +140,7 @@ module T::Types
         obj.class
       else
         # Get the real class name for other `Enumerable` as we don't want them to be collapsed as a `T::Array[T.untyped]`
-        obj.class
+        T.unsafe(obj).class
       end
     end
 
