@@ -36,8 +36,7 @@ unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typ
         formattedTypeString = string(typeString);
     }
 
-    string content =
-        absl::StrCat(docString.value_or(""), docString.has_value() ? "\n\n" : "", formattedTypeString);
+    string content = absl::StrCat(docString.value_or(""), docString.has_value() ? "\n\n" : "", formattedTypeString);
 
     return make_unique<MarkupContent>(markupKind, move(content));
 }
