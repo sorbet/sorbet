@@ -195,8 +195,6 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     if (documentation.empty())
         return nullopt;
     else {
-        // Ensure single newline for non-empty documentation
-        documentation.append("\n");
         return documentation;
     }
 }
