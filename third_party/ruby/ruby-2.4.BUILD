@@ -125,6 +125,7 @@ RUBY_COPTS = [
     "-Wno-constant-logical-operand",
     "-Wno-parentheses",
     "-D_REENTRANT",
+    "-Wno-macro-redefined", # they redefine NDEBUG
 
     # TODO: is this really necessary?
     "-Wno-string-plus-int",

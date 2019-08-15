@@ -71,6 +71,12 @@ class Float < Numeric
     )
     .returns(Complex)
   end
+  sig do
+    params(
+        arg0: T.any(Integer, Float),
+    )
+    .returns(Float)
+  end
   def *(arg0); end
 
   sig do
@@ -135,6 +141,12 @@ class Float < Numeric
     )
     .returns(Complex)
   end
+  sig do
+    params(
+        arg0: T.any(Integer, Float),
+    )
+    .returns(Float)
+  end
   def +(arg0); end
 
   sig {returns(Float)}
@@ -170,6 +182,12 @@ class Float < Numeric
     )
     .returns(Complex)
   end
+  sig do
+    params(
+        arg0: T.any(Integer, Float),
+    )
+    .returns(Float)
+  end
   def -(arg0); end
 
   sig {returns(Float)}
@@ -204,6 +222,12 @@ class Float < Numeric
         arg0: Complex,
     )
     .returns(Complex)
+  end
+  sig do
+    params(
+        arg0: T.any(Integer, Float),
+    )
+    .returns(Float)
   end
   def /(arg0); end
 

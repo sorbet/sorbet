@@ -244,20 +244,28 @@ public:
             }
             bool isModule = klass->kind == ast::ClassDefKind::Module;
             if (!klass->symbol.data(ctx)->isClass()) {
-                if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
-                    e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx)->show(ctx));
-                    e.addErrorLine(klass->symbol.data(ctx)->loc(), "Previous definition");
-                }
-                auto origName = klass->symbol.data(ctx)->name;
-                ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx)->name);
-                klass->symbol = ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx)->owner, origName);
-                klass->symbol.data(ctx)->setIsModule(isModule);
+                // we might have already mangled the class symbol, so see if we have a symbol that is a class already
+                auto klassSymbol =
+                    ctx.state.lookupClassSymbol(klass->symbol.data(ctx)->owner, klass->symbol.data(ctx)->name);
+                if (klassSymbol.exists()) {
+                    klass->symbol = klassSymbol;
+                } else {
+                    if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                        e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx)->show(ctx));
+                        e.addErrorLine(klass->symbol.data(ctx)->loc(), "Previous definition");
+                    }
+                    auto origName = klass->symbol.data(ctx)->name;
+                    ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx)->name);
+                    klass->symbol =
+                        ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx)->owner, origName);
+                    klass->symbol.data(ctx)->setIsModule(isModule);
 
-                auto oldSymCount = ctx.state.symbolsUsed();
-                auto newSingleton =
-                    klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-                ENFORCE(newSingleton._id >= oldSymCount,
-                        "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
+                    auto oldSymCount = ctx.state.symbolsUsed();
+                    auto newSingleton =
+                        klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+                    ENFORCE(newSingleton._id >= oldSymCount,
+                            "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
+                }
             } else if (klass->symbol.data(ctx)->isClassModuleSet() &&
                        isModule != klass->symbol.data(ctx)->isClassModule()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
@@ -289,15 +297,15 @@ public:
             klass->symbol.data(ctx)->setClassSealed();
 
             auto classOfKlass = klass->symbol.data(ctx)->singletonClass(ctx);
-            auto sealedClassesList =
-                ctx.state.enterMethodSymbol(send->loc, classOfKlass, core::Names::sealedClassesList());
+            auto sealedSubclasses =
+                ctx.state.enterMethodSymbol(send->loc, classOfKlass, core::Names::sealedSubclasses());
             auto &blkArg =
-                ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedClassesList, core::Names::blkArg());
+                ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
             blkArg.flags.isBlock = true;
 
             // T.noreturn here represents the zero-length list of subclasses of this sealed class.
             // We will use T.any to record subclasses when they're resolved.
-            sealedClassesList.data(ctx)->resultType = core::Types::arrayOf(ctx, core::Types::bottom());
+            sealedSubclasses.data(ctx)->resultType = core::Types::arrayOf(ctx, core::Types::bottom());
         }
         if (send->fun == core::Names::declareInterface() || send->fun == core::Names::declareAbstract()) {
             klass->symbol.data(ctx)->setClassAbstract();
@@ -484,7 +492,7 @@ public:
                         }
                         core::NameRef name = lit->asSymbol(ctx);
 
-                        core::SymbolRef meth = methodOwner(ctx).data(ctx)->findMember(ctx, name);
+                        core::SymbolRef meth = ctx.state.lookupMethodSymbol(methodOwner(ctx), name);
                         if (!meth.exists()) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::MethodNotFound)) {
                                 e.setHeader("`{}`: no such method: `{}`", original->fun.show(ctx), name.show(ctx));
@@ -588,7 +596,7 @@ public:
 
         auto parsedArgs = ast::ArgParsing::parseArgs(ctx, method->args);
 
-        auto sym = owner.data(ctx)->findMemberNoDealias(ctx, method->name);
+        auto sym = ctx.state.lookupMethodSymbol(owner, method->name);
         if (sym.exists()) {
             if (method->declLoc == sym.data(ctx)->loc()) {
                 // TODO remove if the paramsMatch is perfect
@@ -630,8 +638,7 @@ public:
         ENFORCE(nm->kind != ast::UnresolvedIdent::Local, "Unresolved local left after `name_locals`");
 
         if (nm->kind == ast::UnresolvedIdent::Global) {
-            core::SymbolData root = core::Symbols::root().data(ctx);
-            core::SymbolRef sym = root->findMember(ctx, nm->name);
+            auto sym = ctx.state.lookupSymbol(core::Symbols::root(), nm->name);
             if (!sym.exists()) {
                 sym = ctx.state.enterFieldSymbol(nm->loc, core::Symbols::root(), nm->name);
             }
@@ -688,15 +695,17 @@ public:
             scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
-        auto sym = scope.data(ctx)->findMemberNoDealias(ctx, lhs->cnst);
-        if (sym.exists() && !sym.data(ctx)->isStaticField()) {
+        auto sym = ctx.state.lookupStaticFieldSymbol(scope, lhs->cnst);
+        auto currSym = ctx.state.lookupSymbol(scope, lhs->cnst);
+        auto name = sym.exists() ? sym.data(ctx)->name : lhs->cnst;
+        if (!sym.exists() && currSym.exists()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx)->show(ctx));
-                e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                e.addErrorLine(currSym.data(ctx)->loc(), "Previous definition");
             }
-            ctx.state.mangleRenameSymbol(sym, sym.data(ctx)->name);
+            ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
         }
-        core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
+        core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, name);
         auto loc = lhs->loc;
         unique_ptr<ast::UnresolvedConstantLit> lhsU(lhs);
         asgn->lhs.release();
