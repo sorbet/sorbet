@@ -89,6 +89,20 @@ const string file_string = "# typed: true\n"
                            "    end\n"
                            "    def consecutive_method_3\n"
                            "    end\n"
+                           "\n"
+                           "    # First line\n"
+                           "    #Second line\n"
+                           "    sig do; params(x: Integer).void; end\n"
+                           "    def ensure_one_whitespace(x)\n"
+                           "    end\n"
+                           "\n"
+                           "    # First line\n"
+                           "    # Second line\n"
+                           "    # @param x this is x\n"
+                           "    # @param y this is y\n"
+                           "    sig do; params(x: Integer, y: String).void; end\n"
+                           "    def extra_newlines_for_yarddoc(x, y)\n"
+                           "    end\n"
                            "end\n";
 string_view file = string_view(file_string);
 
@@ -153,6 +167,16 @@ TEST(FindDocumentationTest, ConsecutiveMethodsBlockShorthandSig) { // NOLINT
     int position = file.find("consecutive_method_3");
     optional<string> b = findDocumentation(file, position);
     ASSERT_TRUE(!b);
+}
+TEST(FindDocumentationTest, EnsureOneWhitespace) { // NOLINT
+    int position = file.find("ensure_one_whitespace");
+    optional<string> b = findDocumentation(file, position);
+    ASSERT_EQ(*b, "First line\nSecond line\n");
+}
+TEST(FindDocumentationTest, ExtraNewLinesForYarddoc) { // NOLINT
+    int position = file.find("extra_newlines_for_yarddoc");
+    optional<string> b = findDocumentation(file, position);
+    ASSERT_EQ(*b, "First line\nSecond line\n\n@param x this is x\n\n@param y this is y\n");
 }
 
 } // namespace sorbet::realmain::lsp::test
