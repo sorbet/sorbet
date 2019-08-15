@@ -62,7 +62,7 @@ if grep -q "<details>" "$annotation_path"; then
 fi
 
 if [ "$err" -ne 0 ]; then
-  if [[ "linux" == "$platform" ]] && [[ "${BUILDKITE_BRANCH}" != "" ]]; then
+  if [[ "linux" == "$platform" ]] && [[ "${BUILDKITE_BRANCH}" != "" ]] && [[ "${BUILDKITE_BRANCH}" != "master" ]]; then
     # see if we can fix it!
     ./tools/scripts/update_exp_files.sh
     dirty=
@@ -73,9 +73,10 @@ if [ "$err" -ne 0 ]; then
       if [[ "${BUILDKITE_REPO}" == "git@github.com:stripe/sorbet.git" ]]; then
         branch_name="${BUILDKITE_BRANCH}"
       else
-        branch_name="$(echo ${BUILDKITE_BRANCH} | cut -d ":" -f 2)"
+        branch_name="$(echo "${BUILDKITE_BRANCH}" | cut -d ":" -f 2)"
       fi
       git push pr_source "HEAD:${branch_name}"
     fi
+  fi
   exit "$err"
 fi
