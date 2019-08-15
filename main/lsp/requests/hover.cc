@@ -33,7 +33,7 @@ unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typ
     if (markupKind == MarkupKind::Markdown && typeString.length() > 0) {
         formattedTypeString = fmt::format("```ruby\n{}\n```", typeString);
     } else {
-        absl::StrAppend(&formattedTypeString, typeString);
+        formattedTypeString = string(typeString);
     }
 
     string content = absl::StrCat(docString.value_or(""), formattedTypeString);
