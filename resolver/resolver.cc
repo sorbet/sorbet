@@ -192,18 +192,15 @@ private:
         }
         ast::Expression *resolvedScope = c->scope.get();
         if (auto *id = ast::cast_tree<ast::ConstantLit>(resolvedScope)) {
-            if (!id->symbol.exists()) {
-                id->symbol = resolveConstant(ctx, nesting, id->original);
-                if (!id->symbol.exists()) {
-                    return core::Symbols::noSymbol();
-                }
-            }
             auto sym = id->symbol;
             if (sym.exists() && sym.data(ctx)->isTypeAlias()) {
                 if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
                 }
                 return core::Symbols::untyped();
+            }
+            if (!sym.exists()) {
+                return core::Symbols::noSymbol();
             }
             core::SymbolRef resolved = id->symbol.data(ctx)->dealias(ctx);
             core::SymbolRef result = resolved.data(ctx)->findMember(ctx, c->cnst);
@@ -291,10 +288,12 @@ private:
             return false;
         }
         if (resolved.data(ctx)->isTypeAlias()) {
+            // even if we haven't completed resolution, we might want to report this intermediate symbol to help resolve
+            // other constants via its metadata. This in particular happens when we have a type alias that's unresolved
+            // but we still incorrectly refer to a constant underneath a type alias: updating the job to be closer to
+            // the truth while still not having "finished" is going to let us determine that the constant is incorrect
+            job.out->symbol = resolved;
             if (resolved.data(ctx)->resultType != nullptr) {
-                // A TypeAliasResolutionItem job completed successfully,
-                // or we forced the type alias this constant refers to to resolve.
-                job.out->symbol = resolved;
                 return true;
             }
             return false;
