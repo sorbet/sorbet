@@ -181,6 +181,22 @@ sig(<span class="hljs-symbol">:final</span>) {void}
 </code></pre>
 <p>The main reason for this difference is that we want to know that a method is
 final before running the block inside the sig.</p>
+<p>If the syntax for marking a method final was to have a <code>final.</code> builder put
+inside the block to sig, similar to <code>abstract.</code>, <code>override.</code>, etc, then, if we
+wanted to know whether a method has been marked final or not, then we would need
+to run the block in the <code>sig</code>.</p>
+<p>The problem is, we would like to know whether a method is final or not in the
+runtime &quot;immediately&quot;, i.e. before the method has even been called. This is at
+odds with the semantics of the block to <code>sig</code>: the <code>sig</code> block is lazy, and the
+code inside it is not run until the first time the method is called.</p>
+<p>That is, if we wanted to use a <code>final.</code> builder inside the block to <code>sig.</code>, and
+also wanted to know whether a method is final &quot;immediately&quot;, then we would be
+forced to run the <code>sig</code> block immediately and not defer it until later. But, if
+we were to force the sig block to be run immediately after saying &quot;sig&quot;, then we
+would lose the benefits of having the sig block be lazy.</p>
+<p>We intentionally want to keep the block to sig lazy, because that means, for
+instance, you may reference constants inside the <code>sig</code> block that aren’t yet
+defined but will be defined later.</p>
 <h2><a class="anchor" aria-hidden="true" id="enabling-all-of-the-runtime-checks"></a><a href="#enabling-all-of-the-runtime-checks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Enabling all of the runtime checks</h2>
 <p>Before using final in a project, we recommend opting in to all of the runtime
 checks.</p>
@@ -212,7 +228,44 @@ puts C.new.foo
 <p>At runtime, this does not raise and prints 2, showing that we have violated the
 guarantees of final. This is why we strongly recommend calling
 <code>T::Configuration.enable_final_checks_on_hooks</code> before using final.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/abstract"><span class="arrow-prev">← </span><span>Abstract Classes and Interfaces</span></a><a class="docs-next button" href="/docs/override-checking"><span>Override Checking</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#final-methods">Final methods</a><ul class="toc-headings"><li><a href="#defining-a-final-method">Defining a final method</a></li><li><a href="#semantics-of-final-methods">Semantics of final methods</a></li></ul></li><li><a href="#final-classes-and-modules">Final classes and modules</a><ul class="toc-headings"><li><a href="#defining-a-final-class-or-module">Defining a final class or module</a></li><li><a href="#semantics-of-final-classes-and-modules">Semantics of final classes and modules</a></li></ul></li><li><a href="#final-method-syntax">Final method syntax</a></li><li><a href="#enabling-all-of-the-runtime-checks">Enabling all of the runtime checks</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<h2><a class="anchor" aria-hidden="true" id="limitations-of-the-statics"></a><a href="#limitations-of-the-statics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Limitations of the statics</h2>
+<p>The following violations of the semantics of “final” are currently not caught by
+the static checks (they are only caught by the runtime checks):</p>
+<ol>
+<li><p>When a method is redefined, as in:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+T::Configuration.enable_final_checks_on_hooks
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Bad</span></span>
+  extend T::Sig
+  sig(<span class="hljs-symbol">:final</span>) {void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre></li>
+<li><p>When a method is overridden via including two conflicting modules, as in:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+T::Configuration.enable_final_checks_on_hooks
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">A</span></span>
+  extend T::Sig
+  sig(<span class="hljs-symbol">:final</span>) {void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span></span>
+  extend T::Sig
+  sig(<span class="hljs-symbol">:final</span>) {void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Bad</span></span>
+  <span class="hljs-keyword">include</span> A
+  <span class="hljs-keyword">include</span> B
+<span class="hljs-keyword">end</span>
+</code></pre></li>
+</ol>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/abstract"><span class="arrow-prev">← </span><span>Abstract Classes and Interfaces</span></a><a class="docs-next button" href="/docs/override-checking"><span>Override Checking</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#final-methods">Final methods</a><ul class="toc-headings"><li><a href="#defining-a-final-method">Defining a final method</a></li><li><a href="#semantics-of-final-methods">Semantics of final methods</a></li></ul></li><li><a href="#final-classes-and-modules">Final classes and modules</a><ul class="toc-headings"><li><a href="#defining-a-final-class-or-module">Defining a final class or module</a></li><li><a href="#semantics-of-final-classes-and-modules">Semantics of final classes and modules</a></li></ul></li><li><a href="#final-method-syntax">Final method syntax</a></li><li><a href="#enabling-all-of-the-runtime-checks">Enabling all of the runtime checks</a></li><li><a href="#limitations-of-the-statics">Limitations of the statics</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
