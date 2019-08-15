@@ -62,5 +62,20 @@ if grep -q "<details>" "$annotation_path"; then
 fi
 
 if [ "$err" -ne 0 ]; then
-    exit "$err"
+  if [[ "linux" == "$platform" ]] && [[ "${BUILDKITE_BRANCH}" != "" ]]; then
+    # see if we can fix it!
+    ./tools/scripts/update_exp_files.sh
+    dirty=
+    git diff-index --quiet HEAD -- || dirty=1
+    if [ "$dirty" != "" ]; then
+      git commit -a "Update exp files"
+      git remote add pr_source "${BUILDKITE_PULL_REQUEST_REPO}"
+      if [[ "${BUILDKITE_REPO}" == "git@github.com:stripe/sorbet.git" ]]; then
+        branch_name="${BUILDKITE_BRANCH}"
+      else
+        branch_name="$(echo ${BUILDKITE_BRANCH} | cut -d ":" -f 2)"
+      fi
+      git push pr_source "HEAD:${branch_name}"
+    fi
+  exit "$err"
 fi
