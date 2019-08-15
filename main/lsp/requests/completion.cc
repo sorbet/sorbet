@@ -175,7 +175,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             string_view comment = line.substr(line.find('#') + skip_after_hash);
 
             // Account for yarddoc lines by inserting an extra newline right before
-            if (absl::StartsWith(comment, '@')) {
+            if (absl::StartsWith(comment, "@")) {
                 documentation_lines.push_back(string_view());
             }
 
