@@ -10,6 +10,7 @@
 #include "core/errors/parser.h"
 #include "core/errors/resolver.h"
 #include "core/lsp/QueryResponse.h"
+#include "flattener/flatten.h"
 #include "lsp.h"
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/LocalVarSaver.h"
@@ -173,6 +174,13 @@ void LSPLoop::reIndexFromFileSystem() {
             indexed.resize(id + 1);
         }
         indexed[id] = move(t);
+    }
+}
+
+void flattenAll(const core::GlobalState &gs, vector<ast::ParsedFile> &indexedCopies) {
+    for (auto &t : indexedCopies) {
+        core::Context ctx(gs, core::Symbols::root());
+        t = flatten::runOne(ctx, move(t));
     }
 }
 
@@ -378,11 +386,14 @@ LSPLoop::QueryRun LSPLoop::runQuery(unique_ptr<core::GlobalState> gs, const core
     ENFORCE(gs->lspQuery.isEmpty());
     gs->lspQuery = q;
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), opts);
-    // pipeline::typecheck must be run before tryApplyDefLocSaver, because pipeline::typecheck runs flatten, which
-    // introduces the invariant that ivars defined directly on a class are put into <static-init>.
-    resolved = pipeline::typecheck(gs, move(resolved), opts, workers);
+    // flattenAll must be run before tryApplyDefLocSaver, because flattenAll introduces the invariant that ivars defined
+    // directly on a class are put into <static-init>, and tryApplyDefLocSaver depends on this invariant.
+    // pipeline::typecheck also runs flatten, but running pipeline::typecheck before the try* functions results in
+    // errors elsewhere (this may be fixable with more effort).
+    flattenAll(*gs, resolved);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
+    pipeline::typecheck(gs, move(resolved), opts, workers);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
