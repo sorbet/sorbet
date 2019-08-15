@@ -210,7 +210,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
         SymbolRef current = primary;
         while (current.data(ctx)->isOverloaded()) {
             i++;
-            NameRef overloadName = ctx.state.getNameUnique(UniqueNameKind::Overload, primary.data(ctx)->name, i);
+            NameRef overloadName = ctx.state.lookupNameUnique(UniqueNameKind::Overload, primary.data(ctx)->name, i);
             SymbolRef overload = primary.data(ctx)->owner.data(ctx)->findMember(ctx, overloadName);
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");

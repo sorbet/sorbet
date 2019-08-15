@@ -20,6 +20,51 @@ demand.
 Types of procs are not checked at all at runtime (the same way methods are), and
 serve only as hints to `srb` statically (and for documentation).
 
+## Writing annotations for block parameters
+
+When writing signatures for blocks, you can define types for the block
+parameters, as well as what the code inside the block should return.
+
+For example, if you want to type a method with a block, and that block has an
+integer parameter and doesn't return anything, you can write a sig with a
+`T.proc` like `T.proc.params(arg0: Integer).void`.
+
+```ruby
+# typed: true
+sig { params(block: T.proc.params(arg0: Integer).void).void }
+def foo(&block); end
+
+foo do |x|
+  T.reveal_type(x) # Revealed type: Integer
+end
+```
+
+If you want to type a method that lets you write code to determine whether an
+input is valid, you can require that the block returns a boolean.
+
+```ruby
+# typed: true
+sig do
+  params(
+    block: T.proc.params(arg0: T.untyped).returns(T::Boolean)
+  ).void
+end
+def custom_validator(&block); end
+
+# We want to validate that the input is always greater than five and less than
+# or equal to eight... for some reason.
+custom_validator do |x|
+  if x > 5 && x <= 8
+    return true
+  else
+    return false
+  end
+end
+```
+
+If a block is optional, it should be wrapped in `T.nilable` (e.g.
+`T.nilable(T.proc.params(arg0: String).void)`).
+
 ## Annotating block parameters with yield
 
 Ruby's `yield` keyword can invoke a block without requiring a block argument in
