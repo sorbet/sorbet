@@ -79,7 +79,6 @@ steps:
 
   - label: ":linux: publish_ruby_gems.sh (non-blocking)"
     command: .buildkite/publish_ruby_gems.sh
-    agents:
-      os: linux
+    <<: *elastic
 
   - wait: ~
