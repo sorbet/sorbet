@@ -6,6 +6,12 @@ title: Metaprogramming plugins
 > **Warning**: This feature is experimental and has known limitations. It may
 > not work as expected and may change without notice.
 
+> If you are simply looking for Rails support, checkout [sorbet-rails] and the
+> [community page].
+
+[sorbet-rails]: https://github.com/chanzuckerberg/sorbet-rails
+[community page]: /en/community
+
 In Ruby, it is possible to dynamically define methods. Consider the following
 example:
 
@@ -46,6 +52,7 @@ source = ARGV[5]
 /macro\(:(.*)\)/.match(source) do |match_data|
   puts "def #{match_data[1]}_time; end"
 end
+# Note that Sorbet treats plugin output as rbi files
 ```
 
 We then use a YAML file to tell Sorbet about this plugin.
@@ -78,11 +85,11 @@ We can ask Sorbet to print out the output of all plugin calls using
 
 ```shell
 ❯ srb tc --print plugin-generated-code --dsl-plugins triggers.yaml metaprogramming.rb
-# Path: "metaprogramming.rb//plugin-generated|0":
+# Path: "metaprogramming.rb//plugin-generated|0.rbi":
 class Metaprogramming;
 def bed_time; end
 end;
-# Path: "metaprogramming.rb//plugin-generated|1":
+# Path: "metaprogramming.rb//plugin-generated|1.rbi":
 class Metaprogramming;
 def fun_time; end
 end;
