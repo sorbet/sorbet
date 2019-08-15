@@ -832,14 +832,13 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     ENFORCE(subclass.data(ctx)->isClass(), "Sealed subclass {} must be class", subclass.show(ctx));
 
     auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx);
-    auto sealedClassesList =
-        this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedClassesList());
+    auto sealedSubclasses = this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
 
-    auto data = sealedClassesList.data(ctx);
+    auto data = sealedSubclasses.data(ctx);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
     auto appliedType = cast_type<AppliedType>(data->resultType.get());
-    ENFORCE(appliedType != nullptr, "sealedClassesList should always be AppliedType");
-    ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedClassesList should always be Array");
+    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
+    ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedSubclasses should always be Array");
     auto currentClasses = appliedType->targs[0];
     // Abusing T.any to be list cons, with T.noreturn as the empty list.
     // (Except it's not, because Types::lub is too smart, and drops the T.noreturn to prevent allocating a T.any)
@@ -848,23 +847,22 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
 
 const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
     ENFORCE(this->isClassSealed(), "Class is not marked sealed: {}", this->show(gs));
-    auto sealedClassesList = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedClassesList());
-    auto &result = sealedClassesList.data(gs)->locs();
+    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
+    auto &result = sealedSubclasses.data(gs)->locs();
     ENFORCE(result.size() > 0);
     return result;
 }
 
-TypePtr Symbol::sealedSubclasses(const Context ctx) const {
+TypePtr Symbol::sealedSubclassesToUnion(const Context ctx) const {
     ENFORCE(this->isClassSealed(), "Class is not marked sealed: {}", this->show(ctx));
 
-    auto sealedClassesList =
-        this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedClassesList());
+    auto sealedSubclasses = this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
 
-    auto data = sealedClassesList.data(ctx);
+    auto data = sealedSubclasses.data(ctx);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
     auto appliedType = cast_type<AppliedType>(data->resultType.get());
-    ENFORCE(appliedType != nullptr, "sealedClassesList should always be AppliedType");
-    ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedClassesList should always be Array");
+    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
+    ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedSubclasses should always be Array");
 
     auto currentClasses = appliedType->targs[0];
     if (currentClasses->isBottom()) {
@@ -875,14 +873,14 @@ TypePtr Symbol::sealedSubclasses(const Context ctx) const {
     auto result = Types::bottom();
     while (auto orType = cast_type<OrType>(currentClasses.get())) {
         auto classType = cast_type<ClassType>(orType->right.get());
-        ENFORCE(classType != nullptr, "Something in sealedClassesList that's not a ClassType");
+        ENFORCE(classType != nullptr, "Something in sealedSubclasses that's not a ClassType");
         auto subclass = classType->symbol.data(ctx)->attachedClass(ctx);
         ENFORCE(subclass.exists());
         result = Types::any(ctx, make_type<ClassType>(subclass), result);
         currentClasses = orType->left;
     }
     auto lastClassType = cast_type<ClassType>(currentClasses.get());
-    ENFORCE(lastClassType != nullptr, "Last element of sealedClassesList must be ClassType");
+    ENFORCE(lastClassType != nullptr, "Last element of sealedSubclasses must be ClassType");
     auto subclass = lastClassType->symbol.data(ctx)->attachedClass(ctx);
     ENFORCE(subclass.exists());
     result = Types::any(ctx, make_type<ClassType>(subclass), result);

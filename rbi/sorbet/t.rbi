@@ -78,9 +78,13 @@ module T::Generic
 end
 
 module T::Helpers
+  sig {void}
   def abstract!;  end
+  sig {void}
   def interface!; end
+  sig {void}
   def final!; end
+  sig {void}
   def sealed!; end
   def mixes_in_class_methods(mod); end
 end

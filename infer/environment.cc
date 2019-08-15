@@ -348,8 +348,8 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         if (fnd != vars.end()) {
             whoKnows.truthy = fnd->second.knowledge.falsy;
             whoKnows.falsy = fnd->second.knowledge.truthy;
-            fnd->second.knowledge.truthy.mutate().noTypeTests.emplace_back(local, core::Types::falsyTypes());
-            fnd->second.knowledge.falsy.mutate().yesTypeTests.emplace_back(local, core::Types::falsyTypes());
+            fnd->second.knowledge.truthy.mutate().yesTypeTests.emplace_back(local, core::Types::falsyTypes());
+            fnd->second.knowledge.falsy.mutate().noTypeTests.emplace_back(local, core::Types::falsyTypes());
         }
         whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, core::Types::falsyTypes());
         whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv.variable, core::Types::falsyTypes());
