@@ -1501,7 +1501,6 @@ public:
                     auto loc = rhs->loc;
                     asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
                                                core::Names::suggestType(), move(rhs));
-                    data->resultType = core::Types::untyped(ctx, sym);
                 }
             } else if (!core::isa_type<core::AliasType>(&*data->resultType)) {
                 resolveConstantType(ctx, asgn->rhs, sym);
