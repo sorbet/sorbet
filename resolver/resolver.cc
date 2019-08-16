@@ -1377,11 +1377,6 @@ private:
                         return;
                     }
                 }
-                if (ast::isa_tree<ast::UnresolvedConstantLit>(expr) || ast::isa_tree<ast::ConstantLit>(expr)) {
-                    // we don't want to report an error here because constants that are aliases for other constants can
-                    // easily have their types inferred.
-                    return;
-                }
                 if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::ConstantMissingTypeAnnotation)) {
                     e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                                 "# typed: strict");
@@ -1498,19 +1493,19 @@ public:
             return asgn;
         }
 
-        if (data->isStaticField() && data->resultType == nullptr) {
-            data->resultType = resolveConstantType(ctx, asgn->rhs, sym);
+        if (data->isStaticField()) {
             if (data->resultType == nullptr) {
-                auto rhs = move(asgn->rhs);
-                auto loc = rhs->loc;
-                asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
-                                           core::Names::suggestType(), move(rhs));
-                data->resultType = core::Types::untyped(ctx, sym);
+                data->resultType = resolveConstantType(ctx, asgn->rhs, sym);
+                if (data->resultType == nullptr) {
+                    auto rhs = move(asgn->rhs);
+                    auto loc = rhs->loc;
+                    asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
+                                               core::Names::suggestType(), move(rhs));
+                    data->resultType = core::Types::untyped(ctx, sym);
+                }
+            } else if (!core::isa_type<core::AliasType>(&*data->resultType)) {
+                resolveConstantType(ctx, asgn->rhs, sym);
             }
-        } else if (data->isStaticField()) {
-            // we might have already resolved this constant but we want to make sure to still report some errors if
-            // those errors come up
-            resolveConstantType(ctx, asgn->rhs, sym);
         }
 
         return asgn;
