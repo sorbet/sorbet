@@ -260,11 +260,11 @@ private:
                     if (!suggested.empty()) {
                         vector<core::ErrorLine> lines;
                         for (auto suggestion : suggested) {
+                            const auto replacement = suggestion.symbol.show(ctx);
                             lines.emplace_back(core::ErrorLine::from(suggestion.symbol.data(ctx)->loc(),
-                                                                     "Did you mean: `{}`?",
-                                                                     suggestion.symbol.show(ctx)));
-                            e.replaceWith(fmt::format("Replace with `{}`", suggestion.symbol.show(ctx)), job.out->loc,
-                                          "{}", suggestion.symbol.show(ctx));
+                                                                     "Did you mean: `{}`?", replacement));
+                            e.replaceWith(fmt::format("Replace with `{}`", replacement), job.out->loc, "{}",
+                                          replacement);
                         }
                         e.addErrorSection(core::ErrorSection(lines));
                     }
