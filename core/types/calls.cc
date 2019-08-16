@@ -168,7 +168,7 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
         auto withoutNil = Types::approximateSubtract(ctx, argTpe.type, Types::nilClass());
         if (!withoutNil->isBottom() && Types::isSubTypeUnderConstraint(ctx, constr, withoutNil, expectedType)) {
             if (loc.exists()) {
-                e.replaceWith("Add `T.must`", loc, "T.must({})", loc.source(ctx));
+                e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(ctx));
             }
         }
         return e.build();
@@ -480,7 +480,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 }
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
-                e.replaceWith("Add `T.must`", args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
+                e.replaceWith("Wrap in `T.must`", args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
             } else {
                 if (symbol.data(ctx)->isClassModule()) {
                     auto objMeth = core::Symbols::Object().data(ctx)->findMemberTransitive(ctx, args.name);
@@ -943,7 +943,7 @@ public:
             if (auto e = ctx.state.beginError(loc, errors::Infer::InvalidCast)) {
                 e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type->show(ctx));
                 const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
-                e.replaceWith("Remove the T.must", loc, "{}", locWithoutTMust.source(ctx));
+                e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(ctx));
             }
         }
         res.returnType = move(ret);
