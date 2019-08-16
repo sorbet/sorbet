@@ -82,7 +82,7 @@ public:
     static bool isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2);
     static bool equiv(Context ctx, const TypePtr &t1, const TypePtr &t2);
 
-    /** check that t1 <: t2, but don't allow occurrences of `T.untyped` */
+    /** check that t1 <: t2, but do not consider `T.untyped` as super type or a subtype of all other types */
     static bool isAsSpecificAs(Context ctx, const TypePtr &t1, const TypePtr &t2);
     static bool equivNoUntyped(Context ctx, const TypePtr &t1, const TypePtr &t2);
 
