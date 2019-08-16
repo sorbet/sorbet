@@ -13,9 +13,9 @@
 # .
 #
 # Programs may make subclasses of
-# [Exception](Exception) , typically of
+# [Exception](Exception), typically of
 # [StandardError](https://ruby-doc.org/core-2.6.3/StandardError.html) or
-# [RuntimeError](https://ruby-doc.org/core-2.6.3/RuntimeError.html) , to
+# [RuntimeError](https://ruby-doc.org/core-2.6.3/RuntimeError.html), to
 # provide custom classes and add additional information. See the subclass
 # list below for defaults for `raise` and `rescue` .
 #
@@ -165,7 +165,7 @@ class Exception < Object
 
   # Returns any backtrace associated with the exception. This method is
   # similar to
-  # [\#backtrace](Exception.downloaded.ruby_doc#method-i-backtrace) , but
+  # [\#backtrace](Exception.downloaded.ruby_doc#method-i-backtrace), but
   # the backtrace is an array of
   # [Thread::Backtrace::Location](https://ruby-doc.org/core-2.6.3/Thread/Backtrace/Location.html)
   # .
@@ -215,7 +215,7 @@ class Exception < Object
   # [String](https://ruby-doc.org/core-2.6.3/String.html) objects or a
   # single [String](https://ruby-doc.org/core-2.6.3/String.html) in the
   # format described in
-  # [\#backtrace](Exception.downloaded.ruby_doc#method-i-backtrace) .
+  # [\#backtrace](Exception.downloaded.ruby_doc#method-i-backtrace).
   sig do
     params(
         arg0: T.any(String, T::Array[String]),

@@ -8,7 +8,7 @@
 #
 # You may obtain information about the operation of the
 # [GC](GC) through
-# [GC::Profiler](https://ruby-doc.org/core-2.6.3/GC/Profiler.html) .
+# [GC::Profiler](https://ruby-doc.org/core-2.6.3/GC/Profiler.html).
 module GC
   INTERNAL_CONSTANTS = T.let(T.unsafe(nil), Hash)
   OPTS = T.let(T.unsafe(nil), Array)
@@ -47,7 +47,7 @@ module GC
   #
   #     def GC.start(full_mark: true, immediate_sweep: true); end
   #
-  # Use full\_mark: false to perform a minor [GC](GC.downloaded.ruby_doc) .
+  # Use full\_mark: false to perform a minor [GC](GC.downloaded.ruby_doc).
   # Use immediate\_sweep: false to defer sweeping (use lazy sweep).
   #
   # Note: These keyword arguments are implementation and version dependent.
@@ -63,7 +63,7 @@ module GC
   def self.start(full_mark: T.unsafe(nil), immediate_sweep: T.unsafe(nil)); end
 
   # Returns a [Hash](https://ruby-doc.org/core-2.6.3/Hash.html) containing
-  # information about the [GC](GC.downloaded.ruby_doc) .
+  # information about the [GC](GC.downloaded.ruby_doc).
   #
   # The hash includes information about internal statistics about
   # [GC](GC.downloaded.ruby_doc) such as:

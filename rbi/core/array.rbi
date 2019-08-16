@@ -11,7 +11,7 @@
 # A new array can be created by using the literal constructor `[]` .
 # Arrays can contain different types of objects. For example, the array
 # below contains an
-# [Integer](https://ruby-doc.org/core-2.6.3/Integer.html) , a
+# [Integer](https://ruby-doc.org/core-2.6.3/Integer.html), a
 # [String](https://ruby-doc.org/core-2.6.3/String.html) and a Float:
 #
 # ```ruby
@@ -51,8 +51,8 @@
 # ```
 #
 # An array can also be created by using the Array() method, provided by
-# [Kernel](https://ruby-doc.org/core-2.6.3/Kernel.html) , which tries to
-# call [to\_ary](Array#method-i-to_ary) , then
+# [Kernel](https://ruby-doc.org/core-2.6.3/Kernel.html), which tries to
+# call [to\_ary](Array#method-i-to_ary), then
 # [to\_a](Array#method-i-to_a) on its argument.
 #
 # ```ruby
@@ -92,11 +92,11 @@
 # ```
 #
 # The [slice](Array#method-i-slice) method works in an
-# identical manner to [\#\[\]](Array#method-i-5B-5D) .
+# identical manner to [\#\[\]](Array#method-i-5B-5D).
 #
 # To raise an error for indices outside of the array bounds or else to
 # provide a default value when that happens, you can use
-# [fetch](Array#method-i-fetch) .
+# [fetch](Array#method-i-fetch).
 #
 # ```ruby
 # arr = ['a', 'b', 'c', 'd', 'e', 'f']
@@ -121,7 +121,7 @@
 # ```
 #
 # [drop](Array#method-i-drop) does the opposite of
-# [take](Array#method-i-take) , by returning the
+# [take](Array#method-i-take), by returning the
 # elements after `n` elements have been dropped:
 #
 # ```ruby
@@ -131,9 +131,9 @@
 #
 # Arrays keep track of their own length at all times. To query an array
 # about the number of elements it contains, use
-# [length](Array#method-i-length) ,
+# [length](Array#method-i-length),
 # [count](Array#method-i-count) or
-# [size](Array#method-i-size) .
+# [size](Array#method-i-size).
 #
 # ```ruby
 # browsers = ['Chrome', 'Firefox', 'Safari', 'Opera', 'IE']
@@ -197,7 +197,7 @@
 # ```
 #
 # To retrieve and at the same time remove the first item, use
-# [shift](Array#method-i-shift) :
+# [shift](Array#method-i-shift):
 #
 # ```ruby
 # arr.shift #=> 1
@@ -212,7 +212,7 @@
 # ```
 #
 # To delete a particular element anywhere in an array, use
-# [delete](Array#method-i-delete) :
+# [delete](Array#method-i-delete):
 #
 # ```ruby
 # arr = [1, 2, 2, 3]
@@ -221,7 +221,7 @@
 # ```
 #
 # A useful method if you need to remove `nil` values from an array is
-# [compact](Array#method-i-compact) :
+# [compact](Array#method-i-compact):
 #
 # ```ruby
 # arr = ['foo', 0, nil, 'bar', 7, 'baz', nil]
@@ -234,7 +234,7 @@
 # Another common need is to remove duplicate elements from an array.
 #
 # It has the non-destructive
-# [uniq](Array#method-i-uniq) , and destructive method
+# [uniq](Array#method-i-uniq), and destructive method
 # [uniq\!](Array#method-i-uniq-21)
 #
 # ```ruby
@@ -247,7 +247,7 @@
 # [Enumerable](https://ruby-doc.org/core-2.6.3/Enumerable.html) module,
 # [Array](Array) has an each method, which defines
 # what elements should be iterated over and how. In case of Array’s
-# [each](Array#method-i-each) , all elements in the
+# [each](Array#method-i-each), all elements in the
 # [Array](Array) instance are yielded to the supplied
 # block in sequence.
 #
@@ -306,7 +306,7 @@
 # [reject](Array#method-i-reject)
 #
 # Similar to [select](Array#method-i-select) vs.
-# [reject](Array#method-i-reject) ,
+# [reject](Array#method-i-reject),
 # [delete\_if](Array#method-i-delete_if) and
 # [keep\_if](Array#method-i-keep_if) have the exact
 # opposite result when supplied with the same block:
@@ -399,7 +399,7 @@ class Array < Object
   # This means that it produces a new array. As a consequence, repeated use
   # of `+=` on arrays can be quite inefficient.
   #
-  # See also [\#concat](Array.downloaded.ruby_doc#method-i-concat) .
+  # See also [\#concat](Array.downloaded.ruby_doc#method-i-concat).
   sig do
     params(
         arg0: T::Enumerable[Elem],
@@ -502,8 +502,8 @@ class Array < Object
   # An [IndexError](https://ruby-doc.org/core-2.6.3/IndexError.html) is
   # raised if a negative index points past the beginning of the array.
   #
-  # See also [\#push](Array.downloaded.ruby_doc#method-i-push) , and
-  # [\#unshift](Array.downloaded.ruby_doc#method-i-unshift) .
+  # See also [\#push](Array.downloaded.ruby_doc#method-i-push), and
+  # [\#unshift](Array.downloaded.ruby_doc#method-i-unshift).
   #
   # ```ruby
   # a = Array.new
@@ -578,7 +578,7 @@ class Array < Object
 
   # Returns the element at `index` . A negative index counts from the end of
   # `self` . Returns `nil` if the index is out of range. See also
-  # [\#\[\]](Array.downloaded.ruby_doc#method-i-5B-5D) .
+  # [\#\[\]](Array.downloaded.ruby_doc#method-i-5B-5D).
   #
   # ```ruby
   # a = [ "a", "b", "c", "d", "e" ]
@@ -859,7 +859,7 @@ class Array < Object
   # in an array.
   #
   # If a negative number is given, raises an
-  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html) .
+  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html).
   #
   # See also [\#take](Array.downloaded.ruby_doc#method-i-take)
   #
@@ -1158,7 +1158,7 @@ class Array < Object
   # a                                  #=> ["a", "e"]
   # ```
   #
-  # See also [\#select\!](Array.downloaded.ruby_doc#method-i-select-21) .
+  # See also [\#select\!](Array.downloaded.ruby_doc#method-i-select-21).
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -1388,7 +1388,7 @@ class Array < Object
   #
   # Returns the first contained array that matches `obj` .
   #
-  # See also [\#assoc](Array.downloaded.ruby_doc#method-i-assoc) .
+  # See also [\#assoc](Array.downloaded.ruby_doc#method-i-assoc).
   #
   # ```ruby
   # a = [ [ 1, "one"], [2, "two"], [3, "three"], ["ii", "two"] ]
@@ -1428,7 +1428,7 @@ class Array < Object
   #
   # See also
   # [Enumerable\#reject](https://ruby-doc.org/core-2.6.3/Enumerable.html#method-i-reject)
-  # and [\#delete\_if](Array.downloaded.ruby_doc#method-i-delete_if) .
+  # and [\#delete\_if](Array.downloaded.ruby_doc#method-i-delete_if).
   #
   # If no block is given, an
   # [Enumerator](https://ruby-doc.org/core-2.6.3/Enumerator.html) is
@@ -1534,7 +1534,7 @@ class Array < Object
   sig {returns(T::Array[Elem])}
   def reverse!(); end
 
-  # Same as [\#each](Array.downloaded.ruby_doc#method-i-each) , but
+  # Same as [\#each](Array.downloaded.ruby_doc#method-i-each), but
   # traverses `self` in reverse order.
   #
   # ```ruby
@@ -1564,7 +1564,7 @@ class Array < Object
   #
   # Returns `nil` if no match is found.
   #
-  # See also [\#index](Array.downloaded.ruby_doc#method-i-index) .
+  # See also [\#index](Array.downloaded.ruby_doc#method-i-index).
   #
   # If neither block nor argument is given, an
   # [Enumerator](https://ruby-doc.org/core-2.6.3/Enumerator.html) is
@@ -1661,7 +1661,7 @@ class Array < Object
   # .
   #
   # [\#filter](Array.downloaded.ruby_doc#method-i-filter) is an alias for
-  # [\#select](Array.downloaded.ruby_doc#method-i-select) .
+  # [\#select](Array.downloaded.ruby_doc#method-i-select).
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -1683,10 +1683,10 @@ class Array < Object
   # [Enumerator](https://ruby-doc.org/core-2.6.3/Enumerator.html) is
   # returned instead.
   #
-  # See also [\#keep\_if](Array.downloaded.ruby_doc#method-i-keep_if) .
+  # See also [\#keep\_if](Array.downloaded.ruby_doc#method-i-keep_if).
   #
   # [\#filter\!](Array.downloaded.ruby_doc#method-i-filter-21) is an alias
-  # for [\#select\!](Array.downloaded.ruby_doc#method-i-select-21) .
+  # for [\#select\!](Array.downloaded.ruby_doc#method-i-select-21).
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -1876,7 +1876,7 @@ class Array < Object
   # Returns first `n` elements from the array.
   #
   # If a negative number is given, raises an
-  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html) .
+  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html).
   #
   # See also [\#drop](Array.downloaded.ruby_doc#method-i-drop)
   #
@@ -1916,7 +1916,7 @@ class Array < Object
 
   # Returns `self` .
   #
-  # If called on a subclass of [Array](Array.downloaded.ruby_doc) , converts
+  # If called on a subclass of [Array](Array.downloaded.ruby_doc), converts
   # the receiver to an [Array](Array.downloaded.ruby_doc) object.
   sig {returns(T::Array[Elem])}
   def to_a(); end
@@ -2026,7 +2026,7 @@ class Array < Object
   #
   # The selectors may be either integer indices or ranges.
   #
-  # See also [\#select](Array.downloaded.ruby_doc#method-i-select) .
+  # See also [\#select](Array.downloaded.ruby_doc#method-i-select).
   #
   # ```ruby
   # a = %w{ a b c d e f }
@@ -2064,7 +2064,7 @@ class Array < Object
   # [ "c", "d", "a" ] | [ "a", "b", "c" ]    #=> [ "c", "d", "a", "b" ]
   # ```
   #
-  # See also [\#union](Array.downloaded.ruby_doc#method-i-union) .
+  # See also [\#union](Array.downloaded.ruby_doc#method-i-union).
   sig do
     params(
         arg0: T::Array[Elem],

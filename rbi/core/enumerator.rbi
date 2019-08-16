@@ -293,7 +293,7 @@ class Enumerator < Object
   def peek(); end
 
   # Returns the next object as an array, similar to
-  # [\#next\_values](Enumerator.downloaded.ruby_doc#method-i-next_values) ,
+  # [\#next\_values](Enumerator.downloaded.ruby_doc#method-i-next_values),
   # but doesn’t move the internal position forward. If the position is
   # already at the end,
   # [StopIteration](https://ruby-doc.org/core-2.6.3/StopIteration.html) is
@@ -363,7 +363,7 @@ class Enumerator < Object
   # `obj`, and returns `obj`
   #
   # If no block is given, returns a new
-  # [Enumerator](Enumerator.downloaded.ruby_doc) .
+  # [Enumerator](Enumerator.downloaded.ruby_doc).
   #
   #
   # ```ruby

@@ -32,7 +32,7 @@ class Regexp < Object
   end
   def self.last_match(arg0=T.unsafe(nil)); end
 
-  # Try to convert *obj* into a [Regexp](Regexp.downloaded.ruby_doc) , using
+  # Try to convert *obj* into a [Regexp](Regexp.downloaded.ruby_doc), using
   # to\_regexp method. Returns converted regexp or nil if *obj* cannot be
   # converted for any reason.
   #
@@ -86,7 +86,7 @@ class Regexp < Object
   # Following a regular expression literal with the
   # [===](Regexp.downloaded.ruby_doc#method-i-3D-3D-3D) operator allows you
   # to compare against a
-  # [String](https://ruby-doc.org/core-2.6.3/String.html) .
+  # [String](https://ruby-doc.org/core-2.6.3/String.html).
   #
   # ```ruby
   # /^[a-z]*$/ === "HELLO" #=> false

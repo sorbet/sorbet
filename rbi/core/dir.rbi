@@ -200,7 +200,7 @@ class Dir < Object
   #
   #   - `[set]`
   #     Matches any one character in `set` . Behaves exactly like character
-  #     sets in [Regexp](https://ruby-doc.org/core-2.6.3/Regexp.html) ,
+  #     sets in [Regexp](https://ruby-doc.org/core-2.6.3/Regexp.html),
   #     including set negation ( `[^a-z]` ).
   #
   #   - `{p,q}`

@@ -1,7 +1,7 @@
 # typed: __STDLIB_INTERNAL
 
 # The [Kernel](Kernel) module is included by class
-# [Object](https://ruby-doc.org/core-2.6.3/Object.html) , so its methods
+# [Object](https://ruby-doc.org/core-2.6.3/Object.html), so its methods
 # are available in every Ruby object.
 #
 # The [Kernel](Kernel) instance methods are documented
@@ -646,7 +646,7 @@ module Kernel
   # containing `arg` .
   #
   # If `to_ary` or `to_a` returns something other than an
-  # [Array](https://ruby-doc.org/core-2.6.3/Array.html) , raises a
+  # [Array](https://ruby-doc.org/core-2.6.3/Array.html), raises a
   # `TypeError` .
   #
   # ```ruby
@@ -699,7 +699,7 @@ module Kernel
   #     numerator = integer part | fractional part | integer part , fractional part ;
   #     denominator = digits ;
   #     integer part = digits ;
-  #     fractional part = "." , digits , [ ( "e" | "E" ) , [ sign ] , digits ] ;
+  #     fractional part = "." , digits , [ ( "e" | "E" ), [ sign ] , digits ] ;
   #     imaginary unit = "i" | "I" | "j" | "J" ;
   #     sign = "-" | "+" ;
   #     digits = digit , { digit | "_" , digit };
@@ -775,10 +775,10 @@ module Kernel
   # converted by first trying `to_int`, then `to_i` .
   #
   # Passing `nil` raises a
-  # [TypeError](https://ruby-doc.org/core-2.6.3/TypeError.html) , while
+  # [TypeError](https://ruby-doc.org/core-2.6.3/TypeError.html), while
   # passing a [String](https://ruby-doc.org/core-2.6.3/String.html) that
   # does not conform with numeric representation raises an
-  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html) .
+  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html).
   # This behavior can be altered by passing `exception: false`, in this
   # case a not convertible value will return `nil` .
   #
@@ -803,7 +803,7 @@ module Kernel
   def Integer(arg, base=T.unsafe(nil)); end
 
   # Returns `x/y` or `arg` as a
-  # [Rational](https://ruby-doc.org/core-2.6.3/Rational.html) .
+  # [Rational](https://ruby-doc.org/core-2.6.3/Rational.html).
   #
   # ```ruby
   # Rational(2, 3)   #=> (2/3)
@@ -829,7 +829,7 @@ module Kernel
   #     numerator = integer part | fractional part | integer part , fractional part ;
   #     denominator = digits ;
   #     integer part = digits ;
-  #     fractional part = "." , digits , [ ( "e" | "E" ) , [ sign ] , digits ] ;
+  #     fractional part = "." , digits , [ ( "e" | "E" ), [ sign ] , digits ] ;
   #     sign = "-" | "+" ;
   #     digits = digit , { digit | "_" , digit } ;
   #     digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
@@ -871,7 +871,7 @@ module Kernel
   def String(x); end
 
   # Returns the called name of the current method as a
-  # [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html) . If called
+  # [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html). If called
   # outside of a method, it returns `nil` .
   sig {returns(T.nilable(Symbol))}
   def __callee__(); end
@@ -884,7 +884,7 @@ module Kernel
   def __dir__(); end
 
   # Returns the name at the definition of the current method as a
-  # [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html) . If called
+  # [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html). If called
   # outside of a method, it returns `nil` .
   sig {returns(T.nilable(Symbol))}
   def __method__(); end
@@ -1459,7 +1459,7 @@ module Kernel
   # rand(100)   #=> 12
   # ```
   #
-  # When `max` is a [Range](https://ruby-doc.org/core-2.6.3/Range.html) ,
+  # When `max` is a [Range](https://ruby-doc.org/core-2.6.3/Range.html),
   # `rand` returns a random number where range.member?(number) == true.
   #
   # Negative or floating point values for `max` are allowed, but may give

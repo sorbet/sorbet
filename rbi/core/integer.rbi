@@ -3,7 +3,7 @@
 # Holds [Integer](Integer) values. You cannot add a
 # singleton method to an [Integer](Integer) object,
 # any attempt to do so will raise a
-# [TypeError](https://ruby-doc.org/core-2.6.3/TypeError.html) .
+# [TypeError](https://ruby-doc.org/core-2.6.3/TypeError.html).
 class Integer < Numeric
   # Returns `int` modulo `other` .
   #
@@ -93,8 +93,8 @@ class Integer < Numeric
 
   # Raises `int` to the power of `numeric`, which may be negative or
   # fractional. The result may be an [Integer](Integer.downloaded.ruby_doc)
-  # , a [Float](https://ruby-doc.org/core-2.6.3/Float.html) , a
-  # [Rational](https://ruby-doc.org/core-2.6.3/Rational.html) , or a complex
+  # , a [Float](https://ruby-doc.org/core-2.6.3/Float.html), a
+  # [Rational](https://ruby-doc.org/core-2.6.3/Rational.html), or a complex
   # number.
   #
   # ```ruby
@@ -516,7 +516,7 @@ class Integer < Numeric
   # ```
   #
   # [\#magnitude](Integer.downloaded.ruby_doc#method-i-magnitude) is an
-  # alias for [\#abs](Integer.downloaded.ruby_doc#method-i-abs) .
+  # alias for [\#abs](Integer.downloaded.ruby_doc#method-i-abs).
   sig {returns(Integer)}
   def abs(); end
 
@@ -840,7 +840,7 @@ class Integer < Numeric
   sig {returns(String)}
   def inspect(); end
 
-  # Since `int` is already an [Integer](Integer.downloaded.ruby_doc) , this
+  # Since `int` is already an [Integer](Integer.downloaded.ruby_doc), this
   # always returns `true` .
   sig {returns(TrueClass)}
   def integer?(); end
@@ -871,7 +871,7 @@ class Integer < Numeric
   # ```
   #
   # [\#magnitude](Integer.downloaded.ruby_doc#method-i-magnitude) is an
-  # alias for [\#abs](Integer.downloaded.ruby_doc#method-i-abs) .
+  # alias for [\#abs](Integer.downloaded.ruby_doc#method-i-abs).
   sig {returns(Integer)}
   def magnitude(); end
 
@@ -1121,24 +1121,24 @@ class Integer < Numeric
 
   # Converts `int` to a [Float](https://ruby-doc.org/core-2.6.3/Float.html)
   # . If `int` doesn't fit in a
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html) , the result is
+  # [Float](https://ruby-doc.org/core-2.6.3/Float.html), the result is
   # infinity.
   sig {returns(Float)}
   def to_f(); end
 
-  # Since `int` is already an [Integer](Integer.downloaded.ruby_doc) ,
+  # Since `int` is already an [Integer](Integer.downloaded.ruby_doc),
   # returns `self` .
   #
   # [to\_int](Integer.downloaded.ruby_doc#method-i-to_int) is an alias for
-  # [to\_i](Integer.downloaded.ruby_doc#method-i-to_i) .
+  # [to\_i](Integer.downloaded.ruby_doc#method-i-to_i).
   sig {returns(Integer)}
   def to_i(); end
 
-  # Since `int` is already an [Integer](Integer.downloaded.ruby_doc) ,
+  # Since `int` is already an [Integer](Integer.downloaded.ruby_doc),
   # returns `self` .
   #
   # [to\_int](Integer.downloaded.ruby_doc#method-i-to_int) is an alias for
-  # [to\_i](Integer.downloaded.ruby_doc#method-i-to_i) .
+  # [to\_i](Integer.downloaded.ruby_doc#method-i-to_i).
   sig {returns(Integer)}
   def to_int(); end
 

@@ -6,7 +6,7 @@
 # rational a/1 mathematically.
 #
 # In Ruby, you can create rational objects with the Kernel\#Rational,
-# [\#to\_r](Rational#method-i-to_r) , or rationalize
+# [\#to\_r](Rational#method-i-to_r), or rationalize
 # methods or by suffixing `r` to a literal. The return values will be
 # irreducible fractions.
 #
@@ -445,7 +445,7 @@ class Rational < Numeric
   #     (-1/2r).abs   #=> (1/2)
   #
   # [\#magnitude](Rational.downloaded.ruby_doc#method-i-magnitude) is an
-  # alias for [\#abs](Rational.downloaded.ruby_doc#method-i-abs) .
+  # alias for [\#abs](Rational.downloaded.ruby_doc#method-i-abs).
   sig {returns(Rational)}
   def abs(); end
 
@@ -574,7 +574,7 @@ class Rational < Numeric
   def equal?(arg0); end
 
   # Performs division and returns the value as a
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html) .
+  # [Float](https://ruby-doc.org/core-2.6.3/Float.html).
   #
   # ```ruby
   # Rational(2, 3).fdiv(1)       #=> 0.6666666666666666
@@ -817,7 +817,7 @@ class Rational < Numeric
   def to_c(); end
 
   # Returns the value as a
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html) .
+  # [Float](https://ruby-doc.org/core-2.6.3/Float.html).
   #
   # ```ruby
   # Rational(2).to_f      #=> 2.0
@@ -831,7 +831,7 @@ class Rational < Numeric
   # Returns the truncated value as an integer.
   #
   # Equivalent to
-  # [\#truncate](Rational.downloaded.ruby_doc#method-i-truncate) .
+  # [\#truncate](Rational.downloaded.ruby_doc#method-i-truncate).
   #
   # ```ruby
   # Rational(2, 3).to_i    #=> 0

@@ -23,7 +23,7 @@
 #
 # Some objects cannot be dumped: if the objects to be dumped include
 # bindings, procedure or method objects, instances of class
-# [IO](https://ruby-doc.org/core-2.6.3/IO.html) , or singleton objects, a
+# [IO](https://ruby-doc.org/core-2.6.3/IO.html), or singleton objects, a
 # [TypeError](https://ruby-doc.org/core-2.6.3/TypeError.html) will be
 # raised.
 #
@@ -50,9 +50,9 @@
 #
 # If you need to deserialize untrusted data, use JSON or another
 # serialization format that is only able to load simple, ‘primitive’ types
-# such as [String](https://ruby-doc.org/core-2.6.3/String.html) ,
-# [Array](https://ruby-doc.org/core-2.6.3/Array.html) ,
-# [Hash](https://ruby-doc.org/core-2.6.3/Hash.html) , etc. Never allow
+# such as [String](https://ruby-doc.org/core-2.6.3/String.html),
+# [Array](https://ruby-doc.org/core-2.6.3/Array.html),
+# [Hash](https://ruby-doc.org/core-2.6.3/Hash.html), etc. Never allow
 # user input to specify arbitrary types to deserialize into.
 #
 #
@@ -131,7 +131,7 @@ module Marshal
 
   # Serializes obj and all descendant objects. If anIO is specified, the
   # serialized data will be written to it, otherwise the data will be
-  # returned as a [String](https://ruby-doc.org/core-2.6.3/String.html) . If
+  # returned as a [String](https://ruby-doc.org/core-2.6.3/String.html). If
   # limit is specified, the traversal of subobjects will be limited to that
   # depth. If limit is negative, no checking of depth will be performed.
   #
@@ -160,20 +160,20 @@ module Marshal
   #   - anonymous Class/Module.
   #
   #   - objects which are related to system (ex:
-  #     [Dir](https://ruby-doc.org/core-2.6.3/Dir.html) ,
-  #     [File::Stat](https://ruby-doc.org/core-2.6.3/File/Stat.html) ,
-  #     [IO](https://ruby-doc.org/core-2.6.3/IO.html) ,
-  #     [File](https://ruby-doc.org/core-2.6.3/File.html) , Socket and so
+  #     [Dir](https://ruby-doc.org/core-2.6.3/Dir.html),
+  #     [File::Stat](https://ruby-doc.org/core-2.6.3/File/Stat.html),
+  #     [IO](https://ruby-doc.org/core-2.6.3/IO.html),
+  #     [File](https://ruby-doc.org/core-2.6.3/File.html), Socket and so
   #     on)
   #
   #   - an instance of
-  #     [MatchData](https://ruby-doc.org/core-2.6.3/MatchData.html) ,
-  #     [Data](https://ruby-doc.org/core-2.6.3/Data.html) ,
-  #     [Method](https://ruby-doc.org/core-2.6.3/Method.html) ,
+  #     [MatchData](https://ruby-doc.org/core-2.6.3/MatchData.html),
+  #     [Data](https://ruby-doc.org/core-2.6.3/Data.html),
+  #     [Method](https://ruby-doc.org/core-2.6.3/Method.html),
   #     [UnboundMethod](https://ruby-doc.org/core-2.6.3/UnboundMethod.html)
-  #     , [Proc](https://ruby-doc.org/core-2.6.3/Proc.html) ,
-  #     [Thread](https://ruby-doc.org/core-2.6.3/Thread.html) ,
-  #     [ThreadGroup](https://ruby-doc.org/core-2.6.3/ThreadGroup.html) ,
+  #     , [Proc](https://ruby-doc.org/core-2.6.3/Proc.html),
+  #     [Thread](https://ruby-doc.org/core-2.6.3/Thread.html),
+  #     [ThreadGroup](https://ruby-doc.org/core-2.6.3/ThreadGroup.html),
   #     [Continuation](https://ruby-doc.org/core-2.6.3/Continuation.html)
   #
   #   - objects which define singleton methods

@@ -33,7 +33,7 @@ class Method < Object
   def <<(g); end
 
   # Invokes the method with `obj` as the parameter like
-  # [call](Method.downloaded.ruby_doc#method-i-call) . This allows a method
+  # [call](Method.downloaded.ruby_doc#method-i-call). This allows a method
   # object to be the target of a `when` clause in a case statement.
   #
   # ```ruby

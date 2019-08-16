@@ -288,7 +288,7 @@ module Enumerable
   # [:foo, :bar].filter { |x| x == :foo }   #=> [:foo]
   # ```
   #
-  # See also [\#reject](Enumerable.downloaded.ruby_doc#method-i-reject) .
+  # See also [\#reject](Enumerable.downloaded.ruby_doc#method-i-reject).
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -860,7 +860,7 @@ module Enumerable
   # (1..10).sort { |a, b| b <=> a }  #=> [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
   # ```
   #
-  # See also [\#sort\_by](Enumerable.downloaded.ruby_doc#method-i-sort_by) .
+  # See also [\#sort\_by](Enumerable.downloaded.ruby_doc#method-i-sort_by).
   # It implements a Schwartzian transform which is useful when key
   # computation or comparison is expensive.
   sig {returns(T::Array[Elem])}
@@ -1103,7 +1103,7 @@ module Enumerable
   # [:foo, :bar].filter { |x| x == :foo }   #=> [:foo]
   # ```
   #
-  # See also [\#reject](Enumerable.downloaded.ruby_doc#method-i-reject) .
+  # See also [\#reject](Enumerable.downloaded.ruby_doc#method-i-reject).
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -1127,8 +1127,8 @@ module Enumerable
 
   # Returns a lazy enumerator, whose methods map/collect,
   # flat\_map/collect\_concat, select/find\_all, reject, grep,
-  # [\#grep\_v](Enumerable.downloaded.ruby_doc#method-i-grep_v) , zip, take,
-  # [\#take\_while](Enumerable.downloaded.ruby_doc#method-i-take_while) ,
+  # [\#grep\_v](Enumerable.downloaded.ruby_doc#method-i-grep_v), zip, take,
+  # [\#take\_while](Enumerable.downloaded.ruby_doc#method-i-take_while),
   # drop, and
   # [\#drop\_while](Enumerable.downloaded.ruby_doc#method-i-drop_while)
   # enumerate values only on an as-needed basis. However, if a block is

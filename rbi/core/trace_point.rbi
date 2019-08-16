@@ -11,7 +11,7 @@ class TracePoint < Object
   def initialize(*events, &blk); end
 
   # Returns internal information of
-  # [TracePoint](TracePoint.downloaded.ruby_doc) .
+  # [TracePoint](TracePoint.downloaded.ruby_doc).
   #
   # The contents of the returned value are implementation specific. It may
   # be changed in future.
@@ -111,7 +111,7 @@ class TracePoint < Object
 
   # Return the trace object during event
   #
-  # Same as [\#binding](TracePoint.downloaded.ruby_doc#method-i-binding) :
+  # Same as [\#binding](TracePoint.downloaded.ruby_doc#method-i-binding):
   #
   # ```ruby
   # trace.binding.eval('self')

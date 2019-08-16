@@ -103,7 +103,7 @@ class Symbol < Object
 
   # Case-insensitive version of `Symbol#<=>` . Currently, case-insensitivity
   # only works on characters A-Z/a-z, not all of Unicode. This is different
-  # from [\#casecmp?](Symbol.downloaded.ruby_doc#method-i-casecmp-3F) .
+  # from [\#casecmp?](Symbol.downloaded.ruby_doc#method-i-casecmp-3F).
   #
   # ```ruby
   # :aBcDeF.casecmp(:abcde)     #=> 1

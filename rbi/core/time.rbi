@@ -15,7 +15,7 @@
 #
 # Since Ruby 1.9.2, [Time](Time) implementation uses a
 # signed 63 bit integer, Bignum or
-# [Rational](https://ruby-doc.org/core-2.6.3/Rational.html) . The integer
+# [Rational](https://ruby-doc.org/core-2.6.3/Rational.html). The integer
 # is a number of nanoseconds since the *Epoch* which can represent
 # 1823-11-12 to 2116-02-20. When Bignum or
 # [Rational](https://ruby-doc.org/core-2.6.3/Rational.html) is used
@@ -27,7 +27,7 @@
 #
 #
 # You can create a new instance of [Time](Time) with
-# [::new](Time#method-c-new) . This will use the
+# [::new](Time#method-c-new). This will use the
 # current system time. [::now](Time#method-c-now) is
 # an alias for this. You can also pass parts of the time to
 # [::new](Time#method-c-new) such as year, month,
@@ -55,7 +55,7 @@
 # Time.new(2002, 10, 31, 2, 2, 2, tz) #=> 2002-10-31 02:02:02 +0200
 # ```
 #
-# You can also use [::gm](Time#method-c-gm) ,
+# You can also use [::gm](Time#method-c-gm),
 # [::local](Time#method-c-local) and
 # [::utc](Time#method-c-utc) to infer GMT, local and
 # UTC timezones instead of using the current system setting.
@@ -63,7 +63,7 @@
 # You can also create a new time using
 # [::at](Time#method-c-at) which takes the number of
 # seconds (or fraction of seconds) since the [Unix
-# Epoch](http://en.wikipedia.org/wiki/Unix_time) .
+# Epoch](http://en.wikipedia.org/wiki/Unix_time).
 #
 # ```ruby
 # Time.at(628232400) #=> 1989-11-28 00:00:00 -0500
@@ -135,23 +135,23 @@
 # ignored. Time-like argument to these methods is similar to a
 # [Time](Time) object in UTC without sub-second; it
 # has attribute readers for the parts, e.g.
-# [year](Time#method-i-year) ,
-# [month](Time#method-i-month) , and so on, and epoch
-# time readers, [to\_i](Time#method-i-to_i) . The
+# [year](Time#method-i-year),
+# [month](Time#method-i-month), and so on, and epoch
+# time readers, [to\_i](Time#method-i-to_i). The
 # sub-second attributes are fixed as 0, and
-# [utc\_offset](Time#method-i-utc_offset) ,
-# [zone](Time#method-i-zone) ,
-# [isdst](Time#method-i-isdst) , and their aliases are
+# [utc\_offset](Time#method-i-utc_offset),
+# [zone](Time#method-i-zone),
+# [isdst](Time#method-i-isdst), and their aliases are
 # same as a [Time](Time) object in UTC. Also to\_time,
 # \#+, and \#- methods are defined.
 #
 # The `name` method is used for marshaling. If this method is not defined
 # on a timezone object, [Time](Time) objects using
 # that timezone object can not be dumped by
-# [Marshal](https://ruby-doc.org/core-2.6.3/Marshal.html) .
+# [Marshal](https://ruby-doc.org/core-2.6.3/Marshal.html).
 #
 # The `abbr` method is used by ‘%Z’ in
-# [strftime](Time#method-i-strftime) .
+# [strftime](Time#method-i-strftime).
 #
 #
 # At loading marshaled data, a timezone name will be converted to a
@@ -170,10 +170,10 @@ class Time < Object
   # given by `time`, the given number of `seconds_with_frac`, or `seconds`
   # and `microseconds_with_frac` since the Epoch. `seconds_with_frac` and
   # `microseconds_with_frac` can be an
-  # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html) ,
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html) ,
-  # [Rational](https://ruby-doc.org/core-2.6.3/Rational.html) , or other
-  # [Numeric](https://ruby-doc.org/core-2.6.3/Numeric.html) . non-portable
+  # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html),
+  # [Float](https://ruby-doc.org/core-2.6.3/Float.html),
+  # [Rational](https://ruby-doc.org/core-2.6.3/Rational.html), or other
+  # [Numeric](https://ruby-doc.org/core-2.6.3/Numeric.html). non-portable
   # feature allows the offset to be negative on some systems.
   #
   # If `in` argument is given, the result is in that timezone or UTC offset,
@@ -211,7 +211,7 @@ class Time < Object
   # (0..23). Raises an
   # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html) if
   # any values are out of range. Will also accept ten arguments in the order
-  # output by [\#to\_a](Time.downloaded.ruby_doc#method-i-to_a) .
+  # output by [\#to\_a](Time.downloaded.ruby_doc#method-i-to_a).
   #
   # `sec_with_frac` and `usec_with_frac` can have a fractional part.
   #
@@ -233,7 +233,7 @@ class Time < Object
   end
   def self.gm(year, month=T.unsafe(nil), day=T.unsafe(nil), hour=T.unsafe(nil), min=T.unsafe(nil), sec=T.unsafe(nil), usec_with_frac=T.unsafe(nil)); end
 
-  # Same as [::gm](Time.downloaded.ruby_doc#method-c-gm) , but interprets
+  # Same as [::gm](Time.downloaded.ruby_doc#method-c-gm), but interprets
   # the values in the local time zone.
   #
   # ```ruby
@@ -271,7 +271,7 @@ class Time < Object
   # (0..23). Raises an
   # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html) if
   # any values are out of range. Will also accept ten arguments in the order
-  # output by [\#to\_a](Time.downloaded.ruby_doc#method-i-to_a) .
+  # output by [\#to\_a](Time.downloaded.ruby_doc#method-i-to_a).
   #
   # `sec_with_frac` and `usec_with_frac` can have a fractional part.
   #
@@ -700,7 +700,7 @@ class Time < Object
   # nanoseconds since the Epoch.
   #
   # The more accurate value is returned by
-  # [nsec](Time.downloaded.ruby_doc#method-i-nsec) .
+  # [nsec](Time.downloaded.ruby_doc#method-i-nsec).
   sig {returns(Integer)}
   def nsec(); end
 
@@ -791,7 +791,7 @@ class Time < Object
   # IEEE 754 double is not accurate enough to represent the rational number.
   #
   # The more accurate value is returned by
-  # [subsec](Time.downloaded.ruby_doc#method-i-subsec) .
+  # [subsec](Time.downloaded.ruby_doc#method-i-subsec).
   sig {returns(Numeric)}
   def subsec(); end
 
@@ -926,7 +926,7 @@ class Time < Object
   # nanoseconds since the Epoch.
   #
   # The more accurate value is returned by
-  # [nsec](Time.downloaded.ruby_doc#method-i-nsec) .
+  # [nsec](Time.downloaded.ruby_doc#method-i-nsec).
   sig {returns(Numeric)}
   def tv_nsec(); end
 
@@ -1060,7 +1060,7 @@ class Time < Object
   sig {returns(String)}
   def zone(); end
 
-  # Same as [::gm](Time.downloaded.ruby_doc#method-c-gm) , but interprets
+  # Same as [::gm](Time.downloaded.ruby_doc#method-c-gm), but interprets
   # the values in the local time zone.
   #
   # ```ruby

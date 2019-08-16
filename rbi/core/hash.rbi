@@ -46,7 +46,7 @@
 # Hashes have a *default value* that is returned when accessing keys that
 # do not exist in the hash. If no default is set `nil` is used. You can
 # set the default value by sending it as an argument to
-# [::new](Hash#method-c-new) :
+# [::new](Hash#method-c-new):
 #
 # ```ruby
 # grades = Hash.new(0)
@@ -600,7 +600,7 @@ class Hash < Object
   #
   # If no block is given, an enumerator is returned instead.
   #
-  # See also [\#select\!](Hash.downloaded.ruby_doc#method-i-select-21) .
+  # See also [\#select\!](Hash.downloaded.ruby_doc#method-i-select-21).
   sig do
     params(
         blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
@@ -669,7 +669,7 @@ class Hash < Object
   # ```
   #
   # [\#length](Hash.downloaded.ruby_doc#method-i-length) is an alias for
-  # [\#size](Hash.downloaded.ruby_doc#method-i-size) .
+  # [\#size](Hash.downloaded.ruby_doc#method-i-size).
   sig {returns(Integer)}
   def length(); end
 
@@ -808,7 +808,7 @@ class Hash < Object
   # ```
   #
   # [\#filter](Hash.downloaded.ruby_doc#method-i-filter) is an alias for
-  # [\#select](Hash.downloaded.ruby_doc#method-i-select) .
+  # [\#select](Hash.downloaded.ruby_doc#method-i-select).
   sig do
     params(
         blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
@@ -817,11 +817,11 @@ class Hash < Object
   end
   def select(&blk); end
 
-  # Equivalent to [\#keep\_if](Hash.downloaded.ruby_doc#method-i-keep_if) ,
+  # Equivalent to [\#keep\_if](Hash.downloaded.ruby_doc#method-i-keep_if),
   # but returns `nil` if no changes were made.
   #
   # [\#filter\!](Hash.downloaded.ruby_doc#method-i-filter-21) is an alias
-  # for [\#select\!](Hash.downloaded.ruby_doc#method-i-select-21) .
+  # for [\#select\!](Hash.downloaded.ruby_doc#method-i-select-21).
   sig do
     params(
         blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
@@ -852,7 +852,7 @@ class Hash < Object
   # ```
   #
   # [\#length](Hash.downloaded.ruby_doc#method-i-length) is an alias for
-  # [\#size](Hash.downloaded.ruby_doc#method-i-size) .
+  # [\#size](Hash.downloaded.ruby_doc#method-i-size).
   sig {returns(Integer)}
   def size(); end
 

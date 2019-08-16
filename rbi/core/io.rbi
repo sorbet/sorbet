@@ -7,7 +7,7 @@
 #
 # Many of the examples in this section use the
 # [File](https://ruby-doc.org/core-2.6.3/File.html) class, the only
-# standard subclass of [IO](IO) . The two classes are
+# standard subclass of [IO](IO). The two classes are
 # closely associated. Like the
 # [File](https://ruby-doc.org/core-2.6.3/File.html) class, the Socket
 # library subclasses from [IO](IO) (such as TCPSocket
@@ -35,9 +35,9 @@
 # [Kernel\#open](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-open)
 # for details of the various command formats described above.
 #
-# [::popen](IO#method-c-popen) , the Open3 library, or
+# [::popen](IO#method-c-popen), the Open3 library, or
 # Process\#spawn may also be used to communicate with subprocesses through
-# an [IO](IO) .
+# an [IO](IO).
 #
 # Ruby will convert pathnames between different operating system
 # conventions if possible. For instance, on a Windows system the filename
@@ -217,7 +217,7 @@ class IO < Object
   #
   #   - `TypeError`
   #     Either *advice* was not a
-  #     [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html) , or one of
+  #     [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html), or one of
   #     the other arguments was not an `Integer` .
   #
   #   - `RangeError`
@@ -807,7 +807,7 @@ class IO < Object
   # If *length* is zero, it returns an empty string ( `""` ).
   #
   # If the optional *outbuf* argument is present, it must reference a
-  # [String](https://ruby-doc.org/core-2.6.3/String.html) , which will
+  # [String](https://ruby-doc.org/core-2.6.3/String.html), which will
   # receive the data. The *outbuf* will contain only the received data after
   # the method call even if it is not empty at the beginning.
   #
@@ -848,9 +848,9 @@ class IO < Object
   # *ios* is in non-blocking mode. (This method is non-blocking flag
   # insensitive as other methods.) If you need the behavior like a single
   # read(2) system call, consider
-  # [readpartial](IO.downloaded.ruby_doc#method-i-readpartial) ,
-  # [read\_nonblock](IO.downloaded.ruby_doc#method-i-read_nonblock) , and
-  # [sysread](IO.downloaded.ruby_doc#method-i-sysread) .
+  # [readpartial](IO.downloaded.ruby_doc#method-i-readpartial),
+  # [read\_nonblock](IO.downloaded.ruby_doc#method-i-read_nonblock), and
+  # [sysread](IO.downloaded.ruby_doc#method-i-sysread).
   sig do
     params(
         length: Integer,
@@ -864,7 +864,7 @@ class IO < Object
   # after O\_NONBLOCK is set for the underlying file descriptor.
   #
   # If the optional *outbuf* argument is present, it must reference a
-  # [String](https://ruby-doc.org/core-2.6.3/String.html) , which will
+  # [String](https://ruby-doc.org/core-2.6.3/String.html), which will
   # receive the data. The *outbuf* will contain only the received data after
   # the method call even if it is not empty at the beginning.
   #
@@ -927,7 +927,7 @@ class IO < Object
   # [IO::WaitReadable](https://ruby-doc.org/core-2.6.3/IO/WaitReadable.html)
   # exception, but return the symbol `:wait_readable` instead. At EOF, it
   # will return nil instead of raising
-  # [EOFError](https://ruby-doc.org/core-2.6.3/EOFError.html) .
+  # [EOFError](https://ruby-doc.org/core-2.6.3/EOFError.html).
   sig do
     params(
         len: Integer,
@@ -1001,7 +1001,7 @@ class IO < Object
   # available.
   #
   # If the optional *outbuf* argument is present, it must reference a
-  # [String](https://ruby-doc.org/core-2.6.3/String.html) , which will
+  # [String](https://ruby-doc.org/core-2.6.3/String.html), which will
   # receive the data. The *outbuf* will contain only the received data after
   # the method call even if it is not empty at the beginning.
   #
@@ -1020,13 +1020,13 @@ class IO < Object
   # When readpartial blocks, it waits data or EOF on the stream. If some
   # data is reached, readpartial returns with the data. If EOF is reached,
   # readpartial raises
-  # [EOFError](https://ruby-doc.org/core-2.6.3/EOFError.html) .
+  # [EOFError](https://ruby-doc.org/core-2.6.3/EOFError.html).
   #
   # When readpartial doesn’t blocks, it returns or raises immediately. If
   # the byte buffer is not empty, it returns the data in the buffer.
   # Otherwise if the stream has some content, it returns the data in the
   # stream. Otherwise if the stream is reached to EOF, it raises
-  # [EOFError](https://ruby-doc.org/core-2.6.3/EOFError.html) .
+  # [EOFError](https://ruby-doc.org/core-2.6.3/EOFError.html).
   #
   # ```ruby
   # r, w = IO.pipe           #               buffer          pipe content
@@ -1200,7 +1200,7 @@ class IO < Object
   # may get unpredictable results.
   #
   # If the optional *outbuf* argument is present, it must reference a
-  # [String](https://ruby-doc.org/core-2.6.3/String.html) , which will
+  # [String](https://ruby-doc.org/core-2.6.3/String.html), which will
   # receive the data. The *outbuf* will contain only the received data after
   # the method call even if it is not empty at the beginning.
   #
@@ -1366,7 +1366,7 @@ class IO < Object
   #
   # If optional arguments are not given, the start position of the copy is
   # the beginning of the filename or the current file offset of the
-  # [IO](IO.downloaded.ruby_doc) . The end position of the copy is the end
+  # [IO](IO.downloaded.ruby_doc). The end position of the copy is the end
   # of file.
   #
   # If *copy\_length* is given, No more than *copy\_length* bytes are
@@ -1375,7 +1375,7 @@ class IO < Object
   # If *src\_offset* is given, it specifies the start position of the copy.
   #
   # When *src\_offset* is specified and *src* is an
-  # [IO](IO.downloaded.ruby_doc) ,
+  # [IO](IO.downloaded.ruby_doc),
   # [::copy\_stream](IO.downloaded.ruby_doc#method-c-copy_stream) doesn’t
   # move the current file offset.
   sig do

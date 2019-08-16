@@ -26,7 +26,7 @@
 #
 # A variety of strategies can be used to provide useful portions of the
 # standard library to subclasses of
-# [BasicObject](BasicObject) . A subclass could
+# [BasicObject](BasicObject). A subclass could
 # `include Kernel` to obtain `puts`, `exit`, etc. A custom Kernel-like
 # module could be created and included or delegation can be used via
 # [method\_missing](BasicObject#method-i-method_missing)

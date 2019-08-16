@@ -552,7 +552,7 @@ class Module < Object
   # found, it returns the loaded class. It therefore implements an autoload
   # feature similar to
   # [Kernel\#autoload](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-autoload)
-  # and [\#autoload](Module.downloaded.ruby_doc#method-i-autoload) .
+  # and [\#autoload](Module.downloaded.ruby_doc#method-i-autoload).
   #
   # ```ruby
   # def Object.const_missing(name)

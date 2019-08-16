@@ -2,7 +2,7 @@
 
 # A `Proc` object is an encapsulation of a block of code, which can be
 # stored in a local variable, passed to a method or another
-# [Proc](Proc) , and can be called.
+# [Proc](Proc), and can be called.
 # [Proc](Proc) is an essential concept in Ruby and a
 # core of its functional programming features.
 #
@@ -43,7 +43,7 @@
 #   - Use the
 #     [Kernel\#proc](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-proc)
 #     method as a shorthand of
-#     [::new](Proc#method-c-new) :
+#     [::new](Proc#method-c-new):
 #
 #     ```ruby
 #     proc2 = proc {|x| x**2 }
@@ -199,9 +199,9 @@
 # ```
 #
 # Of the Ruby core classes, this method is implemented by
-# [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html) ,
-# [Method](https://ruby-doc.org/core-2.6.3/Method.html) , and
-# [Hash](https://ruby-doc.org/core-2.6.3/Hash.html) .
+# [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html),
+# [Method](https://ruby-doc.org/core-2.6.3/Method.html), and
+# [Hash](https://ruby-doc.org/core-2.6.3/Hash.html).
 #
 #     :to_s.to_proc.call(1)           #=> "1"
 #     [1, 2].map(&:to_s)              #=> ["1", "2"]
@@ -290,7 +290,7 @@ class Proc < Object
   # a_proc.call(1)   # ArgumentError: wrong number of arguments (given 1, expected 2)
   # ```
   #
-  # See also [\#lambda?](Proc.downloaded.ruby_doc#method-i-lambda-3F) .
+  # See also [\#lambda?](Proc.downloaded.ruby_doc#method-i-lambda-3F).
   sig do
     params(
         arg0: BasicObject,
@@ -327,7 +327,7 @@ class Proc < Object
   # a_proc.call(1)   # ArgumentError: wrong number of arguments (given 1, expected 2)
   # ```
   #
-  # See also [\#lambda?](Proc.downloaded.ruby_doc#method-i-lambda-3F) .
+  # See also [\#lambda?](Proc.downloaded.ruby_doc#method-i-lambda-3F).
   sig do
     params(
         arg0: BasicObject,

@@ -6,7 +6,7 @@
 # candidate for Ruby's [Thread](Thread) class.
 #
 # For example, we can create a new thread separate from the main thread's
-# execution using [::new](Thread#method-c-new) .
+# execution using [::new](Thread#method-c-new).
 #
 # ```ruby
 # thr = Thread.new { puts "Whats the big deal" }
@@ -14,7 +14,7 @@
 #
 # Then we are able to pause the execution of the main thread and allow our
 # new thread to finish, using
-# [join](Thread#method-i-join) :
+# [join](Thread#method-i-join):
 #
 # ```ruby
 # thr.join #=> "Whats the big deal"
@@ -41,9 +41,9 @@
 #
 #
 # In order to create new threads, Ruby provides
-# [::new](Thread#method-c-new) ,
-# [::start](Thread#method-c-start) , and
-# [::fork](Thread#method-c-fork) . A block must be
+# [::new](Thread#method-c-new),
+# [::start](Thread#method-c-start), and
+# [::fork](Thread#method-c-fork). A block must be
 # provided with each of these methods, otherwise a
 # [ThreadError](https://ruby-doc.org/core-2.6.3/ThreadError.html) will be
 # raised.
@@ -51,22 +51,22 @@
 # When subclassing the [Thread](Thread) class, the
 # `initialize` method of your subclass will be ignored by
 # [::start](Thread#method-c-start) and
-# [::fork](Thread#method-c-fork) . Otherwise, be sure
+# [::fork](Thread#method-c-fork). Otherwise, be sure
 # to call super in your `initialize` method.
 #
 #
 # For terminating threads, Ruby provides a variety of ways to do this.
 #
-# The class method [::kill](Thread#method-c-kill) , is
+# The class method [::kill](Thread#method-c-kill), is
 # meant to exit a given thread:
 #
 #     thr = Thread.new { ... }
 #     Thread.kill(thr) # sends exit() to thr
 #
 # Alternatively, you can use the instance method
-# [exit](Thread#method-i-exit) , or any of its aliases
+# [exit](Thread#method-i-exit), or any of its aliases
 # [kill](Thread#method-i-kill) or
-# [terminate](Thread#method-i-terminate) .
+# [terminate](Thread#method-i-terminate).
 #
 # ```ruby
 # thr.exit
@@ -98,7 +98,7 @@
 # Each fiber has its own bucket for
 # [\#\[\]](Thread#method-i-5B-5D) storage. When you
 # set a new fiber-local it is only accessible within this
-# [Fiber](https://ruby-doc.org/core-2.6.3/Fiber.html) . To illustrate:
+# [Fiber](https://ruby-doc.org/core-2.6.3/Fiber.html). To illustrate:
 #
 # ```ruby
 # Thread.new {
@@ -160,7 +160,7 @@
 # . This option is `false` by default, meaning that any unhandled
 # exception will cause the thread to terminate silently when waited on by
 # either [join](Thread#method-i-join) or
-# [value](Thread#method-i-value) . You can change this
+# [value](Thread#method-i-value). You can change this
 # default by either
 # [abort\_on\_exception=](Thread#method-i-abort_on_exception-3D)
 # `true` or setting $DEBUG to `true` .
@@ -173,17 +173,17 @@
 # Ruby provides a few ways to support scheduling threads in your program.
 #
 # The first way is by using the class method
-# [::stop](Thread#method-c-stop) , to put the current
+# [::stop](Thread#method-c-stop), to put the current
 # running thread to sleep and schedule the execution of another thread.
 #
 # Once a thread is asleep, you can use the instance method
 # [wakeup](Thread#method-i-wakeup) to mark your thread
 # as eligible for scheduling.
 #
-# You can also try [::pass](Thread#method-c-pass) ,
+# You can also try [::pass](Thread#method-c-pass),
 # which attempts to pass execution to another thread but is dependent on
 # the OS whether a running thread will switch or not. The same goes for
-# [priority](Thread#method-i-priority) , which lets
+# [priority](Thread#method-i-priority), which lets
 # you hint to the thread scheduler which threads you want to take
 # precedence when passing execution. This method is also dependent on the
 # OS and may be ignored on some platforms.
@@ -201,7 +201,7 @@ class Thread < Object
   # Attribute Assignment—Sets or creates the value of a fiber-local
   # variable, using either a symbol or a string.
   #
-  # See also [\#\[\]](Thread.downloaded.ruby_doc#method-i-5B-5D) .
+  # See also [\#\[\]](Thread.downloaded.ruby_doc#method-i-5B-5D).
   #
   # For thread-local variables, please see
   # [thread\_variable\_set](Thread.downloaded.ruby_doc#method-i-thread_variable_set)
@@ -218,7 +218,7 @@ class Thread < Object
   #
   # If this thread is already marked to be killed,
   # [exit](Thread.downloaded.ruby_doc#method-i-exit) returns the
-  # [Thread](Thread.downloaded.ruby_doc) .
+  # [Thread](Thread.downloaded.ruby_doc).
   #
   # If this is the main thread, or the last thread, exits the process.
   sig {returns(T.nilable(Thread))}
@@ -283,7 +283,7 @@ class Thread < Object
   #
   # If this thread is already marked to be killed,
   # [exit](Thread.downloaded.ruby_doc#method-i-exit) returns the
-  # [Thread](Thread.downloaded.ruby_doc) .
+  # [Thread](Thread.downloaded.ruby_doc).
   #
   # If this is the main thread, or the last thread, exits the process.
   sig {returns(T.nilable(Thread))}
@@ -472,7 +472,7 @@ class Thread < Object
   # ```
   #
   # See also the instance method
-  # [wakeup](Thread.downloaded.ruby_doc#method-i-wakeup) .
+  # [wakeup](Thread.downloaded.ruby_doc#method-i-wakeup).
   sig {returns(Thread)}
   def run; end
 
@@ -496,7 +496,7 @@ class Thread < Object
   # ```
   #
   # See also [alive?](Thread.downloaded.ruby_doc#method-i-alive-3F) and
-  # [status](Thread.downloaded.ruby_doc#method-i-status) .
+  # [status](Thread.downloaded.ruby_doc#method-i-status).
   sig {returns(T::Boolean)}
   def stop?; end
 
@@ -504,7 +504,7 @@ class Thread < Object
   #
   # If this thread is already marked to be killed,
   # [exit](Thread.downloaded.ruby_doc#method-i-exit) returns the
-  # [Thread](Thread.downloaded.ruby_doc) .
+  # [Thread](Thread.downloaded.ruby_doc).
   #
   # If this is the main thread, or the last thread, exits the process.
   sig {returns(T.nilable(Thread))}
@@ -530,7 +530,7 @@ class Thread < Object
   # Returns the value of a thread local variable that has been set. Note
   # that these are different than fiber local values. For fiber local
   # values, please see [\#\[\]](Thread.downloaded.ruby_doc#method-i-5B-5D)
-  # and [\#\[\]=](Thread.downloaded.ruby_doc#method-i-5B-5D-3D) .
+  # and [\#\[\]=](Thread.downloaded.ruby_doc#method-i-5B-5D-3D).
   #
   # [Thread](Thread.downloaded.ruby_doc) local values are carried along with
   # threads, and do not respect fibers. For example:
@@ -567,7 +567,7 @@ class Thread < Object
   def thread_variables; end
 
   # Waits for `thr` to complete, using
-  # [join](Thread.downloaded.ruby_doc#method-i-join) , and returns its value
+  # [join](Thread.downloaded.ruby_doc#method-i-join), and returns its value
   # or raises the exception which terminated the thread.
   #
   # ```ruby
@@ -663,13 +663,13 @@ class Thread < Object
   #
   # If this thread is already marked to be killed,
   # [::exit](Thread.downloaded.ruby_doc#method-c-exit) returns the
-  # [Thread](Thread.downloaded.ruby_doc) .
+  # [Thread](Thread.downloaded.ruby_doc).
   #
   # If this is the main thread, or the last thread, exit the process.
   sig {returns(T.untyped)}
   def self.exit; end
 
-  # Basically the same as [::new](Thread.downloaded.ruby_doc#method-c-new) .
+  # Basically the same as [::new](Thread.downloaded.ruby_doc#method-c-new).
   # However, if class [Thread](Thread.downloaded.ruby_doc) is subclassed,
   # then calling `start` in that subclass will not invoke the subclass’s
   # `initialize` method.
@@ -679,8 +679,8 @@ class Thread < Object
   # Changes asynchronous interrupt timing.
   #
   # *interrupt* means asynchronous event and corresponding procedure by
-  # [\#raise](Thread.downloaded.ruby_doc#method-i-raise) ,
-  # [\#kill](Thread.downloaded.ruby_doc#method-i-kill) , signal trap (not
+  # [\#raise](Thread.downloaded.ruby_doc#method-i-raise),
+  # [\#kill](Thread.downloaded.ruby_doc#method-i-kill), signal trap (not
   # supported yet) and main thread termination (if main thread terminates,
   # then all other thread will be killed).
   #
@@ -875,7 +875,7 @@ class Thread < Object
   sig {params(report_on_exception: T.untyped).returns(T.untyped)}
   def self.report_on_exception=(report_on_exception); end
 
-  # Basically the same as [::new](Thread.downloaded.ruby_doc#method-c-new) .
+  # Basically the same as [::new](Thread.downloaded.ruby_doc#method-c-new).
   # However, if class [Thread](Thread.downloaded.ruby_doc) is subclassed,
   # then calling `start` in that subclass will not invoke the subclass’s
   # `initialize` method.
@@ -918,7 +918,7 @@ class Thread::Backtrace::Location
 end
 
 # [ConditionVariable](ConditionVariable) objects
-# augment class [Mutex](https://ruby-doc.org/core-2.6.3/Mutex.html) .
+# augment class [Mutex](https://ruby-doc.org/core-2.6.3/Mutex.html).
 # Using condition variables, it is possible to suspend while in the middle
 # of a critical section until a resource becomes available.
 #
@@ -1074,7 +1074,7 @@ class Thread::Queue < Object
   #
   # [ClosedQueueError](https://ruby-doc.org/core-2.6.3/ClosedQueueError.html)
   # is inherited from
-  # [StopIteration](https://ruby-doc.org/core-2.6.3/StopIteration.html) , so
+  # [StopIteration](https://ruby-doc.org/core-2.6.3/StopIteration.html), so
   # that you can break loop block.
   #
   #     Example:
@@ -1128,7 +1128,7 @@ class Thread::Queue < Object
   #
   #
   #
-  # Also aliased as: [deq](Queue.downloaded.ruby_doc#method-i-deq) ,
+  # Also aliased as: [deq](Queue.downloaded.ruby_doc#method-i-deq),
   # [shift](Queue.downloaded.ruby_doc#method-i-shift)
   sig {params(args: T.untyped).returns(T.untyped)}
   def pop(*args); end
@@ -1137,7 +1137,7 @@ class Thread::Queue < Object
   #
   #
   #
-  # Also aliased as: [enq](Queue.downloaded.ruby_doc#method-i-enq) ,
+  # Also aliased as: [enq](Queue.downloaded.ruby_doc#method-i-enq),
   # [\<\<](Queue.downloaded.ruby_doc#method-i-3C-3C)
   sig {params(obj: T.untyped).returns(T.untyped)}
   def push(obj); end
@@ -1184,7 +1184,7 @@ class Thread::SizedQueue < Thread::Queue
   #
   #
   #
-  # Also aliased as: [enq](SizedQueue.downloaded.ruby_doc#method-i-enq) ,
+  # Also aliased as: [enq](SizedQueue.downloaded.ruby_doc#method-i-enq),
   # [\<\<](SizedQueue.downloaded.ruby_doc#method-i-3C-3C)
   sig {params(args: T.untyped).returns(T.untyped)}
   def push(*args); end

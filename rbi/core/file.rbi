@@ -28,7 +28,7 @@
 #
 # Various constants for the methods in [File](File)
 # can be found in
-# [File::Constants](https://ruby-doc.org/core-2.6.3/File/Constants.html) .
+# [File::Constants](https://ruby-doc.org/core-2.6.3/File/Constants.html).
 class File < IO
   ALT_SEPARATOR = T.let(T.unsafe(nil), NilClass)
   APPEND = T.let(T.unsafe(nil), Integer)
@@ -434,7 +434,7 @@ class File < IO
   #
   #   - `[set]`
   #     Matches any one character in `set` . Behaves exactly like character
-  #     sets in [Regexp](https://ruby-doc.org/core-2.6.3/Regexp.html) ,
+  #     sets in [Regexp](https://ruby-doc.org/core-2.6.3/Regexp.html),
   #     including set negation ( `[^a-z]` ).
   #
   #   - `\`
@@ -448,7 +448,7 @@ class File < IO
   #
   # `flags` is a bitwise OR of the `FNM_XXX` constants. The same glob
   # pattern and flags are used by
-  # [Dir.glob](https://ruby-doc.org/core-2.6.3/Dir.html#method-c-glob) .
+  # [Dir.glob](https://ruby-doc.org/core-2.6.3/Dir.html#method-c-glob).
   #
   # Examples:
   #
@@ -944,7 +944,7 @@ class File < IO
   # Sets the access and modification times of each named file to the first
   # two arguments. If a file is a symlink, this method acts upon its
   # referent rather than the link itself; for the inverse behavior see
-  # [::lutime](File.downloaded.ruby_doc#method-c-lutime) . Returns the
+  # [::lutime](File.downloaded.ruby_doc#method-c-lutime). Returns the
   # number of file names in the argument list.
   sig do
     params(
@@ -1250,7 +1250,7 @@ class File < IO
   #
   #   - `[set]`
   #     Matches any one character in `set` . Behaves exactly like character
-  #     sets in [Regexp](https://ruby-doc.org/core-2.6.3/Regexp.html) ,
+  #     sets in [Regexp](https://ruby-doc.org/core-2.6.3/Regexp.html),
   #     including set negation ( `[^a-z]` ).
   #
   #   - `\`
@@ -1264,7 +1264,7 @@ class File < IO
   #
   # `flags` is a bitwise OR of the `FNM_XXX` constants. The same glob
   # pattern and flags are used by
-  # [Dir.glob](https://ruby-doc.org/core-2.6.3/Dir.html#method-c-glob) .
+  # [Dir.glob](https://ruby-doc.org/core-2.6.3/Dir.html#method-c-glob).
   #
   # Examples:
   #

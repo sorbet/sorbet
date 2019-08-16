@@ -7,7 +7,7 @@
 #
 # The generator may be initialized with either a system-generated or
 # user-supplied seed value by using
-# [::srand](Random#method-c-srand) .
+# [::srand](Random#method-c-srand).
 #
 # The class method [\#rand](Random#method-i-rand)
 # provides the base functionality of
@@ -86,14 +86,14 @@ class Random < Object
   # than `max` . Unlike
   # [Kernel\#rand](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-rand)
   # , when `max` is a negative integer or zero, `rand` raises an
-  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html) .
+  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html).
   #
   # ```ruby
   # prng = Random.new
   # prng.rand(100)       # => 42
   # ```
   #
-  # When `max` is a [Float](https://ruby-doc.org/core-2.6.3/Float.html) ,
+  # When `max` is a [Float](https://ruby-doc.org/core-2.6.3/Float.html),
   # `rand` returns a random floating point number between 0.0 and `max`,
   # including 0.0 and excluding `max` .
   #
@@ -101,7 +101,7 @@ class Random < Object
   # prng.rand(1.5)       # => 1.4600282860034115
   # ```
   #
-  # When `max` is a [Range](https://ruby-doc.org/core-2.6.3/Range.html) ,
+  # When `max` is a [Range](https://ruby-doc.org/core-2.6.3/Range.html),
   # `rand` returns a random number where range.member?(number) == true.
   #
   # ```ruby
@@ -113,7 +113,7 @@ class Random < Object
   #
   # Both the beginning and ending values of the range must respond to
   # subtract ( `-` ) and add ( `+` )methods, or rand will raise an
-  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html) .
+  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html).
   sig do
     params(
         max: T.any(Integer, T::Range[Integer]),

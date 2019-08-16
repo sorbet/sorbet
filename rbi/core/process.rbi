@@ -181,7 +181,7 @@ module Process
   # [::clock\_gettime](Process.downloaded.ruby_doc#method-c-clock_gettime)
   # is defined in the POSIX part. SUS defines
   # [CLOCK\_REALTIME](Process.downloaded.ruby_doc#CLOCK_REALTIME) mandatory
-  # but [CLOCK\_MONOTONIC](Process.downloaded.ruby_doc#CLOCK_MONOTONIC) ,
+  # but [CLOCK\_MONOTONIC](Process.downloaded.ruby_doc#CLOCK_MONOTONIC),
   # [CLOCK\_PROCESS\_CPUTIME\_ID](Process.downloaded.ruby_doc#CLOCK_PROCESS_CPUTIME_ID)
   # and
   # [CLOCK\_THREAD\_CPUTIME\_ID](Process.downloaded.ruby_doc#CLOCK_THREAD_CPUTIME_ID)
@@ -283,7 +283,7 @@ module Process
   # (), returns a number of nanoseconds.
   # [Float](https://ruby-doc.org/core-2.6.3/Float.html) object (IEEE 754
   # double) is not enough to represent the return value for
-  # [CLOCK\_REALTIME](Process.downloaded.ruby_doc#CLOCK_REALTIME) . If the
+  # [CLOCK\_REALTIME](Process.downloaded.ruby_doc#CLOCK_REALTIME). If the
   # exact nanoseconds value is required, use `:nanoseconds` as the `unit` .
   #
   # The origin (zero) of the returned value varies. For example, system
@@ -296,7 +296,7 @@ module Process
   # across systems.
   # [Time.now](https://ruby-doc.org/core-2.6.3/Time.html#method-c-now) is
   # recommended over
-  # [CLOCK\_REALTIME](Process.downloaded.ruby_doc#CLOCK_REALTIME) .
+  # [CLOCK\_REALTIME](Process.downloaded.ruby_doc#CLOCK_REALTIME).
   sig do
     params(
         clock_id: T.any(Symbol, Integer),

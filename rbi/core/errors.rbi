@@ -26,7 +26,7 @@ class ArgumentError < StandardError
 end
 
 # The exception class which will be raised when pushing into a closed
-# [Queue](https://ruby-doc.org/core-2.6.3/Queue.html) . See
+# [Queue](https://ruby-doc.org/core-2.6.3/Queue.html). See
 # [Queue\#close](https://ruby-doc.org/core-2.6.3/Queue.html#method-i-close)
 # and
 # [SizedQueue\#close](https://ruby-doc.org/core-2.6.3/SizedQueue.html#method-i-close)
@@ -123,7 +123,7 @@ class IOError < StandardError
 end
 
 # Raised when the specified key is not found. It is a subclass of
-# [IndexError](https://ruby-doc.org/core-2.6.3/IndexError.html) .
+# [IndexError](https://ruby-doc.org/core-2.6.3/IndexError.html).
 #
 # ```ruby
 # h = {"foo" => :bar}
@@ -311,7 +311,7 @@ class SignalException < Exception
 end
 
 # The most standard error types are subclasses of
-# [StandardError](StandardError) . A rescue clause
+# [StandardError](StandardError). A rescue clause
 # without an explicit
 # [Exception](https://ruby-doc.org/core-2.6.3/Exception.html) class will
 # rescue all StandardErrors (and only those).

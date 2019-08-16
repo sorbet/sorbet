@@ -71,7 +71,7 @@ class String < Object
   # a << 33        #=> "hello world!"
   # ```
   #
-  # See also [\#concat](String.downloaded.ruby_doc#method-i-concat) , which
+  # See also [\#concat](String.downloaded.ruby_doc#method-i-concat), which
   # takes multiple arguments.
   sig do
     params(
@@ -92,7 +92,7 @@ class String < Object
   #
   # `<=>` is the basis for the methods `<`, `<=`, `>`, `>=`, and
   # `between?`, included from module
-  # [Comparable](https://ruby-doc.org/core-2.6.3/Comparable.html) . The
+  # [Comparable](https://ruby-doc.org/core-2.6.3/Comparable.html). The
   # method String\#== does not use Comparable\#==.
   #
   # ```ruby
@@ -117,7 +117,7 @@ class String < Object
   # .
   #
   # Otherwise, returns similarly to
-  # [\#eql?](String.downloaded.ruby_doc#method-i-eql-3F) , comparing length
+  # [\#eql?](String.downloaded.ruby_doc#method-i-eql-3F), comparing length
   # and content.
   sig do
     params(
@@ -134,7 +134,7 @@ class String < Object
   # .
   #
   # Otherwise, returns similarly to
-  # [\#eql?](String.downloaded.ruby_doc#method-i-eql-3F) , comparing length
+  # [\#eql?](String.downloaded.ruby_doc#method-i-eql-3F), comparing length
   # and content.
   sig do
     params(
@@ -263,7 +263,7 @@ class String < Object
   # remainder to lowercase. Returns `nil` if no changes are made. There is
   # an exception for modern Georgian (mkhedruli/MTAVRULI), where the result
   # is the same as for
-  # [\#downcase](String.downloaded.ruby_doc#method-i-downcase) , to avoid
+  # [\#downcase](String.downloaded.ruby_doc#method-i-downcase), to avoid
   # mixed case.
   #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
@@ -280,7 +280,7 @@ class String < Object
 
   # Case-insensitive version of `String#<=>` . Currently, case-insensitivity
   # only works on characters A-Z/a-z, not all of Unicode. This is different
-  # from [\#casecmp?](String.downloaded.ruby_doc#method-i-casecmp-3F) .
+  # from [\#casecmp?](String.downloaded.ruby_doc#method-i-casecmp-3F).
   #
   # ```ruby
   # "aBcDeF".casecmp("abcde")     #=> 1
@@ -436,7 +436,7 @@ class String < Object
   # b.concat("_", b, "_", b)   #=> "sn_sn_sn"
   # ```
   #
-  # See also [\#\<\<](String.downloaded.ruby_doc#method-i-3C-3C) , which
+  # See also [\#\<\<](String.downloaded.ruby_doc#method-i-3C-3C), which
   # takes a single argument.
   sig do
     params(
@@ -1000,7 +1000,7 @@ class String < Object
 
   # Returns a copy of the receiver with leading whitespace removed. See also
   # [\#rstrip](String.downloaded.ruby_doc#method-i-rstrip) and
-  # [\#strip](String.downloaded.ruby_doc#method-i-strip) .
+  # [\#strip](String.downloaded.ruby_doc#method-i-strip).
   #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
@@ -1015,7 +1015,7 @@ class String < Object
   # Removes leading whitespace from the receiver. Returns the altered
   # receiver, or `nil` if no change was made. See also
   # [\#rstrip\!](String.downloaded.ruby_doc#method-i-rstrip-21) and
-  # [\#strip\!](String.downloaded.ruby_doc#method-i-strip-21) .
+  # [\#strip\!](String.downloaded.ruby_doc#method-i-strip-21).
   #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
@@ -1145,7 +1145,7 @@ class String < Object
   # a                            #=> "hello world!"
   # ```
   #
-  # See also [\#concat](String.downloaded.ruby_doc#method-i-concat) .
+  # See also [\#concat](String.downloaded.ruby_doc#method-i-concat).
   sig do
     params(
         arg0: String,
@@ -1235,7 +1235,7 @@ class String < Object
 
   # Returns a copy of the receiver with trailing whitespace removed. See
   # also [\#lstrip](String.downloaded.ruby_doc#method-i-lstrip) and
-  # [\#strip](String.downloaded.ruby_doc#method-i-strip) .
+  # [\#strip](String.downloaded.ruby_doc#method-i-strip).
   #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
@@ -1250,7 +1250,7 @@ class String < Object
   # Removes trailing whitespace from the receiver. Returns the altered
   # receiver, or `nil` if no change was made. See also
   # [\#lstrip\!](String.downloaded.ruby_doc#method-i-lstrip-21) and
-  # [\#strip\!](String.downloaded.ruby_doc#method-i-strip-21) .
+  # [\#strip\!](String.downloaded.ruby_doc#method-i-strip-21).
   #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
@@ -1629,7 +1629,7 @@ class String < Object
   # 'ruby'.to_c        #=> (0+0i)
   # ```
   #
-  # See [Kernel](https://ruby-doc.org/core-2.6.3/Kernel.html) .Complex.
+  # See [Kernel](https://ruby-doc.org/core-2.6.3/Kernel.html).Complex.
   sig {returns(Complex)}
   def to_c(); end
 
@@ -1700,14 +1700,14 @@ class String < Object
 
   # Returns `self` .
   #
-  # If called on a subclass of [String](String.downloaded.ruby_doc) ,
+  # If called on a subclass of [String](String.downloaded.ruby_doc),
   # converts the receiver to a [String](String.downloaded.ruby_doc) object.
   sig {returns(String)}
   def to_s(); end
 
   # Returns `self` .
   #
-  # If called on a subclass of [String](String.downloaded.ruby_doc) ,
+  # If called on a subclass of [String](String.downloaded.ruby_doc),
   # converts the receiver to a [String](String.downloaded.ruby_doc) object.
   sig {returns(String)}
   def to_str(); end
@@ -2016,7 +2016,7 @@ class String < Object
   sig {returns(T::Boolean)}
   def valid_encoding?(); end
 
-  # Try to convert *obj* into a [String](String.downloaded.ruby_doc) , using
+  # Try to convert *obj* into a [String](String.downloaded.ruby_doc), using
   # [\#to\_str](String.downloaded.ruby_doc#method-i-to_str) method. Returns
   # converted string or nil if *obj* cannot be converted for any reason.
   #

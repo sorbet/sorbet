@@ -20,7 +20,7 @@ class ThreadGroup < Object
   def enclose; end
 
   # Returns `true` if the `thgrp` is enclosed. See also
-  # [\#enclose](ThreadGroup.downloaded.ruby_doc#method-i-enclose) .
+  # [\#enclose](ThreadGroup.downloaded.ruby_doc#method-i-enclose).
   sig {returns(T::Boolean)}
   def enclosed?; end
 

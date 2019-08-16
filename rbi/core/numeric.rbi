@@ -90,7 +90,7 @@ class Numeric < Object
   #
   # Equivalent to `num.divmod(numeric)[1]` .
   #
-  # See [\#divmod](Numeric.downloaded.ruby_doc#method-i-divmod) .
+  # See [\#divmod](Numeric.downloaded.ruby_doc#method-i-divmod).
   sig do
     params(
         arg0: Numeric,
@@ -188,7 +188,7 @@ class Numeric < Object
   # ```
   #
   # [\#magnitude](Numeric.downloaded.ruby_doc#method-i-magnitude) is an
-  # alias for [\#abs](Numeric.downloaded.ruby_doc#method-i-abs) .
+  # alias for [\#abs](Numeric.downloaded.ruby_doc#method-i-abs).
   sig {returns(Numeric)}
   def abs(); end
 
@@ -261,7 +261,7 @@ class Numeric < Object
   #
   # Equivalent to `num.divmod(numeric)[0]` .
   #
-  # See [\#divmod](Numeric.downloaded.ruby_doc#method-i-divmod) .
+  # See [\#divmod](Numeric.downloaded.ruby_doc#method-i-divmod).
   sig do
     params(
         arg0: Numeric,
@@ -381,7 +381,7 @@ class Numeric < Object
   def imaginary(); end
 
   # Returns `true` if `num` is an
-  # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html) .
+  # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html).
   #
   # ```ruby
   # 1.0.integer?   #=> false
@@ -399,7 +399,7 @@ class Numeric < Object
   # ```
   #
   # [\#magnitude](Numeric.downloaded.ruby_doc#method-i-magnitude) is an
-  # alias for [\#abs](Numeric.downloaded.ruby_doc#method-i-abs) .
+  # alias for [\#abs](Numeric.downloaded.ruby_doc#method-i-abs).
   sig {returns(Numeric)}
   def magnitude(); end
 
@@ -407,7 +407,7 @@ class Numeric < Object
   #
   # Equivalent to `num.divmod(numeric)[1]` .
   #
-  # See [\#divmod](Numeric.downloaded.ruby_doc#method-i-divmod) .
+  # See [\#divmod](Numeric.downloaded.ruby_doc#method-i-divmod).
   sig do
     params(
         arg0: Numeric,
@@ -469,7 +469,7 @@ class Numeric < Object
 
   # `x.remainder(y)` means `x-y*(x/y).truncate` .
   #
-  # See [\#divmod](Numeric.downloaded.ruby_doc#method-i-divmod) .
+  # See [\#divmod](Numeric.downloaded.ruby_doc#method-i-divmod).
   sig do
     params(
         arg0: Numeric,

@@ -355,8 +355,8 @@ class Float < Numeric
   def <=>(arg0); end
 
   # Returns `true` only if `obj` has the same value as `float` . Contrast
-  # this with [\#eql?](Float.downloaded.ruby_doc#method-i-eql-3F) , which
-  # requires `obj` to be a [Float](Float.downloaded.ruby_doc) .
+  # this with [\#eql?](Float.downloaded.ruby_doc#method-i-eql-3F), which
+  # requires `obj` to be a [Float](Float.downloaded.ruby_doc).
   #
   # ```ruby
   # 1.0 == 1   #=> true
@@ -373,8 +373,8 @@ class Float < Numeric
   def ==(arg0); end
 
   # Returns `true` only if `obj` has the same value as `float` . Contrast
-  # this with [\#eql?](Float.downloaded.ruby_doc#method-i-eql-3F) , which
-  # requires `obj` to be a [Float](Float.downloaded.ruby_doc) .
+  # this with [\#eql?](Float.downloaded.ruby_doc#method-i-eql-3F), which
+  # requires `obj` to be a [Float](Float.downloaded.ruby_doc).
   #
   # ```ruby
   # 1.0 == 1   #=> true
@@ -459,7 +459,7 @@ class Float < Numeric
   # ```
   #
   # [\#magnitude](Float.downloaded.ruby_doc#method-i-magnitude) is an alias
-  # for [\#abs](Float.downloaded.ruby_doc#method-i-abs) .
+  # for [\#abs](Float.downloaded.ruby_doc#method-i-abs).
   sig {returns(Float)}
   def abs(); end
 
@@ -524,7 +524,7 @@ class Float < Numeric
   # [Float](Float.downloaded.ruby_doc) objects.
   #
   # This is achieved by converting `numeric` to a
-  # [Float](Float.downloaded.ruby_doc) .
+  # [Float](Float.downloaded.ruby_doc).
   #
   # ```ruby
   # 1.2.coerce(3)       #=> [3.0, 1.2]
@@ -553,7 +553,7 @@ class Float < Numeric
   # Returns the denominator (always positive). The result is machine
   # dependent.
   #
-  # See also [\#numerator](Float.downloaded.ruby_doc#method-i-numerator) .
+  # See also [\#numerator](Float.downloaded.ruby_doc#method-i-numerator).
   sig {returns(Integer)}
   def denominator(); end
 
@@ -746,7 +746,7 @@ class Float < Numeric
   # ```
   #
   # [\#magnitude](Float.downloaded.ruby_doc#method-i-magnitude) is an alias
-  # for [\#abs](Float.downloaded.ruby_doc#method-i-abs) .
+  # for [\#abs](Float.downloaded.ruby_doc#method-i-abs).
   sig {returns(Float)}
   def magnitude(); end
 
@@ -949,7 +949,7 @@ class Float < Numeric
   # 1.333.rationalize(0.01)  #=> (4/3)
   # ```
   #
-  # See also [\#to\_r](Float.downloaded.ruby_doc#method-i-to_r) .
+  # See also [\#to\_r](Float.downloaded.ruby_doc#method-i-to_r).
   sig {returns(Rational)}
   sig do
     params(
@@ -1029,13 +1029,13 @@ class Float < Numeric
   sig {returns(Complex)}
   def to_c(); end
 
-  # Since `float` is already a [Float](Float.downloaded.ruby_doc) , returns
+  # Since `float` is already a [Float](Float.downloaded.ruby_doc), returns
   # `self` .
   sig {returns(Float)}
   def to_f(); end
 
   # Returns the `float` truncated to an
-  # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html) .
+  # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html).
   #
   # ```ruby
   # 1.2.to_i      #=> 1
@@ -1050,12 +1050,12 @@ class Float < Numeric
   # ```
   #
   # [to\_int](Float.downloaded.ruby_doc#method-i-to_int) is an alias for
-  # [to\_i](Float.downloaded.ruby_doc#method-i-to_i) .
+  # [to\_i](Float.downloaded.ruby_doc#method-i-to_i).
   sig {returns(Integer)}
   def to_i(); end
 
   # Returns the `float` truncated to an
-  # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html) .
+  # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html).
   #
   # ```ruby
   # 1.2.to_i      #=> 1
@@ -1070,7 +1070,7 @@ class Float < Numeric
   # ```
   #
   # [to\_int](Float.downloaded.ruby_doc#method-i-to_int) is an alias for
-  # [to\_i](Float.downloaded.ruby_doc#method-i-to_i) .
+  # [to\_i](Float.downloaded.ruby_doc#method-i-to_i).
   sig {returns(Integer)}
   def to_int(); end
 

@@ -2,7 +2,7 @@
 
 # A `Range` represents an interval—a set of values with a beginning and an
 # end. Ranges may be constructed using the *s* `..` *e* and *s* `...` *e*
-# literals, or with [::new](Range#method-c-new) .
+# literals, or with [::new](Range#method-c-new).
 # Ranges constructed using `..` run from the beginning to the end
 # inclusively. Those created using `...` exclude the end value. When used
 # as an iterator, ranges return each value in the sequence.
@@ -107,7 +107,7 @@ class Range < Object
   end
   def self.new(from, to, exclude_end=false); end
 
-  # Returns `true` only if `obj` is a [Range](Range.downloaded.ruby_doc) ,
+  # Returns `true` only if `obj` is a [Range](Range.downloaded.ruby_doc),
   # has equivalent begin and end items (by comparing them with `==` ), and
   # has the same
   # [exclude\_end?](Range.downloaded.ruby_doc#method-i-exclude_end-3F)
@@ -441,7 +441,7 @@ class Range < Object
 
   # Returns the number of elements in the range. Both the begin and the end
   # of the [Range](Range.downloaded.ruby_doc) must be
-  # [Numeric](https://ruby-doc.org/core-2.6.3/Numeric.html) , otherwise nil
+  # [Numeric](https://ruby-doc.org/core-2.6.3/Numeric.html), otherwise nil
   # is returned.
   #
   # ```ruby
@@ -509,7 +509,7 @@ class Range < Object
   sig {returns(String)}
   def to_s(); end
 
-  # Returns `true` only if `obj` is a [Range](Range.downloaded.ruby_doc) ,
+  # Returns `true` only if `obj` is a [Range](Range.downloaded.ruby_doc),
   # has equivalent begin and end items (by comparing them with `eql?` ), and
   # has the same
   # [exclude\_end?](Range.downloaded.ruby_doc#method-i-exclude_end-3F)

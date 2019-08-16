@@ -417,7 +417,7 @@ class Encoding < Object
   # Returns a replicated encoding of *enc* whose name is *name* . The new
   # encoding should have the same byte structure of *enc* . If *name* is
   # used by another encoding, raise
-  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html) .
+  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html).
   sig do
     params(
         name: String,

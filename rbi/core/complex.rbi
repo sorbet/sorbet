@@ -6,7 +6,7 @@
 #
 # [Complex](Complex) object can be created as literal,
 # and also by using Kernel\#Complex,
-# [::rect](Complex#method-c-rect) ,
+# [::rect](Complex#method-c-rect),
 # [::polar](Complex#method-c-polar) or
 # [\#to\_c](Complex#method-i-to_c) method.
 #
