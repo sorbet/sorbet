@@ -149,7 +149,7 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
 
     expectedType = Types::replaceSelfType(ctx, expectedType, selfType);
 
-    if (Types::isSubTypeUnderConstraint(ctx, constr, argTpe.type, expectedType)) {
+    if (Types::isSubTypeUnderConstraint(ctx, constr, true, argTpe.type, expectedType)) {
         return nullptr;
     }
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentMismatch)) {
@@ -167,7 +167,7 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
         e.addErrorSection(
             ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:", argTpe.origins2Explanations(ctx)));
         auto withoutNil = Types::approximateSubtract(ctx, argTpe.type, Types::nilClass());
-        if (!withoutNil->isBottom() && Types::isSubTypeUnderConstraint(ctx, constr, withoutNil, expectedType)) {
+        if (!withoutNil->isBottom() && Types::isSubTypeUnderConstraint(ctx, constr, true, withoutNil, expectedType)) {
             if (loc.exists()) {
                 e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(ctx));
             }
@@ -1461,7 +1461,7 @@ private:
         // as we do the subtyping check.
         auto &constr = dispatched.main.constr;
         auto &blockPreType = dispatched.main.blockPreType;
-        if (blockPreType && !Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, blockPreType)) {
+        if (blockPreType && !Types::isSubTypeUnderConstraint(ctx, *constr, true, passedInBlockType, blockPreType)) {
             ClassType *passedInProcClass = cast_type<ClassType>(passedInBlockType.get());
             auto nonNilableBlockType = Types::dropSubtypesOf(ctx, blockPreType, Symbols::NilClass());
             if (passedInProcClass && passedInProcClass->symbol == Symbols::Proc() &&
@@ -1505,7 +1505,7 @@ private:
                     auto bspecType = bspec.type;
                     if (bspecType) {
                         // This subtype check is here to discover the correct generic bounds.
-                        Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, bspecType);
+                        Types::isSubTypeUnderConstraint(ctx, *constr, true, passedInBlockType, bspecType);
                     }
                 }
                 it = it->secondary.get();

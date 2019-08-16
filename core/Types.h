@@ -76,11 +76,15 @@ public:
     static TypePtr any(Context ctx, const TypePtr &t1, const TypePtr &t2);
 
     /** is every instance of  t1 an  instance of t2? */
-    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2);
+    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const bool allowUntyped, const TypePtr &t1, const TypePtr &t2);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
     static bool isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2);
     static bool equiv(Context ctx, const TypePtr &t1, const TypePtr &t2);
+
+    /** check that t1 <: t2, but don't allow occurrences of `T.untyped` */
+    static bool isAsSpecificAs(Context ctx, const TypePtr &t1, const TypePtr &t2);
+    static bool equivNoUntyped(Context ctx, const TypePtr &t1, const TypePtr &t2);
 
     static TypePtr top();
     static TypePtr bottom();
