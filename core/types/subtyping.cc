@@ -1046,8 +1046,8 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const b
                 if (idx.data(ctx)->isCovariant()) {
                     result = Types::isSubTypeUnderConstraint(ctx, constr, allowUntyped, a1->targs[i], a2->targs[j]);
                 } else if (idx.data(ctx)->isInvariant()) {
-                    auto a = a1->targs[i];
-                    auto b = a2->targs[j];
+                    auto &a = a1->targs[i];
+                    auto &b = a2->targs[j];
                     if (allowUntyped) {
                         result = Types::equiv(ctx, a, b);
                     } else {
