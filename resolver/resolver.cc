@@ -1503,6 +1503,11 @@ public:
                                                core::Names::suggestType(), move(rhs));
                 }
             } else if (!core::isa_type<core::AliasType>(data->resultType.get())) {
+                // If we've already resolved a temporary constant, we still want to run resolveConstantType to report
+                // errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent typechecking runs)
+                // but we only want to run this on constants that are value-level and not class or type aliases. The
+                // check for isa_type<AliasType> makes sure that we skip aliases of the form `X = Integer` and only run
+                // this over constant value assignments like `X = 5` or `Y = 5; X = Y`.
                 resolveConstantType(ctx, asgn->rhs, sym);
             }
         }
