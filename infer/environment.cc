@@ -538,13 +538,15 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
         vars[cond].knownTruthy = true;
     }
 
-    auto &knowledgeToChoose = isTrue ? thisKnowledge.truthy : thisKnowledge.falsy;
-
     if (isDead) {
         return;
     }
 
-    for (auto &typeTested : knowledgeToChoose->yesTypeTests) {
+    auto &knowledgeToChoose = isTrue ? thisKnowledge.truthy : thisKnowledge.falsy;
+    auto &yesTests = knowledgeToChoose->yesTypeTests;
+    auto &noTests = knowledgeToChoose->noTypeTests;
+
+    for (auto &typeTested : yesTests) {
         if (filter.find(typeTested.first) == filter.end()) {
             continue;
         }
@@ -568,7 +570,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
         setTypeAndOrigin(typeTested.first, tp);
     }
 
-    for (auto &typeTested : knowledgeToChoose->noTypeTests) {
+    for (auto &typeTested : noTests) {
         if (filter.find(typeTested.first) == filter.end()) {
             continue;
         }
