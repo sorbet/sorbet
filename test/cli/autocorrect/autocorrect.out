@@ -12,10 +12,10 @@
 < foo.bar |= "a"
 < foo.bar &= "a"
 ---
-> T.must(foo.bar) ||= "a"
-> T.must(foo.bar) &&= "a"
-> T.must(foo.bar) |= "a"
-> T.must(foo.bar) &= "a"
+> T.must(foo.bar) warn"a"
+> T.must(foo.bar) warn"a"
+> T.must(foo.bar) warna"
+> T.must(foo.bar) warna"
 17c17
 < [1].max_by {|l,r| 1}[2]
 ---
