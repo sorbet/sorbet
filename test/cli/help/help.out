@@ -4,7 +4,7 @@ You must pass either `-e` or at least one folder or ruby file.
 
 Typechecker for Ruby
 Usage:
-  srb [OPTION...] <path 1> <path 2> ...
+  sorbet [OPTION...] <path 1> <path 2> ...
 
   -e, string     Parse an inline ruby string (default: )
   -q, --quiet    Silence all non-critical errors
@@ -20,7 +20,7 @@ You must pass either `-e` or at least one folder or ruby file.
 
 Typechecker for Ruby
 Usage:
-  srb [OPTION...] <path 1> <path 2> ...
+  sorbet [OPTION...] <path 1> <path 2> ...
 
   -e, string     Parse an inline ruby string (default: )
   -q, --quiet    Silence all non-critical errors
@@ -34,7 +34,7 @@ Usage:
 
 Typechecker for Ruby
 Usage:
-  srb [OPTION...] <path 1> <path 2> ...
+  sorbet [OPTION...] <path 1> <path 2> ...
 
   -e, string     Parse an inline ruby string (default: )
   -q, --quiet    Silence all non-critical errors
