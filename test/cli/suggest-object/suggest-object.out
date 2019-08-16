@@ -1,9 +1,5 @@
 test/cli/suggest-object/suggest-object.rb:4: Method `class` does not exist on `M` https://srb.help/7003
      4 |    self.class
             ^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-object/suggest-object.rb:4: Replace with `class`
-     4 |    self.class
-                 ^^^^^
     ???: Did you mean: `Object#class`?
 Errors: 1

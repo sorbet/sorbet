@@ -520,15 +520,17 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                             }
                         } else {
                             const auto replacement = possibleSymbol->name.toString(ctx);
-                            const auto loc = args.locs.receiver;
                             const auto toReplace = args.name.toString(ctx);
-                            // See comment above.
-                            if (absl::StartsWith(args.locs.call.source(ctx),
-                                                 fmt::format("{}.{}", loc.source(ctx), toReplace))) {
-                                const auto methodLoc =
-                                    Loc{loc.file(), loc.endPos() + 1, (u4)(loc.endPos() + 1 + toReplace.length())};
-                                e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
-                                              replacement);
+                            if (replacement != toReplace) {
+                                const auto loc = args.locs.receiver;
+                                // See comment above.
+                                if (absl::StartsWith(args.locs.call.source(ctx),
+                                                     fmt::format("{}.{}", loc.source(ctx), toReplace))) {
+                                    const auto methodLoc =
+                                        Loc{loc.file(), loc.endPos() + 1, (u4)(loc.endPos() + 1 + toReplace.length())};
+                                    e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
+                                                  replacement);
+                                }
                             }
                         }
                     }

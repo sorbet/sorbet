@@ -1,10 +1,6 @@
 test/cli/suggest-singleton/suggest-singleton.rb:9: Method `foo` does not exist on `T.class_of(A)` https://srb.help/7003
      9 |A.foo
         ^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-singleton/suggest-singleton.rb:9: Replace with `foo`
-     9 |A.foo
-          ^^^
     test/cli/suggest-singleton/suggest-singleton.rb:3: Did you mean: `A#foo`?
      3 |  def foo
           ^^^^^^^
@@ -12,10 +8,6 @@ test/cli/suggest-singleton/suggest-singleton.rb:9: Method `foo` does not exist o
 test/cli/suggest-singleton/suggest-singleton.rb:10: Method `bar` does not exist on `A` https://srb.help/7003
     10 |A.new.bar
         ^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-singleton/suggest-singleton.rb:10: Replace with `bar`
-    10 |A.new.bar
-              ^^^
     test/cli/suggest-singleton/suggest-singleton.rb:5: Did you mean: `A.bar`?
      5 |  def self.bar
           ^^^^^^^^^^^^
