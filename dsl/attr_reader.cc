@@ -7,6 +7,7 @@
 #include "core/errors/dsl.h"
 #include "dsl/dsl.h"
 #include "absl/strings/escaping.h"
+#include <regex>
 
 using namespace std;
 
@@ -24,15 +25,14 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
         } else if (lit->isString(ctx)) {
             core::NameRef nameRef = lit->asString(ctx);
             auto shortName = nameRef.data(ctx)->shortName(ctx);
-            bool validAttr =
-                absl::c_all_of(shortName, [&](char c) { return isalnum(c) || c == '_'; }) && (isalpha(shortName[0]) || shortName[0] == '_');
+            bool validAttr = regex_match(shortName.begin(), shortName.end(), basic_regex("([:alpha:]|_)([:alnum:]|_)*"));
             if (validAttr) {
                 res = nameRef;
             } else {
                 if (auto e = ctx.state.beginError(name->loc, core::errors::DSL::BadAttrArg)) {
                     // we can't necessarily repeat the name here because it might have newlines in it, in which case our
                     // expected invariant that all error lines are a single line will break
-                    e.setHeader("Bad attribute name `{}`", absl::CEscape(shortName));
+                    e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
                 }
                 res = core::Names::empty();
             }
