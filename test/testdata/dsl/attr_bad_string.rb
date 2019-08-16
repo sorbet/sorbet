@@ -1,2 +1,2 @@
 # typed: true
-attr"foo bar" # error: Invalid string provided for attribute name
+attr"foo bar" # error: Bad attribute name `foo bar`
