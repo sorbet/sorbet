@@ -8,8 +8,8 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     15 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L853: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     853 |        arg0: String,
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1947: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+    1947 |        arg0: String,
                   ^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:13:
@@ -58,8 +58,8 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     15 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L853: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     853 |        arg0: String,
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1947: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+    1947 |        arg0: String,
                   ^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:13:
@@ -108,8 +108,8 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     15 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L853: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     853 |        arg0: String,
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1947: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+    1947 |        arg0: String,
                   ^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:13:
