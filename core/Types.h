@@ -75,7 +75,11 @@ public:
     /** Lower upper bound: the narrowest type that is supper type of both t1 and t2 */
     static TypePtr any(Context ctx, const TypePtr &t1, const TypePtr &t2);
 
-    /** is every instance of  t1 an  instance of t2? */
+    /**
+     * is every instance of  t1 an  instance of t2?
+     *
+     * The parameter `allowUntyped` controls whether or not `T.untyped` is
+     * considered to be a super type or subtype of all other types */
     static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const bool allowUntyped, const TypePtr &t1, const TypePtr &t2);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
