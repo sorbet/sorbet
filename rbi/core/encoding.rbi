@@ -210,6 +210,11 @@ class Encoding < Object
   Windows_31J = T.let(T.unsafe(nil), Encoding)
   Windows_874 = T.let(T.unsafe(nil), Encoding)
 
+  # Returns the hash of available encoding alias and original encoding name.
+  # 
+  #     Encoding.aliases
+  #     #=> {"BINARY"=>"ASCII-8BIT", "ASCII"=>"US-ASCII", "ANSI_X3.4-1986"=>"US-ASCII",
+  #           "SJIS"=>"Shift_JIS", "eucJP"=>"EUC-JP", "CP932"=>"Windows-31J"}
   sig {returns(T::Hash[String, String])}
   def self.aliases(); end
 
@@ -222,9 +227,50 @@ class Encoding < Object
   end
   def self.compatible?(obj1, obj2); end
 
+  # Returns default external encoding.
+  # 
+  # The default external encoding is used by default for strings created
+  # from the following locations:
+  # 
+  #   - CSV
+  # 
+  #   - [File](https://ruby-doc.org/core-2.6.3/File.html) data read from
+  #     disk
+  # 
+  #   - SDBM
+  # 
+  #   - StringIO
+  # 
+  #   - Zlib::GzipReader
+  # 
+  #   - Zlib::GzipWriter
+  # 
+  #   - [String\#inspect](https://ruby-doc.org/core-2.6.3/String.html#method-i-inspect)
+  # 
+  #   - [Regexp\#inspect](https://ruby-doc.org/core-2.6.3/Regexp.html#method-i-inspect)
+  # 
+  # While strings created from these locations will have this encoding, the
+  # encoding may not be valid. Be sure to check
+  # [String\#valid\_encoding?](https://ruby-doc.org/core-2.6.3/String.html#method-i-valid_encoding-3F)
+  # .
+  # 
+  # [File](https://ruby-doc.org/core-2.6.3/File.html) data written to disk
+  # will be transcoded to the default external encoding when written.
+  # 
+  # The default external encoding is initialized by the locale or -E option.
   sig {returns(Encoding)}
   def self.default_external(); end
 
+  # Sets default external encoding. You should not set
+  # [::default\_external](Encoding.downloaded.ruby_doc#method-c-default_external)
+  # in ruby code as strings created before changing the value may have a
+  # different encoding from strings created after the value was changed.,
+  # instead you should use `ruby -E` to invoke ruby with the correct
+  # default\_external.
+  # 
+  # See
+  # [::default\_external](Encoding.downloaded.ruby_doc#method-c-default_external)
+  # for information on how the default external encoding is used.
   sig do
     params(
         arg0: String,
@@ -239,9 +285,61 @@ class Encoding < Object
   end
   def self.default_external=(arg0); end
 
+  # Returns default internal encoding. Strings will be transcoded to the
+  # default internal encoding in the following places if the default
+  # internal encoding is not nil:
+  # 
+  #   - CSV
+  # 
+  #   - Etc.sysconfdir and Etc.systmpdir
+  # 
+  #   - [File](https://ruby-doc.org/core-2.6.3/File.html) data read from
+  #     disk
+  # 
+  #   - [File](https://ruby-doc.org/core-2.6.3/File.html) names from
+  #     [Dir](https://ruby-doc.org/core-2.6.3/Dir.html)
+  # 
+  #   - [Integer\#chr](https://ruby-doc.org/core-2.6.3/Integer.html#method-i-chr)
+  # 
+  #   - [String\#inspect](https://ruby-doc.org/core-2.6.3/String.html#method-i-inspect)
+  #     and
+  #     [Regexp\#inspect](https://ruby-doc.org/core-2.6.3/Regexp.html#method-i-inspect)
+  # 
+  #   - Strings returned from Readline
+  # 
+  #   - Strings returned from SDBM
+  # 
+  #   - [Time\#zone](https://ruby-doc.org/core-2.6.3/Time.html#method-i-zone)
+  # 
+  #   - Values from [ENV](https://ruby-doc.org/core-2.6.3/ENV.html)
+  # 
+  #   - Values in ARGV including $PROGRAM\_NAME
+  # 
+  # Additionally
+  # [String\#encode](https://ruby-doc.org/core-2.6.3/String.html#method-i-encode)
+  # and
+  # [String\#encode\!](https://ruby-doc.org/core-2.6.3/String.html#method-i-encode-21)
+  # use the default internal encoding if no encoding is given.
+  # 
+  # The locale encoding (\_\_ENCODING\_\_), not
+  # [::default\_internal](Encoding.downloaded.ruby_doc#method-c-default_internal)
+  # , is used as the encoding of created strings.
+  # 
+  # [::default\_internal](Encoding.downloaded.ruby_doc#method-c-default_internal)
+  # is initialized by the source file's internal\_encoding or -E option.
   sig {returns(Encoding)}
   def self.default_internal(); end
 
+  # Sets default internal encoding or removes default internal encoding when
+  # passed nil. You should not set
+  # [::default\_internal](Encoding.downloaded.ruby_doc#method-c-default_internal)
+  # in ruby code as strings created before changing the value may have a
+  # different encoding from strings created after the change. Instead you
+  # should use `ruby -E` to invoke ruby with the correct default\_internal.
+  # 
+  # See
+  # [::default\_internal](Encoding.downloaded.ruby_doc#method-c-default_internal)
+  # for information on how the default internal encoding is used.
   sig do
     params(
         arg0: String,
@@ -267,24 +365,59 @@ class Encoding < Object
   sig {returns(T::Array[Encoding])}
   def self.list(); end
 
+  # Returns the list of available encoding names.
+  # 
+  #     Encoding.name_list
+  #     #=> ["US-ASCII", "ASCII-8BIT", "UTF-8",
+  #           "ISO-8859-1", "Shift_JIS", "EUC-JP",
+  #           "Windows-31J",
+  #           "BINARY", "CP932", "eucJP"]
   sig {returns(T::Array[String])}
   def self.name_list(); end
 
+  # Returns whether ASCII-compatible or not.
+  # 
+  # ```ruby
+  # Encoding::UTF_8.ascii_compatible?     #=> true
+  # Encoding::UTF_16BE.ascii_compatible?  #=> false
+  # ```
   sig {returns(T::Boolean)}
   def ascii_compatible?(); end
 
+  # Returns true for dummy encodings. A dummy encoding is an encoding for
+  # which character handling is not properly implemented. It is used for
+  # stateful encodings.
+  # 
+  # ```ruby
+  # Encoding::ISO_2022_JP.dummy?       #=> true
+  # Encoding::UTF_8.dummy?             #=> false
+  # ```
   sig {returns(T::Boolean)}
   def dummy?(); end
 
   sig {returns(String)}
   def inspect(); end
 
+  # Returns the name of the encoding.
+  # 
+  # ```ruby
+  # Encoding::UTF_8.name      #=> "UTF-8"
+  # ```
   sig {returns(String)}
   def name(); end
 
+  # Returns the list of name and aliases of the encoding.
+  # 
+  # ```ruby
+  # Encoding::WINDOWS_31J.names  #=> ["Windows-31J", "CP932", "csWindows31J"]
+  # ```
   sig {returns(T::Array[String])}
   def names(); end
 
+  # Returns a replicated encoding of *enc* whose name is *name* . The new
+  # encoding should have the same byte structure of *enc* . If *name* is
+  # used by another encoding, raise
+  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html) .
   sig do
     params(
         name: String,
@@ -293,6 +426,11 @@ class Encoding < Object
   end
   def replicate(name); end
 
+  # Returns the name of the encoding.
+  # 
+  # ```ruby
+  # Encoding::UTF_8.name      #=> "UTF-8"
+  # ```
   sig {returns(String)}
   def to_s(); end
 end
