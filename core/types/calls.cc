@@ -495,14 +495,30 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                     vector<ErrorLine> lines;
                     lines.reserve(alternatives.size());
                     for (auto alternative : alternatives) {
-                        auto possible_symbol = alternative.symbol.data(ctx);
-                        if (!possible_symbol->isClass() && !possible_symbol->isMethod()) {
+                        auto possibleSymbol = alternative.symbol.data(ctx);
+                        if (!possibleSymbol->isClass() && !possibleSymbol->isMethod()) {
                             continue;
                         }
-                        auto suggestedName = possible_symbol->isClass() ? alternative.symbol.show(ctx) + ".new"
-                                                                        : alternative.symbol.show(ctx);
+
+                        auto suggestedName = possibleSymbol->isClass() ? alternative.symbol.show(ctx) + ".new"
+                                                                       : alternative.symbol.show(ctx);
                         lines.emplace_back(
                             ErrorLine::from(alternative.symbol.data(ctx)->loc(), "Did you mean: `{}`?", suggestedName));
+
+                        if (possibleSymbol->isClass()) {
+                            const auto replacement = possibleSymbol->name.show(ctx);
+                            const auto loc = args.locs.call;
+                            const auto methodLoc = Loc{loc.file(), loc.beginPos(),
+                                                       (u4)(loc.beginPos() + args.name.toString(ctx).length())};
+                            e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
+                                          replacement);
+                        } else {
+                            const auto replacement = possibleSymbol->name.toString(ctx);
+                            const auto loc = args.locs.receiver;
+                            const auto methodLoc = Loc{loc.file(), loc.endPos() + 1,
+                                                       (u4)(loc.endPos() + 1 + args.name.toString(ctx).length())};
+                            e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}", replacement);
+                        }
                     }
                     e.addErrorSection(ErrorSection(lines));
                 }

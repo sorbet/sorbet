@@ -263,6 +263,8 @@ private:
                             lines.emplace_back(core::ErrorLine::from(suggestion.symbol.data(ctx)->loc(),
                                                                      "Did you mean: `{}`?",
                                                                      suggestion.symbol.show(ctx)));
+                            e.replaceWith(fmt::format("Replace with `{}`", suggestion.symbol.show(ctx)), job.out->loc,
+                                          "{}", suggestion.symbol.show(ctx));
                         }
                         e.addErrorSection(core::ErrorSection(lines));
                     }
