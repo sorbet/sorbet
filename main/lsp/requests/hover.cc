@@ -1,3 +1,4 @@
+#include "absl/strings/ascii.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
 
@@ -21,14 +22,24 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
         }
         start = start->secondary.get();
     }
+
     return contents;
 }
 
-unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string str) {
-    if (markupKind == MarkupKind::Markdown && str.length() > 0) {
-        str = fmt::format("```ruby\n{}\n```", str);
+unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typeString,
+                                          optional<string_view> docString) {
+    // format typeString
+    string formattedTypeString;
+    if (markupKind == MarkupKind::Markdown && typeString.length() > 0) {
+        formattedTypeString = fmt::format("```ruby\n{}\n```", typeString);
+    } else {
+        formattedTypeString = string(typeString);
     }
-    return make_unique<MarkupContent>(markupKind, move(str));
+
+    string content =
+        absl::StrCat(formattedTypeString, docString.has_value() ? "\n\n---\n\n" : "", docString.value_or(""));
+
+    return make_unique<MarkupContent>(markupKind, move(content));
 }
 
 LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
@@ -51,17 +62,38 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
         }
 
         auto resp = move(queryResponses[0]);
+
+        optional<string> documentation = nullopt;
+        if (resp->isConstant() || resp->isDefinition()) {
+            auto origins = resp->getTypeAndOrigins().origins;
+            if (!origins.empty()) {
+                auto loc = origins[0];
+                if (loc.exists()) {
+                    documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
+                }
+            }
+        }
+
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
+            auto start = sendResp->dispatchResult.get();
+            if (start != nullptr && start->main.method.exists() && !start->main.receiver->isUntyped()) {
+                auto loc = start->main.method.data(*gs)->loc();
+                if (loc.exists()) {
+                    documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
+                }
+            }
             auto &constraint = sendResp->dispatchResult->main.constr;
             if (constraint) {
                 retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
             }
-            response->result = make_unique<Hover>(formatRubyCode(
-                clientHoverMarkupKind, methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint)));
+            response->result = make_unique<Hover>(formatHoverText(
+                clientHoverMarkupKind, methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint),
+                documentation));
         } else if (auto defResp = resp->isDefinition()) {
-            response->result = make_unique<Hover>(formatRubyCode(
-                clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr)));
+            response->result = make_unique<Hover>(formatHoverText(
+                clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr),
+                documentation));
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(*gs);
             auto type = constResp->retType.type;
@@ -74,10 +106,11 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 // `Foo`.
                 type = core::make_type<core::MetaType>(type);
             }
-            response->result = make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, type->showWithMoreInfo(*gs)));
-        } else {
             response->result =
-                make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs)));
+                make_unique<Hover>(formatHoverText(clientHoverMarkupKind, type->showWithMoreInfo(*gs), documentation));
+        } else {
+            response->result = make_unique<Hover>(
+                formatHoverText(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
         }
     }
     return LSPResult::make(move(gs), move(response));

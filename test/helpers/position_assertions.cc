@@ -838,13 +838,14 @@ string_view hoverToString(variant<JSONNullObject, unique_ptr<Hover>> &hoverResul
 
 // Returns `true` if `line` matches a full line of text in `text`.
 bool containsLine(string_view text, string_view line) {
-    auto pos = text.find(line);
-    if (pos == string::npos) {
-        return false;
+    for (int pos = text.find(line); pos != string::npos; pos = text.find(line, pos + 1)) {
+        const bool startsOnNewLine = pos == 0 || text.at(pos - 1) == '\n';
+        const bool endsLine = pos + line.size() == text.size() || text.at(pos + line.size()) == '\n';
+        if (startsOnNewLine && endsLine) {
+            return true;
+        }
     }
-    const bool startsOnNewLine = pos == 0 || text.at(pos - 1) == '\n';
-    const bool endsLine = pos + line.size() == text.size() || text.at(pos + line.size()) == '\n';
-    return startsOnNewLine && endsLine;
+    return false;
 }
 
 void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,

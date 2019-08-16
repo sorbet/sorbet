@@ -145,6 +145,26 @@ sig(:final) {void}
 The main reason for this difference is that we want to know that a method is
 final before running the block inside the sig.
 
+If the syntax for marking a method final was to have a `final.` builder put
+inside the block to sig, similar to `abstract.`, `override.`, etc, then, if we
+wanted to know whether a method has been marked final or not, then we would need
+to run the block in the `sig`.
+
+The problem is, we would like to know whether a method is final or not in the
+runtime "immediately", i.e. before the method has even been called. This is at
+odds with the semantics of the block to `sig`: the `sig` block is lazy, and the
+code inside it is not run until the first time the method is called.
+
+That is, if we wanted to use a `final.` builder inside the block to `sig.`, and
+also wanted to know whether a method is final "immediately", then we would be
+forced to run the `sig` block immediately and not defer it until later. But, if
+we were to force the sig block to be run immediately after saying "sig", then we
+would lose the benefits of having the sig block be lazy.
+
+We intentionally want to keep the block to sig lazy, because that means, for
+instance, you may reference constants inside the `sig` block that aren't yet
+defined but will be defined later.
+
 ## Enabling all of the runtime checks
 
 Before using final in a project, we recommend opting in to all of the runtime
@@ -184,3 +204,46 @@ puts C.new.foo
 At runtime, this does not raise and prints 2, showing that we have violated the
 guarantees of final. This is why we strongly recommend calling
 `T::Configuration.enable_final_checks_on_hooks` before using final.
+
+## Limitations of the statics
+
+The following violations of the semantics of "final" are currently not caught by
+the static checks (they are only caught by the runtime checks):
+
+1.  When a method is redefined, as in:
+
+    ```ruby
+    # typed: true
+    T::Configuration.enable_final_checks_on_hooks
+
+    module Bad
+      extend T::Sig
+      sig(:final) {void}
+      def foo; end
+      def foo; end
+    end
+    ```
+
+1.  When a method is overridden via including two conflicting modules, as in:
+
+    ```ruby
+    # typed: true
+    T::Configuration.enable_final_checks_on_hooks
+
+    module A
+      extend T::Sig
+      sig(:final) {void}
+      def foo; end
+    end
+
+    module B
+      extend T::Sig
+      sig(:final) {void}
+      def foo; end
+    end
+
+    module Bad
+      include A
+      include B
+    end
+    ```
