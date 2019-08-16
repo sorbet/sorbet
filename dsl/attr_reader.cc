@@ -21,7 +21,19 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
             ENFORCE(loc.source(ctx).size() > 1 && loc.source(ctx)[0] == ':');
             loc = core::Loc(loc.file(), loc.beginPos() + 1, loc.endPos());
         } else if (lit->isString(ctx)) {
-            res = lit->asString(ctx);
+            core::NameRef nameRef = lit->asString(ctx);
+            bool validAttr =
+                absl::c_all_of(nameRef.data(ctx)->shortName(ctx), [&](char c) { return isalpha(c) || c == '_'; });
+            if (validAttr) {
+                res = nameRef;
+            } else {
+                if (auto e = ctx.state.beginError(name->loc, core::errors::DSL::BadAttrArg)) {
+                    // we can't necessarily repeat the name here because it might have newlines in it, in which case our
+                    // expected invariant that all error lines are a single line will break
+                    e.setHeader("Invalid string provided for attribute name");
+                }
+                res = core::Names::empty();
+            }
             loc = lit->loc;
         }
     }
