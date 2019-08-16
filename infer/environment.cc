@@ -543,8 +543,8 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
     }
 
     auto &knowledgeToChoose = isTrue ? thisKnowledge.truthy : thisKnowledge.falsy;
-    auto yesTests = knowledgeToChoose->yesTypeTests;
-    auto noTests = knowledgeToChoose->noTypeTests;
+    auto &yesTests = knowledgeToChoose->yesTypeTests;
+    auto &noTests = knowledgeToChoose->noTypeTests;
 
     for (auto &typeTested : yesTests) {
         if (filter.find(typeTested.first) == filter.end()) {
