@@ -538,7 +538,6 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
         vars[cond].knownTruthy = true;
     }
 
-
     if (isDead) {
         return;
     }
