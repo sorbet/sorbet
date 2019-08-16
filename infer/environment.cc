@@ -339,11 +339,10 @@ bool isSingleton(core::Context ctx, core::SymbolRef sym) {
 
 void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, const cfg::Send *send,
                                   KnowledgeFilter &knowledgeFilter) {
-    if (!knowledgeFilter.isNeeded(local)) {
-        return;
-    }
-
     if (send->fun == core::Names::bang()) {
+        if (!knowledgeFilter.isNeeded(local)) {
+            return;
+        }
         auto &whoKnows = getKnowledge(local);
         auto fnd = vars.find(send->recv.variable);
         if (fnd != vars.end()) {
@@ -357,11 +356,17 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
 
         whoKnows.sanityCheck();
     } else if (send->fun == core::Names::nil_p()) {
+        if (!knowledgeFilter.isNeeded(local)) {
+            return;
+        }
         auto &whoKnows = getKnowledge(local);
         whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, core::Types::nilClass());
         whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv.variable, core::Types::nilClass());
         whoKnows.sanityCheck();
     } else if (send->fun == core::Names::blank_p()) {
+        if (!knowledgeFilter.isNeeded(local)) {
+            return;
+        }
         // Note that this assumes that .blank? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         auto &originalType = send->recv.type;
@@ -373,6 +378,9 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             whoKnows.sanityCheck();
         }
     } else if (send->fun == core::Names::present_p()) {
+        if (!knowledgeFilter.isNeeded(local)) {
+            return;
+        }
         // Note that this assumes that .present? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         auto &originalType = send->recv.type;
@@ -389,6 +397,9 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         return;
     }
     if (send->fun == core::Names::kind_of() || send->fun == core::Names::is_a_p()) {
+        if (!knowledgeFilter.isNeeded(local)) {
+            return;
+        }
         auto &whoKnows = getKnowledge(local);
         auto &klassType = send->args[0].type;
         core::SymbolRef klass = core::Types::getRepresentedClass(ctx, klassType.get());
@@ -401,6 +412,9 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             whoKnows.sanityCheck();
         }
     } else if (send->fun == core::Names::eqeq() || send->fun == core::Names::neq()) {
+        if (!knowledgeFilter.isNeeded(local)) {
+            return;
+        }
         auto &whoKnows = getKnowledge(local);
         const auto &argType = send->args[0].type;
         const auto &recvType = send->recv.type;
@@ -432,6 +446,9 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         }
         whoKnows.sanityCheck();
     } else if (send->fun == core::Names::tripleEq()) {
+        if (!knowledgeFilter.isNeeded(local)) {
+            return;
+        }
         auto &whoKnows = getKnowledge(local);
         const auto &recvType = send->recv.type;
 
