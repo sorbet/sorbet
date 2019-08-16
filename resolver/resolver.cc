@@ -1502,7 +1502,7 @@ public:
                     asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
                                                core::Names::suggestType(), move(rhs));
                 }
-            } else if (!core::isa_type<core::AliasType>(&*data->resultType)) {
+            } else if (!core::isa_type<core::AliasType>(data->resultType.get())) {
                 resolveConstantType(ctx, asgn->rhs, sym);
             }
         }
