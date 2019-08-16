@@ -276,7 +276,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     // Used to populate default options.
     Options empty;
 
-    cxxopts::Options options("srb", "Typechecker for Ruby");
+    cxxopts::Options options("sorbet", "Typechecker for Ruby");
 
     // Common user options in order of use
     options.add_options()("e", "Parse an inline ruby string",
