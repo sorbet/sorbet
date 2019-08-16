@@ -9,10 +9,10 @@ cc_library(
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
+    visibility = ["//visibility:public"],
     deps = [
         "//common",
     ],
-    visibility = ["//visibility:public"],
 )
 
 config_setting(
