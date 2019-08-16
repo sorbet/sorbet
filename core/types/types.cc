@@ -841,11 +841,15 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
     if (!ty->derivesFrom(ctx, core::Symbols::Module())) {
         return core::Symbols::noSymbol();
     }
-
     core::SymbolRef singleton;
-    if (auto *s = core::cast_type<core::ClassType>(ty)) {
+    auto *s = core::cast_type<core::ClassType>(ty);
+    if (s != nullptr) {
         singleton = s->symbol;
-    } else if (auto *at = core::cast_type<core::AppliedType>(ty)) {
+    } else {
+        auto *at = core::cast_type<core::AppliedType>(ty);
+        if (at == nullptr) {
+            return core::Symbols::noSymbol();
+        }
         // If this class is a "real" generic, leave it alone. We're not quite
         // sure yet what it means to move between the "attached" and "singleton"
         // levels for generic singletons. However, if the singleton has kind `*`
@@ -855,10 +859,7 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
             return core::Symbols::noSymbol();
         }
         singleton = at->klass;
-    } else {
-        return core::Symbols::noSymbol();
     }
-
     return singleton.data(ctx)->attachedClass(ctx);
 }
 
