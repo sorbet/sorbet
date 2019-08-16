@@ -952,8 +952,8 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
             actualEditedFileContents.replace(startOffset, endOffset - startOffset, e->newText);
         }
         EXPECT_EQ(actualEditedFileContents, expectedEditedFileContents) << fmt::format(
-            "Invalid quick fix result. Expected edited result to be:\n{}\n...but actually resulted in:\n{}",
-            expectedEditedFileContents, actualEditedFileContents);
+            "Invalid quick fix result. Expected edited result ({}) to be:\n{}\n...but actually resulted in:\n{}",
+            expectedUpdatedFilePath, expectedEditedFileContents, actualEditedFileContents);
     }
 }
 
