@@ -3,14 +3,14 @@
 # [Float](Float) objects represent inexact real
 # numbers using the native architecture's double-precision floating point
 # representation.
-# 
+#
 # Floating point has a different arithmetic and is an inexact number. So
 # you should know its esoteric system. See following:
-# 
+#
 #   - [docs.sun.com/source/806-3568/ncg\_goldberg.html](http://docs.sun.com/source/806-3568/ncg_goldberg.html)
-# 
+#
 #   - [wiki.github.com/rdp/ruby\_tutorials\_core/ruby-talk-faq\#wiki-floats\_imprecise](http://wiki.github.com/rdp/ruby_tutorials_core/ruby-talk-faq#wiki-floats_imprecise)
-# 
+#
 #   - [en.wikipedia.org/wiki/Floating\_point\#Accuracy\_problems](http://en.wikipedia.org/wiki/Floating_point#Accuracy_problems)
 class Float < Numeric
   DIG = T.let(T.unsafe(nil), Integer)
@@ -28,7 +28,7 @@ class Float < Numeric
   ROUNDS = T.let(T.unsafe(nil), Integer)
 
   # Returns the modulo after division of `float` by `other` .
-  # 
+  #
   # ```ruby
   # 6543.21.modulo(137)      #=> 104.21000000000004
   # 6543.21.modulo(137.24)   #=> 92.92999999999961
@@ -100,7 +100,7 @@ class Float < Numeric
   def *(arg0); end
 
   # Raises `float` to the power of `other` .
-  # 
+  #
   # ```ruby
   # 2.0**3   #=> 8.0
   # ```
@@ -261,7 +261,7 @@ class Float < Numeric
   def /(arg0); end
 
   # Returns `true` if `float` is less than `real` .
-  # 
+  #
   # The result of `NaN < NaN` is undefined, so an implementation-dependent
   # value is returned.
   sig do
@@ -291,7 +291,7 @@ class Float < Numeric
   def <(arg0); end
 
   # Returns `true` if `float` is less than or equal to `real` .
-  # 
+  #
   # The result of `NaN <= NaN` is undefined, so an implementation-dependent
   # value is returned.
   sig do
@@ -323,10 +323,10 @@ class Float < Numeric
   # Returns -1, 0, or +1 depending on whether `float` is less than, equal
   # to, or greater than `real` . This is the basis for the tests in the
   # [Comparable](https://ruby-doc.org/core-2.6.3/Comparable.html) module.
-  # 
+  #
   # The result of `NaN <=> NaN` is undefined, so an implementation-dependent
   # value is returned.
-  # 
+  #
   # `nil` is returned if the two values are incomparable.
   sig do
     params(
@@ -357,11 +357,11 @@ class Float < Numeric
   # Returns `true` only if `obj` has the same value as `float` . Contrast
   # this with [\#eql?](Float.downloaded.ruby_doc#method-i-eql-3F) , which
   # requires `obj` to be a [Float](Float.downloaded.ruby_doc) .
-  # 
+  #
   # ```ruby
   # 1.0 == 1   #=> true
   # ```
-  # 
+  #
   # The result of `NaN == NaN` is undefined, so an implementation-dependent
   # value is returned.
   sig do
@@ -375,11 +375,11 @@ class Float < Numeric
   # Returns `true` only if `obj` has the same value as `float` . Contrast
   # this with [\#eql?](Float.downloaded.ruby_doc#method-i-eql-3F) , which
   # requires `obj` to be a [Float](Float.downloaded.ruby_doc) .
-  # 
+  #
   # ```ruby
   # 1.0 == 1   #=> true
   # ```
-  # 
+  #
   # The result of `NaN == NaN` is undefined, so an implementation-dependent
   # value is returned.
   sig do
@@ -391,7 +391,7 @@ class Float < Numeric
   def ===(arg0); end
 
   # Returns `true` if `float` is greater than `real` .
-  # 
+  #
   # The result of `NaN > NaN` is undefined, so an implementation-dependent
   # value is returned.
   sig do
@@ -421,7 +421,7 @@ class Float < Numeric
   def >(arg0); end
 
   # Returns `true` if `float` is greater than or equal to `real` .
-  # 
+  #
   # The result of `NaN >= NaN` is undefined, so an implementation-dependent
   # value is returned.
   sig do
@@ -451,13 +451,13 @@ class Float < Numeric
   def >=(arg0); end
 
   # Returns the absolute value of `float` .
-  # 
+  #
   # ```ruby
   # (-34.56).abs   #=> 34.56
   # -34.56.abs     #=> 34.56
   # 34.56.abs      #=> 34.56
   # ```
-  # 
+  #
   # [\#magnitude](Float.downloaded.ruby_doc#method-i-magnitude) is an alias
   # for [\#abs](Float.downloaded.ruby_doc#method-i-abs) .
   sig {returns(Float)}
@@ -476,24 +476,24 @@ class Float < Numeric
 
   # Returns the smallest number greater than or equal to `float` with a
   # precision of `ndigits` decimal digits (default: 0).
-  # 
+  #
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
-  # 
+  #
   # Returns a floating point number when `ndigits` is positive, otherwise
   # returns an integer.
-  # 
+  #
   # ```ruby
   # 1.2.ceil      #=> 2
   # 2.0.ceil      #=> 2
   # (-1.2).ceil   #=> -1
   # (-2.0).ceil   #=> -2
-  # 
+  #
   # 1.234567.ceil(2)   #=> 1.24
   # 1.234567.ceil(3)   #=> 1.235
   # 1.234567.ceil(4)   #=> 1.2346
   # 1.234567.ceil(5)   #=> 1.23457
-  # 
+  #
   # 34567.89.ceil(-5)  #=> 100000
   # 34567.89.ceil(-4)  #=> 40000
   # 34567.89.ceil(-3)  #=> 35000
@@ -504,10 +504,10 @@ class Float < Numeric
   # 34567.89.ceil(2)   #=> 34567.89
   # 34567.89.ceil(3)   #=> 34567.89
   # ```
-  # 
+  #
   # Note that the limited precision of floating point arithmetic might lead
   # to surprising results:
-  # 
+  #
   # ```ruby
   # (2.1 / 0.7).ceil  #=> 4 (!)
   # ```
@@ -522,10 +522,10 @@ class Float < Numeric
 
   # Returns an array with both `numeric` and `float` represented as
   # [Float](Float.downloaded.ruby_doc) objects.
-  # 
+  #
   # This is achieved by converting `numeric` to a
   # [Float](Float.downloaded.ruby_doc) .
-  # 
+  #
   # ```ruby
   # 1.2.coerce(3)       #=> [3.0, 1.2]
   # 2.5.coerce(1.1)     #=> [1.1, 2.5]
@@ -552,7 +552,7 @@ class Float < Numeric
 
   # Returns the denominator (always positive). The result is machine
   # dependent.
-  # 
+  #
   # See also [\#numerator](Float.downloaded.ruby_doc#method-i-numerator) .
   sig {returns(Integer)}
   def denominator(); end
@@ -586,7 +586,7 @@ class Float < Numeric
   # See
   # [Numeric\#divmod](https://ruby-doc.org/core-2.6.3/Numeric.html#method-i-divmod)
   # .
-  # 
+  #
   # ```ruby
   # 42.0.divmod(6)   #=> [7, 0.0]
   # 42.0.divmod(5)   #=> [8, 2.0]
@@ -602,11 +602,11 @@ class Float < Numeric
   # Returns `true` only if `obj` is a [Float](Float.downloaded.ruby_doc)
   # with the same value as `float` . Contrast this with Float\#==, which
   # performs type conversions.
-  # 
+  #
   # ```ruby
   # 1.0.eql?(1)   #=> false
   # ```
-  # 
+  #
   # The result of `NaN.eql?(NaN)` is undefined, so an
   # implementation-dependent value is returned.
   sig do
@@ -666,24 +666,24 @@ class Float < Numeric
 
   # Returns the largest number less than or equal to `float` with a
   # precision of `ndigits` decimal digits (default: 0).
-  # 
+  #
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
-  # 
+  #
   # Returns a floating point number when `ndigits` is positive, otherwise
   # returns an integer.
-  # 
+  #
   # ```ruby
   # 1.2.floor      #=> 1
   # 2.0.floor      #=> 2
   # (-1.2).floor   #=> -2
   # (-2.0).floor   #=> -2
-  # 
+  #
   # 1.234567.floor(2)   #=> 1.23
   # 1.234567.floor(3)   #=> 1.234
   # 1.234567.floor(4)   #=> 1.2345
   # 1.234567.floor(5)   #=> 1.23456
-  # 
+  #
   # 34567.89.floor(-5)  #=> 0
   # 34567.89.floor(-4)  #=> 30000
   # 34567.89.floor(-3)  #=> 34000
@@ -694,10 +694,10 @@ class Float < Numeric
   # 34567.89.floor(2)   #=> 34567.89
   # 34567.89.floor(3)   #=> 34567.89
   # ```
-  # 
+  #
   # Note that the limited precision of floating point arithmetic might lead
   # to surprising results:
-  # 
+  #
   # ```ruby
   # (0.3 / 0.1).floor  #=> 2 (!)
   # ```
@@ -711,7 +711,7 @@ class Float < Numeric
   def floor(digits=0); end
 
   # Returns a hash code for this float.
-  # 
+  #
   # See also Object\#hash.
   sig {returns(Integer)}
   def hash(); end
@@ -724,7 +724,7 @@ class Float < Numeric
 
   # Returns `nil`, -1, or 1 depending on whether the value is finite,
   # `-Infinity`, or `+Infinity` .
-  # 
+  #
   # ```ruby
   # (0.0).infinite?        #=> nil
   # (-1.0/0.0).infinite?   #=> -1
@@ -738,20 +738,20 @@ class Float < Numeric
   def inspect(); end
 
   # Returns the absolute value of `float` .
-  # 
+  #
   # ```ruby
   # (-34.56).abs   #=> 34.56
   # -34.56.abs     #=> 34.56
   # 34.56.abs      #=> 34.56
   # ```
-  # 
+  #
   # [\#magnitude](Float.downloaded.ruby_doc#method-i-magnitude) is an alias
   # for [\#abs](Float.downloaded.ruby_doc#method-i-abs) .
   sig {returns(Float)}
   def magnitude(); end
 
   # Returns the modulo after division of `float` by `other` .
-  # 
+  #
   # ```ruby
   # 6543.21.modulo(137)      #=> 104.21000000000004
   # 6543.21.modulo(137.24)   #=> 92.92999999999961
@@ -783,7 +783,7 @@ class Float < Numeric
   def modulo(arg0); end
 
   # Returns `true` if `float` is an invalid IEEE floating point number.
-  # 
+  #
   # ```ruby
   # a = -1.0      #=> -1.0
   # a.nan?        #=> false
@@ -794,23 +794,23 @@ class Float < Numeric
   def nan?(); end
 
   # Returns the next representable floating point number.
-  # 
+  #
   # Float::MAX.next\_float and Float::INFINITY.next\_float is
   # Float::INFINITY.
-  # 
+  #
   # Float::NAN.next\_float is Float::NAN.
-  # 
+  #
   # For example:
-  # 
+  #
   # ```ruby
   # 0.01.next_float    #=> 0.010000000000000002
   # 1.0.next_float     #=> 1.0000000000000002
   # 100.0.next_float   #=> 100.00000000000001
-  # 
+  #
   # 0.01.next_float - 0.01     #=> 1.734723475976807e-18
   # 1.0.next_float - 1.0       #=> 2.220446049250313e-16
   # 100.0.next_float - 100.0   #=> 1.4210854715202004e-14
-  # 
+  #
   # f = 0.01; 20.times { printf "%-20a %s\n", f, f.to_s; f = f.next_float }
   # #=> 0x1.47ae147ae147bp-7 0.01
   # #   0x1.47ae147ae147cp-7 0.010000000000000002
@@ -832,7 +832,7 @@ class Float < Numeric
   # #   0x1.47ae147ae148cp-7 0.01000000000000003
   # #   0x1.47ae147ae148dp-7 0.010000000000000031
   # #   0x1.47ae147ae148ep-7 0.010000000000000033
-  # 
+  #
   # f = 0.0
   # 100.times { f += 0.1 }
   # f                           #=> 9.99999999999998       # should be 10.0 in the ideal world.
@@ -847,13 +847,13 @@ class Float < Numeric
   def next_float(); end
 
   # Returns the numerator. The result is machine dependent.
-  # 
+  #
   # ```ruby
   # n = 0.3.numerator    #=> 5404319552844595
   # d = 0.3.denominator  #=> 18014398509481984
   # n.fdiv(d)            #=> 0.3
   # ```
-  # 
+  #
   # See also [\#denominator](Float.downloaded.ruby_doc#method-i-denominator)
   # .
   sig {returns(Integer)}
@@ -864,23 +864,23 @@ class Float < Numeric
   def phase(); end
 
   # Returns the previous representable floating point number.
-  # 
+  #
   # (-Float::MAX).prev\_float and (-Float::INFINITY).prev\_float is
   # -Float::INFINITY.
-  # 
+  #
   # Float::NAN.prev\_float is Float::NAN.
-  # 
+  #
   # For example:
-  # 
+  #
   # ```ruby
   # 0.01.prev_float    #=> 0.009999999999999998
   # 1.0.prev_float     #=> 0.9999999999999999
   # 100.0.prev_float   #=> 99.99999999999999
-  # 
+  #
   # 0.01 - 0.01.prev_float     #=> 1.734723475976807e-18
   # 1.0 - 1.0.prev_float       #=> 1.1102230246251565e-16
   # 100.0 - 100.0.prev_float   #=> 1.4210854715202004e-14
-  # 
+  #
   # f = 0.01; 20.times { printf "%-20a %s\n", f, f.to_s; f = f.prev_float }
   # #=> 0x1.47ae147ae147bp-7 0.01
   # #   0x1.47ae147ae147ap-7 0.009999999999999998
@@ -942,13 +942,13 @@ class Float < Numeric
   # Returns a simpler approximation of the value (flt-|eps| \<= result \<=
   # flt+|eps|). If the optional argument `eps` is not given, it will be
   # chosen automatically.
-  # 
+  #
   # ```ruby
   # 0.3.rationalize          #=> (3/10)
   # 1.333.rationalize        #=> (1333/1000)
   # 1.333.rationalize(0.01)  #=> (4/3)
   # ```
-  # 
+  #
   # See also [\#to\_r](Float.downloaded.ruby_doc#method-i-to_r) .
   sig {returns(Rational)}
   sig do
@@ -967,24 +967,24 @@ class Float < Numeric
 
   # Returns `float` rounded to the nearest value with a precision of
   # `ndigits` decimal digits (default: 0).
-  # 
+  #
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
-  # 
+  #
   # Returns a floating point number when `ndigits` is positive, otherwise
   # returns an integer.
-  # 
+  #
   # ```ruby
   # 1.4.round      #=> 1
   # 1.5.round      #=> 2
   # 1.6.round      #=> 2
   # (-1.5).round   #=> -2
-  # 
+  #
   # 1.234567.round(2)   #=> 1.23
   # 1.234567.round(3)   #=> 1.235
   # 1.234567.round(4)   #=> 1.2346
   # 1.234567.round(5)   #=> 1.23457
-  # 
+  #
   # 34567.89.round(-5)  #=> 0
   # 34567.89.round(-4)  #=> 30000
   # 34567.89.round(-3)  #=> 35000
@@ -995,17 +995,17 @@ class Float < Numeric
   # 34567.89.round(2)   #=> 34567.89
   # 34567.89.round(3)   #=> 34567.89
   # ```
-  # 
+  #
   # If the optional `half` keyword argument is given, numbers that are
   # half-way between two possible rounded values will be rounded according
   # to the specified tie-breaking `mode` :
-  # 
+  #
   #   - `:up` or `nil` : round half away from zero (default)
-  # 
+  #
   #   - `:down` : round half toward zero
-  # 
+  #
   #   - `:even` : round half toward the nearest even number
-  #     
+  #
   #     ```ruby
   #     2.5.round(half: :up)      #=> 3
   #     2.5.round(half: :down)    #=> 2
@@ -1036,19 +1036,19 @@ class Float < Numeric
 
   # Returns the `float` truncated to an
   # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html) .
-  # 
+  #
   # ```ruby
   # 1.2.to_i      #=> 1
   # (-1.2).to_i   #=> -1
   # ```
-  # 
+  #
   # Note that the limited precision of floating point arithmetic might lead
   # to surprising results:
-  # 
+  #
   # ```ruby
   # (0.3 / 0.1).to_i  #=> 2 (!)
   # ```
-  # 
+  #
   # [to\_int](Float.downloaded.ruby_doc#method-i-to_int) is an alias for
   # [to\_i](Float.downloaded.ruby_doc#method-i-to_i) .
   sig {returns(Integer)}
@@ -1056,26 +1056,26 @@ class Float < Numeric
 
   # Returns the `float` truncated to an
   # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html) .
-  # 
+  #
   # ```ruby
   # 1.2.to_i      #=> 1
   # (-1.2).to_i   #=> -1
   # ```
-  # 
+  #
   # Note that the limited precision of floating point arithmetic might lead
   # to surprising results:
-  # 
+  #
   # ```ruby
   # (0.3 / 0.1).to_i  #=> 2 (!)
   # ```
-  # 
+  #
   # [to\_int](Float.downloaded.ruby_doc#method-i-to_int) is an alias for
   # [to\_i](Float.downloaded.ruby_doc#method-i-to_i) .
   sig {returns(Integer)}
   def to_int(); end
 
   # Returns the value as a rational.
-  # 
+  #
   # ```ruby
   # 2.0.to_r    #=> (2/1)
   # 2.5.to_r    #=> (5/2)
@@ -1083,13 +1083,13 @@ class Float < Numeric
   # 0.0.to_r    #=> (0/1)
   # 0.3.to_r    #=> (5404319552844595/18014398509481984)
   # ```
-  # 
+  #
   # NOTE: 0.3.to\_r isn’t the same as “0.3”.to\_r. The latter is equivalent
   # to “3/10”.to\_r, but the former isn’t so.
-  # 
+  #
   #     0.3.to_r   == 3/10r  #=> false
   #     "0.3".to_r == 3/10r  #=> true
-  # 
+  #
   # See also [\#rationalize](Float.downloaded.ruby_doc#method-i-rationalize)
   # .
   sig {returns(Rational)}
@@ -1098,32 +1098,32 @@ class Float < Numeric
   # Returns a string containing a representation of `self` . As well as a
   # fixed or exponential form of the `float`, the call may return `NaN`,
   # `Infinity`, and `-Infinity` .
-  # 
-  # 
-  # 
+  #
+  #
+  #
   # Also aliased as: [inspect](Float.downloaded.ruby_doc#method-i-inspect)
   sig {params(base: Integer).returns(String)}
   def to_s(base=10); end
 
   # Returns `float` truncated (toward zero) to a precision of `ndigits`
   # decimal digits (default: 0).
-  # 
+  #
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
-  # 
+  #
   # Returns a floating point number when `ndigits` is positive, otherwise
   # returns an integer.
-  # 
+  #
   # ```ruby
   # 2.8.truncate           #=> 2
   # (-2.8).truncate        #=> -2
   # 1.234567.truncate(2)   #=> 1.23
   # 34567.89.truncate(-2)  #=> 34500
   # ```
-  # 
+  #
   # Note that the limited precision of floating point arithmetic might lead
   # to surprising results:
-  # 
+  #
   # ```ruby
   # (0.3 / 0.1).truncate  #=> 2 (!)
   # ```

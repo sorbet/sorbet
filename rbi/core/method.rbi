@@ -7,7 +7,7 @@ class Method < Object
 
   # Invokes the *meth* with the specified arguments, returning the method’s
   # return value.
-  # 
+  #
   # ```ruby
   # m = 12.method("+")
   # m.call(3)    #=> 15
@@ -19,12 +19,12 @@ class Method < Object
   # Returns a proc that is the composition of this method and the given *g*
   # . The returned proc takes a variable number of arguments, calls *g* with
   # them then calls this method with the result.
-  # 
+  #
   # ```ruby
   # def f(x)
   #   x * x
   # end
-  # 
+  #
   # f = self.method(:f)
   # g = proc {|x| x + x }
   # p (f << g).call(2) #=> 16
@@ -35,10 +35,10 @@ class Method < Object
   # Invokes the method with `obj` as the parameter like
   # [call](Method.downloaded.ruby_doc#method-i-call) . This allows a method
   # object to be the target of a `when` clause in a case statement.
-  # 
+  #
   # ```ruby
   # require 'prime'
-  # 
+  #
   # case 1373
   # when Prime.method(:prime?)
   #   # ...
@@ -50,12 +50,12 @@ class Method < Object
   # Returns a proc that is the composition of this method and the given *g*
   # . The returned proc takes a variable number of arguments, calls *g* with
   # them then calls this method with the result.
-  # 
+  #
   # ```ruby
   # def f(x)
   #   x * x
   # end
-  # 
+  #
   # f = self.method(:f)
   # g = proc {|x| x + x }
   # p (f >> g).call(2) #=> 8
@@ -65,7 +65,7 @@ class Method < Object
 
   # Invokes the *meth* with the specified arguments, returning the method’s
   # return value.
-  # 
+  #
   # ```ruby
   # m = 12.method("+")
   # m.call(3)    #=> 15
@@ -82,7 +82,7 @@ class Method < Object
   # argument being mandatory if any keyword argument is mandatory. For
   # methods written in C, returns -1 if the call takes a variable number of
   # arguments.
-  # 
+  #
   #     class C
   #       def one;    end
   #       def two(a); end
@@ -106,7 +106,7 @@ class Method < Object
   #     c.method(:eight).arity   #=> 1
   #     c.method(:nine).arity    #=> 1
   #     c.method(:ten).arity     #=> -2
-  #     
+  #
   #     "cat".method(:size).arity      #=> 0
   #     "cat".method(:replace).arity   #=> 1
   #     "cat".method(:squeeze).arity   #=> -1
@@ -115,14 +115,14 @@ class Method < Object
   def arity; end
 
   # Returns a clone of this method.
-  # 
+  #
   # ```ruby
   # class A
   #   def foo
   #     return "bar"
   #   end
   # end
-  # 
+  #
   # m = A.new.method(:foo)
   # m.call # => "bar"
   # n = m.clone.call # => "bar"
@@ -138,7 +138,7 @@ class Method < Object
   def name; end
 
   # Returns the original name of the method.
-  # 
+  #
   # ```ruby
   # class C
   #   def foo; end
@@ -150,7 +150,7 @@ class Method < Object
   def original_name; end
 
   # Returns the class or module that defines the method. See also receiver.
-  # 
+  #
   # ```ruby
   # (1..3).method(:map).owner #=> Enumerable
   # ```
@@ -158,17 +158,17 @@ class Method < Object
   def owner; end
 
   # Returns the parameter information of this method.
-  # 
+  #
   # ```ruby
   # def foo(bar); end
   # method(:foo).parameters #=> [[:req, :bar]]
-  # 
+  #
   # def foo(bar, baz, bat, &blk); end
   # method(:foo).parameters #=> [[:req, :bar], [:req, :baz], [:req, :bat], [:block, :blk]]
-  # 
+  #
   # def foo(bar, *args); end
   # method(:foo).parameters #=> [[:req, :bar], [:rest, :args]]
-  # 
+  #
   # def foo(bar, baz, *args, &blk); end
   # method(:foo).parameters #=> [[:req, :bar], [:req, :baz], [:rest, :args], [:block, :blk]]
   # ```
@@ -176,7 +176,7 @@ class Method < Object
   def parameters; end
 
   # Returns the bound receiver of the method object.
-  # 
+  #
   # ```ruby
   # (1..3).method(:map).receiver # => 1..3
   # ```

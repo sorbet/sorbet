@@ -2,10 +2,10 @@
 
 # The [GC](GC) module provides an interface to Ruby’s
 # mark and sweep garbage collection mechanism.
-# 
+#
 # Some of the underlying methods are also available via the
 # [ObjectSpace](https://ruby-doc.org/core-2.6.3/ObjectSpace.html) module.
-# 
+#
 # You may obtain information about the operation of the
 # [GC](GC) through
 # [GC::Profiler](https://ruby-doc.org/core-2.6.3/GC/Profiler.html) .
@@ -14,7 +14,7 @@ module GC
   OPTS = T.let(T.unsafe(nil), Array)
 
   # The number of times [GC](GC.downloaded.ruby_doc) occurred.
-  # 
+  #
   # It returns the number of times [GC](GC.downloaded.ruby_doc) occurred
   # since the process started.
   sig {returns(Integer)}
@@ -22,7 +22,7 @@ module GC
 
   # Disables garbage collection, returning `true` if garbage collection was
   # already disabled.
-  # 
+  #
   # ```ruby
   # GC.disable   #=> false
   # GC.disable   #=> true
@@ -32,7 +32,7 @@ module GC
 
   # Enables garbage collection, returning `true` if garbage collection was
   # previously disabled.
-  # 
+  #
   # ```ruby
   # GC.disable   #=> false
   # GC.enable    #=> true
@@ -42,14 +42,14 @@ module GC
   def self.enable(); end
 
   # Initiates garbage collection, unless manually disabled.
-  # 
+  #
   # This method is defined with keyword arguments that default to true:
-  # 
+  #
   #     def GC.start(full_mark: true, immediate_sweep: true); end
-  # 
+  #
   # Use full\_mark: false to perform a minor [GC](GC.downloaded.ruby_doc) .
   # Use immediate\_sweep: false to defer sweeping (use lazy sweep).
-  # 
+  #
   # Note: These keyword arguments are implementation and version dependent.
   # They are not guaranteed to be future-compatible, and may be ignored if
   # the underlying implementation does not support them.
@@ -64,10 +64,10 @@ module GC
 
   # Returns a [Hash](https://ruby-doc.org/core-2.6.3/Hash.html) containing
   # information about the [GC](GC.downloaded.ruby_doc) .
-  # 
+  #
   # The hash includes information about internal statistics about
   # [GC](GC.downloaded.ruby_doc) such as:
-  # 
+  #
   # ```ruby
   # {
   #     :count=>0,
@@ -97,10 +97,10 @@ module GC
   #     :oldmalloc_increase_bytes_limit=>16777216
   # }
   # ```
-  # 
+  #
   # The contents of the hash are implementation specific and may be changed
   # in the future.
-  # 
+  #
   # This method is only expected to work on C Ruby.
   sig {params(arg0: T::Hash[Symbol, Integer]).returns(T::Hash[Symbol, Integer])}
   sig {params(arg0: Symbol).returns(Integer)}

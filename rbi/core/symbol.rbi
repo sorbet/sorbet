@@ -8,7 +8,7 @@
 # Thus if `Fred` is a constant in one context, a method in another, and a
 # class in a third, the `Symbol` `:Fred` will be the same object in all
 # three contexts.
-# 
+#
 # ```ruby
 # module One
 #   class Fred
@@ -30,7 +30,7 @@ class Symbol < Object
   include Comparable
 
   # Returns an array of all the symbols currently in Ruby's symbol table.
-  # 
+  #
   #     Symbol.all_symbols.size    #=> 903
   #     Symbol.all_symbols[1,20]   #=> [:floor, :ARGV, :Binding, :symlink,
   #                                     :chown, :EOFError, :$;, :String,
@@ -45,9 +45,9 @@ class Symbol < Object
   # [to\_s](Symbol.downloaded.ruby_doc#method-i-to_s) on each of the
   # symbols. Returns -1, 0, +1, or `nil` depending on whether `symbol` is
   # less than, equal to, or greater than `other_symbol` .
-  # 
+  #
   # `nil` is returned if the two values are incomparable.
-  # 
+  #
   # See String\#\<=\> for more information.
   sig do
     params(
@@ -104,17 +104,17 @@ class Symbol < Object
   # Case-insensitive version of `Symbol#<=>` . Currently, case-insensitivity
   # only works on characters A-Z/a-z, not all of Unicode. This is different
   # from [\#casecmp?](Symbol.downloaded.ruby_doc#method-i-casecmp-3F) .
-  # 
+  #
   # ```ruby
   # :aBcDeF.casecmp(:abcde)     #=> 1
   # :aBcDeF.casecmp(:abcdef)    #=> 0
   # :aBcDeF.casecmp(:abcdefg)   #=> -1
   # :abcdef.casecmp(:ABCDEF)    #=> 0
   # ```
-  # 
+  #
   # `nil` is returned if the two symbols have incompatible encodings, or if
   # `other_symbol` is not a symbol.
-  # 
+  #
   # ```ruby
   # :foo.casecmp(2)   #=> nil
   # "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp(:"\u{c4 d6 dc}")   #=> nil
@@ -129,7 +129,7 @@ class Symbol < Object
 
   # Returns `true` if `sym` and `other_symbol` are equal after Unicode case
   # folding, `false` if they are not equal.
-  # 
+  #
   # ```ruby
   # :aBcDeF.casecmp?(:abcde)     #=> false
   # :aBcDeF.casecmp?(:abcdef)    #=> true
@@ -137,10 +137,10 @@ class Symbol < Object
   # :abcdef.casecmp?(:ABCDEF)    #=> true
   # :"\u{e4 f6 fc}".casecmp?(:"\u{c4 d6 dc}")   #=> true
   # ```
-  # 
+  #
   # `nil` is returned if the two symbols have incompatible encodings, or if
   # `other_symbol` is not a symbol.
-  # 
+  #
   # ```ruby
   # :foo.casecmp?(2)   #=> nil
   # "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym.casecmp?(:"\u{c4 d6 dc}")   #=> nil
@@ -167,7 +167,7 @@ class Symbol < Object
   def encoding(); end
 
   # Returns the name or string corresponding to *sym* .
-  # 
+  #
   # ```ruby
   # :fred.id2name   #=> "fred"
   # :ginger.to_s    #=> "ginger"
@@ -176,7 +176,7 @@ class Symbol < Object
   def id2name(); end
 
   # Returns the representation of *sym* as a symbol literal.
-  # 
+  #
   # ```ruby
   # :fred.inspect   #=> ":fred"
   # ```
@@ -222,7 +222,7 @@ class Symbol < Object
   def swapcase(); end
 
   # Returns a *Proc* object which responds to the given method by *sym* .
-  # 
+  #
   # ```ruby
   # (1..3).collect(&:to_s)  #=> ["1", "2", "3"]
   # ```
@@ -260,7 +260,7 @@ class Symbol < Object
   def slice(idx_or_range, n=T.unsafe(nil)); end
 
   # Returns the name or string corresponding to *sym* .
-  # 
+  #
   # ```ruby
   # :fred.id2name   #=> "fred"
   # :ginger.to_s    #=> "ginger"

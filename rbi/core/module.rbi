@@ -6,10 +6,10 @@
 # do not. Conversely, module methods may be called without creating an
 # encapsulating object, while instance methods may not. (See
 # `Module#module_function` .)
-# 
+#
 # In the descriptions that follow, the parameter *sym* refers to a symbol,
 # which is either a quoted string or a `Symbol` (such as `:name` ).
-# 
+#
 # ```ruby
 # module Mod
 #   include Math
@@ -26,24 +26,24 @@ class Module < Object
   # In the first form, returns an array of the names of all constants
   # accessible from the point of call. This list includes the names of all
   # modules and classes defined in the global scope.
-  # 
+  #
   # ```ruby
   # Module.constants.first(4)
   #    # => [:ARGF, :ARGV, :ArgumentError, :Array]
-  # 
+  #
   # Module.constants.include?(:SEEK_SET)   # => false
-  # 
+  #
   # class IO
   #   Module.constants.include?(:SEEK_SET) # => true
   # end
   # ```
-  # 
+  #
   # The second form calls the instance method `constants` .
   sig {returns(T::Array[Integer])}
   def self.constants(); end
 
   # Returns the list of `Modules` nested at the point of call.
-  # 
+  #
   # ```ruby
   # module M1
   #   module M2
@@ -82,7 +82,7 @@ class Module < Object
   # Comparison—Returns -1, 0, +1 or nil depending on whether `module`
   # includes `other_module`, they are the same, or if `module` is included
   # by `other_module` .
-  # 
+  #
   # Returns `nil` if `module` has no relationship with `other_module`, if
   # `other_module` is not a module, or if the two values are incomparable.
   sig do
@@ -96,20 +96,20 @@ class Module < Object
   # Equality — At the `Object` level, `==` returns `true` only if `obj` and
   # `other` are the same object. Typically, this method is overridden in
   # descendant classes to provide class-specific meaning.
-  # 
+  #
   # Unlike `==`, the `equal?` method should never be overridden by
   # subclasses as it is used to determine object identity (that is,
   # `a.equal?(b)` if and only if `a` is the same object as `b` ):
-  # 
+  #
   # ```ruby
   # obj = "a"
   # other = obj.dup
-  # 
+  #
   # obj == other      #=> true
   # obj.equal? other  #=> false
   # obj.equal? obj    #=> true
   # ```
-  # 
+  #
   # The `eql?` method returns `true` if `obj` and `other` refer to the same
   # hash key. This is used by
   # [Hash](https://ruby-doc.org/core-2.6.3/Hash.html) to test members for
@@ -118,7 +118,7 @@ class Module < Object
   # their overridden `==` method, but there are exceptions. `Numeric` types,
   # for example, perform type conversion across `==`, but not across `eql?`
   # , so:
-  # 
+  #
   # ```ruby
   # 1 == 1.0     #=> true
   # 1.eql? 1.0   #=> false
@@ -167,7 +167,7 @@ class Module < Object
 
   # Makes *new\_name* a new copy of the method *old\_name* . This can be
   # used to retain access to methods that are overridden.
-  # 
+  #
   # ```ruby
   # module Mod
   #   alias_method :orig_exit, :exit
@@ -179,9 +179,9 @@ class Module < Object
   # include Mod
   # exit(99)
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   # ```ruby
   # Exiting with code 99
   # ```
@@ -196,14 +196,14 @@ class Module < Object
 
   # Returns a list of modules included/prepended in *mod* (including *mod*
   # itself).
-  # 
+  #
   # ```ruby
   # module Mod
   #   include Math
   #   include Comparable
   #   prepend Enumerable
   # end
-  # 
+  #
   # Mod.ancestors        #=> [Enumerable, Mod, Comparable, Math]
   # Math.ancestors       #=> [Math]
   # Enumerable.ancestors #=> [Enumerable]
@@ -246,7 +246,7 @@ class Module < Object
   # Registers *filename* to be loaded (using `Kernel::require` ) the first
   # time that *module* (which may be a `String` or a symbol) is accessed in
   # the namespace of *mod* .
-  # 
+  #
   # ```ruby
   # module A
   # end
@@ -264,7 +264,7 @@ class Module < Object
 
   # Returns *filename* to be loaded if *name* is registered as `autoload` in
   # the namespace of *mod* .
-  # 
+  #
   # ```ruby
   # module A
   # end
@@ -284,7 +284,7 @@ class Module < Object
   # can be used to add methods to a class. `module_eval` returns the result
   # of evaluating its argument. The optional *filename* and *lineno*
   # parameters set the text for error messages.
-  # 
+  #
   # ```ruby
   # class Thing
   # end
@@ -293,9 +293,9 @@ class Module < Object
   # puts Thing.new.hello()
   # Thing.module_eval("invalid code", "dummy", 123)
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     Hello there!
   #     dummy:123:in `module_eval': undefined local variable
   #         or method `code' for Thing:Class
@@ -322,7 +322,7 @@ class Module < Object
   # defined in the block will belong to the receiver. Any arguments passed
   # to the method will be passed to the block. This can be used if the block
   # needs to access instance variables.
-  # 
+  #
   # ```ruby
   # class Thing
   # end
@@ -331,9 +331,9 @@ class Module < Object
   # }
   # puts Thing.new.hello()
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   # ```ruby
   # Hello there!
   # ```
@@ -349,7 +349,7 @@ class Module < Object
   # Returns `true` if the given class variable is defined in *obj* .
   # [String](https://ruby-doc.org/core-2.6.3/String.html) arguments are
   # converted to symbols.
-  # 
+  #
   # ```ruby
   # class Fred
   #   @@foo = 99
@@ -370,7 +370,7 @@ class Module < Object
   # regular class variables.
   # [String](https://ruby-doc.org/core-2.6.3/String.html) arguments are
   # converted to symbols.
-  # 
+  #
   # ```ruby
   # class Fred
   #   @@foo = 99
@@ -388,7 +388,7 @@ class Module < Object
   # Sets the class variable named by *symbol* to the given object. If the
   # class variable name is passed as a string, that string is converted to a
   # symbol.
-  # 
+  #
   # ```ruby
   # class Fred
   #   @@foo = 99
@@ -411,7 +411,7 @@ class Module < Object
   # Returns an array of the names of class variables in *mod* . This
   # includes the names of class variables in any included modules, unless
   # the *inherit* parameter is set to `false` .
-  # 
+  #
   # ```ruby
   # class One
   #   @@var1 = 1
@@ -432,47 +432,47 @@ class Module < Object
   def class_variables(inherit=T.unsafe(nil)); end
 
   # Says whether *mod* or its ancestors have a constant with the given name:
-  # 
+  #
   # ```ruby
   # Float.const_defined?(:EPSILON)      #=> true, found in Float itself
   # Float.const_defined?("String")      #=> true, found in Object (ancestor)
   # BasicObject.const_defined?(:Hash)   #=> false
   # ```
-  # 
+  #
   # If *mod* is a `Module`, additionally `Object` and its ancestors are
   # checked:
-  # 
+  #
   # ```ruby
   # Math.const_defined?(:String)   #=> true, found in Object
   # ```
-  # 
+  #
   # In each of the checked classes or modules, if the constant is not
   # present but there is an autoload for it, `true` is returned directly
   # without autoloading:
-  # 
+  #
   # ```ruby
   # module Admin
   #   autoload :User, 'admin/user'
   # end
   # Admin.const_defined?(:User)   #=> true
   # ```
-  # 
+  #
   # If the constant is not found the callback `const_missing` is **not**
   # called and the method returns `false` .
-  # 
+  #
   # If `inherit` is false, the lookup only checks the constants in the
   # receiver:
-  # 
+  #
   # ```ruby
   # IO.const_defined?(:SYNC)          #=> true, found in File::Constants (ancestor)
   # IO.const_defined?(:SYNC, false)   #=> false, not found in IO itself
   # ```
-  # 
+  #
   # In this case, the same logic for autoloading applies.
-  # 
+  #
   # If the argument is not a valid constant name a `NameError` is raised
   # with the message “wrong constant name *name* ”:
-  # 
+  #
   # ```ruby
   # Hash.const_defined? 'foobar'   #=> NameError: wrong constant name foobar
   # ```
@@ -488,40 +488,40 @@ class Module < Object
   # Checks for a constant with the given name in *mod* . If `inherit` is
   # set, the lookup will also search the ancestors (and `Object` if *mod* is
   # a `Module` ).
-  # 
+  #
   # The value of the constant is returned if a definition is found,
   # otherwise a `NameError` is raised.
-  # 
+  #
   # ```ruby
   # Math.const_get(:PI)   #=> 3.14159265358979
   # ```
-  # 
+  #
   # This method will recursively look up constant names if a namespaced
   # class name is provided. For example:
-  # 
+  #
   # ```ruby
   # module Foo; class Bar; end end
   # Object.const_get 'Foo::Bar'
   # ```
-  # 
+  #
   # The `inherit` flag is respected on each lookup. For example:
-  # 
+  #
   # ```ruby
   # module Foo
   #   class Bar
   #     VAL = 10
   #   end
-  # 
+  #
   #   class Baz < Bar; end
   # end
-  # 
+  #
   # Object.const_get 'Foo::Baz::VAL'         # => 10
   # Object.const_get 'Foo::Baz::VAL', false  # => NameError
   # ```
-  # 
+  #
   # If the argument is not a valid constant name a `NameError` will be
   # raised with a warning “wrong constant name”.
-  # 
+  #
   # ```ruby
   # Object.const_get 'foobar' #=> NameError: wrong constant name foobar
   # ```
@@ -537,15 +537,15 @@ class Module < Object
   # Invoked when a reference is made to an undefined constant in *mod* . It
   # is passed a symbol for the undefined constant, and returns a value to be
   # used for that constant. The following code is an example of the same:
-  # 
+  #
   # ```ruby
   # def Foo.const_missing(name)
   #   name # return the constant name as Symbol
   # end
-  # 
+  #
   # Foo::UNDEFINED_CONST    #=> :UNDEFINED_CONST: symbol returned
   # ```
-  # 
+  #
   # In the next example when a reference is made to an undefined constant,
   # it attempts to load a file whose name is the lowercase version of the
   # constant (thus class `Fred` is assumed to be in file `fred.rb` ). If
@@ -553,7 +553,7 @@ class Module < Object
   # feature similar to
   # [Kernel\#autoload](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-autoload)
   # and [\#autoload](Module.downloaded.ruby_doc#method-i-autoload) .
-  # 
+  #
   # ```ruby
   # def Object.const_missing(name)
   #   @looked_for ||= {}
@@ -578,15 +578,15 @@ class Module < Object
   # Sets the named constant to the given object, returning that object.
   # Creates a new constant if no constant with the given name previously
   # existed.
-  # 
+  #
   # ```ruby
   # Math.const_set("HIGH_SCHOOL_PI", 22.0/7.0)   #=> 3.14285714285714
   # Math::HIGH_SCHOOL_PI - Math::PI              #=> 0.00126448926734968
   # ```
-  # 
+  #
   # If `sym` or `str` is not a valid constant name a `NameError` will be
   # raised with a warning “wrong constant name”.
-  # 
+  #
   # ```ruby
   # Object.const_set('foobar', 42) #=> NameError: wrong constant name foobar
   # ```
@@ -602,15 +602,15 @@ class Module < Object
   # Returns an array of the names of the constants accessible in *mod* .
   # This includes the names of constants in any included modules (example at
   # start of section), unless the *inherit* parameter is set to `false` .
-  # 
+  #
   # The implementation makes no guarantees about the order in which the
   # constants are yielded.
-  # 
+  #
   # ```ruby
   # IO.constants.include?(:SYNC)        #=> true
   # IO.constants(false).include?(:SYNC) #=> false
   # ```
-  # 
+  #
   # Also see `Module::const_defined?` .
   sig do
     params(
@@ -669,7 +669,7 @@ class Module < Object
   def extended(othermod); end
 
   # Prevents further modifications to *mod* .
-  # 
+  #
   # This method returns self.
   sig {returns(T.self_type)}
   def freeze(); end
@@ -685,7 +685,7 @@ class Module < Object
 
   # Returns `true` if *module* is included in *mod* or one of *mod* 's
   # ancestors.
-  # 
+  #
   # ```ruby
   # module A
   # end
@@ -715,15 +715,15 @@ class Module < Object
   def included(othermod); end
 
   # Returns the list of modules included in *mod* .
-  # 
+  #
   # ```ruby
   # module Mixin
   # end
-  # 
+  #
   # module Outer
   #   include Mixin
   # end
-  # 
+  #
   # Mixin.included_modules   #=> []
   # Outer.included_modules   #=> [Mixin]
   # ```
@@ -741,7 +741,7 @@ class Module < Object
 
   # Returns an `UnboundMethod` representing the given instance method in
   # *mod* .
-  # 
+  #
   # ```ruby
   # class Interpreter
   #   def do_a() print "there, "; end
@@ -758,13 +758,13 @@ class Module < Object
   #     string.each_char {|b| Dispatcher[b].bind(self).call }
   #   end
   # end
-  # 
+  #
   # interpreter = Interpreter.new
   # interpreter.interpret('dave')
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   # ```ruby
   # Hello there, Dave!
   # ```
@@ -781,7 +781,7 @@ class Module < Object
   # protected methods; for a class, they are the instance (not singleton)
   # methods. If the optional parameter is `false`, the methods of any
   # ancestors are not included.
-  # 
+  #
   # ```ruby
   # module A
   #   def method1()  end
@@ -793,7 +793,7 @@ class Module < Object
   # class C < B
   #   def method3()  end
   # end
-  # 
+  #
   # A.instance_methods(false)                   #=> [:method1]
   # B.instance_methods(false)                   #=> [:method2]
   # B.instance_methods(true).include?(:method1) #=> true
@@ -821,7 +821,7 @@ class Module < Object
   # protected methods are matched.
   # [String](https://ruby-doc.org/core-2.6.3/String.html) arguments are
   # converted to symbols.
-  # 
+  #
   # ```ruby
   # module A
   #   def method1()  end
@@ -837,7 +837,7 @@ class Module < Object
   #   include A
   #   def method3()  end
   # end
-  # 
+  #
   # A.method_defined? :method1              #=> true
   # C.method_defined? "method1"             #=> true
   # C.method_defined? "method2"             #=> true
@@ -869,7 +869,7 @@ class Module < Object
   # can be used to add methods to a class. `module_eval` returns the result
   # of evaluating its argument. The optional *filename* and *lineno*
   # parameters set the text for error messages.
-  # 
+  #
   # ```ruby
   # class Thing
   # end
@@ -878,9 +878,9 @@ class Module < Object
   # puts Thing.new.hello()
   # Thing.module_eval("invalid code", "dummy", 123)
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     Hello there!
   #     dummy:123:in `module_eval': undefined local variable
   #         or method `code' for Thing:Class
@@ -907,7 +907,7 @@ class Module < Object
   # defined in the block will belong to the receiver. Any arguments passed
   # to the method will be passed to the block. This can be used if the block
   # needs to access instance variables.
-  # 
+  #
   # ```ruby
   # class Thing
   # end
@@ -916,9 +916,9 @@ class Module < Object
   # }
   # puts Thing.new.hello()
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   # ```ruby
   # Hello there!
   # ```
@@ -979,10 +979,10 @@ class Module < Object
 
   # Makes existing class methods private. Often used to hide the default
   # constructor `new` .
-  # 
+  #
   # [String](https://ruby-doc.org/core-2.6.3/String.html) arguments are
   # converted to symbols.
-  # 
+  #
   # ```ruby
   # class SimpleSingleton  # Not thread safe
   #   private_class_method :new
@@ -1012,7 +1012,7 @@ class Module < Object
   # Returns a list of the private instance methods defined in *mod* . If the
   # optional parameter is `false`, the methods of any ancestors are not
   # included.
-  # 
+  #
   # ```ruby
   # module Mod
   #   def method1()  end
@@ -1034,7 +1034,7 @@ class Module < Object
   # *inherit* is set, the lookup will also search *mod* ’s ancestors.
   # [String](https://ruby-doc.org/core-2.6.3/String.html) arguments are
   # converted to symbols.
-  # 
+  #
   # ```ruby
   # module A
   #   def method1()  end
@@ -1047,7 +1047,7 @@ class Module < Object
   #   include A
   #   def method3()  end
   # end
-  # 
+  #
   # A.method_defined? :method1                   #=> true
   # C.private_method_defined? "method1"          #=> false
   # C.private_method_defined? "method2"          #=> true
@@ -1086,7 +1086,7 @@ class Module < Object
   # *inherit* is set, the lookup will also search *mod* ’s ancestors.
   # [String](https://ruby-doc.org/core-2.6.3/String.html) arguments are
   # converted to symbols.
-  # 
+  #
   # ```ruby
   # module A
   #   def method1()  end
@@ -1099,7 +1099,7 @@ class Module < Object
   #   include A
   #   def method3()  end
   # end
-  # 
+  #
   # A.method_defined? :method1                    #=> true
   # C.protected_method_defined? "method1"         #=> false
   # C.protected_method_defined? "method2"         #=> true
@@ -1124,7 +1124,7 @@ class Module < Object
   def public(*arg0); end
 
   # Makes a list of existing class methods public.
-  # 
+  #
   # [String](https://ruby-doc.org/core-2.6.3/String.html) arguments are
   # converted to symbols.
   sig do
@@ -1168,7 +1168,7 @@ class Module < Object
   # *inherit* is set, the lookup will also search *mod* ’s ancestors.
   # [String](https://ruby-doc.org/core-2.6.3/String.html) arguments are
   # converted to symbols.
-  # 
+  #
   # ```ruby
   # module A
   #   def method1()  end
@@ -1181,7 +1181,7 @@ class Module < Object
   #   include A
   #   def method3()  end
   # end
-  # 
+  #
   # A.method_defined? :method1                 #=> true
   # C.public_method_defined? "method1"         #=> true
   # C.public_method_defined? "method1", true   #=> true
@@ -1207,7 +1207,7 @@ class Module < Object
   def refine(arg0, &blk); end
 
   # Removes the definition of the *sym* , returning that constant's value.
-  # 
+  #
   # ```ruby
   # class Dummy
   #   @@var = 99
@@ -1216,9 +1216,9 @@ class Module < Object
   #   p(defined? @@var)
   # end
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   # ```ruby
   # 99
   # nil
@@ -1253,7 +1253,7 @@ class Module < Object
 
   # Returns `true` if *mod* is a singleton class or `false` if it is an
   # ordinary class or module.
-  # 
+  #
   # ```ruby
   # class C
   # end

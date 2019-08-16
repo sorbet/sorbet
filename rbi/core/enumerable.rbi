@@ -28,10 +28,10 @@ module Enumerable
   # block is not given, Ruby adds an implicit block of `{ |obj| obj }` which
   # will cause [all?](Enumerable.downloaded.ruby_doc#method-i-all-3F) to
   # return `true` when none of the collection members are `false` or `nil` .
-  # 
+  #
   # If instead a pattern is supplied, the method returns whether `pattern
   # === element` for every collection member.
-  # 
+  #
   #     %w[ant bear cat].all? { |word| word.length >= 3 } #=> true
   #     %w[ant bear cat].all? { |word| word.length >= 4 } #=> false
   #     %w[ant bear cat].all?(/t/)                        #=> false
@@ -53,10 +53,10 @@ module Enumerable
   # |obj| obj }` that will cause
   # [any?](Enumerable.downloaded.ruby_doc#method-i-any-3F) to return `true`
   # if at least one of the collection members is not `false` or `nil` .
-  # 
+  #
   # If instead a pattern is supplied, the method returns whether `pattern
   # === element` for any collection member.
-  # 
+  #
   # ```ruby
   # %w[ant bear cat].any? { |word| word.length >= 3 } #=> true
   # %w[ant bear cat].any? { |word| word.length >= 4 } #=> true
@@ -76,9 +76,9 @@ module Enumerable
 
   # Returns a new array with the results of running *block* once for every
   # element in *enum* .
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # (1..4).map { |i| i*i }      #=> [1, 4, 9, 16]
   # (1..4).collect { "cat"  }   #=> ["cat", "cat", "cat", "cat"]
@@ -94,9 +94,9 @@ module Enumerable
 
   # Returns a new array with the concatenated results of running *block*
   # once for every element in *enum* .
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # [1, 2, 3, 4].flat_map { |e| [e, -e] } #=> [1, -1, 2, -2, 3, -3, 4, -4]
   # [[1, 2], [3, 4]].flat_map { |e| e + [100] } #=> [1, 2, 100, 3, 4, 100]
@@ -113,7 +113,7 @@ module Enumerable
   # argument is given, the number of items in `enum` that are equal to
   # `item` are counted. If a block is given, it counts the number of
   # elements yielding a true value.
-  # 
+  #
   # ```ruby
   # ary = [1, 2, 4, 2]
   # ary.count               #=> 4
@@ -167,7 +167,7 @@ module Enumerable
 
   # Drops first n elements from *enum* , and returns rest elements in an
   # array.
-  # 
+  #
   # ```ruby
   # a = [1, 2, 3, 4, 5, 0]
   # a.drop(3)             #=> [4, 5, 0]
@@ -183,9 +183,9 @@ module Enumerable
   # Drops elements up to, but not including, the first element for which the
   # block returns `nil` or `false` and returns an array containing the
   # remaining elements.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # a = [1, 2, 3, 4, 5, 0]
   # a.drop_while { |i| i < 3 }   #=> [3, 4, 5, 0]
@@ -216,9 +216,9 @@ module Enumerable
 
   # Calls *block* with two arguments, the item and its index, for each item
   # in *enum* . Given arguments are passed through to each().
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # hash = Hash.new
   # %w(cat dog wombat).each_with_index { |item, index|
@@ -239,9 +239,9 @@ module Enumerable
   # issue #38, this won't work.
   # Iterates the given block for each element with an arbitrary object
   # given, and returns the initially given object.
-  # 
+  #
   # If no block is given, returns an enumerator.
-  # 
+  #
   # ```ruby
   # evens = (1..10).each_with_object([]) { |i, a| a << i*2 }
   # #=> [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
@@ -262,11 +262,11 @@ module Enumerable
   def each_with_object(arg0, &blk); end
 
   # Returns an array containing the items in *enum* .
-  # 
+  #
   # ```ruby
   # (1..7).to_a                       #=> [1, 2, 3, 4, 5, 6, 7]
   # { 'a'=>1, 'b'=>2, 'c'=>3 }.to_a   #=> [["a", 1], ["b", 2], ["c", 3]]
-  # 
+  #
   # require 'prime'
   # Prime.entries 10                  #=> [2, 3, 5, 7]
   # ```
@@ -275,19 +275,19 @@ module Enumerable
 
   # Returns an array containing all elements of `enum` for which the given
   # `block` returns a true value.
-  # 
+  #
   # If no block is given, an
   # [Enumerator](https://ruby-doc.org/core-2.6.3/Enumerator.html) is
   # returned instead.
-  # 
+  #
   # ```ruby
   # (1..10).find_all { |i|  i % 3 == 0 }   #=> [3, 6, 9]
-  # 
+  #
   # [1,2,3,4,5].select { |num|  num.even?  }   #=> [2, 4]
-  # 
+  #
   # [:foo, :bar].filter { |x| x == :foo }   #=> [:foo]
   # ```
-  # 
+  #
   # See also [\#reject](Enumerable.downloaded.ruby_doc#method-i-reject) .
   sig do
     params(
@@ -301,10 +301,10 @@ module Enumerable
   # Compares each entry in *enum* with *value* or passes to *block* .
   # Returns the index for the first for which the evaluated value is
   # non-false. If no object matches, returns `nil`
-  # 
+  #
   # If neither block nor argument is given, an enumerator is returned
   # instead.
-  # 
+  #
   # ```ruby
   # (1..10).find_index  { |i| i % 5 == 0 and i % 7 == 0 }  #=> nil
   # (1..100).find_index { |i| i % 5 == 0 and i % 7 == 0 }  #=> 34
@@ -328,7 +328,7 @@ module Enumerable
   # Returns the first element, or the first `n` elements, of the enumerable.
   # If the enumerable is empty, the first form returns `nil`, and the
   # second form returns an empty array.
-  # 
+  #
   # ```ruby
   # %w[foo bar baz].first     #=> "foo"
   # %w[foo bar baz].first(2)  #=> ["foo", "bar"]
@@ -348,7 +348,7 @@ module Enumerable
   # Returns an array of every element in *enum* for which `Pattern ===
   # element` . If the optional *block* is supplied, each matching element is
   # passed to it, and the block’s result is stored in the output array.
-  # 
+  #
   # ```ruby
   # (1..100).grep 38..44   #=> [38, 39, 40, 41, 42, 43, 44]
   # c = IO.constants
@@ -374,9 +374,9 @@ module Enumerable
   # Groups the collection by result of the block. Returns a hash where the
   # keys are the evaluated result from the block and the values are arrays
   # of elements in the collection that correspond to the key.
-  # 
+  #
   # If no block is given an enumerator is returned.
-  # 
+  #
   # ```ruby
   # (1..6).group_by { |i| i%3 }   #=> {0=>[3, 6], 1=>[1, 4], 2=>[2, 5]}
   # ```
@@ -391,7 +391,7 @@ module Enumerable
 
   # Returns `true` if any member of *enum* equals *obj* . Equality is tested
   # using `==` .
-  # 
+  #
   # ```ruby
   # IO.constants.include? :SEEK_SET          #=> true
   # IO.constants.include? :SEEK_NO_FURTHER   #=> false
@@ -408,20 +408,20 @@ module Enumerable
 
   # Combines all elements of *enum* by applying a binary operation,
   # specified by a block or a symbol that names a method or operator.
-  # 
+  #
   # The *inject* and *reduce* methods are aliases. There is no performance
   # benefit to either.
-  # 
+  #
   # If you specify a block, then for each element in *enum* the block is
   # passed an accumulator value ( *memo* ) and the element. If you specify a
   # symbol instead, then each element in the collection will be passed to
   # the named method of *memo* . In either case, the result becomes the new
   # value for *memo* . At the end of the iteration, the final value of
   # *memo* is the return value for the method.
-  # 
+  #
   # If you do not explicitly specify an *initial* value for *memo* , then
   # the first element of collection is used as the initial value of *memo* .
-  # 
+  #
   # ```ruby
   # # Sum some numbers
   # (5..10).reduce(:+)                             #=> 45
@@ -468,16 +468,16 @@ module Enumerable
   # Returns the object in *enum* with the maximum value. The first form
   # assumes all objects implement `Comparable` ; the second uses the block
   # to return *a \<=\> b* .
-  # 
+  #
   # ```ruby
   # a = %w(albatross dog horse)
   # a.max                                   #=> "horse"
   # a.max { |a, b| a.length <=> b.length }  #=> "albatross"
   # ```
-  # 
+  #
   # If the `n` argument is given, maximum `n` elements are returned as an
   # array, sorted in descending order.
-  # 
+  #
   # ```ruby
   # a = %w[albatross dog horse]
   # a.max(2)                                  #=> ["horse", "dog"]
@@ -527,26 +527,26 @@ module Enumerable
   # the same T.any
   # Returns the object in *enum* that gives the maximum value from the given
   # block.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # a = %w(albatross dog horse)
   # a.max_by { |x| x.length }   #=> "albatross"
   # ```
-  # 
+  #
   # If the `n` argument is given, maximum `n` elements are returned as an
   # array. These `n` elements are sorted by the value from the given block,
   # in descending order.
-  # 
+  #
   # ```ruby
   # a = %w[albatross dog horse]
   # a.max_by(2) {|x| x.length } #=> ["albatross", "horse"]
   # ```
-  # 
+  #
   # enum.max\_by(n) can be used to implement weighted random sampling.
   # Following example implements and use Enumerable\#wsample.
-  # 
+  #
   # ```ruby
   # module Enumerable
   #   # weighted random sampling.
@@ -601,16 +601,16 @@ module Enumerable
   # Returns the object in *enum* with the minimum value. The first form
   # assumes all objects implement `Comparable` ; the second uses the block
   # to return *a \<=\> b* .
-  # 
+  #
   # ```ruby
   # a = %w(albatross dog horse)
   # a.min                                   #=> "albatross"
   # a.min { |a, b| a.length <=> b.length }  #=> "dog"
   # ```
-  # 
+  #
   # If the `n` argument is given, minimum `n` elements are returned as a
   # sorted array.
-  # 
+  #
   # ```ruby
   # a = %w[albatross dog horse]
   # a.min(2)                                  #=> ["albatross", "dog"]
@@ -660,17 +660,17 @@ module Enumerable
   # the same T.any
   # Returns the object in *enum* that gives the minimum value from the given
   # block.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # a = %w(albatross dog horse)
   # a.min_by { |x| x.length }   #=> "dog"
   # ```
-  # 
+  #
   # If the `n` argument is given, minimum `n` elements are returned as an
   # array. These `n` elements are sorted by the value from the given block.
-  # 
+  #
   # ```ruby
   # a = %w[albatross dog horse]
   # p a.min_by(2) {|x| x.length } #=> ["dog", "horse"]
@@ -687,7 +687,7 @@ module Enumerable
   # Returns a two element array which contains the minimum and the maximum
   # value in the enumerable. The first form assumes all objects implement
   # `Comparable` ; the second uses the block to return *a \<=\> b* .
-  # 
+  #
   # ```ruby
   # a = %w(albatross dog horse)
   # a.minmax                                  #=> ["albatross", "horse"]
@@ -709,9 +709,9 @@ module Enumerable
   # Returns a two element array containing the objects in *enum* that
   # correspond to the minimum and maximum values respectively from the given
   # block.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # a = %w(albatross dog horse)
   # a.minmax_by { |x| x.length }   #=> ["dog", "albatross"]
@@ -728,10 +728,10 @@ module Enumerable
   # returns `true` if the block never returns `true` for all elements. If
   # the block is not given, `none?` will return `true` only if none of the
   # collection members is true.
-  # 
+  #
   # If instead a pattern is supplied, the method returns whether `pattern
   # === element` for none of the collection members.
-  # 
+  #
   # ```ruby
   # %w{ant bear cat}.none? { |word| word.length == 5 } #=> true
   # %w{ant bear cat}.none? { |word| word.length >= 4 } #=> false
@@ -755,10 +755,10 @@ module Enumerable
   # returns `true` if the block returns `true` exactly once. If the block is
   # not given, `one?` will return `true` only if exactly one of the
   # collection members is true.
-  # 
+  #
   # If instead a pattern is supplied, the method returns whether `pattern
   # === element` for exactly one collection member.
-  # 
+  #
   # ```ruby
   # %w{ant bear cat}.one? { |word| word.length == 4 }  #=> true
   # %w{ant bear cat}.one? { |word| word.length > 4 }   #=> false
@@ -780,9 +780,9 @@ module Enumerable
 
   # Returns two arrays, the first containing the elements of *enum* for
   # which the block evaluates to true, the second containing the rest.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # (1..6).partition { |v| v.even? }  #=> [[2, 4, 6], [1, 3, 5]]
   # ```
@@ -797,17 +797,17 @@ module Enumerable
 
   # Returns an array for all elements of `enum` for which the given `block`
   # returns `false` .
-  # 
+  #
   # If no block is given, an
   # [Enumerator](https://ruby-doc.org/core-2.6.3/Enumerator.html) is
   # returned instead.
-  # 
+  #
   # ```ruby
   # (1..10).reject { |i|  i % 3 == 0 }   #=> [1, 2, 4, 5, 7, 8, 10]
-  # 
+  #
   # [1, 2, 3, 4, 5].reject { |num| num.even? } #=> [1, 3, 5]
   # ```
-  # 
+  #
   # See also [\#find\_all](Enumerable.downloaded.ruby_doc#method-i-find_all)
   # .
   sig do
@@ -820,15 +820,15 @@ module Enumerable
   def reject(&blk); end
 
   # Builds a temporary array and traverses that array in reverse order.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # (1..3).reverse_each { |v| p v }
   # ```
-  # 
+  #
   # produces:
-  # 
+  #
   # ```ruby
   # 3
   # 2
@@ -844,22 +844,22 @@ module Enumerable
   def reverse_each(&blk); end
 
   # Returns an array containing the items in *enum* sorted.
-  # 
+  #
   # Comparisons for the sort will be done using the items’ own `<=>`
   # operator or using an optional code block.
-  # 
+  #
   # The block must implement a comparison between `a` and `b` and return an
   # integer less than 0 when `b` follows `a`, `0` when `a` and `b` are
   # equivalent, or an integer greater than 0 when `a` follows `b` .
-  # 
+  #
   # The result is not guaranteed to be stable. When the comparison of two
   # elements returns `0`, the order of the elements is unpredictable.
-  # 
+  #
   # ```ruby
   # %w(rhea kea flea).sort           #=> ["flea", "kea", "rhea"]
   # (1..10).sort { |a, b| b <=> a }  #=> [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
   # ```
-  # 
+  #
   # See also [\#sort\_by](Enumerable.downloaded.ruby_doc#method-i-sort_by) .
   # It implements a Schwartzian transform which is useful when key
   # computation or comparison is expensive.
@@ -884,7 +884,7 @@ module Enumerable
   def sort_by(&blk); end
 
   # Returns first n elements from *enum* .
-  # 
+  #
   # ```ruby
   # a = [1, 2, 3, 4, 5, 0]
   # a.take(3)             #=> [1, 2, 3]
@@ -900,9 +900,9 @@ module Enumerable
 
   # Passes elements to the block until the block returns `nil` or `false`,
   # then stops iterating and returns an array of all prior elements.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # a = [1, 2, 3, 4, 5, 0]
   # a.take_while { |i| i < 3 }   #=> [1, 2]
@@ -919,13 +919,13 @@ module Enumerable
   # Implemented in C++
   # Returns the result of interpreting *enum* as a list of `[key, value]`
   # pairs.
-  # 
+  #
   #     %i[hello world].each_with_index.to_h
   #       # => {:hello => 0, :world => 1}
-  # 
+  #
   # If a block is given, the results of the block on each element of the
   # enum will be used as pairs.
-  # 
+  #
   # ```ruby
   # (1..5).to_h {|x| [x, x ** 2]}
   #   #=> {1=>1, 2=>4, 3=>9, 4=>16, 5=>25}
@@ -978,9 +978,9 @@ module Enumerable
   # method inference.
   # Returns a new array with the concatenated results of running *block*
   # once for every element in *enum* .
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # [1, 2, 3, 4].flat_map { |e| [e, -e] } #=> [1, -1, 2, -2, 3, -3, 4, -4]
   # [[1, 2], [3, 4]].flat_map { |e| e + [100] } #=> [1, 2, 100, 3, 4, 100]
@@ -996,9 +996,9 @@ module Enumerable
 
   # Returns a new array with the results of running *block* once for every
   # element in *enum* .
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # (1..4).map { |i| i*i }      #=> [1, 4, 9, 16]
   # (1..4).collect { "cat"  }   #=> ["cat", "cat", "cat", "cat"]
@@ -1014,7 +1014,7 @@ module Enumerable
 
   # Returns `true` if any member of *enum* equals *obj* . Equality is tested
   # using `==` .
-  # 
+  #
   # ```ruby
   # IO.constants.include? :SEEK_SET          #=> true
   # IO.constants.include? :SEEK_NO_FURTHER   #=> false
@@ -1031,20 +1031,20 @@ module Enumerable
 
   # Combines all elements of *enum* by applying a binary operation,
   # specified by a block or a symbol that names a method or operator.
-  # 
+  #
   # The *inject* and *reduce* methods are aliases. There is no performance
   # benefit to either.
-  # 
+  #
   # If you specify a block, then for each element in *enum* the block is
   # passed an accumulator value ( *memo* ) and the element. If you specify a
   # symbol instead, then each element in the collection will be passed to
   # the named method of *memo* . In either case, the result becomes the new
   # value for *memo* . At the end of the iteration, the final value of
   # *memo* is the return value for the method.
-  # 
+  #
   # If you do not explicitly specify an *initial* value for *memo* , then
   # the first element of collection is used as the initial value of *memo* .
-  # 
+  #
   # ```ruby
   # # Sum some numbers
   # (5..10).reduce(:+)                             #=> 45
@@ -1090,19 +1090,19 @@ module Enumerable
 
   # Returns an array containing all elements of `enum` for which the given
   # `block` returns a true value.
-  # 
+  #
   # If no block is given, an
   # [Enumerator](https://ruby-doc.org/core-2.6.3/Enumerator.html) is
   # returned instead.
-  # 
+  #
   # ```ruby
   # (1..10).find_all { |i|  i % 3 == 0 }   #=> [3, 6, 9]
-  # 
+  #
   # [1,2,3,4,5].select { |num|  num.even?  }   #=> [2, 4]
-  # 
+  #
   # [:foo, :bar].filter { |x| x == :foo }   #=> [:foo]
   # ```
-  # 
+  #
   # See also [\#reject](Enumerable.downloaded.ruby_doc#method-i-reject) .
   sig do
     params(
@@ -1114,11 +1114,11 @@ module Enumerable
   def select(&blk); end
 
   # Returns an array containing the items in *enum* .
-  # 
+  #
   # ```ruby
   # (1..7).to_a                       #=> [1, 2, 3, 4, 5, 6, 7]
   # { 'a'=>1, 'b'=>2, 'c'=>3 }.to_a   #=> [["a", 1], ["b", 2], ["c", 3]]
-  # 
+  #
   # require 'prime'
   # Prime.entries 10                  #=> [2, 3, 5, 7]
   # ```
@@ -1133,10 +1133,10 @@ module Enumerable
   # [\#drop\_while](Enumerable.downloaded.ruby_doc#method-i-drop_while)
   # enumerate values only on an as-needed basis. However, if a block is
   # given to zip, values are enumerated immediately.
-  # 
-  # 
+  #
+  #
   # The following program finds pythagorean triples:
-  # 
+  #
   # ```ruby
   # def pythagorean_triples
   #   (1..Float::INFINITY).lazy.flat_map {|z|

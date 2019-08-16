@@ -3,7 +3,7 @@
 # Objects of class `Dir` are directory streams representing directories in
 # the underlying file system. They provide a variety of ways to list
 # directories and their contents. See also `File` .
-# 
+#
 # The directory used in these examples contains the two regular files (
 # `config.h` and `main.rb` ), the parent directory ( `..` ), and the
 # directory itself ( `.` ).
@@ -18,7 +18,7 @@ class Dir < Object
   # value of the environment variable `HOME`, or `LOGDIR` .
   # `SystemCallError` (probably `Errno::ENOENT` ) if the target directory
   # does not exist.
-  # 
+  #
   # If a block is given, it is passed the name of the new current directory,
   # and the block is executed with that as the current directory. The
   # original working directory is restored when the block exits. The return
@@ -26,7 +26,7 @@ class Dir < Object
   # nested, but in a multi-threaded program an error will be raised if a
   # thread attempts to open a `chdir` block while another thread has one
   # open.
-  # 
+  #
   # ```ruby
   # Dir.chdir("/var/spool/mail")
   # puts Dir.pwd
@@ -39,9 +39,9 @@ class Dir < Object
   # end
   # puts Dir.pwd
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     /var/spool/mail
   #     /tmp
   #     /usr
@@ -85,10 +85,10 @@ class Dir < Object
 
   # Returns an array containing all of the filenames in the given directory.
   # Will raise a `SystemCallError` if the named directory doesn’t exist.
-  # 
+  #
   # The optional *encoding* keyword argument specifies the encoding of the
   # directory. If not specified, the filesystem encoding is used.
-  # 
+  #
   # ```ruby
   # Dir.entries("testdir")   #=> [".", "..", "config.h", "main.rb"]
   # ```
@@ -112,15 +112,15 @@ class Dir < Object
 
   # Calls the block once for each entry in the named directory, passing the
   # filename of each entry as a parameter to the block.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # Dir.foreach("testdir") {|x| puts "Got #{x}" }
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     Got .
   #     Got ..
   #     Got config.h
@@ -144,7 +144,7 @@ class Dir < Object
 
   # Returns the path to the current working directory of this process as a
   # string.
-  # 
+  #
   # ```ruby
   # Dir.chdir("/tmp")   #=> 0
   # Dir.getwd           #=> "/tmp"
@@ -158,67 +158,67 @@ class Dir < Object
   # and returns an array containing the matching filenames. If a block is
   # given, calls the block once for each matching filename, passing the
   # filename as a parameter to the block.
-  # 
+  #
   # The optional `base` keyword argument specifies the base directory for
   # interpreting relative pathnames instead of the current working
   # directory. As the results are not prefixed with the base directory name
   # in this case, you will need to prepend the base directory name if you
   # want real paths.
-  # 
+  #
   # Note that the pattern is not a regexp, it’s closer to a shell glob. See
   # [File.fnmatch](https://ruby-doc.org/core-2.6.3/File.html#method-c-fnmatch)
   # for the meaning of the `flags` parameter. Case sensitivity depends on
   # your system (File::FNM\_CASEFOLD is ignored), as does the order in which
   # the results are returned.
-  # 
-  #   - `*`  
+  #
+  #   - `*`
   #     Matches any file. Can be restricted by other values in the glob.
   #     Equivalent to `/ .* /mx` in regexp.
-  #     
-  #       - `*`  
+  #
+  #       - `*`
   #         Matches all files
-  #     
-  #       - `c*`  
+  #
+  #       - `c*`
   #         Matches all files beginning with `c`
-  #     
-  #       - `*c`  
+  #
+  #       - `*c`
   #         Matches all files ending with `c`
-  #     
-  #       - `*c*`  
+  #
+  #       - `*c*`
   #         Match all files that have `c` in them (including at the
   #         beginning or end).
-  #     
+  #
   #     Note, this will not match Unix-like hidden files (dotfiles). In
   #     order to include those in the match results, you must use the
   #     File::FNM\_DOTMATCH flag or something like `"{*,.*}"` .
-  # 
-  #   - `**`  
+  #
+  #   - `**`
   #     Matches directories recursively.
-  # 
-  #   - `?`  
+  #
+  #   - `?`
   #     Matches any one character. Equivalent to `/.{1}/` in regexp.
-  # 
-  #   - `[set]`  
+  #
+  #   - `[set]`
   #     Matches any one character in `set` . Behaves exactly like character
   #     sets in [Regexp](https://ruby-doc.org/core-2.6.3/Regexp.html) ,
   #     including set negation ( `[^a-z]` ).
-  # 
-  #   - `{p,q}`  
+  #
+  #   - `{p,q}`
   #     Matches either literal `p` or literal `q` . Equivalent to pattern
   #     alternation in regexp.
-  #     
+  #
   #     Matching literals may be more than one character in length. More
   #     than two literals may be specified.
-  # 
-  #   - `\`  
+  #
+  #   - `\`
   #     Escapes the next metacharacter.
-  #     
+  #
   #     Note that this means you cannot use backslash on windows as part of
   #     a glob, i.e. `Dir["c:\foo*"]` will not work, use `Dir["c:/foo*"]`
   #     instead.
-  # 
+  #
   # Examples:
-  # 
+  #
   # ```ruby
   # Dir["config.?"]                     #=> ["config.h"]
   # Dir.glob("config.?")                #=> ["config.h"]
@@ -228,22 +228,22 @@ class Dir < Object
   # Dir.glob("*")                       #=> ["config.h", "main.rb"]
   # Dir.glob("*", File::FNM_DOTMATCH)   #=> [".", "..", "config.h", "main.rb"]
   # Dir.glob(["*.rb", "*.h"])           #=> ["main.rb", "config.h"]
-  # 
+  #
   # rbfiles = File.join("**", "*.rb")
   # Dir.glob(rbfiles)                   #=> ["main.rb",
   #                                     #    "lib/song.rb",
   #                                     #    "lib/song/karaoke.rb"]
-  # 
+  #
   # Dir.glob(rbfiles, base: "lib")      #=> ["song.rb",
   #                                     #    "song/karaoke.rb"]
-  # 
+  #
   # libdirs = File.join("**", "lib")
   # Dir.glob(libdirs)                   #=> ["lib"]
-  # 
+  #
   # librbfiles = File.join("**", "lib", "**", "*.rb")
   # Dir.glob(librbfiles)                #=> ["lib/song.rb",
   #                                     #    "lib/song/karaoke.rb"]
-  # 
+  #
   # librbfiles = File.join("**", "lib", "*.rb")
   # Dir.glob(librbfiles)                #=> ["lib/song.rb"]
   # ```
@@ -279,7 +279,7 @@ class Dir < Object
   # the value of `File::umask`, and are ignored on NT. Raises a
   # `SystemCallError` if the directory cannot be created. See also the
   # discussion of permissions in the class documentation for `File` .
-  # 
+  #
   # ```ruby
   # Dir.mkdir(File.join(Dir.home, ".foo"), 0700) #=> 0
   # ```
@@ -294,7 +294,7 @@ class Dir < Object
 
   # The optional *encoding* keyword argument specifies the encoding of the
   # directory. If not specified, the filesystem encoding is used.
-  # 
+  #
   # With no block, `open` is a synonym for `Dir::new` . If a block is
   # present, it is passed *aDir* as a parameter. The directory is closed at
   # the end of the block, and `Dir::open` returns the value of the block.
@@ -317,7 +317,7 @@ class Dir < Object
 
   # Returns the path to the current working directory of this process as a
   # string.
-  # 
+  #
   # ```ruby
   # Dir.chdir("/tmp")   #=> 0
   # Dir.getwd           #=> "/tmp"
@@ -348,7 +348,7 @@ class Dir < Object
 
   # Closes the directory stream. Calling this method on closed
   # [Dir](Dir.downloaded.ruby_doc) object is ignored since Ruby 2.3.
-  # 
+  #
   # ```ruby
   # d = Dir.new("testdir")
   # d.close   #=> nil
@@ -358,16 +358,16 @@ class Dir < Object
 
   # Calls the block once for each entry in this directory, passing the
   # filename of each entry as a parameter to the block.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # d = Dir.new("testdir")
   # d.each  {|x| puts "Got #{x}" }
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     Got .
   #     Got ..
   #     Got config.h
@@ -382,12 +382,12 @@ class Dir < Object
   def each(&blk); end
 
   # Returns the file descriptor used in *dir* .
-  # 
+  #
   # ```ruby
   # d = Dir.new("..")
   # d.fileno   #=> 8
   # ```
-  # 
+  #
   # This method uses dirfd() function defined by POSIX 2008.
   # [NotImplementedError](https://ruby-doc.org/core-2.6.3/NotImplementedError.html)
   # is raised on other platforms, such as Windows, which doesn’t provide the
@@ -409,7 +409,7 @@ class Dir < Object
   def inspect(); end
 
   # Returns the path parameter passed to *dir* ’s constructor.
-  # 
+  #
   # ```ruby
   # d = Dir.new("..")
   # d.path   #=> ".."
@@ -418,7 +418,7 @@ class Dir < Object
   def path(); end
 
   # Returns the current position in *dir* . See also `Dir#seek` .
-  # 
+  #
   # ```ruby
   # d = Dir.new("testdir")
   # d.tell   #=> 0
@@ -438,7 +438,7 @@ class Dir < Object
 
   # Reads the next entry from *dir* and returns it as a string. Returns
   # `nil` at the end of the stream.
-  # 
+  #
   # ```ruby
   # d = Dir.new("testdir")
   # d.read   #=> "."
@@ -460,7 +460,7 @@ class Dir < Object
   def seek(arg0); end
 
   # Returns the current position in *dir* . See also `Dir#seek` .
-  # 
+  #
   # ```ruby
   # d = Dir.new("testdir")
   # d.tell   #=> 0
@@ -471,7 +471,7 @@ class Dir < Object
   def tell(); end
 
   # Returns the path parameter passed to *dir* ’s constructor.
-  # 
+  #
   # ```ruby
   # d = Dir.new("..")
   # d.path   #=> ".."

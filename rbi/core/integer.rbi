@@ -6,7 +6,7 @@
 # [TypeError](https://ruby-doc.org/core-2.6.3/TypeError.html) .
 class Integer < Numeric
   # Returns `int` modulo `other` .
-  # 
+  #
   # See
   # [Numeric\#divmod](https://ruby-doc.org/core-2.6.3/Numeric.html#method-i-divmod)
   # for more information.
@@ -96,13 +96,13 @@ class Integer < Numeric
   # , a [Float](https://ruby-doc.org/core-2.6.3/Float.html) , a
   # [Rational](https://ruby-doc.org/core-2.6.3/Rational.html) , or a complex
   # number.
-  # 
+  #
   # ```ruby
   # 2 ** 3        #=> 8
   # 2 ** -1       #=> (1/2)
   # 2 ** 0.5      #=> 1.4142135623730951
   # (-1) ** 0.5   #=> (0.0+1.0i)
-  # 
+  #
   # 123456789 ** 2     #=> 15241578750190521
   # 123456789 ** 1.2   #=> 5126464716.0993185
   # 123456789 ** -2    #=> (1/15241578750190521)
@@ -330,10 +330,10 @@ class Integer < Numeric
 
   # Comparison---Returns -1, 0, or +1 depending on whether `int` is less
   # than, equal to, or greater than `numeric` .
-  # 
+  #
   # This is the basis for the tests in the
   # [Comparable](https://ruby-doc.org/core-2.6.3/Comparable.html) module.
-  # 
+  #
   # `nil` is returned if the two values are incomparable.
   sig do
     params(
@@ -365,7 +365,7 @@ class Integer < Numeric
   # [Numeric\#eql?](https://ruby-doc.org/core-2.6.3/Numeric.html#method-i-eql-3F)
   # , which requires `other` to be an [Integer](Integer.downloaded.ruby_doc)
   # .
-  # 
+  #
   # ```ruby
   # 1 == 2     #=> false
   # 1 == 1.0   #=> true
@@ -382,7 +382,7 @@ class Integer < Numeric
   # [Numeric\#eql?](https://ruby-doc.org/core-2.6.3/Numeric.html#method-i-eql-3F)
   # , which requires `other` to be an [Integer](Integer.downloaded.ruby_doc)
   # .
-  # 
+  #
   # ```ruby
   # 1 == 2     #=> false
   # 1 == 1.0   #=> true
@@ -462,12 +462,12 @@ class Integer < Numeric
 
   # Bit Reference---Returns the `n` th bit in the binary representation of
   # `int`, where `int[0]` is the least significant bit.
-  # 
+  #
   # ```ruby
   # a = 0b11001100101010
   # 30.downto(0) {|n| print a[n] }
   # #=> 0000000000000000011001100101010
-  # 
+  #
   # a = 9**15
   # 50.downto(0) {|n| print a[n] }
   # #=> 000101110110100000111000011110010100111100010111001
@@ -508,13 +508,13 @@ class Integer < Numeric
   def ^(arg0); end
 
   # Returns the absolute value of `int` .
-  # 
+  #
   # ```ruby
   # (-12345).abs   #=> 12345
   # -12345.abs     #=> 12345
   # 12345.abs      #=> 12345
   # ```
-  # 
+  #
   # [\#magnitude](Integer.downloaded.ruby_doc#method-i-magnitude) is an
   # alias for [\#abs](Integer.downloaded.ruby_doc#method-i-abs) .
   sig {returns(Integer)}
@@ -530,14 +530,14 @@ class Integer < Numeric
   def arg(); end
 
   # Returns the number of bits of the value of `int` .
-  # 
+  #
   # "Number of bits" means the bit position of the highest bit which is
   # different from the sign bit (where the least significant bit has bit
   # position 1). If there is no such bit (zero or minus one), zero is
   # returned.
-  # 
+  #
   # I.e. this method returns *ceil(log2(int \< 0 ? -int : int+1))* .
-  # 
+  #
   # ```ruby
   # (-2**1000-1).bit_length   #=> 1001
   # (-2**1000).bit_length     #=> 1000
@@ -561,11 +561,11 @@ class Integer < Numeric
   # (2**1000).bit_length      #=> 1001
   # (2**1000+1).bit_length    #=> 1001
   # ```
-  # 
+  #
   # This method can be used to detect overflow in
   # [Array\#pack](https://ruby-doc.org/core-2.6.3/Array.html#method-i-pack)
   # as follows:
-  # 
+  #
   # ```ruby
   # if n.bit_length < 32
   #   [n].pack("l") # no overflow
@@ -578,12 +578,12 @@ class Integer < Numeric
 
   # Returns the smallest number greater than or equal to `int` with a
   # precision of `ndigits` decimal digits (default: 0).
-  # 
+  #
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
-  # 
+  #
   # Returns `self` when `ndigits` is zero or positive.
-  # 
+  #
   # ```ruby
   # 1.ceil           #=> 1
   # 1.ceil(2)        #=> 1
@@ -601,7 +601,7 @@ class Integer < Numeric
 
   # Returns a string containing the character represented by the `int` 's
   # value according to `encoding` .
-  # 
+  #
   # ```ruby
   # 65.chr    #=> "A"
   # 230.chr   #=> "\xE6"
@@ -618,12 +618,12 @@ class Integer < Numeric
 
   # Returns an array with both a `numeric` and a `big` represented as Bignum
   # objects.
-  # 
+  #
   # This is achieved by converting `numeric` to a Bignum.
-  # 
+  #
   # A [TypeError](https://ruby-doc.org/core-2.6.3/TypeError.html) is raised
   # if the `numeric` is not a Fixnum or Bignum type.
-  # 
+  #
   # ```ruby
   # (0x3FFFFFFFFFFFFFFF+1).coerce(42)   #=> [42, 4611686018427387904]
   # ```
@@ -686,11 +686,11 @@ class Integer < Numeric
 
   # Iterates the given block, passing in decreasing values from `int` down
   # to and including `limit` .
-  # 
+  #
   # If no block is given, an
   # [Enumerator](https://ruby-doc.org/core-2.6.3/Enumerator.html) is
   # returned instead.
-  # 
+  #
   # ```ruby
   # 5.downto(1) { |n| print n, ".. " }
   # puts "Liftoff!"
@@ -732,7 +732,7 @@ class Integer < Numeric
   def even?(); end
 
   # Returns the floating point result of dividing `int` by `numeric` .
-  # 
+  #
   # ```ruby
   # 654321.fdiv(13731)      #=> 47.652829364212366
   # 654321.fdiv(13731.24)   #=> 47.65199646936475
@@ -772,12 +772,12 @@ class Integer < Numeric
 
   # Returns the largest number less than or equal to `int` with a precision
   # of `ndigits` decimal digits (default: 0).
-  # 
+  #
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
-  # 
+  #
   # Returns `self` when `ndigits` is zero or positive.
-  # 
+  #
   # ```ruby
   # 1.floor           #=> 1
   # 1.floor(2)        #=> 1
@@ -795,7 +795,7 @@ class Integer < Numeric
 
   # Returns the greatest common divisor of the two integers. The result is
   # always positive. 0.gcd(x) and x.gcd(0) return x.abs.
-  # 
+  #
   # ```ruby
   # 36.gcd(60)                  #=> 12
   # 2.gcd(2)                    #=> 2
@@ -812,7 +812,7 @@ class Integer < Numeric
 
   # Returns an array with the greatest common divisor and the least common
   # multiple of the two integers, \[gcd, lcm\].
-  # 
+  #
   # ```ruby
   # 36.gcdlcm(60)                  #=> [12, 180]
   # 2.gcdlcm(2)                    #=> [2, 2]
@@ -847,7 +847,7 @@ class Integer < Numeric
 
   # Returns the least common multiple of the two integers. The result is
   # always positive. 0.lcm(x) and x.lcm(0) return zero.
-  # 
+  #
   # ```ruby
   # 36.lcm(60)                  #=> 180
   # 2.lcm(2)                    #=> 2
@@ -863,20 +863,20 @@ class Integer < Numeric
   def lcm(arg0); end
 
   # Returns the absolute value of `int` .
-  # 
+  #
   # ```ruby
   # (-12345).abs   #=> 12345
   # -12345.abs     #=> 12345
   # 12345.abs      #=> 12345
   # ```
-  # 
+  #
   # [\#magnitude](Integer.downloaded.ruby_doc#method-i-magnitude) is an
   # alias for [\#abs](Integer.downloaded.ruby_doc#method-i-abs) .
   sig {returns(Integer)}
   def magnitude(); end
 
   # Returns `int` modulo `other` .
-  # 
+  #
   # See
   # [Numeric\#divmod](https://ruby-doc.org/core-2.6.3/Numeric.html#method-i-divmod)
   # for more information.
@@ -908,7 +908,7 @@ class Integer < Numeric
 
   # Returns the successor of `int`, i.e. the
   # [Integer](Integer.downloaded.ruby_doc) equal to `int+1` .
-  # 
+  #
   # ```ruby
   # 1.next      #=> 2
   # (-1).next   #=> 0
@@ -927,14 +927,14 @@ class Integer < Numeric
   def odd?(); end
 
   # Returns the `int` itself.
-  # 
+  #
   # ```ruby
   # 97.ord   #=> 97
   # ```
-  # 
+  #
   # This method is intended for compatibility to character literals in Ruby
   # 1.9.
-  # 
+  #
   # For example, `?a.ord` returns 97 both in 1.8 and 1.9.
   sig {returns(Integer)}
   def ord(); end
@@ -944,7 +944,7 @@ class Integer < Numeric
 
   # Returns the predecessor of `int`, i.e. the
   # [Integer](Integer.downloaded.ruby_doc) equal to `int-1` .
-  # 
+  #
   # ```ruby
   # 1.pred      #=> 0
   # (-1).pred   #=> -2
@@ -1002,9 +1002,9 @@ class Integer < Numeric
   def real?(); end
 
   # Returns the remainder after dividing `int` by `numeric` .
-  # 
+  #
   # `x.remainder(y)` means `x-y*(x/y).truncate` .
-  # 
+  #
   # ```ruby
   # 5.remainder(3)     #=> 2
   # -5.remainder(3)    #=> -2
@@ -1012,7 +1012,7 @@ class Integer < Numeric
   # -5.remainder(-3)   #=> -2
   # 5.remainder(1.5)   #=> 0.5
   # ```
-  # 
+  #
   # See
   # [Numeric\#divmod](https://ruby-doc.org/core-2.6.3/Numeric.html#method-i-divmod)
   # .
@@ -1044,23 +1044,23 @@ class Integer < Numeric
 
   # Returns `int` rounded to the nearest value with a precision of `ndigits`
   # decimal digits (default: 0).
-  # 
+  #
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
-  # 
+  #
   # Returns `self` when `ndigits` is zero or positive.
-  # 
+  #
   # ```ruby
   # 1.round           #=> 1
   # 1.round(2)        #=> 1
   # 15.round(-1)      #=> 20
   # (-15).round(-1)   #=> -20
   # ```
-  # 
+  #
   # The optional `half` keyword argument is available similar to
   # [Float\#round](https://ruby-doc.org/core-2.6.3/Float.html#method-i-round)
   # .
-  # 
+  #
   # ```ruby
   # 25.round(-1, half: :up)      #=> 30
   # 25.round(-1, half: :down)    #=> 20
@@ -1083,7 +1083,7 @@ class Integer < Numeric
 
   # Returns the number of bytes in the machine representation of `int`
   # (machine dependent).
-  # 
+  #
   # ```ruby
   # 1.size               #=> 8
   # -1.size              #=> 8
@@ -1097,7 +1097,7 @@ class Integer < Numeric
 
   # Returns the successor of `int`, i.e. the
   # [Integer](Integer.downloaded.ruby_doc) equal to `int+1` .
-  # 
+  #
   # ```ruby
   # 1.next      #=> 2
   # (-1).next   #=> 0
@@ -1128,7 +1128,7 @@ class Integer < Numeric
 
   # Since `int` is already an [Integer](Integer.downloaded.ruby_doc) ,
   # returns `self` .
-  # 
+  #
   # [to\_int](Integer.downloaded.ruby_doc#method-i-to_int) is an alias for
   # [to\_i](Integer.downloaded.ruby_doc#method-i-to_i) .
   sig {returns(Integer)}
@@ -1136,14 +1136,14 @@ class Integer < Numeric
 
   # Since `int` is already an [Integer](Integer.downloaded.ruby_doc) ,
   # returns `self` .
-  # 
+  #
   # [to\_int](Integer.downloaded.ruby_doc#method-i-to_int) is an alias for
   # [to\_i](Integer.downloaded.ruby_doc#method-i-to_i) .
   sig {returns(Integer)}
   def to_int(); end
 
   # Returns the value as a rational.
-  # 
+  #
   # ```ruby
   # 1.to_r        #=> (1/1)
   # (1<<64).to_r  #=> (18446744073709551616/1)
@@ -1153,7 +1153,7 @@ class Integer < Numeric
 
   # Returns a string containing the place-value representation of `int` with
   # radix `base` (between 2 and 36).
-  # 
+  #
   # ```ruby
   # 12345.to_s       #=> "12345"
   # 12345.to_s(2)    #=> "11000000111001"
@@ -1163,21 +1163,21 @@ class Integer < Numeric
   # 12345.to_s(36)   #=> "9ix"
   # 78546939656932.to_s(36)  #=> "rubyrules"
   # ```
-  # 
-  # 
-  # 
+  #
+  #
+  #
   # Also aliased as: [inspect](Integer.downloaded.ruby_doc#method-i-inspect)
   sig {params(base: Integer).returns(String)}
   def to_s(base=10); end
 
   # Returns `int` truncated (toward zero) to a precision of `ndigits`
   # decimal digits (default: 0).
-  # 
+  #
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
-  # 
+  #
   # Returns `self` when `ndigits` is zero or positive.
-  # 
+  #
   # ```ruby
   # 1.truncate           #=> 1
   # 1.truncate(2)        #=> 1
@@ -1189,11 +1189,11 @@ class Integer < Numeric
 
   # Iterates the given block, passing in integer values from `int` up to and
   # including `limit` .
-  # 
+  #
   # If no block is given, an
   # [Enumerator](https://ruby-doc.org/core-2.6.3/Enumerator.html) is
   # returned instead.
-  # 
+  #
   # ```ruby
   # 5.upto(10) {|i| print i, " " }   #=> 5 6 7 8 9 10
   # ```
