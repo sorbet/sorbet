@@ -12,10 +12,6 @@ test/cli/suggest_static/suggest_static.rb:11: Method `foo` does not exist on `A`
 test/cli/suggest_static/suggest_static.rb:7: Method `foo` does not exist on `A` https://srb.help/7003
      7 |    foo
             ^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest_static/suggest_static.rb:7: Replace with `foo`
-     7 |    foo
-     8 |  end
     test/cli/suggest_static/suggest_static.rb:3: Did you mean: `A.foo`?
      3 |  def self.foo
           ^^^^^^^^^^^^

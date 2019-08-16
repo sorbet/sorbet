@@ -1,3 +1,4 @@
+#include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
@@ -508,16 +509,27 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                         if (possibleSymbol->isClass()) {
                             const auto replacement = possibleSymbol->name.show(ctx);
                             const auto loc = args.locs.call;
-                            const auto methodLoc = Loc{loc.file(), loc.beginPos(),
-                                                       (u4)(loc.beginPos() + args.name.toString(ctx).length())};
-                            e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
-                                          replacement);
+                            const auto toReplace = args.name.toString(ctx);
+                            // This is a bit hacky but the loc corresponding to the send isn't available here and until
+                            // it is, this verifies that the methodLoc below exists.
+                            if (absl::StartsWith(loc.source(ctx), toReplace)) {
+                                const auto methodLoc =
+                                    Loc{loc.file(), loc.beginPos(), (u4)(loc.beginPos() + toReplace.length())};
+                                e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
+                                              replacement);
+                            }
                         } else {
                             const auto replacement = possibleSymbol->name.toString(ctx);
                             const auto loc = args.locs.receiver;
-                            const auto methodLoc = Loc{loc.file(), loc.endPos() + 1,
-                                                       (u4)(loc.endPos() + 1 + args.name.toString(ctx).length())};
-                            e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}", replacement);
+                            const auto toReplace = args.name.toString(ctx);
+                            // See comment above.
+                            if (absl::StartsWith(args.locs.call.source(ctx),
+                                                 fmt::format("{}.{}", loc.source(ctx), toReplace))) {
+                                const auto methodLoc =
+                                    Loc{loc.file(), loc.endPos() + 1, (u4)(loc.endPos() + 1 + toReplace.length())};
+                                e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
+                                              replacement);
+                            }
                         }
                     }
                     e.addErrorSection(ErrorSection(lines));
