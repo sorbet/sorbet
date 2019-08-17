@@ -139,7 +139,8 @@ module T::Types
         # enumerating the object is a destructive operation and might hang.
         obj.class
       else
-        self.class.new(type_from_instances(obj))
+        # Get the real class name for other `Enumerable` as we don't want them to be collapsed as a `T::Array[T.untyped]`
+        T.unsafe(obj).class
       end
     end
 
