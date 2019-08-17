@@ -1,6 +1,6 @@
 begin
   class <emptyTree><<C <root>>> < ()
-    def self.<static-init><<static-init>$108>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
           ::Sorbet::Private::Static.keep_for_ide(::Main)
@@ -29,14 +29,14 @@ begin
       end
     end
 
-    def blockpass<blockpass>(&blk)
+    def blockpass<blockpass>(blk)
       begin
         a = blk.call(1)
         blk.call(a)
       end
     end
 
-    def mixed<mixed>(&blk)
+    def mixed<mixed>(blk)
       begin
         a = blk.call(1)
         blk.call(a)

@@ -9,6 +9,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/lsp/Query.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <memory>
 
 namespace sorbet::core {
@@ -69,6 +70,19 @@ public:
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     ArgInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
 
+    SymbolRef lookupSymbol(SymbolRef owner, NameRef name) {
+        return lookupSymbolWithFlags(owner, name, 0);
+    }
+    SymbolRef lookupClassSymbol(SymbolRef owner, NameRef name) {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS);
+    }
+    SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
+    }
+    SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
+    }
+
     SymbolRef staticInitForFile(Loc loc);
     SymbolRef staticInitForClass(SymbolRef klass, Loc loc);
 
@@ -77,7 +91,7 @@ public:
 
     NameRef enterNameUTF8(std::string_view nm);
 
-    NameRef getNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const;
+    NameRef lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const;
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num);
 
     NameRef enterNameConstant(NameRef original);
@@ -90,7 +104,7 @@ public:
     static std::unique_ptr<GlobalState> replaceFile(std::unique_ptr<GlobalState> inWhat, FileRef whatFile,
                                                     const std::shared_ptr<File> &withWhat);
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
-    FileRef findFileByPath(std::string_view path);
+    FileRef findFileByPath(std::string_view path) const;
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
     spdlog::logger &tracer() const;
@@ -137,13 +151,20 @@ public:
     bool silenceErrors = false;
     bool autocorrect = false;
     bool suggestRuntimeProfiledType = false;
-    bool isInitialized = false;
+
+    // We have a lot of internal names of form `<something>` that's chosen with `<` and `>` as you can't make
+    // this into a valid ruby identifier without suffering.
+    // We want to make sure we don't round-trip through strings for those names.
+    //
+    // If this attribute is set to `true`, all strings will be checked for `<` and `>` characters in them.
+    bool ensureCleanStrings = false;
+
     // So we can know whether we're running in autogen mode.
     // Right now this is only used to turn certain DSL passes on or off.
     // Think very hard before looking at this value in namer / resolver!
     // (hint: probably you want to find an alternate solution)
     bool runningUnderAutogen = false;
-    bool censorRawLocsWithinPayload = false;
+    bool censorForSnapshotTests = false;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
@@ -166,7 +187,7 @@ public:
     void trace(std::string_view msg) const;
 
     std::unique_ptr<GlobalStateHash> hash() const;
-    std::vector<std::shared_ptr<File>> getFiles() const;
+    const std::vector<std::shared_ptr<File>> &getFiles() const;
 
     // Contains a string to be used as the base of the error URL.
     // The error code is appended to this string.
@@ -178,6 +199,8 @@ public:
     void addDslPlugin(std::string_view method, std::string_view command);
     std::optional<std::string_view> findDslPlugin(NameRef method) const;
     bool hasAnyDslPlugin() const;
+
+    std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
 
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
@@ -215,6 +238,8 @@ private:
 
     SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo()._id, bool isModule = false);
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
+
+    SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;
 
     SymbolRef getTopLevelClassSymbol(NameRef name);
 

@@ -39,18 +39,18 @@ private:
 
 public:
     enum class LSPExperimentalFeature {
-        GoToDefinition = 2,
-        FindReferences = 3,
         Autocomplete = 4,
         WorkspaceSymbols = 5,
         DocumentSymbol = 6,
         SignatureHelp = 7,
+        QuickFix = 8,
     };
 
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
     options::Options opts;
 
     LSPWrapper(std::string_view rootPath = EMPTY_STRING, bool disableFastPath = false);
+    LSPWrapper(options::Options &&options, std::string_view rootPath = EMPTY_STRING, bool disableFastPath = false);
     LSPWrapper(std::unique_ptr<core::GlobalState> gs, options::Options &&options,
                const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath);
 

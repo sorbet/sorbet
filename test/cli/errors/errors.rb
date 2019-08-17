@@ -1,7 +1,8 @@
 # typed: true
 class BasicError
+  MyConstantWithNoTypo = nil
   def basicError
-    MissingConstant
+    MyConstantWithTypo
   end
 end
 

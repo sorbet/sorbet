@@ -17,4 +17,4 @@ echo
 cat suggest-t-let.rb
 
 rm suggest-t-let.rb
-rm "$tmp"
+rm -r "$tmp"

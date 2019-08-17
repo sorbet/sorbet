@@ -155,6 +155,8 @@ class <emptyTree><<C <root>>> < ()
   end
 
   class <emptyTree>::<C EnumerableUsage><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
     <self>.include(<emptyTree>::<C Enumerable>)
 
     <emptyTree>::<C Elem> = <self>.type_member()

@@ -124,6 +124,9 @@ unique_ptr<Position> detailToPosition(const core::Loc::Detail &detail) {
 
 /** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
 unique_ptr<Diagnostic> errorToDiagnostic(core::GlobalState &gs, const core::Error &error) {
+    if (!error.loc.exists()) {
+        return nullptr;
+    }
     auto position = error.loc.position(gs);
     auto range = make_unique<Range>(detailToPosition(position.first), detailToPosition(position.second));
     return make_unique<Diagnostic>(move(range), error.header);
@@ -146,9 +149,15 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
     core::GlobalState gs(errorQueue);
-    gs.censorRawLocsWithinPayload = true;
+    gs.censorForSnapshotTests = true;
     auto workers = WorkerPool::create(0, gs.tracer());
-    core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+        gs.initEmpty();
+    } else {
+        core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+    }
     core::MutableContext ctx(gs, core::Symbols::root());
     // Parser
     vector<core::FileRef> files;
@@ -262,7 +271,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         {
             core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-            namedTree = testSerialize(gs, namer::Namer::run(ctx, move(localNamed)));
+            vector<ast::ParsedFile> vTmp;
+            vTmp.emplace_back(move(localNamed));
+            vTmp = namer::Namer::run(ctx, move(vTmp));
+            namedTree = testSerialize(gs, move(vTmp[0]));
         }
 
         expectation = test.expectations.find("name-tree");
@@ -452,15 +464,17 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     // Check warnings and errors
     {
-        auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
-
         map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
         for (auto &error : errors) {
             if (error->isSilenced) {
                 continue;
             }
+            auto diag = errorToDiagnostic(gs, *error);
+            if (diag == nullptr) {
+                continue;
+            }
             auto path = error->loc.file().data(gs).path();
-            diagnostics[string(path.begin(), path.end())].push_back(errorToDiagnostic(gs, *error));
+            diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
@@ -518,6 +532,135 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
+void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, UnorderedSet<string> &filenames,
+                             vector<shared_ptr<RangeAssertion>> &assertions, UnorderedMap<string, string> &testFileUris,
+                             string_view rootUri, int &nextId) {
+    UnorderedMap<string, vector<shared_ptr<ApplyCodeActionAssertion>>> applyCodeActionAssertionsByFilename;
+    for (auto &assertion : assertions) {
+        if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
+            applyCodeActionAssertionsByFilename[applyCodeActionAssertion->filename].push_back(applyCodeActionAssertion);
+        }
+    }
+
+    bool exhaustiveApplyCodeAction =
+        BooleanPropertyAssertion::getValue("exhaustive-apply-code-action", assertions).value_or(false);
+
+    if (applyCodeActionAssertionsByFilename.empty() && !exhaustiveApplyCodeAction) {
+        return;
+    }
+
+    auto errors = RangeAssertion::getErrorAssertions(assertions);
+    UnorderedMap<string, std::vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
+    for (auto &error : errors) {
+        errorsByFilename[error->filename].emplace_back(error);
+    }
+
+    for (auto &filename : filenames) {
+        auto applyCodeActionAssertions = applyCodeActionAssertionsByFilename[filename];
+
+        // Request code actions for each of this file's error.
+        for (auto &error : errorsByFilename[filename]) {
+            vector<unique_ptr<Diagnostic>> diagnostics;
+            auto fileUri = testFileUris[filename];
+            // Unfortunately there's no simpler way to copy the range (yet).
+            auto params = make_unique<CodeActionParams>(
+                make_unique<TextDocumentIdentifier>(fileUri),
+                make_unique<Range>(make_unique<Position>(error->range->start->line, error->range->start->character),
+                                   make_unique<Position>(error->range->end->line, error->range->end->character)),
+                make_unique<CodeActionContext>(move(diagnostics)));
+            auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
+            auto responses = lspWrapper.getLSPResponsesFor(LSPMessage(move(req)));
+            EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a codeAction request.";
+            if (responses.size() != 1) {
+                continue;
+            }
+
+            auto &msg = responses.at(0);
+            EXPECT_TRUE(msg->isResponse());
+            if (!msg->isResponse()) {
+                continue;
+            }
+
+            auto &response = msg->asResponse();
+            ASSERT_TRUE(response.result) << "Code action request returned error: " << msg->toJSON();
+            auto &receivedCodeActionResponse =
+                get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
+            EXPECT_FALSE(get_if<JSONNullObject>(&receivedCodeActionResponse));
+            if (get_if<JSONNullObject>(&receivedCodeActionResponse)) {
+                continue;
+            }
+
+            UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
+            auto &receivedCodeActions = get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse);
+            for (auto &codeAction : receivedCodeActions) {
+                bool codeActionTitleUnique =
+                    receivedCodeActionsByTitle.find(codeAction->title) == receivedCodeActionsByTitle.end();
+                EXPECT_TRUE(codeActionTitleUnique) << "Found code action with duplicate title: " << codeAction->title;
+
+                if (codeActionTitleUnique) {
+                    receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
+                }
+            }
+
+            u4 receivedCodeActionsCount = receivedCodeActionsByTitle.size();
+            vector<shared_ptr<ApplyCodeActionAssertion>> matchedCodeActionAssertions;
+
+            // Test code action assertions matching the range of this error.
+            auto it = applyCodeActionAssertions.begin();
+            while (it != applyCodeActionAssertions.end()) {
+                auto codeActionAssertion = it->get();
+                if (!(cmpPositions(*error->range->start, *codeActionAssertion->range->start) <= 0 &&
+                      cmpPositions(*error->range->end, *codeActionAssertion->range->end) >= 0)) {
+                    ++it;
+                    continue;
+                }
+
+                // Ensure we received a code action matching the assertion.
+                auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
+                EXPECT_NE(it2, receivedCodeActionsByTitle.end())
+                    << fmt::format("Did not receive code action matching assertion `{}` for error `{}`...",
+                                   codeActionAssertion->toString(), error->toString());
+
+                // Ensure that the received code action applies correctly.
+                if (it2 != receivedCodeActionsByTitle.end()) {
+                    auto codeAction = move(it2->second);
+                    codeActionAssertion->check(test.sourceFileContents, *codeAction.get(), rootUri);
+
+                    // Some bookkeeping to make surfacing errors re. extra/insufficient
+                    // apply-code-action annotations easier.
+                    receivedCodeActionsByTitle.erase(it2);
+                    matchedCodeActionAssertions.emplace_back(*it);
+                    it = applyCodeActionAssertions.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+
+            if (exhaustiveApplyCodeAction) {
+                if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
+                    ADD_FAILURE() << fmt::format(
+                        "Found apply-code-action assertions without "
+                        "corresponding code actions from the server:\n{}",
+                        fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
+                                      [](const auto &assertion) -> string { return assertion->toString(); }));
+                } else if (matchedCodeActionAssertions.size() < receivedCodeActionsCount) {
+                    ADD_FAILURE() << fmt::format(
+                        "Received code actions without corresponding apply-code-action assertions:\n{}",
+                        fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
+                                      [](const auto &action) -> string { return action.second->toJSON(); }));
+                }
+            }
+        }
+
+        // We've already removed any code action assertions that matches a received code action assertion.
+        // Any remaining are therefore extraneous.
+        EXPECT_EQ(applyCodeActionAssertions.size(), 0)
+            << fmt::format("Found extraneous apply-code-action assertions:\n{}",
+                           fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), "\n",
+                                         [](const auto &assertion) -> string { return assertion->toString(); }));
+    }
+}
+
 TEST_P(LSPTest, All) {
     string rootPath = "/Users/jvilk/stripe/pay-server";
     string rootUri = fmt::format("file://{}", rootPath);
@@ -530,7 +673,10 @@ TEST_P(LSPTest, All) {
 
     // Perform initialize / initialized handshake.
     {
-        auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true);
+        auto sorbetInitOptions = make_unique<SorbetInitializationOptions>();
+        sorbetInitOptions->enableTypecheckInfo = true;
+        auto initializedResponses =
+            initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true, move(sorbetInitOptions));
         EXPECT_EQ(0, countNonTestMessages(initializedResponses))
             << "Should not receive any response to 'initialized' message.";
     }
@@ -583,7 +729,7 @@ TEST_P(LSPTest, All) {
             make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(testFileUris[*filenames.begin()]));
         auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
         auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(req)));
-        EXPECT_EQ(responses.size(), 1) << "Did not receive a response for a documentSymbols request.";
+        EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a documentSymbols request.";
         if (responses.size() == 1) {
             auto &msg = responses.at(0);
             EXPECT_TRUE(msg->isResponse());
@@ -606,6 +752,8 @@ TEST_P(LSPTest, All) {
             }
         }
     }
+
+    testQuickFixCodeActions(*lspWrapper.get(), test, filenames, assertions, testFileUris, rootUri, nextId);
 
     // Usage and def assertions
     {
@@ -752,8 +900,8 @@ TEST_P(LSPTest, All) {
     }
 } // namespace sorbet::test
 
-INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
-INSTANTIATE_TEST_CASE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_SUITE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_SUITE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 
 bool compareNames(string_view left, string_view right) {
     auto lsplit = left.find("__");
@@ -812,7 +960,7 @@ string rbFile2BaseTestName(string rbFileName) {
 vector<Expectations> listDir(const char *name) {
     vector<Expectations> result;
 
-    vector<string> names = sorbet::FileOps::listFilesInDir(name, {".rb", ".rbupdate", ".exp"}, false, {}, {});
+    vector<string> names = sorbet::FileOps::listFilesInDir(name, {".rb", ".rbi", ".rbupdate", ".exp"}, false, {}, {});
     const int prefixLen = strnlen(name, 1024) + 1;
     // Trim off the input directory from the name.
     transform(names.begin(), names.end(), names.begin(),
@@ -821,7 +969,7 @@ vector<Expectations> listDir(const char *name) {
 
     Expectations current;
     for (auto &s : names) {
-        if (absl::EndsWith(s, ".rb")) {
+        if (absl::EndsWith(s, ".rb") || absl::EndsWith(s, ".rbi")) {
             auto basename = rbFile2BaseTestName(s);
             if (basename != s) {
                 if (basename == current.basename) {

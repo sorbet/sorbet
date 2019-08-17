@@ -64,7 +64,7 @@ bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
     return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig());
 }
 
-optional<core::AutocorrectSuggestion> maybeSuggestExtendTSig(core::Context ctx, core::SymbolRef methodSymbol) {
+optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::SymbolRef methodSymbol) {
     auto method = methodSymbol.data(ctx);
 
     auto enclosingClass = method->enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
@@ -96,7 +96,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTSig(core::Context ctx, 
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return core::AutocorrectSuggestion{nextLineLoc, fmt::format("{}extend T::Sig\n", prefix)};
+    return core::AutocorrectSuggestion::Edit{nextLineLoc, fmt::format("{}extend T::Sig\n", prefix)};
 }
 
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
@@ -426,14 +426,18 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
 
     ENFORCE(!methodSymbol.data(ctx)->arguments().empty(), "There should always be at least one arg (the block arg).");
     bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments().size() == 1 &&
-                                methodSymbol.data(ctx)->arguments()[0].name == core::Names::blkArg();
+                                methodSymbol.data(ctx)->arguments()[0].isSyntheticBlockArgument();
 
     if (!onlyArgumentIsBlkArg) {
         fmt::format_to(ss, "params(");
 
         bool first = true;
         for (auto &argSym : methodSymbol.data(ctx)->arguments()) {
-            if (argSym.name == core::Names::blkArg()) {
+            // WARNING: This is doing raw string equality--don't cargo cult this!
+            // You almost certainly want to compare NameRef's for equality instead.
+            // We need to compare strings here because we're running with a frozen global state
+            // (and thus can't take the string that we get from `argumentName` and enter it as a name).
+            if (argSym.argumentName(ctx) == core::Names::blkArg().data(ctx)->shortName(ctx)) {
                 // Never write "<blk>: ..." in the params of a generated sig, because this doesn't parse.
                 // (We add a block argument to every method if it doesn't mention one.)
                 continue;
@@ -513,23 +517,29 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         }
     }
 
-    e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", to_string(ss), spaces)));
+    vector<core::AutocorrectSuggestion::Edit> edits;
+
+    string sig = to_string(ss);
+    edits.emplace_back(core::AutocorrectSuggestion::Edit{replacementLoc, fmt::format("{}\n{}", sig, spaces)});
 
     if (parentNeedsOverridable(ctx, methodSymbol, closestMethod)) {
         if (auto maybeOffset = startOfExistingReturn(ctx, closestMethod.data(ctx)->loc())) {
             auto offset = *maybeOffset;
             core::Loc overridableReturnLoc(closestMethod.data(ctx)->loc().file(), offset, offset);
             if (closestMethod.data(ctx)->hasGeneratedSig()) {
-                e.addAutocorrect(core::AutocorrectSuggestion(overridableReturnLoc, "overridable."));
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{overridableReturnLoc, "overridable."});
             } else {
-                e.addAutocorrect(core::AutocorrectSuggestion(overridableReturnLoc, "generated.overridable."));
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{overridableReturnLoc, "generated.overridable."});
             }
         }
     }
 
-    if (auto suggestion = maybeSuggestExtendTSig(ctx, methodSymbol)) {
-        e.addAutocorrect(std::move(*suggestion));
+    if (auto edit = maybeSuggestExtendTSig(ctx, methodSymbol)) {
+        edits.emplace_back(edit.value());
     }
+
+    e.addAutocorrect(core::AutocorrectSuggestion{fmt::format("Add `{}`", sig), edits});
+
     return true;
 }
 

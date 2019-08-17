@@ -151,3 +151,7 @@ class Abstract
   sig {abstract.params(a: T.untyped).void}
   def abstract_foo(a); end
 end
+
+def explicitly_named_block_parameter(&blk)
+  42
+end

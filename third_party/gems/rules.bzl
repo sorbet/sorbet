@@ -1,4 +1,8 @@
 load("//third_party/gems:gemfile.bzl", _parse_gemfile_lock = "parse_gemfile_lock")
+load("//third_party/gems:known_gems.bzl", "get_known_gem_sha256")
+
+# hard-coding ruby versions to support
+RUBY_VERSIONS = ["2.4.0", "2.6.0"]
 
 def _label_to_path(label):
     """
@@ -86,15 +90,18 @@ def _setup_bundler(repo_ctx):
         type = "tar",
     )
 
-    # hard coded as 2.4.0 for now
-    site_ruby = "lib/ruby/site_ruby/2.4.0"
     site_bin = "bin"
+
+    site_ruby_glob = ", ".join([
+        "\"lib/ruby/site_ruby/{}/**/*.rb\"".format(version)
+        for version in RUBY_VERSIONS
+    ])
 
     substitutions = {
         "{{workspace}}": repo_ctx.name,
         "{{bundler}}": bundler,
-        "{{site_ruby}}": site_ruby,
         "{{site_bin}}": site_bin,
+        "{{site_ruby_glob}}": site_ruby_glob,
     }
 
     repo_ctx.template(
@@ -104,7 +111,7 @@ def _setup_bundler(repo_ctx):
         substitutions = substitutions,
     )
 
-    repo_ctx.execute(["./setup_bundler.sh"])
+    repo_ctx.execute(["./setup_bundler.sh"] + RUBY_VERSIONS)
 
     repo_ctx.template(
         "bundler/BUILD",
@@ -170,6 +177,12 @@ def _setup_tests(repo_ctx):
     )
 
     repo_ctx.template(
+        "test/smoke_test.bzl",
+        Label("//third_party/gems:test/smoke_test.bzl"),
+        executable = False,
+    )
+
+    repo_ctx.template(
         "test/BUILD",
         Label("//third_party/gems:test/test.BUILD"),
         executable = False,
@@ -220,11 +233,11 @@ def _impl(repo_ctx):
             package_name = _format_package(dep)
 
             if gems_to_fetch.get(package_name) == None:
-                gems_to_fetch[package_name] = ""
-
-                # there is a gem present in a Gemfile.lock that wasn't mentioned
-                # in gems, so we know that the `gems` attr need to be fixed
-                fetched = True
+                gems_to_fetch[package_name] = get_known_gem_sha256(package_name, "")
+                if gems_to_fetch.get(package_name, "") == "":
+                    # there is a gem present in a Gemfile.lock that wasn't mentioned
+                    # in gems, so we know that the `gems` attr need to be fixed
+                    fetched = True
 
     # fetch all the gems
     known_shas = {}

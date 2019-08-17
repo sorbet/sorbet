@@ -1,22 +1,27 @@
-// has to be included first as it violates our poisons
-#include "core/proto/proto.h"
-
+#ifdef SORBET_REALMAIN_MIN
+// minimal build to speedup compilation. Remove extra features
+#else
+#define FULL_BUILD_ONLY(X) X;
+#include "core/proto/proto.h" // has to be included first as it violates our poisons
+// intentional comment to stop from reformatting
 #include "absl/debugging/symbolize.h"
+#include "common/statsd/statsd.h"
+#include "common/web_tracer_framework/tracing.h"
+#include "main/autogen/autogen.h"
+#include "main/autogen/autoloader.h"
+#include "main/autogen/subclasses.h"
+#include "main/lsp/lsp.h"
+#endif
+
 #include "absl/strings/str_cat.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
-#include "common/statsd/statsd.h"
-#include "common/web_tracer_framework/tracing.h"
 #include "core/Error.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
 #include "core/lsp/QueryResponse.h"
 #include "core/serialize/serialize.h"
-#include "main/autogen/autogen.h"
-#include "main/autogen/autoloader.h"
-#include "main/autogen/subclasses.h"
-#include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
 #include "payload/payload.h"
@@ -76,10 +81,12 @@ void startHUPMonitor() {
 }
 
 void addStandardMetrics() {
+#ifndef SORBET_REALMAIN_MIN
     prodCounterAdd("release.build_scm_commit_count", Version::build_scm_commit_count);
     prodCounterAdd("release.build_timestamp",
                    chrono::duration_cast<std::chrono::seconds>(Version::build_timestamp.time_since_epoch()).count());
     StatsD::addRusageStats();
+#endif
 }
 
 core::StrictLevel levelMinusOne(core::StrictLevel level) {
@@ -154,6 +161,7 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
     return core::Loc(file, start, end);
 }
 
+#ifndef SORBET_REALMAIN_MIN
 struct AutogenResult {
     struct Serialized {
         // Selectively populated based on print options
@@ -296,10 +304,13 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
         opts.print.AutogenSubclasses.fmt(
             "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
     }
-} // namespace sorbet::realmain
+}
+#endif
 
 int realmain(int argc, char *argv[]) {
+#ifndef SORBET_REALMAIN_MIN
     absl::InitializeSymbolizer(argv[0]);
+#endif
     returnCode = 0;
     logger = make_shared<spd::logger>("console", stderrColorSink);
     logger->set_level(spd::level::trace); // pass through everything, let the sinks decide
@@ -310,7 +321,9 @@ int realmain(int argc, char *argv[]) {
     typeErrorsConsole->set_pattern("%v");
 
     options::Options opts;
-    options::readOptions(opts, argc, argv, logger);
+    auto extensionProviders = sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders();
+    vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
+    options::readOptions(opts, extensions, argc, argv, extensionProviders, logger);
     while (opts.waitForDebugger && !stopInDebugger()) {
         // spin
     }
@@ -381,6 +394,7 @@ int realmain(int argc, char *argv[]) {
         make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
     gs->pathPrefix = opts.pathPrefix;
     gs->errorUrlBase = opts.errorUrlBase;
+    gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
 
     logger->trace("building initial global state");
@@ -402,8 +416,8 @@ int realmain(int argc, char *argv[]) {
     if (opts.print.isAutogen()) {
         gs->runningUnderAutogen = true;
     }
-    if (opts.censorRawLocsWithinPayload) {
-        gs->censorRawLocsWithinPayload = true;
+    if (opts.censorForSnapshotTests) {
+        gs->censorForSnapshotTests = true;
     }
     if (opts.reserveMemKiB > 0) {
         gs->reserveMemory(opts.reserveMemKiB);
@@ -419,10 +433,17 @@ int realmain(int argc, char *argv[]) {
         gs->addDslPlugin(plugin.first, plugin.second);
     }
     gs->dslRubyExtraArgs = opts.dslRubyExtraArgs;
+    if (!opts.stripeMode) {
+        // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
+        if (opts.errorCodeWhiteList.empty()) {
+            gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+        }
+    }
 
     logger->trace("done building initial global state");
 
     if (opts.runLSP) {
+#ifndef SORBET_REALMAIN_MIN
         gs->errorQueue->ignoreFlushes = true;
         logger->debug("Starting sorbet version {} in LSP server mode. "
                       "Talk ‘\\r\\n’-separated JSON-RPC to me. "
@@ -432,6 +453,7 @@ int realmain(int argc, char *argv[]) {
                       Version::full_version_string);
         lsp::LSPLoop loop(move(gs), opts, logger, *workers, STDIN_FILENO, cout);
         gs = loop.runLSP();
+#endif
     } else {
         Timer timeall(logger, "wall_time");
         vector<core::FileRef> inputFiles;
@@ -460,6 +482,7 @@ int realmain(int argc, char *argv[]) {
         payload::retainGlobalState(gs, opts, kvstore);
 
         if (gs->runningUnderAutogen) {
+#ifndef SORBET_REALMAIN_MIN
             gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);
             gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
@@ -483,6 +506,7 @@ int realmain(int argc, char *argv[]) {
             }
 
             runAutogen(ctx, opts, autoloaderCfg, *workers, indexed);
+#endif
         } else {
             indexed = pipeline::resolve(gs, move(indexed), opts, *workers);
             indexed = pipeline::typecheck(gs, move(indexed), opts, *workers);
@@ -506,7 +530,7 @@ int realmain(int argc, char *argv[]) {
                 if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
                     auto sigil = levelToSigil(minErrorLevel);
                     e.setHeader("You could add `# typed: {}`", sigil);
-                    e.addAutocorrect(core::AutocorrectSuggestion(loc, fmt::format("# typed: {}\n", sigil)));
+                    e.replaceWith(fmt::format("Add `typed: {}` sigil", sigil), loc, "# typed: {}\n", sigil);
                 }
             }
         }
@@ -544,6 +568,7 @@ int realmain(int argc, char *argv[]) {
         }
     }
 
+#ifndef SORBET_REALMAIN_MIN
     addStandardMetrics();
 
     if (!opts.someCounters.empty()) {
@@ -598,6 +623,7 @@ int realmain(int argc, char *argv[]) {
             logger->error("Cannot write metrics file at `{}`", opts.metricsFile);
         }
     }
+#endif
     if (gs->hadCriticalError()) {
         returnCode = 10;
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {

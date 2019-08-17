@@ -10,6 +10,9 @@ class T::Private::Methods::DeclBuilder
   def abstract; end
 
   sig {returns(T::Private::Methods::DeclBuilder)}
+  def final; end
+
+  sig {returns(T::Private::Methods::DeclBuilder)}
   def implementation; end
 
   sig {params(allow_incompatible: T::Boolean).returns(T::Private::Methods::DeclBuilder)}

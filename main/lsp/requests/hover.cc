@@ -1,3 +1,4 @@
+#include "absl/strings/ascii.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
 
@@ -21,26 +22,39 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
         }
         start = start->secondary.get();
     }
+
     return contents;
 }
 
-unique_ptr<MarkupContent> formatRubyCode(MarkupKind markupKind, string str) {
-    if (markupKind == MarkupKind::Markdown && str.length() > 0) {
-        str = fmt::format("```ruby\n{}\n```", str);
+unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typeString,
+                                          optional<string_view> docString) {
+    // format typeString
+    string formattedTypeString;
+    if (markupKind == MarkupKind::Markdown && typeString.length() > 0) {
+        formattedTypeString = fmt::format("```ruby\n{}\n```", typeString);
+    } else {
+        formattedTypeString = string(typeString);
     }
-    return make_unique<MarkupContent>(markupKind, move(str));
+
+    string content =
+        absl::StrCat(formattedTypeString, docString.has_value() ? "\n\n---\n\n" : "", docString.value_or(""));
+
+    return make_unique<MarkupContent>(markupKind, move(content));
 }
 
 LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                           const TextDocumentPositionParams &params) {
+                                           const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.hover");
 
     auto result =
-        setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover, false);
-    if (auto run = get_if<TypecheckRun>(&result)) {
-        gs = move(run->gs);
-        auto &queryResponses = run->responses;
+        setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover);
+    gs = move(result.gs);
+    if (result.error) {
+        // An error happened while setting up the query.
+        response->error = move(result.error);
+    } else {
+        auto &queryResponses = result.responses;
         if (queryResponses.empty()) {
             // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
             response->result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
@@ -48,28 +62,56 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
         }
 
         auto resp = move(queryResponses[0]);
+
+        optional<string> documentation = nullopt;
+        if (resp->isConstant() || resp->isDefinition()) {
+            auto origins = resp->getTypeAndOrigins().origins;
+            if (!origins.empty()) {
+                auto loc = origins[0];
+                if (loc.exists()) {
+                    documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
+                }
+            }
+        }
+
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
+            auto start = sendResp->dispatchResult.get();
+            if (start != nullptr && start->main.method.exists() && !start->main.receiver->isUntyped()) {
+                auto loc = start->main.method.data(*gs)->loc();
+                if (loc.exists()) {
+                    documentation = findDocumentation(loc.file().data(*gs).source(), loc.beginPos());
+                }
+            }
             auto &constraint = sendResp->dispatchResult->main.constr;
             if (constraint) {
                 retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
             }
-            response->result = make_unique<Hover>(formatRubyCode(
-                clientHoverMarkupKind, methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint)));
+            response->result = make_unique<Hover>(formatHoverText(
+                clientHoverMarkupKind, methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint),
+                documentation));
         } else if (auto defResp = resp->isDefinition()) {
-            response->result = make_unique<Hover>(formatRubyCode(
-                clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr)));
-        } else {
+            response->result = make_unique<Hover>(formatHoverText(
+                clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr),
+                documentation));
+        } else if (auto constResp = resp->isConstant()) {
+            const auto &data = constResp->symbol.data(*gs);
+            auto type = constResp->retType.type;
+            if (data->isClass()) {
+                auto singletonClass = data->lookupSingletonClass(*gs);
+                ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
+                type = singletonClass.data(*gs)->externalType(*gs);
+            } else if (data->isStaticField() && data->isTypeAlias()) {
+                // By wrapping the type in `MetaType`, we display a type alias of `Foo` as `<Type: Foo>` rather than
+                // `Foo`.
+                type = core::make_type<core::MetaType>(type);
+            }
             response->result =
-                make_unique<Hover>(formatRubyCode(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs)));
+                make_unique<Hover>(formatHoverText(clientHoverMarkupKind, type->showWithMoreInfo(*gs), documentation));
+        } else {
+            response->result = make_unique<Hover>(
+                formatHoverText(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
         }
-    } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
-        // An error happened while setting up the query.
-        response->error = move(error->first);
-        gs = move(error->second);
-    } else {
-        // Should never happen, but satisfy the compiler.
-        ENFORCE(false, "Internal error: setupLSPQueryByLoc returned invalid value.");
     }
     return LSPResult::make(move(gs), move(response));
 }

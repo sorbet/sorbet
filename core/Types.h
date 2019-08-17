@@ -153,8 +153,12 @@ public:
 };
 
 struct Intrinsic {
+    enum class Kind : u1 {
+        Instance = 1,
+        Singleton = 2,
+    };
     const SymbolRef symbol;
-    const bool singleton;
+    const Kind singleton;
     const NameRef method;
     const IntrinsicMethod *impl;
 };
@@ -258,11 +262,20 @@ public:
 };
 CheckSize(ClassType, 16, 8);
 
+/*
+ * This is the type used to represent a use of a type_member or type_template in
+ * a signature.
+ */
 class LambdaParam final : public Type {
 public:
     SymbolRef definition;
 
-    LambdaParam(const SymbolRef definition);
+    // The type bounds provided in the definition of the type_member or
+    // type_template.
+    TypePtr lowerBound;
+    TypePtr upperBound;
+
+    LambdaParam(SymbolRef definition, TypePtr lower, TypePtr upper);
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
@@ -278,7 +291,7 @@ public:
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
 };
-CheckSize(LambdaParam, 16, 8);
+CheckSize(LambdaParam, 48, 8);
 
 class SelfTypeParam final : public Type {
 public:
@@ -376,6 +389,9 @@ public:
 };
 CheckSize(LiteralType, 24, 8);
 
+/*
+ * TypeVars are the used for the type parameters of generic methods.
+ */
 class TypeVar final : public Type {
 public:
     SymbolRef sym;

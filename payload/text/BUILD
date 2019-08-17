@@ -30,6 +30,7 @@ cc_library(
 cc_library(
     name = "some",
     srcs = [
+        "populate.cc",
         "text.cc",
     ],
     linkstatic = select({
@@ -37,20 +38,29 @@ cc_library(
         "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
-    deps = ["text"],
+    deps = [
+        "text",
+        "//common/concurrency",
+        "//common/kvstore",
+        "//main/pipeline:pipeline-orig",
+    ],
 )
 
 cc_library(
     name = "empty",
     srcs = [
         "empty.cc",
+        "nopopulate.cc",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
-    deps = ["text"],
+    deps = [
+        "text",
+        "//core",
+    ],
 )
 
 genrule(

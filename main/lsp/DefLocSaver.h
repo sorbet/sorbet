@@ -12,5 +12,9 @@ public:
     // Handles loc and symbol requests for instance variables.
     std::unique_ptr<ast::UnresolvedIdent> postTransformUnresolvedIdent(core::Context ctx,
                                                                        std::unique_ptr<ast::UnresolvedIdent> id);
+
+    // Handles loc and symbol requests for constants.
+    std::unique_ptr<ast::ConstantLit> postTransformConstantLit(core::Context ctx,
+                                                               std::unique_ptr<ast::ConstantLit> lit);
 };
 }; // namespace sorbet::realmain::lsp

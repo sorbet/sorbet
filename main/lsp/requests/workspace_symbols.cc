@@ -6,20 +6,24 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 unique_ptr<SymbolInformation> LSPLoop::symbolRef2SymbolInformation(const core::GlobalState &gs,
-                                                                   core::SymbolRef symRef) {
+                                                                   core::SymbolRef symRef) const {
     auto sym = symRef.data(gs);
     if (!sym->loc().file().exists() || hideSymbol(gs, symRef)) {
         return nullptr;
     }
 
-    auto result = make_unique<SymbolInformation>(sym->name.show(gs), symbolRef2SymbolKind(gs, symRef),
-                                                 loc2Location(gs, sym->loc()));
+    auto location = loc2Location(gs, sym->loc());
+    if (location == nullptr) {
+        return nullptr;
+    }
+    auto result =
+        make_unique<SymbolInformation>(sym->name.show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
     result->containerName = sym->owner.data(gs)->showFullName(gs);
     return result;
 }
 
 LSPResult LSPLoop::handleWorkspaceSymbols(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                          const WorkspaceSymbolParams &params) {
+                                          const WorkspaceSymbolParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::WorkspaceSymbol);
     if (!opts.lspWorkspaceSymbolsEnabled) {
         response->error =

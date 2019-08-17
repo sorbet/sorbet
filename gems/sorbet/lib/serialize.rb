@@ -55,7 +55,6 @@ class Sorbet::Private::Serialize
     end
     superclass_str = !superclass_str || superclass_str.empty? ? '' : " < #{superclass_str}"
     ret << (Sorbet::Private::RealStdlib.real_is_a?(klass, Class) ? "class #{class_name}#{superclass_str}\n" : "module #{class_name}\n")
-    ret << "  extend ::T::Sig\n"
 
     # We don't use .included_modules since that also has all the aweful things
     # that are mixed into Object. This way we at least have a delimiter before
@@ -76,7 +75,8 @@ class Sorbet::Private::Serialize
       end
       ret << "  include ::#{ancestor_name}\n"
     end
-    Sorbet::Private::RealStdlib.real_singleton_class(klass).ancestors.each do |ancestor|
+    singleton_class = Sorbet::Private::RealStdlib.real_singleton_class(klass)
+    Sorbet::Private::RealStdlib.real_ancestors(singleton_class).each do |ancestor|
       next if ancestor == Sorbet::Private::RealStdlib.real_singleton_class(klass)
       break if superclass && ancestor == Sorbet::Private::RealStdlib.real_singleton_class(superclass)
       break if ancestor == Module
@@ -102,8 +102,8 @@ class Sorbet::Private::Serialize
       next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym)
-      rescue LoadError, NameError, RuntimeError, ArgumentError
-        ret << "# Failed to load #{class_name}::#{const_sym}\n"
+      rescue LoadError, NameError, RuntimeError, ArgumentError => err
+        ret << "# Got #{err.class} when trying to get class constant symbol #{class_name}::#{const_sym}\n"
         next
       end
       # next if !Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeVariable)
@@ -116,8 +116,8 @@ class Sorbet::Private::Serialize
       next if Sorbet::Private::ConstantLookupCache::DEPRECATED_CONSTANTS.include?("#{class_name}::#{const_sym}")
       begin
         value = klass.const_get(const_sym, false)
-      rescue LoadError, NameError, RuntimeError, ArgumentError
-        ret << "# Failed to load #{class_name}::#{const_sym}\n"
+      rescue LoadError, NameError, RuntimeError, ArgumentError => err
+        ret << "# Got #{err.class} when trying to get class constant symbol #{class_name}::#{const_sym}_\n"
         next
       end
       next if Sorbet::Private::RealStdlib.real_is_a?(value, Module)

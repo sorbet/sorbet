@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=test/testdata/resolver/self.rb start=3:1 end=42:4}, Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4})
   class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $108> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=42:4}
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=42:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
   class <C <U TestSelf>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=3:15}
     method <C <U TestSelf>><U good1> (s, <blk>) -> TestSelf @ Loc {file=test/testdata/resolver/self.rb start=10:3 end=10:15}
@@ -12,7 +12,7 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <S <C <U TestSelf>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=20:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
   class <C <U TestSelfGeneric>>[<C <U Elem>>] < <C <U Object>> () @ Loc {file=test/testdata/resolver/self.rb start=23:1 end=23:22}
-    type-member(=) <C <U TestSelfGeneric>><C <U Elem>> @ Loc {file=test/testdata/resolver/self.rb start=27:3 end=27:21}
+    type-member(=) <C <U TestSelfGeneric>><C <U Elem>> -> LambdaParam(<C <U TestSelfGeneric>><C <U Elem>>, lower=T.noreturn, upper=<any>) @ Loc {file=test/testdata/resolver/self.rb start=27:3 end=27:21}
     method <C <U TestSelfGeneric>><U good1> (s, <blk>) -> AppliedType {
       klass = <C <U TestSelfGeneric>>
       targs = [

@@ -1,8 +1,23 @@
 # typed: true
+# The docs for BigFoo
 class BigFoo; extend T::Sig
     # ^ hover: T.class_of(BigFoo)
+
+# The docs for FOO_CONSTANT
+  FOO_CONSTANT = 1
+# ^^^^^^^^^^^^ The docs for FOO_CONSTANT
+# ^^^^^^^^^^^^ Integer(1)
+
+  # Docs for Bar#static_variable
+  @@static_variable = T.let('asdf', String)
+#   ^^^^^^^^^^^^^^^ hover: Docs for Bar#static_variable
+#   ^^^^^^^^^^^^^^^ hover: String
+
+  # The docs for LittleFoo1
   class LittleFoo1; extend T::Sig
-  sig {params(num: Integer).returns(Integer)}
+    def initialize
+    end
+    sig {params(num: Integer).returns(Integer)}
     def bar(num)
       3 + num
     # ^ hover: Integer(3)
@@ -13,7 +28,8 @@ class BigFoo; extend T::Sig
     sig {returns(Integer)}
     def bar
       a = BigFoo::LittleFoo1.new
-                      # ^ hover: T.class_of(BigFoo::LittleFoo1)
+                # ^^^^^^^^^^ hover: T.class_of(BigFoo::LittleFoo1)
+                # ^^^^^^^^^^ hover: The docs for LittleFoo1
       a.bar(1)
    # ^ hover: null
     # ^ hover: BigFoo::LittleFoo1
@@ -25,8 +41,10 @@ class BigFoo; extend T::Sig
   def self.bar(num1, num2)
               # ^ hover: Integer
                    # ^ hover: String
-    4 + num1 + num2.to_i
+    4 + num1 + num2.to_i + @@static_variable.length
            # ^ hover: sig {params(arg0: Integer).returns(Integer)}
+                           # ^^^^^^^^^^^^^^^ hover: Docs for Bar#static_variable
+                           # ^^^^^^^^^^^^^^^ hover: String
   end
 
   sig {generated.void}
@@ -56,6 +74,16 @@ class BigFoo; extend T::Sig
   sig { returns([Integer, String]) }
   def self.anotherFunc()
     [1, "hello"]
+  end
+
+  # Tests return markdown output
+  sig {void}
+  def tests_return_markdown
+    # ^^^^^^^^^^^^^^^^^^^^^ hover: ```ruby
+    # ^^^^^^^^^^^^^^^^^^^^^ hover: sig {void}
+    # ^^^^^^^^^^^^^^^^^^^^^ hover: ```
+    # ^^^^^^^^^^^^^^^^^^^^^ hover: ---
+    # ^^^^^^^^^^^^^^^^^^^^^ hover: Tests return markdown output
   end
 end
 
@@ -102,6 +130,17 @@ def main
   hash = Hash.new("default")
 # ^ hover: T::Hash[T.untyped, T.untyped]
 
+  boo = BigFoo::FOO_CONSTANT
+              # ^^^^^^^^^^^^ hover: Integer(1)
+              # ^^^^^^^^^^^^ hover: The docs for FOO_CONSTANT
+      # ^^^^^^ hover: T.class_of(BigFoo)
+      # ^^^^^^ hover: The docs for BigFoo
+
+  # .new only works if we definte `initialize`
+  foo = BigFoo.new
+             # ^^^ hover: (nothing)
+  hoo = BigFoo::LittleFoo1.new
+                         # ^^^ hover: sig {returns(BigFoo::LittleFoo1)}
   raise "error message"
 # ^ hover: sig {params(arg0: String).returns(T.noreturn)}
 end

@@ -1,71 +1,103 @@
 #!/bin/bash
 
-set -exuo pipefail
+set -euo pipefail
+cd "$(dirname "$0")"
+cd "../.."
+# we're now at the root of the repo.
 
-if (( $# != 1 )); then
-    echo "Illegal number of parameters. Need a single file to minimize"
+if [ "$#" -lt 2 ]; then
+cat <<EOF
+usage:
+  $0 <target> <crasher> [<options>]
+
+example target:
+  fuzz_dash_e
+  fuzz_doc_symbols
+  fuzz_hover
+
+example crasher:
+  fuzz_crashers/original/crash-[...]
+
+example options:
+  --stress-incremental-resolver
+EOF
+exit 1
 fi
 
-FUZZ_ARG="--stress-incremental-resolver" # to run incremental resolver
+target="$1"
+shift
+# this realpath is needed when running this script under parallel.
+crasher="$(realpath "$1")"
+shift
 
-dir="$( dirname "${BASH_SOURCE[0]}" )"
+mkdir -p fuzz_crashers/fixed/min fuzz_crashers/fixed/original fuzz_crashers/min
 
-mkdir -p "${dir}/../../fuzz_crashers/fixed/min/" "${dir}/../../fuzz_crashers/fixed/original/"
+crasher_name="$(basename "$crasher")"
+output_file="fuzz_crashers/min/$crasher_name"
+done_file="$output_file.done"
 
-file_arg="$(basename "$1")"
-crash_full_path="$(realpath "$1")"
-output_file="${dir}/../../fuzz_crashers/min/${file_arg}"
-if [ -f "${output_file}.done" ]; then
-    echo "already minimized"
-    if "${dir}/../../bazel-bin/test/fuzz/fuzz_dash_e" "${output_file}.done"; then
-      echo "already fixed"
-      mv "${output_file}.done" "${dir}/../../fuzz_crashers/fixed/min/${file_arg}"
-    fi
-    exit 0
+if [ -f "$done_file" ]; then
+  echo "$crasher: already minimized"
+  if "./bazel-bin/test/fuzz/$target" "$done_file"; then
+    echo "$crasher: already fixed"
+    mv "$done_file" "fuzz_crashers/fixed/min/$crasher_name"
+  fi
+  exit
 fi
+
 if [ -f "$output_file" ]; then
-    echo "Reusing previous minimized state"
-    crash_full_path=$(mktemp)
-    cp "$output_file" "$crash_full_path"
+  echo "$crasher: reusing previous minimized state"
+  crasher="$(mktemp)"
+  cp "$output_file" "$crasher"
 fi
 
-if "${dir}/../../bazel-bin/test/fuzz/fuzz_dash_e" "${crash_full_path}" ${FUZZ_ARG}; then
-  echo "already fixed"
-  mv "${crash_full_path}" "${dir}/../../fuzz_crashers/fixed/original/${file_arg}"
-  exit 0
+if "./bazel-bin/test/fuzz/$target" "$crasher" "$@"; then
+  echo "$crasher: already fixed"
+  mv "$crasher" "fuzz_crashers/fixed/original/$crasher_name"
+  exit
 fi
 
-interrupted=
+cancelled=false
 
-handler_int()
-{
-    kill -INT "$child" 2>/dev/null
-    interrupted=1
+handle_INT() {
+  kill -INT "$child" 2>/dev/null
+  cancelled=true
 }
 
-handler_term()
-{
-    kill -TERM "$child" 2>/dev/null
-    interrupted=1
+handle_TERM() {
+  kill -TERM "$child" 2>/dev/null
+  cancelled=true
 }
 
-trap handler_int SIGINT
-trap handler_term SIGTERM
+trap handle_INT SIGINT
+trap handle_TERM SIGTERM
 
-mkdir -p "${dir}/../../fuzz_crashers/min/"
-PATH=$PATH:$(pwd)/bazel-sorbet/external/llvm_toolchain/bin/
-export PATH
+export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
+if ! command -v llvm-symbolizer >/dev/null; then
+  echo "fatal: command not found: llvm-symbolizer"
+  exit 1
+fi
 
-command -v llvm-symbolizer >/dev/null 2>&1 || { echo 'will need llvm-symbolizer' ; exit 1; }
+# use top 10 frames to tell different errors apart
+export ASAN_OPTIONS="dedup_token_length=10"
 
-(
-    cd "$dir"/../..
-    ASAN_OPTIONS=dedup_token_length=10 ./bazel-bin/test/fuzz/fuzz_dash_e -use_value_profile=1 -dict=test/fuzz/ruby.dict -minimize_crash=1 "$crash_full_path" -exact_artifact_path=fuzz_crashers/min/"$file_arg" ${FUZZ_ARG}
-) & # start a subshell that we'll monitor
+# start a backgrounded command that we'll monitor
+echo "$crasher: running"
+# this should not use nice, even though in fuzz.sh we use nice
+"./bazel-bin/test/fuzz/$target" \
+  -dict=test/fuzz/ruby.dict \
+  -minimize_crash=1 \
+  -exact_artifact_path="$output_file" \
+  "$@" \
+  "$crasher" \
+  &
 
-child=$!
+child="$!"
 wait "$child"
 
-if [ -z "$interrupted" ]; then
-  mv "${output_file}" "${output_file}.done"
+if "$cancelled"; then
+  echo "$crasher: cancelled"
+else
+  mv "$output_file" "$done_file"
+  echo "$crasher: done"
 fi

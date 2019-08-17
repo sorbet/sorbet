@@ -22,58 +22,149 @@ com::stripe::rubytyper::LocalVariable Proto::toProto(const core::GlobalState &gs
     return proto;
 }
 
-com::stripe::rubytyper::Instruction Proto::toProto(const core::GlobalState &gs, const Instruction *instr) {
-    com::stripe::rubytyper::Instruction proto;
+InlinedVector<com::stripe::rubytyper::Binding, 1> Proto::toProto(const core::GlobalState &gs, const Binding &bnd) {
+    InlinedVector<com::stripe::rubytyper::Binding, 1> protos;
     typecase(
-        instr,
+        bnd.value.get(),
         [&](const Ident *i) {
-            proto.set_kind(com::stripe::rubytyper::Instruction::IDENT);
-            *proto.mutable_ident() = toProto(gs, i->what);
+            protos.emplace_back();
+            *protos.back().mutable_bind() = toProto(gs, bnd.bind);
+            *protos.back().mutable_location() = core::Proto::toProto(gs, bnd.loc);
+
+            com::stripe::rubytyper::Instruction instr;
+            instr.set_kind(com::stripe::rubytyper::Instruction::IDENT);
+            *instr.mutable_ident() = toProto(gs, i->what);
+
+            *protos.back().mutable_instruction() = instr;
         },
         [&](const Alias *i) {
-            proto.set_kind(com::stripe::rubytyper::Instruction::ALIAS);
-            proto.set_alias_full_name(i->what.show(gs));
+            protos.emplace_back();
+            *protos.back().mutable_bind() = toProto(gs, bnd.bind);
+            *protos.back().mutable_location() = core::Proto::toProto(gs, bnd.loc);
+
+            com::stripe::rubytyper::Instruction instr;
+            instr.set_kind(com::stripe::rubytyper::Instruction::ALIAS);
+            instr.set_alias_full_name(i->what.show(gs));
+
+            *protos.back().mutable_instruction() = instr;
         },
         [&](const Send *i) {
-            proto.set_kind(com::stripe::rubytyper::Instruction::SEND);
-            *proto.mutable_send()->mutable_receiver() = toProto(gs, i->recv);
-            proto.mutable_send()->set_method(i->fun.show(gs));
+            protos.emplace_back();
+            *protos.back().mutable_bind() = toProto(gs, bnd.bind);
+            *protos.back().mutable_location() = core::Proto::toProto(gs, bnd.loc);
+
+            com::stripe::rubytyper::Instruction instr;
+            instr.set_kind(com::stripe::rubytyper::Instruction::SEND);
+            *instr.mutable_send()->mutable_receiver() = toProto(gs, i->recv);
+            instr.mutable_send()->set_method(i->fun.show(gs));
             if (i->link) {
-                *proto.mutable_send()->mutable_block() = com::stripe::rubytyper::Instruction::Block();
+                *instr.mutable_send()->mutable_block() = com::stripe::rubytyper::Instruction::Block();
             }
             for (const auto &arg : i->args) {
-                *proto.mutable_send()->add_arguments() = toProto(gs, arg);
+                *instr.mutable_send()->add_arguments() = toProto(gs, arg);
             }
+
+            *protos.back().mutable_instruction() = instr;
+        },
+        [&](const TAbsurd *i) {
+            com::stripe::rubytyper::Binding aliasBinding;
+            *aliasBinding.mutable_location() = core::Proto::toProto(gs, bnd.loc);
+
+            com::stripe::rubytyper::LocalVariable local;
+            local.set_unique_name(core::Names::tConstTemp().show(gs));
+            *local.mutable_type() = core::Proto::toProto(
+                gs, core::make_type<core::ClassType>(core::Symbols::T().data(gs)->lookupSingletonClass(gs)));
+            *aliasBinding.mutable_bind() = local;
+
+            com::stripe::rubytyper::Instruction alias;
+            alias.set_kind(com::stripe::rubytyper::Instruction::ALIAS);
+            alias.set_alias_full_name(core::Symbols::T().show(gs));
+            *aliasBinding.mutable_instruction() = alias;
+
+            protos.emplace_back(aliasBinding);
+
+            com::stripe::rubytyper::Binding sendBinding;
+            *sendBinding.mutable_location() = core::Proto::toProto(gs, bnd.loc);
+
+            *sendBinding.mutable_bind() = toProto(gs, bnd.bind);
+
+            com::stripe::rubytyper::Instruction send;
+            send.set_kind(com::stripe::rubytyper::Instruction::SEND);
+            *send.mutable_send()->mutable_receiver() = local;
+            send.mutable_send()->set_method(core::Names::absurd().show(gs));
+            *send.mutable_send()->add_arguments() = toProto(gs, i->what);
+            *sendBinding.mutable_instruction() = send;
+
+            protos.emplace_back(sendBinding);
         },
         [&](const Return *i) {
-            proto.set_kind(com::stripe::rubytyper::Instruction::RETURN);
-            *proto.mutable_return_() = toProto(gs, i->what);
+            protos.emplace_back();
+            *protos.back().mutable_bind() = toProto(gs, bnd.bind);
+            *protos.back().mutable_location() = core::Proto::toProto(gs, bnd.loc);
+
+            com::stripe::rubytyper::Instruction instr;
+            instr.set_kind(com::stripe::rubytyper::Instruction::RETURN);
+            *instr.mutable_return_() = toProto(gs, i->what);
+
+            *protos.back().mutable_instruction() = instr;
         },
         [&](const Literal *i) {
-            proto.set_kind(com::stripe::rubytyper::Instruction::LITERAL);
-            *proto.mutable_literal() = core::Proto::toProto(gs, i->value);
+            protos.emplace_back();
+            *protos.back().mutable_bind() = toProto(gs, bnd.bind);
+            *protos.back().mutable_location() = core::Proto::toProto(gs, bnd.loc);
+
+            com::stripe::rubytyper::Instruction instr;
+            instr.set_kind(com::stripe::rubytyper::Instruction::LITERAL);
+            *instr.mutable_literal() = core::Proto::toProto(gs, i->value);
+
+            *protos.back().mutable_instruction() = instr;
         },
-        [&](const Unanalyzable *i) { proto.set_kind(com::stripe::rubytyper::Instruction::UNANALYZABLE); },
+        [&](const Unanalyzable *i) {
+            protos.emplace_back();
+            *protos.back().mutable_bind() = toProto(gs, bnd.bind);
+            *protos.back().mutable_location() = core::Proto::toProto(gs, bnd.loc);
+
+            com::stripe::rubytyper::Instruction instr;
+            instr.set_kind(com::stripe::rubytyper::Instruction::UNANALYZABLE);
+
+            *protos.back().mutable_instruction() = instr;
+        },
         [&](const LoadArg *i) {
-            proto.set_kind(com::stripe::rubytyper::Instruction::LOAD_ARG);
-            proto.set_load_arg_name(i->argument(gs).argumentName(gs));
+            protos.emplace_back();
+            *protos.back().mutable_bind() = toProto(gs, bnd.bind);
+            *protos.back().mutable_location() = core::Proto::toProto(gs, bnd.loc);
+
+            com::stripe::rubytyper::Instruction instr;
+            instr.set_kind(com::stripe::rubytyper::Instruction::LOAD_ARG);
+            instr.set_load_arg_name(i->argument(gs).argumentName(gs));
+
+            *protos.back().mutable_instruction() = instr;
         },
         [&](const Cast *i) {
-            proto.set_kind(com::stripe::rubytyper::Instruction::CAST);
-            *proto.mutable_cast()->mutable_value() = toProto(gs, i->value);
-            *proto.mutable_cast()->mutable_type() = core::Proto::toProto(gs, i->type);
+            protos.emplace_back();
+            *protos.back().mutable_bind() = toProto(gs, bnd.bind);
+            *protos.back().mutable_location() = core::Proto::toProto(gs, bnd.loc);
+
+            com::stripe::rubytyper::Instruction instr;
+            instr.set_kind(com::stripe::rubytyper::Instruction::CAST);
+            *instr.mutable_cast()->mutable_value() = toProto(gs, i->value);
+            *instr.mutable_cast()->mutable_type() = core::Proto::toProto(gs, i->type);
+
+            *protos.back().mutable_instruction() = instr;
         },
         // TODO later: add more types
-        [&](const Instruction *i) { proto.set_kind(com::stripe::rubytyper::Instruction::UNKNOWN); });
-    return proto;
-}
+        [&](const Instruction *i) {
+            protos.emplace_back();
+            *protos.back().mutable_bind() = toProto(gs, bnd.bind);
+            *protos.back().mutable_location() = core::Proto::toProto(gs, bnd.loc);
 
-com::stripe::rubytyper::Binding Proto::toProto(const core::GlobalState &gs, const Binding &bnd) {
-    com::stripe::rubytyper::Binding proto;
-    *proto.mutable_bind() = toProto(gs, bnd.bind);
-    *proto.mutable_instruction() = toProto(gs, bnd.value.get());
-    *proto.mutable_location() = core::Proto::toProto(gs, bnd.loc);
-    return proto;
+            com::stripe::rubytyper::Instruction instr;
+            instr.set_kind(com::stripe::rubytyper::Instruction::UNKNOWN);
+
+            *protos.back().mutable_instruction() = instr;
+        });
+
+    return protos;
 }
 
 com::stripe::rubytyper::Block::BlockExit Proto::toProto(const core::GlobalState &gs, const BlockExit &ex) {
@@ -95,7 +186,9 @@ com::stripe::rubytyper::Block Proto::toProto(const core::GlobalState &gs, const 
     com::stripe::rubytyper::Block proto;
     proto.set_id(bb.id);
     for (auto const &bnd : bb.exprs) {
-        *proto.add_bindings() = toProto(gs, bnd);
+        for (auto const &bndProto : toProto(gs, bnd)) {
+            *proto.add_bindings() = bndProto;
+        }
     }
     *proto.mutable_block_exit() = toProto(gs, bb.bexit);
     return proto;

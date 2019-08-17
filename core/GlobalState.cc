@@ -14,6 +14,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "core/errors/infer.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 
 template class std::vector<std::pair<unsigned int, unsigned int>>;
 template class std::shared_ptr<sorbet::core::GlobalState>;
@@ -276,6 +277,13 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct());
     ENFORCE(id == Symbols::T_Struct());
 
+    id = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
+    ENFORCE(id == Symbols::Singleton());
+
+    id = enterClassSymbol(Loc::none(), Symbols::Opus(), core::Names::Constants::Enum());
+    id.data(*this)->setIsModule(false);
+    ENFORCE(id == Symbols::OpusEnum());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
@@ -380,6 +388,17 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.type = Types::untyped(*this, method);
         arg.flags.isRepeated = true;
+    }
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    // Synthesize <Magic>#<suggest-type>(arg: *T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::suggestType());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
     }
     method.data(*this)->resultType = Types::untyped(*this, method);
     {
@@ -506,15 +525,18 @@ void GlobalState::initEmpty() {
     freezeSymbolTable();
     freezeFileTable();
     sanityCheck();
-
-    isInitialized = true;
 }
 
 void GlobalState::installIntrinsics() {
     for (auto &entry : intrinsicMethods) {
-        auto symbol = entry.symbol;
-        if (entry.singleton) {
-            symbol = symbol.data(*this)->singletonClass(*this);
+        SymbolRef symbol;
+        switch (entry.singleton) {
+            case Intrinsic::Kind::Instance:
+                symbol = entry.symbol;
+                break;
+            case Intrinsic::Kind::Singleton:
+                symbol = entry.symbol.data(*this)->singletonClass(*this);
+                break;
         }
         auto countBefore = symbolsUsed();
         SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);
@@ -558,6 +580,32 @@ void GlobalState::reserveMemory(u4 kb) {
 }
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
+
+// look up a symbol whose flags match the desired flags. This might look through mangled names to discover one whose
+// flags match. If no sych symbol exists, then it will return noSymbol.
+SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const {
+    ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
+    ENFORCE(name.exists(), "looking up symbol with non-existing name");
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_lookup_by_name", ownerScope->members().size());
+
+    NameRef lookupName = name;
+    u2 unique = 1;
+    auto res = ownerScope->members().find(lookupName);
+    while (res != ownerScope->members().end()) {
+        ENFORCE(res->second.exists());
+        if ((res->second.data(*this)->flags & flags) == flags) {
+            return res->second;
+        }
+        lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
+        if (!lookupName.exists()) {
+            break;
+        }
+        res = ownerScope->members().find(lookupName);
+        unique++;
+    }
+    return Symbols::noSymbol();
+}
 
 SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
     ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
@@ -717,7 +765,7 @@ ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRe
 }
 
 string_view GlobalState::enterString(string_view nm) {
-    DEBUG_ONLY(if (isInitialized) {
+    DEBUG_ONLY(if (ensureCleanStrings) {
         if (nm != "<" && nm != "<<" && nm != "<=" && nm != "<=>" && nm != ">" && nm != ">>" && nm != ">=") {
             ENFORCE(nm.find("<") == string::npos);
             ENFORCE(nm.find(">") == string::npos);
@@ -803,7 +851,8 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
     ENFORCE(original.data(*this)->kind == UTF8 ||
                 (original.data(*this)->kind == UNIQUE &&
-                 original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass),
+                 (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::OpusEnum)),
             "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(CONSTANT, original.id());
@@ -892,7 +941,7 @@ void GlobalState::expandNames(int growBy) {
     namesByHash.swap(new_namesByHash);
 }
 
-NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const {
+NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const {
     ENFORCE(num > 0, "num == 0, name overflow");
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
     unsigned int hashTableSize = namesByHash.size();
@@ -915,7 +964,7 @@ NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef origin
         bucketId = (bucketId + probeCount) & mask;
         probeCount++;
     }
-    Exception::raise("should never happen");
+    return core::NameRef::noName();
 }
 
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) {
@@ -1142,9 +1191,9 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->silenceErrors = this->silenceErrors;
     result->autocorrect = this->autocorrect;
     result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
-    result->isInitialized = this->isInitialized;
+    result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
-    result->censorRawLocsWithinPayload = this->censorRawLocsWithinPayload;
+    result->censorForSnapshotTests = this->censorForSnapshotTests;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;
@@ -1181,6 +1230,9 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
         result->symbols.emplace_back(sym.deepCopy(*result, keepId));
     }
     result->pathPrefix = this->pathPrefix;
+    for (auto &semanticExtension : this->semanticExtensions) {
+        result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
+    }
     result->sanityCheck();
     {
         Timer timeit2(tracer(), "GlobalState::deepCopyOut");
@@ -1222,9 +1274,7 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     if (what == errors::Internal::InternalError) {
         Exception::failInFuzzer();
     }
-    bool report = (what == errors::Internal::InternalError) || (what == errors::Internal::FileNotFound) ||
-                  (shouldReportErrorOn(loc, what) && !this->silenceErrors);
-    return ErrorBuilder(*this, report, loc, what);
+    return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
 }
 
 void GlobalState::suppressErrorClass(int code) {
@@ -1260,12 +1310,15 @@ bool GlobalState::hasAnyDslPlugin() const {
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
+    if (what.minLevel == StrictLevel::Internal) {
+        return true;
+    }
+    if (this->silenceErrors) {
+        return false;
+    }
     StrictLevel level = StrictLevel::Strong;
     if (loc.file().exists()) {
         level = loc.file().data(*this).strictLevel;
-    }
-    if (what.code == errors::Internal::InternalError.code) {
-        return true;
     }
     if (suppressedErrorClasses.count(what.code) != 0) {
         return false;
@@ -1321,7 +1374,7 @@ unique_ptr<GlobalState> GlobalState::replaceFile(unique_ptr<GlobalState> inWhat,
     return inWhat;
 }
 
-FileRef GlobalState::findFileByPath(string_view path) {
+FileRef GlobalState::findFileByPath(string_view path) const {
     auto fnd = fileRefByPath.find(string(path));
     if (fnd != fileRefByPath.end()) {
         return fnd->second;
@@ -1372,7 +1425,7 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     return result;
 }
 
-vector<shared_ptr<File>> GlobalState::getFiles() const {
+const vector<shared_ptr<File>> &GlobalState::getFiles() const {
     return files;
 }
 
@@ -1408,7 +1461,7 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
 }
 
 SymbolRef GlobalState::lookupStaticInitForFile(Loc loc) const {
-    auto nm = getNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
+    auto nm = lookupNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto ref = core::Symbols::rootSingleton().data(*this)->findMember(*this, nm);
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", loc.toString(*this));
     return ref;

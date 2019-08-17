@@ -75,6 +75,8 @@ public:
         static constexpr u4 CLASS_ABSTRACT = 0x0000'0040;
         static constexpr u4 CLASS_INTERFACE = 0x0000'0080;
         static constexpr u4 CLASS_LINEARIZATION_COMPUTED = 0x0000'0100;
+        static constexpr u4 CLASS_FINAL = 0x0000'0200;
+        static constexpr u4 CLASS_SEALED = 0x0000'0400;
 
         // Method flags
         static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
@@ -298,6 +300,16 @@ public:
         return (flags & Symbol::Flags::CLASS_LINEARIZATION_COMPUTED) != 0;
     }
 
+    inline bool isClassFinal() const {
+        ENFORCE(isClass());
+        return (flags & Symbol::Flags::CLASS_FINAL) != 0;
+    }
+
+    inline bool isClassSealed() const {
+        ENFORCE(isClass());
+        return (flags & Symbol::Flags::CLASS_SEALED) != 0;
+    }
+
     inline void setClass() {
         ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
         flags = flags | Symbol::Flags::CLASS;
@@ -448,6 +460,16 @@ public:
         flags |= Symbol::Flags::CLASS_LINEARIZATION_COMPUTED;
     }
 
+    inline void setClassFinal() {
+        ENFORCE(isClass());
+        flags |= Symbol::Flags::CLASS_FINAL;
+    }
+
+    inline void setClassSealed() {
+        ENFORCE(isClass());
+        flags |= Symbol::Flags::CLASS_SEALED;
+    }
+
     inline void setTypeAlias() {
         ENFORCE(isStaticField());
         flags |= Symbol::Flags::STATIC_FIELD_TYPE_ALIAS;
@@ -514,7 +536,20 @@ public:
 
     SymbolRef topAttachedClass(const GlobalState &gs) const;
 
-    SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const;
+    void recordSealedSubclass(MutableContext ctx, SymbolRef subclass);
+    const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
+    TypePtr sealedSubclassesToUnion(const Context ctx) const;
+
+    // if dealiasing fails here, then we return Untyped instead
+    SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const {
+        return dealiasWithDefault(gs, depthLimit, Symbols::untyped());
+    }
+    // if dealiasing fails here, then we return a bad alias method stub instead
+    SymbolRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const {
+        return dealiasWithDefault(gs, depthLimit, core::Symbols::Sorbet_Private_Static_badAliasMethodStub());
+    }
+
+    SymbolRef dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const;
 
     bool ignoreInHashing(const GlobalState &gs) const;
 
@@ -545,6 +580,11 @@ public:
     u4 uniqueCounter = 1; // used as a counter inside the namer
     NameRef name;         // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
+
+    bool hasSig() const {
+        ENFORCE(isMethod());
+        return resultType != nullptr;
+    }
 
     UnorderedMap<NameRef, SymbolRef> members_;
     std::vector<ArgInfo> arguments_;

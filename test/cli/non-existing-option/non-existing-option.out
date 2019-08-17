@@ -1,0 +1,2 @@
+Option ‘long-option’ does not exist. To see all available options pass `--help`.
+Argument ‘-short-option’ starts with a - but has incorrect syntax. To see all available options pass `--help`.

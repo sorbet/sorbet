@@ -295,6 +295,7 @@ public:
         auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
+        sigSend->flags |= ast::Send::DSL_SYNTHESIZED;
         return sig;
     }
 
@@ -363,11 +364,28 @@ public:
                 [&](class KeywordArg *kw) { arg = kw->expr.get(); },
                 [&](class OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *blk) { arg = blk->expr.get(); },
                 [&](ShadowArg *shadow) { arg = shadow->expr.get(); },
-                // ENFORCES are last so that we don't pay the price of casting in the happy path.
+                // ENFORCES are last so that we don't pay the price of casting in the fast path.
                 [&](UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
                 [&](Expression *expr) { ENFORCE(false, "Unexpected node type in argument position."); });
         }
     }
+};
+
+class BehaviorHelpers final {
+public:
+    // Recursively check if all children of an expression are EmptyTree's or InsSeq's that only contain EmptyTree's
+    static bool checkEmptyDeep(const std::unique_ptr<ast::Expression> &);
+
+    // Does a class/module definition define "behavior"? A class definition that only serves as a
+    // namespace for inner-definitions is not considered to have behavior.
+    //
+    // module A
+    //   CONST = true <-- Behavior on A::CONST (not A)
+    //   module B
+    //     def m; end <-- Behavior in A::B
+    //   end
+    // end
+    static bool checkClassDefinesBehavior(const std::unique_ptr<ast::ClassDef> &);
 };
 
 } // namespace sorbet::ast

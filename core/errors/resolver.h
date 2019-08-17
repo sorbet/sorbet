@@ -49,6 +49,15 @@ constexpr ErrorClass SubclassingNotAllowed{5041, StrictLevel::False};
 constexpr ErrorClass NonPublicAbstract{5042, StrictLevel::True};
 constexpr ErrorClass InvalidTypeAlias{5043, StrictLevel::False};
 constexpr ErrorClass InvalidVariance{5044, StrictLevel::True};
+constexpr ErrorClass GenericClassWithoutTypeArgs{5045, StrictLevel::False};
+constexpr ErrorClass GenericClassWithoutTypeArgsStdlib{5046, StrictLevel::Strict};
+constexpr ErrorClass FinalAncestor{5047, StrictLevel::False};
+constexpr ErrorClass FinalModuleNonFinalMethod{5048, StrictLevel::False};
+constexpr ErrorClass BadParameterOrdering{5049, StrictLevel::False};
+constexpr ErrorClass SealedAncestor{5050, StrictLevel::False};
+constexpr ErrorClass UndeclaredOverride{5051, StrictLevel::True};
+constexpr ErrorClass InvalidTypeMemberBounds{5052, StrictLevel::False};
+constexpr ErrorClass ParentTypeBoundsMismatch{5053, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

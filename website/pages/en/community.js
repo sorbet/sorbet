@@ -97,6 +97,16 @@ class Index extends React.Component {
                   link: '/docs/talks/ruby-kaigi-2019',
                   venue: 'RubyKaigi 2019',
                 },
+                {
+                  title: 'Gradual typing of Ruby at Scale',
+                  link: '/docs/talks/curry-on-2019',
+                  venue: 'Curry On! 2019',
+                },
+                {
+                  title: 'Fast typechecking for Ruby',
+                  link: '/docs/talks/jvm-ls-2019',
+                  venue: 'JVM Language Summit 2019',
+                },
               ]}
             />
           </div>
@@ -131,6 +141,11 @@ class Index extends React.Component {
                   link: 'https://github.com/jaredbeck/sorbet-progress',
                   description:
                     'Measure your progress as you adopt Sorbet, stay motivated!',
+                },
+                {
+                  title: 'Parlour',
+                  link: 'https://github.com/AaronC81/parlour',
+                  description: 'A versatile RBI generator and plugin system',
                 },
               ]}
             />

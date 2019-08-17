@@ -52,6 +52,8 @@ class HasOverloads
     .returns(Symbol)
   end
   def invalid_overloaded(a:, b:);
+    #                    ^^ error: Bad parameter ordering for `a`, expected `b` instead
+    #                        ^^ error: Bad parameter ordering for `b`, expected `a` instead
     make_untyped
   end
 end

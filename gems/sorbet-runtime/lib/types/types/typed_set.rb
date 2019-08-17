@@ -5,6 +5,10 @@ module T::Types
   class TypedSet < TypedEnumerable
     attr_reader :type
 
+    def underlying_class
+      Hash
+    end
+
     # @override Base
     def name
       "T::Set[#{@type.name}]"
@@ -17,6 +21,16 @@ module T::Types
 
     def new(*args) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
       Set.new(*T.unsafe(args))
+    end
+
+    class Untyped < TypedSet
+      def initialize
+        super(T.untyped)
+      end
+
+      def valid?(obj)
+        obj.is_a?(Set)
+      end
     end
   end
 end

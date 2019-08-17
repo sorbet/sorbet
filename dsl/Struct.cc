@@ -20,11 +20,15 @@ unique_ptr<ast::Expression> dupName(ast::Expression *node) {
     if (node->isSelfReference()) {
         return ast::MK::EmptyTree();
     }
-    auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(node);
-    ENFORCE(cnst);
-    auto newScope = dupName(cnst->scope.get());
-    ENFORCE(newScope);
-    return ast::MK::UnresolvedConstant(node->loc, std::move(newScope), cnst->cnst);
+    if (auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
+        auto newScope = dupName(cnst->scope.get());
+        ENFORCE(newScope);
+        return ast::MK::UnresolvedConstant(node->loc, std::move(newScope), cnst->cnst);
+    } else if (auto cnst = ast::cast_tree<ast::ConstantLit>(node)) {
+        return ast::MK::Constant(node->loc, cnst->symbol);
+    } else {
+        Exception::raise("dupName called on a node that is neither an UnresolvedConstant nor a Constant");
+    }
 }
 
 static bool isKeywordInitKey(const core::GlobalState &gs, ast::Expression *node) {

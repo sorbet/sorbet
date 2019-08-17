@@ -585,6 +585,90 @@ module Opus::Types::Test
       end
     end
 
+    describe "OpusEnum" do
+      before do
+        class ::Opus::Enum
+          extend T::Sig
+          extend T::Generic
+          extend Enumerable
+
+          Elem = type_template
+
+          def initialize(serialized_val = nil); end
+          def inspect; @const_name || '__UNINITIALIZED'; end
+          def self.each(&blk); end
+
+          # This doesn't exist in Opus::Enum--it's here to be able to implement #inspect
+          def const_name=(const_name); @const_name = const_name; end
+        end
+
+        class ::MyEnum < ::Opus::Enum
+          A = new; A.const_name = 'A'
+          B = new; B.const_name = 'B'
+          C = new; C.const_name = 'C'
+        end
+      end
+
+      after do
+        ::Opus.send(:remove_const, :Enum)
+        ::Object.send(:remove_const, :MyEnum)
+      end
+
+      it 'allows Opus::Enum values when coercing' do
+        a = T::Utils.coerce(::MyEnum::A)
+        assert_instance_of(T::Types::OpusEnum, a)
+        assert_equal(a.val, ::MyEnum::A)
+      end
+
+      it 'allows Opus::Enum values in a sig params' do
+        c = Class.new do
+          extend T::Sig
+          sig {params(x: MyEnum::A).void}
+          def self.foo(x); end
+        end
+
+        # TODO(jez) check TypeError messages
+        c.foo(::MyEnum::A) # should not raise
+        assert_raises(TypeError) do
+          c.foo(::MyEnum::B)
+        end
+        assert_raises(TypeError) do
+          c.foo(MyEnum::C)
+        end
+      end
+
+      it 'allows Opus::Enum values in a sig returns' do
+        c = Class.new do
+          extend T::Sig
+          sig {returns(MyEnum::A)}
+          def self.good_return; MyEnum::A; end
+
+          sig {returns(MyEnum::B)}
+          def self.bad_return; MyEnum::C; end
+        end
+
+        assert_equal(c.good_return, MyEnum::A)
+
+        assert_raises(TypeError) do
+          c.bad_return
+        end
+      end
+
+      it 'allows Opus::Enum values in a union' do
+        c = Class.new do
+          extend T::Sig
+          sig {params(x: T.any(MyEnum::A, MyEnum::B)).void}
+          def self.foo(x); end
+        end
+
+        c.foo(::MyEnum::A) # should not raise
+        c.foo(::MyEnum::B) # should not raise
+        assert_raises(TypeError) do
+          c.foo(MyEnum::C)
+        end
+      end
+    end
+
     describe "proc" do
       before do
         @type = T::Utils.coerce(T.proc.params(x: Integer, y: Integer).returns(Integer))
@@ -930,6 +1014,26 @@ module Opus::Types::Test
           assert_subtype(T::Types::TypeParameter.new(:T),
                          T::Types::TypeParameter.new(:V))
           # rubocop:enable PrisonGuard/UseOpusTypesShortcut
+        end
+      end
+
+      describe 'untyped containers' do
+        it 'untyped containers are subtypes of typed containers' do
+          assert_subtype(T::Array[T.untyped], T::Array[Integer])
+          assert_subtype(T::Array[T.untyped], T::Enumerable[Integer])
+          assert_subtype(T::Set[T.untyped], T::Enumerable[Integer])
+          assert_subtype(T::Set[T.untyped], T::Set[Integer])
+          assert_subtype(T::Hash[T.untyped, T.untyped], T::Hash[Integer, String])
+          assert_subtype(T::Enumerator[T.untyped], T::Enumerator[Integer])
+        end
+
+        it 'typed containers are subtypes of untyped containers' do
+          assert_subtype(T::Array[Integer], T::Array[T.untyped])
+          assert_subtype(T::Array[Integer], T::Enumerable[T.untyped])
+          assert_subtype(T::Set[Integer], T::Enumerable[T.untyped])
+          assert_subtype(T::Set[Integer], T::Set[T.untyped])
+          assert_subtype(T::Hash[Integer, String], T::Hash[T.untyped, T.untyped])
+          assert_subtype(T::Enumerator[Integer], T::Enumerator[T.untyped])
         end
       end
     end

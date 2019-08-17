@@ -8,6 +8,10 @@ class <emptyTree><<C <root>>> < ()
       <self>.outside_method()
     end
 
+    def <test_allows constants inside of IT><<C <todo sym>>>(&<blk>)
+      <emptyTree>::<C CONST> = 10
+    end
+
     class <emptyTree>::<C <class_some inner tests>><<C <todo sym>>> < (<self>)
       begin
         def inside_method<<C <todo sym>>>(&<blk>)

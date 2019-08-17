@@ -43,6 +43,11 @@ fi
 
 [ "$2" != "" ] || (usage; exit 1);
 
+if ! command -v file &> /dev/null; then
+  echo "This script requires the 'file' command, but it was not in PATH"
+  exit 1
+fi
+
 REPO="$1"
 shift
 
@@ -82,9 +87,10 @@ response=$(
 
 upload_url="$(echo "$response" | jq -r .upload_url | sed -e "s/{?name,label}//")"
 
+content_type="Content-Type:$(file --mime-type -b "${asset}")"
 for asset in $ASSETS; do
   curl --netrc \
-       --header "Content-Type:$(file --mime-type -b "${asset}")" \
+       --header "$content_type" \
        --data-binary "@$asset" \
        "$upload_url?name=$asset"
 done

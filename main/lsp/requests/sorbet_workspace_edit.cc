@@ -19,29 +19,29 @@ string readFile(string_view path, const FileSystem &fs) {
     }
 }
 
-string getFileContents(UnorderedMap<string, string> &updates, unique_ptr<core::GlobalState> &initialGS,
-                       const string &path) {
+string_view LSPLoop::getFileContents(UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates,
+                                     const core::GlobalState &initialGS, string_view path) {
     if (updates.find(path) != updates.end()) {
-        return updates[path];
+        return updates[path].contents;
     }
 
-    auto currentFileRef = initialGS->findFileByPath(path);
+    auto currentFileRef = initialGS.findFileByPath(path);
     if (currentFileRef.exists()) {
-        return string(currentFileRef.data(*initialGS).source());
+        return currentFileRef.data(initialGS).source();
     } else {
         return "";
     }
 }
 
 void LSPLoop::preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,
-                                            UnorderedMap<string, string> &updates) {
+                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
     string_view uri = changeParams.textDocument->uri;
     if (absl::StartsWith(uri, rootUri)) {
         string localPath = remoteName2Local(uri);
         if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
             return;
         }
-        string fileContents = getFileContents(updates, initialGS, localPath);
+        string fileContents = string(getFileContents(updates, *initialGS, localPath));
         for (auto &change : changeParams.contentChanges) {
             if (change->range) {
                 auto &range = *change->range;
@@ -60,95 +60,110 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &c
                 fileContents = change->text;
             }
         }
-        updates[localPath] = fileContents;
+        updates[localPath] = {fileContents, /* newlyOpened */ false, /* newlyClosed */ false};
     }
 }
 
 void LSPLoop::preprocessSorbetWorkspaceEdit(const DidOpenTextDocumentParams &openParams,
-                                            UnorderedMap<string, string> &updates) {
+                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
     string_view uri = openParams.textDocument->uri;
     if (absl::StartsWith(uri, rootUri)) {
         string localPath = remoteName2Local(uri);
         if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
-            openFiles.insert(localPath);
-            updates[localPath] = move(openParams.textDocument->text);
+            updates[localPath] = {move(openParams.textDocument->text), /* newlyOpened */ true, /* newlyClosed */ false};
         }
     }
 }
 
 void LSPLoop::preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &closeParams,
-                                            UnorderedMap<string, string> &updates) {
+                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
     string_view uri = closeParams.textDocument->uri;
     if (absl::StartsWith(uri, rootUri)) {
         string localPath = remoteName2Local(uri);
         if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
-            auto it = openFiles.find(localPath);
-            if (it != openFiles.end()) {
-                openFiles.erase(it);
-            }
             // Use contents of file on disk.
-            updates[localPath] = readFile(localPath, *opts.fs);
+            updates[localPath] = {readFile(localPath, *opts.fs), /* newlyOpened */ false, /* newlyClosed */ true};
         }
     }
 }
 
 void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
-                                            UnorderedMap<string, string> &updates) {
+                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
     for (auto file : queryResponse.files) {
         string localPath = absl::StrCat(rootPath, "/", file);
-        if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns) &&
-            openFiles.find(localPath) == openFiles.end()) {
-            updates[localPath] = readFile(localPath, *opts.fs);
+        if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
+            auto it = updates.find(localPath);
+            bool isFileOpenInEditor = openFiles.contains(localPath);
+            if (it != updates.end()) {
+                // File is newly opened (true), opened previously but now closed (false), or opened previously and still
+                // open (true).
+                isFileOpenInEditor = it->second.newlyOpened || (isFileOpenInEditor && !it->second.newlyClosed);
+            }
+            // Editor contents supercede file system updates.
+            if (!isFileOpenInEditor) {
+                // File may have been closed and then updated on disk, so make sure we preserve the 'closed' flag.
+                updates[localPath] = {readFile(localPath, *opts.fs), /* newlyOpened */ false,
+                                      /* newlyClosed */ it != updates.end() ? it->second.newlyClosed : false};
+            }
         }
     }
 }
 
-LSPResult LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs, UnorderedMap<string, string> &updates) {
+LSPLoop::TypecheckRun
+LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
+                                    UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
     if (!updates.empty()) {
-        vector<shared_ptr<core::File>> files;
-        files.reserve(updates.size());
+        FileUpdates fileUpdates;
+        fileUpdates.updatedFiles.reserve(updates.size());
         for (auto &update : updates) {
-            files.push_back(
-                make_shared<core::File>(string(update.first), move(update.second), core::File::Type::Normal));
+            auto file =
+                make_shared<core::File>(string(update.first), move(update.second.contents), core::File::Type::Normal);
+            if (update.second.newlyClosed) {
+                fileUpdates.closedFiles.push_back(string(file->path()));
+            }
+            if (update.second.newlyOpened) {
+                fileUpdates.openedFiles.push_back(string(file->path()));
+            }
+            fileUpdates.updatedFiles.push_back(move(file));
         }
-        return pushDiagnostics(tryFastPath(move(gs), files));
+        return runTypechecking(move(gs), move(fileUpdates));
     } else {
-        return LSPResult{move(gs), {}};
+        return TypecheckRun{{}, {}, move(gs), {}, true};
     }
 }
 
-LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
-                                             const DidChangeTextDocumentParams &changeParams) {
-    UnorderedMap<string, string> updates;
+LSPLoop::TypecheckRun LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
+                                                         const DidChangeTextDocumentParams &changeParams) const {
+    UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> updates;
     preprocessSorbetWorkspaceEdit(changeParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
-LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
-                                             const DidOpenTextDocumentParams &openParams) {
-    UnorderedMap<string, string> updates;
+LSPLoop::TypecheckRun LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
+                                                         const DidOpenTextDocumentParams &openParams) const {
+    UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> updates;
     preprocessSorbetWorkspaceEdit(openParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
-LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
-                                             const DidCloseTextDocumentParams &closeParams) {
-    UnorderedMap<string, string> updates;
+LSPLoop::TypecheckRun LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
+                                                         const DidCloseTextDocumentParams &closeParams) const {
+    UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> updates;
     preprocessSorbetWorkspaceEdit(closeParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
-LSPResult LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
-                                             const WatchmanQueryResponse &queryResponse) {
-    UnorderedMap<string, string> updates;
+LSPLoop::TypecheckRun LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
+                                                         const WatchmanQueryResponse &queryResponse) const {
+    UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> updates;
     preprocessSorbetWorkspaceEdit(queryResponse, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
-LSPResult LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
-                                              vector<unique_ptr<SorbetWorkspaceEdit>> &edits) {
+LSPLoop::TypecheckRun LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
+                                                          vector<unique_ptr<SorbetWorkspaceEdit>> &edits) const {
     // path => new file contents
-    UnorderedMap<string, string> updates;
+    UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> updates;
     for (auto &edit : edits) {
         switch (edit->type) {
             case SorbetWorkspaceEditType::EditorOpen: {

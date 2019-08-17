@@ -15,6 +15,16 @@ suggest-typed-true.rb:1: You could add `# typed: true` https://srb.help/7022
         ^
 Errors: 1
 -------------------------
+suggest-typed-true.rb:1: You could add `# typed: true` https://srb.help/7022
+     1 |def true_func
+        ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-typed-true.rb:1: Insert `# typed: true
+`
+     1 |def true_func
+        ^
+Errors: 1
+-------------------------
 suggest-typed-ignore.rb:1: You could add `# typed: ignore` https://srb.help/7022
      1 |Foo
         ^

@@ -1,5 +1,6 @@
 #ifndef SORBET_COUNTERS_H
 #define SORBET_COUNTERS_H
+#include "common/ConstExprStr.h"
 #include "common/common.h"
 #include <chrono>
 #include <string>
@@ -27,19 +28,6 @@ constexpr bool enable_counters = debug_mode;
 // compiler will typically deduplicate string literals within a translation
 // units (but not necessarily between translation units), but this can't be
 // relied upon, so we canonicalize strings when retrieving statistics.
-
-struct ConstExprStr {
-    char const *str;
-    std::size_t size;
-
-    // can only construct from a char[] literal
-    template <std::size_t N>
-    constexpr ConstExprStr(char const (&s)[N])
-        : str(s), size(N - 1) // not count the trailing null
-    {}
-
-    ConstExprStr() = delete;
-};
 
 struct CounterImpl;
 

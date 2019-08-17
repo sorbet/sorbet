@@ -64,7 +64,7 @@ Usage:
                                 When suggesting signatures in `typed: strict`
                                 mode, suggest `::T::Utils::RuntimeProfiled`
   -P, --progress                Draw progressbar
-      --licence                 Show licence
+      --license                 Show license
       --color {always,never,[auto]}
                                 Use color output (default: auto)
       --lsp                     Start in language-server-protocol mode
@@ -74,12 +74,6 @@ Usage:
                                 disable file watching via Watchman
       --watchman-path arg       Path to watchman executable. Defaults to
                                 using `watchman` on your PATH. (default: watchman)
-      --enable-experimental-lsp-go-to-definition
-                                Enable experimental LSP feature:
-                                Go-to-definition
-      --enable-experimental-lsp-find-references
-                                Enable experimental LSP feature: Find
-                                References
       --enable-experimental-lsp-autocomplete
                                 Enable experimental LSP feature: Autocomplete
       --enable-experimental-lsp-workspace-symbols
@@ -91,6 +85,8 @@ Usage:
       --enable-experimental-lsp-signature-help
                                 Enable experimental LSP feature: Signature
                                 Help
+      --enable-experimental-lsp-quick-fix
+                                Enable experimental LSP feature: Quick Fix
       --enable-all-experimental-lsp-features
                                 Enable every experimental LSP feature.
       --ignore string           Ignores input files that contain the given
@@ -101,8 +97,14 @@ Usage:
                                 be against whole folder and file names, so
                                 `foo` matches `/foo/bar.rb` and `/bar/foo/baz.rb`
                                 but not `/foo.rb` or `/foo2/bar.rb`.
+      --lsp-directories-missing-from-client string
+                                Directory prefixes that are not accessible
+                                editor-side. References to files in these
+                                directories will be sent as sorbet: URIs to clients
+                                that understand them.
       --no-error-count          Do not print the error count summary line
       --autogen-version arg     Autogen version to output
+      --stripe-mode             Enable Stripe specific error enforcement
       --autogen-autoloader-exclude-require arg
                                 Names that should be excluded from top-level
                                 require statements in autoloader output. (e.g.
@@ -164,7 +166,7 @@ Usage:
       --simulate-crash          Crash on start
       --silence-dev-message     Silence "You are running a development build"
                                 message
-      --censor-raw-locs-within-payload
+      --censor-for-snapshot-tests
                                 When printing raw location information, don't
                                 show line numbers
       --error-white-list errorCode

@@ -12,7 +12,7 @@
 #include "main/options/options.h"
 #include "options.h"
 #include "sys/stat.h"
-#include "third_party/licences/licences.h"
+#include "third_party/licenses/licenses.h"
 #include "version/version.h"
 
 namespace spd = spdlog;
@@ -173,7 +173,13 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
                         case YAML::NodeType::Sequence:
                             for (const auto &file : child.second) {
                                 if (file.IsScalar()) {
-                                    result[file.as<string>()] = level;
+                                    string key = file.as<string>();
+                                    if (!absl::StartsWith(key, "/") && !absl::StartsWith(key, "./")) {
+                                        logger->error("All relative file names in \"{}\" should start with ./",
+                                                      fileName);
+                                        throw EarlyReturnWithCode(1);
+                                    }
+                                    result[key] = level;
                                 } else {
                                     logger->error("Cannot parse strictness override format. Invalid file name.");
                                     throw EarlyReturnWithCode(1);
@@ -265,7 +271,8 @@ DslConfiguration extractDslPlugins(string filePath, shared_ptr<spdlog::logger> l
     return {triggers, extractExtraSubprocessOptions(config, filePath, logger)};
 }
 
-cxxopts::Options buildOptions() {
+cxxopts::Options
+buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders) {
     // Used to populate default options.
     Options empty;
 
@@ -315,7 +322,7 @@ cxxopts::Options buildOptions() {
         "suggest-runtime-profiled",
         "When suggesting signatures in `typed: strict` mode, suggest `::T::Utils::RuntimeProfiled`");
     options.add_options("advanced")("P,progress", "Draw progressbar");
-    options.add_options("advanced")("licence", "Show licence");
+    options.add_options("advanced")("license", "Show license");
     options.add_options("advanced")("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
                                     "{always,never,[auto]}");
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
@@ -325,10 +332,6 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("watchman-path",
                                     "Path to watchman executable. Defaults to using `watchman` on your PATH.",
                                     cxxopts::value<string>()->default_value(empty.watchmanPath));
-    options.add_options("advanced")("enable-experimental-lsp-go-to-definition",
-                                    "Enable experimental LSP feature: Go-to-definition");
-    options.add_options("advanced")("enable-experimental-lsp-find-references",
-                                    "Enable experimental LSP feature: Find References");
     options.add_options("advanced")("enable-experimental-lsp-autocomplete",
                                     "Enable experimental LSP feature: Autocomplete");
     options.add_options("advanced")("enable-experimental-lsp-workspace-symbols",
@@ -337,6 +340,7 @@ cxxopts::Options buildOptions() {
                                     "Enable experimental LSP feature: Document Symbol");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
+    options.add_options("advanced")("enable-experimental-lsp-quick-fix", "Enable experimental LSP feature: Quick Fix");
     options.add_options("advanced")("enable-all-experimental-lsp-features", "Enable every experimental LSP feature.");
     options.add_options("advanced")(
         "ignore",
@@ -345,8 +349,14 @@ cxxopts::Options buildOptions() {
         "matchs. Matches must be against whole folder and file names, so `foo` matches `/foo/bar.rb` and "
         "`/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.",
         cxxopts::value<vector<string>>(), "string");
+    options.add_options("advanced")(
+        "lsp-directories-missing-from-client",
+        "Directory prefixes that are not accessible editor-side. References to files in these directories will be sent "
+        "as sorbet: URIs to clients that understand them.",
+        cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
+    options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
 
     options.add_options("advanced")(
         "autogen-autoloader-exclude-require",
@@ -392,7 +402,7 @@ cxxopts::Options buildOptions() {
                                "Force incremental updates to discover resolver & namer bugs");
     options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
-    options.add_options("dev")("censor-raw-locs-within-payload",
+    options.add_options("dev")("censor-for-snapshot-tests",
                                "When printing raw location information, don't show line numbers");
     options.add_options("dev")("error-white-list",
                                "Error code to whitelist into reporting. "
@@ -445,6 +455,10 @@ cxxopts::Options buildOptions() {
                                cxxopts::value<string>()->default_value(empty.metricsSha), "sha1");
     options.add_options("dev")("metrics-repo", "Repo to report in metrics export",
                                cxxopts::value<string>()->default_value(empty.metricsRepo), "repo");
+
+    for (auto &provider : semanticExtensionProviders) {
+        provider->injectOptions(options);
+    }
 
     // Positional params
     options.parse_positional("files");
@@ -579,10 +593,13 @@ void addFilesFromDir(Options &opts, string_view dir) {
                                std::make_move_iterator(containedFiles.end()));
 }
 
-void readOptions(Options &opts, int argc, char *argv[],
+void readOptions(Options &opts,
+                 vector<unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions, int argc,
+                 char *argv[],
+                 const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     Timer timeit(*logger, "readOptions");
-    cxxopts::Options options = buildOptions();
+    cxxopts::Options options = buildOptions(semanticExtensionProviders);
     try {
         cxxopts::ParseResult raw = ConfigParser::parseConfig(logger, argc, argv, options);
         if (raw["simulate-crash"].as<bool>()) {
@@ -641,15 +658,24 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
-        opts.lspGoToDefinitionEnabled =
-            enableAllLSPFeatures || raw["enable-experimental-lsp-go-to-definition"].as<bool>();
-        opts.lspFindReferencesEnabled =
-            enableAllLSPFeatures || raw["enable-experimental-lsp-find-references"].as<bool>();
+        opts.lspQuickFixEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-quick-fix"].as<bool>();
         opts.lspWorkspaceSymbolsEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-workspace-symbols"].as<bool>();
         opts.lspDocumentSymbolEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+
+        if (raw.count("lsp-directories-missing-from-client") > 0) {
+            auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
+            // Convert all of these dirs into absolute ignore patterns that begin with '/'.
+            for (auto &dir : lspDirsMissingFromClient) {
+                string pNormalized = dir;
+                if (dir.at(0) != '/') {
+                    pNormalized = '/' + dir;
+                }
+                opts.lspDirsMissingFromClient.push_back(pNormalized);
+            }
+        }
 
         opts.cacheDir = raw["cache-dir"].as<string>();
         if (!extractPrinters(raw, opts, logger)) {
@@ -724,10 +750,10 @@ void readOptions(Options &opts, int argc, char *argv[],
             fmt::print("Sorbet typechecker {}\n", Version::full_version_string);
             throw EarlyReturnWithCode(0);
         }
-        if (raw["licence"].as<bool>()) {
+        if (raw["license"].as<bool>()) {
             fmt::print(
-                "Sorbet typechecker is licenced under Apache License Version 2.0.\n\nSorbet is built on top of:\n{}",
-                fmt::map_join(third_party::licences::all(), "\n\n", [](const auto &pair) { return pair.second; }));
+                "Sorbet typechecker is licensed under Apache License Version 2.0.\n\nSorbet is built on top of:\n{}",
+                fmt::map_join(third_party::licenses::all(), "\n\n", [](const auto &pair) { return pair.second; }));
             throw EarlyReturnWithCode(0);
         }
 
@@ -752,7 +778,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
-        opts.censorRawLocsWithinPayload = raw["censor-raw-locs-within-payload"].as<bool>();
+        opts.censorForSnapshotTests = raw["censor-for-snapshot-tests"].as<bool>();
         opts.statsdHost = raw["statsd-host"].as<string>();
         opts.statsdPort = raw["statsd-port"].as<int>();
         opts.statsdPrefix = raw["statsd-prefix"].as<string>();
@@ -771,17 +797,20 @@ void readOptions(Options &opts, int argc, char *argv[],
             }
             opts.autogenVersion = raw["autogen-version"].as<int>();
         }
+        opts.stripeMode = raw["stripe-mode"].as<bool>();
         extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         if (raw.count("error-white-list") > 0) {
-            opts.errorCodeWhiteList = raw["error-white-list"].as<vector<int>>();
+            auto rawList = raw["error-white-list"].as<vector<int>>();
+            opts.errorCodeWhiteList = set<int>(rawList.begin(), rawList.end());
         }
         if (raw.count("error-black-list") > 0) {
             if (raw.count("error-white-list") > 0) {
                 logger->error("You can't pass both `{}` and `{}`", "--error-black-list", "--error-white-list");
                 throw EarlyReturnWithCode(1);
             }
-            opts.errorCodeBlackList = raw["error-black-list"].as<vector<int>>();
+            auto rawList = raw["error-black-list"].as<vector<int>>();
+            opts.errorCodeBlackList = set<int>(rawList.begin(), rawList.end());
         }
         if (sorbet::debug_mode) {
             opts.suggestSig = raw["suggest-sig"].as<bool>();
@@ -804,14 +833,14 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
 
         if (opts.suggestTyped) {
-            if (opts.errorCodeWhiteList != vector<int>{core::errors::Infer::SuggestTyped.code} &&
+            if (opts.errorCodeWhiteList != set<int>{core::errors::Infer::SuggestTyped.code} &&
                 raw["typed"].as<string>() != "strict") {
                 logger->error(
                     "--suggest-typed must also include `{}`",
                     fmt::format("{}{}", "--typed=strict --error-white-list=", core::errors::Infer::SuggestTyped.code));
                 throw EarlyReturnWithCode(1);
             }
-            if (opts.errorCodeWhiteList != vector<int>{core::errors::Infer::SuggestTyped.code}) {
+            if (opts.errorCodeWhiteList != set<int>{core::errors::Infer::SuggestTyped.code}) {
                 logger->error("--suggest-typed must also include `{}`",
                               fmt::format("{}{}", "--error-white-list=", core::errors::Infer::SuggestTyped.code));
                 throw EarlyReturnWithCode(1);
@@ -835,8 +864,15 @@ void readOptions(Options &opts, int argc, char *argv[],
             opts.dslPluginTriggers = std::move(dslConfig.triggers);
             opts.dslRubyExtraArgs = std::move(dslConfig.rubyExtraArgs);
         }
+
+        for (auto &provider : semanticExtensionProviders) {
+            auto maybeExtension = provider->readOptions(raw);
+            if (maybeExtension) {
+                configuredExtensions.emplace_back(move(maybeExtension));
+            }
+        }
     } catch (cxxopts::OptionParseException &e) {
-        logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
+        logger->info("{}. To see all available options pass `--help`.", e.what());
         throw EarlyReturnWithCode(1);
     }
 }
