@@ -160,7 +160,7 @@ class Exception < Object
   #     prog.rb:2:in `a'
   #     prog.rb:6:in `b'
   #     prog.rb:10
-  sig {returns(T::Array[String])}
+  sig {returns(T.nilable(T::Array[String]))}
   def backtrace(); end
 
   # Returns any backtrace associated with the exception. This method is
@@ -173,7 +173,7 @@ class Exception < Object
   # Now, this method is not affected by
   # [\#set\_backtrace](Exception.downloaded.ruby_doc#method-i-set_backtrace)
   # .
-  sig {returns(T::Array[Thread::Backtrace::Location])}
+  sig {returns(T.nilable(T::Array[Thread::Backtrace::Location]))}
   def backtrace_locations(); end
 
   # Returns the previous exception ($\!) at the time this exception was
