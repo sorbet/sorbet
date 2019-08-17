@@ -358,6 +358,12 @@ unique_ptr<Location> RangeAssertion::getLocation(string_view uriPrefix) const {
     return make_unique<Location>(uri, range->copy());
 }
 
+unique_ptr<DocumentHighlight> RangeAssertion::getDocumentHighlight() {
+    auto newRange = make_unique<Range>(make_unique<Position>(range->start->line, range->start->character),
+                                       make_unique<Position>(range->end->line, range->end->character));
+    return make_unique<DocumentHighlight>(move(newRange));
+}
+
 pair<string_view, int> getSymbolAndVersion(string_view assertionContents) {
     int version = 1;
     vector<string_view> split = absl::StrSplit(assertionContents, ' ');
@@ -391,6 +397,16 @@ vector<unique_ptr<Location>> &extractLocations(ResponseMessage &respMsg) {
         return empty;
     }
     return get<vector<unique_ptr<Location>>>(locationsOrNull);
+}
+
+vector<unique_ptr<DocumentHighlight>> &extractDocumentHighlights(ResponseMessage &respMsg) {
+    static vector<unique_ptr<DocumentHighlight>> empty;
+    auto &result = *(respMsg.result);
+    auto &highlightsOrNull = get<variant<JSONNullObject, vector<unique_ptr<DocumentHighlight>>>>(result);
+    if (auto isNull = get_if<JSONNullObject>(&highlightsOrNull)) {
+        return empty;
+    }
+    return get<vector<unique_ptr<DocumentHighlight>>>(highlightsOrNull);
 }
 
 void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
@@ -496,6 +512,59 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
                 "Sorbet returned references for a location that should not report references.\nGiven location "
                 "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
                 prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *foundLocation), *foundLocation->range,
+                                        ""));
+        }
+        return;
+    }
+
+    assertLocationsMatch(sourceFileContents, uriPrefix, symbol, allLocs, line, character, locSourceLine, locFilename,
+                         locations);
+}
+
+void HighlightAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                               LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string_view symbol,
+                               const Location &queryLoc, const vector<shared_ptr<RangeAssertion>> &allLocs) {
+    const int line = queryLoc.range->start->line;
+    // Can only query with one character, so just use the first one.
+    const int character = queryLoc.range->start->character;
+    auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
+    string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
+
+    int id = nextId++;
+    auto request = make_unique<LSPMessage>(make_unique<RequestMessage>(
+        "2.0", id, LSPMethod::TextDocumentDocumentHighlight,
+        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(queryLoc.uri)),
+                                                make_unique<Position>(line, character))));
+
+    auto responses = lspWrapper.getLSPResponsesFor(move(request));
+    if (responses.size() != 1) {
+        EXPECT_EQ(1, responses.size())
+            << "Unexpected number of responses to a `textDocument/documentHighlight` request.";
+        return;
+    }
+
+    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    auto &respMsg = responses.at(0)->asResponse();
+    ASSERT_TRUE(respMsg.result.has_value());
+    ASSERT_FALSE(respMsg.error.has_value());
+    auto &highlights = extractDocumentHighlights(respMsg);
+
+    // Convert highlights to locations, used by common test functions across assertions involving multiple files.
+    vector<unique_ptr<Location>> locations;
+    for (auto const &highlight : highlights) {
+        auto location = make_unique<Location>(queryLoc.uri, move(highlight->range));
+        locations.push_back(move(location));
+    }
+
+    if (symbol == NOTHING_LABEL) {
+        // Special case: This location should not report usages of anything.
+        for (auto &foundLocation : locations) {
+            auto actualFilePath = uriToFilePath(uriPrefix, foundLocation->uri);
+            ADD_FAILURE_AT(actualFilePath.c_str(), foundLocation->range->start->line + 1) << fmt::format(
+                "Sorbet returned references for a highlight that should not report references.\nGiven location "
+                "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
+                prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
                 prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *foundLocation), *foundLocation->range,
                                         ""));
         }

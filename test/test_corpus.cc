@@ -969,6 +969,16 @@ TEST_P(LSPTest, All) {
                     // Check that a reference request at this location returns entryAssertions.
                     UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
                                           entryAssertions);
+                    // Check that a highlight request at this location returns all of the entryAssertions for the same
+                    // file as the request.
+                    vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
+                    for (auto &e : entryAssertions) {
+                        if (absl::StartsWith(e->getLocation(rootUri)->uri, queryLoc->uri)) {
+                            filteredEntryAssertions.push_back(e);
+                        }
+                    }
+                    HighlightAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
+                                              filteredEntryAssertions);
                 } else {
                     ADD_FAILURE() << fmt::format(
                         "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "

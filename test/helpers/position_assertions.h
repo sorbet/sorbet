@@ -75,6 +75,9 @@ public:
     // Returns a Location object for this assertion's filename and range.
     std::unique_ptr<Location> getLocation(std::string_view uriPrefix) const;
 
+    // Returns a DocumentHighlight object for this assertion's range.
+    std::unique_ptr<DocumentHighlight> getDocumentHighlight();
+
     virtual std::string toString() const = 0;
 };
 
@@ -176,6 +179,14 @@ public:
     TypeAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol);
 
     std::string toString() const override;
+};
+
+// does assertions using positions specified by # ^^^ usage: symbol
+class HighlightAssertion {
+public:
+    static void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                      LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string_view symbol,
+                      const Location &queryLoc, const std::vector<std::shared_ptr<RangeAssertion>> &allLocs);
 };
 
 // # disable-fast-path: true
