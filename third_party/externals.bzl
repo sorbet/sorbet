@@ -10,7 +10,7 @@ def externals():
         name = "com_google_googletest",
         remote = "https://github.com/google/googletest.git",
         commit = "90a443f9c2437ca8a682a1ac625eba64e1d74a8a",
-        shallow_since = "1547838363 -0500",
+        shallow_since = "1565193450 -0400",
     )
 
     http_archive(
@@ -61,7 +61,7 @@ def externals():
         remote = "https://github.com/Tencent/rapidjson.git",
         commit = "d87b698d0fcc10a5f632ecbc80a9cb2a8fa094a5",
         build_file = "//third_party:rapidjson.BUILD",
-        shallow_since = "1555291518 +0800",
+        shallow_since = "1561689433 +0800",
     )
 
     new_git_repository(
@@ -99,7 +99,7 @@ def externals():
         remote = "https://github.com/cameron314/concurrentqueue.git",
         commit = "7e3ad876fcca2e44e17528a51865ab2420afb238",
         build_file = "//third_party:concurrentqueue.BUILD",
-        shallow_since = "1547235167 -0500",
+        shallow_since = "1564683624 -0400",
     )
 
     new_git_repository(
@@ -115,7 +115,7 @@ def externals():
         remote = "https://github.com/jarro2783/cxxopts.git",
         commit = "cb60381e84df99a4829e3d3c657c06380f916d0f",
         build_file = "//third_party:cxxopts.BUILD",
-        shallow_since = "1557700395 +1000",
+        shallow_since = "1565216834 +1000",
     )
 
     http_archive(
@@ -130,7 +130,7 @@ def externals():
         name = "com_google_absl",
         remote = "https://github.com/abseil/abseil-cpp.git",
         commit = "d9aa92d7fb324314f9df487ac23d32a25650b742",
-        shallow_since = "1561428275 -0400",
+        shallow_since = "1565720473 -0400",
     )
 
     new_git_repository(
@@ -180,7 +180,7 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/BLAKE2/libb2",
         commit = "fa83ddbe179912e9a7a57edf0333b33f6ff83056",
         build_file = "//third_party:libb2.BUILD",
-        shallow_since = "1531310625 +0100",
+        shallow_since = "1563839709 +0100",
     )
 
     # portable reference implementation of blake2
@@ -197,7 +197,7 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/msgpack/msgpack-c",
         commit = "3129326432dde8d509326ae9720a33f46dd56917",
         build_file = "//third_party:msgpack.BUILD",
-        shallow_since = "1557663135 +0900",
+        shallow_since = "1564297751 +0900",
     )
 
     new_git_repository(
@@ -258,7 +258,7 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/arun11299/cpp-subprocess.git",
         commit = "6931e3d69fb36e6eae099585646e54ac644bf99c",
         build_file = "//third_party:cpp_subprocess.BUILD",
-        shallow_since = "1552288452 +0530",
+        shallow_since = "1562838002 +0530",
     )
 
     http_archive(
