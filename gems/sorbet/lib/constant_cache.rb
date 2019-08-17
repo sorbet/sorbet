@@ -135,11 +135,11 @@ class Sorbet::Private::ConstantLookupCache
 
         begin
           nested_constant = Sorbet::Private::RealStdlib.real_const_get(mod, nested, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
-        rescue LoadError
-          puts "Failed to load #{name}::#{nested}"
+        rescue LoadError => err
+          puts "Got #{err.class} when trying to get nested name #{name}::#{nested}"
           next
-        rescue NameError, ArgumentError
-          puts "Failed to load #{name}::#{nested}"
+        rescue NameError, ArgumentError => err
+          puts "Got #{err.class} when trying to get nested name #{name}::#{nested}_"
           # some stuff fails to load, like
           # `const_get': uninitialized constant YARD::Parser::Ruby::Legacy::RipperParser (NameError)
           # Did you mean?  YARD::Parser::Ruby::Legacy::RipperParser

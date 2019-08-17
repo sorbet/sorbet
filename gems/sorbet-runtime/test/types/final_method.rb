@@ -37,7 +37,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be redefined")
+    assert_match(/^The method `foo` on #<Class:0x[0-9a-f]+> was declared as final and cannot be redefined$/, err.message)
   end
 
   it "forbids redefining a final class method with a final sig" do
@@ -50,7 +50,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def self.foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be redefined")
+    assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be redefined$/, err.message)
   end
 
   it "forbids redefining a final instance method with a regular sig" do
@@ -63,7 +63,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be redefined")
+    assert_match(/^The method `foo` on #<Class:0x[0-9a-f]+> was declared as final and cannot be redefined$/, err.message)
   end
 
   it "forbids redefining a final class method with a regular sig" do
@@ -76,7 +76,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def self.foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be redefined")
+    assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be redefined$/, err.message)
   end
 
   it "forbids redefining a final instance method with no sig" do
@@ -88,7 +88,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be redefined")
+    assert_match(/^The method `foo` on #<Class:0x[0-9a-f]+> was declared as final and cannot be redefined$/, err.message)
   end
 
   it "forbids redefining a final class method with no sig" do
@@ -100,7 +100,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def self.foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be redefined")
+    assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be redefined$/, err.message)
   end
 
   it "allows redefining a regular instance method to be final" do
@@ -132,7 +132,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be overridden")
+    assert_match(/^The method `foo` on #<Class:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
   end
 
   it "forbids overriding a final class method" do
@@ -146,7 +146,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def self.foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be overridden")
+    assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be overridden in #<Class:#<Class:0x[0-9a-f]+>>$/, err.message)
   end
 
   it "forbids overriding a final method from an included module" do
@@ -161,7 +161,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be overridden")
+    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
   end
 
   it "forbids overriding a final method from an extended module" do
@@ -176,7 +176,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def self.foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be overridden")
+    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:#<Class:0x[0-9a-f]+>>$/, err.message)
   end
 
   it "forbids overriding a final method by including two modules" do
@@ -193,7 +193,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         include m2, m1
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be overridden")
+    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
   end
 
   it "forbids overriding a final method by extending two modules" do
@@ -210,7 +210,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend m2, m1
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be overridden")
+    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
   end
 
   it "allows calling final methods" do
@@ -291,7 +291,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be overridden")
+    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
   end
 
   it "forbids overriding through many levels of include" do
@@ -312,7 +312,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_includes(err.message, "was declared as final and cannot be overridden")
+    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
   end
 
   it "allows including modules again" do
@@ -335,5 +335,17 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     m2 = Module.new do
       extend m1, m1
     end
+  end
+
+  it "has a good error if you use the wrong syntax" do
+    err = assert_raises(ArgumentError) do
+      m = Module.new do
+        extend T::Sig
+        sig {final.void}
+        def self.foo; end
+      end
+      m.foo
+    end
+    assert_includes(err.message, "The syntax for declaring a method final is `sig(:final) {...}`, not `sig {final. ...}`")
   end
 end

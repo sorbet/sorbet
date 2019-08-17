@@ -1,4 +1,6 @@
 # typed: true
+# Fast path un-duplicates duplicated errors.
+# disable-fast-path: true
 extend T::Sig
 
 S = S # error: Class alias aliases to itself

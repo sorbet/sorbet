@@ -271,7 +271,8 @@ DslConfiguration extractDslPlugins(string filePath, shared_ptr<spdlog::logger> l
     return {triggers, extractExtraSubprocessOptions(config, filePath, logger)};
 }
 
-cxxopts::Options buildOptions() {
+cxxopts::Options
+buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders) {
     // Used to populate default options.
     Options empty;
 
@@ -331,10 +332,6 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("watchman-path",
                                     "Path to watchman executable. Defaults to using `watchman` on your PATH.",
                                     cxxopts::value<string>()->default_value(empty.watchmanPath));
-    options.add_options("advanced")("enable-experimental-lsp-go-to-definition",
-                                    "Enable experimental LSP feature: Go-to-definition");
-    options.add_options("advanced")("enable-experimental-lsp-find-references",
-                                    "Enable experimental LSP feature: Find References");
     options.add_options("advanced")("enable-experimental-lsp-autocomplete",
                                     "Enable experimental LSP feature: Autocomplete");
     options.add_options("advanced")("enable-experimental-lsp-workspace-symbols",
@@ -343,6 +340,7 @@ cxxopts::Options buildOptions() {
                                     "Enable experimental LSP feature: Document Symbol");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
+    options.add_options("advanced")("enable-experimental-lsp-quick-fix", "Enable experimental LSP feature: Quick Fix");
     options.add_options("advanced")("enable-all-experimental-lsp-features", "Enable every experimental LSP feature.");
     options.add_options("advanced")(
         "ignore",
@@ -351,8 +349,14 @@ cxxopts::Options buildOptions() {
         "matchs. Matches must be against whole folder and file names, so `foo` matches `/foo/bar.rb` and "
         "`/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.",
         cxxopts::value<vector<string>>(), "string");
+    options.add_options("advanced")(
+        "lsp-directories-missing-from-client",
+        "Directory prefixes that are not accessible editor-side. References to files in these directories will be sent "
+        "as sorbet: URIs to clients that understand them.",
+        cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
+    options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
 
     options.add_options("advanced")(
         "autogen-autoloader-exclude-require",
@@ -451,6 +455,10 @@ cxxopts::Options buildOptions() {
                                cxxopts::value<string>()->default_value(empty.metricsSha), "sha1");
     options.add_options("dev")("metrics-repo", "Repo to report in metrics export",
                                cxxopts::value<string>()->default_value(empty.metricsRepo), "repo");
+
+    for (auto &provider : semanticExtensionProviders) {
+        provider->injectOptions(options);
+    }
 
     // Positional params
     options.parse_positional("files");
@@ -585,10 +593,13 @@ void addFilesFromDir(Options &opts, string_view dir) {
                                std::make_move_iterator(containedFiles.end()));
 }
 
-void readOptions(Options &opts, int argc, char *argv[],
+void readOptions(Options &opts,
+                 vector<unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions, int argc,
+                 char *argv[],
+                 const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     Timer timeit(*logger, "readOptions");
-    cxxopts::Options options = buildOptions();
+    cxxopts::Options options = buildOptions(semanticExtensionProviders);
     try {
         cxxopts::ParseResult raw = ConfigParser::parseConfig(logger, argc, argv, options);
         if (raw["simulate-crash"].as<bool>()) {
@@ -647,15 +658,24 @@ void readOptions(Options &opts, int argc, char *argv[],
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
-        opts.lspGoToDefinitionEnabled =
-            enableAllLSPFeatures || raw["enable-experimental-lsp-go-to-definition"].as<bool>();
-        opts.lspFindReferencesEnabled =
-            enableAllLSPFeatures || raw["enable-experimental-lsp-find-references"].as<bool>();
+        opts.lspQuickFixEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-quick-fix"].as<bool>();
         opts.lspWorkspaceSymbolsEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-workspace-symbols"].as<bool>();
         opts.lspDocumentSymbolEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+
+        if (raw.count("lsp-directories-missing-from-client") > 0) {
+            auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
+            // Convert all of these dirs into absolute ignore patterns that begin with '/'.
+            for (auto &dir : lspDirsMissingFromClient) {
+                string pNormalized = dir;
+                if (dir.at(0) != '/') {
+                    pNormalized = '/' + dir;
+                }
+                opts.lspDirsMissingFromClient.push_back(pNormalized);
+            }
+        }
 
         opts.cacheDir = raw["cache-dir"].as<string>();
         if (!extractPrinters(raw, opts, logger)) {
@@ -777,6 +797,7 @@ void readOptions(Options &opts, int argc, char *argv[],
             }
             opts.autogenVersion = raw["autogen-version"].as<int>();
         }
+        opts.stripeMode = raw["stripe-mode"].as<bool>();
         extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         if (raw.count("error-white-list") > 0) {
@@ -843,8 +864,15 @@ void readOptions(Options &opts, int argc, char *argv[],
             opts.dslPluginTriggers = std::move(dslConfig.triggers);
             opts.dslRubyExtraArgs = std::move(dslConfig.rubyExtraArgs);
         }
+
+        for (auto &provider : semanticExtensionProviders) {
+            auto maybeExtension = provider->readOptions(raw);
+            if (maybeExtension) {
+                configuredExtensions.emplace_back(move(maybeExtension));
+            }
+        }
     } catch (cxxopts::OptionParseException &e) {
-        logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
+        logger->info("{}. To see all available options pass `--help`.", e.what());
         throw EarlyReturnWithCode(1);
     }
 }

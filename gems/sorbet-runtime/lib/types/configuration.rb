@@ -89,6 +89,7 @@ module T::Configuration
     else
       inline_type_error_handler_default(error)
     end
+    nil
   end
 
   # Set a handler to handle errors that occur when the builder methods in the
@@ -119,7 +120,7 @@ module T::Configuration
   end
 
   private_class_method def self.sig_builder_error_handler_default(error, location)
-    T::Private::Methods.sig_error(location, error.message)
+    raise ArgumentError.new("#{location.path}:#{location.lineno}: Error interpreting `sig`:\n  #{error.message}\n\n")
   end
 
   def self.sig_builder_error_handler(error, location)
@@ -128,6 +129,7 @@ module T::Configuration
     else
       sig_builder_error_handler_default(error, location)
     end
+    nil
   end
 
   # Set a handler to handle sig validation errors.
@@ -171,12 +173,13 @@ module T::Configuration
     raise error
   end
 
-  def self.sig_validation_error_handler(error, opts)
+  def self.sig_validation_error_handler(error, opts={})
     if @sig_validation_error_handler
       @sig_validation_error_handler.call(error, opts)
     else
       sig_validation_error_handler_default(error, opts)
     end
+    nil
   end
 
   # Set a handler for type errors that result from calling a method.
@@ -216,12 +219,13 @@ module T::Configuration
     raise TypeError.new(opts[:pretty_message])
   end
 
-  def self.call_validation_error_handler(signature, opts)
+  def self.call_validation_error_handler(signature, opts={})
     if @call_validation_error_handler
       @call_validation_error_handler.call(signature, opts)
     else
       call_validation_error_handler_default(signature, opts)
     end
+    nil
   end
 
   # Set a handler for logging

@@ -2,6 +2,7 @@
 
 set -euo pipefail
 if [ "schedule" == "${BUILDKITE_SOURCE}" ]; then
+  echo "Skipping publish, because this is a scheduled build."
   exit 0
 fi
 
@@ -19,7 +20,7 @@ fi
 
 git_commit_count=$(git rev-list --count HEAD)
 prefix="0.4"
-release_version="0.4.${git_commit_count}"
+release_version="$prefix.${git_commit_count}"
 long_release_version="${release_version}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
 
 echo "--- Dowloading artifacts"
@@ -84,26 +85,6 @@ else
 fi
 git checkout -f "$current_rev"
 
-echo "--- publishing gems to RubyGems.org"
-
-mkdir -p "$HOME/.gem"
-printf -- $'---\n:rubygems_api_key: %s\n' "$RUBY_GEMS_API_KEY" > "$HOME/.gem/credentials"
-chmod 600 "$HOME/.gem/credentials"
-
-if [ "$dryrun" = "" ]; then
-  # push the sorbet-static gems first, in case they fail. We don't want to end
-  # up in a weird state where 'sorbet' requires a pinned version of
-  # sorbet-static, but the sorbet-static gem push failed.
-  #
-  # (By failure here, we mean that RubyGems.org 502'd for some reason.)
-  for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
-    gem push "$gem_archive"
-  done
-
-  gem push "_out_/gems/sorbet-runtime-$release_version.gem"
-  gem push "_out_/gems/sorbet-$release_version.gem"
-fi
-
 echo "--- making a github release"
 echo releasing "${long_release_version}"
 git tag -f "${long_release_version}"
@@ -125,9 +106,11 @@ files=()
 while IFS='' read -r line; do files+=("$line"); done < <(find . -type f | sed 's#^./##')
 release_notes="To use Sorbet add this line to your Gemfile:
 \`\`\`
-gem 'sorbet', '$prefix.$git_commit_count'
+gem 'sorbet', '$release_version', :group => :development
+gem 'sorbet-runtime', '$release_version'
 \`\`\`"
 if [ "$dryrun" = "" ]; then
     echo "$release_notes" | ../.buildkite/tools/gh-release.sh sorbet/sorbet "${long_release_version}" -- "${files[@]}"
 fi
 popd
+

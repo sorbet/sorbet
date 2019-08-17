@@ -56,7 +56,8 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         }
         my = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
         my.data(gs)->setFixed();
-        my.data(gs)->resultType = core::Types::untyped(gs, sym);
+        auto untyped = core::Types::untyped(gs, sym);
+        my.data(gs)->resultType = core::make_type<core::LambdaParam>(my, untyped, untyped);
         return false;
     }
     const auto &data = my.data(gs);
@@ -67,7 +68,8 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         auto synthesizedName = gs.freshNameUnique(core::UniqueNameKind::TypeVarName, name, 1);
         my = gs.enterTypeMember(sym.data(gs)->loc(), sym, synthesizedName, core::Variance::Invariant);
         my.data(gs)->setFixed();
-        my.data(gs)->resultType = core::Types::untyped(gs, sym);
+        auto untyped = core::Types::untyped(gs, sym);
+        my.data(gs)->resultType = core::make_type<core::LambdaParam>(my, untyped, untyped);
         return false;
     }
     auto myVariance = data->variance();

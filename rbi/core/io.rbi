@@ -539,14 +539,14 @@ class IO < Object
 
   sig do
     params(
-        read_array: T::Array[IO],
-        write_array: T::Array[IO],
-        error_array: T::Array[IO],
-        timeout: Integer,
+        read_array: T.nilable(T::Array[IO]),
+        write_array: T.nilable(T::Array[IO]),
+        error_array: T.nilable(T::Array[IO]),
+        timeout: T.nilable(Integer),
     )
     .returns(T.nilable(T::Array[T::Array[IO]]))
   end
-  def self.select(read_array, write_array=T.unsafe(nil), error_array=T.unsafe(nil), timeout=T.unsafe(nil)); end
+  def self.select(read_array, write_array=nil, error_array=nil, timeout=nil); end
 
   sig do
     params(

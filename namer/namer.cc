@@ -89,7 +89,23 @@ class NameInserter {
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
+        // we know right now that pos >= arguments().size() because otherwise we would have hit the early return at the
+        // beginning of this method
         auto &argInfo = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, name);
+        // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
+        // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
+        // identical). We know that we need to match the arity of the function as written, so if we don't have as many
+        // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
+        if (ctx.owner.dataAllowingNone(ctx)->arguments().size() == pos) {
+            auto argCopy = argInfo.deepCopy();
+            argCopy.name = ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, argInfo.name, pos + 1);
+            ctx.owner.dataAllowingNone(ctx)->arguments().emplace_back(move(argCopy));
+            auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
+            return move(localExpr);
+        }
+        // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
+        // from enterMethodArgumentSymbol
+        ENFORCE(ctx.owner.data(ctx)->arguments().size() >= pos + 1);
         unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
 
         if (parsedArg.default_) {
@@ -228,20 +244,28 @@ public:
             }
             bool isModule = klass->kind == ast::ClassDefKind::Module;
             if (!klass->symbol.data(ctx)->isClass()) {
-                if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
-                    e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx)->show(ctx));
-                    e.addErrorLine(klass->symbol.data(ctx)->loc(), "Previous definition");
-                }
-                auto origName = klass->symbol.data(ctx)->name;
-                ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx)->name);
-                klass->symbol = ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx)->owner, origName);
-                klass->symbol.data(ctx)->setIsModule(isModule);
+                // we might have already mangled the class symbol, so see if we have a symbol that is a class already
+                auto klassSymbol =
+                    ctx.state.lookupClassSymbol(klass->symbol.data(ctx)->owner, klass->symbol.data(ctx)->name);
+                if (klassSymbol.exists()) {
+                    klass->symbol = klassSymbol;
+                } else {
+                    if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                        e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx)->show(ctx));
+                        e.addErrorLine(klass->symbol.data(ctx)->loc(), "Previous definition");
+                    }
+                    auto origName = klass->symbol.data(ctx)->name;
+                    ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx)->name);
+                    klass->symbol =
+                        ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx)->owner, origName);
+                    klass->symbol.data(ctx)->setIsModule(isModule);
 
-                auto oldSymCount = ctx.state.symbolsUsed();
-                auto newSignleton =
-                    klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-                ENFORCE(newSignleton._id >= oldSymCount,
-                        "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
+                    auto oldSymCount = ctx.state.symbolsUsed();
+                    auto newSingleton =
+                        klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+                    ENFORCE(newSingleton._id >= oldSymCount,
+                            "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
+                }
             } else if (klass->symbol.data(ctx)->isClassModuleSet() &&
                        isModule != klass->symbol.data(ctx)->isClassModule()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
@@ -265,19 +289,34 @@ public:
         if (send == nullptr) {
             return false;
         }
-        if (send->fun != core::Names::declareInterface() && send->fun != core::Names::declareAbstract()) {
-            return false;
+        if (send->fun == core::Names::declareFinal()) {
+            klass->symbol.data(ctx)->setClassFinal();
+            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassFinal();
         }
+        if (send->fun == core::Names::declareSealed()) {
+            klass->symbol.data(ctx)->setClassSealed();
 
-        klass->symbol.data(ctx)->setClassAbstract();
-        klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
+            auto classOfKlass = klass->symbol.data(ctx)->singletonClass(ctx);
+            auto sealedSubclasses =
+                ctx.state.enterMethodSymbol(send->loc, classOfKlass, core::Names::sealedSubclasses());
+            auto &blkArg =
+                ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
+            blkArg.flags.isBlock = true;
 
+            // T.noreturn here represents the zero-length list of subclasses of this sealed class.
+            // We will use T.any to record subclasses when they're resolved.
+            sealedSubclasses.data(ctx)->resultType = core::Types::arrayOf(ctx, core::Types::bottom());
+        }
+        if (send->fun == core::Names::declareInterface() || send->fun == core::Names::declareAbstract()) {
+            klass->symbol.data(ctx)->setClassAbstract();
+            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
+        }
         if (send->fun == core::Names::declareInterface()) {
             klass->symbol.data(ctx)->setClassInterface();
-
             if (klass->kind == ast::Class) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
+                    e.replaceWith("Change `interface!` to `abstract!`", send->loc, "abstract!");
                 }
             }
         }
@@ -357,6 +396,19 @@ public:
             ctx.state.staticInitForClass(klass->symbol, klass->loc);
         }
 
+        if (klass->symbol != core::Symbols::root() && !klass->declLoc.file().data(ctx).isRBI() &&
+            ast::BehaviorHelpers::checkClassDefinesBehavior(klass)) {
+            // TODO(dmitry) This won't find errors in fast-incremental mode.
+            auto prevLoc = classBehaviorLocs.find(klass->symbol);
+            if (prevLoc == classBehaviorLocs.end()) {
+                classBehaviorLocs[klass->symbol] = klass->declLoc;
+            } else if (prevLoc->second.file() != klass->declLoc.file()) {
+                if (auto e = ctx.state.beginError(klass->declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
+                    e.setHeader("`{}` has behavior defined in multiple files", klass->symbol.data(ctx)->show(ctx));
+                    e.addErrorLine(prevLoc->second, "Previous definition");
+                }
+            }
+        }
         return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
     }
 
@@ -440,7 +492,7 @@ public:
                         }
                         core::NameRef name = lit->asSymbol(ctx);
 
-                        core::SymbolRef meth = methodOwner(ctx).data(ctx)->findMember(ctx, name);
+                        core::SymbolRef meth = ctx.state.lookupMethodSymbol(methodOwner(ctx), name);
                         if (!meth.exists()) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::MethodNotFound)) {
                                 e.setHeader("`{}`: no such method: `{}`", original->fun.show(ctx), name.show(ctx));
@@ -544,7 +596,7 @@ public:
 
         auto parsedArgs = ast::ArgParsing::parseArgs(ctx, method->args);
 
-        auto sym = owner.data(ctx)->findMemberNoDealias(ctx, method->name);
+        auto sym = ctx.state.lookupMethodSymbol(owner, method->name);
         if (sym.exists()) {
             if (method->declLoc == sym.data(ctx)->loc()) {
                 // TODO remove if the paramsMatch is perfect
@@ -586,8 +638,7 @@ public:
         ENFORCE(nm->kind != ast::UnresolvedIdent::Local, "Unresolved local left after `name_locals`");
 
         if (nm->kind == ast::UnresolvedIdent::Global) {
-            core::SymbolData root = core::Symbols::root().data(ctx);
-            core::SymbolRef sym = root->findMember(ctx, nm->name);
+            auto sym = ctx.state.lookupSymbol(core::Symbols::root(), nm->name);
             if (!sym.exists()) {
                 sym = ctx.state.enterFieldSymbol(nm->loc, core::Symbols::root(), nm->name);
             }
@@ -618,7 +669,14 @@ public:
     }
 
     unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
-        // TODO(nelhage): forbid dynamic constant definition
+        // forbid dynamic constant definition
+        auto ownerData = ctx.owner.data(ctx);
+        if (!ownerData->isClass() && !ownerData->isDSLSynthesized()) {
+            if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::DynamicConstantAssignment)) {
+                e.setHeader("Dynamic constant assignment");
+            }
+        }
+
         auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         ENFORCE(lhs);
         core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs->scope);
@@ -637,15 +695,17 @@ public:
             scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
-        auto sym = scope.data(ctx)->findMemberNoDealias(ctx, lhs->cnst);
-        if (sym.exists() && !sym.data(ctx)->isStaticField()) {
+        auto sym = ctx.state.lookupStaticFieldSymbol(scope, lhs->cnst);
+        auto currSym = ctx.state.lookupSymbol(scope, lhs->cnst);
+        auto name = sym.exists() ? sym.data(ctx)->name : lhs->cnst;
+        if (!sym.exists() && currSym.exists()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx)->show(ctx));
-                e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                e.addErrorLine(currSym.data(ctx)->loc(), "Previous definition");
             }
-            ctx.state.mangleRenameSymbol(sym, sym.data(ctx)->name);
+            ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
         }
-        core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
+        core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, name);
         auto loc = lhs->loc;
         unique_ptr<ast::UnresolvedConstantLit> lhsU(lhs);
         asgn->lhs.release();
@@ -730,6 +790,15 @@ public:
             ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
         }
         auto sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
+
+        // Ensure that every type member has a LambdaParam with bounds, but give
+        // both bounds as T.untyped. The reason for this is that the bounds will
+        // be fixed up in the resolver, but if the type is used out of order (as
+        // in test/testdata/todo/fixed_ordering.rb) `T.untyped` will be used for
+        // the value of the type, instead of `<any>`
+        auto untyped = core::Types::untyped(ctx, sym);
+        sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, untyped, untyped);
+
         if (isTypeTemplate) {
             auto context = ctx.owner.data(ctx)->enclosingClass(ctx);
             oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
@@ -749,6 +818,10 @@ public:
             auto *hash = ast::cast_tree<ast::Hash>(send->args.back().get());
             if (hash) {
                 int i = -1;
+
+                bool fixed = false;
+                bool bounded = false;
+
                 for (auto &keyExpr : hash->keys) {
                     i++;
                     auto key = ast::cast_tree<ast::Literal>(keyExpr.get());
@@ -756,51 +829,38 @@ public:
                     if (key != nullptr && key->isSymbol(ctx)) {
                         switch (key->asSymbol(ctx)._id) {
                             case core::Names::fixed()._id:
-                                // Leave it in the tree for the resolver to chew on.
                                 sym.data(ctx)->setFixed();
+                                fixed = true;
+                                break;
 
-                                // TODO(nelhage): This creates an order
-                                // dependency in the resolver. See RUBYPLAT-520
-                                sym.data(ctx)->resultType = core::Types::untyped(ctx, sym);
-
-                                asgn->lhs = ast::MK::Constant(asgn->lhs->loc, sym);
-                                continue;
-
-                            // intentionally falling through here
                             case core::Names::lower()._id:
                             case core::Names::upper()._id:
-                                sym.data(ctx)->setBounded();
+                                bounded = true;
                                 break;
                         }
                     }
                 }
 
-                const bool fixed = sym.data(ctx)->isFixed();
-                const bool bounded = sym.data(ctx)->isBounded();
-
-                // For now, bounded type members are not supported
-                if (bounded) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Only `{}` type members are supported", ":fixed");
-                    }
-                }
-
-                // one of :fixed or bounds were provided
+                // one of fixed or bounds were provided
                 if (fixed != bounded) {
+                    asgn->lhs = ast::MK::Constant(asgn->lhs->loc, sym);
+
+                    // Leave it in the tree for the resolver to chew on.
                     return asgn;
                 } else if (fixed) {
-                    // both :fixed and bounds were specified
+                    // both fixed and bounds were specified
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Type member is defined with bounds and `{}`", ":fixed");
+                        e.setHeader("Type member is defined with bounds and `{}`", "fixed");
                     }
                 } else {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Missing required param :fixed");
+                        e.setHeader("Missing required param `{}`", "fixed");
                     }
                 }
             }
         }
-        return make_unique<ast::EmptyTree>();
+
+        return asgn;
     }
 
     unique_ptr<ast::Expression> handleAssignment(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
@@ -851,18 +911,31 @@ public:
     }
 
 private:
-    NameInserter() {
-        enterScope();
-    }
+    UnorderedMap<core::SymbolRef, core::Loc> classBehaviorLocs;
 };
 
-ast::ParsedFile Namer::run(core::MutableContext ctx, ast::ParsedFile tree) {
+std::vector<ast::ParsedFile> Namer::run(core::MutableContext ctx, std::vector<ast::ParsedFile> trees) {
     NameInserter nameInserter;
-    tree.tree = ast::TreeMap::apply(ctx, nameInserter, std::move(tree.tree));
-    // This check is FAR too slow to run on large codebases, especially with sanitizers on.
-    // But it can be super useful to uncomment when debugging certain issues.
-    // ctx.state.sanityCheck();
-    return tree;
+    for (auto &tree : trees) {
+        auto file = tree.file;
+        nameInserter.enterScope();
+        try {
+            ast::ParsedFile ast;
+            {
+                Timer timeit(ctx.state.tracer(), "naming", {{"file", (string)file.data(ctx).path()}});
+                core::ErrorRegion errs(ctx.state, file);
+                tree.tree = ast::TreeMap::apply(ctx, nameInserter, std::move(tree.tree));
+            }
+        } catch (SorbetException &) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.state.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
+                e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(ctx).path());
+            }
+        }
+        nameInserter.exitScope();
+        ENFORCE(nameInserter.scopeStack.empty());
+    }
+    return trees;
 }
 
 }; // namespace sorbet::namer

@@ -48,17 +48,20 @@ steps:
     <<: *elastic
 
 
-  - label: ":mac: build-static-release.sh"
+  - label: ":mac: build-static-release.sh (master only)"
     command: .buildkite/build-static-release.sh
+    branches: master
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":linux::cloud: build-emscripten.sh"
-    command: .buildkite/build-emscripten.sh
-    artifact_paths: _out_/**/*
-    <<: *elastic
+
   - label: ":linux::cloud: build-static-release.sh"
     command: .buildkite/build-static-release.sh
+    artifact_paths: _out_/**/*
+    <<: *elastic
+
+  - label: ":linux::cloud: build-emscripten.sh"
+    command: .buildkite/build-emscripten.sh
     artifact_paths: _out_/**/*
     <<: *elastic
   - wait: ~
@@ -73,4 +76,9 @@ steps:
 # Success Phase - Allow the PR to be merged
   - label: "All tests and builds succeeded"
     command: .buildkite/all-succeeded.sh
+
+  - label: ":linux: publish_ruby_gems.sh (non-blocking)"
+    command: .buildkite/publish_ruby_gems.sh
+    <<: *elastic
+
   - wait: ~

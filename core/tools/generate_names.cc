@@ -79,6 +79,7 @@ NameDef names[] = {
     {"finalReturn", "<finalReturn>"},
     {"cfgAlias", "<cfgAlias>"},
     {"magic", "<magic>"},
+    {"tConstTemp", "<tConstTemp>"},
     // end CFG temporaries
 
     {"include"},
@@ -99,7 +100,7 @@ NameDef names[] = {
     // Sig builders
     {"bind"},
     {"params"},
-    {"final"},
+    {"final_", "final"},
     {"returns"},
     {"void_", "void"},
     {"checked"},
@@ -127,7 +128,10 @@ NameDef names[] = {
     {"must"},
     {"declareInterface", "interface!"},
     {"declareAbstract", "abstract!"},
+    {"declareFinal", "final!"},
+    {"declareSealed", "sealed!"},
     {"revealType", "reveal_type"},
+    {"absurd"},
     // end T keywords
 
     // Ruby DSL methods which we understand
@@ -182,6 +186,18 @@ NameDef names[] = {
     {"prefix"},
     {"to"},
 
+    {"mattrAccessor", "mattr_accessor"},
+    {"mattrReader", "mattr_reader"},
+    {"mattrWriter", "mattr_writer"},
+    {"cattrAccessor", "cattr_accessor"},
+    {"cattrReader", "cattr_reader"},
+    {"cattrWriter", "cattr_writer"},
+    {"instanceReader", "instance_reader"},
+    {"instanceWriter", "instance_writer"},
+    {"instanceAccessor", "instance_accessor"},
+    {"instancePredicate", "instance_predicate"},
+    {"classAttribute", "class_attribute"},
+
     {"describe"},
     {"it"},
     {"before"},
@@ -219,6 +235,8 @@ NameDef names[] = {
     {"ActiveRecord", "ActiveRecord", true},
     {"Migration", "Migration", true},
     {"Compatibility", "Compatibility", true},
+
+    {"instance"},
     // end DSL methods
 
     // The next two names are used as keys in SymbolInfo::members to store
@@ -232,6 +250,10 @@ NameDef names[] = {
     // object"
     {"singleton", "<singleton class>"},
     {"attached", "<attached class>"},
+
+    // This behaves like the above two names, in the sense that we use a member
+    // on a class to lookup an associated symbol with some extra info.
+    {"sealedSubclasses", "sealed_subclasses"},
 
     // This name is used as a key in SymbolInfo::members to store the module
     // registered via the `mixes_in_class_method` name.
@@ -266,6 +288,7 @@ NameDef names[] = {
     {"buildArray", "<build-array>"},
     {"splat", "<splat>"},
     {"expandSplat", "<expand-splat>"},
+    {"suggestType", "<suggest-type>"},
     {"arg0"},
     {"arg1"},
     {"arg2"},
@@ -319,6 +342,7 @@ NameDef names[] = {
     {"Proc", "Proc", true},
     {"TrueClass", "TrueClass", true},
     {"FalseClass", "FalseClass", true},
+    {"Boolean", "Boolean", true},
     {"NilClass", "NilClass", true},
     {"Class", "Class", true},
     {"Module", "Module", true},
@@ -377,6 +401,7 @@ NameDef names[] = {
     {"Protocol", "Protocol", true},
     {"CFGExport", "CFGExport", true},
     {"WithoutRuntime", "WithoutRuntime", true},
+    {"Singleton", "Singleton", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

@@ -39,6 +39,9 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     // TODO: this range should cover body. Currently it doesn't.
     auto range = loc2Range(gs, sym->loc());
     auto selectionRange = loc2Range(gs, sym->loc());
+    if (range == nullptr || selectionRange == nullptr) {
+        return nullptr;
+    }
 
     string prefix = "";
     if (sym->owner.exists() && sym->owner.data(gs)->isClass() && sym->owner.data(gs)->attachedClass(gs).exists()) {
@@ -65,7 +68,7 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 }
 
 LSPResult LSPLoop::handleTextDocumentDocumentSymbol(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                    const DocumentSymbolParams &params) {
+                                                    const DocumentSymbolParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
     if (!opts.lspDocumentSymbolEnabled) {
         response->error =
@@ -81,6 +84,7 @@ LSPResult LSPLoop::handleTextDocumentDocumentSymbol(unique_ptr<core::GlobalState
     for (u4 idx = 1; idx < gs->symbolsUsed(); idx++) {
         core::SymbolRef ref(gs.get(), idx);
         if (!hideSymbol(*gs, ref) &&
+            // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
             (ref.data(*gs)->owner.data(*gs)->loc().file() != fref || ref.data(*gs)->owner == core::Symbols::root())) {
             for (auto definitionLocation : ref.data(*gs)->locs()) {
                 if (definitionLocation.file() == fref) {

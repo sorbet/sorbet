@@ -30,8 +30,11 @@ vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClass()); // should be removed when we have generic methods
     vector<TypePtr> targs;
     for (auto tm : typeMembers()) {
-        if (tm.data(gs)->isFixed()) {
-            targs.emplace_back(tm.data(gs)->resultType);
+        auto tmData = tm.data(gs);
+        if (tmData->isFixed()) {
+            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
+            ENFORCE(lambdaParam != nullptr);
+            targs.emplace_back(lambdaParam->upperBound);
         } else {
             targs.emplace_back(make_type<SelfTypeParam>(tm));
         }
@@ -60,9 +63,14 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
         } else {
             vector<TypePtr> targs;
             for (auto tm : typeMembers()) {
-                if (tm.data(gs)->isFixed()) {
-                    targs.emplace_back(tm.data(gs)->resultType);
+                auto tmData = tm.data(gs);
+                if (tmData->isFixed()) {
+                    auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
+                    ENFORCE(lambdaParam != nullptr);
+                    targs.emplace_back(lambdaParam->upperBound);
                 } else {
+                    // NOTE: at some point in the future it might make sense to
+                    // instantiate this with the upper bound of the type
                     targs.emplace_back(Types::untyped(gs, ref));
                 }
             }
@@ -260,6 +268,13 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
 vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState &gs, NameRef name,
                                                                int betterThan) const {
     vector<Symbol::FuzzySearchResult> res;
+    // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
+    // N.B.: There are benefits to running this method under the fuzzer; we have found bugs in this method before
+    // via fuzzing (e.g. https://github.com/sorbet/sorbet/issues/128).
+    if (fuzz_mode) {
+        return res;
+    }
+
     if (name.data(gs)->kind == NameKind::UTF8) {
         auto sym = findMemberFuzzyMatchUTF8(gs, name, betterThan);
         if (sym.symbol.exists()) {
@@ -811,7 +826,69 @@ SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
     return classSymbol;
 }
 
-SymbolRef Symbol::dealias(const GlobalState &gs, int depthLimit) const {
+void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
+    ENFORCE(this->isClassSealed(), "Class is not marked sealed: {}", this->show(ctx));
+    ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
+    ENFORCE(subclass.data(ctx)->isClass(), "Sealed subclass {} must be class", subclass.show(ctx));
+
+    auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx);
+    auto sealedSubclasses = this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
+
+    auto data = sealedSubclasses.data(ctx);
+    ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
+    auto appliedType = cast_type<AppliedType>(data->resultType.get());
+    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
+    ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedSubclasses should always be Array");
+    auto currentClasses = appliedType->targs[0];
+    // Abusing T.any to be list cons, with T.noreturn as the empty list.
+    // (Except it's not, because Types::lub is too smart, and drops the T.noreturn to prevent allocating a T.any)
+    appliedType->targs[0] = Types::any(ctx, currentClasses, make_type<ClassType>(classOfSubclass));
+}
+
+const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
+    ENFORCE(this->isClassSealed(), "Class is not marked sealed: {}", this->show(gs));
+    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
+    auto &result = sealedSubclasses.data(gs)->locs();
+    ENFORCE(result.size() > 0);
+    return result;
+}
+
+TypePtr Symbol::sealedSubclassesToUnion(const Context ctx) const {
+    ENFORCE(this->isClassSealed(), "Class is not marked sealed: {}", this->show(ctx));
+
+    auto sealedSubclasses = this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
+
+    auto data = sealedSubclasses.data(ctx);
+    ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
+    auto appliedType = cast_type<AppliedType>(data->resultType.get());
+    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
+    ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedSubclasses should always be Array");
+
+    auto currentClasses = appliedType->targs[0];
+    if (currentClasses->isBottom()) {
+        // Declared sealed parent class, but never saw any children.
+        return make_type<ClassType>(this->ref(ctx));
+    }
+
+    auto result = Types::bottom();
+    while (auto orType = cast_type<OrType>(currentClasses.get())) {
+        auto classType = cast_type<ClassType>(orType->right.get());
+        ENFORCE(classType != nullptr, "Something in sealedSubclasses that's not a ClassType");
+        auto subclass = classType->symbol.data(ctx)->attachedClass(ctx);
+        ENFORCE(subclass.exists());
+        result = Types::any(ctx, make_type<ClassType>(subclass), result);
+        currentClasses = orType->left;
+    }
+    auto lastClassType = cast_type<ClassType>(currentClasses.get());
+    ENFORCE(lastClassType != nullptr, "Last element of sealedSubclasses must be ClassType");
+    auto subclass = lastClassType->symbol.data(ctx)->attachedClass(ctx);
+    ENFORCE(subclass.exists());
+    result = Types::any(ctx, make_type<ClassType>(subclass), result);
+
+    return result;
+}
+
+SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {
     if (auto alias = cast_type<AliasType>(resultType.get())) {
         if (depthLimit == 0) {
             if (auto e = gs.beginError(loc(), errors::Internal::CyclicReferenceError)) {
@@ -819,9 +896,9 @@ SymbolRef Symbol::dealias(const GlobalState &gs, int depthLimit) const {
                             "expansion would have been to {}",
                             showFullName(gs), alias->symbol.data(gs)->showFullName(gs));
             }
-            return Symbols::untyped();
+            return def;
         }
-        return alias->symbol.data(gs)->dealias(gs, depthLimit - 1);
+        return alias->symbol.data(gs)->dealiasWithDefault(gs, depthLimit - 1, def);
     }
     return this->ref(gs);
 }

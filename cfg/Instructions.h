@@ -187,6 +187,18 @@ public:
 };
 CheckSize(Cast, 64, 8);
 
+class TAbsurd final : public Instruction {
+public:
+    VariableUseSite what;
+
+    TAbsurd(core::LocalVariable what) : what(what) {
+        categoryCounterInc("cfg", "tabsurd");
+    }
+
+    virtual std::string toString(core::Context ctx);
+};
+CheckSize(TAbsurd, 40, 8);
+
 } // namespace sorbet::cfg
 
 #endif // SORBET_CFG_H

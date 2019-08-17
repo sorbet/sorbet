@@ -7,6 +7,7 @@ class Base
 end
 
 class Concrete < Base
+  extend T::Generic
   Klass = type_template(fixed: String)
 end
 

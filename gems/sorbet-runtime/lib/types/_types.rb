@@ -184,7 +184,7 @@ module T
     begin
       raise TypeError.new("Passed `nil` into T.must")
     rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-      T::Private::ErrorHandler.handle_inline_type_error(e)
+      T::Configuration.inline_type_error_handler(e)
     end
   end
 
@@ -195,29 +195,63 @@ module T
     value
   end
 
+  # A way to ask Sorbet to prove that a certain branch of control flow never
+  # happens. Commonly used to assert that a case or if statement exhausts all
+  # possible cases.
+  def self.absurd(value)
+    msg = "Control flow reached T.absurd."
+
+    case value
+    when Kernel
+      msg += " Got value: #{value}"
+    end
+
+    begin
+      raise TypeError.new(msg)
+    rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
+      T::Configuration.inline_type_error_handler(e)
+    end
+  end
+
   ### Generic classes ###
 
   module Array
     def self.[](type)
-      T::Types::TypedArray.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedArray::Untyped.new
+      else
+        T::Types::TypedArray.new(type)
+      end
     end
   end
 
   module Hash
     def self.[](keys, values)
-      T::Types::TypedHash.new(keys: keys, values: values)
+      if keys.is_a?(T::Types::Untyped) && values.is_a?(T::Types::Untyped)
+        T::Types::TypedHash::Untyped.new
+      else
+        T::Types::TypedHash.new(keys: keys, values: values)
+      end
     end
   end
 
   module Enumerable
     def self.[](type)
-      T::Types::TypedEnumerable.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedEnumerable::Untyped.new
+      else
+        T::Types::TypedEnumerable.new(type)
+      end
     end
   end
 
   module Enumerator
     def self.[](type)
-      T::Types::TypedEnumerator.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedEnumerator::Untyped.new
+      else
+        T::Types::TypedEnumerator.new(type)
+      end
     end
   end
 
@@ -229,7 +263,11 @@ module T
 
   module Set
     def self.[](type)
-      T::Types::TypedSet.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedSet::Untyped.new
+      else
+        T::Types::TypedSet.new(type)
+      end
     end
   end
 

@@ -805,6 +805,9 @@ module Kernel
   def select(read, write=T.unsafe(nil), error=T.unsafe(nil), timeout=T.unsafe(nil)); end
 
   sig do
+    returns(T.noreturn)
+  end
+  sig do
     params(
         duration: Numeric,
     )

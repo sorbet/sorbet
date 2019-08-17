@@ -11,6 +11,7 @@ class Foo
    # ^ hover: sig {params(arg0: String).returns(Integer)}
   end
 
+  # Docs for static bar
   sig {params(a: String).void}
   def self.bar(a)
          # ^ hover: sig {params(a: String).void}
@@ -30,6 +31,23 @@ class Foo
   sig {params(i: Integer).returns(Integer)}
   def self.bat(i)
     10
+  end
+
+  # Docs above single-line sig
+  sig {params(arg0: Integer).void}
+  def typed_with_docs(arg0)
+    # ^ hover: Docs above single-line sig
+    # ^ hover: sig {params(arg0: Integer).void}
+  end
+
+  # Some docs for qux
+  sig {void}
+  def qux
+    # ^^^ hover: Some docs for qux
+    # ^^^ hover: sig {void}
+    typed_with_docs(1)
+  # ^ hover: Docs above single-line sig
+  # ^ hover: sig {params(arg0: Integer).void}
   end
 
   sig {void}
@@ -56,6 +74,13 @@ class Foo
   # ^ hover: T::Array[String]
     x
   end
+
+  sig{void}
+  # Docs are below the sig
+  def docs_below_sig
+    # ^^^^^^^^^^^^^^ hover: Docs are below the sig
+    # ^^^^^^^^^^^^^^ hover: sig {void}
+  end
 end
 
 def main
@@ -68,4 +93,15 @@ def main
 # ^ hover: T::Array[String]
           # ^ hover: sig {params(a: String, x: String).returns(T::Array[String])}
 
+  Foo.bar('')
+# ^^^ hover: T.class_of(Foo)
+    # ^^^ hover: Docs for static bar
+    # ^^^ hover: sig {params(a: String).void}
+
+  f = Foo.new
+# ^ hover: Foo
+     # ^ hover: T.class_of(Foo)
+  f.qux
+  # ^^^ hover: Some docs for qux
+  # ^^^ hover: sig {void}
 end

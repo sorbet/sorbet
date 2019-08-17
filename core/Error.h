@@ -1,6 +1,6 @@
 #ifndef SORBET_REPORTER_H
 #define SORBET_REPORTER_H
-
+#include "common/ConstExprStr.h"
 #include "core/AutocorrectSuggestion.h"
 #include "core/Loc.h"
 #include "core/StrictLevel.h"
@@ -146,20 +146,21 @@ public:
         return state == State::WillBuild;
     }
     void addErrorSection(ErrorSection &&section);
-    template <typename... Args> void addErrorLine(Loc loc, const std::string &msg, const Args &... args) {
-        std::string formatted = ErrorColors::format(msg, args...);
+    template <typename... Args> void addErrorLine(Loc loc, ConstExprStr msg, const Args &... args) {
+        std::string formatted = ErrorColors::format(msg.str, args...);
         addErrorSection(ErrorSection({ErrorLine(loc, formatted)}));
     }
 
-    template <typename... Args> void setHeader(const std::string &msg, const Args &... args) {
-        std::string formatted = ErrorColors::format(msg, args...);
+    template <typename... Args> void setHeader(ConstExprStr msg, const Args &... args) {
+        std::string formatted = ErrorColors::format(msg.str, args...);
         _setHeader(move(formatted));
     }
 
     void addAutocorrect(AutocorrectSuggestion &&autocorrect);
-    template <typename... Args> void replaceWith(Loc loc, const std::string &msg, const Args &... args) {
-        std::string formatted = fmt::format(msg, args...);
-        addAutocorrect(AutocorrectSuggestion(loc, move(formatted)));
+    template <typename... Args>
+    void replaceWith(const std::string &title, Loc loc, ConstExprStr replacement, const Args &... args) {
+        std::string formatted = fmt::format(replacement.str, args...);
+        addAutocorrect(AutocorrectSuggestion{title, {AutocorrectSuggestion::Edit{loc, move(formatted)}}});
     }
 
     // build() builds and returns the reported Error. Only valid if state ==

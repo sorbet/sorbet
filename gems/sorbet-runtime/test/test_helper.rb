@@ -9,6 +9,7 @@ require 'minitest/spec'
 require 'mocha/minitest'
 
 require 'pathname'
+require 'tempfile'
 
 require_relative '../lib/sorbet-runtime'
 

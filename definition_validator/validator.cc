@@ -173,6 +173,9 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
         }
     }
 
+    // we don't raise override errors if the method implements an abstract method, which means we need to know ahead of
+    // time whether any parent methods are abstract
+    auto anyIsInterface = absl::c_any_of(overridenMethods, [&](auto &m) { return m.data(gs)->isAbstract(); });
     for (const auto &overridenMethod : overridenMethods) {
         if (overridenMethod.data(gs)->isFinalMethod()) {
             if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::OverridesFinal)) {
@@ -182,11 +185,141 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
             }
         }
         auto isRBI = absl::c_any_of(method.data(gs)->locs(), [&](auto &loc) { return loc.file().data(gs).isRBI(); });
+        if (!method.data(gs)->isOverride() && method.data(gs)->hasSig() && overridenMethod.data(gs)->isOverridable() &&
+            !anyIsInterface && overridenMethod.data(gs)->hasSig() && !method.data(gs)->isDSLSynthesized() && !isRBI) {
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::UndeclaredOverride)) {
+                e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
+                            method.data(gs)->show(gs), overridenMethod.data(gs)->show(gs), ".override");
+                e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
+            }
+        }
+        if (!method.data(gs)->isImplementation() && !method.data(gs)->isOverride() && method.data(gs)->hasSig() &&
+            overridenMethod.data(gs)->isAbstract() && overridenMethod.data(gs)->hasSig() &&
+            !method.data(gs)->isDSLSynthesized() && !isRBI) {
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::UndeclaredOverride)) {
+                e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
+                            method.data(gs)->show(gs), overridenMethod.data(gs)->show(gs), ".implementation");
+                e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
+            }
+        }
         if ((overridenMethod.data(gs)->isAbstract() || overridenMethod.data(gs)->isOverridable()) &&
-            !method.data(gs)->isIncompatibleOverride() && !isRBI) {
+            !method.data(gs)->isIncompatibleOverride() && !isRBI && !method.data(gs)->isDSLSynthesized()) {
             validateCompatibleOverride(gs, overridenMethod, method);
         }
     }
+}
+
+core::Loc getAncestorLoc(const core::GlobalState &gs, const unique_ptr<ast::ClassDef> &classDef,
+                         const core::SymbolRef ancestor) {
+    for (const auto &anc : classDef->ancestors) {
+        const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
+        if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+            return anc->loc;
+        }
+    }
+    for (const auto &anc : classDef->singletonAncestors) {
+        const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
+        if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
+            return anc->loc;
+        }
+    }
+    // give up
+    return classDef->loc;
+}
+
+void validateFinalAncestorHelper(const core::GlobalState &gs, const core::SymbolRef klass,
+                                 const unique_ptr<ast::ClassDef> &classDef, const core::SymbolRef errMsgClass,
+                                 const string_view verb) {
+    for (const auto &mixin : klass.data(gs)->mixins()) {
+        if (!mixin.data(gs)->isClassFinal()) {
+            continue;
+        }
+        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, mixin), core::errors::Resolver::FinalAncestor)) {
+            e.setHeader("`{}` was declared as final and cannot be {} in `{}`", mixin.data(gs)->show(gs), verb,
+                        errMsgClass.data(gs)->show(gs));
+            e.addErrorLine(mixin.data(gs)->loc(), "`{}` defined here", mixin.data(gs)->show(gs));
+        }
+    }
+}
+
+void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRef klass,
+                               const core::SymbolRef errMsgClass) {
+    if (!klass.data(gs)->isClassFinal()) {
+        return;
+    }
+    for (const auto [name, sym] : klass.data(gs)->members()) {
+        if (!sym.exists() || !sym.data(gs)->isMethod() || sym.data(gs)->name == core::Names::staticInit() ||
+            sym.data(gs)->isFinalMethod()) {
+            continue;
+        }
+        if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
+            e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
+                        errMsgClass.data(gs)->show(gs), sym.data(gs)->name.show(gs));
+        }
+    }
+}
+
+void validateFinal(const core::GlobalState &gs, const core::SymbolRef klass,
+                   const unique_ptr<ast::ClassDef> &classDef) {
+    const auto superClass = klass.data(gs)->superClass();
+    if (superClass.exists() && superClass.data(gs)->isClassFinal()) {
+        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
+            e.setHeader("`{}` was declared as final and cannot be inherited by `{}`", superClass.data(gs)->show(gs),
+                        klass.data(gs)->show(gs));
+            e.addErrorLine(superClass.data(gs)->loc(), "`{}` defined here", superClass.data(gs)->show(gs));
+        }
+    }
+    validateFinalAncestorHelper(gs, klass, classDef, klass, "included");
+    validateFinalMethodHelper(gs, klass, klass);
+    const auto singleton = klass.data(gs)->lookupSingletonClass(gs);
+    validateFinalAncestorHelper(gs, singleton, classDef, klass, "extended");
+    validateFinalMethodHelper(gs, singleton, klass);
+}
+
+void validateSealedAncestorHelper(const core::GlobalState &gs, const core::SymbolRef klass,
+                                  const unique_ptr<ast::ClassDef> &classDef, const core::SymbolRef errMsgClass,
+                                  const string_view verb) {
+    auto klassFile = klass.data(gs)->loc().file();
+    for (const auto &mixin : klass.data(gs)->mixins()) {
+        if (!mixin.data(gs)->isClassSealed()) {
+            continue;
+        }
+        // Statically, we allow including / extending in any file that adds a loc to sealedLocs.
+        // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
+        if (absl::c_any_of(mixin.data(gs)->sealedLocs(gs), [klassFile](auto loc) { return loc.file() == klassFile; })) {
+            continue;
+        }
+        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, mixin), core::errors::Resolver::SealedAncestor)) {
+            e.setHeader("`{}` is sealed and cannot be {} in `{}`", mixin.data(gs)->show(gs), verb,
+                        errMsgClass.data(gs)->show(gs));
+            for (auto loc : mixin.data(gs)->sealedLocs(gs)) {
+                e.addErrorLine(loc, "`{}` was marked sealed and can only be {} in this file", mixin.data(gs)->show(gs),
+                               verb);
+            }
+        }
+    }
+}
+
+void validateSealed(const core::GlobalState &gs, const core::SymbolRef klass,
+                    const unique_ptr<ast::ClassDef> &classDef) {
+    const auto superClass = klass.data(gs)->superClass();
+    // Statically, we allow a subclass in any file that adds a loc to sealedLocs.
+    // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
+    auto file = klass.data(gs)->loc().file();
+    if (superClass.exists() && superClass.data(gs)->isClassSealed() &&
+        !absl::c_any_of(superClass.data(gs)->sealedLocs(gs), [file](auto loc) { return loc.file() == file; })) {
+        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
+            e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.data(gs)->show(gs),
+                        klass.data(gs)->show(gs));
+            for (auto loc : superClass.data(gs)->sealedLocs(gs)) {
+                e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
+                               superClass.data(gs)->show(gs));
+            }
+        }
+    }
+    validateSealedAncestorHelper(gs, klass, classDef, klass, "included");
+    const auto singleton = klass.data(gs)->lookupSingletonClass(gs);
+    validateSealedAncestorHelper(gs, singleton, classDef, klass, "extended");
 }
 
 class ValidateWalk {
@@ -216,9 +349,9 @@ private:
 
         auto isAbstract = klass.data(gs)->isClassAbstract();
         if (isAbstract) {
-            for (auto mem : klass.data(gs)->members()) {
-                if (mem.second.data(gs)->isMethod() && mem.second.data(gs)->isAbstract()) {
-                    abstract.emplace_back(mem.second);
+            for (auto [name, sym] : klass.data(gs)->members()) {
+                if (sym.exists() && sym.data(gs)->isMethod() && sym.data(gs)->isAbstract()) {
+                    abstract.emplace_back(sym);
                 }
             }
         }
@@ -283,6 +416,8 @@ public:
         validateTStructNotGrandparent(ctx.state, sym);
         validateAbstract(ctx.state, sym);
         validateAbstract(ctx.state, singleton);
+        validateFinal(ctx.state, sym, classDef);
+        validateSealed(ctx.state, sym, classDef);
         return classDef;
     }
 
