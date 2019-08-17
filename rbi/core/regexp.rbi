@@ -11,7 +11,7 @@ class Regexp < Object
   # expression. Returns a new escaped string, or self if no characters are
   # escaped. For any string, `Regexp.new(Regexp.escape( str ))=~ str` will
   # be true.
-  # 
+  #
   # ```ruby
   # Regexp.escape('\*?{}.')   #=> \\\*\?\{\}\.
   # ```
@@ -32,14 +32,14 @@ class Regexp < Object
   end
   def self.last_match(arg0=T.unsafe(nil)); end
 
-  # Try to convert *obj* into a [Regexp](Regexp.downloaded.ruby_doc) , using
+  # Try to convert *obj* into a [Regexp](Regexp.downloaded.ruby_doc), using
   # to\_regexp method. Returns converted regexp or nil if *obj* cannot be
   # converted for any reason.
-  # 
+  #
   # ```ruby
   # Regexp.try_convert(/re/)         #=> /re/
   # Regexp.try_convert("re")         #=> nil
-  # 
+  #
   # o = Object.new
   # Regexp.try_convert(o)            #=> nil
   # def o.to_regexp() /foo/ end
@@ -56,7 +56,7 @@ class Regexp < Object
   # Equality—Two regexps are equal if their patterns are identical, they
   # have the same character set code, and their `casefold?` values are the
   # same.
-  # 
+  #
   # ```ruby
   # /abc/  == /abc/x   #=> false
   # /abc/  == /abc/i   #=> false
@@ -72,7 +72,7 @@ class Regexp < Object
   def ==(other); end
 
   # Case Equality—Used in case statements.
-  # 
+  #
   # ```ruby
   # a = "HELLO"
   # case a
@@ -82,12 +82,12 @@ class Regexp < Object
   # end
   # #=> "Upper case"
   # ```
-  # 
+  #
   # Following a regular expression literal with the
   # [===](Regexp.downloaded.ruby_doc#method-i-3D-3D-3D) operator allows you
   # to compare against a
-  # [String](https://ruby-doc.org/core-2.6.3/String.html) .
-  # 
+  # [String](https://ruby-doc.org/core-2.6.3/String.html).
+  #
   # ```ruby
   # /^[a-z]*$/ === "HELLO" #=> false
   # /^[A-Z]*$/ === "HELLO" #=> true
@@ -109,7 +109,7 @@ class Regexp < Object
   def =~(str); end
 
   # Returns the value of the case-insensitive flag.
-  # 
+  #
   # ```ruby
   # /a/.casefold?           #=> false
   # /a/i.casefold?          #=> true
@@ -127,7 +127,7 @@ class Regexp < Object
   def fixed_encoding?(); end
 
   # Produce a hash based on the text and options of this regular expression.
-  # 
+  #
   # See also Object\#hash.
   sig {returns(Integer)}
   def hash(); end
@@ -151,7 +151,7 @@ class Regexp < Object
   # Produce a nicely formatted string-version of *rxp* . Perhaps
   # surprisingly, `#inspect` actually produces the more natural version of
   # the string than `#to_s` .
-  # 
+  #
   # ```ruby
   # /ab+c/ix.inspect        #=> "/ab+c/ix"
   # ```
@@ -162,32 +162,32 @@ class Regexp < Object
   # no match. This is equivalent to retrieving the value of the special
   # variable `$~` following a normal match. If the second parameter is
   # present, it specifies the position in the string to begin the search.
-  # 
+  #
   # ```ruby
   # /(.)(.)(.)/.match("abc")[2]   #=> "b"
   # /(.)(.)/.match("abc", 1)[2]   #=> "c"
   # ```
-  # 
+  #
   # If a block is given, invoke the block with
   # [MatchData](https://ruby-doc.org/core-2.6.3/MatchData.html) if match
   # succeed, so that you can write
-  # 
+  #
   # ```ruby
   # /M(.*)/.match("Matz") do |m|
   #   puts m[0]
   #   puts m[1]
   # end
   # ```
-  # 
+  #
   # instead of
-  # 
+  #
   # ```ruby
   # if m = /M(.*)/.match("Matz")
   #   puts m[0]
   #   puts m[1]
   # end
   # ```
-  # 
+  #
   # The return value is a value from block execution in this case.
   sig do
     params(
@@ -209,17 +209,17 @@ class Regexp < Object
   # details. Note that additional bits may be set in the returned options:
   # these are used internally by the regular expression code. These extra
   # bits are ignored if the options are passed to `Regexp::new` .
-  # 
+  #
   # ```ruby
   # Regexp::IGNORECASE                  #=> 1
   # Regexp::EXTENDED                    #=> 2
   # Regexp::MULTILINE                   #=> 4
-  # 
+  #
   # /cat/.options                       #=> 0
   # /cat/ix.options                     #=> 3
   # Regexp.new('cat', true).options     #=> 1
   # /\xa1\xa2/e.options                 #=> 16
-  # 
+  #
   # r = /cat/ix
   # Regexp.new(r.source, r.options)     #=> /cat/ix
   # ```
@@ -227,13 +227,13 @@ class Regexp < Object
   def options(); end
 
   # Returns the original string of the pattern.
-  # 
+  #
   # ```ruby
   # /ab+c/ix.source #=> "ab+c"
   # ```
-  # 
+  #
   # Note that escape sequences are retained as is.
-  # 
+  #
   # ```ruby
   # /\x20\+/.source  #=> "\\x20\\+"
   # ```
@@ -247,7 +247,7 @@ class Regexp < Object
   # two, as the source of the regular expression itself may differ, as the
   # example shows). `Regexp#inspect` produces a generally more readable
   # version of *rxp* .
-  # 
+  #
   # ```ruby
   # r1 = /ab+c/ix           #=> /ab+c/ix
   # s1 = r1.to_s            #=> "(?ix-m:ab+c)"
@@ -283,7 +283,7 @@ class Regexp < Object
   # expression. Returns a new escaped string, or self if no characters are
   # escaped. For any string, `Regexp.new(Regexp.escape( str ))=~ str` will
   # be true.
-  # 
+  #
   # ```ruby
   # Regexp.escape('\*?{}.')   #=> \\\*\?\{\}\.
   # ```
@@ -298,7 +298,7 @@ class Regexp < Object
   # Equality—Two regexps are equal if their patterns are identical, they
   # have the same character set code, and their `casefold?` values are the
   # same.
-  # 
+  #
   # ```ruby
   # /abc/  == /abc/x   #=> false
   # /abc/  == /abc/i   #=> false
