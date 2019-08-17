@@ -669,10 +669,15 @@ module Kernel
     params(
         initial: T.any(Integer, Float, Rational, BigDecimal, String),
         digits: Integer,
+        exception: T::Boolean
     )
     .returns(BigDecimal)
   end
-  def BigDecimal(initial, digits=0); end
+  def BigDecimal(initial, digits=0, exception: true); end
+  # As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
+  # means the non-nilable return value is technically incorrect, but it seemed like the least worst option given that
+  # 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
+  # see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   # Returns x+i\*y;
   #
@@ -713,16 +718,15 @@ module Kernel
     params(
         x: T.any(Numeric, String),
         y: T.any(Numeric, String),
+        exception: T::Boolean
     )
     .returns(Complex)
   end
-  sig do
-    params(
-        x: String,
-    )
-    .returns(Complex)
-  end
-  def Complex(x, y=T.unsafe(nil)); end
+  def Complex(x, y=T.unsafe(nil), exception: false); end
+  # As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
+  # means the non-nilable return value is technically incorrect, but it seemed like the least worst option given that
+  # 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
+  # see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   # Returns *arg* converted to a float.
   # [Numeric](https://ruby-doc.org/core-2.6.3/Numeric.html) types are
@@ -742,10 +746,15 @@ module Kernel
   sig do
     params(
         x: T.any(Numeric, String),
+        exception: T::Boolean
     )
     .returns(Float)
   end
-  def Float(x); end
+  def Float(x, exception: true); end
+  # As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
+  # means the non-nilable return value is technically incorrect, but it seemed like the least worst option given that
+  # 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
+  # see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   # Converts *arg* to a `Hash` by calling *arg* `.to_hash` . Returns an
   # empty `Hash` when *arg* is `nil` or `[]` .
@@ -797,10 +806,15 @@ module Kernel
     params(
         arg: T.any(Numeric, String),
         base: Integer,
+        exception: T::Boolean
     )
     .returns(Integer)
   end
-  def Integer(arg, base=T.unsafe(nil)); end
+  def Integer(arg, base=T.unsafe(nil), exception: true); end
+  # As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
+  # means the non-nilable return value is technically incorrect, but it seemed like the least worst option given that
+  # 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
+  # see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   # Returns `x/y` or `arg` as a
   # [Rational](https://ruby-doc.org/core-2.6.3/Rational.html).
@@ -840,18 +854,17 @@ module Kernel
   # .
   sig do
     params(
-        x: T.any(Numeric, String),
+        x: T.any(Numeric, String, Object),
         y: T.any(Numeric, String),
+        exception: T::Boolean
     )
     .returns(Rational)
   end
-  sig do
-    params(
-        x: Object,
-    )
-    .returns(Rational)
-  end
-  def Rational(x, y=T.unsafe(nil)); end
+  def Rational(x, y=T.unsafe(nil), exception: true); end
+  # As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
+  # means the non-nilable return value is technically incorrect, but it seemed like the least worst option given that
+  # 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
+  # see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   # Returns *arg* as a `String` .
   #
