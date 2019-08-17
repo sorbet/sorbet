@@ -80,7 +80,8 @@ public:
      *
      * The parameter `allowUntyped` controls whether or not `T.untyped` is
      * considered to be a super type or subtype of all other types */
-    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const bool allowUntyped, const TypePtr &t1, const TypePtr &t2);
+    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const bool allowUntyped,
+                                         const TypePtr &t1, const TypePtr &t2);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
     static bool isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2);
