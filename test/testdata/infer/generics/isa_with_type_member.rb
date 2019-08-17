@@ -72,3 +72,27 @@ class Test
   end
 
 end
+
+
+class Nil
+  extend T::Generic
+  Elem = type_member(fixed: T.noreturn)
+end
+
+class Cons
+  extend T::Generic
+  Elem = type_member
+end
+
+extend T::Sig
+
+sig {params(x: T.any(Nil, Cons[Integer])).void}
+def foo(x)
+  if x.is_a? Cons
+    T.reveal_type(x) # error: Revealed type: `Cons[Integer]`
+  elsif x.is_a? Nil
+    T.reveal_type(x) # error: Revealed type: `Nil`
+  else
+    T.absurd(x)
+  end
+end
