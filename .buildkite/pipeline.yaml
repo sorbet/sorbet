@@ -20,6 +20,7 @@ steps:
             propagate-environment: true
             environment:
               - "CODECOV_TOKEN"
+              - "SORBET_RUBYGEMS_API_KEY"
             volumes:
               - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
