@@ -210,7 +210,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
         SymbolRef current = primary;
         while (current.data(ctx)->isOverloaded()) {
             i++;
-            NameRef overloadName = ctx.state.getNameUnique(UniqueNameKind::Overload, primary.data(ctx)->name, i);
+            NameRef overloadName = ctx.state.lookupNameUnique(UniqueNameKind::Overload, primary.data(ctx)->name, i);
             SymbolRef overload = primary.data(ctx)->owner.data(ctx)->findMember(ctx, overloadName);
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
@@ -943,7 +943,7 @@ public:
             if (auto e = ctx.state.beginError(loc, errors::Infer::InvalidCast)) {
                 e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type->show(ctx));
                 const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
-                e.replaceWith("Remove the T.must", loc, locWithoutTMust.source(ctx));
+                e.replaceWith("Remove the T.must", loc, "{}", locWithoutTMust.source(ctx));
             }
         }
         res.returnType = move(ret);

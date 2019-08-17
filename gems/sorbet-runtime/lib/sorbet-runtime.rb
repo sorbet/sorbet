@@ -30,6 +30,7 @@ require_relative 'types/private/methods/_methods'
 require_relative 'types/sig'
 require_relative 'types/helpers'
 require_relative 'types/private/final'
+require_relative 'types/private/sealed'
 
 # The types themselves. First base classes
 require_relative 'types/types/base'

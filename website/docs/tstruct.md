@@ -27,9 +27,7 @@ This is basically the same as having written code like this:
 ```ruby
 class MyStruct < T::Struct
   sig {params(x: Integer, y: String, z: Float).void}
-  def initialize(x:, y: nil, z: 0.5)
-    ...
-  end
+  def initialize(x:, y: nil, z: 0.5); ...; end
 
   sig {returns(Integer)}
   def x; ...; end

@@ -894,8 +894,8 @@ TEST_P(LSPTest, All) {
     }
 } // namespace sorbet::test
 
-INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
-INSTANTIATE_TEST_CASE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_SUITE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_SUITE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 
 bool compareNames(string_view left, string_view right) {
     auto lsplit = left.find("__");
