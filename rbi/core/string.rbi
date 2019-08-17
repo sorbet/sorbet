@@ -1935,7 +1935,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(T::Array[String])
+    .returns(T::Array[T.nilable(T.any(Integer, Float, String))])
   end
   def unpack(arg0); end
 
