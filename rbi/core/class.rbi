@@ -2,23 +2,23 @@
 
 # Classes in Ruby are first-class objects---each is an instance of class
 # `Class` .
-# 
+#
 # Typically, you create a new class by using:
-# 
+#
 # ```ruby
 # class Name
 #  # some code describing the class behavior
 # end
 # ```
-# 
+#
 # When a new class is created, an object of type
 # [Class](Class) is initialized and assigned to a
 # global constant ( `Name` in this case).
-# 
+#
 # When `Name.new` is called to create a new object, the `new` method in
 # `Class` is run by default. This can be demonstrated by overriding `new`
 # in `Class` :
-# 
+#
 # ```ruby
 # class Class
 #   alias old_new new
@@ -27,24 +27,24 @@
 #     old_new(*args)
 #   end
 # end
-# 
+#
 # class Name
 # end
-# 
+#
 # n = Name.new
 # ```
-# 
+#
 # *produces:*
-# 
+#
 # ```ruby
 # Creating a new Name
 # ```
-# 
+#
 # Classes, modules, and objects are interrelated. In the diagram that
 # follows, the vertical arrows represent inheritance, and the parentheses
 # metaclasses. All metaclasses are instances of the class \`Class'.
-# 
-# ``` 
+#
+# ```
 #                          +---------+             +-...
 #                          |         |             |
 #          BasicObject-----|-->(BasicObject)-------|-...
@@ -68,18 +68,18 @@ class Class < Module
   # Allocates space for a new object of *class* ’s class and does not call
   # initialize on the new instance. The returned object must be an instance
   # of *class* .
-  # 
+  #
   # ```ruby
   # klass = Class.new do
   #   def initialize(*args)
   #     @initialized = true
   #   end
-  # 
+  #
   #   def initialized?
   #     @initialized || false
   #   end
   # end
-  # 
+  #
   # klass.allocate.initialized? #=> false
   # ```
   sig {returns(T.untyped)}
@@ -114,7 +114,7 @@ class Class < Module
   def name(); end
 
   # Returns the superclass of *class* , or `nil` .
-  # 
+  #
   # ```ruby
   # File.superclass          #=> IO
   # IO.superclass            #=> Object
@@ -123,9 +123,9 @@ class Class < Module
   # class Bar < Foo; end
   # Bar.superclass           #=> Foo
   # ```
-  # 
+  #
   # Returns nil when the given class does not have a parent class:
-  # 
+  #
   # ```ruby
   # BasicObject.superclass   #=> nil
   # ```

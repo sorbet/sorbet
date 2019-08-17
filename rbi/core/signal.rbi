@@ -5,7 +5,7 @@
 # trapped at the code level and acted upon. For example, your process may
 # trap the USR1 signal and use it to toggle debugging, and may use TERM to
 # initiate a controlled shutdown.
-# 
+#
 # ```ruby
 # pid = fork do
 #   Signal.trap("USR1") do
@@ -18,9 +18,9 @@
 #   end
 #   # . . . do some work . . .
 # end
-# 
+#
 # Process.detach(pid)
-# 
+#
 # # Controlling program:
 # Process.kill("USR1", pid)
 # # ...
@@ -28,15 +28,15 @@
 # # ...
 # Process.kill("TERM", pid)
 # ```
-# 
+#
 # produces:
-# 
-# ``` 
+#
+# ```
 #  Debug now: true
 #  Debug now: false
 # Terminating...
 # ```
-# 
+#
 # The list of available signal names and their interpretation is system
 # dependent. [Signal](Signal) delivery semantics may
 # also vary between systems; in particular signal delivery may not always
@@ -44,7 +44,7 @@
 module Signal
   # Returns a list of signal names mapped to the corresponding underlying
   # signal numbers.
-  # 
+  #
   # ```ruby
   # Signal.list   #=> {"EXIT"=>0, "HUP"=>1, "INT"=>2, "QUIT"=>3, "ILL"=>4, "TRAP"=>5, "IOT"=>6, "ABRT"=>6, "FPE"=>8, "KILL"=>9, "BUS"=>7, "SEGV"=>11, "SYS"=>31, "PIPE"=>13, "ALRM"=>14, "TERM"=>15, "URG"=>23, "STOP"=>19, "TSTP"=>20, "CONT"=>18, "CHLD"=>17, "CLD"=>17, "TTIN"=>21, "TTOU"=>22, "IO"=>29, "XCPU"=>24, "XFSZ"=>25, "VTALRM"=>26, "PROF"=>27, "WINCH"=>28, "USR1"=>10, "USR2"=>12, "PWR"=>30, "POLL"=>29}
   # ```
@@ -53,14 +53,14 @@ module Signal
 
   # Convert signal number to signal name. Returns `nil` if the signo is an
   # invalid signal number.
-  # 
+  #
   # ```ruby
   # Signal.trap("INT") { |signo| puts Signal.signame(signo) }
   # Process.kill("INT", 0)
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   # ```ruby
   # INT
   # ```
@@ -84,15 +84,15 @@ module Signal
   # will be run. The special signal name “EXIT” or signal number zero will
   # be invoked just prior to program termination. trap returns the previous
   # handler for the given signal.
-  # 
+  #
   # ```ruby
   # Signal.trap(0, proc { puts "Terminating: #{$$}" })
   # Signal.trap("CLD")  { puts "Child died" }
   # fork && Process.wait
   # ```
-  # 
+  #
   # produces:
-  # 
+  #
   #     Terminating: 27461
   #     Child died
   #     Terminating: 27460
