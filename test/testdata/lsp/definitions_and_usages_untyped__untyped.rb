@@ -14,7 +14,7 @@ module Untyped
 end
 
 def main
-  # go-to-def/find refs should work on constant refs.
+  # go-to-def/find-refs/highlight should work on constant refs.
   TypedFoo.new.bar
 # ^^^^^^^^ usage: TypedFoo
              # ^^^ def: (nothing) 2

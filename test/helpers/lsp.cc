@@ -143,6 +143,13 @@ unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int l
                                                 make_unique<Position>(line, character))));
 }
 
+unique_ptr<LSPMessage> makeDocumentHighlightRequest(int id, std::string_view uri, int line, int character) {
+    return make_unique<LSPMessage>(make_unique<RequestMessage>(
+        "2.0", id, LSPMethod::TextDocumentDocumentHighlight,
+        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
+                                                make_unique<Position>(line, character))));
+}
+
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities) {
     // Properties checked in the same order they are described in the LSP spec.
@@ -178,7 +185,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     EXPECT_FALSE(capabilities.typeDefinitionProvider.has_value());
     EXPECT_FALSE(capabilities.implementationProvider.has_value());
     EXPECT_TRUE(capabilities.referencesProvider.value_or(false));
-    EXPECT_FALSE(capabilities.documentHighlightProvider.has_value());
+    EXPECT_TRUE(capabilities.documentHighlightProvider.has_value());
     EXPECT_TRUE(capabilities.documentSymbolProvider.value_or(false));
     EXPECT_TRUE(capabilities.workspaceSymbolProvider.value_or(false));
     EXPECT_TRUE(capabilities.codeActionProvider.has_value());

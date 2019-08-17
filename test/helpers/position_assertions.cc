@@ -123,6 +123,15 @@ string_view getLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFi
     return file->getLine(loc.range->start->line + 1);
 }
 
+string_view getLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, string_view uriPrefix,
+                    string_view uri, const DocumentHighlight &loc) {
+    auto filename = uriToFilePath(uriPrefix, uri);
+    auto foundFile = sourceFileContents.find(filename);
+    EXPECT_NE(sourceFileContents.end(), foundFile) << fmt::format("Unable to find file `{}`", filename);
+    auto &file = foundFile->second;
+    return file->getLine(loc.range->start->line + 1);
+}
+
 string filePathToUri(string_view prefixUrl, string_view filePath) {
     return fmt::format("{}/{}", prefixUrl, filePath);
 }
@@ -314,6 +323,12 @@ unique_ptr<Location> RangeAssertion::getLocation(string_view uriPrefix) {
     return make_unique<Location>(uri, move(newRange));
 }
 
+unique_ptr<DocumentHighlight> RangeAssertion::getDocumentHighlight() {
+    auto newRange = make_unique<Range>(make_unique<Position>(range->start->line, range->start->character),
+                                       make_unique<Position>(range->end->line, range->end->character));
+    return make_unique<DocumentHighlight>(move(newRange));
+}
+
 pair<string_view, int> getSymbolAndVersion(string_view assertionContents) {
     int version = 1;
     vector<string_view> split = absl::StrSplit(assertionContents, ' ');
@@ -347,6 +362,16 @@ vector<unique_ptr<Location>> &extractLocations(ResponseMessage &respMsg) {
         return empty;
     }
     return get<vector<unique_ptr<Location>>>(locationsOrNull);
+}
+
+vector<unique_ptr<DocumentHighlight>> &extractDocumentHighlights(ResponseMessage &respMsg) {
+    static vector<unique_ptr<DocumentHighlight>> empty;
+    auto &result = *(respMsg.result);
+    auto &highlightsOrNull = get<variant<JSONNullObject, vector<unique_ptr<DocumentHighlight>>>>(result);
+    if (auto isNull = get_if<JSONNullObject>(&highlightsOrNull)) {
+        return empty;
+    }
+    return get<vector<unique_ptr<DocumentHighlight>>>(highlightsOrNull);
 }
 
 void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
@@ -542,6 +567,128 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
                 prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation), *actualLocation->range,
                                         ""));
             actualLocationsIt++;
+        }
+    }
+}
+
+void HighlightAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                               LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string_view symbol,
+                               const Location &queryLoc, const vector<shared_ptr<RangeAssertion>> &allLocs) {
+    const int line = queryLoc.range->start->line;
+    // Can only query with one character, so just use the first one.
+    const int character = queryLoc.range->start->character;
+    auto uri = queryLoc.uri;
+    auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
+    string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
+
+    auto referenceParams =
+        make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(queryLoc.uri),
+                                     // TODO: Try with this false, too.
+                                     make_unique<Position>(line, character), make_unique<ReferenceContext>(true));
+    int id = nextId++;
+    auto responses = lspWrapper.getLSPResponsesFor(*makeDocumentHighlightRequest(id, queryLoc.uri, line, character));
+    if (responses.size() != 1) {
+        EXPECT_EQ(1, responses.size())
+            << "Unexpected number of responses to a `textDocument/documentHighlight` request.";
+        return;
+    }
+
+    if (assertResponseMessage(id, *responses.at(0))) {
+        auto &respMsg = responses.at(0)->asResponse();
+        ASSERT_TRUE(respMsg.result.has_value());
+        ASSERT_FALSE(respMsg.error.has_value());
+        auto &highlights = extractDocumentHighlights(respMsg);
+        if (symbol == NOTHING_LABEL) {
+            // Special case: This location should not report hightlights of anything.
+            for (auto &foundHighlight : highlights) {
+                ADD_FAILURE_AT(locFilename.c_str(), foundHighlight->range->start->line + 1) << fmt::format(
+                    "Sorbet returned references for a highlight that should not report references.\nGiven highlight "
+                    "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
+                    prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1),
+                                            ""),
+                    prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, uri, *foundHighlight),
+                                            *foundHighlight->range, ""));
+            }
+            return;
+        }
+
+        fast_sort(highlights,
+                  [&](const unique_ptr<DocumentHighlight> &a, const unique_ptr<DocumentHighlight> &b) -> bool {
+                      return errorComparison("", *a->range, "", "", *b->range, "") < 0;
+                  });
+
+        auto expectedHighlightsIt = allLocs.begin();
+        auto actualHighlightsIt = highlights.begin();
+        while (expectedHighlightsIt != allLocs.end() && actualHighlightsIt != highlights.end()) {
+            auto expectedHighlight = (*expectedHighlightsIt)->getLocation(uriPrefix);
+            auto &actualHighlight = *actualHighlightsIt;
+
+            // If true, the expectedHighlight is a subset of the actualHighlight
+            if (rangeIsSubset(*actualHighlight->range, *expectedHighlight->range)) {
+                // Assertion passes. Consume both.
+                actualHighlightsIt++;
+                expectedHighlightsIt++;
+            } else {
+                switch (errorComparison("", *expectedHighlight->range, "", "", *actualHighlight->range, "")) {
+                    case -1: {
+                        // Expected highlight is *before* actual highlight.
+                        ADD_FAILURE_AT(locFilename.c_str(), expectedHighlight->range->start->line + 1) << fmt::format(
+                            "Sorbet did not report a highlight to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
+                            "did not report highlight at:\n{}",
+                            symbol,
+                            prettyPrintRangeComment(locSourceLine,
+                                                    *RangeAssertion::makeRange(line, character, character + 1), ""),
+                            prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedHighlight),
+                                                    *expectedHighlight->range, ""));
+                        expectedHighlightsIt++;
+                        break;
+                    }
+                    case 1: {
+                        // Expected highlight is *after* actual highlight
+                        ADD_FAILURE_AT(locFilename.c_str(), actualHighlight->range->start->line + 1) << fmt::format(
+                            "Sorbet reported unexpected highlight to symbol `{}`.\nGiven symbol "
+                            "at:\n{}\nSorbet reported an unexpected highlight at:\n{}",
+                            symbol,
+                            prettyPrintRangeComment(locSourceLine,
+                                                    *RangeAssertion::makeRange(line, character, character + 1), ""),
+                            prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, uri, *actualHighlight),
+                                                    *actualHighlight->range, ""));
+                        actualHighlightsIt++;
+                        break;
+                    }
+                    default:
+                        // Should never happen.
+                        ADD_FAILURE()
+                            << "Error in test runner: identical highlights weren't reported as subsets of one another.";
+                        expectedHighlightsIt++;
+                        actualHighlightsIt++;
+                        break;
+                }
+            }
+        }
+
+        while (expectedHighlightsIt != allLocs.end()) {
+            auto expectedHighlight = (*expectedHighlightsIt)->getLocation(uriPrefix);
+            ADD_FAILURE_AT(locFilename.c_str(), expectedHighlight->range->start->line + 1) << fmt::format(
+                "Sorbet did not report a highlight to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
+                "did not report highlight at:\n{}",
+                symbol,
+                prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
+                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedHighlight),
+                                        *expectedHighlight->range, ""));
+            expectedHighlightsIt++;
+        }
+
+        while (actualHighlightsIt != highlights.end()) {
+            auto &actualHighlight = *actualHighlightsIt;
+            ADD_FAILURE_AT(locFilename.c_str(), actualHighlight->range->start->line + 1) << fmt::format(
+                "Sorbet reported unexpected highlight to symbol `{}`.\nGiven symbol "
+                "at:\n{}\nSorbet reported an unexpected highlight at:\n{}",
+                symbol,
+                prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
+                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, uri, *actualHighlight),
+                                        *actualHighlight->range, ""));
+            actualHighlightsIt++;
         }
     }
 }

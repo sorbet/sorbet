@@ -221,9 +221,12 @@ class LSPLoop {
     LSPLoop::QueryRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri,
                                          const Position &pos, const LSPMethod forMethod,
                                          bool errorIfFileIsUntyped = true) const;
-    QueryRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol) const;
+    QueryRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol,
+                                   const std::optional<std::string_view> uri = std::nullopt) const;
     LSPResult handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                       const TextDocumentPositionParams &params) const;
+    LSPResult handleTextDocumentDocumentHighlight(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                                  const TextDocumentPositionParams &params) const;
     LSPResult handleTextDocumentDocumentSymbol(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                const DocumentSymbolParams &params) const;
     LSPResult handleWorkspaceSymbols(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
@@ -231,6 +234,9 @@ class LSPLoop {
     std::pair<std::unique_ptr<core::GlobalState>, std::vector<std::unique_ptr<Location>>>
     getReferencesToSymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol,
                           std::vector<std::unique_ptr<Location>> locations = {}) const;
+    std::pair<std::unique_ptr<core::GlobalState>, std::vector<std::unique_ptr<DocumentHighlight>>>
+    getHighlightsToSymbolInFile(std::unique_ptr<core::GlobalState> gs, std::string_view uri, core::SymbolRef symbol,
+                                std::vector<std::unique_ptr<DocumentHighlight>> highlights = {}) const;
     LSPResult handleTextDocumentReferences(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const ReferenceParams &params) const;
     LSPResult handleTextDocumentDefinition(std::unique_ptr<core::GlobalState> gs, const MessageId &id,

@@ -17,6 +17,9 @@ makeInitializeParams(std::variant<std::string, JSONNullObject> rootPath,
 /** Create an LSPMessage containing a textDocument/definition request. */
 std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character);
 
+/** Create an LSPMessage containing a textDocument/documentHighlight request. */
+std::unique_ptr<LSPMessage> makeDocumentHighlightRequest(int id, std::string_view uri, int line, int character);
+
 /** Create an LSPMessage containing a textDocument/didChange request. */
 std::unique_ptr<LSPMessage> makeDidChange(std::string_view uri, std::string_view contents, int version);
 

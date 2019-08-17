@@ -177,6 +177,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             serverCap->definitionProvider = true;
             serverCap->documentSymbolProvider = opts.lspDocumentSymbolEnabled;
             serverCap->workspaceSymbolProvider = opts.lspWorkspaceSymbolsEnabled;
+            serverCap->documentHighlightProvider = true;
             serverCap->hoverProvider = true;
             serverCap->referencesProvider = true;
 
@@ -200,6 +201,9 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
 
             response->result = make_unique<InitializeResult>(move(serverCap));
             return LSPResult::make(move(gs), move(response));
+        } else if (method == LSPMethod::TextDocumentDocumentHighlight) {
+            auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
+            return handleTextDocumentDocumentHighlight(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentDocumentSymbol) {
             auto &params = get<unique_ptr<DocumentSymbolParams>>(rawParams);
             return handleTextDocumentDocumentSymbol(move(gs), id, *params);
