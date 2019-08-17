@@ -1,5 +1,5 @@
 cc_binary(
-    name = "test_corpus_sharded",
+    name = "test_corpus_runner",
     testonly = 1,
     srcs = [
         "LSPTest.cc",
