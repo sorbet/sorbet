@@ -352,7 +352,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work
     // distribution
     fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
-        return lhs.file.data(ctx).source().size() < rhs.file.data(ctx).source().size();
+        return lhs.file.data(ctx).source().size() > rhs.file.data(ctx).source().size();
     });
 
     for (auto &resolvedTree : trees) {

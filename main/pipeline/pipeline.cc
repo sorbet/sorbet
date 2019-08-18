@@ -917,7 +917,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
 
         // We want to start typeckecking big files first because it helps with better work distribution
         fast_sort(what, [&](const auto &lhs, const auto &rhs) -> bool {
-            return lhs.file.data(*gs).source().size() < rhs.file.data(*gs).source().size();
+            return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
         });
         for (auto &resolved : what) {
             fileq->push(move(resolved), 1);
