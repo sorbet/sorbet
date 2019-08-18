@@ -20,6 +20,18 @@ T.assert_type!([1,2].zip([2]), T::Array[[Integer, T.nilable(Integer)]])
 
 [1, 2] - [1, nil]
 
+# array permutation/combinations with no block
+T.assert_type!([1,2].permutation, T::Enumerator[T::Array[Integer]])
+T.assert_type!([1,2].repeated_permutation(1), T::Enumerator[T::Array[Integer]])
+T.assert_type!([1,2].combination(1), T::Enumerator[T::Array[Integer]])
+T.assert_type!([1,2].repeated_combination(1), T::Enumerator[T::Array[Integer]])
+
+# array permutation/combinations with a block
+T.assert_type!([1,2].permutation {}, T::Array[Integer])
+T.assert_type!([1,2].repeated_permutation(1) {}, T::Array[Integer])
+T.assert_type!([1,2].combination(1) {}, T::Array[Integer])
+T.assert_type!([1,2].repeated_combination(1) {}, T::Array[Integer])
+
 # errors
 
 T::Array[Float].new.sum.nan? # error: Method `nan?` does not exist on `Integer` component of `T.any(Integer, Float)`
