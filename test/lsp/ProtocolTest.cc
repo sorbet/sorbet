@@ -85,10 +85,6 @@ unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, i
     return makeDefinitionRequest(nextId++, getUri(path), line, character);
 }
 
-unique_ptr<LSPMessage> ProtocolTest::getDocumentHighlight(string_view path, int line, int character) {
-    return getDocumentHighlight(nextId++, getUri(path), line, character);
-}
-
 unique_ptr<LSPMessage> ProtocolTest::watchmanFileUpdate(vector<string> updatedFilePaths) {
     auto req = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange,
                                                 make_unique<WatchmanQueryResponse>("", "", false, updatedFilePaths));
