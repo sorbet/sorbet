@@ -195,6 +195,7 @@ struct Options {
     bool lspAutocompleteEnabled = false;
     bool lspQuickFixEnabled = false;
     bool lspWorkspaceSymbolsEnabled = false;
+    bool lspDocumentHighlightEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspHoverEnabled = false;

@@ -34,7 +34,14 @@ vector<unique_ptr<DocumentHighlight>> locationsToDocumentHighlights(vector<uniqu
 LSPResult LSPLoop::handleTextDocumentDocumentHighlight(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                        const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentHighlight);
+    if (!opts.lspDocumentHighlightEnabled) {
+        response->error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidRequest, "The `Highlight` LSP feature is experimental and disabled by default.");
+        return LSPResult::make(move(gs), move(response));
+    }
+
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.documentHighlight");
+
     auto uri = params.textDocument->uri;
     auto result = setupLSPQueryByLoc(move(gs), uri, *params.position, LSPMethod::TextDocumentCompletion, false);
     gs = move(result.gs);
