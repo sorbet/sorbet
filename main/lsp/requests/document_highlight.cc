@@ -47,16 +47,18 @@ LSPResult LSPLoop::handleTextDocumentDocumentHighlight(unique_ptr<core::GlobalSt
         response->result = variant<JSONNullObject, vector<unique_ptr<DocumentHighlight>>>(JSONNullObject());
         auto &queryResponses = result.responses;
         if (!queryResponses.empty()) {
-            const bool fileIsTyped = uri2FileRef(uri).data(*gs).strictLevel >= core::StrictLevel::True;
+            auto file = uri2FileRef(uri);
+            if (!file.exists()) {
+                return LSPResult::make(move(gs), move(response));
+            }
+            const bool fileIsTyped = file.data(*gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
             // N.B.: Ignores literals.
             // If file is untyped, only supports find reference requests from constants and class definitions.
             if (auto constResp = resp->isConstant()) {
-                std::vector<std::unique_ptr<Location>> locations;
                 tie(gs, response->result) = getHighlightsToSymbolInFile(move(gs), uri, constResp->symbol);
             } else if (auto defResp = resp->isDefinition()) {
                 if (fileIsTyped || defResp->symbol.data(*gs)->isClass()) {
-                    std::vector<std::unique_ptr<Location>> locations;
                     tie(gs, response->result) = getHighlightsToSymbolInFile(move(gs), uri, defResp->symbol);
                 }
             } else if (fileIsTyped && resp->isIdent()) {

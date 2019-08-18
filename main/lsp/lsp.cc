@@ -58,13 +58,15 @@ LSPLoop::QueryRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, 
 }
 
 LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym,
-                                                 optional<string_view> uri) const {
+                                                 optional<string_view> overSingleFile) const {
     Timer timeit(logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<core::FileRef> frefs;
-    if (uri.has_value()) {
-        auto fref = uri2FileRef(uri.value());
-        frefs.emplace_back(fref);
+    if (overSingleFile.has_value()) {
+        auto fref = uri2FileRef(overSingleFile.value());
+        if (fref.exists()) {
+            frefs.emplace_back(fref);
+        }
     } else {
         const core::NameHash symNameHash(*gs, sym.data(*gs)->name.data(*gs));
         // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
