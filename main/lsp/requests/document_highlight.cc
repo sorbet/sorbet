@@ -34,6 +34,12 @@ unique_ptr<ResponseMessage>
 LSPLoop::handleTextDocumentDocumentHighlight(LSPTypechecker &typechecker, const MessageId &id,
                                              const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentHighlight);
+    if (!config->opts.lspDocumentHighlightEnabled) {
+        response->error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidRequest, "The `Highlight` LSP feature is experimental and disabled by default.");
+        return response;
+    }
+
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.documentHighlight");
     const core::GlobalState &gs = typechecker.state();
     auto uri = params.textDocument->uri;

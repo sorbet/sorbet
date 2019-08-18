@@ -105,7 +105,7 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
             serverCap->typeDefinitionProvider = true;
             serverCap->documentSymbolProvider = opts.lspDocumentSymbolEnabled;
             serverCap->workspaceSymbolProvider = opts.lspWorkspaceSymbolsEnabled;
-            serverCap->documentHighlightProvider = true;
+            serverCap->documentHighlightProvider = opts.lspDocumentHighlightEnabled;
             serverCap->hoverProvider = true;
             serverCap->referencesProvider = true;
 
