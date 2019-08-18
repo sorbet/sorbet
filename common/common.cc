@@ -34,11 +34,11 @@ bool sorbet::FileOps::exists(string_view filename) {
 string sorbet::FileOps::read(string_view filename) {
     FILE *fp = std::fopen((string(filename)).c_str(), "rb");
     if (fp) {
-        string contents;
         fseek(fp, 0, SEEK_END);
-        contents.resize(ftell(fp));
+        auto sz = ftell(fp);
+        string contents(sz, '\0');
         rewind(fp);
-        auto readBytes = fread(&contents[0], 1, contents.size(), fp);
+        auto readBytes = fread(&contents[0], 1, sz, fp);
         fclose(fp);
         if (readBytes != contents.size()) {
             // Error reading file?
