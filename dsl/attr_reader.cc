@@ -30,8 +30,6 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
                 res = nameRef;
             } else {
                 if (auto e = ctx.state.beginError(name->loc, core::errors::DSL::BadAttrArg)) {
-                    // we can't necessarily repeat the name here because it might have newlines in it, in which case our
-                    // expected invariant that all error lines are a single line will break
                     e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
                 }
                 res = core::Names::empty();
