@@ -503,9 +503,8 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
                         auto suggestedName = possibleSymbol->isClass() ? alternative.symbol.show(ctx) + ".new"
                                                                        : alternative.symbol.show(ctx);
-                        lines.emplace_back(
-                            ErrorLine::from(alternative.symbol.data(ctx)->loc(), "Did you mean: `{}`?", suggestedName));
 
+                        bool addedAutocorrect = false;
                         if (possibleSymbol->isClass()) {
                             const auto replacement = possibleSymbol->name.show(ctx);
                             const auto loc = args.locs.call;
@@ -517,6 +516,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                                     Loc{loc.file(), loc.beginPos(), (u4)(loc.beginPos() + toReplace.length())};
                                 e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
                                               replacement);
+                                addedAutocorrect = true;
                             }
                         } else {
                             const auto replacement = possibleSymbol->name.toString(ctx);
@@ -530,8 +530,14 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                                         Loc{loc.file(), loc.endPos() + 1, (u4)(loc.endPos() + 1 + toReplace.length())};
                                     e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
                                                   replacement);
+                                    addedAutocorrect = true;
                                 }
                             }
+                        }
+
+                        if (!addedAutocorrect) {
+                            lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx)->loc(),
+                                                               "Did you mean: `{}`?", suggestedName));
                         }
                     }
                     e.addErrorSection(ErrorSection(lines));
