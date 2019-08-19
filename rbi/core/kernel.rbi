@@ -590,10 +590,11 @@ module Kernel
   def tainted?(); end
 
   sig do
-    params(
-      blk: T.proc.params(x: T.untyped).void
-    )
-    .returns(T.self_type)
+    type_parameters(:U)
+      .params(
+        blk: T.proc.params(self: T.type_parameter(:U)).void
+      )
+      .returns(T.type_parameter(:U))
   end
   def tap(&blk); end
 
