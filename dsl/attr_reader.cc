@@ -7,7 +7,6 @@
 #include "core/core.h"
 #include "core/errors/dsl.h"
 #include "dsl/dsl.h"
-#include <regex>
 
 using namespace std;
 
@@ -25,8 +24,8 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
         } else if (lit->isString(ctx)) {
             core::NameRef nameRef = lit->asString(ctx);
             auto shortName = nameRef.data(ctx)->shortName(ctx);
-            bool validAttr =
-                regex_match(shortName.begin(), shortName.end(), basic_regex("([:alpha:]|_)([:alnum:]|_)*"));
+            bool validAttr = (isalpha(shortName.front()) || shortName.front() == '_') &&
+                absl::c_all_of(shortName, [](char c){ return isalnum(c) || c == '_'; });
             if (validAttr) {
                 res = nameRef;
             } else {
