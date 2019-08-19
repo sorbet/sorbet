@@ -25,7 +25,7 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
             core::NameRef nameRef = lit->asString(ctx);
             auto shortName = nameRef.data(ctx)->shortName(ctx);
             bool validAttr = (isalpha(shortName.front()) || shortName.front() == '_') &&
-                absl::c_all_of(shortName, [](char c){ return isalnum(c) || c == '_'; });
+                             absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
             if (validAttr) {
                 res = nameRef;
             } else {
