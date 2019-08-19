@@ -740,12 +740,12 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
 
         if (isa_type<ClassType>(t1.get()) || isa_type<AppliedType>(t1.get())) {
             auto lft = Types::all(ctx, t1, o2->left);
-            if (Types::isSubType(ctx, lft, o2->right) && !lft->isBottom()) {
+            if (Types::isAsSpecificAs(ctx, lft, o2->right) && !lft->isBottom()) {
                 categoryCounterInc("glb", "ZZZorClass");
                 return lft;
             }
             auto rght = Types::all(ctx, t1, o2->right);
-            if (Types::isSubType(ctx, rght, o2->left) && !rght->isBottom()) {
+            if (Types::isAsSpecificAs(ctx, rght, o2->left) && !rght->isBottom()) {
                 categoryCounterInc("glb", "ZZZZorClass");
                 return rght;
             }
@@ -809,7 +809,11 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
         bool rtl = a1->klass == a2->klass || a1->klass.data(ctx)->derivesFrom(ctx, a2->klass);
         bool ltr = !rtl && a2->klass.data(ctx)->derivesFrom(ctx, a1->klass);
         if (!rtl && !ltr) {
-            return AndType::make_shared(t1, t2); // we can as well return nothing here?
+            if (a1->klass.data(ctx)->isClass() && a2->klass.data(ctx)->isClass()) {
+                return Types::bottom();
+            } else {
+                return AndType::make_shared(t1, t2); // we can as well return nothing here?
+            }
         }
         if (ltr) { // swap
             swap(a1, a2);
