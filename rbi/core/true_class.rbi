@@ -13,15 +13,15 @@ class TrueClass
   def ^(obj); end
   # Or—Returns `true` . As *obj* is an argument to a method call, it is
   # always evaluated; there is no short-circuit evaluation in this case.
-  # 
+  #
   # ```ruby
   # true |  puts("or")
   # true || puts("logical or")
   # ```
-  # 
+  #
   # *produces:*
-  # 
-  # ``` 
+  #
+  # ```
   # or
   # ```
   sig {params(obj: BasicObject).returns(TrueClass)}

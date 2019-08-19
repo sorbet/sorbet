@@ -5,15 +5,15 @@
 # represent methods that are associated with a particular object: these
 # method objects are bound to that object. Bound method objects for an
 # object can be created using `Object#method` .
-# 
+#
 # Ruby also supports unbound methods; methods objects that are not
 # associated with a particular object. These can be created either by
 # calling `Module#instance_method` or by calling `unbind` on a bound
 # method object. The result of both of these is an `UnboundMethod` object.
-# 
+#
 # Unbound methods can only be called after they are bound to an object.
 # That object must be a kind\_of? the method's original class.
-# 
+#
 # ```ruby
 # class Square
 #   def area
@@ -23,18 +23,18 @@
 #     @side = side
 #   end
 # end
-# 
+#
 # area_un = Square.instance_method(:area)
-# 
+#
 # s = Square.new(12)
 # area = area_un.bind(s)
 # area.call   #=> 144
 # ```
-# 
+#
 # Unbound methods are a reference to the method at the time it was
 # objectified: subsequent changes to the underlying class will not affect
 # the unbound method.
-# 
+#
 # ```ruby
 # class Test
 #   def test
@@ -60,7 +60,7 @@ class UnboundMethod
   # argument being mandatory if any keyword argument is mandatory. For
   # methods written in C, returns -1 if the call takes a variable number of
   # arguments.
-  # 
+  #
   #     class C
   #       def one;    end
   #       def two(a); end
@@ -84,7 +84,7 @@ class UnboundMethod
   #     c.method(:eight).arity   #=> 1
   #     c.method(:nine).arity    #=> 1
   #     c.method(:ten).arity     #=> -2
-  #     
+  #
   #     "cat".method(:size).arity      #=> 0
   #     "cat".method(:replace).arity   #=> 1
   #     "cat".method(:squeeze).arity   #=> -1
@@ -94,7 +94,7 @@ class UnboundMethod
 
   # Bind *umeth* to *obj* . If `Klass` was the class from which *umeth* was
   # obtained, `obj.kind_of?(Klass)` must be true.
-  # 
+  #
   # ```ruby
   # class A
   #   def test
@@ -105,7 +105,7 @@ class UnboundMethod
   # end
   # class C < B
   # end
-  # 
+  #
   # um = B.instance_method(:test)
   # bm = um.bind(C.new)
   # bm.call
@@ -114,9 +114,9 @@ class UnboundMethod
   # bm = um.bind(A.new)
   # bm.call
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     In test, class = C
   #     In test, class = B
   #     prog.rb:16:in `bind': bind argument must be an instance of B (TypeError)
@@ -129,7 +129,7 @@ class UnboundMethod
   def name; end
 
   # Returns the class or module that defines the method. See also receiver.
-  # 
+  #
   # ```ruby
   # (1..3).method(:map).owner #=> Enumerable
   # ```
@@ -137,17 +137,17 @@ class UnboundMethod
   def owner; end
 
   # Returns the parameter information of this method.
-  # 
+  #
   # ```ruby
   # def foo(bar); end
   # method(:foo).parameters #=> [[:req, :bar]]
-  # 
+  #
   # def foo(bar, baz, bat, &blk); end
   # method(:foo).parameters #=> [[:req, :bar], [:req, :baz], [:req, :bat], [:block, :blk]]
-  # 
+  #
   # def foo(bar, *args); end
   # method(:foo).parameters #=> [[:req, :bar], [:rest, :args]]
-  # 
+  #
   # def foo(bar, baz, *args, &blk); end
   # method(:foo).parameters #=> [[:req, :bar], [:req, :baz], [:rest, :args], [:block, :blk]]
   # ```

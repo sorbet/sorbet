@@ -8,7 +8,7 @@
 # nil. `Comparable` uses `<=>` to implement the conventional comparison
 # operators ( `<`, `<=`, `==`, `>=`, and `>` ) and the method
 # `between?` .
-# 
+#
 # ```ruby
 # class SizeMatters
 #   include Comparable
@@ -23,13 +23,13 @@
 #     @str
 #   end
 # end
-# 
+#
 # s1 = SizeMatters.new("Z")
 # s2 = SizeMatters.new("YY")
 # s3 = SizeMatters.new("XXX")
 # s4 = SizeMatters.new("WWWW")
 # s5 = SizeMatters.new("VVVVV")
-# 
+#
 # s1 < s2                       #=> true
 # s4.between?(s1, s3)           #=> false
 # s4.between?(s3, s5)           #=> true
@@ -64,7 +64,7 @@ module Comparable
 
   # Returns `false` if *obj* `<=>` *min* is less than zero or if *anObject*
   # `<=>` *max* is greater than zero, `true` otherwise.
-  # 
+  #
   # ```ruby
   # 3.between?(1, 5)               #=> true
   # 6.between?(1, 5)               #=> false
@@ -76,12 +76,12 @@ module Comparable
 
   # Returns *min* if *obj* `<=>` *min* is less than zero, *max* if *obj*
   # `<=>` *max* is greater than zero and *obj* otherwise.
-  # 
+  #
   # ```ruby
   # 12.clamp(0, 100)         #=> 12
   # 523.clamp(0, 100)        #=> 100
   # -3.123.clamp(0, 100)     #=> 0
-  # 
+  #
   # 'd'.clamp('a', 'f')      #=> 'd'
   # 'z'.clamp('a', 'f')      #=> 'f'
   # ```

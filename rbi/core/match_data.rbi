@@ -47,7 +47,7 @@ class MatchData < Object
   def begin(n); end
 
   # Returns the array of captures; equivalent to `mtch.to_a[1..-1]` .
-  # 
+  #
   # ```ruby
   # f1,f2,f3,f4 = /(.)(.)(\d+)(\d)/.match("THX1138.").captures
   # f1    #=> "H"
@@ -78,7 +78,7 @@ class MatchData < Object
 
   # Produce a hash based on the target string, regexp and matched positions
   # of this matchdata.
-  # 
+  #
   # See also Object\#hash.
   sig {returns(Integer)}
   def hash(); end
@@ -87,7 +87,7 @@ class MatchData < Object
   def inspect(); end
 
   # Returns the number of elements in the match array.
-  # 
+  #
   # ```ruby
   # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   # m.length   #=> 5
@@ -98,20 +98,20 @@ class MatchData < Object
 
   # Returns a [Hash](https://ruby-doc.org/core-2.6.3/Hash.html) using named
   # capture.
-  # 
+  #
   # A key of the hash is a name of the named captures. A value of the hash
   # is a string of last successful capture of corresponding group.
-  # 
+  #
   # ```ruby
   # m = /(?.)(?.)/.match("01")
   # m.named_captures #=> {"a" => "0", "b" => "1"}
-  # 
+  #
   # m = /(?.)(?.)?/.match("0")
   # m.named_captures #=> {"a" => "0", "b" => nil}
-  # 
+  #
   # m = /(?.)(?.)/.match("01")
   # m.named_captures #=> {"a" => "1"}
-  # 
+  #
   # m = /(?x)|(?y)/.match("x")
   # m.named_captures #=> {"a" => "x"}
   # ```
@@ -131,7 +131,7 @@ class MatchData < Object
 
   # Returns the portion of the original string after the current match.
   # Equivalent to the special variable `$'` .
-  # 
+  #
   # ```ruby
   # m = /(.)(.)(\d+)(\d)/.match("THX1138: The Movie")
   # m.post_match   #=> ": The Movie"
@@ -141,7 +141,7 @@ class MatchData < Object
 
   # Returns the portion of the original string before the current match.
   # Equivalent to the special variable `` $` `` .
-  # 
+  #
   # ```ruby
   # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   # m.pre_match   #=> "T"
@@ -150,7 +150,7 @@ class MatchData < Object
   def pre_match(); end
 
   # Returns the regexp.
-  # 
+  #
   # ```ruby
   # m = /a.*b/.match("abc")
   # m.regexp #=> /a.*b/
@@ -159,7 +159,7 @@ class MatchData < Object
   def regexp(); end
 
   # Returns the number of elements in the match array.
-  # 
+  #
   # ```ruby
   # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   # m.length   #=> 5
@@ -169,7 +169,7 @@ class MatchData < Object
   def size(); end
 
   # Returns a frozen copy of the string passed in to `match` .
-  # 
+  #
   # ```ruby
   # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   # m.string   #=> "THX1138."
@@ -178,17 +178,17 @@ class MatchData < Object
   def string(); end
 
   # Returns the array of matches.
-  # 
+  #
   # ```ruby
   # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   # m.to_a   #=> ["HX1138", "H", "X", "113", "8"]
   # ```
-  # 
+  #
   # Because `to_a` is called when expanding `*` *variable* , there’s a
   # useful assignment shortcut for extracting matched fields. This is
   # slightly slower than accessing the fields directly (as an intermediate
   # array is generated).
-  # 
+  #
   # ```ruby
   # all,f1,f2,f3 = * /(.)(.)(\d+)(\d)/.match("THX1138.")
   # all   #=> "HX1138"
@@ -200,7 +200,7 @@ class MatchData < Object
   def to_a(); end
 
   # Returns the entire matched string.
-  # 
+  #
   # ```ruby
   # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   # m.to_s   #=> "HX1138"

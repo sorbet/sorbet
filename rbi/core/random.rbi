@@ -4,23 +4,23 @@
 # pseudo-random number generator, or PRNG. The PRNG produces a
 # deterministic sequence of bits which approximate true randomness. The
 # sequence may be represented by integers, floats, or binary strings.
-# 
+#
 # The generator may be initialized with either a system-generated or
 # user-supplied seed value by using
-# [::srand](Random#method-c-srand) .
-# 
+# [::srand](Random#method-c-srand).
+#
 # The class method [\#rand](Random#method-i-rand)
 # provides the base functionality of
 # [Kernel\#rand](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-rand)
 # along with better handling of floating point values. These are both
 # interfaces to Random::DEFAULT, the Ruby system PRNG.
-# 
+#
 # [::new](Random#method-c-new) will create a new PRNG
 # with a state independent of Random::DEFAULT, allowing multiple
 # generators with different seed values or sequence positions to exist
 # simultaneously. [Random](Random) objects can be
 # marshaled, allowing sequences to be saved and resumed.
-# 
+#
 # PRNGs are currently implemented as a modified Mersenne Twister with a
 # period of 2\*\*19937-1.
 class Random < Object
@@ -32,22 +32,22 @@ class Random < Object
   # otherwise false. Equivalent generators will return the same sequence of
   # pseudo-random numbers. Two generators will generally have the same state
   # only if they were initialized with the same seed
-  # 
+  #
   # ```ruby
   # Random.new == Random.new             # => false
   # Random.new(1234) == Random.new(1234) # => true
   # ```
-  # 
+  #
   # and have the same invocation history.
-  # 
+  #
   # ```ruby
   # prng1 = Random.new(1234)
   # prng2 = Random.new(1234)
   # prng1 == prng2 # => true
-  # 
+  #
   # prng1.rand     # => 0.1915194503788923
   # prng1 == prng2 # => false
-  # 
+  #
   # prng2.rand     # => 0.1915194503788923
   # prng1 == prng2 # => true
   # ```
@@ -60,7 +60,7 @@ class Random < Object
   def ==(arg0); end
 
   # Returns a random binary string containing `size` bytes.
-  # 
+  #
   # ```ruby
   # random_string = Random.new.bytes(10) # => "\xD7:R\xAB?\x83\xCE\xFAkO"
   # random_string.size                   # => 10
@@ -86,34 +86,34 @@ class Random < Object
   # than `max` . Unlike
   # [Kernel\#rand](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-rand)
   # , when `max` is a negative integer or zero, `rand` raises an
-  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html) .
-  # 
+  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html).
+  #
   # ```ruby
   # prng = Random.new
   # prng.rand(100)       # => 42
   # ```
-  # 
-  # When `max` is a [Float](https://ruby-doc.org/core-2.6.3/Float.html) ,
+  #
+  # When `max` is a [Float](https://ruby-doc.org/core-2.6.3/Float.html),
   # `rand` returns a random floating point number between 0.0 and `max`,
   # including 0.0 and excluding `max` .
-  # 
+  #
   # ```ruby
   # prng.rand(1.5)       # => 1.4600282860034115
   # ```
-  # 
-  # When `max` is a [Range](https://ruby-doc.org/core-2.6.3/Range.html) ,
+  #
+  # When `max` is a [Range](https://ruby-doc.org/core-2.6.3/Range.html),
   # `rand` returns a random number where range.member?(number) == true.
-  # 
+  #
   # ```ruby
   # prng.rand(5..9)      # => one of [5, 6, 7, 8, 9]
   # prng.rand(5...9)     # => one of [5, 6, 7, 8]
   # prng.rand(5.0..9.0)  # => between 5.0 and 9.0, including 9.0
   # prng.rand(5.0...9.0) # => between 5.0 and 9.0, excluding 9.0
   # ```
-  # 
+  #
   # Both the beginning and ending values of the range must respond to
   # subtract ( `-` ) and add ( `+` )methods, or rand will raise an
-  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html) .
+  # [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html).
   sig do
     params(
         max: T.any(Integer, T::Range[Integer]),
@@ -131,12 +131,12 @@ class Random < Object
   # Returns the seed value used to initialize the generator. This may be
   # used to initialize another generator with the same state at a later
   # time, causing it to produce the same sequence of numbers.
-  # 
+  #
   # ```ruby
   # prng1 = Random.new(1234)
   # prng1.seed       #=> 1234
   # prng1.rand(100)  #=> 47
-  # 
+  #
   # prng2 = Random.new(prng1.seed)
   # prng2.rand(100)  #=> 47
   # ```
@@ -146,7 +146,7 @@ class Random < Object
   # Returns an arbitrary seed value. This is used by
   # [::new](Random.downloaded.ruby_doc#method-c-new) when no seed value is
   # specified as an argument.
-  # 
+  #
   # ```ruby
   # Random.new_seed  #=> 115032730400174366788466674494640623225
   # ```
@@ -164,16 +164,16 @@ class Random < Object
 
   # Seeds the system pseudo-random number generator, Random::DEFAULT, with
   # `number` . The previous seed value is returned.
-  # 
+  #
   # If `number` is omitted, seeds the generator using a source of entropy
   # provided by the operating system, if available (/dev/urandom on Unix
   # systems or the RSA cryptographic provider on Windows), which is then
   # combined with the time, the process id, and a sequence number.
-  # 
+  #
   # srand may be used to ensure repeatable sequences of pseudo-random
   # numbers between different runs of the program. By setting the seed to a
   # known value, programs can be made deterministic during testing.
-  # 
+  #
   # ```ruby
   # srand 1234               # => 268519324636777531569100071560086917274
   # [ rand, rand ]           # => [0.1915194503788923, 0.6221087710398319]

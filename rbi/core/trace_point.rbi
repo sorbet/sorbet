@@ -11,11 +11,11 @@ class TracePoint < Object
   def initialize(*events, &blk); end
 
   # Returns internal information of
-  # [TracePoint](TracePoint.downloaded.ruby_doc) .
-  # 
+  # [TracePoint](TracePoint.downloaded.ruby_doc).
+  #
   # The contents of the returned value are implementation specific. It may
   # be changed in future.
-  # 
+  #
   # This method is only for debugging
   # [TracePoint](TracePoint.downloaded.ruby_doc) itself.
   sig {returns(T.untyped)}
@@ -42,34 +42,34 @@ class TracePoint < Object
   def defined_class; end
 
   # Deactivates the trace
-  # 
+  #
   # Return true if trace was enabled. Return false if trace was disabled.
-  # 
+  #
   # ```ruby
   # trace.enabled?       #=> true
   # trace.disable        #=> true (previous status)
   # trace.enabled?       #=> false
   # trace.disable        #=> false
   # ```
-  # 
+  #
   # If a block is given, the trace will only be disable within the scope of
   # the block.
-  # 
+  #
   # ```ruby
   # trace.enabled?
   # #=> true
-  # 
+  #
   # trace.disable do
   #     trace.enabled?
   #     # only disabled for this block
   # end
-  # 
+  #
   # trace.enabled?
   # #=> true
   # ```
-  # 
+  #
   # Note: You cannot access event hooks within the block.
-  # 
+  #
   # ```ruby
   # trace.disable { p tp.lineno }
   # #=> RuntimeError: access from outside
@@ -110,9 +110,9 @@ class TracePoint < Object
   def return_value; end
 
   # Return the trace object during event
-  # 
-  # Same as [\#binding](TracePoint.downloaded.ruby_doc#method-i-binding) :
-  # 
+  #
+  # Same as [\#binding](TracePoint.downloaded.ruby_doc#method-i-binding):
+  #
   # ```ruby
   # trace.binding.eval('self')
   # ```

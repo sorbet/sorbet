@@ -28,7 +28,7 @@ class NilClass < Object
   def rationalize(); end
 
   # Always returns an empty array.
-  # 
+  #
   # ```ruby
   # nil.to_a   #=> []
   # ```
@@ -40,7 +40,7 @@ class NilClass < Object
   def to_c(); end
 
   # Always returns zero.
-  # 
+  #
   # ```ruby
   # nil.to_f   #=> 0.0
   # ```
@@ -48,7 +48,7 @@ class NilClass < Object
   def to_f(); end
 
   # Always returns an empty hash.
-  # 
+  #
   # ```ruby
   # nil.to_h   #=> {}
   # ```

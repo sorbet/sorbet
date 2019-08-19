@@ -3,7 +3,7 @@
 # A `String` object holds and manipulates an arbitrary sequence of bytes,
 # typically representing characters. [String](String)
 # objects may be created using `String::new` or as literals.
-# 
+#
 # Because of aliasing issues, users of strings should be aware of the
 # methods that modify the contents of a `String` object. Typically,
 # methods with names ending in “\!” modify their receiver, while those
@@ -17,7 +17,7 @@ class String < Object
   # one substitution, then *arg* must be an `Array` or `Hash` containing the
   # values to be substituted. See `Kernel::sprintf` for details of the
   # format string.
-  # 
+  #
   # ```ruby
   # "%05d" % 123                              #=> "00123"
   # "%-5s: %016x" % [ "ID", self.object_id ]  #=> "ID   : 00002b054ec93168"
@@ -34,7 +34,7 @@ class String < Object
   # Copy — Returns a new [String](String.downloaded.ruby_doc) containing
   # `integer` copies of the receiver. `integer` must be greater than or
   # equal to 0.
-  # 
+  #
   # ```ruby
   # "Ho! " * 3   #=> "Ho! Ho! Ho! "
   # "Ho! " * 0   #=> ""
@@ -49,7 +49,7 @@ class String < Object
 
   # Concatenation—Returns a new `String` containing *other\_str*
   # concatenated to *str* .
-  # 
+  #
   # ```ruby
   # "Hello from " + self.to_s   #=> "Hello from main"
   # ```
@@ -64,14 +64,14 @@ class String < Object
   # Appends the given object to *str* . If the object is an `Integer`, it
   # is considered a codepoint and converted to a character before being
   # appended.
-  # 
+  #
   # ```ruby
   # a = "hello "
   # a << "world"   #=> "hello world"
   # a << 33        #=> "hello world!"
   # ```
-  # 
-  # See also [\#concat](String.downloaded.ruby_doc#method-i-concat) , which
+  #
+  # See also [\#concat](String.downloaded.ruby_doc#method-i-concat), which
   # takes multiple arguments.
   sig do
     params(
@@ -83,18 +83,18 @@ class String < Object
 
   # Comparison—Returns -1, 0, +1, or `nil` depending on whether `string` is
   # less than, equal to, or greater than `other_string` .
-  # 
+  #
   # `nil` is returned if the two values are incomparable.
-  # 
+  #
   # If the strings are of different lengths, and the strings are equal when
   # compared up to the shortest length, then the longer string is considered
   # greater than the shorter one.
-  # 
+  #
   # `<=>` is the basis for the methods `<`, `<=`, `>`, `>=`, and
   # `between?`, included from module
-  # [Comparable](https://ruby-doc.org/core-2.6.3/Comparable.html) . The
+  # [Comparable](https://ruby-doc.org/core-2.6.3/Comparable.html). The
   # method String\#== does not use Comparable\#==.
-  # 
+  #
   # ```ruby
   # "abcdef" <=> "abcde"     #=> 1
   # "abcdef" <=> "abcdef"    #=> 0
@@ -111,13 +111,13 @@ class String < Object
   def <=>(other); end
 
   # Equality—Returns whether `str` == `obj`, similar to Object\#==.
-  # 
+  #
   # If `obj` is not an instance of [String](String.downloaded.ruby_doc) but
   # responds to `to_str`, then the two strings are compared using `obj.==`
   # .
-  # 
+  #
   # Otherwise, returns similarly to
-  # [\#eql?](String.downloaded.ruby_doc#method-i-eql-3F) , comparing length
+  # [\#eql?](String.downloaded.ruby_doc#method-i-eql-3F), comparing length
   # and content.
   sig do
     params(
@@ -128,13 +128,13 @@ class String < Object
   def ==(arg0); end
 
   # Equality—Returns whether `str` == `obj`, similar to Object\#==.
-  # 
+  #
   # If `obj` is not an instance of [String](String.downloaded.ruby_doc) but
   # responds to `to_str`, then the two strings are compared using `obj.==`
   # .
-  # 
+  #
   # Otherwise, returns similarly to
-  # [\#eql?](String.downloaded.ruby_doc#method-i-eql-3F) , comparing length
+  # [\#eql?](String.downloaded.ruby_doc#method-i-eql-3F), comparing length
   # and content.
   sig do
     params(
@@ -188,7 +188,7 @@ class String < Object
   def [](arg0, arg1=T.unsafe(nil)); end
 
   # Returns true for a string which has only ASCII characters.
-  # 
+  #
   # ```ruby
   # "abc".force_encoding("UTF-8").ascii_only?          #=> true
   # "abc\u{6666}".force_encoding("UTF-8").ascii_only?  #=> false
@@ -202,14 +202,14 @@ class String < Object
 
   # Returns an array of bytes in *str* . This is a shorthand for
   # `str.each_byte.to_a` .
-  # 
+  #
   # If a block is given, which is a deprecated form, works the same as
   # `each_byte` .
   sig {returns(Array)}
   def bytes(); end
 
   # Returns the length of `str` in bytes.
-  # 
+  #
   #     "\x80\u3042".bytesize  #=> 4
   #     "hello".bytesize       #=> 5
   sig {returns(Integer)}
@@ -224,7 +224,7 @@ class String < Object
   # initial offset falls outside the string, the length is negative, or the
   # beginning of the range is greater than the end. The encoding of the
   # resulted string keeps original encoding.
-  # 
+  #
   #     "hello".byteslice(1)     #=> "e"
   #     "hello".byteslice(-1)    #=> "o"
   #     "hello".byteslice(1, 2)  #=> "el"
@@ -247,10 +247,10 @@ class String < Object
 
   # Returns a copy of *str* with the first character converted to uppercase
   # and the remainder to lowercase.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
-  # 
+  #
   # ```ruby
   # "hello".capitalize    #=> "Hello"
   # "HELLO".capitalize    #=> "Hello"
@@ -263,12 +263,12 @@ class String < Object
   # remainder to lowercase. Returns `nil` if no changes are made. There is
   # an exception for modern Georgian (mkhedruli/MTAVRULI), where the result
   # is the same as for
-  # [\#downcase](String.downloaded.ruby_doc#method-i-downcase) , to avoid
+  # [\#downcase](String.downloaded.ruby_doc#method-i-downcase), to avoid
   # mixed case.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
-  # 
+  #
   # ```ruby
   # a = "hello"
   # a.capitalize!   #=> "Hello"
@@ -280,18 +280,18 @@ class String < Object
 
   # Case-insensitive version of `String#<=>` . Currently, case-insensitivity
   # only works on characters A-Z/a-z, not all of Unicode. This is different
-  # from [\#casecmp?](String.downloaded.ruby_doc#method-i-casecmp-3F) .
-  # 
+  # from [\#casecmp?](String.downloaded.ruby_doc#method-i-casecmp-3F).
+  #
   # ```ruby
   # "aBcDeF".casecmp("abcde")     #=> 1
   # "aBcDeF".casecmp("abcdef")    #=> 0
   # "aBcDeF".casecmp("abcdefg")   #=> -1
   # "abcdef".casecmp("ABCDEF")    #=> 0
   # ```
-  # 
+  #
   # `nil` is returned if the two strings have incompatible encodings, or if
   # `other_str` is not a string.
-  # 
+  #
   # ```ruby
   # "foo".casecmp(2)   #=> nil
   # "\u{e4 f6 fc}".encode("ISO-8859-1").casecmp("\u{c4 d6 dc}")   #=> nil
@@ -308,7 +308,7 @@ class String < Object
   # `str`, returns a new [String](String.downloaded.ruby_doc) of length
   # `width` with `str` centered and padded with `padstr` ; otherwise,
   # returns `str` .
-  # 
+  #
   # ```ruby
   # "hello".center(4)         #=> "hello"
   # "hello".center(20)        #=> "       hello        "
@@ -325,7 +325,7 @@ class String < Object
 
   # Returns an array of characters in *str* . This is a shorthand for
   # `str.each_char.to_a` .
-  # 
+  #
   # If a block is given, which is a deprecated form, works the same as
   # `each_char` .
   sig {returns(Array)}
@@ -337,7 +337,7 @@ class String < Object
   # characters (that is it will remove `\n`, `\r`, and `\r\n` ). If `$/`
   # is an empty string, it will remove all trailing newlines from the
   # string.
-  # 
+  #
   # ```ruby
   # "hello".chomp                #=> "hello"
   # "hello\n".chomp              #=> "hello"
@@ -372,7 +372,7 @@ class String < Object
   # empty string returns an empty string. `String#chomp` is often a safer
   # alternative, as it leaves the string unchanged if it doesn’t end in a
   # record separator.
-  # 
+  #
   # ```ruby
   # "string\r\n".chop   #=> "string"
   # "string\n\r".chop   #=> "string\n"
@@ -389,7 +389,7 @@ class String < Object
   def chop!(); end
 
   # Returns a one-character string at the beginning of the string.
-  # 
+  #
   # ```ruby
   # a = "abcde"
   # a.chr    #=> "a"
@@ -398,7 +398,7 @@ class String < Object
   def chr(); end
 
   # Makes string empty.
-  # 
+  #
   # ```ruby
   # a = "abcde"
   # a.clear    #=> ""
@@ -408,7 +408,7 @@ class String < Object
 
   # Returns an array of the `Integer` ordinals of the characters in *str* .
   # This is a shorthand for `str.each_codepoint.to_a` .
-  # 
+  #
   # If a block is given, which is a deprecated form, works the same as
   # `each_codepoint` .
   sig {returns(T::Array[Integer])}
@@ -423,20 +423,20 @@ class String < Object
   # Concatenates the given object(s) to *str* . If an object is an `Integer`
   # , it is considered a codepoint and converted to a character before
   # concatenation.
-  # 
+  #
   # `concat` can take multiple arguments, and all the arguments are
   # concatenated in order.
-  # 
+  #
   # ```ruby
   # a = "hello "
   # a.concat("world", 33)      #=> "hello world!"
   # a                          #=> "hello world!"
-  # 
+  #
   # b = "sn"
   # b.concat("_", b, "_", b)   #=> "sn_sn_sn"
   # ```
-  # 
-  # See also [\#\<\<](String.downloaded.ruby_doc#method-i-3C-3C) , which
+  #
+  # See also [\#\<\<](String.downloaded.ruby_doc#method-i-3C-3C), which
   # takes a single argument.
   sig do
     params(
@@ -460,51 +460,51 @@ class String < Object
   # Please do not use this method any longer. It is legacy; provided only
   # for backward compatibility with ruby scripts in earlier days. It is bad
   # to use in contemporary programs for several reasons:
-  # 
+  #
   #     * Behaviour of C's crypt(3) depends on the OS it is
   #       run.  The generated string lacks data portability.
-  #     
+  #
   #     * On some OSes such as Mac OS, crypt(3) never fails
   #       (i.e. silently ends up in unexpected results).
-  #     
+  #
   #     * On some OSes such as Mac OS, crypt(3) is not
   #       thread safe.
-  #     
+  #
   #     * So-called "traditional" usage of crypt(3) is very
   #       very very weak.  According to its manpage, Linux's traditional
   #       crypt(3) output has only 2**56 variations; too
   #       easy to brute force today.  And this is the default behaviour.
-  #     
+  #
   #     * In order to make things robust some OSes implement so-called
   #       "modular" usage. To go through, you have to do a complex
   #       build-up of the salt_str parameter, by hand.
   #       Failure in generation of a proper salt string tends not to
   #       yield any errors; typos in parameters are normally not
   #       detectable.
-  #     
+  #
   #         * For instance, in the following example, the second invocation
   #           of String#crypt is wrong; it has a typo in
   #           "round=" (lacks "s").  However the call does not fail and
   #           something unexpected is generated.
-  #     
+  #
   #              "foo".crypt("$5$rounds=1000$salt$") # OK, proper usage
   #              "foo".crypt("$5$round=1000$salt$")  # Typo not detected
-  #     
+  #
   #     * Even in the "modular" mode, some hash functions are considered
   #       archaic and no longer recommended at all; for instance module
   #       $1$ is officially abandoned by its author: see
   #       http://phk.freebsd.dk/sagas/md5crypt_eol.html .  For another
   #       instance module $3$ is considered completely
   #       broken: see the manpage of FreeBSD.
-  #     
+  #
   #     * On some OS such as Mac OS, there is no modular mode. Yet, as
   #       written above, crypt(3) on Mac OS never fails.
   #       This means even if you build up a proper salt string it
   #       generates a traditional DES hash anyways, and there is no way
   #       for you to be aware of.
-  #     
+  #
   #           "foo".crypt("$5$rounds=1000$salt$") # => "$5fNPQMxC5j6."
-  # 
+  #
   # If for some reason you cannot migrate to other secure contemporary
   # password hashing algorithms, install the string-crypt gem and `require
   # 'string/crypt'` to continue using it.
@@ -519,7 +519,7 @@ class String < Object
   # Returns a copy of *str* with all characters in the intersection of its
   # arguments deleted. Uses the same rules for building the set of
   # characters as `String#count` .
-  # 
+  #
   # ```ruby
   # "hello".delete "l","lo"        #=> "heo"
   # "hello".delete "lo"            #=> "he"
@@ -548,36 +548,36 @@ class String < Object
   # lowercase counterparts. Which letters exactly are replaced, and by which
   # other letters, depends on the presence or absence of options, and on the
   # `encoding` of the string.
-  # 
+  #
   # The meaning of the `options` is as follows:
-  # 
-  #   - No option  
+  #
+  #   - No option
   #     Full Unicode case mapping, suitable for most languages (see :turkic
   #     and :lithuanian options below for exceptions). Context-dependent
   #     case mapping as described in Table 3-14 of the Unicode standard is
   #     currently not supported.
-  # 
-  #   - :ascii  
+  #
+  #   - :ascii
   #     Only the ASCII region, i.e. the characters “A” to “Z” and “a” to
   #     “z”, are affected. This option cannot be combined with any other
   #     option.
-  # 
-  #   - :turkic  
+  #
+  #   - :turkic
   #     Full Unicode case mapping, adapted for Turkic languages (Turkish,
   #     Azerbaijani, …). This means that upper case I is mapped to lower
   #     case dotless i, and so on.
-  # 
-  #   - :lithuanian  
+  #
+  #   - :lithuanian
   #     Currently, just full Unicode case mapping. In the future, full
   #     Unicode case mapping adapted for Lithuanian (keeping the dot on the
   #     lower case i even if there is an accent on top).
-  # 
-  #   - :fold  
+  #
+  #   - :fold
   #     Only available on `downcase` and `downcase!` . Unicode case
   #     **folding** , which is more far-reaching than Unicode case mapping.
   #     This option currently cannot be combined with any other option (i.e.
   #     there is currently no variant for turkic languages).
-  # 
+  #
   # Please note that several assumptions that are valid for ASCII-only case
   # conversions do not hold for more general case conversions. For example,
   # the length of the result may not be the same as the length of the input
@@ -586,11 +586,11 @@ class String < Object
   # normalization (i.e.
   # [\#unicode\_normalize](String.downloaded.ruby_doc#method-i-unicode_normalize)
   # ) is not necessarily maintained by case mapping operations.
-  # 
+  #
   # Non-ASCII case mapping/folding is currently supported for UTF-8,
   # UTF-16BE/LE, UTF-32BE/LE, and ISO-8859-1\~16 Strings/Symbols. This
   # support will be extended to other encodings.
-  # 
+  #
   # ```ruby
   # "hEllO".downcase   #=> "hello"
   # ```
@@ -599,7 +599,7 @@ class String < Object
 
   # Downcases the contents of *str* , returning `nil` if no changes were
   # made.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
   sig {returns(T.nilable(String))}
@@ -607,7 +607,7 @@ class String < Object
 
   # Produces a version of `str` with all non-printing characters replaced by
   # `\nnn` notation and all special characters escaped.
-  # 
+  #
   # ```ruby
   # "hello \n ''".dump  #=> "\"hello \\n ''\""
   # ```
@@ -616,13 +616,13 @@ class String < Object
 
   # Passes each byte in *str* to the given block, or returns an enumerator
   # if no block is given.
-  # 
+  #
   # ```ruby
   # "hello".each_byte {|c| print c, ' ' }
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     104 101 108 108 111
   sig do
     params(
@@ -635,13 +635,13 @@ class String < Object
 
   # Passes each character in *str* to the given block, or returns an
   # enumerator if no block is given.
-  # 
+  #
   # ```ruby
   # "hello".each_char {|c| print c, ' ' }
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   # ```ruby
   # h e l l o
   # ```
@@ -658,15 +658,15 @@ class String < Object
   # a *codepoint* when applied to Unicode strings to the given block. For
   # encodings other than UTF-8/UTF-16(BE|LE)/UTF-32(BE|LE), values are
   # directly derived from the binary representation of each character.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # "hello\u0639".each_codepoint {|c| print c, ' ' }
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     104 101 108 108 111 1593
   sig do
     params(
@@ -681,13 +681,13 @@ class String < Object
   # by default), passing each substring in turn to the supplied block. If a
   # zero-length record separator is supplied, the string is split into
   # paragraphs delimited by multiple successive newlines.
-  # 
+  #
   # See
   # [IO.readlines](https://ruby-doc.org/core-2.6.3/IO.html#method-c-readlines)
   # for details about getline\_args.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # print "Example one\n"
   # "hello\nworld".each_line {|s| p s}
@@ -696,9 +696,9 @@ class String < Object
   # print "Example three\n"
   # "hello\n\n\nworld".each_line('') {|s| p s}
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   # ```ruby
   # Example one
   # "hello\n"
@@ -728,7 +728,7 @@ class String < Object
   def each_line(arg0=T.unsafe(nil), &blk); end
 
   # Returns `true` if *str* has a length of zero.
-  # 
+  #
   # ```ruby
   # "hello".empty?   #=> false
   # " ".empty?       #=> false
@@ -838,7 +838,7 @@ class String < Object
   def gsub!(arg0, arg1=T.unsafe(nil), &blk); end
 
   # Returns a hash based on the string’s length, content and encoding.
-  # 
+  #
   # See also Object\#hash.
   sig {returns(Integer)}
   def hash(); end
@@ -846,7 +846,7 @@ class String < Object
   # Treats leading characters from *str* as a string of hexadecimal digits
   # (with an optional sign and an optional `0x` ) and returns the
   # corresponding number. Zero is returned on error.
-  # 
+  #
   # ```ruby
   # "0x0a".hex     #=> 10
   # "-1234".hex    #=> -4660
@@ -857,7 +857,7 @@ class String < Object
   def hex(); end
 
   # Returns `true` if *str* contains the given string or character.
-  # 
+  #
   # ```ruby
   # "hello".include? "lo"   #=> true
   # "hello".include? "ol"   #=> false
@@ -875,7 +875,7 @@ class String < Object
   # pattern ( *regexp* ) in *str* . Returns `nil` if not found. If the
   # second parameter is present, it specifies the position in the string to
   # begin the search.
-  # 
+  #
   # ```ruby
   # "hello".index('e')             #=> 1
   # "hello".index('lo')            #=> 3
@@ -904,7 +904,7 @@ class String < Object
   # modifying *str* . Negative indices count from the end of the string, and
   # insert *after* the given character. The intent is insert *aString* so
   # that it starts at the given *index* .
-  # 
+  #
   # ```ruby
   # "abcd".insert(0, 'X')    #=> "Xabcd"
   # "abcd".insert(3, 'X')    #=> "abcXd"
@@ -923,7 +923,7 @@ class String < Object
 
   # Returns a printable version of *str* , surrounded by quote marks, with
   # special characters escaped.
-  # 
+  #
   # ```ruby
   # str = "hello"
   # str[3] = "\b"
@@ -934,7 +934,7 @@ class String < Object
 
   # Returns the `Symbol` corresponding to *str* , creating the symbol if it
   # did not previously exist. See `Symbol#id2name` .
-  # 
+  #
   # ```ruby
   # "Koala".intern         #=> :Koala
   # s = 'cat'.to_sym       #=> :cat
@@ -942,10 +942,10 @@ class String < Object
   # s = '@cat'.to_sym      #=> :@cat
   # s == :@cat             #=> true
   # ```
-  # 
+  #
   # This can also be used to create symbols that cannot be represented using
   # the `:xxx` notation.
-  # 
+  #
   # ```ruby
   # 'cat and dog'.to_sym   #=> :"cat and dog"
   # ```
@@ -959,17 +959,17 @@ class String < Object
   # Returns an array of lines in *str* split using the supplied record
   # separator ( `$/` by default). This is a shorthand for
   # `str.each_line(separator, getline_args).to_a` .
-  # 
+  #
   # See
   # [IO.readlines](https://ruby-doc.org/core-2.6.3/IO.html#method-c-readlines)
   # for details about getline\_args.
-  # 
+  #
   # ```ruby
   # "hello\nworld\n".lines              #=> ["hello\n", "world\n"]
   # "hello  world".lines(' ')           #=> ["hello ", " ", "world"]
   # "hello\nworld\n".lines(chomp: true) #=> ["hello", "world"]
   # ```
-  # 
+  #
   # If a block is given, which is a deprecated form, works the same as
   # `each_line` .
   sig do
@@ -983,7 +983,7 @@ class String < Object
   # If *integer* is greater than the length of *str* , returns a new
   # `String` of length *integer* with *str* left justified and padded with
   # *padstr* ; otherwise, returns *str* .
-  # 
+  #
   # ```ruby
   # "hello".ljust(4)            #=> "hello"
   # "hello".ljust(20)           #=> "hello               "
@@ -1000,11 +1000,11 @@ class String < Object
 
   # Returns a copy of the receiver with leading whitespace removed. See also
   # [\#rstrip](String.downloaded.ruby_doc#method-i-rstrip) and
-  # [\#strip](String.downloaded.ruby_doc#method-i-strip) .
-  # 
+  # [\#strip](String.downloaded.ruby_doc#method-i-strip).
+  #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
-  # 
+  #
   # ```ruby
   # "  hello  ".lstrip   #=> "hello  "
   # "hello".lstrip       #=> "hello"
@@ -1015,11 +1015,11 @@ class String < Object
   # Removes leading whitespace from the receiver. Returns the altered
   # receiver, or `nil` if no change was made. See also
   # [\#rstrip\!](String.downloaded.ruby_doc#method-i-rstrip-21) and
-  # [\#strip\!](String.downloaded.ruby_doc#method-i-strip-21) .
-  # 
+  # [\#strip\!](String.downloaded.ruby_doc#method-i-strip-21).
+  #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
-  # 
+  #
   # ```ruby
   # "  hello  ".lstrip!  #=> "hello  "
   # "hello  ".lstrip!    #=> nil
@@ -1048,7 +1048,7 @@ class String < Object
   # without updating `$~` and other related variables. If the second
   # parameter is present, it specifies the position in the string to begin
   # the search.
-  # 
+  #
   # ```ruby
   # "Ruby".match?(/R.../)    #=> true
   # "Ruby".match?(/R.../, 1) #=> false
@@ -1076,11 +1076,11 @@ class String < Object
   # Incrementing a digit always results in another digit, and incrementing a
   # letter results in another letter of the same case. Incrementing
   # nonalphanumerics uses the underlying character set’s collating sequence.
-  # 
+  #
   # If the increment generates a “carry,” the character to the left of it is
   # incremented. This process repeats until there is no carry, adding an
   # additional character if necessary.
-  # 
+  #
   # ```ruby
   # "abcd".succ        #=> "abce"
   # "THX1138".succ     #=> "THX1139"
@@ -1099,21 +1099,21 @@ class String < Object
   # Treats leading characters of *str* as a string of octal digits (with an
   # optional sign) and returns the corresponding number. Returns 0 if the
   # conversion fails.
-  # 
+  #
   # ```ruby
   # "123".oct       #=> 83
   # "-377".oct      #=> -255
   # "bad".oct       #=> 0
   # "0377bad".oct   #=> 255
   # ```
-  # 
+  #
   # If `str` starts with `0`, radix indicators are honored. See
   # Kernel\#Integer.
   sig {returns(Integer)}
   def oct(); end
 
   # Returns the `Integer` ordinal of a one-character string.
-  # 
+  #
   # ```ruby
   # "a".ord         #=> 97
   # ```
@@ -1123,7 +1123,7 @@ class String < Object
   # Searches *sep* or pattern ( *regexp* ) in the string and returns the
   # part before it, the match, and the part after it. If it is not found,
   # returns two empty strings and *str* .
-  # 
+  #
   # ```ruby
   # "hello".partition("l")         #=> ["he", "l", "lo"]
   # "hello".partition("x")         #=> ["hello", "", ""]
@@ -1138,14 +1138,14 @@ class String < Object
   def partition(arg0); end
 
   # Prepend—Prepend the given strings to *str* .
-  # 
+  #
   # ```ruby
   # a = "!"
   # a.prepend("hello ", "world") #=> "hello world!"
   # a                            #=> "hello world!"
   # ```
-  # 
-  # See also [\#concat](String.downloaded.ruby_doc#method-i-concat) .
+  #
+  # See also [\#concat](String.downloaded.ruby_doc#method-i-concat).
   sig do
     params(
         arg0: String,
@@ -1156,7 +1156,7 @@ class String < Object
 
   # Replaces the contents and taintedness of *str* with the corresponding
   # values in *other\_str* .
-  # 
+  #
   # ```ruby
   # s = "hello"         #=> "hello"
   # s.replace "world"   #=> "world"
@@ -1170,7 +1170,7 @@ class String < Object
   def replace(arg0); end
 
   # Returns a new string with the characters from *str* in reverse order.
-  # 
+  #
   # ```ruby
   # "stressed".reverse   #=> "desserts"
   # ```
@@ -1181,7 +1181,7 @@ class String < Object
   # pattern ( *regexp* ) in *str* . Returns `nil` if not found. If the
   # second parameter is present, it specifies the position in the string to
   # end the search—characters beyond this point will not be considered.
-  # 
+  #
   # ```ruby
   # "hello".rindex('e')             #=> 1
   # "hello".rindex('l')             #=> 3
@@ -1201,7 +1201,7 @@ class String < Object
   # If *integer* is greater than the length of *str* , returns a new
   # `String` of length *integer* with *str* right justified and padded with
   # *padstr* ; otherwise, returns *str* .
-  # 
+  #
   # ```ruby
   # "hello".rjust(4)            #=> "hello"
   # "hello".rjust(20)           #=> "               hello"
@@ -1219,7 +1219,7 @@ class String < Object
   # Searches *sep* or pattern ( *regexp* ) in the string from the end of the
   # string, and returns the part before it, the match, and the part after
   # it. If it is not found, returns two empty strings and *str* .
-  # 
+  #
   # ```ruby
   # "hello".rpartition("l")         #=> ["hel", "l", "o"]
   # "hello".rpartition("x")         #=> ["", "", "hello"]
@@ -1235,11 +1235,11 @@ class String < Object
 
   # Returns a copy of the receiver with trailing whitespace removed. See
   # also [\#lstrip](String.downloaded.ruby_doc#method-i-lstrip) and
-  # [\#strip](String.downloaded.ruby_doc#method-i-strip) .
-  # 
+  # [\#strip](String.downloaded.ruby_doc#method-i-strip).
+  #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
-  # 
+  #
   # ```ruby
   # "  hello  ".rstrip   #=> "  hello"
   # "hello".rstrip       #=> "hello"
@@ -1250,11 +1250,11 @@ class String < Object
   # Removes trailing whitespace from the receiver. Returns the altered
   # receiver, or `nil` if no change was made. See also
   # [\#lstrip\!](String.downloaded.ruby_doc#method-i-lstrip-21) and
-  # [\#strip\!](String.downloaded.ruby_doc#method-i-strip-21) .
-  # 
+  # [\#strip\!](String.downloaded.ruby_doc#method-i-strip-21).
+  #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
-  # 
+  #
   # ```ruby
   # "  hello  ".rstrip!  #=> "  hello"
   # "  hello".rstrip!    #=> nil
@@ -1269,7 +1269,7 @@ class String < Object
   # contains no groups, each individual result consists of the matched
   # string, `$&` . If the pattern contains groups, each individual result is
   # itself an array containing one entry per group.
-  # 
+  #
   # ```ruby
   # a = "cruel world"
   # a.scan(/\w+/)        #=> ["cruel", "world"]
@@ -1277,18 +1277,18 @@ class String < Object
   # a.scan(/(...)/)      #=> [["cru"], ["el "], ["wor"]]
   # a.scan(/(..)(..)/)   #=> [["cr", "ue"], ["l ", "wo"]]
   # ```
-  # 
+  #
   # And the block form:
-  # 
+  #
   # ```ruby
   # a.scan(/\w+/) {|w| print "<<#{w}>> " }
   # print "\n"
   # a.scan(/(.)(.)/) {|x,y| print y, x }
   # print "\n"
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   #     <<cruel>> <<world>>
   #     rceu lowlr
   sig do
@@ -1387,21 +1387,21 @@ class String < Object
 
   # Divides *str* into substrings based on a delimiter, returning an array
   # of these substrings.
-  # 
+  #
   # If *pattern* is a `String`, then its contents are used as the delimiter
   # when splitting *str* . If *pattern* is a single space, *str* is split on
   # whitespace, with leading and trailing whitespace and runs of contiguous
   # whitespace characters ignored.
-  # 
+  #
   # If *pattern* is a `Regexp`, *str* is divided where the pattern matches.
   # Whenever the pattern matches a zero-length string, *str* is split into
   # individual characters. If *pattern* contains groups, the respective
   # matches will be returned in the array as well.
-  # 
+  #
   # If *pattern* is `nil`, the value of `$;` is used. If `$;` is `nil`
   # (which is the default), *str* is split on whitespace as if ‘ ’ were
   # specified.
-  # 
+  #
   # If the *limit* parameter is omitted, trailing null fields are
   # suppressed. If *limit* is a positive number, at most that number of
   # split substrings will be returned (captured groups will be returned as
@@ -1409,11 +1409,11 @@ class String < Object
   # entire string is returned as the only entry in an array. If negative,
   # there is no limit to the number of fields returned, and trailing null
   # fields are not suppressed.
-  # 
+  #
   # When the input `str` is empty an empty
   # [Array](https://ruby-doc.org/core-2.6.3/Array.html) is returned as the
   # string is considered to have no fields to split.
-  # 
+  #
   # ```ruby
   # " now's  the time ".split       #=> ["now's", "the", "time"]
   # " now's  the time ".split(' ')  #=> ["now's", "the", "time"]
@@ -1422,17 +1422,17 @@ class String < Object
   # "hello".split(//)               #=> ["h", "e", "l", "l", "o"]
   # "hello".split(//, 3)            #=> ["h", "e", "llo"]
   # "hi mom".split(%r{\s*})         #=> ["h", "i", "m", "o", "m"]
-  # 
+  #
   # "mellow yellow".split("ello")   #=> ["m", "w y", "w"]
   # "1,2,,3,4,,".split(',')         #=> ["1", "2", "", "3", "4"]
   # "1,2,,3,4,,".split(',', 4)      #=> ["1", "2", "", "3,4,,"]
   # "1,2,,3,4,,".split(',', -4)     #=> ["1", "2", "", "3", "4", "", ""]
-  # 
+  #
   # "1:2:3".split(/(:)()()/, 2)     #=> ["1", ":", "", "", "2:3"]
-  # 
+  #
   # "".split(',', -1)               #=> []
   # ```
-  # 
+  #
   # If a block is given, invoke the block with each split substring.
   sig do
     params(
@@ -1454,7 +1454,7 @@ class String < Object
   # of the same character that occur in this set are replaced by a single
   # character. If no arguments are given, all runs of identical characters
   # are replaced by a single character.
-  # 
+  #
   # ```ruby
   # "yellow moon".squeeze                  #=> "yelow mon"
   # "  now   is  the".squeeze(" ")         #=> " now is the"
@@ -1486,11 +1486,11 @@ class String < Object
 
   # Returns a copy of the receiver with leading and trailing whitespace
   # removed.
-  # 
+  #
   # Whitespace is defined as any of the following characters: null,
   # horizontal tab, line feed, vertical tab, form feed, carriage return,
   # space.
-  # 
+  #
   # ```ruby
   # "    hello    ".strip   #=> "hello"
   # "\tgoodbye\r\n".strip   #=> "goodbye"
@@ -1502,10 +1502,10 @@ class String < Object
 
   # Removes leading and trailing whitespace from the receiver. Returns the
   # altered receiver, or `nil` if there was no change.
-  # 
+  #
   # Refer to [\#strip](String.downloaded.ruby_doc#method-i-strip) for the
   # definition of whitespace.
-  # 
+  #
   # ```ruby
   # "  hello  ".strip!  #=> "hello"
   # "hello".strip!      #=> nil
@@ -1531,7 +1531,7 @@ class String < Object
 
   # Performs the same substitution as
   # [\#sub](String.downloaded.ruby_doc#method-i-sub) in-place.
-  # 
+  #
   # Returns `str` if a substitution was performed or `nil` if no
   # substitution was performed.
   sig do
@@ -1556,11 +1556,11 @@ class String < Object
   # Incrementing a digit always results in another digit, and incrementing a
   # letter results in another letter of the same case. Incrementing
   # nonalphanumerics uses the underlying character set’s collating sequence.
-  # 
+  #
   # If the increment generates a “carry,” the character to the left of it is
   # incremented. This process repeats until there is no carry, adding an
   # additional character if necessary.
-  # 
+  #
   # ```ruby
   # "abcd".succ        #=> "abce"
   # "THX1138".succ     #=> "THX1139"
@@ -1576,7 +1576,7 @@ class String < Object
   # is the optional `Integer` parameter, defaulting to 16. The result is
   # simply the sum of the binary value of each byte in *str* modulo `2**n
   # - 1` . This is not a particularly good checksum.
-  # 
+  #
   # sum0 &= (((unsigned long)1)\<\<bits)-1; } sum = LONG2FIX(sum0); } else {
   # VALUE mod; if (sum0) { sum = rb\_funcall(sum, '+', 1, LONG2FIX(sum0)); }
   # mod = rb\_funcall(INT2FIX(1), idLTLT, 1, INT2FIX(bits)); mod =
@@ -1592,10 +1592,10 @@ class String < Object
 
   # Returns a copy of *str* with uppercase alphabetic characters converted
   # to lowercase and lowercase characters converted to uppercase.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
-  # 
+  #
   # ```ruby
   # "Hello".swapcase          #=> "hELLO"
   # "cYbEr_PuNk11".swapcase   #=> "CyBeR_pUnK11"
@@ -1605,7 +1605,7 @@ class String < Object
 
   # Equivalent to `String#swapcase`, but modifies the receiver in place,
   # returning *str* , or `nil` if no changes were made.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
   sig {returns(T.nilable(String))}
@@ -1614,7 +1614,7 @@ class String < Object
   # Returns a complex which denotes the string form. The parser ignores
   # leading whitespaces and trailing garbage. Any digit sequences can be
   # separated by an underscore. Returns zero for null or garbage string.
-  # 
+  #
   # ```ruby
   # '9'.to_c           #=> (9+0i)
   # '2.5'.to_c         #=> (2.5+0i)
@@ -1628,8 +1628,8 @@ class String < Object
   # '1/2+3/4i'.to_c    #=> ((1/2)+(3/4)*i)
   # 'ruby'.to_c        #=> (0+0i)
   # ```
-  # 
-  # See [Kernel](https://ruby-doc.org/core-2.6.3/Kernel.html) .Complex.
+  #
+  # See [Kernel](https://ruby-doc.org/core-2.6.3/Kernel.html).Complex.
   sig {returns(Complex)}
   def to_c(); end
 
@@ -1637,7 +1637,7 @@ class String < Object
   # floating point number. Extraneous characters past the end of a valid
   # number are ignored. If there is not a valid number at the start of *str*
   # , `0.0` is returned. This method never raises an exception.
-  # 
+  #
   # ```ruby
   # "123.45e1".to_f        #=> 1234.5
   # "45.67 degrees".to_f   #=> 45.67
@@ -1651,7 +1651,7 @@ class String < Object
   # end of a valid number are ignored. If there is not a valid number at the
   # start of *str* , `0` is returned. This method never raises an exception
   # when *base* is valid.
-  # 
+  #
   # ```ruby
   # "12345".to_i             #=> 12345
   # "99 red balloons".to_i   #=> 99
@@ -1676,7 +1676,7 @@ class String < Object
   # valid number are ignored. Digit sequences can be separated by an
   # underscore. If there is not a valid number at the start of `str`, zero
   # is returned. This method never raises an exception.
-  # 
+  #
   # ```ruby
   # '  2  '.to_r       #=> (2/1)
   # '300/2'.to_r       #=> (150/1)
@@ -1687,34 +1687,34 @@ class String < Object
   # '21/06/09'.to_r    #=> (7/2)
   # 'BWV 1079'.to_r    #=> (0/1)
   # ```
-  # 
+  #
   # NOTE: “0.3”.to\_r isn’t the same as 0.3.to\_r. The former is equivalent
   # to “3/10”.to\_r, but the latter isn’t so.
-  # 
+  #
   #     "0.3".to_r == 3/10r  #=> true
   #     0.3.to_r   == 3/10r  #=> false
-  # 
+  #
   # See also Kernel\#Rational.
   sig {returns(Rational)}
   def to_r(); end
 
   # Returns `self` .
-  # 
-  # If called on a subclass of [String](String.downloaded.ruby_doc) ,
+  #
+  # If called on a subclass of [String](String.downloaded.ruby_doc),
   # converts the receiver to a [String](String.downloaded.ruby_doc) object.
   sig {returns(String)}
   def to_s(); end
 
   # Returns `self` .
-  # 
-  # If called on a subclass of [String](String.downloaded.ruby_doc) ,
+  #
+  # If called on a subclass of [String](String.downloaded.ruby_doc),
   # converts the receiver to a [String](String.downloaded.ruby_doc) object.
   sig {returns(String)}
   def to_str(); end
 
   # Returns the `Symbol` corresponding to *str* , creating the symbol if it
   # did not previously exist. See `Symbol#id2name` .
-  # 
+  #
   # ```ruby
   # "Koala".intern         #=> :Koala
   # s = 'cat'.to_sym       #=> :cat
@@ -1722,10 +1722,10 @@ class String < Object
   # s = '@cat'.to_sym      #=> :@cat
   # s == :@cat             #=> true
   # ```
-  # 
+  #
   # This can also be used to create symbols that cannot be represented using
   # the `:xxx` notation.
-  # 
+  #
   # ```ruby
   # 'cat and dog'.to_sym   #=> :"cat and dog"
   # ```
@@ -1736,34 +1736,34 @@ class String < Object
   # the corresponding characters in `to_str` . If `to_str` is shorter than
   # `from_str`, it is padded with its last character in order to maintain
   # the correspondence.
-  # 
+  #
   # ```ruby
   # "hello".tr('el', 'ip')      #=> "hippo"
   # "hello".tr('aeiou', '*')    #=> "h*ll*"
   # "hello".tr('aeiou', 'AA*')  #=> "hAll*"
   # ```
-  # 
+  #
   # Both strings may use the `c1-c2` notation to denote ranges of
   # characters, and `from_str` may start with a `^`, which denotes all
   # characters except those listed.
-  # 
+  #
   # ```ruby
   # "hello".tr('a-y', 'b-z')    #=> "ifmmp"
   # "hello".tr('^aeiou', '*')   #=> "*e**o"
   # ```
-  # 
+  #
   # The backslash character `\` can be used to escape `^` or `-` and is
   # otherwise ignored unless it appears at the end of a range or the end of
   # the `from_str` or `to_str` :
-  # 
+  #
   # ```ruby
   # "hello^world".tr("\\^aeiou", "*") #=> "h*ll**w*rld"
   # "hello-world".tr("a\\-eo", "*")   #=> "h*ll**w*rld"
-  # 
+  #
   # "hello\r\nworld".tr("\r", "")   #=> "hello\nworld"
   # "hello\r\nworld".tr("\\r", "")  #=> "hello\r\nwold"
   # "hello\r\nworld".tr("\\\r", "") #=> "hello\nworld"
-  # 
+  #
   # "X['\\b']".tr("X\\", "")   #=> "['b']"
   # "X['\\b']".tr("X-\\]", "") #=> "'b'"
   # ```
@@ -1789,7 +1789,7 @@ class String < Object
 
   # Processes a copy of *str* as described under `String#tr`, then removes
   # duplicate characters in regions that were affected by the translation.
-  # 
+  #
   # ```ruby
   # "hello".tr_s('l', 'r')     #=> "hero"
   # "hello".tr_s('el', '*')    #=> "h*o"
@@ -1826,7 +1826,7 @@ class String < Object
   # specified type; otherwise, it uses a platform-independent consistent
   # size. Spaces are ignored in the format string. See also `String#unpack1`
   # , `Array#pack` .
-  # 
+  #
   # ```ruby
   # "abc \0\0abc \0\0".unpack('A6Z6')   #=> ["abc", "abc "]
   # "abc \0\0".unpack('a3a3')           #=> ["abc", " \000\000"]
@@ -1837,10 +1837,10 @@ class String < Object
   # "now=20is".unpack('M*')             #=> ["now is"]
   # "whole".unpack('xax2aX2aX1aX2a')    #=> ["h", "e", "l", "l", "o"]
   # ```
-  # 
+  #
   # This table summarizes the various formats and the Ruby classes returned
   # by each.
-  # 
+  #
   #     Integer       |         |
   #     Directive     | Returns | Meaning
   #     ------------------------------------------------------------------
@@ -1889,7 +1889,7 @@ class String < Object
   #                   |         |
   #     U             | Integer | UTF-8 character
   #     w             | Integer | BER-compressed integer (see Array.pack)
-  #     
+  #
   #     Float        |         |
   #     Directive    | Returns | Meaning
   #     -----------------------------------------------------------------
@@ -1899,7 +1899,7 @@ class String < Object
   #     e            | Float   | single-precision, little-endian byte order
   #     G            | Float   | double-precision, network (big-endian) byte order
   #     g            | Float   | single-precision, network (big-endian) byte order
-  #     
+  #
   #     String       |         |
   #     Directive    | Returns | Meaning
   #     -----------------------------------------------------------------
@@ -1916,35 +1916,35 @@ class String < Object
   #                  |         | base64 encoded string (RFC 4648) if followed by 0
   #     P            | String  | pointer to a structure (fixed-length string)
   #     p            | String  | pointer to a null-terminated string
-  #     
+  #
   #     Misc.        |         |
   #     Directive    | Returns | Meaning
   #     -----------------------------------------------------------------
   #     @            | ---     | skip to the offset given by the length argument
   #     X            | ---     | skip backward one byte
   #     x            | ---     | skip forward one byte
-  # 
+  #
   # HISTORY
-  # 
+  #
   #   - J, J\! j, and j\! are available since Ruby 2.3.
-  # 
+  #
   #   - Q\_, Q\!, q\_, and q\! are available since Ruby 2.1.
-  # 
+  #
   #   - I\!\<, i\!\<, I\!\>, and i\!\> are available since Ruby 1.9.3.
   sig do
     params(
         arg0: String,
     )
-    .returns(T::Array[String])
+    .returns(T::Array[T.nilable(T.any(Integer, Float, String))])
   end
   def unpack(arg0); end
 
   # Returns a copy of *str* with all lowercase letters replaced with their
   # uppercase counterparts.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
-  # 
+  #
   # ```ruby
   # "hEllO".upcase   #=> "HELLO"
   # ```
@@ -1952,7 +1952,7 @@ class String < Object
   def upcase(); end
 
   # Upcases the contents of *str* , returning `nil` if no changes were made.
-  # 
+  #
   # See [\#downcase](String.downloaded.ruby_doc#method-i-downcase) for
   # meaning of `options` and use with different encodings.
   sig {returns(T.nilable(String))}
@@ -1963,27 +1963,27 @@ class String < Object
   # `String#succ` method is used to generate each value. If optional second
   # argument exclusive is omitted or is false, the last value will be
   # included; otherwise it will be excluded.
-  # 
+  #
   # If no block is given, an enumerator is returned instead.
-  # 
+  #
   # ```ruby
   # "a8".upto("b6") {|s| print s, ' ' }
   # for s in "a8".."b6"
   #   print s, ' '
   # end
   # ```
-  # 
+  #
   # *produces:*
-  # 
+  #
   # ```ruby
   # a8 a9 b0 b1 b2 b3 b4 b5 b6
   # a8 a9 b0 b1 b2 b3 b4 b5 b6
   # ```
-  # 
+  #
   # If *str* and *other\_str* contains only ascii numeric characters, both
   # are recognized as decimal numbers. In addition, the width of string
   # (e.g. leading zeros) is handled appropriately.
-  # 
+  #
   # ```ruby
   # "9".upto("11").to_a   #=> ["9", "10", "11"]
   # "25".upto("5").to_a   #=> []
@@ -2007,7 +2007,7 @@ class String < Object
   def upto(arg0, arg1=T.unsafe(nil), &blk); end
 
   # Returns true for a string which is encoded correctly.
-  # 
+  #
   # ```ruby
   # "\xc2\xa1".force_encoding("UTF-8").valid_encoding?  #=> true
   # "\xc2".force_encoding("UTF-8").valid_encoding?      #=> false
@@ -2016,10 +2016,10 @@ class String < Object
   sig {returns(T::Boolean)}
   def valid_encoding?(); end
 
-  # Try to convert *obj* into a [String](String.downloaded.ruby_doc) , using
+  # Try to convert *obj* into a [String](String.downloaded.ruby_doc), using
   # [\#to\_str](String.downloaded.ruby_doc#method-i-to_str) method. Returns
   # converted string or nil if *obj* cannot be converted for any reason.
-  # 
+  #
   # ```ruby
   # String.try_convert("str")     #=> "str"
   # String.try_convert(/re/)      #=> nil
