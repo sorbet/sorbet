@@ -1,7 +1,7 @@
 -e:1: Method `to_` does not exist on `Integer` component of `Integer(1)` https://srb.help/7003
      1 |1.to_
         ^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L773: Did you mean: `Integer#to_c`?
-     773 |  def to_c(); end
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L1120: Did you mean: `Integer#to_c`?
+    1120 |  def to_c(); end
             ^^^^^^^^^^
 Errors: 1

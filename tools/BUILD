@@ -18,7 +18,7 @@ compilation_database(
         "//test/fuzz:fuzz_doc_symbols",
         "//test/fuzz:fuzz_dash_e",
         "//test/fuzz:fuzz_dash_e_impl",
-        "//test:test_corpus_sharded",
+        "//test:test_corpus_runner",
         "//test:print_document_symbols",
         "//test/helpers:helpers",
         "//test:hello-test",
