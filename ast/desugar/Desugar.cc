@@ -557,7 +557,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     auto block = MK::InsSeq(loc, std::move(stats), std::move(expr));
                     result.swap(block);
                 } else {
-                    unique_ptr<Expression> res = MK::EmptyTree();
+                    unique_ptr<Expression> res = MK::Nil(loc);
                     result.swap(res);
                 }
             },
