@@ -291,3 +291,18 @@ aims to document those which are most likely to be encountered in normal usage:
       include B # runtime-only error: Overriding final method from `A`
     end
     ```
+
+<!-- TODO(jez) Update this to link to docs for sealed -->
+
+## What's next?
+
+- [Abstract Classes and Interfaces](abstract.md)
+
+  Marking methods as `abstract` and requiring child classes to implement them is
+  a powerful tool for code organization and correctness. Learn more about
+  Sorbet's support for abstract classes and interfaces.
+
+- [Override Checking](override-checking.md)
+
+  When override checking is **desired**, Sorbet has ways to declare that intent
+  as well.

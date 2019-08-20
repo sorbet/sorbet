@@ -169,3 +169,13 @@ end
 # Sorbet knows that `foo` is a class method on `A`
 A.foo
 ```
+
+<!-- TODO(jez) Update this to link to sealed -->
+
+## What's next?
+
+- [Override Checking](override-checking.md)
+
+  Sorbet has more ways to check overriding than just whether an abstract method
+  is implemented in a child. See this doc to learn about the ways to declare
+  what kinds of overriding should be allowed.
