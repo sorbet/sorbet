@@ -17,8 +17,8 @@ a grandchild class override a concrete implementation of its parent.
 
 Use this table to track when annotations can be used, although the error
 messages are the canonical source of truth. ✅ means "this pairing is allowed"
-while ❌ means "this is an error" (currently, most of these errors are runtime
-errors, though in the future they may become static errors).
+while ❌ means "this is an error" (most of these errors are static errors,
+though some are still only implemented in the runtime).
 
 > Below, `standard` (for the child or parent) means "has a `sig`, but has none
 > of the special modifiers."
@@ -32,5 +32,26 @@ errors, though in the future they may become static errors).
 | `implementation`  |   ✅   |     ❌     |     ❌     |        ❌        |
 | `abstract`        |   ✅   |     ❌     |     ❌     |        ✅        |
 
-> **Note**: if the implementation methods are inherited--from either a class or
-> mixin--the methods don't need the `implementation` annotation.
+Some other things are checked that don't fit into the above table:
+
+- It is an error to mark a method `override` or `implementation` if the method
+  doesn't actually override anything.
+- If the implementation methods are inherited--from either a class or mixin--the
+  methods don't need the `implementation` annotation.
+
+Note that the **absence** of `abstract` or `overridable` does **not** mean that
+a method is never overridden. To declare that a method can never be overridden,
+look into [final methods](final.md).
+
+## What's next?
+
+- [Final Methods, Classes, and Modules](final.md)
+
+  Learn how to prohibit overriding entirely, both at the method level and the
+  class level.
+
+- [Abstract Classes and Interfaces](abstract.md)
+
+  Marking methods as `abstract` and requiring child classes to implement them is
+  a powerful tool for code organization and correctness. Learn more about
+  Sorbet's support for abstract classes and interfaces.
