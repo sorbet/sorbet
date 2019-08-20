@@ -1,6 +1,7 @@
 ---
 id: abstract
 title: Abstract Classes and Interfaces
+sidebar_label: Abstract Classes & Interfaces
 ---
 
 Sorbet supports abstract classes, abstract methods, and interfaces.
