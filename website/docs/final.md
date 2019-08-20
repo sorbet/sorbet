@@ -1,6 +1,7 @@
 ---
 id: final
 title: Final Methods, Classes, and Modules
+sidebar_label: Final Methods & Classes
 ---
 
 Sorbet supports final methods, classes, and modules.
