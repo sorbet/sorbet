@@ -1,6 +1,7 @@
 ---
 id: procs
-title: Proc Types
+title: Blocks, Procs and Lambda Types
+sidebar_label: Blocks, Procs, & Lambdas
 ---
 
 > TODO: This page is still a fragment. Contributions welcome!
