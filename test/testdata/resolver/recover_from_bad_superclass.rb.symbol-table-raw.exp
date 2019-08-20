@@ -19,7 +19,7 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
   class <S <C <U D>> $1> < <C <U Sorbet>><C <U Private>><C <U Static>><S <C <U StubSuperClass>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=21:7 end=21:8}
     method <S <C <U D>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=21:1 end=22:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
-  static-field <C <U DynamicParent>> -> T.untyped @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=11:1 end=11:14}
+  static-field <C <U DynamicParent>> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=11:1 end=11:14}
   class <C <U F>> < <C <U G>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=25:1 end=25:12}
   class <S <C <U F>> $1> < <S <C <U G>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=25:7 end=25:8}
     method <S <C <U F>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=25:1 end=26:4}

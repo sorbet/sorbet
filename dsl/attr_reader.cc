@@ -1,4 +1,5 @@
 #include "dsl/attr_reader.h"
+#include "absl/strings/escaping.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
@@ -21,7 +22,18 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
             ENFORCE(loc.source(ctx).size() > 1 && loc.source(ctx)[0] == ':');
             loc = core::Loc(loc.file(), loc.beginPos() + 1, loc.endPos());
         } else if (lit->isString(ctx)) {
-            res = lit->asString(ctx);
+            core::NameRef nameRef = lit->asString(ctx);
+            auto shortName = nameRef.data(ctx)->shortName(ctx);
+            bool validAttr = (isalpha(shortName.front()) || shortName.front() == '_') &&
+                             absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
+            if (validAttr) {
+                res = nameRef;
+            } else {
+                if (auto e = ctx.state.beginError(name->loc, core::errors::DSL::BadAttrArg)) {
+                    e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
+                }
+                res = core::Names::empty();
+            }
             loc = lit->loc;
         }
     }
