@@ -416,6 +416,10 @@ class Numeric < Object
   end
   def modulo(arg0); end
 
+  # Returns `true` if `num` is less than 0.
+  sig {returns(T::Boolean}
+  def negative?(); end
+
   # Returns `self` if `num` is not zero, `nil` otherwise.
   #
   # This behavior is useful when chaining comparisons:
@@ -439,6 +443,10 @@ class Numeric < Object
   # Returns an array; \[num.abs, num.arg\].
   sig {returns([Numeric, Numeric])}
   def polar(); end
+
+  # Returns `true` if `num` is greater than 0.
+  sig {returns(T::Boolean}
+  def positive?(); end
 
   # Returns the most exact division (rational for integers, float for
   # floats).
