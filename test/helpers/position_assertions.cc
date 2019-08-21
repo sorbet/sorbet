@@ -50,19 +50,6 @@ bool rangeIsSubset(const Range &a, const Range &b) {
     return b.start->character >= a.start->character && b.end->character <= a.end->character;
 }
 
-int errorComparison(string_view aFilename, const Range &a, string_view aMessage, string_view bFilename, const Range &b,
-                    string_view bMessage) {
-    const int fileCmp = aFilename.compare(bFilename);
-    if (fileCmp != 0) {
-        return fileCmp;
-    }
-    const int rangeCmp = a.cmp(b);
-    if (rangeCmp != 0) {
-        return rangeCmp;
-    }
-    return aMessage.compare(bMessage);
-}
-
 string prettyPrintRangeComment(string_view sourceLine, const Range &range, string_view comment) {
     int numLeadingSpaces = range.start->character;
     if (numLeadingSpaces < 0) {
@@ -112,7 +99,7 @@ RangeAssertion::RangeAssertion(string_view filename, unique_ptr<Range> &range, i
     : filename(filename), range(move(range)), assertionLine(assertionLine) {}
 
 int RangeAssertion::compare(string_view otherFilename, const Range &otherRange) {
-    int filenamecmp = filename.compare(otherFilename);
+    const int filenamecmp = filename.compare(otherFilename);
     if (filenamecmp != 0) {
         return filenamecmp;
     }
@@ -128,6 +115,18 @@ int RangeAssertion::compare(string_view otherFilename, const Range &otherRange) 
         }
     }
     return range->cmp(otherRange);
+}
+
+bool RangeAssertion::operator<(const RangeAssertion &b) const {
+    const int filenameCmp = filename.compare(b.filename);
+    if (filenameCmp != 0) {
+        return filenameCmp < 0;
+    }
+    const int rangeCmp = range->cmp(*b.range);
+    if (rangeCmp != 0) {
+        return rangeCmp < 0;
+    }
+    return toString().compare(b.toString()) < 0;
 }
 
 ErrorAssertion::ErrorAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message,
@@ -270,9 +269,8 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
     }
 
     // Sort assertions in (filename, range, message) order
-    fast_sort(assertions, [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
-        return errorComparison(a->filename, *a->range, a->toString(), b->filename, *b->range, b->toString()) < 0;
-    });
+    fast_sort(assertions,
+              [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool { return *a < *b; });
 
     return assertions;
 }
@@ -570,9 +568,8 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
                               map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
                               string errorPrefix) {
     // Sort input error assertions so they are in (filename, line, column) order.
-    fast_sort(errorAssertions, [](const shared_ptr<ErrorAssertion> &a, const shared_ptr<ErrorAssertion> &b) -> bool {
-        return errorComparison(a->filename, *a->range, a->message, b->filename, *b->range, b->message) < 0;
-    });
+    fast_sort(errorAssertions,
+              [](const shared_ptr<ErrorAssertion> &a, const shared_ptr<ErrorAssertion> &b) -> bool { return *a < *b; });
 
     auto assertionsIt = errorAssertions.begin();
 
@@ -586,8 +583,12 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
         // Sort diagnostics within file in range, message order.
         // This explicit sort, combined w/ the map's implicit sort order, ensures that this loop iterates over
         // diagnostics in (filename, range, message) order -- matching the sort order of errorAssertions.
-        fast_sort(diagnostics, [&filename](const unique_ptr<Diagnostic> &a, const unique_ptr<Diagnostic> &b) -> bool {
-            return errorComparison(filename, *a->range, a->message, filename, *b->range, b->message) < 0;
+        fast_sort(diagnostics, [](const unique_ptr<Diagnostic> &a, const unique_ptr<Diagnostic> &b) -> bool {
+            const int rangeCmp = a->range->cmp(*b->range);
+            if (rangeCmp != 0) {
+                return rangeCmp < 0;
+            }
+            return a->message.compare(b->message) < 0;
         });
 
         auto diagnosticsIt = diagnostics.begin();

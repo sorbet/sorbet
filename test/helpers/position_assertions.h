@@ -69,6 +69,8 @@ public:
      * Range.cmp, this function supports line-only ranges. */
     int compare(std::string_view otherFilename, const Range &otherRange);
 
+    bool operator<(const RangeAssertion &b) const;
+
     // Returns a Location object for this assertion's filename and range.
     std::unique_ptr<Location> getLocation(std::string_view uriPrefix);
 
