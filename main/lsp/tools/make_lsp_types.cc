@@ -96,6 +96,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                {
                                    "int cmp(const Position &b) const;",
                                    "bool operator <(const Position &b) const;",
+                                   "std::unique_ptr<Position> copy() const;",
                                });
 
     auto Range = makeObject("Range",
@@ -110,6 +111,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                 "core::Loc toLoc(const core::GlobalState &gs, core::FileRef file) const;",
                                 "int cmp(const Range &b) const;",
                                 "bool operator <(const Range &b) const;",
+                                "std::unique_ptr<Range> copy() const;",
                             });
 
     auto Location = makeObject("Location",

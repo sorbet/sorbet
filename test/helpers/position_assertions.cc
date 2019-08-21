@@ -276,10 +276,8 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
 }
 
 unique_ptr<Location> RangeAssertion::getLocation(string_view uriPrefix) {
-    auto newRange = make_unique<Range>(make_unique<Position>(range->start->line, range->start->character),
-                                       make_unique<Position>(range->end->line, range->end->character));
     auto uri = filePathToUri(uriPrefix, filename);
-    return make_unique<Location>(uri, move(newRange));
+    return make_unique<Location>(uri, range->copy());
 }
 
 pair<string_view, int> getSymbolAndVersion(string_view assertionContents) {
@@ -799,8 +797,7 @@ bool containsLine(string_view text, string_view line) {
 void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
                            int &nextId, string_view uriPrefix, string errorPrefix) {
     auto uri = filePathToUri(uriPrefix, filename);
-    auto pos = make_unique<TextDocumentPositionParams>(
-        make_unique<TextDocumentIdentifier>(uri), make_unique<Position>(range->start->line, range->start->character));
+    auto pos = make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(uri), range->start->copy());
     auto id = nextId++;
     auto msg = LSPMessage(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentHover, move(pos)));
     auto responses = wrapper.getLSPResponsesFor(msg);

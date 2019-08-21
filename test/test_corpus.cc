@@ -116,20 +116,12 @@ ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     return {move(restored), expr.file};
 }
 
-/** Converts a Sorbet Detail object into an equivalent LSP Position object. */
-unique_ptr<Position> detailToPosition(const core::Loc::Detail &detail) {
-    // 1-indexed => 0-indexed
-    return make_unique<Position>(detail.line - 1, detail.column - 1);
-}
-
 /** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
-unique_ptr<Diagnostic> errorToDiagnostic(core::GlobalState &gs, const core::Error &error) {
+unique_ptr<Diagnostic> errorToDiagnostic(const core::GlobalState &gs, const core::Error &error) {
     if (!error.loc.exists()) {
         return nullptr;
     }
-    auto position = error.loc.position(gs);
-    auto range = make_unique<Range>(detailToPosition(position.first), detailToPosition(position.second));
-    return make_unique<Diagnostic>(move(range), error.header);
+    return make_unique<Diagnostic>(Range::fromLoc(gs, error.loc), error.header);
 }
 
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
@@ -562,11 +554,9 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
             vector<unique_ptr<Diagnostic>> diagnostics;
             auto fileUri = testFileUris[filename];
             // Unfortunately there's no simpler way to copy the range (yet).
-            auto params = make_unique<CodeActionParams>(
-                make_unique<TextDocumentIdentifier>(fileUri),
-                make_unique<Range>(make_unique<Position>(error->range->start->line, error->range->start->character),
-                                   make_unique<Position>(error->range->end->line, error->range->end->character)),
-                make_unique<CodeActionContext>(move(diagnostics)));
+            auto params =
+                make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri), error->range->copy(),
+                                              make_unique<CodeActionContext>(move(diagnostics)));
             auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
             auto responses = lspWrapper.getLSPResponsesFor(LSPMessage(move(req)));
             EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a codeAction request.";
