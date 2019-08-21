@@ -78,7 +78,7 @@ TEST_F(ProtocolTest, Cancellation) {
         ASSERT_NE(idIt, requestIds.end())
             << fmt::format("Received cancellation response for invalid request id: {}", (*errorMsg->id()).asInt());
         requestIds.erase(idIt);
-        assertResponseError(-32800, "cancel", *errorMsg);
+        ASSERT_NO_FATAL_FAILURE(assertResponseError(-32800, "cancel", *errorMsg));
     }
     ASSERT_EQ(requestIds.size(), 0);
 }
@@ -90,7 +90,7 @@ TEST_F(ProtocolTest, DefinitionError) {
     auto defResponses = send(*getDefinition("foobar.rb", 6, 1));
     ASSERT_EQ(defResponses.size(), 1) << "Expected a single response to a definition request to an untyped document.";
 
-    assertResponseMessage(nextId - 1, *defResponses.at(0));
+    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(nextId - 1, *defResponses.at(0)));
 
     auto &respMsg = defResponses.at(0)->asResponse();
     ASSERT_TRUE(respMsg.result);
@@ -136,7 +136,7 @@ TEST_F(ProtocolTest, MergeDidChangeAfterCancellation) {
     int diagnosticCount = 0;
     for (auto &msg : msgs) {
         if (msg->isResponse()) {
-            assertResponseError(-32800, "cancel", *msg);
+            ASSERT_NO_FATAL_FAILURE(assertResponseError(-32800, "cancel", *msg));
             cancelRequestCount++;
         } else if (msg->isNotification() && msg->method() == LSPMethod::TextDocumentPublishDiagnostics) {
             diagnosticCount++;
@@ -249,7 +249,7 @@ TEST_F(ProtocolTest, NotInitialized) {
     auto msgs = send(*getDefinition("foo.rb", 12, 24));
     ASSERT_EQ(msgs.size(), 1);
     auto &msg1 = msgs.at(0);
-    assertResponseError(-32002, "not initialize", *msg1);
+    ASSERT_NO_FATAL_FAILURE(assertResponseError(-32002, "not initialize", *msg1));
 }
 
 // There's a different code path that checks for workspace edits before initialization occurs.
@@ -287,11 +287,10 @@ TEST_F(ProtocolTest, EmptyRootUriInitialization) {
     // Check the response for the expected URI.
     EXPECT_EQ(diagnostics.size(), 1);
     auto &msg = diagnostics.at(0);
-    if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg)) {
-        // Will fail test if this does not parse.
-        if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
-            EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
-        }
+    ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg));
+    // Will fail test if this does not parse.
+    if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
+        EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
     }
 }
 
@@ -322,11 +321,10 @@ TEST_F(ProtocolTest, MonacoInitialization) {
     // Check the response for the expected URI.
     EXPECT_EQ(diagnostics.size(), 1);
     auto &msg = diagnostics.at(0);
-    if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg)) {
-        // Will fail test if this does not parse.
-        if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
-            EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
-        }
+    ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg));
+    // Will fail test if this does not parse.
+    if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
+        EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
     }
 }
 

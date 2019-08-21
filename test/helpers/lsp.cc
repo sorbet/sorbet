@@ -193,66 +193,34 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     EXPECT_FALSE(capabilities.workspace.has_value());
 }
 
-void failWithUnexpectedLSPResponse(const LSPMessage &item) {
-    if (item.isResponse()) {
-        FAIL() << fmt::format("Expected a notification, but received the following response message instead: {}",
-                              item.asResponse().toJSON());
-    } else if (item.isNotification()) {
-        FAIL() << fmt::format("Expected a response message, but received the following notification instead: {}",
-                              item.asNotification().toJSON());
-    } else {
-        // Received something else! This can *only* happen if our test logic is buggy. Any invalid LSP responses
-        // are rejected before they reach this point.
-        FAIL() << "Received unexpected response message type; this should never happen.";
-    }
-}
-
-bool assertResponseMessage(int expectedId, const LSPMessage &response) {
-    if (!response.isResponse()) {
-        failWithUnexpectedLSPResponse(response);
-        return false;
-    }
+void assertResponseMessage(int expectedId, const LSPMessage &response) {
+    ASSERT_TRUE(response.isResponse()) << fmt::format(
+        "Expected a response message, but received the following notification instead: {}", response.toJSON());
 
     auto &respMsg = response.asResponse();
     auto idIntPtr = get_if<int>(&respMsg.id);
-    EXPECT_NE(nullptr, idIntPtr) << "Response message lacks an integer ID field.";
-    if (idIntPtr != nullptr) {
-        EXPECT_EQ(expectedId, *idIntPtr) << "Response message's ID does not match expected value.";
-        return expectedId == *idIntPtr;
-    }
-    return false;
+    ASSERT_NE(nullptr, idIntPtr) << "Response message lacks an integer ID field.";
+    ASSERT_EQ(expectedId, *idIntPtr) << "Response message's ID does not match expected value.";
 }
 
-bool assertResponseError(int code, string_view msg, const LSPMessage &response) {
-    EXPECT_TRUE(response.isResponse()) << fmt::format(
+void assertResponseError(int code, string_view msg, const LSPMessage &response) {
+    ASSERT_TRUE(response.isResponse()) << fmt::format(
         "Expected a response message with error `{}: {}`, but received:\n{}", code, msg, response.toJSON());
-    if (response.isResponse()) {
-        auto &r = response.asResponse();
-        auto &maybeError = r.error;
-        if (maybeError.has_value()) {
-            auto &error = *maybeError;
-            EXPECT_EQ(error->code, code) << fmt::format("Response message contains error with unexpected code:\n{}",
-                                                        error->toJSON());
-
-            bool msgMatches = error->message.find(msg) != string::npos;
-            EXPECT_TRUE(msgMatches) << fmt::format("Expected a response message with error `{}: {}`, but received:\n{}",
-                                                   code, msg, response.toJSON());
-            return error->code == code && msgMatches;
-        } else {
-            ADD_FAILURE() << fmt::format("Expected a response message with an error, but received:\n{}",
-                                         response.toJSON());
-        }
-    }
-    return false;
+    auto &r = response.asResponse();
+    auto &maybeError = r.error;
+    ASSERT_TRUE(maybeError.has_value()) << fmt::format("Expected a response message with an error, but received:\n{}",
+                                                       response.toJSON());
+    auto &error = *maybeError;
+    ASSERT_EQ(error->code, code) << fmt::format("Response message contains error with unexpected code:\n{}",
+                                                error->toJSON());
+    ASSERT_NE(error->message.find(msg), string::npos) << fmt::format(
+        "Expected a response message with error `{}: {}`, but received:\n{}", code, msg, response.toJSON());
 }
 
-bool assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage &response) {
-    if (!response.isNotification()) {
-        failWithUnexpectedLSPResponse(response);
-        return false;
-    }
-    EXPECT_EQ(expectedMethod, response.method()) << "Unexpected method on notification message.";
-    return expectedMethod == response.method();
+void assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage &response) {
+    ASSERT_TRUE(response.isNotification()) << fmt::format(
+        "Expected a notification, but received the following response message instead: {}", response.toJSON());
+    ASSERT_EQ(expectedMethod, response.method()) << "Unexpected method on notification message.";
 }
 
 optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMessage &notifMsg) {
@@ -283,18 +251,17 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
             return {};
         }
 
-        if (assertResponseMessage(0, *responses.at(0))) {
-            auto &respMsg = responses.at(0)->asResponse();
-            EXPECT_FALSE(respMsg.error.has_value());
-            EXPECT_TRUE(respMsg.result.has_value());
+        assertResponseMessage(0, *responses.at(0));
+        auto &respMsg = responses.at(0)->asResponse();
+        EXPECT_FALSE(respMsg.error.has_value());
+        EXPECT_TRUE(respMsg.result.has_value());
 
-            if (respMsg.result.has_value()) {
-                auto &result = *respMsg.result;
-                auto &initializeResult = get<unique_ptr<InitializeResult>>(result);
-                checkServerCapabilities(*initializeResult->capabilities);
-            } else {
-                return {};
-            }
+        if (respMsg.result.has_value()) {
+            auto &result = *respMsg.result;
+            auto &initializeResult = get<unique_ptr<InitializeResult>>(result);
+            checkServerCapabilities(*initializeResult->capabilities);
+        } else {
+            return {};
         }
     }
 

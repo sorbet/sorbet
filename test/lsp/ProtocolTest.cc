@@ -180,10 +180,7 @@ vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, 
 
 void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected) {
     for (auto &msg : messages) {
-        if (!assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg)) {
-            // Assertion failed: Received a non-diagnostic. No need to continue.
-            return;
-        }
+        ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg));
     }
 
     // Convert ExpectedDiagnostic into ErrorAssertion objects.

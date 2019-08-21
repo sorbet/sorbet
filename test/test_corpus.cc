@@ -498,17 +498,16 @@ void updateDiagnostics(string_view rootUri, UnorderedMap<string, string> &testFi
         if (isTestMessage(*response)) {
             continue;
         }
-        if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response)) {
-            auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
-            ASSERT_TRUE(maybeDiagnosticParams.has_value());
-            auto &diagnosticParams = *maybeDiagnosticParams;
-            auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
-            EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
-                << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
+        ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response));
+        auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
+        ASSERT_TRUE(maybeDiagnosticParams.has_value());
+        auto &diagnosticParams = *maybeDiagnosticParams;
+        auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
+        EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
+            << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
 
-            // Will explicitly overwrite older diagnostics that are irrelevant.
-            diagnostics[filename] = move(diagnosticParams->diagnostics);
-        }
+        // Will explicitly overwrite older diagnostics that are irrelevant.
+        diagnostics[filename] = move(diagnosticParams->diagnostics);
     }
 }
 
