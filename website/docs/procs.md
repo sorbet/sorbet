@@ -109,8 +109,9 @@ to connect the `yield` call to the `blk` parameter automatically.
 ## Modifying the self type
 
 Many Ruby constructs accept a block argument in one context, but then execute it
-a different context entirely. This means that inside the block, certain methods
-will definitely exist that definitely don't exist immediately above the block.
+in a different context entirely. This means that inside the block, certain
+methods will definitely exist that definitely don't exist immediately above the
+block.
 
 In particular, this is precisely how Sorbet's `sig` pattern works:
 
