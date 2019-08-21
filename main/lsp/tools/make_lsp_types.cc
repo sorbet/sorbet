@@ -92,7 +92,11 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                    makeField("line", JSONInt),
                                    makeField("character", JSONInt),
                                },
-                               classTypes);
+                               classTypes,
+                               {
+                                   "int cmp(const Position &b) const;",
+                                   "bool operator <(const Position &b) const;",
+                               });
 
     auto Range = makeObject("Range",
                             {
@@ -103,7 +107,9 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                             {
                                 "// Returns nullptr if loc does not exist",
                                 "static std::unique_ptr<Range> fromLoc(const core::GlobalState &gs, core::Loc loc);",
-                                "core::Loc toLoc(const core::GlobalState &gs, core::FileRef file);",
+                                "core::Loc toLoc(const core::GlobalState &gs, core::FileRef file) const;",
+                                "int cmp(const Range &b) const;",
+                                "bool operator <(const Range &b) const;",
                             });
 
     auto Location = makeObject("Location",
@@ -111,7 +117,11 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                    makeField("uri", JSONString),
                                    makeField("range", Range),
                                },
-                               classTypes);
+                               classTypes,
+                               {
+                                   "int cmp(const Location &b) const;",
+                                   "bool operator <(const Location &b) const;",
+                               });
 
     auto DiagnosticRelatedInformation = makeObject("DiagnosticRelatedInformation",
                                                    {

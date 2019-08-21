@@ -101,7 +101,7 @@ unique_ptr<Range> Range::fromLoc(const core::GlobalState &gs, core::Loc loc) {
                               make_unique<Position>(pair.second.line - 1, pair.second.column - 1));
 }
 
-core::Loc Range::toLoc(const core::GlobalState &gs, core::FileRef file) {
+core::Loc Range::toLoc(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(start->line >= 0);
     ENFORCE(start->character >= 0);
     ENFORCE(end->line >= 0);
@@ -111,6 +111,42 @@ core::Loc Range::toLoc(const core::GlobalState &gs, core::FileRef file) {
     auto ePos = core::Loc::pos2Offset(file.data(gs), core::Loc::Detail{(u4)end->line + 1, (u4)end->character + 1});
 
     return core::Loc(file, sPos, ePos);
+}
+
+int Range::cmp(const Range &b) const {
+    const int startCmp = start->cmp(*b.start);
+    if (startCmp != 0) {
+        return startCmp;
+    }
+    return end->cmp(*b.end);
+}
+
+bool Range::operator<(const Range &b) const {
+    return cmp(b) < 0;
+}
+
+int Location::cmp(const Location &b) const {
+    const int uriCmp = uri.compare(b.uri);
+    if (uriCmp != 0) {
+        return uriCmp;
+    }
+    return range->cmp(*b.range);
+}
+
+bool Location::operator<(const Location &b) const {
+    return cmp(b) < 0;
+}
+
+int Position::cmp(const Position &b) const {
+    const int lineCmp = line - b.line;
+    if (lineCmp != 0) {
+        return lineCmp;
+    }
+    return character - b.character;
+}
+
+bool Position::operator<(const Position &b) const {
+    return cmp(b) < 0;
 }
 
 } // namespace sorbet::realmain::lsp

@@ -609,8 +609,8 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
             auto it = applyCodeActionAssertions.begin();
             while (it != applyCodeActionAssertions.end()) {
                 auto codeActionAssertion = it->get();
-                if (!(cmpPositions(*error->range->start, *codeActionAssertion->range->start) <= 0 &&
-                      cmpPositions(*error->range->end, *codeActionAssertion->range->end) >= 0)) {
+                if (!(error->range->start->cmp(*codeActionAssertion->range->start) <= 0 &&
+                      error->range->end->cmp(*codeActionAssertion->range->end) >= 0)) {
                     ++it;
                     continue;
                 }
@@ -786,7 +786,7 @@ TEST_P(LSPTest, All) {
             // Sort assertions in (filename, range) order
             fast_sort(entryAssertions,
                       [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
-                          return errorComparison(a->filename, *a->range, "", b->filename, *b->range, "") == -1;
+                          return errorComparison(a->filename, *a->range, "", b->filename, *b->range, "") < 0;
                       });
 
             auto &defAssertions = entry.second.first;

@@ -9,10 +9,6 @@
 namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
-// Compares the two ranges. Returns -1 if `a` comes before `b`, 1 if `b` comes before `a`, and 0 if they are equivalent.
-// If range `a` starts at the same character as `b` but ends earlier, it comes before `b`.
-int rangeComparison(const Range &a, const Range &b);
-
 // Compares the two errors. Returns -1 if `a` comes before `b`, 1 if `b` comes before `a`, and 0 if they are equivalent.
 // Compares filenames, then ranges, and then compares messages in the event of a tie.
 int errorComparison(std::string_view aFilename, const Range &a, std::string_view aMessage, std::string_view bFilename,
@@ -68,9 +64,9 @@ public:
     RangeAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine);
     virtual ~RangeAssertion() = default;
 
-    /** Compares this assertion's filename and range with the given filename and range. Returns 0 if it matches, -1 if
-     * range comes before otherRange, and 1 if otherRange comes before range. Unlike rangeComparison, this function
-     * supports line-only ranges. */
+    /** Compares this assertion's filename and range with the given filename and range. Returns 0 if it matches, a
+     * negative int if range comes before otherRange, and a positive int if otherRange comes before range. Unlike
+     * Range.cmp, this function supports line-only ranges. */
     int compare(std::string_view otherFilename, const Range &otherRange);
 
     // Returns a Location object for this assertion's filename and range.
