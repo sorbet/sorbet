@@ -116,20 +116,12 @@ ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     return {move(restored), expr.file};
 }
 
-/** Converts a Sorbet Detail object into an equivalent LSP Position object. */
-unique_ptr<Position> detailToPosition(const core::Loc::Detail &detail) {
-    // 1-indexed => 0-indexed
-    return make_unique<Position>(detail.line - 1, detail.column - 1);
-}
-
 /** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
-unique_ptr<Diagnostic> errorToDiagnostic(core::GlobalState &gs, const core::Error &error) {
+unique_ptr<Diagnostic> errorToDiagnostic(const core::GlobalState &gs, const core::Error &error) {
     if (!error.loc.exists()) {
         return nullptr;
     }
-    auto position = error.loc.position(gs);
-    auto range = make_unique<Range>(detailToPosition(position.first), detailToPosition(position.second));
-    return make_unique<Diagnostic>(move(range), error.header);
+    return make_unique<Diagnostic>(Range::fromLoc(gs, error.loc), error.header);
 }
 
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
@@ -501,17 +493,16 @@ void updateDiagnostics(string_view rootUri, UnorderedMap<string, string> &testFi
         if (isTestMessage(*response)) {
             continue;
         }
-        if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response)) {
-            auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
-            ASSERT_TRUE(maybeDiagnosticParams.has_value());
-            auto &diagnosticParams = *maybeDiagnosticParams;
-            auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
-            EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
-                << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
+        ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response));
+        auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
+        ASSERT_TRUE(maybeDiagnosticParams.has_value());
+        auto &diagnosticParams = *maybeDiagnosticParams;
+        auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
+        EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
+            << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
 
-            // Will explicitly overwrite older diagnostics that are irrelevant.
-            diagnostics[filename] = move(diagnosticParams->diagnostics);
-        }
+        // Will explicitly overwrite older diagnostics that are irrelevant.
+        diagnostics[filename] = move(diagnosticParams->diagnostics);
     }
 }
 
@@ -566,11 +557,9 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
             vector<unique_ptr<Diagnostic>> diagnostics;
             auto fileUri = testFileUris[filename];
             // Unfortunately there's no simpler way to copy the range (yet).
-            auto params = make_unique<CodeActionParams>(
-                make_unique<TextDocumentIdentifier>(fileUri),
-                make_unique<Range>(make_unique<Position>(error->range->start->line, error->range->start->character),
-                                   make_unique<Position>(error->range->end->line, error->range->end->character)),
-                make_unique<CodeActionContext>(move(diagnostics)));
+            auto params =
+                make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri), error->range->copy(),
+                                              make_unique<CodeActionContext>(move(diagnostics)));
             auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
             auto responses = lspWrapper.getLSPResponsesFor(LSPMessage(move(req)));
             EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a codeAction request.";
@@ -612,8 +601,8 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
             auto it = applyCodeActionAssertions.begin();
             while (it != applyCodeActionAssertions.end()) {
                 auto codeActionAssertion = it->get();
-                if (!(cmpPositions(*error->range->start, *codeActionAssertion->range->start) <= 0 &&
-                      cmpPositions(*error->range->end, *codeActionAssertion->range->end) >= 0)) {
+                if (!(error->range->start->cmp(*codeActionAssertion->range->start) <= 0 &&
+                      error->range->end->cmp(*codeActionAssertion->range->end) >= 0)) {
                     ++it;
                     continue;
                 }
@@ -794,7 +783,7 @@ TEST_P(LSPTest, All) {
             // Sort assertions in (filename, range) order
             fast_sort(entryAssertions,
                       [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
-                          return errorComparison(a->filename, *a->range, "", b->filename, *b->range, "") == -1;
+                          return a->cmp(*b) < 0;
                       });
 
             auto &defAssertions = entry.second.first;
