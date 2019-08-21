@@ -175,3 +175,28 @@ end
     # Will error if `x` ever becomes nilable or untyped due to a refactoring
     T.absurd(x) if x.nil?
     ```
+
+## What's next?
+
+- [Flow-Sensitive Typing](flow-sensitive.md)
+
+  Sorbet implements a control flow-sensitive type system, which means it tracks
+  the flow of control through a program and narrows or widens the types of
+  variables in response. Flow-sensitive typing is the feature that ultimately
+  powers exhaustiveness.
+
+- [Sealed Classes and Modules](sealed.md)
+
+  The form of exhaustiveness checking seen here relied on simultaneously
+  updating a type alias when adding a new case to consider. An alternative to
+  this is to use sealed classes, which effectively make exhaustiveness a
+  property of the definition not the usage site.
+
+- [Abstract Classes and Interfaces](abstract.md)
+
+  The form of exhaustiveness we've seen here is structural—Sorbet checks that
+  each case of a particular structure have been handled. An alternative is to
+  describe an abstract method (i.e., behavior) and require that all subclasses
+  implement that method (a form of "behavioral exhaustiveness"). This doc
+  describes how to use Sorbet's abstract classes and methods to enforce those
+  guarantees.

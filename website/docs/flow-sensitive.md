@@ -87,6 +87,7 @@ The complete list of constructs that affect Sorbet's flow-sensitive typing:
 - `Class#<` (like `is_a?`, but for class objects instead of instances of
 - Negated conditions (including both `!` and `unless`)
 - Truthiness (everything but `nil` and `false` is truthy in Ruby) classes)
+- `block_given?` (internally, this is a special case of truthiness)
 
 > **Warning**: Sorbet's analysis for these constructs hinges on them not being
 > overridden! For example, Sorbet can behave unpredictably if when overriding

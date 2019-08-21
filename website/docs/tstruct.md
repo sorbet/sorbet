@@ -1,6 +1,7 @@
 ---
 id: tstruct
-title: Typed Structs
+title: Typed Structs via T::Struct
+sidebar_label: T::Struct
 ---
 
 > TODO: This page is still a fragment. Contributions welcome!
