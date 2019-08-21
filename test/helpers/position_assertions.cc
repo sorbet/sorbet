@@ -119,12 +119,12 @@ int RangeAssertion::compare(string_view otherFilename, const Range &otherRange) 
     if (range->end->character == RangeAssertion::END_OF_LINE_POS) {
         // This assertion matches the whole line.
         // (Will match diagnostics that span multiple lines for parity with existing test logic.)
-        int targetLine = range->start->line;
+        const int targetLine = range->start->line;
         const int cmp = targetLine - otherRange.start->line;
         if (cmp >= 0 && targetLine <= otherRange.end->line) {
             return 0;
         } else {
-            return targetLine - otherRange.start->line;
+            return cmp;
         }
     }
     return range->cmp(otherRange);
@@ -862,10 +862,7 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
     for (auto &c : *codeAction.edit.value()->documentChanges) {
         auto filename = uriToFilePath(rootUri, c->textDocument->uri);
         auto it = sourceFileContents.find(filename);
-        if (it == sourceFileContents.end()) {
-            ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
-            return;
-        }
+        ASSERT_NE(it, sourceFileContents.end()) << fmt::format("Unable to find referenced source file `{}`", filename);
         auto &file = it->second;
 
         auto expectedUpdatedFilePath =
