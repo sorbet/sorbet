@@ -89,33 +89,8 @@ string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) con
     return uri;
 } // namespace sorbet::realmain::lsp
 
-unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
-    if (!loc.exists()) {
-        // this will happen if e.g. we disable the stdlib (e.g. to speed up testing in fuzzers).
-        return nullptr;
-    }
-    auto pair = loc.position(gs);
-    // All LSP numbers are zero-based, ours are 1-based.
-    return make_unique<Range>(make_unique<Position>(pair.first.line - 1, pair.first.column - 1),
-                              make_unique<Position>(pair.second.line - 1, pair.second.column - 1));
-}
-
-unique_ptr<core::Loc> range2Loc(const core::GlobalState &gs, const Range &range, core::FileRef file) {
-    ENFORCE(range.start->line >= 0);
-    ENFORCE(range.start->character >= 0);
-    ENFORCE(range.end->line >= 0);
-    ENFORCE(range.end->character >= 0);
-
-    auto start = core::Loc::pos2Offset(file.data(gs),
-                                       core::Loc::Detail{(u4)range.start->line + 1, (u4)range.start->character + 1});
-    auto end =
-        core::Loc::pos2Offset(file.data(gs), core::Loc::Detail{(u4)range.end->line + 1, (u4)range.end->character + 1});
-
-    return make_unique<core::Loc>(file, start, end);
-}
-
 unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) const {
-    auto range = loc2Range(gs, loc);
+    auto range = Range::fromLoc(gs, loc);
     if (range == nullptr) {
         return nullptr;
     }

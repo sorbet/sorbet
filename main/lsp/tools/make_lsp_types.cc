@@ -29,8 +29,9 @@ shared_ptr<FieldDef> makeField(const string jsonName, const string cppName, shar
 }
 
 shared_ptr<JSONObjectType> makeObject(const string name, vector<shared_ptr<FieldDef>> fields,
-                                      vector<shared_ptr<JSONObjectType>> &classTypes) {
-    shared_ptr<JSONObjectType> ct = make_shared<JSONObjectType>(name, fields);
+                                      vector<shared_ptr<JSONObjectType>> &classTypes,
+                                      vector<string> extraMethodDefinitions = {}) {
+    shared_ptr<JSONObjectType> ct = make_shared<JSONObjectType>(name, fields, extraMethodDefinitions);
     classTypes.push_back(ct);
     return ct;
 }
@@ -98,7 +99,12 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                 makeField("start", Position),
                                 makeField("end", Position),
                             },
-                            classTypes);
+                            classTypes,
+                            {
+                                "// Returns nullptr if loc does not exist",
+                                "static std::unique_ptr<Range> fromLoc(const core::GlobalState &gs, core::Loc loc);",
+                                "core::Loc toLoc(const core::GlobalState &gs, core::FileRef file);",
+                            });
 
     auto Location = makeObject("Location",
                                {

@@ -631,6 +631,7 @@ public:
 
 class JSONObjectType final : public JSONClassType {
 private:
+    std::vector<std::string> extraMethodDefinitions;
     std::vector<std::shared_ptr<FieldDef>> fieldDefs;
     std::vector<std::shared_ptr<FieldDef>> getRequiredFields() {
         std::vector<std::shared_ptr<FieldDef>> reqFields;
@@ -641,8 +642,9 @@ private:
     }
 
 public:
-    JSONObjectType(std::string_view typeName, std::vector<std::shared_ptr<FieldDef>> fieldDefs)
-        : JSONClassType(typeName), fieldDefs(fieldDefs) {}
+    JSONObjectType(std::string_view typeName, std::vector<std::shared_ptr<FieldDef>> fieldDefs,
+                   std::vector<std::string> extraMethodDefinitions)
+        : JSONClassType(typeName), extraMethodDefinitions(extraMethodDefinitions), fieldDefs(fieldDefs) {}
 
     BaseKind getCPPBaseKind() const {
         return BaseKind::ObjectKind;
@@ -698,6 +700,7 @@ public:
         }
         fmt::format_to(
             out, "std::unique_ptr<rapidjson::Value> toJSONValue(rapidjson::MemoryPoolAllocator<> &alloc) const;\n");
+        fmt::format_to(out, "{}\n", fmt::join(extraMethodDefinitions.begin(), extraMethodDefinitions.end(), "\n"));
         fmt::format_to(out, "}};\n");
     }
 
