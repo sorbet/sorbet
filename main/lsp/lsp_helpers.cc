@@ -129,7 +129,8 @@ LSPLoop::extractLocations(const core::GlobalState &gs,
         }
     }
     // Dedupe locations
-    fast_sort(locations, [](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return *a < *b; });
+    fast_sort(locations,
+              [](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
     locations.resize(std::distance(locations.begin(),
                                    std::unique(locations.begin(), locations.end(),
                                                [](const unique_ptr<Location> &a,

@@ -121,10 +121,6 @@ int Range::cmp(const Range &b) const {
     return end->cmp(*b.end);
 }
 
-bool Range::operator<(const Range &b) const {
-    return cmp(b) < 0;
-}
-
 unique_ptr<Range> Range::copy() const {
     return make_unique<Range>(start->copy(), end->copy());
 }
@@ -137,20 +133,12 @@ int Location::cmp(const Location &b) const {
     return range->cmp(*b.range);
 }
 
-bool Location::operator<(const Location &b) const {
-    return cmp(b) < 0;
-}
-
 int Position::cmp(const Position &b) const {
     const int lineCmp = line - b.line;
     if (lineCmp != 0) {
         return lineCmp;
     }
     return character - b.character;
-}
-
-bool Position::operator<(const Position &b) const {
-    return cmp(b) < 0;
 }
 
 unique_ptr<Position> Position::copy() const {

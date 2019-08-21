@@ -98,7 +98,7 @@ string uriToFilePath(string_view prefixUrl, string_view uri) {
 RangeAssertion::RangeAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine)
     : filename(filename), range(move(range)), assertionLine(assertionLine) {}
 
-int RangeAssertion::compare(string_view otherFilename, const Range &otherRange) {
+int RangeAssertion::matches(string_view otherFilename, const Range &otherRange) {
     const int filenamecmp = filename.compare(otherFilename);
     if (filenamecmp != 0) {
         return filenamecmp;
@@ -117,16 +117,16 @@ int RangeAssertion::compare(string_view otherFilename, const Range &otherRange) 
     return range->cmp(otherRange);
 }
 
-bool RangeAssertion::operator<(const RangeAssertion &b) const {
+int RangeAssertion::cmp(const RangeAssertion &b) const {
     const int filenameCmp = filename.compare(b.filename);
     if (filenameCmp != 0) {
-        return filenameCmp < 0;
+        return filenameCmp;
     }
     const int rangeCmp = range->cmp(*b.range);
     if (rangeCmp != 0) {
-        return rangeCmp < 0;
+        return rangeCmp;
     }
-    return toString().compare(b.toString()) < 0;
+    return toString().compare(b.toString());
 }
 
 ErrorAssertion::ErrorAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message,
@@ -269,8 +269,9 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
     }
 
     // Sort assertions in (filename, range, message) order
-    fast_sort(assertions,
-              [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool { return *a < *b; });
+    fast_sort(assertions, [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
+        return a->cmp(*b) < 0;
+    });
 
     return assertions;
 }
@@ -424,7 +425,8 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         return;
     }
 
-    fast_sort(locations, [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return *a < *b; });
+    fast_sort(locations,
+              [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
 
     auto expectedLocationsIt = allLocs.begin();
     auto actualLocationsIt = locations.begin();
@@ -551,7 +553,7 @@ string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceF
 }
 
 bool isDuplicateDiagnostic(string_view filename, ErrorAssertion *assertion, const Diagnostic &d) {
-    return assertion && assertion->matchesDuplicateErrors && assertion->compare(filename, *d.range) == 0 &&
+    return assertion && assertion->matchesDuplicateErrors && assertion->matches(filename, *d.range) == 0 &&
            d.message.find(assertion->message) != string::npos;
 }
 
@@ -560,8 +562,9 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
                               map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
                               string errorPrefix) {
     // Sort input error assertions so they are in (filename, line, column) order.
-    fast_sort(errorAssertions,
-              [](const shared_ptr<ErrorAssertion> &a, const shared_ptr<ErrorAssertion> &b) -> bool { return *a < *b; });
+    fast_sort(errorAssertions, [](const shared_ptr<ErrorAssertion> &a, const shared_ptr<ErrorAssertion> &b) -> bool {
+        return a->cmp(*b) < 0;
+    });
 
     auto assertionsIt = errorAssertions.begin();
 
@@ -607,7 +610,7 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
                 lastAssertion = nullptr;
             }
 
-            const int cmp = assertion->compare(filename, *diagnostic->range);
+            const int cmp = assertion->matches(filename, *diagnostic->range);
             if (cmp > 0) {
                 // Diagnostic comes *before* this assertion, so we don't
                 // have an assertion that matches the diagnostic.
@@ -871,9 +874,9 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         string actualEditedFileContents = string(file->source());
 
         // First, sort the edits by increasing starting location and verify that none overlap.
-        fast_sort(c->edits, [](const auto &l, const auto &r) -> bool { return *l->range < *r->range; });
+        fast_sort(c->edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
         for (u4 i = 1; i < c->edits.size(); i++) {
-            ASSERT_TRUE(*c->edits[i - 1]->range->end < *c->edits[i]->range->start)
+            ASSERT_LT(c->edits[i - 1]->range->end->cmp(*c->edits[i]->range->start), 0)
                 << fmt::format("Received quick fix edit\n{}\nthat overlaps edit\n{}\nThe test runner does not support "
                                "overlapping autocomplete edits, and it's likely that this is a bug.",
                                c->edits[i - 1]->toJSON(), c->edits[i]->toJSON());

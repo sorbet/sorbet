@@ -775,7 +775,7 @@ TEST_P(LSPTest, All) {
             // Sort assertions in (filename, range) order
             fast_sort(entryAssertions,
                       [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
-                          return a->compare(b->filename, *b->range) < 0;
+                          return a->cmp(*b) < 0;
                       });
 
             auto &defAssertions = entry.second.first;

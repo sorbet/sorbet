@@ -95,7 +95,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                classTypes,
                                {
                                    "int cmp(const Position &b) const;",
-                                   "bool operator <(const Position &b) const;",
                                    "std::unique_ptr<Position> copy() const;",
                                });
 
@@ -110,7 +109,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                 "static std::unique_ptr<Range> fromLoc(const core::GlobalState &gs, core::Loc loc);",
                                 "core::Loc toLoc(const core::GlobalState &gs, core::FileRef file) const;",
                                 "int cmp(const Range &b) const;",
-                                "bool operator <(const Range &b) const;",
                                 "std::unique_ptr<Range> copy() const;",
                             });
 
@@ -122,7 +120,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                classTypes,
                                {
                                    "int cmp(const Location &b) const;",
-                                   "bool operator <(const Location &b) const;",
                                });
 
     auto DiagnosticRelatedInformation = makeObject("DiagnosticRelatedInformation",

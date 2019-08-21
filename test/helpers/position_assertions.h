@@ -64,12 +64,12 @@ public:
     RangeAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine);
     virtual ~RangeAssertion() = default;
 
-    /** Compares this assertion's filename and range with the given filename and range. Returns 0 if it matches, a
-     * negative int if range comes before otherRange, and a positive int if otherRange comes before range. Unlike
-     * Range.cmp, this function supports line-only ranges. */
-    int compare(std::string_view otherFilename, const Range &otherRange);
+    /** Checks if the provided filename and range matches the assertion. Returns 0 if they match, a
+     * negative int if they come after, and a positive int if they come before. Unlike
+     * `cmp`, this function has special logic for line-only ranges. */
+    int matches(std::string_view otherFilename, const Range &otherRange);
 
-    bool operator<(const RangeAssertion &b) const;
+    int cmp(const RangeAssertion &b) const;
 
     // Returns a Location object for this assertion's filename and range.
     std::unique_ptr<Location> getLocation(std::string_view uriPrefix);
