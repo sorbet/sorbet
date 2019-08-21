@@ -1,5 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Final Methods, Classes, and Modules · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Sorbet supports final methods, classes, and modules.&lt;/p&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Final Methods, Classes, and Modules · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;Sorbet supports final methods, classes, and modules.&lt;/p&gt;
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Final Methods, Classes, and Modules · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Sorbet supports marking methods, classes, and modules &amp;quot;final&amp;quot;, which limits how&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Final Methods, Classes, and Modules · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;Sorbet supports marking methods, classes, and modules &amp;quot;final&amp;quot;, which limits how&lt;/p&gt;
 "/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
               (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -8,7 +8,7 @@
 
               ga('create', 'UA-119877071-2', 'auto');
               ga('send', 'pageview');
-            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Type System</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">Typed Structs</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/final">Final Methods, Classes, and Modules</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/metaprogramming-plugins">Metaprogramming plugins</a></li></ul></div></div></section></div><script>
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Type System</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/metaprogramming-plugins">Metaprogramming plugins</a></li></ul></div></div></section></div><script>
             var coll = document.getElementsByClassName('collapsible');
             var checkActiveCategory = true;
             for (var i = 0; i < coll.length; i++) {
@@ -64,154 +64,197 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/final.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Final Methods, Classes, and Modules</h1></header><article><div><span><p>Sorbet supports final methods, classes, and modules.</p>
-<blockquote>
-<p><strong>Note</strong>: Some of the support for final is only implemented using the runtime
-system. Support for these checks in the static system is planned for the
-future.</p>
-</blockquote>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/final.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Final Methods, Classes, and Modules</h1></header><article><div><span><p>Sorbet supports marking methods, classes, and modules &quot;final&quot;, which limits how
+they can be overridden and extended, making some patterns easier to reason about
+and depend on.</p>
+<p>In this doc we’ll answer:</p>
+<ul>
+<li>What does it mean for a method to be final?</li>
+<li>What about final classes and modules?</li>
+<li>What are some use cases for final method and classes?</li>
+</ul>
+<p>Before we get into the in-depth details, here’s a full snippet that demonstrates
+the syntax for all these features at once:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+<span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
+
+<span class="hljs-comment"># (0) One-time setup for final:</span>
+T::Configuration.enable_final_checks_on_hooks
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  extend T::Sig      <span class="hljs-comment"># (Brings `sig` into scope)</span>
+  extend T::Helpers  <span class="hljs-comment"># (Brings `final!` into scope)</span>
+
+  final!             <span class="hljs-comment"># (1) Final class (can't be subclassed)</span>
+
+  sig(<span class="hljs-symbol">:final</span>) {void} <span class="hljs-comment"># (2) Final method (can't be overridden / redefined)</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="final-methods"></a><a href="#final-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Final methods</h2>
-<h3><a class="anchor" aria-hidden="true" id="defining-a-final-method"></a><a href="#defining-a-final-method" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining a final method</h3>
+<p>Final methods can’t be overriden or redefined. This is a powerful guarantee: it
+means that inheritance can’t affect what code will be run when calling a method
+on a class.</p>
+<p>For example, it might be a good idea to mark methods that acquire a lock to a
+shared resource as final so that the class can’t be subclassed and tampered with
+to avoid acquiring the locks. Marking these methods final reduces the scope of
+correctness the original author has to worry about.</p>
+<p>To start using final, there’s some one-time, per-project setup:</p>
 <ol>
 <li>Call <code>T::Configuration.enable_final_checks_on_hooks</code> at least once.</li>
-<li>Add <code>extend T::Sig</code> to the class or module.</li>
-<li>Add a sig for the method, with the additional modifier <code>:final</code> passed as an
-argument to <code>sig</code>.</li>
-<li>Define the method as usual.</li>
 </ol>
-<pre><code class="hljs css language-ruby">T::Configuration.enable_final_checks_on_hooks
+<p>Once that’s done, making a method final is straightforward:</p>
+<ol start="2">
+<li>Use the syntax <code>sig(:final)</code> above a method to declare it final:</li>
+</ol>
+<p>Here’s a full example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
+<span class="hljs-comment"># (1) Call this once per project, ideally right after `require 'sorbet-runtime'`</span>
+T::Configuration.enable_final_checks_on_hooks
 
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">HasFinalMethod</span></span>
   extend T::Sig
+
+  <span class="hljs-comment"># (2) The special `sig(:final)` syntax declares this method final:</span>
   sig(<span class="hljs-symbol">:final</span>) {void}
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<h3><a class="anchor" aria-hidden="true" id="semantics-of-final-methods"></a><a href="#semantics-of-final-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Semantics of final methods</h3>
-<p>Final methods must be defined exactly once on their enclosing module or class.</p>
+<p>Final methods must be defined exactly once on their enclosing module or class,
+and can never be overridden in a subclass or module. For example, here are
+things that are errors:</p>
+<blockquote>
+<p><strong>Note</strong>: Some of the features of final methods are only implemented in the
+runtime system. Support for these checks in the static system is planned for
+the future.</p>
+</blockquote>
 <pre><code class="hljs css language-ruby">T::Configuration.enable_final_checks_on_hooks
 
-<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">HasFinalMethod</span></span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   extend T::Sig
   sig(<span class="hljs-symbol">:final</span>) {void}
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
 
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error: Redefining final method</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error: Overriding final method</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Final methods must not be overridden by any class or module that includes,
-extends, or inherits the class or module in which the final method was defined.</p>
-<pre><code class="hljs css language-ruby">T::Configuration.enable_final_checks_on_hooks
-
-<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">HasFinalMethod</span></span>
+<p>Note in particular that stubbing a method is considered a method redefinition in
+the Ruby runtime, and is therefore not allowed on final methods. This is a
+feature, and is unlikely to change:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyFeature</span></span>
   extend T::Sig
-  sig(<span class="hljs-symbol">:final</span>) {void}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+  sig(<span class="hljs-symbol">:final</span>) {returns(T::Boolean)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">enabled</span>;</span> <span class="hljs-literal">false</span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
-<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">BadModule</span></span>
-  <span class="hljs-keyword">include</span> HasFinalMethod
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
-<span class="hljs-keyword">end</span>
+<span class="hljs-comment"># error: Redefining final method</span>
+MyFeature.stubs(<span class="hljs-symbol">:enabled</span>).returns(<span class="hljs-literal">true</span>)
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="final-classes-and-modules"></a><a href="#final-classes-and-modules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Final classes and modules</h2>
-<h3><a class="anchor" aria-hidden="true" id="defining-a-final-class-or-module"></a><a href="#defining-a-final-class-or-module" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining a final class or module</h3>
+<p>In the same spirit as final methods, final classes cannot be subclassed, and
+final modules cannot be included or extended. But more than that, every method
+in a final class or module must be made into a final method.</p>
+<p>It might seem redundant to require final classes to mark all methods final too,
+(“How could a method be overriden in a subclass if the act of subclassing is
+prohibited?”) but the answer is (<a href="/docs/gradual">like many</a>) that this protects
+against untyped code. This guarantees that untyped or ignored code can’t
+redefine methods at runtime in a class that is marked <code>final!</code> statically.</p>
+<p>Final classes are good for “plain old data” classes, as well as classes or
+modules that are meant be no more than namespaces for functions (i.e., those
+which don’t want to have to worry about being affected by inheritance).</p>
+<p>As mentioned above, to start using final, there’s some one-time, per-project
+setup:</p>
 <ol>
 <li>Call <code>T::Configuration.enable_final_checks_on_hooks</code> at least once.</li>
-<li>Add <code>extend T::Helpers</code> in the body of the class or module.</li>
-<li>Call <code>final!</code> in the body of the class or module.</li>
 </ol>
-<pre><code class="hljs css language-ruby">T::Configuration.enable_final_checks_on_hooks
+<p>And once that’s done, making a class or module final is straightforward:</p>
+<ol start="2">
+<li>Add <code>extend T::Helpers</code> to the class (or module) body.</li>
+<li>Call <code>final!</code> at the top-level of the class (or module).</li>
+</ol>
+<p>Here’s a full example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
+<span class="hljs-comment"># (1) Call this once per project, ideally right after `require 'sorbet-runtime'`</span>
+T::Configuration.enable_final_checks_on_hooks
 
-<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">FinalModule</span></span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FinalParentClass</span></span>
+  <span class="hljs-comment"># (2) Bring `final!` into scope:</span>
   extend T::Helpers
-  final!
-<span class="hljs-keyword">end</span>
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FinalClass</span></span>
-  extend T::Helpers
-  final!
-<span class="hljs-keyword">end</span>
-</code></pre>
-<h3><a class="anchor" aria-hidden="true" id="semantics-of-final-classes-and-modules"></a><a href="#semantics-of-final-classes-and-modules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Semantics of final classes and modules</h3>
-<p>Final classes and modules must not be included, extended, or inherited.</p>
-<pre><code class="hljs css language-ruby">T::Configuration.enable_final_checks_on_hooks
-
-<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">FinalModule</span></span>
-  extend T::Helpers
-  final!
-<span class="hljs-keyword">end</span>
-
-<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">BadModule</span></span>
-  <span class="hljs-keyword">include</span> FinalModule <span class="hljs-comment"># error</span>
-  extend FinalModule <span class="hljs-comment"># error</span>
-<span class="hljs-keyword">end</span>
-
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FinalClass</span></span>
-  extend T::Helpers
-  final!
-<span class="hljs-keyword">end</span>
-
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BadClass</span> &lt; FinalClass;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
-</code></pre>
-<p>Every method defined in a final class or module must be explicitly declared as
-final.</p>
-<pre><code class="hljs css language-ruby">T::Configuration.enable_final_checks_on_hooks
-
-<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">FinalModule</span></span>
-  extend T::Helpers
+  <span class="hljs-comment"># (3) Use `final!` to declare this class final</span>
   final!
 
+  <span class="hljs-comment"># (4) If there are any methods in this class, they must be final</span>
   sig(<span class="hljs-symbol">:final</span>) {void}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">good_final_sig</span>;</span> <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
 
-  sig {void}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bad_regular_sig</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
+<span class="hljs-comment"># (5) Final classes can't be subclassed:</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChildClass</span> &lt; FinalParentClass;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error!</span>
 
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bad_no_sig</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">FinalModule</span></span>
+  extend T::Helpers
+  final!
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MixesInFinalModule</span></span>
+  <span class="hljs-comment"># (6) Final modules can't be included or extended:</span>
+  <span class="hljs-keyword">include</span> FinalModule <span class="hljs-comment"># error!</span>
+  extend  FinalModule <span class="hljs-comment"># error!</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<h2><a class="anchor" aria-hidden="true" id="final-method-syntax"></a><a href="#final-method-syntax" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Final method syntax</h2>
-<p>Note that the syntax for final methods is different from the usual syntax for
-declaring things as abstract, override, implementation, etc.</p>
-<pre><code class="hljs css language-ruby">sig {abstract.void}
+<h2><a class="anchor" aria-hidden="true" id="a-note-on-syntax"></a><a href="#a-note-on-syntax" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>A note on syntax</h2>
+<blockquote>
+<p><strong>Note</strong>: This section is rather technical and is not relevant to the question
+of “how do I use final methods and classes?”</p>
+</blockquote>
+<p>The syntax for final methods is different from the syntax for things like
+abstract methods:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># These attributes are inside the block:</span>
+sig {overridable.void}
 sig {override.void}
+sig {abstract.void}
 sig {implementation.void}
+
+<span class="hljs-comment"># But this one is outside the block:</span>
 sig(<span class="hljs-symbol">:final</span>) {void}
 </code></pre>
-<p>The main reason for this difference is that we want to know that a method is
-final before running the block inside the sig.</p>
-<p>If the syntax for marking a method final was to have a <code>final.</code> builder put
-inside the block to sig, similar to <code>abstract.</code>, <code>override.</code>, etc, then, if we
-wanted to know whether a method has been marked final or not, then we would need
-to run the block in the <code>sig</code>.</p>
-<p>The problem is, we would like to know whether a method is final or not in the
-runtime &quot;immediately&quot;, i.e. before the method has even been called. This is at
-odds with the semantics of the block to <code>sig</code>: the <code>sig</code> block is lazy, and the
-code inside it is not run until the first time the method is called.</p>
-<p>That is, if we wanted to use a <code>final.</code> builder inside the block to <code>sig.</code>, and
-also wanted to know whether a method is final &quot;immediately&quot;, then we would be
-forced to run the <code>sig</code> block immediately and not defer it until later. But, if
-we were to force the sig block to be run immediately after saying &quot;sig&quot;, then we
-would lose the benefits of having the sig block be lazy.</p>
-<p>We intentionally want to keep the block to sig lazy, because that means, for
-instance, you may reference constants inside the <code>sig</code> block that aren’t yet
-defined but will be defined later.</p>
-<h2><a class="anchor" aria-hidden="true" id="enabling-all-of-the-runtime-checks"></a><a href="#enabling-all-of-the-runtime-checks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Enabling all of the runtime checks</h2>
-<p>Before using final in a project, we recommend opting in to all of the runtime
-checks.</p>
-<p>After requiring <code>sorbet-runtime</code>, but before declaring anything as final, call
-<code>T::Configuration.enable_final_checks_on_hooks</code>.</p>
-<p>This will install some runtime hooks on <code>Module#included</code>, <code>Module#extended</code>,
-and <code>Class#inherited</code>, to allow us to do more runtime checking for correct final
-usage.</p>
+<p>The reason for this difference is that this gives us stronger runtime
+guarantees. In general, any Ruby method might be overridden at any time, with no
+warning. So the <strong>absence</strong> of an <code>overridable</code> or <code>abstract</code> attribute on a
+method signature does not guarantee that a method is never overriden. Given
+these circumstances, it’s fine for override / abstract checks to be done lazily,
+because the stakes for eliding an error for them wrong is relatively low.</p>
+<p>But for final methods, the stakes are higher for missing an error. We aspire to
+have Sorbet’s type annotations be strong enough to one day enable code to
+<strong>run</strong> faster. In particular, known final methods can be made to execute much
+faster than otherwise, because calling the method shouldn’t need to do complex
+virtual dispatch. Also, final methods often must be final from a correctness
+standpoint (recall our earlier example of methods which acquire locks).</p>
+<p>Thus, we’ve taken special care to make sure final methods can’t be tampered
+with, even in the runtime. The <code>sig(:final)</code> syntax is an artifact of this
+implementation (method signatures are usually lazily evaluated, to avoid
+circular constant dependencies and make code load faster).</p>
+<p>By moving the <code>final</code> attribute outside the block, <code>sorbet-runtime</code> can learn
+that a method is final without having to force the block to execute.</p>
+<h2><a class="anchor" aria-hidden="true" id="more-on-t-configurationenable_final_checks_on_hooks"></a><a href="#more-on-t-configurationenable_final_checks_on_hooks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>More on <code>T::Configuration.enable_final_checks_on_hooks</code></h2>
+<p>Some runtime final checks can only be checked by installing global monkey
+patches. Users who want 100% confidence that final methods and classes behave
+like described in this doc will want to opt into these checks. But for example
+libraries or other users may not want to enable these monkey patches for
+interoperability concerns.</p>
+<p>Specifically, calling <code>enable_final_checks_on_hooks</code> will install runtime hooks
+on <code>Module#included</code>, <code>Module#extended</code>, and <code>Class#inherited</code>.</p>
 <p>If these checks are enabled, any classes or modules that define their own
-<code>included</code>, <code>extended</code>, or <code>inherited</code> hooks should take care to always call
-<code>super</code>.</p>
+<code>included</code>, <code>extended</code>, or <code>inherited</code> hooks should take care to <strong>always</strong> call
+<code>super</code>!</p>
 <p>If these checks are not enabled, then some but not all of the runtime checks for
-final will be run. For instance, in the following example, we violate the
-requirements of final, but the violation is not a runtime error because we did
-not call <code>T::Configuration.enable_final_checks_on_hooks</code>:</p>
+final will be run. For instance, the following example violates the requirements
+of final, but the violation is not reported at runtime:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">M</span></span>
   extend T::Sig
   sig(<span class="hljs-symbol">:final</span>) {returns(Integer)}
@@ -220,19 +263,20 @@ not call <code>T::Configuration.enable_final_checks_on_hooks</code>:</p>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span></span>
   <span class="hljs-keyword">include</span> M
+
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-number">2</span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 puts C.new.foo
 </code></pre>
-<p>At runtime, this does not raise and prints 2, showing that we have violated the
-guarantees of final. This is why we strongly recommend calling
+<p>At runtime, this does not raise and prints 2, showing that a final method has
+been overriden. This is why we strongly recommend calling
 <code>T::Configuration.enable_final_checks_on_hooks</code> before using final.</p>
-<h2><a class="anchor" aria-hidden="true" id="limitations-of-the-statics"></a><a href="#limitations-of-the-statics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Limitations of the statics</h2>
-<p>The following violations of the semantics of “final” are currently not caught by
-the static checks (they are only caught by the runtime checks):</p>
+<h2><a class="anchor" aria-hidden="true" id="known-static-limitations"></a><a href="#known-static-limitations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Known static limitations</h2>
+<p>Some of the guarantees of final are only implemented at runtime. This section
+aims to document those which are most likely to be encountered in normal usage:</p>
 <ol>
-<li><p>When a method is redefined, as in:</p>
+<li><p>When a method is redefined with matching arguments, as in:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 T::Configuration.enable_final_checks_on_hooks
 
@@ -240,7 +284,7 @@ T::Configuration.enable_final_checks_on_hooks
   extend T::Sig
   sig(<span class="hljs-symbol">:final</span>) {void}
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># runtime-only error: Redefining final method</span>
 <span class="hljs-keyword">end</span>
 </code></pre></li>
 <li><p>When a method is overridden via including two conflicting modules, as in:</p>
@@ -261,11 +305,25 @@ T::Configuration.enable_final_checks_on_hooks
 
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Bad</span></span>
   <span class="hljs-keyword">include</span> A
-  <span class="hljs-keyword">include</span> B
+  <span class="hljs-keyword">include</span> B <span class="hljs-comment"># runtime-only error: Overriding final method from `A`</span>
 <span class="hljs-keyword">end</span>
 </code></pre></li>
 </ol>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/abstract"><span class="arrow-prev">← </span><span>Abstract Classes and Interfaces</span></a><a class="docs-next button" href="/docs/override-checking"><span>Override Checking</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#final-methods">Final methods</a><ul class="toc-headings"><li><a href="#defining-a-final-method">Defining a final method</a></li><li><a href="#semantics-of-final-methods">Semantics of final methods</a></li></ul></li><li><a href="#final-classes-and-modules">Final classes and modules</a><ul class="toc-headings"><li><a href="#defining-a-final-class-or-module">Defining a final class or module</a></li><li><a href="#semantics-of-final-classes-and-modules">Semantics of final classes and modules</a></li></ul></li><li><a href="#final-method-syntax">Final method syntax</a></li><li><a href="#enabling-all-of-the-runtime-checks">Enabling all of the runtime checks</a></li><li><a href="#limitations-of-the-statics">Limitations of the statics</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<h2><a class="anchor" aria-hidden="true" id="what-s-next"></a><a href="#what-s-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
+<ul>
+<li><p><a href="/docs/sealed">Sealed Classes and Modules</a></p>
+<p>Sealed classes are similar to final classes in that they restrict who’s
+allowed to subclass a given class, but they can be used to enforce slightly
+different guarantees.</p></li>
+<li><p><a href="/docs/abstract">Abstract Classes and Interfaces</a></p>
+<p>Marking methods as <code>abstract</code> and requiring child classes to implement them is
+a powerful tool for code organization and correctness. Learn more about
+Sorbet’s support for abstract classes and interfaces.</p></li>
+<li><p><a href="/docs/override-checking">Override Checking</a></p>
+<p>When override checking is <strong>desired</strong>, Sorbet has ways to declare that intent
+as well.</p></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/abstract"><span class="arrow-prev">← </span><span>Abstract Classes &amp; Interfaces</span></a><a class="docs-next button" href="/docs/override-checking"><span>Override Checking</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#final-methods">Final methods</a></li><li><a href="#final-classes-and-modules">Final classes and modules</a></li><li><a href="#a-note-on-syntax">A note on syntax</a></li><li><a href="#more-on-t-configurationenable_final_checks_on_hooks">More on <code>T::Configuration.enable_final_checks_on_hooks</code></a></li><li><a href="#known-static-limitations">Known static limitations</a></li><li><a href="#what-s-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;

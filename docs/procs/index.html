@@ -1,7 +1,7 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Proc Types · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;blockquote&gt;
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Blocks, Procs and Lambda Types · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;blockquote&gt;
 &lt;p&gt;TODO: This page is still a fragment. Contributions welcome!&lt;/p&gt;
 &lt;/blockquote&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Proc Types · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;blockquote&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Blocks, Procs and Lambda Types · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;blockquote&gt;
 &lt;p&gt;TODO: This page is still a fragment. Contributions welcome!&lt;/p&gt;
 &lt;/blockquote&gt;
 "/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
@@ -12,7 +12,7 @@
 
               ga('create', 'UA-119877071-2', 'auto');
               ga('send', 'pageview');
-            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Type System</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">Typed Structs</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/procs">Proc Types</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes and Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods, Classes, and Modules</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/metaprogramming-plugins">Metaprogramming plugins</a></li></ul></div></div></section></div><script>
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Type System</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/metaprogramming-plugins">Metaprogramming plugins</a></li></ul></div></div></section></div><script>
             var coll = document.getElementsByClassName('collapsible');
             var checkActiveCategory = true;
             for (var i = 0; i < coll.length; i++) {
@@ -68,7 +68,7 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/procs.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Proc Types</h1></header><article><div><span><blockquote>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/procs.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Blocks, Procs and Lambda Types</h1></header><article><div><span><blockquote>
 <p>TODO: This page is still a fragment. Contributions welcome!</p>
 </blockquote>
 <pre><code class="hljs css language-ruby">T.proc.params(<span class="hljs-symbol">arg0:</span> Arg0Type, <span class="hljs-symbol">arg1:</span> Arg2Type, ...).returns(ReturnType)
@@ -79,89 +79,122 @@ returns <code>ReturnType</code>.</p>
 <p>At present, all parameters are assumed to be required positional parameters. We
 may add support for optional or keyword parameters in the future, if there is
 demand.</p>
-<p>Types of procs are not checked at all at runtime (the same way methods are), and
+<p>Types of procs are not checked at all at runtime (whereas methods are), and
 serve only as hints to <code>srb</code> statically (and for documentation).</p>
-<h2><a class="anchor" aria-hidden="true" id="writing-annotations-for-block-parameters"></a><a href="#writing-annotations-for-block-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Writing annotations for block parameters</h2>
-<p>When writing signatures for blocks, you can define types for the block
-parameters, as well as what the code inside the block should return.</p>
-<p>For example, if you want to type a method with a block, and that block has an
-integer parameter and doesn’t return anything, you can write a sig with a
-<code>T.proc</code> like <code>T.proc.params(arg0: Integer).void</code>.</p>
+<p>Here’s a larger example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
-sig { params(<span class="hljs-symbol">block:</span> T.proc.params(<span class="hljs-symbol">arg0:</span> Integer).void).void }
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;block)</span></span>; <span class="hljs-keyword">end</span>
 
+<span class="hljs-comment"># (1) Declare the type of a block arg with `T.proc`:</span>
+sig {params(<span class="hljs-symbol">blk:</span> T.proc.params(<span class="hljs-symbol">arg0:</span> Integer).void).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span>
+  x = T.let(<span class="hljs-string">'not an int'</span>, T.untyped)
+
+  <span class="hljs-comment"># (2) The `T.proc` annotation is not checked at runtime.</span>
+  <span class="hljs-comment">#     (This won't raise even though x is not an Integer)</span>
+  <span class="hljs-keyword">yield</span> x
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># (3) Sorbet incorporates the `T.proc` annotation into what it knows statically</span>
 foo <span class="hljs-keyword">do</span> <span class="hljs-params">|x|</span>
   T.reveal_type(x) <span class="hljs-comment"># Revealed type: Integer</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>If you want to type a method that lets you write code to determine whether an
-input is valid, you can require that the block returns a boolean.</p>
+<h2><a class="anchor" aria-hidden="true" id="optional-blocks"></a><a href="#optional-blocks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Optional blocks</h2>
+<p>Use <code>T.nilable</code> to declare that a method can take an optional block:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
-sig <span class="hljs-keyword">do</span>
-  params(
-    <span class="hljs-symbol">block:</span> T.proc.params(<span class="hljs-symbol">arg0:</span> T.untyped).returns(T::Boolean)
-  ).void
-<span class="hljs-keyword">end</span>
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">custom_validator</span><span class="hljs-params">(&amp;block)</span></span>; <span class="hljs-keyword">end</span>
 
-<span class="hljs-comment"># We want to validate that the input is always greater than five and less than</span>
-<span class="hljs-comment"># or equal to eight... for some reason.</span>
-custom_validator <span class="hljs-keyword">do</span> <span class="hljs-params">|x|</span>
-  <span class="hljs-keyword">if</span> x &gt; <span class="hljs-number">5</span> &amp;&amp; x &lt;= <span class="hljs-number">8</span>
-    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
-  <span class="hljs-keyword">else</span>
-    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+extend T::Sig
+
+<span class="hljs-comment"># (1) Declare optional block with `T.nilable(...)`:</span>
+sig {params(<span class="hljs-symbol">blk:</span> T.nilable(T.proc.void)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span>
+  T.reveal_type(blk)   <span class="hljs-comment"># Revealed type: `T.nilable(T.proc.void)`</span>
+
+  <span class="hljs-comment"># (2) Use `block_given?` to check whether a method was given a block:</span>
+  <span class="hljs-keyword">if</span> block_given?
+    T.reveal_type(blk) <span class="hljs-comment"># Revealed type: `T.proc.void`</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-comment"># (3) Equivalently:</span>
+  <span class="hljs-keyword">if</span> blk
+    T.reveal_type(blk) <span class="hljs-comment"># Revealed type: `T.proc.void`</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>If a block is optional, it should be wrapped in <code>T.nilable</code> (e.g.
-<code>T.nilable(T.proc.params(arg0: String).void)</code>).</p>
-<h2><a class="anchor" aria-hidden="true" id="annotating-block-parameters-with-yield"></a><a href="#annotating-block-parameters-with-yield" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Annotating block parameters with yield</h2>
-<p>Ruby’s <code>yield</code> keyword can invoke a block without requiring a block argument in
-the parameter list. Even so, it’s a good idea when using Sorbet to name those
-block parameters anyway, because without a local name there’s no way to give the
-block parameter a static type annotation. In fact, at the typed level
-<code># typed: strict</code>, Sorbet will require that all block parameters have names
-<em>even if the methods use</em> <code>yield</code>. For example, Sorbet will <strong>reject</strong> the
-following code snippet because the method uses <code>yield</code> but has not named its
-block parameter, which in turn means that it lacks a declared type in the <code>sig</code>:</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
-sig { void }
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">call_twice</span>  <span class="hljs-comment"># error: Method call_twice uses yield but does not mention a block parameter</span></span>
-  <span class="hljs-keyword">yield</span>
+<p>Because we used <code>block_given?</code> above, Sorbet will know that ouside the <code>if</code>
+expression <code>blk</code> might be <code>nil</code>, while inside the <code>if</code> it’s not <code>nil</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="annotating-methods-that-use-yield"></a><a href="#annotating-methods-that-use-yield" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Annotating methods that use <code>yield</code></h2>
+<p>Ruby’s <code>yield</code> keyword yields control to the provided block even when a method
+declaration doesn’t mention a block parameter:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
   <span class="hljs-keyword">yield</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>This error can be fixed without modifying the method body to use <code>block.call</code>:
-It’s possible to give the method a named block parameter like <code>&amp;blk</code>, and
-<code>yield</code> will still work exactly as it did, invoking the block regardless of
-whether or not it was named. Once the block parameter has a name, it’s in turn
-possible to associate that name with a type:</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
-sig { params(<span class="hljs-symbol">blk:</span> T.proc.void).void }
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">call_twice</span><span class="hljs-params">(&amp;blk)</span></span>
-  <span class="hljs-keyword">yield</span>
+<p>This is valid Ruby, and Sorbet will accept this code too. Implicitly, Sorbet
+will know that the method might accept a block, but it will treat the block
+itself as <code>T.untyped</code>. In order to give a signature to this method, the block
+parameter will need a name:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span> <span class="hljs-comment"># &lt;-</span>
   <span class="hljs-keyword">yield</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
+<p>And once it has a name, the method can be given a sig:</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">blk:</span> T.proc.returns(Integer)).returns(Integer)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span> <span class="hljs-comment"># &lt;-</span>
+  <span class="hljs-keyword">yield</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Note that the <code>yield</code> itself in the method body doesn’t need to change at all.
+Since every Ruby method can only accept one block, both Ruby and Sorbet are able
+to connect the <code>yield</code> call to the <code>blk</code> parameter automatically.</p>
 <h2><a class="anchor" aria-hidden="true" id="modifying-the-self-type"></a><a href="#modifying-the-self-type" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Modifying the self type</h2>
-<p>While blocks are usually evaluated in the context in which they appear, it’s
-possible to use the methods <code>instance_exec</code> and <code>instance_eval</code> to evaluate them
-in some other specified context, which changes the meaning of <code>self</code> in the body
-of that block. To convey this to Sorbet, we add a <code>.bind(...)</code> clause on the
-<code>T.proc</code> type that indicates the context in which the method will be invoked:</p>
+<p>Many Ruby constructs accept a block argument in one context, but then execute it
+in a different context entirely. This means that inside the block, certain
+methods will definitely exist that definitely don’t exist immediately above the
+block.</p>
+<p>In particular, this is precisely how Sorbet’s <code>sig</code> pattern works:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) `params` doesn't exist outside the `sig` block:</span>
+params(<span class="hljs-symbol">x:</span> Integer).void <span class="hljs-comment"># error: Method `params` does not exist</span>
+
+<span class="hljs-comment"># (2) But `params` does exist inside the `sig` block:</span>
+sig <span class="hljs-keyword">do</span>
+  params(<span class="hljs-symbol">x:</span> Integer).void <span class="hljs-comment"># ok!</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>This also happens a lot with certain Rails APIs, etc. Sorbet has direct support
+for this sort of pattern using an extra argument <code>T.proc</code> called <code>.bind</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (0) We're simplifying how `sig` specifically works a bit here,</span>
+<span class="hljs-comment">#     but the general ideas apply.</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">T::Sig</span></span>
+  <span class="hljs-comment"># (1) Use `T.proc.bind` to annotate the context in which the block will run</span>
+  sig {params(<span class="hljs-symbol">blk:</span> T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sig</span><span class="hljs-params">(&amp;blk)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># This comes from a private, internal sorbet-runtime API that implements sigs:</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">T::Private::Method::DeclBuilder</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">params</span><span class="hljs-params">(params)</span></span>; <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns</span><span class="hljs-params">(type)</span></span>; <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">void</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Here’s another example that’s a little more contrived but which shows both the
+method call site and method definition site:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 extend T::Sig
 
-sig { params(<span class="hljs-symbol">blk:</span> T.proc.bind(String).returns(String)).returns(String) }
+<span class="hljs-comment"># (1) Use `.bind(String)` to say "will be run in the context of a String":</span>
+sig {params(<span class="hljs-symbol">blk:</span> T.proc.bind(String).returns(String)).returns(String)}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span>
-  <span class="hljs-string">"Hello"</span>.instance_eval(&amp;blk)
+  <span class="hljs-string">"hello"</span>.instance_exec(&amp;blk)
 <span class="hljs-keyword">end</span>
 
-puts foo { <span class="hljs-keyword">self</span>.upcase }
+puts foo <span class="hljs-keyword">do</span>
+  <span class="hljs-comment"># (2) Sorbet knows that `self.upcase` is available because of the `.bind`</span>
+  <span class="hljs-keyword">self</span>.upcase <span class="hljs-comment"># =&gt; "HELLO"</span>
+<span class="hljs-keyword">end</span>
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/stdlib-generics"><span class="arrow-prev">← </span><span>Arrays &amp; Hashes</span></a><a class="docs-next button" href="/docs/class-of"><span>T.class_of</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#writing-annotations-for-block-parameters">Writing annotations for block parameters</a></li><li><a href="#annotating-block-parameters-with-yield">Annotating block parameters with yield</a></li><li><a href="#modifying-the-self-type">Modifying the self type</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/untyped"><span class="arrow-prev">← </span><span>T.untyped</span></a><a class="docs-next button" href="/docs/abstract"><span>Abstract Classes &amp; Interfaces</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#optional-blocks">Optional blocks</a></li><li><a href="#annotating-methods-that-use-yield">Annotating methods that use <code>yield</code></a></li><li><a href="#modifying-the-self-type">Modifying the self type</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;

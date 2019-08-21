@@ -1,0 +1,252 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Sealed Classes and Modules · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Sorbet supports sealed classes. Sealed classes restrict who’s allowed to&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Sealed Classes and Modules · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;Sorbet supports sealed classes. Sealed classes restrict who’s allowed to&lt;/p&gt;
+"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Type System</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/metaprogramming-plugins">Metaprogramming plugins</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/sealed.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Sealed Classes and Modules</h1></header><article><div><span><p>Sorbet supports sealed classes. Sealed classes restrict who’s allowed to
+subclass a class. This is a considerably advanced feature, but it’s also
+considerably powerful. That being said, if you’re already familiar with the
+concept, here’s what the syntax looks like in Sorbet:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- foo.rb --</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Parent</span></span>
+  extend T::Helpers
+  <span class="hljs-comment"># (1) Mark module as sealed</span>
+  sealed!
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># (2) CAN be included/extended/inherited in `foo.rb`</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child1</span>;</span> <span class="hljs-keyword">include</span> Parent; <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child2</span>;</span> <span class="hljs-keyword">include</span> Parent; <span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">x:</span> Parent).void
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
+  <span class="hljs-keyword">case</span> x
+  <span class="hljs-keyword">when</span> Child1 <span class="hljs-keyword">then</span> <span class="hljs-comment"># ...</span>
+  <span class="hljs-keyword">when</span> Child2 <span class="hljs-keyword">then</span> <span class="hljs-comment"># ...</span>
+  <span class="hljs-comment"># (3) Sealed classes support exhaustiveness</span>
+  <span class="hljs-keyword">else</span> T.absurd(x)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+
+<span class="hljs-comment"># -- bar.rb --</span>
+<span class="hljs-comment"># (4) CANNOT be included/extended/inherited in other files</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BadChild</span>;</span> <span class="hljs-keyword">include</span> Parent; <span class="hljs-keyword">end</span> <span class="hljs-comment"># error!</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="what-s-the-point-of-sealed-classes"></a><a href="#what-s-the-point-of-sealed-classes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s the point of sealed classes?</h2>
+<p>Sealed classes (and modules) let us declare “there are only these subclasses of
+this class.” Consider code that looks like this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NotNeeded</span>;</span> ...; <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Paid</span>;</span>      ...; <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Failed</span>;</span>    ...; <span class="hljs-keyword">end</span>
+
+ChargeAttemptResult = T.type_alias(T.any(NotNeeded, Paid, Failed))
+</code></pre>
+<p>We might be annoyed that the definitions for <code>NotNeeded</code>, <code>Paid</code>, and <code>Failed</code>
+are not intrinsically connected to each other… It’s only after defining them
+that we’ve linked them with an ad-hoc type alias, declaring a
+<code>ChargeAttemptResult</code> as the union of those three classes.</p>
+<p>We could use a parent class or module (or even an <a href="/docs/abstract">interface</a>) to
+relate these classes to each other:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">ChargeAttemptResult</span>;</span> <span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NotNeeded</span>;</span> <span class="hljs-keyword">include</span> ChargeAttemptResult; <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Paid</span>;</span>      <span class="hljs-keyword">include</span> ChargeAttemptResult; <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Failed</span>;</span>    <span class="hljs-keyword">include</span> ChargeAttemptResult; <span class="hljs-keyword">end</span>
+</code></pre>
+<p>But this would mean we lose out on <a href="/docs/exhaustiveness">exhaustiveness</a>: there’s
+no way for Sorbet to know that <code>ChargeAttemptResult</code> is only included in these
+classes.</p>
+<p>But that’s precisely what sealed classes let us declare to Sorbet:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">ChargeAttemptResult</span></span>
+  extend T::Helpers
+  sealed!     <span class="hljs-comment"># ← Adding `sealed!` here</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># ... same classes from before ...</span>
+</code></pre>
+<p>Now Sorbet will do two things:</p>
+<ul>
+<li>It will only allow <code>ChargeAttemptResult</code> to be included into classes defined
+in this file.</li>
+<li>It will will feed information into Sorbet’s
+<a href="/docs/flow-sensitive">control flow-sensitive typing</a> to check that all
+subclasses are handled exhaustively.</li>
+</ul>
+<p>Specifically, here’s what it would look like to <code>case</code> over this sealed class:</p>
+<pre><code class="hljs css language-ruby">T.reveal_type(x)                     <span class="hljs-comment"># type:  ChargeAttemptResult</span>
+<span class="hljs-keyword">case</span> x
+<span class="hljs-keyword">when</span> NotNeeded <span class="hljs-keyword">then</span> T.reveal_type(x) <span class="hljs-comment"># type:  NotNeeded</span>
+<span class="hljs-keyword">when</span> Paid      <span class="hljs-keyword">then</span> T.reveal_type(x) <span class="hljs-comment"># type:  Paid</span>
+<span class="hljs-keyword">else</span> T.absurd(x)                     <span class="hljs-comment"># error: Missing case for `Failed`</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Sealed classes are a powerful feature. They let us declare intentional,
+definition-side interfaces, without sacrificing flow-sensitive typing or
+exhaustiveness.</p>
+<h2><a class="anchor" aria-hidden="true" id="sealed-classes-vs-sealed-modules"></a><a href="#sealed-classes-vs-sealed-modules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sealed classes vs sealed modules</h2>
+<p>Throughout this doc we’ve been talking about sealed classes and sealed modules
+as if they were interchangable. But they’re actually different in one key way:</p>
+<ul>
+<li>Sealed modules only require being declared <code>sealed!</code></li>
+<li>Sealed classes require being declared both <code>sealed!</code> and <code>abstract!</code></li>
+</ul>
+<p>Modules can’t be instantiated, but classes can. So in order to ensure that
+something exhaustively covers all the subclasses and can ignore handling the
+parent class, it must be marked abstract so that Sorbet knows a value of that
+type could never need to be created in the first place.</p>
+<p>To re-iterate:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">SealedModule</span></span>
+  extend T::Helpers
+  sealed!
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SealedClass</span></span>
+  extend T::Helpers
+  abstract!
+  sealed!
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="approximating-algebraic-data-types"></a><a href="#approximating-algebraic-data-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Approximating algebraic data types</h2>
+<p>Given sealed classes, Sorbet is powerful enough to model algebraic data types
+the same way as other object-oriented languages model them, because it also has
+record types (<code>T::Struct</code>). An “algebraic data type” is basically a way to say
+that a type is composed of a fixed set of cases, and in each case, a fixed
+number of fields are available.</p>
+<p>For example, here’s an example that combines <code>T::Struct</code> with <code>sealed!</code> modules
+to create an algebraic data type representing an invoice, which could be in a
+number of different states:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">InvoiceState</span></span>
+  extend T::Helpers
+  sealed!
+
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Drafted</span> &lt; T::Struct</span>
+    <span class="hljs-keyword">include</span> InvoiceState
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Opened</span> &lt; T::Struct</span>
+    <span class="hljs-keyword">include</span> InvoiceState
+    prop <span class="hljs-symbol">:due_at</span>, Time
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Paid</span> &lt; T::Struct</span>
+    <span class="hljs-keyword">include</span> InvoiceState
+    prop <span class="hljs-symbol">:charge</span>, Charge
+    prop <span class="hljs-symbol">:paid_at</span>, Time
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Voided</span> &lt; T::Struct</span>
+    <span class="hljs-keyword">include</span> InvoiceState
+    prop <span class="hljs-symbol">:voided_at</span>, Time
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">invoice_state:</span> InvoiceState).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">process_invoice</span><span class="hljs-params">(invoice_state)</span></span>
+  <span class="hljs-keyword">case</span> invoice_state
+  <span class="hljs-keyword">when</span> InvoiceState::Drafted
+    <span class="hljs-comment"># ... no special props available!</span>
+  <span class="hljs-keyword">when</span> InvoiceState::Opened
+    puts invoice_state.due_at
+  <span class="hljs-keyword">when</span> InvoiceState::Paid
+    puts invoice_state.charge
+    puts invoice_state.paid_at
+  <span class="hljs-keyword">when</span> InvoiceState::Voided
+    puts invoice_state.voided_at
+  <span class="hljs-keyword">else</span>
+    T.absurd(invoice_state)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="what-s-next"></a><a href="#what-s-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
+<ul>
+<li><p><a href="/docs/abstract">Abstract Classes and Interfaces</a></p>
+<p>Sealed classes are often combined with some sort of parent interface which has
+common methods that all child classes implement. This can be either an
+abstract parent class or an interface that’s included.</p></li>
+<li><p><a href="/docs/final">Final Methods, Classes, and Modules</a></p>
+<p>Final classes and methods are similar to sealed, in that they’re both ways to
+limit the extent and effects of inheritance. And in fact, they’re often
+combined.</p></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/override-checking"><span class="arrow-prev">← </span><span>Override Checking</span></a><a class="docs-next button" href="/docs/class-of"><span>T.class_of</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#what-s-the-point-of-sealed-classes">What's the point of sealed classes?</a></li><li><a href="#sealed-classes-vs-sealed-modules">Sealed classes vs sealed modules</a></li><li><a href="#approximating-algebraic-data-types">Approximating algebraic data types</a></li><li><a href="#what-s-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'fa1ec885ab70787d636759b88e509b92',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
