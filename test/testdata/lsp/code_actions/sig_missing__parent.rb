@@ -4,7 +4,7 @@
 class Foo
   extend T::Sig
 
-  sig {void}
+  sig {overridable.void}
   def self.bar
   end
 end
