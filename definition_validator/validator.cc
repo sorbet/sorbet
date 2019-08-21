@@ -173,6 +173,20 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
         }
     }
 
+    if (overridenMethods.size() == 0 && method.data(gs)->isOverride()) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Method `{}` is marked `{}` but does not override anything", method.data(gs)->show(gs),
+                        "override");
+        }
+    }
+
+    if (overridenMethods.size() == 0 && method.data(gs)->isImplementation()) {
+        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Method `{}` is marked `{}` but does not implement anything", method.data(gs)->show(gs),
+                        "implementation");
+        }
+    }
+
     // we don't raise override errors if the method implements an abstract method, which means we need to know ahead of
     // time whether any parent methods are abstract
     auto anyIsInterface = absl::c_any_of(overridenMethods, [&](auto &m) { return m.data(gs)->isAbstract(); });
