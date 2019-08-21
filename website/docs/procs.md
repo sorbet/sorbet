@@ -85,7 +85,7 @@ end
 This is valid Ruby, and Sorbet will accept this code too. Implicitly, Sorbet
 will know that the method might accept a block, but it will treat the block
 itself as `T.untyped`. In order to give a signature to this method, the block
-paramter will need a name:
+parameter will need a name:
 
 ```ruby
 def foo(&blk) # <-
