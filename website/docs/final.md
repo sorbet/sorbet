@@ -292,9 +292,13 @@ aims to document those which are most likely to be encountered in normal usage:
     end
     ```
 
-<!-- TODO(jez) Update this to link to docs for sealed -->
-
 ## What's next?
+
+- [Sealed Classes and Modules](sealed.md)
+
+  Sealed classes are similar to final classes in that they restrict who's
+  allowed to subclass a given class, but they can be used to enforce slightly
+  different guarantees.
 
 - [Abstract Classes and Interfaces](abstract.md)
 

@@ -170,8 +170,6 @@ end
 A.foo
 ```
 
-<!-- TODO(jez) Update this to link to sealed -->
-
 ## What's next?
 
 - [Override Checking](override-checking.md)
@@ -179,3 +177,8 @@ A.foo
   Sorbet has more ways to check overriding than just whether an abstract method
   is implemented in a child. See this doc to learn about the ways to declare
   what kinds of overriding should be allowed.
+
+- [Sealed Classes and Modules](sealed.md)
+
+  Abstract classes and interfaces are frequently used with sealed classes to
+  recreate a sort of "algebraic data type" in Sorbet.
