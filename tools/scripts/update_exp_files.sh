@@ -37,7 +37,7 @@ bazel build \
 
 # shellcheck disable=SC2207
 rb_src=(
-  $(find test/testdata -name '*.rb' | sort)
+  $(find test/testdata -name '*.rb*' | sort)
 )
 
 basename=

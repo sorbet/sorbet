@@ -442,7 +442,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     for (auto &gotPhase : got) {
         auto expectation = test.expectations.find(gotPhase.first);
         ASSERT_TRUE(expectation != test.expectations.end()) << "missing expectation for " << gotPhase.first;
-        auto checker = test.folder + expectation->second;
+        ASSERT_TRUE(expectation->second.size() == 1)
+            << "found unexpected multiple expectations of type " << gotPhase.first;
+
+        auto checker = test.folder + expectation->second.begin()->second;
         auto expect = FileOps::read(checker.c_str());
         EXPECT_EQ(expect, gotPhase.second) << "Mismatch on: " << checker;
         if (expect == gotPhase.second) {
@@ -661,6 +664,40 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
     }
 }
 
+void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId, string_view uri,
+                         string_view testFile) {
+    // Document symbols
+    auto expectationFileName = test.expectations["document-symbols"][testFile];
+    if (expectationFileName.empty()) {
+        return;
+    }
+
+    auto params = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(string(uri)));
+    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
+    auto responses = lspWrapper.getLSPResponsesFor(LSPMessage(move(req)));
+    EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a documentSymbols request.";
+    if (responses.size() == 1) {
+        auto &msg = responses.at(0);
+        EXPECT_TRUE(msg->isResponse());
+        if (msg->isResponse()) {
+            auto &response = msg->asResponse();
+            ASSERT_TRUE(response.result) << "Document symbols request returned error: " << msg->toJSON();
+            auto &receivedSymbolResponse =
+                get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*response.result);
+
+            auto expectedSymbolsPath = test.folder + expectationFileName;
+            auto expected = LSPMessage::fromClient(FileOps::read(expectedSymbolsPath.c_str()));
+            auto &expectedResp = expected->asResponse();
+            auto &expectedSymbolResponse =
+                get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
+
+            // Simple string comparison, just like other *.exp files.
+            EXPECT_EQ(documentSymbolsToString(receivedSymbolResponse), documentSymbolsToString(expectedSymbolResponse))
+                << "Mismatch on: " << expectedSymbolsPath;
+        }
+    }
+}
+
 TEST_P(LSPTest, All) {
     string rootPath = "/Users/jvilk/stripe/pay-server";
     string rootUri = fmt::format("file://{}", rootPath);
@@ -721,39 +758,10 @@ TEST_P(LSPTest, All) {
         }
     }
 
-    // Document symbols
-    auto docSymbolExpectation = test.expectations.find("document-symbols");
-    if (docSymbolExpectation != test.expectations.end()) {
-        ASSERT_EQ(filenames.size(), 1) << "document-symbols only works with tests that have a single file.";
-        auto params =
-            make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(testFileUris[*filenames.begin()]));
-        auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
-        auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(req)));
-        EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a documentSymbols request.";
-        if (responses.size() == 1) {
-            auto &msg = responses.at(0);
-            EXPECT_TRUE(msg->isResponse());
-            if (msg->isResponse()) {
-                auto &response = msg->asResponse();
-                ASSERT_TRUE(response.result) << "Document symbols request returned error: " << msg->toJSON();
-                auto &receivedSymbolResponse =
-                    get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*response.result);
-
-                auto expectedSymbolsPath = test.folder + docSymbolExpectation->second;
-                auto expected = LSPMessage::fromClient(FileOps::read(expectedSymbolsPath.c_str()));
-                auto &expectedResp = expected->asResponse();
-                auto &expectedSymbolResponse =
-                    get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
-
-                // Simple string comparison, just like other *.exp files.
-                EXPECT_EQ(documentSymbolsToString(receivedSymbolResponse),
-                          documentSymbolsToString(expectedSymbolResponse))
-                    << "Mismatch on: " << expectedSymbolsPath;
-            }
-        }
+    for (auto &filename : filenames) {
+        testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[filename], filename);
     }
-
-    testQuickFixCodeActions(*lspWrapper.get(), test, filenames, assertions, testFileUris, rootUri, nextId);
+    testQuickFixCodeActions(*lspWrapper, test, filenames, assertions, testFileUris, rootUri, nextId);
 
     // Usage and def assertions
     {
@@ -886,6 +894,12 @@ TEST_P(LSPTest, All) {
 
             updateDiagnostics(rootUri, testFileUris, responses, diagnostics);
 
+            for (auto &update : updates) {
+                auto originalFile = test.folder + update.first;
+                auto updateFile = test.folder + update.second;
+                testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[originalFile], updateFile);
+            }
+
             const bool passed = ErrorAssertion::checkAll(
                 updatesAndContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
 
@@ -991,7 +1005,8 @@ vector<Expectations> listDir(const char *name) {
             if (absl::StartsWith(s, current.basename)) {
                 auto kind_start = s.rfind(".", s.size() - strlen(".exp") - 1);
                 string kind = s.substr(kind_start + 1, s.size() - kind_start - strlen(".exp") - 1);
-                current.expectations[kind] = s;
+                string source_file_path = string(name) + "/" + s.substr(0, kind_start);
+                current.expectations[kind][source_file_path] = s;
             }
         } else if (absl::EndsWith(s, ".rbupdate")) {
             if (absl::StartsWith(s, current.basename)) {
