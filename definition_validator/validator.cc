@@ -173,7 +173,7 @@ void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
         }
     }
 
-    if (overridenMethods.size() == 0 && method.data(gs)->isOverride()) {
+    if (overridenMethods.size() == 0 && method.data(gs)->isOverride() && !method.data(gs)->isIncompatibleOverride()) {
         if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Method `{}` is marked `{}` but does not override anything", method.data(gs)->show(gs),
                         "override");
