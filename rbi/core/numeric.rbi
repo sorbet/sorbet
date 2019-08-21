@@ -417,7 +417,7 @@ class Numeric < Object
   def modulo(arg0); end
 
   # Returns `true` if `num` is less than 0.
-  sig {returns(T::Boolean}
+  sig {returns(T::Boolean)}
   def negative?(); end
 
   # Returns `self` if `num` is not zero, `nil` otherwise.
@@ -445,7 +445,7 @@ class Numeric < Object
   def polar(); end
 
   # Returns `true` if `num` is greater than 0.
-  sig {returns(T::Boolean}
+  sig {returns(T::Boolean)}
   def positive?(); end
 
   # Returns the most exact division (rational for integers, float for
