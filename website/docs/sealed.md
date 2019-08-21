@@ -190,4 +190,14 @@ end
 
 ## What's next?
 
--
+- [Abstract Classes and Interfaces](abstract.md)
+
+  Sealed classes are often combined with some sort of parent interface which has
+  common methods that all child classes implement. This can be either an
+  abstract parent class or an interface that's included.
+
+- [Final Methods, Classes, and Modules](final.md)
+
+  Final classes and methods are similar to sealed, in that they're both ways to
+  limit the extent and effects of inheritance. And in fact, they're often
+  combined.
