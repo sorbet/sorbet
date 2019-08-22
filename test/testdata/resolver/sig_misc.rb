@@ -80,11 +80,12 @@ class A
   end
 
   sig { implementation.void }
-  def test_implementation(x) # error: Malformed `sig`. Type not specified for argument
+  def test_implementation(x) # error: Method `A#test_implementation` is marked `implementation` but does not implement anything
+                        # ^ error: Malformed `sig`. Type not specified for argument
   end
 
   sig {override.returns(T1)}
-  def test_override;
+  def test_override; # error: Method `A#test_override` is marked `override` but does not override anything
     T1.new
   end
 
@@ -94,7 +95,7 @@ class A
   end
 
   sig {implementation.overridable.returns(T1)}
-  def test_overridable_implementation;
+  def test_overridable_implementation; # error: Method `A#test_overridable_implementation` is marked `implementation` but does not implement anything
     T1.new
   end
 

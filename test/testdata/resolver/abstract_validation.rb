@@ -162,6 +162,7 @@ end
 module BadTypedImpl
   extend T::Sig
   extend T::Helpers
+  include GoodInterface
 
   sig {implementation.returns(Integer)} # incompatible return type: Integer
   def foo; 1; end
