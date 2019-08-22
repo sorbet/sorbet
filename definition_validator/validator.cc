@@ -283,15 +283,15 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
         }
     }
 
-    if (overridenMethods.size() == 0 && method.data(gs)->isOverride() && !method.data(gs)->isIncompatibleOverride()) {
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Method `{}` is marked `{}` but does not override anything", method.data(gs)->show(gs),
+    if (overridenMethods.size() == 0 && method.data(ctx)->isOverride() && !method.data(ctx)->isIncompatibleOverride()) {
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Method `{}` is marked `{}` but does not override anything", method.data(ctx)->show(ctx),
                         "override");
         }
     }
 
     if (overridenMethods.size() == 0 && method.data(ctx)->isImplementation()) {
-        if (auto e = ctx.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Method `{}` is marked `{}` but does not implement anything", method.data(ctx)->show(ctx),
                         "implementation");
         }
@@ -301,18 +301,18 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     // time whether any parent methods are abstract
     auto anyIsInterface = absl::c_any_of(overridenMethods, [&](auto &m) { return m.data(ctx)->isAbstract(); });
     for (const auto &overridenMethod : overridenMethods) {
-
         if (overridenMethod.data(ctx)->isFinalMethod()) {
-            if (auto e = ctx.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
                 e.setHeader("`{}` was declared as final and cannot be overridden by `{}`",
                             overridenMethod.data(ctx)->show(ctx), method.data(ctx)->show(ctx));
                 e.addErrorLine(overridenMethod.data(ctx)->loc(), "original method defined here");
             }
         }
         auto isRBI = absl::c_any_of(method.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isRBI(); });
-        if (!method.data(ctx)->isOverride() && method.data(ctx)->hasSig() && overridenMethod.data(ctx)->isOverridable() &&
-            !anyIsInterface && overridenMethod.data(ctx)->hasSig() && !method.data(ctx)->isDSLSynthesized() && !isRBI) {
-            if (auto e = ctx.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
+        if (!method.data(ctx)->isOverride() && method.data(ctx)->hasSig() &&
+            overridenMethod.data(ctx)->isOverridable() && !anyIsInterface && overridenMethod.data(ctx)->hasSig() &&
+            !method.data(ctx)->isDSLSynthesized() && !isRBI) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
                             method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), ".override");
                 e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
@@ -321,7 +321,7 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
         if (!method.data(ctx)->isImplementation() && !method.data(ctx)->isOverride() && method.data(ctx)->hasSig() &&
             overridenMethod.data(ctx)->isAbstract() && overridenMethod.data(ctx)->hasSig() &&
             !method.data(ctx)->isDSLSynthesized() && !isRBI) {
-            if (auto e = ctx.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
                             method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), ".implementation");
                 e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
@@ -331,15 +331,16 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
             !method.data(ctx)->isIncompatibleOverride() && !isRBI && !method.data(ctx)->isDSLSynthesized()) {
             validateCompatibleOverride(ctx, overridenMethod, method);
 
-        if (overridenMethod.data(ctx)->isFinalMethod()) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
-                e.setHeader("Method overrides a final method `{}`", overridenMethod.data(ctx)->show(ctx));
-                e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
+            if (overridenMethod.data(ctx)->isFinalMethod()) {
+                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
+                    e.setHeader("Method overrides a final method `{}`", overridenMethod.data(ctx)->show(ctx));
+                    e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
+                }
             }
-        }
-        if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable()) &&
-            !method.data(ctx)->isIncompatibleOverride()) {
-            validateCompatibleOverride(ctx, overridenMethod, method);
+            if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable()) &&
+                !method.data(ctx)->isIncompatibleOverride()) {
+                validateCompatibleOverride(ctx, overridenMethod, method);
+            }
         }
     }
 }
