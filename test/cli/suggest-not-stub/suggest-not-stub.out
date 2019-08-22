@@ -5,6 +5,14 @@ test/cli/suggest-not-stub/suggest-not-stub.rb:3: Unable to resolve constant `B` 
 test/cli/suggest-not-stub/suggest-not-stub.rb:6: Unable to resolve constant `B` https://srb.help/5002
      6 |B
         ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-not-stub/suggest-not-stub.rb:6: Replace with `A`
+     6 |B
+        ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-not-stub/suggest-not-stub.rb:6: Replace with `T`
+     6 |B
+        ^
     test/cli/suggest-not-stub/suggest-not-stub.rb:2: Did you mean: `A`?
      2 |class A
         ^^^^^^^

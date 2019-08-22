@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_JSON_TYPES_H
 
 #include "common/common.h"
+#include "core/core.h"
 #include "rapidjson/document.h"
 
 #include <optional>

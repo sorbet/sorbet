@@ -88,4 +88,61 @@ string JSONBaseType::toJSON() const {
     return buffer.GetString();
 }
 
+// Object-specific helpers
+
+unique_ptr<Range> Range::fromLoc(const core::GlobalState &gs, core::Loc loc) {
+    if (!loc.exists()) {
+        // this will happen if e.g. we disable the stdlib (e.g. to speed up testing in fuzzers).
+        return nullptr;
+    }
+    auto pair = loc.position(gs);
+    // All LSP numbers are zero-based, ours are 1-based.
+    return make_unique<Range>(make_unique<Position>(pair.first.line - 1, pair.first.column - 1),
+                              make_unique<Position>(pair.second.line - 1, pair.second.column - 1));
+}
+
+core::Loc Range::toLoc(const core::GlobalState &gs, core::FileRef file) const {
+    ENFORCE(start->line >= 0);
+    ENFORCE(start->character >= 0);
+    ENFORCE(end->line >= 0);
+    ENFORCE(end->character >= 0);
+
+    auto sPos = core::Loc::pos2Offset(file.data(gs), core::Loc::Detail{(u4)start->line + 1, (u4)start->character + 1});
+    auto ePos = core::Loc::pos2Offset(file.data(gs), core::Loc::Detail{(u4)end->line + 1, (u4)end->character + 1});
+
+    return core::Loc(file, sPos, ePos);
+}
+
+int Range::cmp(const Range &b) const {
+    const int startCmp = start->cmp(*b.start);
+    if (startCmp != 0) {
+        return startCmp;
+    }
+    return end->cmp(*b.end);
+}
+
+unique_ptr<Range> Range::copy() const {
+    return make_unique<Range>(start->copy(), end->copy());
+}
+
+int Location::cmp(const Location &b) const {
+    const int uriCmp = uri.compare(b.uri);
+    if (uriCmp != 0) {
+        return uriCmp;
+    }
+    return range->cmp(*b.range);
+}
+
+int Position::cmp(const Position &b) const {
+    const int lineCmp = line - b.line;
+    if (lineCmp != 0) {
+        return lineCmp;
+    }
+    return character - b.character;
+}
+
+unique_ptr<Position> Position::copy() const {
+    return make_unique<Position>(line, character);
+}
+
 } // namespace sorbet::realmain::lsp

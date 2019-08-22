@@ -29,8 +29,9 @@ shared_ptr<FieldDef> makeField(const string jsonName, const string cppName, shar
 }
 
 shared_ptr<JSONObjectType> makeObject(const string name, vector<shared_ptr<FieldDef>> fields,
-                                      vector<shared_ptr<JSONObjectType>> &classTypes) {
-    shared_ptr<JSONObjectType> ct = make_shared<JSONObjectType>(name, fields);
+                                      vector<shared_ptr<JSONObjectType>> &classTypes,
+                                      vector<string> extraMethodDefinitions = {}) {
+    shared_ptr<JSONObjectType> ct = make_shared<JSONObjectType>(name, fields, extraMethodDefinitions);
     classTypes.push_back(ct);
     return ct;
 }
@@ -91,21 +92,35 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                    makeField("line", JSONInt),
                                    makeField("character", JSONInt),
                                },
-                               classTypes);
+                               classTypes,
+                               {
+                                   "int cmp(const Position &b) const;",
+                                   "std::unique_ptr<Position> copy() const;",
+                               });
 
     auto Range = makeObject("Range",
                             {
                                 makeField("start", Position),
                                 makeField("end", Position),
                             },
-                            classTypes);
+                            classTypes,
+                            {
+                                "// Returns nullptr if loc does not exist",
+                                "static std::unique_ptr<Range> fromLoc(const core::GlobalState &gs, core::Loc loc);",
+                                "core::Loc toLoc(const core::GlobalState &gs, core::FileRef file) const;",
+                                "int cmp(const Range &b) const;",
+                                "std::unique_ptr<Range> copy() const;",
+                            });
 
     auto Location = makeObject("Location",
                                {
                                    makeField("uri", JSONString),
                                    makeField("range", Range),
                                },
-                               classTypes);
+                               classTypes,
+                               {
+                                   "int cmp(const Location &b) const;",
+                               });
 
     auto DiagnosticRelatedInformation = makeObject("DiagnosticRelatedInformation",
                                                    {

@@ -1,0 +1,4 @@
+# typed: true
+class C
+  @food = T.let(3, Integer)
+end

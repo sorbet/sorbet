@@ -25,7 +25,7 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto run = runTypechecking(move(gs), move(updates));
 
-    auto loc = range2Loc(*run.gs, *params.range.get(), file);
+    auto loc = params.range->toLoc(*run.gs, file);
     for (auto &error : run.errors) {
         if (!error->isSilenced && !error->autocorrects.empty()) {
             // We return code actions corresponding to any error that encloses the request's range. Matching request
@@ -33,14 +33,14 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
             // actions since it sends a 0 length range (i.e. the cursor). VSCode's request does include matching
             // diagnostics in the request context that could be used instead but this simpler approach should suffice
             // until proven otherwise.
-            if (!error->loc.contains(*loc)) {
+            if (!error->loc.contains(loc)) {
                 continue;
             }
 
             for (auto &autocorrect : error->autocorrects) {
                 UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
                 for (auto &edit : autocorrect.edits) {
-                    auto range = loc2Range(*run.gs, edit.loc);
+                    auto range = Range::fromLoc(*run.gs, edit.loc);
                     if (range != nullptr) {
                         editsByFile[fileRef2Uri(*run.gs, edit.loc.file())].emplace_back(
                             make_unique<TextEdit>(std::move(range), edit.replacement));

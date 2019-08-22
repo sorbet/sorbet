@@ -9,9 +9,11 @@ test/cli/cache-dsl/attr_accessor.rb:7: Method `prop=` does not exist on `A` http
 test/cli/cache-dsl/attr_accessor.rb:8: Method `prop` does not exist on `A` https://srb.help/7003
      8 |a.prop
         ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1384: Did you mean: `Kernel#proc`?
-    1384 |  def proc(&blk); end
-            ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/cache-dsl/attr_accessor.rb:8: Replace with `proc`
+     8 |a.prop
+          ^^^^
+
 Errors: 2
 test/cli/cache-dsl/attr_accessor.rb:7: Method `prop=` does not exist on `A` https://srb.help/7003
      7 |a.prop = 7
@@ -23,7 +25,9 @@ test/cli/cache-dsl/attr_accessor.rb:7: Method `prop=` does not exist on `A` http
 test/cli/cache-dsl/attr_accessor.rb:8: Method `prop` does not exist on `A` https://srb.help/7003
      8 |a.prop
         ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1384: Did you mean: `Kernel#proc`?
-    1384 |  def proc(&blk); end
-            ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/cache-dsl/attr_accessor.rb:8: Replace with `proc`
+     8 |a.prop
+          ^^^^
+
 Errors: 2

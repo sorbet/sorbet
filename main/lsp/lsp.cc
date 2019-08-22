@@ -160,7 +160,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                 // diagnostics
                 if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
                     for (auto &e : errorsAccumulated[file]) {
-                        auto range = loc2Range(gs, e->loc);
+                        auto range = Range::fromLoc(gs, e->loc);
                         if (range == nullptr) {
                             continue;
                         }
