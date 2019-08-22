@@ -1,3 +1,4 @@
+#include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
@@ -168,7 +169,7 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
         auto withoutNil = Types::approximateSubtract(ctx, argTpe.type, Types::nilClass());
         if (!withoutNil->isBottom() && Types::isSubTypeUnderConstraint(ctx, constr, withoutNil, expectedType)) {
             if (loc.exists()) {
-                e.replaceWith("Add `T.must`", loc, "T.must({})", loc.source(ctx));
+                e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(ctx));
             }
         }
         return e.build();
@@ -480,7 +481,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 }
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
-                e.replaceWith("Add `T.must`", args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
+                e.replaceWith("Wrap in `T.must`", args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
             } else {
                 if (symbol.data(ctx)->isClassModule()) {
                     auto objMeth = core::Symbols::Object().data(ctx)->findMemberTransitive(ctx, args.name);
@@ -495,14 +496,49 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                     vector<ErrorLine> lines;
                     lines.reserve(alternatives.size());
                     for (auto alternative : alternatives) {
-                        auto possible_symbol = alternative.symbol.data(ctx);
-                        if (!possible_symbol->isClass() && !possible_symbol->isMethod()) {
+                        auto possibleSymbol = alternative.symbol.data(ctx);
+                        if (!possibleSymbol->isClass() && !possibleSymbol->isMethod()) {
                             continue;
                         }
-                        auto suggestedName = possible_symbol->isClass() ? alternative.symbol.show(ctx) + ".new"
-                                                                        : alternative.symbol.show(ctx);
-                        lines.emplace_back(
-                            ErrorLine::from(alternative.symbol.data(ctx)->loc(), "Did you mean: `{}`?", suggestedName));
+
+                        auto suggestedName = possibleSymbol->isClass() ? alternative.symbol.show(ctx) + ".new"
+                                                                       : alternative.symbol.show(ctx);
+
+                        bool addedAutocorrect = false;
+                        if (possibleSymbol->isClass()) {
+                            const auto replacement = possibleSymbol->name.show(ctx);
+                            const auto loc = args.locs.call;
+                            const auto toReplace = args.name.toString(ctx);
+                            // This is a bit hacky but the loc corresponding to the send isn't available here and until
+                            // it is, this verifies that the methodLoc below exists.
+                            if (absl::StartsWith(loc.source(ctx), toReplace)) {
+                                const auto methodLoc =
+                                    Loc{loc.file(), loc.beginPos(), (u4)(loc.beginPos() + toReplace.length())};
+                                e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
+                                              replacement);
+                                addedAutocorrect = true;
+                            }
+                        } else {
+                            const auto replacement = possibleSymbol->name.toString(ctx);
+                            const auto toReplace = args.name.toString(ctx);
+                            if (replacement != toReplace) {
+                                const auto loc = args.locs.receiver;
+                                // See comment above.
+                                if (absl::StartsWith(args.locs.call.source(ctx),
+                                                     fmt::format("{}.{}", loc.source(ctx), toReplace))) {
+                                    const auto methodLoc =
+                                        Loc{loc.file(), loc.endPos() + 1, (u4)(loc.endPos() + 1 + toReplace.length())};
+                                    e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
+                                                  replacement);
+                                    addedAutocorrect = true;
+                                }
+                            }
+                        }
+
+                        if (!addedAutocorrect) {
+                            lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx)->loc(),
+                                                               "Did you mean: `{}`?", suggestedName));
+                        }
                     }
                     e.addErrorSection(ErrorSection(lines));
                 }
@@ -943,7 +979,7 @@ public:
             if (auto e = ctx.state.beginError(loc, errors::Infer::InvalidCast)) {
                 e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type->show(ctx));
                 const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
-                e.replaceWith("Remove the T.must", loc, "{}", locWithoutTMust.source(ctx));
+                e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(ctx));
             }
         }
         res.returnType = move(ret);

@@ -1,6 +1,14 @@
 test/cli/top-level/top-level.rb:2: Unable to resolve constant `ARGW` https://srb.help/5002
      2 |ARGW
         ^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/top-level/top-level.rb:2: Replace with `ARGV`
+     2 |ARGW
+        ^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/top-level/top-level.rb:2: Replace with `ARGF`
+     2 |ARGW
+        ^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/constants.rbi#L4: Did you mean: `ARGV`?
      4 |::ARGV = T.let(T.unsafe(nil), Array)
         ^^^^^^
