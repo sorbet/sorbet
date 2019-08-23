@@ -12,6 +12,8 @@ using namespace std;
 
 namespace sorbet::dsl {
 
+namespace {
+
 pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression *name) {
     core::Loc loc;
     core::NameRef res = core::NameRef::noName();
@@ -45,6 +47,27 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
     return make_pair(res, loc);
 }
 
+// these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
+// either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
+// users, but we don't know that information in the DSL passes.
+bool isT(const unique_ptr<ast::Expression> &expr) {
+    auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr.get());
+    if (t == nullptr || t->cnst != core::Names::Constants::T()) {
+        return false;
+    }
+    auto scope = t->scope.get();
+    if (ast::isa_tree<ast::EmptyTree>(scope)) {
+        return true;
+    }
+    auto root = ast::cast_tree<ast::ConstantLit>(scope);
+    return root != nullptr && root->symbol == core::Symbols::root();
+}
+
+bool isTNilable(const unique_ptr<ast::Expression> &expr) {
+    auto *nilable = ast::cast_tree<ast::Send>(expr.get());
+    return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
+}
+
 // Slightly modified from TypeSyntax::isSig.
 // We don't want to depend on resolver so that one day everything in the DSL pass can be standalone.
 //
@@ -73,10 +96,34 @@ bool isSig(const ast::Send *send) {
     return true;
 }
 
+bool hasNilableReturns(core::MutableContext ctx, const ast::Send *sharedSig) {
+    ENFORCE(isSig(sharedSig), "We weren't given a send node that's a valid signature");
+
+    auto block = ast::cast_tree<ast::Block>(sharedSig->block.get());
+    auto body = ast::cast_tree<ast::Send>(block->body.get());
+
+    ENFORCE(body->fun == core::Names::returns());
+    if (body->args.size() != 1) {
+        return false;
+    }
+    return isTNilable(body->args[0]);
+}
+
+unique_ptr<ast::Expression> dupReturnsType(core::MutableContext ctx, const ast::Send *sharedSig) {
+    ENFORCE(isSig(sharedSig), "We weren't given a send node that's a valid signature");
+
+    auto block = ast::cast_tree<ast::Block>(sharedSig->block.get());
+    auto body = ast::cast_tree<ast::Send>(block->body.get());
+
+    ENFORCE(body->fun == core::Names::returns());
+    if (body->args.size() != 1) {
+        return nullptr;
+    }
+    return body->args[0]->deepCopy();
+}
+
 // To convert a sig into a writer sig with argument `name`, we copy the `returns(...)`
 // value into the `sig {params(...)}` using whatever name we have for the setter.
-//
-// This change is done in place; it's assumed that the caller created a new sig for us.
 unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const ast::Send *sharedSig,
                                                const core::NameRef name, core::Loc nameLoc) {
     ENFORCE(isSig(sharedSig), "We weren't given a send node that's a valid signature");
@@ -112,6 +159,7 @@ unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const a
     }
     return sig;
 }
+} // namespace
 
 // Converts something like
 //
@@ -168,6 +216,11 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
     auto sig = ast::cast_tree_const<ast::Send>(prevStat);
     bool hasSig = sig && isSig(sig);
 
+    bool declareIvars = false;
+    if (hasSig && hasNilableReturns(ctx, sig)) {
+        declareIvars = true;
+    }
+
     bool usedPrevSig = false;
 
     if (makeReader) {
@@ -217,7 +270,13 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
                 }
             }
 
-            auto body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(loc, name));
+            unique_ptr<ast::Expression> body;
+            if (declareIvars) {
+                body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName),
+                                       ast::MK::Let(loc, ast::MK::Local(loc, name), dupReturnsType(ctx, sig)));
+            } else {
+                body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(loc, name));
+            }
             stats.emplace_back(ast::MK::Method1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body),
                                                 ast::MethodDef::DSLSynthesized));
         }
