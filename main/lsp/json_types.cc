@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "rapidjson/prettywriter.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 
@@ -79,12 +80,17 @@ InvalidTypeError::InvalidTypeError(string_view fieldName, string_view expectedTy
 
 const std::string JSONBaseType::defaultFieldName = "root";
 
-string JSONBaseType::toJSON() const {
+string JSONBaseType::toJSON(bool prettyPrint) const {
     rapidjson::MemoryPoolAllocator<> alloc;
     auto v = toJSONValue(alloc);
     rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    v->Accept(writer);
+    if (!prettyPrint) {
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        v->Accept(writer);
+    } else {
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        v->Accept(writer);
+    }
     return buffer.GetString();
 }
 

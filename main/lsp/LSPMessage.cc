@@ -243,13 +243,13 @@ LSPMethod LSPMessage::method() const {
     }
 }
 
-string LSPMessage::toJSON() const {
+string LSPMessage::toJSON(bool prettyPrint) const {
     if (isRequest()) {
-        return asRequest().toJSON();
+        return asRequest().toJSON(prettyPrint);
     } else if (isNotification()) {
-        return asNotification().toJSON();
+        return asNotification().toJSON(prettyPrint);
     } else if (isResponse()) {
-        return asResponse().toJSON();
+        return asResponse().toJSON(prettyPrint);
     } else {
         Exception::raise("LSPMessage is not a request, notification, or a response.");
     }
