@@ -1289,7 +1289,7 @@ class Array < Object
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(T::Enumerator[T::Array[Elem]])
   end
   sig do
     params(
@@ -1476,7 +1476,7 @@ class Array < Object
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(T::Enumerator[T::Array[Elem]])
   end
   def repeated_combination(arg0, &blk); end
 
@@ -1511,7 +1511,7 @@ class Array < Object
     params(
         arg0: Integer,
     )
-    .returns(T::Enumerator[Elem])
+    .returns(T::Enumerator[T::Array[Elem]])
   end
   def repeated_permutation(arg0, &blk); end
 
