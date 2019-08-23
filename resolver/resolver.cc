@@ -424,9 +424,8 @@ private:
                 job.klass.data(ctx)->setSuperClass(resolved);
             } else {
                 if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
-                    e.setHeader("Class parents redefined for class `{}`", job.klass.data(ctx)->show(ctx));
-                    e.addErrorLine(job.ancestor->loc, "Parent redefined from `{}` to `{}`",
-                                   job.klass.data(ctx)->superClass().show(ctx), resolved.show(ctx));
+                    e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.data(ctx)->show(ctx),
+                                job.klass.data(ctx)->superClass().show(ctx), resolved.show(ctx));
                 }
             }
         } else {
