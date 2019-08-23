@@ -24,14 +24,14 @@ end
 class C
   sig {void}
   def foo
-    @foo = T.let(0, Integer) # error: Instance variables must be declared inside `initialize` or declared nilable
+    @foo = T.let(0, Integer) # error: The instance variable `@foo` must be declared inside `initialize` or declared nilable
   end
 end
 
 class D
   sig {void}
   def self.foo
-    @foo = T.let(0, Integer) # error: Singleton instance variables must be declared inside the class body or declared nilable
+    @foo = T.let(0, Integer) # error: The singleton instance variable `@foo` must be declared inside the class body or declared nilable
   end
 end
 
@@ -60,7 +60,7 @@ class Box
 
   sig {void}
   def non_nil_elem
-    @non_nil_elem = T.let(T.unsafe(nil), Elem) # error: Instance variables must be declared inside `initialize` or declared nilable
+    @non_nil_elem = T.let(T.unsafe(nil), Elem) # error: The instance variable `@non_nil_elem` must be declared inside `initialize` or declared nilable
   end
 end
 
