@@ -138,7 +138,7 @@ public:
     /**
      * Returns the message in JSON form.
      */
-    std::string toJSON() const;
+    std::string toJSON(bool prettyPrint = false) const;
 };
 } // namespace sorbet::realmain::lsp
 

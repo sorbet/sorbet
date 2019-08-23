@@ -96,7 +96,7 @@ public:
     /**
      * Converts C++ object into a string containing a stringified JSON object.
      */
-    std::string toJSON() const;
+    std::string toJSON(bool prettyPrint = false) const;
 
     /**
      * Converts C++ object into a RapidJSON JSON value owned by the given rapidjson allocator.
