@@ -522,7 +522,7 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     } else {
         auto &symbols = get<vector<unique_ptr<DocumentSymbol>>>(symbolResult);
         return fmt::format("{}", fmt::map_join(symbols.begin(), symbols.end(), ", ",
-                                               [](const auto &sym) -> string { return sym->toJSON(); }));
+                                               [](const auto &sym) -> string { return sym->toJSON(true); }));
     }
 }
 
@@ -655,36 +655,31 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
 
 void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId, string_view uri,
                          string_view testFile) {
-    // Document symbols
     auto expectationFileName = test.expectations["document-symbols"][testFile];
     if (expectationFileName.empty()) {
+        // No .exp file found; nothing to do.
         return;
     }
 
     auto params = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(string(uri)));
     auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
     auto responses = lspWrapper.getLSPResponsesFor(LSPMessage(move(req)));
-    EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a documentSymbols request.";
-    if (responses.size() == 1) {
-        auto &msg = responses.at(0);
-        EXPECT_TRUE(msg->isResponse());
-        if (msg->isResponse()) {
-            auto &response = msg->asResponse();
-            ASSERT_TRUE(response.result) << "Document symbols request returned error: " << msg->toJSON();
-            auto &receivedSymbolResponse =
-                get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*response.result);
+    ASSERT_EQ(responses.size(), 1) << "Did not receive exactly one response for a documentSymbols request.";
+    auto &msg = responses.at(0);
+    ASSERT_TRUE(msg->isResponse());
+    auto &response = msg->asResponse();
+    ASSERT_TRUE(response.result) << "Document symbols request returned error: " << msg->toJSON();
+    auto &receivedSymbolResponse = get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*response.result);
 
-            auto expectedSymbolsPath = test.folder + expectationFileName;
-            auto expected = LSPMessage::fromClient(FileOps::read(expectedSymbolsPath.c_str()));
-            auto &expectedResp = expected->asResponse();
-            auto &expectedSymbolResponse =
-                get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
+    auto expectedSymbolsPath = test.folder + expectationFileName;
+    auto expected = LSPMessage::fromClient(FileOps::read(expectedSymbolsPath.c_str()));
+    auto &expectedResp = expected->asResponse();
+    auto &expectedSymbolResponse =
+        get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
 
-            // Simple string comparison, just like other *.exp files.
-            EXPECT_EQ(documentSymbolsToString(receivedSymbolResponse), documentSymbolsToString(expectedSymbolResponse))
-                << "Mismatch on: " << expectedSymbolsPath;
-        }
-    }
+    // Simple string comparison, just like other *.exp files.
+    EXPECT_EQ(documentSymbolsToString(receivedSymbolResponse), documentSymbolsToString(expectedSymbolResponse))
+        << "Mismatch on: " << expectedSymbolsPath;
 }
 
 TEST_P(LSPTest, All) {

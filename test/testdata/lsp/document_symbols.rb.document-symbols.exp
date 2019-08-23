@@ -4,7 +4,7 @@
     "requestMethod": "textDocument/documentSymbol",
     "result": [
         {
-            "name": "A",
+            "name": "Aboo",
             "detail": "",
             "kind": 5,
             "range": {
