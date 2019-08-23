@@ -1,5 +1,8 @@
 class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4})
   class <C <U Test>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:1 end=3:11}
+    field <C <U Test>><U @a> -> String | NilClass @ Loc {file=test/testdata/dsl/attr_multi.rb start=7:18 end=7:19}
+    field <C <U Test>><U @b> -> Integer | NilClass @ Loc {file=test/testdata/dsl/attr_multi.rb start=10:18 end=10:19}
+    field <C <U Test>><U @c> -> Integer | NilClass @ Loc {file=test/testdata/dsl/attr_multi.rb start=10:22 end=10:23}
     method <C <U Test>><U a> (<blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/attr_multi.rb start=7:3 end=7:19}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr_multi.rb start=??? end=???}
     method <C <U Test>><U a=> (a, <blk>) -> String | NilClass @ Loc {file=test/testdata/dsl/attr_multi.rb start=7:3 end=7:19}
