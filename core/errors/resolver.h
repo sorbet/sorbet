@@ -7,7 +7,7 @@ constexpr ErrorClass DynamicConstant{5001, StrictLevel::True};
 constexpr ErrorClass StubConstant{5002, StrictLevel::False};
 constexpr ErrorClass InvalidMethodSignature{5003, StrictLevel::False};
 constexpr ErrorClass InvalidTypeDeclaration{5004, StrictLevel::False};
-constexpr ErrorClass InvalidDeclareVariables{5005, StrictLevel::True};
+constexpr ErrorClass InvalidDeclareVariables{5005, StrictLevel::False};
 constexpr ErrorClass DuplicateVariableDeclaration{5006, StrictLevel::True};
 // constexpr ErrorClass UndeclaredVariable{5007, StrictLevel::Strict};
 constexpr ErrorClass DynamicSuperclass{5008, StrictLevel::True};
