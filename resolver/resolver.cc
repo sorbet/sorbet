@@ -61,7 +61,20 @@ namespace {
  *    resolvable, and so if any resolution succeeds, we need to keep looping in
  *    the outer loop.
  *
- * After this pass:
+ * We also track failure in the item, in order to distinguish a thing left in the
+ * list because we simply haven't succeeded yet and a thing left in the list
+ * because we have actively found a failure. For example, we might know that a
+ * given constant is unresolvable by Sorbet because it was qualified under
+ * not-a-constant: we mark this kind of job `resolution_failed`. The reason for
+ * this is unresolved constants are set to noSymbol, and once constant resolution
+ * has truly finished, we want to know which remaining failed jobs we need to set
+ * to a sensible default value. (Setting a conceptually failed job to untyped()
+ * before we've completed this loop can occasionally cause other jobs to
+ * non-deterministically half-resolve in the presence of multiple errors---c.f.
+ * issue #1126 on Github---so we mark jobs as failed rather than reporting an
+ * error and "resolving" them as untyped during the loop.)
+ *
+ * After the above passes:
  *
  * - ast::UnresolvedConstantLit nodes (constants that have a NameRef) are
  *   replaced with ast::ConstantLit nodes (constants that have a SymbolRef).
