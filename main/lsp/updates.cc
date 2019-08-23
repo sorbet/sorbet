@@ -265,6 +265,9 @@ bool LSPLoop::canTakeFastPath(const FileUpdates &updates, const vector<core::Fil
             } else {
                 auto &oldHash = globalStateHashes[fref.id()];
                 ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
+                if (hashes[i].definitions.hierarchyHash == core::GlobalStateHash::HASH_STATE_INVALID) {
+                    return false;
+                }
                 if (hashes[i].definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
                     hashes[i].definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
                     logger->debug("Taking slow path because {} has changed definitions", f->path());
