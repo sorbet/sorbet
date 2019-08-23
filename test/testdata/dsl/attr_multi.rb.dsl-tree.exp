@@ -14,7 +14,7 @@ class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
   end
 
   def a=<<C <todo sym>>>(a, &<blk>)
-    @a = a
+    @a = ::T.let(a, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
   end
 
   <self>.sig() do ||
@@ -38,7 +38,7 @@ class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
   end
 
   def b=<<C <todo sym>>>(b, &<blk>)
-    @b = b
+    @b = ::T.let(b, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
   end
 
   <self>.sig() do ||
@@ -46,7 +46,7 @@ class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
   end
 
   def c=<<C <todo sym>>>(c, &<blk>)
-    @c = c
+    @c = ::T.let(c, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
   end
 
   <self>.sig() do ||

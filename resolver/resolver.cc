@@ -1426,15 +1426,17 @@ private:
                 // Declaring a class instance variable
             } else if (nestedBlockCounts.back() == 0 && ctx.owner.data(ctx)->name == core::Names::initialize()) {
                 // Declaring a instance variable
-            } else if (ctx.owner.data(ctx)->isMethod() && ctx.owner.data(ctx)->owner.data(ctx)->isSingletonClass(ctx)) {
+            } else if (ctx.owner.data(ctx)->isMethod() && ctx.owner.data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
+                       !core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
                 // Declaring a class instance variable in a static method
                 if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("Singleton instance variables must be declared inside the class body");
+                    e.setHeader(
+                        "Singleton instance variables must be declared inside the class body or declared nilable");
                 }
-            } else {
+            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
                 // Inside a method; declaring a normal instance variable
                 if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("Instance variables must be declared inside `initialize`");
+                    e.setHeader("Instance variables must be declared inside `initialize` or declared nilable");
                 }
             }
             scope = ctx.selfClass();
@@ -1446,9 +1448,22 @@ private:
                 // We already have a symbol for this field, and it matches what we already saw, so we can short circuit.
                 return true;
             } else {
-                if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
+                // We do some normalization here to ensure that the file / line we report the error on doesn't
+                // depend on the order that we traverse files nor the order we traverse within a file.
+                auto priorLoc = prior.data(ctx)->loc();
+                core::Loc reportOn;
+                core::Loc errorLine;
+                if (uid->loc.file() == priorLoc.file()) {
+                    reportOn = uid->loc.beginPos() < priorLoc.beginPos() ? uid->loc : priorLoc;
+                    errorLine = uid->loc.beginPos() < priorLoc.beginPos() ? priorLoc : uid->loc;
+                } else {
+                    reportOn = uid->loc.file() < priorLoc.file() ? uid->loc : priorLoc;
+                    errorLine = uid->loc.file() < priorLoc.file() ? priorLoc : uid->loc;
+                }
+
+                if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
                     e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.data(ctx)->show(ctx));
-                    e.addErrorLine(prior.data(ctx)->loc(), "Previous declaration is here:");
+                    e.addErrorLine(errorLine, "Previous declaration is here:");
                 }
                 return false;
             }
