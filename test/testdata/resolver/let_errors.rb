@@ -1,12 +1,12 @@
 # typed: true
 class LetErrors
   def initialize
-    @@cvar = T.let(0, Integer) # error: Class variables must be declared at class scope
+    @@cvar = T.let(0, Integer) # error: The class variable `@@cvar` must be declared at class scope
     @ivar = T.cast(nil, Integer) # error: Use `T.let` to specify the type of constants
   end
 
   def not_initialize
-    @a = T.let(0, Integer) # error: Instance variables must be declared inside `initialize`
+    @a = T.let(0, Integer) # error: The instance variable `@a` must be declared inside `initialize`
   end
 
   @b = T.let("hi", String)

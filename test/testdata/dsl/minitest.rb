@@ -32,7 +32,7 @@ class MyTest
     end
 
     random_method do
-        @random_method_ivar = T.let(3, Integer) # error: Instance variables must be declared inside `initialize
+        @random_method_ivar = T.let(3, Integer) # error: The instance variable `@random_method_ivar` must be declared inside `initialize`
     end
 
     describe Object do
