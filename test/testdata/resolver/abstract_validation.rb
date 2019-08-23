@@ -164,6 +164,6 @@ module BadTypedImpl
   extend T::Helpers
   include GoodInterface
 
-  sig {implementation.returns(Integer)} # incompatible return type: Integer
-  def foo; 1; end
+  sig {implementation.returns(Integer)}
+  def foo; 1; end # error: Return type `Integer` does not match return type of abstract method `GoodInterface#foo`
 end
