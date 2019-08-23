@@ -15,9 +15,9 @@ class LetErrors
   @@cv = T.let(:foo, Symbol)
   @@cv = T.let(:bar, Symbol) # explicitly not an error: the type is the same
 
-  @d = T.let("hi", String)
-  @d = T.let(0, Integer) # error: Redeclaring variable `@d` with mismatching type
+  @d = T.let("hi", String) # error: Redeclaring variable `@d` with mismatching type
+  @d = T.let(0, Integer)
 
-  @@dv = T.let(:foo, Symbol)
-  @@dv = T.let(0.0, Float) # error: Redeclaring variable `@@dv` with mismatching type
+  @@dv = T.let(:foo, Symbol) # error: Redeclaring variable `@@dv` with mismatching type
+  @@dv = T.let(0.0, Float)
 end
