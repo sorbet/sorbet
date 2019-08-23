@@ -1,0 +1,8 @@
+# typed: true
+class C
+  @@foo = T.let(3, Integer)
+
+  def bar
+    @@ # error-with-dupes: Parse Error: unexpected `@`
+  end
+end
