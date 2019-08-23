@@ -197,7 +197,7 @@ private:
                 if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
                 }
-                return core::Symbols::untyped();
+                return core::Symbols::noSymbol();
             }
             if (!sym.exists()) {
                 return core::Symbols::noSymbol();
@@ -209,7 +209,7 @@ private:
             if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::DynamicConstant)) {
                 e.setHeader("Dynamic constant references are unsupported");
             }
-            return core::Symbols::untyped();
+            return core::Symbols::noSymbol();
         }
     }
 
@@ -288,12 +288,8 @@ private:
             return false;
         }
         if (resolved.data(ctx)->isTypeAlias()) {
-            // even if we haven't completed resolution, we might want to report this intermediate symbol to help resolve
-            // other constants via its metadata. This in particular happens when we have a type alias that's unresolved
-            // but we still incorrectly refer to a constant underneath a type alias: updating the job to be closer to
-            // the truth while still not having "finished" is going to let us determine that the constant is incorrect
-            job.out->symbol = resolved;
             if (resolved.data(ctx)->resultType != nullptr) {
+                job.out->symbol = resolved;
                 return true;
             }
             return false;
