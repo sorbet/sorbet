@@ -1,4 +1,5 @@
 # typed: true
+# assert-slow-path: true
 class C
   @@foo = T.let(3, Integer)
 
