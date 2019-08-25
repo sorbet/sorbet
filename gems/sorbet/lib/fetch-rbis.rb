@@ -14,7 +14,7 @@ class Sorbet::Private::FetchRBIs
   SORBET_DIR = 'sorbet'
   SORBET_CONFIG_FILE = "#{SORBET_DIR}/config"
   SORBET_RBI_LIST = "#{SORBET_DIR}/rbi_list"
-  SORBET_RBI_SORBET_TYPED = "#{SORBET_DIR}/rbi/sorbet-typed"
+  SORBET_RBI_SORBET_TYPED = "#{SORBET_DIR}/rbi/sorbet-typed/"
 
   XDG_CACHE_HOME = ENV['XDG_CACHE_HOME'] || "#{ENV['HOME']}/.cache"
   RBI_CACHE_DIR = "#{XDG_CACHE_HOME}/sorbet/sorbet-typed"
@@ -100,20 +100,6 @@ class Sorbet::Private::FetchRBIs
     end
   end
 
-  # Remove extra rbi files if there are any.
-  T::Sig::WithoutRuntime.sig {params(vendor_paths: T::Array[String]).void}
-  def self.remove_extra_rbis(vendor_paths)
-    relative_vendor_paths = vendor_paths.map { |path| path.sub(RBI_CACHE_DIR, '') }
-    rbis = Dir.glob("#{SORBET_RBI_SORBET_TYPED}/lib/**/*.rbi")
-    # Use uniq to make sure 'ruby/all/' isn't included multiple times.
-    current_rbi_paths = rbis.map { |rbi| rbi.split("/")[0...-1].join("/").sub(SORBET_RBI_SORBET_TYPED, '') }.uniq
-    # Get any sorbet-typed directories that are in the current 'sorbet/'
-    # directory and not in the vendor cache, and delete them.
-    (current_rbi_paths - relative_vendor_paths).each do |extra_dir|
-      FileUtils.remove_dir("#{SORBET_RBI_SORBET_TYPED}#{extra_dir}")
-    end
-  end
-
   T::Sig::WithoutRuntime.sig {void}
   def self.main
     fetch_sorbet_typed
@@ -126,14 +112,15 @@ class Sorbet::Private::FetchRBIs
       vendor_paths += paths_for_gem_version(gemspec)
     end
 
+    # Remove the sorbet-typed directory before repopulating it.
+    FileUtils.rm_r(SORBET_RBI_SORBET_TYPED) if Dir.exist?(SORBET_RBI_SORBET_TYPED)
     if vendor_paths.length > 0
       vendor_rbis_within_paths(vendor_paths)
-      remove_extra_rbis(vendor_paths)
     end
   end
 
   def self.output_file
-    "#{SORBET_RBI_SORBET_TYPED}/"
+    SORBET_RBI_SORBET_TYPED
   end
 end
 
