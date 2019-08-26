@@ -3,7 +3,7 @@
 module M; end
 
 class A; include M; end
-class B < A; en
+class B < A; end
 
 class Test
   extend T::Sig
