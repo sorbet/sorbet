@@ -1374,12 +1374,6 @@ private:
             },
             [&](ast::InsSeq *outer) { result = resolveConstantType(ctx, outer->expr, ofSym); },
             [&](ast::Expression *expr) {
-                if (auto *send = ast::cast_tree<ast::Send>(expr)) {
-                    if (send->fun == core::Names::typeAlias()) {
-                        // short circuit if this is a type alias
-                        return;
-                    }
-                }
                 if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::ConstantMissingTypeAnnotation)) {
                     e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                                 "# typed: strict");
