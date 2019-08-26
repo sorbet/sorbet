@@ -1,0 +1,33 @@
+class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
+  def outside_method<<C <todo sym>>>(&<blk>)
+    <emptyTree>
+  end
+
+  [true, false].each() do |value|
+    begin
+      <self>.puts(value)
+      def <test_works outside><<C <todo sym>>>(&<blk>)
+        <self>.outside_method()
+      end
+    end
+  end
+
+  [true, false].each() do |value|
+    begin
+      <self>.puts(value)
+      class <emptyTree>::<C <class_some inner tests>><<C <todo sym>>> < (<self>)
+        begin
+          def inside_method<<C <todo sym>>>(&<blk>)
+            <emptyTree>
+          end
+          def <test_works inside><<C <todo sym>>>(&<blk>)
+            begin
+              <self>.outside_method()
+              <self>.inside_method()
+            end
+          end
+        end
+      end
+    end
+  end
+end
