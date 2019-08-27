@@ -64,7 +64,10 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
             vector<TypePtr> targs;
             for (auto tm : typeMembers()) {
                 auto tmData = tm.data(gs);
-                if (tmData->isFixed()) {
+
+                // Default type parameters to their upper bound if they are
+                // fixed, or type_template parameters.
+                if (tmData->isFixed() || this->isSingletonClass(gs)) {
                     auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
                     ENFORCE(lambdaParam != nullptr);
                     targs.emplace_back(lambdaParam->upperBound);

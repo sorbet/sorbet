@@ -847,17 +847,14 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
         singleton = s->symbol;
     } else {
         auto *at = core::cast_type<core::AppliedType>(ty);
-        if (at == nullptr) {
+
+        // If this is not singleton class return noSymbol; we default
+        // `type_template` variables to their upper bound, but not `type_member`
+        // variables.
+        if (at == nullptr || !at->klass.data(ctx)->isSingletonClass(ctx)) {
             return core::Symbols::noSymbol();
         }
-        // If this class is a "real" generic, leave it alone. We're not quite
-        // sure yet what it means to move between the "attached" and "singleton"
-        // levels for generic singletons. However, if the singleton has kind `*`
-        // due to all type members being fixed:, we're OK to treat the
-        // AppliedType and the Symbol as interchangeable here.
-        if (at->klass.data(ctx)->typeArity(ctx) != 0) {
-            return core::Symbols::noSymbol();
-        }
+
         singleton = at->klass;
     }
     return singleton.data(ctx)->attachedClass(ctx);
