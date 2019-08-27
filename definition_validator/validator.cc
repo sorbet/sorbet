@@ -70,29 +70,24 @@ void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrap
                      core::SymbolRef superMethod,
                      absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
                      core::SymbolRef method) {
-    auto superPos = superArgs.begin();
-    auto superEnd = superArgs.end();
+    auto idx = 0;
+    auto maxLen = min(superArgs.size(), methodArgs.size());
 
-    auto methodPos = methodArgs.begin();
-    auto methodEnd = methodArgs.end();
-
-    while (superPos != superEnd && methodPos != methodEnd) {
-        auto superArgType = superPos->get().type;
-        auto methodArgType = methodPos->get().type;
+    while (idx < maxLen) {
+        auto superArgType = superArgs[idx].get().type;
+        auto methodArgType = methodArgs[idx].get().type;
 
         if (!checkSubtype(ctx, superArgType, methodArgType)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                            methodPos->get().show(ctx), methodArgType->show(ctx), supermethodKind(ctx, superMethod),
+                            methodArgs[idx].get().show(ctx), methodArgType->show(ctx), supermethodKind(ctx, superMethod),
                             superMethod.data(ctx)->show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter `{}` was declared here with type `{}`",
-                               superPos->get().show(ctx), superArgType->show(ctx));
+                               superArgs[idx].get().show(ctx), superArgType->show(ctx));
             }
         }
-
-        superPos++;
-        methodPos++;
+        idx++;
     }
 }
 
