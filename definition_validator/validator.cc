@@ -67,7 +67,8 @@ string supermethodKind(const core::Context ctx, core::SymbolRef method) {
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
 void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
-                     core::SymbolRef superMethod, absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
+                     core::SymbolRef superMethod,
+                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
                      core::SymbolRef method) {
     auto superPos = superArgs.begin();
     auto superEnd = superArgs.end();
@@ -147,7 +148,8 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
             auto corresponding =
                 absl::c_find_if(right.kw.required, [&](const auto &r) { return r.get().name == req.get().name; });
             if (corresponding == right.kw.required.end()) {
-                corresponding = absl::c_find_if(right.kw.optional, [&](const auto &r) { return r.get().name == req.get().name; });
+                corresponding =
+                    absl::c_find_if(right.kw.optional, [&](const auto &r) { return r.get().name == req.get().name; });
             }
 
             // if there is a corresponding parameter, make sure it has the right type
@@ -220,7 +222,8 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
         }
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Implementation of {} method `{}` contains extra required keyword argument `{}`",
-                        supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx), extra.get().name.toString(ctx));
+                        supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx),
+                        extra.get().name.toString(ctx));
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
         }
     }
