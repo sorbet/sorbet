@@ -96,9 +96,13 @@ module T::Private::Methods::SignatureValidation
       # Peaceful
       nil
     when *Modes::IMPLEMENT_MODES
-      raise "You marked `#{signature.method_name}` as #{pretty_mode(signature)}, but it doesn't match up with a corresponding abstract method.\n" \
-        "  Either check for typos and for missing includes or super classes to make the parent method shows up\n" \
-        "  ... or remove #{pretty_mode(signature)} here: #{method_loc_str(signature.method)}\n"
+      if signature.method_name == :each && signature.method.owner < Enumerable
+        nil
+      else
+        raise "You marked `#{signature.method_name}` as #{pretty_mode(signature)}, but it doesn't match up with a corresponding abstract method.\n" \
+          "  Either check for typos and for missing includes or super classes to make the parent method shows up\n" \
+          "  ... or remove #{pretty_mode(signature)} here: #{method_loc_str(signature.method)}\n"
+      end
     else
       raise "Unexpected mode: #{signature.mode}. Please report to #dev-productivity."
     end
