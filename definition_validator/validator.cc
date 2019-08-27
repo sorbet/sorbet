@@ -40,7 +40,7 @@ Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method
     return sig;
 }
 
-// This returns true if `sub` is a subtype of `super`, but it also returns true if either one is `T.untyped` or if
+// This returns true if `sub` is a subtype of `super`, but it also returns true if either one is `nullptr` or if
 // either one is not fully defined.
 bool checkSubtype(const core::Context ctx, core::TypePtr sub, core::TypePtr super) {
     if (sub == nullptr || super == nullptr) {
