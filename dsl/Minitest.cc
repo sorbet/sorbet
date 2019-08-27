@@ -48,38 +48,35 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
         return nullptr;
     }
 
-    if (send->recv->isSelfReference()) {
-        if (send->args.empty() && send->fun == core::Names::before()) {
-            return ast::MK::Method0(send->loc, send->loc, core::Names::initialize(),
-                                    prepareBody(ctx, std::move(send->block->body)), ast::MethodDef::DSLSynthesized);
-        }
+    if (!send->recv->isSelfReference()) {
+        return nullptr;
+    }
 
-        if (send->args.size() != 1) {
-            return nullptr;
-        }
-        auto &arg = send->args[0];
-        auto argString = to_s(ctx, arg);
+    if (send->args.empty() && send->fun == core::Names::before()) {
+        return ast::MK::Method0(send->loc, send->loc, core::Names::initialize(),
+                                prepareBody(ctx, std::move(send->block->body)), ast::MethodDef::DSLSynthesized);
+    }
 
-        vector<unique_ptr<ast::Expression>> stats;
-        if (send->fun == core::Names::describe()) {
-            ast::ClassDef::ANCESTORS_store ancestors;
-            ancestors.emplace_back(ast::MK::Self(arg->loc));
-            ast::ClassDef::RHS_store rhs;
-            rhs.emplace_back(prepareBody(ctx, std::move(send->block->body)));
-            auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
-                                                    ctx.state.enterNameConstant("<class_" + argString + ">"));
-            return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs),
-                                  ast::ClassDefKind::Class);
-        } else if (send->fun == core::Names::it()) {
-            auto name = ctx.state.enterNameUTF8("<test_" + argString + ">");
-            return ast::MK::Method0(send->loc, send->loc, std::move(name),
-                                    prepareBody(ctx, std::move(send->block->body)), ast::MethodDef::DSLSynthesized);
-        }
-    } else if (send->fun == core::Names::each() && send->args.empty()) {
-        auto noArgs = ast::Send::ARGS_store{};
-        return ast::MK::Send(send->loc, std::move(send->recv), send->fun, std::move(noArgs), send->flags,
-                             ast::MK::Block(send->block->loc, prepareBody(ctx, std::move(send->block->body)),
-                                            std::move(send->block->args)));
+    if (send->args.size() != 1) {
+        return nullptr;
+    }
+    auto &arg = send->args[0];
+    auto argString = to_s(ctx, arg);
+
+    vector<unique_ptr<ast::Expression>> stats;
+    if (send->fun == core::Names::describe()) {
+        ast::ClassDef::ANCESTORS_store ancestors;
+        ancestors.emplace_back(ast::MK::Self(arg->loc));
+        ast::ClassDef::RHS_store rhs;
+        rhs.emplace_back(prepareBody(ctx, std::move(send->block->body)));
+        auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
+                                                ctx.state.enterNameConstant("<class_" + argString + ">"));
+        return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs),
+                              ast::ClassDefKind::Class);
+    } else if (send->fun == core::Names::it()) {
+        auto name = ctx.state.enterNameUTF8("<test_" + argString + ">");
+        return ast::MK::Method0(send->loc, send->loc, std::move(name), prepareBody(ctx, std::move(send->block->body)),
+                                ast::MethodDef::DSLSynthesized);
     }
 
     return nullptr;
