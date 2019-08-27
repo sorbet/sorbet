@@ -86,7 +86,7 @@ void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrap
                             methodPos->get().show(ctx), methodArgType->show(ctx), supermethodKind(ctx, superMethod),
                             superMethod.data(ctx)->show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
-                               "The corresponding parameter `{}` was declared here with type `{}`",
+                               "The super method parameter `{}` was declared here with type `{}`",
                                superPos->get().show(ctx), superArgType->show(ctx));
             }
         }
@@ -186,10 +186,10 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
                     if (auto e =
                             ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                                    corresponding->get().type->show(ctx), corresponding->get().type->show(ctx),
+                                    corresponding->get().show(ctx), corresponding->get().type->show(ctx),
                                     supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
                         e.addErrorLine(superMethod.data(ctx)->loc(),
-                                       "The corresponding parameter `{}` was declared here with type `{}`",
+                                       "The super method parameter `{}` was declared here with type `{}`",
                                        opt.get().show(ctx), opt.get().type->show(ctx));
                     }
                 }
@@ -210,7 +210,7 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
                             right.kw.rest->get().show(ctx), right.kw.rest->get().type->show(ctx),
                             supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
-                               "The corresponding parameter **`{}` was declared here with type `{}`",
+                               "The super method parameter **`{}` was declared here with type `{}`",
                                left.kw.rest->get().show(ctx), left.kw.rest->get().type->show(ctx));
             }
         }
@@ -245,7 +245,7 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturn->show(ctx),
                             supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
-                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here with return type `{}`",
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Super method defined here with return type `{}`",
                                superReturn->show(ctx));
             }
         }
