@@ -80,8 +80,8 @@ void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrap
         if (!checkSubtype(ctx, superArgType, methodArgType)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                            methodArgs[idx].get().show(ctx), methodArgType->show(ctx), supermethodKind(ctx, superMethod),
-                            superMethod.data(ctx)->show(ctx));
+                            methodArgs[idx].get().show(ctx), methodArgType->show(ctx),
+                            supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter `{}` was declared here with type `{}`",
                                superArgs[idx].get().show(ctx), superArgType->show(ctx));
