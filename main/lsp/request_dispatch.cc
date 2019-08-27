@@ -19,7 +19,7 @@ LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const LSPMes
 LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<unique_ptr<LSPMessage>> messages) {
     LSPLoop::QueueState state{{}, false, false, 0};
     for (auto &message : messages) {
-        enqueueRequest(logger, state, move(message));
+        preprocessAndEnqueue(logger, state, move(message));
     }
     ENFORCE(state.paused == false, "__PAUSE__ not supported in single-threaded mode.");
 
