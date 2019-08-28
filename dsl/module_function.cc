@@ -12,6 +12,46 @@ using namespace std;
 
 namespace sorbet::dsl {
 
+bool ModuleFunction::isModuleFunction(const ast::Expression *expr) {
+    if (auto send = ast::cast_tree_const<ast::Send>(expr)) {
+        return send->fun == core::Names::moduleFunction();
+    }
+    return false;
+}
+
+vector<unique_ptr<ast::Expression>> ModuleFunction::rewriteDefn(core::MutableContext ctx, const ast::Expression *expr,
+                                                                const ast::Expression *prevStat, bool usedSig) {
+    vector<unique_ptr<ast::Expression>> stats;
+    if (!ast::cast_tree_const<ast::MethodDef>(expr)) {
+        return stats;
+    }
+
+    auto sig = ast::cast_tree_const<ast::Send>(prevStat);
+    bool hasSig = sig && sig->fun == core::Names::sig();
+    auto loc = expr->loc;
+
+    // copy the sig first
+    if (hasSig && !usedSig) {
+        stats.emplace_back(sig->deepCopy());
+    }
+
+    // this creates a private copy of the method
+    unique_ptr<ast::Expression> privateCopy = expr->deepCopy();
+    stats.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::private_(), move(privateCopy)));
+
+    // as well as a public static copy of the method
+    if (hasSig) {
+        stats.emplace_back(sig->deepCopy());
+    }
+    unique_ptr<ast::Expression> moduleCopy = expr->deepCopy();
+    ENFORCE(moduleCopy, "Should be non-nil.");
+    auto newDefn = ast::cast_tree<ast::MethodDef>(moduleCopy.get());
+    newDefn->flags |= ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized;
+    stats.emplace_back(move(moduleCopy));
+
+    return stats;
+}
+
 vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableContext ctx, ast::Send *send,
                                                                const ast::Expression *prevStat) {
     vector<unique_ptr<ast::Expression>> stats;
@@ -20,27 +60,19 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableCont
         return stats;
     }
 
-    auto sig = ast::cast_tree_const<ast::Send>(prevStat);
-    bool hasSig = sig && sig->fun == core::Names::sig();
+    // if module_function is used in a context with no args, then the rest of the definitions after this one should be
+    // rewritten, so let's return the nullary call to module_function as a "replacement" expression: the DSL loop will
+    // in turn know to apply a rewrite to all subsequent definitions
+    if (send->args.size() == 0) {
+        stats.emplace_back(send->deepCopy());
+    }
 
-    auto loc = send->loc;
     for (auto &arg : send->args) {
-        if (auto defn = ast::cast_tree<ast::MethodDef>(arg.get())) {
-            // this creates a private copy of the method
-            unique_ptr<ast::Expression> privateCopy = defn->deepCopy();
-            stats.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::private_(), move(privateCopy)));
-
-            // as well as a public static copy of the method
-            if (hasSig) {
-                stats.emplace_back(sig->deepCopy());
-            }
-            unique_ptr<ast::Expression> moduleCopy = defn->deepCopy();
-            ENFORCE(moduleCopy, "Should be non-nil.");
-            auto newDefn = ast::cast_tree<ast::MethodDef>(moduleCopy.get());
-            newDefn->flags |= ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized;
-            stats.emplace_back(move(moduleCopy));
+        if (ast::isa_tree<ast::MethodDef>(arg.get())) {
+            return ModuleFunction::rewriteDefn(ctx, arg.get(), prevStat, true);
         } else if (auto lit = ast::cast_tree<ast::Literal>(arg.get())) {
             core::NameRef methodName = core::NameRef::noName();
+            auto loc = send->loc;
             if (lit->isSymbol(ctx)) {
                 methodName = lit->asSymbol(ctx);
             } else if (lit->isString(ctx)) {
