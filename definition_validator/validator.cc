@@ -13,9 +13,9 @@ namespace sorbet::definition_validator {
 
 struct Signature {
     struct {
-        absl::InlinedVector<core::NameRef, 4> required;
-        absl::InlinedVector<core::NameRef, 4> optional;
-        std::optional<const core::ArgInfo *> rest;
+        absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> required;
+        absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> optional;
+        std::optional<reference_wrapper<const core::ArgInfo>> rest;
     } pos, kw;
     bool syntheticBlk;
 } left, right;
@@ -30,195 +30,324 @@ Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method
 
         auto &dst = arg.flags.isKeyword ? sig.kw : sig.pos;
         if (arg.flags.isRepeated) {
-            dst.rest = std::optional<const core::ArgInfo *>{&arg};
+            dst.rest = std::optional<reference_wrapper<const core::ArgInfo>>{arg};
         } else if (arg.flags.isDefault) {
-            dst.optional.push_back(arg.name);
+            dst.optional.push_back(arg);
         } else {
-            dst.required.push_back(arg.name);
+            dst.required.push_back(arg);
         }
     }
     return sig;
 }
 
-// Eventually this should check the appropriate subtype relationships on types,
-// as well, but for now we just look at the argument shapes and ensure that they
-// are compatible.
-void validateCompatibleOverride(const core::GlobalState &gs, core::SymbolRef superMethod, core::SymbolRef method) {
-    if (method.data(gs)->isOverloaded()) {
+// This returns true if `sub` is a subtype of `super`, but it also returns true if either one is `nullptr` or if either
+// one is not fully defined. This is really just a useful helper function for this module: do not use it elsewhere.
+bool checkSubtype(const core::Context ctx, core::TypePtr sub, core::TypePtr super) {
+    if (sub == nullptr || super == nullptr) {
+        return true;
+    }
+
+    // type-checking these in the presence of generic type parameters is tricky, so for now we're going to punt on
+    // it. TODO: build up the machinery to type-check in the presence of type parameters!
+    if (!super->isFullyDefined() || !sub->isFullyDefined()) {
+        return true;
+    }
+
+    return core::Types::isSubType(ctx, sub, super);
+}
+
+string supermethodKind(const core::Context ctx, core::SymbolRef method) {
+    auto methodData = method.data(ctx);
+    ENFORCE(methodData->isAbstract() || methodData->isOverridable());
+    if (methodData->isAbstract()) {
+        return "abstract";
+    } else {
+        return "overridable";
+    }
+}
+
+// This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
+// implementing method is either the same or a supertype of the abstract or overridable definition)
+void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
+                     core::SymbolRef superMethod,
+                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
+                     core::SymbolRef method) {
+    auto idx = 0;
+    auto maxLen = min(superArgs.size(), methodArgs.size());
+
+    while (idx < maxLen) {
+        auto superArgType = superArgs[idx].get().type;
+        auto methodArgType = methodArgs[idx].get().type;
+
+        if (!checkSubtype(ctx, superArgType, methodArgType)) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
+                            methodArgs[idx].get().show(ctx), methodArgType->show(ctx),
+                            supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(),
+                               "The super method parameter `{}` was declared here with type `{}`",
+                               superArgs[idx].get().show(ctx), superArgType->show(ctx));
+            }
+        }
+        idx++;
+    }
+}
+
+// Ensure that two argument lists are compatible in shape and type
+void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMethod, core::SymbolRef method) {
+    if (method.data(ctx)->isOverloaded()) {
         // Don't try to check overloaded methods; It's not immediately clear how
         // to match overloads against their superclass definitions. Since we
         // Only permit overloading in the stdlib for now, this is no great loss.
         return;
     }
 
-    auto left = decomposeSignature(gs, superMethod);
-    auto right = decomposeSignature(gs, method);
+    auto left = decomposeSignature(ctx, superMethod);
+    auto right = decomposeSignature(ctx, method);
 
     if (!right.pos.rest) {
         auto leftPos = left.pos.required.size() + left.pos.optional.size();
         auto rightPos = right.pos.required.size() + right.pos.optional.size();
         if (leftPos > rightPos) {
-            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("Implementation of abstract method `{}` must accept at least `{}` positional arguments",
-                            superMethod.data(gs)->show(gs), leftPos);
-                e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Implementation of {} method `{}` must accept at least `{}` positional arguments",
+                            supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx), leftPos);
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
         }
     }
 
     if (auto leftRest = left.pos.rest) {
         if (!right.pos.rest) {
-            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("Implementation of abstract method `{}` must accept *`{}`", superMethod.data(gs)->show(gs),
-                            (*leftRest)->show(gs));
-                e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Implementation of {} method `{}` must accept *`{}`", supermethodKind(ctx, superMethod),
+                            superMethod.data(ctx)->show(ctx), leftRest->get().show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
         }
     }
 
     if (right.pos.required.size() > left.pos.required.size()) {
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Implementation of abstract method `{}` must accept no more than `{}` required argument(s)",
-                        superMethod.data(gs)->show(gs), left.pos.required.size());
-            e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Implementation of {} method `{}` must accept no more than `{}` required argument(s)",
+                        supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx), left.pos.required.size());
+            e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
         }
     }
 
+    // match types of required positional arguments
+    matchPositional(ctx, left.pos.required, superMethod, right.pos.required, method);
+    // match types of optional positional arguments
+    matchPositional(ctx, left.pos.optional, superMethod, right.pos.optional, method);
+
     if (!right.kw.rest) {
         for (auto req : left.kw.required) {
-            if (absl::c_any_of(right.kw.required, [&](const auto &r) { return r == req; })) {
-                continue;
+            auto corresponding =
+                absl::c_find_if(right.kw.required, [&](const auto &r) { return r.get().name == req.get().name; });
+            if (corresponding == right.kw.required.end()) {
+                corresponding =
+                    absl::c_find_if(right.kw.optional, [&](const auto &r) { return r.get().name == req.get().name; });
             }
-            if (absl::c_any_of(right.kw.optional, [&](const auto &r) { return r == req; })) {
-                continue;
+
+            // if there is a corresponding parameter, make sure it has the right type
+            if (corresponding != right.kw.required.end() && corresponding != right.kw.optional.end()) {
+                if (!checkSubtype(ctx, req.get().type, corresponding->get().type)) {
+                    if (auto e =
+                            ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                        e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
+                                    corresponding->get().show(ctx), corresponding->get().type->show(ctx),
+                                    supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
+                        e.addErrorLine(superMethod.data(ctx)->loc(),
+                                       "The corresponding parameter `{}` was declared here with type `{}`",
+                                       req.get().show(ctx), req.get().type->show(ctx));
+                    }
+                }
+            } else {
+                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                    e.setHeader("Implementation of {} method `{}` is missing required keyword argument `{}`",
+                                supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx),
+                                req.get().name.show(ctx));
+                    e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+                }
             }
-            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("Implementation of abstract method `{}` is missing required keyword argument `{}`",
-                            superMethod.data(gs)->show(gs), req.show(gs));
-                e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+        }
+
+        // make sure that optional parameters expect a compatible type, as well
+        for (auto opt : left.kw.optional) {
+            auto corresponding =
+                absl::c_find_if(right.kw.optional, [&](const auto &r) { return r.get().name == opt.get().name; });
+
+            // if there is a corresponding parameter, make sure it has the right type
+            if (corresponding != right.kw.optional.end()) {
+                if (!checkSubtype(ctx, opt.get().type, corresponding->get().type)) {
+                    if (auto e =
+                            ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                        e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
+                                    corresponding->get().show(ctx), corresponding->get().type->show(ctx),
+                                    supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
+                        e.addErrorLine(superMethod.data(ctx)->loc(),
+                                       "The super method parameter `{}` was declared here with type `{}`",
+                                       opt.get().show(ctx), opt.get().type->show(ctx));
+                    }
+                }
             }
         }
     }
 
     if (auto leftRest = left.kw.rest) {
         if (!right.kw.rest) {
-            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("Implementation of abstract method `{}` must accept **`{}`", superMethod.data(gs)->show(gs),
-                            (*leftRest)->show(gs));
-                e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Implementation of {} method `{}` must accept **`{}`", supermethodKind(ctx, superMethod),
+                            superMethod.data(ctx)->show(ctx), leftRest->get().show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+            }
+        } else if (!checkSubtype(ctx, leftRest->get().type, right.kw.rest->get().type)) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Parameter **`{}` of type `{}` not compatible with type of {} method `{}`",
+                            right.kw.rest->get().show(ctx), right.kw.rest->get().type->show(ctx),
+                            supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(),
+                               "The super method parameter **`{}` was declared here with type `{}`",
+                               left.kw.rest->get().show(ctx), left.kw.rest->get().type->show(ctx));
             }
         }
     }
 
     for (auto extra : right.kw.required) {
-        if (absl::c_any_of(left.kw.required, [&](const auto &l) { return l == extra; })) {
+        if (absl::c_any_of(left.kw.required, [&](const auto &l) { return l.get().name == extra.get().name; })) {
             continue;
         }
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Implementation of abstract method `{}` contains extra required keyword argument `{}`",
-                        superMethod.data(gs)->show(gs), extra.toString(gs));
-            e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Implementation of {} method `{}` contains extra required keyword argument `{}`",
+                        supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx),
+                        extra.get().name.toString(ctx));
+            e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
         }
     }
 
     if (!left.syntheticBlk && right.syntheticBlk) {
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Implementation of abstract method `{}` must explicitly name a block argument",
-                        superMethod.data(gs)->show(gs));
-            e.addErrorLine(superMethod.data(gs)->loc(), "Base method defined here");
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Implementation of {} method `{}` must explicitly name a block argument",
+                        supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
+            e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+        }
+    }
+
+    {
+        // make sure the return types are compatible
+        auto superReturn = superMethod.data(ctx)->resultType;
+        auto methodReturn = method.data(ctx)->resultType;
+
+        if (!checkSubtype(ctx, methodReturn, superReturn)) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturn->show(ctx),
+                            supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Super method defined here with return type `{}`",
+                               superReturn->show(ctx));
+            }
         }
     }
 }
 
-void validateOverriding(const core::GlobalState &gs, core::SymbolRef method) {
-    auto klass = method.data(gs)->owner;
-    auto name = method.data(gs)->name;
-    ENFORCE(klass.data(gs)->isClass());
-    auto klassData = klass.data(gs);
+void validateOverriding(const core::Context ctx, core::SymbolRef method) {
+    auto klass = method.data(ctx)->owner;
+    auto name = method.data(ctx)->name;
+    ENFORCE(klass.data(ctx)->isClass());
+    auto klassData = klass.data(ctx);
     InlinedVector<core::SymbolRef, 4> overridenMethods;
 
     // both of these match the behavior of the runtime checks, which will only allow public methods to be defined in
     // interfaces
-    if (klassData->isClassInterface() && method.data(gs)->isPrivate()) {
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicAbstract)) {
-            e.setHeader("Interface method `{}` cannot be private", method.show(gs));
+    if (klassData->isClassInterface() && method.data(ctx)->isPrivate()) {
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
+            e.setHeader("Interface method `{}` cannot be private", method.show(ctx));
         }
     }
 
-    if (klassData->isClassInterface() && method.data(gs)->isProtected()) {
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::NonPublicAbstract)) {
-            e.setHeader("Interface method `{}` cannot be protected", method.show(gs));
+    if (klassData->isClassInterface() && method.data(ctx)->isProtected()) {
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
+            e.setHeader("Interface method `{}` cannot be protected", method.show(ctx));
         }
     }
 
-    if (method.data(gs)->isAbstract() && klassData->isClass() && klassData->isSingletonClass(gs)) {
-        auto attached = klassData->attachedClass(gs);
-        if (attached.exists() && attached.data(gs)->isClassModule()) {
-            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadAbstractMethod)) {
+    if (method.data(ctx)->isAbstract() && klassData->isClass() && klassData->isSingletonClass(ctx)) {
+        auto attached = klassData->attachedClass(ctx);
+        if (attached.exists() && attached.data(ctx)->isClassModule()) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadAbstractMethod)) {
                 e.setHeader("Static methods in a module cannot be abstract");
             }
         }
     }
 
     if (klassData->superClass().exists()) {
-        auto superMethod = klassData->superClass().data(gs)->findMemberTransitive(gs, name);
+        auto superMethod = klassData->superClass().data(ctx)->findMemberTransitive(ctx, name);
         if (superMethod.exists()) {
             overridenMethods.emplace_back(superMethod);
         }
     }
     for (const auto &mixin : klassData->mixins()) {
-        auto superMethod = mixin.data(gs)->findMember(gs, name);
+        auto superMethod = mixin.data(ctx)->findMember(ctx, name);
         if (superMethod.exists()) {
             overridenMethods.emplace_back(superMethod);
         }
     }
 
-    if (overridenMethods.size() == 0 && method.data(gs)->isOverride() && !method.data(gs)->isIncompatibleOverride()) {
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Method `{}` is marked `{}` but does not override anything", method.data(gs)->show(gs),
+    if (overridenMethods.size() == 0 && method.data(ctx)->isOverride() && !method.data(ctx)->isIncompatibleOverride()) {
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Method `{}` is marked `{}` but does not override anything", method.data(ctx)->show(ctx),
                         "override");
         }
     }
 
-    if (overridenMethods.size() == 0 && method.data(gs)->isImplementation()) {
-        if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Method `{}` is marked `{}` but does not implement anything", method.data(gs)->show(gs),
+    if (overridenMethods.size() == 0 && method.data(ctx)->isImplementation()) {
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Method `{}` is marked `{}` but does not implement anything", method.data(ctx)->show(ctx),
                         "implementation");
         }
     }
 
     // we don't raise override errors if the method implements an abstract method, which means we need to know ahead of
     // time whether any parent methods are abstract
-    auto anyIsInterface = absl::c_any_of(overridenMethods, [&](auto &m) { return m.data(gs)->isAbstract(); });
+    auto anyIsInterface = absl::c_any_of(overridenMethods, [&](auto &m) { return m.data(ctx)->isAbstract(); });
     for (const auto &overridenMethod : overridenMethods) {
-        if (overridenMethod.data(gs)->isFinalMethod()) {
-            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::OverridesFinal)) {
+        if (overridenMethod.data(ctx)->isFinalMethod()) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
                 e.setHeader("`{}` was declared as final and cannot be overridden by `{}`",
-                            overridenMethod.data(gs)->show(gs), method.data(gs)->show(gs));
-                e.addErrorLine(overridenMethod.data(gs)->loc(), "original method defined here");
+                            overridenMethod.data(ctx)->show(ctx), method.data(ctx)->show(ctx));
+                e.addErrorLine(overridenMethod.data(ctx)->loc(), "original method defined here");
             }
         }
-        auto isRBI = absl::c_any_of(method.data(gs)->locs(), [&](auto &loc) { return loc.file().data(gs).isRBI(); });
-        if (!method.data(gs)->isOverride() && method.data(gs)->hasSig() && overridenMethod.data(gs)->isOverridable() &&
-            !anyIsInterface && overridenMethod.data(gs)->hasSig() && !method.data(gs)->isDSLSynthesized() && !isRBI) {
-            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::UndeclaredOverride)) {
+        auto isRBI = absl::c_any_of(method.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isRBI(); });
+        if (!method.data(ctx)->isOverride() && method.data(ctx)->hasSig() &&
+            overridenMethod.data(ctx)->isOverridable() && !anyIsInterface && overridenMethod.data(ctx)->hasSig() &&
+            !method.data(ctx)->isDSLSynthesized() && !isRBI) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
-                            method.data(gs)->show(gs), overridenMethod.data(gs)->show(gs), ".override");
-                e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
+                            method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), ".override");
+                e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
             }
         }
-        if (!method.data(gs)->isImplementation() && !method.data(gs)->isOverride() && method.data(gs)->hasSig() &&
-            overridenMethod.data(gs)->isAbstract() && overridenMethod.data(gs)->hasSig() &&
-            !method.data(gs)->isDSLSynthesized() && !isRBI) {
-            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::UndeclaredOverride)) {
+        if (!method.data(ctx)->isImplementation() && !method.data(ctx)->isOverride() && method.data(ctx)->hasSig() &&
+            overridenMethod.data(ctx)->isAbstract() && overridenMethod.data(ctx)->hasSig() &&
+            !method.data(ctx)->isDSLSynthesized() && !isRBI) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
-                            method.data(gs)->show(gs), overridenMethod.data(gs)->show(gs), ".implementation");
-                e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
+                            method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), ".implementation");
+                e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
             }
         }
-        if ((overridenMethod.data(gs)->isAbstract() || overridenMethod.data(gs)->isOverridable()) &&
-            !method.data(gs)->isIncompatibleOverride() && !isRBI && !method.data(gs)->isDSLSynthesized()) {
-            validateCompatibleOverride(gs, overridenMethod, method);
+        if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable()) &&
+            !method.data(ctx)->isIncompatibleOverride() && !isRBI && !method.data(ctx)->isDSLSynthesized()) {
+            if (overridenMethod.data(ctx)->isFinalMethod()) {
+                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
+                    e.setHeader("Method overrides a final method `{}`", overridenMethod.data(ctx)->show(ctx));
+                    e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
+                }
+            }
+            if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable()) &&
+                !method.data(ctx)->isIncompatibleOverride()) {
+                validateCompatibleOverride(ctx, overridenMethod, method);
+            }
         }
     }
 }
@@ -448,7 +577,7 @@ public:
             variance::validateMethodVariance(ctx, methodDef->symbol);
         }
 
-        validateOverriding(ctx.state, methodDef->symbol);
+        validateOverriding(ctx, methodDef->symbol);
         return methodDef;
     }
 };
