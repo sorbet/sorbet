@@ -12,7 +12,7 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <C <U Funcs>><U f> (x, <blk>) -> Integer @ Loc {file=test/testdata/namer/module_function.rb start=6:3 end=6:11}
       argument x<> -> Integer @ Loc {file=test/testdata/namer/module_function.rb start=5:15 end=5:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
-    method <C <U Funcs>><U g> (s, <blk>) -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=11:19 end=11:27}
+    method <C <U Funcs>><U g> : private (s, <blk>) -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=11:19 end=11:27}
       argument s<> -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=10:15 end=10:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
     method <C <U Funcs>><U h> (s, <blk>) -> String @ Loc {file=test/testdata/namer/module_function.rb start=16:3 end=16:11}
@@ -21,7 +21,11 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
   class <S <C <U Funcs>> $1> < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/module_function.rb start=2:8 end=2:13}
     method <S <C <U Funcs>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=17:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
-    method <S <C <U Funcs>> $1><U f> () -> AliasType { symbol = <C <U Funcs>><U f> } @ Loc {file=test/testdata/namer/module_function.rb start=8:3 end=8:21}
-    method <S <C <U Funcs>> $1><U g> () -> AliasType { symbol = <C <U Funcs>><U g> } @ Loc {file=test/testdata/namer/module_function.rb start=11:3 end=11:35}
+    method <S <C <U Funcs>> $1><U f> (module_function :f, module_function :f) @ Loc {file=test/testdata/namer/module_function.rb start=8:3 end=8:21}
+      argument module_function :f<repeated> @ Loc {file=test/testdata/namer/module_function.rb start=8:3 end=8:21}
+      argument module_function :f<block> @ Loc {file=test/testdata/namer/module_function.rb start=8:3 end=8:21}
+    method <S <C <U Funcs>> $1><U g> (s, <blk>) -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=11:19 end=11:27}
+      argument s<> -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=10:15 end=10:16}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
     method <S <C <U Funcs>> $1><U h> () -> AliasType { symbol = <C <U Funcs>><U h> } @ Loc {file=test/testdata/namer/module_function.rb start=16:3 end=16:11}
 

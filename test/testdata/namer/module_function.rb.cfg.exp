@@ -35,6 +35,24 @@ subgraph "cluster_::Funcs#f" {
     "bb::Funcs#f_1" -> "bb::Funcs#f_1" [style="bold"];
 }
 
+subgraph "cluster_::<Class:Funcs>#f" {
+    label = "::<Class:Funcs>#f";
+    color = blue;
+    "bb::<Class:Funcs>#f_0" [shape = invhouse];
+    "bb::<Class:Funcs>#f_1" [shape = parallelogram];
+
+    "bb::<Class:Funcs>#f_0" [
+        label = "block[id=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, T.class_of(Funcs));\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Funcs>#f_0" -> "bb::<Class:Funcs>#f_1" [style="bold"];
+    "bb::<Class:Funcs>#f_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Funcs>#f_1" -> "bb::<Class:Funcs>#f_1" [style="bold"];
+}
+
 subgraph "cluster_::Funcs#g" {
     label = "::Funcs#g";
     color = blue;
@@ -51,6 +69,24 @@ subgraph "cluster_::Funcs#g" {
     ];
 
     "bb::Funcs#g_1" -> "bb::Funcs#g_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:Funcs>#g" {
+    label = "::<Class:Funcs>#g";
+    color = blue;
+    "bb::<Class:Funcs>#g_0" [shape = invhouse];
+    "bb::<Class:Funcs>#g_1" [shape = parallelogram];
+
+    "bb::<Class:Funcs>#g_0" [
+        label = "block[id=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, T.class_of(Funcs));\ls: Symbol = load_arg(s)\l<returnMethodTemp>$2: Symbol = s\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Funcs>#g_0" -> "bb::<Class:Funcs>#g_1" [style="bold"];
+    "bb::<Class:Funcs>#g_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Funcs>#g_1" -> "bb::<Class:Funcs>#g_1" [style="bold"];
 }
 
 subgraph "cluster_::Funcs#h" {
@@ -95,7 +131,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_2" -> "bb::<Class:Funcs>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Funcs>#<static-init>_3" [
-        label = "block[id=3](<selfRestore>$6: T.class_of(Funcs))\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(Funcs) = <selfRestore>$6\l<statTemp>$20: Symbol(:\"f\") = :\"f\"\l<statTemp>$18: T.class_of(Funcs) = <self>: T.class_of(Funcs).module_function(<statTemp>$20: Symbol(:\"f\"))\l<block-pre-call-temp>$23: Sorbet::Private::Static::Void = <self>: T.class_of(Funcs).sig()\l<selfRestore>$24: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=3](<selfRestore>$6: T.class_of(Funcs))\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(Funcs) = <selfRestore>$6\l<statTemp>$20: Symbol(:\"f\") = :\"f\"\l<statTemp>$18: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$20: Symbol(:\"f\"))\l<block-pre-call-temp>$23: Sorbet::Private::Static::Void = <self>: T.class_of(Funcs).sig()\l<selfRestore>$24: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_3" -> "bb::<Class:Funcs>#<static-init>_6" [style="bold"];
@@ -112,7 +148,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_6" -> "bb::<Class:Funcs>#<static-init>_7" [style="tapered"];
 
     "bb::<Class:Funcs>#<static-init>_7" [
-        label = "block[id=7](<selfRestore>$24: T.class_of(Funcs))\l<statTemp>$21: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(Funcs) = <selfRestore>$24\l<statTemp>$36: T.class_of(Funcs) = <self>: T.class_of(Funcs).module_function()\l<block-pre-call-temp>$40: Sorbet::Private::Static::Void = <self>: T.class_of(Funcs).sig()\l<selfRestore>$41: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=7](<selfRestore>$24: T.class_of(Funcs))\l<statTemp>$21: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(Funcs) = <selfRestore>$24\l<block-pre-call-temp>$38: Sorbet::Private::Static::Void = <self>: T.class_of(Funcs).sig()\l<selfRestore>$39: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_7" -> "bb::<Class:Funcs>#<static-init>_10" [style="bold"];
@@ -122,22 +158,39 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
 
     "bb::<Class:Funcs>#<static-init>_9" -> "bb::<Class:Funcs>#<static-init>_6" [style="bold"];
     "bb::<Class:Funcs>#<static-init>_10" [
-        label = "block[id=10](<self>: T.class_of(Funcs), <selfRestore>$41: T.class_of(Funcs))\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=10](<self>: T.class_of(Funcs), <selfRestore>$39: T.class_of(Funcs))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_10" -> "bb::<Class:Funcs>#<static-init>_13" [style="bold"];
     "bb::<Class:Funcs>#<static-init>_10" -> "bb::<Class:Funcs>#<static-init>_11" [style="tapered"];
 
     "bb::<Class:Funcs>#<static-init>_11" [
-        label = "block[id=11](<selfRestore>$41: T.class_of(Funcs))\l<statTemp>$38: Sorbet::Private::Static::Void = Solve<sig>\l<statTemp>$54: T.class_of(Sorbet::Private::Static) = alias <C Static>\lkeep_for_ide$56: T.class_of(T) = alias <C T>\l<statTemp>$55: T.class_of(T::Sig) = alias <C Sig>\l<statTemp>$53: Sorbet::Private::Static::Void = <statTemp>$54: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$55: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=11](<selfRestore>$39: T.class_of(Funcs))\l<statTemp>$36: Sorbet::Private::Static::Void = Solve<sig>\l<self>: T.class_of(Funcs) = <selfRestore>$39\l<statTemp>$51: T.class_of(Funcs) = <self>: T.class_of(Funcs).module_function()\l<block-pre-call-temp>$55: Sorbet::Private::Static::Void = <self>: T.class_of(Funcs).sig()\l<selfRestore>$56: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
-    "bb::<Class:Funcs>#<static-init>_11" -> "bb::<Class:Funcs>#<static-init>_1" [style="bold"];
+    "bb::<Class:Funcs>#<static-init>_11" -> "bb::<Class:Funcs>#<static-init>_14" [style="bold"];
     "bb::<Class:Funcs>#<static-init>_13" [
-        label = "block[id=13](<self>: T.class_of(Funcs), <selfRestore>$41: T.class_of(Funcs))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$48: Symbol(:\"s\") = :\"s\"\l<hashTemp>$49: T.class_of(String) = alias <C String>\l<magic>$50: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$47: {s: T.class_of(String)} = <magic>$50: T.class_of(<Magic>).<build-hash>(<hashTemp>$48: Symbol(:\"s\"), <hashTemp>$49: T.class_of(String))\l<statTemp>$45: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$47: {s: T.class_of(String)})\l<statTemp>$51: T.class_of(String) = alias <C String>\l<blockReturnTemp>$44: T::Private::Methods::DeclBuilder = <statTemp>$45: T::Private::Methods::DeclBuilder.returns(<statTemp>$51: T.class_of(String))\l<blockReturnTemp>$52: T.noreturn = blockreturn<sig> <blockReturnTemp>$44: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+        label = "block[id=13](<self>: T.class_of(Funcs), <selfRestore>$39: T.class_of(Funcs))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$46: Symbol(:\"s\") = :\"s\"\l<hashTemp>$47: T.class_of(Symbol) = alias <C Symbol>\l<magic>$48: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$45: {s: T.class_of(Symbol)} = <magic>$48: T.class_of(<Magic>).<build-hash>(<hashTemp>$46: Symbol(:\"s\"), <hashTemp>$47: T.class_of(Symbol))\l<statTemp>$43: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$45: {s: T.class_of(Symbol)})\l<statTemp>$49: T.class_of(Symbol) = alias <C Symbol>\l<blockReturnTemp>$42: T::Private::Methods::DeclBuilder = <statTemp>$43: T::Private::Methods::DeclBuilder.returns(<statTemp>$49: T.class_of(Symbol))\l<blockReturnTemp>$50: T.noreturn = blockreturn<sig> <blockReturnTemp>$42: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_13" -> "bb::<Class:Funcs>#<static-init>_10" [style="bold"];
+    "bb::<Class:Funcs>#<static-init>_14" [
+        label = "block[id=14](<self>: T.class_of(Funcs), <selfRestore>$56: T.class_of(Funcs))\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::<Class:Funcs>#<static-init>_14" -> "bb::<Class:Funcs>#<static-init>_17" [style="bold"];
+    "bb::<Class:Funcs>#<static-init>_14" -> "bb::<Class:Funcs>#<static-init>_15" [style="tapered"];
+
+    "bb::<Class:Funcs>#<static-init>_15" [
+        label = "block[id=15](<selfRestore>$56: T.class_of(Funcs))\l<statTemp>$53: Sorbet::Private::Static::Void = Solve<sig>\l<statTemp>$69: T.class_of(Sorbet::Private::Static) = alias <C Static>\lkeep_for_ide$71: T.class_of(T) = alias <C T>\l<statTemp>$70: T.class_of(T::Sig) = alias <C Sig>\l<statTemp>$68: Sorbet::Private::Static::Void = <statTemp>$69: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$70: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Funcs>#<static-init>_15" -> "bb::<Class:Funcs>#<static-init>_1" [style="bold"];
+    "bb::<Class:Funcs>#<static-init>_17" [
+        label = "block[id=17](<self>: T.class_of(Funcs), <selfRestore>$56: T.class_of(Funcs))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$63: Symbol(:\"s\") = :\"s\"\l<hashTemp>$64: T.class_of(String) = alias <C String>\l<magic>$65: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$62: {s: T.class_of(String)} = <magic>$65: T.class_of(<Magic>).<build-hash>(<hashTemp>$63: Symbol(:\"s\"), <hashTemp>$64: T.class_of(String))\l<statTemp>$60: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$62: {s: T.class_of(String)})\l<statTemp>$66: T.class_of(String) = alias <C String>\l<blockReturnTemp>$59: T::Private::Methods::DeclBuilder = <statTemp>$60: T::Private::Methods::DeclBuilder.returns(<statTemp>$66: T.class_of(String))\l<blockReturnTemp>$67: T.noreturn = blockreturn<sig> <blockReturnTemp>$59: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Funcs>#<static-init>_17" -> "bb::<Class:Funcs>#<static-init>_14" [style="bold"];
 }
 
 subgraph "cluster_::C#test_calls" {
@@ -147,7 +200,7 @@ subgraph "cluster_::C#test_calls" {
     "bb::C#test_calls_1" [shape = parallelogram];
 
     "bb::C#test_calls_0" [
-        label = "block[id=0]()\l<self>: C = cast(<self>: NilClass, C);\l<statTemp>$5: Integer(0) = 0\l<statTemp>$3: Integer = <self>: C.f(<statTemp>$5: Integer(0))\l<statTemp>$7: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$8: Integer(0) = 0\l<statTemp>$6: Integer = <statTemp>$7: T.class_of(Funcs).f(<statTemp>$8: Integer(0))\l<statTemp>$11: Symbol(:\"f\") = :\"f\"\l<statTemp>$9: Symbol = <self>: C.g(<statTemp>$11: Symbol(:\"f\"))\l<statTemp>$13: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$14: Symbol(:\"f\") = :\"f\"\l<statTemp>$12: Symbol = <statTemp>$13: T.class_of(Funcs).g(<statTemp>$14: Symbol(:\"f\"))\l<statTemp>$17: String(\"hello\") = \"hello\"\l<statTemp>$15: String = <self>: C.h(<statTemp>$17: String(\"hello\"))\l<statTemp>$19: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$20: String(\"world\") = \"world\"\l<statTemp>$18: String = <statTemp>$19: T.class_of(Funcs).h(<statTemp>$20: String(\"world\"))\l<statTemp>$21: T.class_of(C) = alias <C C>\l<returnMethodTemp>$2: T.untyped = <statTemp>$21: T.class_of(C).f()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: C = cast(<self>: NilClass, C);\l<statTemp>$5: Integer(0) = 0\l<statTemp>$3: Integer = <self>: C.f(<statTemp>$5: Integer(0))\l<statTemp>$7: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$8: Integer(0) = 0\l<statTemp>$6: T.untyped = <statTemp>$7: T.class_of(Funcs).f(<statTemp>$8: Integer(0))\l<statTemp>$11: Symbol(:\"f\") = :\"f\"\l<statTemp>$9: Symbol = <self>: C.g(<statTemp>$11: Symbol(:\"f\"))\l<statTemp>$13: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$14: Symbol(:\"f\") = :\"f\"\l<statTemp>$12: Symbol = <statTemp>$13: T.class_of(Funcs).g(<statTemp>$14: Symbol(:\"f\"))\l<statTemp>$17: String(\"hello\") = \"hello\"\l<statTemp>$15: String = <self>: C.h(<statTemp>$17: String(\"hello\"))\l<statTemp>$19: T.class_of(Funcs) = alias <C Funcs>\l<statTemp>$20: String(\"world\") = \"world\"\l<statTemp>$18: String = <statTemp>$19: T.class_of(Funcs).h(<statTemp>$20: String(\"world\"))\l<statTemp>$21: T.class_of(C) = alias <C C>\l<returnMethodTemp>$2: T.untyped = <statTemp>$21: T.class_of(C).f()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::C#test_calls_0" -> "bb::C#test_calls_1" [style="bold"];
