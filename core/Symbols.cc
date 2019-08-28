@@ -1077,6 +1077,7 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     result = mix(result, this->flags | METHOD_FLAGS_IGNORED_IN_SHAPE_HASH);
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
+    result = mix(result, this->hasSig());
 
     for (const auto &e : arguments()) {
         // Changing name of keyword arg is a shape change.
