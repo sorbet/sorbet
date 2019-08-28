@@ -18,6 +18,7 @@
 #include "dsl/Regexp.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
+#include "dsl/module_function.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 
 using namespace std;
@@ -106,8 +107,14 @@ public:
                         return;
                     }
 
-                    // This one is different: it gets an extra prevStat argument.
+                    // These few are different: they get an extra prevStat argument.
                     nodes = AttrReader::replaceDSL(ctx, send, prevStat);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = ModuleFunction::replaceDSL(ctx, send, prevStat);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
