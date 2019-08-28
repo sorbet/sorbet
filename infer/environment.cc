@@ -556,12 +556,11 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
             tp.origins.emplace_back(loc);
             tp.type = glbbed;
         }
+        setTypeAndOrigin(typeTested.first, tp);
         if (tp.type->isBottom()) {
             isDead = true;
-            setTypeAndOrigin(typeTested.first, tp);
             return;
         }
-        setTypeAndOrigin(typeTested.first, tp);
     }
 
     for (auto &typeTested : noTests) {
