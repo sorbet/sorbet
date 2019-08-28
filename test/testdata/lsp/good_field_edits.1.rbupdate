@@ -1,0 +1,9 @@
+# typed: true
+# assert-slow-path: true
+class C
+  @@food = T.let(3, Integer)
+
+  def bar
+    @@quz
+  end
+end
