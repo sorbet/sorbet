@@ -1,0 +1,7 @@
+# typed: true
+# assert-slow-path: true
+class Foo
+  extend T::Sig
+
+  def foo; 1; end
+end
