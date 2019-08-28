@@ -22,7 +22,10 @@ bool ModuleFunction::isModuleFunction(const ast::Expression *expr) {
 vector<unique_ptr<ast::Expression>> ModuleFunction::rewriteDefn(core::MutableContext ctx, const ast::Expression *expr,
                                                                 const ast::Expression *prevStat, bool usedSig) {
     vector<unique_ptr<ast::Expression>> stats;
-    if (!ast::cast_tree_const<ast::MethodDef>(expr)) {
+    auto mdef = ast::cast_tree_const<ast::MethodDef>(expr);
+    // only do this rewrite to method defs that aren't self methods
+    if (mdef == nullptr || (mdef->flags & ast::MethodDef::SelfMethod) != 0) {
+        stats.emplace_back(expr->deepCopy());
         return stats;
     }
 
