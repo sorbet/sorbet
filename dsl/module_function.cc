@@ -13,7 +13,7 @@ using namespace std;
 namespace sorbet::dsl {
 
 vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableContext ctx, ast::Send *send,
-                                                           const ast::Expression *prevStat) {
+                                                               const ast::Expression *prevStat) {
     vector<unique_ptr<ast::Expression>> stats;
 
     if (send->fun != core::Names::moduleFunction()) {
@@ -22,7 +22,6 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableCont
 
     auto sig = ast::cast_tree_const<ast::Send>(prevStat);
     bool hasSig = sig && sig->fun == core::Names::sig();
-
 
     auto loc = send->loc;
     for (auto &arg : send->args) {
@@ -48,7 +47,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableCont
                 core::NameRef nameRef = lit->asString(ctx);
                 auto shortName = nameRef.data(ctx)->shortName(ctx);
                 bool validAttr = (isalpha(shortName.front()) || shortName.front() == '_') &&
-                    absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
+                                 absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
                 if (validAttr) {
                     methodName = nameRef;
                 } else {
@@ -73,4 +72,4 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableCont
 
     return stats;
 }
-}
+} // namespace sorbet::dsl
