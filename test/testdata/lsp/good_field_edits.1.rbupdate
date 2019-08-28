@@ -1,5 +1,5 @@
 # typed: true
-# assert-fast-path: true
+# assert-slow-path: true
 class C
   @@food = T.let(3, Integer)
 
