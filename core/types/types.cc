@@ -509,11 +509,11 @@ bool LiteralType::isFullyDefined() {
 }
 
 bool ShapeType::isFullyDefined() {
-    return true; // might not be true if we support uninstantiated types inside hashes. For now, we don't
+    return absl::c_all_of(values, [](TypePtr t) { return t->isFullyDefined(); });
 }
 
 bool TupleType::isFullyDefined() {
-    return true; // might not be true if we support uninstantiated types inside tuples. For now, we don't
+    return absl::c_all_of(elems, [](TypePtr t) { return t->isFullyDefined(); });
 }
 
 bool AliasType::isFullyDefined() {
