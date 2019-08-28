@@ -96,9 +96,20 @@ module T::Private::Methods::SignatureValidation
       # Peaceful
       nil
     when *Modes::IMPLEMENT_MODES
-      raise "You marked `#{signature.method_name}` as #{pretty_mode(signature)}, but it doesn't match up with a corresponding abstract method.\n" \
-        "  Either check for typos and for missing includes or super classes to make the parent method shows up\n" \
-        "  ... or remove #{pretty_mode(signature)} here: #{method_loc_str(signature.method)}\n"
+      if signature.method_name == :each && signature.method.owner < Enumerable
+        # Enumerable#each is the only method in Sorbet's RBI payload that defines an abstract method.
+        # Enumerable#each does not actually exist at runtime, but it is required to be implemented by
+        # any class which includes Enumerable. We want to declare Enumerable#each as abstract so that
+        # people can call it anything which implements the Enumerable interface, and so that it's a
+        # static error to forget to implement it.
+        #
+        # This is a one-off hack, and we should think carefully before adding more methods here.
+        nil
+      else
+        raise "You marked `#{signature.method_name}` as #{pretty_mode(signature)}, but it doesn't match up with a corresponding abstract method.\n" \
+          "  Either check for typos and for missing includes or super classes to make the parent method shows up\n" \
+          "  ... or remove #{pretty_mode(signature)} here: #{method_loc_str(signature.method)}\n"
+      end
     else
       raise "Unexpected mode: #{signature.mode}. Please report to #dev-productivity."
     end

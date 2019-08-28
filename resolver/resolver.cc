@@ -1373,18 +1373,7 @@ private:
                 result = cast->type;
             },
             [&](ast::InsSeq *outer) { result = resolveConstantType(ctx, outer->expr, ofSym); },
-            [&](ast::Expression *expr) {
-                if (auto *send = ast::cast_tree<ast::Send>(expr)) {
-                    if (send->fun == core::Names::typeAlias()) {
-                        // short circuit if this is a type alias
-                        return;
-                    }
-                }
-                if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::ConstantMissingTypeAnnotation)) {
-                    e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
-                                "# typed: strict");
-                }
-            });
+            [&](ast::Expression *expr) {});
         return result;
     }
 
@@ -1517,6 +1506,7 @@ public:
             if (data->resultType == nullptr) {
                 data->resultType = resolveConstantType(ctx, asgn->rhs, sym);
                 if (data->resultType == nullptr) {
+                    // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
                     auto rhs = move(asgn->rhs);
                     auto loc = rhs->loc;
                     asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
@@ -1528,7 +1518,13 @@ public:
                 // but we only want to run this on constants that are value-level and not class or type aliases. The
                 // check for isa_type<AliasType> makes sure that we skip aliases of the form `X = Integer` and only run
                 // this over constant value assignments like `X = 5` or `Y = 5; X = Y`.
-                resolveConstantType(ctx, asgn->rhs, sym);
+                if (resolveConstantType(ctx, asgn->rhs, sym) == nullptr) {
+                    if (auto e = ctx.state.beginError(asgn->rhs->loc,
+                                                      core::errors::Resolver::ConstantMissingTypeAnnotation)) {
+                        e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
+                                    "# typed: strict");
+                    }
+                }
             }
         }
 

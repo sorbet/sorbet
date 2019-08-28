@@ -555,7 +555,7 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     if (auto *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == Symbols::untyped()) {
             categoryCounterInc("glb", "<untyped");
-            return t1;
+            return t2;
         }
         if (mayBeSpecial1->symbol == Symbols::bottom()) {
             categoryCounterInc("glb", "<bottom");
@@ -570,7 +570,7 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
         if (mayBeSpecial2->symbol == Symbols::untyped()) {
             categoryCounterInc("glb", "untyped>");
-            return t2;
+            return t1;
         }
         if (mayBeSpecial2->symbol == Symbols::bottom()) {
             categoryCounterInc("glb", "bottom>");
