@@ -107,14 +107,8 @@ public:
                         return;
                     }
 
-                    // These few are different: they get an extra prevStat argument.
+                    // This one is different: it gets an extra prevStat argument.
                     nodes = AttrReader::replaceDSL(ctx, send, prevStat);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
-                        return;
-                    }
-
-                    nodes = ModuleFunction::replaceDSL(ctx, send, prevStat);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
@@ -133,6 +127,7 @@ public:
             prevStat = stat.get();
         }
         if (replaceNodes.empty()) {
+            ModuleFunction::patchDSL(ctx, classDef.get());
             return classDef;
         }
 
@@ -140,36 +135,17 @@ public:
         classDef->rhs.clear();
         classDef->rhs.reserve(oldRHS.size());
 
-        bool applyModuleFunction = false;
-
         for (auto &stat : oldRHS) {
             if (replaceNodes.find(stat.get()) == replaceNodes.end()) {
-                if (applyModuleFunction) {
-                    for (auto &mdefNode : ModuleFunction::rewriteDefn(ctx, stat.get(), prevStat, false)) {
-                        classDef->rhs.emplace_back(std::move(mdefNode));
-                    }
-                    prevStat = stat.get();
-                } else {
-                    prevStat = stat.get();
-                    classDef->rhs.emplace_back(std::move(stat));
-                }
+                classDef->rhs.emplace_back(std::move(stat));
             } else {
                 for (auto &newNode : replaceNodes.at(stat.get())) {
-                    if (ModuleFunction::isModuleFunction(newNode.get())) {
-                        applyModuleFunction = true;
-                        prevStat = newNode.get();
-                    } else if (applyModuleFunction) {
-                        for (auto &mdefNode : ModuleFunction::rewriteDefn(ctx, newNode.get(), prevStat, false)) {
-                            classDef->rhs.emplace_back(std::move(mdefNode));
-                        }
-                        prevStat = newNode.get();
-                    } else {
-                        prevStat = newNode.get();
-                        classDef->rhs.emplace_back(std::move(newNode));
-                    }
+                    classDef->rhs.emplace_back(std::move(newNode));
                 }
             }
         }
+        ModuleFunction::patchDSL(ctx, classDef.get());
+
         return classDef;
     }
 

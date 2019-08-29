@@ -12,15 +12,70 @@ using namespace std;
 
 namespace sorbet::dsl {
 
-bool ModuleFunction::isModuleFunction(const ast::Expression *expr) {
+bool ModuleFunction::isBareModuleFunction(const ast::Expression *expr) {
     if (auto send = ast::cast_tree_const<ast::Send>(expr)) {
-        return send->fun == core::Names::moduleFunction();
+        return send->fun == core::Names::moduleFunction() && send->args.size() == 0;
     }
     return false;
 }
 
+void ModuleFunction::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
+    // once we see a bare `module_function`, we should replace every subsequent definition
+    bool moduleFunctionActive = false;
+    ast::Expression *prevStat = nullptr;
+    UnorderedMap<ast::Expression*, vector<unique_ptr<ast::Expression>>> replaceNodes;
+    for (auto &stat : cdef->rhs) {
+        if (auto send = ast::cast_tree<ast::Send>(stat.get())) {
+            // we only care about sends if they're `module_function`
+            if (send->fun == core::Names::moduleFunction()) {
+                if (send->args.size() == 0) {
+                    // a `module_function` with no args changes the way that every subsequent method definition works so
+                    // we set this flag so we know that the rest of the defns should be rewritten
+                    moduleFunctionActive = true;
+                    // putting in an empty statement list, which means we remove this statement when we get around to
+                    // updating the statement list
+                    vector<unique_ptr<ast::Expression>> empty;
+                    replaceNodes[stat.get()] = move(empty);
+                } else {
+                    // if we do have arguments, then we can rewrite them appropriately
+                    replaceNodes[stat.get()] = replaceDSL(ctx, send, prevStat);
+                }
+            }
+        } else if (auto defn = ast::cast_tree<ast::MethodDef>(stat.get())) {
+            // if we've already seen a bare `module_function` call, then every subsequent method definition needs to get
+            // rewritten appropriately
+            if (moduleFunctionActive) {
+                auto res = rewriteDefn(ctx, defn, prevStat);
+                // we might not actually want to rewrite this definition (e.g. if it's already a static method) so this
+                // check is needed
+                if (res.size() != 0) {
+                    replaceNodes[stat.get()] = move(res);
+                }
+            }
+        }
+        // this is to give us access to the `sig`
+        prevStat = stat.get();
+    }
+
+    // now we clear out the definitions of the class...
+    auto oldRHS = std::move(cdef->rhs);
+    cdef->rhs.clear();
+    cdef->rhs.reserve(oldRHS.size());
+
+    // and either put them back, or replace them
+    for (auto &stat : oldRHS) {
+        if (replaceNodes.find(stat.get()) == replaceNodes.end()) {
+            cdef->rhs.emplace_back(std::move(stat));
+        } else {
+            for (auto &newNode : replaceNodes.at(stat.get())) {
+                cdef->rhs.emplace_back(std::move(newNode));
+            }
+        }
+    }
+}
+
 vector<unique_ptr<ast::Expression>> ModuleFunction::rewriteDefn(core::MutableContext ctx, const ast::Expression *expr,
-                                                                const ast::Expression *prevStat, bool usedSig) {
+                                                                const ast::Expression *prevStat) {
     vector<unique_ptr<ast::Expression>> stats;
     auto mdef = ast::cast_tree_const<ast::MethodDef>(expr);
     // only do this rewrite to method defs that aren't self methods
@@ -32,11 +87,6 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::rewriteDefn(core::MutableCon
     auto sig = ast::cast_tree_const<ast::Send>(prevStat);
     bool hasSig = sig && sig->fun == core::Names::sig();
     auto loc = expr->loc;
-
-    // copy the sig first
-    if (hasSig && !usedSig) {
-        stats.emplace_back(sig->deepCopy());
-    }
 
     // this creates a private copy of the method
     unique_ptr<ast::Expression> privateCopy = expr->deepCopy();
@@ -63,16 +113,9 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableCont
         return stats;
     }
 
-    // if module_function is used in a context with no args, then the rest of the definitions after this one should be
-    // rewritten, so let's return the nullary call to module_function as a "replacement" expression: the DSL loop will
-    // in turn know to apply a rewrite to all subsequent definitions
-    if (send->args.size() == 0) {
-        stats.emplace_back(send->deepCopy());
-    }
-
     for (auto &arg : send->args) {
         if (ast::isa_tree<ast::MethodDef>(arg.get())) {
-            return ModuleFunction::rewriteDefn(ctx, arg.get(), prevStat, true);
+            return ModuleFunction::rewriteDefn(ctx, arg.get(), prevStat);
         } else if (auto lit = ast::cast_tree<ast::Literal>(arg.get())) {
             core::NameRef methodName = core::NameRef::noName();
             auto loc = send->loc;
