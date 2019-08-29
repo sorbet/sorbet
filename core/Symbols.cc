@@ -62,21 +62,21 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
             newResultType = make_type<ClassType>(ref);
         } else {
             vector<TypePtr> targs;
-            for (auto tm : typeMembers()) {
-                auto tmData = tm.data(gs);
+            targs.reserve(typeMembers().size());
 
-                // Default type parameters to their upper bound if they are
-                // fixed, or type_template parameters.
-                if (tmData->isFixed() || this->isSingletonClass(gs)) {
+            for (auto &tm : typeMembers()) {
+                auto tmData = tm.data(gs);
+                if (tmData->isFixed()) {
                     auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
                     ENFORCE(lambdaParam != nullptr);
+
+                    // Default type parameters to their upper bound
                     targs.emplace_back(lambdaParam->upperBound);
                 } else {
-                    // NOTE: at some point in the future it might make sense to
-                    // instantiate this with the upper bound of the type
                     targs.emplace_back(Types::untyped(gs, ref));
                 }
             }
+
             newResultType = make_type<AppliedType>(ref, targs);
         }
         {
