@@ -23,7 +23,7 @@ void ModuleFunction::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
     // once we see a bare `module_function`, we should replace every subsequent definition
     bool moduleFunctionActive = false;
     ast::Expression *prevStat = nullptr;
-    UnorderedMap<ast::Expression*, vector<unique_ptr<ast::Expression>>> replaceNodes;
+    UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
     for (auto &stat : cdef->rhs) {
         if (auto send = ast::cast_tree<ast::Send>(stat.get())) {
             // we only care about sends if they're `module_function`
