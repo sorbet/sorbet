@@ -61,7 +61,20 @@ namespace {
  *    resolvable, and so if any resolution succeeds, we need to keep looping in
  *    the outer loop.
  *
- * After this pass:
+ * We also track failure in the item, in order to distinguish a thing left in the
+ * list because we simply haven't succeeded yet and a thing left in the list
+ * because we have actively found a failure. For example, we might know that a
+ * given constant is unresolvable by Sorbet because it was qualified under
+ * not-a-constant: we mark this kind of job `resolution_failed`. The reason for
+ * this is unresolved constants are set to noSymbol, and once constant resolution
+ * has truly finished, we want to know which remaining failed jobs we need to set
+ * to a sensible default value. (Setting a conceptually failed job to untyped()
+ * before we've completed this loop can occasionally cause other jobs to
+ * non-deterministically half-resolve in the presence of multiple errors---c.f.
+ * issue #1126 on Github---so we mark jobs as failed rather than reporting an
+ * error and "resolving" them as untyped during the loop.)
+ *
+ * After the above passes:
  *
  * - ast::UnresolvedConstantLit nodes (constants that have a NameRef) are
  *   replaced with ast::ConstantLit nodes (constants that have a SymbolRef).
@@ -88,6 +101,7 @@ private:
     struct ResolutionItem {
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
+        bool resolutionFailed = false;
 
         ResolutionItem() = default;
         ResolutionItem(ResolutionItem &&rhs) noexcept = default;
@@ -185,7 +199,7 @@ private:
     }
 
     static core::SymbolRef resolveConstant(core::Context ctx, shared_ptr<Nesting> nesting,
-                                           const unique_ptr<ast::UnresolvedConstantLit> &c) {
+                                           const unique_ptr<ast::UnresolvedConstantLit> &c, bool &resolutionFailed) {
         if (ast::isa_tree<ast::EmptyTree>(c->scope.get())) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c->cnst);
             return result;
@@ -193,30 +207,34 @@ private:
         ast::Expression *resolvedScope = c->scope.get();
         if (auto *id = ast::cast_tree<ast::ConstantLit>(resolvedScope)) {
             auto sym = id->symbol;
-            if (sym.exists() && sym.data(ctx)->isTypeAlias()) {
+            if (sym.exists() && sym.data(ctx)->isTypeAlias() && !resolutionFailed) {
                 if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
                 }
-                return core::Symbols::untyped();
+                resolutionFailed = true;
+                return core::Symbols::noSymbol();
             }
-            if (!id->symbol.exists()) {
-                // TODO: try to resolve if not resolved.
+            if (!sym.exists()) {
                 return core::Symbols::noSymbol();
             }
             core::SymbolRef resolved = id->symbol.data(ctx)->dealias(ctx);
             core::SymbolRef result = resolved.data(ctx)->findMember(ctx, c->cnst);
             return result;
         } else {
-            if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::DynamicConstant)) {
-                e.setHeader("Dynamic constant references are unsupported");
+            if (!resolutionFailed) {
+                if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::DynamicConstant)) {
+                    e.setHeader("Dynamic constant references are unsupported");
+                }
             }
-            return core::Symbols::untyped();
+            resolutionFailed = true;
+            return core::Symbols::noSymbol();
         }
     }
 
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     static void constantResolutionFailed(core::MutableContext ctx, ResolutionItem &job) {
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original);
+        auto resolved =
+            resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, job.resolutionFailed);
         if (resolved.exists() && resolved.data(ctx)->isTypeAlias()) {
             if (resolved.data(ctx)->resultType == nullptr) {
                 // This is actually a use-site error, but we limit ourselves to emitting it once by checking resultType
@@ -229,6 +247,12 @@ private:
                     core::Types::untyped(ctx, resolved); // <<-- This is the reason this takes a MutableContext
             }
             job.out->symbol = resolved;
+            return;
+        }
+        if (job.resolutionFailed) {
+            // we only set this when a job has failed for other reasons and we've already reported an error, and
+            // continuining on will only redundantly report that we can't resolve the constant, so bail early here
+            job.out->symbol = core::Symbols::untyped();
             return;
         }
         ENFORCE(!resolved.exists());
@@ -284,14 +308,13 @@ private:
         if (isAlreadyResolved(ctx, *job.out)) {
             return true;
         }
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original);
+        auto resolved =
+            resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, job.resolutionFailed);
         if (!resolved.exists()) {
             return false;
         }
         if (resolved.data(ctx)->isTypeAlias()) {
             if (resolved.data(ctx)->resultType != nullptr) {
-                // A TypeAliasResolutionItem job completed successfully,
-                // or we forced the type alias this constant refers to to resolve.
                 job.out->symbol = resolved;
                 return true;
             }
