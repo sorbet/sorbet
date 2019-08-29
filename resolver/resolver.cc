@@ -447,7 +447,8 @@ private:
                 job.klass.data(ctx)->setSuperClass(resolved);
             } else {
                 if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
-                    e.setHeader("Class parents redefined for class `{}`", job.klass.data(ctx)->show(ctx));
+                    e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.data(ctx)->show(ctx),
+                                job.klass.data(ctx)->superClass().show(ctx), resolved.show(ctx));
                 }
             }
         } else {
@@ -1395,18 +1396,7 @@ private:
                 result = cast->type;
             },
             [&](ast::InsSeq *outer) { result = resolveConstantType(ctx, outer->expr, ofSym); },
-            [&](ast::Expression *expr) {
-                if (auto *send = ast::cast_tree<ast::Send>(expr)) {
-                    if (send->fun == core::Names::typeAlias()) {
-                        // short circuit if this is a type alias
-                        return;
-                    }
-                }
-                if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::ConstantMissingTypeAnnotation)) {
-                    e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
-                                "# typed: strict");
-                }
-            });
+            [&](ast::Expression *expr) {});
         return result;
     }
 
@@ -1437,7 +1427,7 @@ private:
         if (uid->kind == ast::UnresolvedIdent::Class) {
             if (!ctx.owner.data(ctx)->isClass()) {
                 if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("Class variables must be declared at class scope");
+                    e.setHeader("The class variable `{}` must be declared at class scope", uid->name.show(ctx));
                 }
             }
 
@@ -1453,13 +1443,15 @@ private:
                        !core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
                 // Declaring a class instance variable in a static method
                 if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader(
-                        "Singleton instance variables must be declared inside the class body or declared nilable");
+                    e.setHeader("The singleton instance variable `{}` must be declared inside the class body or "
+                                "declared nilable",
+                                uid->name.show(ctx));
                 }
             } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
                 // Inside a method; declaring a normal instance variable
                 if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("Instance variables must be declared inside `initialize` or declared nilable");
+                    e.setHeader("The instance variable `{}` must be declared inside `{}` or declared nilable",
+                                uid->name.show(ctx), "initialize");
                 }
             }
             scope = ctx.selfClass();
@@ -1537,6 +1529,7 @@ public:
             if (data->resultType == nullptr) {
                 data->resultType = resolveConstantType(ctx, asgn->rhs, sym);
                 if (data->resultType == nullptr) {
+                    // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
                     auto rhs = move(asgn->rhs);
                     auto loc = rhs->loc;
                     asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
@@ -1548,7 +1541,13 @@ public:
                 // but we only want to run this on constants that are value-level and not class or type aliases. The
                 // check for isa_type<AliasType> makes sure that we skip aliases of the form `X = Integer` and only run
                 // this over constant value assignments like `X = 5` or `Y = 5; X = Y`.
-                resolveConstantType(ctx, asgn->rhs, sym);
+                if (resolveConstantType(ctx, asgn->rhs, sym) == nullptr) {
+                    if (auto e = ctx.state.beginError(asgn->rhs->loc,
+                                                      core::errors::Resolver::ConstantMissingTypeAnnotation)) {
+                        e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
+                                    "# typed: strict");
+                    }
+                }
             }
         }
 

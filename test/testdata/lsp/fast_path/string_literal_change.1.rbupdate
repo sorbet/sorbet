@@ -1,5 +1,3 @@
 # typed: strict
 # assert-fast-path: string_literal_change.rb
 A = ["baar"] # error: Constants must have type annotations with `T.let` when specifying `# typed: strict`
-  # ^^^^^^^^ error: Suggested type for constant without type annotation: `T::Array[String]`
-

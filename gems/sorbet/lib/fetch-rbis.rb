@@ -112,6 +112,8 @@ class Sorbet::Private::FetchRBIs
       vendor_paths += paths_for_gem_version(gemspec)
     end
 
+    # Remove the sorbet-typed directory before repopulating it.
+    FileUtils.rm_r(SORBET_RBI_SORBET_TYPED) if Dir.exist?(SORBET_RBI_SORBET_TYPED)
     if vendor_paths.length > 0
       vendor_rbis_within_paths(vendor_paths)
     end

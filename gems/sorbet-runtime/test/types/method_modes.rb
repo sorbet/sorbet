@@ -282,5 +282,29 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         "You marked `foo` as .implementation, but it doesn't match up with a corresponding abstract method."
       )
     end
+
+    it "special cases Enumerable#each to allow .implementation" do
+      klass = Class.new do
+        extend T::Sig
+        extend T::Generic
+        include Enumerable
+
+        Elem = type_member
+
+        sig do
+          implementation
+            .params(blk: T.proc.params(arg0: Elem).returns(BasicObject))
+            .returns(T.untyped)
+        end
+        def each(&blk); yield; end
+      end
+
+      called = false
+      klass.new.each do
+        called = true
+      end
+
+      assert(called, "Expected block to be called but it wasn't")
+    end
   end
 end

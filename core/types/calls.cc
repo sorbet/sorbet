@@ -1657,9 +1657,10 @@ public:
         ENFORCE(args.args.size() == 1);
         auto ty = core::Types::widen(ctx, args.args.front()->type);
         auto loc = args.locs.args[0];
-        if (!ty->isUntyped() && loc.exists()) {
-            if (auto e = ctx.state.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
-                e.setHeader("Suggested type for constant without type annotation: `{}`", ty->show(ctx));
+        if (auto e = ctx.state.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
+            e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
+                        "# typed: strict");
+            if (!ty->isUntyped() && loc.exists()) {
                 e.replaceWith(fmt::format("Initialize as `{}`", ty->show(ctx)), loc, "T.let({}, {})", loc.source(ctx),
                               ty->show(ctx));
             }

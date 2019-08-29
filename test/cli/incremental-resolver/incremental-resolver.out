@@ -10,7 +10,7 @@ test/cli/incremental-resolver/expect-failures/abstract_impl.rb:5: Malformed `sig
      4 |  sig { overridable.void }
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/incremental-resolver/expect-failures/abstract_impl.rb:126: Implementation of abstract method `A#foo` must accept *`foo` https://srb.help/5035
+test/cli/incremental-resolver/expect-failures/abstract_impl.rb:126: Implementation of overridable method `A#foo` must accept *`foo` https://srb.help/5035
      126 | def foo; end
            ^^^^^^^
     test/cli/incremental-resolver/expect-failures/abstract_impl.rb:123: Base method defined here
