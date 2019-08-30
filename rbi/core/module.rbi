@@ -941,7 +941,7 @@ class Module < Object
 
   # Returns the name of the module *mod* . Returns nil for anonymous
   # modules.
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   def name(); end
 
   # Invokes `Module.prepend_features` on each parameter in reverse order.
