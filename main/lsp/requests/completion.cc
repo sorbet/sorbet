@@ -213,7 +213,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
         if (what.exists()) {
             item->detail = methodDetail(gs, what, receiverType, nullptr, constraint);
         }
-        if (clientCompletionItemSnippetSupport) {
+        if (config.clientCompletionItemSnippetSupport) {
             item->insertTextFormat = InsertTextFormat::Snippet;
             item->insertText = methodSnippet(gs, what);
         } else {
@@ -265,7 +265,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
 LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                 const CompletionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
-    if (!opts.lspAutocompleteEnabled) {
+    if (!config.opts.lspAutocompleteEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Autocomplete` LSP feature is experimental and disabled by default.");

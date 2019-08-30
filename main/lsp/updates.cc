@@ -24,7 +24,7 @@ namespace sorbet::realmain::lsp {
 
 LSPLoop::ShowOperation::ShowOperation(const LSPLoop &loop, string_view operationName, string_view description)
     : loop(loop), operationName(string(operationName)), description(string(description)) {
-    if (loop.enableOperationNotifications) {
+    if (loop.config.enableOperationNotifications) {
         auto params = make_unique<SorbetShowOperationParams>(this->operationName, this->description,
                                                              SorbetOperationStatus::Start);
         loop.sendMessage(
@@ -33,7 +33,7 @@ LSPLoop::ShowOperation::ShowOperation(const LSPLoop &loop, string_view operation
 }
 
 LSPLoop::ShowOperation::~ShowOperation() {
-    if (loop.enableOperationNotifications) {
+    if (loop.config.enableOperationNotifications) {
         auto params = make_unique<SorbetShowOperationParams>(operationName, description, SorbetOperationStatus::End);
         loop.sendMessage(
             LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetShowOperation, move(params))));
@@ -80,7 +80,7 @@ LSPResult LSPLoop::commitTypecheckRun(TypecheckRun run) {
         core::UnfreezeFileTable fileTableAccess(*initialGS);
         for (auto &file : updates.updatedFiles) {
             // Update initialGS and index.
-            auto rv = updateFile(move(initialGS), file, opts);
+            auto rv = updateFile(move(initialGS), file, config.opts);
             initialGS = move(rv.first);
             const auto id = rv.second.file.id();
             if (id >= indexed.size()) {
@@ -166,8 +166,8 @@ void LSPLoop::reIndexFromFileSystem() {
     ShowOperation op(*this, "Indexing", "Indexing files...");
     Timer timeit(logger, "reIndexFromFileSystem");
     indexed.clear();
-    vector<core::FileRef> inputFiles = pipeline::reserveFiles(initialGS, opts.inputFileNames);
-    for (auto &t : pipeline::index(initialGS, inputFiles, opts, workers, kvstore)) {
+    vector<core::FileRef> inputFiles = pipeline::reserveFiles(initialGS, config.opts.inputFileNames);
+    for (auto &t : pipeline::index(initialGS, inputFiles, config.opts, workers, kvstore)) {
         int id = t.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
@@ -212,7 +212,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(FileUpdates updates) const {
     {
         core::UnfreezeFileTable fileTableAccess(*finalGS);
         for (auto &file : updates.updatedFiles) {
-            auto pair = updateFile(move(finalGS), file, opts);
+            auto pair = updateFile(move(finalGS), file, config.opts);
             finalGS = move(pair.first);
             auto &ast = pair.second;
             if (ast.tree) {
@@ -232,13 +232,13 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(FileUpdates updates) const {
     }
 
     ENFORCE(finalGS->lspQuery.isEmpty());
-    auto resolved = pipeline::resolve(finalGS, move(indexedCopies), opts, workers, skipConfigatron);
+    auto resolved = pipeline::resolve(finalGS, move(indexedCopies), config.opts, workers, config.skipConfigatron);
     vector<core::FileRef> affectedFiles;
     for (auto &tree : resolved) {
         ENFORCE(tree.file.exists());
         affectedFiles.push_back(tree.file);
     }
-    pipeline::typecheck(finalGS, move(resolved), opts, workers);
+    pipeline::typecheck(finalGS, move(resolved), config.opts, workers);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
     finalGS->lspTypecheckCount++;
     finalGS->lspQuery = core::lsp::Query::noQuery();
@@ -246,7 +246,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(FileUpdates updates) const {
 }
 
 bool LSPLoop::canTakeFastPath(const FileUpdates &updates, const vector<core::FileHash> &hashes) const {
-    if (disableFastPath) {
+    if (config.disableFastPath) {
         logger->debug("Taking slow path because fast path is disabled.");
         return false;
     }
@@ -346,14 +346,14 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
         unique_ptr<KeyValueStore> kvstore; // nullptr
         // TODO: Thread through kvstore.
         ENFORCE(this->kvstore == nullptr);
-        auto t = pipeline::indexOne(opts, *gs, f, kvstore);
+        auto t = pipeline::indexOne(config.opts, *gs, f, kvstore);
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree->deepCopy(), t.file});
         updates.updatedFileIndexes.push_back(move(t));
     }
 
     ENFORCE(gs->lspQuery.isEmpty());
-    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), opts);
-    pipeline::typecheck(gs, move(resolved), opts, workers);
+    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config.opts);
+    pipeline::typecheck(gs, move(resolved), config.opts, workers);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
     return TypecheckRun{move(out.first), move(subset), move(gs), move(updates), true};
@@ -380,10 +380,10 @@ LSPLoop::QueryRun LSPLoop::runQuery(unique_ptr<core::GlobalState> gs, const core
 
     ENFORCE(gs->lspQuery.isEmpty());
     gs->lspQuery = q;
-    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), opts);
+    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config.opts);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
-    pipeline::typecheck(gs, move(resolved), opts, workers);
+    pipeline::typecheck(gs, move(resolved), config.opts, workers);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();

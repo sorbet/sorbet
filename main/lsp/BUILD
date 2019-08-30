@@ -7,6 +7,7 @@ cc_library(
     ]) + ["lsp_messages_gen.cc"],
     hdrs = [
         "DefLocSaver.h",
+        "LSPConfiguration.h",
         "LSPMessage.h",
         "LocalVarSaver.h",
         "json_types.h",

@@ -1,8 +1,6 @@
 #include "common/Timer.h"
 #include "lsp.h"
 
-#include "absl/strings/match.h"
-
 using namespace std;
 
 namespace sorbet::realmain::lsp {
@@ -38,7 +36,7 @@ LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<uniq
 LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
     const LSPMethod method = msg.method();
 
-    if (!ensureInitialized(method, msg, gs)) {
+    if (!ensureInitialized(method, msg)) {
         logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
         vector<unique_ptr<LSPMessage>> responses;
         if (!msg.isNotification()) {
@@ -97,11 +95,11 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             reIndexFromFileSystem();
             LSPResult result = pushDiagnostics(runSlowPath({}));
             ENFORCE(result.gs);
-            if (!disableFastPath) {
+            if (!config.disableFastPath) {
                 ShowOperation stateHashOp(*this, "GlobalStateHash", "Finishing initialization...");
                 this->globalStateHashes = computeStateHashes(result.gs->getFiles());
             }
-            initialized = true;
+            config.initialized = true;
             return result;
         }
         if (method == LSPMethod::Exit) {
@@ -134,44 +132,10 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         auto &rawParams = requestMessage.params;
         if (method == LSPMethod::Initialize) {
             prodCategoryCounterInc("lsp.messages.processed", "initialize");
-            auto &params = get<unique_ptr<InitializeParams>>(rawParams);
-            if (auto rootUriString = get_if<string>(&params->rootUri)) {
-                if (absl::EndsWith(*rootUriString, "/")) {
-                    rootUri = rootUriString->substr(0, rootUriString->length() - 1);
-                } else {
-                    rootUri = *rootUriString;
-                }
-            }
-            clientCompletionItemSnippetSupport = false;
-            clientHoverMarkupKind = MarkupKind::Plaintext;
-            if (params->capabilities->textDocument) {
-                auto &textDocument = *params->capabilities->textDocument;
-                if (textDocument->completion) {
-                    auto &completion = *textDocument->completion;
-                    if (completion->completionItem) {
-                        clientCompletionItemSnippetSupport =
-                            (*completion->completionItem)->snippetSupport.value_or(false);
-                    }
-                }
-                if (textDocument->hover) {
-                    auto &hover = *textDocument->hover;
-                    if (hover->contentFormat) {
-                        auto &contentFormat = *hover->contentFormat;
-                        clientHoverMarkupKind = find(contentFormat.begin(), contentFormat.end(),
-                                                     MarkupKind::Markdown) != contentFormat.end()
-                                                    ? MarkupKind::Markdown
-                                                    : MarkupKind::Plaintext;
-                    }
-                }
-            }
+            const auto &params = get<unique_ptr<InitializeParams>>(rawParams);
+            config.configure(*params);
 
-            if (params->initializationOptions) {
-                auto &initOptions = *params->initializationOptions;
-                enableOperationNotifications = initOptions->supportsOperationNotifications.value_or(false);
-                enableTypecheckInfo = initOptions->enableTypecheckInfo.value_or(false);
-                enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
-            }
-
+            const auto &opts = config.opts;
             auto serverCap = make_unique<ServerCapabilities>();
             serverCap->textDocumentSync = TextDocumentSyncKind::Full;
             serverCap->definitionProvider = true;
@@ -226,7 +190,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             return handleTextDocumentReferences(move(gs), id, *params);
         } else if (method == LSPMethod::SorbetReadFile) {
             auto &params = get<unique_ptr<TextDocumentIdentifier>>(rawParams);
-            auto fref = uri2FileRef(params->uri);
+            auto fref = config.uri2FileRef(*gs, params->uri);
             if (fref.exists()) {
                 response->result =
                     make_unique<TextDocumentItem>(params->uri, "ruby", 0, string(fref.data(*gs).source()));

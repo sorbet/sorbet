@@ -7,8 +7,8 @@
 #include "core/ErrorQueue.h"
 #include "core/NameHash.h"
 #include "core/core.h"
+#include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
-#include "main/options/options.h"
 #include <chrono>
 #include <deque>
 #include <optional>
@@ -89,6 +89,8 @@ class LSPLoop {
         ~ShowOperation();
     };
 
+    /** Encapsulates the active configuration for the language server. */
+    LSPConfiguration config;
     /** Trees that have been indexed (with initialGS) and can be reused between different runs */
     std::vector<ast::ParsedFile> indexed;
     /** Trees that have been indexed (with finalGS) and can be reused between different runs */
@@ -97,10 +99,6 @@ class LSPLoop {
     std::vector<core::FileHash> globalStateHashes;
     /** List of files that have had errors in last run*/
     std::vector<core::FileRef> filesThatHaveErrors;
-    /** Root of LSP client workspace */
-    std::string rootUri;
-    /** File system root of LSP client workspace. May be empty if it is the current working directory. */
-    std::string rootPath;
 
     /** Concrete error queue shared by all global states */
     std::shared_ptr<core::ErrorQueue> errorQueue;
@@ -112,46 +110,15 @@ class LSPLoop {
      * the clone. This clone is what LSPLoop returns within a `TypecheckRun`.
      */
     std::unique_ptr<core::GlobalState> initialGS;
-    const options::Options &opts;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     std::shared_ptr<spdlog::logger> logger;
     WorkerPool &workers;
-    /**
-     * Whether or not the active client has support for snippets in CompletionItems.
-     * Note: There is a generated ClientCapabilities class, but it is cumbersome to work with as most fields are
-     * optional.
-     */
-    bool clientCompletionItemSnippetSupport = false;
-    /** What hover markup should we send to the client? */
-    MarkupKind clientHoverMarkupKind = MarkupKind::Plaintext;
     /** Input file descriptor; used by runLSP to receive LSP messages */
     int inputFd = 0;
     /** Output stream; used by LSP to output messages */
     std::ostream &outputStream;
-    /** If true, LSPLoop will skip configatron during type checking */
-    const bool skipConfigatron;
-    /** If true, all queries will hit the slow path. */
-    const bool disableFastPath;
     /** The set of files currently open in the user's editor. */
     UnorderedSet<std::string> openFiles;
-    /**
-     * Set to true once the server is initialized.
-     * TODO(jvilk): Use to raise server not initialized errors.
-     */
-    bool initialized = false;
-    /**
-     * If true, then LSP will send the client notifications at the start and end of slow operations.
-     * We don't want to send these notifications to clients that don't know what to do with them,
-     * so this boolean gets set when the client sends the `initialize` request with
-     * `params.initializationOptions.supportsOperationNotifications` set to `true`.
-     */
-    bool enableOperationNotifications = false;
-    /**
-     * If true, then Sorbet will use sorbet: URIs for files that are not stored on disk (e.g., payload files).
-     */
-    bool enableSorbetURIs = false;
-    /** If true, then LSP sends metadata to the client every time it typechecks files. Used in tests. */
-    bool enableTypecheckInfo = false;
     /**
      * The time that LSP last sent metrics to statsd -- if `opts.statsdHost` was specified.
      */
@@ -162,8 +129,6 @@ class LSPLoop {
     /* Send the given message to client */
     void sendMessage(const LSPMessage &msg) const;
 
-    // returns nullptr if this loc doesn't exist
-    std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc) const;
     void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc) const;
     std::vector<std::unique_ptr<Location>>
     extractLocations(const core::GlobalState &gs,
@@ -205,19 +170,8 @@ class LSPLoop {
     LSPResult pushDiagnostics(TypecheckRun run);
 
     std::vector<core::FileHash> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
-    bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg,
-                           const std::unique_ptr<core::GlobalState> &currentGs) const;
+    bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg) const;
 
-    core::FileRef uri2FileRef(std::string_view uri) const;
-    std::string fileRef2Uri(const core::GlobalState &gs, core::FileRef) const;
-    std::string remoteName2Local(std::string_view uri) const;
-    std::string localName2Remote(std::string_view uri, bool useSorbetUri) const;
-    std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) const;
-
-    /** Used to implement textDocument/documentSymbol
-     * Returns `nullptr` if symbol kind is not supported by LSP
-     * */
-    std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef) const;
     LSPLoop::QueryRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri,
                                          const Position &pos, const LSPMethod forMethod,
                                          bool errorIfFileIsUntyped = true) const;
@@ -292,9 +246,8 @@ class LSPLoop {
     void sendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
 
 public:
-    LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts,
-            const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, int inputFd, std::ostream &output,
-            bool skipConfigatron = false, bool disableFastPath = false);
+    LSPLoop(std::unique_ptr<core::GlobalState> gs, LSPConfiguration config, const std::shared_ptr<spd::logger> &logger,
+            WorkerPool &workers, int inputFd, std::ostream &output);
     std::unique_ptr<core::GlobalState> runLSP();
     LSPResult processRequest(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
     LSPResult processRequest(std::unique_ptr<core::GlobalState> gs, const std::string &json);

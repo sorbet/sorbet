@@ -107,6 +107,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     absl::Notification initializedNotification;
 
     unique_ptr<watchman::WatchmanProcess> watchmanProcess;
+    const auto &opts = config.opts;
     if (!opts.disableWatchman) {
         if (opts.rawInputDirNames.size() == 1 && opts.rawInputFileNames.empty()) {
             // The lambda below intentionally does not capture `this`.
@@ -208,7 +209,7 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 sendMessage(*msg);
             }
 
-            if (initialized && !initializedNotification.HasBeenNotified()) {
+            if (config.initialized && !initializedNotification.HasBeenNotified()) {
                 initializedNotification.Notify();
             }
 
@@ -439,14 +440,6 @@ bool isServerNotification(const LSPMethod method) {
         default:
             return false;
     }
-}
-
-unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) const {
-    core::Loc::Detail reqPos;
-    reqPos.line = pos.line + 1;
-    reqPos.column = pos.character + 1;
-    auto offset = core::Loc::pos2Offset(fref.data(gs), reqPos);
-    return make_unique<core::Loc>(core::Loc(fref, offset, offset));
 }
 
 void LSPLoop::sendMessage(const LSPMessage &msg) const {

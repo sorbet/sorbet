@@ -88,12 +88,12 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
             }
             response->result = make_unique<Hover>(formatHoverText(
-                clientHoverMarkupKind, methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint),
-                documentation));
+                config.clientHoverMarkupKind,
+                methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint), documentation));
         } else if (auto defResp = resp->isDefinition()) {
             response->result = make_unique<Hover>(formatHoverText(
-                clientHoverMarkupKind, methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr),
-                documentation));
+                config.clientHoverMarkupKind,
+                methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr), documentation));
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(*gs);
             auto type = constResp->retType.type;
@@ -106,11 +106,11 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 // `Foo`.
                 type = core::make_type<core::MetaType>(type);
             }
-            response->result =
-                make_unique<Hover>(formatHoverText(clientHoverMarkupKind, type->showWithMoreInfo(*gs), documentation));
-        } else {
             response->result = make_unique<Hover>(
-                formatHoverText(clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
+                formatHoverText(config.clientHoverMarkupKind, type->showWithMoreInfo(*gs), documentation));
+        } else {
+            response->result = make_unique<Hover>(formatHoverText(
+                config.clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
         }
     }
     return LSPResult::make(move(gs), move(response));
