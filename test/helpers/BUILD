@@ -7,6 +7,7 @@ cc_library(
     hdrs = glob([
         "*.h",
     ]),
+    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
