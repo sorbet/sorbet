@@ -384,7 +384,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     assert_match(/Use of `optional: :existing` is not allowed/, e.message)
   end
 
-  it 'raises if the word secret appears in a prop' do
+  it 'raises if the word secret appears in a prop without a sensitivity annotation' do
     e = assert_raises do
       Class.new(T::Struct) do
         prop :secret, String
