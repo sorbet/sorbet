@@ -79,6 +79,7 @@ public:
     SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
     }
+    SymbolRef lookupMethodSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;
     SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
     }
@@ -239,6 +240,7 @@ private:
     SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo()._id, bool isModule = false);
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 
+    SymbolRef lookupSymbolSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;
     SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;
 
     SymbolRef getTopLevelClassSymbol(NameRef name);

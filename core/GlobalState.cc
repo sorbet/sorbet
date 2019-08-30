@@ -584,6 +584,17 @@ constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZ
 // look up a symbol whose flags match the desired flags. This might look through mangled names to discover one whose
 // flags match. If no sych symbol exists, then it will return noSymbol.
 SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const {
+    return lookupSymbolSuchThat(owner, name, [&](SymbolRef res) { return (res.data(*this)->flags & flags) == flags; });
+}
+
+SymbolRef GlobalState::lookupMethodSuchThat(SymbolRef owner, NameRef name, function<bool(SymbolRef)> pred) const {
+    return lookupSymbolSuchThat(owner, name, [&](SymbolRef res) {
+        return (res.data(*this)->flags & Symbol::Flags::METHOD) == Symbol::Flags::METHOD && pred(res);
+    });
+}
+
+// look up a symbol such that the provided predicate returns true
+SymbolRef GlobalState::lookupSymbolSuchThat(SymbolRef owner, NameRef name, function<bool(SymbolRef)> pred) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     SymbolData ownerScope = owner.dataAllowingNone(*this);
@@ -594,7 +605,7 @@ SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 f
     auto res = ownerScope->members().find(lookupName);
     while (res != ownerScope->members().end()) {
         ENFORCE(res->second.exists());
-        if ((res->second.data(*this)->flags & flags) == flags) {
+        if (pred(res->second)) {
             return res->second;
         }
         lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
