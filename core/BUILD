@@ -44,12 +44,12 @@ cc_test(
             "**/flycheck_*",
         ],
     ),
+    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//tools:__pkg__"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":core",
         "@com_google_googletest//:gtest",
