@@ -319,7 +319,7 @@ module T::Configuration
     raise str
   end
 
-  def self.hard_assert_handler(str, extra)
+  def self.hard_assert_handler(str, extra={})
     if @hard_assert_handler
       @hard_assert_handler.call(str, extra)
     else
