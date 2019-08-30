@@ -185,3 +185,18 @@ sig {params(x: Integer).void}
 def only_keyword_arg(x)
   T.absurd(x: nil) if x.nil? # error: Control flow could reach `T.absurd` because the type `{x: NilClass}` wasn't handled
 end
+
+sig {returns(T.any(Integer, String))}
+def looks_like_a_variable
+  T.unsafe(nil) ? 0 : ''
+end
+
+sig {void}
+def rejects_absurd_on_non_variable
+  case looks_like_a_variable
+  when Integer
+  when String
+  else
+    T.absurd(looks_like_a_variable) # error: `T.absurd` expects to be called on a variable, not a method call
+  end
+end
