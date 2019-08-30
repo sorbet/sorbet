@@ -102,6 +102,32 @@ using <code>T.let</code> at the top-level of a class:</p>
   @alpaca_count = T.let(<span class="hljs-number">0</span>, Integer)
 <span class="hljs-keyword">end</span>
 </code></pre>
+<p>Sorbet requires that instance and class variables are defined in these specific
+places to guarantee that they’re initialized. But sometimes requiring that these
+variables be declared in specific places is too restrictive. Sorbet allows an
+instance variable to be declared <strong>anywhere</strong> so long as the type is at least
+nilable:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
+    <span class="hljs-comment"># Does NOT have to be declared in `initialize`, because it's nilable:</span>
+    @x = T.let(<span class="hljs-number">0</span>, T.nilable(Integer))
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">bar</span></span>
+    <span class="hljs-comment"># Also works for `self.` methods:</span>
+    @y = T.let(<span class="hljs-string">''</span>, T.nilable(String))
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>It’s common to use this technique to add type annotations for instance variables
+in functions that memoize their result:</p>
+<pre><code class="hljs css language-ruby">sig {returns(String)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">current_user</span></span>
+  @user = T.let(@user, T.nilable(String))
+  @user <span class="hljs-params">||</span>= ENV.fetch(<span class="hljs-string">'USER'</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="why-do-i-need-to-repeat-types-from-the-constructor"></a><a href="#why-do-i-need-to-repeat-types-from-the-constructor" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why do I need to repeat types from the constructor?</h2>
 <p>A current shortcoming of Sorbet is it cannot reuse static type knowledge in
 order to automatically determine the type of an instance or class variable. In
 the following example, despite the fact that Sorbet knows that <code>x</code> has type
@@ -140,7 +166,7 @@ strictness level, unannotated methods, instance variables, and constants are
 assumed to be <code>T.untyped</code>. This allows a programmer to write untyped or
 partially-typed definitions while still benefitting from type checking when
 static type information is present.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/sigs"><span class="arrow-prev">← </span><span>Signatures</span></a><a class="docs-next button" href="/docs/type-assertions"><span>Type Assertions</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#annotating-constants">Annotating constants</a></li><li><a href="#declaring-class-and-instance-variables">Declaring class and instance variables</a></li><li><a href="#type-annotations-and-strictness-levels">Type annotations and strictness levels</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/sigs"><span class="arrow-prev">← </span><span>Signatures</span></a><a class="docs-next button" href="/docs/type-assertions"><span>Type Assertions</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#annotating-constants">Annotating constants</a></li><li><a href="#declaring-class-and-instance-variables">Declaring class and instance variables</a></li><li><a href="#why-do-i-need-to-repeat-types-from-the-constructor">Why do I need to repeat types from the constructor?</a></li><li><a href="#type-annotations-and-strictness-levels">Type annotations and strictness levels</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
