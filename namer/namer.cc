@@ -519,6 +519,25 @@ public:
     bool paramsMatch(core::MutableContext ctx, core::Loc loc, const vector<ast::ParsedArg> &parsedArgs) {
         auto sym = ctx.owner.data(ctx)->dealias(ctx);
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
+            return false;
+        }
+        for (int i = 0; i < parsedArgs.size(); i++) {
+            auto &methodArg = parsedArgs[i];
+            auto &symArg = sym.data(ctx)->arguments()[i];
+
+            if (symArg.flags.isKeyword != methodArg.keyword || symArg.flags.isBlock != methodArg.block ||
+                symArg.flags.isRepeated != methodArg.repeated ||
+                (symArg.flags.isKeyword && symArg.name != methodArg.local._name)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<ast::ParsedArg> &parsedArgs) {
+        auto sym = ctx.owner.data(ctx)->dealias(ctx);
+        if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                 if (sym != ctx.owner) {
                     // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
@@ -536,7 +555,7 @@ public:
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
             }
-            return false;
+            return;
         }
         for (int i = 0; i < parsedArgs.size(); i++) {
             auto &methodArg = parsedArgs[i];
@@ -549,7 +568,7 @@ public:
                         sym.data(ctx)->show(ctx), "isKeyword", symArg.flags.isKeyword, methodArg.keyword);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
-                return false;
+                return;
             }
             if (symArg.flags.isBlock != methodArg.block) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
@@ -558,7 +577,7 @@ public:
                         sym.data(ctx)->show(ctx), "isBlock", symArg.flags.isBlock, methodArg.block);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
-                return false;
+                return;
             }
             if (symArg.flags.isRepeated != methodArg.repeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
@@ -567,7 +586,7 @@ public:
                         sym.data(ctx)->show(ctx), "isRepeated", symArg.flags.isRepeated, methodArg.repeated);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
-                return false;
+                return;
             }
             if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
@@ -575,11 +594,9 @@ public:
                                 sym.data(ctx)->show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
-                return false;
+                return;
             }
         }
-
-        return true;
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
@@ -596,21 +613,23 @@ public:
 
         auto parsedArgs = ast::ArgParsing::parseArgs(ctx, method->args);
 
-        auto sym = ctx.state.lookupMethodSymbol(owner, method->name);
-        if (sym.exists()) {
-            if (method->declLoc == sym.data(ctx)->loc()) {
-                // TODO remove if the paramsMatch is perfect
-                // Reparsing the same file
-                method->symbol = sym;
-                method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
-                return method;
+        auto sym = ctx.state.lookupMethodSuchThat(owner, method->name, [&](core::SymbolRef ref) {
+            return isIntrinsic(ctx, ref) || paramsMatch(ctx.withOwner(ref), method->declLoc, parsedArgs);
+        });
+        auto oldSym = ctx.state.lookupMethodSymbol(owner, method->name);
+        if (!sym.exists() && oldSym.exists()) {
+            if (!isIntrinsic(ctx, oldSym)) {
+                paramMismatchErrors(ctx.withOwner(oldSym), method->declLoc, parsedArgs);
             }
-            if (isIntrinsic(ctx, sym) || paramsMatch(ctx.withOwner(sym), method->declLoc, parsedArgs)) {
-                sym.data(ctx)->addLoc(ctx, method->declLoc);
-            } else {
-                ctx.state.mangleRenameSymbol(sym, method->name);
-            }
+            ctx.state.mangleRenameSymbol(oldSym, method->name);
         }
+        if (sym.exists()) {
+            sym.data(ctx)->addLoc(ctx, method->declLoc);
+            method->symbol = sym;
+            method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
+            return method;
+        }
+
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
         method->symbol.data(ctx)->addLoc(ctx, method->declLoc);
