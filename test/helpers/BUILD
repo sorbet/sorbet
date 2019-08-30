@@ -11,6 +11,7 @@ cc_library(
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
+    copts = ["-Iexternal/gtest/include"],
     visibility = ["//visibility:public"],
     deps = [
         "//core",

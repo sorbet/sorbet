@@ -27,6 +27,7 @@ cc_test(
         "//conditions:default": 1,
     }),
     visibility = ["//tools:__pkg__"],
+    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":serialize",
         "@com_google_googletest//:gtest",
