@@ -55,6 +55,39 @@ class HasVariables
 end
 ```
 
+Sorbet requires that instance and class variables are defined in these specific
+places to guarantee that they're initialized. But sometimes requiring that these
+variables be declared in specific places is too restrictive. Sorbet allows an
+instance variable to be declared **anywhere** so long as the type is at least
+nilable:
+
+```ruby
+class A
+  def foo
+    # Does NOT have to be declared in `initialize`, because it's nilable:
+    @x = T.let(0, T.nilable(Integer))
+  end
+
+  def self.bar
+    # Also works for `self.` methods:
+    @y = T.let('', T.nilable(String))
+  end
+end
+```
+
+It's common to use this technique to add type annotations for instance variables
+in functions that memoize their result:
+
+```ruby
+sig {returns(String)}
+def current_user
+  @user = T.let(@user, T.nilable(String))
+  @user ||= ENV.fetch('USER')
+end
+```
+
+## Why do I need to repeat types from the constructor?
+
 A current shortcoming of Sorbet is it cannot reuse static type knowledge in
 order to automatically determine the type of an instance or class variable. In
 the following example, despite the fact that Sorbet knows that `x` has type
