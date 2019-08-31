@@ -5,7 +5,7 @@ class TestCase
     when Integer
       T.assert_type!(x, Integer)
     when Array, Hash
-      T.assert_type!(x, T.any(T::Array[T.untyped], T::Hash[T.untyped, T.untyped]))
+      T.reveal_type(x) # error: Revealed type: `T.any(T::Hash[<any>, <any>], T::Array[<any>])`
     end
   end
 end

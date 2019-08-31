@@ -66,14 +66,19 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
 
             for (auto &tm : typeMembers()) {
                 auto tmData = tm.data(gs);
-                if (tmData->isFixed()) {
-                    auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
-                    ENFORCE(lambdaParam != nullptr);
+                auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
+                ENFORCE(lambdaParam != nullptr);
 
+                if (tmData->isFixed() || tmData->isCovariant()) {
                     // Default type parameters to their upper bound
                     targs.emplace_back(lambdaParam->upperBound);
-                } else {
+                } else if (tmData->isInvariant()) {
+                    // We instantiate Invariant type members as T.untyped as
+                    // this will behave a bit like a unification variable with
+                    // Types::glb.
                     targs.emplace_back(Types::untyped(gs, ref));
+                } else {
+                    targs.emplace_back(lambdaParam->lowerBound);
                 }
             }
 
