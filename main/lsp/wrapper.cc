@@ -58,8 +58,8 @@ void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared
     workers = WorkerPool::create(0, *logger);
     // N.B.: stdin will not actually be used the way we are driving LSP.
     // Configure LSPLoop to disable configatron.
-    lspLoop = make_unique<LSPLoop>(std::move(gs), opts, logger, *workers.get(), STDIN_FILENO, lspOstream, true,
-                                   disableFastPath);
+    lspLoop = make_unique<LSPLoop>(std::move(gs), LSPConfiguration(opts, logger, true, disableFastPath), logger,
+                                   *workers.get(), STDIN_FILENO, lspOstream);
 }
 
 LSPWrapper::LSPWrapper(options::Options &&options, std::string_view rootPath, bool disableFastPath)

@@ -50,7 +50,7 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
 LSPResult LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentSignatureHelp);
-    if (!opts.lspSignatureHelpEnabled) {
+    if (!config.opts.lspSignatureHelpEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Signature Help` LSP feature is experimental and disabled by default.");
@@ -74,13 +74,13 @@ LSPResult LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, con
             if (auto sendResp = resp->isSend()) {
                 auto sendLocIndex = sendResp->termLoc.beginPos();
 
-                auto fref = uri2FileRef(params.textDocument->uri);
+                auto fref = config.uri2FileRef(*gs, params.textDocument->uri);
                 if (!fref.exists()) {
                     // TODO(jvilk): This should probably return *something*; it's a request!
                     return LSPResult{move(gs), {}};
                 }
                 auto src = fref.data(*gs).source();
-                auto loc = lspPos2Loc(fref, *params.position, *gs);
+                auto loc = config.lspPos2Loc(fref, *params.position, *gs);
                 if (!loc) {
                     return LSPResult{move(gs), {}};
                 }

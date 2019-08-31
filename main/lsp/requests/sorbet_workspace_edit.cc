@@ -36,9 +36,9 @@ string_view LSPLoop::getFileContents(UnorderedMap<string, LSPLoop::SorbetWorkspa
 void LSPLoop::preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,
                                             UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
     string_view uri = changeParams.textDocument->uri;
-    if (absl::StartsWith(uri, rootUri)) {
-        string localPath = remoteName2Local(uri);
-        if (FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
+    if (absl::StartsWith(uri, config.rootUri)) {
+        string localPath = config.remoteName2Local(uri);
+        if (config.isFileIgnored(localPath)) {
             return;
         }
         string fileContents = string(getFileContents(updates, *initialGS, localPath));
@@ -67,9 +67,9 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &c
 void LSPLoop::preprocessSorbetWorkspaceEdit(const DidOpenTextDocumentParams &openParams,
                                             UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
     string_view uri = openParams.textDocument->uri;
-    if (absl::StartsWith(uri, rootUri)) {
-        string localPath = remoteName2Local(uri);
-        if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
+    if (absl::StartsWith(uri, config.rootUri)) {
+        string localPath = config.remoteName2Local(uri);
+        if (!config.isFileIgnored(localPath)) {
             updates[localPath] = {move(openParams.textDocument->text), /* newlyOpened */ true, /* newlyClosed */ false};
         }
     }
@@ -78,11 +78,12 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidOpenTextDocumentParams &ope
 void LSPLoop::preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &closeParams,
                                             UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
     string_view uri = closeParams.textDocument->uri;
-    if (absl::StartsWith(uri, rootUri)) {
-        string localPath = remoteName2Local(uri);
-        if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
+    if (absl::StartsWith(uri, config.rootUri)) {
+        string localPath = config.remoteName2Local(uri);
+        if (!config.isFileIgnored(localPath)) {
             // Use contents of file on disk.
-            updates[localPath] = {readFile(localPath, *opts.fs), /* newlyOpened */ false, /* newlyClosed */ true};
+            updates[localPath] = {readFile(localPath, *config.opts.fs), /* newlyOpened */ false,
+                                  /* newlyClosed */ true};
         }
     }
 }
@@ -90,8 +91,8 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &cl
 void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
                                             UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
     for (auto file : queryResponse.files) {
-        string localPath = absl::StrCat(rootPath, "/", file);
-        if (!FileOps::isFileIgnored(rootPath, localPath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns)) {
+        string localPath = absl::StrCat(config.rootPath, "/", file);
+        if (!config.isFileIgnored(localPath)) {
             auto it = updates.find(localPath);
             bool isFileOpenInEditor = openFiles.contains(localPath);
             if (it != updates.end()) {
@@ -102,7 +103,7 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryRe
             // Editor contents supercede file system updates.
             if (!isFileOpenInEditor) {
                 // File may have been closed and then updated on disk, so make sure we preserve the 'closed' flag.
-                updates[localPath] = {readFile(localPath, *opts.fs), /* newlyOpened */ false,
+                updates[localPath] = {readFile(localPath, *config.opts.fs), /* newlyOpened */ false,
                                       /* newlyClosed */ it != updates.end() ? it->second.newlyClosed : false};
             }
         }

@@ -11,28 +11,20 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, const shared_ptr<spd::logger> &logger,
-                 WorkerPool &workers, int inputFd, std::ostream &outputStream, bool skipConfigatron,
-                 bool disableFastPath)
-    : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), inputFd(inputFd),
-      outputStream(outputStream), skipConfigatron(skipConfigatron), disableFastPath(disableFastPath),
-      lastMetricUpdateTime(chrono::steady_clock::now()) {
+LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, LSPConfiguration config, const shared_ptr<spd::logger> &logger,
+                 WorkerPool &workers, int inputFd, std::ostream &outputStream)
+    : config(move(config)), initialGS(std::move(gs)), logger(logger), workers(workers), inputFd(inputFd),
+      outputStream(outputStream), lastMetricUpdateTime(chrono::steady_clock::now()) {
     errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
     ENFORCE(errorQueue->ignoreFlushes,
             "LSPLoop's error queue is not ignoring flushes, which will prevent LSP from sending diagnostics");
-
-    if (opts.rawInputDirNames.size() != 1) {
-        logger->error("Sorbet's language server requires a single input directory.");
-        throw options::EarlyReturnWithCode(1);
-    }
-    rootPath = opts.rawInputDirNames.at(0);
 }
 
 LSPLoop::QueryRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
                                               const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
     Timer timeit(logger, "setupLSPQueryByLoc");
-    auto fref = uri2FileRef(uri);
+    auto fref = config.uri2FileRef(*gs, uri);
     if (!fref.exists()) {
         auto error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidParams,
@@ -46,7 +38,7 @@ LSPLoop::QueryRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, 
         return QueryRun{move(gs), {}};
     }
 
-    auto loc = lspPos2Loc(fref, pos, *gs);
+    auto loc = config.lspPos2Loc(fref, pos, *gs);
     if (!loc) {
         auto error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidParams,
@@ -81,9 +73,8 @@ LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> g
     return runQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
-bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg,
-                                const unique_ptr<core::GlobalState> &currentGs) const {
-    if (initialized || forMethod == LSPMethod::Initialize || forMethod == LSPMethod::Initialized ||
+bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg) const {
+    if (config.initialized || forMethod == LSPMethod::Initialize || forMethod == LSPMethod::Initialized ||
         forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown || forMethod == LSPMethod::SorbetError) {
         return true;
     }
@@ -97,7 +88,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
     vector<unique_ptr<LSPMessage>> responses;
 
-    if (enableTypecheckInfo) {
+    if (config.enableTypecheckInfo) {
         vector<string> pathsTypechecked;
         for (auto &f : filesTypechecked) {
             pathsTypechecked.emplace_back(f.data(gs).path());
@@ -151,7 +142,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                 if (file.data(gs).sourceType == core::File::Type::Payload) {
                     uri = string(file.data(gs).path());
                 } else {
-                    uri = fileRef2Uri(gs, file);
+                    uri = config.fileRef2Uri(gs, file);
                 }
             }
 
@@ -180,7 +171,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                                     } else {
                                         message = sectionHeader;
                                     }
-                                    auto location = loc2Location(gs, errorLine.loc);
+                                    auto location = config.loc2Location(gs, errorLine.loc);
                                     if (location == nullptr) {
                                         continue;
                                     }
@@ -191,7 +182,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                             // Add link to error documentation.
                             relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
                                 make_unique<Location>(
-                                    absl::StrCat(opts.errorUrlBase, e->what.code),
+                                    absl::StrCat(config.opts.errorUrlBase, e->what.code),
                                     make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
                                 "Click for more information on this error."));
                             diagnostic->relatedInformation = move(relatedInformation);
@@ -212,11 +203,12 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
 
 bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) const {
-    return !opts.statsdHost.empty() && (currentTime - lastMetricUpdateTime) > STATSD_INTERVAL;
+    return !config.opts.statsdHost.empty() && (currentTime - lastMetricUpdateTime) > STATSD_INTERVAL;
 }
 
 void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
     ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
+    const auto &opts = config.opts;
     // Record rusage-related stats.
     StatsD::addRusageStats();
     auto counters = getAndClearThreadCounters();

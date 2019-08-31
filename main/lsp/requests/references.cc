@@ -36,7 +36,7 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
         auto &queryResponses = result.responses;
         if (!queryResponses.empty()) {
             const bool fileIsTyped =
-                uri2FileRef(params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
+                config.uri2FileRef(*gs, params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
             // N.B.: Ignores literals.
             // If file is untyped, only supports find reference requests from constants and class definitions.
