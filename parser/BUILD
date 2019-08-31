@@ -60,8 +60,8 @@ genrule(
     cmd = "$(location @parser//:generate_diagnostics) dclassStrings > $(location diagnostics.cc) && \
            $(location //tools:clang-format) -i $(location diagnostics.cc)",
     tools = [
-        "@parser//:generate_diagnostics",
         "//tools:clang-format",
+        "@parser//:generate_diagnostics",
     ],
 )
 

@@ -10,13 +10,16 @@ ragel(
 bison(
     name = "typedruby_bison",
     src = "cc/grammars/typedruby.ypp",
-    opts = ["-Wno-empty-rule", "-Wno-precedence"],
+    opts = [
+        "-Wno-empty-rule",
+        "-Wno-precedence",
+    ],
 )
 
 cc_binary(
     name = "generate_diagnostics",
     srcs = [
-        "codegen/generate_diagnostics.cc"
+        "codegen/generate_diagnostics.cc",
     ],
     linkstatic = select({
         "@com_stripe_ruby_typer//tools/config:linkshared": 0,
@@ -32,7 +35,7 @@ genrule(
     ],
     cmd = "$(location :generate_diagnostics) dclass > $@",
     tools = [
-        ":generate_diagnostics"
+        ":generate_diagnostics",
     ],
 )
 
@@ -51,12 +54,12 @@ cc_library(
         "include",
         "include/ruby_parser",
     ],
-    visibility = ["//visibility:public"],
     linkstatic = select({
-            "@com_stripe_ruby_typer//tools/config:linkshared": 0,
-            "//conditions:default": 1,
-        }),
-   deps = [
+        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
         "@com_google_absl//absl/strings",
-   ],
+    ],
 )
