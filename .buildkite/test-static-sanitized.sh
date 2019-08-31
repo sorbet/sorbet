@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-if [ "$SIMULATE_FAIL" != "" ]; then
+if [ "${SIMULATE_FAIL:-}" != "" ]; then
   echo "Simulating build failure. Exiting status 1"
   exit 1
 fi
