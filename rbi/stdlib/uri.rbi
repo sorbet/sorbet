@@ -210,22 +210,22 @@ class URI::Generic < Object
   VERSION_CODE = T.let(T.unsafe(nil), String)
   WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
 
-  sig { params(oth: T.untyped).returns(T.untyped) }
+  sig {params(oth: T.untyped).returns(T.untyped)}
   def +(oth); end
 
-  sig { params(oth: T.untyped).returns(T.untyped) }
+  sig {params(oth: T.untyped).returns(T.untyped)}
   def -(oth); end
 
   # Compares two URIs.
-  sig { params(oth: T.untyped).returns(T::Boolean) }
+  sig {params(oth: T.untyped).returns(T::Boolean)}
   def ==(oth); end
 
   # Returns true if URI has a scheme (e.g. http:// or https://) specified.
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def absolute; end
 
   # Returns true if URI has a scheme (e.g. http:// or https://) specified.
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def absolute?; end
 
   # Attempts to parse other URI `oth`,
@@ -238,21 +238,21 @@ class URI::Generic < Object
   # uri.coerce("http://foo.com")
   # #=> [#<URI::HTTP http://foo.com>, #<URI::HTTP http://my.example.com>]
   # ```
-  sig { params(oth: T.any(URI, String)).returns(T.untyped) }
+  sig {params(oth: T.any(URI, String)).returns(T.untyped)}
   def coerce(oth); end
 
   # Components of the URI in the order.
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def component; end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def component_ary; end
 
   # Returns default port.
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def default_port; end
 
-  sig { params(oth: T.untyped).returns(T::Boolean) }
+  sig {params(oth: T.untyped).returns(T::Boolean)}
   def eql?(oth); end
 
   # Returns a proxy URI.
@@ -270,7 +270,7 @@ class URI::Generic < Object
   # So HTTP_PROXY is not used.
   # http_proxy is not used too if the variable is case insensitive.
   # CGI_HTTP_PROXY can be used instead.
-  sig { params(env: T.untyped).returns(T.untyped) }
+  sig {params(env: T.untyped).returns(T.untyped)}
   def find_proxy(env = T.unsafe(nil)); end
 
   # Returns the fragment component of the URI.
@@ -278,7 +278,7 @@ class URI::Generic < Object
   # ```ruby
   # URI("http://foo/bar/baz?search=FooBar#ponies").fragment #=> "ponies"
   # ```
-  sig { returns(T.nilable(String)) }
+  sig {returns(T.nilable(String))}
   def fragment; end
 
   # Checks the fragment `v` component against the URI::Parser Regexp for :FRAGMENT.
@@ -293,7 +293,7 @@ class URI::Generic < Object
   # uri.fragment = "time=1305212086"
   # uri.to_s  #=> "http://my.example.com/?id=25#time=1305212086"
   # ```
-  sig { params(v: T.nilable(String)).returns(T.untyped) }
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def fragment=(v); end
 
   # Returns true if URI is hierarchical.
@@ -311,7 +311,7 @@ class URI::Generic < Object
   # uri.hierarchical?
   # #=> false
   # ```
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def hierarchical?; end
 
   # Returns the host component of the URI.
@@ -341,7 +341,7 @@ class URI::Generic < Object
   # URI("http://[::1]/bar/baz").host     #=> "[::1]"
   # URI("http://[::1]/bar/baz").hostname #=> "::1"
   # ```
-  sig { returns(T.nilable(String)) }
+  sig {returns(T.nilable(String))}
   def host; end
 
   # Public setter for the host component `v`
@@ -356,7 +356,7 @@ class URI::Generic < Object
   # uri.host = "foo.com"
   # uri.to_s  #=> "http://foo.com"
   # ```
-  sig { params(v: String).returns(T.untyped) }
+  sig {params(v: String).returns(T.untyped)}
   def host=(v); end
 
   # Extract the host part of the URI and unwrap brackets for IPv6 addresses.
@@ -369,7 +369,7 @@ class URI::Generic < Object
   # uri.hostname      #=> "::1"
   # uri.host          #=> "[::1]"
   # ```
-  sig { returns(String) }
+  sig {returns(String)}
   def hostname; end
 
   # Sets the host part of the URI as the argument with brackets for IPv6 addresses.
@@ -385,7 +385,7 @@ class URI::Generic < Object
   # 
   # If the argument seems to be an IPv6 address,
   # it is wrapped with brackets.
-  sig { params(v: String).returns(T.untyped) }
+  sig {params(v: String).returns(T.untyped)}
   def hostname=(v); end
 
   # == Args
@@ -439,7 +439,7 @@ class URI::Generic < Object
   # uri.merge("/main.rbx?page=1")
   # # => "http://my.example.com/main.rbx?page=1"
   # ```
-  sig { params(oth: String).returns(URI) }
+  sig {params(oth: String).returns(URI)}
   def merge(oth); end
 
   # Destructive form of #merge.
@@ -451,7 +451,7 @@ class URI::Generic < Object
   # uri.merge!("/main.rbx?page=1")
   # uri.to_s  # => "http://my.example.com/main.rbx?page=1"
   # ```
-  sig { params(oth: T.untyped).returns(T.untyped) }
+  sig {params(oth: T.untyped).returns(T.untyped)}
   def merge!(oth); end
 
   # Returns normalized URI.
@@ -467,11 +467,11 @@ class URI::Generic < Object
   # 
   # * scheme and host are converted to lowercase,
   # * an empty path component is set to "/".
-  sig { returns(URI) }
+  sig {returns(URI)}
   def normalize; end
 
   # Destructive version of #normalize.
-  sig { void }
+  sig {void}
   def normalize!; end
 
   # Returns the opaque part of the URI.
@@ -484,24 +484,24 @@ class URI::Generic < Object
   # The portion of the path that does not make use of the slash '/'.
   # The path typically refers to an absolute path or an opaque part.
   # (See RFC2396 Section 3 and 5.2.)
-  sig { returns(T.nilable(String)) }
+  sig {returns(T.nilable(String))}
   def opaque; end
 
   # Public setter for the opaque component `v`
   # (with validation).
   # 
   # See also URI::Generic.check_opaque.
-  sig { params(v: T.nilable(String)).returns(T.untyped) }
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def opaque=(v); end
 
   # Returns the parser to be used.
   # 
   # Unless a URI::Parser is defined, DEFAULT_PARSER is used.
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def parser; end
 
   # Returns the password component.
-  sig { returns(T.nilable(String)) }
+  sig {returns(T.nilable(String))}
   def password; end
 
   # Public setter for the `password` component
@@ -516,7 +516,7 @@ class URI::Generic < Object
   # uri.password = "V3ry_S3nsit1ve"
   # uri.to_s  #=> "http://john:V3ry_S3nsit1ve@my.example.com"
   # ```
-  sig { params(password: T.nilable(String)).returns(T.untyped) }
+  sig {params(password: T.nilable(String)).returns(T.untyped)}
   def password=(password); end
 
   # Returns the path component of the URI.
@@ -524,7 +524,7 @@ class URI::Generic < Object
   # ```ruby
   # URI("http://foo/bar/baz").path #=> "/bar/baz"
   # ```
-  sig { returns(T.nilable(String)) }
+  sig {returns(T.nilable(String))}
   def path; end
 
   # Public setter for the path component `v`
@@ -539,7 +539,7 @@ class URI::Generic < Object
   # uri.path = "/faq/"
   # uri.to_s  #=> "http://my.example.com/faq/"
   # ```
-  sig { params(v: T.nilable(String)).returns(T.untyped) }
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def path=(v); end
 
   # Returns the port component of the URI.
@@ -548,7 +548,7 @@ class URI::Generic < Object
   # URI("http://foo/bar/baz").port      #=> 80
   # URI("http://foo:8080/bar/baz").port #=> 8080
   # ```
-  sig { returns(T.nilable(Integer)) }
+  sig {returns(T.nilable(Integer))}
   def port; end
 
   # Public setter for the port component `v`
@@ -563,7 +563,7 @@ class URI::Generic < Object
   # uri.port = 8080
   # uri.to_s  #=> "http://my.example.com:8080"
   # ```
-  sig { params(v: T.nilable(Integer)).returns(T.untyped) }
+  sig {params(v: T.nilable(Integer)).returns(T.untyped)}
   def port=(v); end
 
   # Returns the query component of the URI.
@@ -571,7 +571,7 @@ class URI::Generic < Object
   # ```ruby
   # URI("http://foo/bar/baz?search=FooBar").query #=> "search=FooBar"
   # ```
-  sig { returns(T.nilable(String)) }
+  sig {returns(T.nilable(String))}
   def query; end
 
   # Public setter for the query component `v`.
@@ -583,17 +583,17 @@ class URI::Generic < Object
   # uri.query = "id=1"
   # uri.to_s  #=> "http://my.example.com/?id=1"
   # ```
-  sig { params(v: T.nilable(String)).returns(T.untyped) }
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def query=(v); end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def registry; end
 
-  sig { params(v: T.untyped).returns(T.untyped) }
+  sig {params(v: T.untyped).returns(T.untyped)}
   def registry=(v); end
 
   # Returns true if URI does not have a scheme (e.g. http:// or https://) specified.
-  sig { returns(T::Boolean) }
+  sig {returns(T::Boolean)}
   def relative?; end
 
   # Calculates relative path from oth to self.
@@ -605,7 +605,7 @@ class URI::Generic < Object
   # uri.route_from('http://my.example.com')
   # #=> #<URI::Generic /main.rbx?page=1>
   # ```
-  sig { params(oth: T.untyped).returns(T.untyped) }
+  sig {params(oth: T.untyped).returns(T.untyped)}
   def route_from(oth); end
 
   # Calculates relative path to oth from self.
@@ -617,7 +617,7 @@ class URI::Generic < Object
   # uri.route_to('http://my.example.com/main.rbx?page=1')
   # #=> #<URI::Generic /main.rbx?page=1>
   # ```
-  sig { params(oth: T.untyped).returns(T.untyped) }
+  sig {params(oth: T.untyped).returns(T.untyped)}
   def route_to(oth); end
 
   # Returns the scheme component of the URI.
@@ -625,7 +625,7 @@ class URI::Generic < Object
   # ```ruby
   # URI("http://foo/bar/baz").scheme #=> "http"
   # ```
-  sig { returns(T.nilable(String)) }
+  sig {returns(T.nilable(String))}
   def scheme; end
 
   # Public setter for the scheme component `v`
@@ -640,7 +640,7 @@ class URI::Generic < Object
   # uri.scheme = "https"
   # uri.to_s  #=> "https://my.example.com"
   # ```
-  sig { params(v: T.nilable(String)).returns(T.untyped) }
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def scheme=(v); end
 
   # Selects specified components from URI.
@@ -652,63 +652,63 @@ class URI::Generic < Object
   # uri.select(:userinfo, :host, :path)
   # # => ["myuser:mypass", "my.example.com", "/test.rbx"]
   # ```
-  sig { params(components: T.untyped).returns(T.untyped) }
+  sig {params(components: T.untyped).returns(T.untyped)}
   def select(*components); end
 
   # Protected setter for the host component `v`.
   # 
   # See also URI::Generic.host=.
-  sig { params(v: T.untyped).returns(T.untyped) }
+  sig {params(v: T.untyped).returns(T.untyped)}
   def set_host(v); end
 
   # Protected setter for the opaque component `v`.
   # 
   # See also URI::Generic.opaque=.
-  sig { params(v: T.untyped).returns(T.untyped) }
+  sig {params(v: T.untyped).returns(T.untyped)}
   def set_opaque(v); end
 
   # Protected setter for the password component `v`.
   # 
   # See also URI::Generic.password=.
-  sig { params(v: T.nilable(String)).returns(T.untyped) }
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def set_password(v); end
 
   # Protected setter for the path component `v`.
   # 
   # See also URI::Generic.path=.
-  sig { params(v: T.nilable(String)).returns(T.untyped) }
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def set_path(v); end
 
   # Protected setter for the port component `v`.
   # 
   # See also URI::Generic.port=.
-  sig { params(v: Integer).returns(T.untyped) }
+  sig {params(v: Integer).returns(T.untyped)}
   def set_port(v); end
 
-  sig { params(v: T.untyped).returns(T.untyped) }
+  sig {params(v: T.untyped).returns(T.untyped)}
   def set_registry(v); end
 
   # Protected setter for the scheme component `v`.
   # 
   # See also URI::Generic.scheme=.
-  sig { params(v: String).returns(T.untyped) }
+  sig {params(v: String).returns(T.untyped)}
   def set_scheme(v); end
 
   # Protected setter for the user component `v`.
   # 
   # See also URI::Generic.user=.
-  sig { params(v: T.nilable(String)).returns(T.untyped) }
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def set_user(v); end
 
   # Protected setter for the `user` component, and `password` if available
   # (with validation).
   # 
   # See also URI::Generic.userinfo=.
-  sig { params(user: T.untyped, password: T.untyped).returns(T.untyped) }
+  sig {params(user: T.untyped, password: T.untyped).returns(T.untyped)}
   def set_userinfo(user, password = nil); end
 
   # Returns the user component.
-  sig { returns(T.nilable(String)) }
+  sig {returns(T.nilable(String))}
   def user; end
 
   # Public setter for the `user` component
@@ -723,36 +723,36 @@ class URI::Generic < Object
   # uri.user = "sam"
   # uri.to_s  #=> "http://sam:V3ry_S3nsit1ve@my.example.com"
   # ```
-  sig { params(user: T.nilable(String)).returns(T.untyped) }
+  sig {params(user: T.nilable(String)).returns(T.untyped)}
   def user=(user); end
 
   # Returns the userinfo, either as 'user' or 'user:password'.
-  sig { returns(T.nilable(String)) }
+  sig {returns(T.nilable(String))}
   def userinfo; end
 
   # Sets userinfo, argument is string like 'name:pass'.
-  sig { params(userinfo: T.nilable(String)).returns(T.untyped) }
+  sig {params(userinfo: T.nilable(String)).returns(T.untyped)}
   def userinfo=(userinfo); end
 
   # Creates a new URI::Generic instance from components of URI::Generic
   # with check. Components are: scheme, userinfo, host, port, registry, path,
   # opaque, query, and fragment. You can provide arguments either by an Array or a Hash.
   # See ::new for hash keys to use or for order of array items.
-  sig { params(args: T.untyped).returns(T.untyped) }
+  sig {params(args: T.untyped).returns(T.untyped)}
   def self.build(args); end
 
   # At first, tries to create a new URI::Generic instance using
   # URI::Generic::build. But, if exception URI::InvalidComponentError is raised,
   # then it does URI::Escape.escape all URI components and tries again.
-  sig { params(args: T.untyped).returns(T.untyped) }
+  sig {params(args: T.untyped).returns(T.untyped)}
   def self.build2(args); end
 
   # Components of the URI in the order.
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def self.component; end
 
   # Returns default port.
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def self.default_port; end
 
   sig do
@@ -765,7 +765,7 @@ class URI::Generic < Object
   end
   def self.use_proxy?(hostname, addr, port, no_proxy); end
 
-  sig { returns(T.untyped) }
+  sig {returns(T.untyped)}
   def self.use_registry; end
 end
 
