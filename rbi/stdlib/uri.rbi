@@ -389,46 +389,46 @@ class URI::Generic < Object
   def hostname=(v); end
 
   # == Args
-  # +scheme+::
+  # `scheme`::
   #   Protocol scheme, i.e. 'http','ftp','mailto' and so on.
-  # +userinfo+::
+  # `userinfo`::
   #   User name and password, i.e. 'sdmitry:bla'.
-  # +host+::
+  # `host`::
   #   Server host name.
-  # +port+::
+  # `port`::
   #   Server port.
-  # +registry+::
+  # `registry`::
   #   Registry of naming authorities.
-  # +path+::
+  # `path`::
   #   Path on server.
-  # +opaque+::
+  # `opaque`::
   #   Opaque part.
-  # +query+::
+  # `query`::
   #   Query data.
-  # +fragment+::
+  # `fragment`::
   #   Part of the URI after '#' character.
-  # +parser+::
+  # `parser`::
   #   Parser for internal use [URI::DEFAULT_PARSER by default].
-  # +arg_check+::
+  # `arg_check`::
   #   Check arguments [false by default].
   # 
   # Creates a new URI::Generic instance from `generic` components without check.
   sig do
     params(
-      scheme: T.untyped,
-      userinfo: T.untyped,
-      host: T.untyped,
-      port: T.untyped,
+      scheme: T.nilable(String),
+      userinfo: T.nilable(String),
+      host: T.nilable(String),
+      port: T.nilable(Integer),
       registry: T.untyped,
-      path: T.untyped,
-      opaque: T.untyped,
-      query: T.untyped,
-      fragment: T.untyped,
+      path: T.nilable(String),
+      opaque: T.nilable(String),
+      query: T.nilable(String),
+      fragment: T.nilable(String),
       parser: T.untyped,
-      arg_check: T.untyped
+      arg_check: T::Boolean
     ).void
   end
-  def initialize(scheme, userinfo, host, port, registry, path, opaque, query, fragment, parser = T.unsafe(nil), arg_check = T.unsafe(nil)); end
+  def initialize(scheme, userinfo, host, port, registry, path, opaque, query, fragment, parser = DEFAULT_PARSER, arg_check = false); end
 
   # Merges two URIs.
   # 
@@ -625,7 +625,7 @@ class URI::Generic < Object
   # ```ruby
   # URI("http://foo/bar/baz").scheme #=> "http"
   # ```
-  sig { returns(T.untyped) }
+  sig { returns(T.nilable(String)) }
   def scheme; end
 
   # Public setter for the scheme component `v`
@@ -640,7 +640,7 @@ class URI::Generic < Object
   # uri.scheme = "https"
   # uri.to_s  #=> "https://my.example.com"
   # ```
-  sig { params(v: T.untyped).returns(T.untyped) }
+  sig { params(v: T.nilable(String)).returns(T.untyped) }
   def scheme=(v); end
 
   # Selects specified components from URI.
