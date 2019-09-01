@@ -54,16 +54,15 @@ genrule(
 
 genrule(
     name = "generate_diagnostics_cc",
-    srcs = [
-        "tools/generate_diagnostics.rb",
-        "@parser//:codegen/diagnostics.rb",
-    ],
     outs = [
         "diagnostics.cc",
     ],
-    cmd = "ruby $(location tools/generate_diagnostics.rb) $(location @parser//:codegen/diagnostics.rb) $(location diagnostics.cc) && \
+    cmd = "$(location @parser//:generate_diagnostics) dclassStrings > $(location diagnostics.cc) && \
            $(location //tools:clang-format) -i $(location diagnostics.cc)",
-    tools = ["//tools:clang-format"],
+    tools = [
+        "//tools:clang-format",
+        "@parser//:generate_diagnostics",
+    ],
 )
 
 cc_test(

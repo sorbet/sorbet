@@ -10,24 +10,39 @@ ragel(
 bison(
     name = "typedruby_bison",
     src = "cc/grammars/typedruby.ypp",
-    opts = ["-Wno-empty-rule", "-Wno-precedence"],
+    opts = [
+        "-Wno-empty-rule",
+        "-Wno-precedence",
+    ],
+)
+
+cc_binary(
+    name = "generate_diagnostics",
+    srcs = [
+        "codegen/generate_diagnostics.cc",
+    ],
+    linkstatic = select({
+        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
 )
 
 genrule(
-    name = "gen_cpp_diagnostics",
-    srcs = [
-        "codegen/diagnostics.rb",
-    ],
+    name = "gen_diagnostics_dclass",
     outs = [
         "include/ruby_parser/diagnostic_class.hh",
     ],
-    cmd = "$(location codegen/diagnostics.rb) --cpp=$@",
+    cmd = "$(location :generate_diagnostics) dclass > $@",
+    tools = [
+        ":generate_diagnostics",
+    ],
 )
 
 cc_library(
     name = "parser",
     srcs = glob(["cc/*.cc"]) + [
-        ":gen_cpp_diagnostics",
+        ":gen_diagnostics_dclass",
         ":ragel_lexer",
         ":typedruby_bison",
     ],
@@ -39,14 +54,12 @@ cc_library(
         "include",
         "include/ruby_parser",
     ],
-    visibility = ["//visibility:public"],
     linkstatic = select({
-            "@com_stripe_ruby_typer//tools/config:linkshared": 0,
-            "//conditions:default": 1,
-        }),
-   deps = [
+        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
         "@com_google_absl//absl/strings",
-   ],
+    ],
 )
-
-exports_files(["codegen/diagnostics.rb"])
