@@ -345,6 +345,10 @@ class Numeric < Object
   end
   def fdiv(arg0); end
 
+  # Returns `true` if `num` is a finite number, otherwise returns `false`.
+  sig {returns(T::Boolean)}
+  def finite?; end
+
   # Returns the largest number less than or equal to `num` with a precision
   # of `ndigits` decimal digits (default: 0).
   #
@@ -379,6 +383,11 @@ class Numeric < Object
   # Returns zero.
   sig {returns(Numeric)}
   def imaginary(); end
+
+  # Returns `nil`, `-1`, or `1` depending on whether the value is
+  # finite, `-Infinity`, or `+Infinity`.
+  sig {returns(T.nilable(Integer))}
+  def infinite?; end
 
   # Returns `true` if `num` is an
   # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html).
