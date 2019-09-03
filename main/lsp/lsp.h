@@ -207,6 +207,11 @@ class LSPLoop {
      */
     static void preprocessAndEnqueue(const std::shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
                                      std::unique_ptr<LSPMessage> msg);
+    static std::unique_ptr<Joinable> startPreprocessorThread(LSPLoop::QueueState &incomingQueue,
+                                                             absl::Mutex &incomingMtx,
+                                                             LSPLoop::QueueState &processingQueue,
+                                                             absl::Mutex &processingMtx,
+                                                             std::shared_ptr<spdlog::logger> logger);
 
     LSPResult processRequestInternal(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
 

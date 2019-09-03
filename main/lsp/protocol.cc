@@ -114,6 +114,45 @@ void tagNewRequest(const std::shared_ptr<spd::logger> &logger, int &requestCount
     msg.timers.push_back(make_unique<Timer>(logger, "processing_time"));
 }
 
+unique_ptr<Joinable> LSPLoop::startPreprocessorThread(LSPLoop::QueueState &incomingQueue, absl::Mutex &incomingMtx,
+                                                      LSPLoop::QueueState &processingQueue, absl::Mutex &processingMtx,
+                                                      shared_ptr<spdlog::logger> logger) {
+    return runInAThread("preprocessingThread",
+                        [&incomingQueue, &incomingMtx, &processingQueue, &processingMtx, &logger] {
+                            // Propagate the termination flag across the two queues.
+                            NotifyOnDestruction notifyIncoming(incomingMtx, incomingQueue.terminate);
+                            NotifyOnDestruction notifyProcessing(processingMtx, processingQueue.terminate);
+                            while (true) {
+                                unique_ptr<LSPMessage> msg;
+                                {
+                                    absl::MutexLock lck(&incomingMtx);
+                                    incomingMtx.Await(absl::Condition(
+                                        +[](LSPLoop::QueueState *incomingQueue) -> bool {
+                                            return incomingQueue->terminate || !incomingQueue->pendingRequests.empty();
+                                        },
+                                        &incomingQueue));
+                                    // Only terminate once incoming queue is drained.
+                                    if (incomingQueue.terminate && incomingQueue.pendingRequests.empty()) {
+                                        return;
+                                    }
+                                    msg = move(incomingQueue.pendingRequests.front());
+                                    incomingQueue.pendingRequests.pop_front();
+                                    // Combine counters with this thread's counters.
+                                    if (!incomingQueue.counters.hasNullCounters()) {
+                                        counterConsume(move(incomingQueue.counters));
+                                    }
+                                }
+                                {
+                                    absl::MutexLock lck(&processingMtx);
+                                    // Merge the counters from all of the worker threads with those stored in
+                                    // processingQueue.
+                                    processingQueue.counters = mergeCounters(move(processingQueue.counters));
+                                    preprocessAndEnqueue(logger, processingQueue, move(msg));
+                                }
+                            }
+                        });
+}
+
 unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
 
@@ -199,39 +238,8 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
         });
 
     // Bridges the gap between the {reader, watchman} threads and the coordinator thread.
-    auto preprocessingThread = runInAThread(
-        "preprocessingThread", [&incomingQueue, &incomingMtx, &processingQueue, &processingMtx, logger = this->logger] {
-            // Propagate the termination flag across the two queues.
-            NotifyOnDestruction notifyIncoming(incomingMtx, incomingQueue.terminate);
-            NotifyOnDestruction notifyProcessing(processingMtx, processingQueue.terminate);
-            while (true) {
-                unique_ptr<LSPMessage> msg;
-                {
-                    absl::MutexLock lck(&incomingMtx);
-                    incomingMtx.Await(absl::Condition(
-                        +[](LSPLoop::QueueState *incomingQueue) -> bool {
-                            return incomingQueue->terminate || !incomingQueue->pendingRequests.empty();
-                        },
-                        &incomingQueue));
-                    // Only terminate once incoming queue is drained.
-                    if (incomingQueue.terminate && incomingQueue.pendingRequests.empty()) {
-                        return;
-                    }
-                    msg = move(incomingQueue.pendingRequests.front());
-                    incomingQueue.pendingRequests.pop_front();
-                    // Combine counters with this thread's counters.
-                    if (!incomingQueue.counters.hasNullCounters()) {
-                        counterConsume(move(incomingQueue.counters));
-                    }
-                }
-                {
-                    absl::MutexLock lck(&processingMtx);
-                    // Merge the counters from all of the worker threads with those stored in processingQueue.
-                    processingQueue.counters = mergeCounters(move(processingQueue.counters));
-                    preprocessAndEnqueue(logger, processingQueue, move(msg));
-                }
-            }
-        });
+    auto preprocessingThread =
+        startPreprocessorThread(incomingQueue, incomingMtx, processingQueue, processingMtx, logger);
 
     mainThreadId = this_thread::get_id();
     unique_ptr<core::GlobalState> gs;
