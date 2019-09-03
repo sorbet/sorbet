@@ -78,7 +78,9 @@ LSPResult LSPLoop::commitTypecheckRun(TypecheckRun run) {
 
     {
         core::UnfreezeFileTable fileTableAccess(*initialGS);
+        int i = -1;
         for (auto &file : updates.updatedFiles) {
+            i++;
             // Update initialGS and index.
             auto rv = updateFile(move(initialGS), file, config.opts);
             initialGS = move(rv.first);
@@ -87,20 +89,14 @@ LSPResult LSPLoop::commitTypecheckRun(TypecheckRun run) {
                 indexed.resize(id + 1);
             }
             indexed[id] = move(rv.second);
+            if (id >= globalStateHashes.size()) {
+                globalStateHashes.resize(id + 1);
+            }
+            globalStateHashes[id] = move(updates.updatedFileHashes[i]);
         }
         // Drop any indexing errors produced during `updateFile`.
         // (Note: Flushing is disabled in LSP mode, so we have to drain.)
         errorQueue->drainWithQueryResponses();
-    }
-
-    for (auto &entry : updates.updatedFileHashes) {
-        auto fref = initialGS->findFileByPath(entry.first);
-        ENFORCE(fref.exists());
-        const auto id = fref.id();
-        if (id >= globalStateHashes.size()) {
-            globalStateHashes.resize(id + 1);
-        }
-        globalStateHashes[fref.id()] = move(entry.second);
     }
 
     return pushDiagnostics(move(run));
@@ -289,7 +285,8 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
     vector<core::NameHash> changedHashes;
     {
         Timer timeit(logger, "fast_path_decision");
-        auto hashes = computeStateHashes(updates.updatedFiles);
+        updates.updatedFileHashes = computeStateHashes(updates.updatedFiles);
+        const auto &hashes = updates.updatedFileHashes;
         logger->debug("Trying to see if fast path is available after {} file changes", updates.updatedFiles.size());
         ENFORCE(updates.updatedFiles.size() == hashes.size());
         takeFastPath = canTakeFastPath(updates, hashes);
@@ -311,8 +308,6 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
                 gs = core::GlobalState::replaceFile(move(gs), fref, f);
                 subset.emplace_back(fref);
             }
-            // Note: We may not have an id yet for this file if it is brand new, so we store hashes with their paths.
-            updates.updatedFileHashes.push_back(make_pair(f->path(), hashes[i]));
         }
         core::NameHash::sortAndDedupe(changedHashes);
     }

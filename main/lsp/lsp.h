@@ -68,10 +68,10 @@ class LSPLoop {
      */
     struct FileUpdates {
         std::vector<std::shared_ptr<core::File>> updatedFiles;
+        std::vector<core::FileHash> updatedFileHashes;
         std::vector<std::string> openedFiles;
         std::vector<std::string> closedFiles;
         std::vector<ast::ParsedFile> updatedFileIndexes;
-        std::vector<std::pair<std::string_view, core::FileHash>> updatedFileHashes;
     };
 
     /**
