@@ -1,17 +1,17 @@
 class <emptyTree><<C <root>>> < ()
   def foo<<C <todo sym>>>(&<blk>)
     begin
-      ::T.let(::Regexp.new("abc", 0), ::Regexp)
+      ::Regexp.new("abc", 0)
       <emptyTree>::<C Regexp>.new("abc")
-      ::T.let(::Regexp.new("abc", 0.|(1)), ::Regexp)
+      ::Regexp.new("abc", 0.|(1))
       <emptyTree>::<C Regexp>.new("abc", <emptyTree>::<C Regexp>::<C IGNORECASE>)
-      ::T.let(::Regexp.new("abc", 0.|(1).|(2).|(4)), ::Regexp)
+      ::Regexp.new("abc", 0.|(1).|(2).|(4))
       <emptyTree>::<C Regexp>.new("abc", 0.|(<emptyTree>::<C Regexp>::<C IGNORECASE>).|(<emptyTree>::<C Regexp>::<C EXTENDED>).|(<emptyTree>::<C Regexp>::<C MULTILINE>))
       a = "a"
       c = "c"
-      ::T.let(::Regexp.new(a.to_s().concat("b").concat(c.to_s()), 0), ::Regexp)
+      ::Regexp.new(a.to_s().concat("b").concat(c.to_s()), 0)
       <emptyTree>::<C Regexp>.new(a.+("b").+(c))
-      ::T.let(::Regexp.new("abc", 0), ::Regexp)
+      ::Regexp.new("abc", 0)
     end
   end
 end
