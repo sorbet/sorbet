@@ -451,21 +451,6 @@ class Hash < Object
   sig {returns(T::Boolean)}
   def empty?(); end
 
-  sig do
-    params(
-        arg0: K,
-    )
-    .returns(V)
-  end
-  sig do
-   type_parameters(:X).params(
-      arg0: K,
-      arg1: T.type_parameter(:X),
-    )
-    .returns(T.any(V, T.type_parameter(:X)))
-  end
-  sig do
-   type_parameters(:X).params(
   # Returns a value from the hash for the given key. If the key can’t be
   # found, there are several options: With no other arguments, it will raise
   # a `KeyError` exception; if *default* is given, then that will be
@@ -489,8 +474,25 @@ class Hash < Object
   #
   # *produces:*
   #
-  #     prog.rb:2:in `fetch': key not found (KeyError)
-  #      from prog.rb:2
+  # ```
+  #  prog.rb:2:in `fetch': key not found (KeyError)
+  #   from prog.rb:2
+  # ```
+  sig do
+    params(
+        arg0: K,
+    )
+    .returns(V)
+  end
+  sig do
+   type_parameters(:X).params(
+      arg0: K,
+      arg1: T.type_parameter(:X),
+    )
+    .returns(T.any(V, T.type_parameter(:X)))
+  end
+  sig do
+   type_parameters(:X).params(
         arg0: K,
         blk: T.proc.params(arg0: K).returns(T.type_parameter(:X)),
     )
@@ -895,7 +897,7 @@ class Hash < Object
   sig {returns(T::Array[[K, V]])}
   def to_a(); end
 
-  # Returns `self` .
+  # Returns `self`.
   sig {returns(T::Hash[K, V])}
   def to_hash(); end
 
