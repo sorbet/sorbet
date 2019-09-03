@@ -539,7 +539,7 @@ public:
         auto sym = ctx.owner.data(ctx)->dealias(ctx);
         auto owner = sym.data(ctx)->owner;
         string methodName = fmt::format("{}{}{}", owner.show(ctx), owner.data(ctx)->isSingletonClass(ctx) ? "." : "#",
-                                        sym.data(ctx)->name.show(ctx));
+                                        sym.data(ctx)->name.data(ctx)->shortName(ctx));
         if (!sym.data(ctx)->isMethod()) {
             return;
         }
@@ -626,13 +626,14 @@ public:
         if (!sym.exists() && oldSym.exists()) {
             if (!isIntrinsic(ctx, oldSym)) {
                 paramMismatchErrors(ctx.withOwner(oldSym), method->declLoc, parsedArgs);
+                ctx.state.mangleRenameSymbol(oldSym, method->name);
+            } else {
+                sym.data(ctx)->addLoc(ctx, method->declLoc);
             }
-            ctx.state.mangleRenameSymbol(oldSym, method->name);
         }
-        if (sym.exists()) {
+        if (sym.exists() && !paramsMatch(ctx, oldSym, parsedArgs)) {
             auto replacedSym = ctx.state.findRenamedSymbol(owner, sym);
-            if (replacedSym.exists()) {
-                ctx.state.tracer().error("appears to have replaced {}", replacedSym.show(ctx));
+            if (replacedSym.exists() && !isIntrinsic(ctx, replacedSym)) {
                 paramMismatchErrors(ctx.withOwner(replacedSym), method->declLoc, parsedArgs);
             }
             sym.data(ctx)->addLoc(ctx, method->declLoc);
