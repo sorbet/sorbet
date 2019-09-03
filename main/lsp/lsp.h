@@ -75,6 +75,16 @@ class LSPLoop {
     };
 
     /**
+     * Distilled form of an update to a single file. Typically embedded within a map keyed by path.
+     * Used when lookup speed is more important than a compact memory representation.
+     */
+    struct SorbetWorkspaceFileUpdate {
+        std::string contents = "";
+        bool newlyOpened = false;
+        bool newlyClosed = false;
+    };
+
+    /**
      * Object that uses the RAII pattern to notify the client when a *slow* operation
      * starts and ends. Is used to provide user feedback in the status line of VS Code.
      */
@@ -217,20 +227,18 @@ class LSPLoop {
 
     LSPResult processRequestInternal(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
 
-    // Distilled form of an update to a single file.
-    struct SorbetWorkspaceFileUpdate {
-        std::string contents = "";
-        bool newlyOpened = false;
-        bool newlyClosed = false;
-    };
-    void preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,
-                                       UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates) const;
-    void preprocessSorbetWorkspaceEdit(const DidOpenTextDocumentParams &openParams,
-                                       UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates) const;
-    void preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &closeParams,
-                                       UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates) const;
-    void preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
-                                       UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates) const;
+    static void preprocessSorbetWorkspaceEdit(const LSPConfiguration &config, const core::GlobalState &initialGS,
+                                              const DidChangeTextDocumentParams &changeParams,
+                                              UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates);
+    static void preprocessSorbetWorkspaceEdit(const LSPConfiguration &config,
+                                              const DidOpenTextDocumentParams &openParams,
+                                              UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates);
+    static void preprocessSorbetWorkspaceEdit(const LSPConfiguration &config,
+                                              const DidCloseTextDocumentParams &closeParams,
+                                              UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates);
+    static void preprocessSorbetWorkspaceEdit(const LSPConfiguration &config, const UnorderedSet<std::string> openFiles,
+                                              const WatchmanQueryResponse &queryResponse,
+                                              UnorderedMap<std::string, SorbetWorkspaceFileUpdate> &updates);
     TypecheckRun handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,
                                            const DidChangeTextDocumentParams &changeParams) const;
     TypecheckRun handleSorbetWorkspaceEdit(std::unique_ptr<core::GlobalState> gs,

@@ -33,15 +33,16 @@ string_view LSPLoop::getFileContents(UnorderedMap<string, LSPLoop::SorbetWorkspa
     }
 }
 
-void LSPLoop::preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &changeParams,
-                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
+void LSPLoop::preprocessSorbetWorkspaceEdit(const LSPConfiguration &config, const core::GlobalState &initialGS,
+                                            const DidChangeTextDocumentParams &changeParams,
+                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) {
     string_view uri = changeParams.textDocument->uri;
     if (absl::StartsWith(uri, config.rootUri)) {
         string localPath = config.remoteName2Local(uri);
         if (config.isFileIgnored(localPath)) {
             return;
         }
-        string fileContents = string(getFileContents(updates, *initialGS, localPath));
+        string fileContents = string(getFileContents(updates, initialGS, localPath));
         for (auto &change : changeParams.contentChanges) {
             if (change->range) {
                 auto &range = *change->range;
@@ -64,8 +65,8 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidChangeTextDocumentParams &c
     }
 }
 
-void LSPLoop::preprocessSorbetWorkspaceEdit(const DidOpenTextDocumentParams &openParams,
-                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
+void LSPLoop::preprocessSorbetWorkspaceEdit(const LSPConfiguration &config, const DidOpenTextDocumentParams &openParams,
+                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) {
     string_view uri = openParams.textDocument->uri;
     if (absl::StartsWith(uri, config.rootUri)) {
         string localPath = config.remoteName2Local(uri);
@@ -75,8 +76,9 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidOpenTextDocumentParams &ope
     }
 }
 
-void LSPLoop::preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &closeParams,
-                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
+void LSPLoop::preprocessSorbetWorkspaceEdit(const LSPConfiguration &config,
+                                            const DidCloseTextDocumentParams &closeParams,
+                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) {
     string_view uri = closeParams.textDocument->uri;
     if (absl::StartsWith(uri, config.rootUri)) {
         string localPath = config.remoteName2Local(uri);
@@ -88,8 +90,9 @@ void LSPLoop::preprocessSorbetWorkspaceEdit(const DidCloseTextDocumentParams &cl
     }
 }
 
-void LSPLoop::preprocessSorbetWorkspaceEdit(const WatchmanQueryResponse &queryResponse,
-                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) const {
+void LSPLoop::preprocessSorbetWorkspaceEdit(const LSPConfiguration &config, const UnorderedSet<std::string> openFiles,
+                                            const WatchmanQueryResponse &queryResponse,
+                                            UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> &updates) {
     for (auto file : queryResponse.files) {
         string localPath = absl::StrCat(config.rootPath, "/", file);
         if (!config.isFileIgnored(localPath)) {
@@ -136,28 +139,28 @@ LSPLoop::commitSorbetWorkspaceEdits(unique_ptr<core::GlobalState> gs,
 LSPLoop::TypecheckRun LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
                                                          const DidChangeTextDocumentParams &changeParams) const {
     UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> updates;
-    preprocessSorbetWorkspaceEdit(changeParams, updates);
+    preprocessSorbetWorkspaceEdit(config, *initialGS, changeParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
 LSPLoop::TypecheckRun LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
                                                          const DidOpenTextDocumentParams &openParams) const {
     UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> updates;
-    preprocessSorbetWorkspaceEdit(openParams, updates);
+    preprocessSorbetWorkspaceEdit(config, openParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
 LSPLoop::TypecheckRun LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
                                                          const DidCloseTextDocumentParams &closeParams) const {
     UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> updates;
-    preprocessSorbetWorkspaceEdit(closeParams, updates);
+    preprocessSorbetWorkspaceEdit(config, closeParams, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
 LSPLoop::TypecheckRun LSPLoop::handleSorbetWorkspaceEdit(unique_ptr<core::GlobalState> gs,
                                                          const WatchmanQueryResponse &queryResponse) const {
     UnorderedMap<string, LSPLoop::SorbetWorkspaceFileUpdate> updates;
-    preprocessSorbetWorkspaceEdit(queryResponse, updates);
+    preprocessSorbetWorkspaceEdit(config, openFiles, queryResponse, updates);
     return commitSorbetWorkspaceEdits(move(gs), updates);
 }
 
@@ -168,19 +171,23 @@ LSPLoop::TypecheckRun LSPLoop::handleSorbetWorkspaceEdits(unique_ptr<core::Globa
     for (auto &edit : edits) {
         switch (edit->type) {
             case SorbetWorkspaceEditType::EditorOpen: {
-                preprocessSorbetWorkspaceEdit(*get<unique_ptr<DidOpenTextDocumentParams>>(edit->contents), updates);
+                preprocessSorbetWorkspaceEdit(config, *get<unique_ptr<DidOpenTextDocumentParams>>(edit->contents),
+                                              updates);
                 break;
             }
             case SorbetWorkspaceEditType::EditorChange: {
-                preprocessSorbetWorkspaceEdit(*get<unique_ptr<DidChangeTextDocumentParams>>(edit->contents), updates);
+                preprocessSorbetWorkspaceEdit(config, *initialGS,
+                                              *get<unique_ptr<DidChangeTextDocumentParams>>(edit->contents), updates);
                 break;
             }
             case SorbetWorkspaceEditType::EditorClose: {
-                preprocessSorbetWorkspaceEdit(*get<unique_ptr<DidCloseTextDocumentParams>>(edit->contents), updates);
+                preprocessSorbetWorkspaceEdit(config, *get<unique_ptr<DidCloseTextDocumentParams>>(edit->contents),
+                                              updates);
                 break;
             }
             case SorbetWorkspaceEditType::FileSystem: {
-                preprocessSorbetWorkspaceEdit(*get<unique_ptr<WatchmanQueryResponse>>(edit->contents), updates);
+                preprocessSorbetWorkspaceEdit(config, openFiles,
+                                              *get<unique_ptr<WatchmanQueryResponse>>(edit->contents), updates);
                 break;
             }
         }
