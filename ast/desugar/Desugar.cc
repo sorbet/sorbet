@@ -1308,10 +1308,10 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(send);
             },
             [&](parser::Regexp *regexpNode) {
-                unique_ptr<Expression> regexp = MK::Constant(loc, core::Symbols::Regexp());
-                auto regex = desugarDString(dctx, loc, std::move(regexpNode->regex));
+                unique_ptr<Expression> cnst = MK::Constant(loc, core::Symbols::Regexp());
+                auto pattern = desugarDString(dctx, loc, std::move(regexpNode->regex));
                 auto opts = node2TreeImpl(dctx, std::move(regexpNode->opts));
-                auto send = MK::Send2(loc, std::move(regexp), core::Names::new_(), std::move(regex), std::move(opts));
+                auto send = MK::Send2(loc, std::move(cnst), core::Names::new_(), std::move(pattern), std::move(opts));
                 result.swap(send);
             },
             [&](parser::Regopt *regopt) {
