@@ -819,6 +819,18 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
+    auto tp = gs.enterTypeMember(this->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+    tp.data(gs)->resultType = make_type<LambdaParam>(tp, Types::bottom(), this->externalType(gs));
+
+    // Only create the alias if it doesn't already exist. This happens when
+    // a singleton class has `singletonClass` called on it, as it already has a
+    // field named `AttachedClass`
+    auto alias = findMember(gs, Names::Constants::AttachedClass());
+    if (!alias.exists()) {
+        alias = gs.enterStaticFieldSymbol(Loc::none(), selfRef, Names::Constants::AttachedClass());
+        alias.data(gs)->resultType = make_type<AliasType>(tp);
+    }
+
     selfRef.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;
 }

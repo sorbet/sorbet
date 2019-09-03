@@ -404,6 +404,7 @@ NameDef names[] = {
     {"CFGExport", "CFGExport", true},
     {"WithoutRuntime", "WithoutRuntime", true},
     {"Singleton", "Singleton", true},
+    {"AttachedClass", "AttachedClass", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
