@@ -15,6 +15,7 @@
 #include "dsl/Prop.h"
 #include "dsl/ProtobufDescriptorPool.h"
 #include "dsl/Rails.h"
+#include "dsl/Regexp.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
@@ -52,6 +53,12 @@ public:
                     }
 
                     nodes = ProtobufDescriptorPool::replaceDSL(ctx, assign);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = Regexp::replaceDSL(ctx, assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
