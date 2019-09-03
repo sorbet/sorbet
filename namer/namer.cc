@@ -118,6 +118,7 @@ class NameInserter {
         }
         if (parsedArg.block) {
             argInfo.flags.isBlock = true;
+            localExpr = make_unique<ast::BlockArg>(parsedArg.loc, move(localExpr));
         }
         if (parsedArg.repeated) {
             argInfo.flags.isRepeated = true;
