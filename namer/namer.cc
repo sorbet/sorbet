@@ -538,9 +538,7 @@ public:
     void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<ast::ParsedArg> &parsedArgs) {
         auto sym = ctx.owner.data(ctx)->dealias(ctx);
         auto owner = sym.data(ctx)->owner;
-        string methodName = fmt::format("{}{}{}",
-                                        owner.show(ctx),
-                                        owner.data(ctx)->isSingletonClass(ctx) ? "." : "#",
+        string methodName = fmt::format("{}{}{}", owner.show(ctx), owner.data(ctx)->isSingletonClass(ctx) ? "." : "#",
                                         sym.data(ctx)->name.show(ctx));
         if (!sym.data(ctx)->isMethod()) {
             return;
@@ -622,7 +620,7 @@ public:
         auto parsedArgs = ast::ArgParsing::parseArgs(ctx, method->args);
 
         auto sym = ctx.state.lookupMethodSuchThat(owner, method->name, [&](core::SymbolRef ref) {
-                return isIntrinsic(ctx, ref) || paramsMatch(ctx, ref, parsedArgs);
+            return isIntrinsic(ctx, ref) || paramsMatch(ctx, ref, parsedArgs);
         });
         auto oldSym = ctx.state.lookupMethodSymbol(owner, method->name);
         if (!sym.exists() && oldSym.exists()) {
