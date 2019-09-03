@@ -14,10 +14,10 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
       method <C <U AdvancedODM>><C <U Mutator>><U array=> (array, <blk>) -> AppliedType {
         klass = <C <U Array>>
         targs = [
-          <C <U Elem>> = <any>
+          <C <U Elem>> = T.untyped
         ]
       } @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:23}
-        argument array<> -> T::Array[<any>] @ Loc {file=test/testdata/dsl/prop.rb start=43:11 end=43:16}
+        argument array<> -> T::Array[T.untyped] @ Loc {file=test/testdata/dsl/prop.rb start=43:11 end=43:16}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U array_of_explicit> (<blk>) -> AppliedType {
         klass = <C <U Chalk>><C <U ODM>><C <U Mutator>><C <U Private>><C <U ArrayMutator>>
@@ -29,10 +29,10 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
       method <C <U AdvancedODM>><C <U Mutator>><U array_of_explicit=> (array_of_explicit, <blk>) -> AppliedType {
         klass = <C <U Array>>
         targs = [
-          <C <U Elem>> = <any>
+          <C <U Elem>> = T.untyped
         ]
       } @ Loc {file=test/testdata/dsl/prop.rb start=45:5 end=45:50}
-        argument array_of_explicit<> -> T::Array[<any>] @ Loc {file=test/testdata/dsl/prop.rb start=45:11 end=45:28}
+        argument array_of_explicit<> -> T::Array[T.untyped] @ Loc {file=test/testdata/dsl/prop.rb start=45:11 end=45:28}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U hash_of> (<blk>) -> AppliedType {
         klass = <C <U Chalk>><C <U ODM>><C <U Mutator>><C <U Private>><C <U HashMutator>>
@@ -65,10 +65,10 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
       method <C <U AdvancedODM>><C <U Mutator>><U no_class_arg=> (no_class_arg, <blk>) -> AppliedType {
         klass = <C <U Array>>
         targs = [
-          <C <U Elem>> = <any>
+          <C <U Elem>> = T.untyped
         ]
       } @ Loc {file=test/testdata/dsl/prop.rb start=52:5 end=52:68}
-        argument no_class_arg<> -> T::Array[<any>] @ Loc {file=test/testdata/dsl/prop.rb start=52:11 end=52:23}
+        argument no_class_arg<> -> T::Array[T.untyped] @ Loc {file=test/testdata/dsl/prop.rb start=52:11 end=52:23}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
       method <C <U AdvancedODM>><C <U Mutator>><U t_array> (<blk>) -> AppliedType {
         klass = <C <U Chalk>><C <U ODM>><C <U Mutator>><C <U Private>><C <U ArrayMutator>>
@@ -91,17 +91,17 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <C <U AdvancedODM>><U array> (<blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
-        <C <U Elem>> = <any>
+        <C <U Elem>> = T.untyped
       ]
     } @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U array=> (array, <blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
-        <C <U Elem>> = <any>
+        <C <U Elem>> = T.untyped
       ]
     } @ Loc {file=test/testdata/dsl/prop.rb start=43:5 end=43:23}
-      argument array<> -> T::Array[<any>] @ Loc {file=test/testdata/dsl/prop.rb start=43:11 end=43:16}
+      argument array<> -> T::Array[T.untyped] @ Loc {file=test/testdata/dsl/prop.rb start=43:11 end=43:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U array_of> (<blk>) -> AppliedType {
       klass = <C <U Array>>
@@ -121,17 +121,17 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <C <U AdvancedODM>><U array_of_explicit> (<blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
-        <C <U Elem>> = <any>
+        <C <U Elem>> = T.untyped
       ]
     } @ Loc {file=test/testdata/dsl/prop.rb start=45:5 end=45:50}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U array_of_explicit=> (array_of_explicit, <blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
-        <C <U Elem>> = <any>
+        <C <U Elem>> = T.untyped
       ]
     } @ Loc {file=test/testdata/dsl/prop.rb start=45:5 end=45:50}
-      argument array_of_explicit<> -> T::Array[<any>] @ Loc {file=test/testdata/dsl/prop.rb start=45:11 end=45:28}
+      argument array_of_explicit<> -> T::Array[T.untyped] @ Loc {file=test/testdata/dsl/prop.rb start=45:11 end=45:28}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U const> (<blk>) -> String @ Loc {file=test/testdata/dsl/prop.rb start=50:5 end=50:25}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}
@@ -226,7 +226,7 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <C <U AdvancedODM>><U no_class_arg> (<blk>) -> AppliedType {
       klass = <C <U Array>>
       targs = [
-        <C <U Elem>> = <any>
+        <C <U Elem>> = T.untyped
       ]
     } @ Loc {file=test/testdata/dsl/prop.rb start=52:5 end=52:68}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/prop.rb start=??? end=???}

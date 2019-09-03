@@ -64,12 +64,22 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
             vector<TypePtr> targs;
             targs.reserve(typeMembers().size());
 
+            // Special-case covariant stdlib generics to have their types
+            // defaulted to `T.untyped`. This set *should not* grow over time.
+            bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
+                                   ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
+                                   ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator();
+
             for (auto &tm : typeMembers()) {
                 auto tmData = tm.data(gs);
                 auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
                 ENFORCE(lambdaParam != nullptr);
 
-                if (tmData->isFixed() || tmData->isCovariant()) {
+                if (isStdlibGeneric) {
+                    // For backwards compatibility, instantiate stdlib generics
+                    // with T.untyped.
+                    targs.emplace_back(Types::untyped(gs, ref));
+                } else if (tmData->isFixed() || tmData->isCovariant()) {
                     // Default type parameters to their upper bound
                     targs.emplace_back(lambdaParam->upperBound);
                 } else if (tmData->isInvariant()) {
