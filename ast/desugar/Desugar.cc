@@ -1311,8 +1311,9 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 unique_ptr<Expression> cnst = MK::Constant(loc, core::Symbols::Regexp());
                 auto pattern = desugarDString(dctx, loc, std::move(regexpNode->regex));
                 auto opts = node2TreeImpl(dctx, std::move(regexpNode->opts));
-                auto send = MK::Send2(loc, std::move(cnst), core::Names::new_(), std::move(pattern), std::move(opts));
-                result.swap(send);
+                auto send = MK::Send2(loc, cnst->deepCopy(), core::Names::new_(), std::move(pattern), std::move(opts));
+                auto let = MK::Let(loc, std::move(send), std::move(cnst));
+                result.swap(let);
             },
             [&](parser::Regopt *regopt) {
                 unique_ptr<Expression> acc = MK::Int(loc, 0);
