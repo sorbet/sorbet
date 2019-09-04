@@ -631,9 +631,9 @@ public:
                 sym.data(ctx)->addLoc(ctx, method->declLoc);
             }
         }
-        if (sym.exists() && !paramsMatch(ctx, oldSym, parsedArgs)) {
+        if (sym.exists()) {
             auto replacedSym = ctx.state.findRenamedSymbol(owner, sym);
-            if (replacedSym.exists() && !isIntrinsic(ctx, replacedSym)) {
+            if (replacedSym.exists() && !paramsMatch(ctx, oldSym, parsedArgs) && !isIntrinsic(ctx, replacedSym)) {
                 paramMismatchErrors(ctx.withOwner(replacedSym), method->declLoc, parsedArgs);
             }
             sym.data(ctx)->addLoc(ctx, method->declLoc);
