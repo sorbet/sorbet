@@ -6,7 +6,7 @@ pushd gems/sorbet-runtime
 
 echo "--- setup :ruby:"
 eval "$(rbenv init -)"
-rbenv shell 2.4.3
+rbenv shell 2.6.3
 rbenv exec bundle install --path vendor/bundle
 
 echo "+++ tests"
