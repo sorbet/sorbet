@@ -143,6 +143,39 @@ public:
     std::string toString() const override;
 };
 
+// # ^^^ type-def: symbol
+class TypeDefAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<TypeDefAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                  int assertionLine, std::string_view assertionContents,
+                                                  std::string_view assertionType);
+
+    const std::string symbol;
+
+    TypeDefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                     std::string_view symbol);
+
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+               int &nextId, std::string_view uriPrefix, const Location &queryLoc);
+
+    std::string toString() const override;
+};
+
+// # ^^^ type: symbol
+class TypeAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<TypeAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                               int assertionLine, std::string_view assertionContents,
+                                               std::string_view assertionType);
+
+    const std::string symbol;
+    std::shared_ptr<DefAssertion> def;
+
+    TypeAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol);
+
+    std::string toString() const override;
+};
+
 // # disable-fast-path: true
 // # assert-slow-path: true
 class BooleanPropertyAssertion final : public RangeAssertion {
