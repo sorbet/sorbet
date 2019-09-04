@@ -10,20 +10,13 @@ test/cli/incremental-resolver/expect-failures/abstract_impl.rb:5: Malformed `sig
      4 |  sig { overridable.void }
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/incremental-resolver/expect-failures/abstract_impl.rb:123: Malformed `sig`. Type not specified for argument `foo` https://srb.help/5003
-     123 |  def foo(*foo)end
-                     ^^^
-    test/cli/incremental-resolver/expect-failures/abstract_impl.rb:122: Signature
-     122 |  sig { overridable.void }
-            ^^^^^^^^^^^^^^^^^^^^^^^^
-
 test/cli/incremental-resolver/expect-failures/abstract_impl.rb:126: Implementation of overridable method `A#foo` must accept *`foo` https://srb.help/5035
      126 | def foo; end
            ^^^^^^^
     test/cli/incremental-resolver/expect-failures/abstract_impl.rb:123: Base method defined here
      123 |  def foo(*foo)end
             ^^^^^^^^^^^^^
-Errors: 3
+Errors: 2
 ----- test/cli/incremental-resolver/expect-failures/constant_override.rb ---------------------
 test/cli/incremental-resolver/expect-failures/constant_override.rb:3: Redefining constant `B` https://srb.help/4012
      3 |module B
@@ -69,13 +62,6 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Unused type a
     69 |  sig {void}
           ^^^^^^^^^^
 
-test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:70: Malformed `sig`. Type not specified for argument `f` https://srb.help/5003
-    70 |  def-f
-              ^
-    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Signature
-    68 |  sig {void}
-          ^^^^^^^^^^
-
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `sig` does not exist on `Object` https://srb.help/7003
     68 |  sig {void}
           ^^^^^^^^^^
@@ -97,4 +83,4 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `void`
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1131: Did you mean: `Kernel#load`?
     1131 |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 8
+Errors: 7
