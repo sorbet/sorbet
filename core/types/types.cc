@@ -848,9 +848,7 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
     } else {
         auto *at = core::cast_type<core::AppliedType>(ty);
 
-        // If this is not singleton class return noSymbol; we default
-        // `type_template` variables to their upper bound, but not `type_member`
-        // variables.
+        // TODO: should the singletonClass check be an ENFORCE?
         if (at == nullptr || !at->klass.data(ctx)->isSingletonClass(ctx)) {
             return core::Symbols::noSymbol();
         }
