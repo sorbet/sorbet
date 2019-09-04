@@ -62,8 +62,9 @@ public:
      * this one. */
     std::vector<std::unique_ptr<Timer>> timers;
 
-    /** Request counter. */
-    int counter;
+    /** Internal request id. Used to track unique messages internally. Used instead of id() since notification messages
+     * lack IDs. */
+    std::optional<int> internalId = std::nullopt;
 
     /** If `true`, then this LSPMessage contains a canceled LSP request. */
     bool canceled = false;

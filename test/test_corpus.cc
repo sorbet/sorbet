@@ -579,7 +579,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
                 make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri), error->range->copy(),
                                               make_unique<CodeActionContext>(move(diagnostics)));
             auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
-            auto responses = lspWrapper.getLSPResponsesFor(LSPMessage(move(req)));
+            auto responses = lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(req)));
             EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a codeAction request.";
             if (responses.size() != 1) {
                 continue;
@@ -681,7 +681,7 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
 
     auto params = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(string(uri)));
     auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
-    auto responses = lspWrapper.getLSPResponsesFor(LSPMessage(move(req)));
+    auto responses = lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(req)));
     ASSERT_EQ(responses.size(), 1) << "Did not receive exactly one response for a documentSymbols request.";
     auto &msg = responses.at(0);
     ASSERT_TRUE(msg->isResponse());
@@ -725,8 +725,8 @@ TEST_P(LSPTest, All) {
         for (auto &filename : filenames) {
             auto params = make_unique<DidOpenTextDocumentParams>(
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
-            auto responses = lspWrapper->getLSPResponsesFor(
-                LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params))));
+            auto responses = lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(
+                make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params))));
             EXPECT_EQ(0, countNonTestMessages(responses))
                 << "Should not receive any response to opening an empty file.";
         }
@@ -863,11 +863,11 @@ TEST_P(LSPTest, All) {
 
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
-        // sourceFileUpdates is unordered (and we can't use an ordered map unless we make its contents `const`)
+        // sourceLSPFileUpdates is unordered (and we can't use an ordered map unless we make its contents `const`)
         // Sort by version.
         vector<int> sortedUpdates;
         const int baseVersion = 4;
-        for (auto &update : test.sourceFileUpdates) {
+        for (auto &update : test.sourceLSPFileUpdates) {
             sortedUpdates.push_back(update.first);
         }
         fast_sort(sortedUpdates);
@@ -875,7 +875,7 @@ TEST_P(LSPTest, All) {
         // Apply updates in order.
         for (auto version : sortedUpdates) {
             auto errorPrefix = fmt::format("[*.{}.rbupdate] ", version);
-            auto &updates = test.sourceFileUpdates[version];
+            auto &updates = test.sourceLSPFileUpdates[version];
             vector<unique_ptr<LSPMessage>> lspUpdates;
             UnorderedMap<std::string, std::shared_ptr<core::File>> updatesAndContents;
 
@@ -1042,7 +1042,7 @@ vector<Expectations> listDir(const char *name) {
                 auto pos = s.rfind('.', s.length() - 10);
                 if (pos != string::npos) {
                     int version = stoi(s.substr(pos + 1, s.length() - 9));
-                    current.sourceFileUpdates[version].emplace_back(absl::StrCat(s.substr(0, pos), ".rb"), s);
+                    current.sourceLSPFileUpdates[version].emplace_back(absl::StrCat(s.substr(0, pos), ".rb"), s);
                 } else {
                     cout << "Ignoring " << s << ": No version number provided (expected .[number].rbupdate).\n";
                 }

@@ -452,7 +452,7 @@ int realmain(int argc, char *argv[]) {
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       Version::full_version_string);
         lsp::LSPLoop loop(move(gs), lsp::LSPConfiguration(opts, logger), logger, *workers, STDIN_FILENO, cout);
-        gs = loop.runLSP();
+        gs = loop.runLSP().value_or(nullptr);
 #endif
     } else {
         Timer timeall(logger, "wall_time");
@@ -624,7 +624,7 @@ int realmain(int argc, char *argv[]) {
         }
     }
 #endif
-    if (gs->hadCriticalError()) {
+    if (!gs || gs->hadCriticalError()) {
         returnCode = 10;
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {
         returnCode = 1;

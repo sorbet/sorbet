@@ -44,7 +44,7 @@ TEST_F(ProtocolTest, DeleteFileUnknownToSorbet) {
 }
 
 // Updates a file, opens it in editor (but it's empty), closes file without saving to disk.
-TEST_F(ProtocolTest, IgnoresFileUpdatesWhileFileIsOpen) {
+TEST_F(ProtocolTest, IgnoresLSPFileUpdatesWhileFileIsOpen) {
     assertDiagnostics(initializeLSP(), {});
 
     ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};

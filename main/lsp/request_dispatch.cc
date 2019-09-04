@@ -6,34 +6,38 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const string &json) {
-    unique_ptr<LSPMessage> msg = LSPMessage::fromClient(json);
-    return LSPLoop::processRequest(move(gs), *msg);
+    vector<unique_ptr<LSPMessage>> messages;
+    messages.push_back(LSPMessage::fromClient(json));
+    return LSPLoop::processRequests(move(gs), move(messages));
 }
 
-LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
-    // TODO(jvilk): Make Timer accept multiple FlowIds so we can show merged messages correctly.
-    Timer timeit(logger, "process_request");
-    return processRequestInternal(move(gs), msg);
+LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, std::unique_ptr<LSPMessage> msg) {
+    vector<unique_ptr<LSPMessage>> messages;
+    messages.push_back(move(msg));
+    return processRequests(move(gs), move(messages));
 }
 
 LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<unique_ptr<LSPMessage>> messages) {
-    LSPLoop::QueueState state{{}, false, false, 0};
+    static QueueState state{{}, false, false, 0};
     for (auto &message : messages) {
-        preprocessAndEnqueue(logger, state, move(message));
+        preprocessor.preprocessAndEnqueue(state, move(message));
     }
     ENFORCE(state.paused == false, "__PAUSE__ not supported in single-threaded mode.");
 
     LSPResult rv{move(gs), {}};
     for (auto &message : state.pendingRequests) {
-        auto rslt = processRequest(move(rv.gs), *message);
+        auto rslt = processRequestInternal(move(rv.gs), *message);
         rv.gs = move(rslt.gs);
         rv.responses.insert(rv.responses.end(), make_move_iterator(rslt.responses.begin()),
                             make_move_iterator(rslt.responses.end()));
     }
+    state.pendingRequests.clear();
     return rv;
 }
 
 LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
+    // TODO(jvilk): Make Timer accept multiple FlowIds so we can show merged messages correctly.
+    Timer timeit(logger, "process_request");
     const LSPMethod method = msg.method();
 
     if (!ensureInitialized(method, msg)) {
@@ -53,30 +57,9 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
     if (msg.isNotification()) {
         Timer timeit(logger, "notification", {{"method", convertLSPMethodToString(method)}});
         auto &params = msg.asNotification().params;
-        if (method == LSPMethod::TextDocumentDidChange) {
-            prodCategoryCounterInc("lsp.messages.processed", "textDocument.didChange");
-            return commitTypecheckRun(
-                handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidChangeTextDocumentParams>>(params)));
-        }
-        if (method == LSPMethod::TextDocumentDidOpen) {
-            prodCategoryCounterInc("lsp.messages.processed", "textDocument.didOpen");
-            return commitTypecheckRun(
-                handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidOpenTextDocumentParams>>(params)));
-        }
-        if (method == LSPMethod::TextDocumentDidClose) {
-            prodCategoryCounterInc("lsp.messages.processed", "textDocument.didClose");
-            return commitTypecheckRun(
-                handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<DidCloseTextDocumentParams>>(params)));
-        }
-        if (method == LSPMethod::SorbetWatchmanFileChange) {
-            prodCategoryCounterInc("lsp.messages.processed", "sorbet/watchmanFileChange");
-            return commitTypecheckRun(
-                handleSorbetWorkspaceEdit(move(gs), *get<unique_ptr<WatchmanQueryResponse>>(params)));
-        }
         if (method == LSPMethod::SorbetWorkspaceEdit) {
             // Note: We increment `lsp.messages.processed` when the original requests were merged into this one.
             auto &editParams = get<unique_ptr<SorbetWorkspaceEditParams>>(params);
-            auto &edits = editParams->changes;
             auto &counts = editParams->counts;
             prodCategoryCounterAdd("lsp.messages.processed", "textDocument.didChange", counts->textDocumentDidChange);
             prodCategoryCounterAdd("lsp.messages.processed", "textDocument.didOpen", counts->textDocumentDidOpen);
@@ -87,18 +70,16 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             prodCounterAdd("lsp.messages.merged", (counts->textDocumentDidChange + counts->textDocumentDidOpen +
                                                    counts->textDocumentDidClose + counts->sorbetWatchmanFileChange) -
                                                       1);
-            return commitTypecheckRun(handleSorbetWorkspaceEdits(move(gs), edits));
+            return commitTypecheckRun(runTypechecking(move(gs), move(editParams->updates)));
         }
         if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
-            Timer timeit(logger, "initial_index");
-            reIndexFromFileSystem();
-            LSPResult result = pushDiagnostics(runSlowPath({}));
+            auto &initParams = get<unique_ptr<InitializedParams>>(params);
+            auto &updates = initParams->updates;
+            globalStateHashes = move(updates.updatedFileHashes);
+            indexed = move(updates.updatedFileIndexes);
+            LSPResult result = pushDiagnostics(runSlowPath(move(updates)));
             ENFORCE(result.gs);
-            if (!config.disableFastPath) {
-                ShowOperation stateHashOp(*this, "GlobalStateHash", "Finishing initialization...");
-                this->globalStateHashes = computeStateHashes(result.gs->getFiles());
-            }
             config.initialized = true;
             return result;
         }
@@ -114,6 +95,11 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             } else {
                 logger->error(errorInfo->message);
             }
+            return LSPResult{move(gs), {}};
+        }
+        if (method == LSPMethod::SorbetShowOperation) {
+            // Forward to client. These are sent from the preprocessor.
+            sendMessage(msg);
             return LSPResult{move(gs), {}};
         }
     } else if (msg.isRequest()) {

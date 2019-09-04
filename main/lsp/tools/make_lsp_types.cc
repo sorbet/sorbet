@@ -1239,7 +1239,11 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                    classTypes);
 
     // Empty object.
-    auto InitializedParams = makeObject("InitializedParams", {}, classTypes);
+    auto InitializedParams = makeObject("InitializedParams", {}, classTypes,
+                                        {
+                                            "// Contains initialization state from preprocessing step.",
+                                            "LSPFileUpdates updates;",
+                                        });
 
     /* Sorbet LSP extensions */
     auto SorbetOperationStatus = makeStrEnum("SorbetOperationStatus", {"start", "end"}, enumTypes);
@@ -1267,24 +1271,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                             },
                                             classTypes);
 
-    auto SorbetWorkspaceEditType =
-        makeStrEnum("SorbetWorkspaceEditType", {"EditorOpen", "EditorChange", "EditorClose", "FileSystem"}, enumTypes);
-
-    auto editTypeField = makeField("type", SorbetWorkspaceEditType);
-    auto SorbetWorkspaceEdit =
-        makeObject("SorbetWorkspaceEdit",
-                   {
-                       editTypeField,
-                       makeField("contents", makeDiscriminatedUnion(editTypeField,
-                                                                    {
-                                                                        {"EditorOpen", DidOpenTextDocumentParams},
-                                                                        {"EditorChange", DidChangeTextDocumentParams},
-                                                                        {"EditorClose", DidCloseTextDocumentParams},
-                                                                        {"FileSystem", WatchmanQueryResponse},
-                                                                    })),
-                   },
-                   classTypes);
-
     auto SorbetWorkspaceEditCounts = makeObject("SorbetWorkspaceEditCounts",
                                                 {
                                                     makeField("textDocumentDidOpen", JSONInt),
@@ -1292,14 +1278,22 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                     makeField("textDocumentDidClose", JSONInt),
                                                     makeField("sorbetWatchmanFileChange", JSONInt),
                                                 },
-                                                classTypes);
-
-    auto SorbetWorkspaceEditParams = makeObject("SorbetWorkspaceEditParams",
+                                                classTypes,
                                                 {
-                                                    makeField("counts", SorbetWorkspaceEditCounts),
-                                                    makeField("changes", makeArray(SorbetWorkspaceEdit)),
-                                                },
-                                                classTypes);
+                                                    "// Merges the given counter into this one",
+                                                    "void merge(const SorbetWorkspaceEditCounts &other);",
+                                                });
+
+    auto SorbetWorkspaceEditParams =
+        makeObject("SorbetWorkspaceEditParams",
+                   {
+                       makeField("counts", SorbetWorkspaceEditCounts),
+                   },
+                   classTypes,
+                   {
+                       "// Contains distilled file updates combined from one or more file update notifications.",
+                       "LSPFileUpdates updates;",
+                   });
 
     auto SorbetTypecheckRunInfo = makeObject("SorbetTypecheckRunInfo",
                                              {

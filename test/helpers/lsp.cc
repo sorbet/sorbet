@@ -242,8 +242,9 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
     {
         auto initializeParams =
             makeInitializeParams(string(rootPath), string(rootUri), supportsMarkdown, move(initOptions));
-        LSPMessage message(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize, move(initializeParams)));
-        auto responses = lspWrapper.getLSPResponsesFor(message);
+        auto message = make_unique<LSPMessage>(
+            make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize, move(initializeParams)));
+        auto responses = lspWrapper.getLSPResponsesFor(move(message));
 
         // Should just have an 'initialize' response.
         EXPECT_EQ(1, responses.size());
@@ -270,7 +271,7 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
         rapidjson::Value emptyObject(rapidjson::kObjectType);
         auto initialized =
             make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>());
-        return lspWrapper.getLSPResponsesFor(LSPMessage(move(initialized)));
+        return lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(initialized)));
     }
 }
 
