@@ -118,7 +118,7 @@ unique_ptr<Joinable> LSPLoop::startPreprocessorThread(LSPLoop::QueueState &incom
                                                       LSPLoop::QueueState &processingQueue, absl::Mutex &processingMtx,
                                                       shared_ptr<spdlog::logger> logger) {
     return runInAThread("preprocessingThread",
-                        [&incomingQueue, &incomingMtx, &processingQueue, &processingMtx, &logger] {
+                        [&incomingQueue, &incomingMtx, &processingQueue, &processingMtx, logger] {
                             // Propagate the termination flag across the two queues.
                             NotifyOnDestruction notifyIncoming(incomingMtx, incomingQueue.terminate);
                             NotifyOnDestruction notifyProcessing(processingMtx, processingQueue.terminate);
