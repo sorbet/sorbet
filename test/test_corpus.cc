@@ -783,7 +783,7 @@ TEST_P(LSPTest, All) {
             }
         }
 
-        // Check each assertion.
+        // Check each def/usage assertion.
         for (auto &entry : defUsageMap) {
             auto &entryAssertions = entry.second.second;
             // Sort assertions in (filename, range) order
@@ -820,6 +820,23 @@ TEST_P(LSPTest, All) {
                         "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "
                         "^^ def: {0} {1}` assertion that points to the definition of the pointed-to thing being used.",
                         symbol, version);
+                }
+            }
+        }
+
+        // Check each type-def/type assertion.
+        for (auto &[symbol, typeDefAndAssertions] : typeDefMap) {
+            auto &[typeDef, typeAssertions] = typeDefAndAssertions;
+            for (auto &typeAssertion : typeAssertions) {
+                if (typeDef != nullptr) {
+                    auto queryLoc = typeAssertion->getLocation(rootUri);
+                    // Check that a type definition request at this location returns type-def.
+                    typeDef->check(test.sourceFileContents, *lspWrapper, nextId, rootUri, *queryLoc);
+                } else {
+                    ADD_FAILURE() << fmt::format(
+                        "Found 'type:' comment for label {0} without matching type-def comment. Please add a `# "
+                        "^^ type-def: {0}` assertion that points where 'Go to Type Definition' should jump to.",
+                        typeAssertion->symbol);
                 }
             }
         }
