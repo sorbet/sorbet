@@ -147,6 +147,11 @@ class Index extends React.Component {
                   link: 'https://github.com/AaronC81/parlour',
                   description: 'A versatile RBI generator and plugin system',
                 },
+                {
+                  title: 'rubocop-sorbet',
+                  link: 'https://github.com/Shopify/rubocop-sorbet',
+                  description: 'A collection of Rubocop rules for Sorbet.',
+                },
               ]}
             />
             <p>
