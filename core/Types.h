@@ -83,7 +83,7 @@ public:
     /**
      * is every instance of  t1 an  instance of t2?
      *
-     * The parameter `allowUntyped` controls whether or not `T.untyped` is
+     * The parameter `mode` controls whether or not `T.untyped` is
      * considered to be a super type or subtype of all other types */
     static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, UntypedMode mode,
                                          const TypePtr &t1, const TypePtr &t2);
