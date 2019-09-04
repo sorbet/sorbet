@@ -529,8 +529,16 @@ shared_ptr<TypeDefAssertion> TypeDefAssertion::make(string_view filename, unique
 
 void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                              LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, const Location &queryLoc) {
-    // TODO(jez) Implement this
-    return;
+    const int line = queryLoc.range->start->line;
+    // Can only query with one character, so just use the first one.
+    // const int character = queryLoc.range->start->character;
+    // auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
+    // auto defSourceLine = getLine(sourceFileContents, uriPrefix, *getLocation(uriPrefix));
+    string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
+    // string defUri = filePathToUri(uriPrefix, filename);
+
+    ADD_FAILURE_AT(locFilename.c_str(), line) << fmt::format(
+        "TODO(jez) Implement the actual checks for `type` and `type-def` once Go To Type Definition is implemented");
 }
 
 string TypeDefAssertion::toString() const {
