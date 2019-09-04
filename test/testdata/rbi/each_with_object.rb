@@ -1,6 +1,6 @@
 # typed: true
 
-arr = T::Array[Integer].new
+arr = T.let(Array.new, T::Array[Integer])
 
 init = T.let([], T::Array[Integer])
 
