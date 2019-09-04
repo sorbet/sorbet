@@ -85,8 +85,8 @@ public:
      *
      * The parameter `mode` controls whether or not `T.untyped` is
      * considered to be a super type or subtype of all other types */
-    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1,
-                                         const TypePtr &t2, UntypedMode mode);
+    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2,
+                                         UntypedMode mode);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
     static bool isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2);
