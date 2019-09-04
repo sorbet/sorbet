@@ -7,5 +7,5 @@
 class Array
   extend T::Sig
   sig {returns(T.untyped)}
-  def sum; end
+  def sum; end # error: Method `Array#sum` redefined without matching argument count. Expected: `1`, got: `0`
 end
