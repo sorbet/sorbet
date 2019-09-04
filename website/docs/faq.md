@@ -101,6 +101,11 @@ bundle exec srb init
 
 # For plugins like sorbet-rails, see their docs, eg.
 https://github.com/chanzuckerberg/sorbet-rails#initial-setup
+
+# Optional: Suggest new, stronger sigils (per-file strictness
+# levels) when possible. Currently, the suggestion process is
+# fallible, and may suggest downgrading when it's not necessary.
+bundle exec srb rbi suggest-typed
 ```
 
 ## What platforms does Sorbet support?
