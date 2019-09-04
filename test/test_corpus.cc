@@ -750,11 +750,14 @@ TEST_P(LSPTest, All) {
     // Usage and def assertions
     {
         // Sort by symbol.
-        // symbol => [version => DefAssertion, [DefAssertion+UsageAssertion][]]
+        // symbol => [ (version => DefAssertion), (DefAssertion | UsageAssertion)[] ]
         // Note: Using a vector in pair since order matters; assertions are ordered by location, which
         // is used when comparing against LSP responses.
         UnorderedMap<string, pair<UnorderedMap<int, shared_ptr<DefAssertion>>, vector<shared_ptr<RangeAssertion>>>>
             defUsageMap;
+
+        // symbol => [ TypeDefAssertion, TypeAssertion[] ]
+        UnorderedMap<string, pair<shared_ptr<TypeDefAssertion>, vector<shared_ptr<TypeAssertion>>>> typeDefMap;
         for (auto &assertion : assertions) {
             if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                 auto &entry = defUsageMap[defAssertion->symbol];
@@ -769,6 +772,14 @@ TEST_P(LSPTest, All) {
             } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
                 auto &entry = defUsageMap[usageAssertion->symbol];
                 entry.second.push_back(usageAssertion);
+            } else if (auto typeDefAssertion = dynamic_pointer_cast<TypeDefAssertion>(assertion)) {
+                auto &[typeDef, _typeAssertions] = typeDefMap[typeDefAssertion->symbol];
+                EXPECT_FALSE(typeDef != nullptr)
+                    << fmt::format("Found multiple type-def comments for label `{}`.", defAssertion->symbol);
+                typeDef = typeDefAssertion;
+            } else if (auto typeAssertion = dynamic_pointer_cast<TypeAssertion>(assertion)) {
+                auto &[_typeDef, typeAssertions] = typeDefMap[typeAssertion->symbol];
+                typeAssertions.push_back(typeAssertion);
             }
         }
 
