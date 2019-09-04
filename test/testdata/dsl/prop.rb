@@ -92,9 +92,9 @@ def main
 
     T.reveal_type(AdvancedODM.new.type) # error: Revealed type: `String`
     T.reveal_type(AdvancedODM.new.object) # error: Revealed type: `Object`
-    T.reveal_type(AdvancedODM.new.array) # error: Revealed type: `T::Array[<any>]`
+    T.reveal_type(AdvancedODM.new.array) # error: Revealed type: `T::Array[T.untyped]`
     T.reveal_type(AdvancedODM.new.array_of) # error: Revealed type: `T::Array[String]`
-    T.reveal_type(AdvancedODM.new.array_of_explicit) # error: Revealed type: `T::Array[<any>]`
+    T.reveal_type(AdvancedODM.new.array_of_explicit) # error: Revealed type: `T::Array[T.untyped]`
     T.reveal_type(AdvancedODM.new.t_array) # error: Revealed type: `T::Array[String]`
     T.reveal_type(AdvancedODM.new.hash_of) # error: Revealed type: `T::Hash[Symbol, String]`
 
@@ -103,7 +103,7 @@ def main
     T.reveal_type(AdvancedODM.new.const) # error: Revealed type: `String`
     AdvancedODM.new.const = 'b' # error: Method `const=` does not exist on `AdvancedODM`
 
-    T.reveal_type(AdvancedODM.new.no_class_arg) # error: Revealed type: `T::Array[<any>]`
+    T.reveal_type(AdvancedODM.new.no_class_arg) # error: Revealed type: `T::Array[T.untyped]`
     AdvancedODM.new.no_class_arg = ['b'] # error: Method `no_class_arg=` does not exist on `AdvancedODM`
 
     T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `T.untyped`

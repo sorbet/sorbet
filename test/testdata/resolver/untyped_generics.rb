@@ -63,9 +63,9 @@ class Foo
   end
 end
 
-T.reveal_type(Foo.new.array_method) # error: Revealed type: `T::Array[<any>]`
-T.reveal_type(Foo.new.hash_method) # error: Revealed type: `T::Hash[<any>, <any>]`
-T.reveal_type(Foo.new.set_method) # error: Revealed type: `T::Set[<any>]`
-T.reveal_type(Foo.new.range_method) # error: Revealed type: `T::Range[<any>]`
-T.reveal_type(Foo.new.enumerable_method) # error: Revealed type: `T::Enumerable[<any>]`
-T.reveal_type(Foo.new.enumerator_method) # error: Revealed type: `T::Enumerator[<any>]`
+T.reveal_type(Foo.new.array_method) # error: Revealed type: `T::Array[T.untyped]`
+T.reveal_type(Foo.new.hash_method) # error: Revealed type: `T::Hash[T.untyped, T.untyped]`
+T.reveal_type(Foo.new.set_method) # error: Revealed type: `T::Set[T.untyped]`
+T.reveal_type(Foo.new.range_method) # error: Revealed type: `T::Range[T.untyped]`
+T.reveal_type(Foo.new.enumerable_method) # error: Revealed type: `T::Enumerable[T.untyped]`
+T.reveal_type(Foo.new.enumerator_method) # error: Revealed type: `T::Enumerator[T.untyped]`
