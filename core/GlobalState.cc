@@ -635,6 +635,9 @@ SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 f
 }
 
 SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) {
+    // This method works by knowing how to replicate the logic of renaming in order to find whatever
+    // the previous name was: for `x$n` where `n` is larger than 2, it'll be `x$(n-1)`, for bare `x`,
+    // it'll be whatever the largest `x$n` that exists is, if any; otherwise, there will be none.
     ENFORCE(sym.exists(), "lookup up previous name of non-existing symbol");
     NameRef name = sym.data(*this)->name;
     NameData nameData = name.data(*this);

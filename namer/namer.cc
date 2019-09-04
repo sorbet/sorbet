@@ -617,18 +617,41 @@ public:
 
         auto parsedArgs = ast::ArgParsing::parseArgs(ctx, method->args);
 
+        // There are three symbols in play here, because there's:
+        //
+        // - sym, the symbol which, if it exists, is the 'correct' symbol for the method in question, as it matches
+        //   in both name and argument structure
+        // - currentSym, which is the whatever the non-mangled name currently points to in that context
+        // - replacedSym, which is whatever name was the name that sym replaced.
+        //
+        // In the context of something like
+        //   def f(); end
+        //   def f(x); end
+        //   def f(x, y); end
+        // when the namer is in incremental mode and looking at `def f(x)`, then `sym` refers to `f(x)`, `currentSym`
+        // refers to `def f(x, y)` (which is the symbol that is "currently" non-mangled and available under the name
+        // `f`, because the namer has already run in this context) and `replacedSym` refers to `def f()`, because that's
+        // the symbol that `f` referred to immediately before `def f(x)` became the then-current symbol. If we weren't
+        // running in incremental mode, then `sym` wouldn't exist yet (we would be about to create it!) and `currentSym`
+        // would be `def f()`, because we have not yet progressed far enough in the file to see any other definition of
+        // `f`.
         auto sym =
             ctx.state.lookupMethodSymbolWithHash(owner, method->name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
-        auto oldSym = ctx.state.lookupMethodSymbol(owner, method->name);
-        if (!sym.exists() && oldSym.exists()) {
-            if (!isIntrinsic(ctx, oldSym)) {
-                paramMismatchErrors(ctx.withOwner(oldSym), method->declLoc, parsedArgs);
-                ctx.state.mangleRenameSymbol(oldSym, method->name);
+        auto currentSym = ctx.state.lookupMethodSymbol(owner, method->name);
+        if (!sym.exists() && currentSym.exists()) {
+            // we don't have a method definition with the right argument structure, so we need to mangle the existing
+            // one and create a new one
+            if (!isIntrinsic(ctx, currentSym)) {
+                paramMismatchErrors(ctx.withOwner(currentSym), method->declLoc, parsedArgs);
+                ctx.state.mangleRenameSymbol(currentSym, method->name);
             } else {
+                // ...unless it's an intrinsic, because we allow multiple incompatible definitions of those in code
                 sym.data(ctx)->addLoc(ctx, method->declLoc);
             }
         }
         if (sym.exists()) {
+            // if the symbol does exist, then we're running in incremental mode, and we need to compare it to the
+            // previously defined equivalent to re-report any errors
             auto replacedSym = ctx.state.findRenamedSymbol(owner, sym);
             if (replacedSym.exists() && !paramsMatch(ctx, replacedSym, parsedArgs) && !isIntrinsic(ctx, replacedSym)) {
                 paramMismatchErrors(ctx.withOwner(replacedSym), method->declLoc, parsedArgs);
@@ -639,6 +662,8 @@ public:
             return method;
         }
 
+        // we'll only get this far if we're not in incremental mode, so enter a new symbol and fill in the data
+        // appropriately
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
         method->symbol.data(ctx)->addLoc(ctx, method->declLoc);
