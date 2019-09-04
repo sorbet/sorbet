@@ -80,7 +80,8 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
                     // with T.untyped.
                     targs.emplace_back(Types::untyped(gs, ref));
                 } else if (tmData->isFixed() || tmData->isCovariant()) {
-                    // Default type parameters to their upper bound
+                    // Default fixed or covariant parameters to their upper
+                    // bound.
                     targs.emplace_back(lambdaParam->upperBound);
                 } else if (tmData->isInvariant()) {
                     // We instantiate Invariant type members as T.untyped as
@@ -88,6 +89,8 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
                     // Types::glb.
                     targs.emplace_back(Types::untyped(gs, ref));
                 } else {
+                    // The remaining case is a contravariant parameter, which
+                    // gets defaulted to its lower bound.
                     targs.emplace_back(lambdaParam->lowerBound);
                 }
             }
