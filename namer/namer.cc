@@ -620,9 +620,8 @@ public:
 
         auto parsedArgs = ast::ArgParsing::parseArgs(ctx, method->args);
 
-        auto sym = ctx.state.lookupMethodSuchThat(owner, method->name, [&](core::SymbolRef ref) {
-            return isIntrinsic(ctx, ref) || paramsMatch(ctx, ref, parsedArgs);
-        });
+        auto sym =
+            ctx.state.lookupMethodSymbolWithHash(owner, method->name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
         auto oldSym = ctx.state.lookupMethodSymbol(owner, method->name);
         if (!sym.exists() && oldSym.exists()) {
             if (!isIntrinsic(ctx, oldSym)) {

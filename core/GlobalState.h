@@ -79,7 +79,7 @@ public:
     SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
     }
-    SymbolRef lookupMethodSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;
+    SymbolRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, u4 methodHash) const;
     SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
     }
