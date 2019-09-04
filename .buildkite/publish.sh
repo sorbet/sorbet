@@ -8,7 +8,7 @@ fi
 
 echo "--- setup"
 apt-get update
-apt-get install -yy curl jq rubygems
+apt-get install -yy curl jq rubygems file
 
 git config --global user.email "sorbet+bot@stripe.com"
 git config --global user.name "Sorbet build farm"
