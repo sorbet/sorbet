@@ -538,9 +538,6 @@ public:
 
     void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<ast::ParsedArg> &parsedArgs) {
         auto sym = ctx.owner.data(ctx)->dealias(ctx);
-        auto owner = sym.data(ctx)->owner;
-        string methodName = fmt::format("{}{}{}", owner.show(ctx), owner.data(ctx)->isSingletonClass(ctx) ? "." : "#",
-                                        sym.data(ctx)->name.data(ctx)->shortName(ctx));
         if (!sym.data(ctx)->isMethod()) {
             return;
         }
@@ -558,7 +555,7 @@ public:
                     // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                                methodName, sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
+                                sym.show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
             }
@@ -572,7 +569,7 @@ public:
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        methodName, "isKeyword", symArg.flags.isKeyword, methodArg.keyword);
+                        sym.show(ctx), "isKeyword", symArg.flags.isKeyword, methodArg.keyword);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return;
@@ -581,7 +578,7 @@ public:
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        methodName, "isBlock", symArg.flags.isBlock, methodArg.block);
+                        sym.show(ctx), "isBlock", symArg.flags.isBlock, methodArg.block);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return;
@@ -590,7 +587,7 @@ public:
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        methodName, "isRepeated", symArg.flags.isRepeated, methodArg.repeated);
+                        sym.show(ctx), "isRepeated", symArg.flags.isRepeated, methodArg.repeated);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return;
@@ -598,7 +595,7 @@ public:
             if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with mismatched argument name. Expected: `{}`, got: `{}`",
-                                methodName, symArg.name.show(ctx), methodArg.local._name.show(ctx));
+                                sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return;

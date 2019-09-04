@@ -123,7 +123,9 @@ string Name::show(const GlobalState &gs) const {
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
                 return absl::StrCat(this->unique.original.data(gs)->show(gs), " (overload.", this->unique.num, ")");
             } else if (this->unique.uniqueNameKind == UniqueNameKind::MangleRename) {
-                return fmt::format("{}${}", this->unique.original.data(gs)->show(gs), this->unique.num);
+                // we use `show` extensively in user-facing output, so even though this is a mangled name we will want
+                // to present it to the user as though it were the original name
+                return this->unique.original.data(gs)->show(gs);
             } else if (this->unique.uniqueNameKind == UniqueNameKind::OpusEnum) {
                 // The entire goal of UniqueNameKind::OpusEnum is to have Name::show print the name as if on the
                 // original name, so that our OpusEnum DSL-synthesized class names are kept as an implementation detail.
