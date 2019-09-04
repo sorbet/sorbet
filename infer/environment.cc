@@ -933,7 +933,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
                     methodReturnType = core::Types::untypedUntracked();
                 }
-                if (!core::Types::isSubTypeUnderConstraint(ctx, constr, true, typeAndOrigin.type, methodReturnType)) {
+                if (!core::Types::isSubTypeUnderConstraint(ctx, constr, core::UntypedMode::AlwaysCompatible,
+                                                           typeAndOrigin.type, methodReturnType)) {
                     if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         e.setHeader("Returning value that does not conform to method result type");
                         e.addErrorSection(core::ErrorSection(
@@ -959,7 +960,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 }
                 bool isSubtype;
                 if (i->link->result->main.constr) {
-                    isSubtype = core::Types::isSubTypeUnderConstraint(ctx, *i->link->result->main.constr, true,
+                    isSubtype = core::Types::isSubTypeUnderConstraint(ctx, *i->link->result->main.constr,
+                                                                      core::UntypedMode::AlwaysCompatible,
                                                                       typeAndOrigin.type, expectedType);
                 } else {
                     isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType);

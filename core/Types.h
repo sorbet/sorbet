@@ -67,6 +67,11 @@ template <class T, class... Args> TypePtr make_type(Args &&... args) {
     return TypePtr(std::make_shared<T>(std::forward<Args>(args)...));
 }
 
+enum class UntypedMode {
+    AlwaysCompatible = 1,
+    AlwaysIncompatible = 2,
+};
+
 class Types final {
 public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
@@ -80,7 +85,7 @@ public:
      *
      * The parameter `allowUntyped` controls whether or not `T.untyped` is
      * considered to be a super type or subtype of all other types */
-    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const bool allowUntyped,
+    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, UntypedMode mode,
                                          const TypePtr &t1, const TypePtr &t2);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
