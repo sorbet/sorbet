@@ -606,12 +606,12 @@ TypePtr Types::getProcReturnType(Context ctx, const TypePtr &procType) {
 }
 
 bool Types::isAsSpecificAs(Context ctx, const TypePtr &t1, const TypePtr &t2) {
-    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, UntypedMode::AlwaysIncompatible, t1,
-                                    t2);
+    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2,
+                                    UntypedMode::AlwaysIncompatible);
 }
 
 bool Types::isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2) {
-    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, UntypedMode::AlwaysCompatible, t1, t2);
+    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
 bool TypeVar::isFullyDefined() {

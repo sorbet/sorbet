@@ -1048,7 +1048,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, Untyped
                 ENFORCE(i < a1->klass.data(ctx)->typeMembers().size());
 
                 if (idx.data(ctx)->isCovariant()) {
-                    result = Types::isSubTypeUnderConstraint(ctx, constr, mode, a1->targs[i], a2->targs[j]);
+                    result = Types::isSubTypeUnderConstraint(ctx, constr, a1->targs[i], a2->targs[j], mode);
                 } else if (idx.data(ctx)->isInvariant()) {
                     auto &a = a1->targs[i];
                     auto &b = a2->targs[j];
@@ -1058,7 +1058,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, Untyped
                         result = Types::equivNoUntyped(ctx, a, b);
                     }
                 } else if (idx.data(ctx)->isContravariant()) {
-                    result = Types::isSubTypeUnderConstraint(ctx, constr, mode, a2->targs[j], a1->targs[i]);
+                    result = Types::isSubTypeUnderConstraint(ctx, constr, a2->targs[j], a1->targs[i], mode);
                 }
                 if (!result) {
                     break;
@@ -1071,7 +1071,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, Untyped
     }
     if (isa_type<AppliedType>(t2.get())) {
         if (auto *pt = cast_type<ProxyType>(t1.get())) {
-            return Types::isSubTypeUnderConstraint(ctx, constr, mode, pt->underlying(), t2);
+            return Types::isSubTypeUnderConstraint(ctx, constr, pt->underlying(), t2, mode);
         }
         return false;
     }
@@ -1089,7 +1089,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, Untyped
                         int i = -1;
                         for (auto &el2 : a2->elems) {
                             ++i;
-                            result = Types::isSubTypeUnderConstraint(ctx, constr, mode, a1->elems[i], el2);
+                            result = Types::isSubTypeUnderConstraint(ctx, constr, a1->elems[i], el2, mode);
                             if (!result) {
                                 break;
                             }
@@ -1115,8 +1115,8 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, Untyped
                             return el1l->value == el2l->value && u1->symbol == u2->symbol; // from lambda
                         });
                         result = fnd != h1->keys.end() &&
-                                 Types::isSubTypeUnderConstraint(ctx, constr, mode, h1->values[fnd - h1->keys.begin()],
-                                                                 h2->values[i]);
+                                 Types::isSubTypeUnderConstraint(ctx, constr, h1->values[fnd - h1->keys.begin()],
+                                                                 h2->values[i], mode);
                         if (!result) {
                             return;
                         }
@@ -1164,8 +1164,8 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, Untyped
     }
 }
 
-bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, UntypedMode mode, const TypePtr &t1,
-                                     const TypePtr &t2) {
+bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2,
+                                     UntypedMode mode) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -1183,13 +1183,13 @@ bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, Untype
 
     // Note: order of cases here matters!
     if (auto *o1 = cast_type<OrType>(t1.get())) { // 7, 8, 9
-        return Types::isSubTypeUnderConstraint(ctx, constr, mode, o1->left, t2) &&
-               Types::isSubTypeUnderConstraint(ctx, constr, mode, o1->right, t2);
+        return Types::isSubTypeUnderConstraint(ctx, constr, o1->left, t2, mode) &&
+               Types::isSubTypeUnderConstraint(ctx, constr, o1->right, t2, mode);
     }
 
     if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 5
-        return Types::isSubTypeUnderConstraint(ctx, constr, mode, t1, a2->left) &&
-               Types::isSubTypeUnderConstraint(ctx, constr, mode, t1, a2->right);
+        return Types::isSubTypeUnderConstraint(ctx, constr, t1, a2->left, mode) &&
+               Types::isSubTypeUnderConstraint(ctx, constr, t1, a2->right, mode);
     }
 
     auto *a1 = cast_type<AndType>(t1.get());
@@ -1206,8 +1206,8 @@ bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, Untype
         auto *a2o = cast_type<OrType>(l.get());
         if (a2o != nullptr) {
             // This handles `(A | B) & C` -> `(A & C) | (B & C)`
-            return Types::isSubTypeUnderConstraint(ctx, constr, mode, glb(ctx, a2o->left, r), t2) &&
-                   Types::isSubTypeUnderConstraint(ctx, constr, mode, glb(ctx, a2o->right, r), t2);
+            return Types::isSubTypeUnderConstraint(ctx, constr, glb(ctx, a2o->left, r), t2, mode) &&
+                   Types::isSubTypeUnderConstraint(ctx, constr, glb(ctx, a2o->right, r), t2, mode);
         }
     }
     if (o2 != nullptr) {
@@ -1221,19 +1221,19 @@ bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, Untype
         auto *o2a = cast_type<AndType>(l.get());
         if (o2a != nullptr) {
             // This handles `(A & B) | C` -> `(A | C) & (B | C)`
-            return Types::isSubTypeUnderConstraint(ctx, constr, mode, t1, lub(ctx, o2a->left, r)) &&
-                   Types::isSubTypeUnderConstraint(ctx, constr, mode, t1, lub(ctx, o2a->right, r));
+            return Types::isSubTypeUnderConstraint(ctx, constr, t1, lub(ctx, o2a->left, r), mode) &&
+                   Types::isSubTypeUnderConstraint(ctx, constr, t1, lub(ctx, o2a->right, r), mode);
         }
     }
 
     // This order matters
     if (o2 != nullptr) { // 3
-        return Types::isSubTypeUnderConstraint(ctx, constr, mode, t1, o2->left) ||
-               Types::isSubTypeUnderConstraint(ctx, constr, mode, t1, o2->right);
+        return Types::isSubTypeUnderConstraint(ctx, constr, t1, o2->left, mode) ||
+               Types::isSubTypeUnderConstraint(ctx, constr, t1, o2->right, mode);
     }
     if (a1 != nullptr) { // 4
-        return Types::isSubTypeUnderConstraint(ctx, constr, mode, a1->left, t2) ||
-               Types::isSubTypeUnderConstraint(ctx, constr, mode, a1->right, t2);
+        return Types::isSubTypeUnderConstraint(ctx, constr, a1->left, t2, mode) ||
+               Types::isSubTypeUnderConstraint(ctx, constr, a1->right, t2, mode);
     }
 
     return isSubTypeUnderConstraintSingle(ctx, constr, mode, t1, t2); // 1
