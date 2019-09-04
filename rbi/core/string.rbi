@@ -544,6 +544,18 @@ class String < Object
   end
   def delete!(arg0, *arg1); end
 
+  sig {params(prefix: String).returns(String)}
+  def delete_prefix(prefix); end
+
+  sig {params(prefix: String).returns(T.nilable(String))}
+  def delete_prefix!(prefix); end
+
+  sig {params(prefix: String).returns(String)}
+  def delete_suffix(prefix); end
+
+  sig {params(prefix: String).returns(T.nilable(String))}
+  def delete_suffix!(prefix); end
+
   # Returns a copy of *str* with all uppercase letters replaced with their
   # lowercase counterparts. Which letters exactly are replaced, and by which
   # other letters, depends on the presence or absence of options, and on the
