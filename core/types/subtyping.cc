@@ -556,7 +556,19 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     }
 
     if (auto *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
+        if (mayBeSpecial1->symbol == Symbols::top()) {
+            categoryCounterInc("glb", "<top");
+            return t2;
+        }
         if (mayBeSpecial1->symbol == Symbols::untyped()) {
+            // This case is to prefer `T.untyped` to top, so that
+            // `glb(T.untyped,<any>)` will reduce to `T.untyped`.
+            if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
+                if (mayBeSpecial2->symbol == Symbols::top()) {
+                    categoryCounterInc("glb", "top>");
+                    return t1;
+                }
+            }
             categoryCounterInc("glb", "<untyped");
             return t2;
         }
@@ -564,13 +576,13 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
             categoryCounterInc("glb", "<bottom");
             return t1;
         }
-        if (mayBeSpecial1->symbol == Symbols::top()) {
-            categoryCounterInc("glb", "<top");
-            return t2;
-        }
     }
 
     if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
+        if (mayBeSpecial2->symbol == Symbols::top()) {
+            categoryCounterInc("glb", "top>");
+            return t1;
+        }
         if (mayBeSpecial2->symbol == Symbols::untyped()) {
             categoryCounterInc("glb", "untyped>");
             return t1;
@@ -578,10 +590,6 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
         if (mayBeSpecial2->symbol == Symbols::bottom()) {
             categoryCounterInc("glb", "bottom>");
             return t2;
-        }
-        if (mayBeSpecial2->symbol == Symbols::top()) {
-            categoryCounterInc("glb", "top>");
-            return t1;
         }
     }
 
