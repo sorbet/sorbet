@@ -120,6 +120,18 @@ class Main
 end
 ```
 
+## 4012
+
+This error occurs when an object is defined as class and a method.
+An example is ActiveStorage::Attachment where it is defined
+as "class ActiveStorage::Attachment < ActiveRecord::Base" in
+
+ * sorbet/rails-rbi/models/active_storage/attachment.rbi
+ 
+and module ("def attachment; end") in
+
+ * sorbet/rbi/sorbet-typed/lib/activestorage/all/activestorage.rbi
+ 
 ## 4015
 
 This error usually comes when a class or module is dynamically defined and
