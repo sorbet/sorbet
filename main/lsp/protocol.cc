@@ -100,67 +100,133 @@ public:
     }
 };
 
+CounterState mergeCounters(CounterState counters) {
+    if (!counters.hasNullCounters()) {
+        counterConsume(move(counters));
+    }
+    return getAndClearThreadCounters();
+}
+
+void tagNewRequest(const std::shared_ptr<spd::logger> &logger, int &requestCounter, LSPMessage &msg) {
+    Timer timeit(logger, "tagNewRequest");
+    msg.counter = requestCounter++;
+    msg.startTracers.push_back(timeit.getFlowEdge());
+    msg.timers.push_back(make_unique<Timer>(logger, "processing_time"));
+}
+
+unique_ptr<Joinable> LSPLoop::startPreprocessorThread(LSPLoop::QueueState &incomingQueue, absl::Mutex &incomingMtx,
+                                                      LSPLoop::QueueState &processingQueue, absl::Mutex &processingMtx,
+                                                      shared_ptr<spdlog::logger> logger) {
+    return runInAThread("preprocessingThread",
+                        [&incomingQueue, &incomingMtx, &processingQueue, &processingMtx, logger] {
+                            // Propagate the termination flag across the two queues.
+                            NotifyOnDestruction notifyIncoming(incomingMtx, incomingQueue.terminate);
+                            NotifyOnDestruction notifyProcessing(processingMtx, processingQueue.terminate);
+                            while (true) {
+                                unique_ptr<LSPMessage> msg;
+                                {
+                                    absl::MutexLock lck(&incomingMtx);
+                                    incomingMtx.Await(absl::Condition(
+                                        +[](LSPLoop::QueueState *incomingQueue) -> bool {
+                                            return incomingQueue->terminate || !incomingQueue->pendingRequests.empty();
+                                        },
+                                        &incomingQueue));
+                                    // Only terminate once incoming queue is drained.
+                                    if (incomingQueue.terminate && incomingQueue.pendingRequests.empty()) {
+                                        return;
+                                    }
+                                    msg = move(incomingQueue.pendingRequests.front());
+                                    incomingQueue.pendingRequests.pop_front();
+                                    // Combine counters with this thread's counters.
+                                    if (!incomingQueue.counters.hasNullCounters()) {
+                                        counterConsume(move(incomingQueue.counters));
+                                    }
+                                }
+                                {
+                                    absl::MutexLock lck(&processingMtx);
+                                    // Merge the counters from all of the worker threads with those stored in
+                                    // processingQueue.
+                                    processingQueue.counters = mergeCounters(move(processingQueue.counters));
+                                    preprocessAndEnqueue(logger, processingQueue, move(msg));
+                                }
+                            }
+                        });
+}
+
 unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
-    LSPLoop::QueueState guardedState{{}, false, false, 0};
-    absl::Mutex mtx;
+
+    // Incoming queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
+    // these messages (e.g., edits are not merged).
+    absl::Mutex incomingMtx;
+    LSPLoop::QueueState incomingQueue;
+
+    // Notifies threads once LSP is initialized. Used to prevent Watchman thread from enqueueing messages that mutate
+    // file state until after initialization.
     absl::Notification initializedNotification;
+
+    // Processing queue contains preprocessed messages that are ready to be processed (e.g., edits are merged).
+    absl::Mutex processingMtx;
+    LSPLoop::QueueState processingQueue;
 
     unique_ptr<watchman::WatchmanProcess> watchmanProcess;
     const auto &opts = config.opts;
     if (!opts.disableWatchman) {
-        if (opts.rawInputDirNames.size() == 1 && opts.rawInputFileNames.empty()) {
-            // The lambda below intentionally does not capture `this`.
-            watchmanProcess = make_unique<watchman::WatchmanProcess>(
-                logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
-                [&guardedState, &mtx, logger = this->logger,
-                 &initializedNotification](std::unique_ptr<WatchmanQueryResponse> response) {
-                    auto notifMsg =
-                        make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
-                    auto msg = make_unique<LSPMessage>(move(notifMsg));
-                    // Don't start enqueueing requests until LSP is initialized.
-                    initializedNotification.WaitForNotification();
-                    {
-                        absl::MutexLock lck(&mtx); // guards guardedState
-                        // Merge with any existing pending watchman file updates.
-                        enqueueRequest(logger, guardedState, move(msg), true);
-                    }
-                },
-                [&guardedState, &mtx](int watchmanExitCode) {
-                    {
-                        absl::MutexLock lck(&mtx); // guards guardedState
-                        if (!guardedState.terminate) {
-                            guardedState.terminate = true;
-                            guardedState.errorCode = watchmanExitCode;
-                        }
-                    }
-                });
-        } else {
+        if (opts.rawInputDirNames.size() != 1 || !opts.rawInputFileNames.empty()) {
             logger->error("Watchman support currently only works when Sorbet is run with a single input directory. If "
                           "Watchman is not needed, run Sorbet with `--disable-watchman`.");
             throw options::EarlyReturnWithCode(1);
         }
+
+        // The lambda below intentionally does not capture `this`.
+        watchmanProcess = make_unique<watchman::WatchmanProcess>(
+            logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
+            [&incomingQueue, &incomingMtx, logger = this->logger,
+             &initializedNotification](std::unique_ptr<WatchmanQueryResponse> response) {
+                auto notifMsg =
+                    make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
+                auto msg = make_unique<LSPMessage>(move(notifMsg));
+                // Don't start enqueueing requests until LSP is initialized.
+                initializedNotification.WaitForNotification();
+                {
+                    absl::MutexLock lck(&incomingMtx);
+                    tagNewRequest(logger, incomingQueue.requestCounter, *msg);
+                    incomingQueue.counters = mergeCounters(move(incomingQueue.counters));
+                    incomingQueue.pendingRequests.push_back(move(msg));
+                }
+            },
+            [&incomingQueue, &incomingMtx](int watchmanExitCode) {
+                {
+                    absl::MutexLock lck(&incomingMtx);
+                    if (!incomingQueue.terminate) {
+                        incomingQueue.terminate = true;
+                        incomingQueue.errorCode = watchmanExitCode;
+                    }
+                }
+            });
     }
 
     auto readerThread =
-        runInAThread("lspReader", [&guardedState, &mtx, logger = this->logger, inputFd = this->inputFd] {
+        runInAThread("lspReader", [&incomingQueue, &incomingMtx, logger = this->logger, inputFd = this->inputFd] {
             // Thread that executes this lambda is called reader thread.
             // This thread _intentionally_ does not capture `this`.
-            NotifyOnDestruction notify(mtx, guardedState.terminate);
+            NotifyOnDestruction notify(incomingMtx, incomingQueue.terminate);
             string buffer;
             try {
                 auto timeit = make_unique<Timer>(logger, "getNewRequest");
                 while (true) {
                     auto msg = getNewRequest(logger, inputFd, buffer);
                     {
-                        absl::MutexLock lck(&mtx); // guards guardedState.
+                        absl::MutexLock lck(&incomingMtx); // guards guardedState.
                         if (msg) {
-                            enqueueRequest(logger, guardedState, move(msg), true);
+                            tagNewRequest(logger, incomingQueue.requestCounter, *msg);
+                            incomingQueue.counters = mergeCounters(move(incomingQueue.counters));
+                            incomingQueue.pendingRequests.push_back(move(msg));
                             // Reset span now that we've found a request.
                             timeit = make_unique<Timer>(logger, "getNewRequest");
                         }
                         // Check if it's time to exit.
-                        if (guardedState.terminate) {
+                        if (incomingQueue.terminate) {
                             // Another thread exited.
                             break;
                         }
@@ -171,36 +237,42 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             }
         });
 
+    // Bridges the gap between the {reader, watchman} threads and the coordinator thread.
+    auto preprocessingThread =
+        startPreprocessorThread(incomingQueue, incomingMtx, processingQueue, processingMtx, logger);
+
     mainThreadId = this_thread::get_id();
     unique_ptr<core::GlobalState> gs;
     {
         // Ensure Watchman thread gets unstuck when thread exits.
         NotifyNotificationOnDestruction notify(initializedNotification);
+        bool exitProcessed = false;
         while (true) {
             unique_ptr<LSPMessage> msg;
             bool hasMoreMessages;
             {
-                absl::MutexLock lck(&mtx);
+                absl::MutexLock lck(&processingMtx);
                 Timer timeit(logger, "idle");
-                mtx.Await(absl::Condition(
-                    +[](LSPLoop::QueueState *guardedState) -> bool {
-                        return guardedState->terminate ||
-                               (!guardedState->paused && !guardedState->pendingRequests.empty());
+                processingMtx.Await(absl::Condition(
+                    +[](LSPLoop::QueueState *processingQueue) -> bool {
+                        return processingQueue->terminate ||
+                               (!processingQueue->paused && !processingQueue->pendingRequests.empty());
                     },
-                    &guardedState));
-                ENFORCE(!guardedState.paused);
-                if (guardedState.terminate) {
-                    if (guardedState.errorCode != 0) {
+                    &processingQueue));
+                ENFORCE(!processingQueue.paused);
+                if (processingQueue.terminate) {
+                    if (processingQueue.errorCode != 0) {
                         // Abnormal termination.
-                        throw options::EarlyReturnWithCode(guardedState.errorCode);
-                    } else if (guardedState.pendingRequests.empty()) {
-                        // Normal termination. Wait until all pending requests finish.
+                        throw options::EarlyReturnWithCode(processingQueue.errorCode);
+                    } else if (exitProcessed || processingQueue.pendingRequests.empty()) {
+                        // Normal termination. Wait until all pending requests finish or we process an exit.
                         break;
                     }
                 }
-                msg = move(guardedState.pendingRequests.front());
-                guardedState.pendingRequests.pop_front();
-                hasMoreMessages = !guardedState.pendingRequests.empty();
+                msg = move(processingQueue.pendingRequests.front());
+                exitProcessed = msg->isNotification() && msg->method() == LSPMethod::Exit;
+                processingQueue.pendingRequests.pop_front();
+                hasMoreMessages = !processingQueue.pendingRequests.empty();
             }
             prodCounterInc("lsp.messages.received");
             auto result = processRequest(move(gs), *msg);
@@ -217,16 +289,14 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             if (shouldSendCountersToStatsd(currentTime)) {
                 {
                     // Merge counters from worker threads.
-                    absl::MutexLock counterLck(&mtx);
-                    if (!guardedState.counters.hasNullCounters()) {
-                        counterConsume(move(guardedState.counters));
+                    absl::MutexLock counterLck(&processingMtx);
+                    if (!processingQueue.counters.hasNullCounters()) {
+                        counterConsume(move(processingQueue.counters));
                     }
                 }
                 sendCountersToStatsd(currentTime);
             }
-            if (!hasMoreMessages) {
-                logger->flush();
-            }
+            logger->flush();
         }
     }
 
@@ -384,13 +454,8 @@ void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, con
     // and ignore.
 }
 
-void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
-                             std::unique_ptr<LSPMessage> msg, bool collectThreadCounters) {
-    Timer timeit(logger, "enqueueRequest");
-    msg->counter = state.requestCounter++;
-    msg->startTracers.push_back(timeit.getFlowEdge());
-    msg->timers.push_back(make_unique<Timer>(logger, "processing_time"));
-
+void LSPLoop::preprocessAndEnqueue(const shared_ptr<spd::logger> &logger, LSPLoop::QueueState &state,
+                                   unique_ptr<LSPMessage> msg) {
     const LSPMethod method = msg->method();
     if (method == LSPMethod::$CancelRequest) {
         cancelRequest(state.pendingRequests, *get<unique_ptr<CancelParams>>(msg->asNotification().params));
@@ -413,13 +478,6 @@ void LSPLoop::enqueueRequest(const shared_ptr<spd::logger> &logger, LSPLoop::Que
     } else {
         state.pendingRequests.push_back(move(msg));
         mergeFileChanges(state.pendingRequests);
-    }
-
-    if (collectThreadCounters) {
-        if (!state.counters.hasNullCounters()) {
-            counterConsume(move(state.counters));
-        }
-        state.counters = getAndClearThreadCounters();
     }
 }
 

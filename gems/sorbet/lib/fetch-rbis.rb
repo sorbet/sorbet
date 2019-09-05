@@ -35,7 +35,7 @@ class Sorbet::Private::FetchRBIs
     end
 
     FileUtils.cd(RBI_CACHE_DIR) do
-      IO.popen(%w{git fetch origin}) {|pipe| pipe.read}
+      IO.popen(%w{git fetch --all}) {|pipe| pipe.read}
       raise "Failed to git fetch" if $?.exitstatus != 0
       IO.popen(%w{git checkout -q} + [SORBET_TYPED_REVISION]) {|pipe| pipe.read}
       raise "Failed to git checkout" if $?.exitstatus != 0
