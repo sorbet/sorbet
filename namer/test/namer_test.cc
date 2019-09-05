@@ -85,6 +85,7 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
     auto baseNames = ctx.state.namesUsed();
 
     auto tree = hello_world(ctx);
+    ast::ParsedFile treeCopy{tree.tree->deepCopy(), tree.file};
     vector<ast::ParsedFile> trees;
     {
         auto localTree = sorbet::local_vars::LocalVars::run(ctx, move(tree));
@@ -100,7 +101,9 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
     ASSERT_EQ(baseNames + 2, ctx.state.namesUsed());
 
     // Run it again and get the same numbers
-    namer::Namer::run(ctx, move(trees));
+    auto localTree = sorbet::local_vars::LocalVars::run(ctx, move(treeCopy));
+    runNamer(ctx, move(localTree));
+
     ASSERT_EQ(baseSymbols + extraSymbols, ctx.state.symbolsUsed());
     ASSERT_EQ(baseNames + 2, ctx.state.namesUsed());
 }
