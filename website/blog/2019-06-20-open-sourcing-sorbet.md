@@ -77,8 +77,7 @@ reports:
 
 [ask us questions on stack overflow]:
   https://stackoverflow.com/questions/tagged/sorbet
-[chat with us on slack]:
-  https://join.slack.com/t/sorbet-ruby/shared_invite/enQtNjU5MzA2NzU0OTYxLWNiZjcyZmM4MDE5YjIxZjAyMmE0NWYwYzU3MDNmNzNhNWY4YTNhOWE5YWU3NGQ4Y2Y4MDc5ZjAzNjI3NjcwYTE
+[chat with us on slack]: /slack
 [report issues on github]: https://github.com/sorbet/sorbet/issues
 
 ## Acknowledgements
