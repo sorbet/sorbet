@@ -148,7 +148,7 @@ C = 1
 D = 1
 class D; end
 ```
-[Sorbet.run link](https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%3B%20end%0Amodule%20A%3B%20end%0A%0Amodule%20B%3B%20end%0Aclass%20B%3B%20end%0A%0Aclass%20C%3B%20end%0AC%20%3D%201%0A%0AD%20%3D%201%0Aclass%20D%3B%20end)
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%3B%20end%0Amodule%20A%3B%20end%0A%0Amodule%20B%3B%20end%0Aclass%20B%3B%20end%0A%0Aclass%20C%3B%20end%0AC%20%3D%201%0A%0AD%20%3D%201%0Aclass%20D%3B%20end)
 
 ## 4015
 
