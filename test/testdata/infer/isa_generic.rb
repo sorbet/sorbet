@@ -36,7 +36,7 @@ end
 sig { params(x: T.any(Base, Other)).void }
 def f2(x)
   if x.is_a?(Base)
-    T.assert_type!(x, Base)
+    T.reveal_type(x) # error: Revealed type: `Base`
   end
 end
 

@@ -84,7 +84,7 @@ subgraph "cluster_::Object#f2" {
 
     "bb::Object#f2_1" -> "bb::Object#f2_1" [style="bold"];
     "bb::Object#f2_2" [
-        label = "block[id=2](x: Base)\l<statTemp>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$8: T.class_of(Base)[T.untyped] = alias <C Base>\l<statTemp>$6: Sorbet::Private::Static::Void = <statTemp>$7: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$8: T.class_of(Base)[T.untyped])\l<castTemp>$9: Base = x\l<returnMethodTemp>$2: Base = cast(<castTemp>$9: Base, Base);\l<unconditional>\l"
+        label = "block[id=2](x: Base)\l<statTemp>$6: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: Base = <statTemp>$6: T.class_of(T).reveal_type(x: Base)\l<unconditional>\l"
     ];
 
     "bb::Object#f2_2" -> "bb::Object#f2_4" [style="bold"];
