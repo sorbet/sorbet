@@ -24,6 +24,8 @@ const UnorderedMap<
         {"error-with-dupes", ErrorAssertion::make},
         {"usage", UsageAssertion::make},
         {"def", DefAssertion::make},
+        {"type", TypeAssertion::make},
+        {"type-def", TypeDefAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"exhaustive-apply-code-action", BooleanPropertyAssertion::make},
         {"assert-fast-path", FastPathAssertion::make},
@@ -287,7 +289,7 @@ pair<string_view, int> getSymbolAndVersion(string_view assertionContents) {
     EXPECT_GE(split.size(), 0);
     EXPECT_LT(split.size(), 3) << fmt::format(
         "Invalid usage and def assertion; multiple words found:\n{}\nUsage and def assertions should be "
-        "of the form:\n# [^*] [usage | def]: symbolname [version?]",
+        "of the form:\n# [^*] [usage | def | type | type-def]: symbolname [version?]",
         assertionContents);
     if (split.size() == 2) {
         string_view versionString = split[1];
@@ -513,6 +515,47 @@ shared_ptr<UsageAssertion> UsageAssertion::make(string_view filename, unique_ptr
 
 string UsageAssertion::toString() const {
     return fmt::format("usage: {}", symbol);
+}
+
+TypeDefAssertion::TypeDefAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                   string_view symbol)
+    : RangeAssertion(filename, range, assertionLine), symbol(symbol) {}
+
+shared_ptr<TypeDefAssertion> TypeDefAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                    string_view assertionContents, string_view assertionType) {
+    auto [symbol, _version] = getSymbolAndVersion(assertionContents);
+    return make_shared<TypeDefAssertion>(filename, range, assertionLine, symbol);
+}
+
+void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                             LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, const Location &queryLoc) {
+    const int line = queryLoc.range->start->line;
+    // Can only query with one character, so just use the first one.
+    // const int character = queryLoc.range->start->character;
+    // auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
+    // auto defSourceLine = getLine(sourceFileContents, uriPrefix, *getLocation(uriPrefix));
+    string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
+    // string defUri = filePathToUri(uriPrefix, filename);
+
+    ADD_FAILURE_AT(locFilename.c_str(), line) << fmt::format(
+        "TODO(jez) Implement the actual checks for `type` and `type-def` once Go To Type Definition is implemented");
+}
+
+string TypeDefAssertion::toString() const {
+    return fmt::format("type-def: {}", symbol);
+}
+
+TypeAssertion::TypeAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view symbol)
+    : RangeAssertion(filename, range, assertionLine), symbol(symbol) {}
+
+shared_ptr<TypeAssertion> TypeAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                              string_view assertionContents, string_view assertionType) {
+    auto [symbol, _version] = getSymbolAndVersion(assertionContents);
+    return make_shared<TypeAssertion>(filename, range, assertionLine, symbol);
+}
+
+string TypeAssertion::toString() const {
+    return fmt::format("type: {}", symbol);
 }
 
 void reportMissingError(const string &filename, const ErrorAssertion &assertion, string_view sourceLine,

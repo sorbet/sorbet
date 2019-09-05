@@ -750,11 +750,14 @@ TEST_P(LSPTest, All) {
     // Usage and def assertions
     {
         // Sort by symbol.
-        // symbol => [version => DefAssertion, [DefAssertion+UsageAssertion][]]
+        // symbol => [ (version => DefAssertion), (DefAssertion | UsageAssertion)[] ]
         // Note: Using a vector in pair since order matters; assertions are ordered by location, which
         // is used when comparing against LSP responses.
         UnorderedMap<string, pair<UnorderedMap<int, shared_ptr<DefAssertion>>, vector<shared_ptr<RangeAssertion>>>>
             defUsageMap;
+
+        // symbol => [ TypeDefAssertion, TypeAssertion[] ]
+        UnorderedMap<string, pair<shared_ptr<TypeDefAssertion>, vector<shared_ptr<TypeAssertion>>>> typeDefMap;
         for (auto &assertion : assertions) {
             if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                 auto &entry = defUsageMap[defAssertion->symbol];
@@ -769,10 +772,18 @@ TEST_P(LSPTest, All) {
             } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
                 auto &entry = defUsageMap[usageAssertion->symbol];
                 entry.second.push_back(usageAssertion);
+            } else if (auto typeDefAssertion = dynamic_pointer_cast<TypeDefAssertion>(assertion)) {
+                auto &[typeDef, _typeAssertions] = typeDefMap[typeDefAssertion->symbol];
+                EXPECT_NE(typeDef, nullptr)
+                    << fmt::format("Found multiple type-def comments for label `{}`.", typeDefAssertion->symbol);
+                typeDef = typeDefAssertion;
+            } else if (auto typeAssertion = dynamic_pointer_cast<TypeAssertion>(assertion)) {
+                auto &[_typeDef, typeAssertions] = typeDefMap[typeAssertion->symbol];
+                typeAssertions.push_back(typeAssertion);
             }
         }
 
-        // Check each assertion.
+        // Check each def/usage assertion.
         for (auto &entry : defUsageMap) {
             auto &entryAssertions = entry.second.second;
             // Sort assertions in (filename, range) order
@@ -809,6 +820,23 @@ TEST_P(LSPTest, All) {
                         "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "
                         "^^ def: {0} {1}` assertion that points to the definition of the pointed-to thing being used.",
                         symbol, version);
+                }
+            }
+        }
+
+        // Check each type-def/type assertion.
+        for (auto &[symbol, typeDefAndAssertions] : typeDefMap) {
+            auto &[typeDef, typeAssertions] = typeDefAndAssertions;
+            for (auto &typeAssertion : typeAssertions) {
+                if (typeDef != nullptr) {
+                    auto queryLoc = typeAssertion->getLocation(rootUri);
+                    // Check that a type definition request at this location returns type-def.
+                    typeDef->check(test.sourceFileContents, *lspWrapper, nextId, rootUri, *queryLoc);
+                } else {
+                    ADD_FAILURE() << fmt::format(
+                        "Found 'type:' comment for label {0} without matching type-def comment. Please add a `# "
+                        "^^ type-def: {0}` assertion that points where 'Go to Type Definition' should jump to.",
+                        typeAssertion->symbol);
                 }
             }
         }
