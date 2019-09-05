@@ -50,9 +50,9 @@ InsSeq{
         MethodDef{
           flags = 0
           name = <U has_while><<U has_while>>
-          args = [BlockArg{ expr = Local{
+          args = [Local{
               localVariable = <U <blk>>
-            } }]
+            }]
           rhs = While{
             cond = Literal{ value = 1 }
             body = Send{
@@ -70,9 +70,9 @@ InsSeq{
         MethodDef{
           flags = 0
           name = <U has_constant_with_resolution_scope><<U has_constant_with_resolution_scope>>
-          args = [BlockArg{ expr = Local{
+          args = [Local{
               localVariable = <U <blk>>
-            } }]
+            }]
           rhs = ConstantLit{
             orig = UnresolvedConstantLit{
               scope = EmptyTree
@@ -86,9 +86,9 @@ InsSeq{
         MethodDef{
           flags = 0
           name = <U has_global_field><<U has_global_field>>
-          args = [BlockArg{ expr = Local{
+          args = [Local{
               localVariable = <U <blk>>
-            } }]
+            }]
           rhs = Field{
             symbol = <U $S>
           }
@@ -97,9 +97,9 @@ InsSeq{
         MethodDef{
           flags = 0
           name = <U has_class_field><<U has_class_field>>
-          args = [BlockArg{ expr = Local{
+          args = [Local{
               localVariable = <U <blk>>
-            } }]
+            }]
           rhs = UnresolvedIdent{
             kind = Class
             name = <U @@f>
@@ -109,9 +109,9 @@ InsSeq{
         MethodDef{
           flags = 0
           name = <U has_next><<U has_next>>
-          args = [BlockArg{ expr = Local{
+          args = [Local{
               localVariable = <U <blk>>
-            } }]
+            }]
           rhs = Send{
             recv = Local{
               localVariable = <U <self>>
@@ -130,9 +130,9 @@ InsSeq{
         MethodDef{
           flags = 0
           name = <U has_break><<U has_break>>
-          args = [BlockArg{ expr = Local{
+          args = [Local{
               localVariable = <U <blk>>
-            } }]
+            }]
           rhs = Send{
             recv = Local{
               localVariable = <U <self>>
@@ -151,18 +151,18 @@ InsSeq{
         MethodDef{
           flags = 0
           name = <U has_return><<U has_return>>
-          args = [BlockArg{ expr = Local{
+          args = [Local{
               localVariable = <U <blk>>
-            } }]
+            }]
           rhs = Return{ expr = Literal{ value = 1 } }
         }
 
         MethodDef{
           flags = 0
           name = <U has_cast><<U has_cast>>
-          args = [BlockArg{ expr = Local{
+          args = [Local{
               localVariable = <U <blk>>
-            } }]
+            }]
           rhs = InsSeq{
             stats = [
               Send{

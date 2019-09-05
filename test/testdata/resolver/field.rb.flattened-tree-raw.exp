@@ -8,9 +8,9 @@ ClassDef{
       name = <U foo><<U foo>>
       args = [Local{
           localVariable = <U a>
-        }, BlockArg{ expr = Local{
+        }, Local{
           localVariable = <U <blk>>
-        } }]
+        }]
       rhs = Assign{
         lhs = UnresolvedIdent{
           kind = Instance
