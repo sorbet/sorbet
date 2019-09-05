@@ -107,7 +107,7 @@ public:
 
     u4 hash(const GlobalState &gs) const;
     u4 methodShapeHash(const GlobalState &gs) const;
-    u4 methodArgumentHash(const GlobalState &gs) const;
+    std::vector<u4> methodArgumentHash(const GlobalState &gs) const;
 
     std::vector<TypePtr> selfTypeArgs(const GlobalState &gs) const;
 

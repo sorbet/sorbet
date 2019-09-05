@@ -55,12 +55,14 @@ vector<ParsedArg> ArgParsing::parseArgs(core::Context ctx, ast::MethodDef::ARGS_
     return parsedArgs;
 }
 
-u4 ArgParsing::hashArgs(core::Context ctx, std::vector<ParsedArg> &args) {
-    u4 result = args.size();
+std::vector<u4> ArgParsing::hashArgs(core::Context ctx, std::vector<ParsedArg> &args) {
+    std::vector<u4> result;
+    result.reserve(args.size());
     for (const auto &e : args) {
+        u4 arg = 0;
         u1 flags = 0;
         if (e.keyword) {
-            result = core::mix(result, core::_hash(e.local._name.data(ctx)->shortName(ctx)));
+            arg = core::mix(arg, core::_hash(e.local._name.data(ctx)->shortName(ctx)));
             flags += 1;
         }
         if (e.repeated) {
@@ -76,7 +78,7 @@ u4 ArgParsing::hashArgs(core::Context ctx, std::vector<ParsedArg> &args) {
             flags += 16;
         }
 
-        result = core::mix(result, flags);
+        result.push_back(core::mix(arg, flags));
     }
     return result;
 }
