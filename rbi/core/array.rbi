@@ -1333,30 +1333,6 @@ class Array < Object
   end
   def prepend(*arg0); end
 
-  # Returns an array of all combinations of elements from all arrays.
-  #
-  # The length of the returned array is the product of the length of `self`
-  # and the argument arrays.
-  #
-  # If given a block, [product](Array.downloaded.ruby_doc#method-i-product)
-  # will yield all combinations and return `self` instead.
-  #
-  # ```ruby
-  # [1,2,3].product([4,5])     #=> [[1,4],[1,5],[2,4],[2,5],[3,4],[3,5]]
-  # [1,2].product([1,2])       #=> [[1,1],[1,2],[2,1],[2,2]]
-  # [1,2].product([3,4],[5,6]) #=> [[1,3,5],[1,3,6],[1,4,5],[1,4,6],
-  #                            #     [2,3,5],[2,3,6],[2,4,5],[2,4,6]]
-  # [1,2].product()            #=> [[1],[2]]
-  # [1,2].product([])          #=> []
-  # ```
-  sig do
-    type_parameters(:U).params(
-        arg0: T::Array[T.type_parameter(:U)],
-    )
-    .returns(T::Array[T::Array[T.any(Elem, T.type_parameter(:U))]])
-  end
-  def product(*arg0); end
-
   # Append — Pushes the given object(s) on to the end of this array. This
   # expression returns the array itself, so several appends may be chained
   # together. See also [\#pop](Array.downloaded.ruby_doc#method-i-pop) for

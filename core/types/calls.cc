@@ -1916,6 +1916,45 @@ public:
     }
 } Array_flatten;
 
+class Array_product : public IntrinsicMethod {
+public:
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
+        TypePtr element;
+        if (auto *ap = cast_type<AppliedType>(thisType)) {
+            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
+            ENFORCE(!ap->targs.empty());
+            element = ap->targs.front();
+        } else if (auto *tuple = cast_type<TupleType>(thisType)) {
+            element = tuple->elementType();
+        } else {
+            ENFORCE(false, "Array#product on unexpected type: {}", args.selfType->show(ctx));
+        }
+
+        vector<TypePtr> unwrappedElems;
+        unwrappedElems.reserve(args.args.size() + 1);
+        unwrappedElems.emplace_back(element);
+
+        for (int i = 0; i < args.args.size(); i++) {
+            auto argTyp = args.args[i]->type;
+            TypePtr el;
+            if (auto *ap = cast_type<AppliedType>(argTyp.get())) {
+                ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
+                ENFORCE(!ap->targs.empty());
+                el = ap->targs.front();
+            } else if (auto *tuple = cast_type<TupleType>(argTyp.get())) {
+                el = tuple->elementType();
+            } else {
+                ENFORCE(false, "Array#product called with unexpected type: {}", el->show(ctx));
+            }
+
+            unwrappedElems.emplace_back(el);
+        }
+
+        res.returnType = Types::arrayOf(ctx, TupleType::build(ctx, unwrappedElems));
+    }
+} Array_product;
+
 class Array_compact : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
@@ -2061,6 +2100,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
 
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
+    {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
