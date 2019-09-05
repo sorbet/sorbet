@@ -774,7 +774,7 @@ TEST_P(LSPTest, All) {
                 entry.second.push_back(usageAssertion);
             } else if (auto typeDefAssertion = dynamic_pointer_cast<TypeDefAssertion>(assertion)) {
                 auto &[typeDef, _typeAssertions] = typeDefMap[typeDefAssertion->symbol];
-                EXPECT_FALSE(typeDef != nullptr)
+                EXPECT_NE(typeDef, nullptr)
                     << fmt::format("Found multiple type-def comments for label `{}`.", defAssertion->symbol);
                 typeDef = typeDefAssertion;
             } else if (auto typeAssertion = dynamic_pointer_cast<TypeAssertion>(assertion)) {
