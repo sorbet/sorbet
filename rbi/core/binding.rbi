@@ -49,7 +49,7 @@ class Binding < Object
   # ```ruby
   # binding.eval("defined?(#{symbol}) == 'local-variable'")
   # ```
-  sig {params(symbol: Symbol).returns(T::Boolean)}
+  sig {params(symbol: T.any(String, Symbol)).returns(T::Boolean)}
   def local_variable_defined?(symbol); end
 
   # Returns the value of the local variable `symbol`.
@@ -67,7 +67,7 @@ class Binding < Object
   # ```ruby
   # binding.eval("#{symbol}")
   # ```
-  sig {params(symbol: Symbol).returns(T.untyped)}
+  sig {params(symbol: T.any(String, Symbol)).returns(T.untyped)}
   def local_variable_get(symbol); end
 
   # Set local variable named `symbol` as `obj`.
@@ -94,7 +94,7 @@ class Binding < Object
   # ```
   #
   # if `obj` can be dumped in Ruby code.
-  sig {params(symbol: Symbol, obj: T.untyped).returns(T.untyped)}
+  sig {params(symbol: T.any(String, Symbol), obj: T.untyped).returns(T.untyped)}
   def local_variable_set(symbol, obj); end
 
   # Returns the bound receiver of the binding object.
