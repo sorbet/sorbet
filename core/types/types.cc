@@ -848,9 +848,7 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
         singleton = s->symbol;
     } else {
         auto *at = core::cast_type<core::AppliedType>(ty);
-
-        // TODO: should the singletonClass check be an ENFORCE?
-        if (at == nullptr || !at->klass.data(ctx)->isSingletonClass(ctx)) {
+        if (at == nullptr) {
             return core::Symbols::noSymbol();
         }
 
