@@ -1935,8 +1935,8 @@ public:
         unwrappedElems.reserve(args.args.size() + 1);
         unwrappedElems.emplace_back(element);
 
-        for (int i = 0; i < args.args.size(); i++) {
-            auto argTyp = args.args[i]->type;
+        for (auto arg : args.args) {
+            auto argTyp = arg->type;
             TypePtr el;
             if (auto *ap = cast_type<AppliedType>(argTyp.get())) {
                 ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
