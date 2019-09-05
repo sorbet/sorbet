@@ -77,7 +77,7 @@ reports:
 
 [ask us questions on stack overflow]:
   https://stackoverflow.com/questions/tagged/sorbet
-[chat with us on slack]: https://sorbet.org/slack
+[chat with us on slack]: /slack
 [report issues on github]: https://github.com/sorbet/sorbet/issues
 
 ## Acknowledgements

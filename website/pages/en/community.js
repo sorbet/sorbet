@@ -63,7 +63,7 @@ class Index extends React.Component {
                 },
                 {
                   title: `Chat with us`,
-                  content: `We have a [Slack community](https://sorbet.org/slack) for general discussions. Topics include discussion of Sorbet internals, learning how others use Sorbet, and showing off projects built with Sorbet.`,
+                  content: `We have a [Slack community](/slack) for general discussions. Topics include discussion of Sorbet internals, learning how others use Sorbet, and showing off projects built with Sorbet.`,
                 },
                 {
                   title: `Report issues`,
