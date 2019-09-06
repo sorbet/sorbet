@@ -200,7 +200,10 @@ If instead you want to explore your files locally, here are some things to try:
     when 'sorbet-typed', Sorbet::Private::FetchRBIs.output_file, Sorbet::Private::FetchRBIs::SORBET_RBI_LIST
       make_step(Sorbet::Private::FetchRBIs)
     when 'gems', Sorbet::Private::GemGeneratorTracepoint.output_file
-      make_step(Sorbet::Private::GemGeneratorTracepoint)
+      -> do
+        make_step(Sorbet::Private::GemGeneratorTracepoint).call
+        make_step(Sorbet::Private::SuggestTyped).call
+      end
     when 'hidden-definitions', Sorbet::Private::HiddenMethodFinder.output_file
       make_step(Sorbet::Private::HiddenMethodFinder)
     when 'todo', Sorbet::Private::TodoRBI.output_file
