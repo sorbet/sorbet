@@ -252,27 +252,27 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
 void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     auto klass = method.data(ctx)->owner;
     auto name = method.data(ctx)->name;
-    ENFORCE(klass.data(ctx)->isClass());
+    ENFORCE(klass.data(ctx)->isClassOrModule());
     auto klassData = klass.data(ctx);
     InlinedVector<core::SymbolRef, 4> overridenMethods;
 
     // both of these match the behavior of the runtime checks, which will only allow public methods to be defined in
     // interfaces
-    if (klassData->isClassInterface() && method.data(ctx)->isPrivate()) {
+    if (klassData->isClassOrModuleInterface() && method.data(ctx)->isPrivate()) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be private", method.show(ctx));
         }
     }
 
-    if (klassData->isClassInterface() && method.data(ctx)->isProtected()) {
+    if (klassData->isClassOrModuleInterface() && method.data(ctx)->isProtected()) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be protected", method.show(ctx));
         }
     }
 
-    if (method.data(ctx)->isAbstract() && klassData->isClass() && klassData->isSingletonClass(ctx)) {
+    if (method.data(ctx)->isAbstract() && klassData->isClassOrModule() && klassData->isSingletonClass(ctx)) {
         auto attached = klassData->attachedClass(ctx);
-        if (attached.exists() && attached.data(ctx)->isClassModule()) {
+        if (attached.exists() && attached.data(ctx)->isClassOrModuleModule()) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadAbstractMethod)) {
                 e.setHeader("Static methods in a module cannot be abstract");
             }
@@ -374,7 +374,7 @@ void validateFinalAncestorHelper(const core::GlobalState &gs, const core::Symbol
                                  const unique_ptr<ast::ClassDef> &classDef, const core::SymbolRef errMsgClass,
                                  const string_view verb) {
     for (const auto &mixin : klass.data(gs)->mixins()) {
-        if (!mixin.data(gs)->isClassFinal()) {
+        if (!mixin.data(gs)->isClassOrModuleFinal()) {
             continue;
         }
         if (auto e = gs.beginError(getAncestorLoc(gs, classDef, mixin), core::errors::Resolver::FinalAncestor)) {
@@ -387,7 +387,7 @@ void validateFinalAncestorHelper(const core::GlobalState &gs, const core::Symbol
 
 void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRef klass,
                                const core::SymbolRef errMsgClass) {
-    if (!klass.data(gs)->isClassFinal()) {
+    if (!klass.data(gs)->isClassOrModuleFinal()) {
         return;
     }
     for (const auto [name, sym] : klass.data(gs)->members()) {
@@ -405,7 +405,7 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
 void validateFinal(const core::GlobalState &gs, const core::SymbolRef klass,
                    const unique_ptr<ast::ClassDef> &classDef) {
     const auto superClass = klass.data(gs)->superClass();
-    if (superClass.exists() && superClass.data(gs)->isClassFinal()) {
+    if (superClass.exists() && superClass.data(gs)->isClassOrModuleFinal()) {
         if (auto e = gs.beginError(getAncestorLoc(gs, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
             e.setHeader("`{}` was declared as final and cannot be inherited by `{}`", superClass.data(gs)->show(gs),
                         klass.data(gs)->show(gs));
@@ -424,7 +424,7 @@ void validateSealedAncestorHelper(const core::GlobalState &gs, const core::Symbo
                                   const string_view verb) {
     auto klassFile = klass.data(gs)->loc().file();
     for (const auto &mixin : klass.data(gs)->mixins()) {
-        if (!mixin.data(gs)->isClassSealed()) {
+        if (!mixin.data(gs)->isClassOrModuleSealed()) {
             continue;
         }
         // Statically, we allow including / extending in any file that adds a loc to sealedLocs.
@@ -449,7 +449,7 @@ void validateSealed(const core::GlobalState &gs, const core::SymbolRef klass,
     // Statically, we allow a subclass in any file that adds a loc to sealedLocs.
     // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
     auto file = klass.data(gs)->loc().file();
-    if (superClass.exists() && superClass.data(gs)->isClassSealed() &&
+    if (superClass.exists() && superClass.data(gs)->isClassOrModuleSealed() &&
         !absl::c_any_of(superClass.data(gs)->sealedLocs(gs), [file](auto loc) { return loc.file() == file; })) {
         if (auto e = gs.beginError(getAncestorLoc(gs, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
             e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.data(gs)->show(gs),
@@ -490,7 +490,7 @@ private:
             abstract.insert(abstract.end(), fromMixin.begin(), fromMixin.end());
         }
 
-        auto isAbstract = klass.data(gs)->isClassAbstract();
+        auto isAbstract = klass.data(gs)->isClassOrModuleAbstract();
         if (isAbstract) {
             for (auto [name, sym] : klass.data(gs)->members()) {
                 if (sym.exists() && sym.data(gs)->isMethod() && sym.data(gs)->isAbstract()) {
@@ -523,7 +523,7 @@ private:
     }
 
     void validateAbstract(const core::GlobalState &gs, core::SymbolRef sym) {
-        if (sym.data(gs)->isClassAbstract()) {
+        if (sym.data(gs)->isClassOrModuleAbstract()) {
             return;
         }
         auto loc = sym.data(gs)->loc();

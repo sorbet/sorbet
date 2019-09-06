@@ -334,7 +334,7 @@ void Environment::clearKnowledge(core::Context ctx, core::LocalVariable reassign
 bool isSingleton(core::Context ctx, core::SymbolRef sym) {
     return sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() ||
            sym == core::Symbols::TrueClass() ||
-           (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->isClassFinal());
+           (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->isClassOrModuleFinal());
 }
 
 void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, const cfg::Send *send,
@@ -824,7 +824,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
             [&](cfg::Alias *a) {
                 core::SymbolRef symbol = a->what.data(ctx)->dealias(ctx);
                 const auto &data = symbol.data(ctx);
-                if (data->isClass()) {
+                if (data->isClassOrModule()) {
                     auto singletonClass = data->lookupSingletonClass(ctx);
                     ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                     tp.type = singletonClass.data(ctx)->externalType(ctx);

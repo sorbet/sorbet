@@ -52,7 +52,7 @@ class NameInserter {
         auto newOwner = squashNames(ctx, owner, constLit->scope);
         core::SymbolRef existing = newOwner.data(ctx)->findMember(ctx, constLit->cnst);
         if (!existing.exists()) {
-            if (!newOwner.data(ctx)->isClass()) {
+            if (!newOwner.data(ctx)->isClassOrModule()) {
                 if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::InvalidClassOwner)) {
                     auto constLitName = constLit->cnst.data(ctx)->show(ctx);
                     auto newOwnerName = newOwner.data(ctx)->show(ctx);
@@ -243,7 +243,7 @@ public:
                 ENFORCE(klass->symbol == core::Symbols::root());
             }
             bool isModule = klass->kind == ast::ClassDefKind::Module;
-            if (!klass->symbol.data(ctx)->isClass()) {
+            if (!klass->symbol.data(ctx)->isClassOrModule()) {
                 // we might have already mangled the class symbol, so see if we have a symbol that is a class already
                 auto klassSymbol =
                     ctx.state.lookupClassSymbol(klass->symbol.data(ctx)->owner, klass->symbol.data(ctx)->name);
@@ -267,10 +267,10 @@ public:
                             "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
                 }
             } else if (klass->symbol.data(ctx)->isClassModuleSet() &&
-                       isModule != klass->symbol.data(ctx)->isClassModule()) {
+                       isModule != klass->symbol.data(ctx)->isClassOrModuleModule()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("`{}` was previously defined as a `{}`", klass->symbol.data(ctx)->show(ctx),
-                                klass->symbol.data(ctx)->isClassModule() ? "module" : "class");
+                                klass->symbol.data(ctx)->isClassOrModuleModule() ? "module" : "class");
                 }
             } else {
                 klass->symbol.data(ctx)->setIsModule(isModule);
@@ -588,11 +588,11 @@ public:
         core::SymbolRef owner = methodOwner(ctx);
 
         if (method->isSelf()) {
-            if (owner.data(ctx)->isClass()) {
+            if (owner.data(ctx)->isClassOrModule()) {
                 owner = owner.data(ctx)->singletonClass(ctx);
             }
         }
-        ENFORCE(owner.data(ctx)->isClass());
+        ENFORCE(owner.data(ctx)->isClassOrModule());
 
         auto parsedArgs = ast::ArgParsing::parseArgs(ctx, method->args);
 
@@ -656,7 +656,7 @@ public:
             ENFORCE(owner.exists(), "non-existing owner in contextClass");
             const auto &data = owner.data(gs);
 
-            if (data->isClass()) {
+            if (data->isClassOrModule()) {
                 break;
             }
             if (data->name == core::Names::staticInit()) {
@@ -671,7 +671,7 @@ public:
     unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         // forbid dynamic constant definition
         auto ownerData = ctx.owner.data(ctx);
-        if (!ownerData->isClass() && !ownerData->isDSLSynthesized()) {
+        if (!ownerData->isClassOrModule() && !ownerData->isDSLSynthesized()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::DynamicConstantAssignment)) {
                 e.setHeader("Dynamic constant assignment");
             }
@@ -680,7 +680,7 @@ public:
         auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         ENFORCE(lhs);
         core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs->scope);
-        if (!scope.data(ctx)->isClass()) {
+        if (!scope.data(ctx)->isClassOrModule()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::InvalidClassOwner)) {
                 auto constLitName = lhs->cnst.data(ctx)->show(ctx);
                 auto scopeName = scope.data(ctx)->show(ctx);
@@ -720,7 +720,7 @@ public:
                 asgn->rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
         core::Variance variance = core::Variance::Invariant;
         bool isTypeTemplate = send->fun == core::Names::typeTemplate();
-        if (!ctx.owner.data(ctx)->isClass()) {
+        if (!ctx.owner.data(ctx)->isClassOrModule()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Types must be defined in class or module scopes");
             }

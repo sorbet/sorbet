@@ -111,28 +111,28 @@ public:
     std::vector<TypePtr> selfTypeArgs(const GlobalState &gs) const;
 
     // selfType and externalType return the type of an instance of this Symbol
-    // (which must be isClass()), if instantiated without specific type
+    // (which must be isClassOrModule()), if instantiated without specific type
     // parameters, as seen from inside or outside of the class, respectively.
     TypePtr selfType(const GlobalState &gs) const;
     TypePtr externalType(const GlobalState &gs) const;
 
     inline InlinedVector<SymbolRef, 4> &mixins() {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         return mixins_;
     }
 
     inline const InlinedVector<SymbolRef, 4> &mixins() const {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         return mixins_;
     }
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         return typeParams;
     }
 
     inline const InlinedVector<SymbolRef, 4> &typeMembers() const {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         return typeParams;
     }
 
@@ -156,7 +156,7 @@ public:
     // TODO(dmitry) perf: most calls to this method could be eliminated as part of perf work.
     SymbolRef ref(const GlobalState &gs) const;
 
-    inline bool isClass() const {
+    inline bool isClassOrModule() const {
         return (flags & Symbol::Flags::CLASS) != 0;
     }
 
@@ -267,8 +267,8 @@ public:
         return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
     }
 
-    inline bool isClassModule() const {
-        ENFORCE(isClass());
+    inline bool isClassOrModuleModule() const {
+        ENFORCE(isClassOrModule());
         if (flags & Symbol::Flags::CLASS_MODULE)
             return true;
         if (flags & Symbol::Flags::CLASS_CLASS)
@@ -277,36 +277,36 @@ public:
     }
 
     inline bool isClassModuleSet() const {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         return flags & (Symbol::Flags::CLASS_MODULE | Symbol::Flags::CLASS_CLASS);
     }
 
-    inline bool isClassClass() const {
-        return !isClassModule();
+    inline bool isClassOrModuleClass() const {
+        return !isClassOrModuleModule();
     }
 
-    inline bool isClassAbstract() const {
-        ENFORCE(isClass());
+    inline bool isClassOrModuleAbstract() const {
+        ENFORCE(isClassOrModule());
         return (flags & Symbol::Flags::CLASS_ABSTRACT) != 0;
     }
 
-    inline bool isClassInterface() const {
-        ENFORCE(isClass());
+    inline bool isClassOrModuleInterface() const {
+        ENFORCE(isClassOrModule());
         return (flags & Symbol::Flags::CLASS_INTERFACE) != 0;
     }
 
-    inline bool isClassLinearizationComputed() const {
-        ENFORCE(isClass());
+    inline bool isClassOrModuleLinearizationComputed() const {
+        ENFORCE(isClassOrModule());
         return (flags & Symbol::Flags::CLASS_LINEARIZATION_COMPUTED) != 0;
     }
 
-    inline bool isClassFinal() const {
-        ENFORCE(isClass());
+    inline bool isClassOrModuleFinal() const {
+        ENFORCE(isClassOrModule());
         return (flags & Symbol::Flags::CLASS_FINAL) != 0;
     }
 
-    inline bool isClassSealed() const {
-        ENFORCE(isClass());
+    inline bool isClassOrModuleSealed() const {
+        ENFORCE(isClassOrModule());
         return (flags & Symbol::Flags::CLASS_SEALED) != 0;
     }
 
@@ -316,32 +316,32 @@ public:
     }
 
     inline void setStaticField() {
-        ENFORCE(!isClass() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
+        ENFORCE(!isClassOrModule() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
         flags = flags | Symbol::Flags::STATIC_FIELD;
     }
 
     inline void setField() {
-        ENFORCE(!isClass() && !isStaticField() && !isMethod() && !isTypeArgument() && !isTypeMember());
+        ENFORCE(!isClassOrModule() && !isStaticField() && !isMethod() && !isTypeArgument() && !isTypeMember());
         flags = flags | Symbol::Flags::FIELD;
     }
 
     inline void setMethod() {
-        ENFORCE(!isClass() && !isStaticField() && !isField() && !isTypeArgument() && !isTypeMember());
+        ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isTypeArgument() && !isTypeMember());
         flags = flags | Symbol::Flags::METHOD;
     }
 
     inline void setTypeArgument() {
-        ENFORCE(!isClass() && !isStaticField() && !isField() && !isMethod() && !isTypeMember());
+        ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isMethod() && !isTypeMember());
         flags = flags | Symbol::Flags::TYPE_ARGUMENT;
     }
 
     inline void setTypeMember() {
-        ENFORCE(!isClass() && !isStaticField() && !isField() && !isMethod() && !isTypeArgument());
+        ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isMethod() && !isTypeArgument());
         flags = flags | Symbol::Flags::TYPE_MEMBER;
     }
 
     inline void setIsModule(bool isModule) {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         if (isModule) {
             ENFORCE((flags & Symbol::Flags::CLASS_CLASS) == 0);
             flags = flags | Symbol::Flags::CLASS_MODULE;
@@ -446,27 +446,27 @@ public:
     }
 
     inline void setClassAbstract() {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_ABSTRACT;
     }
 
     inline void setClassInterface() {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_INTERFACE;
     }
 
     inline void setClassLinearizationComputed() {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_LINEARIZATION_COMPUTED;
     }
 
     inline void setClassFinal() {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_FINAL;
     }
 
     inline void setClassSealed() {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_SEALED;
     }
 
@@ -478,7 +478,7 @@ public:
         // We should only be able to set the type alias bit on static fields.
         // But it's rather unweidly to ask "isStaticField() && isTypeAlias()" just to satisfy the ENFORCE.
         // To make things nicer, we relax the ENFORCE here to also allow asking whether "some constant" is a type alias.
-        ENFORCE(isClass() || isStaticField() || isTypeMember());
+        ENFORCE(isClassOrModule() || isStaticField() || isTypeMember());
         return isStaticField() && (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
     }
 
@@ -557,12 +557,12 @@ public:
     SymbolRef superClassOrRebind; // method arugments store rebind here
 
     inline SymbolRef superClass() const {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         return superClassOrRebind;
     }
 
     inline void setSuperClass(SymbolRef claz) {
-        ENFORCE(isClass());
+        ENFORCE(isClassOrModule());
         superClassOrRebind = claz;
     }
 
@@ -630,7 +630,7 @@ private:
     /*
      * mixins and superclasses: `superClass` is *not* included in the
      *   `argumentsOrMixins` list. `superClass` may not exist even if
-     *   `isClass()`, which implies that this symbol is either a module or one
+     *   `isClassOrModule()`, which implies that this symbol is either a module or one
      *   of our magic synthetic classes. During parsing+naming, `superClass ==
      *   todo()` iff every definition we've seen for this class has had an
      *   implicit superclass (`class Foo` with no `< Parent`); Once we hit

@@ -44,7 +44,7 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     }
 
     string prefix = "";
-    if (sym->owner.exists() && sym->owner.data(gs)->isClass() && sym->owner.data(gs)->attachedClass(gs).exists()) {
+    if (sym->owner.exists() && sym->owner.data(gs)->isClassOrModule() && sym->owner.data(gs)->attachedClass(gs).exists()) {
         prefix = "self.";
     }
     auto result = make_unique<DocumentSymbol>(prefix + sym->name.show(gs), kind, move(range), move(selectionRange));
@@ -57,7 +57,7 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 
     vector<unique_ptr<DocumentSymbol>> children;
     symbolRef2DocumentSymbolWalkMembers(gs, symRef, filter, children);
-    if (sym->isClass()) {
+    if (sym->isClassOrModule()) {
         auto singleton = sym->lookupSingletonClass(gs);
         if (singleton.exists()) {
             symbolRef2DocumentSymbolWalkMembers(gs, singleton, filter, children);

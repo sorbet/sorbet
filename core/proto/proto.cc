@@ -48,7 +48,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     symbolProto.set_id(sym._id);
     *symbolProto.mutable_name() = toProto(gs, data->name);
 
-    if (data->isClass()) {
+    if (data->isClassOrModule()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::CLASS);
     } else if (data->isStaticField()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::STATIC_FIELD);
@@ -62,8 +62,8 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_ARGUMENT);
     }
 
-    if (data->isClass() || data->isMethod()) {
-        if (data->isClass()) {
+    if (data->isClassOrModule() || data->isMethod()) {
+        if (data->isClassOrModule()) {
             for (auto thing : data->mixins()) {
                 symbolProto.add_mixins(thing._id);
             }
@@ -73,7 +73,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             }
         }
 
-        if (data->isClass() && data->superClass().exists()) {
+        if (data->isClassOrModule() && data->superClass().exists()) {
             symbolProto.set_superclass(data->superClass()._id);
         }
     }

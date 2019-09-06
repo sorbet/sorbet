@@ -477,7 +477,7 @@ void GlobalState::initEmpty() {
     vector<SymbolRef> needSingletons;
     for (auto &sym : symbols) {
         auto ref = sym.ref(*this);
-        if (ref.exists() && sym.isClass()) {
+        if (ref.exists() && sym.isClassOrModule()) {
             needSingletons.emplace_back(ref);
         }
     }
@@ -631,7 +631,7 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(
-        if (data->isClass()) { categoryCounterInc("symbols", "class"); } else if (data->isMethod()) {
+        if (data->isClassOrModule()) { categoryCounterInc("symbols", "class"); } else if (data->isMethod()) {
             categoryCounterInc("symbols", "method");
         } else if (data->isField()) { categoryCounterInc("symbols", "field"); } else if (data->isStaticField()) {
             categoryCounterInc("symbols", "static_field");
@@ -647,14 +647,14 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
 
 SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
     ENFORCE(!owner.exists() || // used when entering entirely syntehtic classes
-            owner.data(*this)->isClass());
+            owner.data(*this)->isClassOrModule());
     ENFORCE(name.data(*this)->isClassName(*this));
     return enterSymbol(loc, owner, name, Symbol::Flags::CLASS);
 }
 
 SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
     u4 flags;
-    ENFORCE(owner.data(*this)->isClass());
+    ENFORCE(owner.data(*this)->isClassOrModule());
     if (variance == Variance::Invariant) {
         flags = Symbol::Flags::TYPE_INVARIANT;
     } else if (variance == Variance::CoVariant) {
@@ -695,7 +695,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
     bool isBlock =
         name.data(*this)->kind == NameKind::UNIQUE && name.data(*this)->unique.original == Names::blockTemp();
-    ENFORCE(isBlock || owner.data(*this)->isClass(), "entering method symbol into not-a-class");
+    ENFORCE(isBlock || owner.data(*this)->isClassOrModule(), "entering method symbol into not-a-class");
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD);
 }
 
@@ -732,12 +732,12 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, co
 }
 
 SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.data(*this)->isClass(), "entering field symbol into not-a-class");
+    ENFORCE(owner.data(*this)->isClassOrModule(), "entering field symbol into not-a-class");
     return enterSymbol(loc, owner, name, Symbol::Flags::FIELD);
 }
 
 SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.data(*this)->isClass());
+    ENFORCE(owner.data(*this)->isClassOrModule());
     return enterSymbol(loc, owner, name, Symbol::Flags::STATIC_FIELD);
 }
 
@@ -1081,7 +1081,7 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
     ownerMembers.erase(fnd);
     ownerMembers[name] = what;
     whatData->name = name;
-    if (whatData->isClass()) {
+    if (whatData->isClassOrModule()) {
         auto singleton = whatData->lookupSingletonClass(*this);
         if (singleton.exists()) {
             mangleRenameSymbol(singleton, singleton.data(*this)->name);
@@ -1442,7 +1442,7 @@ SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
 
 SymbolRef GlobalState::lookupStaticInitForClass(SymbolRef klass) const {
     auto &classData = klass.data(*this);
-    ENFORCE(classData->isClass());
+    ENFORCE(classData->isClassOrModule());
     auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));
     return ref;
