@@ -24,9 +24,13 @@ class Test
       T.absurd(x)
     end
 
+    T.reveal_type(x) # error: Revealed type: `Base1[T.untyped]`
+
     if x.is_a? Child2
       puts x # error: This code is unreachable
       T.absurd(x)
     end
+
+    T.reveal_type(x) # error: Revealed type: `Base1[T.untyped]`
   end
 end
