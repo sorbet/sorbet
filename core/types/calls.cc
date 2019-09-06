@@ -503,7 +503,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                         }
 
                         auto suggestedName = possibleSymbol->isClassOrModule() ? alternative.symbol.show(ctx) + ".new"
-                                                                       : alternative.symbol.show(ctx);
+                                                                               : alternative.symbol.show(ctx);
 
                         bool addedAutocorrect = false;
                         if (possibleSymbol->isClassOrModule()) {
