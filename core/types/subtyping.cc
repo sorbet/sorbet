@@ -817,7 +817,10 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
         bool rtl = a1->klass == a2->klass || a1->klass.data(ctx)->derivesFrom(ctx, a2->klass);
         bool ltr = !rtl && a2->klass.data(ctx)->derivesFrom(ctx, a1->klass);
         if (!rtl && !ltr) {
-            if (a1->klass.data(ctx)->isClass() && a2->klass.data(ctx)->isClass()) {
+            if (a1->klass.data(ctx)->isClassClass() && a2->klass.data(ctx)->isClassClass()) {
+                // At this point, the two types are both classes, and unrelated
+                // to each other. Because ruby does not support multiple
+                // inheritance, this type is empty.
                 return Types::bottom();
             } else {
                 return AndType::make_shared(t1, t2); // we can as well return nothing here?
