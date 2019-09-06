@@ -163,7 +163,7 @@ private:
             }
             scope = scope->parent.get();
         }
-        return nesting->scope.data(ctx)->findMemberTransitive(ctx, name); // ctx.state.lookupSymbolWithFlags(nesting->scope, name, flags);
+        return nesting->scope.data(ctx)->findMemberTransitive(ctx, name);
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
