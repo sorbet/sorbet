@@ -120,6 +120,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
         // Propagate the termination flag across the two queues.
         NotifyOnDestruction notifyIncoming(incomingMtx, incomingQueue.terminate);
         NotifyOnDestruction notifyProcessing(processingMtx, processingQueue.terminate);
+        ttgs.switchToNewThread();
         while (true) {
             unique_ptr<LSPMessage> msg;
             {

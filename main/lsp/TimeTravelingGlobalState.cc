@@ -269,4 +269,9 @@ bool TimeTravelingGlobalState::canTakeFastPath(const LSPFileUpdates &updates) co
     return true;
 }
 
+void TimeTravelingGlobalState::switchToNewThread() {
+    // Re-create error queue that is owned by new thread.
+    gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer);
+}
+
 } // namespace sorbet::realmain::lsp
