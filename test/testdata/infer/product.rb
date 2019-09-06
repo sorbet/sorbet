@@ -54,3 +54,8 @@ T.assert_type!(
 
 T.assert_type!(empty.product(bar), T::Array[[T.untyped, Integer]])
 
+foo.product("haha") # error: Expected `T::Array[U]` but found `String("haha")` for argument `arg0`
+          # ^^^^^^ error: You must pass an Array as every argument to Array#product
+
+foo.product(bar, "haha") # error: Expected `T::Array[U]` but found `String("haha")` for argument `arg0`
+               # ^^^^^^ error: You must pass an Array as every argument to Array#product
