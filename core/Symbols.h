@@ -70,13 +70,13 @@ public:
         // --- For our current symbol type, what flags does it have?
 
         // Class flags
-        static constexpr u4 CLASS_CLASS = 0x0000'0010;
-        static constexpr u4 CLASS_MODULE = 0x0000'0020;
-        static constexpr u4 CLASS_ABSTRACT = 0x0000'0040;
-        static constexpr u4 CLASS_INTERFACE = 0x0000'0080;
-        static constexpr u4 CLASS_LINEARIZATION_COMPUTED = 0x0000'0100;
-        static constexpr u4 CLASS_FINAL = 0x0000'0200;
-        static constexpr u4 CLASS_SEALED = 0x0000'0400;
+        static constexpr u4 CLASS_OR_MODULE_CLASS = 0x0000'0010;
+        static constexpr u4 CLASS_OR_MODULE_MODULE = 0x0000'0020;
+        static constexpr u4 CLASS_OR_MODULE_ABSTRACT = 0x0000'0040;
+        static constexpr u4 CLASS_OR_MODULE_INTERFACE = 0x0000'0080;
+        static constexpr u4 CLASS_OR_MODULE_LINEARIZATION_COMPUTED = 0x0000'0100;
+        static constexpr u4 CLASS_OR_MODULE_FINAL = 0x0000'0200;
+        static constexpr u4 CLASS_OR_MODULE_SEALED = 0x0000'0400;
 
         // Method flags
         static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
@@ -269,16 +269,16 @@ public:
 
     inline bool isClassOrModuleModule() const {
         ENFORCE(isClassOrModule());
-        if (flags & Symbol::Flags::CLASS_MODULE)
+        if (flags & Symbol::Flags::CLASS_OR_MODULE_MODULE)
             return true;
-        if (flags & Symbol::Flags::CLASS_CLASS)
+        if (flags & Symbol::Flags::CLASS_OR_MODULE_CLASS)
             return false;
         Exception::raise("Should never happen");
     }
 
     inline bool isClassModuleSet() const {
         ENFORCE(isClassOrModule());
-        return flags & (Symbol::Flags::CLASS_MODULE | Symbol::Flags::CLASS_CLASS);
+        return flags & (Symbol::Flags::CLASS_OR_MODULE_MODULE | Symbol::Flags::CLASS_OR_MODULE_CLASS);
     }
 
     inline bool isClassOrModuleClass() const {
@@ -287,27 +287,27 @@ public:
 
     inline bool isClassOrModuleAbstract() const {
         ENFORCE(isClassOrModule());
-        return (flags & Symbol::Flags::CLASS_ABSTRACT) != 0;
+        return (flags & Symbol::Flags::CLASS_OR_MODULE_ABSTRACT) != 0;
     }
 
     inline bool isClassOrModuleInterface() const {
         ENFORCE(isClassOrModule());
-        return (flags & Symbol::Flags::CLASS_INTERFACE) != 0;
+        return (flags & Symbol::Flags::CLASS_OR_MODULE_INTERFACE) != 0;
     }
 
     inline bool isClassOrModuleLinearizationComputed() const {
         ENFORCE(isClassOrModule());
-        return (flags & Symbol::Flags::CLASS_LINEARIZATION_COMPUTED) != 0;
+        return (flags & Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED) != 0;
     }
 
     inline bool isClassOrModuleFinal() const {
         ENFORCE(isClassOrModule());
-        return (flags & Symbol::Flags::CLASS_FINAL) != 0;
+        return (flags & Symbol::Flags::CLASS_OR_MODULE_FINAL) != 0;
     }
 
     inline bool isClassOrModuleSealed() const {
         ENFORCE(isClassOrModule());
-        return (flags & Symbol::Flags::CLASS_SEALED) != 0;
+        return (flags & Symbol::Flags::CLASS_OR_MODULE_SEALED) != 0;
     }
 
     inline void setClassOrModule() {
@@ -343,11 +343,11 @@ public:
     inline void setIsModule(bool isModule) {
         ENFORCE(isClassOrModule());
         if (isModule) {
-            ENFORCE((flags & Symbol::Flags::CLASS_CLASS) == 0);
-            flags = flags | Symbol::Flags::CLASS_MODULE;
+            ENFORCE((flags & Symbol::Flags::CLASS_OR_MODULE_CLASS) == 0);
+            flags = flags | Symbol::Flags::CLASS_OR_MODULE_MODULE;
         } else {
-            ENFORCE((flags & Symbol::Flags::CLASS_MODULE) == 0);
-            flags = flags | Symbol::Flags::CLASS_CLASS;
+            ENFORCE((flags & Symbol::Flags::CLASS_OR_MODULE_MODULE) == 0);
+            flags = flags | Symbol::Flags::CLASS_OR_MODULE_CLASS;
         }
     }
 
@@ -447,27 +447,27 @@ public:
 
     inline void setClassAbstract() {
         ENFORCE(isClassOrModule());
-        flags |= Symbol::Flags::CLASS_ABSTRACT;
+        flags |= Symbol::Flags::CLASS_OR_MODULE_ABSTRACT;
     }
 
     inline void setClassInterface() {
         ENFORCE(isClassOrModule());
-        flags |= Symbol::Flags::CLASS_INTERFACE;
+        flags |= Symbol::Flags::CLASS_OR_MODULE_INTERFACE;
     }
 
     inline void setClassLinearizationComputed() {
         ENFORCE(isClassOrModule());
-        flags |= Symbol::Flags::CLASS_LINEARIZATION_COMPUTED;
+        flags |= Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED;
     }
 
     inline void setClassFinal() {
         ENFORCE(isClassOrModule());
-        flags |= Symbol::Flags::CLASS_FINAL;
+        flags |= Symbol::Flags::CLASS_OR_MODULE_FINAL;
     }
 
     inline void setClassSealed() {
         ENFORCE(isClassOrModule());
-        flags |= Symbol::Flags::CLASS_SEALED;
+        flags |= Symbol::Flags::CLASS_OR_MODULE_SEALED;
     }
 
     inline void setTypeAlias() {
