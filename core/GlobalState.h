@@ -207,6 +207,8 @@ public:
 
     std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
 
+    SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;
+
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
     struct DeepCloneHistoryEntry {
@@ -246,7 +248,6 @@ private:
 
     SymbolRef lookupSymbolSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;
     SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;
-
     SymbolRef getTopLevelClassSymbol(NameRef name);
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
