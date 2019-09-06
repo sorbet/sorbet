@@ -1920,35 +1920,36 @@ class Array_product : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
-        TypePtr element;
+        vector<TypePtr> unwrappedElems;
+        unwrappedElems.reserve(args.args.size() + 1);
+
         if (auto *ap = cast_type<AppliedType>(thisType)) {
             ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
             ENFORCE(!ap->targs.empty());
-            element = ap->targs.front();
+            unwrappedElems.emplace_back(ap->targs.front());
         } else if (auto *tuple = cast_type<TupleType>(thisType)) {
-            element = tuple->elementType();
+            unwrappedElems.emplace_back(tuple->elementType());
         } else {
             ENFORCE(false, "Array#product on unexpected type: {}", args.selfType->show(ctx));
         }
 
-        vector<TypePtr> unwrappedElems;
-        unwrappedElems.reserve(args.args.size() + 1);
-        unwrappedElems.emplace_back(element);
-
+        auto i = -1;
         for (auto arg : args.args) {
+            i++;
             auto argTyp = arg->type;
-            TypePtr el;
             if (auto *ap = cast_type<AppliedType>(argTyp.get())) {
                 ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
                 ENFORCE(!ap->targs.empty());
-                el = ap->targs.front();
+                unwrappedElems.emplace_back(ap->targs.front());
             } else if (auto *tuple = cast_type<TupleType>(argTyp.get())) {
-                el = tuple->elementType();
+                unwrappedElems.emplace_back(tuple->elementType());
             } else {
-                ENFORCE(false, "Array#product called with unexpected type: {}", el->show(ctx));
+                auto argLoc = args.locs.args[i];
+                if (auto e = ctx.state.beginError(argLoc, core::errors::Infer::MethodArgumentMismatch)) {
+                    e.setHeader("You must pass an Array as every argument to Array#product");
+                }
+                return;
             }
-
-            unwrappedElems.emplace_back(el);
         }
 
         res.returnType = Types::arrayOf(ctx, TupleType::build(ctx, unwrappedElems));
