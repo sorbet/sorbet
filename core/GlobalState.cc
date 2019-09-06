@@ -649,7 +649,7 @@ SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) 
     ENFORCE(!owner.exists() || // used when entering entirely syntehtic classes
             owner.data(*this)->isClassOrModule());
     ENFORCE(name.data(*this)->isClassName(*this));
-    return enterSymbol(loc, owner, name, Symbol::Flags::CLASS);
+    return enterSymbol(loc, owner, name, Symbol::Flags::CLASS_OR_MODULE);
 }
 
 SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance) {

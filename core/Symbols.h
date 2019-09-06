@@ -55,7 +55,7 @@ public:
         //
 
         // --- What type of symbol is this? ---
-        static constexpr u4 CLASS = 0x8000'0000;
+        static constexpr u4 CLASS_OR_MODULE = 0x8000'0000;
         static constexpr u4 METHOD = 0x4000'0000;
         static constexpr u4 FIELD = 0x2000'0000;
         static constexpr u4 STATIC_FIELD = 0x1000'0000;
@@ -157,7 +157,7 @@ public:
     SymbolRef ref(const GlobalState &gs) const;
 
     inline bool isClassOrModule() const {
-        return (flags & Symbol::Flags::CLASS) != 0;
+        return (flags & Symbol::Flags::CLASS_OR_MODULE) != 0;
     }
 
     bool isSingletonClass(const GlobalState &gs) const;
@@ -312,7 +312,7 @@ public:
 
     inline void setClassOrModule() {
         ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
-        flags = flags | Symbol::Flags::CLASS;
+        flags = flags | Symbol::Flags::CLASS_OR_MODULE;
     }
 
     inline void setStaticField() {
