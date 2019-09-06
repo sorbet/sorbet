@@ -5,5 +5,5 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
   class <S <C <U A>> $1>[<C <U B>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/fuzz_type_template_overwrite.rb start=2:7 end=2:8}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/fuzz_type_template_overwrite.rb start=2:1 end=5:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/fuzz_type_template_overwrite.rb start=??? end=???}
-    type-member(=) <S <C <U A>> $1><C <U B>> -> LambdaParam(<S <C <U A>> $1><C <U B>>, lower=T.noreturn, upper=<any>) @ Loc {file=test/testdata/namer/fuzz_type_template_overwrite.rb start=4:3 end=4:20}
+    type-member(=) <S <C <U A>> $1><C <U B>> -> LambdaParam(<S <C <U A>> $1><C <U B>>, lower=T.untyped, upper=T.untyped) @ Loc {file=test/testdata/namer/fuzz_type_template_overwrite.rb start=4:3 end=4:20}
 
