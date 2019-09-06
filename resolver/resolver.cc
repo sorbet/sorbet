@@ -163,7 +163,7 @@ private:
             }
             scope = scope->parent.get();
         }
-        return ctx.state.lookupSymbolWithFlags(nesting->scope, name, flags);
+        return nesting->scope.data(ctx)->findMemberTransitive(ctx, name); // ctx.state.lookupSymbolWithFlags(nesting->scope, name, flags);
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
@@ -595,8 +595,7 @@ public:
 
             // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
             // we'll still emit a warning when the rhs of a type alias doesn't resolve.
-            auto item = ResolutionItem{
-                nesting_, id, core::Symbol::Flags::STATIC_FIELD_TYPE_ALIAS & core::Symbol::Flags::STATIC_FIELD};
+            auto item = ResolutionItem{nesting_, id, 0};
 
             this->todo_.emplace_back(std::move(item));
             return asgn;
