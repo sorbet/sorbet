@@ -97,6 +97,85 @@ string uriToFilePath(string_view prefixUrl, string_view uri) {
     return string(uri.substr(prefixUrl.length() + 1));
 }
 
+void assertLocationsMatch(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, string_view uriPrefix,
+                          string_view symbol, const vector<shared_ptr<RangeAssertion>> &allLocs, int line,
+                          int character, string_view locSourceLine, string_view locFilename,
+                          vector<unique_ptr<Location>> &locations) {
+    auto expectedLocationsIt = allLocs.begin();
+    auto actualLocationsIt = locations.begin();
+    while (expectedLocationsIt != allLocs.end() && actualLocationsIt != locations.end()) {
+        auto expectedLocation = (*expectedLocationsIt)->getLocation(uriPrefix);
+        auto &actualLocation = *actualLocationsIt;
+
+        // If true, the expectedLocation is a subset of the actualLocation
+        if (actualLocation->uri == expectedLocation->uri &&
+            rangeIsSubset(*actualLocation->range, *expectedLocation->range)) {
+            // Assertion passes. Consume both.
+            actualLocationsIt++;
+            expectedLocationsIt++;
+        } else {
+            const int cmp = expectedLocation->cmp(*actualLocation);
+            if (cmp < 0) {
+                // Expected location is *before* actual location.
+                auto expectedFilePath = uriToFilePath(uriPrefix, expectedLocation->uri);
+                ADD_FAILURE_AT(expectedFilePath.c_str(), expectedLocation->range->start->line + 1)
+                    << fmt::format("Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
+                                   "did not report reference at:\n{}",
+                                   symbol,
+                                   prettyPrintRangeComment(
+                                       locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
+                                   prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedLocation),
+                                                           *expectedLocation->range, ""));
+                expectedLocationsIt++;
+            } else if (cmp > 0) {
+                // Expected location is *after* actual location
+                auto actualFilePath = uriToFilePath(uriPrefix, actualLocation->uri);
+                ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1)
+                    << fmt::format("Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
+                                   "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
+                                   symbol,
+                                   prettyPrintRangeComment(
+                                       locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
+                                   prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation),
+                                                           *actualLocation->range, ""));
+                actualLocationsIt++;
+            } else {
+                // Should never happen.
+                ADD_FAILURE()
+                    << "Error in test runner: identical locations weren't reported as subsets of one another.";
+                expectedLocationsIt++;
+                actualLocationsIt++;
+            }
+        }
+    }
+
+    while (expectedLocationsIt != allLocs.end()) {
+        auto expectedLocation = (*expectedLocationsIt)->getLocation(uriPrefix);
+        auto expectedFilePath = uriToFilePath(uriPrefix, expectedLocation->uri);
+        ADD_FAILURE_AT(expectedFilePath.c_str(), expectedLocation->range->start->line + 1) << fmt::format(
+            "Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
+            "did not report reference at:\n{}",
+            symbol,
+            prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
+            prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedLocation), *expectedLocation->range,
+                                    ""));
+        expectedLocationsIt++;
+    }
+
+    while (actualLocationsIt != locations.end()) {
+        auto &actualLocation = *actualLocationsIt;
+        auto actualFilePath = uriToFilePath(uriPrefix, actualLocation->uri);
+        ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1) << fmt::format(
+            "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
+            "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
+            symbol,
+            prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
+            prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation), *actualLocation->range,
+                                    ""));
+        actualLocationsIt++;
+    }
+}
+
 RangeAssertion::RangeAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine)
     : filename(filename), range(move(range)), assertionLine(assertionLine) {}
 
@@ -430,73 +509,8 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
     fast_sort(locations,
               [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
 
-    auto expectedLocationsIt = allLocs.begin();
-    auto actualLocationsIt = locations.begin();
-    while (expectedLocationsIt != allLocs.end() && actualLocationsIt != locations.end()) {
-        auto expectedLocation = (*expectedLocationsIt)->getLocation(uriPrefix);
-        auto &actualLocation = *actualLocationsIt;
-
-        // If true, the expectedLocation is a subset of the actualLocation
-        if (actualLocation->uri == expectedLocation->uri &&
-            rangeIsSubset(*actualLocation->range, *expectedLocation->range)) {
-            // Assertion passes. Consume both.
-            actualLocationsIt++;
-            expectedLocationsIt++;
-        } else {
-            const int cmp = expectedLocation->cmp(*actualLocation);
-            if (cmp < 0) {
-                // Expected location is *before* actual location.
-                auto expectedFilePath = uriToFilePath(uriPrefix, expectedLocation->uri);
-                ADD_FAILURE_AT(expectedFilePath.c_str(), expectedLocation->range->start->line + 1) << fmt::format(
-                    "Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
-                    "did not report reference at:\n{}",
-                    symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-                    prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedLocation),
-                                            *expectedLocation->range, ""));
-                expectedLocationsIt++;
-            } else if (cmp > 0) {
-                // Expected location is *after* actual location
-                auto actualFilePath = uriToFilePath(uriPrefix, actualLocation->uri);
-                ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1) << fmt::format(
-                    "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
-                    "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
-                    symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-                    prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation),
-                                            *actualLocation->range, ""));
-                actualLocationsIt++;
-            } else {
-                // Should never happen.
-                ADD_FAILURE()
-                    << "Error in test runner: identical locations weren't reported as subsets of one another.";
-                expectedLocationsIt++;
-                actualLocationsIt++;
-            }
-        }
-    }
-
-    while (expectedLocationsIt != allLocs.end()) {
-        auto expectedLocation = (*expectedLocationsIt)->getLocation(uriPrefix);
-        auto expectedFilePath = uriToFilePath(uriPrefix, expectedLocation->uri);
-        ADD_FAILURE_AT(expectedFilePath.c_str(), expectedLocation->range->start->line + 1) << fmt::format(
-            "Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
-            "did not report reference at:\n{}",
-            symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-            prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedLocation), *expectedLocation->range,
-                                    ""));
-        expectedLocationsIt++;
-    }
-
-    while (actualLocationsIt != locations.end()) {
-        auto &actualLocation = *actualLocationsIt;
-        auto actualFilePath = uriToFilePath(uriPrefix, actualLocation->uri);
-        ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1) << fmt::format(
-            "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
-            "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
-            symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-            prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation), *actualLocation->range,
-                                    ""));
-        actualLocationsIt++;
-    }
+    assertLocationsMatch(sourceFileContents, uriPrefix, symbol, allLocs, line, character, locSourceLine, locFilename,
+                         locations);
 }
 
 string DefAssertion::toString() const {
