@@ -605,8 +605,13 @@ TypePtr Types::getProcReturnType(Context ctx, const TypePtr &procType) {
     return applied->targs.front();
 }
 
+bool Types::isAsSpecificAs(Context ctx, const TypePtr &t1, const TypePtr &t2) {
+    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2,
+                                    UntypedMode::AlwaysIncompatible);
+}
+
 bool Types::isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2) {
-    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2);
+    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
 bool TypeVar::isFullyDefined() {
@@ -846,14 +851,7 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
         if (at == nullptr) {
             return core::Symbols::noSymbol();
         }
-        // If this class is a "real" generic, leave it alone. We're not quite
-        // sure yet what it means to move between the "attached" and "singleton"
-        // levels for generic singletons. However, if the singleton has kind `*`
-        // due to all type members being fixed:, we're OK to treat the
-        // AppliedType and the Symbol as interchangeable here.
-        if (at->klass.data(ctx)->typeArity(ctx) != 0) {
-            return core::Symbols::noSymbol();
-        }
+
         singleton = at->klass;
     }
     return singleton.data(ctx)->attachedClass(ctx);

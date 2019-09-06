@@ -67,6 +67,11 @@ template <class T, class... Args> TypePtr make_type(Args &&... args) {
     return TypePtr(std::make_shared<T>(std::forward<Args>(args)...));
 }
 
+enum class UntypedMode {
+    AlwaysCompatible = 1,
+    AlwaysIncompatible = 2,
+};
+
 class Types final {
 public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
@@ -75,12 +80,21 @@ public:
     /** Lower upper bound: the narrowest type that is supper type of both t1 and t2 */
     static TypePtr any(Context ctx, const TypePtr &t1, const TypePtr &t2);
 
-    /** is every instance of  t1 an  instance of t2? */
-    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2);
+    /**
+     * is every instance of  t1 an  instance of t2?
+     *
+     * The parameter `mode` controls whether or not `T.untyped` is
+     * considered to be a super type or subtype of all other types */
+    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2,
+                                         UntypedMode mode);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
     static bool isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2);
     static bool equiv(Context ctx, const TypePtr &t1, const TypePtr &t2);
+
+    /** check that t1 <: t2, but do not consider `T.untyped` as super type or a subtype of all other types */
+    static bool isAsSpecificAs(Context ctx, const TypePtr &t1, const TypePtr &t2);
+    static bool equivNoUntyped(Context ctx, const TypePtr &t1, const TypePtr &t2);
 
     static TypePtr top();
     static TypePtr bottom();

@@ -62,18 +62,39 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
             newResultType = make_type<ClassType>(ref);
         } else {
             vector<TypePtr> targs;
-            for (auto tm : typeMembers()) {
+            targs.reserve(typeMembers().size());
+
+            // Special-case covariant stdlib generics to have their types
+            // defaulted to `T.untyped`. This set *should not* grow over time.
+            bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
+                                   ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
+                                   ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator();
+
+            for (auto &tm : typeMembers()) {
                 auto tmData = tm.data(gs);
-                if (tmData->isFixed()) {
-                    auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
-                    ENFORCE(lambdaParam != nullptr);
-                    targs.emplace_back(lambdaParam->upperBound);
-                } else {
-                    // NOTE: at some point in the future it might make sense to
-                    // instantiate this with the upper bound of the type
+                auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
+                ENFORCE(lambdaParam != nullptr);
+
+                if (isStdlibGeneric) {
+                    // For backwards compatibility, instantiate stdlib generics
+                    // with T.untyped.
                     targs.emplace_back(Types::untyped(gs, ref));
+                } else if (tmData->isFixed() || tmData->isCovariant()) {
+                    // Default fixed or covariant parameters to their upper
+                    // bound.
+                    targs.emplace_back(lambdaParam->upperBound);
+                } else if (tmData->isInvariant()) {
+                    // We instantiate Invariant type members as T.untyped as
+                    // this will behave a bit like a unification variable with
+                    // Types::glb.
+                    targs.emplace_back(Types::untyped(gs, ref));
+                } else {
+                    // The remaining case is a contravariant parameter, which
+                    // gets defaulted to its lower bound.
+                    targs.emplace_back(lambdaParam->lowerBound);
                 }
             }
+
             newResultType = make_type<AppliedType>(ref, targs);
         }
         {
