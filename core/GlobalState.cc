@@ -33,7 +33,7 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
     data->name = nameId;
     data->owner = Symbols::root();
     data->flags = 0;
-    data->setClass();
+    data->setClassOrModule();
     data->setIsModule(isModule);
     data->setSuperClass(SymbolRef(this, superclass));
 

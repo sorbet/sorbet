@@ -310,7 +310,7 @@ public:
         return (flags & Symbol::Flags::CLASS_SEALED) != 0;
     }
 
-    inline void setClass() {
+    inline void setClassOrModule() {
         ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
         flags = flags | Symbol::Flags::CLASS;
     }
