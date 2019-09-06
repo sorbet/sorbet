@@ -228,11 +228,6 @@ void TimeTravelingGlobalState::commitEdits(int version, LSPFileUpdates &update) 
     gs->errorQueue->drainWithQueryResponses();
 }
 
-const core::FileHash &TimeTravelingGlobalState::getFileHash(core::FileRef fref) const {
-    ENFORCE(fref.id() >= globalStateHashes.size());
-    return globalStateHashes[fref.id()];
-}
-
 bool TimeTravelingGlobalState::canTakeFastPath(const LSPFileUpdates &updates) const {
     Timer timeit(logger, "fast_path_decision");
     if (config.disableFastPath) {

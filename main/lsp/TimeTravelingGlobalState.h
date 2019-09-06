@@ -85,11 +85,6 @@ public:
     void commitEdits(int version, LSPFileUpdates &update);
 
     /**
-     * Returns the file hash for the given file reference.
-     */
-    const core::FileHash &getFileHash(core::FileRef fref) const;
-
-    /**
      * Indexes all workspace files from file system and hashes them.
      * This runs code that is not considered performance critical and this is expected to be slow.
      */
