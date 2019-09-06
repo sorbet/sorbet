@@ -101,6 +101,7 @@ private:
     struct ResolutionItem {
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
+        u4 expectedConstantFlags = 0;
         bool resolutionFailed = false;
 
         ResolutionItem() = default;
@@ -153,16 +154,16 @@ private:
     vector<ClassAliasResolutionItem> todoClassAliases_;
     vector<TypeAliasResolutionItem> todoTypeAliases_;
 
-    static core::SymbolRef resolveLhs(core::Context ctx, shared_ptr<Nesting> nesting, core::NameRef name) {
+    static core::SymbolRef resolveLhs(core::Context ctx, shared_ptr<Nesting> nesting, core::NameRef name, u4 flags) {
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
-            auto lookup = scope->scope.data(ctx)->findMember(ctx, name);
+            auto lookup = ctx.state.lookupSymbolWithFlags(scope->scope, name, flags);
             if (lookup.exists()) {
                 return lookup;
             }
             scope = scope->parent.get();
         }
-        return nesting->scope.data(ctx)->findMemberTransitive(ctx, name);
+        return ctx.state.lookupSymbolWithFlags(nesting->scope, name, flags);
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
@@ -199,9 +200,9 @@ private:
     }
 
     static core::SymbolRef resolveConstant(core::Context ctx, shared_ptr<Nesting> nesting,
-                                           const unique_ptr<ast::UnresolvedConstantLit> &c, bool &resolutionFailed) {
+                                           const unique_ptr<ast::UnresolvedConstantLit> &c, bool &resolutionFailed, u4 flags) {
         if (ast::isa_tree<ast::EmptyTree>(c->scope.get())) {
-            core::SymbolRef result = resolveLhs(ctx, nesting, c->cnst);
+            core::SymbolRef result = resolveLhs(ctx, nesting, c->cnst, flags);
             return result;
         }
         ast::Expression *resolvedScope = c->scope.get();
@@ -218,7 +219,8 @@ private:
                 return core::Symbols::noSymbol();
             }
             core::SymbolRef resolved = id->symbol.data(ctx)->dealias(ctx);
-            core::SymbolRef result = resolved.data(ctx)->findMember(ctx, c->cnst);
+            core::SymbolRef result = ctx.state.lookupSymbolWithFlags(resolved, c->cnst, flags);
+
             return result;
         } else {
             if (!resolutionFailed) {
@@ -234,7 +236,7 @@ private:
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     static void constantResolutionFailed(core::MutableContext ctx, ResolutionItem &job) {
         auto resolved =
-            resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, job.resolutionFailed);
+            resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, job.resolutionFailed, 0);
         if (resolved.exists() && resolved.data(ctx)->isTypeAlias()) {
             if (resolved.data(ctx)->resultType == nullptr) {
                 // This is actually a use-site error, but we limit ourselves to emitting it once by checking resultType
@@ -308,8 +310,9 @@ private:
         if (isAlreadyResolved(ctx, *job.out)) {
             return true;
         }
+
         auto resolved =
-            resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, job.resolutionFailed);
+            resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, job.resolutionFailed, job.expectedConstantFlags);
         if (!resolved.exists()) {
             return false;
         }
@@ -591,7 +594,8 @@ public:
 
             // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
             // we'll still emit a warning when the rhs of a type alias doesn't resolve.
-            auto item = ResolutionItem{nesting_, id};
+            auto item = ResolutionItem{nesting_, id, core::Symbol::Flags::STATIC_FIELD_TYPE_ALIAS};
+
             this->todo_.emplace_back(std::move(item));
             return asgn;
         }
