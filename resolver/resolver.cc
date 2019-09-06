@@ -200,7 +200,8 @@ private:
     }
 
     static core::SymbolRef resolveConstant(core::Context ctx, shared_ptr<Nesting> nesting,
-                                           const unique_ptr<ast::UnresolvedConstantLit> &c, bool &resolutionFailed, u4 flags) {
+                                           const unique_ptr<ast::UnresolvedConstantLit> &c, bool &resolutionFailed,
+                                           u4 flags) {
         if (ast::isa_tree<ast::EmptyTree>(c->scope.get())) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c->cnst, flags);
             return result;
@@ -311,8 +312,8 @@ private:
             return true;
         }
 
-        auto resolved =
-            resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, job.resolutionFailed, job.expectedConstantFlags);
+        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original,
+                                        job.resolutionFailed, job.expectedConstantFlags);
         if (!resolved.exists()) {
             return false;
         }
@@ -594,7 +595,8 @@ public:
 
             // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
             // we'll still emit a warning when the rhs of a type alias doesn't resolve.
-            auto item = ResolutionItem{nesting_, id, core::Symbol::Flags::STATIC_FIELD_TYPE_ALIAS};
+            auto item = ResolutionItem{
+                nesting_, id, core::Symbol::Flags::STATIC_FIELD_TYPE_ALIAS & core::Symbol::Flags::STATIC_FIELD};
 
             this->todo_.emplace_back(std::move(item));
             return asgn;
