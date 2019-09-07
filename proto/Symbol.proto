@@ -6,7 +6,7 @@ import "proto/Name.proto";
 message Symbol {
     enum Kind {
         UNKNOWN_TYPE = 0;
-        CLASS = 1;
+        CLASS_OR_MODULE = 1;
         STATIC_FIELD = 2;
         FIELD = 3;
         METHOD = 4;
@@ -58,7 +58,7 @@ message Symbol {
 //    Visibility visibility = 5;
     int32 superClass = 6;
 
-//    // CLASS
+//    // CLASS_OR_MODULE
 //    repeated int32 typeMembers = 7;
     repeated int32 mixins = 8;
 

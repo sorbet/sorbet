@@ -49,7 +49,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     *symbolProto.mutable_name() = toProto(gs, data->name);
 
     if (data->isClassOrModule()) {
-        symbolProto.set_kind(com::stripe::rubytyper::Symbol::CLASS);
+        symbolProto.set_kind(com::stripe::rubytyper::Symbol::CLASS_OR_MODULE);
     } else if (data->isStaticField()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::STATIC_FIELD);
     } else if (data->isField()) {
