@@ -176,7 +176,9 @@ TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass)
             if (c->isUntyped()) {
                 result = from;
             } else if (cdata->isClassSealed() && (cdata->isClassAbstract() || cdata->isClassModule())) {
-                result = dropSubtypesOf(ctx, cdata->sealedSubclassesToUnion(ctx), klass);
+                auto subclasses = cdata->sealedSubclassesToUnion(ctx);
+                ENFORCE(!Types::equiv(ctx, subclasses, from), "sealedSubclassesToUnion about to cause infinte loop");
+                result = dropSubtypesOf(ctx, subclasses, klass);
             } else if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
                 result = Types::bottom();
             } else {
