@@ -452,6 +452,15 @@ aaa = T.let(A.new, T.any(A, B))
 # ^ type: AorB
 ```
 
+If a location should not report any definition or usage, then use the magic
+label `(nothing)`:
+
+```ruby
+# typed: false
+class A; end
+aaa = A.new
+# ^ def: (nothing)
+```
 
 #### Testing hover
 

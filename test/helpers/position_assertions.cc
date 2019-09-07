@@ -543,7 +543,7 @@ shared_ptr<TypeDefAssertion> TypeDefAssertion::make(string_view filename, unique
 
 void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                              LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string_view symbol,
-                             const Location &queryLoc, const std::vector<std::shared_ptr<RangeAssertion>> &allLocs) {
+                             const Location &queryLoc, const std::vector<std::shared_ptr<RangeAssertion>> &typeDefs) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
@@ -564,10 +564,33 @@ void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> 
     ASSERT_FALSE(respMsg.error.has_value());
 
     auto &locations = extractLocations(respMsg);
+
+    if (symbol == NOTHING_LABEL) {
+        // can't add type-def for NOTHING_LABEL
+        for (auto &location : locations) {
+            auto filePath = uriToFilePath(uriPrefix, location->uri);
+            ADD_FAILURE_AT(filePath.c_str(), location->range->start->line + 1) << fmt::format(
+                "Sorbet returned references for a location that should not report references.\nGiven go to type def "
+                "here:\n{}\nSorbet reported an unexpected definition at:\n{}",
+                prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *location), *location->range, ""));
+        }
+        return;
+    }
+
+    if (typeDefs.empty()) {
+        ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
+            "There are no 'type-def: {0}' assertions for this 'type: {0}' assertion:\n{1}\n"
+            "To assert that there are no results, use the {2} label",
+            symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+            NOTHING_LABEL);
+        return;
+    }
+
     fast_sort(locations,
               [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
 
-    assertLocationsMatch(sourceFileContents, uriPrefix, symbol, allLocs, line, character, locSourceLine, locFilename,
+    assertLocationsMatch(sourceFileContents, uriPrefix, symbol, typeDefs, line, character, locSourceLine, locFilename,
                          locations);
 }
 

@@ -829,17 +829,10 @@ TEST_P(LSPTest, All) {
         for (auto &[symbol, typeDefAndAssertions] : typeDefMap) {
             auto &[typeDefs, typeAssertions] = typeDefAndAssertions;
             for (auto &typeAssertion : typeAssertions) {
-                if (!typeDefs.empty()) {
-                    auto queryLoc = typeAssertion->getLocation(rootUri);
-                    // Check that a type definition request at this location returns type-def.
-                    TypeDefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
-                                            typeDefs);
-                } else {
-                    ADD_FAILURE() << fmt::format(
-                        "Found 'type:' comment for label {0} without any matching type-def comments. Please add a `# "
-                        "^^ type-def: {0}` assertion that points where 'Go to Type Definition' should jump to.",
-                        typeAssertion->symbol);
-                }
+                auto queryLoc = typeAssertion->getLocation(rootUri);
+                // Check that a type definition request at this location returns type-def.
+                TypeDefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
+                                        typeDefs);
             }
         }
     }
