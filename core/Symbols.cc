@@ -867,7 +867,7 @@ TypePtr Symbol::sealedSubclassesToUnion(const Context ctx) const {
     auto currentClasses = appliedType->targs[0];
     if (currentClasses->isBottom()) {
         // Declared sealed parent class, but never saw any children.
-        return make_type<ClassType>(this->ref(ctx));
+        return Types::bottom();
     }
 
     auto result = Types::bottom();
