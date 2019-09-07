@@ -530,7 +530,11 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
 
     string_view type = "unknown"sv;
     if (this->isClassOrModule()) {
-        type = "class"sv;
+        if (this->isClassOrModuleClass()) {
+            type = "class"sv;
+        } else {
+            type = "module"sv;
+        }
     } else if (this->isStaticField()) {
         if (this->isTypeAlias()) {
             type = "static-field-type-alias"sv;
