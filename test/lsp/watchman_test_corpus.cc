@@ -9,7 +9,7 @@ using namespace std;
 using namespace sorbet::realmain::lsp;
 
 // Adds a file to the file system with an error, and asserts that Sorbet returns an error.
-TEST_F(ProtocolTest, UpdateFileOnFileSystem) {
+/*TEST_F(ProtocolTest, UpdateFileOnFileSystem) {
     assertDiagnostics(initializeLSP(), {});
     writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
     ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
@@ -88,7 +88,7 @@ TEST_F(ProtocolTest, HandlesClosedAndDeletedFile) {
     assertDiagnostics(
         send(*openFile("foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n")), {d});
     assertDiagnostics(send(*closeFile("foo.rb")), {});
-}
+}*/
 
 // Sorbet merges all pending watchman updates into a single update.
 TEST_F(ProtocolTest, MergesMultipleWatchmanUpdates) {

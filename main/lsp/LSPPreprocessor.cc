@@ -38,7 +38,7 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
         it++;
         while (it != pendingRequests.end()) {
             auto &mergeMsg = **it;
-            const bool canMerge = !mergeMsg.isNotification() || mergeMsg.method() != LSPMethod::SorbetWorkspaceEdit;
+            const bool canMerge = mergeMsg.isNotification() && mergeMsg.method() == LSPMethod::SorbetWorkspaceEdit;
             ENFORCE(mergeMsg.internalId.has_value());
             if (!canMerge) {
                 if (mergeMsg.isDelayable()) {
@@ -353,25 +353,11 @@ void LSPPreprocessor::canonicalizeEdits(unique_ptr<WatchmanQueryResponse> queryR
     }
 }
 
-namespace {
-// Returns 'true' if a comes before b (that is, b falls in the range [a, nextId] where nextId can wrap around).
-// The only way this will fail is if the distance between a and b is ~MAX INT.
-bool comesBefore(int a, int b, int nextId) {
-    // Is version in (maxVersion, currentVersion)?
-    if (b < nextId) {
-        // Not in [currentVersion, maxVersion]
-        return a < b || a > nextId;
-    } else {
-        // In (maxVersion, currentVersion)
-        return a > nextId && a < b;
-    }
-}
-} // namespace
-
 void LSPPreprocessor::mergeEdits(int toId, LSPFileUpdates &to, int fromId, LSPFileUpdates &from) {
     // fromId must happen *after* toId.
-    ENFORCE(comesBefore(toId, fromId, nextMessageId));
-    ENFORCE(to.updatedFiles.size() == to.updatedFileHashes.size() == to.updatedFileIndexes.size());
+    ENFORCE(ttgs.comesBefore(toId, fromId));
+    ENFORCE(to.updatedFiles.size() == to.updatedFileHashes.size() &&
+            to.updatedFileHashes.size() == to.updatedFileIndexes.size());
     // 'from' has newer updates, so merge into from and then move into to.
     UnorderedSet<int> encounteredFiles;
     for (auto &index : from.updatedFileIndexes) {
@@ -390,7 +376,8 @@ void LSPPreprocessor::mergeEdits(int toId, LSPFileUpdates &to, int fromId, LSPFi
     to.updatedFiles = move(from.updatedFiles);
     to.updatedFileIndexes = move(from.updatedFileIndexes);
     to.updatedFileHashes = move(from.updatedFileHashes);
-    ENFORCE(to.updatedFiles.size() == to.updatedFileHashes.size() == to.updatedFileIndexes.size());
+    ENFORCE(to.updatedFiles.size() == to.updatedFileHashes.size() &&
+            to.updatedFileHashes.size() == to.updatedFileIndexes.size());
 
     to.hasNewFiles = to.hasNewFiles || from.hasNewFiles;
 

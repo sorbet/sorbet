@@ -45,30 +45,26 @@ vector<core::FileRef> TimeTravelingGlobalState::applyUpdate(TimeTravelUpdate &tt
     return rv;
 }
 
-namespace {
-// TODO: Unit tests.
-bool comesBefore(int version, int currentVersion, int maxVersion) {
+bool TimeTravelingGlobalState::comesBefore(int a, int b) const {
+    // The code may request versions up to `latestVersion + 1`, so be one more than that.
+    const int maxVersion = latestVersion + 2;
     // Is version in (maxVersion, currentVersion)?
-    if (currentVersion < maxVersion) {
+    if (b < maxVersion) {
         // Not in [currentVersion, maxVersion]
-        return version < currentVersion || version > maxVersion;
+        return a < b || a > maxVersion;
     } else {
         // In (maxVersion, currentVersion)
-        return version > maxVersion && version < currentVersion;
+        return a > maxVersion && a < b;
     }
 }
-} // namespace
 
 vector<TimeTravelingGlobalState::TimeTravelUpdate *> TimeTravelingGlobalState::updatesBetweenExclusive(int start,
                                                                                                        int end) {
-    // The end may be latest-version-inclusive, or latestVersion+1. So set to one more than that.
-    const int latestValidVersion = latestVersion + 21;
-    ENFORCE(comesBefore(start, end, latestValidVersion));
+    ENFORCE(comesBefore(start, end));
     vector<TimeTravelUpdate *> updates;
     for (auto &entry : log) {
         // start < entry.version < end
-        if (comesBefore(start, entry.version, latestValidVersion) &&
-            comesBefore(entry.version, end, latestValidVersion)) {
+        if (comesBefore(start, entry.version) && comesBefore(entry.version, end)) {
             updates.push_back(&entry);
         }
     }
@@ -76,7 +72,7 @@ vector<TimeTravelingGlobalState::TimeTravelUpdate *> TimeTravelingGlobalState::u
 }
 
 void TimeTravelingGlobalState::travel(int version) {
-    const bool undo = comesBefore(version, activeVersion, latestVersion);
+    const bool undo = comesBefore(version, activeVersion);
     // Undo: Undo (version, activeVersion].
     // Redo: Redo (activeVersion, version].
     const int startVersion = undo ? version : activeVersion;
@@ -179,7 +175,7 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector
 
 void TimeTravelingGlobalState::pruneBefore(int version) {
     for (auto it = log.begin(); it != log.end();) {
-        if (comesBefore(it->version, version, latestVersion)) {
+        if (comesBefore(it->version, version)) {
             it = log.erase(it);
         } else {
             it++;

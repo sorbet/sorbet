@@ -84,7 +84,8 @@ LSPResult LSPLoop::commitTypecheckRun(TypecheckRun run) {
     }
 
     int i = -1;
-    ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFileHashes.size() == updates.updatedFiles.size());
+    ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFileHashes.size() &&
+            updates.updatedFileHashes.size() == updates.updatedFiles.size());
     for (auto &ast : updates.updatedFileIndexes) {
         i++;
         const int id = ast.file.id();

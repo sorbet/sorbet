@@ -100,6 +100,11 @@ public:
      * TODO(jvilk): Return reason and track slow path stats.
      */
     bool canTakeFastPath(const LSPFileUpdates &updates) const;
+
+    /**
+     * Returns true if `a` comes before `b`.
+     */
+    bool comesBefore(int a, int b) const;
 };
 
 } // namespace sorbet::realmain::lsp
