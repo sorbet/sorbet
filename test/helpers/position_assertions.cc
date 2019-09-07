@@ -101,6 +101,9 @@ void assertLocationsMatch(const UnorderedMap<string, shared_ptr<core::File>> &so
                           string_view symbol, const vector<shared_ptr<RangeAssertion>> &allLocs, int line,
                           int character, string_view locSourceLine, string_view locFilename,
                           vector<unique_ptr<Location>> &locations) {
+    fast_sort(locations,
+              [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
+
     auto expectedLocationsIt = allLocs.begin();
     auto actualLocationsIt = locations.begin();
     while (expectedLocationsIt != allLocs.end() && actualLocationsIt != locations.end()) {
@@ -506,9 +509,6 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         return;
     }
 
-    fast_sort(locations,
-              [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
-
     assertLocationsMatch(sourceFileContents, uriPrefix, symbol, allLocs, line, character, locSourceLine, locFilename,
                          locations);
 }
@@ -586,9 +586,6 @@ void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> 
             NOTHING_LABEL);
         return;
     }
-
-    fast_sort(locations,
-              [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
 
     assertLocationsMatch(sourceFileContents, uriPrefix, symbol, typeDefs, line, character, locSourceLine, locFilename,
                          locations);
