@@ -294,10 +294,9 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
   def convert_string(text)
     if !in_tt?
       text = text
-        .gsub(/(?<=\A|\s|\()``/, '“')
-        .gsub(/(?<!\s)''(?=\s|\z|\.|,|\))/, '”')
-        .gsub(/`([\w\s]+)'/, '‘\\1’')
-        .gsub(/---/, '—')
+        .gsub(/(?<=\A|\s|\()``/, '"')
+        .gsub(/(?<!\s)''(?=\s|\z|\.|,|\))/, '"')
+        .gsub(/`([\w\s]+)'/, "'\\1'")
         .gsub(/([\\\*_])/, '\\\\\\1') # fix special markdown chars likely to cause problems
         .gsub(/\.  /, '. ') # fix double-space after periods
     end
