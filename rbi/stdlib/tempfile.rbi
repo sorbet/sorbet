@@ -76,7 +76,7 @@ class Tempfile < File
   sig {returns(Tempfile)}
   def open; end
 
-  # path returns nil if the Tempfile has been unlinked.
+  ### path returns nil if the Tempfile has been unlinked.
   sig {returns(T.nilable(String))}
   def path; end
 

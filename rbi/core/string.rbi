@@ -1576,12 +1576,12 @@ class String < Object
   # is the optional `Integer` parameter, defaulting to 16. The result is
   # simply the sum of the binary value of each byte in *str* modulo `2**n
   # - 1` . This is not a particularly good checksum.
-  #
-  # sum0 &= (((unsigned long)1)\<\<bits)-1; } sum = LONG2FIX(sum0); } else {
-  # VALUE mod; if (sum0) { sum = rb\_funcall(sum, '+', 1, LONG2FIX(sum0)); }
-  # mod = rb\_funcall(INT2FIX(1), idLTLT, 1, INT2FIX(bits)); mod =
-  # rb\_funcall(mod, '-', 1, INT2FIX(1)); sum = rb\_funcall(sum, '&', 1,
-  # mod); } } return sum; }
+
+  ### sum0 &= (((unsigned long)1)\<\<bits)-1; } sum = LONG2FIX(sum0); } else {
+  ### VALUE mod; if (sum0) { sum = rb\_funcall(sum, '+', 1, LONG2FIX(sum0)); }
+  ### mod = rb\_funcall(INT2FIX(1), idLTLT, 1, INT2FIX(bits)); mod =
+  ### rb\_funcall(mod, '-', 1, INT2FIX(1)); sum = rb\_funcall(sum, '&', 1,
+  ### mod); } } return sum; }
   sig do
     params(
         arg0: Integer,

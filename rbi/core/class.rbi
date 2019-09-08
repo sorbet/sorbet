@@ -85,8 +85,9 @@ class Class < Module
   sig {returns(T.untyped)}
   def allocate(); end
 
-  # Sorbet hijacks Class#new to re-use the sig from MyClass#initialize when creating new instances of a class.
-  # This method must be here so that all calls to MyClass.new aren't forced to take 0 arguments.
+  ### Sorbet hijacks Class#new to re-use the sig from MyClass#initialize when creating new instances of a class.
+  ### This method must be here so that all calls to MyClass.new aren't forced to take 0 arguments.
+
   # Calls `allocate` to create a new object of *class* ’s class, then
   # invokes that object’s `initialize` method, passing it *args* . This is
   # the method that ends up getting called whenever an object is constructed

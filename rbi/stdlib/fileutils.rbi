@@ -1,6 +1,6 @@
 # typed: __STDLIB_INTERNAL
 
-# https://github.com/ruby/fileutils
+### https://github.com/ruby/fileutils
 module FileUtils
   LOW_METHODS = T.let(T.unsafe(nil), Array)
   METHODS = T.let(T.unsafe(nil), Array)

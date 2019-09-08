@@ -76,7 +76,8 @@ class Object < BasicObject
   sig {params(blk: T.proc.params(arg: T.untyped).returns(T.untyped)).returns(T.untyped)}
   def yield_self(&blk); end
 
-  # `then` is just an alias of `yield_self`. Separately def'd here for easier IDE integration
+  ### `then` is just an alias of `yield_self`. Separately def'd here for easier IDE integration
+
   # Yields self to the block and returns the result of the block.
   #
   # ```ruby

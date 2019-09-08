@@ -665,7 +665,8 @@ class Array < Object
   end
   def combination(arg0, &blk); end
 
-  # This is implemented in C++ to fix the return type
+  ### This is implemented in C++ to fix the return type
+
   # Returns a copy of `self` with all `nil` elements removed.
   #
   # ```ruby
@@ -1029,7 +1030,8 @@ class Array < Object
   end
   def first(arg0=T.unsafe(nil)); end
 
-  # This is implemented in C++ to fix the return type
+  ### This is implemented in C++ to fix the return type
+
   # Returns a new array that is a one-dimensional flattening of `self`
   # (recursively).
   #
@@ -2124,54 +2126,6 @@ class Array < Object
   end
   def slice(arg0, arg1=T.unsafe(nil)); end
 
-  # {#sum} will combine non-{Numeric} {Elem} types using `:+`, the sigs here
-  # assume any custom implementation of `:+` is sane and returns the same type
-  # as the receiver.
-  #
-  # @note Since `[].sum` is `0`, {Integer} is a potential return type even if it
-  #   is incompatible to sum with the {Elem} type.
-  #
-  # @example returning {Integer}
-  #   T::Array[Float].new.sum #=> 0
-  # @example returning {Elem}
-  #   [1.0].sum #=> 1.0
-  sig {returns(T.any(Elem, Integer))}
-  # {#sum} can optionally take a block to perform a function on each element of
-  # the receiver before summation. (It will still return `0` for an empty
-  # array.)
-  #
-  # @example returning {Integer}
-  #   T::Array[Float].new.sum(&:to_f) #=> 0
-  # @example returing generic type
-  #   ['a', 'b'].sum{|t| t.ord.to_f} #=> 195.0
-  sig do
-    type_parameters(:T).params(
-      blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:T))
-    ).returns(T.any(Integer, T.type_parameter(:T)))
-  end
-  # The generic is probably overkill here, but `arg0` is returned when the
-  # receiver is empty, even if `arg0` and the {Elem} type cannot be combined
-  # with `:+`.
-  #
-  # @example returning {Elem} type
-  #   [1.0].sum(1) #=> 2.0
-  # @example returning generic type
-  #   T::Array[Float].new.sum(1) #=> 1
-  sig do
-    type_parameters(:T)
-      .params(arg0: T.type_parameter(:T))
-      .returns(T.any(Elem, T.type_parameter(:T)))
-  end
-  # In the most general case, {#sum} can take both an initial value and a block
-  # to process each element. We require `arg0` and the `blk` return type to
-  # match, but ruby does not require this.
-  #
-  # @example
-  #   [1.0].sum(1) {|t| t.to_i}
-  # @example this is valid ruby via coercion but does not typecheck
-  #   T::Array[Float].new.sum(1) {|t| Complex(t, 1)} #=> 1
-  # @example this is valid ruby via coercion but does not typecheck
-  #   [Complex(1, 2)].sum(1) {|t| 1.0} #=> 2.0
   # Returns the sum of elements. For example, \[e1, e2, e3\].sum returns
   # init + e1 + e2 + e3.
   #
@@ -2215,6 +2169,55 @@ class Array < Object
   #
   # [\#sum](Array.downloaded.ruby_doc#method-i-sum) method may not respect
   # method redefinition of "+" methods such as Integer\#+.
+
+  ### {#sum} will combine non-{Numeric} {Elem} types using `:+`, the sigs here
+  ### assume any custom implementation of `:+` is sane and returns the same type
+  ### as the receiver.
+  ###
+  ### @note Since `[].sum` is `0`, {Integer} is a potential return type even if it
+  ###   is incompatible to sum with the {Elem} type.
+  ###
+  ### @example returning {Integer}
+  ###   T::Array[Float].new.sum #=> 0
+  ### @example returning {Elem}
+  ###   [1.0].sum #=> 1.0
+  sig {returns(T.any(Elem, Integer))}
+  ### {#sum} can optionally take a block to perform a function on each element of
+  ### the receiver before summation. (It will still return `0` for an empty
+  ### array.)
+  ###
+  ### @example returning {Integer}
+  ###   T::Array[Float].new.sum(&:to_f) #=> 0
+  ### @example returing generic type
+  ###   ['a', 'b'].sum{|t| t.ord.to_f} #=> 195.0
+  sig do
+    type_parameters(:T).params(
+      blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:T))
+    ).returns(T.any(Integer, T.type_parameter(:T)))
+  end
+  ### The generic is probably overkill here, but `arg0` is returned when the
+  ### receiver is empty, even if `arg0` and the {Elem} type cannot be combined
+  ### with `:+`.
+  ###
+  ### @example returning {Elem} type
+  ###   [1.0].sum(1) #=> 2.0
+  ### @example returning generic type
+  ###   T::Array[Float].new.sum(1) #=> 1
+  sig do
+    type_parameters(:T)
+      .params(arg0: T.type_parameter(:T))
+      .returns(T.any(Elem, T.type_parameter(:T)))
+  end
+  ### In the most general case, {#sum} can take both an initial value and a block
+  ### to process each element. We require `arg0` and the `blk` return type to
+  ### match, but ruby does not require this.
+  ###
+  ### @example
+  ###   [1.0].sum(1) {|t| t.to_i}
+  ### @example this is valid ruby via coercion but does not typecheck
+  ###   T::Array[Float].new.sum(1) {|t| Complex(t, 1)} #=> 1
+  ### @example this is valid ruby via coercion but does not typecheck
+  ###   [Complex(1, 2)].sum(1) {|t| 1.0} #=> 2.0
   sig do
     type_parameters(:U).params(
       arg0: T.type_parameter(:U),

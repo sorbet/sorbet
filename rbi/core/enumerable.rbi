@@ -235,8 +235,9 @@ module Enumerable
   sig {returns(T::Enumerator[[Elem, Integer]])}
   def each_with_index(&blk); end
 
-  # TODO: the arg1 type in blk should be `T.type_parameter(:U)`, but because of
-  # issue #38, this won't work.
+  ### TODO: the arg1 type in blk should be `T.type_parameter(:U)`, but because of
+  ### issue #38, this won't work.
+
   # Iterates the given block for each element with an arbitrary object
   # given, and returns the initially given object.
   #
@@ -506,25 +507,6 @@ module Enumerable
   end
   def max(arg0=T.unsafe(nil), &blk); end
 
-  sig {returns(T::Enumerator[Elem])}
-  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
-  # signatures. In reality, it should be recursively defined as an Array of elements of
-  # the same T.any
-  sig do
-    params(
-        blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
-    )
-    .returns(T.nilable(Elem))
-  end
-  sig do
-    params(
-        arg0: Integer,
-    )
-    .returns(T::Enumerator[Elem])
-  end
-  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
-  # signatures. In reality, it should be recursively defined as an Array of elements of
-  # the same T.any
   # Returns the object in *enum* that gives the maximum value from the given
   # block.
   #
@@ -589,6 +571,25 @@ module Enumerable
   # #   ***
   # #   *
   # ```
+  sig {returns(T::Enumerator[Elem])}
+  ### The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  ### signatures. In reality, it should be recursively defined as an Array of elements of
+  ### the same T.any
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
+    )
+    .returns(T.nilable(Elem))
+  end
+  sig do
+    params(
+        arg0: Integer,
+    )
+    .returns(T::Enumerator[Elem])
+  end
+  ### The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  ### signatures. In reality, it should be recursively defined as an Array of elements of
+  ### the same T.any
   sig do
     params(
         arg0: Integer,
@@ -639,25 +640,6 @@ module Enumerable
   end
   def min(arg0=T.unsafe(nil), &blk); end
 
-  sig {returns(T::Enumerator[Elem])}
-  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
-  # signatures. In reality, it should be recursively defined as an Array of elements of
-  # the same T.any
-  sig do
-    params(
-        blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
-    )
-    .returns(T.nilable(Elem))
-  end
-  sig do
-    params(
-        arg0: Integer,
-    )
-    .returns(T::Enumerator[Elem])
-  end
-  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
-  # signatures. In reality, it should be recursively defined as an Array of elements of
-  # the same T.any
   # Returns the object in *enum* that gives the minimum value from the given
   # block.
   #
@@ -675,6 +657,25 @@ module Enumerable
   # a = %w[albatross dog horse]
   # p a.min_by(2) {|x| x.length } #=> ["dog", "horse"]
   # ```
+  sig {returns(T::Enumerator[Elem])}
+  ### The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  ### signatures. In reality, it should be recursively defined as an Array of elements of
+  ### the same T.any
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
+    )
+    .returns(T.nilable(Elem))
+  end
+  sig do
+    params(
+        arg0: Integer,
+    )
+    .returns(T::Enumerator[Elem])
+  end
+  ### The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  ### signatures. In reality, it should be recursively defined as an Array of elements of
+  ### the same T.any
   sig do
     params(
         arg0: Integer,
@@ -702,10 +703,6 @@ module Enumerable
   end
   def minmax(&blk); end
 
-  sig {returns([T.nilable(Elem), T.nilable(Elem)])}
-  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
-  # signatures. In reality, it should be recursively defined as an Array of elements of
-  # the same T.any
   # Returns a two element array containing the objects in *enum* that
   # correspond to the minimum and maximum values respectively from the given
   # block.
@@ -716,6 +713,10 @@ module Enumerable
   # a = %w(albatross dog horse)
   # a.minmax_by { |x| x.length }   #=> ["dog", "albatross"]
   # ```
+  sig {returns([T.nilable(Elem), T.nilable(Elem)])}
+  ### The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  ### signatures. In reality, it should be recursively defined as an Array of elements of
+  ### the same T.any
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
@@ -871,9 +872,9 @@ module Enumerable
     .returns(T::Array[Elem])
   end
   def sort(&blk); end
-  # The block returning T::Array[BasicObject] is just a stopgap solution to get better
-  # signatures. In reality, it should be recursively defined as an Array of elements of
-  # the same T.any
+  ### The block returning T::Array[BasicObject] is just a stopgap solution to get better
+  ### signatures. In reality, it should be recursively defined as an Array of elements of
+  ### the same T.any
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(T.any(Comparable, T::Array[BasicObject])),
@@ -916,7 +917,8 @@ module Enumerable
   sig {returns(T::Enumerator[Elem])}
   def take_while(&blk); end
 
-  # Implemented in C++
+  ### Implemented in C++
+
   # Returns the result of interpreting *enum* as a list of `[key, value]`
   # pairs.
   #
@@ -963,19 +965,20 @@ module Enumerable
   end
   def find(ifnone=T.unsafe(nil), &blk); end
 
-  # N.B. this signature is wrong; Our generic method implementation
-  # cannot model the correct signature, so we pass through the return
-  # type of the block and then fix it up in an ad-hoc way in Ruby. A
-  # more-correct signature might be:
-  #   sig do
-  #     type_parameters(:U).params(
-  #       blk: T.proc.params(arg0: Elem).returns(T.any(T::Array[T.type_parameter(:U)], T.type_parameter(:U)),
-  #     )
-  #     .returns(T.type_parameter(:U))
-  #   end
-  #
-  # But that would require a lot more sophistication from our generic
-  # method inference.
+  ### N.B. this signature is wrong; Our generic method implementation
+  ### cannot model the correct signature, so we pass through the return
+  ### type of the block and then fix it up in an ad-hoc way in Ruby. A
+  ### more-correct signature might be:
+  ###   sig do
+  ###     type_parameters(:U).params(
+  ###       blk: T.proc.params(arg0: Elem).returns(T.any(T::Array[T.type_parameter(:U)], T.type_parameter(:U)),
+  ###     )
+  ###     .returns(T.type_parameter(:U))
+  ###   end
+  ###
+  ### But that would require a lot more sophistication from our generic
+  ### method inference.
+
   # Returns a new array with the concatenated results of running *block*
   # once for every element in *enum* .
   #

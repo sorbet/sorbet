@@ -24,7 +24,7 @@ class BigDecimal < Numeric
   SIGN_POSITIVE_INFINITE = T.let(T.unsafe(nil), Integer)
   SIGN_POSITIVE_ZERO = T.let(T.unsafe(nil), Integer)
 
-  # internal method, here for completeness
+  ### internal method, here for completeness
   sig {params(p1: T.untyped).returns(T.untyped)}
   def self._load(p1); end
 
@@ -34,15 +34,15 @@ class BigDecimal < Numeric
   sig {params(digits: Integer).returns(Integer)}
   def self.limit(digits=0); end
 
-  # `mode` can be one of:
-  #   BigDecimal::EXCEPTION_ALL
-  #   BigDecimal::EXCEPTION_INFINITY
-  #   BigDecimal::EXCEPTION_NaN
-  #   BigDecimal::EXCEPTION_OVERFLOW
-  #   BigDecimal::EXCEPTION_UNDERFLOW
-  #   BigDecimal::EXCEPTION_ZERODIVIDE
-  #   BigDecimal::ROUND_MODE
-  # @see https://ruby-doc.org/stdlib-2.6.3/libdoc/bigdecimal/rdoc/BigDecimal.html#method-c-mode
+  ### `mode` can be one of:
+  ###   BigDecimal::EXCEPTION_ALL
+  ###   BigDecimal::EXCEPTION_INFINITY
+  ###   BigDecimal::EXCEPTION_NaN
+  ###   BigDecimal::EXCEPTION_OVERFLOW
+  ###   BigDecimal::EXCEPTION_UNDERFLOW
+  ###   BigDecimal::EXCEPTION_ZERODIVIDE
+  ###   BigDecimal::ROUND_MODE
+  ### @see https://ruby-doc.org/stdlib-2.6.3/libdoc/bigdecimal/rdoc/BigDecimal.html#method-c-mode
   sig do
     params(
       mode: Integer,
