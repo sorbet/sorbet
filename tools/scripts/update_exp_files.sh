@@ -6,6 +6,11 @@ cd "$(dirname "$0")"
 cd ../..
 # we are now at the repo root.
 
+if ! command -v parallel &> /dev/null; then
+  echo "This script requires GNU parallel to be installed"
+  exit 1
+fi
+
 COMMAND_FILE="$(mktemp)"
 trap 'rm -f "$COMMAND_FILE"' EXIT
 
