@@ -63,14 +63,6 @@ class CSV < Object
   def self.read(path, options=T.unsafe(nil)); end
 end
 
-sig do
-  params(
-      io: T.any(::Sorbet::Private::Static::IOLike, String),
-      options: T::Hash[Symbol, T.untyped],
-  )
-  .returns(CSV)
-end
-
 class CSV::Row < Object
   include Enumerable
 
@@ -93,4 +85,11 @@ class CSV::Table < Object
   Elem = type_member(:out)
 end
 
+sig do
+  params(
+      io: T.any(::Sorbet::Private::Static::IOLike, String),
+      options: T::Hash[Symbol, T.untyped],
+  )
+  .returns(CSV)
+end
 def CSV(io=T.unsafe(nil), options=T.unsafe(nil)); end
