@@ -28,6 +28,7 @@ passes=(
   resolve-tree
   resolve-tree-raw
   cfg
+  cfg-raw
   cfg-json
   flattened-tree
   flattened-tree-raw

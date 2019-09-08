@@ -106,9 +106,10 @@ public:
 };
 
 UnorderedSet<string> knownExpectations = {
-    "parse-tree",     "parse-tree-json",    "ast",       "ast-raw",       "dsl-tree",     "dsl-tree-raw",
-    "symbol-table",   "symbol-table-raw",   "name-tree", "name-tree-raw", "resolve-tree", "resolve-tree-raw",
-    "flattened-tree", "flattened-tree-raw", "cfg",       "cfg-json",      "autogen",      "document-symbols"};
+    "parse-tree",      "parse-tree-json",    "ast",       "ast-raw",       "dsl-tree",     "dsl-tree-raw",
+    "symbol-table",    "symbol-table-raw",   "name-tree", "name-tree-raw", "resolve-tree", "resolve-tree-raw",
+    "flattened-tree",  "flattened-tree-raw", "cfg",       "cfg-raw",       "cfg-json",     "autogen",
+    "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -388,8 +389,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         // CFG
         auto expCfg = test.expectations.find("cfg");
+        auto expCfgRaw = test.expectations.find("cfg-raw");
         auto expCfgJson = test.expectations.find("cfg-json");
-        if (expCfg != test.expectations.end() || expCfgJson != test.expectations.end()) {
+        if (expCfg != test.expectations.end() || expCfgRaw != test.expectations.end() ||
+            expCfgJson != test.expectations.end()) {
             checkTree();
             checkPragma("cfg");
             CFGCollectorAndTyper collector;
@@ -404,6 +407,21 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                 }
                 dot << "}" << '\n' << '\n';
                 got["cfg"].append(dot.str());
+                auto newErrors = errorQueue->drainAllErrors();
+                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+            }
+
+            if (expCfgRaw != test.expectations.end()) {
+                stringstream dot;
+                dot << "digraph \"" << rbName << "\" {" << '\n';
+                dot << "  graph [fontname = \"Courier\"];\n";
+                dot << "  node [fontname = \"Courier\"];\n";
+                dot << "  edge [fontname = \"Courier\"];\n";
+                for (auto &cfg : collector.cfgs) {
+                    dot << cfg->showRaw(ctx) << '\n' << '\n';
+                }
+                dot << "}" << '\n' << '\n';
+                got["cfg-raw"].append(dot.str());
                 auto newErrors = errorQueue->drainAllErrors();
                 errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
             }

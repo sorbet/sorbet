@@ -66,7 +66,7 @@ public:
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
         if (print.CFGRaw.enabled) {
-            print.CFG.fmt("{}\n\n", cfg->showRaw(ctx));
+            print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
         }
 #ifndef SORBET_REALMAIN_MIN
         if ((print.CFGJson.enabled || print.CFGProto.enabled) && cfg->shouldExport(ctx.state)) {
@@ -713,8 +713,11 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
             core::ErrorRegion errs(ctx, f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
         }
-        if (opts.print.CFG.enabled || opts.print.CFGRaw.enabled) {
+        if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("}}\n\n");
+        }
+        if (opts.print.CFGRaw.enabled) {
+            opts.print.CFGRaw.fmt("}}\n\n");
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
