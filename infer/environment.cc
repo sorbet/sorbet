@@ -837,9 +837,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                                 // isFixed() => lowerBound == upperBound.
                                 auto lambdaParam = core::cast_type<core::LambdaParam>(data->resultType.get());
                                 ENFORCE(lambdaParam != nullptr);
-                                tp.type = lambdaParam->upperBound;
+                                tp.type = core::make_type<core::MetaType>(lambdaParam->upperBound);
                             } else {
-                                tp.type = core::make_type<core::SelfTypeParam>(symbol);
+                                tp.type = core::make_type<core::MetaType>(core::make_type<core::SelfTypeParam>(symbol));
                             }
                         } else if (data->isField()) {
                             tp.type = core::Types::resultTypeAsSeenFrom(
