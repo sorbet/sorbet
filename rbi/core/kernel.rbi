@@ -1534,37 +1534,52 @@ module Kernel
   end
   def readlines(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
 
-  # Loads the given `name`, returning `true` if successful and `false` if
-  # the feature is already loaded.
+  # Loads the given `name`, returning `true` if successful and `false` if the
+  # feature is already loaded.
   #
-  # If the filename does not resolve to an absolute path, it will be
-  # searched for in the directories listed in `$LOAD_PATH` ( `$:` ).
+  # If the filename does not resolve to an absolute path, it will be searched
+  # for in the directories listed in `$LOAD_PATH` (`$:`).
   #
-  # If the filename has the extension “.rb”, it is loaded as a source file;
-  # if the extension is “.so”, “.o”, or “.dll”, or the default shared
-  # library extension on the current platform, Ruby loads the shared library
-  # as a Ruby extension. Otherwise, Ruby tries adding “.rb”, “.so”, and so
-  # on to the name until found. If the file named cannot be found, a
-  # [LoadError](https://ruby-doc.org/core-2.6.3/LoadError.html) will be
+  # If the filename has the extension ".rb", it is loaded as a source file; if
+  # the extension is ".so", ".o", or ".dll", or the default shared library
+  # extension on the current platform, Ruby loads the shared library as a Ruby
+  # extension. Otherwise, Ruby tries adding ".rb", ".so", and so on to the name
+  # until found. If the file named cannot be found, a
+  # [`LoadError`](https://docs.ruby-lang.org/en/2.6.0/LoadError.html) will be
   # raised.
   #
-  # For Ruby extensions the filename given may use any shared library
-  # extension. For example, on Linux the socket extension is “socket.so” and
-  # `require 'socket.dll'` will load the socket extension.
+  # For Ruby extensions the filename given may use any shared library extension.
+  # For example, on Linux the socket extension is "socket.so" and `require
+  # 'socket.dll'` will load the socket extension.
   #
-  # The absolute path of the loaded file is added to `$LOADED_FEATURES` (
-  # `$"` ). A file will not be loaded again if its path already appears in
-  # `$"` . For example, `require 'a'; require './a'` will not load `a.rb`
-  # again.
+  # The absolute path of the loaded file is added to `$LOADED_FEATURES` (`$"`).
+  # A file will not be loaded again if its path already appears in `$"`. For
+  # example, `require 'a'; require './a'` will not load `a.rb` again.
   #
   # ```ruby
   # require "my-library.rb"
   # require "db-driver"
   # ```
   #
-  # Any constants or globals within the loaded source file will be available
-  # in the calling program’s global namespace. However, local variables will
-  # not be propagated to the loading environment.
+  # Any constants or globals within the loaded source file will be available in
+  # the calling program's global namespace. However, local variables will not be
+  # propagated to the loading environment.
+  #
+  # When RubyGems is required,
+  # [`#require`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-require)
+  # is replaced with our own which is capable of loading gems on demand.
+  #
+  # When you call `require 'x'`, this is what happens:
+  # *   If the file can be loaded from the existing Ruby loadpath, it is.
+  # *   Otherwise, installed gems are searched for a file that matches. If it's
+  #     found in gem 'y', that gem is activated (added to the loadpath).
+  #
+  #
+  # The normal `require` functionality of returning false if that file has
+  # already been loaded is preserved.
+  #
+  # Also aliased as:
+  # [`gem_original_require`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-gem_original_require)
   sig do
     params(
         path: String,
