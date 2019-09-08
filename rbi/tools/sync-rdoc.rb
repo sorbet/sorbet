@@ -337,31 +337,21 @@ class SyncRDoc
   end
 
   private def find_module(name)
-    begin
-      store.load_class(apply_renames(name))
-    rescue RDoc::Store::Error
-      nil
-    end
+    store.find_class_or_module(apply_renames(name))
   end
 
   private def find_class_method(namespace, name)
-    begin
-      store.load_method(apply_renames(namespace), "::#{name}")
-    rescue RDoc::Store::Error
-      nil
-    end
+    mod = find_module(namespace)
+    mod&.find_method(name, true) || mod&.find_attribute(name, true)
   end
 
   private def find_instance_method(namespace, name)
-    begin
-      store.load_method(apply_renames(namespace), "\##{name}")
-    rescue RDoc::Store::Error
-      nil
-    end
+    mod = find_module(namespace)
+    mod&.find_method(name, false) || mod&.find_attribute(name, false)
   end
 
   private def find_constant(namespace, name)
-    find_module(namespace)&.constants_hash&.[](name)
+    find_module(namespace)&.find_constant_named(name)
   end
 
   private def render_comment(code_obj, indentation)
@@ -419,6 +409,7 @@ class SyncRDoc
 
   def run!(argv)
     store.load_all # ensure cross-referencing can find everything
+    store.complete(:private)
 
     if argv.empty?
       puts "Usage: #{$0} <rbi_path>..."
