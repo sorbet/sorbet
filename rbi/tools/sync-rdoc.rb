@@ -236,6 +236,13 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
       super
     end
   end
+
+  def accept_verbatim(verbatim)
+    open = (verbatim.ruby? || @html_crossref.parseable?(verbatim.text.strip)) ? "```ruby\n" : "```\n"
+    @res << open
+    @res.push(*verbatim.parts)
+    @res << "```\n\n"
+  end
 end
 
 class SyncRDoc
