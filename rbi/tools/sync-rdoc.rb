@@ -433,6 +433,12 @@ class SyncRDoc
     "Thread::SizedQueue" => "SizedQueue",
   }
 
+  SKIP = [
+    /\A(?:Sorbet|T)(?:\z|::|\.|\#)/,
+    # rdoc is dumb sometimes
+    "Kernel#require",
+  ]
+
   private def driver
     @driver ||= RDoc::RI::Driver.new
   end
@@ -501,7 +507,7 @@ class SyncRDoc
   def process_file!(file)
     to_replace = []
     DocParser.new(file).each_doc do |path, def_node, doc_range, indentation|
-      next if path =~ /\A(?:Sorbet|T)(?:\z|::|\.|\#)/
+      next if SKIP.any? {|s| s.is_a?(String) ? path == s : path =~ s}
       namespace, separator, name = path.rpartition(/::|\.|\#/)
       code_obj = case separator
       when ""
