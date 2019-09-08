@@ -238,6 +238,7 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
   end
 
   def accept_verbatim(verbatim)
+    @res.push("\n") unless @res.last(2).join =~ /\n\n\z/
     open = (verbatim.ruby? || @html_crossref.parseable?(verbatim.text.strip)) ? "```ruby\n" : "```\n"
     @res << open
     lines = verbatim.parts.join.lines
