@@ -240,7 +240,12 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
   def accept_verbatim(verbatim)
     open = (verbatim.ruby? || @html_crossref.parseable?(verbatim.text.strip)) ? "```ruby\n" : "```\n"
     @res << open
-    @res.push(*verbatim.parts)
+    lines = verbatim.parts.join.lines
+      .reverse_each
+      .drop_while {|line| line.strip.empty?} # remove trailing blank lines
+      .reverse
+    lines.push("\n") unless lines.last.end_with?("\n")
+    @res.push(*lines)
     @res << "```\n\n"
   end
 end
@@ -319,8 +324,11 @@ class SyncRDoc
     formatter = ToMarkdownRef.new(options, "https://docs.ruby-lang.org/en/2.6.0/", context.path, context)
     formatter.width -= indentation.gsub("\t", '  ').length # account for indentation (assuming tabstop is 2)
     doc.comment.accept(formatter)
-    s = formatter.res.join
-    s.lines.map {|line| "#{indentation}\# #{line}".rstrip + "\n"}
+    formatter.res.join.lines
+      .reverse_each
+      .drop_while {|line| line.strip.empty?} # remove trailing blank lines
+      .reverse
+      .map {|line| "#{indentation}\# #{line}".rstrip + "\n"}
   end
 
   def process_file!(file)
