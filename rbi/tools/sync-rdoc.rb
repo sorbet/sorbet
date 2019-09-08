@@ -251,9 +251,11 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
   end
 
   def convert_string(text)
-    # there are other special markdown characters, but these are the most
-    # likely to cause problems
-    text = text.gsub(/([\\`\*_])/, '\\\\\\1') if !in_tt?
+    if !in_tt?
+      text = text
+        .gsub(/([\\`\*_])/, '\\\\\\1') # fix special markdown chars likely to cause problems
+        .gsub(/\.  /, '. ') # fix double-space after periods
+    end
     super(text)
   end
 
