@@ -357,7 +357,7 @@ class SyncRDoc
   private def render_comment(code_obj, indentation)
     context = code_obj.is_a?(RDoc::Context) ? code_obj : code_obj.parent
 
-    formatter = ToMarkdownRef.new(options, "https://docs.ruby-lang.org/en/2.6.0/", context.path, context)
+    formatter = ToMarkdownRef.new(options, "https://docs.ruby-lang.org/en/2.6.0/", "/", context)
     formatter.width -= indentation.gsub("\t", '  ').length # account for indentation (assuming tabstop is 2)
     code_obj.comment.accept(formatter)
     formatter.add_alias_info(code_obj) if code_obj.is_a?(RDoc::MethodAttr)
