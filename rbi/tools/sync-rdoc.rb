@@ -192,10 +192,18 @@ class DocParser
     start_line = end_line = node.first_lineno - 1 # lineno is 1-indexed
     (start_line - 1).downto(0) do |i| # line-by-line, upwards from the def
       line = file.lines[i]
-      if line =~ /\A\s*\z/ # blank line; don't include but keep going
-        # keep going
+      if line =~ /\A\s*(\z|###)/
+        # blank line or internal comment; don't include but keep going
       elsif line =~ /\A\s*\#(?!\s*typed:)/ # comment (except sigil); include in range
         start_line = i
+      else
+        break
+      end
+    end
+    (end_line - 1).downto(start_line) do |i|
+      line = file.lines[i]
+      if line =~ /\A\s*###/
+        end_line = i
       else
         break
       end
