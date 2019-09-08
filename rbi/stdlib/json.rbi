@@ -527,12 +527,12 @@ class JSON::Ext::Generator::State
 
   sig do
     params(
-      _: ::T.untyped,
-      _: ::T.untyped,
+      name: ::T.untyped,
+      value: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def []=(_, _); end
+  def []=(name, value); end
 
   sig do
     returns(::T.untyped)
