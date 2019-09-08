@@ -304,6 +304,10 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
     super(text)
   end
 
+  def annotate(tag)
+    in_tt? ? '' : super
+  end
+
   def wrap(text)
     i = 0
     line_re = /\G(.{,#{width - indent}}|[^ ]+)(?: +|\z)/
