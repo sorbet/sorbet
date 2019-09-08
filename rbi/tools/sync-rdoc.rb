@@ -221,7 +221,7 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
       text = text.gsub(/<\/?code>/, '`')
       "[#{text}](#{href})"
     else
-      text
+      convert_string(text)
     end
   end
 
@@ -247,6 +247,13 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
     lines.push("\n") unless lines.last.end_with?("\n")
     @res.push(*lines)
     @res << "```\n\n"
+  end
+
+  def convert_string(text)
+    # there are other special markdown characters, but these are the most
+    # likely to cause problems
+    text = text.gsub(/([\\`\*_])/, '\\\\\\1') if !in_tt?
+    super(text)
   end
 end
 
