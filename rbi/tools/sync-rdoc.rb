@@ -204,7 +204,48 @@ class DocParser
   end
 end
 
+# Fix generation of nested markup <code>foo<em>bar</em>baz</code>
+module FormatterTagPatch
+  TagRange = Struct.new(:tag, :begin, :end)
+
+  def convert_flow(flow)
+    tag_ranges = []
+    tag_on_pos = {}
+    flow.each_with_index do |item, i|
+      next unless item.is_a?(RDoc::Markup::AttrChanger)
+      @attr_tags
+        .select {|t| item.turn_off & t.bit != 0}
+        .each {|t| tag_ranges.push(TagRange.new(t, tag_on_pos.delete(t), i))}
+      @attr_tags
+        .select {|t| item.turn_on & t.bit != 0}
+        .each {|t| tag_on_pos[t] = i}
+    end
+
+    tag_order = @attr_tags.each_with_index.to_h
+    by_off = tag_ranges.group_by(&:end)
+    by_on = tag_ranges.group_by(&:begin)
+    new_flow = flow.each_with_index.flat_map do |item, i|
+      case item
+      when RDoc::Markup::AttrChanger
+        off = by_off.fetch(i, [])
+          .sort_by {|r| [-r.begin, -tag_order[r.tag]]}
+          .map {|r| RDoc::Markup::AttrChanger.new(0, r.tag.bit)}
+        on = by_on.fetch(i, [])
+          .sort_by {|r| [-r.end, tag_order[r.tag]]}
+          .map {|r| RDoc::Markup::AttrChanger.new(r.tag.bit, 0)}
+        [*off, *on]
+      else
+        [item]
+      end
+    end
+
+    super(new_flow)
+  end
+end
+
 class ToMarkdownRef < RDoc::Markup::ToMarkdown
+  include FormatterTagPatch
+
   def initialize(options, base_url, from_path, context, markup=nil)
     super(markup)
     @base_url = base_url
