@@ -268,6 +268,24 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
       i = match.end(0)
     end
   end
+
+  def link_for_method(method)
+    convert_html_link(@html_crossref.link(method.pretty_name, method.name))
+  end
+
+  def add_alias_info(method)
+    unless method.aliases.empty?
+      @res << "\n"
+      aliases = method.aliases.map {|a| link_for_method(a)}.join(", ")
+      wrap("Also aliased as: #{aliases}")
+    end
+
+    alias_for = method.is_alias_for
+    if alias_for
+      @res << "\n"
+      wrap("Alias for: #{link_for_method(alias_for)}")
+    end
+  end
 end
 
 class SyncRDoc
@@ -339,15 +357,18 @@ class SyncRDoc
     find_module(namespace)&.constants_hash&.[](name)
   end
 
-  private def render_comment(doc, indentation)
-    context = doc.is_a?(RDoc::Context) ? doc : doc.parent
+  private def render_comment(code_obj, indentation)
+    context = code_obj.is_a?(RDoc::Context) ? code_obj : code_obj.parent
+
     formatter = ToMarkdownRef.new(options, "https://docs.ruby-lang.org/en/2.6.0/", context.path, context)
     formatter.width -= indentation.gsub("\t", '  ').length # account for indentation (assuming tabstop is 2)
-    doc.comment.accept(formatter)
+    code_obj.comment.accept(formatter)
+    formatter.add_alias_info(code_obj) if code_obj.is_a?(RDoc::MethodAttr)
     formatter.res.join.lines
       .reverse_each
       .drop_while {|line| line.strip.empty?} # remove trailing blank lines
       .reverse
+      .drop_while {|line| line.strip.empty?} # remove leading blank lines
       .map {|line| "#{indentation}\# #{line}".rstrip + "\n"}
   end
 
@@ -356,7 +377,7 @@ class SyncRDoc
     DocParser.new(file).each_doc do |path, def_node, doc_range, indentation|
       next if path =~ /\A(?:Sorbet|T)(?:\z|::|\.|\#)/
       namespace, separator, name = path.rpartition(/::|\.|\#/)
-      doc = case separator
+      code_obj = case separator
       when ""
         # toplevel constants could be documented as a class or constant, so try both (e.g. ENV)
         find_module(path) || find_constant("Object", name)
@@ -371,8 +392,9 @@ class SyncRDoc
         raise "impossible"
       end
 
-      if doc
-        to_replace.push([doc_range, render_comment(doc, indentation)])
+      rendered_lines = code_obj && render_comment(code_obj, indentation)
+      if rendered_lines && !rendered_lines.empty?
+        to_replace.push([doc_range, rendered_lines])
       elsif doc_range.size > 0
         Warning.warn("#{file.path}:#{def_node.first_lineno}:#{def_node.first_column}: #{path} has existing doc but can't find it with ri; not clobbering\n")
       end
