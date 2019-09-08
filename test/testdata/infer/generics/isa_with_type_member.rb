@@ -77,7 +77,6 @@ end
 class Nil
   extend T::Generic
   Elem = type_member(fixed: T.noreturn)
-                   # ^^^^^ error: This code is unreachable
 end
 
 class Cons
