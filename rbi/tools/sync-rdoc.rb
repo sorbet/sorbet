@@ -256,6 +256,7 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
         .gsub(/(?<=\A|\s|\()``/, '“')
         .gsub(/(?<!\s)''(?=\s|\z|\.|,|\))/, '”')
         .gsub(/`([\w\s]+)'/, '‘\\1’')
+        .gsub(/---/, '—')
         .gsub(/([\\\*_])/, '\\\\\\1') # fix special markdown chars likely to cause problems
         .gsub(/\.  /, '. ') # fix double-space after periods
     end
