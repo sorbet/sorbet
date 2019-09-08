@@ -204,6 +204,40 @@ class DocParser
   end
 end
 
+class ToMarkdownRef < RDoc::Markup::ToMarkdown
+  def initialize(options, base_url, from_path, context, markup=nil)
+    super(markup)
+    @base_url = base_url
+    @html_crossref = RDoc::Markup::ToHtmlCrossref.new(options, from_path, context, markup)
+    @markup.add_regexp_handling(RDoc::Markup::ToHtmlCrossref::CROSSREF_REGEXP, :REF)
+  end
+
+  def convert_html_link(text)
+    # sorry i'm parsing html with regex
+    match = /<a href="([^"]*)">(.*)<\/a>/.match(text)
+    if match
+      href, text = match.captures
+      href = @base_url + href
+      text = text.gsub(/<\/?code>/, '`')
+      "[#{text}](#{href})"
+    else
+      text
+    end
+  end
+
+  def handle_regexp_REF(target)
+    convert_html_link(@html_crossref.handle_regexp_CROSSREF(target))
+  end
+
+  def gen_url(url, text)
+    if url.start_with?('rdoc-ref:')
+      convert_html_link(@html_crossref.gen_url(url, text))
+    else
+      super
+    end
+  end
+end
+
 class SyncRDoc
   # some classes are not where they say they are
   RENAMES = {
@@ -218,7 +252,27 @@ class SyncRDoc
   end
 
   private def store
-    @store ||= driver.stores.find {|s| s.source == 'ruby'}
+    return @store if defined?(@store)
+    @store = driver.stores.find {|s| s.source == 'ruby'}
+    rdoc.store = @store
+    @store
+  end
+
+  private def options
+    @options ||= begin
+      opts = RDoc::Options.new
+      opts.parse(['--all'])
+      opts.setup_generator("darkfish")
+      opts
+    end
+  end
+
+  private def rdoc
+    return @rdoc if defined?(@rdoc)
+    @rdoc = RDoc::RDoc.new
+    @rdoc.options = options
+    @rdoc.generator = options.generator.new(store, options)
+    @rdoc
   end
 
   private def apply_renames(namespace)
@@ -254,7 +308,9 @@ class SyncRDoc
   end
 
   private def render_comment(doc, indentation)
-    formatter = RDoc::Markup::ToMarkdown.new
+    context = doc.is_a?(RDoc::Context) ? doc : doc.parent
+    formatter = ToMarkdownRef.new(options, "https://docs.ruby-lang.org/en/2.6.0/", context.path, context)
+    formatter.width -= indentation.gsub("\t", '  ').length # account for indentation (assuming tabstop is 2)
     doc.comment.accept(formatter)
     s = formatter.res.join
     s.lines.map {|line| "#{indentation}\# #{line}".rstrip + "\n"}
@@ -298,6 +354,8 @@ class SyncRDoc
   end
 
   def run!(argv)
+    store.load_all # ensure cross-referencing can find everything
+
     if argv.empty?
       puts "Usage: #{$0} <rbi_path>..."
       return 1
