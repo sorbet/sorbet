@@ -1,5 +1,15 @@
 #!/usr/bin/env ruby
 require 'rdoc'
+require 'optparse'
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'commonmarker'
+  gem 'nokogiri'
+  gem 'diff-lcs', require: 'diff/lcs'
+  gem 'paint'
+end
 
 class RBIFile
   attr_reader :path
@@ -339,6 +349,63 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
   end
 end
 
+module DocDiff
+  def self.render_lines(lines)
+    md = lines.map {|l| l.gsub(/\A\s*# /, '')}.join
+    html = CommonMarker.render_html(md, :DEFAULT)
+    root = Nokogiri::HTML.fragment(html)
+    root.text
+      .tr("“”‘’", %q{""''})
+      .gsub(/—/, "---")
+      .split
+      .flat_map {|s| s.scan(/\G.+?\b/)}
+  end
+
+  def self.diff(old, new)
+    Diff::LCS::sdiff(render_lines(old), render_lines(new))
+  end
+
+  def self.render_diff(diff)
+    parts = []
+    diff_chunks = diff.chunk {|change| change.action}.to_a
+    diff_chunks.each_with_index do |action_chunk, i|
+      action, chunk = action_chunk
+      case action
+      when '+'
+        parts << Paint[chunk.map(&:new_element).join(" "), :green]
+      when '-'
+        parts << Paint[chunk.map(&:old_element).join(" "), :red, :inverse, :bold]
+      when '!'
+        parts << Paint[chunk.map(&:old_element).join(" "), :red, :inverse, :bold]
+        parts << Paint[chunk.map(&:new_element).join(" "), :green]
+      when '='
+        context_start = 0
+        context_end = chunk.length
+        word_context = 2
+        context_start += word_context unless i == 0
+        context_end -= word_context unless i == diff_chunks.length - 1
+        omit_range = (context_start...context_end)
+        if omit_range.size == 0
+          parts << Paint[chunk.map(&:old_element).join(" "), :faint]
+        else
+          start_range = (0...omit_range.begin)
+          end_range = (omit_range.end...)
+          if start_range.size > 0
+            parts << Paint[chunk[start_range].map(&:old_element).join(" "), :faint]
+          end
+          parts << Paint["...", :faint]
+          if end_range.size > 0
+            parts << Paint[chunk[end_range].map(&:old_element).join(" "), :faint]
+          end
+        end
+      else
+        raise "impossible: #{action}"
+      end
+    end
+    parts.join(" ")
+  end
+end
+
 class SyncRDoc
   # some classes are not where they say they are
   RENAMES = {
@@ -441,24 +508,50 @@ class SyncRDoc
       end
     end
 
-    to_replace.sort_by! do |replacement|
-      doc_range, _comment = replacement
-      doc_range.begin
+    if @diff
+      to_replace.each do |doc_range, comment|
+        next if doc_range.size == 0
+        orig_comment = file.lines[doc_range]
+        diff = DocDiff.diff(orig_comment, comment)
+        has_changes = diff.any? {|change| change.action != '='}
+        next unless has_changes
+
+        print "#{file.path}:#{doc_range.begin}-#{doc_range.end}"
+        puts DocDiff.render_diff(diff)
+      end
     end
-    to_replace.reverse_each do |doc_range, comment| # mutate in reverse to avoid keeping track of shifted ranges
-      file.lines[doc_range] = comment
-    end
-    file.write_back!
+
+    to_replace
+      .sort_by {|doc_range, _| doc_range.begin}
+      .reverse_each do |doc_range, comment| # mutate in reverse to avoid keeping track of shifted ranges
+        file.lines[doc_range] = comment
+      end
+    file.write_back! unless @dry_run
   end
 
   def run!(argv)
+    @dry_run = false
+    @diff = false
+
+    parser = OptionParser.new do |opts|
+      opts.banner = "Usage: #{opts.program_name} [options] <rbi_path>..."
+
+      opts.on("--[no-]dry-run", "Don't write any files") do |v|
+        @dry_run = v
+      end
+
+      opts.on("--[no-]diff", "Print changes for changed docs") do |d|
+        @diff = d
+      end
+    end
+    parser.parse!
+    if argv.empty?
+      puts parser
+      return -1
+    end
+
     store.load_all # ensure cross-referencing can find everything
     store.complete(:private)
-
-    if argv.empty?
-      puts "Usage: #{$0} <rbi_path>..."
-      return 1
-    end
 
     argv.each do |dir|
       Dir.glob(File.join('**', '*.rbi'), base: dir) do |path|
