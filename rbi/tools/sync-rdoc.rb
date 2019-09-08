@@ -93,6 +93,10 @@ class DocParser
     @root ||= RubyVM::AbstractSyntaxTree.parse(file.content)
   end
 
+  private def warn(node, msg)
+    Warning.warn("#{file.path}:#{node.first_lineno}:#{node.first_column}: #{msg}\n")
+  end
+
   private def error!(node, msg)
     raise "#{file.path}:#{node.first_lineno}:#{node.first_column}: #{msg}"
   end
@@ -214,8 +218,14 @@ class DocParser
     [(start_line...end_line), indentation]
   end
 
+  private def find_comment_between(a, b)
+    range = (a.last_lineno + 1...b.first_lineno)
+    range.size == 0 ? [] : file.lines[range].filter {|l| l =~ /\A\s*#(?!##)/}
+  end
+
   def each_doc(&blk)
     each_def do |path, def_node, node|
+      warn(def_node, "found split comment") unless find_comment_between(node, def_node).empty?
       doc_range, indentation = find_comment_before(node)
       yield path, def_node, doc_range, indentation
     end
