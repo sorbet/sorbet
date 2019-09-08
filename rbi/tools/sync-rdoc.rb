@@ -255,6 +255,19 @@ class ToMarkdownRef < RDoc::Markup::ToMarkdown
     text = text.gsub(/([\\`\*_])/, '\\\\\\1') if !in_tt?
     super(text)
   end
+
+  def wrap(text)
+    i = 0
+    line_re = /\G(.{,#{width - indent}}|[^ ]+)(?: +|\z)/
+    indentation = " " * indent
+    while i < text.length
+      match = line_re.match(text, i)
+      raise "impossible" unless match
+      @res.push(indentation) if i > 0 || !use_prefix
+      @res << match[1] << "\n"
+      i = match.end(0)
+    end
+  end
 end
 
 class SyncRDoc
