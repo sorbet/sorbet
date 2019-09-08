@@ -1,18 +1,18 @@
 # typed: __STDLIB_INTERNAL
 
 # Ruby supports two forms of objectified methods.
-# [Class](https://ruby-doc.org/core-2.6.3/Class.html) `Method` is used to
-# represent methods that are associated with a particular object: these
-# method objects are bound to that object. Bound method objects for an
-# object can be created using `Object#method` .
+# [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) `Method` is used to
+# represent methods that are associated with a particular object: these method
+# objects are bound to that object. Bound method objects for an object can be
+# created using `Object#method`.
 #
-# Ruby also supports unbound methods; methods objects that are not
-# associated with a particular object. These can be created either by
-# calling `Module#instance_method` or by calling `unbind` on a bound
-# method object. The result of both of these is an `UnboundMethod` object.
+# Ruby also supports unbound methods; methods objects that are not associated
+# with a particular object. These can be created either by calling
+# `Module#instance_method` or by calling `unbind` on a bound method object. The
+# result of both of these is an `UnboundMethod` object.
 #
-# Unbound methods can only be called after they are bound to an object.
-# That object must be a kind\_of? the method's original class.
+# Unbound methods can only be called after they are bound to an object. That
+# object must be a kind\_of? the method's original class.
 #
 # ```ruby
 # class Square
@@ -31,9 +31,8 @@
 # area.call   #=> 144
 # ```
 #
-# Unbound methods are a reference to the method at the time it was
-# objectified: subsequent changes to the underlying class will not affect
-# the unbound method.
+# Unbound methods are a reference to the method at the time it was objectified:
+# subsequent changes to the underlying class will not affect the unbound method.
 #
 # ```ruby
 # class Test
@@ -55,44 +54,45 @@ class UnboundMethod
   # Returns an indication of the number of arguments accepted by a method.
   # Returns a nonnegative integer for methods that take a fixed number of
   # arguments. For Ruby methods that take a variable number of arguments,
-  # returns -n-1, where n is the number of required arguments. Keyword
-  # arguments will be considered as a single additional argument, that
-  # argument being mandatory if any keyword argument is mandatory. For
-  # methods written in C, returns -1 if the call takes a variable number of
-  # arguments.
+  # returns -n-1, where n is the number of required arguments. Keyword arguments
+  # will be considered as a single additional argument, that argument being
+  # mandatory if any keyword argument is mandatory. For methods written in C,
+  # returns -1 if the call takes a variable number of arguments.
   #
-  #     class C
-  #       def one;    end
-  #       def two(a); end
-  #       def three(*a);  end
-  #       def four(a, b); end
-  #       def five(a, b, *c);    end
-  #       def six(a, b, *c, &d); end
-  #       def seven(a, b, x:0); end
-  #       def eight(x:, y:); end
-  #       def nine(x:, y:, **z); end
-  #       def ten(*a, x:, y:); end
-  #     end
-  #     c = C.new
-  #     c.method(:one).arity     #=> 0
-  #     c.method(:two).arity     #=> 1
-  #     c.method(:three).arity   #=> -1
-  #     c.method(:four).arity    #=> 2
-  #     c.method(:five).arity    #=> -3
-  #     c.method(:six).arity     #=> -3
-  #     c.method(:seven).arity   #=> -3
-  #     c.method(:eight).arity   #=> 1
-  #     c.method(:nine).arity    #=> 1
-  #     c.method(:ten).arity     #=> -2
+  # ```ruby
+  # class C
+  #   def one;    end
+  #   def two(a); end
+  #   def three(*a);  end
+  #   def four(a, b); end
+  #   def five(a, b, *c);    end
+  #   def six(a, b, *c, &d); end
+  #   def seven(a, b, x:0); end
+  #   def eight(x:, y:); end
+  #   def nine(x:, y:, **z); end
+  #   def ten(*a, x:, y:); end
+  # end
+  # c = C.new
+  # c.method(:one).arity     #=> 0
+  # c.method(:two).arity     #=> 1
+  # c.method(:three).arity   #=> -1
+  # c.method(:four).arity    #=> 2
+  # c.method(:five).arity    #=> -3
+  # c.method(:six).arity     #=> -3
+  # c.method(:seven).arity   #=> -3
+  # c.method(:eight).arity   #=> 1
+  # c.method(:nine).arity    #=> 1
+  # c.method(:ten).arity     #=> -2
   #
-  #     "cat".method(:size).arity      #=> 0
-  #     "cat".method(:replace).arity   #=> 1
-  #     "cat".method(:squeeze).arity   #=> -1
-  #     "cat".method(:count).arity     #=> -1
+  # "cat".method(:size).arity      #=> 0
+  # "cat".method(:replace).arity   #=> 1
+  # "cat".method(:squeeze).arity   #=> -1
+  # "cat".method(:count).arity     #=> -1
+  # ```
   sig {returns(Integer)}
   def arity; end
 
-  # Bind *umeth* to *obj* . If `Klass` was the class from which *umeth* was
+  # Bind *umeth* to *obj*. If `Klass` was the class from which *umeth* was
   # obtained, `obj.kind_of?(Klass)` must be true.
   #
   # ```ruby
@@ -117,10 +117,12 @@ class UnboundMethod
   #
   # *produces:*
   #
-  #     In test, class = C
-  #     In test, class = B
-  #     prog.rb:16:in `bind': bind argument must be an instance of B (TypeError)
-  #      from prog.rb:16
+  # ```
+  # In test, class = C
+  # In test, class = B
+  # prog.rb:16:in `bind': bind argument must be an instance of B (TypeError)
+  #  from prog.rb:16
+  # ```
   sig {params(obj: BasicObject).returns(Method)}
   def bind(obj); end
 
@@ -154,14 +156,14 @@ class UnboundMethod
   sig {returns(T::Array[[Symbol, Symbol]])}
   def parameters; end
 
-  # Returns the Ruby source filename and line number containing this method
-  # or nil if this method was not defined in Ruby (i.e. native).
+  # Returns the Ruby source filename and line number containing this method or
+  # nil if this method was not defined in Ruby (i.e. native).
   sig {returns(T.nilable([String, Integer]))}
   def source_location; end
 
-  # Returns a [Method](https://ruby-doc.org/core-2.6.3/Method.html) of
-  # superclass which would be called when super is used or nil if there is
-  # no method on superclass.
+  # Returns a [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) of
+  # superclass which would be called when super is used or nil if there is no
+  # method on superclass.
   sig {returns(T.nilable(UnboundMethod))}
   def super_method; end
 end

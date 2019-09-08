@@ -1,11 +1,12 @@
 # typed: __STDLIB_INTERNAL
 
-# A `Range` represents an interval—a set of values with a beginning and an
-# end. Ranges may be constructed using the *s* `..` *e* and *s* `...` *e*
-# literals, or with [::new](Range#method-c-new).
-# Ranges constructed using `..` run from the beginning to the end
-# inclusively. Those created using `...` exclude the end value. When used
-# as an iterator, ranges return each value in the sequence.
+# A `Range` represents an interval---a set of values with a beginning and an
+# end. Ranges may be constructed using the *s*`..`*e* and *s*`...`*e* literals,
+# or with
+# [`Range::new`](https://docs.ruby-lang.org/en/2.6.0/Range.html#method-c-new).
+# Ranges constructed using `..` run from the beginning to the end inclusively.
+# Those created using `...` exclude the end value. When used as an iterator,
+# ranges return each value in the sequence.
 #
 # ```ruby
 # (-1..-5).to_a      #=> []
@@ -14,13 +15,16 @@
 # ('a'...'e').to_a   #=> ["a", "b", "c", "d"]
 # ```
 #
+# ## Endless Ranges
 #
-# An “endless range” represents a semi-infinite range. Literal notation
-# for an endless range is:
+# An "endless range" represents a semi-infinite range. Literal notation for an
+# endless range is:
 #
-#     (1..)
-#     # or similarly
-#     (1...)
+# ```ruby
+# (1..)
+# # or similarly
+# (1...)
+# ```
 #
 # Which is equivalent to
 #
@@ -31,34 +35,37 @@
 #
 # Endless ranges are useful, for example, for idiomatic slicing of arrays:
 #
-#     [1, 2, 3, 4, 5][2...]   # => [3, 4, 5]
+# ```ruby
+# [1, 2, 3, 4, 5][2...]   # => [3, 4, 5]
+# ```
 #
 # Some implementation details:
 #
-#   - `end` of endless range is `nil` ;
-#
-#   - `each` of endless range enumerates infinite sequence (may be useful
-#     in combination with
-#     [Enumerable\#take\_while](https://ruby-doc.org/core-2.6.3/Enumerable.html#method-i-take_while)
+# *   `end` of endless range is `nil`;
+# *   `each` of endless range enumerates infinite sequence (may be useful in
+#     combination with
+#     [`Enumerable#take_while`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-take_while)
 #     or similar methods);
+# *   `(1..)` and `(1...)` are not equal, although technically representing the
+#     same sequence.
 #
-#   - `(1..)` and `(1...)` are not equal, although technically
-#     representing the same sequence.
 #
+# ## Custom Objects in Ranges
 #
-# Ranges can be constructed using any objects that can be compared using
-# the `<=>` operator. Methods that treat the range as a sequence (\#each
-# and methods inherited from
-# [Enumerable](https://ruby-doc.org/core-2.6.3/Enumerable.html) ) expect
-# the begin object to implement a `succ` method to return the next object
-# in sequence. The [step](Range#method-i-step) and
-# [include?](Range#method-i-include-3F) methods
-# require the begin object to implement `succ` or to be numeric.
+# Ranges can be constructed using any objects that can be compared using the
+# `<=>` operator. Methods that treat the range as a sequence (#each and methods
+# inherited from
+# [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html)) expect
+# the begin object to implement a `succ` method to return the next object in
+# sequence. The
+# [`step`](https://docs.ruby-lang.org/en/2.6.0/Range.html#method-i-step) and
+# [`include?`](https://docs.ruby-lang.org/en/2.6.0/Range.html#method-i-include-3F)
+# methods require the begin object to implement `succ` or to be numeric.
 #
-# In the `Xs` class below both `<=>` and `succ` are implemented so `Xs`
-# can be used to construct ranges. Note that the
-# [Comparable](https://ruby-doc.org/core-2.6.3/Comparable.html) module is
-# included so the `==` method is defined in terms of `<=>` .
+# In the `Xs` class below both `<=>` and `succ` are implemented so `Xs` can be
+# used to construct ranges. Note that the
+# [`Comparable`](https://docs.ruby-lang.org/en/2.6.0/Comparable.html) module is
+# included so the `==` method is defined in terms of `<=>`.
 #
 # ```ruby
 # class Xs                # represent a string of 'x's
@@ -95,9 +102,9 @@ class Range < Object
   extend T::Generic
   Elem = type_member(:out)
 
-  # Constructs a range using the given `begin` and `end` . If the
-  # `exclude_end` parameter is omitted or is `false`, the range will
-  # include the end object; otherwise, it will be excluded.
+  # Constructs a range using the given `begin` and `end`. If the `exclude_end`
+  # parameter is omitted or is `false`, the range will include the end object;
+  # otherwise, it will be excluded.
   sig do
     type_parameters(:U).params(
       from: T.type_parameter(:U),
@@ -107,10 +114,10 @@ class Range < Object
   end
   def self.new(from, to, exclude_end=false); end
 
-  # Returns `true` only if `obj` is a [Range](Range.downloaded.ruby_doc),
-  # has equivalent begin and end items (by comparing them with `==` ), and
-  # has the same
-  # [exclude\_end?](Range.downloaded.ruby_doc#method-i-exclude_end-3F)
+  # Returns `true` only if `obj` is a
+  # [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html), has equivalent
+  # begin and end items (by comparing them with `==`), and has the same
+  # [`exclude_end?`](https://docs.ruby-lang.org/en/2.6.0/Range.html#method-i-exclude_end-3F)
   # setting as the range.
   #
   # ```ruby
@@ -127,8 +134,7 @@ class Range < Object
   def ==(obj); end
 
   # Returns `true` if `obj` is an element of the range, `false` otherwise.
-  # Conveniently, `===` is the comparison operator used by `case`
-  # statements.
+  # Conveniently, `===` is the comparison operator used by `case` statements.
   #
   # ```ruby
   # case 79
@@ -162,17 +168,17 @@ class Range < Object
   # By using binary search, finds a value in range which meets the given
   # condition in O(log n) where n is the size of the range.
   #
-  # You can use this method in two use cases: a find-minimum mode and a
-  # find-any mode. In either case, the elements of the range must be
-  # monotone (or sorted) with respect to the block.
+  # You can use this method in two use cases: a find-minimum mode and a find-any
+  # mode. In either case, the elements of the range must be monotone (or sorted)
+  # with respect to the block.
   #
-  # In find-minimum mode (this is a good choice for typical use case), the
-  # block must return true or false, and there must be a value x so that:
+  # In find-minimum mode (this is a good choice for typical use case), the block
+  # must return true or false, and there must be a value x so that:
   #
-  #   - the block returns false for any value which is less than x, and
+  # *   the block returns false for any value which is less than x, and
+  # *   the block returns true for any value which is greater than or equal to
+  #     x.
   #
-  #   - the block returns true for any value which is greater than or equal
-  #     to x.
   #
   # If x is within the range, this method returns the value x. Otherwise, it
   # returns nil.
@@ -187,18 +193,17 @@ class Range < Object
   # (0.0...Float::INFINITY).bsearch {|x| Math.log(x) >= 0 } #=> 1.0
   # ```
   #
-  # In find-any mode (this behaves like libc’s bsearch(3)), the block must
-  # return a number, and there must be two values x and y (x \<= y) so that:
+  # In find-any mode (this behaves like libc's bsearch(3)), the block must
+  # return a number, and there must be two values x and y (x <= y) so that:
   #
-  #   - the block returns a positive number for v if v \< x,
+  # *   the block returns a positive number for v if v < x,
+  # *   the block returns zero for v if x <= v < y, and
+  # *   the block returns a negative number for v if y <= v.
   #
-  #   - the block returns zero for v if x \<= v \< y, and
   #
-  #   - the block returns a negative number for v if y \<= v.
-  #
-  # This method returns any value which is within the intersection of the
-  # given range and x…y (if any). If there is no value that satisfies the
-  # condition, it returns nil.
+  # This method returns any value which is within the intersection of the given
+  # range and x...y (if any). If there is no value that satisfies the condition,
+  # it returns nil.
   #
   # ```ruby
   # ary = [0, 100, 100, 100, 200]
@@ -208,8 +213,8 @@ class Range < Object
   # ```
   #
   # You must not mix the two modes at a time; the block must always return
-  # either true/false, or always return a number. It is undefined which
-  # value is actually picked up at each iteration.
+  # either true/false, or always return a number. It is undefined which value is
+  # actually picked up at each iteration.
   sig do
     type_parameters(:U).params(
         blk: T.proc.params(arg0: Elem).returns(T::Boolean),
@@ -221,19 +226,19 @@ class Range < Object
   # Returns `true` if `obj` is between the begin and end of the range.
   #
   # This tests `begin <= obj <= end` when
-  # [exclude\_end?](Range.downloaded.ruby_doc#method-i-exclude_end-3F) is
-  # `false` and `begin <= obj < end` when
-  # [exclude\_end?](Range.downloaded.ruby_doc#method-i-exclude_end-3F) is
-  # `true` .
+  # [`exclude_end?`](https://docs.ruby-lang.org/en/2.6.0/Range.html#method-i-exclude_end-3F)
+  # is `false` and `begin <= obj < end` when
+  # [`exclude_end?`](https://docs.ruby-lang.org/en/2.6.0/Range.html#method-i-exclude_end-3F)
+  # is `true`.
   #
-  # If called with a [Range](Range.downloaded.ruby_doc) argument, returns
-  # `true` when the given range is covered by the receiver, by comparing the
-  # begin and end values. If the argument can be treated as a sequence, this
-  # method treats it that way. In the specific case of
-  # `(a..b).cover?(c...d)` with `a <= c && b < d`, the end of the sequence
-  # must be calculated, which may exhibit poor performance if `c` is
-  # non-numeric. Returns `false` if the begin value of the range is larger
-  # than the end value.
+  # If called with a [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html)
+  # argument, returns `true` when the given range is covered by the receiver, by
+  # comparing the begin and end values. If the argument can be treated as a
+  # sequence, this method treats it that way. In the specific case of
+  # `(a..b).cover?(c...d)` with `a <= c && b < d`, the end of the sequence must
+  # be calculated, which may exhibit poor performance if `c` is non-numeric.
+  # Returns `false` if the begin value of the range is larger than the end
+  # value.
   #
   # ```ruby
   # ("a".."z").cover?("c")  #=> true
@@ -253,11 +258,11 @@ class Range < Object
 
   # Iterates over the elements of range, passing each in turn to the block.
   #
-  # The `each` method can only be used if the begin object of the range
-  # supports the `succ` method. A
-  # [TypeError](https://ruby-doc.org/core-2.6.3/TypeError.html) is raised if
-  # the object does not have `succ` method defined (like
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html) ).
+  # The `each` method can only be used if the begin object of the range supports
+  # the `succ` method. A
+  # [`TypeError`](https://docs.ruby-lang.org/en/2.6.0/TypeError.html) is raised
+  # if the object does not have `succ` method defined (like
+  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html)).
   #
   # If no block is given, an enumerator is returned instead.
   #
@@ -312,17 +317,17 @@ class Range < Object
   def first(n=T.unsafe(nil)); end
 
   # Compute a hash-code for this range. Two ranges with equal begin and end
-  # points (using `eql?` ), and the same
-  # [exclude\_end?](Range.downloaded.ruby_doc#method-i-exclude_end-3F) value
-  # will generate the same hash-code.
+  # points (using `eql?`), and the same
+  # [`exclude_end?`](https://docs.ruby-lang.org/en/2.6.0/Range.html#method-i-exclude_end-3F)
+  # value will generate the same hash-code.
   #
-  # See also Object\#hash.
+  # See also Object#hash.
   sig {returns(Integer)}
   def hash(); end
 
-  # Returns `true` if `obj` is an element of the range, `false` otherwise.
-  # If begin and end are numeric, comparison is done according to the
-  # magnitude of the values.
+  # Returns `true` if `obj` is an element of the range, `false` otherwise. If
+  # begin and end are numeric, comparison is done according to the magnitude of
+  # the values.
   #
   # ```ruby
   # ("a".."z").include?("g")   #=> true
@@ -347,18 +352,17 @@ class Range < Object
   end
   def initialize(_begin, _end, exclude_end=T.unsafe(nil)); end
 
-  # Convert this range object to a printable form (using `inspect` to
-  # convert the begin and end objects).
+  # Convert this range object to a printable form (using `inspect` to convert
+  # the begin and end objects).
   sig {returns(String)}
   def inspect(); end
 
-  # Returns the last object in the range, or an array of the last `n`
-  # elements.
+  # Returns the last object in the range, or an array of the last `n` elements.
   #
-  # Note that with no arguments `last` will return the object that defines
-  # the end of the range even if
-  # [exclude\_end?](Range.downloaded.ruby_doc#method-i-exclude_end-3F) is
-  # `true` .
+  # Note that with no arguments `last` will return the object that defines the
+  # end of the range even if
+  # [`exclude_end?`](https://docs.ruby-lang.org/en/2.6.0/Range.html#method-i-exclude_end-3F)
+  # is `true`.
   #
   # ```ruby
   # (10..20).last      #=> 20
@@ -375,12 +379,12 @@ class Range < Object
   end
   def last(n=T.unsafe(nil)); end
 
-  # Returns the maximum value in the range. Returns `nil` if the begin value
-  # of the range larger than the end value. Returns `nil` if the begin value
-  # of an exclusive range is equal to the end value.
+  # Returns the maximum value in the range. Returns `nil` if the begin value of
+  # the range larger than the end value. Returns `nil` if the begin value of an
+  # exclusive range is equal to the end value.
   #
-  # Can be given an optional block to override the default comparison method
-  # `a <=> b` .
+  # Can be given an optional block to override the default comparison method `a
+  # <=> b`.
   #
   # ```ruby
   # (10..20).max    #=> 20
@@ -407,12 +411,12 @@ class Range < Object
   end
   def max(n=T.unsafe(nil), &blk); end
 
-  # Returns the minimum value in the range. Returns `nil` if the begin value
-  # of the range is larger than the end value. Returns `nil` if the begin
-  # value of an exclusive range is equal to the end value.
+  # Returns the minimum value in the range. Returns `nil` if the begin value of
+  # the range is larger than the end value. Returns `nil` if the begin value of
+  # an exclusive range is equal to the end value.
   #
-  # Can be given an optional block to override the default comparison method
-  # `a <=> b` .
+  # Can be given an optional block to override the default comparison method `a
+  # <=> b`.
   #
   # ```ruby
   # (10..20).min    #=> 10
@@ -439,9 +443,9 @@ class Range < Object
   end
   def min(n=T.unsafe(nil), &blk); end
 
-  # Returns the number of elements in the range. Both the begin and the end
-  # of the [Range](Range.downloaded.ruby_doc) must be
-  # [Numeric](https://ruby-doc.org/core-2.6.3/Numeric.html), otherwise nil
+  # Returns the number of elements in the range. Both the begin and the end of
+  # the [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) must be
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html), otherwise nil
   # is returned.
   #
   # ```ruby
@@ -452,17 +456,13 @@ class Range < Object
   sig {returns(T.nilable(Integer))}
   def size(); end
 
-  # ```
-  # %
-  # ```
-  #
-  # Iterates over the range, passing each `n` th element to the block. If
-  # begin and end are numeric, `n` is added for each iteration. Otherwise
-  # `step` invokes `succ` to iterate through range elements.
+  # Iterates over the range, passing each `n`th element to the block. If begin
+  # and end are numeric, `n` is added for each iteration. Otherwise `step`
+  # invokes `succ` to iterate through range elements.
   #
   # If no block is given, an enumerator is returned instead. Especially, the
   # enumerator is an
-  # [Enumerator::ArithmeticSequence](https://ruby-doc.org/core-2.6.3/Enumerator/ArithmeticSequence.html)
+  # [`Enumerator::ArithmeticSequence`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/ArithmeticSequence.html)
   # if begin and end of the range are numeric.
   #
   # ```ruby
@@ -487,7 +487,8 @@ class Range < Object
   # 10 xxxxxxxxxx
   # ```
   #
-  # See [Range](Range.downloaded.ruby_doc) for the definition of class Xs.
+  # See [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) for the
+  # definition of class Xs.
   sig do
     params(
         n: Integer,
@@ -504,15 +505,15 @@ class Range < Object
   def step(n=T.unsafe(nil), &blk); end
 
   # Convert this range object to a printable form (using
-  # [to\_s](Range.downloaded.ruby_doc#method-i-to_s) to convert the begin
-  # and end objects).
+  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Range.html#method-i-to_s) to
+  # convert the begin and end objects).
   sig {returns(String)}
   def to_s(); end
 
-  # Returns `true` only if `obj` is a [Range](Range.downloaded.ruby_doc),
-  # has equivalent begin and end items (by comparing them with `eql?` ), and
-  # has the same
-  # [exclude\_end?](Range.downloaded.ruby_doc#method-i-exclude_end-3F)
+  # Returns `true` only if `obj` is a
+  # [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html), has equivalent
+  # begin and end items (by comparing them with `eql?`), and has the same
+  # [`exclude_end?`](https://docs.ruby-lang.org/en/2.6.0/Range.html#method-i-exclude_end-3F)
   # setting as the range.
   #
   # ```ruby
@@ -528,9 +529,9 @@ class Range < Object
   end
   def eql?(obj); end
 
-  # Returns `true` if `obj` is an element of the range, `false` otherwise.
-  # If begin and end are numeric, comparison is done according to the
-  # magnitude of the values.
+  # Returns `true` if `obj` is an element of the range, `false` otherwise. If
+  # begin and end are numeric, comparison is done according to the magnitude of
+  # the values.
   #
   # ```ruby
   # ("a".."z").include?("g")   #=> true

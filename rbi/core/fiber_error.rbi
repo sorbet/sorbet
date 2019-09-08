@@ -1,9 +1,9 @@
 # typed: __STDLIB_INTERNAL
 
 # Raised when an invalid operation is attempted on a
-# [Fiber](https://ruby-doc.org/core-2.6.3/Fiber.html), in particular when
-# attempting to call/resume a dead fiber, attempting to yield from the
-# root fiber, or calling a fiber across threads.
+# [`Fiber`](https://docs.ruby-lang.org/en/2.6.0/Fiber.html), in particular when
+# attempting to call/resume a dead fiber, attempting to yield from the root
+# fiber, or calling a fiber across threads.
 #
 # ```ruby
 # fiber = Fiber.new{}

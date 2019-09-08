@@ -1,5 +1,65 @@
 # typed: __STDLIB_INTERNAL
 
+# A class that provides the functionality of
+# [`Kernel#set_trace_func`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-set_trace_func)
+# in a nice Object-Oriented API.
+#
+# ## Example
+#
+# We can use [`TracePoint`](https://docs.ruby-lang.org/en/2.6.0/TracePoint.html)
+# to gather information specifically for exceptions:
+#
+# ```ruby
+# trace = TracePoint.new(:raise) do |tp|
+#     p [tp.lineno, tp.event, tp.raised_exception]
+# end
+# #=> #<TracePoint:disabled>
+#
+# trace.enable
+# #=> false
+#
+# 0 / 0
+# #=> [5, :raise, #<ZeroDivisionError: divided by 0>]
+# ```
+#
+# ## Events
+#
+# If you don't specify the type of events you want to listen for,
+# [`TracePoint`](https://docs.ruby-lang.org/en/2.6.0/TracePoint.html) will
+# include all available events.
+#
+# **Note** do not depend on current event set, as this list is subject to
+# change. Instead, it is recommended you specify the type of events you want to
+# use.
+#
+# To filter what is traced, you can pass any of the following as `events`:
+#
+# `:line`
+# :   execute code on a new line
+# `:class`
+# :   start a class or module definition
+# `:end`
+# :   finish a class or module definition
+# `:call`
+# :   call a Ruby method
+# `:return`
+# :   return from a Ruby method
+# `:c_call`
+# :   call a C-language routine
+# `:c_return`
+# :   return from a C-language routine
+# `:raise`
+# :   raise an exception
+# `:b_call`
+# :   event hook at block entry
+# `:b_return`
+# :   event hook at block ending
+# `:thread_begin`
+# :   event hook at thread beginning
+# `:thread_end`
+# :   event hook at thread ending
+# `:fiber_switch`
+# :   event hook at fiber switch
 class TracePoint < Object
   sig do
     params(
@@ -11,16 +71,26 @@ class TracePoint < Object
   def initialize(*events, &blk); end
 
   # Returns internal information of
-  # [TracePoint](TracePoint.downloaded.ruby_doc).
+  # [`TracePoint`](https://docs.ruby-lang.org/en/2.6.0/TracePoint.html).
   #
-  # The contents of the returned value are implementation specific. It may
-  # be changed in future.
+  # The contents of the returned value are implementation specific. It may be
+  # changed in future.
   #
   # This method is only for debugging
-  # [TracePoint](TracePoint.downloaded.ruby_doc) itself.
+  # [`TracePoint`](https://docs.ruby-lang.org/en/2.6.0/TracePoint.html) itself.
   sig {returns(T.untyped)}
   def self.stat; end
 
+  # A convenience method for
+  # [`TracePoint.new`](https://docs.ruby-lang.org/en/2.6.0/TracePoint.html#method-c-new),
+  # that activates the trace automatically.
+  #
+  # ```ruby
+  # trace = TracePoint.trace(:call) { |tp| [tp.lineno, tp.event] }
+  # #=> #<TracePoint:enabled>
+  #
+  # trace.enabled? #=> true
+  # ```
   sig do
     params(
         events: Symbol,
@@ -38,6 +108,49 @@ class TracePoint < Object
   sig {returns(T.untyped)}
   def callee_id; end
 
+  # Return class or module of the method being called.
+  #
+  # ```ruby
+  # class C; def foo; end; end
+  # trace = TracePoint.new(:call) do |tp|
+  #   p tp.defined_class #=> C
+  # end.enable do
+  #   C.new.foo
+  # end
+  # ```
+  #
+  # If method is defined by a module, then that module is returned.
+  #
+  # ```ruby
+  # module M; def foo; end; end
+  # class C; include M; end;
+  # trace = TracePoint.new(:call) do |tp|
+  #   p tp.defined_class #=> M
+  # end.enable do
+  #   C.new.foo
+  # end
+  # ```
+  #
+  # **Note:**
+  # [`defined_class`](https://docs.ruby-lang.org/en/2.6.0/TracePoint.html#method-i-defined_class)
+  # returns singleton class.
+  #
+  # 6th block parameter of
+  # [`Kernel#set_trace_func`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-set_trace_func)
+  # passes original class of attached by singleton class.
+  #
+  # **This is a difference between
+  # [`Kernel#set_trace_func`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-set_trace_func)
+  # and [`TracePoint`](https://docs.ruby-lang.org/en/2.6.0/TracePoint.html).**
+  #
+  # ```ruby
+  # class C; def self.foo; end; end
+  # trace = TracePoint.new(:call) do |tp|
+  #   p tp.defined_class #=> #<Class:C>
+  # end.enable do
+  #   C.foo
+  # end
+  # ```
   sig {returns(Module)}
   def defined_class; end
 
@@ -52,8 +165,8 @@ class TracePoint < Object
   # trace.disable        #=> false
   # ```
   #
-  # If a block is given, the trace will only be disable within the scope of
-  # the block.
+  # If a block is given, the trace will only be disable within the scope of the
+  # block.
   #
   # ```ruby
   # trace.enabled?
@@ -86,6 +199,8 @@ class TracePoint < Object
   sig {returns(T::Boolean)}
   def enabled?; end
 
+  # Return a string containing a human-readable
+  # [`TracePoint`](https://docs.ruby-lang.org/en/2.6.0/TracePoint.html) status.
   sig {returns(String)}
   def inspect; end
 
@@ -111,7 +226,8 @@ class TracePoint < Object
 
   # Return the trace object during event
   #
-  # Same as [\#binding](TracePoint.downloaded.ruby_doc#method-i-binding):
+  # Same as
+  # [`TracePoint#binding`](https://docs.ruby-lang.org/en/2.6.0/TracePoint.html#method-i-binding):
   #
   # ```ruby
   # trace.binding.eval('self')

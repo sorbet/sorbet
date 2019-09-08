@@ -1,14 +1,13 @@
 # typed: __STDLIB_INTERNAL
 
-# A [Struct](Struct) is a convenient way to bundle a
-# number of attributes together, using accessor methods, without having to
-# write an explicit class.
+# A [`Struct`](https://docs.ruby-lang.org/en/2.6.0/Struct.html) is a convenient
+# way to bundle a number of attributes together, using accessor methods, without
+# having to write an explicit class.
 #
-# The [Struct](Struct) class generates new subclasses
-# that hold a set of members and their values. For each member a reader
-# and writer method is created similar to
-# [Module\#attr\_accessor](https://ruby-doc.org/core-2.6.3/Module.html#method-i-attr_accessor)
-# .
+# The [`Struct`](https://docs.ruby-lang.org/en/2.6.0/Struct.html) class
+# generates new subclasses that hold a set of members and their values. For each
+# member a reader and writer method is created similar to
+# [`Module#attr_accessor`](https://docs.ruby-lang.org/en/2.6.0/Module.html#method-i-attr_accessor).
 #
 # ```ruby
 # Customer = Struct.new(:name, :address) do
@@ -22,12 +21,13 @@
 # dave.greeting #=> "Hello Dave!"
 # ```
 #
-# See [::new](Struct#method-c-new) for further
-# examples of creating struct subclasses and instances.
+# See
+# [`Struct::new`](https://docs.ruby-lang.org/en/2.6.0/Struct.html#method-c-new)
+# for further examples of creating struct subclasses and instances.
 #
 # In the method descriptions that follow, a "member" parameter refers to a
-# struct member which is either a quoted string ( `"name"` ) or a
-# [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html) ( `:name` ).
+# struct member which is either a quoted string (`"name"`) or a
+# [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html) (`:name`).
 class Struct < Object
   include Enumerable
 
@@ -44,6 +44,22 @@ class Struct < Object
   end
   def initialize(arg0, *arg1, keyword_init: false); end
 
+  # Yields the value of each struct member in order. If no block is given an
+  # enumerator is returned.
+  #
+  # ```ruby
+  # Customer = Struct.new(:name, :address, :zip)
+  # joe = Customer.new("Joe Smith", "123 Maple, Anytown NC", 12345)
+  # joe.each {|x| puts(x) }
+  # ```
+  #
+  # Produces:
+  #
+  # ```
+  # Joe Smith
+  # 123 Maple, Anytown NC
+  # 12345
+  # ```
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),

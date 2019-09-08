@@ -1,20 +1,18 @@
 # typed: __STDLIB_INTERNAL
 
-# Ruby exception objects are subclasses of `Exception` . However,
-# operating systems typically report errors using plain integers.
-# [Module](https://ruby-doc.org/core-2.6.3/Module.html) `Errno` is created
-# dynamically to map these operating system errors to Ruby classes, with
-# each error number generating its own subclass of `SystemCallError` . As
-# the subclass is created in module `Errno`, its name will start
-# `Errno::` .
+# Ruby exception objects are subclasses of `Exception`. However, operating
+# systems typically report errors using plain integers.
+# [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html) `Errno` is created
+# dynamically to map these operating system errors to Ruby classes, with each
+# error number generating its own subclass of `SystemCallError`. As the subclass
+# is created in module `Errno`, its name will start `Errno::`.
 #
-# The names of the `Errno::` classes depend on the environment in which
-# Ruby runs. On a typical Unix or Windows platform, there are `Errno`
-# classes such as `Errno::EACCES`, `Errno::EAGAIN`, `Errno::EINTR`, and
-# so on.
+# The names of the `Errno::` classes depend on the environment in which Ruby
+# runs. On a typical Unix or Windows platform, there are `Errno` classes such as
+# `Errno::EACCES`, `Errno::EAGAIN`, `Errno::EINTR`, and so on.
 #
-# The integer operating system error number corresponding to a particular
-# error is available as the class constant `Errno::` *error* `::Errno` .
+# The integer operating system error number corresponding to a particular error
+# is available as the class constant `Errno::`*error*`::Errno`.
 #
 # ```ruby
 # Errno::EACCES::Errno   #=> 13
@@ -23,11 +21,21 @@
 # ```
 #
 # The full list of operating system errors on your particular platform are
-# available as the constants of `Errno` .
+# available as the constants of `Errno`.
 #
 # ```ruby
 # Errno.constants   #=> :E2BIG, :EACCES, :EADDRINUSE, :EADDRNOTAVAIL, ...
 # ```
+#
+# System call error module used by webrick for cross platform compatibility.
+#
+# EPROTO
+# :   protocol error
+# ECONNRESET
+# :   remote host reset the connection request
+# ECONNABORTED
+# :   Client sent TCP reset (RST) before server has accepted the connection
+#     requested by client.
 module Errno
 end
 
@@ -119,6 +127,8 @@ class Errno::ECOMM < SystemCallError
   Errno = T.let(nil, Integer)
 end
 
+# Client sent TCP reset (RST) before server has accepted the connection
+# requested by client.
 class Errno::ECONNABORTED < SystemCallError
   Errno = T.let(nil, Integer)
 end
@@ -127,6 +137,7 @@ class Errno::ECONNREFUSED < SystemCallError
   Errno = T.let(nil, Integer)
 end
 
+# Remote host reset the connection request.
 class Errno::ECONNRESET < SystemCallError
   Errno = T.let(nil, Integer)
 end
@@ -455,6 +466,7 @@ class Errno::EPIPE < SystemCallError
   Errno = T.let(nil, Integer)
 end
 
+# Protocol error.
 class Errno::EPROTO < SystemCallError
   Errno = T.let(nil, Integer)
 end

@@ -1,10 +1,10 @@
 # typed: __STDLIB_INTERNAL
 
-# A `Proc` object is an encapsulation of a block of code, which can be
-# stored in a local variable, passed to a method or another
-# [Proc](Proc), and can be called.
-# [Proc](Proc) is an essential concept in Ruby and a
-# core of its functional programming features.
+# A `Proc` object is an encapsulation of a block of code, which can be stored in
+# a local variable, passed to a method or another
+# [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html), and can be called.
+# [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) is an essential
+# concept in Ruby and a core of its functional programming features.
 #
 # ```ruby
 # square = Proc.new {|x| x**2 }
@@ -15,8 +15,9 @@
 # square[3]       #=> 9
 # ```
 #
-# [Proc](Proc) objects are *closures* , meaning they
-# remember and can use the entire context in which they were created.
+# [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) objects are
+# *closures*, meaning they remember and can use the entire context in which they
+# were created.
 #
 # ```ruby
 # def gen_times(factor)
@@ -31,67 +32,70 @@
 # times3.call(times5.call(4))   #=> 60
 # ```
 #
+# ## Creation
 #
-# There are several methods to create a [Proc](Proc)
+# There are several methods to create a
+# [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html)
 #
-#   - Use the [Proc](Proc) class constructor:
+# *   Use the [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) class
+#     constructor:
 #
-#     ```ruby
-#     proc1 = Proc.new {|x| x**2 }
-#     ```
+# ```ruby
+# proc1 = Proc.new {|x| x**2 }
+# ```
 #
-#   - Use the
-#     [Kernel\#proc](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-proc)
+# *   Use the
+#     [`Kernel#proc`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-proc)
 #     method as a shorthand of
-#     [::new](Proc#method-c-new):
+#     [`Proc.new`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-c-new):
 #
-#     ```ruby
-#     proc2 = proc {|x| x**2 }
-#     ```
+# ```ruby
+# proc2 = proc {|x| x**2 }
+# ```
 #
-#   - Receiving a block of code into proc argument (note the `&` ):
+# *   Receiving a block of code into proc argument (note the `&`):
 #
-#     ```ruby
-#     def make_proc(&block)
-#       block
-#     end
+# ```ruby
+# def make_proc(&block)
+#   block
+# end
 #
-#     proc3 = make_proc {|x| x**2 }
-#     ```
+# proc3 = make_proc {|x| x**2 }
+# ```
 #
-#   - Construct a proc with lambda semantics using the
-#     [Kernel\#lambda](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-lambda)
+# *   Construct a proc with lambda semantics using the
+#     [`Kernel#lambda`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-lambda)
 #     method (see below for explanations about lambdas):
 #
-#     ```ruby
-#     lambda1 = lambda {|x| x**2 }
-#     ```
+# ```ruby
+# lambda1 = lambda {|x| x**2 }
+# ```
 #
-#   - Use the Lambda literal syntax (also constructs a proc with lambda
+# *   Use the Lambda literal syntax (also constructs a proc with lambda
 #     semantics):
 #
-#     ```ruby
-#     lambda2 = ->(x) { x**2 }
-#     ```
+# ```ruby
+# lambda2 = ->(x) { x**2 }
+# ```
 #
+#
+# ## Lambda and non-lambda semantics
 #
 # Procs are coming in two flavors: lambda and non-lambda (regular procs).
 # Differences are:
 #
-#   - In lambdas, `return` means exit from this lambda;
+# *   In lambdas, `return` means exit from this lambda;
+# *   In regular procs, `return` means exit from embracing method (and will
+#     throw `LocalJumpError` if invoked outside the method);
+# *   In lambdas, arguments are treated in the same way as in methods: strict,
+#     with `ArgumentError` for mismatching argument number, and no additional
+#     argument processing;
+# *   Regular procs accept arguments more generously: missing arguments are
+#     filled with `nil`, single
+#     [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) arguments are
+#     deconstructed if the proc has multiple arguments, and there is no error
+#     raised on extra arguments.
 #
-#   - In regular procs, `return` means exit from embracing method (and
-#     will throw `LocalJumpError` if invoked outside the method);
-#
-#   - In lambdas, arguments are treated in the same way as in methods:
-#     strict, with `ArgumentError` for mismatching argument number, and no
-#     additional argument processing;
-#
-#   - Regular procs accept arguments more generously: missing arguments
-#     are filled with `nil`, single
-#     [Array](https://ruby-doc.org/core-2.6.3/Array.html) arguments are
-#     deconstructed if the proc has multiple arguments, and there is no
-#     error raised on extra arguments.
 #
 # Examples:
 #
@@ -129,16 +133,17 @@
 # end
 # ```
 #
-# Inside `map`, the block of code is treated as a regular (non-lambda)
-# proc, which means that the internal arrays will be deconstructed to
-# pairs of arguments, and `return` will exit from the method `test` . That
-# would not be possible with a stricter lambda.
+# Inside `map`, the block of code is treated as a regular (non-lambda) proc,
+# which means that the internal arrays will be deconstructed to pairs of
+# arguments, and `return` will exit from the method `test`. That would not be
+# possible with a stricter lambda.
 #
 # You can tell a lambda from a regular proc by using the
-# [lambda?](Proc#method-i-lambda-3F) instance method.
+# [`lambda?`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-i-lambda-3F)
+# instance method.
 #
-# Lambda semantics is typically preserved during the proc lifetime,
-# including `&` -deconstruction to a block of code:
+# Lambda semantics is typically preserved during the proc lifetime, including
+# `&`-deconstruction to a block of code:
 #
 # ```ruby
 # p = proc {|x, y| x }
@@ -147,9 +152,8 @@
 # [[1, 2], [3, 4]].map(&l) # ArgumentError: wrong number of arguments (given 1, expected 2)
 # ```
 #
-# The only exception is dynamic method definition: even if defined by
-# passing a non-lambda proc, methods still have normal semantics of
-# argument checking.
+# The only exception is dynamic method definition: even if defined by passing a
+# non-lambda proc, methods still have normal semantics of argument checking.
 #
 # ```ruby
 # class C
@@ -160,8 +164,8 @@
 # ```
 #
 # This exception ensures that methods never have unusual argument passing
-# conventions, and makes it easy to have wrappers defining methods that
-# behave as usual.
+# conventions, and makes it easy to have wrappers defining methods that behave
+# as usual.
 #
 # ```ruby
 # class C
@@ -174,12 +178,13 @@
 # C.new.f(1,2)       #=> ArgumentError
 # ```
 #
-# The wrapper *def2* receives `body` as a non-lambda proc, yet defines a
-# method which has normal semantics.
+# The wrapper *def2* receives `body` as a non-lambda proc, yet defines a method
+# which has normal semantics.
 #
+# ## Conversion of other objects to procs
 #
-# Any object that implements the `to_proc` method can be converted into a
-# proc by the `&` operator, and therefore con be consumed by iterators.
+# Any object that implements the `to_proc` method can be converted into a proc
+# by the `&` operator, and therefore con be consumed by iterators.
 #
 # ```ruby
 # class Greater
@@ -199,57 +204,60 @@
 # ```
 #
 # Of the Ruby core classes, this method is implemented by
-# [Symbol](https://ruby-doc.org/core-2.6.3/Symbol.html),
-# [Method](https://ruby-doc.org/core-2.6.3/Method.html), and
-# [Hash](https://ruby-doc.org/core-2.6.3/Hash.html).
+# [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html),
+# [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html), and
+# [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html).
 #
-#     :to_s.to_proc.call(1)           #=> "1"
-#     [1, 2].map(&:to_s)              #=> ["1", "2"]
+# ```ruby
+# :to_s.to_proc.call(1)           #=> "1"
+# [1, 2].map(&:to_s)              #=> ["1", "2"]
 #
-#     method(:puts).to_proc.call(1)   # prints 1
-#     [1, 2].each(&method(:puts))     # prints 1, 2
+# method(:puts).to_proc.call(1)   # prints 1
+# [1, 2].each(&method(:puts))     # prints 1, 2
 #
-#     {test: 1}.to_proc.call(:test)       #=> 1
-#     %i[test many keys].map(&{test: 1})  #=> [1, nil, nil]
+# {test: 1}.to_proc.call(:test)       #=> 1
+# %i[test many keys].map(&{test: 1})  #=> [1, nil, nil]
+# ```
 class Proc < Object
-  # Returns the number of mandatory arguments. If the block is declared to
-  # take no arguments, returns 0. If the block is known to take exactly n
-  # arguments, returns n. If the block has optional arguments, returns -n-1,
-  # where n is the number of mandatory arguments, with the exception for
-  # blocks that are not lambdas and have only a finite number of optional
-  # arguments; in this latter case, returns n. Keyword arguments will be
-  # considered as a single additional argument, that argument being
-  # mandatory if any keyword argument is mandatory. A `proc` with no
-  # argument declarations is the same as a block declaring `||` as its
-  # arguments.
+  # Returns the number of mandatory arguments. If the block is declared to take
+  # no arguments, returns 0. If the block is known to take exactly n arguments,
+  # returns n. If the block has optional arguments, returns -n-1, where n is the
+  # number of mandatory arguments, with the exception for blocks that are not
+  # lambdas and have only a finite number of optional arguments; in this latter
+  # case, returns n. Keyword arguments will be considered as a single additional
+  # argument, that argument being mandatory if any keyword argument is
+  # mandatory. A `proc` with no argument declarations is the same as a block
+  # declaring `||` as its arguments.
   #
-  #     proc {}.arity                  #=>  0
-  #     proc { || }.arity              #=>  0
-  #     proc { |a| }.arity             #=>  1
-  #     proc { |a, b| }.arity          #=>  2
-  #     proc { |a, b, c| }.arity       #=>  3
-  #     proc { |*a| }.arity            #=> -1
-  #     proc { |a, *b| }.arity         #=> -2
-  #     proc { |a, *b, c| }.arity      #=> -3
-  #     proc { |x:, y:, z:0| }.arity   #=>  1
-  #     proc { |*a, x:, y:0| }.arity   #=> -2
+  # ```ruby
+  # proc {}.arity                  #=>  0
+  # proc { || }.arity              #=>  0
+  # proc { |a| }.arity             #=>  1
+  # proc { |a, b| }.arity          #=>  2
+  # proc { |a, b, c| }.arity       #=>  3
+  # proc { |*a| }.arity            #=> -1
+  # proc { |a, *b| }.arity         #=> -2
+  # proc { |a, *b, c| }.arity      #=> -3
+  # proc { |x:, y:, z:0| }.arity   #=>  1
+  # proc { |*a, x:, y:0| }.arity   #=> -2
   #
-  #     proc   { |a=0| }.arity         #=>  0
-  #     lambda { |a=0| }.arity         #=> -1
-  #     proc   { |a=0, b| }.arity      #=>  1
-  #     lambda { |a=0, b| }.arity      #=> -2
-  #     proc   { |a=0, b=0| }.arity    #=>  0
-  #     lambda { |a=0, b=0| }.arity    #=> -1
-  #     proc   { |a, b=0| }.arity      #=>  1
-  #     lambda { |a, b=0| }.arity      #=> -2
-  #     proc   { |(a, b), c=0| }.arity #=>  1
-  #     lambda { |(a, b), c=0| }.arity #=> -2
-  #     proc   { |a, x:0, y:0| }.arity #=>  1
-  #     lambda { |a, x:0, y:0| }.arity #=> -2
+  # proc   { |a=0| }.arity         #=>  0
+  # lambda { |a=0| }.arity         #=> -1
+  # proc   { |a=0, b| }.arity      #=>  1
+  # lambda { |a=0, b| }.arity      #=> -2
+  # proc   { |a=0, b=0| }.arity    #=>  0
+  # lambda { |a=0, b=0| }.arity    #=> -1
+  # proc   { |a, b=0| }.arity      #=>  1
+  # lambda { |a, b=0| }.arity      #=> -2
+  # proc   { |(a, b), c=0| }.arity #=>  1
+  # lambda { |(a, b), c=0| }.arity #=> -2
+  # proc   { |a, x:0, y:0| }.arity #=>  1
+  # lambda { |a, x:0, y:0| }.arity #=> -2
+  # ```
   sig {returns(Integer)}
   def arity(); end
 
-  # Returns the binding associated with *prc* .
+  # Returns the binding associated with *prc*.
   #
   # ```ruby
   # def fred(param)
@@ -262,9 +270,9 @@ class Proc < Object
   sig {returns(Binding)}
   def binding(); end
 
-  # Invokes the block, setting the block's parameters to the values in
-  # *params* using something close to method calling semantics. Returns the
-  # value of the last expression evaluated in the block.
+  # Invokes the block, setting the block's parameters to the values in *params*
+  # using something close to method calling semantics. Returns the value of the
+  # last expression evaluated in the block.
   #
   # ```ruby
   # a_proc = Proc.new {|scalar, *values| values.map {|value| value*scalar } }
@@ -278,9 +286,9 @@ class Proc < Object
   # syntactic sugar to hide "call".
   #
   # For procs created using `lambda` or `->()` an error is generated if the
-  # wrong number of parameters are passed to the proc. For procs created
-  # using `Proc.new` or `Kernel.proc`, extra parameters are silently
-  # discarded and missing parameters are set to `nil` .
+  # wrong number of parameters are passed to the proc. For procs created using
+  # `Proc.new` or `Kernel.proc`, extra parameters are silently discarded and
+  # missing parameters are set to `nil`.
   #
   # ```ruby
   # a_proc = proc {|a,b| [a,b] }
@@ -290,7 +298,8 @@ class Proc < Object
   # a_proc.call(1)   # ArgumentError: wrong number of arguments (given 1, expected 2)
   # ```
   #
-  # See also [\#lambda?](Proc.downloaded.ruby_doc#method-i-lambda-3F).
+  # See also
+  # [`Proc#lambda?`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-i-lambda-3F).
   sig do
     params(
         arg0: BasicObject,
@@ -299,9 +308,9 @@ class Proc < Object
   end
   def call(*arg0); end
 
-  # Invokes the block, setting the block's parameters to the values in
-  # *params* using something close to method calling semantics. Returns the
-  # value of the last expression evaluated in the block.
+  # Invokes the block, setting the block's parameters to the values in *params*
+  # using something close to method calling semantics. Returns the value of the
+  # last expression evaluated in the block.
   #
   # ```ruby
   # a_proc = Proc.new {|scalar, *values| values.map {|value| value*scalar } }
@@ -315,9 +324,9 @@ class Proc < Object
   # syntactic sugar to hide "call".
   #
   # For procs created using `lambda` or `->()` an error is generated if the
-  # wrong number of parameters are passed to the proc. For procs created
-  # using `Proc.new` or `Kernel.proc`, extra parameters are silently
-  # discarded and missing parameters are set to `nil` .
+  # wrong number of parameters are passed to the proc. For procs created using
+  # `Proc.new` or `Kernel.proc`, extra parameters are silently discarded and
+  # missing parameters are set to `nil`.
   #
   # ```ruby
   # a_proc = proc {|a,b| [a,b] }
@@ -327,7 +336,8 @@ class Proc < Object
   # a_proc.call(1)   # ArgumentError: wrong number of arguments (given 1, expected 2)
   # ```
   #
-  # See also [\#lambda?](Proc.downloaded.ruby_doc#method-i-lambda-3F).
+  # See also
+  # [`Proc#lambda?`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-i-lambda-3F).
   sig do
     params(
         arg0: BasicObject,
@@ -337,11 +347,10 @@ class Proc < Object
   def [](*arg0); end
 
   # Returns a curried proc. If the optional *arity* argument is given, it
-  # determines the number of arguments. A curried proc receives some
-  # arguments. If a sufficient number of arguments are supplied, it passes
-  # the supplied arguments to the original proc and returns the result.
-  # Otherwise, returns another curried proc that takes the rest of
-  # arguments.
+  # determines the number of arguments. A curried proc receives some arguments.
+  # If a sufficient number of arguments are supplied, it passes the supplied
+  # arguments to the original proc and returns the result. Otherwise, returns
+  # another curried proc that takes the rest of arguments.
   #
   # ```ruby
   # b = proc {|x, y, z| (x||0) + (y||0) + (z||0) }
@@ -384,16 +393,16 @@ class Proc < Object
 
   # Returns a hash value corresponding to proc body.
   #
-  # See also Object\#hash.
+  # See also Object#hash.
   sig {returns(Integer)}
   def hash(); end
 
-  # Returns `true` for a [Proc](Proc.downloaded.ruby_doc) object for which
-  # argument handling is rigid. Such procs are typically generated by
-  # `lambda` .
+  # Returns `true` for a [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html)
+  # object for which argument handling is rigid. Such procs are typically
+  # generated by `lambda`.
   #
-  # A [Proc](Proc.downloaded.ruby_doc) object generated by `proc` ignores
-  # extra arguments.
+  # A [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) object generated
+  # by `proc` ignores extra arguments.
   #
   # ```ruby
   # proc {|a,b| [a,b] }.call(1,2,3)    #=> [1,2]
@@ -411,8 +420,8 @@ class Proc < Object
   # proc {|a,b| [a,b] }.call([1,2])    #=> [1,2]
   # ```
   #
-  # A [Proc](Proc.downloaded.ruby_doc) object generated by `lambda` doesn’t
-  # have such tricks.
+  # A [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) object generated
+  # by `lambda` doesn't have such tricks.
   #
   # ```ruby
   # lambda {|a,b| [a,b] }.call(1,2,3)  #=> ArgumentError
@@ -420,23 +429,26 @@ class Proc < Object
   # lambda {|a,b| [a,b] }.call([1,2])  #=> ArgumentError
   # ```
   #
-  # [\#lambda?](Proc.downloaded.ruby_doc#method-i-lambda-3F) is a predicate
-  # for the tricks. It returns `true` if no tricks apply.
+  # [`Proc#lambda?`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-i-lambda-3F)
+  # is a predicate for the tricks. It returns `true` if no tricks apply.
   #
   # ```ruby
   # lambda {}.lambda?            #=> true
   # proc {}.lambda?              #=> false
   # ```
   #
-  # [::new](Proc.downloaded.ruby_doc#method-c-new) is the same as `proc` .
+  # [`Proc.new`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-c-new) is
+  # the same as `proc`.
   #
   # ```ruby
   # Proc.new {}.lambda?          #=> false
   # ```
   #
-  # `lambda`, `proc` and [::new](Proc.downloaded.ruby_doc#method-c-new)
-  # preserve the tricks of a [Proc](Proc.downloaded.ruby_doc) object given
-  # by `&` argument.
+  # `lambda`, `proc` and
+  # [`Proc.new`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-c-new)
+  # preserve the tricks of a
+  # [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) object given by `&`
+  # argument.
   #
   # ```ruby
   # lambda(&lambda {}).lambda?   #=> true
@@ -448,8 +460,8 @@ class Proc < Object
   # Proc.new(&proc {}).lambda?   #=> false
   # ```
   #
-  # A [Proc](Proc.downloaded.ruby_doc) object generated by `&` argument has
-  # the tricks
+  # A [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) object generated
+  # by `&` argument has the tricks
   #
   # ```ruby
   # def n(&b) b.lambda? end
@@ -457,7 +469,8 @@ class Proc < Object
   # ```
   #
   # The `&` argument preserves the tricks if a
-  # [Proc](Proc.downloaded.ruby_doc) object is given by `&` argument.
+  # [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) object is given by
+  # `&` argument.
   #
   # ```ruby
   # n(&lambda {})                #=> true
@@ -465,8 +478,8 @@ class Proc < Object
   # n(&Proc.new {})              #=> false
   # ```
   #
-  # A [Proc](Proc.downloaded.ruby_doc) object converted from a method has no
-  # tricks.
+  # A [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) object converted
+  # from a method has no tricks.
   #
   # ```ruby
   # def m() end
@@ -476,8 +489,8 @@ class Proc < Object
   # n(&method(:m).to_proc)       #=> true
   # ```
   #
-  # `define_method` is treated the same as method definition. The defined
-  # method has no tricks.
+  # `define_method` is treated the same as method definition. The defined method
+  # has no tricks.
   #
   # ```ruby
   # class C
@@ -488,8 +501,8 @@ class Proc < Object
   # ```
   #
   # `define_method` always defines a method without the tricks, even if a
-  # non-lambda [Proc](Proc.downloaded.ruby_doc) object is given. This is the
-  # only exception for which the tricks are not preserved.
+  # non-lambda [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) object is
+  # given. This is the only exception for which the tricks are not preserved.
   #
   # ```ruby
   # class C
@@ -499,8 +512,8 @@ class Proc < Object
   # C.new.method(:e).to_proc.lambda?   #=> true
   # ```
   #
-  # This exception ensures that methods never have tricks and makes it easy
-  # to have wrappers to define methods that behave as usual.
+  # This exception ensures that methods never have tricks and makes it easy to
+  # have wrappers to define methods that behave as usual.
   #
   # ```ruby
   # class C
@@ -531,21 +544,21 @@ class Proc < Object
   sig {returns([String, Integer])}
   def source_location(); end
 
-  # Part of the protocol for converting objects to `Proc` objects. Instances
-  # of class `Proc` simply return themselves.
+  # Part of the protocol for converting objects to `Proc` objects. Instances of
+  # class `Proc` simply return themselves.
   sig {returns(T.self_type)}
   def to_proc(); end
 
   # Returns the unique identifier for this proc, along with an indication of
   # where the proc was defined.
   #
-  #
-  #
-  # Also aliased as: [inspect](Proc.downloaded.ruby_doc#method-i-inspect)
+  # Also aliased as:
+  # [`inspect`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-i-inspect)
   sig {returns(String)}
   def to_s(); end
 
-  # Alias for: [to\_s](Proc.downloaded.ruby_doc#method-i-to_s)
+  # Alias for:
+  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-i-to_s)
   sig {returns(String)}
   def inspect(); end
 end

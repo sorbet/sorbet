@@ -1,5 +1,34 @@
 # typed: __STDLIB_INTERNAL
 
+# The [`Etc`](https://docs.ruby-lang.org/en/2.6.0/Etc.html) module provides
+# access to information typically stored in files in the /etc directory on Unix
+# systems.
+#
+# The information accessible consists of the information found in the
+# /etc/passwd and /etc/group files, plus information about the system's
+# temporary directory (/tmp) and configuration directory (/etc).
+#
+# The [`Etc`](https://docs.ruby-lang.org/en/2.6.0/Etc.html) module provides a
+# more reliable way to access information about the logged in user than
+# environment variables such as +$USER+.
+#
+# ## Example:
+#
+# ```ruby
+# require 'etc'
+#
+# login = Etc.getlogin
+# info = Etc.getpwnam(login)
+# username = info.gecos.split(/,/).first
+# puts "Hello #{username}, I see your login name is #{login}"
+# ```
+#
+# Note that the methods provided by this module are not always secure. It should
+# be used for informational purposes, and not for security.
+#
+# All operations defined in this module are class methods, so that you can
+# include the [`Etc`](https://docs.ruby-lang.org/en/2.6.0/Etc.html) module into
+# your class.
 module Etc
   CS_GNU_LIBC_VERSION = T.let(T.unsafe(nil), Integer)
   CS_GNU_LIBPTHREAD_VERSION = T.let(T.unsafe(nil), Integer)
@@ -182,11 +211,83 @@ module Etc
   SC_XOPEN_VERSION = T.let(T.unsafe(nil), Integer)
 end
 
+# [`Group`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Group)
+#
+# [`Group`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Group) is a
+# [`Struct`](https://docs.ruby-lang.org/en/2.6.0/Struct.html) that is only
+# available when compiled with `HAVE_GETGRENT`.
+#
+# The struct contains the following members:
+#
+# name
+# :   contains the name of the group as a
+#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+# passwd
+# :   contains the encrypted password as a
+#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). An 'x' is
+#     returned if password access to the group is not available; an empty string
+#     is returned if no password is needed to obtain membership of the group.
+#
+#     Must be compiled with `HAVE_STRUCT_GROUP_GR_PASSWD`.
+# gid
+# :   contains the group's numeric ID as an integer.
+# mem
+# :   is an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Strings
+#     containing the short login names of the members of the group.
 class Etc::Group < Struct
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
 end
 
+# [`Passwd`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Passwd)
+#
+# [`Passwd`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Passwd) is a
+# [`Struct`](https://docs.ruby-lang.org/en/2.6.0/Struct.html) that contains the
+# following members:
+#
+# name
+# :   contains the short login name of the user as a
+#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+# passwd
+# :   contains the encrypted password of the user as a
+#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). an 'x' is
+#     returned if shadow passwords are in use. An '\*' is returned if the user
+#     cannot log in using a password.
+# uid
+# :   contains the integer user ID (uid) of the user.
+# gid
+# :   contains the integer group ID (gid) of the user's primary group.
+# dir
+# :   contains the path to the home directory of the user as a
+#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+# shell
+# :   contains the path to the login shell of the user as a
+#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+#
+#
+# ### The following members below are optional, and must be compiled with special flags:
+#
+# gecos
+# :   contains a longer
+#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) description of
+#     the user, such as a full name. Some Unix systems provide structured
+#     information in the gecos field, but this is system-dependent. must be
+#     compiled with `HAVE_STRUCT_PASSWD_PW_GECOS`
+# change
+# :   password change time(integer) must be compiled with
+#     `HAVE_STRUCT_PASSWD_PW_CHANGE`
+# quota
+# :   quota value(integer) must be compiled with `HAVE_STRUCT_PASSWD_PW_QUOTA`
+# age
+# :   password age(integer) must be compiled with `HAVE_STRUCT_PASSWD_PW_AGE`
+# class
+# :   user access class(string) must be compiled with
+#     `HAVE_STRUCT_PASSWD_PW_CLASS`
+# comment
+# :   comment(string) must be compiled with `HAVE_STRUCT_PASSWD_PW_COMMENT`
+# expire
+# :   account expiration time(integer) must be compiled with
+#     `HAVE_STRUCT_PASSWD_PW_EXPIRE`
 class Etc::Passwd < Struct
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)

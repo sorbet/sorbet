@@ -1,20 +1,26 @@
 # typed: __STDLIB_INTERNAL
 
-# The [Math](Math) module contains module functions
-# for basic trigonometric and transcendental functions. See class
-# [Float](https://ruby-doc.org/core-2.6.3/Float.html) for a list of
+# The [`Math`](https://docs.ruby-lang.org/en/2.6.0/Math.html) module contains
+# module functions for basic trigonometric and transcendental functions. See
+# class [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) for a list of
 # constants that define Ruby's floating point accuracy.
 #
 # Domains and codomains are given only for real (not complex) numbers.
 module Math
+  # Definition of the mathematical constant
+  # [`E`](https://docs.ruby-lang.org/en/2.6.0/Math.html#E) (e) as a
+  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) number.
   E = T.let(T.unsafe(nil), Float)
+  # Definition of the mathematical constant
+  # [`PI`](https://docs.ruby-lang.org/en/2.6.0/Math.html#PI) as a
+  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) number.
   PI = T.let(T.unsafe(nil), Float)
 
-  # Computes the arc cosine of `x` . Returns 0..PI.
+  # Computes the arc cosine of `x`. Returns 0..PI.
   #
-  # Domain: \[-1, 1\]
+  # Domain: [-1, 1]
   #
-  # Codomain: \[0, PI\]
+  # Codomain: [0, PI]
   #
   # ```ruby
   # Math.acos(0) == Math::PI/2  #=> true
@@ -27,11 +33,11 @@ module Math
   end
   def self.acos(x); end
 
-  # Computes the inverse hyperbolic cosine of `x` .
+  # Computes the inverse hyperbolic cosine of `x`.
   #
-  # Domain: \[1, INFINITY)
+  # Domain: [1, INFINITY)
   #
-  # Codomain: \[0, INFINITY)
+  # Codomain: [0, INFINITY)
   #
   # ```ruby
   # Math.acosh(1) #=> 0.0
@@ -44,11 +50,11 @@ module Math
   end
   def self.acosh(x); end
 
-  # Computes the arc sine of `x` . Returns -PI/2..PI/2.
+  # Computes the arc sine of `x`. Returns -PI/2..PI/2.
   #
-  # Domain: \[-1, -1\]
+  # Domain: [-1, -1]
   #
-  # Codomain: \[-PI/2, PI/2\]
+  # Codomain: [-PI/2, PI/2]
   #
   # ```ruby
   # Math.asin(1) == Math::PI/2  #=> true
@@ -61,7 +67,7 @@ module Math
   end
   def self.asin(x); end
 
-  # Computes the inverse hyperbolic sine of `x` .
+  # Computes the inverse hyperbolic sine of `x`.
   #
   # Domain: (-INFINITY, INFINITY)
   #
@@ -78,7 +84,7 @@ module Math
   end
   def self.asinh(x); end
 
-  # Computes the arc tangent of `x` . Returns -PI/2..PI/2.
+  # Computes the arc tangent of `x`. Returns -PI/2..PI/2.
   #
   # Domain: (-INFINITY, INFINITY)
   #
@@ -95,15 +101,14 @@ module Math
   end
   def self.atan(x); end
 
-  # Computes the arc tangent given `y` and `x` . Returns a
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html) in the range
-  # -PI..PI. Return value is a angle in radians between the positive x-axis
-  # of cartesian plane and the point given by the coordinates ( `x`, `y` )
-  # on it.
+  # Computes the arc tangent given `y` and `x`. Returns a
+  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) in the range
+  # -PI..PI. Return value is a angle in radians between the positive x-axis of
+  # cartesian plane and the point given by the coordinates (`x`, `y`) on it.
   #
   # Domain: (-INFINITY, INFINITY)
   #
-  # Codomain: \[-PI, PI\]
+  # Codomain: [-PI, PI]
   #
   # ```ruby
   # Math.atan2(-0.0, -1.0) #=> -3.141592653589793
@@ -130,7 +135,7 @@ module Math
   end
   def self.atan2(y, x); end
 
-  # Computes the inverse hyperbolic tangent of `x` .
+  # Computes the inverse hyperbolic tangent of `x`.
   #
   # Domain: (-1, 1)
   #
@@ -147,7 +152,7 @@ module Math
   end
   def self.atanh(x); end
 
-  # Returns the cube root of `x` .
+  # Returns the cube root of `x`.
   #
   # Domain: (-INFINITY, INFINITY)
   #
@@ -186,12 +191,12 @@ module Math
   def self.cbrt(x); end
 
   # Computes the cosine of `x` (expressed in radians). Returns a
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html) in the range
+  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) in the range
   # -1.0..1.0.
   #
   # Domain: (-INFINITY, INFINITY)
   #
-  # Codomain: \[-1, 1\]
+  # Codomain: [-1, 1]
   #
   # ```ruby
   # Math.cos(Math::PI) #=> -1.0
@@ -208,7 +213,7 @@ module Math
   #
   # Domain: (-INFINITY, INFINITY)
   #
-  # Codomain: \[1, INFINITY)
+  # Codomain: [1, INFINITY)
   #
   # ```ruby
   # Math.cosh(0) #=> 1.0
@@ -221,7 +226,7 @@ module Math
   end
   def self.cosh(x); end
 
-  # Calculates the error function of `x` .
+  # Calculates the error function of `x`.
   #
   # Domain: (-INFINITY, INFINITY)
   #
@@ -275,8 +280,8 @@ module Math
   def self.exp(x); end
 
   # Returns a two-element array containing the normalized fraction (a
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html) ) and exponent (an
-  # [Integer](https://ruby-doc.org/core-2.6.3/Integer.html) ) of `x` .
+  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html)) and exponent (an
+  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html)) of `x`.
   #
   # ```ruby
   # fraction, exponent = Math.frexp(1234)   #=> [0.6025390625, 11]
@@ -292,8 +297,8 @@ module Math
 
   # Calculates the gamma function of x.
   #
-  # Note that gamma(n) is same as fact(n-1) for integer n \> 0. However
-  # gamma(n) returns float and can be an approximation.
+  # Note that gamma(n) is same as fact(n-1) for integer n > 0. However gamma(n)
+  # returns float and can be an approximation.
   #
   # ```ruby
   # def fact(n) (1..n).inject(1) {|r,i| r*i } end
@@ -334,7 +339,7 @@ module Math
   def self.gamma(x); end
 
   # Returns sqrt(x\*\*2 + y\*\*2), the hypotenuse of a right-angled triangle
-  # with sides `x` and `y` .
+  # with sides `x` and `y`.
   #
   # ```ruby
   # Math.hypot(3, 4)   #=> 5.0
@@ -348,7 +353,7 @@ module Math
   end
   def self.hypot(x, y); end
 
-  # Returns the value of `fraction` \*(2\*\* `exponent` ).
+  # Returns the value of `fraction`\*(2\*\*`exponent`).
   #
   # ```ruby
   # fraction, exponent = Math.frexp(1234)
@@ -363,15 +368,17 @@ module Math
   end
   def self.ldexp(fraction, exponent); end
 
-  # Calculates the logarithmic gamma of `x` and the sign of gamma of `x` .
+  # Calculates the logarithmic gamma of `x` and the sign of gamma of `x`.
   #
-  # [::lgamma](Math.downloaded.ruby_doc#method-c-lgamma) is same as
+  # [`Math.lgamma(x)`](https://docs.ruby-lang.org/en/2.6.0/Math.html#method-c-lgamma)
+  # is same as
   #
   # ```ruby
   # [Math.log(Math.gamma(x).abs), Math.gamma(x) < 0 ? -1 : 1]
   # ```
   #
-  # but avoid overflow by [::gamma](Math.downloaded.ruby_doc#method-c-gamma)
+  # but avoid overflow by
+  # [`Math.gamma(x)`](https://docs.ruby-lang.org/en/2.6.0/Math.html#method-c-gamma)
   # for large x.
   #
   # ```ruby
@@ -394,7 +401,7 @@ module Math
   end
   def self.log(x, base=T.unsafe(nil)); end
 
-  # Returns the base 10 logarithm of `x` .
+  # Returns the base 10 logarithm of `x`.
   #
   # Domain: (0, INFINITY)
   #
@@ -413,7 +420,7 @@ module Math
   end
   def self.log10(x); end
 
-  # Returns the base 2 logarithm of `x` .
+  # Returns the base 2 logarithm of `x`.
   #
   # Domain: (0, INFINITY)
   #
@@ -434,12 +441,12 @@ module Math
   def self.log2(x); end
 
   # Computes the sine of `x` (expressed in radians). Returns a
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html) in the range
+  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) in the range
   # -1.0..1.0.
   #
   # Domain: (-INFINITY, INFINITY)
   #
-  # Codomain: \[-1, 1\]
+  # Codomain: [-1, 1]
   #
   # ```ruby
   # Math.sin(Math::PI/2) #=> 1.0
@@ -469,11 +476,11 @@ module Math
   end
   def self.sinh(x); end
 
-  # Returns the non-negative square root of `x` .
+  # Returns the non-negative square root of `x`.
   #
-  # Domain: \[0, INFINITY)
+  # Domain: [0, INFINITY)
   #
-  # Codomain:\[0, INFINITY)
+  # Codomain:[0, INFINITY)
   #
   # ```ruby
   # 0.upto(10) {|x|
@@ -492,16 +499,17 @@ module Math
   # #   [10, 3.16227766016838, 10.0]
   # ```
   #
-  # Note that the limited precision of floating point arithmetic might lead
-  # to surprising results:
+  # Note that the limited precision of floating point arithmetic might lead to
+  # surprising results:
   #
   # ```ruby
   # Math.sqrt(10**46).to_i  #=> 99999999999999991611392 (!)
   # ```
   #
-  # See also BigDecimal\#sqrt and
-  # [Integer.sqrt](https://ruby-doc.org/core-2.6.3/Integer.html#method-c-sqrt)
-  # .
+  # See also
+  # [`BigDecimal#sqrt`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-i-sqrt)
+  # and
+  # [`Integer.sqrt`](https://docs.ruby-lang.org/en/2.6.0/Integer.html#method-c-sqrt).
   sig do
     params(
         x: T.any(Integer, Float, Rational, BigDecimal),
@@ -545,5 +553,20 @@ module Math
   def self.tanh(x); end
 end
 
+# Raised when a mathematical function is evaluated outside of its domain of
+# definition.
+#
+# For example, since `cos` returns values in the range -1..1, its inverse
+# function `acos` is only defined on that interval:
+#
+# ```ruby
+# Math.acos(42)
+# ```
+#
+# *produces:*
+#
+# ```
+# Math::DomainError: Numerical argument is out of domain - "acos"
+# ```
 class Math::DomainError < StandardError
 end

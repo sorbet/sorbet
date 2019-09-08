@@ -1,31 +1,29 @@
 # typed: __STDLIB_INTERNAL
 
-# Objects of class `Dir` are directory streams representing directories in
-# the underlying file system. They provide a variety of ways to list
-# directories and their contents. See also `File` .
+# Objects of class `Dir` are directory streams representing directories in the
+# underlying file system. They provide a variety of ways to list directories and
+# their contents. See also `File`.
 #
-# The directory used in these examples contains the two regular files (
-# `config.h` and `main.rb` ), the parent directory ( `..` ), and the
-# directory itself ( `.` ).
+# The directory used in these examples contains the two regular files
+# (`config.h` and `main.rb`), the parent directory (`..`), and the directory
+# itself (`.`).
 class Dir < Object
   include Enumerable
 
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 
-  # Changes the current working directory of the process to the given
-  # string. When called without an argument, changes the directory to the
-  # value of the environment variable `HOME`, or `LOGDIR` .
-  # `SystemCallError` (probably `Errno::ENOENT` ) if the target directory
-  # does not exist.
+  # Changes the current working directory of the process to the given string.
+  # When called without an argument, changes the directory to the value of the
+  # environment variable `HOME`, or `LOGDIR`. `SystemCallError` (probably
+  # `Errno::ENOENT`) if the target directory does not exist.
   #
-  # If a block is given, it is passed the name of the new current directory,
-  # and the block is executed with that as the current directory. The
-  # original working directory is restored when the block exits. The return
-  # value of `chdir` is the value of the block. `chdir` blocks can be
-  # nested, but in a multi-threaded program an error will be raised if a
-  # thread attempts to open a `chdir` block while another thread has one
-  # open.
+  # If a block is given, it is passed the name of the new current directory, and
+  # the block is executed with that as the current directory. The original
+  # working directory is restored when the block exits. The return value of
+  # `chdir` is the value of the block. `chdir` blocks can be nested, but in a
+  # multi-threaded program an error will be raised if a thread attempts to open
+  # a `chdir` block while another thread has one open.
   #
   # ```ruby
   # Dir.chdir("/var/spool/mail")
@@ -42,11 +40,13 @@ class Dir < Object
   #
   # *produces:*
   #
-  #     /var/spool/mail
-  #     /tmp
-  #     /usr
-  #     /tmp
-  #     /var/spool/mail
+  # ```
+  # /var/spool/mail
+  # /tmp
+  # /usr
+  # /tmp
+  # /var/spool/mail
+  # ```
   sig do
     params(
         arg0: T.any(String, Pathname),
@@ -62,9 +62,9 @@ class Dir < Object
   end
   def self.chdir(arg0=T.unsafe(nil), &blk); end
 
-  # Changes this process’s idea of the file system root. Only a privileged
-  # process may make this call. Not available on all platforms. On Unix
-  # systems, see `chroot(2)` for more information.
+  # Changes this process's idea of the file system root. Only a privileged
+  # process may make this call. Not available on all platforms. On Unix systems,
+  # see `chroot(2)` for more information.
   sig do
     params(
         arg0: String,
@@ -73,8 +73,8 @@ class Dir < Object
   end
   def self.chroot(arg0); end
 
-  # Deletes the named directory. Raises a subclass of `SystemCallError` if
-  # the directory isn’t empty.
+  # Deletes the named directory. Raises a subclass of `SystemCallError` if the
+  # directory isn't empty.
   sig do
     params(
         arg0: String,
@@ -84,7 +84,7 @@ class Dir < Object
   def self.delete(arg0); end
 
   # Returns an array containing all of the filenames in the given directory.
-  # Will raise a `SystemCallError` if the named directory doesn’t exist.
+  # Will raise a `SystemCallError` if the named directory doesn't exist.
   #
   # The optional *encoding* keyword argument specifies the encoding of the
   # directory. If not specified, the filesystem encoding is used.
@@ -121,10 +121,12 @@ class Dir < Object
   #
   # *produces:*
   #
-  #     Got .
-  #     Got ..
-  #     Got config.h
-  #     Got main.rb
+  # ```
+  # Got .
+  # Got ..
+  # Got config.h
+  # Got main.rb
+  # ```
   sig do
     params(
         dir: String,
@@ -154,68 +156,66 @@ class Dir < Object
   def self.getwd(); end
 
   # Expands `pattern`, which is a pattern string or an
-  # [Array](https://ruby-doc.org/core-2.6.3/Array.html) of pattern strings,
-  # and returns an array containing the matching filenames. If a block is
-  # given, calls the block once for each matching filename, passing the
+  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of pattern
+  # strings, and returns an array containing the matching filenames. If a block
+  # is given, calls the block once for each matching filename, passing the
   # filename as a parameter to the block.
   #
   # The optional `base` keyword argument specifies the base directory for
-  # interpreting relative pathnames instead of the current working
-  # directory. As the results are not prefixed with the base directory name
-  # in this case, you will need to prepend the base directory name if you
-  # want real paths.
+  # interpreting relative pathnames instead of the current working directory. As
+  # the results are not prefixed with the base directory name in this case, you
+  # will need to prepend the base directory name if you want real paths.
   #
-  # Note that the pattern is not a regexp, it’s closer to a shell glob. See
-  # [File.fnmatch](https://ruby-doc.org/core-2.6.3/File.html#method-c-fnmatch)
-  # for the meaning of the `flags` parameter. Case sensitivity depends on
-  # your system (File::FNM\_CASEFOLD is ignored), as does the order in which
-  # the results are returned.
+  # Note that the pattern is not a regexp, it's closer to a shell glob. See
+  # [`File::fnmatch`](https://docs.ruby-lang.org/en/2.6.0/File.html#method-c-fnmatch)
+  # for the meaning of the `flags` parameter. Case sensitivity depends on your
+  # system (File::FNM\_CASEFOLD is ignored), as does the order in which the
+  # results are returned.
   #
-  #   - `*`
-  #     Matches any file. Can be restricted by other values in the glob.
+  # `*`
+  # :   Matches any file. Can be restricted by other values in the glob.
   #     Equivalent to `/ .* /mx` in regexp.
   #
-  #       - `*`
-  #         Matches all files
+  #     `*`
+  # :       Matches all files
+  #     `c*`
+  # :       Matches all files beginning with `c`
+  #     `*c`
+  # :       Matches all files ending with `c`
+  #     `*c*`
+  # :       Match all files that have `c` in them (including at the beginning or
+  #         end).
   #
-  #       - `c*`
-  #         Matches all files beginning with `c`
   #
-  #       - `*c`
-  #         Matches all files ending with `c`
+  #     Note, this will not match Unix-like hidden files (dotfiles). In order to
+  #     include those in the match results, you must use the File::FNM\_DOTMATCH
+  #     flag or something like `"{*,.*}"`.
   #
-  #       - `*c*`
-  #         Match all files that have `c` in them (including at the
-  #         beginning or end).
+  # `**`
+  # :   Matches directories recursively.
   #
-  #     Note, this will not match Unix-like hidden files (dotfiles). In
-  #     order to include those in the match results, you must use the
-  #     File::FNM\_DOTMATCH flag or something like `"{*,.*}"` .
+  # `?`
+  # :   Matches any one character. Equivalent to `/.{1}/` in regexp.
   #
-  #   - `**`
-  #     Matches directories recursively.
+  # `[set]`
+  # :   Matches any one character in `set`. Behaves exactly like character sets
+  #     in [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html),
+  #     including set negation (`[^a-z]`).
   #
-  #   - `?`
-  #     Matches any one character. Equivalent to `/.{1}/` in regexp.
-  #
-  #   - `[set]`
-  #     Matches any one character in `set` . Behaves exactly like character
-  #     sets in [Regexp](https://ruby-doc.org/core-2.6.3/Regexp.html),
-  #     including set negation ( `[^a-z]` ).
-  #
-  #   - `{p,q}`
-  #     Matches either literal `p` or literal `q` . Equivalent to pattern
+  # `{p,q}`
+  # :   Matches either literal `p` or literal `q`. Equivalent to pattern
   #     alternation in regexp.
   #
-  #     Matching literals may be more than one character in length. More
-  #     than two literals may be specified.
+  #     Matching literals may be more than one character in length. More than
+  #     two literals may be specified.
   #
-  #   - `\`
-  #     Escapes the next metacharacter.
+  # ` \\ `
+  # :   Escapes the next metacharacter.
   #
-  #     Note that this means you cannot use backslash on windows as part of
-  #     a glob, i.e. `Dir["c:\foo*"]` will not work, use `Dir["c:/foo*"]`
+  #     Note that this means you cannot use backslash on windows as part of a
+  #     glob, i.e.  `Dir["c:\\foo*"]` will not work, use `Dir["c:/foo*"]`
   #     instead.
+  #
   #
   # Examples:
   #
@@ -264,8 +264,7 @@ class Dir < Object
   end
   def self.glob(pattern, flags=T.unsafe(nil), &blk); end
 
-  # Returns the home directory of the current user or the named user if
-  # given.
+  # Returns the home directory of the current user or the named user if given.
   sig do
     params(
         arg0: String,
@@ -274,11 +273,11 @@ class Dir < Object
   end
   def self.home(arg0=T.unsafe(nil)); end
 
-  # Makes a new directory named by *string* , with permissions specified by
-  # the optional parameter *anInteger* . The permissions may be modified by
-  # the value of `File::umask`, and are ignored on NT. Raises a
-  # `SystemCallError` if the directory cannot be created. See also the
-  # discussion of permissions in the class documentation for `File` .
+  # Makes a new directory named by *string*, with permissions specified by the
+  # optional parameter *anInteger*. The permissions may be modified by the value
+  # of `File::umask`, and are ignored on NT. Raises a `SystemCallError` if the
+  # directory cannot be created. See also the discussion of permissions in the
+  # class documentation for `File`.
   #
   # ```ruby
   # Dir.mkdir(File.join(Dir.home, ".foo"), 0700) #=> 0
@@ -295,9 +294,9 @@ class Dir < Object
   # The optional *encoding* keyword argument specifies the encoding of the
   # directory. If not specified, the filesystem encoding is used.
   #
-  # With no block, `open` is a synonym for `Dir::new` . If a block is
-  # present, it is passed *aDir* as a parameter. The directory is closed at
-  # the end of the block, and `Dir::open` returns the value of the block.
+  # With no block, `open` is a synonym for `Dir::new`. If a block is present, it
+  # is passed *aDir* as a parameter. The directory is closed at the end of the
+  # block, and `Dir::open` returns the value of the block.
   sig do
     params(
         arg0: String,
@@ -326,8 +325,8 @@ class Dir < Object
   sig {returns(String)}
   def self.pwd(); end
 
-  # Deletes the named directory. Raises a subclass of `SystemCallError` if
-  # the directory isn’t empty.
+  # Deletes the named directory. Raises a subclass of `SystemCallError` if the
+  # directory isn't empty.
   sig do
     params(
         arg0: String,
@@ -336,8 +335,8 @@ class Dir < Object
   end
   def self.rmdir(arg0); end
 
-  # Deletes the named directory. Raises a subclass of `SystemCallError` if
-  # the directory isn’t empty.
+  # Deletes the named directory. Raises a subclass of `SystemCallError` if the
+  # directory isn't empty.
   sig do
     params(
         arg0: String,
@@ -347,7 +346,8 @@ class Dir < Object
   def self.unlink(arg0); end
 
   # Closes the directory stream. Calling this method on closed
-  # [Dir](Dir.downloaded.ruby_doc) object is ignored since Ruby 2.3.
+  # [`Dir`](https://docs.ruby-lang.org/en/2.6.0/Dir.html) object is ignored
+  # since Ruby 2.3.
   #
   # ```ruby
   # d = Dir.new("testdir")
@@ -356,8 +356,8 @@ class Dir < Object
   sig {returns(NilClass)}
   def close(); end
 
-  # Calls the block once for each entry in this directory, passing the
-  # filename of each entry as a parameter to the block.
+  # Calls the block once for each entry in this directory, passing the filename
+  # of each entry as a parameter to the block.
   #
   # If no block is given, an enumerator is returned instead.
   #
@@ -368,10 +368,12 @@ class Dir < Object
   #
   # *produces:*
   #
-  #     Got .
-  #     Got ..
-  #     Got config.h
-  #     Got main.rb
+  # ```
+  # Got .
+  # Got ..
+  # Got config.h
+  # Got main.rb
+  # ```
   sig do
     params(
         blk: T.proc.params(arg0: String).returns(BasicObject),
@@ -381,7 +383,7 @@ class Dir < Object
   sig {returns(T::Enumerator[String])}
   def each(&blk); end
 
-  # Returns the file descriptor used in *dir* .
+  # Returns the file descriptor used in *dir*.
   #
   # ```ruby
   # d = Dir.new("..")
@@ -389,8 +391,8 @@ class Dir < Object
   # ```
   #
   # This method uses dirfd() function defined by POSIX 2008.
-  # [NotImplementedError](https://ruby-doc.org/core-2.6.3/NotImplementedError.html)
-  # is raised on other platforms, such as Windows, which doesn’t provide the
+  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html)
+  # is raised on other platforms, such as Windows, which doesn't provide the
   # function.
   sig {returns(Integer)}
   def fileno(); end
@@ -404,11 +406,12 @@ class Dir < Object
   end
   def initialize(arg0, arg1=T.unsafe(nil)); end
 
-  # Return a string describing this [Dir](Dir.downloaded.ruby_doc) object.
+  # Return a string describing this
+  # [`Dir`](https://docs.ruby-lang.org/en/2.6.0/Dir.html) object.
   sig {returns(String)}
   def inspect(); end
 
-  # Returns the path parameter passed to *dir* ’s constructor.
+  # Returns the path parameter passed to *dir*'s constructor.
   #
   # ```ruby
   # d = Dir.new("..")
@@ -417,7 +420,7 @@ class Dir < Object
   sig {returns(T.nilable(String))}
   def path(); end
 
-  # Returns the current position in *dir* . See also `Dir#seek` .
+  # Returns the current position in *dir*. See also `Dir#seek`.
   #
   # ```ruby
   # d = Dir.new("testdir")
@@ -428,6 +431,16 @@ class Dir < Object
   sig {returns(Integer)}
   def pos(); end
 
+  # Synonym for `Dir#seek`, but returns the position parameter.
+  #
+  # ```ruby
+  # d = Dir.new("testdir")   #=> #<Dir:0x401b3c40>
+  # d.read                   #=> "."
+  # i = d.pos                #=> 12
+  # d.read                   #=> ".."
+  # d.pos = i                #=> 12
+  # d.read                   #=> ".."
+  # ```
   sig do
     params(
         arg0: Integer,
@@ -436,8 +449,8 @@ class Dir < Object
   end
   def pos=(arg0); end
 
-  # Reads the next entry from *dir* and returns it as a string. Returns
-  # `nil` at the end of the stream.
+  # Reads the next entry from *dir* and returns it as a string. Returns `nil` at
+  # the end of the stream.
   #
   # ```ruby
   # d = Dir.new("testdir")
@@ -448,9 +461,28 @@ class Dir < Object
   sig {returns(T.nilable(String))}
   def read(); end
 
+  # Repositions *dir* to the first entry.
+  #
+  # ```ruby
+  # d = Dir.new("testdir")
+  # d.read     #=> "."
+  # d.rewind   #=> #<Dir:0x401b3fb0>
+  # d.read     #=> "."
+  # ```
   sig {returns(T.self_type)}
   def rewind(); end
 
+  # Seeks to a particular location in *dir*. *integer* must be a value returned
+  # by `Dir#tell`.
+  #
+  # ```ruby
+  # d = Dir.new("testdir")   #=> #<Dir:0x401b3c40>
+  # d.read                   #=> "."
+  # i = d.tell               #=> 12
+  # d.read                   #=> ".."
+  # d.seek(i)                #=> #<Dir:0x401b3c40>
+  # d.read                   #=> ".."
+  # ```
   sig do
     params(
         arg0: Integer,
@@ -459,7 +491,7 @@ class Dir < Object
   end
   def seek(arg0); end
 
-  # Returns the current position in *dir* . See also `Dir#seek` .
+  # Returns the current position in *dir*. See also `Dir#seek`.
   #
   # ```ruby
   # d = Dir.new("testdir")
@@ -470,7 +502,7 @@ class Dir < Object
   sig {returns(Integer)}
   def tell(); end
 
-  # Returns the path parameter passed to *dir* ’s constructor.
+  # Returns the path parameter passed to *dir*'s constructor.
   #
   # ```ruby
   # d = Dir.new("..")
@@ -479,7 +511,7 @@ class Dir < Object
   sig {returns(T.nilable(String))}
   def to_path(); end
 
-  # Equivalent to calling `Dir.glob([string,...], 0)` .
+  # Equivalent to calling `Dir.glob([string,...], 0)`.
   sig do
     params(
         pattern: T.any(String, T::Array[String]),
