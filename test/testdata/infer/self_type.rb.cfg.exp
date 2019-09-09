@@ -149,7 +149,7 @@ subgraph "cluster_::<Class:Generic>#<static-init>" {
     "bb::<Class:Generic>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Generic>#<static-init>_0" [
-        label = "block[id=0]()\l<C TM>$4: Generic::TM = alias <C TM>\l<self>: T.class_of(Generic) = cast(<self>: NilClass, T.class_of(Generic));\l<C TM>$4: T.untyped = <self>: T.class_of(Generic).type_member()\l<block-pre-call-temp>$8: Sorbet::Private::Static::Void = <self>: T.class_of(Generic).sig()\l<selfRestore>$9: T.class_of(Generic) = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<C TM>$4: <Type: Generic::TM> = alias <C TM>\l<self>: T.class_of(Generic) = cast(<self>: NilClass, T.class_of(Generic));\l<C TM>$4: T.untyped = <self>: T.class_of(Generic).type_member()\l<block-pre-call-temp>$8: Sorbet::Private::Static::Void = <self>: T.class_of(Generic).sig()\l<selfRestore>$9: T.class_of(Generic) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_0" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
