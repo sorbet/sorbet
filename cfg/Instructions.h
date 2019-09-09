@@ -22,6 +22,7 @@ public:
     VariableUseSite(VariableUseSite &&) = default;
     VariableUseSite &operator=(VariableUseSite &&rhs) = default;
     std::string toString(core::Context ctx) const;
+    std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 
 // TODO: convert it to implicitly numbered instead of explicitly bound
@@ -33,6 +34,7 @@ class Instruction {
 public:
     virtual ~Instruction() = default;
     virtual std::string toString(core::Context ctx) = 0;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) = 0;
     Instruction() = default;
     bool isSynthetic = false;
 };
@@ -54,6 +56,7 @@ public:
 
     Ident(core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(Ident, 24, 8);
 
@@ -64,6 +67,7 @@ public:
     Alias(core::SymbolRef what);
 
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(Alias, 16, 8);
 
@@ -72,6 +76,7 @@ public:
     std::shared_ptr<core::SendAndBlockLink> link;
     SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link){};
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(SolveConstraint, 32, 8);
 
@@ -89,6 +94,7 @@ public:
          const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(Send, 152, 8);
 
@@ -98,6 +104,7 @@ public:
 
     Return(core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(Return, 40, 8);
 
@@ -108,6 +115,7 @@ public:
 
     BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(BlockReturn, 56, 8);
 
@@ -117,6 +125,7 @@ public:
     core::LocalVariable fallback;
     LoadSelf(std::shared_ptr<core::SendAndBlockLink> link, core::LocalVariable fallback);
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(LoadSelf, 40, 8);
 
@@ -126,6 +135,7 @@ public:
 
     Literal(const core::TypePtr &value);
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(Literal, 32, 8);
 
@@ -135,6 +145,7 @@ public:
         categoryCounterInc("cfg", "unanalyzable");
     };
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(Unanalyzable, 16, 8);
 
@@ -146,6 +157,7 @@ public:
         categoryCounterInc("cfg", "notsupported");
     };
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(NotSupported, 40, 8);
 
@@ -160,6 +172,7 @@ public:
 
     const core::ArgInfo &argument(const core::GlobalState &gs) const;
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(LoadArg, 24, 8);
 
@@ -171,6 +184,7 @@ public:
         categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(LoadYieldParams, 32, 8);
 
@@ -184,6 +198,7 @@ public:
         : value(value), type(type), cast(cast) {}
 
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(Cast, 64, 8);
 
@@ -196,6 +211,7 @@ public:
     }
 
     virtual std::string toString(core::Context ctx);
+    virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
 CheckSize(TAbsurd, 40, 8);
 
