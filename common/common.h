@@ -55,6 +55,11 @@ constexpr bool fuzz_mode = true;
 #endif
 
 #define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
+
+// Used for cases like https://xkcd.com/2200/
+// where there is some assumption that you believe should always hold.
+// Please use this to explicitly write down what assumptions was the code written under.
+// One day they might be violated and you'll help the next person debug the issue.
 #define ENFORCE(x, ...)                                                                             \
     ((::sorbet::debug_mode && !(x)) ? ({                                                            \
         ::sorbet::Exception::failInFuzzer();                                                        \
