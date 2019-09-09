@@ -143,8 +143,8 @@ Usage:
                                 symbol-table-full-json, name-tree, name-tree-raw,
                                 file-table-json, resolve-tree, resolve-tree-raw,
                                 missing-constants, flattened-tree,
-                                flattened-tree-raw, cfg, cfg-json, cfg-proto, autogen,
-                                autogen-msgpack, autogen-classlist,
+                                flattened-tree-raw, cfg, cfg-raw, cfg-json, cfg-proto,
+                                autogen, autogen-msgpack, autogen-classlist,
                                 autogen-autoloader, autogen-subclasses,
                                 plugin-generated-code]
       --autogen-subclasses-parent string
