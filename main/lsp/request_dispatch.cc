@@ -173,6 +173,9 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         } else if (method == LSPMethod::TextDocumentDefinition) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
             return handleTextDocumentDefinition(move(gs), id, *params);
+        } else if (method == LSPMethod::TextDocumentTypeDefinition) {
+            auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
+            return handleTextDocumentTypeDefinition(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentHover) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
             return handleTextDocumentHover(move(gs), id, *params);

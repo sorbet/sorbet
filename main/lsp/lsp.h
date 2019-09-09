@@ -189,6 +189,8 @@ class LSPLoop {
                                            const ReferenceParams &params) const;
     LSPResult handleTextDocumentDefinition(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const TextDocumentPositionParams &params) const;
+    LSPResult handleTextDocumentTypeDefinition(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                               const TextDocumentPositionParams &params) const;
     LSPResult handleTextDocumentCompletion(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const CompletionParams &params) const;
     LSPResult handleTextDocumentCodeAction(std::unique_ptr<core::GlobalState> gs, const MessageId &id,

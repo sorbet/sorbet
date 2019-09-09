@@ -101,6 +101,9 @@ void assertLocationsMatch(const UnorderedMap<string, shared_ptr<core::File>> &so
                           string_view symbol, const vector<shared_ptr<RangeAssertion>> &allLocs, int line,
                           int character, string_view locSourceLine, string_view locFilename,
                           vector<unique_ptr<Location>> &locations) {
+    fast_sort(locations,
+              [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
+
     auto expectedLocationsIt = allLocs.begin();
     auto actualLocationsIt = locations.begin();
     while (expectedLocationsIt != allLocs.end() && actualLocationsIt != locations.end()) {
@@ -132,7 +135,7 @@ void assertLocationsMatch(const UnorderedMap<string, shared_ptr<core::File>> &so
                 auto actualFilePath = uriToFilePath(uriPrefix, actualLocation->uri);
                 ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1)
                     << fmt::format("Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
-                                   "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
+                                   "at:\n{}\nSorbet reported an unexpected (additional?) reference at:\n{}",
                                    symbol,
                                    prettyPrintRangeComment(
                                        locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
@@ -167,7 +170,7 @@ void assertLocationsMatch(const UnorderedMap<string, shared_ptr<core::File>> &so
         auto actualFilePath = uriToFilePath(uriPrefix, actualLocation->uri);
         ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1) << fmt::format(
             "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
-            "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
+            "at:\n{}\nSorbet reported an unexpected (additional?) reference at:\n{}",
             symbol,
             prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
             prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation), *actualLocation->range,
@@ -506,9 +509,6 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         return;
     }
 
-    fast_sort(locations,
-              [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
-
     assertLocationsMatch(sourceFileContents, uriPrefix, symbol, allLocs, line, character, locSourceLine, locFilename,
                          locations);
 }
@@ -542,17 +542,53 @@ shared_ptr<TypeDefAssertion> TypeDefAssertion::make(string_view filename, unique
 }
 
 void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                             LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, const Location &queryLoc) {
+                             LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string_view symbol,
+                             const Location &queryLoc, const std::vector<std::shared_ptr<RangeAssertion>> &typeDefs) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
-    // const int character = queryLoc.range->start->character;
-    // auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
-    // auto defSourceLine = getLine(sourceFileContents, uriPrefix, *getLocation(uriPrefix));
+    const int character = queryLoc.range->start->character;
+    auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
     string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
-    // string defUri = filePathToUri(uriPrefix, filename);
 
-    ADD_FAILURE_AT(locFilename.c_str(), line) << fmt::format(
-        "TODO(jez) Implement the actual checks for `type` and `type-def` once Go To Type Definition is implemented");
+    const int id = nextId++;
+    auto request = make_unique<LSPMessage>(make_unique<RequestMessage>(
+        "2.0", id, LSPMethod::TextDocumentTypeDefinition,
+        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(queryLoc.uri)),
+                                                make_unique<Position>(line, character))));
+    auto responses = lspWrapper.getLSPResponsesFor(*request);
+    ASSERT_EQ(1, responses.size());
+
+    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    auto &respMsg = responses.at(0)->asResponse();
+    ASSERT_TRUE(respMsg.result.has_value());
+    ASSERT_FALSE(respMsg.error.has_value());
+
+    auto &locations = extractLocations(respMsg);
+
+    if (symbol == NOTHING_LABEL) {
+        // can't add type-def for NOTHING_LABEL
+        for (auto &location : locations) {
+            auto filePath = uriToFilePath(uriPrefix, location->uri);
+            ADD_FAILURE_AT(filePath.c_str(), location->range->start->line + 1) << fmt::format(
+                "Sorbet returned references for a location that should not report references.\nGiven go to type def "
+                "here:\n{}\nSorbet reported an unexpected definition at:\n{}",
+                prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *location), *location->range, ""));
+        }
+        return;
+    }
+
+    if (typeDefs.empty()) {
+        ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
+            "There are no 'type-def: {0}' assertions for this 'type: {0}' assertion:\n{1}\n"
+            "To assert that there are no results, use the {2} label",
+            symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+            NOTHING_LABEL);
+        return;
+    }
+
+    assertLocationsMatch(sourceFileContents, uriPrefix, symbol, typeDefs, line, character, locSourceLine, locFilename,
+                         locations);
 }
 
 string TypeDefAssertion::toString() const {
