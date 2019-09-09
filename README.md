@@ -522,6 +522,24 @@ tools/scripts/update_exp_files.sh
 You will probably want to look through the changes and `git checkout` any files
 with changes that you believe are actually bugs in your code and fix your code.
 
+`update_exp_files.sh` updates every snapshot file kind known to Sorbet. This can
+be slow, depending on what needs to be recompiled and updated. Some faster
+commands:
+
+```bash
+# Only update the `*.exp` files in `test/testdata`
+tools/scripts/update_testdata_exp.sh
+
+# Only update the `*.exp` files in `test/testdata/cfg`
+tools/scripts/update_testdata_exp.sh test/testdata/cfg
+
+# Only update a single exp file's test:
+tools/scripts/update_testdata_exp.sh test/testdata/cfg/next.rb
+
+# Only update the `*.out` files in `test/cli`
+bazel test //test/cli:update
+```
+
 
 ## C++ conventions
 
