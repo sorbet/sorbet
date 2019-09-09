@@ -235,7 +235,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
     } else if (what.data(gs)->isStaticField()) {
         item->kind = CompletionItemKind::Constant;
         item->detail = resultType->show(gs);
-    } else if (what.data(gs)->isClass()) {
+    } else if (what.data(gs)->isClassOrModule()) {
         item->kind = CompletionItemKind::Class;
     }
     return item;
@@ -251,7 +251,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
             owner = owner.data(gs)->owner;
             for (auto member : owner.data(gs)->membersStableOrderSlow(gs)) {
                 auto sym = member.second;
-                if (sym.exists() && (sym.data(gs)->isClass() || sym.data(gs)->isStaticField()) &&
+                if (sym.exists() && (sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField()) &&
                     sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                     // hide singletons
                     hasSimilarName(gs, sym.data(gs)->name, pattern)) {
