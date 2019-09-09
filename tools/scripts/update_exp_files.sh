@@ -13,7 +13,6 @@ bazel build \
 
 tools/scripts/update_testdata_exp.sh
 
-# shellcheck disable=SC2207
 bazel test \
   //gems/sorbet/test/snapshot:update \
   //test/cli:update //test/lsp:update -c opt "$@"
