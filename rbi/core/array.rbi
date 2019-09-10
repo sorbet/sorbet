@@ -1333,7 +1333,6 @@ class Array < Object
   end
   def prepend(*arg0); end
 
-  # This is implemented in C++ to fix the return type
   # Returns an array of all combinations of elements from all arrays.
   #
   # The length of the returned array is the product of the length of `self`
@@ -1350,6 +1349,9 @@ class Array < Object
   # [1,2].product()            #=> [[1],[2]]
   # [1,2].product([])          #=> []
   # ```
+  #
+  # (Note: this signature is inaccurate; Sorbet computes a special return type
+  # internally.)
   sig do
     type_parameters(:U).params(
         arg0: T::Array[T.type_parameter(:U)],
