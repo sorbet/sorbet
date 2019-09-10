@@ -209,7 +209,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
         resultType = core::Types::untypedUntracked();
     }
     if (what.data(gs)->isMethod()) {
-        item->kind = CompletionItemKind::Function;
+        item->kind = CompletionItemKind::Method;
         if (what.exists()) {
             item->detail = methodDetail(gs, what, receiverType, nullptr, constraint);
         }
