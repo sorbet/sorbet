@@ -149,7 +149,7 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
 
     expectedType = Types::replaceSelfType(ctx, expectedType, selfType);
 
-    if (Types::isSubTypeUnderConstraint(ctx, constr, argTpe.type, expectedType)) {
+    if (Types::isSubTypeUnderConstraint(ctx, constr, argTpe.type, expectedType, UntypedMode::AlwaysCompatible)) {
         return nullptr;
     }
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentMismatch)) {
@@ -167,7 +167,8 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
         e.addErrorSection(
             ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:", argTpe.origins2Explanations(ctx)));
         auto withoutNil = Types::approximateSubtract(ctx, argTpe.type, Types::nilClass());
-        if (!withoutNil->isBottom() && Types::isSubTypeUnderConstraint(ctx, constr, withoutNil, expectedType)) {
+        if (!withoutNil->isBottom() &&
+            Types::isSubTypeUnderConstraint(ctx, constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
             if (loc.exists()) {
                 e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(ctx));
             }
@@ -483,9 +484,9 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
                 e.replaceWith("Wrap in `T.must`", args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
             } else {
-                if (symbol.data(ctx)->isClassModule()) {
+                if (symbol.data(ctx)->isClassOrModuleModule()) {
                     auto objMeth = core::Symbols::Object().data(ctx)->findMemberTransitive(ctx, args.name);
-                    if (objMeth.exists() && objMeth.data(ctx)->owner.data(ctx)->isClassModule()) {
+                    if (objMeth.exists() && objMeth.data(ctx)->owner.data(ctx)->isClassOrModuleModule()) {
                         e.addErrorSection(
                             ErrorSection(ErrorColors::format("Did you mean to `include {}` in this module?",
                                                              objMeth.data(ctx)->owner.data(ctx)->name.show(ctx))));
@@ -497,15 +498,15 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                     lines.reserve(alternatives.size());
                     for (auto alternative : alternatives) {
                         auto possibleSymbol = alternative.symbol.data(ctx);
-                        if (!possibleSymbol->isClass() && !possibleSymbol->isMethod()) {
+                        if (!possibleSymbol->isClassOrModule() && !possibleSymbol->isMethod()) {
                             continue;
                         }
 
-                        auto suggestedName = possibleSymbol->isClass() ? alternative.symbol.show(ctx) + ".new"
-                                                                       : alternative.symbol.show(ctx);
+                        auto suggestedName = possibleSymbol->isClassOrModule() ? alternative.symbol.show(ctx) + ".new"
+                                                                               : alternative.symbol.show(ctx);
 
                         bool addedAutocorrect = false;
-                        if (possibleSymbol->isClass()) {
+                        if (possibleSymbol->isClassOrModule()) {
                             const auto replacement = possibleSymbol->name.show(ctx);
                             const auto loc = args.locs.call;
                             const auto toReplace = args.name.toString(ctx);
@@ -1435,7 +1436,7 @@ private:
             return;
         }
 
-        if (dispatchComp.method.data(ctx)->isClass()) {
+        if (dispatchComp.method.data(ctx)->isClassOrModule()) {
             return;
         }
 
@@ -1461,7 +1462,8 @@ private:
         // as we do the subtyping check.
         auto &constr = dispatched.main.constr;
         auto &blockPreType = dispatched.main.blockPreType;
-        if (blockPreType && !Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, blockPreType)) {
+        if (blockPreType && !Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, blockPreType,
+                                                             UntypedMode::AlwaysCompatible)) {
             ClassType *passedInProcClass = cast_type<ClassType>(passedInBlockType.get());
             auto nonNilableBlockType = Types::dropSubtypesOf(ctx, blockPreType, Symbols::NilClass());
             if (passedInProcClass && passedInProcClass->symbol == Symbols::Proc() &&
@@ -1496,7 +1498,7 @@ private:
         {
             auto it = &dispatched;
             while (it != nullptr) {
-                if (it->main.method.exists() && !it->main.method.data(ctx)->isClass()) {
+                if (it->main.method.exists() && !it->main.method.data(ctx)->isClassOrModule()) {
                     const auto &methodArgs = it->main.method.data(ctx)->arguments();
                     ENFORCE(!methodArgs.empty());
                     const auto &bspec = methodArgs.back();
@@ -1505,7 +1507,8 @@ private:
                     auto bspecType = bspec.type;
                     if (bspecType) {
                         // This subtype check is here to discover the correct generic bounds.
-                        Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, bspecType);
+                        Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, bspecType,
+                                                        UntypedMode::AlwaysCompatible);
                     }
                 }
                 it = it->secondary.get();

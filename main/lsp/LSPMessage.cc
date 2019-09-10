@@ -138,6 +138,7 @@ bool LSPMessage::isDelayable() const {
         // Definition, reference, and workspace symbol requests are typically requested directly by the user, so we
         // shouldn't delay processing them.
         case LSPMethod::TextDocumentDefinition:
+        case LSPMethod::TextDocumentTypeDefinition:
         case LSPMethod::TextDocumentCodeAction:
         case LSPMethod::TextDocumentReferences:
         case LSPMethod::WorkspaceSymbol:

@@ -27,7 +27,7 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
 }
 
 vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
-    ENFORCE(isClass()); // should be removed when we have generic methods
+    ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
     for (auto tm : typeMembers()) {
         auto tmData = tm.data(gs);
@@ -42,7 +42,7 @@ vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     return targs;
 }
 TypePtr Symbol::selfType(const GlobalState &gs) const {
-    ENFORCE(isClass());
+    ENFORCE(isClassOrModule());
     // todo: in dotty it made sense to cache those.
     if (typeMembers().empty()) {
         return externalType(gs);
@@ -52,7 +52,7 @@ TypePtr Symbol::selfType(const GlobalState &gs) const {
 }
 
 TypePtr Symbol::externalType(const GlobalState &gs) const {
-    ENFORCE(isClass());
+    ENFORCE(isClassOrModule());
     if (!resultType) {
         // note that sometimes resultType is set externally to not be a result of this computation
         // this happens e.g. in case this is a stub class
@@ -62,18 +62,39 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
             newResultType = make_type<ClassType>(ref);
         } else {
             vector<TypePtr> targs;
-            for (auto tm : typeMembers()) {
+            targs.reserve(typeMembers().size());
+
+            // Special-case covariant stdlib generics to have their types
+            // defaulted to `T.untyped`. This set *should not* grow over time.
+            bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
+                                   ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
+                                   ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator();
+
+            for (auto &tm : typeMembers()) {
                 auto tmData = tm.data(gs);
-                if (tmData->isFixed()) {
-                    auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
-                    ENFORCE(lambdaParam != nullptr);
-                    targs.emplace_back(lambdaParam->upperBound);
-                } else {
-                    // NOTE: at some point in the future it might make sense to
-                    // instantiate this with the upper bound of the type
+                auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
+                ENFORCE(lambdaParam != nullptr);
+
+                if (isStdlibGeneric) {
+                    // For backwards compatibility, instantiate stdlib generics
+                    // with T.untyped.
                     targs.emplace_back(Types::untyped(gs, ref));
+                } else if (tmData->isFixed() || tmData->isCovariant()) {
+                    // Default fixed or covariant parameters to their upper
+                    // bound.
+                    targs.emplace_back(lambdaParam->upperBound);
+                } else if (tmData->isInvariant()) {
+                    // We instantiate Invariant type members as T.untyped as
+                    // this will behave a bit like a unification variable with
+                    // Types::glb.
+                    targs.emplace_back(Types::untyped(gs, ref));
+                } else {
+                    // The remaining case is a contravariant parameter, which
+                    // gets defaulted to its lower bound.
+                    targs.emplace_back(lambdaParam->lowerBound);
                 }
             }
+
             newResultType = make_type<AppliedType>(ref, targs);
         }
         {
@@ -89,7 +110,7 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
 }
 
 bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
-    if (isClassLinearizationComputed()) {
+    if (isClassOrModuleLinearizationComputed()) {
         for (SymbolRef a : mixins()) {
             if (a == sym) {
                 return true;
@@ -158,7 +179,7 @@ string SymbolRef::show(const GlobalState &gs) const {
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner;
     auto klass = owner.data(ctx)->enclosingClass(ctx);
-    ENFORCE(klass.data(ctx)->isClass());
+    ENFORCE(klass.data(ctx)->isClassOrModule());
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(ctx, owner);
@@ -207,7 +228,7 @@ SymbolRef Symbol::findConcreteMethodTransitive(const GlobalState &gs, NameRef na
 
 SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                                int maxDepth) const {
-    ENFORCE(this->isClass());
+    ENFORCE(this->isClassOrModule());
     if (maxDepth == 0) {
         if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
             e.setHeader("findMemberTransitive hit a loop while resolving `{}` in `{}`. Parents are: ", name.show(gs),
@@ -237,10 +258,10 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
             return result;
         }
     }
-    if (isClassLinearizationComputed()) {
+    if (isClassOrModuleLinearizationComputed()) {
         for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
             ENFORCE(it->exists());
-            if (isClassLinearizationComputed()) {
+            if (isClassOrModuleLinearizationComputed()) {
                 result = it->data(gs)->findMember(gs, name);
                 if (result.exists()) {
                     if (mask == 0 || (result.data(gs)->flags & mask) == flags) {
@@ -387,12 +408,12 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         while (!yetToGoDeeper.empty()) {
             const SymbolRef thisIter = yetToGoDeeper.back();
             yetToGoDeeper.pop_back();
-            ENFORCE(thisIter.data(gs)->isClass());
+            ENFORCE(thisIter.data(gs)->isClassOrModule());
             for (auto member : thisIter.data(gs)->membersStableOrderSlow(gs)) {
                 if (member.second.exists() && member.first.exists() &&
                     member.first.data(gs)->kind == NameKind::CONSTANT &&
                     member.first.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8) {
-                    if (member.second.data(gs)->isClass() &&
+                    if (member.second.data(gs)->isClassOrModule() &&
                         member.second.data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
                     }
@@ -408,7 +429,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                         best.name = member.first;
                         globalBest.emplace_back(best);
                     }
-                    if (member.second.data(gs)->isClass()) {
+                    if (member.second.data(gs)->isClassOrModule()) {
                         yetToGoDeeper.emplace_back(member.second);
                     }
                 }
@@ -481,7 +502,7 @@ string Symbol::showFullName(const GlobalState &gs) const {
     bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
     string owner = includeOwner ? this->owner.data(gs)->showFullName(gs) : "";
 
-    bool needsColonColon = this->isClass() || this->isStaticField() || this->isTypeMember();
+    bool needsColonColon = this->isClassOrModule() || this->isStaticField() || this->isTypeMember();
     string separator = needsColonColon ? "::" : "#";
 
     return fmt::format("{}{}{}", owner, separator, this->name.show(gs));
@@ -508,8 +529,12 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
     printTabs(buf, tabs);
 
     string_view type = "unknown"sv;
-    if (this->isClass()) {
-        type = "class"sv;
+    if (this->isClassOrModule()) {
+        if (this->isClassOrModuleClass()) {
+            type = "class"sv;
+        } else {
+            type = "module"sv;
+        }
     } else if (this->isStaticField()) {
         if (this->isTypeAlias()) {
             type = "static-field-type-alias"sv;
@@ -542,7 +567,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
 
     fmt::format_to(buf, "{}{} {}", type, variance, showRaw ? this->toStringFullName(gs) : this->showFullName(gs));
 
-    if (this->isClass() || this->isMethod()) {
+    if (this->isClassOrModule() || this->isMethod()) {
         if (this->isMethod()) {
             if (this->isPrivate()) {
                 fmt::format_to(buf, " : private");
@@ -551,7 +576,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
             }
         }
 
-        auto typeMembers = this->isClass() ? this->typeMembers() : this->typeArguments();
+        auto typeMembers = this->isClassOrModule() ? this->typeMembers() : this->typeArguments();
         auto it = remove_if(typeMembers.begin(), typeMembers.end(),
                             [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
         typeMembers.erase(it, typeMembers.end());
@@ -562,12 +587,12 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                            }));
         }
 
-        if (this->isClass() && this->superClass().exists()) {
+        if (this->isClassOrModule() && this->superClass().exists()) {
             auto superClass = this->superClass().data(gs);
             fmt::format_to(buf, " < {}", showRaw ? superClass->toStringFullName(gs) : superClass->showFullName(gs));
         }
 
-        if (this->isClass()) {
+        if (this->isClassOrModule()) {
             fmt::format_to(buf, " ({})", fmt::map_join(this->mixins(), ", ", [&](auto symb) {
                                auto name = symb.data(gs)->name;
                                return showRaw ? name.showRaw(gs) : name.show(gs);
@@ -579,7 +604,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                            }));
         }
     }
-    if (this->resultType && !isClass()) {
+    if (this->resultType && !isClassOrModule()) {
         fmt::format_to(buf, " -> {}",
                        showRaw ? this->resultType->toStringWithTabs(gs, tabs) : this->resultType->show(gs));
     }
@@ -712,7 +737,7 @@ string ArgInfo::toString(const GlobalState &gs) const {
 }
 
 string Symbol::show(const GlobalState &gs) const {
-    if (isClass() && isSingletonClass(gs)) {
+    if (isClassOrModule() && isSingletonClass(gs)) {
         auto attached = this->attachedClass(gs);
         if (attached.exists()) {
             return fmt::format("T.class_of({})", attached.data(gs)->show(gs));
@@ -723,12 +748,12 @@ string Symbol::show(const GlobalState &gs) const {
         return this->name.data(gs)->show(gs);
     }
 
-    if (this->isMethod() && this->owner.data(gs)->isClass() && this->owner.data(gs)->isSingletonClass(gs)) {
+    if (this->isMethod() && this->owner.data(gs)->isClassOrModule() && this->owner.data(gs)->isSingletonClass(gs)) {
         return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs),
                            this->name.data(gs)->show(gs));
     }
 
-    auto needsColonColon = this->isClass() || this->isStaticField() || this->isTypeMember();
+    auto needsColonColon = this->isClassOrModule() || this->isStaticField() || this->isTypeMember();
 
     return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#",
                        this->name.data(gs)->show(gs));
@@ -759,7 +784,7 @@ bool isMangledSingletonName(const GlobalState &gs, core::NameRef name) {
 } // namespace
 
 bool Symbol::isSingletonClass(const GlobalState &gs) const {
-    bool isSingleton = isClass() && (isSingletonName(gs, name) || isMangledSingletonName(gs, name));
+    bool isSingleton = isClassOrModule() && (isSingletonName(gs, name) || isMangledSingletonName(gs, name));
     DEBUG_ONLY(if (ref(gs) != Symbols::untyped()) { // Symbol::untyped is attached to itself
         if (isSingleton) {
             ENFORCE(attachedClass(gs).exists());
@@ -791,7 +816,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 }
 
 SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
-    ENFORCE(this->isClass());
+    ENFORCE(this->isClassOrModule());
     ENFORCE(this->name.data(gs)->isClassName(gs));
 
     SymbolRef selfRef = this->ref(gs);
@@ -803,7 +828,7 @@ SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
 }
 
 SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
-    ENFORCE(this->isClass());
+    ENFORCE(this->isClassOrModule());
     if (this->ref(gs) == Symbols::untyped()) {
         return Symbols::untyped();
     }
@@ -827,9 +852,9 @@ SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
 }
 
 void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
-    ENFORCE(this->isClassSealed(), "Class is not marked sealed: {}", this->show(ctx));
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(ctx));
     ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
-    ENFORCE(subclass.data(ctx)->isClass(), "Sealed subclass {} must be class", subclass.show(ctx));
+    ENFORCE(subclass.data(ctx)->isClassOrModule(), "Sealed subclass {} must be class", subclass.show(ctx));
 
     auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx);
     auto sealedSubclasses = this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
@@ -846,7 +871,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
 }
 
 const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
-    ENFORCE(this->isClassSealed(), "Class is not marked sealed: {}", this->show(gs));
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(gs));
     auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
     auto &result = sealedSubclasses.data(gs)->locs();
     ENFORCE(result.size() > 0);
@@ -854,7 +879,7 @@ const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
 }
 
 TypePtr Symbol::sealedSubclassesToUnion(const Context ctx) const {
-    ENFORCE(this->isClassSealed(), "Class is not marked sealed: {}", this->show(ctx));
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(ctx));
 
     auto sealedSubclasses = this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
 
@@ -867,7 +892,7 @@ TypePtr Symbol::sealedSubclassesToUnion(const Context ctx) const {
     auto currentClasses = appliedType->targs[0];
     if (currentClasses->isBottom()) {
         // Declared sealed parent class, but never saw any children.
-        return make_type<ClassType>(this->ref(ctx));
+        return Types::bottom();
     }
 
     auto result = Types::bottom();
@@ -975,7 +1000,7 @@ Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {
 }
 
 int Symbol::typeArity(const GlobalState &gs) const {
-    ENFORCE(this->isClass());
+    ENFORCE(this->isClassOrModule());
     int arity = 0;
     for (auto &ty : this->typeMembers()) {
         if (!ty.data(gs)->isFixed()) {
@@ -1024,7 +1049,7 @@ SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
 
 SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
     SymbolRef owner = ref(gs);
-    while (!owner.data(gs)->isClass()) {
+    while (!owner.data(gs)->isClassOrModule()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
         owner = owner.data(gs)->owner;
     }
@@ -1091,7 +1116,7 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
 }
 
 bool Symbol::ignoreInHashing(const GlobalState &gs) const {
-    if (isClass()) {
+    if (isClassOrModule()) {
         return superClass() == core::Symbols::StubModule();
     } else if (isMethod()) {
         return name.data(gs)->kind == NameKind::UNIQUE && name.data(gs)->unique.original == core::Names::staticInit();

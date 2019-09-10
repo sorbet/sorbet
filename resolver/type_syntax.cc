@@ -518,7 +518,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                                                         const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     // Ensure that we only check types from a class context
     auto ctxOwnerData = ctx.owner.data(ctx);
-    ENFORCE(ctxOwnerData->isClass(), "getResultTypeAndBind wasn't called with a class owner");
+    ENFORCE(ctxOwnerData->isClassOrModule(), "getResultTypeAndBind wasn't called with a class owner");
 
     ResultType result;
     typecase(
@@ -576,7 +576,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
             }
 
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
-            if (sym.data(ctx)->isClass()) {
+            if (sym.data(ctx)->isClassOrModule()) {
                 if (sym.data(ctx)->typeArity(ctx) > 0) {
                     // This set **should not** grow over time.
                     bool isStdlibWhitelisted = sym == core::Symbols::Hash() || sym == core::Symbols::Array() ||
@@ -809,7 +809,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
             }
             corrected = corrected.data(ctx)->dealias(ctx);
 
-            if (!corrected.data(ctx)->isClass()) {
+            if (!corrected.data(ctx)->isClassOrModule()) {
                 if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Expected a class or module");
                 }

@@ -97,7 +97,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(*gs);
             auto type = constResp->retType.type;
-            if (data->isClass()) {
+            if (data->isClassOrModule()) {
                 auto singletonClass = data->lookupSingletonClass(*gs);
                 ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                 type = singletonClass.data(*gs)->externalType(*gs);

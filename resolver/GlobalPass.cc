@@ -87,7 +87,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
 
 void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
                         vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases, vector<bool> &resolved) {
-    ENFORCE(sym.data(gs)->isClass());
+    ENFORCE(sym.data(gs)->isClassOrModule());
     if (resolved[sym._id]) {
         return;
     }
@@ -135,7 +135,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
         }
     }
 
-    if (sym.data(gs)->isClassClass()) {
+    if (sym.data(gs)->isClassOrModuleClass()) {
         for (core::SymbolRef tp : sym.data(gs)->typeMembers()) {
             auto myVariance = tp.data(gs)->variance();
             if (myVariance != core::Variance::Invariant) {
@@ -163,11 +163,11 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             if (ref.data(gs)->isMethod()) {
                 methodCount++;
-            } else if (ref.data(gs)->isClass()) {
+            } else if (ref.data(gs)->isClassOrModule()) {
                 classCount++;
             }
         }
-        if (!ref.data(gs)->isClass()) {
+        if (!ref.data(gs)->isClassOrModule()) {
             continue;
         }
         classCount++;
@@ -199,7 +199,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 ref.data(gs)->setSuperClass(attached.data(gs)->superClass().data(gs)->singletonClass(gs));
             }
         } else {
-            if (ref.data(gs)->isClassClass()) {
+            if (ref.data(gs)->isClassOrModuleClass()) {
                 if (!core::Symbols::Object().data(gs)->derivesFrom(gs, ref) && core::Symbols::Object() != ref) {
                     ref.data(gs)->setSuperClass(core::Symbols::Object());
                 }
@@ -251,8 +251,8 @@ int maybeAddMixin(core::GlobalState &gs, core::SymbolRef forSym, InlinedVector<c
 ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core::SymbolRef ofClass) {
     ENFORCE(ofClass.exists());
     auto data = ofClass.data(gs);
-    ENFORCE(data->isClass());
-    if (!data->isClassLinearizationComputed()) {
+    ENFORCE(data->isClassOrModule());
+    if (!data->isClassOrModuleLinearizationComputed()) {
         if (data->superClass().exists()) {
             computeLinearization(gs, data->superClass());
         }
@@ -267,10 +267,10 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
                 newMixins.emplace_back(mixin);
                 continue;
             }
-            ENFORCE(mixin.data(gs)->isClass());
+            ENFORCE(mixin.data(gs)->isClassOrModule());
             ParentLinearizationInformation mixinLinearization = computeLinearization(gs, mixin);
 
-            if (!mixin.data(gs)->isClassModule()) {
+            if (!mixin.data(gs)->isClassOrModuleModule()) {
                 if (mixin != core::Symbols::BasicObject()) {
                     if (auto e = gs.beginError(data->loc(), core::errors::Resolver::IncludesNonModule)) {
                         e.setHeader("Only modules can be `{}`d. This module or class includes `{}`", "include",
@@ -297,7 +297,7 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
             }
         }
     }
-    ENFORCE(data->isClassLinearizationComputed());
+    ENFORCE(data->isClassOrModuleLinearizationComputed());
     return ParentLinearizationInformation{data->mixins(), data->superClass(), ofClass};
 }
 
@@ -308,7 +308,7 @@ void fullLinearizationSlowImpl(core::GlobalState &gs, const ParentLinearizationI
 
     for (auto m : info.mixins) {
         if (!absl::c_linear_search(acc, m)) {
-            if (m.data(gs)->isClassModule()) {
+            if (m.data(gs)->isClassOrModuleModule()) {
                 acc.emplace_back(m);
             } else {
                 fullLinearizationSlowImpl(gs, computeLinearization(gs, m), acc);
@@ -333,7 +333,7 @@ void computeLinearization(core::GlobalState &gs) {
     // TODO: this does not support `prepend`
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         const auto &data = core::SymbolRef(&gs, i).data(gs);
-        if (!data->isClass()) {
+        if (!data->isClassOrModule()) {
             continue;
         }
         computeLinearization(gs, core::SymbolRef(&gs, i));
@@ -349,7 +349,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     // `ResolveConstantsWalk` if it becomes necessary to process earlier.
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto sym = core::SymbolRef(&gs, i);
-        if (!sym.data(gs)->isClass()) {
+        if (!sym.data(gs)->isClassOrModule()) {
             continue;
         }
 
@@ -374,7 +374,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     resolved.resize(gs.symbolsUsed());
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto sym = core::SymbolRef(&gs, i);
-        if (sym.data(gs)->isClass()) {
+        if (sym.data(gs)->isClassOrModule()) {
             resolveTypeMembers(gs, sym, typeAliases, resolved);
         }
     }

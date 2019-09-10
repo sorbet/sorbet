@@ -78,10 +78,17 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
     // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
     while (lit && symbol.exists() && lit->original) {
         if (lspQuery.matchesLoc(lit->loc) || lspQuery.matchesSymbol(symbol)) {
+            // This basically approximates the cfg::Alias case from Environment::processBinding.
             core::TypeAndOrigins tp;
-            auto resultType = symbol.data(ctx.state)->resultType;
-            tp.type = resultType != nullptr ? resultType : core::Types::untyped(ctx, symbol);
-            tp.origins.emplace_back(symbol.data(ctx.state)->loc());
+            tp.origins.emplace_back(symbol.data(ctx)->loc());
+
+            if (symbol.data(ctx)->isClassOrModule()) {
+                tp.type = symbol.data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType(ctx);
+            } else {
+                auto resultType = symbol.data(ctx)->resultType;
+                tp.type = resultType == nullptr ? core::Types::untyped(ctx, symbol) : resultType;
+            }
+
             core::lsp::QueryResponse::pushQueryResponse(
                 ctx, core::lsp::ConstantResponse(ctx.owner, symbol, lit->loc, symbol.data(ctx)->name, tp, tp));
         }

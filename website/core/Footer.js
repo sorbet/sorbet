@@ -6,7 +6,6 @@ class Footer extends React.Component {
     const {baseUrl, docsUrl} = siteConfig;
     const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`;
     const docUrl = (doc) => `${baseUrl}${docsPart}${doc}`;
-    // TODO(jez) Consider putting the sitemap / GitHub buttons back.
     return (
       <footer className="nav-footer" id="footer">
         <div className="wrapper">

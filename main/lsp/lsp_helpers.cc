@@ -35,10 +35,10 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
     auto data = sym.data(gs);
-    if (data->isClass() && data->attachedClass(gs).exists()) {
+    if (data->isClassOrModule() && data->attachedClass(gs).exists()) {
         return true;
     }
-    if (data->isClass() && data->superClass() == core::Symbols::StubModule()) {
+    if (data->isClassOrModule() && data->superClass() == core::Symbols::StubModule()) {
         return true;
     }
     // static-init for a class
@@ -168,11 +168,11 @@ core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, cor
 
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol) {
     auto sym = symbol.data(gs);
-    if (sym->isClass()) {
-        if (sym->isClassModule()) {
+    if (sym->isClassOrModule()) {
+        if (sym->isClassOrModuleModule()) {
             return SymbolKind::Module;
         }
-        if (sym->isClassClass()) {
+        if (sym->isClassOrModuleClass()) {
             return SymbolKind::Class;
         }
     } else if (sym->isMethod()) {

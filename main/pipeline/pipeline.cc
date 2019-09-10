@@ -65,6 +65,9 @@ public:
         if (print.CFG.enabled) {
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
+        if (print.CFGRaw.enabled) {
+            print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
+        }
 #ifndef SORBET_REALMAIN_MIN
         if ((print.CFGJson.enabled || print.CFGProto.enabled) && cfg->shouldExport(ctx.state)) {
             auto proto = cfg::Proto::toProto(ctx.state, *cfg);
@@ -699,6 +702,12 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
         }
+        if (opts.print.CFGRaw.enabled) {
+            opts.print.CFGRaw.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
+            opts.print.CFGRaw.fmt("  graph [fontname = \"Courier\"];\n");
+            opts.print.CFGRaw.fmt("  node [fontname = \"Courier\"];\n");
+            opts.print.CFGRaw.fmt("  edge [fontname = \"Courier\"];\n");
+        }
         CFGCollectorAndTyper collector(opts);
         {
             core::ErrorRegion errs(ctx, f);
@@ -706,6 +715,9 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         }
         if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("}}\n\n");
+        }
+        if (opts.print.CFGRaw.enabled) {
+            opts.print.CFGRaw.fmt("}}\n\n");
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();

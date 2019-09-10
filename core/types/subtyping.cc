@@ -516,7 +516,7 @@ TypePtr glbGround(Context ctx, const TypePtr &t1, const TypePtr &t2) {
         categoryCounterInc("glb.<class>.collapsed", "yes");
         return t2;
     } else {
-        if (sym1.data(ctx)->isClassClass() && sym2.data(ctx)->isClassClass()) {
+        if (sym1.data(ctx)->isClassOrModuleClass() && sym2.data(ctx)->isClassOrModuleClass()) {
             categoryCounterInc("glb.<class>.collapsed", "bottom");
             return Types::bottom();
         }
@@ -556,7 +556,19 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     }
 
     if (auto *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
+        if (mayBeSpecial1->symbol == Symbols::top()) {
+            categoryCounterInc("glb", "<top");
+            return t2;
+        }
         if (mayBeSpecial1->symbol == Symbols::untyped()) {
+            // This case is to prefer `T.untyped` to top, so that
+            // `glb(T.untyped,<any>)` will reduce to `T.untyped`.
+            if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
+                if (mayBeSpecial2->symbol == Symbols::top()) {
+                    categoryCounterInc("glb", "top>");
+                    return t1;
+                }
+            }
             categoryCounterInc("glb", "<untyped");
             return t2;
         }
@@ -564,13 +576,13 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
             categoryCounterInc("glb", "<bottom");
             return t1;
         }
-        if (mayBeSpecial1->symbol == Symbols::top()) {
-            categoryCounterInc("glb", "<top");
-            return t2;
-        }
     }
 
     if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
+        if (mayBeSpecial2->symbol == Symbols::top()) {
+            categoryCounterInc("glb", "top>");
+            return t1;
+        }
         if (mayBeSpecial2->symbol == Symbols::untyped()) {
             categoryCounterInc("glb", "untyped>");
             return t1;
@@ -578,10 +590,6 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
         if (mayBeSpecial2->symbol == Symbols::bottom()) {
             categoryCounterInc("glb", "bottom>");
             return t2;
-        }
-        if (mayBeSpecial2->symbol == Symbols::top()) {
-            categoryCounterInc("glb", "top>");
-            return t1;
         }
     }
 
@@ -726,13 +734,13 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     }
 
     if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 6
-        bool collapseInLeft = Types::isSubType(ctx, t1, t2);
+        bool collapseInLeft = Types::isAsSpecificAs(ctx, t1, t2);
         if (collapseInLeft) {
             categoryCounterInc("glb", "Zor");
             return t1;
         }
 
-        bool collapseInRight = Types::isSubType(ctx, t2, t1);
+        bool collapseInRight = Types::isAsSpecificAs(ctx, t2, t1);
         if (collapseInRight) {
             categoryCounterInc("glb", "ZZor");
             return t2;
@@ -740,12 +748,12 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
 
         if (isa_type<ClassType>(t1.get()) || isa_type<AppliedType>(t1.get())) {
             auto lft = Types::all(ctx, t1, o2->left);
-            if (Types::isSubType(ctx, lft, o2->right) && !lft->isBottom()) {
+            if (Types::isAsSpecificAs(ctx, lft, o2->right) && !lft->isBottom()) {
                 categoryCounterInc("glb", "ZZZorClass");
                 return lft;
             }
             auto rght = Types::all(ctx, t1, o2->right);
-            if (Types::isSubType(ctx, rght, o2->left) && !rght->isBottom()) {
+            if (Types::isAsSpecificAs(ctx, rght, o2->left) && !rght->isBottom()) {
                 categoryCounterInc("glb", "ZZZZorClass");
                 return rght;
             }
@@ -795,13 +803,13 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
         auto *a2 = cast_type<AppliedType>(t2.get());
         if (a2 == nullptr) {
             auto *c2 = cast_type<ClassType>(t2.get());
-            if (a1->klass.data(ctx)->isClassModule() || c2 == nullptr) {
+            if (a1->klass.data(ctx)->isClassOrModuleModule() || c2 == nullptr) {
                 return AndType::make_shared(t1, t2);
             }
             if (a1->klass.data(ctx)->derivesFrom(ctx, c2->symbol)) {
                 return t1;
             }
-            if (c2->symbol.data(ctx)->isClassModule()) {
+            if (c2->symbol.data(ctx)->isClassOrModuleModule()) {
                 return AndType::make_shared(t1, t2);
             }
             return Types::bottom();
@@ -809,7 +817,14 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
         bool rtl = a1->klass == a2->klass || a1->klass.data(ctx)->derivesFrom(ctx, a2->klass);
         bool ltr = !rtl && a2->klass.data(ctx)->derivesFrom(ctx, a1->klass);
         if (!rtl && !ltr) {
-            return AndType::make_shared(t1, t2); // we can as well return nothing here?
+            if (a1->klass.data(ctx)->isClassOrModuleClass() && a2->klass.data(ctx)->isClassOrModuleClass()) {
+                // At this point, the two types are both classes, and unrelated
+                // to each other. Because ruby does not support multiple
+                // inheritance, this type is empty.
+                return Types::bottom();
+            } else {
+                return AndType::make_shared(t1, t2); // we can as well return nothing here?
+            }
         }
         if (ltr) { // swap
             swap(a1, a2);
@@ -894,8 +909,8 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
 }
 
 bool classSymbolIsAsGoodAs(Context ctx, SymbolRef c1, SymbolRef c2) {
-    ENFORCE(c1.data(ctx)->isClass());
-    ENFORCE(c2.data(ctx)->isClass());
+    ENFORCE(c1.data(ctx)->isClassOrModule());
+    ENFORCE(c2.data(ctx)->isClassOrModule());
     return c1 == c2 || c1.data(ctx)->derivesFrom(ctx, c2);
 }
 
@@ -930,7 +945,8 @@ void compareToUntyped(Context ctx, TypeConstraint &constr, const TypePtr &ty, co
 
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
 // be proxies over class types, this means "class or class-like"
-bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2) {
+bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, UntypedMode mode, const TypePtr &t1,
+                                    const TypePtr &t2) {
     ENFORCE(t1 != nullptr);
     ENFORCE(t2 != nullptr);
 
@@ -951,7 +967,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const T
             if (!constr.isSolved()) {
                 compareToUntyped(ctx, constr, t2, t1);
             }
-            return true;
+            return mode == UntypedMode::AlwaysCompatible;
         }
         if (mayBeSpecial1->symbol == Symbols::bottom()) {
             return true;
@@ -970,7 +986,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const T
             if (!constr.isSolved()) {
                 compareToUntyped(ctx, constr, t1, t2);
             }
-            return true;
+            return mode == UntypedMode::AlwaysCompatible;
         }
         if (mayBeSpecial2->symbol == Symbols::bottom()) {
             return false; // (bot, bot) is handled above.
@@ -1043,11 +1059,17 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const T
                 ENFORCE(i < a1->klass.data(ctx)->typeMembers().size());
 
                 if (idx.data(ctx)->isCovariant()) {
-                    result = Types::isSubTypeUnderConstraint(ctx, constr, a1->targs[i], a2->targs[j]);
+                    result = Types::isSubTypeUnderConstraint(ctx, constr, a1->targs[i], a2->targs[j], mode);
                 } else if (idx.data(ctx)->isInvariant()) {
-                    result = Types::equiv(ctx, a1->targs[i], a2->targs[j]);
+                    auto &a = a1->targs[i];
+                    auto &b = a2->targs[j];
+                    if (mode == UntypedMode::AlwaysCompatible) {
+                        result = Types::equiv(ctx, a, b);
+                    } else {
+                        result = Types::equivNoUntyped(ctx, a, b);
+                    }
                 } else if (idx.data(ctx)->isContravariant()) {
-                    result = Types::isSubTypeUnderConstraint(ctx, constr, a2->targs[j], a1->targs[i]);
+                    result = Types::isSubTypeUnderConstraint(ctx, constr, a2->targs[j], a1->targs[i], mode);
                 }
                 if (!result) {
                     break;
@@ -1060,7 +1082,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const T
     }
     if (isa_type<AppliedType>(t2.get())) {
         if (auto *pt = cast_type<ProxyType>(t1.get())) {
-            return Types::isSubTypeUnderConstraint(ctx, constr, pt->underlying(), t2);
+            return Types::isSubTypeUnderConstraint(ctx, constr, pt->underlying(), t2, mode);
         }
         return false;
     }
@@ -1078,7 +1100,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const T
                         int i = -1;
                         for (auto &el2 : a2->elems) {
                             ++i;
-                            result = Types::isSubTypeUnderConstraint(ctx, constr, a1->elems[i], el2);
+                            result = Types::isSubTypeUnderConstraint(ctx, constr, a1->elems[i], el2, mode);
                             if (!result) {
                                 break;
                             }
@@ -1105,7 +1127,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const T
                         });
                         result = fnd != h1->keys.end() &&
                                  Types::isSubTypeUnderConstraint(ctx, constr, h1->values[fnd - h1->keys.begin()],
-                                                                 h2->values[i]);
+                                                                 h2->values[i], mode);
                         if (!result) {
                             return;
                         }
@@ -1138,7 +1160,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const T
         } else {
             // only 1st is proxy
             TypePtr und = p1->underlying();
-            return isSubTypeUnderConstraintSingle(ctx, constr, und, t2);
+            return isSubTypeUnderConstraintSingle(ctx, constr, mode, und, t2);
         }
     } else if (isa_type<ProxyType>(t2.get())) {
         // non-proxies are never subtypes of proxies.
@@ -1153,7 +1175,8 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const T
     }
 }
 
-bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2) {
+bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2,
+                                     UntypedMode mode) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -1171,13 +1194,13 @@ bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const 
 
     // Note: order of cases here matters!
     if (auto *o1 = cast_type<OrType>(t1.get())) { // 7, 8, 9
-        return Types::isSubTypeUnderConstraint(ctx, constr, o1->left, t2) &&
-               Types::isSubTypeUnderConstraint(ctx, constr, o1->right, t2);
+        return Types::isSubTypeUnderConstraint(ctx, constr, o1->left, t2, mode) &&
+               Types::isSubTypeUnderConstraint(ctx, constr, o1->right, t2, mode);
     }
 
     if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 5
-        return Types::isSubTypeUnderConstraint(ctx, constr, t1, a2->left) &&
-               Types::isSubTypeUnderConstraint(ctx, constr, t1, a2->right);
+        return Types::isSubTypeUnderConstraint(ctx, constr, t1, a2->left, mode) &&
+               Types::isSubTypeUnderConstraint(ctx, constr, t1, a2->right, mode);
     }
 
     auto *a1 = cast_type<AndType>(t1.get());
@@ -1194,8 +1217,8 @@ bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const 
         auto *a2o = cast_type<OrType>(l.get());
         if (a2o != nullptr) {
             // This handles `(A | B) & C` -> `(A & C) | (B & C)`
-            return Types::isSubTypeUnderConstraint(ctx, constr, glb(ctx, a2o->left, r), t2) &&
-                   Types::isSubTypeUnderConstraint(ctx, constr, glb(ctx, a2o->right, r), t2);
+            return Types::isSubTypeUnderConstraint(ctx, constr, glb(ctx, a2o->left, r), t2, mode) &&
+                   Types::isSubTypeUnderConstraint(ctx, constr, glb(ctx, a2o->right, r), t2, mode);
         }
     }
     if (o2 != nullptr) {
@@ -1209,26 +1232,30 @@ bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const 
         auto *o2a = cast_type<AndType>(l.get());
         if (o2a != nullptr) {
             // This handles `(A & B) | C` -> `(A | C) & (B | C)`
-            return Types::isSubTypeUnderConstraint(ctx, constr, t1, lub(ctx, o2a->left, r)) &&
-                   Types::isSubTypeUnderConstraint(ctx, constr, t1, lub(ctx, o2a->right, r));
+            return Types::isSubTypeUnderConstraint(ctx, constr, t1, lub(ctx, o2a->left, r), mode) &&
+                   Types::isSubTypeUnderConstraint(ctx, constr, t1, lub(ctx, o2a->right, r), mode);
         }
     }
 
     // This order matters
     if (o2 != nullptr) { // 3
-        return Types::isSubTypeUnderConstraint(ctx, constr, t1, o2->left) ||
-               Types::isSubTypeUnderConstraint(ctx, constr, t1, o2->right);
+        return Types::isSubTypeUnderConstraint(ctx, constr, t1, o2->left, mode) ||
+               Types::isSubTypeUnderConstraint(ctx, constr, t1, o2->right, mode);
     }
     if (a1 != nullptr) { // 4
-        return Types::isSubTypeUnderConstraint(ctx, constr, a1->left, t2) ||
-               Types::isSubTypeUnderConstraint(ctx, constr, a1->right, t2);
+        return Types::isSubTypeUnderConstraint(ctx, constr, a1->left, t2, mode) ||
+               Types::isSubTypeUnderConstraint(ctx, constr, a1->right, t2, mode);
     }
 
-    return isSubTypeUnderConstraintSingle(ctx, constr, t1, t2); // 1
+    return isSubTypeUnderConstraintSingle(ctx, constr, mode, t1, t2); // 1
 }
 
 bool Types::equiv(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
+}
+
+bool Types::equivNoUntyped(Context ctx, const TypePtr &t1, const TypePtr &t2) {
+    return isAsSpecificAs(ctx, t1, t2) && isAsSpecificAs(ctx, t2, t1);
 }
 
 bool ProxyType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {

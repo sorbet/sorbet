@@ -5,7 +5,7 @@ No errors! Great job.
   "kind": "CONSTANT",
   "name": "\u003croot\u003e"
  },
- "kind": "CLASS",
+ "kind": "CLASS_OR_MODULE",
  "id": <redacted>,
  "children": [
   {
@@ -14,7 +14,7 @@ No errors! Great job.
     "kind": "UNIQUE",
     "name": "\u003cClass:\u003croot\u003e\u003e"
    },
-   "kind": "CLASS",
+   "kind": "CLASS_OR_MODULE",
    "id": <redacted>,
    "children": [
     {
@@ -42,7 +42,7 @@ No errors! Great job.
     "kind": "CONSTANT",
     "name": "A"
    },
-   "kind": "CLASS",
+   "kind": "CLASS_OR_MODULE",
    "id": <redacted>
   },
   {
@@ -51,7 +51,7 @@ No errors! Great job.
     "kind": "UNIQUE",
     "name": "\u003cClass:A\u003e"
    },
-   "kind": "CLASS",
+   "kind": "CLASS_OR_MODULE",
    "id": <redacted>,
    "children": [
     {

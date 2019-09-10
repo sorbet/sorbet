@@ -12,7 +12,7 @@ unique_ptr<ast::Local> LocalVarSaver::postTransformLocal(core::Context ctx, uniq
     } else if (ctx.owner == core::Symbols::root()) {
         owner = ctx.state.lookupStaticInitForFile(local->loc);
     } else {
-        ENFORCE(ctx.owner.data(ctx)->isClass());
+        ENFORCE(ctx.owner.data(ctx)->isClassOrModule());
         owner = ctx.state.lookupStaticInitForClass(ctx.owner);
     }
 

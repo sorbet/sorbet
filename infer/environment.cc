@@ -334,7 +334,7 @@ void Environment::clearKnowledge(core::Context ctx, core::LocalVariable reassign
 bool isSingleton(core::Context ctx, core::SymbolRef sym) {
     return sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() ||
            sym == core::Symbols::TrueClass() ||
-           (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->isClassFinal());
+           (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->isClassOrModuleFinal());
 }
 
 void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, const cfg::Send *send,
@@ -824,7 +824,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
             [&](cfg::Alias *a) {
                 core::SymbolRef symbol = a->what.data(ctx)->dealias(ctx);
                 const auto &data = symbol.data(ctx);
-                if (data->isClass()) {
+                if (data->isClassOrModule()) {
                     auto singletonClass = data->lookupSingletonClass(ctx);
                     ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                     tp.type = singletonClass.data(ctx)->externalType(ctx);
@@ -837,9 +837,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                                 // isFixed() => lowerBound == upperBound.
                                 auto lambdaParam = core::cast_type<core::LambdaParam>(data->resultType.get());
                                 ENFORCE(lambdaParam != nullptr);
-                                tp.type = lambdaParam->upperBound;
+                                tp.type = core::make_type<core::MetaType>(lambdaParam->upperBound);
                             } else {
-                                tp.type = core::make_type<core::SelfTypeParam>(symbol);
+                                tp.type = core::make_type<core::MetaType>(core::make_type<core::SelfTypeParam>(symbol));
                             }
                         } else if (data->isField()) {
                             tp.type = core::Types::resultTypeAsSeenFrom(
@@ -933,7 +933,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
                     methodReturnType = core::Types::untypedUntracked();
                 }
-                if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType)) {
+                if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
+                                                           core::UntypedMode::AlwaysCompatible)) {
                     if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         e.setHeader("Returning value that does not conform to method result type");
                         e.addErrorSection(core::ErrorSection(
@@ -960,7 +961,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 bool isSubtype;
                 if (i->link->result->main.constr) {
                     isSubtype = core::Types::isSubTypeUnderConstraint(ctx, *i->link->result->main.constr,
-                                                                      typeAndOrigin.type, expectedType);
+
+                                                                      typeAndOrigin.type, expectedType,
+                                                                      core::UntypedMode::AlwaysCompatible);
                 } else {
                     isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType);
                 }

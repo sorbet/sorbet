@@ -175,8 +175,11 @@ TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass)
             auto cdata = c->symbol.data(ctx);
             if (c->isUntyped()) {
                 result = from;
-            } else if (cdata->isClassSealed() && (cdata->isClassAbstract() || cdata->isClassModule())) {
-                result = dropSubtypesOf(ctx, cdata->sealedSubclassesToUnion(ctx), klass);
+            } else if (cdata->isClassOrModuleSealed() &&
+                       (cdata->isClassOrModuleAbstract() || cdata->isClassOrModuleModule())) {
+                auto subclasses = cdata->sealedSubclassesToUnion(ctx);
+                ENFORCE(!Types::equiv(ctx, subclasses, from), "sealedSubclassesToUnion about to cause infinte loop");
+                result = dropSubtypesOf(ctx, subclasses, klass);
             } else if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
                 result = Types::bottom();
             } else {
@@ -533,8 +536,8 @@ bool OrType::isFullyDefined() {
  * */
 InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what, const vector<TypePtr> &targs,
                                                      SymbolRef asIf) {
-    ENFORCE(asIf.data(ctx)->isClass());
-    ENFORCE(what.data(ctx)->isClass());
+    ENFORCE(asIf.data(ctx)->isClassOrModule());
+    ENFORCE(what.data(ctx)->isClassOrModule());
     ENFORCE(what == asIf || what.data(ctx)->derivesFrom(ctx, asIf) || asIf.data(ctx)->derivesFrom(ctx, what),
             what.data(ctx)->name.showRaw(ctx), asIf.data(ctx)->name.showRaw(ctx));
     InlinedVector<SymbolRef, 4> currentAlignment;
@@ -542,7 +545,7 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
         return currentAlignment;
     }
 
-    if (what == asIf || (asIf.data(ctx)->isClassClass() && what.data(ctx)->isClassClass() &&
+    if (what == asIf || (asIf.data(ctx)->isClassOrModuleClass() && what.data(ctx)->isClassOrModuleClass() &&
                          asIf.data(ctx)->typeMembers().size() == what.data(ctx)->typeMembers().size())) {
         currentAlignment = what.data(ctx)->typeMembers();
     } else {
@@ -574,8 +577,8 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
 TypePtr Types::resultTypeAsSeenFrom(Context ctx, TypePtr what, SymbolRef fromWhat, SymbolRef inWhat,
                                     const vector<TypePtr> &targs) {
     SymbolRef originalOwner = fromWhat;
-    ENFORCE(fromWhat.data(ctx)->isClass());
-    ENFORCE(inWhat.data(ctx)->isClass());
+    ENFORCE(fromWhat.data(ctx)->isClassOrModule());
+    ENFORCE(inWhat.data(ctx)->isClassOrModule());
 
     // TODO: the ENFORCE below should be above this conditional, but there is
     // currently a problem with the handling of `module_function` that causes it
@@ -605,8 +608,13 @@ TypePtr Types::getProcReturnType(Context ctx, const TypePtr &procType) {
     return applied->targs.front();
 }
 
+bool Types::isAsSpecificAs(Context ctx, const TypePtr &t1, const TypePtr &t2) {
+    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2,
+                                    UntypedMode::AlwaysIncompatible);
+}
+
 bool Types::isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2) {
-    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2);
+    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
 bool TypeVar::isFullyDefined() {
@@ -639,7 +647,7 @@ bool AppliedType::isFullyDefined() {
 }
 
 void AppliedType::_sanityCheck(Context ctx) {
-    ENFORCE(this->klass.data(ctx)->isClass());
+    ENFORCE(this->klass.data(ctx)->isClassOrModule());
     ENFORCE(this->klass != Symbols::untyped());
 
     ENFORCE(this->klass.data(ctx)->typeMembers().size() == this->targs.size() ||
@@ -846,14 +854,7 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
         if (at == nullptr) {
             return core::Symbols::noSymbol();
         }
-        // If this class is a "real" generic, leave it alone. We're not quite
-        // sure yet what it means to move between the "attached" and "singleton"
-        // levels for generic singletons. However, if the singleton has kind `*`
-        // due to all type members being fixed:, we're OK to treat the
-        // AppliedType and the Symbol as interchangeable here.
-        if (at->klass.data(ctx)->typeArity(ctx) != 0) {
-            return core::Symbols::noSymbol();
-        }
+
         singleton = at->klass;
     }
     return singleton.data(ctx)->attachedClass(ctx);

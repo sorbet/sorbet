@@ -105,9 +105,6 @@ high-level architecture diagram of Sorbet's core type checking pipeline:
 
 ## Phases
 
-<!-- TODO(jez) Which GlobalState data structures are populated/frozen when? -->
-<!-- TODO(jez) Consider talking about GlobalState, Symbols, etc. first -->
-
 IR stands for "internal representation". Each phase either translates from one
 IR to another, or modifies an existing IR. This table shows the order of the
 phases, what IR they operate on, and whether they translate from one IR to
