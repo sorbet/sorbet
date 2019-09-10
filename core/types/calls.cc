@@ -1919,6 +1919,45 @@ public:
     }
 } Array_flatten;
 
+class Array_product : public IntrinsicMethod {
+public:
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        vector<TypePtr> unwrappedElems;
+        unwrappedElems.reserve(args.args.size() + 1);
+
+        if (auto *ap = cast_type<AppliedType>(thisType)) {
+            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
+            ENFORCE(!ap->targs.empty());
+            unwrappedElems.emplace_back(ap->targs.front());
+        } else if (auto *tuple = cast_type<TupleType>(thisType)) {
+            unwrappedElems.emplace_back(tuple->elementType());
+        } else {
+            // We will have only dispatched to this intrinsic when we knew the receiver.
+            // Did we register this intrinsic on the wrong symbol?
+            ENFORCE(false, "Array#product on unexpected receiver type: {}", args.selfType->show(ctx));
+            res.returnType = Types::untypedUntracked();
+            return;
+        }
+
+        for (auto arg : args.args) {
+            auto argTyp = arg->type;
+            if (auto *ap = cast_type<AppliedType>(argTyp.get())) {
+                ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
+                ENFORCE(!ap->targs.empty());
+                unwrappedElems.emplace_back(ap->targs.front());
+            } else if (auto *tuple = cast_type<TupleType>(argTyp.get())) {
+                unwrappedElems.emplace_back(tuple->elementType());
+            } else {
+                // Arg type didn't match; we already reported an error for the arg type; just return untyped to recover.
+                res.returnType = Types::untypedUntracked();
+                return;
+            }
+        }
+
+        res.returnType = Types::arrayOf(ctx, TupleType::build(ctx, unwrappedElems));
+    }
+} Array_product;
+
 class Array_compact : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
@@ -2064,6 +2103,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
 
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
+    {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
