@@ -175,7 +175,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
 
     // We don't support all possible features. Make sure we don't make any false claims.
     EXPECT_TRUE(capabilities.definitionProvider.value_or(false));
-    EXPECT_FALSE(capabilities.typeDefinitionProvider.has_value());
+    EXPECT_TRUE(capabilities.typeDefinitionProvider.value_or(false));
     EXPECT_FALSE(capabilities.implementationProvider.has_value());
     EXPECT_TRUE(capabilities.referencesProvider.value_or(false));
     EXPECT_FALSE(capabilities.documentHighlightProvider.has_value());
