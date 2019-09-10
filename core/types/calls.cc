@@ -1922,7 +1922,6 @@ public:
 class Array_product : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
-        // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(args.args.size() + 1);
 
@@ -1933,7 +1932,10 @@ public:
         } else if (auto *tuple = cast_type<TupleType>(thisType)) {
             unwrappedElems.emplace_back(tuple->elementType());
         } else {
-            ENFORCE(false, "Array#product on unexpected type: {}", args.selfType->show(ctx));
+            // Someone changed the RBI sig such that the above checks aren't valid anymore.
+            ENFORCE(false, "Array#product on unexpected receiver type: {}", args.selfType->show(ctx));
+            res.returnType = Types::untypedUntracked();
+            return;
         }
 
         auto i = -1;
@@ -1947,10 +1949,9 @@ public:
             } else if (auto *tuple = cast_type<TupleType>(argTyp.get())) {
                 unwrappedElems.emplace_back(tuple->elementType());
             } else {
-                auto argLoc = args.locs.args[i];
-                if (auto e = ctx.state.beginError(argLoc, core::errors::Infer::MethodArgumentMismatch)) {
-                    e.setHeader("You must pass an Array as every argument to Array#product");
-                }
+                // Someone changed the RBI sig such that the above checks aren't valid anymore.
+                ENFORCE(false, "Array#flatten on unexpected arg type: {}", argTyp->show(ctx));
+                res.returnType = Types::untypedUntracked();
                 return;
             }
         }
