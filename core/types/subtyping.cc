@@ -198,9 +198,6 @@ TypePtr Types::lub(Context ctx, const TypePtr &t1, const TypePtr &t2) {
             if (isSubType(ctx, t2, t1)) {
                 return t1;
             }
-            if (isSubType(ctx, t1, t2)) {
-                return t2;
-            }
             return OrType::make_shared(t1, t2);
         }
 
