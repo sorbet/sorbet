@@ -21,5 +21,5 @@ T.reveal_type(arr_string.product(arr_string, arr_string, arr_string, arr_string)
 
 T.reveal_type(empty.product(arr_integer)) # error: `T::Array[[T.untyped, Integer]]`
 
-arr_string.product("haha") # error: Expected `T::Array[U]` but found `String("haha")` for argument `arg0`
-arr_string.product(arr_integer, "haha") # error: Expected `T::Array[U]` but found `String("haha")` for argument `arg0`
+arr_string.product("haha") # error: Expected `Array` but found `String("haha")`
+arr_string.product(arr_integer, "haha") # error: Expected `Array` but found `String("haha")`

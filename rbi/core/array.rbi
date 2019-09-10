@@ -1350,14 +1350,7 @@ class Array < Object
   # [1,2].product([])          #=> []
   # ```
   #
-  # (Note: this signature is inaccurate; Sorbet computes a special return type
-  # internally.)
-  sig do
-    type_parameters(:U).params(
-        arg0: T::Array[T.type_parameter(:U)],
-    )
-    .returns(T::Array[T::Array[T.any(Elem, T.type_parameter(:U))]])
-  end
+  # (Note: Sorbet checks the params and returns of this method internally.
   def product(*arg0); end
 
   # Append — Pushes the given object(s) on to the end of this array. This

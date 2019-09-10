@@ -1942,6 +1942,8 @@ public:
         for (auto arg : args.args) {
             i++;
             auto argTyp = arg->type;
+            auto argLoc = args.locs.args[i];
+
             if (auto *ap = cast_type<AppliedType>(argTyp.get())) {
                 ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
                 ENFORCE(!ap->targs.empty());
@@ -1949,8 +1951,12 @@ public:
             } else if (auto *tuple = cast_type<TupleType>(argTyp.get())) {
                 unwrappedElems.emplace_back(tuple->elementType());
             } else {
-                // Someone changed the RBI sig such that the above checks aren't valid anymore.
-                ENFORCE(false, "Array#flatten on unexpected arg type: {}", argTyp->show(ctx));
+                if (auto e = ctx.state.beginError(argLoc, errors::Infer::MethodArgumentMismatch)) {
+                    e.setHeader("Expected `Array` but found `{}` for argument", argTyp->show(ctx));
+                    e.addErrorSection(ErrorSection("Got " + argTyp->show(ctx) + " originating from:",
+                                                   arg->origins2Explanations(ctx)));
+                }
+
                 res.returnType = Types::untypedUntracked();
                 return;
             }
