@@ -1,3 +1,4 @@
+#include "common/Timer.h"
 #include "common/common.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
@@ -10,6 +11,8 @@ using namespace std;
 namespace sorbet::infer {
 
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
+    Timer timeit(ctx.state.tracer(), "Inference::run",
+                 {{"func", (string)cfg->symbol.data(ctx)->toStringFullName(ctx)}});
     ENFORCE(cfg->symbol == ctx.owner);
     auto methodLoc = cfg->symbol.data(ctx)->loc();
     prodCounterInc("types.input.methods.typechecked");
