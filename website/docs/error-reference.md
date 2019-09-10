@@ -122,7 +122,8 @@ end
 
 ## 4012
 
-This error occurs when an object is defined as (class or constant) and a method, like this:
+This error occurs when an object is defined as (class or constant) and a method, 
+like this:
 
 Example with class:
 ```ruby
@@ -131,7 +132,7 @@ module A; end
 
 module B; end
 class B; end
-````
+```
 [Sorbet.run link](https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%3B%20end%0Amodule%20A%3B%20end%0A%0Amodule%20B%3B%20end%0Aclass%20B%3B%20end)
   
 Example with constant:
