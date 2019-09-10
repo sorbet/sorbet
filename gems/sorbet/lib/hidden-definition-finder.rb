@@ -189,12 +189,15 @@ class Sorbet::Private::HiddenMethodFinder
   def serialize_constants(source, rbi, klass, is_singleton, source_symbols, rbi_symbols)
     source_by_name = source.map {|v| [v["name"]["name"], v]}.to_h
     ret = []
+    seen_constants = Set.new
 
     rbi.each do |rbi_entry|
+      next if seen_constants.include?(rbi_entry["name"]["name"])
       source_entry = source_by_name[rbi_entry["name"]["name"]]
 
       ret << serialize_alias(source_entry, rbi_entry, klass, source_symbols, rbi_symbols)
       ret << serialize_class(source_entry, rbi_entry, klass, source_symbols, rbi_symbols, source_by_name)
+      seen_constants.add(rbi_entry["name"]["name"])
     end
 
     ret.compact.join("\n")
