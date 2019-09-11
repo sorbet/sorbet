@@ -500,7 +500,7 @@ end
 The `^` corresponds to the position of the cursor. So in the above example, it's
 as if the cursor is like this: `foo│`. If the `^` had been directly under the
 last `o`, it would have been like this: `fo|o`. Only the first `^` is used. If
-you use `^^^` in the assertion, the test harness will take only the first one.
+you use `^^^` in the assertion, the test harness will use only the first caret.
 
 Right now, the assertion must contain every item in the completion result, and
 it must be in order. This will become more ergonomic over time.
