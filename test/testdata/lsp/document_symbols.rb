@@ -63,7 +63,7 @@ end
 class Child < Parent
   extend T::Sig
   sig do
-    implementation
+    override
     .params(
       first: Integer,
       second: Integer,

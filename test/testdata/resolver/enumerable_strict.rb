@@ -6,6 +6,6 @@ class A # error: Type `Elem` declared by parent `Enumerable` must be re-declared
 
   sig {void}
   def each # error: Implementation of abstract method `Enumerable#each` must explicitly name a block argument
-# ^^^^^^^^ error: Method `A#each` implements an abstract method `Enumerable#each` but is not declared with `.implementation`
+# ^^^^^^^^ error: Method `A#each` implements an abstract method `Enumerable#each` but is not declared with `override.`
   end
 end
