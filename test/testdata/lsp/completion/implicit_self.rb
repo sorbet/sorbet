@@ -6,7 +6,4 @@ class A
 
   foo # error: does not exist
 #    ^ completion: foo_1, foo_2
-
-  f # error: does not exist
-#  ^ completion: foo
 end

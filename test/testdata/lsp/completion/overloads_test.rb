@@ -10,7 +10,7 @@ class A
 end
 
 A.new.my_metho # error: does not exist
-#             ^ completion: my_method, my_method, my_method, my_method, my_method, my_method
+#             ^ completion: my_method, my_method, my_method, my_method, my_method
 
 # TODO(jez) The above is not the right behavior.
 #

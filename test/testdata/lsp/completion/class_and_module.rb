@@ -18,4 +18,4 @@ class A
 end
 
 A.new.foo # error: does not exist
-#        ^ completion: foo_from_a, foo_from_
+#        ^ completion: foo_from_a, foo_from_m
