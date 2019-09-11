@@ -466,6 +466,7 @@ private:
         if (!ancestorSym.data(ctx)->isClassOrModuleSealed()) {
             return;
         }
+        Timer timeit(ctx.state.errorQueue->logger, "resolver.registerSealedSubclass");
 
         // TODO(jez) Would it ever make sense to put an AppliedType into the union?
         // TODO(jez) Do we want to make sure that the child class doesn't have any type members?
