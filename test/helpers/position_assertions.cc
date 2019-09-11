@@ -31,6 +31,7 @@ const UnorderedMap<
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
+        {"completion", CompletionAssertion::make},
         {"apply-code-action", ApplyCodeActionAssertion::make},
         {"no-stdlib", BooleanPropertyAssertion::make},
 };
@@ -917,6 +918,59 @@ void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
 
 string HoverAssertion::toString() const {
     return fmt::format("hover: {}", message);
+}
+
+shared_ptr<CompletionAssertion> CompletionAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                          int assertionLine, string_view assertionContents,
+                                                          string_view assertionType) {
+    return make_shared<CompletionAssertion>(filename, range, assertionLine, assertionContents);
+}
+CompletionAssertion::CompletionAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                         string_view message)
+    : RangeAssertion(filename, range, assertionLine), message(string(message)) {}
+
+void CompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
+                                   const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                   LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<CompletionAssertion>(assertion)) {
+            assertionOfType->check(sourceFileContents, wrapper, nextId, uriPrefix, errorPrefix);
+        }
+    }
+}
+
+void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+    auto uri = filePathToUri(uriPrefix, filename);
+    auto pos = make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(uri), range->start->copy());
+    auto id = nextId++;
+    auto msg = LSPMessage(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion, move(pos)));
+    auto responses = wrapper.getLSPResponsesFor(msg);
+    ASSERT_EQ(responses.size(), 1);
+    auto &responseMsg = responses.at(0);
+    ASSERT_TRUE(responseMsg->isResponse());
+    auto &response = responseMsg->asResponse();
+    ASSERT_TRUE(response.result.has_value());
+
+    auto &completionList = get<unique_ptr<CompletionList>>(*response.result);
+
+    // TODO(jez) Add ability to expect CompletionItemKind of each item
+    string actualMessage =
+        fmt::format("{}", fmt::map_join(completionList->items.begin(), completionList->items.end(), ", ",
+                                        [](const auto &item) -> string { return item->label; }));
+
+    // TODO(jez) Add support for using `, ...` to match a prefix of the result
+    if (this->message != actualMessage) {
+        auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
+        ADD_FAILURE_AT(filename.c_str(), range->start->line + 1)
+            << fmt::format("{}Expected completion contents:\n{}\nFound completion contents:\n{}", errorPrefix,
+                           prettyPrintRangeComment(sourceLine, *range, toString()),
+                           prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage)));
+    }
+}
+
+string CompletionAssertion::toString() const {
+    return fmt::format("completion: {}", message);
 }
 
 shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view filename, unique_ptr<Range> &range,

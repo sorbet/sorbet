@@ -478,6 +478,33 @@ If a location should report the empty string, use the special label `(nothing)`:
 # ^ hover: (nothing)
 ```
 
+#### Testing completion
+
+<!-- TODO(jez) Un-declare this under construction -->
+
+🚧 This section is under construction! 🚧
+
+LSP tests can also assert the contents of completion responses with `completion`
+assertions.
+
+```ruby
+class A
+  def self.foo_1; end
+  def self.foo_2; end
+
+  foo
+#    ^ completion: foo_1, foo_2
+end
+```
+
+The `^` corresponds to the position of the cursor. So in the above example, it's
+as if the cursor is like this: `foo│`. If the `^` had been directly under the
+last `o`, it would have been like this: `fo|o`. Only the first `^` is used. If
+you use `^^^` in the assertion, the test harness will use only the first caret.
+
+Right now, the assertion must contain every item in the completion result, and
+it must be in order. This will become more ergonomic over time.
+
 #### Testing incremental typechecking
 
 In LSP mode, Sorbet runs file updates on a *fast path* or a *slow path*. It checks the structure of the

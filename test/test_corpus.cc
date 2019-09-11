@@ -858,6 +858,9 @@ TEST_P(LSPTest, All) {
     // Hover assertions
     HoverAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
 
+    // Completion assertions
+    CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
         // sourceFileUpdates is unordered (and we can't use an ordered map unless we make its contents `const`)
