@@ -31,6 +31,7 @@ const UnorderedMap<
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
+        {"completion", CompletionAssertion::make},
         {"apply-code-action", ApplyCodeActionAssertion::make},
         {"no-stdlib", BooleanPropertyAssertion::make},
 };
@@ -917,6 +918,35 @@ void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
 
 string HoverAssertion::toString() const {
     return fmt::format("hover: {}", message);
+}
+
+shared_ptr<CompletionAssertion> CompletionAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                          int assertionLine, string_view assertionContents,
+                                                          string_view assertionType) {
+    return make_shared<CompletionAssertion>(filename, range, assertionLine, assertionContents);
+}
+CompletionAssertion::CompletionAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                         string_view message)
+    : RangeAssertion(filename, range, assertionLine), message(string(message)) {}
+
+void CompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
+                                   const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                   LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<CompletionAssertion>(assertion)) {
+            assertionOfType->check(sourceFileContents, wrapper, nextId, uriPrefix, errorPrefix);
+        }
+    }
+}
+
+void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+    // TODO(jez) Implement CompletionAssertion::check
+    return;
+}
+
+string CompletionAssertion::toString() const {
+    return fmt::format("completion: {}", message);
 }
 
 shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view filename, unique_ptr<Range> &range,
