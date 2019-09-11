@@ -10,6 +10,8 @@ namespace sorbet::realmain::lsp {
 constexpr string_view sorbetScheme = "sorbet:";
 constexpr string_view httpsScheme = "https";
 
+namespace {
+
 string getRootPath(const options::Options &opts, const shared_ptr<spdlog::logger> &logger) {
     if (opts.rawInputDirNames.size() != 1) {
         logger->error("Sorbet's language server requires a single input directory.");
@@ -17,6 +19,15 @@ string getRootPath(const options::Options &opts, const shared_ptr<spdlog::logger
     }
     return opts.rawInputDirNames.at(0);
 }
+
+MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
+    if (find(formats.begin(), formats.end(), MarkupKind::Markdown) != formats.end()) {
+        return MarkupKind::Markdown;
+    } else {
+        return MarkupKind::Plaintext;
+    }
+}
+} // namespace
 
 LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<spdlog::logger> &logger,
                                    bool skipConfigatron, bool disableFastPath)
@@ -33,22 +44,25 @@ void LSPConfiguration::configure(const InitializeParams &params) {
     }
     clientCompletionItemSnippetSupport = false;
     clientHoverMarkupKind = MarkupKind::Plaintext;
+    clientCompletionItemMarkupKind = MarkupKind::Plaintext;
     if (params.capabilities->textDocument) {
         auto &textDocument = *params.capabilities->textDocument;
         if (textDocument->completion) {
             auto &completion = *textDocument->completion;
             if (completion->completionItem) {
-                clientCompletionItemSnippetSupport = (*completion->completionItem)->snippetSupport.value_or(false);
+                auto &completionItem = (*completion->completionItem);
+                clientCompletionItemSnippetSupport = completionItem->snippetSupport.value_or(false);
+                if (completionItem->documentationFormat != nullopt) {
+                    clientCompletionItemMarkupKind =
+                        getPreferredMarkupKind(completionItem->documentationFormat.value());
+                }
             }
         }
         if (textDocument->hover) {
             auto &hover = *textDocument->hover;
             if (hover->contentFormat) {
                 auto &contentFormat = *hover->contentFormat;
-                clientHoverMarkupKind =
-                    find(contentFormat.begin(), contentFormat.end(), MarkupKind::Markdown) != contentFormat.end()
-                        ? MarkupKind::Markdown
-                        : MarkupKind::Plaintext;
+                clientHoverMarkupKind = getPreferredMarkupKind(contentFormat);
             }
         }
     }

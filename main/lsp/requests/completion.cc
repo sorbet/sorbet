@@ -226,11 +226,12 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
             documentation =
                 findDocumentation(what.data(gs)->loc().file().data(gs).source(), what.data(gs)->loc().beginPos());
         }
-        if (documentation) {
+        if (documentation != nullopt) {
             if (documentation->find("@deprecated") != documentation->npos) {
                 item->deprecated = true;
             }
-            item->documentation = documentation;
+            item->documentation =
+                make_unique<MarkupContent>(config.clientCompletionItemMarkupKind, documentation.value());
         }
     } else if (what.data(gs)->isStaticField()) {
         item->kind = CompletionItemKind::Constant;
