@@ -305,10 +305,10 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
                     }
                     return leftPair.first._id < rightPair.first._id;
                 });
-                for (auto &entry : methodsSorted) {
-                    if (entry.second[0].exists()) {
-                        fast_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                        items.push_back(getCompletionItem(*gs, entry.second[0], receiverType,
+                for (auto &[methodName, methodSymbols] : methodsSorted) {
+                    if (methodSymbols[0].exists()) {
+                        fast_sort(methodSymbols, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
+                        items.push_back(getCompletionItem(*gs, methodSymbols[0], receiverType,
                                                           sendResp->dispatchResult->main.constr));
                     }
                 }
