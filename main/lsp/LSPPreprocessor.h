@@ -101,10 +101,9 @@ public:
      * * Indexes all files on filesystem if client sends an `initialized` message. If configured, will also send
      * progress notifications.
      *
-     * If a mutex is specified, it grabs the mutex before reading/writing state.
+     * It grabs the mutex before reading/writing `state`.
      */
-    void preprocessAndEnqueue(QueueState &state, std::unique_ptr<LSPMessage> msg,
-                              std::optional<absl::Mutex *> stateMtx = std::nullopt);
+    void preprocessAndEnqueue(QueueState &state, std::unique_ptr<LSPMessage> msg, absl::Mutex &stateMtx);
 
     std::unique_ptr<Joinable> runPreprocessor(QueueState &incomingQueue, absl::Mutex &incomingMtx,
                                               QueueState &processingQueue, absl::Mutex &processingMtx);

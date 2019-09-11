@@ -44,9 +44,9 @@ TimeTravelingGlobalState makeTTGS(const LSPConfiguration &config = nullConfig, i
     return TimeTravelingGlobalState(config, logger, *workers, makeGS(config.opts), initialVersion);
 }
 
-// LSPPreprocessor makePreprocessor(const LSPConfiguration &config = nullConfig) {
-//    return LSPPreprocessor(makeGS(config.opts), config, *workers, logger);
-//}
+LSPPreprocessor makePreprocessor(const LSPConfiguration &config = nullConfig) {
+    return LSPPreprocessor(makeGS(config.opts), config, *workers, logger);
+}
 
 bool comesBeforeSymmetric(const TimeTravelingGlobalState &ttgs, int a, int b) {
     return ttgs.comesBefore(a, b) && !ttgs.comesBefore(b, a);
@@ -98,7 +98,11 @@ TEST(TimeTravelingGlobalState, ComesBefore) { // NOLINT
         TimeTravelingGlobalState ttgs = makeTTGS(nullConfig, INT_MAX);
         EXPECT_PRED3(comesBeforeSymmetric, ttgs, INT_MAX, INT_MIN);
     }
-    // Wrap-around tests
+}
+
+TEST(LSPPreprocessor, Lol) { // NOLINT
+    auto preprocessor = makePreprocessor();
+    //
 }
 
 } // namespace sorbet::realmain::lsp::test

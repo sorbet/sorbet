@@ -142,7 +142,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
                 }
             }
 
-            preprocessAndEnqueue(processingQueue, move(msg), &processingMtx);
+            preprocessAndEnqueue(processingQueue, move(msg), processingMtx);
 
             {
                 absl::MutexLock lck(&processingMtx);

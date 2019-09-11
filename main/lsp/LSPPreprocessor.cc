@@ -87,18 +87,6 @@ void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, con
     // and ignore.
 }
 
-class MaybeMutexLock final {
-private:
-    unique_ptr<absl::MutexLock> lock;
-
-public:
-    MaybeMutexLock(optional<absl::Mutex *> stateMtx) {
-        if (stateMtx.has_value()) {
-            lock = make_unique<absl::MutexLock>(stateMtx.value());
-        }
-    }
-};
-
 unique_ptr<core::GlobalState> LSPPreprocessor::getTypecheckingGS() const {
     auto finalGS = ttgs.getGlobalState().deepCopy();
     finalGS->errorQueue = finalGSErrorQueue;
@@ -122,8 +110,7 @@ unique_ptr<LSPMessage> LSPPreprocessor::makeAndCommitWorkspaceEdit(unique_ptr<So
     return newMsg;
 }
 
-void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMessage> msg,
-                                           optional<absl::Mutex *> stateMtx) {
+void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMessage> msg, absl::Mutex &stateMtx) {
     ENFORCE(!msg->internalId.has_value());
     msg->internalId = nextMessageId++;
     if (msg->isResponse()) {
@@ -136,28 +123,28 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
     bool shouldMerge = false;
     switch (method) {
         case LSPMethod::$CancelRequest: {
-            MaybeMutexLock lock(stateMtx);
+            absl::MutexLock lock(&stateMtx);
             cancelRequest(state.pendingRequests, *get<unique_ptr<CancelParams>>(msg->asNotification().params));
             // A canceled request can be moved around, so we may be able to merge more file changes.
             mergeFileChanges(state);
             break;
         }
         case LSPMethod::PAUSE: {
-            MaybeMutexLock lock(stateMtx);
+            absl::MutexLock lock(&stateMtx);
             ENFORCE(!state.paused);
             logger->error("Pausing");
             state.paused = true;
             break;
         }
         case LSPMethod::RESUME: {
-            MaybeMutexLock lock(stateMtx);
+            absl::MutexLock lock(&stateMtx);
             logger->error("Resuming");
             ENFORCE(state.paused);
             state.paused = false;
             break;
         }
         case LSPMethod::Exit: {
-            MaybeMutexLock lock(stateMtx);
+            absl::MutexLock lock(&stateMtx);
             // Don't override previous error code if already terminated.
             if (!state.terminate) {
                 state.terminate = true;
@@ -177,11 +164,8 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             InitializedParams &params = *get<unique_ptr<InitializedParams>>(msg->asNotification().params);
             {
                 Timer timeit(logger, "initial_index");
-                unique_ptr<ShowOperationPreprocessorThread> op;
-                if (stateMtx.has_value()) {
-                    op = make_unique<ShowOperationPreprocessorThread>(config, *stateMtx.value(), state.pendingRequests,
-                                                                      "Indexing", "Indexing files...");
-                }
+                ShowOperationPreprocessorThread op(config, stateMtx, state.pendingRequests, "Indexing",
+                                                   "Indexing files...");
                 params.updates.updatedFileIndexes = ttgs.indexFromFileSystem();
                 params.updates.updatedFileHashes = ttgs.getGlobalStateHashes();
             }
@@ -191,9 +175,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             shouldEnqueue = true;
             break;
         }
-
-            /* For file update events, convert to a SorbetWorkspaceEdit and commit the changes to GlobalState. */
-
+        /* For file update events, convert to a SorbetWorkspaceEdit and commit the changes to GlobalState. */
         case LSPMethod::TextDocumentDidOpen: {
             auto &params = get<unique_ptr<DidOpenTextDocumentParams>>(msg->asNotification().params);
             openFiles.insert(config.remoteName2Local(params->textDocument->uri));
@@ -244,7 +226,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
     }
 
     if (shouldEnqueue || shouldMerge) {
-        MaybeMutexLock lock(stateMtx);
+        absl::MutexLock lock(&stateMtx);
         if (shouldEnqueue) {
             state.pendingRequests.push_back(move(msg));
         }

@@ -18,9 +18,10 @@ LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, std::unique_
 }
 
 LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<unique_ptr<LSPMessage>> messages) {
-    static QueueState state{{}, false, false, 0};
+    QueueState state{{}, false, false, 0};
+    absl::Mutex mutex;
     for (auto &message : messages) {
-        preprocessor.preprocessAndEnqueue(state, move(message));
+        preprocessor.preprocessAndEnqueue(state, move(message), mutex);
     }
     ENFORCE(state.paused == false, "__PAUSE__ not supported in single-threaded mode.");
 
