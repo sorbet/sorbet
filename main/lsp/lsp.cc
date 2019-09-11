@@ -39,14 +39,7 @@ LSPLoop::QueryRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, 
     }
 
     auto loc = config.lspPos2Loc(fref, pos, *gs);
-    if (!loc) {
-        auto error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidParams,
-            fmt::format("Did not find location at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
-        return LSPLoop::QueryRun{move(gs), {}, move(error)};
-    }
-
-    return runQuery(move(gs), core::lsp::Query::createLocQuery(*loc.get()), {fref});
+    return runQuery(move(gs), core::lsp::Query::createLocQuery(loc), {fref});
 }
 
 LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) const {

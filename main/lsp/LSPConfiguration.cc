@@ -75,13 +75,19 @@ void LSPConfiguration::configure(const InitializeParams &params) {
     }
 }
 
-unique_ptr<core::Loc> LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position &pos,
-                                                   const core::GlobalState &gs) const {
+// LSP Spec: line / col in Position are 0-based
+// Sorbet:   line / col in core::Loc are 1-based (like most editors)
+// LSP Spec: distinguishes Position (zero-width) and Range (start & end)
+// Sorbet:   zero-width core::Loc is a Position
+//
+// https://microsoft.github.io/language-server-protocol/specification#text-documents
+core::Loc LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position &pos,
+                                       const core::GlobalState &gs) const {
     core::Loc::Detail reqPos;
     reqPos.line = pos.line + 1;
     reqPos.column = pos.character + 1;
     auto offset = core::Loc::pos2Offset(fref.data(gs), reqPos);
-    return make_unique<core::Loc>(core::Loc(fref, offset, offset));
+    return core::Loc{fref, offset, offset};
 }
 
 string LSPConfiguration::localName2Remote(string_view filePath) const {
