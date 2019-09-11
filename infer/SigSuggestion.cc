@@ -328,9 +328,7 @@ bool childNeedsOverride(core::Context ctx, core::SymbolRef childSymbol, core::Sy
         //  that is either overridable...
         (parentSymbol.data(ctx)->isOverridable() ||
          // or override...
-         parentSymbol.data(ctx)->isOverride() ||
-         // or implementation.
-         parentSymbol.data(ctx)->isImplementation());
+         parentSymbol.data(ctx)->isOverride());
 }
 
 bool parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core::SymbolRef parentSymbol) {
@@ -347,8 +345,6 @@ bool parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core
         !parentSymbol.data(ctx)->isDSLSynthesized() &&
         // It it has a sig...
         parentSymbol.data(ctx)->resultType != nullptr &&
-        // that is implementation...
-        parentSymbol.data(ctx)->isImplementation() &&
         // and doesn't already have overridable.
         !parentSymbol.data(ctx)->isOverridable();
     // In all other cases, we wouldn't have put override on the child's sig.
@@ -476,9 +472,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
         // Only need override / implementation if the parent has a sig
         if (closestMethod.exists() && closestMethod.data(ctx)->resultType != nullptr) {
-            if (closestMethod.data(ctx)->isAbstract()) {
-                fmt::format_to(ss, "implementation.");
-            } else if (childNeedsOverride(ctx, methodSymbol, closestMethod)) {
+            if (closestMethod.data(ctx)->isAbstract() || childNeedsOverride(ctx, methodSymbol, closestMethod)) {
                 fmt::format_to(ss, "override.");
             }
         }

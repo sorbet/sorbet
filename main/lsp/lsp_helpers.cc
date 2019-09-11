@@ -101,9 +101,6 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
         if (sym->isOverride()) {
             flags.emplace_back("override");
         }
-        if (sym->isImplementation()) {
-            flags.emplace_back("implementation");
-        }
         if (sym->isPrivate()) {
             accessFlagString = "private ";
         }

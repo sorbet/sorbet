@@ -280,7 +280,9 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 }
                 case core::Names::implementation()._id:
-                    sig.seen.implementation = true;
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
+                        e.setHeader("Use of `{}` is deprecated; please use `{}` instead", "implementation", "override");
+                    }
                     break;
                 case core::Names::overridable()._id:
                     sig.seen.overridable = true;
