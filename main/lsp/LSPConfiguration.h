@@ -67,7 +67,7 @@ public:
     std::string fileRef2Uri(const core::GlobalState &gs, const core::FileRef) const;
     std::string remoteName2Local(std::string_view uri) const;
     std::string localName2Remote(std::string_view filePath) const;
-    std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) const;
+    core::Loc lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) const;
     // returns nullptr if this loc doesn't exist
     std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc) const;
     bool isFileIgnored(std::string_view filePath) const;

@@ -81,10 +81,7 @@ LSPResult LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, con
                 }
                 auto src = fref.data(*gs).source();
                 auto loc = config.lspPos2Loc(fref, *params.position, *gs);
-                if (!loc) {
-                    return LSPResult{move(gs), {}};
-                }
-                string_view call_str = src.substr(sendLocIndex, loc->endPos() - sendLocIndex);
+                string_view call_str = src.substr(sendLocIndex, loc.endPos() - sendLocIndex);
                 int numberCommas = absl::c_count(call_str, ',');
                 // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =
                 // 2nd arg)
