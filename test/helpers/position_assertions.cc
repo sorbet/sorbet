@@ -941,8 +941,32 @@ void CompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &ass
 
 void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                                 LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
-    // TODO(jez) Implement CompletionAssertion::check
-    return;
+    auto uri = filePathToUri(uriPrefix, filename);
+    auto pos = make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(uri), range->start->copy());
+    auto id = nextId++;
+    auto msg = LSPMessage(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion, move(pos)));
+    auto responses = wrapper.getLSPResponsesFor(msg);
+    ASSERT_EQ(responses.size(), 1);
+    auto &responseMsg = responses.at(0);
+    ASSERT_TRUE(responseMsg->isResponse());
+    auto &response = responseMsg->asResponse();
+    ASSERT_TRUE(response.result.has_value());
+
+    auto &completionList = get<unique_ptr<CompletionList>>(*response.result);
+
+    // TODO(jez) Add ability to expect CompletionItemKind of each item
+    string actualMessage =
+        fmt::format("{}", fmt::map_join(completionList->items.begin(), completionList->items.end(), ", ",
+                                        [](const auto &item) -> string { return item->label; }));
+
+    // TODO(jez) Add support for using `, ...` to match a prefix of the result
+    if (this->message != actualMessage) {
+        auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
+        ADD_FAILURE_AT(filename.c_str(), range->start->line + 1)
+            << fmt::format("{}Expected completion contents:\n{}\nFound completion contents:\n{}", errorPrefix,
+                           prettyPrintRangeComment(sourceLine, *range, toString()),
+                           prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage)));
+    }
 }
 
 string CompletionAssertion::toString() const {
