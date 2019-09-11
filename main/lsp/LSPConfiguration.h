@@ -55,6 +55,8 @@ public:
     bool clientCompletionItemSnippetSupport = false;
     /** What hover markup should we send to the client? */
     MarkupKind clientHoverMarkupKind = MarkupKind::Plaintext;
+    /** What completion item markup should we send to the client? */
+    MarkupKind clientCompletionItemMarkupKind = MarkupKind::Plaintext;
 
     LSPConfiguration(const options::Options &opts, const std::shared_ptr<spdlog::logger> &logger,
                      bool skipConfigatron = false, bool disableFastPath = false);
