@@ -8,6 +8,27 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
+namespace {
+bool sanityCheckUpdate(const core::GlobalState &gs, const LSPFileUpdates &updates) {
+    UnorderedSet<string> encounteredFiles;
+    ENFORCE(updates.updatedFiles.size() == updates.updatedFileHashes.size());
+    ENFORCE(updates.updatedFiles.size() == updates.updatedFileIndexes.size());
+    for (int i = 0; i < updates.updatedFiles.size(); i++) {
+        const auto &f = updates.updatedFiles[i];
+        // const auto &h = updates.updatedFileHashes[i];
+        const auto &ast = updates.updatedFileIndexes[i];
+        ENFORCE(f->path() == ast.file.data(gs).path());
+        ENFORCE(!encounteredFiles.contains(f->path()));
+        encounteredFiles.insert(string(f->path()));
+    }
+    ENFORCE(updates.canTakeFastPath || updates.updatedGS.has_value());
+    if (updates.hasNewFiles) {
+        ENFORCE(!updates.canTakeFastPath);
+    }
+    return true;
+}
+} // namespace
+
 constexpr int INITIAL_VERSION = 0;
 
 LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPConfiguration config, WorkerPool &workers,
@@ -326,7 +347,8 @@ void LSPPreprocessor::canonicalizeEdits(unique_ptr<DidCloseTextDocumentParams> c
 void LSPPreprocessor::canonicalizeEdits(unique_ptr<WatchmanQueryResponse> queryResponse,
                                         LSPFileUpdates &updates) const {
     for (auto file : queryResponse->files) {
-        string localPath = absl::StrCat(config.rootPath, "/", file);
+        // Don't append rootPath if it is empty.
+        string localPath = config.rootPath.size() > 0 ? absl::StrCat(config.rootPath, "/", file) : file;
         // Editor contents supercede file system updates.
         if (!config.isFileIgnored(localPath) && !openFiles.contains(localPath)) {
             updates.updatedFiles.push_back(make_shared<core::File>(
@@ -338,8 +360,8 @@ void LSPPreprocessor::canonicalizeEdits(unique_ptr<WatchmanQueryResponse> queryR
 void LSPPreprocessor::mergeEdits(int toId, LSPFileUpdates &to, int fromId, LSPFileUpdates &from) {
     // fromId must happen *after* toId.
     ENFORCE(ttgs.comesBefore(toId, fromId));
-    ENFORCE(to.updatedFiles.size() == to.updatedFileHashes.size() &&
-            to.updatedFileHashes.size() == to.updatedFileIndexes.size());
+    ENFORCE(to.updatedFiles.size() == to.updatedFileHashes.size());
+    ENFORCE(to.updatedFileHashes.size() == to.updatedFileIndexes.size());
     // 'from' has newer updates, so merge into from and then move into to.
     UnorderedSet<int> encounteredFiles;
     for (auto &index : from.updatedFileIndexes) {
@@ -358,8 +380,6 @@ void LSPPreprocessor::mergeEdits(int toId, LSPFileUpdates &to, int fromId, LSPFi
     to.updatedFiles = move(from.updatedFiles);
     to.updatedFileIndexes = move(from.updatedFileIndexes);
     to.updatedFileHashes = move(from.updatedFileHashes);
-    ENFORCE(to.updatedFiles.size() == to.updatedFileHashes.size() &&
-            to.updatedFileHashes.size() == to.updatedFileIndexes.size());
 
     to.hasNewFiles = to.hasNewFiles || from.hasNewFiles;
 
@@ -369,9 +389,15 @@ void LSPPreprocessor::mergeEdits(int toId, LSPFileUpdates &to, int fromId, LSPFi
     to.canTakeFastPath = ttgs.canTakeFastPath(to);
     if (to.canTakeFastPath) {
         to.updatedGS = nullopt;
+    } else if (from.updatedGS.has_value()) {
+        // `from` has all file updates from `to` and `from` so its GS can be re-used if specified.
+        to.updatedGS = move(from.updatedGS.value());
     } else {
+        // Roll forward again so initial GS has changes from this update prior to copying.
+        ttgs.travel(fromId);
         to.updatedGS = getTypecheckingGS();
     }
+    ENFORCE(sanityCheckUpdate(ttgs.getGlobalState(), to));
 }
 
 } // namespace sorbet::realmain::lsp

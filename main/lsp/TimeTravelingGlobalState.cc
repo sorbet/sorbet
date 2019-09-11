@@ -85,7 +85,7 @@ void TimeTravelingGlobalState::travel(int version) {
         applyUpdate(*update, undo);
     }
     // Should exactly match if redoing, or be at/just over version if undoing.
-    ENFORCE((undo && activeVersion >= version) || activeVersion == version);
+    ENFORCE((undo && comesBefore(version, activeVersion + 1)) || activeVersion == version);
 }
 
 const core::GlobalState &TimeTravelingGlobalState::getGlobalState() const {
