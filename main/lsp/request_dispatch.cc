@@ -139,6 +139,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             auto serverCap = make_unique<ServerCapabilities>();
             serverCap->textDocumentSync = TextDocumentSyncKind::Full;
             serverCap->definitionProvider = true;
+            serverCap->typeDefinitionProvider = true;
             serverCap->documentSymbolProvider = opts.lspDocumentSymbolEnabled;
             serverCap->workspaceSymbolProvider = opts.lspWorkspaceSymbolsEnabled;
             serverCap->hoverProvider = true;
