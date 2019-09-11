@@ -47,9 +47,8 @@ vector<core::FileRef> TimeTravelingGlobalState::applyUpdate(TimeTravelUpdate &tt
 
 bool TimeTravelingGlobalState::comesBefore(int a, int b) const {
     // The code may request versions up to `latestVersion + 1`, so be one more than that.
-    const int maxVersion = latestVersion + 2;
-    // Is version in (maxVersion, currentVersion)?
-    if (b < maxVersion) {
+    const int maxVersion = latestVersion + 1;
+    if (b <= maxVersion) {
         // Not in [currentVersion, maxVersion]
         return a < b || a > maxVersion;
     } else {
