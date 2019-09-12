@@ -1,8 +1,8 @@
 bar.rb:4: Expected `Integer` but found `String("bar.rb")` for argument `arg0` https://srb.help/7002
      4 |1 + "bar.rb"
         ^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L146: Method `Integer#+` has specified `arg0` as `Integer`
-     146 |        arg0: Integer,
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148: Method `Integer#+` has specified `arg0` as `Integer`
+     148 |        arg0: Integer,
                   ^^^^
   Got String("bar.rb") originating from:
     bar.rb:4:

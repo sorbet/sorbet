@@ -630,7 +630,7 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subproce
   class ::<Class:<Class:Nope>> < ::<Class:<Class:Object>> () @ test/cli/subprocess-plugin/multi5.rb:4
     method ::<Class:<Class:Nope>>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi5.rb:4
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi5.rb start=??? end=???}
-  class ::Object < ::BasicObject (Kernel) @ https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#L26
+  class ::Object < ::BasicObject (Kernel) @ https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#L27
     method ::Object#bar_gen (<blk>) @ test/cli/subprocess-plugin/multi1.rb:9
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb start=??? end=???}
     method ::Object#baz_gen (<blk>) @ test/cli/subprocess-plugin/multi1.rb:12
