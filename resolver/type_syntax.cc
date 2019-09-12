@@ -282,7 +282,12 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                 case core::Names::implementation()._id:
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
                         e.setHeader("Use of `{}` has been replaced by `{}`", "implementation", "override");
-                        e.replaceWith("Replace with `override`", send->loc, "override");
+                        if (send->recv->isSelfReference()) {
+                            e.replaceWith("Replace with `override`", send->loc, "override");
+                        } else {
+                            e.replaceWith("Replace with `override`", send->loc, "{}.override",
+                                          send->recv->loc.source(ctx));
+                        }
                     }
                     break;
                 case core::Names::overridable()._id:
