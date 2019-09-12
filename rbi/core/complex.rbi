@@ -1,23 +1,25 @@
 # typed: __STDLIB_INTERNAL
 
-# A complex number can be represented as a paired real number with
-# imaginary unit; a+bi. Where a is real part, b is imaginary part and i is
-# imaginary unit. Real a equals complex a+0i mathematically.
+# A complex number can be represented as a paired real number with imaginary
+# unit; a+bi. Where a is real part, b is imaginary part and i is imaginary unit.
+# Real a equals complex a+0i mathematically.
 #
-# [Complex](Complex) object can be created as literal,
-# and also by using Kernel\#Complex,
-# [::rect](Complex#method-c-rect),
-# [::polar](Complex#method-c-polar) or
-# [\#to\_c](Complex#method-i-to_c) method.
+# [`Complex`](https://docs.ruby-lang.org/en/2.6.0/Complex.html) object can be
+# created as literal, and also by using Kernel#Complex,
+# [`Complex::rect`](https://docs.ruby-lang.org/en/2.6.0/Complex.html#method-c-rect),
+# [`Complex::polar`](https://docs.ruby-lang.org/en/2.6.0/Complex.html#method-c-polar)
+# or [`to_c`](https://docs.ruby-lang.org/en/2.6.0/Complex.html#method-i-to_c)
+# method.
 #
-#     2+1i                 #=> (2+1i)
-#     Complex(1)           #=> (1+0i)
-#     Complex(2, 3)        #=> (2+3i)
-#     Complex.polar(2, 3)  #=> (-1.9799849932008908+0.2822400161197344i)
-#     3.to_c               #=> (3+0i)
+# ```ruby
+# 2+1i                 #=> (2+1i)
+# Complex(1)           #=> (1+0i)
+# Complex(2, 3)        #=> (2+3i)
+# Complex.polar(2, 3)  #=> (-1.9799849932008908+0.2822400161197344i)
+# 3.to_c               #=> (3+0i)
+# ```
 #
-# You can also create complex object from floating-point numbers or
-# strings.
+# You can also create complex object from floating-point numbers or strings.
 #
 # ```ruby
 # Complex(0.3)         #=> (0.3+0i)
@@ -38,6 +40,7 @@
 # Complex(1, 1) / 2.0  #=> (0.5+0.5i)
 # ```
 class Complex < Numeric
+  # The imaginary unit.
   I = T.let(T.unsafe(nil), Complex)
 
   # Performs multiplication.
@@ -163,6 +166,15 @@ class Complex < Numeric
   sig {returns(Complex)}
   def +@(); end
 
+  # Performs subtraction.
+  #
+  # ```ruby
+  # Complex(2, 3)  - Complex(2, 3)   #=> (0+0i)
+  # Complex(900)   - Complex(1)      #=> (899+0i)
+  # Complex(-2, 9) - Complex(-9, 2)  #=> (7+7i)
+  # Complex(9, 8)  - 4               #=> (5+8i)
+  # Complex(20, 9) - 9.8             #=> (10.2+9i)
+  # ```
   sig do
     params(
         arg0: Integer,
@@ -195,6 +207,11 @@ class Complex < Numeric
   end
   def -(arg0); end
 
+  # Returns negation of the value.
+  #
+  # ```ruby
+  # -Complex(1, 2)  #=> (-1-2i)
+  # ```
   sig {returns(Complex)}
   def -@(); end
 
@@ -418,7 +435,7 @@ class Complex < Numeric
   sig {returns(Float)}
   def phase(); end
 
-  # Returns an array; \[cmp.abs, cmp.arg\].
+  # Returns an array; [cmp.abs, cmp.arg].
   #
   # ```ruby
   # Complex(1, 2).polar  #=> [2.23606797749979, 1.1071487177940904]
@@ -467,8 +484,8 @@ class Complex < Numeric
   end
   def quo(arg0); end
 
-  # Returns the value as a rational if possible (the imaginary part should
-  # be exactly zero).
+  # Returns the value as a rational if possible (the imaginary part should be
+  # exactly zero).
   #
   # ```ruby
   # Complex(1.0/3, 0).rationalize  #=> (1/3)
@@ -499,7 +516,7 @@ class Complex < Numeric
   sig {returns(FalseClass)}
   def real?(); end
 
-  # Returns an array; \[cmp.real, cmp.imag\].
+  # Returns an array; [cmp.real, cmp.imag].
   #
   # ```ruby
   # Complex(1, 2).rectangular  #=> [1, 2]
@@ -507,7 +524,7 @@ class Complex < Numeric
   sig {returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])}
   def rect(); end
 
-  # Returns an array; \[cmp.real, cmp.imag\].
+  # Returns an array; [cmp.real, cmp.imag].
   #
   # ```ruby
   # Complex(1, 2).rectangular  #=> [1, 2]
@@ -535,8 +552,8 @@ class Complex < Numeric
   sig {returns(Float)}
   def to_f(); end
 
-  # Returns the value as an integer if possible (the imaginary part should
-  # be exactly zero).
+  # Returns the value as an integer if possible (the imaginary part should be
+  # exactly zero).
   #
   # ```ruby
   # Complex(1, 0).to_i    #=> 1
@@ -546,8 +563,8 @@ class Complex < Numeric
   sig {returns(Integer)}
   def to_i(); end
 
-  # Returns the value as a rational if possible (the imaginary part should
-  # be exactly zero).
+  # Returns the value as a rational if possible (the imaginary part should be
+  # exactly zero).
   #
   # ```ruby
   # Complex(1, 0).to_r    #=> (1/1)

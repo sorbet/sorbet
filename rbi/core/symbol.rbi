@@ -1,13 +1,12 @@
 # typed: __STDLIB_INTERNAL
 
-# `Symbol` objects represent names and some strings inside the Ruby
-# interpreter. They are generated using the `:name` and `:"string"`
-# literals syntax, and by the various `to_sym` methods. The same `Symbol`
-# object will be created for a given name or string for the duration of a
-# program's execution, regardless of the context or meaning of that name.
-# Thus if `Fred` is a constant in one context, a method in another, and a
-# class in a third, the `Symbol` `:Fred` will be the same object in all
-# three contexts.
+# `Symbol` objects represent names and some strings inside the Ruby interpreter.
+# They are generated using the `:name` and `:"string"` literals syntax, and by
+# the various `to_sym` methods. The same `Symbol` object will be created for a
+# given name or string for the duration of a program's execution, regardless of
+# the context or meaning of that name. Thus if `Fred` is a constant in one
+# context, a method in another, and a class in a third, the `Symbol` `:Fred`
+# will be the same object in all three contexts.
 #
 # ```ruby
 # module One
@@ -31,24 +30,26 @@ class Symbol < Object
 
   # Returns an array of all the symbols currently in Ruby's symbol table.
   #
-  #     Symbol.all_symbols.size    #=> 903
-  #     Symbol.all_symbols[1,20]   #=> [:floor, :ARGV, :Binding, :symlink,
-  #                                     :chown, :EOFError, :$;, :String,
-  #                                     :LOCK_SH, :"setuid?", :$<,
-  #                                     :default_proc, :compact, :extend,
-  #                                     :Tms, :getwd, :$=, :ThreadGroup,
-  #                                     :wait2, :$>]
+  # ```
+  # Symbol.all_symbols.size    #=> 903
+  # Symbol.all_symbols[1,20]   #=> [:floor, :ARGV, :Binding, :symlink,
+  #                                 :chown, :EOFError, :$;, :String,
+  #                                 :LOCK_SH, :"setuid?", :$<,
+  #                                 :default_proc, :compact, :extend,
+  #                                 :Tms, :getwd, :$=, :ThreadGroup,
+  #                                 :wait2, :$>]
+  # ```
   sig {returns(T::Array[Symbol])}
   def self.all_symbols(); end
 
   # Compares `symbol` with `other_symbol` after calling
-  # [to\_s](Symbol.downloaded.ruby_doc#method-i-to_s) on each of the
-  # symbols. Returns -1, 0, +1, or `nil` depending on whether `symbol` is
-  # less than, equal to, or greater than `other_symbol` .
+  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html#method-i-to_s) on
+  # each of the symbols. Returns -1, 0, +1, or `nil` depending on whether
+  # `symbol` is less than, equal to, or greater than `other_symbol`.
   #
   # `nil` is returned if the two values are incomparable.
   #
-  # See String\#\<=\> for more information.
+  # See String#<=> for more information.
   sig do
     params(
         other: Symbol,
@@ -57,8 +58,7 @@ class Symbol < Object
   end
   def <=>(other); end
 
-  # Equality—If *sym* and *obj* are exactly the same symbol, returns `true`
-  # .
+  # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
   sig do
     params(
         obj: BasicObject,
@@ -67,6 +67,7 @@ class Symbol < Object
   end
   def ==(obj); end
 
+  # Returns `sym.to_s =~ obj`.
   sig do
     params(
         obj: BasicObject,
@@ -75,7 +76,7 @@ class Symbol < Object
   end
   def =~(obj); end
 
-  # Returns `sym.to_s[]` .
+  # Returns `sym.to_s[]`.
   sig do
     params(
         idx_or_range: Integer,
@@ -97,13 +98,13 @@ class Symbol < Object
   end
   def [](idx_or_range, n=T.unsafe(nil)); end
 
-  # Same as `sym.to_s.capitalize.intern` .
+  # Same as `sym.to_s.capitalize.intern`.
   sig {returns(Symbol)}
   def capitalize(); end
 
-  # Case-insensitive version of `Symbol#<=>` . Currently, case-insensitivity
-  # only works on characters A-Z/a-z, not all of Unicode. This is different
-  # from [\#casecmp?](Symbol.downloaded.ruby_doc#method-i-casecmp-3F).
+  # Case-insensitive version of `Symbol#<=>`. Currently, case-insensitivity only
+  # works on characters A-Z/a-z, not all of Unicode. This is different from
+  # [`Symbol#casecmp?`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html#method-i-casecmp-3F).
   #
   # ```ruby
   # :aBcDeF.casecmp(:abcde)     #=> 1
@@ -153,20 +154,20 @@ class Symbol < Object
   end
   def casecmp?(other); end
 
-  # Same as `sym.to_s.downcase.intern` .
+  # Same as `sym.to_s.downcase.intern`.
   sig {returns(Symbol)}
   def downcase(); end
 
-  # Returns whether *sym* is :“” or not.
+  # Returns whether *sym* is :"" or not.
   sig {returns(T::Boolean)}
   def empty?(); end
 
-  # Returns the [Encoding](https://ruby-doc.org/core-2.6.3/Encoding.html)
-  # object that represents the encoding of *sym* .
+  # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
+  # object that represents the encoding of *sym*.
   sig {returns(Encoding)}
   def encoding(); end
 
-  # Returns the name or string corresponding to *sym* .
+  # Returns the name or string corresponding to *sym*.
   #
   # ```ruby
   # :fred.id2name   #=> "fred"
@@ -188,11 +189,11 @@ class Symbol < Object
   sig {returns(T.self_type)}
   def intern(); end
 
-  # Same as `sym.to_s.length` .
+  # Same as `sym.to_s.length`.
   sig {returns(Integer)}
   def length(); end
 
-  # Returns `sym.to_s.match` .
+  # Returns `sym.to_s.match`.
   sig do
     params(
         obj: BasicObject,
@@ -201,7 +202,7 @@ class Symbol < Object
   end
   def match(obj); end
 
-  # Returns `sym.to_s.match?` .
+  # Returns `sym.to_s.match?`.
   sig do
     params(
         args: T.untyped
@@ -209,19 +210,19 @@ class Symbol < Object
   end
   def match?(*args); end
 
-  # Same as `sym.to_s.succ.intern` .
+  # Same as `sym.to_s.succ.intern`.
   sig {returns(Symbol)}
   def next(); end
 
-  # Same as `sym.to_s.succ.intern` .
+  # Same as `sym.to_s.succ.intern`.
   sig {returns(Symbol)}
   def succ(); end
 
-  # Same as `sym.to_s.swapcase.intern` .
+  # Same as `sym.to_s.swapcase.intern`.
   sig {returns(Symbol)}
   def swapcase(); end
 
-  # Returns a *Proc* object which responds to the given method by *sym* .
+  # Returns a *Proc* object which responds to the given method by *sym*.
   #
   # ```ruby
   # (1..3).collect(&:to_s)  #=> ["1", "2", "3"]
@@ -229,15 +230,15 @@ class Symbol < Object
   sig {returns(Proc)}
   def to_proc(); end
 
-  # Same as `sym.to_s.upcase.intern` .
+  # Same as `sym.to_s.upcase.intern`.
   sig {returns(Symbol)}
   def upcase(); end
 
-  # Same as `sym.to_s.length` .
+  # Same as `sym.to_s.length`.
   sig {returns(Integer)}
   def size(); end
 
-  # Returns `sym.to_s[]` .
+  # Returns `sym.to_s[]`.
   sig do
     params(
         idx_or_range: Integer,
@@ -259,7 +260,7 @@ class Symbol < Object
   end
   def slice(idx_or_range, n=T.unsafe(nil)); end
 
-  # Returns the name or string corresponding to *sym* .
+  # Returns the name or string corresponding to *sym*.
   #
   # ```ruby
   # :fred.id2name   #=> "fred"

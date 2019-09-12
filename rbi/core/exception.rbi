@@ -1,36 +1,34 @@
 # typed: __STDLIB_INTERNAL
 
-# Descendants of class [Exception](Exception) are used
-# to communicate between
-# [Kernel\#raise](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-raise)
+# Descendants of class
+# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) are used to
+# communicate between
+# [`Kernel#raise`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-raise)
 # and `rescue` statements in `begin ... end` blocks.
-# [Exception](Exception) objects carry information
-# about the exception – its type (the exception’s class name), an optional
-# descriptive string, and optional traceback information.
-# [Exception](Exception) subclasses may add additional
-# information like
-# [NameError\#name](https://ruby-doc.org/core-2.6.3/NameError.html#method-i-name)
-# .
+# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) objects
+# carry information about the exception -- its type (the exception's class
+# name), an optional descriptive string, and optional traceback information.
+# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) subclasses
+# may add additional information like
+# [`NameError#name`](https://docs.ruby-lang.org/en/2.6.0/NameError.html#method-i-name).
 #
 # Programs may make subclasses of
-# [Exception](Exception), typically of
-# [StandardError](https://ruby-doc.org/core-2.6.3/StandardError.html) or
-# [RuntimeError](https://ruby-doc.org/core-2.6.3/RuntimeError.html), to
-# provide custom classes and add additional information. See the subclass
-# list below for defaults for `raise` and `rescue` .
+# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html), typically
+# of [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html)
+# or [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html), to
+# provide custom classes and add additional information. See the subclass list
+# below for defaults for `raise` and `rescue`.
 #
-# When an exception has been raised but not yet handled (in `rescue`,
-# `ensure`, `at_exit` and `END` blocks) the global variable `$!` will
-# contain the current exception and `$@` contains the current exception’s
-# backtrace.
+# When an exception has been raised but not yet handled (in `rescue`, `ensure`,
+# `at_exit` and `END` blocks) the global variable `$!` will contain the current
+# exception and `$@` contains the current exception's backtrace.
 #
 # It is recommended that a library should have one subclass of
-# [StandardError](https://ruby-doc.org/core-2.6.3/StandardError.html) or
-# [RuntimeError](https://ruby-doc.org/core-2.6.3/RuntimeError.html) and
-# have specific exception types inherit from it. This allows the user to
-# rescue a generic exception type to catch all exceptions the library may
-# raise even if future versions of the library add new exception
-# subclasses.
+# [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html) or
+# [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html) and
+# have specific exception types inherit from it. This allows the user to rescue
+# a generic exception type to catch all exceptions the library may raise even if
+# future versions of the library add new exception subclasses.
 #
 # For example:
 #
@@ -51,82 +49,58 @@
 # To handle both WidgetError and FrobError the library user can rescue
 # MyLibrary::Error.
 #
-# The built-in subclasses of [Exception](Exception)
-# are:
+# The built-in subclasses of
+# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) are:
 #
-#   - [NoMemoryError](https://ruby-doc.org/core-2.6.3/NoMemoryError.html)
+# *   [`NoMemoryError`](https://docs.ruby-lang.org/en/2.6.0/NoMemoryError.html)
+# *   [`ScriptError`](https://docs.ruby-lang.org/en/2.6.0/ScriptError.html)
+#     *   [`LoadError`](https://docs.ruby-lang.org/en/2.6.0/LoadError.html)
+#     *   [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html)
+#     *   [`SyntaxError`](https://docs.ruby-lang.org/en/2.6.0/SyntaxError.html)
 #
-#   - [ScriptError](https://ruby-doc.org/core-2.6.3/ScriptError.html)
+# *   [`SecurityError`](https://docs.ruby-lang.org/en/2.6.0/SecurityError.html)
+# *   [`SignalException`](https://docs.ruby-lang.org/en/2.6.0/SignalException.html)
+#     *   [`Interrupt`](https://docs.ruby-lang.org/en/2.6.0/Interrupt.html)
 #
-#       - [LoadError](https://ruby-doc.org/core-2.6.3/LoadError.html)
-#
-#       - [NotImplementedError](https://ruby-doc.org/core-2.6.3/NotImplementedError.html)
-#
-#       - [SyntaxError](https://ruby-doc.org/core-2.6.3/SyntaxError.html)
-#
-#   - [SecurityError](https://ruby-doc.org/core-2.6.3/SecurityError.html)
-#
-#   - [SignalException](https://ruby-doc.org/core-2.6.3/SignalException.html)
-#
-#       - [Interrupt](https://ruby-doc.org/core-2.6.3/Interrupt.html)
-#
-#   - [StandardError](https://ruby-doc.org/core-2.6.3/StandardError.html)
+# *   [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html)
 #     -- default for `rescue`
+#     *   [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html)
+#         *   [`UncaughtThrowError`](https://docs.ruby-lang.org/en/2.6.0/UncaughtThrowError.html)
 #
-#       - [ArgumentError](https://ruby-doc.org/core-2.6.3/ArgumentError.html)
+#     *   [`EncodingError`](https://docs.ruby-lang.org/en/2.6.0/EncodingError.html)
+#     *   [`FiberError`](https://docs.ruby-lang.org/en/2.6.0/FiberError.html)
+#     *   [`IOError`](https://docs.ruby-lang.org/en/2.6.0/IOError.html)
+#         *   [`EOFError`](https://docs.ruby-lang.org/en/2.6.0/EOFError.html)
 #
-#           - [UncaughtThrowError](https://ruby-doc.org/core-2.6.3/UncaughtThrowError.html)
+#     *   [`IndexError`](https://docs.ruby-lang.org/en/2.6.0/IndexError.html)
+#         *   [`KeyError`](https://docs.ruby-lang.org/en/2.6.0/KeyError.html)
+#         *   [`StopIteration`](https://docs.ruby-lang.org/en/2.6.0/StopIteration.html)
 #
-#       - [EncodingError](https://ruby-doc.org/core-2.6.3/EncodingError.html)
+#     *   [`LocalJumpError`](https://docs.ruby-lang.org/en/2.6.0/LocalJumpError.html)
+#     *   [`NameError`](https://docs.ruby-lang.org/en/2.6.0/NameError.html)
+#         *   [`NoMethodError`](https://docs.ruby-lang.org/en/2.6.0/NoMethodError.html)
 #
-#       - [FiberError](https://ruby-doc.org/core-2.6.3/FiberError.html)
+#     *   [`RangeError`](https://docs.ruby-lang.org/en/2.6.0/RangeError.html)
+#         *   [`FloatDomainError`](https://docs.ruby-lang.org/en/2.6.0/FloatDomainError.html)
 #
-#       - [IOError](https://ruby-doc.org/core-2.6.3/IOError.html)
-#
-#           - [EOFError](https://ruby-doc.org/core-2.6.3/EOFError.html)
-#
-#       - [IndexError](https://ruby-doc.org/core-2.6.3/IndexError.html)
-#
-#           - [KeyError](https://ruby-doc.org/core-2.6.3/KeyError.html)
-#
-#           - [StopIteration](https://ruby-doc.org/core-2.6.3/StopIteration.html)
-#
-#       - [LocalJumpError](https://ruby-doc.org/core-2.6.3/LocalJumpError.html)
-#
-#       - [NameError](https://ruby-doc.org/core-2.6.3/NameError.html)
-#
-#           - [NoMethodError](https://ruby-doc.org/core-2.6.3/NoMethodError.html)
-#
-#       - [RangeError](https://ruby-doc.org/core-2.6.3/RangeError.html)
-#
-#           - [FloatDomainError](https://ruby-doc.org/core-2.6.3/FloatDomainError.html)
-#
-#       - [RegexpError](https://ruby-doc.org/core-2.6.3/RegexpError.html)
-#
-#       - [RuntimeError](https://ruby-doc.org/core-2.6.3/RuntimeError.html)
+#     *   [`RegexpError`](https://docs.ruby-lang.org/en/2.6.0/RegexpError.html)
+#     *   [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html)
 #         -- default for `raise`
+#         *   [`FrozenError`](https://docs.ruby-lang.org/en/2.6.0/FrozenError.html)
 #
-#           - [FrozenError](https://ruby-doc.org/core-2.6.3/FrozenError.html)
+#     *   [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+#         *   Errno::\*
 #
-#       - [SystemCallError](https://ruby-doc.org/core-2.6.3/SystemCallError.html)
+#     *   [`ThreadError`](https://docs.ruby-lang.org/en/2.6.0/ThreadError.html)
+#     *   [`TypeError`](https://docs.ruby-lang.org/en/2.6.0/TypeError.html)
+#     *   [`ZeroDivisionError`](https://docs.ruby-lang.org/en/2.6.0/ZeroDivisionError.html)
 #
-#           - Errno::\*
-#
-#       - [ThreadError](https://ruby-doc.org/core-2.6.3/ThreadError.html)
-#
-#       - [TypeError](https://ruby-doc.org/core-2.6.3/TypeError.html)
-#
-#       - [ZeroDivisionError](https://ruby-doc.org/core-2.6.3/ZeroDivisionError.html)
-#
-#   - [SystemExit](https://ruby-doc.org/core-2.6.3/SystemExit.html)
-#
-#   - [SystemStackError](https://ruby-doc.org/core-2.6.3/SystemStackError.html)
-#
-#   - fatal – impossible to rescue
+# *   [`SystemExit`](https://docs.ruby-lang.org/en/2.6.0/SystemExit.html)
+# *   [`SystemStackError`](https://docs.ruby-lang.org/en/2.6.0/SystemStackError.html)
+# *   fatal -- impossible to rescue
 class Exception < Object
-  # Equality—If *obj* is not an `Exception`, returns `false` . Otherwise,
-  # returns `true` if *exc* and *obj* share same class, messages, and
-  # backtrace.
+  # Equality---If *obj* is not an `Exception`, returns `false`. Otherwise,
+  # returns `true` if *exc* and *obj* share same class, messages, and backtrace.
   sig do
     params(
         arg0: BasicObject,
@@ -136,8 +110,8 @@ class Exception < Object
   def ==(arg0); end
 
   # Returns any backtrace associated with the exception. The backtrace is an
-  # array of strings, each containing either “filename:lineNo: in \`method”‘
-  # or “filename:lineNo.”
+  # array of strings, each containing either "filename:lineNo: in 'method'" or
+  # "filename:lineNo."
   #
   # ```ruby
   # def a
@@ -157,34 +131,34 @@ class Exception < Object
   #
   # *produces:*
   #
-  #     prog.rb:2:in `a'
-  #     prog.rb:6:in `b'
-  #     prog.rb:10
+  # ```
+  # prog.rb:2:in `a'
+  # prog.rb:6:in `b'
+  # prog.rb:10
+  # ```
   sig {returns(T.nilable(T::Array[String]))}
   def backtrace(); end
 
-  # Returns any backtrace associated with the exception. This method is
-  # similar to
-  # [\#backtrace](Exception.downloaded.ruby_doc#method-i-backtrace), but
-  # the backtrace is an array of
-  # [Thread::Backtrace::Location](https://ruby-doc.org/core-2.6.3/Thread/Backtrace/Location.html)
-  # .
+  # Returns any backtrace associated with the exception. This method is similar
+  # to
+  # [`Exception#backtrace`](https://docs.ruby-lang.org/en/2.6.0/Exception.html#method-i-backtrace),
+  # but the backtrace is an array of
+  # [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/2.6.0/Thread/Backtrace/Location.html).
   #
   # Now, this method is not affected by
-  # [\#set\_backtrace](Exception.downloaded.ruby_doc#method-i-set_backtrace)
-  # .
+  # [`Exception#set_backtrace()`](https://docs.ruby-lang.org/en/2.6.0/Exception.html#method-i-set_backtrace).
   sig {returns(T.nilable(T::Array[Thread::Backtrace::Location]))}
   def backtrace_locations(); end
 
-  # Returns the previous exception ($\!) at the time this exception was
-  # raised. This is useful for wrapping exceptions and retaining the
-  # original exception information.
+  # Returns the previous exception ($!) at the time this exception was raised.
+  # This is useful for wrapping exceptions and retaining the original exception
+  # information.
   sig {returns(T.nilable(Exception))}
   def cause(); end
 
-  # With no argument, or if the argument is the same as the receiver, return
-  # the receiver. Otherwise, create a new exception object of the same class
-  # as the receiver, but with a message equal to `string.to_str` .
+  # With no argument, or if the argument is the same as the receiver, return the
+  # receiver. Otherwise, create a new exception object of the same class as the
+  # receiver, but with a message equal to `string.to_str`.
   sig do
     params(
         arg0: String,
@@ -201,21 +175,21 @@ class Exception < Object
   end
   def initialize(arg0=T.unsafe(nil)); end
 
-  # Return this exception’s class name and message.
+  # Return this exception's class name and message.
   sig {returns(String)}
   def inspect(); end
 
-  # Returns the result of invoking `exception.to_s` . Normally this returns
-  # the exception’s message or name.
+  # Returns the result of invoking `exception.to_s`. Normally this returns the
+  # exception's message or name.
   sig {returns(String)}
   def message(); end
 
-  # Sets the backtrace information associated with `exc` . The `backtrace`
-  # must be an array of
-  # [String](https://ruby-doc.org/core-2.6.3/String.html) objects or a
-  # single [String](https://ruby-doc.org/core-2.6.3/String.html) in the
-  # format described in
-  # [\#backtrace](Exception.downloaded.ruby_doc#method-i-backtrace).
+  # Sets the backtrace information associated with `exc`. The `backtrace` must
+  # be an array of [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # objects or a single
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) in the format
+  # described in
+  # [`Exception#backtrace`](https://docs.ruby-lang.org/en/2.6.0/Exception.html#method-i-backtrace).
   sig do
     params(
         arg0: T.any(String, T::Array[String]),
@@ -224,8 +198,8 @@ class Exception < Object
   end
   def set_backtrace(arg0); end
 
-  # Returns exception’s message (or the name of the exception if no message
-  # is set).
+  # Returns exception's message (or the name of the exception if no message is
+  # set).
   sig {returns(String)}
   def to_s(); end
 end

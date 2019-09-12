@@ -13,14 +13,14 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Fiber`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L413: Did you mean: `Enumerator::Yielder`?
-     413 |class Enumerator::Yielder < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L419: Did you mean: `Enumerator::Yielder`?
+     419 |class Enumerator::Yielder < Object
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/ripper.rbi#L3: Did you mean: `Ripper`?
-     3 |class Ripper
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/ripper.rbi#L78: Did you mean: `Ripper`?
+    78 |class Ripper
         ^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/fiber.rbi#L64: Did you mean: `Fiber`?
-    64 |class Fiber < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/fiber.rbi#L67: Did you mean: `Fiber`?
+    67 |class Fiber < Object
         ^^^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` https://srb.help/5002
@@ -34,11 +34,11 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege`
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Integer`
      3 |Yieldr.foo(Intege, Int)
                    ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/date.rbi#L3: Did you mean: `Date`?
-     3 |class Date
-        ^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L7: Did you mean: `Integer`?
-     7 |class Integer < Numeric
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/date.rbi#L159: Did you mean: `Date`?
+     159 |class Date
+          ^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L8: Did you mean: `Integer`?
+     8 |class Integer < Numeric
         ^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` https://srb.help/5002
@@ -56,14 +56,14 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` ht
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Set`
      3 |Yieldr.foo(Intege, Int)
                            ^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/io.rbi#L107: Did you mean: `IO`?
-     107 |class IO < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/io.rbi#L116: Did you mean: `IO`?
+     116 |class IO < Object
           ^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#L6: Did you mean: `Net`?
      6 |module Net
         ^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#L3: Did you mean: `Set`?
-     3 |class Set < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#L58: Did you mean: `Set`?
+    58 |class Set < Object
         ^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:7: Unable to resolve constant `Constant` https://srb.help/5002

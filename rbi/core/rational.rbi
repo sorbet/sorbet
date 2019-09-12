@@ -1,23 +1,24 @@
 # typed: __STDLIB_INTERNAL
 
-# A rational number can be represented as a pair of integer numbers: a/b
-# (b\>0), where a is the numerator and b is the denominator.
-# [Integer](https://ruby-doc.org/core-2.6.3/Integer.html) a equals
+# A rational number can be represented as a pair of integer numbers: a/b (b>0),
+# where a is the numerator and b is the denominator.
+# [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) a equals
 # rational a/1 mathematically.
 #
-# In Ruby, you can create rational objects with the Kernel\#Rational,
-# [\#to\_r](Rational#method-i-to_r), or rationalize
-# methods or by suffixing `r` to a literal. The return values will be
-# irreducible fractions.
+# In Ruby, you can create rational objects with the Kernel#Rational,
+# [`to_r`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-to_r), or
+# rationalize methods or by suffixing `r` to a literal. The return values will
+# be irreducible fractions.
 #
-#     Rational(1)      #=> (1/1)
-#     Rational(2, 3)   #=> (2/3)
-#     Rational(4, -6)  #=> (-2/3)
-#     3.to_r           #=> (3/1)
-#     2/3r             #=> (2/3)
+# ```ruby
+# Rational(1)      #=> (1/1)
+# Rational(2, 3)   #=> (2/3)
+# Rational(4, -6)  #=> (-2/3)
+# 3.to_r           #=> (3/1)
+# 2/3r             #=> (2/3)
+# ```
 #
-# You can also create rational objects from floating-point numbers or
-# strings.
+# You can also create rational objects from floating-point numbers or strings.
 #
 # ```ruby
 # Rational(0.3)    #=> (5404319552844595/18014398509481984)
@@ -38,8 +39,8 @@
 # 10.times.inject(0) {|t| t + Rational('0.1') }  #=> (1/1)
 # ```
 #
-# However, when an expression includes an inexact component (numerical
-# value or operation), it will produce an inexact result.
+# However, when an expression includes an inexact component (numerical value or
+# operation), it will produce an inexact result.
 #
 # ```ruby
 # Rational(10) / 3   #=> (10/3)
@@ -202,6 +203,15 @@ class Rational < Numeric
   sig {returns(Rational)}
   def +@(); end
 
+  # Performs subtraction.
+  #
+  # ```ruby
+  # Rational(2, 3)  - Rational(2, 3)   #=> (0/1)
+  # Rational(900)   - Rational(1)      #=> (899/1)
+  # Rational(-2, 9) - Rational(-9, 2)  #=> (77/18)
+  # Rational(9, 8)  - 4                #=> (-23/8)
+  # Rational(20, 9) - 9.8              #=> -7.577777777777778
+  # ```
   sig do
     params(
         arg0: Integer,
@@ -234,6 +244,7 @@ class Rational < Numeric
   end
   def -(arg0); end
 
+  # Negates `rat`.
   sig {returns(Rational)}
   def -@(); end
 
@@ -330,8 +341,8 @@ class Rational < Numeric
   end
   def <=(arg0); end
 
-  # Returns -1, 0, or +1 depending on whether `rational` is less than, equal
-  # to, or greater than `numeric` .
+  # Returns -1, 0, or +1 depending on whether `rational` is less than, equal to,
+  # or greater than `numeric`.
   #
   # `nil` is returned if the two values are incomparable.
   #
@@ -439,13 +450,16 @@ class Rational < Numeric
   end
   def >=(arg0); end
 
-  # Returns the absolute value of `rat` .
+  # Returns the absolute value of `rat`.
   #
-  #     (1/2r).abs    #=> (1/2)
-  #     (-1/2r).abs   #=> (1/2)
+  # ```ruby
+  # (1/2r).abs    #=> (1/2)
+  # (-1/2r).abs   #=> (1/2)
+  # ```
   #
-  # [\#magnitude](Rational.downloaded.ruby_doc#method-i-magnitude) is an
-  # alias for [\#abs](Rational.downloaded.ruby_doc#method-i-abs).
+  # [`Rational#magnitude`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-magnitude)
+  # is an alias for
+  # [`Rational#abs`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-abs).
   sig {returns(Rational)}
   def abs(); end
 
@@ -458,14 +472,13 @@ class Rational < Numeric
   sig {returns(Numeric)}
   def arg(); end
 
-  # Returns the smallest number greater than or equal to `rat` with a
-  # precision of `ndigits` decimal digits (default: 0).
+  # Returns the smallest number greater than or equal to `rat` with a precision
+  # of `ndigits` decimal digits (default: 0).
   #
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
   #
-  # Returns a rational when `ndigits` is positive, otherwise returns an
-  # integer.
+  # Returns a rational when `ndigits` is positive, otherwise returns an integer.
   #
   # ```ruby
   # Rational(3).ceil      #=> 3
@@ -574,7 +587,7 @@ class Rational < Numeric
   def equal?(arg0); end
 
   # Performs division and returns the value as a
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html).
+  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html).
   #
   # ```ruby
   # Rational(2, 3).fdiv(1)       #=> 0.6666666666666666
@@ -613,14 +626,13 @@ class Rational < Numeric
   end
   def fdiv(arg0); end
 
-  # Returns the largest number less than or equal to `rat` with a precision
-  # of `ndigits` decimal digits (default: 0).
+  # Returns the largest number less than or equal to `rat` with a precision of
+  # `ndigits` decimal digits (default: 0).
   #
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
   #
-  # Returns a rational when `ndigits` is positive, otherwise returns an
-  # integer.
+  # Returns a rational when `ndigits` is positive, otherwise returns an integer.
   #
   # ```ruby
   # Rational(3).floor      #=> 3
@@ -743,8 +755,8 @@ class Rational < Numeric
   end
   def quo(arg0); end
 
-  # Returns a simpler approximation of the value if the optional argument
-  # `eps` is given (rat-|eps| \<= result \<= rat+|eps|), self otherwise.
+  # Returns a simpler approximation of the value if the optional argument `eps`
+  # is given (rat-|eps| <= result <= rat+|eps|), self otherwise.
   #
   # ```ruby
   # r = Rational(5033165, 16777216)
@@ -773,8 +785,7 @@ class Rational < Numeric
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
   #
-  # Returns a rational when `ndigits` is positive, otherwise returns an
-  # integer.
+  # Returns a rational when `ndigits` is positive, otherwise returns an integer.
   #
   # ```ruby
   # Rational(3).round      #=> 3
@@ -790,8 +801,7 @@ class Rational < Numeric
   # ```
   #
   # The optional `half` keyword argument is available similar to
-  # [Float\#round](https://ruby-doc.org/core-2.6.3/Float.html#method-i-round)
-  # .
+  # [`Float#round`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-round).
   #
   # ```ruby
   # Rational(25, 100).round(1, half: :up)    #=> (3/10)
@@ -817,7 +827,7 @@ class Rational < Numeric
   def to_c(); end
 
   # Returns the value as a
-  # [Float](https://ruby-doc.org/core-2.6.3/Float.html).
+  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html).
   #
   # ```ruby
   # Rational(2).to_f      #=> 2.0
@@ -831,7 +841,7 @@ class Rational < Numeric
   # Returns the truncated value as an integer.
   #
   # Equivalent to
-  # [\#truncate](Rational.downloaded.ruby_doc#method-i-truncate).
+  # [`Rational#truncate`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-truncate).
   #
   # ```ruby
   # Rational(2, 3).to_i    #=> 0
@@ -862,14 +872,13 @@ class Rational < Numeric
   sig {returns(String)}
   def to_s(); end
 
-  # Returns `rat` truncated (toward zero) to a precision of `ndigits`
-  # decimal digits (default: 0).
+  # Returns `rat` truncated (toward zero) to a precision of `ndigits` decimal
+  # digits (default: 0).
   #
   # When the precision is negative, the returned value is an integer with at
   # least `ndigits.abs` trailing zeros.
   #
-  # Returns a rational when `ndigits` is positive, otherwise returns an
-  # integer.
+  # Returns a rational when `ndigits` is positive, otherwise returns an integer.
   #
   # ```ruby
   # Rational(3).truncate      #=> 3

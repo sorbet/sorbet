@@ -1,7 +1,9 @@
 # typed: __STDLIB_INTERNAL
 
+# Extends any [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) to
+# include *json\_creatable?* method.
 # Classes in Ruby are first-class objects---each is an instance of class
-# `Class` .
+# `Class`.
 #
 # Typically, you create a new class by using:
 #
@@ -12,12 +14,11 @@
 # ```
 #
 # When a new class is created, an object of type
-# [Class](Class) is initialized and assigned to a
-# global constant ( `Name` in this case).
+# [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) is initialized and
+# assigned to a global constant (`Name` in this case).
 #
-# When `Name.new` is called to create a new object, the `new` method in
-# `Class` is run by default. This can be demonstrated by overriding `new`
-# in `Class` :
+# When `Name.new` is called to create a new object, the `new` method in `Class`
+# is run by default. This can be demonstrated by overriding `new` in `Class`:
 #
 # ```ruby
 # class Class
@@ -40,9 +41,9 @@
 # Creating a new Name
 # ```
 #
-# Classes, modules, and objects are interrelated. In the diagram that
-# follows, the vertical arrows represent inheritance, and the parentheses
-# metaclasses. All metaclasses are instances of the class \`Class'.
+# Classes, modules, and objects are interrelated. In the diagram that follows,
+# the vertical arrows represent inheritance, and the parentheses metaclasses.
+# All metaclasses are instances of the class 'Class'.
 #
 # ```
 #                          +---------+             +-...
@@ -65,9 +66,9 @@
 # obj--->OtherClass---------->(OtherClass)-----------...
 # ```
 class Class < Module
-  # Allocates space for a new object of *class* ’s class and does not call
-  # initialize on the new instance. The returned object must be an instance
-  # of *class* .
+  # Allocates space for a new object of *class*'s class and does not call
+  # initialize on the new instance. The returned object must be an instance of
+  # *class*.
   #
   # ```ruby
   # klass = Class.new do
@@ -85,15 +86,39 @@ class Class < Module
   sig {returns(T.untyped)}
   def allocate(); end
 
-  # Sorbet hijacks Class#new to re-use the sig from MyClass#initialize when creating new instances of a class.
-  # This method must be here so that all calls to MyClass.new aren't forced to take 0 arguments.
-  # Calls `allocate` to create a new object of *class* ’s class, then
-  # invokes that object’s `initialize` method, passing it *args* . This is
-  # the method that ends up getting called whenever an object is constructed
-  # using .new.
+  ### Sorbet hijacks Class#new to re-use the sig from MyClass#initialize when creating new instances of a class.
+  ### This method must be here so that all calls to MyClass.new aren't forced to take 0 arguments.
+
+  # Calls `allocate` to create a new object of *class*'s class, then invokes
+  # that object's `initialize` method, passing it *args*. This is the method
+  # that ends up getting called whenever an object is constructed using .new.
   sig {params(args: T.untyped).returns(T.untyped)}
   def new(*args); end
 
+  # Callback invoked whenever a subclass of the current class is created.
+  #
+  # Example:
+  #
+  # ```ruby
+  # class Foo
+  #   def self.inherited(subclass)
+  #     puts "New subclass: #{subclass}"
+  #   end
+  # end
+  #
+  # class Bar < Foo
+  # end
+  #
+  # class Baz < Bar
+  # end
+  # ```
+  #
+  # *produces:*
+  #
+  # ```ruby
+  # New subclass: Bar
+  # New subclass: Baz
+  # ```
   sig do
     params(
         arg0: Class,
@@ -113,7 +138,7 @@ class Class < Module
   sig {returns(T.nilable(String))}
   def name(); end
 
-  # Returns the superclass of *class* , or `nil` .
+  # Returns the superclass of *class*, or `nil`.
   #
   # ```ruby
   # File.superclass          #=> IO

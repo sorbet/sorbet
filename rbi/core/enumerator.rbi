@@ -2,19 +2,17 @@
 
 # A class which allows both internal and external iteration.
 #
-# An [Enumerator](Enumerator) can be created by the
-# following methods.
+# An [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) can be
+# created by the following methods.
+# *   Kernel#to\_enum
+# *   Kernel#enum\_for
+# *   [`Enumerator.new`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html#method-c-new)
 #
-#   - Kernel\#to\_enum
 #
-#   - Kernel\#enum\_for
-#
-#   - [::new](Enumerator#method-c-new)
-#
-# Most methods have two forms: a block form where the contents are
-# evaluated for each item in the enumeration, and a non-block form which
-# returns a new [Enumerator](Enumerator) wrapping the
-# iteration.
+# Most methods have two forms: a block form where the contents are evaluated for
+# each item in the enumeration, and a non-block form which returns a new
+# [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) wrapping
+# the iteration.
 #
 # ```ruby
 # enumerator = %w(one two three).each
@@ -40,21 +38,22 @@
 # # foo: three
 # ```
 #
-# This allows you to chain Enumerators together. For example, you can map
-# a list's elements to strings containing the index and the element as a
-# string via:
+# This allows you to chain Enumerators together. For example, you can map a
+# list's elements to strings containing the index and the element as a string
+# via:
 #
 # ```ruby
 # puts %w[foo bar baz].map.with_index { |w, i| "#{i}:#{w}" }
 # # => ["0:foo", "1:bar", "2:baz"]
 # ```
 #
-# An [Enumerator](Enumerator) can also be used as an
-# external iterator. For example,
-# [\#next](Enumerator#method-i-next) returns the next
-# value of the iterator or raises
-# [StopIteration](https://ruby-doc.org/core-2.6.3/StopIteration.html) if
-# the [Enumerator](Enumerator) is at the end.
+# An [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) can
+# also be used as an external iterator. For example,
+# [`Enumerator#next`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html#method-i-next)
+# returns the next value of the iterator or raises
+# [`StopIteration`](https://docs.ruby-lang.org/en/2.6.0/StopIteration.html) if
+# the [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is at
+# the end.
 #
 # ```ruby
 # e = [1,2,3].each   # returns an enumerator object.
@@ -104,9 +103,10 @@ class Enumerator < Object
   Elem = type_member(:out)
 
   # Iterates over the block according to how this
-  # [Enumerator](Enumerator.downloaded.ruby_doc) was constructed. If no
-  # block and no arguments are given, returns self.
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) was
+  # constructed. If no block and no arguments are given, returns self.
   #
+  # ### Examples
   #
   # ```ruby
   # "Hello, world!".scan(/\w+/)                     #=> ["Hello", "world"]
@@ -141,7 +141,7 @@ class Enumerator < Object
   sig {returns(T.self_type)}
   def each(&blk); end
 
-  # Sets the value to be returned by the next yield inside `e` .
+  # Sets the value to be returned by the next yield inside `e`.
   #
   # If the value is not set, the yield returns nil.
   #
@@ -200,15 +200,16 @@ class Enumerator < Object
   end
   def initialize(arg0=T.unsafe(nil), &blk); end
 
-  # Creates a printable version of *e* .
+  # Creates a printable version of *e*.
   sig {returns(String)}
   def inspect(); end
 
-  # Returns the next object in the enumerator, and move the internal
-  # position forward. When the position reached at the end,
-  # [StopIteration](https://ruby-doc.org/core-2.6.3/StopIteration.html) is
+  # Returns the next object in the enumerator, and move the internal position
+  # forward. When the position reached at the end,
+  # [`StopIteration`](https://docs.ruby-lang.org/en/2.6.0/StopIteration.html) is
   # raised.
   #
+  # ### Example
   #
   # ```ruby
   # a = [1,2,3]
@@ -219,21 +220,21 @@ class Enumerator < Object
   # p e.next   #raises StopIteration
   # ```
   #
-  # Note that enumeration sequence by `next` does not affect other
-  # non-external enumeration methods, unless the underlying iteration
-  # methods itself has side-effect, e.g.
-  # [IO\#each\_line](https://ruby-doc.org/core-2.6.3/IO.html#method-i-each_line)
-  # .
+  # Note that enumeration sequence by `next` does not affect other non-external
+  # enumeration methods, unless the underlying iteration methods itself has
+  # side-effect, e.g.
+  # [`IO#each_line`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-each_line).
   sig {returns(Elem)}
   def next(); end
 
-  # Returns the next object as an array in the enumerator, and move the
-  # internal position forward. When the position reached at the end,
-  # [StopIteration](https://ruby-doc.org/core-2.6.3/StopIteration.html) is
+  # Returns the next object as an array in the enumerator, and move the internal
+  # position forward. When the position reached at the end,
+  # [`StopIteration`](https://docs.ruby-lang.org/en/2.6.0/StopIteration.html) is
   # raised.
   #
-  # This method can be used to distinguish `yield` and `yield nil` .
+  # This method can be used to distinguish `yield` and `yield nil`.
   #
+  # ### Example
   #
   # ```ruby
   # o = Object.new
@@ -267,16 +268,16 @@ class Enumerator < Object
   #
   # Note that `next_values` does not affect other non-external enumeration
   # methods unless underlying iteration method itself has side-effect, e.g.
-  # [IO\#each\_line](https://ruby-doc.org/core-2.6.3/IO.html#method-i-each_line)
-  # .
+  # [`IO#each_line`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-each_line).
   sig {returns(T::Array[Elem])}
   def next_values(); end
 
-  # Returns the next object in the enumerator, but doesn’t move the internal
+  # Returns the next object in the enumerator, but doesn't move the internal
   # position forward. If the position is already at the end,
-  # [StopIteration](https://ruby-doc.org/core-2.6.3/StopIteration.html) is
+  # [`StopIteration`](https://docs.ruby-lang.org/en/2.6.0/StopIteration.html) is
   # raised.
   #
+  # ### Example
   #
   # ```ruby
   # a = [1,2,3]
@@ -293,12 +294,13 @@ class Enumerator < Object
   def peek(); end
 
   # Returns the next object as an array, similar to
-  # [\#next\_values](Enumerator.downloaded.ruby_doc#method-i-next_values),
-  # but doesn’t move the internal position forward. If the position is
-  # already at the end,
-  # [StopIteration](https://ruby-doc.org/core-2.6.3/StopIteration.html) is
+  # [`Enumerator#next_values`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html#method-i-next_values),
+  # but doesn't move the internal position forward. If the position is already
+  # at the end,
+  # [`StopIteration`](https://docs.ruby-lang.org/en/2.6.0/StopIteration.html) is
   # raised.
   #
+  # ### Example
   #
   # ```ruby
   # o = Object.new
@@ -322,11 +324,11 @@ class Enumerator < Object
 
   # Rewinds the enumeration sequence to the beginning.
   #
-  # If the enclosed object responds to a “rewind” method, it is called.
+  # If the enclosed object responds to a "rewind" method, it is called.
   sig {returns(T.self_type)}
   def rewind(); end
 
-  # Returns the size of the enumerator, or `nil` if it can’t be calculated
+  # Returns the size of the enumerator, or `nil` if it can't be calculated
   # lazily.
   #
   # ```ruby
@@ -337,13 +339,13 @@ class Enumerator < Object
   sig {returns(T.nilable(T.any(Integer, Float)))}
   def size(); end
 
-  # Iterates the given block for each element with an index, which starts
-  # from `offset` . If no block is given, returns a new
-  # [Enumerator](Enumerator.downloaded.ruby_doc) that includes the index,
-  # starting from `offset`
+  # Iterates the given block for each element with an index, which starts from
+  # `offset`. If no block is given, returns a new
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) that
+  # includes the index, starting from `offset`
   #
-  #   - `offset`
-  #     the starting index to use
+  # `offset`
+  # :   the starting index to use
   sig do
     params(
         offset: Integer,
@@ -359,12 +361,13 @@ class Enumerator < Object
   end
   def with_index(offset=0, &blk); end
 
-  # Iterates the given block for each element with an arbitrary object,
-  # `obj`, and returns `obj`
+  # Iterates the given block for each element with an arbitrary object, `obj`,
+  # and returns `obj`
   #
   # If no block is given, returns a new
-  # [Enumerator](Enumerator.downloaded.ruby_doc).
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html).
   #
+  # ### Example
   #
   # ```ruby
   # to_three = Enumerator.new do |y|
@@ -398,6 +401,7 @@ class Enumerator < Object
   def with_object(arg0, &blk); end
 end
 
+# [`Generator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/Generator.html)
 class Enumerator::Generator < Object
   include Enumerable
 
@@ -405,11 +409,13 @@ class Enumerator::Generator < Object
   Elem = type_member(:out)
 end
 
+# [`Lazy`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/Lazy.html)
 class Enumerator::Lazy < Enumerator
   extend T::Generic
   Elem = type_member(:out)
 end
 
+# [`Yielder`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/Yielder.html)
 class Enumerator::Yielder < Object
   sig do
     params(

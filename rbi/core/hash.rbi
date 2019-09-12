@@ -1,17 +1,17 @@
 # typed: __STDLIB_INTERNAL
 
-# A [Hash](Hash) is a dictionary-like collection of
-# unique keys and their values. Also called associative arrays, they are
-# similar to Arrays, but where an
-# [Array](https://ruby-doc.org/core-2.6.3/Array.html) uses integers as its
-# index, a [Hash](Hash) allows you to use any object
-# type.
+# A [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) is a dictionary-like
+# collection of unique keys and their values. Also called associative arrays,
+# they are similar to Arrays, but where an
+# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) uses integers as its
+# index, a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) allows you to
+# use any object type.
 #
-# Hashes enumerate their values in the order that the corresponding keys
-# were inserted.
+# Hashes enumerate their values in the order that the corresponding keys were
+# inserted.
 #
-# A [Hash](Hash) can be easily created by using its
-# implicit form:
+# A [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) can be easily
+# created by using its implicit form:
 #
 # ```ruby
 # grades = { "Jane Doe" => 10, "Jim Doe" => 6 }
@@ -35,24 +35,26 @@
 # options[:font_size]  # => 10
 # ```
 #
-# A [Hash](Hash) can also be created through its
-# [::new](Hash#method-c-new) method:
+# A [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) can also be created
+# through its
+# [`::new`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-c-new) method:
 #
 # ```ruby
 # grades = Hash.new
 # grades["Dorothy Doe"] = 9
 # ```
 #
-# Hashes have a *default value* that is returned when accessing keys that
-# do not exist in the hash. If no default is set `nil` is used. You can
-# set the default value by sending it as an argument to
-# [::new](Hash#method-c-new):
+# Hashes have a *default value* that is returned when accessing keys that do not
+# exist in the hash. If no default is set `nil` is used. You can set the default
+# value by sending it as an argument to
+# [`Hash.new`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-c-new):
 #
 # ```ruby
 # grades = Hash.new(0)
 # ```
 #
-# Or by using the [default=](Hash#method-i-default-3D)
+# Or by using the
+# [`default=`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-default-3D)
 # method:
 #
 # ```ruby
@@ -60,13 +62,14 @@
 # grades.default = 0
 # ```
 #
-# Accessing a value in a [Hash](Hash) requires using
-# its key:
+# Accessing a value in a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+# requires using its key:
 #
 # ```ruby
 # puts grades["Jane Doe"] # => 0
 # ```
 #
+# ### Common Uses
 #
 # Hashes are an easy way to represent data structures, such as
 #
@@ -76,10 +79,9 @@
 # books[:black] = "The Well-Grounded Rubyist"
 # ```
 #
-# Hashes are also commonly used as a way to have named parameters in
-# functions. Note that no brackets are used below. If a hash is the last
-# argument on a method call, no braces are needed, thus creating a really
-# clean interface:
+# Hashes are also commonly used as a way to have named parameters in functions.
+# Note that no brackets are used below. If a hash is the last argument on a
+# method call, no braces are needed, thus creating a really clean interface:
 #
 # ```ruby
 # Person.create(name: "John Doe", age: 27)
@@ -90,16 +92,17 @@
 # end
 # ```
 #
+# ### [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) Keys
 #
-# Two objects refer to the same hash key when their `hash` value is
-# identical and the two objects are `eql?` to each other.
+# Two objects refer to the same hash key when their `hash` value is identical
+# and the two objects are `eql?` to each other.
 #
 # A user-defined class may be used as a hash key if the `hash` and `eql?`
-# methods are overridden to provide meaningful behavior. By default,
-# separate instances refer to separate hash keys.
+# methods are overridden to provide meaningful behavior. By default, separate
+# instances refer to separate hash keys.
 #
-# A typical implementation of `hash` is based on the object’s data while
-# `eql?` is usually aliased to the overridden `==` method:
+# A typical implementation of `hash` is based on the object's data while `eql?`
+# is usually aliased to the overridden `==` method:
 #
 # ```ruby
 # class Book
@@ -134,8 +137,8 @@
 # reviews.length #=> 1
 # ```
 #
-# See also Object\#hash and
-# [Object\#eql?](https://ruby-doc.org/core-2.6.3/Object.html#method-i-eql-3F)
+# See also Object#hash and
+# [`Object#eql?`](https://docs.ruby-lang.org/en/2.6.0/Object.html#method-i-eql-3F)
 class Hash < Object
   include Enumerable
 
@@ -146,12 +149,11 @@ class Hash < Object
 
   # Creates a new hash populated with the given objects.
   #
-  # Similar to the literal `{ key => value , ... }` . In the first form,
-  # keys and values occur in pairs, so there must be an even number of
-  # arguments.
+  # Similar to the literal `{ key => value, ... }`. In the first form, keys and
+  # values occur in pairs, so there must be an even number of arguments.
   #
-  # The second and third form take a single argument which is either an
-  # array of key-value pairs or an object convertible to a hash.
+  # The second and third form take a single argument which is either an array of
+  # key-value pairs or an object convertible to a hash.
   #
   # ```ruby
   # Hash["a", 100, "b", 200]             #=> {"a"=>100, "b"=>200}
@@ -166,9 +168,9 @@ class Hash < Object
   end
   def self.[](*arg0); end
 
-  # Element Reference—Retrieves the *value* object corresponding to the
-  # *key* object. If not found, returns the default value (see `Hash::new`
-  # for details).
+  # Element Reference---Retrieves the *value* object corresponding to the *key*
+  # object. If not found, returns the default value (see `Hash::new` for
+  # details).
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }
@@ -183,7 +185,9 @@ class Hash < Object
   end
   def [](arg0); end
 
-  # Associates the value given by `value` with the key given by `key` .
+  # ## Element Assignment
+  #
+  # Associates the value given by `value` with the key given by `key`.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }
@@ -213,9 +217,9 @@ class Hash < Object
   end
   def []=(arg0, arg1); end
 
-  # Searches through the hash comparing *obj* with the key using `==` .
-  # Returns the key-value pair (two elements array) or `nil` if no match is
-  # found. See `Array#assoc` .
+  # Searches through the hash comparing *obj* with the key using `==`. Returns
+  # the key-value pair (two elements array) or `nil` if no match is found. See
+  # `Array#assoc`.
   #
   # ```ruby
   # h = {"colors"  => ["red", "blue", "green"],
@@ -231,7 +235,7 @@ class Hash < Object
   end
   def assoc(arg0); end
 
-  # Removes all key-value pairs from *hsh* .
+  # Removes all key-value pairs from *hsh*.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }   #=> {"a"=>100, "b"=>200}
@@ -240,8 +244,8 @@ class Hash < Object
   sig {returns(T::Hash[K, V])}
   def clear(); end
 
-  # Makes *hsh* compare its keys by their identity, i.e. it will consider
-  # exact same objects as same keys.
+  # Makes *hsh* compare its keys by their identity, i.e. it will consider exact
+  # same objects as same keys.
   #
   # ```ruby
   # h1 = { "a" => 100, "b" => 200, :c => "c" }
@@ -254,14 +258,13 @@ class Hash < Object
   sig {returns(T::Hash[K, V])}
   def compare_by_identity(); end
 
-  # Returns `true` if *hsh* will compare its keys by their identity. Also
-  # see `Hash#compare_by_identity` .
+  # Returns `true` if *hsh* will compare its keys by their identity. Also see
+  # `Hash#compare_by_identity`.
   sig {returns(T::Boolean)}
   def compare_by_identity?(); end
 
-  # Returns the default value, the value that would be returned by
-  # *[hsh](https://ruby-doc.org/core-2.6.3/key)* if *key* did not exist in
-  # *hsh* . See also `Hash::new` and `Hash#default=` .
+  # Returns the default value, the value that would be returned by *[hsh](key)*
+  # if *key* did not exist in *hsh*. See also `Hash::new` and `Hash#default=`.
   #
   # ```ruby
   # h = Hash.new                            #=> {}
@@ -291,6 +294,22 @@ class Hash < Object
   end
   def default(arg0=T.unsafe(nil), &blk); end
 
+  # Sets the default value, the value returned for a key that does not exist in
+  # the hash. It is not possible to set the default to a `Proc` that will be
+  # executed on each key lookup.
+  #
+  # ```ruby
+  # h = { "a" => 100, "b" => 200 }
+  # h.default = "Go fish"
+  # h["a"]     #=> 100
+  # h["z"]     #=> "Go fish"
+  # # This doesn't do what you might hope...
+  # h.default = proc do |hash, key|
+  #   hash[key] = key + key
+  # end
+  # h[2]       #=> #<Proc:0x401b3948@-:6>
+  # h["cat"]   #=> #<Proc:0x401b3948@-:6>
+  # ```
   sig do
     params(
         arg0: V,
@@ -300,9 +319,9 @@ class Hash < Object
   def default=(arg0); end
 
   # Deletes the key-value pair and returns the value from *hsh* whose key is
-  # equal to *key* . If the key is not found, it returns *nil* . If the
-  # optional code block is given and the key is not found, pass in the key
-  # and return the result of *block* .
+  # equal to *key*. If the key is not found, it returns *nil*. If the optional
+  # code block is given and the key is not found, pass in the key and return the
+  # result of *block*.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }
@@ -326,7 +345,7 @@ class Hash < Object
   def delete(arg0, &blk); end
 
   # Deletes every key-value pair from *hsh* for which *block* evaluates to
-  # `true` .
+  # `true`.
   #
   # If no block is given, an enumerator is returned instead.
   #
@@ -343,7 +362,7 @@ class Hash < Object
   sig {returns(T::Enumerator[[K, V]])}
   def delete_if(&blk); end
 
-  # Calls *block* once for each key in *hsh* , passing the key-value pair as
+  # Calls *block* once for each key in *hsh*, passing the key-value pair as
   # parameters.
   #
   # If no block is given, an enumerator is returned instead.
@@ -368,8 +387,7 @@ class Hash < Object
   sig {returns(T::Enumerator[[K, V]])}
   def each(&blk); end
 
-  # Calls *block* once for each key in *hsh* , passing the key as a
-  # parameter.
+  # Calls *block* once for each key in *hsh*, passing the key as a parameter.
   #
   # If no block is given, an enumerator is returned instead.
   #
@@ -393,7 +411,7 @@ class Hash < Object
   sig {returns(T::Enumerator[[K, V]])}
   def each_key(&blk); end
 
-  # Calls *block* once for each key in *hsh* , passing the key-value pair as
+  # Calls *block* once for each key in *hsh*, passing the key-value pair as
   # parameters.
   #
   # If no block is given, an enumerator is returned instead.
@@ -418,8 +436,7 @@ class Hash < Object
   sig {returns(T::Enumerator[[K, V]])}
   def each_pair(&blk); end
 
-  # Calls *block* once for each key in *hsh* , passing the value as a
-  # parameter.
+  # Calls *block* once for each key in *hsh*, passing the value as a parameter.
   #
   # If no block is given, an enumerator is returned instead.
   #
@@ -451,11 +468,11 @@ class Hash < Object
   sig {returns(T::Boolean)}
   def empty?(); end
 
-  # Returns a value from the hash for the given key. If the key can’t be
-  # found, there are several options: With no other arguments, it will raise
-  # a `KeyError` exception; if *default* is given, then that will be
-  # returned; if the optional code block is specified, then that will be run
-  # and its result returned.
+  # Returns a value from the hash for the given key. If the key can't be found,
+  # there are several options: With no other arguments, it will raise a
+  # `KeyError` exception; if *default* is given, then that will be returned; if
+  # the optional code block is specified, then that will be run and its result
+  # returned.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }
@@ -464,8 +481,8 @@ class Hash < Object
   # h.fetch("z") { |el| "go fish, #{el}"}   #=> "go fish, z"
   # ```
   #
-  # The following example shows that an exception is raised if the key is
-  # not found and a default value is not supplied.
+  # The following example shows that an exception is raised if the key is not
+  # found and a default value is not supplied.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }
@@ -475,8 +492,8 @@ class Hash < Object
   # *produces:*
   #
   # ```
-  #  prog.rb:2:in `fetch': key not found (KeyError)
-  #   from prog.rb:2
+  # prog.rb:2:in `fetch': key not found (KeyError)
+  #  from prog.rb:2
   # ```
   sig do
     params(
@@ -500,7 +517,7 @@ class Hash < Object
   end
   def fetch(arg0, arg1=T.unsafe(nil), &blk); end
 
-  # Returns `true` if the given key is present in *hsh* .
+  # Returns `true` if the given key is present in *hsh*.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }
@@ -508,11 +525,11 @@ class Hash < Object
   # h.has_key?("z")   #=> false
   # ```
   #
-  # Note that `include?` and `member?` do not test member equality using
-  # `==` as do other Enumerables.
+  # Note that `include?` and `member?` do not test member equality using `==` as
+  # do other Enumerables.
   #
   # See also
-  # [Enumerable\#include?](https://ruby-doc.org/core-2.6.3/Enumerable.html#method-i-include-3F)
+  # [`Enumerable#include?`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-include-3F)
   sig do
     params(
         arg0: K,
@@ -521,7 +538,7 @@ class Hash < Object
   end
   def has_key?(arg0); end
 
-  # Returns `true` if the given value is present for some key in *hsh* .
+  # Returns `true` if the given value is present for some key in *hsh*.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }
@@ -559,15 +576,14 @@ class Hash < Object
   # ```
   #
   #
-  #
-  # Also aliased as: [to\_s](Hash.downloaded.ruby_doc#method-i-to_s)
+  # Also aliased as:
+  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-to_s)
   sig {returns(String)}
   def inspect(); end
 
-  # Returns a new hash created by using *hsh* ’s values as keys, and the
-  # keys as values. If a key with the same value already exists in the *hsh*
-  # , then the last one defined will be used, the earlier value(s) will be
-  # discarded.
+  # Returns a new hash created by using *hsh*'s values as keys, and the keys as
+  # values. If a key with the same value already exists in the *hsh*, then the
+  # last one defined will be used, the earlier value(s) will be discarded.
   #
   # ```ruby
   # h = { "n" => 100, "m" => 100, "y" => 300, "d" => 200, "a" => 0 }
@@ -575,15 +591,16 @@ class Hash < Object
   # ```
   #
   # If there is no key with the same value,
-  # [\#invert](Hash.downloaded.ruby_doc#method-i-invert) is involutive.
+  # [`Hash#invert`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-invert)
+  # is involutive.
   #
   # ```ruby
   # h = { a: 1, b: 3, c: 4 }
   # h.invert.invert == h #=> true
   # ```
   #
-  # The condition, no key with the same value, can be tested by comparing
-  # the size of inverted hash.
+  # The condition, no key with the same value, can be tested by comparing the
+  # size of inverted hash.
   #
   # ```ruby
   # # no key with the same value
@@ -598,11 +615,12 @@ class Hash < Object
   def invert(); end
 
   # Deletes every key-value pair from *hsh* for which *block* evaluates to
-  # `false` .
+  # `false`.
   #
   # If no block is given, an enumerator is returned instead.
   #
-  # See also [\#select\!](Hash.downloaded.ruby_doc#method-i-select-21).
+  # See also
+  # [`Hash#select!`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-select-21).
   sig do
     params(
         blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
@@ -613,7 +631,7 @@ class Hash < Object
   def keep_if(&blk); end
 
   # Returns the key of an occurrence of a given value. If the value is not
-  # found, returns `nil` .
+  # found, returns `nil`.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200, "c" => 300, "d" => 300 }
@@ -629,7 +647,7 @@ class Hash < Object
   end
   def key(arg0); end
 
-  # Returns `true` if the given key is present in *hsh* .
+  # Returns `true` if the given key is present in *hsh*.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }
@@ -637,11 +655,11 @@ class Hash < Object
   # h.has_key?("z")   #=> false
   # ```
   #
-  # Note that `include?` and `member?` do not test member equality using
-  # `==` as do other Enumerables.
+  # Note that `include?` and `member?` do not test member equality using `==` as
+  # do other Enumerables.
   #
   # See also
-  # [Enumerable\#include?](https://ruby-doc.org/core-2.6.3/Enumerable.html#method-i-include-3F)
+  # [`Enumerable#include?`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-include-3F)
   sig do
     params(
         arg0: K,
@@ -651,7 +669,7 @@ class Hash < Object
   def key?(arg0); end
 
   # Returns a new array populated with the keys from this hash. See also
-  # `Hash#values` .
+  # `Hash#values`.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200, "c" => 300, "d" => 400 }
@@ -670,12 +688,13 @@ class Hash < Object
   # h.length        #=> 3
   # ```
   #
-  # [\#length](Hash.downloaded.ruby_doc#method-i-length) is an alias for
-  # [\#size](Hash.downloaded.ruby_doc#method-i-size).
+  # [`Hash#length`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-length)
+  # is an alias for
+  # [`Hash#size`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-size).
   sig {returns(Integer)}
   def length(); end
 
-  # Returns `true` if the given key is present in *hsh* .
+  # Returns `true` if the given key is present in *hsh*.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }
@@ -683,11 +702,11 @@ class Hash < Object
   # h.has_key?("z")   #=> false
   # ```
   #
-  # Note that `include?` and `member?` do not test member equality using
-  # `==` as do other Enumerables.
+  # Note that `include?` and `member?` do not test member equality using `==` as
+  # do other Enumerables.
   #
   # See also
-  # [Enumerable\#include?](https://ruby-doc.org/core-2.6.3/Enumerable.html#method-i-include-3F)
+  # [`Enumerable#include?`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-include-3F)
   sig do
     params(
         arg0: K,
@@ -699,10 +718,10 @@ class Hash < Object
   # Returns a new hash that combines the contents of the receiver and the
   # contents of the given hashes.
   #
-  # If no block is given, entries with duplicate keys are overwritten with
-  # the values from each `other_hash` successively, otherwise the value for
-  # each duplicate key is determined by calling the block with the key, its
-  # value in the receiver and its value in each `other_hash` .
+  # If no block is given, entries with duplicate keys are overwritten with the
+  # values from each `other_hash` successively, otherwise the value for each
+  # duplicate key is determined by calling the block with the key, its value in
+  # the receiver and its value in each `other_hash`.
   #
   # When called without any argument, returns a copy of the receiver.
   #
@@ -734,9 +753,9 @@ class Hash < Object
   end
   def merge(*arg0, &blk); end
 
-  # Searches through the hash comparing *obj* with the value using `==` .
-  # Returns the first key-value pair (two-element array) that matches. See
-  # also `Array#rassoc` .
+  # Searches through the hash comparing *obj* with the value using `==`. Returns
+  # the first key-value pair (two-element array) that matches. See also
+  # `Array#rassoc`.
   #
   # ```ruby
   # a = {1=> "one", 2 => "two", 3 => "three", "ii" => "two"}
@@ -751,10 +770,10 @@ class Hash < Object
   end
   def rassoc(arg0); end
 
-  # Rebuilds the hash based on the current hash values for each key. If
-  # values of key objects have changed since they were inserted, this method
-  # will reindex *hsh* . If `Hash#rehash` is called while an iterator is
-  # traversing the hash, a `RuntimeError` will be raised in the iterator.
+  # Rebuilds the hash based on the current hash values for each key. If values
+  # of key objects have changed since they were inserted, this method will
+  # reindex *hsh*. If `Hash#rehash` is called while an iterator is traversing
+  # the hash, a `RuntimeError` will be raised in the iterator.
   #
   # ```ruby
   # a = [ "a", "b" ]
@@ -769,8 +788,7 @@ class Hash < Object
   sig {returns(T::Hash[K, V])}
   def rehash(); end
 
-  # Returns a new hash consisting of entries for which the block returns
-  # false.
+  # Returns a new hash consisting of entries for which the block returns false.
   #
   # If no block is given, an enumerator is returned instead.
   #
@@ -788,8 +806,7 @@ class Hash < Object
   end
   def reject(&blk); end
 
-  # Equivalent to `Hash#delete_if`, but returns `nil` if no changes were
-  # made.
+  # Equivalent to `Hash#delete_if`, but returns `nil` if no changes were made.
   sig do
     params(
         blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
@@ -798,8 +815,7 @@ class Hash < Object
   end
   def reject!(&blk); end
 
-  # Returns a new hash consisting of entries for which the block returns
-  # true.
+  # Returns a new hash consisting of entries for which the block returns true.
   #
   # If no block is given, an enumerator is returned instead.
   #
@@ -809,8 +825,9 @@ class Hash < Object
   # h.select {|k,v| v < 200}  #=> {"a" => 100}
   # ```
   #
-  # [\#filter](Hash.downloaded.ruby_doc#method-i-filter) is an alias for
-  # [\#select](Hash.downloaded.ruby_doc#method-i-select).
+  # [`Hash#filter`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-filter)
+  # is an alias for
+  # [`Hash#select`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-select).
   sig do
     params(
         blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
@@ -819,11 +836,13 @@ class Hash < Object
   end
   def select(&blk); end
 
-  # Equivalent to [\#keep\_if](Hash.downloaded.ruby_doc#method-i-keep_if),
+  # Equivalent to
+  # [`Hash#keep_if`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-keep_if),
   # but returns `nil` if no changes were made.
   #
-  # [\#filter\!](Hash.downloaded.ruby_doc#method-i-filter-21) is an alias
-  # for [\#select\!](Hash.downloaded.ruby_doc#method-i-select-21).
+  # [`Hash#filter!`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-filter-21)
+  # is an alias for
+  # [`Hash#select!`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-select-21).
   sig do
     params(
         blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
@@ -832,8 +851,8 @@ class Hash < Object
   end
   def select!(&blk); end
 
-  # Removes a key-value pair from *hsh* and returns it as the two-item array
-  # `[` *key, value* `]`, or the hash’s default value if the hash is empty.
+  # Removes a key-value pair from *hsh* and returns it as the two-item array `[`
+  # *key, value* `]`, or the hash's default value if the hash is empty.
   #
   # ```ruby
   # h = { 1 => "a", 2 => "b", 3 => "c" }
@@ -853,12 +872,15 @@ class Hash < Object
   # h.length        #=> 3
   # ```
   #
-  # [\#length](Hash.downloaded.ruby_doc#method-i-length) is an alias for
-  # [\#size](Hash.downloaded.ruby_doc#method-i-size).
+  # [`Hash#length`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-length)
+  # is an alias for
+  # [`Hash#size`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-size).
   sig {returns(Integer)}
   def size(); end
 
-  # Associates the value given by `value` with the key given by `key` .
+  # ## Element Assignment
+  #
+  # Associates the value given by `value` with the key given by `key`.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }
@@ -901,11 +923,12 @@ class Hash < Object
   sig {returns(T::Hash[K, V])}
   def to_hash(); end
 
-  # Alias for: [inspect](Hash.downloaded.ruby_doc#method-i-inspect)
+  # Alias for:
+  # [`inspect`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-inspect)
   sig {returns(String)}
   def to_s(); end
 
-  # Returns `true` if the given value is present for some key in *hsh* .
+  # Returns `true` if the given value is present for some key in *hsh*.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200 }
@@ -920,8 +943,8 @@ class Hash < Object
   end
   def value?(arg0); end
 
-  # Returns a new array populated with the values from *hsh* . See also
-  # `Hash#keys` .
+  # Returns a new array populated with the values from *hsh*. See also
+  # `Hash#keys`.
   #
   # ```ruby
   # h = { "a" => 100, "b" => 200, "c" => 300 }
@@ -930,6 +953,13 @@ class Hash < Object
   sig {returns(T::Array[V])}
   def values(); end
 
+  # Return an array containing the values associated with the given keys. Also
+  # see `Hash.select`.
+  #
+  # ```ruby
+  # h = { "cat" => "feline", "dog" => "canine", "cow" => "bovine" }
+  # h.values_at("cow", "cat")  #=> ["bovine", "feline"]
+  # ```
   sig do
     params(
         arg0: K,

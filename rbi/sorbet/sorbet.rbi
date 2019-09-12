@@ -152,6 +152,8 @@ class Sorbet::Private::Static::ENVClass
   end
   def update(key, &blk); end
 end
+# [`ENV`](https://docs.ruby-lang.org/en/2.6.0/ENV.html) is a hash-like accessor
+# for environment variables.
 ::ENV = T.let(T.unsafe(nil), Sorbet::Private::Static::ENVClass)
 
 # The magic type that sig {void} returns

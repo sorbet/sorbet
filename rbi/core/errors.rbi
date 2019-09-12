@@ -1,7 +1,7 @@
 # typed: __STDLIB_INTERNAL
 
 # Raised when the arguments are wrong and there isn't a more specific
-# [Exception](https://ruby-doc.org/core-2.6.3/Exception.html) class.
+# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) class.
 #
 # Ex: passing the wrong number of arguments
 #
@@ -11,7 +11,9 @@
 #
 # *raises the exception:*
 #
-#     ArgumentError: wrong number of arguments (given 2, expected 1)
+# ```
+# ArgumentError: wrong number of arguments (given 2, expected 1)
+# ```
 #
 # Ex: passing an argument that is not acceptable:
 #
@@ -21,33 +23,34 @@
 #
 # *raises the exception:*
 #
-#     ArgumentError: negative array size
+# ```
+# ArgumentError: negative array size
+# ```
 class ArgumentError < StandardError
 end
 
 # The exception class which will be raised when pushing into a closed
-# [Queue](https://ruby-doc.org/core-2.6.3/Queue.html). See
-# [Queue\#close](https://ruby-doc.org/core-2.6.3/Queue.html#method-i-close)
+# [`Queue`](https://docs.ruby-lang.org/en/2.6.0/Queue.html). See
+# [`Queue#close`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-close)
 # and
-# [SizedQueue\#close](https://ruby-doc.org/core-2.6.3/SizedQueue.html#method-i-close)
-# .
+# [`SizedQueue#close`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html#method-i-close).
 class ClosedQueueError < StopIteration
 end
 
-# [EncodingError](EncodingError) is the base class for
-# encoding errors.
+# [`EncodingError`](https://docs.ruby-lang.org/en/2.6.0/EncodingError.html) is
+# the base class for encoding errors.
 class EncodingError < StandardError
 end
 
-# Raised by some [IO](https://ruby-doc.org/core-2.6.3/IO.html) operations
+# Raised by some [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) operations
 # when reaching the end of file. Many
-# [IO](https://ruby-doc.org/core-2.6.3/IO.html) methods exist in two
+# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) methods exist in two
 # forms,
 #
 # one that returns `nil` when the end of file is reached, the other raises
-# `EOFError` .
+# `EOFError`.
 #
-# `EOFError` is a subclass of `IOError` .
+# `EOFError` is a subclass of `IOError`.
 #
 # ```ruby
 # file = File.open("/etc/hosts")
@@ -59,7 +62,7 @@ class EOFError < IOError
 end
 
 # Raised when attempting to convert special float values (in particular
-# `Infinity` or `NaN` ) to numerical classes which don't support them.
+# `Infinity` or `NaN`) to numerical classes which don't support them.
 #
 # ```ruby
 # Float::INFINITY.to_r   #=> FloatDomainError: Infinity
@@ -78,9 +81,9 @@ end
 class IndexError < StandardError
 end
 
-# Raised when the interrupt signal is received, typically because the user
-# has pressed Control-C (on most posix platforms). As such, it is a
-# subclass of `SignalException` .
+# Raised when the interrupt signal is received, typically because the user has
+# pressed Control-C (on most posix platforms). As such, it is a subclass of
+# `SignalException`.
 #
 # ```ruby
 # begin
@@ -93,15 +96,19 @@ end
 #
 # *produces:*
 #
-#     Press ctrl-C when you get bored
+# ```
+# Press ctrl-C when you get bored
+# ```
 #
 # *then waits until it is interrupted with Control-C and then prints:*
 #
-#     Note: You will typically use Signal.trap instead.
+# ```
+# Note: You will typically use Signal.trap instead.
+# ```
 class Interrupt < SignalException
 end
 
-# Raised when an [IO](https://ruby-doc.org/core-2.6.3/IO.html) operation
+# Raised when an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) operation
 # fails.
 #
 # ```ruby
@@ -112,8 +119,8 @@ end
 #   #=> IOError: closed stream
 # ```
 #
-# Note that some [IO](https://ruby-doc.org/core-2.6.3/IO.html) failures
-# raise `SystemCallError` s and these are not subclasses of IOError:
+# Note that some [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) failures
+# raise `SystemCallError`s and these are not subclasses of IOError:
 #
 # ```ruby
 # File.open("does/not/exist")
@@ -123,7 +130,7 @@ class IOError < StandardError
 end
 
 # Raised when the specified key is not found. It is a subclass of
-# [IndexError](https://ruby-doc.org/core-2.6.3/IndexError.html).
+# [`IndexError`](https://docs.ruby-lang.org/en/2.6.0/IndexError.html).
 #
 # ```ruby
 # h = {"foo" => :bar}
@@ -133,8 +140,8 @@ end
 class KeyError < IndexError
 end
 
-# Raised when a file required (a Ruby script, extension library, ...)
-# fails to load.
+# Raised when a file required (a Ruby script, extension library, ...) fails to
+# load.
 #
 # ```ruby
 # require 'this/file/does/not/exist'
@@ -142,7 +149,9 @@ end
 #
 # *raises the exception:*
 #
-#     LoadError: no such file to load -- this/file/does/not/exist
+# ```
+# LoadError: no such file to load -- this/file/does/not/exist
+# ```
 class LoadError < ScriptError
 end
 
@@ -159,7 +168,9 @@ end
 #
 # *raises the exception:*
 #
-#     LocalJumpError: no block given (yield)
+# ```
+# LocalJumpError: no block given (yield)
+# ```
 #
 # A more subtle example:
 #
@@ -172,7 +183,9 @@ end
 #
 # *raises the exception:*
 #
-#     LocalJumpError: unexpected return
+# ```
+# LocalJumpError: unexpected return
+# ```
 class LocalJumpError < StandardError
 end
 
@@ -184,7 +197,9 @@ end
 #
 # *raises the exception:*
 #
-#     NameError: undefined local variable or method `foo' for main:Object
+# ```
+# NameError: undefined local variable or method `foo' for main:Object
+# ```
 #
 # Since constant names must start with a capital:
 #
@@ -194,7 +209,9 @@ end
 #
 # *raises the exception:*
 #
-#     NameError: wrong constant name answer
+# ```
+# NameError: wrong constant name answer
+# ```
 class NameError < StandardError
 end
 
@@ -202,8 +219,8 @@ end
 class NoMemoryError < Exception
 end
 
-# Raised when a method is called on a receiver which doesn't have it
-# defined and also fails to respond with `method_missing` .
+# Raised when a method is called on a receiver which doesn't have it defined and
+# also fails to respond with `method_missing`.
 #
 # ```ruby
 # "hello".to_ary
@@ -211,17 +228,19 @@ end
 #
 # *raises the exception:*
 #
-#     NoMethodError: undefined method `to_ary' for "hello":String
+# ```
+# NoMethodError: undefined method `to_ary' for "hello":String
+# ```
 class NoMethodError < NameError
 end
 
-# Raised when a feature is not implemented on the current platform. For
-# example, methods depending on the `fsync` or `fork` system calls may
-# raise this exception if the underlying operating system or Ruby runtime
-# does not support them.
+# Raised when a feature is not implemented on the current platform. For example,
+# methods depending on the `fsync` or `fork` system calls may raise this
+# exception if the underlying operating system or Ruby runtime does not support
+# them.
 #
-# Note that if `fork` raises a `NotImplementedError`, then
-# `respond_to?(:fork)` returns `false` .
+# Note that if `fork` raises a `NotImplementedError`, then `respond_to?(:fork)`
+# returns `false`.
 class NotImplementedError < ScriptError
 end
 
@@ -233,7 +252,9 @@ end
 #
 # *raises the exception:*
 #
-#     RangeError: bignum too big to convert into `long'
+# ```
+# RangeError: bignum too big to convert into `long'
+# ```
 class RangeError < StandardError
 end
 
@@ -245,14 +266,17 @@ end
 #
 # *raises the exception:*
 #
-#     RegexpError: target of repeat operator is not specified: /?/
+# ```
+# RegexpError: target of repeat operator is not specified: /?/
+# ```
 class RegexpError < StandardError
 end
 
 # A generic error class raised when an invalid operation is attempted.
-# [Kernel\#raise](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-raise)
-# will raise a [RuntimeError](RuntimeError) if no
-# [Exception](https://ruby-doc.org/core-2.6.3/Exception.html) class is
+# [`Kernel#raise`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-raise)
+# will raise a
+# [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html) if no
+# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) class is
 # specified.
 #
 # ```ruby
@@ -261,20 +285,22 @@ end
 #
 # *raises the exception:*
 #
-#     RuntimeError: ouch
+# ```
+# RuntimeError: ouch
+# ```
 class RuntimeError < StandardError
 end
 
-# [ScriptError](ScriptError) is the superclass for
-# errors raised when a script can not be executed because of a `LoadError`
-# , `NotImplementedError` or a `SyntaxError` . Note these type of
-# `ScriptErrors` are not `StandardError` and will not be rescued unless it
-# is specified explicitly (or its ancestor `Exception` ).
+# [`ScriptError`](https://docs.ruby-lang.org/en/2.6.0/ScriptError.html) is the
+# superclass for errors raised when a script can not be executed because of a
+# `LoadError`, `NotImplementedError` or a `SyntaxError`. Note these type of
+# `ScriptErrors` are not `StandardError` and will not be rescued unless it is
+# specified explicitly (or its ancestor `Exception`).
 class ScriptError < Exception
 end
 
-# Raised when attempting a potential unsafe operation, typically when the
-# $SAFE level is raised above 0.
+# Raised when attempting a potential unsafe operation, typically when the $SAFE
+# level is raised above 0.
 #
 # ```ruby
 # foo = "bar"
@@ -287,7 +313,9 @@ end
 #
 # *raises the exception:*
 #
-#     SecurityError: Insecure: Insecure operation `untaint' at level 3
+# ```
+# SecurityError: Insecure: Insecure operation `untaint' at level 3
+# ```
 class SecurityError < Exception
 end
 
@@ -311,9 +339,9 @@ class SignalException < Exception
 end
 
 # The most standard error types are subclasses of
-# [StandardError](StandardError). A rescue clause
-# without an explicit
-# [Exception](https://ruby-doc.org/core-2.6.3/Exception.html) class will
+# [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html). A
+# rescue clause without an explicit
+# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) class will
 # rescue all StandardErrors (and only those).
 #
 # ```ruby
@@ -331,15 +359,16 @@ end
 #
 # *raises the exception:*
 #
-#     LoadError: no such file to load -- does/not/exist
+# ```
+# LoadError: no such file to load -- does/not/exist
+# ```
 class StandardError < Exception
 end
 
 # Raised to stop the iteration, in particular by
-# [Enumerator\#next](https://ruby-doc.org/core-2.6.3/Enumerator.html#method-i-next)
-# . It is rescued by
-# [Kernel\#loop](https://ruby-doc.org/core-2.6.3/Kernel.html#method-i-loop)
-# .
+# [`Enumerator#next`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html#method-i-next).
+# It is rescued by
+# [`Kernel#loop`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-loop).
 #
 # ```ruby
 # loop do
@@ -367,16 +396,19 @@ end
 #
 # *raises the exception:*
 #
-#     SyntaxError: (eval):1: syntax error, unexpected '=', expecting $end
+# ```
+# SyntaxError: (eval):1: syntax error, unexpected '=', expecting $end
+# ```
 class SyntaxError < ScriptError
 end
 
-# [SystemCallError](SystemCallError) is the base class
-# for all low-level platform-dependent errors.
+# [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+# is the base class for all low-level platform-dependent errors.
 #
 # The errors available on the current platform are subclasses of
-# [SystemCallError](SystemCallError) and are defined
-# in the [Errno](https://ruby-doc.org/core-2.6.3/Errno.html) module.
+# [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+# and are defined in the
+# [`Errno`](https://docs.ruby-lang.org/en/2.6.0/Errno.html) module.
 #
 # ```ruby
 # File.open("does/not/exist")
@@ -384,7 +416,9 @@ end
 #
 # *raises the exception:*
 #
-#     Errno::ENOENT: No such file or directory - does/not/exist
+# ```
+# Errno::ENOENT: No such file or directory - does/not/exist
+# ```
 class SystemCallError < StandardError
 end
 
@@ -403,7 +437,9 @@ end
 #
 # *raises the exception:*
 #
-#     SystemStackError: stack level too deep
+# ```
+# SystemStackError: stack level too deep
+# ```
 class SystemStackError < Exception
 end
 
@@ -417,8 +453,10 @@ end
 #
 # This will raises the following exception:
 #
-#     ThreadError: stopping only thread
-#     note: use sleep to stop forever
+# ```
+# ThreadError: stopping only thread
+# note: use sleep to stop forever
+# ```
 class ThreadError < StandardError
 end
 
@@ -430,12 +468,14 @@ end
 #
 # *raises the exception:*
 #
-#     TypeError: no implicit conversion of String into Integer
+# ```
+# TypeError: no implicit conversion of String into Integer
+# ```
 class TypeError < StandardError
 end
 
-# Raised when `throw` is called with a *tag* which does not have
-# corresponding `catch` block.
+# Raised when `throw` is called with a *tag* which does not have corresponding
+# `catch` block.
 #
 # ```ruby
 # throw "foo", "bar"
@@ -443,7 +483,9 @@ end
 #
 # *raises the exception:*
 #
-#     UncaughtThrowError: uncaught throw "foo"
+# ```
+# UncaughtThrowError: uncaught throw "foo"
+# ```
 class UncaughtThrowError < ArgumentError
 end
 
