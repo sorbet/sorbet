@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 // ^ Include first because it violates linting rules.
 
+#include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "test/helpers/lsp.h"
@@ -959,13 +960,24 @@ void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File
         fmt::format("{}", fmt::map_join(completionList->items.begin(), completionList->items.end(), ", ",
                                         [](const auto &item) -> string { return item->label; }));
 
-    // TODO(jez) Add support for using `, ...` to match a prefix of the result
-    if (this->message != actualMessage) {
-        auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
-        ADD_FAILURE_AT(filename.c_str(), range->start->line + 1)
-            << fmt::format("{}Expected completion contents:\n{}\nFound completion contents:\n{}", errorPrefix,
-                           prettyPrintRangeComment(sourceLine, *range, toString()),
-                           prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage)));
+    auto partial = absl::EndsWith(this->message, ", ...");
+    if (partial) {
+        auto prefix = this->message.substr(0, this->message.size() - 5);
+        if (!absl::StartsWith(actualMessage, prefix)) {
+            auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
+            ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
+                "{}Expected partial completion contents:\n{}\nFound incompatible completion contents:\n{}", errorPrefix,
+                prettyPrintRangeComment(sourceLine, *range, toString()),
+                prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage)));
+        }
+    } else {
+        if (this->message != actualMessage) {
+            auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
+            ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
+                "{}Expected completion contents:\n{}\nFound completion contents:\n{}", errorPrefix,
+                prettyPrintRangeComment(sourceLine, *range, toString()),
+                prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage)));
+        }
     }
 }
 
