@@ -32,31 +32,6 @@ optional<u4> startOfExistingSig(core::Context ctx, core::Loc loc) {
     }
 }
 
-optional<u4> startOfExistingReturn(core::Context ctx, core::Loc loc) {
-    auto file = loc.file();
-    if (!file.exists()) {
-        return nullopt;
-    }
-
-    auto textBeforeTheMethod = file.data(ctx).source().substr(0, loc.beginPos());
-    auto lastReturns = textBeforeTheMethod.rfind("returns(");
-    auto lastVoid = textBeforeTheMethod.rfind("void");
-    if (lastReturns != string_view::npos) {
-        if (lastVoid != string_view::npos) {
-            return max(lastReturns, lastVoid);
-        } else {
-            return lastReturns;
-        }
-    } else {
-        if (lastVoid != string_view::npos) {
-            return lastVoid;
-        } else {
-            // failed to find sig
-            return nullopt;
-        }
-    }
-}
-
 bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
     ENFORCE(enclosingClass.exists());
     auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
@@ -331,27 +306,6 @@ bool childNeedsOverride(core::Context ctx, core::SymbolRef childSymbol, core::Sy
          parentSymbol.data(ctx)->isOverride());
 }
 
-bool parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core::SymbolRef parentSymbol) {
-    return
-        // We're overriding a method...
-        parentSymbol.exists() &&
-        // in a file which we can edit...
-        parentSymbol.data(ctx)->loc().file().exists() &&
-        // defined outside an RBI (because it might be codegen'd)...
-        !parentSymbol.data(ctx)->loc().file().data(ctx).isRBI() &&
-        // that isn't the constructor...
-        childSymbol.data(ctx)->name != core::Names::initialize() &&
-        // and wasn't DSL synthesized (beause we can't change DSL'd sigs)
-        !parentSymbol.data(ctx)->isDSLSynthesized() &&
-        // It it has a sig...
-        parentSymbol.data(ctx)->resultType != nullptr &&
-        // that is override...
-        parentSymbol.data(ctx)->isOverride() &&
-        // and doesn't already have overridable.
-        !parentSymbol.data(ctx)->isOverridable();
-    // In all other cases, we wouldn't have put override on the child's sig.
-}
-
 } // namespace
 
 bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, unique_ptr<cfg::CFG> &cfg,
@@ -517,18 +471,6 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
 
     string sig = to_string(ss);
     edits.emplace_back(core::AutocorrectSuggestion::Edit{replacementLoc, fmt::format("{}\n{}", sig, spaces)});
-
-    if (parentNeedsOverridable(ctx, methodSymbol, closestMethod)) {
-        if (auto maybeOffset = startOfExistingReturn(ctx, closestMethod.data(ctx)->loc())) {
-            auto offset = *maybeOffset;
-            core::Loc overridableReturnLoc(closestMethod.data(ctx)->loc().file(), offset, offset);
-            if (closestMethod.data(ctx)->hasGeneratedSig()) {
-                edits.emplace_back(core::AutocorrectSuggestion::Edit{overridableReturnLoc, "overridable."});
-            } else {
-                edits.emplace_back(core::AutocorrectSuggestion::Edit{overridableReturnLoc, "generated.overridable."});
-            }
-        }
-    }
 
     if (auto edit = maybeSuggestExtendTSig(ctx, methodSymbol)) {
         edits.emplace_back(edit.value());
