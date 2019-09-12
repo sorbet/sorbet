@@ -122,6 +122,23 @@ unique_ptr<ast::Expression> dupReturnsType(core::MutableContext ctx, const ast::
     return body->args[0]->deepCopy();
 }
 
+// This will raise an error if we've given a type that's not what we want
+void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, const ast::Send *sig) {
+    // Loop down the chain of recv's until we get to the inner 'sig' node.
+    auto block = ast::cast_tree<ast::Block>(sig->block.get());
+    auto body = ast::cast_tree<ast::Send>(block->body.get());
+    ast::Send *cur = body;
+    while (cur != nullptr) {
+        if (cur->fun == core::Names::typeParameters()) {
+            if (auto e = ctx.state.beginError(sig->loc, core::errors::DSL::BadAttrType)) {
+                e.setHeader("The type for an `{}` cannot contain `{}`", attrFun.show(ctx), "type_parameters");
+            }
+            body->args[0] = ast::MK::Untyped(body->args[0]->loc);
+        }
+        cur = ast::cast_tree<ast::Send>(cur->recv.get());
+    }
+}
+
 // To convert a sig into a writer sig with argument `name`, we copy the `returns(...)`
 // value into the `sig {params(...)}` using whatever name we have for the setter.
 unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const ast::Send *sharedSig,
@@ -215,6 +232,9 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
 
     auto sig = ast::cast_tree_const<ast::Send>(prevStat);
     bool hasSig = sig && isSig(sig);
+    if (hasSig) {
+        ensureSafeSig(ctx, send->fun, sig);
+    }
 
     bool declareIvars = false;
     if (hasSig && hasNilableReturns(ctx, sig)) {

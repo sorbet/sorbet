@@ -287,7 +287,7 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
 
 core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclosingClassSymbol, core::NameRef name) {
     auto enclosingClass = enclosingClassSymbol.data(ctx);
-    ENFORCE(enclosingClass->isClassLinearizationComputed(), "Should have been linearized by resolver");
+    ENFORCE(enclosingClass->isClassOrModuleLinearizationComputed(), "Should have been linearized by resolver");
 
     for (const auto &mixin : enclosingClass->mixins()) {
         auto mixinMethod = mixin.data(ctx)->findMember(ctx, name);

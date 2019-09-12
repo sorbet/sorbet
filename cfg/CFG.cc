@@ -169,6 +169,39 @@ string CFG::toString(core::Context ctx) {
     return to_string(buf);
 }
 
+string CFG::showRaw(core::Context ctx) {
+    fmt::memory_buffer buf;
+    string symbolName = this->symbol.data(ctx)->showFullName(ctx);
+    fmt::format_to(buf,
+                   "subgraph \"cluster_{}\" {{\n"
+                   "    label = \"{}\";\n"
+                   "    color = blue;\n"
+                   "    \"bb{}_0\" [shape = box];\n"
+                   "    \"bb{}_1\" [shape = parallelogram];\n\n",
+                   symbolName, symbolName, symbolName, symbolName);
+    for (auto &basicBlock : this->basicBlocks) {
+        auto text = basicBlock->showRaw(ctx);
+        auto lines = absl::StrSplit(text, "\n");
+
+        fmt::format_to(
+            buf,
+            "    \"bb{}_{}\" [\n"
+            "        label = \"{}\\l\"\n"
+            "    ];\n\n"
+            "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
+            symbolName, basicBlock->id,
+            fmt::map_join(lines.begin(), lines.end(), "\\l", [](auto line) -> string { return absl::CEscape(line); }),
+            symbolName, basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
+
+        if (basicBlock->bexit.thenb != basicBlock->bexit.elseb) {
+            fmt::format_to(buf, "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"tapered\"];\n\n", symbolName, basicBlock->id,
+                           symbolName, basicBlock->bexit.elseb->id);
+        }
+    }
+    fmt::format_to(buf, "}}");
+    return to_string(buf);
+}
+
 string BasicBlock::toString(core::Context ctx) {
     fmt::memory_buffer buf;
     fmt::format_to(
@@ -184,6 +217,28 @@ string BasicBlock::toString(core::Context ctx) {
     }
     if (this->bexit.cond.variable.exists()) {
         fmt::format_to(buf, "{}", this->bexit.cond.toString(ctx));
+    } else {
+        fmt::format_to(buf, "<unconditional>");
+    }
+    return to_string(buf);
+}
+
+string BasicBlock::showRaw(core::Context ctx) {
+    fmt::memory_buffer buf;
+    fmt::format_to(
+        buf, "block[id={}]({})\n", this->id,
+        fmt::map_join(
+            this->args.begin(), this->args.end(), ", ", [&](const auto &arg) -> auto { return arg.showRaw(ctx); }));
+
+    if (this->outerLoops > 0) {
+        fmt::format_to(buf, "outerLoops: {}\n", this->outerLoops);
+    }
+    for (Binding &exp : this->exprs) {
+        fmt::format_to(buf, "Binding {{\n&nbsp;bind = {},\n&nbsp;value = {},\n}}\n", exp.bind.showRaw(ctx, 1),
+                       exp.value->showRaw(ctx, 1));
+    }
+    if (this->bexit.cond.variable.exists()) {
+        fmt::format_to(buf, "{}", this->bexit.cond.showRaw(ctx));
     } else {
         fmt::format_to(buf, "<unconditional>");
     }

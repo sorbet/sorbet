@@ -201,7 +201,7 @@ class Sorbet::Private::HiddenMethodFinder
   end
 
   def serialize_class(source_entry, rbi_entry, klass, source_symbols, rbi_symbols, source_by_name)
-    return if rbi_entry["kind"] != "CLASS"
+    return if rbi_entry["kind"] != "CLASS_OR_MODULE"
 
     name = rbi_entry["name"]["name"]
     if name.start_with?('<Class:')
@@ -230,7 +230,7 @@ class Sorbet::Private::HiddenMethodFinder
     else
       source_type = source_entry["kind"]
     end
-    if source_type && source_type != "CLASS"
+    if source_type && source_type != "CLASS_OR_MODULE"
       return "# The source says #{real_name(my_klass)} is a #{source_type} but reflection says it is a #{rbi_entry['kind']}"
     end
 

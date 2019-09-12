@@ -367,67 +367,6 @@ module Kernel
   end
   def extend(mod); end
 
-  # Initiates the termination of the Ruby script by raising the `SystemExit`
-  # exception. This exception may be caught. The optional parameter is used to
-  # return a status code to the invoking environment. `true` and `FALSE` of
-  # *status* means success and failure respectively. The interpretation of other
-  # integer values are system dependent.
-  #
-  # ```ruby
-  # begin
-  #   exit
-  #   puts "never get here"
-  # rescue SystemExit
-  #   puts "rescued a SystemExit exception"
-  # end
-  # puts "after begin block"
-  # ```
-  #
-  # *produces:*
-  #
-  # ```
-  # rescued a SystemExit exception
-  # after begin block
-  # ```
-  #
-  # Just prior to termination, Ruby executes any `at_exit` functions (see
-  # Kernel::at\_exit) and runs any object finalizers (see
-  # [`ObjectSpace::define_finalizer`](https://docs.ruby-lang.org/en/2.6.0/ObjectSpace.html#method-c-define_finalizer)).
-  #
-  # ```ruby
-  # at_exit { puts "at_exit function" }
-  # ObjectSpace.define_finalizer("string",  proc { puts "in finalizer" })
-  # exit
-  # ```
-  #
-  # *produces:*
-  #
-  # ```
-  # at_exit function
-  # in finalizer
-  # ```
-  sig do
-    params(
-        status: Integer,
-    )
-    .returns(T.untyped)
-  end
-  def exit(status=T.unsafe(nil)); end
-
-  # Exits the process immediately. No exit handlers are run. *status* is
-  # returned to the underlying system as the exit status.
-  #
-  # ```ruby
-  # Process.exit!(true)
-  # ```
-  sig do
-    params(
-        status: Integer,
-    )
-    .returns(T.untyped)
-  end
-  def exit!(status=T.unsafe(nil)); end
-
   # Creates a subprocess. If a block is specified, that block is run in the
   # subprocess, and the subprocess terminates with a status of zero. Otherwise,
   # the `fork` call returns twice, once in the parent, returning the process ID

@@ -10,6 +10,8 @@ namespace sorbet::realmain::lsp {
 constexpr string_view sorbetScheme = "sorbet:";
 constexpr string_view httpsScheme = "https";
 
+namespace {
+
 string getRootPath(const options::Options &opts, const shared_ptr<spdlog::logger> &logger) {
     if (opts.rawInputDirNames.size() != 1) {
         logger->error("Sorbet's language server requires a single input directory.");
@@ -17,6 +19,15 @@ string getRootPath(const options::Options &opts, const shared_ptr<spdlog::logger
     }
     return opts.rawInputDirNames.at(0);
 }
+
+MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
+    if (find(formats.begin(), formats.end(), MarkupKind::Markdown) != formats.end()) {
+        return MarkupKind::Markdown;
+    } else {
+        return MarkupKind::Plaintext;
+    }
+}
+} // namespace
 
 LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<spdlog::logger> &logger,
                                    bool skipConfigatron, bool disableFastPath)
@@ -33,22 +44,25 @@ void LSPConfiguration::configure(const InitializeParams &params) {
     }
     clientCompletionItemSnippetSupport = false;
     clientHoverMarkupKind = MarkupKind::Plaintext;
+    clientCompletionItemMarkupKind = MarkupKind::Plaintext;
     if (params.capabilities->textDocument) {
         auto &textDocument = *params.capabilities->textDocument;
         if (textDocument->completion) {
             auto &completion = *textDocument->completion;
             if (completion->completionItem) {
-                clientCompletionItemSnippetSupport = (*completion->completionItem)->snippetSupport.value_or(false);
+                auto &completionItem = (*completion->completionItem);
+                clientCompletionItemSnippetSupport = completionItem->snippetSupport.value_or(false);
+                if (completionItem->documentationFormat != nullopt) {
+                    clientCompletionItemMarkupKind =
+                        getPreferredMarkupKind(completionItem->documentationFormat.value());
+                }
             }
         }
         if (textDocument->hover) {
             auto &hover = *textDocument->hover;
             if (hover->contentFormat) {
                 auto &contentFormat = *hover->contentFormat;
-                clientHoverMarkupKind =
-                    find(contentFormat.begin(), contentFormat.end(), MarkupKind::Markdown) != contentFormat.end()
-                        ? MarkupKind::Markdown
-                        : MarkupKind::Plaintext;
+                clientHoverMarkupKind = getPreferredMarkupKind(contentFormat);
             }
         }
     }
@@ -61,13 +75,19 @@ void LSPConfiguration::configure(const InitializeParams &params) {
     }
 }
 
-unique_ptr<core::Loc> LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position &pos,
-                                                   const core::GlobalState &gs) const {
+// LSP Spec: line / col in Position are 0-based
+// Sorbet:   line / col in core::Loc are 1-based (like most editors)
+// LSP Spec: distinguishes Position (zero-width) and Range (start & end)
+// Sorbet:   zero-width core::Loc is a Position
+//
+// https://microsoft.github.io/language-server-protocol/specification#text-documents
+core::Loc LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position &pos,
+                                       const core::GlobalState &gs) const {
     core::Loc::Detail reqPos;
     reqPos.line = pos.line + 1;
     reqPos.column = pos.character + 1;
     auto offset = core::Loc::pos2Offset(fref.data(gs), reqPos);
-    return make_unique<core::Loc>(core::Loc(fref, offset, offset));
+    return core::Loc{fref, offset, offset};
 }
 
 string LSPConfiguration::localName2Remote(string_view filePath) const {

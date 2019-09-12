@@ -43,7 +43,7 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
             if (auto constResp = resp->isConstant()) {
                 tie(gs, response->result) = getReferencesToSymbol(move(gs), constResp->symbol);
             } else if (auto defResp = resp->isDefinition()) {
-                if (fileIsTyped || defResp->symbol.data(*gs)->isClass()) {
+                if (fileIsTyped || defResp->symbol.data(*gs)->isClassOrModule()) {
                     tie(gs, response->result) = getReferencesToSymbol(move(gs), defResp->symbol);
                 }
             } else if (fileIsTyped && resp->isIdent()) {

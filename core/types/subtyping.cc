@@ -516,7 +516,7 @@ TypePtr glbGround(Context ctx, const TypePtr &t1, const TypePtr &t2) {
         categoryCounterInc("glb.<class>.collapsed", "yes");
         return t2;
     } else {
-        if (sym1.data(ctx)->isClassClass() && sym2.data(ctx)->isClassClass()) {
+        if (sym1.data(ctx)->isClassOrModuleClass() && sym2.data(ctx)->isClassOrModuleClass()) {
             categoryCounterInc("glb.<class>.collapsed", "bottom");
             return Types::bottom();
         }
@@ -803,13 +803,13 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
         auto *a2 = cast_type<AppliedType>(t2.get());
         if (a2 == nullptr) {
             auto *c2 = cast_type<ClassType>(t2.get());
-            if (a1->klass.data(ctx)->isClassModule() || c2 == nullptr) {
+            if (a1->klass.data(ctx)->isClassOrModuleModule() || c2 == nullptr) {
                 return AndType::make_shared(t1, t2);
             }
             if (a1->klass.data(ctx)->derivesFrom(ctx, c2->symbol)) {
                 return t1;
             }
-            if (c2->symbol.data(ctx)->isClassModule()) {
+            if (c2->symbol.data(ctx)->isClassOrModuleModule()) {
                 return AndType::make_shared(t1, t2);
             }
             return Types::bottom();
@@ -817,7 +817,7 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
         bool rtl = a1->klass == a2->klass || a1->klass.data(ctx)->derivesFrom(ctx, a2->klass);
         bool ltr = !rtl && a2->klass.data(ctx)->derivesFrom(ctx, a1->klass);
         if (!rtl && !ltr) {
-            if (a1->klass.data(ctx)->isClassClass() && a2->klass.data(ctx)->isClassClass()) {
+            if (a1->klass.data(ctx)->isClassOrModuleClass() && a2->klass.data(ctx)->isClassOrModuleClass()) {
                 // At this point, the two types are both classes, and unrelated
                 // to each other. Because ruby does not support multiple
                 // inheritance, this type is empty.
@@ -909,8 +909,8 @@ TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
 }
 
 bool classSymbolIsAsGoodAs(Context ctx, SymbolRef c1, SymbolRef c2) {
-    ENFORCE(c1.data(ctx)->isClass());
-    ENFORCE(c2.data(ctx)->isClass());
+    ENFORCE(c1.data(ctx)->isClassOrModule());
+    ENFORCE(c2.data(ctx)->isClassOrModule());
     return c1 == c2 || c1.data(ctx)->derivesFrom(ctx, c2);
 }
 

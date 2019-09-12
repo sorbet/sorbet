@@ -584,8 +584,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             makeField("completionProvider", makeOptional(CompletionOptions)),
             makeField("signatureHelpProvider", makeOptional(SignatureHelpOptions)),
             makeField("definitionProvider", makeOptional(JSONBool)),
-            makeField("typeDefinitionProvider",
-                      makeOptional(makeVariant({JSONBool, TextDocumentAndStaticRegistrationOptions}))),
+            makeField("typeDefinitionProvider", makeOptional(JSONBool)),
             makeField("implementationProvider",
                       makeOptional(makeVariant({JSONBool, TextDocumentAndStaticRegistrationOptions}))),
             makeField("referencesProvider", makeOptional(JSONBool)),
@@ -1330,6 +1329,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "textDocument/codeAction",
                                      "textDocument/completion",
                                      "textDocument/definition",
+                                     "textDocument/typeDefinition",
                                      "textDocument/didChange",
                                      "textDocument/didClose",
                                      "textDocument/didOpen",
@@ -1350,6 +1350,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"shutdown", makeOptional(JSONNull)},
                                                 {"textDocument/documentSymbol", DocumentSymbolParams},
                                                 {"textDocument/definition", TextDocumentPositionParams},
+                                                {"textDocument/typeDefinition", TextDocumentPositionParams},
                                                 {"textDocument/hover", TextDocumentPositionParams},
                                                 {"textDocument/completion", CompletionParams},
                                                 {"textDocument/references", ReferenceParams},
@@ -1377,6 +1378,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             // Location | Location[] | LocationLink[] | null
             // Sorbet only uses Location[].
             {"textDocument/definition", makeVariant({JSONNull, makeArray(Location)})},
+            {"textDocument/typeDefinition", makeVariant({JSONNull, makeArray(Location)})},
             {"textDocument/hover", makeVariant({JSONNull, Hover})},
             // CompletionItem[] | CompletionList | null
             // Sorbet only sends CompletionList.

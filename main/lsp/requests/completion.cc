@@ -209,7 +209,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
         resultType = core::Types::untypedUntracked();
     }
     if (what.data(gs)->isMethod()) {
-        item->kind = CompletionItemKind::Function;
+        item->kind = CompletionItemKind::Method;
         if (what.exists()) {
             item->detail = methodDetail(gs, what, receiverType, nullptr, constraint);
         }
@@ -226,16 +226,17 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
             documentation =
                 findDocumentation(what.data(gs)->loc().file().data(gs).source(), what.data(gs)->loc().beginPos());
         }
-        if (documentation) {
+        if (documentation != nullopt) {
             if (documentation->find("@deprecated") != documentation->npos) {
                 item->deprecated = true;
             }
-            item->documentation = documentation;
+            item->documentation =
+                make_unique<MarkupContent>(config.clientCompletionItemMarkupKind, documentation.value());
         }
     } else if (what.data(gs)->isStaticField()) {
         item->kind = CompletionItemKind::Constant;
         item->detail = resultType->show(gs);
-    } else if (what.data(gs)->isClass()) {
+    } else if (what.data(gs)->isClassOrModule()) {
         item->kind = CompletionItemKind::Class;
     }
     return item;
@@ -251,7 +252,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
             owner = owner.data(gs)->owner;
             for (auto member : owner.data(gs)->membersStableOrderSlow(gs)) {
                 auto sym = member.second;
-                if (sym.exists() && (sym.data(gs)->isClass() || sym.data(gs)->isStaticField()) &&
+                if (sym.exists() && (sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField()) &&
                     sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                     // hide singletons
                     hasSimilarName(gs, sym.data(gs)->name, pattern)) {
@@ -304,10 +305,10 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
                     }
                     return leftPair.first._id < rightPair.first._id;
                 });
-                for (auto &entry : methodsSorted) {
-                    if (entry.second[0].exists()) {
-                        fast_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                        items.push_back(getCompletionItem(*gs, entry.second[0], receiverType,
+                for (auto &[methodName, methodSymbols] : methodsSorted) {
+                    if (methodSymbols[0].exists()) {
+                        fast_sort(methodSymbols, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
+                        items.push_back(getCompletionItem(*gs, methodSymbols[0], receiverType,
                                                           sendResp->dispatchResult->main.constr));
                     }
                 }
