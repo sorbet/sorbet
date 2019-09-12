@@ -282,44 +282,46 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
-    } else {
-        auto &queryResponses = result.responses;
-        vector<unique_ptr<CompletionItem>> items;
-        if (!queryResponses.empty()) {
-            auto resp = move(queryResponses[0]);
-
-            if (auto sendResp = resp->isSend()) {
-                auto pattern = sendResp->callerSideName.data(*gs)->shortName(*gs);
-                auto receiverType = sendResp->dispatchResult->main.receiver;
-                logger->debug("Looking for method similar to {}", pattern);
-                UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
-                    findSimilarMethodsIn(*gs, receiverType, pattern);
-                vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
-                methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
-                                     make_move_iterator(methods.end()));
-                fast_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
-                    auto leftShortName = leftPair.first.data(*gs)->shortName(*gs);
-                    auto rightShortName = rightPair.first.data(*gs)->shortName(*gs);
-                    if (leftShortName != rightShortName) {
-                        return leftShortName < rightShortName;
-                    }
-                    return leftPair.first._id < rightPair.first._id;
-                });
-                for (auto &[methodName, methodSymbols] : methodsSorted) {
-                    if (methodSymbols[0].exists()) {
-                        fast_sort(methodSymbols, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                        items.push_back(getCompletionItem(*gs, methodSymbols[0], receiverType,
-                                                          sendResp->dispatchResult->main.constr));
-                    }
-                }
-            } else if (auto identResp = resp->isIdent()) {
-                findSimilarConstantOrIdent(*gs, identResp->retType.type, items);
-            } else if (auto constantResp = resp->isConstant()) {
-                findSimilarConstantOrIdent(*gs, constantResp->retType.type, items);
-            }
-        }
-        response->result = make_unique<CompletionList>(false, move(items));
+        return LSPResult::make(move(gs), move(response));
     }
+
+    auto &queryResponses = result.responses;
+    vector<unique_ptr<CompletionItem>> items;
+    if (!queryResponses.empty()) {
+        auto resp = move(queryResponses[0]);
+
+        if (auto sendResp = resp->isSend()) {
+            auto pattern = sendResp->callerSideName.data(*gs)->shortName(*gs);
+            auto receiverType = sendResp->dispatchResult->main.receiver;
+            logger->debug("Looking for method similar to {}", pattern);
+            UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
+                findSimilarMethodsIn(*gs, receiverType, pattern);
+            vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
+            methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
+                                 make_move_iterator(methods.end()));
+            fast_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
+                auto leftShortName = leftPair.first.data(*gs)->shortName(*gs);
+                auto rightShortName = rightPair.first.data(*gs)->shortName(*gs);
+                if (leftShortName != rightShortName) {
+                    return leftShortName < rightShortName;
+                }
+                return leftPair.first._id < rightPair.first._id;
+            });
+            for (auto &[methodName, methodSymbols] : methodsSorted) {
+                if (methodSymbols[0].exists()) {
+                    fast_sort(methodSymbols, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
+                    items.push_back(
+                        getCompletionItem(*gs, methodSymbols[0], receiverType, sendResp->dispatchResult->main.constr));
+                }
+            }
+        } else if (auto identResp = resp->isIdent()) {
+            findSimilarConstantOrIdent(*gs, identResp->retType.type, items);
+        } else if (auto constantResp = resp->isConstant()) {
+            findSimilarConstantOrIdent(*gs, constantResp->retType.type, items);
+        }
+    }
+
+    response->result = make_unique<CompletionList>(false, move(items));
     return LSPResult::make(move(gs), move(response));
 }
 
