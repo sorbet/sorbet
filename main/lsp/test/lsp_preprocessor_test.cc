@@ -280,7 +280,10 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
     string fileV3 = "# typed: true\ndef foo; 1 + 2; end";
     // V3 => V4: Fast path
     string fileV4 = "# typed: true\ndef foo; 1 + 3; end";
+    // V4 => V5: Slow path
+    string fileV5 = "# typed: true\ndef foo2; 1 + 3; end";
     int id = 0;
+    string barV1 = "2+3+4";
 
     preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", 1, fileV1), mtx);
     preprocessor.preprocessAndEnqueue(state, makeHoverReq(id++, "foo.rb", 0, 0), mtx);
@@ -291,7 +294,7 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 4, fileV4), mtx);
     preprocessor.preprocessAndEnqueue(state, makeHoverReq(id++, "foo.rb", 0, 0), mtx);
     // New file. Should not be present in any cloned global states for earlier edits.
-    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", 1, "2+3+4"), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", 1, barV1), mtx);
 
     // Cancel hover requests, and ensure that initialGS has the proper value of foo.rb
     vector<pair<int, string>> entries = {
@@ -313,14 +316,16 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
         // bar.rb shouldn't be defined for this earlier file update.
         EXPECT_EQ(gs.findFileByPath("bar.rb").data(gs).source(), "");
     }
+
+    // Push a new edit that takes the slow path.
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 5, fileV5), mtx);
+    {
+        // Ensure GS for new edit has all previous edits.
+        const auto [updates, counts] = getUpdates(state, state.pendingRequests.size() - 1).value();
+        ASSERT_FALSE(updates->canTakeFastPath);
+        const auto &gs = *updates->updatedGS.value();
+        EXPECT_EQ(gs.findFileByPath("foo.rb").data(gs).source(), fileV5);
+        EXPECT_EQ(gs.findFileByPath("bar.rb").data(gs).source(), barV1);
+    }
 }
-// getTypecheckingGS: How often does it happen?
-// canTakeFastPath: Ditto.
-
-// TODO: Add in ENFORCEs to make sure preprocessor used from correct thread.
-// TODO2: Add in ENFORCEs to sanity check merged updates.
-// Doesn't deepCopy GS if `from` takes slow path.
-// Only indexes new files. Doesn't re-index later.
-// --> Alternatively, indexes match? Hashes match?
-
 } // namespace sorbet::realmain::lsp::test

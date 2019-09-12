@@ -41,9 +41,10 @@ private:
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     std::unique_ptr<core::GlobalState> gs;
 
-    // Indicates the current version of `gs`.
+    // Indicates the current version of `gs`. May be a version that comes before `latestVersion` if `gs` has traveled
+    // back in time.
     int activeVersion = 0;
-    // Indicates the last version committed to `gs` and present in the log.
+    // Indicates the version number of the latest file update encountered. It has been committed to the `log`.
     int latestVersion = 0;
 
     // Get all updates that fall within the range (start, end), exclusive of endpoints.
