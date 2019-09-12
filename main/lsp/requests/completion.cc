@@ -294,12 +294,9 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
             auto pattern = sendResp->callerSideName.data(*gs)->shortName(*gs);
             auto receiverType = sendResp->dispatchResult->main.receiver;
             logger->debug("Looking for method similar to {}", pattern);
-            UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
-                findSimilarMethodsIn(*gs, receiverType, pattern);
-            vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
-            methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
-                                 make_move_iterator(methods.end()));
-            fast_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
+            auto methodsMap = findSimilarMethodsIn(*gs, receiverType, pattern);
+            auto methods = vector<pair<core::NameRef, vector<core::SymbolRef>>>(methodsMap.begin(), methodsMap.end());
+            fast_sort(methods, [&](auto leftPair, auto rightPair) -> bool {
                 auto leftShortName = leftPair.first.data(*gs)->shortName(*gs);
                 auto rightShortName = rightPair.first.data(*gs)->shortName(*gs);
                 if (leftShortName != rightShortName) {
@@ -307,7 +304,7 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
                 }
                 return leftPair.first._id < rightPair.first._id;
             });
-            for (auto &[methodName, methodSymbols] : methodsSorted) {
+            for (auto &[methodName, methodSymbols] : methods) {
                 if (methodSymbols[0].exists()) {
                     fast_sort(methodSymbols, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
                     items.push_back(
