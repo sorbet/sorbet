@@ -7,49 +7,6 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-UnorderedMap<core::NameRef, vector<core::SymbolRef>>
-mergeMaps(UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&first,
-          UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&second) {
-    for (auto &other : second) {
-        first[other.first].insert(first[other.first].end(), make_move_iterator(other.second.begin()),
-                                  make_move_iterator(other.second.end()));
-    }
-    return std::move(first);
-};
-
-UnorderedMap<core::NameRef, vector<core::SymbolRef>> findSimilarMethodsIn(const core::GlobalState &gs,
-                                                                          core::TypePtr receiver, string_view name) {
-    UnorderedMap<core::NameRef, vector<core::SymbolRef>> result;
-    typecase(
-        receiver.get(),
-        [&](core::ClassType *c) {
-            const auto &owner = c->symbol.data(gs);
-            for (auto member : owner->membersStableOrderSlow(gs)) {
-                auto sym = member.second;
-                if (sym.data(gs)->isMethod() && hasSimilarName(gs, sym.data(gs)->name, name)) {
-                    result[sym.data(gs)->name].emplace_back(sym);
-                }
-            }
-            for (auto mixin : owner->mixins()) {
-                result = mergeMaps(std::move(result),
-                                   findSimilarMethodsIn(gs, core::make_type<core::ClassType>(mixin), name));
-            }
-            if (owner->superClass().exists()) {
-                result =
-                    mergeMaps(std::move(result),
-                              findSimilarMethodsIn(gs, core::make_type<core::ClassType>(owner->superClass()), name));
-            }
-        },
-        [&](core::AndType *c) {
-            result = mergeMaps(findSimilarMethodsIn(gs, c->left, name), findSimilarMethodsIn(gs, c->right, name));
-        },
-        [&](core::AppliedType *c) {
-            result = findSimilarMethodsIn(gs, core::make_type<core::ClassType>(c->klass), name);
-        },
-        [&](core::ProxyType *c) { result = findSimilarMethodsIn(gs, c->underlying(), name); },
-        [&](core::Type *c) { return; });
-    return result;
-}
 namespace {
 
 string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
@@ -175,8 +132,7 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
             auto pattern = sendResp->callerSideName.data(*gs)->shortName(*gs);
             auto receiverType = sendResp->dispatchResult->main.receiver;
             logger->debug("Looking for method similar to {}", pattern);
-            auto methodsMap = findSimilarMethodsIn(*gs, receiverType, pattern);
-            auto methods = vector<pair<core::NameRef, vector<core::SymbolRef>>>(methodsMap.begin(), methodsMap.end());
+            auto methods = vector<pair<core::NameRef, vector<core::SymbolRef>>>{};
             fast_sort(methods, [&](auto leftPair, auto rightPair) -> bool {
                 auto leftShortName = leftPair.first.data(*gs)->shortName(*gs);
                 auto rightShortName = rightPair.first.data(*gs)->shortName(*gs);
