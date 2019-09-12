@@ -13,7 +13,7 @@ using namespace std;
 namespace sorbet::test {
 // Matches '    #    ^^^^^ label: dafhdsjfkhdsljkfh*&#&*%'
 // and '    # label: foobar'.
-const regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z-]+):[ ]+(.*)$");
+const regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z-]+): (.*)$");
 
 const regex whitespaceRegex("^[ ]*$");
 

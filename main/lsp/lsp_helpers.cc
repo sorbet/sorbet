@@ -67,7 +67,7 @@ bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view
 }
 
 // iff a sig has more than this many parameters, then print it as a multi-line sig.
-constexpr int MULTI_LINE_CUTOFF = 4;
+constexpr int NUM_ARGS_CUTOFF_FOR_MULTILINE_SIG = 4;
 
 string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
                     const unique_ptr<core::TypeConstraint> &constraint) {
@@ -122,7 +122,7 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
 
     string flagString = "";
     string paramsString = "";
-    if (typeAndArgNames.size() > MULTI_LINE_CUTOFF) {
+    if (typeAndArgNames.size() > NUM_ARGS_CUTOFF_FOR_MULTILINE_SIG) {
         if (!flags.empty()) {
             flagString = fmt::format("{}\n  .", fmt::join(flags, "\n  ."));
         }
@@ -140,6 +140,72 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
         }
         return fmt::format("{}{} {{{}{}{}}}", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
     }
+}
+
+// iff a `def` would be this wide or wider, expand it to be a multi-line def.
+constexpr int WIDTH_CUTOFF_FOR_MULTILINE_DEF = 80;
+
+string methodDefinition(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
+                        core::TypePtr retType, const unique_ptr<core::TypeConstraint> &constraint) {
+    ENFORCE(method.exists());
+    // handle this case anyways so that we don't crash in prod when this method is mis-used
+    if (!method.exists()) {
+        return "";
+    }
+    auto methodData = method.data(gs);
+
+    auto methodNameRef = methodData->name;
+    ENFORCE(methodNameRef.exists());
+    string methodName = "???";
+    if (methodNameRef.exists()) {
+        methodName = methodNameRef.data(gs)->toString(gs);
+    }
+    string methodNamePrefix = "";
+    if (methodData->owner.exists() && methodData->owner.data(gs)->isClassOrModule() &&
+        methodData->owner.data(gs)->attachedClass(gs).exists()) {
+        methodNamePrefix = "self.";
+    }
+    vector<string> arguments;
+    for (auto &argSym : methodData->arguments()) {
+        // Don't display synthetic arguments (like blk).
+        if (argSym.isSyntheticBlockArgument()) {
+            continue;
+        }
+        string prefix = "";
+        string suffix = "";
+        if (argSym.flags.isKeyword) {
+            if (argSym.flags.isDefault) {
+                suffix = ":…"; // optional keyword (has a default value)
+            } else {
+                suffix = ":"; // required keyword
+            }
+        } else if (argSym.flags.isRepeated) {
+            prefix = "*";
+        } else if (argSym.flags.isBlock) {
+            prefix = "&";
+        }
+        arguments.emplace_back(fmt::format("{}{}{}", prefix, argSym.argumentName(gs), suffix));
+    }
+
+    string argListPrefix = "";
+    string argListSeparator = "";
+    string argListSuffix = "";
+    if (arguments.size() > 0) {
+        argListPrefix = "(";
+        argListSeparator = ", ";
+        argListSuffix = ")";
+    }
+
+    auto result = fmt::format("def {}{}{}{}{}", methodNamePrefix, methodName, argListPrefix,
+                              fmt::join(arguments, argListSeparator), argListSuffix);
+    if (arguments.size() > 0 && result.length() >= WIDTH_CUTOFF_FOR_MULTILINE_DEF) {
+        argListPrefix = "(\n  ";
+        argListSeparator = ",\n  ";
+        argListSuffix = "\n)";
+        result = fmt::format("def {}{}{}{}{}", methodNamePrefix, methodName, argListPrefix,
+                             fmt::join(arguments, argListSeparator), argListSuffix);
+    }
+    return result;
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,

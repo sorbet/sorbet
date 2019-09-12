@@ -6,9 +6,9 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &retType,
-                             const core::DispatchResult &dispatchResult,
-                             const unique_ptr<core::TypeConstraint> &constraint) {
+string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retType,
+                        const core::DispatchResult &dispatchResult,
+                        const unique_ptr<core::TypeConstraint> &constraint) {
     string contents = "";
     auto start = &dispatchResult;
     ;
@@ -16,9 +16,11 @@ string methodSignatureString(const core::GlobalState &gs, const core::TypePtr &r
         auto &dispatchComponent = start->main;
         if (dispatchComponent.method.exists()) {
             if (!contents.empty()) {
-                contents += " ";
+                contents += "\n";
             }
-            contents += methodDetail(gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint);
+            contents = absl::StrCat(
+                contents, methodDetail(gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint),
+                "\n", methodDefinition(gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint));
         }
         start = start->secondary.get();
     }
@@ -87,9 +89,9 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             if (constraint) {
                 retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
             }
-            response->result = make_unique<Hover>(formatHoverText(
-                config.clientHoverMarkupKind,
-                methodSignatureString(*gs, retType, *sendResp->dispatchResult, constraint), documentation));
+            auto methodInfo = methodInfoString(*gs, retType, *sendResp->dispatchResult, constraint);
+            response->result =
+                make_unique<Hover>(formatHoverText(config.clientHoverMarkupKind, methodInfo, documentation));
         } else if (auto defResp = resp->isDefinition()) {
             response->result = make_unique<Hover>(formatHoverText(
                 config.clientHoverMarkupKind,
