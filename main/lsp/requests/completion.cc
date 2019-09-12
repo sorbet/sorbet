@@ -46,21 +46,6 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> findSimilarMethodsIn(const 
         [&](core::AndType *c) {
             result = mergeMaps(findSimilarMethodsIn(gs, c->left, name), findSimilarMethodsIn(gs, c->right, name));
         },
-        [&](core::OrType *c) {
-            auto lhs = findSimilarMethodsIn(gs, c->left, name);
-            auto rhs = findSimilarMethodsIn(gs, c->right, name);
-            for (auto it = rhs.begin(); it != rhs.end(); /*nothing*/) {
-                auto &other = *it;
-                auto fnd = lhs.find(other.first);
-                if (fnd == lhs.end()) {
-                    rhs.erase(it++);
-                } else {
-                    it->second.insert(it->second.end(), make_move_iterator(fnd->second.begin()),
-                                      make_move_iterator(fnd->second.end()));
-                    ++it;
-                }
-            }
-        },
         [&](core::AppliedType *c) {
             result = findSimilarMethodsIn(gs, core::make_type<core::ClassType>(c->klass), name);
         },
