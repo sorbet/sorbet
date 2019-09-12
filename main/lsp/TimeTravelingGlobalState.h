@@ -15,6 +15,7 @@ namespace sorbet::realmain::lsp {
  * A class that encloses a global state and allows one to 'time-travel' it between versions.
  * It also time-travels an array of file hashes corresponding to the files in the time-traveled global state.
  * Updates cannot be re-ordered, so updates that are undone are assumed to eventually become re-applied.
+ * Progressing past `index` isn't supported. Actual naming/resolving/typechecking should be done on deep copies
  */
 class TimeTravelingGlobalState final {
 private:
