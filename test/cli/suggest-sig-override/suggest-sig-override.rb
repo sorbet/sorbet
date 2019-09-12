@@ -11,7 +11,6 @@ extend T::Sig
 # - overridable
 # - abstract
 # - override
-# - implementation
 
 class ParentNoSig
   extend T::Sig
@@ -73,7 +72,7 @@ class GrandParentImplementation
   def foo; end
 end
 class ParentImplementation < GrandParentImplementation
-  sig {implementation.void}
+  sig {override.void}
   def foo; end
 end
 class ChildImplementation < ParentImplementation

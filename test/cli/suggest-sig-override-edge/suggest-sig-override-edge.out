@@ -16,49 +16,49 @@ class ParentNeedsOverridable
   # Every sig here should have `generated.overridable.` added to it.
   extend T::Sig
 
-  sig {implementation.generated.overridable.void}
-  def just_void; end
-
-  sig {implementation.generated.overridable.returns(NilClass)}
-  def just_returns; end
-
-  sig {implementation.params(x: Integer).generated.overridable.void}
-  def x_to_void(x); end
-
-  sig {implementation.params(x: Integer).generated.overridable.returns(NilClass)}
-  def x_to_returns(x); end
-
-  sig do
-    implementation
-    .params(x: Integer)
-    .generated.overridable.void
-  end
-  def multiline_x_to_void(x); end
-
-  sig do
-    implementation
-    .params(x: Integer)
-    .generated.overridable.returns(NilClass)
-  end
-  def multiline_x_to_returns(x); end
-end
-class ChildForcesOverridable < ParentNeedsOverridable
   sig {override.void}
   def just_void; end
 
   sig {override.returns(NilClass)}
   def just_returns; end
 
-  sig {params(x: Integer).override.void}
+  sig {override.params(x: Integer).void}
   def x_to_void(x); end
 
-  sig {params(x: Integer).override.returns(NilClass)}
+  sig {override.params(x: Integer).returns(NilClass)}
   def x_to_returns(x); end
 
-  sig {params(x: Integer).override.void}
+  sig do
+    override
+    .params(x: Integer)
+    .void
+  end
   def multiline_x_to_void(x); end
 
-  sig {params(x: Integer).override.returns(NilClass)}
+  sig do
+    override
+    .params(x: Integer)
+    .returns(NilClass)
+  end
+  def multiline_x_to_returns(x); end
+end
+class ChildForcesOverridable < ParentNeedsOverridable
+  sig {void}
+  def just_void; end
+
+  sig {returns(NilClass)}
+  def just_returns; end
+
+  sig {params(x: Integer).void}
+  def x_to_void(x); end
+
+  sig {params(x: Integer).returns(NilClass)}
+  def x_to_returns(x); end
+
+  sig {params(x: Integer).void}
+  def multiline_x_to_void(x); end
+
+  sig {params(x: Integer).returns(NilClass)}
   def multiline_x_to_returns(x); end
 end
 
@@ -80,7 +80,7 @@ end
 
 # Doesn't need generated because parent already has overridable
 class DoesntNeedGenerated
-  sig {implementation.overridable.void}
+  sig {override.overridable.void}
   def already_overridable; end
 end
 

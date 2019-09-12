@@ -319,7 +319,7 @@
             "children": [
                 {
                     "name": "sum_many",
-                    "detail": "sig do\n  implementation\n  .params(\n    first: Integer,\n    second: Integer,\n    third: Integer,\n    fourth: Integer,\n    fifth: Integer\n  )\n  .returns(Integer)\nend",
+                    "detail": "sig do\n  override\n  .params(\n    first: Integer,\n    second: Integer,\n    third: Integer,\n    fourth: Integer,\n    fifth: Integer\n  )\n  .returns(Integer)\nend",
                     "kind": 6,
                     "range": {
                         "start": {
