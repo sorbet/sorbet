@@ -38,7 +38,9 @@ docs about Stripe-specific development workflows and historical Stripe context.
   - [CLI tests](#cli-tests)
   - [LSP tests](#lsp-tests)
     - [Testing "Find Definition" and "Find All References"](#testing-find-definition-and-find-all-references)
+    - [Testing "Go to Type Definition"](#testing-go-to-type-definition)
     - [Testing hover](#testing-hover)
+    - [Testing completion](#testing-completion)
     - [Testing incremental typechecking](#testing-incremental-typechecking)
   - [LSP recorded tests](#lsp-recorded-tests)
   - [Updating tests](#updating-tests)
@@ -49,6 +51,7 @@ docs about Stripe-specific development workflows and historical Stripe context.
 - [Writing docs](#writing-docs)
 - [Editor and environment](#editor-and-environment)
   - [Bazel](#bazel)
+  - [Multiple git worktrees](#multiple-git-worktrees)
   - [Shell](#shell)
   - [Formatting files](#formatting-files)
   - [Editor setup for C++](#editor-setup-for-c)
@@ -502,8 +505,21 @@ as if the cursor is like this: `foo│`. If the `^` had been directly under the
 last `o`, it would have been like this: `fo|o`. Only the first `^` is used. If
 you use `^^^` in the assertion, the test harness will use only the first caret.
 
-Right now, the assertion must contain every item in the completion result, and
-it must be in order. This will become more ergonomic over time.
+You can also write a test for a partial prefix of the completion results:
+
+```ruby
+class A
+  def self.foo_1; end
+  def self.foo_2; end
+
+  foo
+#    ^ completion: foo_1, ...
+end
+```
+
+Add the `, ...` suffix to the end of a partial list of completion results, and
+the test harness will ensure that the listed functions match a prefix of the
+completion items. This prefix must still be listed in order.
 
 #### Testing incremental typechecking
 
