@@ -216,7 +216,10 @@ void TimeTravelingGlobalState::commitEdits(int version, LSPFileUpdates &update) 
     log.push_back(move(newUpdate));
 
     // Index changes.
-    update.updatedFileIndexes = pipeline::index(gs, frefs, config.opts, workers, kvstore);
+    // TODO: Use pipeline::index for parallelism. Currently, it sorts output by file id.
+    for (auto fref : frefs) {
+        update.updatedFileIndexes.push_back(pipeline::indexOne(config.opts, *gs, fref, kvstore));
+    }
 
     // Clear error queue.
     // (Note: Flushing is disabled in LSP mode, so we have to drain.)

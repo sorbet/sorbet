@@ -53,7 +53,7 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
             it++;
             continue;
         }
-        smallestId = min(nextMessageId, msg.internalId.value_or(0));
+        smallestId = min(smallestId, msg.internalId.value_or(0));
         auto &msgParams = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
         // See which newer requests we can enqueue. We want to merge them *backwards* into msgParams.
         it++;
@@ -358,10 +358,11 @@ void LSPPreprocessor::canonicalizeEdits(unique_ptr<WatchmanQueryResponse> queryR
 }
 
 void LSPPreprocessor::mergeEdits(int toId, LSPFileUpdates &to, int fromId, LSPFileUpdates &from) {
+    ENFORCE(sanityCheckUpdate(ttgs.getGlobalState(), to));
+    ENFORCE(sanityCheckUpdate(ttgs.getGlobalState(), from));
+
     // fromId must happen *after* toId.
     ENFORCE(ttgs.comesBefore(toId, fromId));
-    ENFORCE(to.updatedFiles.size() == to.updatedFileHashes.size());
-    ENFORCE(to.updatedFileHashes.size() == to.updatedFileIndexes.size());
     // 'from' has newer updates, so merge into from and then move into to.
     UnorderedSet<int> encounteredFiles;
     for (auto &index : from.updatedFileIndexes) {
