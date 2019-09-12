@@ -58,8 +58,8 @@ private:
     // the client.
     std::shared_ptr<core::ErrorQueue> finalGSErrorQueue;
 
-    // Indicates the next ID to use on an incoming message. Used to refer to messages by ID.
-    int nextMessageId = 1;
+    // Indicates the next version to use on an incoming edit. Used to refer to edits by ID.
+    u4 nextVersion = 1;
 
     /**
      * Merges all consecutive file updates into a single update. File updates are also merged if they are only separated
@@ -77,11 +77,13 @@ private:
 
     /* The following methods convert edits into LSPFileUpdates. */
 
-    void canonicalizeEdits(std::unique_ptr<DidChangeTextDocumentParams> changeParams, LSPFileUpdates &updates) const;
-    void canonicalizeEdits(std::unique_ptr<DidOpenTextDocumentParams> openParams, LSPFileUpdates &updates) const;
-    void canonicalizeEdits(std::unique_ptr<DidCloseTextDocumentParams> closeParams, LSPFileUpdates &updates) const;
-    void canonicalizeEdits(std::unique_ptr<WatchmanQueryResponse> queryResponse, LSPFileUpdates &updates) const;
-    void mergeEdits(int toId, LSPFileUpdates &to, int fromId, LSPFileUpdates &from);
+    void canonicalizeEdits(u4 v, std::unique_ptr<DidChangeTextDocumentParams> changeParams,
+                           LSPFileUpdates &updates) const;
+    void canonicalizeEdits(u4 v, std::unique_ptr<DidOpenTextDocumentParams> openParams, LSPFileUpdates &updates) const;
+    void canonicalizeEdits(u4 v, std::unique_ptr<DidCloseTextDocumentParams> closeParams,
+                           LSPFileUpdates &updates) const;
+    void canonicalizeEdits(u4 v, std::unique_ptr<WatchmanQueryResponse> queryResponse, LSPFileUpdates &updates) const;
+    void mergeEdits(LSPFileUpdates &to, LSPFileUpdates &from);
 
     /**
      * Returns a global state for typechecking, cloned from initialGS. Note: The clone does not share an error queue

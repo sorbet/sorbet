@@ -29,12 +29,12 @@ bool sanityCheckUpdate(const core::GlobalState &gs, const LSPFileUpdates &update
 }
 } // namespace
 
-constexpr int INITIAL_VERSION = 0;
+constexpr u4 INITIAL_VERSION = 0;
 
 LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPConfiguration config, WorkerPool &workers,
                                  const std::shared_ptr<spdlog::logger> &logger)
     : ttgs(TimeTravelingGlobalState(config, logger, workers, move(initialGS), INITIAL_VERSION)), config(move(config)),
-      workers(workers), logger(logger), owner(this_thread::get_id()), nextMessageId(INITIAL_VERSION + 1) {
+      workers(workers), logger(logger), owner(this_thread::get_id()), nextVersion(INITIAL_VERSION + 1) {
     const auto &gs = ttgs.getGlobalState();
     finalGSErrorQueue = make_shared<core::ErrorQueue>(gs.errorQueue->logger, gs.errorQueue->tracer);
     // Required for diagnostics to work.
@@ -42,25 +42,23 @@ LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPCon
 }
 
 void LSPPreprocessor::mergeFileChanges(QueueState &state) {
-    int smallestId = nextMessageId;
+    u4 earliestVersionInQueue = nextVersion;
     auto &pendingRequests = state.pendingRequests;
     const int originalSize = pendingRequests.size();
     int requestsMergedCounter = 0;
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
         auto &msg = **it;
-        ENFORCE(msg.internalId.has_value());
         if (!msg.isNotification() || msg.method() != LSPMethod::SorbetWorkspaceEdit) {
             it++;
             continue;
         }
-        smallestId = min(smallestId, msg.internalId.value_or(0));
         auto &msgParams = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
         // See which newer requests we can enqueue. We want to merge them *backwards* into msgParams.
+        earliestVersionInQueue = min(earliestVersionInQueue, msgParams->updates.version);
         it++;
         while (it != pendingRequests.end()) {
             auto &mergeMsg = **it;
             const bool canMerge = mergeMsg.isNotification() && mergeMsg.method() == LSPMethod::SorbetWorkspaceEdit;
-            ENFORCE(mergeMsg.internalId.has_value());
             if (!canMerge) {
                 if (mergeMsg.isDelayable()) {
                     ++it;
@@ -74,12 +72,7 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
             // Merge updates, timers, and tracers.
             auto &mergeableParams = get<unique_ptr<SorbetWorkspaceEditParams>>(mergeMsg.asNotification().params);
             msgParams->counts->merge(*mergeableParams->counts);
-            const int toId = msg.internalId.value_or(0);
-            const int fromId = mergeMsg.internalId.value_or(0);
-            mergeEdits(toId, msgParams->updates, fromId, mergeableParams->updates);
-            // Use largest ID in the sequence for this message's ID for time-traveling purposes (as this message
-            // contains edits up to the largest version).
-            msg.internalId = max(toId, fromId);
+            mergeEdits(msgParams->updates, mergeableParams->updates);
             msg.timers.insert(msg.timers.end(), make_move_iterator(mergeMsg.timers.begin()),
                               make_move_iterator(mergeMsg.timers.end()));
             msg.startTracers.insert(msg.startTracers.end(), mergeMsg.startTracers.begin(), mergeMsg.startTracers.end());
@@ -89,7 +82,7 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
         }
     }
     // Prune history for all messages no longer in queue.
-    ttgs.pruneBefore(smallestId);
+    ttgs.pruneBefore(earliestVersionInQueue);
     ENFORCE(pendingRequests.size() + requestsMergedCounter == originalSize);
 }
 
@@ -117,15 +110,12 @@ unique_ptr<core::GlobalState> LSPPreprocessor::getTypecheckingGS() const {
 unique_ptr<LSPMessage> LSPPreprocessor::makeAndCommitWorkspaceEdit(unique_ptr<SorbetWorkspaceEditParams> params,
                                                                    unique_ptr<SorbetWorkspaceEditCounts> counts,
                                                                    unique_ptr<LSPMessage> oldMsg) {
-    const int id = oldMsg->internalId.value_or(0);
-    ttgs.commitEdits(id, params->updates);
+    ttgs.commitEdits(params->updates);
     if (!params->updates.canTakeFastPath) {
         params->updates.updatedGS = getTypecheckingGS();
     }
     auto newMsg =
         make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWorkspaceEdit, move(params)));
-    newMsg->internalId = id;
-    ENFORCE(newMsg->internalId.has_value());
     newMsg->timers = move(oldMsg->timers);
     newMsg->startTracers = move(oldMsg->startTracers);
     return newMsg;
@@ -133,8 +123,6 @@ unique_ptr<LSPMessage> LSPPreprocessor::makeAndCommitWorkspaceEdit(unique_ptr<So
 
 void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMessage> msg, absl::Mutex &stateMtx) {
     ENFORCE(owner == this_thread::get_id());
-    ENFORCE(!msg->internalId.has_value());
-    msg->internalId = nextMessageId++;
     if (msg->isResponse()) {
         return;
     }
@@ -204,7 +192,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
             counts->textDocumentDidOpen++;
             auto newParams = make_unique<SorbetWorkspaceEditParams>(move(counts));
-            canonicalizeEdits(move(params), newParams->updates);
+            canonicalizeEdits(nextVersion++, move(params), newParams->updates);
             msg = makeAndCommitWorkspaceEdit(move(newParams), move(counts), move(msg));
             shouldEnqueue = shouldMerge = true;
             break;
@@ -215,7 +203,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
             counts->textDocumentDidClose++;
             auto newParams = make_unique<SorbetWorkspaceEditParams>(move(counts));
-            canonicalizeEdits(move(params), newParams->updates);
+            canonicalizeEdits(nextVersion++, move(params), newParams->updates);
             msg = makeAndCommitWorkspaceEdit(move(newParams), move(counts), move(msg));
             shouldEnqueue = shouldMerge = true;
             break;
@@ -225,7 +213,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
             counts->textDocumentDidChange++;
             auto newParams = make_unique<SorbetWorkspaceEditParams>(move(counts));
-            canonicalizeEdits(move(params), newParams->updates);
+            canonicalizeEdits(nextVersion++, move(params), newParams->updates);
             msg = makeAndCommitWorkspaceEdit(move(newParams), move(counts), move(msg));
             shouldEnqueue = shouldMerge = true;
             break;
@@ -235,7 +223,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
             counts->sorbetWatchmanFileChange++;
             auto newParams = make_unique<SorbetWorkspaceEditParams>(move(counts));
-            canonicalizeEdits(move(params), newParams->updates);
+            canonicalizeEdits(nextVersion++, move(params), newParams->updates);
             msg = makeAndCommitWorkspaceEdit(move(newParams), move(counts), move(msg));
             shouldEnqueue = shouldMerge = true;
             break;
@@ -287,8 +275,9 @@ string_view getFileContents(LSPFileUpdates &updates, const core::GlobalState &in
     }
 }
 
-void LSPPreprocessor::canonicalizeEdits(unique_ptr<DidChangeTextDocumentParams> changeParams,
+void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentParams> changeParams,
                                         LSPFileUpdates &updates) const {
+    updates.version = v;
     string_view uri = changeParams->textDocument->uri;
     if (absl::StartsWith(uri, config.rootUri)) {
         string localPath = config.remoteName2Local(uri);
@@ -320,8 +309,9 @@ void LSPPreprocessor::canonicalizeEdits(unique_ptr<DidChangeTextDocumentParams> 
     }
 }
 
-void LSPPreprocessor::canonicalizeEdits(unique_ptr<DidOpenTextDocumentParams> openParams,
+void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentParams> openParams,
                                         LSPFileUpdates &updates) const {
+    updates.version = v;
     string_view uri = openParams->textDocument->uri;
     if (absl::StartsWith(uri, config.rootUri)) {
         string localPath = config.remoteName2Local(uri);
@@ -332,8 +322,9 @@ void LSPPreprocessor::canonicalizeEdits(unique_ptr<DidOpenTextDocumentParams> op
     }
 }
 
-void LSPPreprocessor::canonicalizeEdits(unique_ptr<DidCloseTextDocumentParams> closeParams,
+void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentParams> closeParams,
                                         LSPFileUpdates &updates) const {
+    updates.version = v;
     string_view uri = closeParams->textDocument->uri;
     if (absl::StartsWith(uri, config.rootUri)) {
         string localPath = config.remoteName2Local(uri);
@@ -345,8 +336,9 @@ void LSPPreprocessor::canonicalizeEdits(unique_ptr<DidCloseTextDocumentParams> c
     }
 }
 
-void LSPPreprocessor::canonicalizeEdits(unique_ptr<WatchmanQueryResponse> queryResponse,
+void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<WatchmanQueryResponse> queryResponse,
                                         LSPFileUpdates &updates) const {
+    updates.version = v;
     for (auto file : queryResponse->files) {
         // Don't append rootPath if it is empty.
         string localPath = config.rootPath.size() > 0 ? absl::StrCat(config.rootPath, "/", file) : file;
@@ -358,12 +350,12 @@ void LSPPreprocessor::canonicalizeEdits(unique_ptr<WatchmanQueryResponse> queryR
     }
 }
 
-void LSPPreprocessor::mergeEdits(int toId, LSPFileUpdates &to, int fromId, LSPFileUpdates &from) {
+void LSPPreprocessor::mergeEdits(LSPFileUpdates &to, LSPFileUpdates &from) {
     ENFORCE(sanityCheckUpdate(ttgs.getGlobalState(), to));
     ENFORCE(sanityCheckUpdate(ttgs.getGlobalState(), from));
 
     // fromId must happen *after* toId.
-    ENFORCE(ttgs.comesBefore(toId, fromId));
+    ENFORCE(ttgs.comesBefore(to.version, from.version));
     // 'from' has newer updates, so merge into from and then move into to.
     UnorderedSet<int> encounteredFiles;
     for (auto &index : from.updatedFileIndexes) {
@@ -386,9 +378,11 @@ void LSPPreprocessor::mergeEdits(int toId, LSPFileUpdates &to, int fromId, LSPFi
     to.hasNewFiles = to.hasNewFiles || from.hasNewFiles;
 
     // Roll back to just before `to`.
-    ttgs.travel(toId - 1);
+    ttgs.travel(to.version - 1);
 
     to.canTakeFastPath = ttgs.canTakeFastPath(to);
+    // `to` now includes the contents of `from`.
+    to.version = from.version;
     if (to.canTakeFastPath) {
         to.updatedGS = nullopt;
     } else if (from.updatedGS.has_value()) {
@@ -396,7 +390,7 @@ void LSPPreprocessor::mergeEdits(int toId, LSPFileUpdates &to, int fromId, LSPFi
         to.updatedGS = move(from.updatedGS.value());
     } else {
         // Roll forward again so initial GS has changes from this update prior to copying.
-        ttgs.travel(fromId);
+        ttgs.travel(from.version);
         to.updatedGS = getTypecheckingGS();
     }
     ENFORCE(sanityCheckUpdate(ttgs.getGlobalState(), to));

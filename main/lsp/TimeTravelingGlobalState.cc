@@ -8,7 +8,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 TimeTravelingGlobalState::TimeTravelingGlobalState(const LSPConfiguration &config,
                                                    const std::shared_ptr<spdlog::logger> &logger, WorkerPool &workers,
-                                                   unique_ptr<core::GlobalState> gs, int initialVersion)
+                                                   unique_ptr<core::GlobalState> gs, u4 initialVersion)
     : config(config), logger(logger), workers(workers), gs(move(gs)), activeVersion(initialVersion),
       latestVersion(initialVersion) {
     auto errorQueue = dynamic_pointer_cast<core::ErrorQueue>(this->gs->errorQueue);
@@ -45,9 +45,9 @@ vector<core::FileRef> TimeTravelingGlobalState::applyUpdate(TimeTravelUpdate &tt
     return rv;
 }
 
-bool TimeTravelingGlobalState::comesBefore(int a, int b) const {
+bool TimeTravelingGlobalState::comesBefore(u4 a, u4 b) const {
     // The code may request versions up to `latestVersion + 1`, so be one more than that.
-    const int maxVersion = latestVersion + 1;
+    const u4 maxVersion = latestVersion + 1;
     if (b <= maxVersion) {
         // Not in [currentVersion, maxVersion]
         return a < b || a > maxVersion;
@@ -57,8 +57,8 @@ bool TimeTravelingGlobalState::comesBefore(int a, int b) const {
     }
 }
 
-vector<TimeTravelingGlobalState::TimeTravelUpdate *> TimeTravelingGlobalState::updatesBetweenExclusive(int start,
-                                                                                                       int end) {
+vector<TimeTravelingGlobalState::TimeTravelUpdate *> TimeTravelingGlobalState::updatesBetweenExclusive(u4 start,
+                                                                                                       u4 end) {
     ENFORCE(comesBefore(start, end));
     vector<TimeTravelUpdate *> updates;
     for (auto &entry : log) {
@@ -70,12 +70,12 @@ vector<TimeTravelingGlobalState::TimeTravelUpdate *> TimeTravelingGlobalState::u
     return updates;
 }
 
-void TimeTravelingGlobalState::travel(int version) {
+void TimeTravelingGlobalState::travel(u4 version) {
     const bool undo = comesBefore(version, activeVersion);
     // Undo: Undo (version, activeVersion].
     // Redo: Redo (activeVersion, version].
-    const int startVersion = undo ? version : activeVersion;
-    const int endVersion = undo ? activeVersion + 1 : version + 1;
+    const u4 startVersion = undo ? version : activeVersion;
+    const u4 endVersion = undo ? activeVersion + 1 : version + 1;
     auto updates = updatesBetweenExclusive(startVersion, endVersion);
     if (undo) {
         // Apply undos in reverse order (newest to oldest).
@@ -172,7 +172,7 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector
     return res;
 }
 
-void TimeTravelingGlobalState::pruneBefore(int version) {
+void TimeTravelingGlobalState::pruneBefore(u4 version) {
     for (auto it = log.begin(); it != log.end();) {
         if (comesBefore(it->version, version)) {
             it = log.erase(it);
@@ -182,7 +182,7 @@ void TimeTravelingGlobalState::pruneBefore(int version) {
     }
 }
 
-void TimeTravelingGlobalState::commitEdits(int version, LSPFileUpdates &update) {
+void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
     travel(latestVersion);
 
     Timer timeit(logger, "ttgs_commit_edits");
@@ -190,7 +190,7 @@ void TimeTravelingGlobalState::commitEdits(int version, LSPFileUpdates &update) 
     update.updatedFileHashes = computeStateHashes(update.updatedFiles);
     update.canTakeFastPath = canTakeFastPath(update);
 
-    TimeTravelUpdate newUpdate{version};
+    TimeTravelUpdate newUpdate{update.version};
     newUpdate.update.fileUpdates = update.updatedFiles;
     newUpdate.update.hashUpdates = update.updatedFileHashes;
 
@@ -211,7 +211,7 @@ void TimeTravelingGlobalState::commitEdits(int version, LSPFileUpdates &update) 
         }
     }
     auto frefs = applyUpdate(newUpdate, false);
-    latestVersion = version;
+    latestVersion = update.version;
 
     log.push_back(move(newUpdate));
 

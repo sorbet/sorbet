@@ -43,7 +43,7 @@ unique_ptr<core::GlobalState> makeGS(const options::Options &opts = nullOpts) {
 
 static auto nullConfig = makeConfig();
 
-TimeTravelingGlobalState makeTTGS(const LSPConfiguration &config = nullConfig, int initialVersion = 0) {
+TimeTravelingGlobalState makeTTGS(const LSPConfiguration &config = nullConfig, u4 initialVersion = 0) {
     return TimeTravelingGlobalState(config, logger, *workers, makeGS(config.opts), initialVersion);
 }
 
@@ -51,18 +51,18 @@ LSPPreprocessor makePreprocessor(const LSPConfiguration &config = nullConfig) {
     return LSPPreprocessor(makeGS(config.opts), config, *workers, logger);
 }
 
-bool comesBeforeSymmetric(const TimeTravelingGlobalState &ttgs, int a, int b) {
+bool comesBeforeSymmetric(const TimeTravelingGlobalState &ttgs, u4 a, u4 b) {
     return ttgs.comesBefore(a, b) && !ttgs.comesBefore(b, a);
 }
 
-unique_ptr<LSPMessage> makeOpen(string_view path, int version, string_view source) {
+unique_ptr<LSPMessage> makeOpen(string_view path, u4 version, string_view source) {
     auto params = make_unique<DidOpenTextDocumentParams>(
         make_unique<TextDocumentItem>(string(path), "ruby", version, string(source)));
     return make_unique<LSPMessage>(
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params)));
 }
 
-unique_ptr<LSPMessage> makeChange(string_view path, int version, string_view source) {
+unique_ptr<LSPMessage> makeChange(string_view path, u4 version, string_view source) {
     auto contentChange = make_unique<TextDocumentContentChangeEvent>(string(source));
     vector<unique_ptr<TextDocumentContentChangeEvent>> changes;
     changes.push_back(move(contentChange));
@@ -117,35 +117,33 @@ TEST(TimeTravelingGlobalState, ComesBefore) { // NOLINT
         EXPECT_PRED3(comesBeforeSymmetric, ttgs, 3, 2);
         // 3 and 4 are from previous trip round the integer space, so 4 came after 3.
         EXPECT_PRED3(comesBeforeSymmetric, ttgs, 3, 4);
-        // Negative versions
-        EXPECT_PRED3(comesBeforeSymmetric, ttgs, -1, 0);
-        // Integer limits.
-        EXPECT_PRED3(comesBeforeSymmetric, ttgs, INT_MAX, INT_MIN);
+        // Uint limits.
+        EXPECT_PRED3(comesBeforeSymmetric, ttgs, UINT32_MAX, 0);
         // A and B are equal but come after maxVersion + 1.
         EXPECT_FALSE(ttgs.comesBefore(5, 5));
-        // Negative versions.
-        EXPECT_PRED3(comesBeforeSymmetric, ttgs, -10, -9);
+        // A and B come before one another on last trip through the uint space.
+        EXPECT_PRED3(comesBeforeSymmetric, ttgs, UINT32_MAX - 10, UINT32_MAX - 9);
     }
     // Negative maximum version tests
     {
-        TimeTravelingGlobalState ttgs = makeTTGS(nullConfig, -1);
+        TimeTravelingGlobalState ttgs = makeTTGS(nullConfig, UINT32_MAX);
         EXPECT_PRED3(comesBeforeSymmetric, ttgs, 2, 3);
-        // Handles maxVersion + 1.
-        EXPECT_PRED3(comesBeforeSymmetric, ttgs, -1, 0);
-        // maxVersion + 2 is part of previous trip 'round the space of ints.
+        // Uint limits.
+        EXPECT_PRED3(comesBeforeSymmetric, ttgs, UINT32_MAX, 0);
+        // maxVersion + 2 is part of previous trip 'round the space of uints.
         EXPECT_PRED3(comesBeforeSymmetric, ttgs, 1, 0);
-        // Negative versions.
-        EXPECT_PRED3(comesBeforeSymmetric, ttgs, -10, -9);
+        // A and B come before one another on last trip through the uint space.
+        EXPECT_PRED3(comesBeforeSymmetric, ttgs, UINT32_MAX - 10, UINT32_MAX - 9);
     }
-    // Maximum version + 1 is MAX_INT
+    // Maximum version + 1 is UINT32_MAX
     {
-        TimeTravelingGlobalState ttgs = makeTTGS(nullConfig, INT_MAX - 1);
-        EXPECT_PRED3(comesBeforeSymmetric, ttgs, INT_MIN, INT_MAX);
+        TimeTravelingGlobalState ttgs = makeTTGS(nullConfig, UINT32_MAX - 1);
+        EXPECT_PRED3(comesBeforeSymmetric, ttgs, 0, UINT32_MAX);
     }
-    // Maximum version + 1 is MIN_INT
+    // Maximum version + 1 is 0
     {
-        TimeTravelingGlobalState ttgs = makeTTGS(nullConfig, INT_MAX);
-        EXPECT_PRED3(comesBeforeSymmetric, ttgs, INT_MAX, INT_MIN);
+        TimeTravelingGlobalState ttgs = makeTTGS(nullConfig, UINT32_MAX);
+        EXPECT_PRED3(comesBeforeSymmetric, ttgs, UINT32_MAX, 0);
     }
 }
 

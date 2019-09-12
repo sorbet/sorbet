@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_LSP_TIMETRAVELINGGLOBALSTATE_H
 #define RUBY_TYPER_LSP_TIMETRAVELINGGLOBALSTATE_H
 
+#include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/NameHash.h"
@@ -31,7 +32,7 @@ private:
      * undo or redo log.
      */
     struct TimeTravelUpdate {
-        int version = 0;
+        u4 version = 0;
         GlobalStateUpdate update;
         GlobalStateUpdate undoUpdate;
     };
@@ -43,12 +44,12 @@ private:
 
     // Indicates the current version of `gs`. May be a version that comes before `latestVersion` if `gs` has traveled
     // back in time.
-    int activeVersion = 0;
+    u4 activeVersion = 0;
     // Indicates the version number of the latest file update encountered. It has been committed to the `log`.
-    int latestVersion = 0;
+    u4 latestVersion = 0;
 
     // Get all updates that fall within the range (start, end), exclusive of endpoints.
-    std::vector<TimeTravelUpdate *> updatesBetweenExclusive(int start, int end);
+    std::vector<TimeTravelUpdate *> updatesBetweenExclusive(u4 start, u4 end);
 
     // Log of applied updates, from earliest to latest.
     // We frequently delete from the back to prune history, so we use a deque rather than a vector.
@@ -64,12 +65,12 @@ private:
 
 public:
     TimeTravelingGlobalState(const LSPConfiguration &config, const std::shared_ptr<spdlog::logger> &logger,
-                             WorkerPool &workers, std::unique_ptr<core::GlobalState> gs, int initialVersion);
+                             WorkerPool &workers, std::unique_ptr<core::GlobalState> gs, u4 initialVersion);
 
     /**
      * Travels GlobalState forwards and backwards in time. No-op if version == current version.
      */
-    void travel(int version);
+    void travel(u4 version);
 
     /**
      * Indicates that TTGS operations will happen on a new thread. Used to work around error queue ENFORCEs.
@@ -83,13 +84,13 @@ public:
      * Prunes entries in the time travel log that fall before version.
      * Note: Supports a version ID that wraps around.
      */
-    void pruneBefore(int version);
+    void pruneBefore(u4 version);
 
     /**
      * Applies the given update to GlobalState, appends a corresponding entry to the undo log, and indexes the update.
      * Mutates update to include file hashes and indexes.
      */
-    void commitEdits(int version, LSPFileUpdates &update);
+    void commitEdits(LSPFileUpdates &update);
 
     /**
      * Indexes all workspace files from file system and hashes them.
@@ -106,7 +107,7 @@ public:
     /**
      * Returns true if `a` comes before `b`.
      */
-    bool comesBefore(int a, int b) const;
+    bool comesBefore(u4 a, u4 b) const;
 };
 
 } // namespace sorbet::realmain::lsp
