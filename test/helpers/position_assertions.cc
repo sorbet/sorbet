@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 // ^ Include first because it violates linting rules.
 
+#include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "test/helpers/lsp.h"
@@ -41,14 +42,6 @@ const UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "lineariza
 
 constexpr string_view NOTHING_LABEL = "(nothing)"sv;
 constexpr string_view NULL_LABEL = "null"sv;
-
-bool startsWith(const std::string &str, const std::string &prefix) {
-    return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
-}
-
-bool endsWith(const std::string &str, const std::string &suffix) {
-    return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
 
 /** Returns true if `b` is a subset of `a`. Only works on single-line ranges. Assumes ranges are well-formed (start <=
  * end) */
@@ -967,10 +960,10 @@ void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File
         fmt::format("{}", fmt::map_join(completionList->items.begin(), completionList->items.end(), ", ",
                                         [](const auto &item) -> string { return item->label; }));
 
-    auto partial = endsWith(this->message, ", ...");
+    auto partial = absl::EndsWith(this->message, ", ...");
     if (partial) {
         auto prefix = this->message.substr(0, this->message.size() - 5);
-        if (!startsWith(actualMessage, prefix)) {
+        if (!absl::StartsWith(actualMessage, prefix)) {
             auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
             ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
                 "{}Expected partial completion contents:\n{}\nFound incompatible completion contents:\n{}", errorPrefix,

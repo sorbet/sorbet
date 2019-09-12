@@ -518,7 +518,7 @@ end
 ```
 
 Add the `, ...` suffix to the end of a partial list of completion results, and
-the test harness will ensure that the listed functions match a prefix of the
+the test harness will ensure that the listed identifiers match a prefix of the
 completion items. This prefix must still be listed in order.
 
 #### Testing incremental typechecking
