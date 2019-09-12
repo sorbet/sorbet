@@ -1,7 +1,4 @@
-#include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/str_join.h"
-#include "absl/strings/str_split.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
@@ -53,6 +50,7 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> findSimilarMethodsIn(const 
         [&](core::Type *c) { return; });
     return result;
 }
+namespace {
 
 string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
@@ -80,110 +78,7 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames, ", "), "${0}");
 }
 
-/**
- * Retrieves the documentation above a symbol.
- * - Returned documentation has one trailing newline (if it exists)
- * - Assumes that valid ruby syntax is used.
- * - Strips the first whitespace character from a comment e.g
- *      # a comment
- *      #a comment
- *   are the same.
- */
-optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
-    // Everything in the file before the method definition.
-    string_view preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
-
-    // Get all the lines before it.
-    std::vector<string_view> all_lines = absl::StrSplit(preDefinition, '\n');
-
-    // if there are no lines before the method definition, we're at the top of the file.
-    if (all_lines.empty()) {
-        return nullopt;
-    }
-
-    std::vector<string_view> documentation_lines;
-
-    // Iterate from the last line, to the first line
-    for (auto it = all_lines.rbegin(); it != all_lines.rend(); it++) {
-        string_view line = absl::StripAsciiWhitespace(*it);
-
-        // Short circuit when line is empty
-        if (line.empty()) {
-            break;
-        }
-
-        // Handle single-line sig block
-        else if (absl::StartsWith(line, "sig")) {
-            // Do nothing for a one-line sig block
-        }
-
-        // Handle multi-line sig block
-        else if (absl::StartsWith(line, "end")) {
-            // ASSUMPTION: We either hit the start of file, a `sig do` or an `end`
-            it++;
-            while (
-                // SOF
-                it != all_lines.rend()
-                // Start of sig block
-                && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig do")
-                // Invalid end keyword
-                && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "end")) {
-                it++;
-            };
-
-            // We have either
-            // 1) Reached the start of the file
-            // 2) Found a `sig do`
-            // 3) Found an invalid end keyword
-            if (it == all_lines.rend() || absl::StartsWith(absl::StripAsciiWhitespace(*it), "end")) {
-                break;
-            }
-
-            // Reached a sig block.
-            line = absl::StripAsciiWhitespace(*it);
-            ENFORCE(absl::StartsWith(line, "sig do"));
-
-            // Stop looking if this is a single-line block e.g `sig do; <block>; end`
-            if (absl::StartsWith(line, "sig do;") && absl::EndsWith(line, "end")) {
-                break;
-            }
-
-            // Else, this is a valid sig block. Move on to any possible documentation.
-        }
-
-        // Handle a comment line. Do not count typing declarations.
-        else if (absl::StartsWith(line, "#") && !absl::StartsWith(line, "# typed:")) {
-            // Account for whitespace before comment e.g
-            // # abc -> "abc"
-            // #abc -> "abc"
-            int skip_after_hash = absl::StartsWith(line, "# ") ? 2 : 1;
-
-            string_view comment = line.substr(line.find('#') + skip_after_hash);
-
-            documentation_lines.push_back(comment);
-
-            // Account for yarddoc lines by inserting an extra newline right before
-            // the yarddoc line (note that we are reverse iterating)
-            if (absl::StartsWith(comment, "@")) {
-                documentation_lines.push_back(string_view(""));
-            }
-        }
-
-        // No other cases applied to this line, so stop looking.
-        else {
-            break;
-        }
-    }
-
-    string documentation = absl::StrJoin(documentation_lines.rbegin(), documentation_lines.rend(), "\n");
-    documentation = absl::StripTrailingAsciiWhitespace(documentation);
-
-    if (documentation.empty())
-        return nullopt;
-    else {
-        return documentation;
-    }
-}
+} // namespace
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
