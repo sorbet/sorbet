@@ -16,29 +16,29 @@ class ParentNeedsOverridable
   # Every sig here should have `generated.overridable.` added to it.
   extend T::Sig
 
-  sig {implementation.generated.overridable.void}
+  sig {implementation.void}
   def just_void; end
 
-  sig {implementation.generated.overridable.returns(NilClass)}
+  sig {implementation.returns(NilClass)}
   def just_returns; end
 
-  sig {implementation.params(x: Integer).generated.overridable.void}
+  sig {implementation.params(x: Integer).void}
   def x_to_void(x); end
 
-  sig {implementation.params(x: Integer).generated.overridable.returns(NilClass)}
+  sig {implementation.params(x: Integer).returns(NilClass)}
   def x_to_returns(x); end
 
   sig do
     implementation
     .params(x: Integer)
-    .generated.overridable.void
+    .void
   end
   def multiline_x_to_void(x); end
 
   sig do
     implementation
     .params(x: Integer)
-    .generated.overridable.returns(NilClass)
+    .returns(NilClass)
   end
   def multiline_x_to_returns(x); end
 end
