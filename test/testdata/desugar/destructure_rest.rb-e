@@ -1,2 +1,0 @@
-# typed: false
-[].map { |(*_)| }
