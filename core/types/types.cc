@@ -175,13 +175,19 @@ TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass)
             auto cdata = c->symbol.data(ctx);
             if (c->isUntyped()) {
                 result = from;
+            } else if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
+                result = Types::bottom();
+            } else if (c->symbol.data(ctx)->isClassOrModuleClass() && klass.data(ctx)->isClassOrModuleClass() &&
+                       !klass.data(ctx)->derivesFrom(ctx, c->symbol)) {
+                // We have two classes (not modules), and if the class we're
+                // removing doesn't derive from `c`, there's nothing to do,
+                // because of ruby having single inheretance.
+                result = from;
             } else if (cdata->isClassOrModuleSealed() &&
                        (cdata->isClassOrModuleAbstract() || cdata->isClassOrModuleModule())) {
                 auto subclasses = cdata->sealedSubclassesToUnion(ctx);
                 ENFORCE(!Types::equiv(ctx, subclasses, from), "sealedSubclassesToUnion about to cause infinte loop");
                 result = dropSubtypesOf(ctx, subclasses, klass);
-            } else if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
-                result = Types::bottom();
             } else {
                 result = from;
             }
