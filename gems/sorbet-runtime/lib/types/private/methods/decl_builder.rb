@@ -145,8 +145,7 @@ module T::Private::Methods
       when Modes.abstract
         raise BuilderError.new(".abstract cannot be repeated in a single signature")
       else
-        raise BuilderError.new("`.abstract` cannot be combined with any of `.override`, `.implementation`, or "\
-              "`.overridable`.")
+        raise BuilderError.new("`.abstract` cannot be combined with `.override` or `.overridable`.")
       end
 
       self
@@ -164,11 +163,12 @@ module T::Private::Methods
       when Modes.standard
         decl.mode = Modes.override
         decl.override_allow_incompatible = allow_incompatible
-      when Modes.override
+      when Modes.override, Modes.overridable_override
         raise BuilderError.new(".override cannot be repeated in a single signature")
+      when Modes.overridable
+        decl.mode = Modes.overridable_override
       else
-        raise BuilderError.new("`.override` cannot be combined with any of `.abstract`, `.implementation`, or "\
-              "`.overridable`.")
+        raise BuilderError.new("`.override` cannot be combined with `.abstract`.")
       end
 
       self
@@ -178,11 +178,13 @@ module T::Private::Methods
       check_live!
 
       case decl.mode
-      when Modes.abstract, Modes.override
+      when Modes.abstract
         raise BuilderError.new("`.overridable` cannot be combined with `.#{decl.mode}`")
+      when Modes.override
+        decl.mode = Modes.overridable_override
       when Modes.standard
         decl.mode = Modes.overridable
-      when Modes.overridable
+      when Modes.overridable, Modes.overridable_override
         raise BuilderError.new(".overridable cannot be repeated in a single signature")
       end
 

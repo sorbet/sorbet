@@ -54,7 +54,7 @@ module Opus::Types::Test
         Child1 = Class.new(Base) do
           extend T::Sig
           sig do
-            builders[:implementation] = void.implementation
+            builders[:override] = void.override
           end
           def implement_me; end
 
@@ -67,7 +67,7 @@ module Opus::Types::Test
         Child2 = Class.new(Base) do
           extend T::Sig
           sig do
-            builders[:implementation_overridable] = void.implementation.overridable
+            builders[:override_overridable] = void.override.overridable
           end
           def implement_me; end
         end
@@ -75,24 +75,23 @@ module Opus::Types::Test
         Child3 = Class.new(Base) do
           extend T::Sig
           sig do
-            builders[:overridable_implementation] = void.overridable.implementation
+            builders[:overridable_override] = void.overridable.override
           end
           def implement_me; end
         end
 
         Child1.new.implement_me
         assert_equal('abstract', builders[:abstract].decl.mode)
-        assert_equal('implementation', builders[:implementation].decl.mode)
 
         Child1.new.override_me
         assert_equal('overridable', builders[:overridable].decl.mode)
         assert_equal('override', builders[:override].decl.mode)
 
         Child2.new.implement_me
-        assert_equal('overridable_implementation', builders[:implementation_overridable].decl.mode)
+        assert_equal('overridable_override', builders[:override_overridable].decl.mode)
 
         Child3.new.implement_me
-        assert_equal('overridable_implementation', builders[:overridable_implementation].decl.mode)
+        assert_equal('overridable_override', builders[:overridable_override].decl.mode)
       end
 
       INVALID_MODE_TESTS = [
@@ -103,11 +102,9 @@ module Opus::Types::Test
 
         [:override, :abstract],
         [:override, :override],
-        [:override, :overridable],
         [:override, :implementation],
 
         [:overridable, :abstract],
-        [:overridable, :override],
         [:overridable, :overridable],
 
         [:implementation, :abstract],

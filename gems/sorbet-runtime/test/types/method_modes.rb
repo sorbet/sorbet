@@ -72,12 +72,12 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
       klass.new.foo
     end
 
-    it "succeeds when overriding an .overridable.implementation method with .override" do
+    it "succeeds when overriding an .overridable.override method with .override" do
       mixin = Module.new do
         extend T::Sig
         include AbstractMixin
         extend T::Helpers
-        sig {implementation.overridable.returns(Object)}
+        sig {override.overridable.returns(Object)}
         def foo; end
       end
 
@@ -116,12 +116,12 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
       assert_includes(
         err.message,
-        "You declared `foo` as .override, but the method it overrides is not declared as `overridable`.\n" \
+        "You declared `foo` as .override, but the method it overrides is not declared as `overridable` or `abstract`.\n" \
         "  Parent definition: #{parent} at #{__FILE__}"
       )
     end
 
-    it "raises when overriding an abstract method with .override" do
+    it "succeeds when overriding an abstract method with .override" do
       klass = Class.new do
         extend T::Sig
         extend T::Helpers
@@ -129,24 +129,14 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         sig {override.returns(Object)}
         def foo; end
       end
-
-      err = assert_raises(RuntimeError) do
-        klass.new.foo
-      end
-
-      assert_includes(
-        err.message,
-        "You declared `foo` as .override, but the method it overrides is not declared as `overridable`.\n" \
-        "  Parent definition: #{AbstractMixin} at #{__FILE__}"
-      )
     end
 
-    it "raises when overriding an implementation method with .override" do
+    it "succeeds when overriding an override method with .override" do
       parent = Class.new do
         extend T::Sig
         extend T::Helpers
         include AbstractMixin
-        sig {implementation.returns(Object)}
+        sig {override.returns(Object)}
         def foo; end
       end
 
@@ -155,16 +145,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         sig {override.returns(Object)}
         def foo; end
       end
-
-      err = assert_raises(RuntimeError) do
-        klass.new.foo
-      end
-
-      assert_includes(
-        err.message,
-        "You declared `foo` as .override, but the method it overrides is not declared as `overridable`.\n" \
-        "  Parent definition: #{parent} at #{__FILE__}"
-      )
     end
 
     it "succeeds when overriding an unannotated method with bare sig" do
@@ -215,12 +195,12 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
       assert_includes(
         err.message,
-        "You must use `.implementation` when overriding the abstract method `foo`.\n" \
+        "You must use `.override` when overriding the abstract method `foo`.\n" \
         "  Abstract definition: #{AbstractMixin} at #{__FILE__}"
       )
     end
 
-    it "raises when overriding an .overridable method with .implementation" do
+    it "succeeds when overriding an .overridable method with .override" do
       parent = Class.new do
         extend T::Sig
         extend T::Helpers
@@ -230,19 +210,9 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
       klass = Class.new(parent) do
         extend T::Sig
-        sig {implementation.returns(Object)}
+        sig {override.returns(Object)}
         def foo; end
       end
-
-      err = assert_raises(RuntimeError) do
-        klass.new.foo
-      end
-
-      assert_includes(
-        err.message,
-        "You declared `foo` as .implementation, but the method it overrides is not declared as abstract.\n" \
-        "  Either mark foo as `abstract.` in the parent: #{parent} at #{__FILE__}"
-      )
     end
   end
 
@@ -269,7 +239,7 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
       klass = Class.new do
         extend T::Sig
         extend T::Helpers
-        sig {implementation.returns(Object)}
+        sig {override.returns(Object)}
         def foo; end
       end
 
@@ -279,11 +249,11 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
       assert_includes(
         err.message,
-        "You marked `foo` as .implementation, but it doesn't match up with a corresponding abstract method."
+        "You marked `foo` as .override, but that method doesn't already exist in this class/module to be overriden"
       )
     end
 
-    it "special cases Enumerable#each to allow .implementation" do
+    it "special cases Enumerable#each to allow .override" do
       klass = Class.new do
         extend T::Sig
         extend T::Generic
@@ -292,7 +262,7 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         Elem = type_member
 
         sig do
-          implementation
+          override
             .params(blk: T.proc.params(arg0: Elem).returns(BasicObject))
             .returns(T.untyped)
         end

@@ -10,7 +10,7 @@ module T::Private::Methods::Modes
   def self.untyped; 'untyped'; end
   MODES = [self.standard, self.abstract, self.overridable, self.override, self.overridable_override, self.untyped]
 
-  OVERRIDABLE_MODES = [self.override, self.overridable, self.overridable_override, self.untyped]
+  OVERRIDABLE_MODES = [self.override, self.overridable, self.overridable_override, self.untyped, self.abstract]
   OVERRIDE_MODES = [self.override, self.overridable_override]
   NON_OVERRIDE_MODES = MODES - OVERRIDE_MODES
 end
