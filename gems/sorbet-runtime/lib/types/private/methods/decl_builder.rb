@@ -182,9 +182,7 @@ module T::Private::Methods
         raise BuilderError.new("`.overridable` cannot be combined with `.#{decl.mode}`")
       when Modes.standard
         decl.mode = Modes.overridable
-      when Modes.implementation
-        decl.mode = Modes.overridable_implementation
-      when Modes.overridable, Modes.overridable_implementation
+      when Modes.overridable
         raise BuilderError.new(".overridable cannot be repeated in a single signature")
       end
 
@@ -194,18 +192,7 @@ module T::Private::Methods
     def implementation
       check_live!
 
-      case decl.mode
-      when Modes.abstract, Modes.override
-        raise BuilderError.new("`.implementation` cannot be combined with `.#{decl.mode}`")
-      when Modes.standard
-        decl.mode = Modes.implementation
-      when Modes.overridable
-        decl.mode = Modes.overridable_implementation
-      when Modes.implementation, Modes.overridable_implementation
-        raise BuilderError.new(".implementation cannot be repeated in a single signature")
-      end
-
-      self
+      raise BuilderError.new(".implementation has been deprecated")
     end
 
     # Declares valid type paramaters which can be used with `T.type_parameter` in

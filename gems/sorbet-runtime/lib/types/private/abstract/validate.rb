@@ -61,7 +61,7 @@ module T::Private::Abstract::Validate
       # In that case, get its untyped signature.
       implementation_signature ||= Methods::Signature.new_untyped(
         method: implementation_method,
-        mode: Methods::Modes.implementation
+        mode: Methods::Modes.override
       )
       SignatureValidation.validate_override_shape(implementation_signature, abstract_signature)
       SignatureValidation.validate_override_types(implementation_signature, abstract_signature)
