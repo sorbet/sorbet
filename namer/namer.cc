@@ -516,8 +516,30 @@ public:
         return data->intrinsic != nullptr && data->resultType == nullptr;
     }
 
-    bool paramsMatch(core::MutableContext ctx, core::Loc loc, const vector<ast::ParsedArg> &parsedArgs) {
+    bool paramsMatch(core::MutableContext ctx, core::SymbolRef method, const vector<ast::ParsedArg> &parsedArgs) {
+        auto sym = method.data(ctx)->dealias(ctx);
+        if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
+            return false;
+        }
+        for (int i = 0; i < parsedArgs.size(); i++) {
+            auto &methodArg = parsedArgs[i];
+            auto &symArg = sym.data(ctx)->arguments()[i];
+
+            if (symArg.flags.isKeyword != methodArg.keyword || symArg.flags.isBlock != methodArg.block ||
+                symArg.flags.isRepeated != methodArg.repeated ||
+                (symArg.flags.isKeyword && symArg.name != methodArg.local._name)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<ast::ParsedArg> &parsedArgs) {
         auto sym = ctx.owner.data(ctx)->dealias(ctx);
+        if (!sym.data(ctx)->isMethod()) {
+            return;
+        }
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                 if (sym != ctx.owner) {
@@ -532,11 +554,11 @@ public:
                     // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                                sym.data(ctx)->show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
+                                sym.show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
             }
-            return false;
+            return;
         }
         for (int i = 0; i < parsedArgs.size(); i++) {
             auto &methodArg = parsedArgs[i];
@@ -546,40 +568,38 @@ public:
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.data(ctx)->show(ctx), "isKeyword", symArg.flags.isKeyword, methodArg.keyword);
+                        sym.show(ctx), "isKeyword", symArg.flags.isKeyword, methodArg.keyword);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
-                return false;
+                return;
             }
             if (symArg.flags.isBlock != methodArg.block) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.data(ctx)->show(ctx), "isBlock", symArg.flags.isBlock, methodArg.block);
+                        sym.show(ctx), "isBlock", symArg.flags.isBlock, methodArg.block);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
-                return false;
+                return;
             }
             if (symArg.flags.isRepeated != methodArg.repeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.data(ctx)->show(ctx), "isRepeated", symArg.flags.isRepeated, methodArg.repeated);
+                        sym.show(ctx), "isRepeated", symArg.flags.isRepeated, methodArg.repeated);
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
-                return false;
+                return;
             }
             if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with mismatched argument name. Expected: `{}`, got: `{}`",
-                                sym.data(ctx)->show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
+                                sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
-                return false;
+                return;
             }
         }
-
-        return true;
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
@@ -596,21 +616,53 @@ public:
 
         auto parsedArgs = ast::ArgParsing::parseArgs(ctx, method->args);
 
-        auto sym = ctx.state.lookupMethodSymbol(owner, method->name);
-        if (sym.exists()) {
-            if (method->declLoc == sym.data(ctx)->loc()) {
-                // TODO remove if the paramsMatch is perfect
-                // Reparsing the same file
-                method->symbol = sym;
-                method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
-                return method;
-            }
-            if (isIntrinsic(ctx, sym) || paramsMatch(ctx.withOwner(sym), method->declLoc, parsedArgs)) {
-                sym.data(ctx)->addLoc(ctx, method->declLoc);
+        // There are three symbols in play here, because there's:
+        //
+        // - sym, the symbol which, if it exists, is the 'correct' symbol for the method in question, as it matches
+        //   in both name and argument structure
+        // - currentSym, which is the whatever the non-mangled name currently points to in that context
+        // - replacedSym, which is whatever name was the name that sym replaced.
+        //
+        // In the context of something like
+        //   def f(); end
+        //   def f(x); end
+        //   def f(x, y); end
+        // when the namer is in incremental mode and looking at `def f(x)`, then `sym` refers to `f(x)`, `currentSym`
+        // refers to `def f(x, y)` (which is the symbol that is "currently" non-mangled and available under the name
+        // `f`, because the namer has already run in this context) and `replacedSym` refers to `def f()`, because that's
+        // the symbol that `f` referred to immediately before `def f(x)` became the then-current symbol. If we weren't
+        // running in incremental mode, then `sym` wouldn't exist yet (we would be about to create it!) and `currentSym`
+        // would be `def f()`, because we have not yet progressed far enough in the file to see any other definition of
+        // `f`.
+        auto sym =
+            ctx.state.lookupMethodSymbolWithHash(owner, method->name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
+        auto currentSym = ctx.state.lookupMethodSymbol(owner, method->name);
+        if (!sym.exists() && currentSym.exists()) {
+            // we don't have a method definition with the right argument structure, so we need to mangle the existing
+            // one and create a new one
+            if (!isIntrinsic(ctx, currentSym)) {
+                paramMismatchErrors(ctx.withOwner(currentSym), method->declLoc, parsedArgs);
+                ctx.state.mangleRenameSymbol(currentSym, method->name);
             } else {
-                ctx.state.mangleRenameSymbol(sym, method->name);
+                // ...unless it's an intrinsic, because we allow multiple incompatible definitions of those in code
+                sym.data(ctx)->addLoc(ctx, method->declLoc);
             }
         }
+        if (sym.exists()) {
+            // if the symbol does exist, then we're running in incremental mode, and we need to compare it to the
+            // previously defined equivalent to re-report any errors
+            auto replacedSym = ctx.state.findRenamedSymbol(owner, sym);
+            if (replacedSym.exists() && !paramsMatch(ctx, replacedSym, parsedArgs) && !isIntrinsic(ctx, replacedSym)) {
+                paramMismatchErrors(ctx.withOwner(replacedSym), method->declLoc, parsedArgs);
+            }
+            sym.data(ctx)->addLoc(ctx, method->declLoc);
+            method->symbol = sym;
+            method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
+            return method;
+        }
+
+        // we'll only get this far if we're not in incremental mode, so enter a new symbol and fill in the data
+        // appropriately
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
         method->symbol.data(ctx)->addLoc(ctx, method->declLoc);

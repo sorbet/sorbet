@@ -581,6 +581,33 @@ void GlobalState::reserveMemory(u4 kb) {
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
+SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, vector<u4> methodHash) const {
+    ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
+    ENFORCE(name.exists(), "looking up symbol with non-existing name");
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_lookup_by_name", ownerScope->members().size());
+
+    NameRef lookupName = name;
+    u2 unique = 1;
+    auto res = ownerScope->members().find(lookupName);
+    while (res != ownerScope->members().end()) {
+        ENFORCE(res->second.exists());
+        auto resData = res->second.data(*this);
+        if ((resData->flags & Symbol::Flags::METHOD) == Symbol::Flags::METHOD &&
+            (resData->methodArgumentHash(*this) == methodHash ||
+             (resData->intrinsic != nullptr && resData->resultType == nullptr))) {
+            return res->second;
+        }
+        lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
+        if (!lookupName.exists()) {
+            break;
+        }
+        res = ownerScope->members().find(lookupName);
+        unique++;
+    }
+    return Symbols::noSymbol();
+}
+
 // look up a symbol whose flags match the desired flags. This might look through mangled names to discover one whose
 // flags match. If no sych symbol exists, then it will return noSymbol.
 SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const {
@@ -605,6 +632,41 @@ SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 f
         unique++;
     }
     return Symbols::noSymbol();
+}
+
+SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) {
+    // This method works by knowing how to replicate the logic of renaming in order to find whatever
+    // the previous name was: for `x$n` where `n` is larger than 2, it'll be `x$(n-1)`, for bare `x`,
+    // it'll be whatever the largest `x$n` that exists is, if any; otherwise, there will be none.
+    ENFORCE(sym.exists(), "lookup up previous name of non-existing symbol");
+    NameRef name = sym.data(*this)->name;
+    NameData nameData = name.data(*this);
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+
+    if (nameData->kind == NameKind::UNIQUE) {
+        if (nameData->unique.num == 1) {
+            return Symbols::noSymbol();
+        } else {
+            ENFORCE(nameData->unique.num > 1);
+            auto nm =
+                lookupNameUnique(UniqueNameKind::MangleRename, nameData->unique.original, nameData->unique.num - 1);
+            return nm.exists() ? ownerScope->members()[nm] : Symbols::noSymbol();
+        }
+    } else {
+        u2 unique = 1;
+        NameRef lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
+        auto res = ownerScope->members().find(lookupName);
+        while (res != ownerScope->members().end()) {
+            ENFORCE(res->second.exists());
+            unique++;
+            lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
+            if (!lookupName.exists()) {
+                return res->second;
+            }
+            res = ownerScope->members().find(lookupName);
+        }
+        return Symbols::noSymbol();
+    }
 }
 
 SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {

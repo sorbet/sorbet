@@ -1,4 +1,5 @@
 # typed: true
+# disable-fast-path: true
 module Foo
   module_function
   def self.bar(b)
