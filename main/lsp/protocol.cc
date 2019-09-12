@@ -116,11 +116,13 @@ void tagNewRequest(const std::shared_ptr<spd::logger> &logger, LSPMessage &msg) 
 
 unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue, absl::Mutex &incomingMtx,
                                                       QueueState &processingQueue, absl::Mutex &processingMtx) {
+    ENFORCE(owner == this_thread::get_id());
     return runInAThread("preprocessingThread", [this, &incomingQueue, &incomingMtx, &processingQueue, &processingMtx] {
         // Propagate the termination flag across the two queues.
         NotifyOnDestruction notifyIncoming(incomingMtx, incomingQueue.terminate);
         NotifyOnDestruction notifyProcessing(processingMtx, processingQueue.terminate);
         ttgs.switchToNewThread();
+        owner = this_thread::get_id();
         while (true) {
             unique_ptr<LSPMessage> msg;
             {

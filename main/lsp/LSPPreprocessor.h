@@ -47,6 +47,8 @@ private:
     WorkerPool &workers;
     std::shared_ptr<spdlog::logger> logger;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
+    /** ID of the thread that owns the preprocessor and is allowed to invoke methods on it. */
+    std::thread::id owner;
 
     // The current set of open files as of the latest edit preprocessed. Used to canonicalize file edits into a
     // standard format.

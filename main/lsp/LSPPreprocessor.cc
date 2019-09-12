@@ -34,7 +34,7 @@ constexpr int INITIAL_VERSION = 0;
 LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPConfiguration config, WorkerPool &workers,
                                  const std::shared_ptr<spdlog::logger> &logger)
     : ttgs(TimeTravelingGlobalState(config, logger, workers, move(initialGS), INITIAL_VERSION)), config(move(config)),
-      workers(workers), logger(logger), nextMessageId(INITIAL_VERSION + 1) {
+      workers(workers), logger(logger), owner(this_thread::get_id()), nextMessageId(INITIAL_VERSION + 1) {
     const auto &gs = ttgs.getGlobalState();
     finalGSErrorQueue = make_shared<core::ErrorQueue>(gs.errorQueue->logger, gs.errorQueue->tracer);
     // Required for diagnostics to work.
@@ -132,6 +132,7 @@ unique_ptr<LSPMessage> LSPPreprocessor::makeAndCommitWorkspaceEdit(unique_ptr<So
 }
 
 void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMessage> msg, absl::Mutex &stateMtx) {
+    ENFORCE(owner == this_thread::get_id());
     ENFORCE(!msg->internalId.has_value());
     msg->internalId = nextMessageId++;
     if (msg->isResponse()) {
