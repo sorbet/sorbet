@@ -1,7 +1,4 @@
-#include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/str_join.h"
-#include "absl/strings/str_split.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
@@ -46,27 +43,14 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> findSimilarMethodsIn(const 
         [&](core::AndType *c) {
             result = mergeMaps(findSimilarMethodsIn(gs, c->left, name), findSimilarMethodsIn(gs, c->right, name));
         },
-        [&](core::OrType *c) {
-            auto lhs = findSimilarMethodsIn(gs, c->left, name);
-            auto rhs = findSimilarMethodsIn(gs, c->right, name);
-            for (auto it = rhs.begin(); it != rhs.end(); /*nothing*/) {
-                auto &other = *it;
-                auto fnd = lhs.find(other.first);
-                if (fnd == lhs.end()) {
-                    rhs.erase(it++);
-                } else {
-                    it->second.insert(it->second.end(), make_move_iterator(fnd->second.begin()),
-                                      make_move_iterator(fnd->second.end()));
-                    ++it;
-                }
-            }
-        },
         [&](core::AppliedType *c) {
             result = findSimilarMethodsIn(gs, core::make_type<core::ClassType>(c->klass), name);
         },
-        [&](core::ProxyType *c) { result = findSimilarMethodsIn(gs, c->underlying(), name); }, [&](core::Type *c) {});
+        [&](core::ProxyType *c) { result = findSimilarMethodsIn(gs, c->underlying(), name); },
+        [&](core::Type *c) { return; });
     return result;
 }
+namespace {
 
 string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
@@ -94,110 +78,7 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames, ", "), "${0}");
 }
 
-/**
- * Retrieves the documentation above a symbol.
- * - Returned documentation has one trailing newline (if it exists)
- * - Assumes that valid ruby syntax is used.
- * - Strips the first whitespace character from a comment e.g
- *      # a comment
- *      #a comment
- *   are the same.
- */
-optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
-    // Everything in the file before the method definition.
-    string_view preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
-
-    // Get all the lines before it.
-    std::vector<string_view> all_lines = absl::StrSplit(preDefinition, '\n');
-
-    // if there are no lines before the method definition, we're at the top of the file.
-    if (all_lines.empty()) {
-        return nullopt;
-    }
-
-    std::vector<string_view> documentation_lines;
-
-    // Iterate from the last line, to the first line
-    for (auto it = all_lines.rbegin(); it != all_lines.rend(); it++) {
-        string_view line = absl::StripAsciiWhitespace(*it);
-
-        // Short circuit when line is empty
-        if (line.empty()) {
-            break;
-        }
-
-        // Handle single-line sig block
-        else if (absl::StartsWith(line, "sig")) {
-            // Do nothing for a one-line sig block
-        }
-
-        // Handle multi-line sig block
-        else if (absl::StartsWith(line, "end")) {
-            // ASSUMPTION: We either hit the start of file, a `sig do` or an `end`
-            it++;
-            while (
-                // SOF
-                it != all_lines.rend()
-                // Start of sig block
-                && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig do")
-                // Invalid end keyword
-                && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "end")) {
-                it++;
-            };
-
-            // We have either
-            // 1) Reached the start of the file
-            // 2) Found a `sig do`
-            // 3) Found an invalid end keyword
-            if (it == all_lines.rend() || absl::StartsWith(absl::StripAsciiWhitespace(*it), "end")) {
-                break;
-            }
-
-            // Reached a sig block.
-            line = absl::StripAsciiWhitespace(*it);
-            ENFORCE(absl::StartsWith(line, "sig do"));
-
-            // Stop looking if this is a single-line block e.g `sig do; <block>; end`
-            if (absl::StartsWith(line, "sig do;") && absl::EndsWith(line, "end")) {
-                break;
-            }
-
-            // Else, this is a valid sig block. Move on to any possible documentation.
-        }
-
-        // Handle a comment line. Do not count typing declarations.
-        else if (absl::StartsWith(line, "#") && !absl::StartsWith(line, "# typed:")) {
-            // Account for whitespace before comment e.g
-            // # abc -> "abc"
-            // #abc -> "abc"
-            int skip_after_hash = absl::StartsWith(line, "# ") ? 2 : 1;
-
-            string_view comment = line.substr(line.find('#') + skip_after_hash);
-
-            documentation_lines.push_back(comment);
-
-            // Account for yarddoc lines by inserting an extra newline right before
-            // the yarddoc line (note that we are reverse iterating)
-            if (absl::StartsWith(comment, "@")) {
-                documentation_lines.push_back(string_view(""));
-            }
-        }
-
-        // No other cases applied to this line, so stop looking.
-        else {
-            break;
-        }
-    }
-
-    string documentation = absl::StrJoin(documentation_lines.rbegin(), documentation_lines.rend(), "\n");
-    documentation = absl::StripTrailingAsciiWhitespace(documentation);
-
-    if (documentation.empty())
-        return nullopt;
-    else {
-        return documentation;
-    }
-}
+} // namespace
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
@@ -282,44 +163,43 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
-    } else {
-        auto &queryResponses = result.responses;
-        vector<unique_ptr<CompletionItem>> items;
-        if (!queryResponses.empty()) {
-            auto resp = move(queryResponses[0]);
-
-            if (auto sendResp = resp->isSend()) {
-                auto pattern = sendResp->callerSideName.data(*gs)->shortName(*gs);
-                auto receiverType = sendResp->dispatchResult->main.receiver;
-                logger->debug("Looking for method similar to {}", pattern);
-                UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
-                    findSimilarMethodsIn(*gs, receiverType, pattern);
-                vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
-                methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
-                                     make_move_iterator(methods.end()));
-                fast_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
-                    auto leftShortName = leftPair.first.data(*gs)->shortName(*gs);
-                    auto rightShortName = rightPair.first.data(*gs)->shortName(*gs);
-                    if (leftShortName != rightShortName) {
-                        return leftShortName < rightShortName;
-                    }
-                    return leftPair.first._id < rightPair.first._id;
-                });
-                for (auto &[methodName, methodSymbols] : methodsSorted) {
-                    if (methodSymbols[0].exists()) {
-                        fast_sort(methodSymbols, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                        items.push_back(getCompletionItem(*gs, methodSymbols[0], receiverType,
-                                                          sendResp->dispatchResult->main.constr));
-                    }
-                }
-            } else if (auto identResp = resp->isIdent()) {
-                findSimilarConstantOrIdent(*gs, identResp->retType.type, items);
-            } else if (auto constantResp = resp->isConstant()) {
-                findSimilarConstantOrIdent(*gs, constantResp->retType.type, items);
-            }
-        }
-        response->result = make_unique<CompletionList>(false, move(items));
+        return LSPResult::make(move(gs), move(response));
     }
+
+    auto &queryResponses = result.responses;
+    vector<unique_ptr<CompletionItem>> items;
+    if (!queryResponses.empty()) {
+        auto resp = move(queryResponses[0]);
+
+        if (auto sendResp = resp->isSend()) {
+            auto pattern = sendResp->callerSideName.data(*gs)->shortName(*gs);
+            auto receiverType = sendResp->dispatchResult->main.receiver;
+            logger->debug("Looking for method similar to {}", pattern);
+            auto methodsMap = findSimilarMethodsIn(*gs, receiverType, pattern);
+            auto methods = vector<pair<core::NameRef, vector<core::SymbolRef>>>(methodsMap.begin(), methodsMap.end());
+            fast_sort(methods, [&](auto leftPair, auto rightPair) -> bool {
+                auto leftShortName = leftPair.first.data(*gs)->shortName(*gs);
+                auto rightShortName = rightPair.first.data(*gs)->shortName(*gs);
+                if (leftShortName != rightShortName) {
+                    return leftShortName < rightShortName;
+                }
+                return leftPair.first._id < rightPair.first._id;
+            });
+            for (auto &[methodName, methodSymbols] : methods) {
+                if (methodSymbols[0].exists()) {
+                    fast_sort(methodSymbols, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
+                    items.push_back(
+                        getCompletionItem(*gs, methodSymbols[0], receiverType, sendResp->dispatchResult->main.constr));
+                }
+            }
+        } else if (auto identResp = resp->isIdent()) {
+            findSimilarConstantOrIdent(*gs, identResp->retType.type, items);
+        } else if (auto constantResp = resp->isConstant()) {
+            findSimilarConstantOrIdent(*gs, constantResp->retType.type, items);
+        }
+    }
+
+    response->result = make_unique<CompletionList>(false, move(items));
     return LSPResult::make(move(gs), move(response));
 }
 
