@@ -64,7 +64,8 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> findSimilarMethodsIn(const 
         [&](core::AppliedType *c) {
             result = findSimilarMethodsIn(gs, core::make_type<core::ClassType>(c->klass), name);
         },
-        [&](core::ProxyType *c) { result = findSimilarMethodsIn(gs, c->underlying(), name); }, [&](core::Type *c) {});
+        [&](core::ProxyType *c) { result = findSimilarMethodsIn(gs, c->underlying(), name); },
+        [&](core::Type *c) { return; });
     return result;
 }
 
