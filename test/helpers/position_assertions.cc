@@ -42,6 +42,14 @@ const UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "lineariza
 constexpr string_view NOTHING_LABEL = "(nothing)"sv;
 constexpr string_view NULL_LABEL = "null"sv;
 
+bool startsWith(const std::string &str, const std::string &prefix) {
+    return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
+}
+
+bool endsWith(const std::string &str, const std::string &suffix) {
+    return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
 /** Returns true if `b` is a subset of `a`. Only works on single-line ranges. Assumes ranges are well-formed (start <=
  * end) */
 bool rangeIsSubset(const Range &a, const Range &b) {
@@ -959,13 +967,24 @@ void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File
         fmt::format("{}", fmt::map_join(completionList->items.begin(), completionList->items.end(), ", ",
                                         [](const auto &item) -> string { return item->label; }));
 
-    // TODO(jez) Add support for using `, ...` to match a prefix of the result
-    if (this->message != actualMessage) {
-        auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
-        ADD_FAILURE_AT(filename.c_str(), range->start->line + 1)
-            << fmt::format("{}Expected completion contents:\n{}\nFound completion contents:\n{}", errorPrefix,
-                           prettyPrintRangeComment(sourceLine, *range, toString()),
-                           prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage)));
+    auto partial = endsWith(this->message, ", ...");
+    if (partial) {
+        auto prefix = this->message.substr(0, this->message.size() - 5);
+        if (!startsWith(actualMessage, prefix)) {
+            auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
+            ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
+                "{}Expected partial completion contents:\n{}\nFound incompatible completion contents:\n{}", errorPrefix,
+                prettyPrintRangeComment(sourceLine, *range, toString()),
+                prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage)));
+        }
+    } else {
+        if (this->message != actualMessage) {
+            auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
+            ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
+                "{}Expected completion contents:\n{}\nFound completion contents:\n{}", errorPrefix,
+                prettyPrintRangeComment(sourceLine, *range, toString()),
+                prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage)));
+        }
     }
 }
 
