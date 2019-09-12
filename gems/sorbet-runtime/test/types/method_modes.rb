@@ -121,32 +121,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
       )
     end
 
-    it "succeeds when overriding an abstract method with .override" do
-      klass = Class.new do
-        extend T::Sig
-        extend T::Helpers
-        include AbstractMixin
-        sig {override.returns(Object)}
-        def foo; end
-      end
-    end
-
-    it "succeeds when overriding an override method with .override" do
-      parent = Class.new do
-        extend T::Sig
-        extend T::Helpers
-        include AbstractMixin
-        sig {override.returns(Object)}
-        def foo; end
-      end
-
-      klass = Class.new(parent) do
-        extend T::Sig
-        sig {override.returns(Object)}
-        def foo; end
-      end
-    end
-
     it "succeeds when overriding an unannotated method with bare sig" do
       parent = Class.new do
         def foo; end
@@ -198,21 +172,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         "You must use `.override` when overriding the abstract method `foo`.\n" \
         "  Abstract definition: #{AbstractMixin} at #{__FILE__}"
       )
-    end
-
-    it "succeeds when overriding an .overridable method with .override" do
-      parent = Class.new do
-        extend T::Sig
-        extend T::Helpers
-        sig {overridable.returns(Object)}
-        def foo; end
-      end
-
-      klass = Class.new(parent) do
-        extend T::Sig
-        sig {override.returns(Object)}
-        def foo; end
-      end
     end
   end
 
