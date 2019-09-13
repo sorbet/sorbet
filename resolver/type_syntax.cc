@@ -280,7 +280,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 }
                 case core::Names::implementation()._id:
-                    sig.seen.implementation = true;
+                    sig.seen.override_ = true;
                     break;
                 case core::Names::overridable()._id:
                     sig.seen.overridable = true;

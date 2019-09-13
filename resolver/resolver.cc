@@ -1003,9 +1003,6 @@ private:
         if (sig.seen.abstract) {
             method.data(ctx)->setAbstract();
         }
-        if (sig.seen.implementation) {
-            method.data(ctx)->setImplementation();
-        }
         if (sig.seen.incompatibleOverride) {
             method.data(ctx)->setIncompatibleOverride();
         }

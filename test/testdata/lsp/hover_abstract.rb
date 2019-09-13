@@ -12,9 +12,9 @@ end
 class Dog < AbstractItem
   extend T::Sig
 
-  sig {implementation.returns(String)}
+  sig {override.returns(String)}
   def self.name
-    # ^ hover: sig {implementation.returns(String)}
+    # ^ hover: sig {override.returns(String)}
     'Dog'
   end
 end

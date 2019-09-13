@@ -114,7 +114,7 @@ module AbstractVarianceTests
   class GoodOverride
     include IFace
     extend T::Sig
-    sig { implementation.params(arg: B).returns(B) }
+    sig { override.params(arg: B).returns(B) }
     def bar(arg); B.new; end
   end
 
@@ -123,7 +123,7 @@ module AbstractVarianceTests
   class ArgWidening
     include IFace
     extend T::Sig
-    sig { implementation.params(arg: A).returns(B) }
+    sig { override.params(arg: A).returns(B) }
     def bar(arg); B.new; end
   end
 
@@ -131,7 +131,7 @@ module AbstractVarianceTests
   class ArgNarrowing
     include IFace
     extend T::Sig
-    sig { implementation.params(arg: C).returns(B) }
+    sig { override.params(arg: C).returns(B) }
     def bar(arg); B.new; end # error: Parameter `arg` of type `AbstractVarianceTests::C` not compatible with type of abstract method `AbstractVarianceTests::IFace#bar`
   end
 
@@ -140,7 +140,7 @@ module AbstractVarianceTests
   class RetNarrowing
     include IFace
     extend T::Sig
-    sig { implementation.params(arg: B).returns(C) }
+    sig { override.params(arg: B).returns(C) }
     def bar(arg); C.new; end
   end
 
@@ -148,7 +148,7 @@ module AbstractVarianceTests
   class RetWidening
     include IFace
     extend T::Sig
-    sig { implementation.params(arg: B).returns(A) }
+    sig { override.params(arg: B).returns(A) }
     def bar(arg); A.new; end # error: Return type `AbstractVarianceTests::A` does not match return type of abstract method `AbstractVarianceTests::IFace#bar`
   end
 

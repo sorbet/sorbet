@@ -41,7 +41,7 @@ end
 class B4 < A4
   extend T::Sig
   sig { void }
-  def foo; end # error: Method `B4#foo` overrides an overridable method `A4#foo` but is not declared with `.override`
+  def foo; end # error: Method `B4#foo` overrides an overridable method `A4#foo` but is not declared with `override.`
 end
 
 # overriding an overridable method with an override sig on the child should be okay

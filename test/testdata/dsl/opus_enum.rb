@@ -12,7 +12,7 @@ module Opus
     def initialize(x = nil)
     end
 
-    sig {implementation.params(blk: T.untyped).returns(T.untyped)}
+    sig {override.params(blk: T.untyped).returns(T.untyped)}
     def self.each(&blk); end
   end
 end

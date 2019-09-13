@@ -64,7 +64,7 @@ class C3 < AbstractClass
     # ^^ error: Missing definition for abstract method `AbstractClass.foo`
   extend T::Sig
   extend T::Helpers
-  sig { implementation.returns(Object) }
+  sig { override.returns(Object) }
   def bar; end
 end
 
@@ -73,7 +73,7 @@ end
 # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `AbstractClass#bar`
   extend T::Sig
   extend T::Helpers
-  sig {implementation.returns(Object)}
+  sig {override.returns(Object)}
   def self.foo; end
 end
 
@@ -164,6 +164,6 @@ module BadTypedImpl
   extend T::Helpers
   include GoodInterface
 
-  sig {implementation.returns(Integer)}
+  sig {override.returns(Integer)}
   def foo; 1; end # error: Return type `Integer` does not match return type of abstract method `GoodInterface#foo`
 end

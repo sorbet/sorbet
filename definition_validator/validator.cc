@@ -299,13 +299,6 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
         }
     }
 
-    if (overridenMethods.size() == 0 && method.data(ctx)->isImplementation()) {
-        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Method `{}` is marked `{}` but does not implement anything", method.data(ctx)->show(ctx),
-                        "implementation");
-        }
-    }
-
     // we don't raise override errors if the method implements an abstract method, which means we need to know ahead of
     // time whether any parent methods are abstract
     auto anyIsInterface = absl::c_any_of(overridenMethods, [&](auto &m) { return m.data(ctx)->isAbstract(); });
@@ -323,16 +316,15 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
             !method.data(ctx)->isDSLSynthesized() && !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
-                            method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), ".override");
+                            method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), "override.");
                 e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
             }
         }
-        if (!method.data(ctx)->isImplementation() && !method.data(ctx)->isOverride() && method.data(ctx)->hasSig() &&
-            overridenMethod.data(ctx)->isAbstract() && overridenMethod.data(ctx)->hasSig() &&
-            !method.data(ctx)->isDSLSynthesized() && !isRBI) {
+        if (!method.data(ctx)->isOverride() && method.data(ctx)->hasSig() && overridenMethod.data(ctx)->isAbstract() &&
+            overridenMethod.data(ctx)->hasSig() && !method.data(ctx)->isDSLSynthesized() && !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
-                            method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), ".implementation");
+                            method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), "override.");
                 e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
             }
         }

@@ -48,8 +48,8 @@ module T::Private::Methods::SignatureValidation
   end
 
   private_class_method def self.pretty_mode(signature)
-    if signature.mode == Modes.overridable_implementation
-      '.overridable.implementation'
+    if signature.mode == Modes.overridable_override
+      '.overridable.override'
     else
       ".#{signature.mode}"
     end
@@ -59,21 +59,15 @@ module T::Private::Methods::SignatureValidation
     case signature.mode
     when *Modes::OVERRIDE_MODES
       if !Modes::OVERRIDABLE_MODES.include?(super_signature.mode)
-        raise "You declared `#{signature.method_name}` as #{pretty_mode(signature)}, but the method it overrides is not declared as `overridable`.\n" \
+        raise "You declared `#{signature.method_name}` as #{pretty_mode(signature)}, but the method it overrides is not declared as `overridable` or `abstract`.\n" \
               "  Parent definition: #{method_loc_str(super_signature.method)}\n" \
               "  Child definition:  #{method_loc_str(signature.method)}\n"
-      end
-    when *Modes::IMPLEMENT_MODES
-      if super_signature.mode != Modes.abstract
-        raise "You declared `#{signature.method_name}` as #{pretty_mode(signature)}, but the method it overrides is not declared as abstract.\n" \
-              "  Either mark #{super_signature.method_name} as `abstract.` in the parent: #{method_loc_str(super_signature.method)}\n" \
-              "  ... or mark #{signature.method_name} as `override.` in the child: #{method_loc_str(signature.method)}\n"
       end
     when *Modes::NON_OVERRIDE_MODES
       if super_signature.mode == Modes.standard
         # Peaceful
       elsif super_signature.mode == Modes.abstract
-        raise "You must use `.implementation` when overriding the abstract method `#{signature.method_name}`.\n" \
+        raise "You must use `.override` when overriding the abstract method `#{signature.method_name}`.\n" \
               "  Abstract definition: #{method_loc_str(super_signature.method)}\n" \
               "  Implementation definition: #{method_loc_str(signature.method)}\n"
       elsif super_signature.mode != Modes.untyped
@@ -89,13 +83,6 @@ module T::Private::Methods::SignatureValidation
   def self.validate_non_override_mode(signature)
     case signature.mode
     when Modes.override
-      raise "You marked `#{signature.method_name}` as #{pretty_mode(signature)}, but that method doesn't already exist in this class/module to be overriden.\n" \
-        "  Either check for typos and for missing includes or super classes to make the parent method shows up\n" \
-        "  ... or remove #{pretty_mode(signature)} here: #{method_loc_str(signature.method)}\n"
-    when Modes.standard, *Modes::NON_OVERRIDE_MODES
-      # Peaceful
-      nil
-    when *Modes::IMPLEMENT_MODES
       if signature.method_name == :each && signature.method.owner < Enumerable
         # Enumerable#each is the only method in Sorbet's RBI payload that defines an abstract method.
         # Enumerable#each does not actually exist at runtime, but it is required to be implemented by
@@ -106,10 +93,13 @@ module T::Private::Methods::SignatureValidation
         # This is a one-off hack, and we should think carefully before adding more methods here.
         nil
       else
-        raise "You marked `#{signature.method_name}` as #{pretty_mode(signature)}, but it doesn't match up with a corresponding abstract method.\n" \
+        raise "You marked `#{signature.method_name}` as #{pretty_mode(signature)}, but that method doesn't already exist in this class/module to be overriden.\n" \
           "  Either check for typos and for missing includes or super classes to make the parent method shows up\n" \
           "  ... or remove #{pretty_mode(signature)} here: #{method_loc_str(signature.method)}\n"
       end
+    when Modes.standard, *Modes::NON_OVERRIDE_MODES
+      # Peaceful
+      nil
     else
       raise "Unexpected mode: #{signature.mode}. Please report to #dev-productivity."
     end

@@ -23,7 +23,7 @@ end
 class B2 < A2
   extend T::Sig
   sig { void }
-  def foo; end # error: Method `B2#foo` implements an abstract method `A2#foo` but is not declared with `.implementation`
+  def foo; end # error: Method `B2#foo` implements an abstract method `A2#foo` but is not declared with `override.`
 end
 
 # implementing an abstract method with an implementation sig on the child should be okay
@@ -36,6 +36,6 @@ class A3
 end
 class B3 < A3
   extend T::Sig
-  sig { implementation.void }
+  sig { override.void }
   def foo; end
 end
