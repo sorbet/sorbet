@@ -33,7 +33,7 @@ module Opus::Types::Test
       # @see T::Test::AbstractValidationTest
       # for error cases with abstract/override/implementation signatures
 
-      it 'correctly constructs abstract/override/implementation modes' do
+      it 'correctly constructs abstract/override modes' do
         # `sig` block is run in scope of decl, so it doesn't have assertion methods.
         # Hoist to assert afterwards.
         builders = {}
@@ -98,21 +98,12 @@ module Opus::Types::Test
         [:abstract, :abstract],
         [:abstract, :override],
         [:abstract, :overridable],
-        [:abstract, :implementation],
 
         [:override, :abstract],
         [:override, :override],
-        [:override, :implementation],
 
         [:overridable, :abstract],
         [:overridable, :overridable],
-
-        [:implementation, :abstract],
-        [:implementation, :override],
-        [:implementation, :implementation],
-
-        [:implementation, :overridable, :overridable],
-        [:implementation, :overridable, :implementation],
       ]
       INVALID_MODE_TESTS.each do |seq|
         name = (["sig"] + seq).join(".")
