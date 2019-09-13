@@ -591,7 +591,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
         bool sameType;
         if (thisTO.type.get() != nullptr) {
             auto temp = core::Types::any(ctx, thisTO.type, otherTO.type);
-            sameType = temp == otherTO.type;
+            sameType = temp == otherTO.type || temp == thisTO.type;
             thisTO.type = move(temp);
             thisTO.type->sanityCheck(ctx);
             for (auto origin : otherTO.origins) {
