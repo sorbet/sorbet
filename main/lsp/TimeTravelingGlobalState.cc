@@ -264,6 +264,7 @@ bool TimeTravelingGlobalState::canTakeFastPath(const LSPFileUpdates &updates) co
             }
         }
     }
+    logger->debug("Taking fast path");
     return true;
 }
 

@@ -26,8 +26,7 @@ unique_ptr<LSPMessage> makeShowOperation(std::string_view operationName, std::st
                                          SorbetOperationStatus status) {
     return make_unique<LSPMessage>(make_unique<NotificationMessage>(
         "2.0", LSPMethod::SorbetShowOperation,
-        make_unique<SorbetShowOperationParams>(string(operationName), string(description),
-                                               SorbetOperationStatus::Start)));
+        make_unique<SorbetShowOperationParams>(string(operationName), string(description), status)));
 }
 
 LSPLoop::ShowOperation::ShowOperation(const LSPLoop &loop, string_view operationName, string_view description)
@@ -193,7 +192,6 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
     vector<core::NameHash> changedHashes;
     {
         const auto &hashes = updates.updatedFileHashes;
-        logger->debug("Trying to see if fast path is available after {} file changes", updates.updatedFiles.size());
         ENFORCE(updates.updatedFiles.size() == hashes.size());
 
         int i = -1;

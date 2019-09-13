@@ -127,7 +127,6 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
         return;
     }
 
-    std::optional<absl::MutexLock> lock;
     const LSPMethod method = msg->method();
     bool shouldEnqueue = false;
     bool shouldMerge = false;
