@@ -30,8 +30,6 @@ unsigned int Name::hash(const GlobalState &gs) const {
             return _hash_mix_unique((u2)unique.uniqueNameKind, UNIQUE, unique.num, unique.original.id());
         case CONSTANT:
             return _hash_mix_constant(CONSTANT, cnst.original.id());
-        default:
-            Exception::raise("Unknown name kind? {}", kind);
     }
 }
 
@@ -85,8 +83,6 @@ string Name::showRaw(const GlobalState &gs) const {
         }
         case CONSTANT:
             return fmt::format("<C {}>", this->cnst.original.showRaw(gs));
-        default:
-            Exception::notImplemented();
     }
 }
 
@@ -108,8 +104,6 @@ string Name::toString(const GlobalState &gs) const {
             }
         case CONSTANT:
             return fmt::format("<C {}>", this->cnst.original.toString(gs));
-        default:
-            Exception::notImplemented();
     }
 }
 
@@ -142,8 +136,6 @@ string_view Name::shortName(const GlobalState &gs) const {
             return this->unique.original.data(gs)->shortName(gs);
         case CONSTANT:
             return this->cnst.original.data(gs)->shortName(gs);
-        default:
-            Exception::notImplemented();
     }
 }
 
@@ -170,8 +162,6 @@ void Name::sanityCheck(const GlobalState &gs) const {
             ENFORCE(current == const_cast<GlobalState &>(gs).enterNameConstant(this->cnst.original),
                     "Name table corrupted, re-entering CONSTANT name gives different id");
             break;
-        default:
-            Exception::notImplemented();
     }
 }
 
@@ -195,8 +185,6 @@ bool Name::isClassName(const GlobalState &gs) const {
                         (this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
                          this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::OpusEnum));
             return true;
-        default:
-            Exception::notImplemented();
     }
 }
 
@@ -311,9 +299,6 @@ Name Name::deepCopy(const GlobalState &to) const {
         case CONSTANT:
             out.cnst.original = NameRef(to, this->cnst.original.id());
             break;
-
-        default:
-            Exception::notImplemented();
     }
 
     return out;
