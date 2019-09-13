@@ -63,7 +63,8 @@ LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> g
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg) const {
     if (config.initialized || forMethod == LSPMethod::Initialize || forMethod == LSPMethod::Initialized ||
-        forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown || forMethod == LSPMethod::SorbetError) {
+        forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown || forMethod == LSPMethod::SorbetError ||
+        forMethod == LSPMethod::SorbetShowOperation) {
         return true;
     }
     return false;
