@@ -238,7 +238,7 @@ shared_ptr<File> SerializerImpl::unpickleFile(UnPickler &p) {
 }
 
 void SerializerImpl::pickle(Pickler &p, const Name &what) {
-    p.putU1(what.kind);
+    p.putU1(static_cast<u1>(what.kind));
     switch (what.kind) {
         case NameKind::UTF8:
             p.putStr(what.raw.utf8);

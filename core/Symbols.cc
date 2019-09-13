@@ -774,11 +774,12 @@ string ArgInfo::argumentName(const GlobalState &gs) const {
 
 namespace {
 bool isSingletonName(const GlobalState &gs, core::NameRef name) {
-    return name.data(gs)->kind == UNIQUE && name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
+    return name.data(gs)->kind == NameKind::UNIQUE && name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
 }
 
 bool isMangledSingletonName(const GlobalState &gs, core::NameRef name) {
-    return name.data(gs)->kind == UNIQUE && name.data(gs)->unique.uniqueNameKind == UniqueNameKind::MangleRename &&
+    return name.data(gs)->kind == NameKind::UNIQUE &&
+           name.data(gs)->unique.uniqueNameKind == UniqueNameKind::MangleRename &&
            isSingletonName(gs, name.data(gs)->unique.original);
 }
 } // namespace

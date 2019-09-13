@@ -911,13 +911,13 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
 
 NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
-    ENFORCE(original.data(*this)->kind == UTF8 ||
-                (original.data(*this)->kind == UNIQUE &&
+    ENFORCE(original.data(*this)->kind == NameKind::UTF8 ||
+                (original.data(*this)->kind == NameKind::UNIQUE &&
                  (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
                   original.data(*this)->unique.uniqueNameKind == UniqueNameKind::OpusEnum)),
             "making a constant name over wrong name kind");
 
-    const auto hs = _hash_mix_constant(CONSTANT, original.id());
+    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -927,7 +927,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
-            if (nm2.kind == CONSTANT && nm2.cnst.original == original) {
+            if (nm2.kind == NameKind::CONSTANT && nm2.cnst.original == original) {
                 counterInc("names.constant.hit");
                 return nm2.ref(*this);
             } else {
@@ -962,7 +962,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     auto idx = names.size();
     names.emplace_back();
 
-    names[idx].kind = CONSTANT;
+    names[idx].kind = NameKind::CONSTANT;
     names[idx].cnst.original = original;
     ENFORCE(names[idx].hash(*this) == hs);
     wasModified_ = true;
@@ -1005,7 +1005,7 @@ void GlobalState::expandNames(int growBy) {
 
 NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
+    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.id());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1015,7 +1015,7 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
-            if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
+            if (nm2.kind == NameKind::UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
                 counterInc("names.unique.hit");
                 return nm2.ref(*this);
@@ -1031,7 +1031,7 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
 
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
+    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.id());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1041,7 +1041,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
-            if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
+            if (nm2.kind == NameKind::UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
                 counterInc("names.unique.hit");
                 return nm2.ref(*this);
@@ -1077,7 +1077,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     auto idx = names.size();
     names.emplace_back();
 
-    names[idx].kind = UNIQUE;
+    names[idx].kind = NameKind::UNIQUE;
     names[idx].unique.num = num;
     names[idx].unique.uniqueNameKind = uniqueNameKind;
     names[idx].unique.original = original;
