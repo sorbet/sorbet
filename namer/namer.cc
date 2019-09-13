@@ -549,7 +549,6 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-
         core::SymbolRef owner = methodOwner(ctx);
 
         if (method->isSelf()) {
