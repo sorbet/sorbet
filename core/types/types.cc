@@ -225,8 +225,8 @@ bool Types::canBeTruthy(Context ctx, const TypePtr &what) {
         },
         [&](AppliedType *c) {
             auto sym = c->klass;
-            isTruthy = isTruthy = sym == core::Symbols::untyped() ||
-                                  (sym != core::Symbols::FalseClass() && sym != core::Symbols::NilClass());
+            isTruthy = sym == core::Symbols::untyped() ||
+                       (sym != core::Symbols::FalseClass() && sym != core::Symbols::NilClass());
         },
         [&](ProxyType *c) { isTruthy = canBeTruthy(ctx, c->underlying()); }, [&](Type *) {});
 
