@@ -62,6 +62,8 @@ LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> g
 }
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg) const {
+    // Note: During initialization, the preprocessor sends ShowOperation notifications to the main thread to forward to
+    // the client ("Indexing..."). So, whitelist those messages as OK to process prior to initialization.
     if (config.initialized || forMethod == LSPMethod::Initialize || forMethod == LSPMethod::Initialized ||
         forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown || forMethod == LSPMethod::SorbetError ||
         forMethod == LSPMethod::SorbetShowOperation) {
