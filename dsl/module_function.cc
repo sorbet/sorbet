@@ -117,7 +117,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableCont
         if (ast::isa_tree<ast::MethodDef>(arg.get())) {
             return ModuleFunction::rewriteDefn(ctx, arg.get(), prevStat);
         } else if (auto lit = ast::cast_tree<ast::Literal>(arg.get())) {
-            core::NameRef methodName = core::NameRef::noName();
+            core::NameRef methodName;
             auto loc = send->loc;
             if (lit->isSymbol(ctx)) {
                 methodName = lit->asSymbol(ctx);
