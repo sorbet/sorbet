@@ -136,7 +136,7 @@ public:
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             auto name = id->name.data(gs_);
-            ENFORCE(name->kind == core::UTF8);
+            ENFORCE(name->kind == core::NameKind::UTF8);
             if (driver_->lex.is_declared(name->show(gs_))) {
                 return make_unique<LVar>(node->loc, id->name);
             } else {

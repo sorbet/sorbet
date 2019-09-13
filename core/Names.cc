@@ -24,22 +24,20 @@ unsigned int Name::hash(const GlobalState &gs) const {
     // TODO: use https://github.com/Cyan4973/xxHash
     // !!! keep this in sync with GlobalState.enter*
     switch (kind) {
-        case UTF8:
+        case NameKind::UTF8:
             return _hash(raw.utf8);
-        case UNIQUE:
-            return _hash_mix_unique((u2)unique.uniqueNameKind, UNIQUE, unique.num, unique.original.id());
-        case CONSTANT:
-            return _hash_mix_constant(CONSTANT, cnst.original.id());
-        default:
-            Exception::raise("Unknown name kind? {}", kind);
+        case NameKind::UNIQUE:
+            return _hash_mix_unique((u2)unique.uniqueNameKind, NameKind::UNIQUE, unique.num, unique.original.id());
+        case NameKind::CONSTANT:
+            return _hash_mix_constant(NameKind::CONSTANT, cnst.original.id());
     }
 }
 
 string Name::showRaw(const GlobalState &gs) const {
     switch (this->kind) {
-        case UTF8:
+        case NameKind::UTF8:
             return fmt::format("<U {}>", string(raw.utf8.begin(), raw.utf8.end()));
-        case UNIQUE: {
+        case NameKind::UNIQUE: {
             string kind;
             switch (this->unique.uniqueNameKind) {
                 case UniqueNameKind::Parser:
@@ -83,18 +81,16 @@ string Name::showRaw(const GlobalState &gs) const {
                 return fmt::format("<{} {} ${}>", kind, this->unique.original.data(gs)->showRaw(gs), this->unique.num);
             }
         }
-        case CONSTANT:
+        case NameKind::CONSTANT:
             return fmt::format("<C {}>", this->cnst.original.showRaw(gs));
-        default:
-            Exception::notImplemented();
     }
 }
 
 string Name::toString(const GlobalState &gs) const {
     switch (this->kind) {
-        case UTF8:
+        case NameKind::UTF8:
             return string(raw.utf8.begin(), raw.utf8.end());
-        case UNIQUE:
+        case NameKind::UNIQUE:
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
                 return fmt::format("<Class:{}>", this->unique.original.data(gs)->show(gs));
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
@@ -106,18 +102,16 @@ string Name::toString(const GlobalState &gs) const {
             } else {
                 return fmt::format("{}${}", this->unique.original.data(gs)->show(gs), this->unique.num);
             }
-        case CONSTANT:
+        case NameKind::CONSTANT:
             return fmt::format("<C {}>", this->cnst.original.toString(gs));
-        default:
-            Exception::notImplemented();
     }
 }
 
 string Name::show(const GlobalState &gs) const {
     switch (this->kind) {
-        case UTF8:
+        case NameKind::UTF8:
             return string(raw.utf8.begin(), raw.utf8.end());
-        case UNIQUE:
+        case NameKind::UNIQUE:
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
                 return fmt::format("<Class:{}>", this->unique.original.data(gs)->show(gs));
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
@@ -130,20 +124,18 @@ string Name::show(const GlobalState &gs) const {
                 // Thus, we fall through.
             }
             return this->unique.original.data(gs)->show(gs);
-        case CONSTANT:
+        case NameKind::CONSTANT:
             return this->cnst.original.show(gs);
     }
 }
 string_view Name::shortName(const GlobalState &gs) const {
     switch (this->kind) {
-        case UTF8:
+        case NameKind::UTF8:
             return string_view(raw.utf8.begin(), raw.utf8.end() - raw.utf8.begin());
-        case UNIQUE:
+        case NameKind::UNIQUE:
             return this->unique.original.data(gs)->shortName(gs);
-        case CONSTANT:
+        case NameKind::CONSTANT:
             return this->cnst.original.data(gs)->shortName(gs);
-        default:
-            Exception::notImplemented();
     }
 }
 
@@ -153,11 +145,11 @@ void Name::sanityCheck(const GlobalState &gs) const {
     }
     NameRef current = this->ref(gs);
     switch (this->kind) {
-        case UTF8:
+        case NameKind::UTF8:
             ENFORCE(current == const_cast<GlobalState &>(gs).enterNameUTF8(this->raw.utf8),
                     "Name table corrupted, re-entering UTF8 name gives different id");
             break;
-        case UNIQUE: {
+        case NameKind::UNIQUE: {
             ENFORCE(this->unique.original._id < current._id, "unique name id not bigger than original");
             ENFORCE(this->unique.num > 0, "unique num == 0");
             NameRef current2 = const_cast<GlobalState &>(gs).freshNameUnique(this->unique.uniqueNameKind,
@@ -165,13 +157,11 @@ void Name::sanityCheck(const GlobalState &gs) const {
             ENFORCE(current == current2, "Name table corrupted, re-entering UNIQUE name gives different id");
             break;
         }
-        case CONSTANT:
+        case NameKind::CONSTANT:
             ENFORCE(this->cnst.original._id < current._id, "constant name id not bigger than original");
             ENFORCE(current == const_cast<GlobalState &>(gs).enterNameConstant(this->cnst.original),
                     "Name table corrupted, re-entering CONSTANT name gives different id");
             break;
-        default:
-            Exception::notImplemented();
     }
 }
 
@@ -182,21 +172,19 @@ NameRef Name::ref(const GlobalState &gs) const {
 
 bool Name::isClassName(const GlobalState &gs) const {
     switch (this->kind) {
-        case UTF8:
+        case NameKind::UTF8:
             return false;
-        case UNIQUE: {
+        case NameKind::UNIQUE: {
             return (this->unique.uniqueNameKind == Singleton || this->unique.uniqueNameKind == MangleRename ||
                     this->unique.uniqueNameKind == OpusEnum) &&
                    this->unique.original.data(gs)->isClassName(gs);
         }
-        case CONSTANT:
-            ENFORCE(this->cnst.original.data(gs)->kind == UTF8 ||
-                    this->cnst.original.data(gs)->kind == UNIQUE &&
+        case NameKind::CONSTANT:
+            ENFORCE(this->cnst.original.data(gs)->kind == NameKind::UTF8 ||
+                    this->cnst.original.data(gs)->kind == NameKind::UNIQUE &&
                         (this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
                          this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::OpusEnum));
             return true;
-        default:
-            Exception::notImplemented();
     }
 }
 
@@ -267,28 +255,28 @@ string NameRef::show(const GlobalState &gs) const {
 
 NameRef NameRef::addEq(GlobalState &gs) const {
     auto name = this->data(gs);
-    ENFORCE(name->kind == UTF8, "addEq over non-utf8 name");
+    ENFORCE(name->kind == NameKind::UTF8, "addEq over non-utf8 name");
     string nameEq = absl::StrCat(name->raw.utf8, "=");
     return gs.enterNameUTF8(nameEq);
 }
 
 NameRef NameRef::addQuestion(GlobalState &gs) const {
     auto name = this->data(gs);
-    ENFORCE(name->kind == UTF8, "addQuestion over non-utf8 name");
+    ENFORCE(name->kind == NameKind::UTF8, "addQuestion over non-utf8 name");
     string nameEq = absl::StrCat(name->raw.utf8, "?");
     return gs.enterNameUTF8(nameEq);
 }
 
 NameRef NameRef::addAt(GlobalState &gs) const {
     auto name = this->data(gs);
-    ENFORCE(name->kind == UTF8, "addAt over non-utf8 name");
+    ENFORCE(name->kind == NameKind::UTF8, "addAt over non-utf8 name");
     string nameEq = absl::StrCat("@", name->raw.utf8);
     return gs.enterNameUTF8(nameEq);
 }
 
 NameRef NameRef::prepend(GlobalState &gs, string_view s) const {
     auto name = this->data(gs);
-    ENFORCE(name->kind == UTF8, "prepend over non-utf8 name");
+    ENFORCE(name->kind == NameKind::UTF8, "prepend over non-utf8 name");
     string nameEq = absl::StrCat(s, name->raw.utf8);
     return gs.enterNameUTF8(nameEq);
 }
@@ -298,22 +286,19 @@ Name Name::deepCopy(const GlobalState &to) const {
     out.kind = this->kind;
 
     switch (this->kind) {
-        case UTF8:
+        case NameKind::UTF8:
             out.raw = this->raw;
             break;
 
-        case UNIQUE:
+        case NameKind::UNIQUE:
             out.unique.uniqueNameKind = this->unique.uniqueNameKind;
             out.unique.num = this->unique.num;
             out.unique.original = NameRef(to, this->unique.original.id());
             break;
 
-        case CONSTANT:
+        case NameKind::CONSTANT:
             out.cnst.original = NameRef(to, this->cnst.original.id());
             break;
-
-        default:
-            Exception::notImplemented();
     }
 
     return out;
