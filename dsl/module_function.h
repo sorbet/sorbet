@@ -27,7 +27,7 @@ namespace sorbet::dsl {
  *
  * finally, you can use module_function on its on, in which case it will do the above-described rewrite to every
  * subsequent method definition in the class
- */    
+ */
 class ModuleFunction final {
 public:
     static void patchDSL(core::MutableContext ctx, ast::ClassDef *cdef);
