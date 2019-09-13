@@ -413,7 +413,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
     string defUri = filePathToUri(uriPrefix, filename);
 
     const int id = nextId++;
-    auto responses = lspWrapper.getLSPResponsesFor(*makeDefinitionRequest(id, queryLoc.uri, line, character));
+    auto responses = lspWrapper.getLSPResponsesFor(makeDefinitionRequest(id, queryLoc.uri, line, character));
     ASSERT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/definition` request.";
     ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
 
@@ -485,8 +485,8 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
                                      // TODO: Try with this false, too.
                                      make_unique<Position>(line, character), make_unique<ReferenceContext>(true));
     int id = nextId++;
-    auto responses = lspWrapper.getLSPResponsesFor(
-        LSPMessage(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentReferences, move(referenceParams))));
+    auto responses = lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(
+        make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentReferences, move(referenceParams))));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/references` request.";
         return;
@@ -557,7 +557,7 @@ void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> 
         "2.0", id, LSPMethod::TextDocumentTypeDefinition,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(queryLoc.uri)),
                                                 make_unique<Position>(line, character))));
-    auto responses = lspWrapper.getLSPResponsesFor(*request);
+    auto responses = lspWrapper.getLSPResponsesFor(move(request));
     ASSERT_EQ(1, responses.size());
 
     ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
@@ -897,8 +897,8 @@ void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
     auto uri = filePathToUri(uriPrefix, filename);
     auto pos = make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(uri), range->start->copy());
     auto id = nextId++;
-    auto msg = LSPMessage(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentHover, move(pos)));
-    auto responses = wrapper.getLSPResponsesFor(msg);
+    auto msg = make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentHover, move(pos)));
+    auto responses = wrapper.getLSPResponsesFor(move(msg));
     ASSERT_EQ(responses.size(), 1);
     auto &responseMsg = responses.at(0);
     ASSERT_TRUE(responseMsg->isResponse());
@@ -945,8 +945,9 @@ void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File
     auto uri = filePathToUri(uriPrefix, filename);
     auto pos = make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(uri), range->start->copy());
     auto id = nextId++;
-    auto msg = LSPMessage(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion, move(pos)));
-    auto responses = wrapper.getLSPResponsesFor(msg);
+    auto msg =
+        make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion, move(pos)));
+    auto responses = wrapper.getLSPResponsesFor(move(msg));
     ASSERT_EQ(responses.size(), 1);
     auto &responseMsg = responses.at(0);
     ASSERT_TRUE(responseMsg->isResponse());

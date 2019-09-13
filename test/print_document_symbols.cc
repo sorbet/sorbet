@@ -21,14 +21,14 @@ int printDocumentSymbols(string_view filePath) {
             make_unique<TextDocumentItem>(fileUri, "ruby", 1, fs.readFile(filePath)));
         auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params));
         // Discard responses; it's OK if the file has errors.
-        lspWrapper.getLSPResponsesFor(LSPMessage(move(notif)));
+        lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
     }
 
     auto docSymbolParams = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(fileUri));
     auto req =
         make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(docSymbolParams));
     // Make documentSymbol request.
-    auto responses = lspWrapper.getLSPResponsesFor(LSPMessage(move(req)));
+    auto responses = lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(req)));
 
     if (responses.size() == 1 && responses.at(0)->isResponse()) {
         cout << responses.at(0)->toJSON(true) << "\n";

@@ -9,7 +9,9 @@ cc_library(
         "DefLocSaver.h",
         "LSPConfiguration.h",
         "LSPMessage.h",
+        "LSPPreprocessor.h",
         "LocalVarSaver.h",
+        "TimeTravelingGlobalState.h",
         "json_types.h",
         "lsp.h",
         "lsp_messages_gen.h",
@@ -87,6 +89,7 @@ cc_test(
     deps = [
         "lsp",
         "//payload",
+        "//test/helpers",
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],

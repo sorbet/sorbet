@@ -11,15 +11,10 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, LSPConfiguration config, const shared_ptr<spd::logger> &logger,
-                 WorkerPool &workers, int inputFd, std::ostream &outputStream)
-    : config(move(config)), initialGS(std::move(gs)), logger(logger), workers(workers), inputFd(inputFd),
-      outputStream(outputStream), lastMetricUpdateTime(chrono::steady_clock::now()) {
-    errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);
-    ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
-    ENFORCE(errorQueue->ignoreFlushes,
-            "LSPLoop's error queue is not ignoring flushes, which will prevent LSP from sending diagnostics");
-}
+LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, LSPConfiguration config,
+                 const shared_ptr<spd::logger> &logger, WorkerPool &workers, int inputFd, std::ostream &outputStream)
+    : config(config), preprocessor(move(initialGS), config, workers, logger), logger(logger), workers(workers),
+      inputFd(inputFd), outputStream(outputStream), lastMetricUpdateTime(chrono::steady_clock::now()) {}
 
 LSPLoop::QueryRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
                                               const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
@@ -67,8 +62,11 @@ LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> g
 }
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg) const {
+    // Note: During initialization, the preprocessor sends ShowOperation notifications to the main thread to forward to
+    // the client ("Indexing..."). So, whitelist those messages as OK to process prior to initialization.
     if (config.initialized || forMethod == LSPMethod::Initialize || forMethod == LSPMethod::Initialized ||
-        forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown || forMethod == LSPMethod::SorbetError) {
+        forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown || forMethod == LSPMethod::SorbetError ||
+        forMethod == LSPMethod::SorbetShowOperation) {
         return true;
     }
     return false;

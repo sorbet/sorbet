@@ -62,9 +62,6 @@ public:
      * this one. */
     std::vector<std::unique_ptr<Timer>> timers;
 
-    /** Request counter. */
-    int counter;
-
     /** If `true`, then this LSPMessage contains a canceled LSP request. */
     bool canceled = false;
 

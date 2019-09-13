@@ -10,13 +10,14 @@ namespace sorbet::realmain::lsp {
 
 const std::string LSPWrapper::EMPTY_STRING = "";
 
-vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const LSPMessage &message) {
-    auto result = lspLoop->processRequest(move(gs), message);
+vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMessage> message) {
+    const bool isInitialize = message->isNotification() && message->method() == LSPMethod::Initialize;
+    auto result = lspLoop->processRequest(move(gs), move(message));
     gs = move(result.gs);
 
     // Should always run typechecking at least once for each request post-initialization.
     ENFORCE(!initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
-    if (message.isNotification() && message.method() == LSPMethod::Initialize) {
+    if (isInitialize) {
         initialized = true;
     }
 
@@ -49,7 +50,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &json) {
-    return getLSPResponsesFor(*LSPMessage::fromClient(json));
+    return getLSPResponsesFor(LSPMessage::fromClient(json));
 }
 
 void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,

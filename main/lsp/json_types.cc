@@ -151,4 +151,11 @@ unique_ptr<Position> Position::copy() const {
     return make_unique<Position>(line, character);
 }
 
+void SorbetWorkspaceEditCounts::merge(const SorbetWorkspaceEditCounts &other) {
+    sorbetWatchmanFileChange += other.sorbetWatchmanFileChange;
+    textDocumentDidChange += other.textDocumentDidChange;
+    textDocumentDidOpen += other.textDocumentDidOpen;
+    textDocumentDidClose += other.textDocumentDidClose;
+}
+
 } // namespace sorbet::realmain::lsp
