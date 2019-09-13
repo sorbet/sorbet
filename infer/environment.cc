@@ -588,8 +588,11 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
         auto var = pair.first;
         const auto &otherTO = other.getTypeAndOrigin(ctx, var);
         auto &thisTO = pair.second.typeAndOrigins;
+        bool sameType;
         if (thisTO.type.get() != nullptr) {
-            thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
+            auto temp = core::Types::any(ctx, thisTO.type, otherTO.type);
+            sameType = temp == otherTO.type;
+            thisTO.type = move(temp);
             thisTO.type->sanityCheck(ctx);
             for (auto origin : otherTO.origins) {
                 if (!absl::c_linear_search(thisTO.origins, origin)) {
@@ -599,14 +602,15 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
             pair.second.knownTruthy = pair.second.knownTruthy && other.getKnownTruthy(var);
         } else {
             thisTO = otherTO;
+            sameType = false;
             pair.second.knownTruthy = other.getKnownTruthy(var);
         }
 
         if (((bb->flags & cfg::CFG::LOOP_HEADER) != 0) && bb->outerLoops <= inWhat.maxLoopWrite[var]) {
             continue;
         }
-        bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !other.getKnownTruthy(var);
-        bool canBeTruthy = core::Types::canBeTruthy(ctx, otherTO.type);
+        bool canBeFalsy = sameType || (core::Types::canBeFalsy(ctx, otherTO.type) && !other.getKnownTruthy(var));
+        bool canBeTruthy = sameType || core::Types::canBeTruthy(ctx, otherTO.type);
 
         if (canBeTruthy) {
             auto &thisKnowledge = getKnowledge(var);
