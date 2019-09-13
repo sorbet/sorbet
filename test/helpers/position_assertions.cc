@@ -557,7 +557,7 @@ void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> 
         "2.0", id, LSPMethod::TextDocumentTypeDefinition,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(queryLoc.uri)),
                                                 make_unique<Position>(line, character))));
-    auto responses = lspWrapper.getLSPResponsesFor(*request);
+    auto responses = lspWrapper.getLSPResponsesFor(move(request));
     ASSERT_EQ(1, responses.size());
 
     ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
@@ -945,8 +945,9 @@ void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File
     auto uri = filePathToUri(uriPrefix, filename);
     auto pos = make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(uri), range->start->copy());
     auto id = nextId++;
-    auto msg = LSPMessage(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion, move(pos)));
-    auto responses = wrapper.getLSPResponsesFor(msg);
+    auto msg =
+        make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion, move(pos)));
+    auto responses = wrapper.getLSPResponsesFor(move(msg));
     ASSERT_EQ(responses.size(), 1);
     auto &responseMsg = responses.at(0);
     ASSERT_TRUE(responseMsg->isResponse());
