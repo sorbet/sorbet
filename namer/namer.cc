@@ -444,9 +444,6 @@ public:
                 case core::Names::public_()._id:
                     mdef->symbol.data(ctx)->setPublic();
                     break;
-                case core::Names::moduleFunction()._id:
-                    ENFORCE(false, "module_function should be removed by the DSL pass");
-                    break;
                 default:
                     return original;
             }
