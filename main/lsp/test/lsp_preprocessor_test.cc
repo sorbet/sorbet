@@ -303,7 +303,9 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
     int i = 0;
     for (auto &[hoverId, fooContents] : entries) {
         i++;
+        // Cancel a hover.
         preprocessor.preprocessAndEnqueue(state, makeCancel(hoverId), mtx);
+        // Check that the next edit was merged into the first edit.
         ASSERT_EQ(state.pendingRequests[0]->method(), LSPMethod::SorbetWorkspaceEdit);
         auto [updates, count] = getUpdates(state, 0).value();
         EXPECT_EQ(count->textDocumentDidOpen, 1);
@@ -318,7 +320,7 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
     // Push a new edit that takes the slow path.
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 5, fileV5), mtx);
     {
-        // Ensure GS for new edit has all previous edits.
+        // Ensure GS for new edit has all previous edits, including the contents of bar.rb.
         const auto [updates, counts] = getUpdates(state, state.pendingRequests.size() - 1).value();
         ASSERT_FALSE(updates->canTakeFastPath);
         const auto &gs = *updates->updatedGS.value();
