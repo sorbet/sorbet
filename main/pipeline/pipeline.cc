@@ -836,6 +836,9 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
                                 const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
     try {
         what = name(*gs, move(what), opts, skipConfigatron);
+        if (gs->shouldCancelTypechecking()) {
+            return {};
+        }
 
         for (auto &named : what) {
             if (opts.print.NameTree.enabled) {
@@ -862,6 +865,9 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             what = resolver::Resolver::run(ctx, move(what), workers);
+            if (gs->shouldCancelTypechecking()) {
+                return {};
+            }
         }
         if (opts.stressIncrementalResolver) {
             auto symbolsBefore = gs->symbolsUsed();
@@ -943,7 +949,8 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                 int processedByThread = 0;
 
                 {
-                    for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                    for (auto result = fileq->try_pop(job); !result.done() && !ctx.state.shouldCancelTypechecking();
+                         result = fileq->try_pop(job)) {
                         if (result.gotItem()) {
                             processedByThread++;
                             core::FileRef file = job.file;
@@ -975,6 +982,9 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
                     gs->errorQueue->flushErrors();
+                    if (ctx.state.shouldCancelTypechecking()) {
+                        return {};
+                    }
                 }
             }
         }

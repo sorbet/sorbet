@@ -167,6 +167,8 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::TextDocumentPublishDiagnostics:
         case LSPMethod::SorbetShowOperation:
         case LSPMethod::SorbetTypecheckRunInfo:
+        // No-op message used to determine if the server has processed a message in the queue.
+        case LSPMethod::SorbetNop:
             return true;
     }
 }

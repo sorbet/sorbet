@@ -1788,11 +1788,29 @@ public:
 
 vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), workers);
+    if (ctx.state.shouldCancelTypechecking()) {
+        return {};
+    }
     finalizeAncestors(ctx.state);
+    if (ctx.state.shouldCancelTypechecking()) {
+        return {};
+    }
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
+    if (ctx.state.shouldCancelTypechecking()) {
+        return {};
+    }
     finalizeSymbols(ctx.state);
+    if (ctx.state.shouldCancelTypechecking()) {
+        return {};
+    }
     trees = resolveTypeParams(ctx, std::move(trees));
+    if (ctx.state.shouldCancelTypechecking()) {
+        return {};
+    }
     trees = resolveSigs(ctx, std::move(trees));
+    if (ctx.state.shouldCancelTypechecking()) {
+        return {};
+    }
     sanityCheck(ctx, trees);
 
     return trees;

@@ -22,6 +22,10 @@ struct QueueState {
     bool terminate = false;
     bool paused = false;
     int errorCode = 0;
+    // The latest edit version to be processed.
+    u4 latestVersion = 0;
+    // If 'true', the processing thread is currently running a slow path.
+    bool runningSlowPath = false;
     // Counters collected from worker threads.
     CounterState counters;
 };
@@ -71,6 +75,13 @@ private:
      */
     void mergeFileChanges(QueueState &state);
 
+    /**
+     * Checks if the processing thread is still processing `lastEncounteredSlowPath`, if defined.
+     *
+     * Updates `lastEncounteredSlowPath` and cancels typechecking when applicable.
+     */
+    void maybeCancelSlowPath(QueueState &state);
+
     std::unique_ptr<LSPMessage> makeAndCommitWorkspaceEdit(std::unique_ptr<SorbetWorkspaceEditParams> params,
                                                            std::unique_ptr<SorbetWorkspaceEditCounts> counts,
                                                            std::unique_ptr<LSPMessage> oldMsg);
@@ -108,6 +119,11 @@ public:
      * It grabs the mutex before reading/writing `state`.
      */
     void preprocessAndEnqueue(QueueState &state, std::unique_ptr<LSPMessage> msg, absl::Mutex &stateMtx);
+
+    /**
+     * Clears the undo history. Used in single-threaded mode to signal when updates are safely committed.
+     */
+    void clearHistory();
 
     std::unique_ptr<Joinable> runPreprocessor(QueueState &incomingQueue, absl::Mutex &incomingMtx,
                                               QueueState &processingQueue, absl::Mutex &processingMtx);

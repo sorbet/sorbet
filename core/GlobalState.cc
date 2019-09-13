@@ -1412,6 +1412,10 @@ bool GlobalState::wasModified() const {
     return wasModified_;
 }
 
+bool GlobalState::shouldCancelTypechecking() const {
+    return lspEpoch != nullptr && expectedLspEpoch && expectedLspEpoch.value() != lspEpoch->load();
+}
+
 void GlobalState::trace(string_view msg) const {
     errorQueue->tracer.trace(msg);
 }

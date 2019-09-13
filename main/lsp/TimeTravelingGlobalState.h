@@ -33,6 +33,7 @@ private:
      */
     struct TimeTravelUpdate {
         u4 version = 0;
+        bool hasNewFiles;
         GlobalStateUpdate update;
         GlobalStateUpdate undoUpdate;
     };
@@ -99,10 +100,17 @@ public:
     std::vector<ast::ParsedFile> indexFromFileSystem();
 
     /**
-     * Returns `true` if the given changes can run on the fast path relative to the current version of global state.
+     * Returns `true` if the given changes can run on the fast path relative to the provided version of global state.
+     * Only requires `updatedFileHashes` and `updatedFiles`.
+     *
      * TODO(jvilk): Return reason and track slow path stats.
      */
-    bool canTakeFastPath(const LSPFileUpdates &updates) const;
+    bool canTakeFastPath(u4 fromVersion, const LSPFileUpdates &updates);
+
+    /**
+     * Get a combined LSPFileUpdates containing edits from [fromId, toId] (inclusive).
+     */
+    LSPFileUpdates getCombinedUpdates(u4 fromId, u4 toId);
 
     /**
      * Returns true if `a` comes before `b`.

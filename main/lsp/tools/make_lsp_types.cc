@@ -1302,6 +1302,11 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                              },
                                              classTypes);
 
+    auto SorbetNopParam = makeObject("SorbetNopParam", {}, classTypes,
+                                     {
+                                         "u4 id;",
+                                     });
+
     /* Core LSPMessage objects */
     // N.B.: Only contains LSP methods that Sorbet actually cares about.
     // All others are ignored.
@@ -1320,6 +1325,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "sorbet/typecheckRunInfo",
                                      "sorbet/watchmanFileChange",
                                      "sorbet/workspaceEdit",
+                                     "sorbet/nop",
                                      "textDocument/codeAction",
                                      "textDocument/completion",
                                      "textDocument/definition",
@@ -1415,6 +1421,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"sorbet/watchmanFileChange", WatchmanQueryResponse},
                                                 {"sorbet/showOperation", SorbetShowOperationParams},
                                                 {"sorbet/error", SorbetErrorParams},
+                                                {"sorbet/nop", SorbetNopParam},
                                                 {"sorbet/workspaceEdit", SorbetWorkspaceEditParams},
                                                 {"sorbet/typecheckRunInfo", SorbetTypecheckRunInfo},
                                             });

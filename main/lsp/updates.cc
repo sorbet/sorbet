@@ -60,6 +60,21 @@ ShowOperationPreprocessorThread::~ShowOperationPreprocessorThread() {
     }
 }
 
+LSPLoop::TypecheckRun::TypecheckRun(unique_ptr<core::GlobalState> gs, vector<unique_ptr<core::Error>> errors,
+                                    vector<core::FileRef> filesTypechecked, LSPFileUpdates updates, bool tookFastPath)
+    : gs(move(gs)), errors(move(errors)), filesTypechecked(move(filesTypechecked)), updates(move(updates)),
+      tookFastPath(tookFastPath) {}
+
+LSPLoop::TypecheckRun LSPLoop::TypecheckRun::makeCanceled(std::unique_ptr<core::GlobalState> gs) {
+    if (gs) {
+        // Drain any enqueued errors from aborted typechecking run.
+        gs->errorQueue->drainWithQueryResponses();
+    }
+    TypecheckRun run(move(gs));
+    run.canceled = true;
+    return run;
+}
+
 pair<unique_ptr<core::GlobalState>, ast::ParsedFile>
 updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file, const options::Options &opts) {
     core::FileRef fref = gs->findFileByPath(file->path());
@@ -74,6 +89,11 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
 }
 
 LSPResult LSPLoop::commitTypecheckRun(TypecheckRun run) {
+    if (run.canceled) {
+        logger->error("Typecheck run was canceled.");
+        return LSPResult{move(run.gs), {}, true};
+    }
+
     Timer timeit(logger, "commitTypecheckRun");
     auto &updates = run.updates;
 
@@ -105,6 +125,7 @@ LSPResult LSPLoop::commitTypecheckRun(TypecheckRun run) {
     return pushDiagnostics(move(run));
 }
 
+namespace {
 void tryApplyLocalVarSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &indexedCopies) {
     if (gs.lspQuery.kind != core::lsp::Query::Kind::VAR) {
         return;
@@ -127,7 +148,21 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
     }
 }
 
-LSPLoop::TypecheckRun LSPLoop::runSlowPath(LSPFileUpdates updates) const {
+class ExpectedEpochSetter final {
+private:
+    core::GlobalState &gs;
+
+public:
+    ExpectedEpochSetter(u4 version, core::GlobalState &gs) : gs(gs) {
+        gs.expectedLspEpoch = version;
+    }
+    ~ExpectedEpochSetter() {
+        gs.expectedLspEpoch = nullopt;
+    }
+};
+} // namespace
+
+LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previousGS, LSPFileUpdates updates) const {
     ShowOperation slowPathOp(*this, "SlowPath", "Typechecking...");
     Timer timeit(logger, "slow_path");
     ENFORCE(!updates.canTakeFastPath || config.disableFastPath);
@@ -141,6 +176,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(LSPFileUpdates updates) const {
     UnorderedSet<int> updatedFiles;
     vector<ast::ParsedFile> indexedCopies;
     auto finalGS = move(updates.updatedGS.value());
+    ExpectedEpochSetter setter(updates.version, *finalGS);
     // Index the updated files using finalGS.
     {
         core::UnfreezeFileTable fileTableAccess(*finalGS);
@@ -163,19 +199,30 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(LSPFileUpdates updates) const {
             indexedCopies.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
         }
     }
+    if (finalGS->shouldCancelTypechecking()) {
+        return TypecheckRun::makeCanceled(move(previousGS));
+    }
 
     ENFORCE(finalGS->lspQuery.isEmpty());
     auto resolved = pipeline::resolve(finalGS, move(indexedCopies), config.opts, workers, config.skipConfigatron);
+    if (finalGS->shouldCancelTypechecking()) {
+        return TypecheckRun::makeCanceled(move(previousGS));
+    }
+
     vector<core::FileRef> affectedFiles;
     for (auto &tree : resolved) {
         ENFORCE(tree.file.exists());
         affectedFiles.push_back(tree.file);
     }
     pipeline::typecheck(finalGS, move(resolved), config.opts, workers);
+    if (finalGS->shouldCancelTypechecking()) {
+        return TypecheckRun::makeCanceled(move(previousGS));
+    }
+
     auto out = finalGS->errorQueue->drainWithQueryResponses();
     finalGS->lspTypecheckCount++;
     finalGS->lspQuery = core::lsp::Query::noQuery();
-    return TypecheckRun{move(out.first), move(affectedFiles), move(finalGS), move(updates), false};
+    return TypecheckRun(move(finalGS), move(out.first), move(affectedFiles), move(updates), false);
 }
 
 LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs, LSPFileUpdates updates) const {
@@ -184,7 +231,7 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
 
     if (!updates.canTakeFastPath) {
-        return runSlowPath(move(updates));
+        return runSlowPath(move(gs), move(updates));
     }
 
     Timer timeit(logger, "fast_path");
@@ -252,7 +299,7 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
     pipeline::typecheck(gs, move(resolved), config.opts, workers);
     auto out = gs->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
-    return TypecheckRun{move(out.first), move(subset), move(gs), move(updates), true};
+    return TypecheckRun(move(gs), move(out.first), move(subset), move(updates), true);
 }
 
 LSPLoop::QueryRun LSPLoop::runQuery(unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,

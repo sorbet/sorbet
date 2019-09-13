@@ -46,6 +46,7 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
     auto &pendingRequests = state.pendingRequests;
     const int originalSize = pendingRequests.size();
     int requestsMergedCounter = 0;
+
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
         auto &msg = **it;
         if (!msg.isNotification() || msg.method() != LSPMethod::SorbetWorkspaceEdit) {
@@ -84,6 +85,26 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
     // Prune history for all edits no longer in queue.
     ttgs.pruneBefore(earliestVersionInQueue);
     ENFORCE(pendingRequests.size() + requestsMergedCounter == originalSize);
+
+    // Check if we should cancel the slow path.
+    if (state.runningSlowPath) {
+        for (auto it = pendingRequests.begin(); it != pendingRequests.end(); it++) {
+            const auto &msg = *it;
+            if (msg->isNotification() && msg->method() == LSPMethod::SorbetWorkspaceEdit) {
+                auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
+                auto combinedUpdates = ttgs.getCombinedUpdates(state.latestVersion, params->updates.version);
+                if (combinedUpdates.canTakeFastPath) {
+                    params->updates = move(combinedUpdates);
+                    // Tell typechecking thread to cancel slow path run.
+                    ttgs.getGlobalState().lspEpoch->store(combinedUpdates.version);
+                }
+                return;
+            } else if (!msg->isDelayable()) {
+                // Message is not delayable, and is not an edit. Can't cancel the slow path.
+                return;
+            }
+        }
+    }
 }
 
 void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, const CancelParams &cancelParams) {
@@ -245,6 +266,10 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
     }
 }
 
+void LSPPreprocessor::clearHistory() {
+    ttgs.pruneBefore(nextVersion);
+}
+
 string readFile(string_view path, const FileSystem &fs) {
     try {
         return fs.readFile(path);
@@ -377,13 +402,8 @@ void LSPPreprocessor::mergeEdits(LSPFileUpdates &to, LSPFileUpdates &from) {
     to.updatedFiles = move(from.updatedFiles);
     to.updatedFileIndexes = move(from.updatedFileIndexes);
     to.updatedFileHashes = move(from.updatedFileHashes);
-
     to.hasNewFiles = to.hasNewFiles || from.hasNewFiles;
-
-    // Roll back to just before `to`.
-    ttgs.travel(to.versionStart - 1);
-
-    to.canTakeFastPath = ttgs.canTakeFastPath(to);
+    to.canTakeFastPath = ttgs.canTakeFastPath(to.versionStart - 1, to);
     // `to` now includes the contents of `from`.
     to.versionEnd = from.versionEnd;
     // No need to update versionStart, as to comes before from.

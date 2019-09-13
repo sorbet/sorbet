@@ -277,6 +277,20 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                     }
                 }
                 msg = move(processingQueue.pendingRequests.front());
+                processingQueue.runningSlowPath = false;
+                if (msg->isNotification()) {
+                    auto method = msg->method();
+                    exitProcessed = method == LSPMethod::Exit;
+                    if (method == LSPMethod::SorbetWorkspaceEdit) {
+                        const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
+                        processingQueue.latestVersion = params->updates.version;
+                        processingQueue.runningSlowPath = !params->updates.canTakeFastPath;
+                        if (gs && gs->lspEpoch) {
+                            gs->lspEpoch->store(processingQueue.latestVersion);
+                        }
+                    }
+                }
+
                 exitProcessed = msg->isNotification() && msg->method() == LSPMethod::Exit;
                 processingQueue.pendingRequests.pop_front();
                 hasMoreMessages = !processingQueue.pendingRequests.empty();

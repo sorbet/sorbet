@@ -18,7 +18,8 @@ LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, std::unique_
 }
 
 LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<unique_ptr<LSPMessage>> messages) {
-    QueueState state{{}, false, false, 0};
+    // TODO: Memory leak -- prune TTGS history.
+    QueueState state;
     absl::Mutex mutex;
     for (auto &message : messages) {
         preprocessor.preprocessAndEnqueue(state, move(message), mutex);
@@ -76,23 +77,20 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
                                                    counts->textDocumentDidClose + counts->sorbetWatchmanFileChange) -
                                                       1);
             return commitTypecheckRun(runTypechecking(move(gs), move(editParams->updates)));
-        }
-        if (method == LSPMethod::Initialized) {
+        } else if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
             auto &initParams = get<unique_ptr<InitializedParams>>(params);
             auto &updates = initParams->updates;
             globalStateHashes = move(updates.updatedFileHashes);
             indexed = move(updates.updatedFileIndexes);
-            LSPResult result = pushDiagnostics(runSlowPath(move(updates)));
+            LSPResult result = pushDiagnostics(runSlowPath(move(gs), move(updates)));
             ENFORCE(result.gs);
             config.initialized = true;
             return result;
-        }
-        if (method == LSPMethod::Exit) {
+        } else if (method == LSPMethod::Exit) {
             prodCategoryCounterInc("lsp.messages.processed", "exit");
             return LSPResult{move(gs), {}};
-        }
-        if (method == LSPMethod::SorbetError) {
+        } else if (method == LSPMethod::SorbetError) {
             auto &errorInfo = get<unique_ptr<SorbetErrorParams>>(params);
             if (errorInfo->code == (int)LSPErrorCodes::MethodNotFound) {
                 // Not an error; we just don't care about this notification type (e.g. TextDocumentDidSave).
@@ -101,10 +99,12 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
                 logger->error(errorInfo->message);
             }
             return LSPResult{move(gs), {}};
-        }
-        if (method == LSPMethod::SorbetShowOperation) {
+        } else if (method == LSPMethod::SorbetShowOperation) {
             // Forward to client. These are sent from the preprocessor.
             sendMessage(msg);
+            return LSPResult{move(gs), {}};
+        } else if (method == LSPMethod::SorbetNop) {
+            // No-op.
             return LSPResult{move(gs), {}};
         }
     } else if (msg.isRequest()) {
