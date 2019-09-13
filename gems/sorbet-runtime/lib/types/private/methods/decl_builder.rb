@@ -191,11 +191,6 @@ module T::Private::Methods
       self
     end
 
-    def implementation
-      check_live!
-      raise BuilderError.new(".implementation has been deprecated")
-    end
-
     # Declares valid type paramaters which can be used with `T.type_parameter` in
     # this `sig`.
     #
