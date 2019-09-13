@@ -143,7 +143,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableCont
                                                ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
         } else {
             if (auto e = ctx.state.beginError(arg->loc, core::errors::DSL::BadModuleFunction)) {
-                e.setHeader("Bad argument to `{}`: must be a symbol, string, or method definition", "module_function");
+                e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing", "module_function");
             }
         }
     }
