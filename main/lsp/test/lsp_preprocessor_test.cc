@@ -101,6 +101,15 @@ unique_ptr<LSPMessage> makeCancel(int id) {
     return make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::$CancelRequest, move(params)));
 }
 
+LSPFileUpdates makeUpdates(u4 &version, vector<pair<string, string>> files) {
+    LSPFileUpdates updates;
+    updates.version = version++;
+    for (auto &[path, contents] : files) {
+        updates.updatedFiles.push_back(make_shared<core::File>(move(path), move(contents), core::File::Type::Normal));
+    }
+    return updates;
+}
+
 } // namespace
 
 TEST(TimeTravelingGlobalState, ComesBefore) { // NOLINT
@@ -144,6 +153,72 @@ TEST(TimeTravelingGlobalState, ComesBefore) { // NOLINT
     {
         TimeTravelingGlobalState ttgs = makeTTGS(nullConfig, UINT32_MAX);
         EXPECT_PRED3(comesBeforeSymmetric, ttgs, UINT32_MAX, 0);
+    }
+}
+
+TEST(TimeTravelingGlobalState, Undo) { // NOLINT
+    TimeTravelingGlobalState ttgs = makeTTGS(nullConfig, 1);
+    string foo1 = "# typed: strict\ndef foo; end";
+    string foo2 = "# typed: strict\ndef foo; 1 + 1; end";
+    string bar1 = "1 + 1";
+    u4 version = 2;
+    auto v2 = makeUpdates(version, {{"foo.rb", foo1}});
+    ttgs.commitEdits(v2);
+    auto v3 = makeUpdates(version, {{"bar.rb", bar1}});
+    ttgs.commitEdits(v3);
+    version = 100;
+    auto v100 = makeUpdates(version, {{"foo.rb", foo2}});
+    ttgs.commitEdits(v100);
+    {
+        const auto &gs = ttgs.getGlobalState();
+        EXPECT_EQ(gs.findFileByPath("foo.rb").data(gs).source(), foo2);
+        EXPECT_EQ(gs.findFileByPath("bar.rb").data(gs).source(), bar1);
+    }
+    // going back to v99 is the same as going back to v3, since that's the next smallest version.
+    ttgs.travel(99);
+    {
+        const auto &gs = ttgs.getGlobalState();
+        EXPECT_EQ(gs.findFileByPath("foo.rb").data(gs).source(), foo1);
+        EXPECT_EQ(gs.findFileByPath("bar.rb").data(gs).source(), bar1);
+    }
+    // going back to v3 when already technically on v3 should cause no change.
+    ttgs.travel(3);
+    {
+        const auto &gs = ttgs.getGlobalState();
+        EXPECT_EQ(gs.findFileByPath("foo.rb").data(gs).source(), foo1);
+        EXPECT_EQ(gs.findFileByPath("bar.rb").data(gs).source(), bar1);
+    }
+    // go back to v2
+    ttgs.travel(2);
+    {
+        const auto &gs = ttgs.getGlobalState();
+        EXPECT_EQ(gs.findFileByPath("foo.rb").data(gs).source(), foo1);
+        EXPECT_EQ(gs.findFileByPath("bar.rb").data(gs).source(), "");
+    }
+    // Travel to before *all* edits.
+    ttgs.travel(1);
+    {
+        const auto &gs = ttgs.getGlobalState();
+        EXPECT_EQ(gs.findFileByPath("foo.rb").data(gs).source(), "");
+        EXPECT_EQ(gs.findFileByPath("bar.rb").data(gs).source(), "");
+    }
+    // Delete undo log prior to latest version. Note that ttgs is explicitly at a version whose history is getting
+    // erased, so this checks that ttgs properly time-travels forward to avoid forgetting how to get to v100.
+    ttgs.pruneBefore(100);
+    // Should know how to go from 100 => 3, but no longer knows how to get to versions 2 or 1.
+    // This is the same as traveling to v3.
+    ttgs.travel(1);
+    {
+        const auto &gs = ttgs.getGlobalState();
+        EXPECT_EQ(gs.findFileByPath("foo.rb").data(gs).source(), foo1);
+        EXPECT_EQ(gs.findFileByPath("bar.rb").data(gs).source(), bar1);
+    }
+    // Back to v100.
+    ttgs.travel(100);
+    {
+        const auto &gs = ttgs.getGlobalState();
+        EXPECT_EQ(gs.findFileByPath("foo.rb").data(gs).source(), foo2);
+        EXPECT_EQ(gs.findFileByPath("bar.rb").data(gs).source(), bar1);
     }
 }
 

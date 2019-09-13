@@ -173,6 +173,8 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector
 }
 
 void TimeTravelingGlobalState::pruneBefore(u4 version) {
+    // Time-travel to the present before we forget how to.
+    travel(latestVersion);
     for (auto it = log.begin(); it != log.end();) {
         if (comesBefore(it->version, version)) {
             it = log.erase(it);
