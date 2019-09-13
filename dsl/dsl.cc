@@ -18,6 +18,7 @@
 #include "dsl/Regexp.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
+#include "dsl/module_function.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 
 using namespace std;
@@ -126,6 +127,7 @@ public:
             prevStat = stat.get();
         }
         if (replaceNodes.empty()) {
+            ModuleFunction::patchDSL(ctx, classDef.get());
             return classDef;
         }
 
@@ -142,6 +144,8 @@ public:
                 }
             }
         }
+        ModuleFunction::patchDSL(ctx, classDef.get());
+
         return classDef;
     }
 

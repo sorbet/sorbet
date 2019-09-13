@@ -126,21 +126,6 @@ class NameInserter {
         return move(localExpr);
     }
 
-    struct LocalFrame {
-        bool moduleFunctionActive = false;
-    };
-
-    LocalFrame &enterScope() {
-        auto &frame = scopeStack.emplace_back();
-        return frame;
-    }
-
-    void exitScope() {
-        scopeStack.pop_back();
-    }
-
-    vector<LocalFrame> scopeStack;
-
     bool addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &node) {
         auto send = ast::cast_tree<ast::Send>(node.get());
         if (send == nullptr) {
@@ -202,11 +187,6 @@ class NameInserter {
                      core::SymbolRef method) {
         core::SymbolRef alias = ctx.state.enterMethodSymbol(loc, owner, newName);
         alias.data(ctx)->resultType = core::make_type<core::AliasType>(method);
-    }
-
-    void aliasModuleFunction(core::MutableContext ctx, core::Loc loc, core::SymbolRef method) {
-        core::SymbolRef owner = method.data(ctx)->owner;
-        aliasMethod(ctx, loc, owner.data(ctx)->singletonClass(ctx), method.data(ctx)->name, method);
     }
 
     core::SymbolRef methodOwner(core::MutableContext ctx) {
@@ -276,7 +256,6 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
             }
         }
-        enterScope();
         return klass;
     }
 
@@ -339,7 +318,6 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
-        exitScope();
         if (klass->kind == ast::Class && !klass->symbol.data(ctx)->superClass().exists() &&
             klass->symbol != core::Symbols::BasicObject()) {
             klass->symbol.data(ctx)->setSuperClass(core::Symbols::todo());
@@ -466,46 +444,11 @@ public:
                 case core::Names::public_()._id:
                     mdef->symbol.data(ctx)->setPublic();
                     break;
-                case core::Names::moduleFunction()._id:
-                    aliasModuleFunction(ctx, original->loc, mdef->symbol);
-                    break;
                 default:
                     return original;
             }
             return std::move(original->args[0]);
         }
-        if (original->recv->isSelfReference()) {
-            switch (original->fun._id) {
-                case core::Names::moduleFunction()._id: {
-                    if (original->args.empty()) {
-                        scopeStack.back().moduleFunctionActive = true;
-                        break;
-                    }
-                    for (auto &arg : original->args) {
-                        auto lit = ast::cast_tree<ast::Literal>(arg.get());
-                        if (lit == nullptr || !lit->isSymbol(ctx)) {
-                            if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::DynamicDSLInvocation)) {
-                                e.setHeader("Unsupported argument to `{}`: arguments must be symbol literals",
-                                            original->fun.show(ctx));
-                            }
-                            continue;
-                        }
-                        core::NameRef name = lit->asSymbol(ctx);
-
-                        core::SymbolRef meth = ctx.state.lookupMethodSymbol(methodOwner(ctx), name);
-                        if (!meth.exists()) {
-                            if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::MethodNotFound)) {
-                                e.setHeader("`{}`: no such method: `{}`", original->fun.show(ctx), name.show(ctx));
-                            }
-                            continue;
-                        }
-                        aliasModuleFunction(ctx, original->loc, meth);
-                    }
-                    break;
-                }
-            }
-        }
-
         return original;
     }
 
@@ -603,8 +546,6 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-        enterScope();
-
         core::SymbolRef owner = methodOwner(ctx);
 
         if (method->isSelf()) {
@@ -674,10 +615,6 @@ public:
 
     unique_ptr<ast::MethodDef> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size());
-        exitScope();
-        if (scopeStack.back().moduleFunctionActive) {
-            aliasModuleFunction(ctx, method->symbol.data(ctx)->loc(), method->symbol);
-        }
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size(), "{}: {} != {}",
                 method->name.showRaw(ctx), method->args.size(), method->symbol.data(ctx)->arguments().size());
         // Not all information is unfortunately available in the symbol. Original argument names aren't.
@@ -970,7 +907,6 @@ std::vector<ast::ParsedFile> Namer::run(core::MutableContext ctx, std::vector<as
     NameInserter nameInserter;
     for (auto &tree : trees) {
         auto file = tree.file;
-        nameInserter.enterScope();
         try {
             ast::ParsedFile ast;
             {
@@ -984,8 +920,6 @@ std::vector<ast::ParsedFile> Namer::run(core::MutableContext ctx, std::vector<as
                 e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(ctx).path());
             }
         }
-        nameInserter.exitScope();
-        ENFORCE(nameInserter.scopeStack.empty());
     }
     return trees;
 }
