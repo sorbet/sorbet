@@ -214,12 +214,24 @@ TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass)
 }
 
 bool Types::canBeTruthy(Context ctx, const TypePtr &what) {
-    if (what->isUntyped()) {
-        return true;
-    }
-    auto truthyPart =
-        Types::dropSubtypesOf(ctx, Types::dropSubtypesOf(ctx, what, Symbols::NilClass()), Symbols::FalseClass());
-    return !truthyPart->isBottom(); // check if truthyPart is empty
+    bool isTruthy = false;
+
+    typecase(
+        what.get(), [&](OrType *o) { isTruthy = canBeTruthy(ctx, o->left) || canBeTruthy(ctx, o->right); },
+        [&](AndType *a) { isTruthy = canBeTruthy(ctx, a->left) && canBeTruthy(ctx, a->right); },
+        [&](ClassType *c) {
+            auto sym = c->symbol;
+            isTruthy = sym == core::Symbols::untyped() ||
+                       (sym != core::Symbols::FalseClass() && sym != core::Symbols::NilClass());
+        },
+        [&](AppliedType *c) {
+            auto sym = c->klass;
+            isTruthy = sym == core::Symbols::untyped() ||
+                       (sym != core::Symbols::FalseClass() && sym != core::Symbols::NilClass());
+        },
+        [&](ProxyType *c) { isTruthy = canBeTruthy(ctx, c->underlying()); }, [&](Type *) {});
+
+    return isTruthy;
 }
 
 bool Types::canBeFalsy(Context ctx, const TypePtr &what) {
