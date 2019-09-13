@@ -12,13 +12,6 @@ using namespace std;
 
 namespace sorbet::dsl {
 
-bool ModuleFunction::isBareModuleFunction(const ast::Expression *expr) {
-    if (auto send = ast::cast_tree_const<ast::Send>(expr)) {
-        return send->fun == core::Names::moduleFunction() && send->args.size() == 0;
-    }
-    return false;
-}
-
 void ModuleFunction::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
     // once we see a bare `module_function`, we should replace every subsequent definition
     bool moduleFunctionActive = false;
@@ -27,7 +20,7 @@ void ModuleFunction::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
     for (auto &stat : cdef->rhs) {
         if (auto send = ast::cast_tree<ast::Send>(stat.get())) {
             // we only care about sends if they're `module_function`
-            if (send->fun == core::Names::moduleFunction()) {
+            if (send->fun == core::Names::moduleFunction() && send->recv->isSelfReference()) {
                 if (send->args.size() == 0) {
                     // a `module_function` with no args changes the way that every subsequent method definition works so
                     // we set this flag so we know that the rest of the defns should be rewritten
