@@ -762,16 +762,25 @@ public:
             }
         }
 
-        auto members = onSymbol.data(ctx)->typeMembers();
-        auto it = absl::c_find_if(members, [&](auto mem) { return mem.data(ctx)->name == typeName->cnst; });
-        if (it != members.end() && !(it->data(ctx)->loc() == asgn->loc || it->data(ctx)->loc().isTombStoned(ctx))) {
-            if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
+        auto existingTypeMember = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
+        if (existingTypeMember.exists()) {
+            // we've already constructed the type member, which means the only thing we need to do is find out whether
+            // there was a redefinition the first time, and in that case display the same error
+            auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
+            if (oldSym.exists()) {
+                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
+                    e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
+                }
             }
-            return make_unique<ast::EmptyTree>();
+            // if we have more than one type member with the same name, then we have messed up somewhere
+            ENFORCE(absl::c_find_if(onSymbol.data(ctx)->typeMembers(), [&](auto mem) {
+                        return mem.data(ctx)->name == existingTypeMember.data(ctx)->name;
+                    }) != onSymbol.data(ctx)->typeMembers().end());
+            return asgn;
         }
         auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
-        if (oldSym.exists() && !(oldSym.data(ctx)->loc() == asgn->loc || oldSym.data(ctx)->loc().isTombStoned(ctx))) {
+        if (oldSym.exists()) {
             if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
                 e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
