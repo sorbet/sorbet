@@ -694,6 +694,17 @@ public:
             }
             ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
         }
+        if (sym.exists()) {
+            // if sym exists, then currSym should definitely exist
+            ENFORCE(currSym.exists());
+            auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
+            if (renamedSym.exists()) {
+                if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                    e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx)->show(ctx));
+                    e.addErrorLine(renamedSym.data(ctx)->loc(), "Previous definition");
+                }
+            }
+        }
         core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, name);
         auto loc = lhs->loc;
         unique_ptr<ast::UnresolvedConstantLit> lhsU(lhs);
