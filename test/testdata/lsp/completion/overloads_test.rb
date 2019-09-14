@@ -10,9 +10,9 @@ class A
 end
 
 A.new.my_metho # error: does not exist
-#             ^ completion: my_method, my_method, my_method, my_method, my_method
+#             ^ completion: my_method
 
-# TODO(jez) The above is not the right behavior.
+# TODO(jez) Verify whether the above is the right behavior w.r.t. mangling and overloads.
 #
 # There are 3 symbols here. One of them was mangle renamed?
 # Looks like we mangleRenameSymbol in resolver before fillInInfoFromSig.
