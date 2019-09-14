@@ -12,7 +12,7 @@ namespace sorbet::dsl {
 
 void TypeMembers::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
     UnorderedSet<core::NameRef> typeMembers;
-    
+
     for (auto &expr : cdef->rhs) {
         auto assn = ast::cast_tree<ast::Assign>(expr.get());
         if (!assn) {
@@ -42,4 +42,4 @@ void TypeMembers::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
     }
 }
 
-}
+} // namespace sorbet::dsl
