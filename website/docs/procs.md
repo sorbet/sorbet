@@ -68,7 +68,7 @@ def foo(&blk)
 end
 ```
 
-Because we used `block_given?` above, Sorbet will know that ouside the `if`
+Because we used `block_given?` above, Sorbet will know that outside the `if`
 expression `blk` might be `nil`, while inside the `if` it's not `nil`.
 
 ## Annotating methods that use `yield`

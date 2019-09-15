@@ -45,7 +45,7 @@ method with a signature is called incorrectly. For those, see the next section.
 
 ## Errors from invalid method calls
 
-To customize the behvaior when a method with a sig is called and the argument
+To customize the behavior when a method with a sig is called and the argument
 types or return types don't match the actual value present at runtime, use this:
 
 ```ruby
