@@ -872,7 +872,25 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     auto currentClasses = appliedType->targs[0];
     // Abusing T.any to be list cons, with T.noreturn as the empty list.
     // (Except it's not, because Types::lub is too smart, and drops the T.noreturn to prevent allocating a T.any)
-    appliedType->targs[0] = Types::any(ctx, currentClasses, make_type<ClassType>(classOfSubclass));
+    auto iter = currentClasses.get();
+    OrType *orT = nullptr;
+    while ((orT = cast_type<OrType>(iter))) {
+        auto right = cast_type<ClassType>(orT->right.get());
+        ENFORCE(left);
+        if (right->symbol == classOfSubclass) {
+            return;
+        }
+        iter = orT->left.get();
+    }
+    ENFORCE(isa_type<ClassType>(iter));
+    if (cast_type<ClassType>(iter)->symbol == classOfSubclass) {
+        return;
+    }
+    if (currentClasses != core::Types::bottom()) {
+        appliedType->targs[0] = OrType::make_shared(currentClasses, make_type<ClassType>(classOfSubclass));
+    } else {
+        appliedType->targs[0] = make_type<ClassType>(classOfSubclass);
+    }
 }
 
 const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
