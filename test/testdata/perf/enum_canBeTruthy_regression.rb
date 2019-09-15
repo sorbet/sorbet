@@ -56,9 +56,6 @@ class Test < Opus::Enum
   Val39 = new('39')
   Val40 = new('40')
 end
-# typed: true
-
-require 'test-big-enum'
 
 class A
   extend T::Sig
