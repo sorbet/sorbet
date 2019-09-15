@@ -60,66 +60,58 @@ end
 class A
   extend T::Sig
 
-  sig {returns(T::Hash[Symbol, T.any(String,Symbol)])}
-  attr_reader :metadata
-
-  sig {returns(Test).checked(:tests)}
-  attr_reader :x
-
-  ALLOWED_CHARS_RE = T.let(Regexp.new('^[\w\-\.,:]+$'), Regexp)
-
   sig {params(str: String, props: T::Hash[Symbol,Symbol], x: Test).void}
   def initialize(str, props, x)
-    if str !~ ALLOWED_CHARS_RE
+    if str.empty?
       raise "oh no"
     end
 
     props.each do |k,v|
     end
 
-    if str !~ ALLOWED_CHARS_RE
+    if str.empty?
       raise "oh no"
     end
 
     props.each do |k,v|
     end
 
-    if str !~ ALLOWED_CHARS_RE
+    if str.empty?
       raise "oh no"
     end
 
     props.each do |k,v|
     end
 
-    if str !~ ALLOWED_CHARS_RE
+    if str.empty?
       raise "oh no"
     end
 
     props.each do |k,v|
     end
 
-    if str !~ ALLOWED_CHARS_RE
+    if str.empty?
       raise "oh no"
     end
 
     props.each do |k,v|
     end
 
-    if str !~ ALLOWED_CHARS_RE
+    if str.empty?
       raise "oh no"
     end
 
     props.each do |k,v|
     end
 
-    if str !~ ALLOWED_CHARS_RE
+    if str.empty?
       raise "oh no"
     end
 
     props.each do |k,v|
     end
 
-    if str !~ ALLOWED_CHARS_RE
+    if str.empty?
       raise "oh no"
     end
 
