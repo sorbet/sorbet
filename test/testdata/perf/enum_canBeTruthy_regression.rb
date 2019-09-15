@@ -1,61 +1,57 @@
 # typed: true
 #
 # This test will time out when `dropSubtypesOf` is called too frequently on
-# values of type `Test`.
+# values of type `Test`. The original case for this was with `canBeTruthy`,
+# which was previously implemented in terms of `dropSubtypesOf`.
 
-module Opus
-  class Enum
-    extend T::Generic
-    def initialize(x = nil)
-    end
-  end
+class Test
+  extend T::Helpers
+
+  abstract!
+  sealed!
 end
 
-class Test < Opus::Enum
-  include T::Props::Serializable
-  Elem = type_template(fixed: self)
-  Val0 = new('0')
-  Val1 = new('1')
-  Val2 = new('2')
-  Val3 = new('3')
-  Val4 = new('4')
-  Val5 = new('5')
-  Val6 = new('6')
-  Val7 = new('7')
-  Val8 = new('8')
-  Val9 = new('9')
-  Val10 = new('10')
-  Val11 = new('11')
-  Val12 = new('12')
-  Val13 = new('13')
-  Val14 = new('14')
-  Val15 = new('15')
-  Val16 = new('16')
-  Val17 = new('17')
-  Val18 = new('18')
-  Val19 = new('19')
-  Val20 = new('20')
-  Val21 = new('21')
-  Val22 = new('22')
-  Val23 = new('23')
-  Val24 = new('24')
-  Val25 = new('25')
-  Val26 = new('26')
-  Val27 = new('27')
-  Val28 = new('28')
-  Val29 = new('29')
-  Val30 = new('30')
-  Val31 = new('31')
-  Val32 = new('32')
-  Val33 = new('33')
-  Val34 = new('34')
-  Val35 = new('35')
-  Val36 = new('36')
-  Val37 = new('37')
-  Val38 = new('38')
-  Val39 = new('39')
-  Val40 = new('40')
-end
+class Val0  < Test; end
+class Val1  < Test; end
+class Val2  < Test; end
+class Val3  < Test; end
+class Val4  < Test; end
+class Val5  < Test; end
+class Val6  < Test; end
+class Val7  < Test; end
+class Val8  < Test; end
+class Val9  < Test; end
+class Val10 < Test; end
+class Val11 < Test; end
+class Val12 < Test; end
+class Val13 < Test; end
+class Val14 < Test; end
+class Val15 < Test; end
+class Val16 < Test; end
+class Val17 < Test; end
+class Val18 < Test; end
+class Val19 < Test; end
+class Val20 < Test; end
+class Val21 < Test; end
+class Val22 < Test; end
+class Val23 < Test; end
+class Val24 < Test; end
+class Val25 < Test; end
+class Val26 < Test; end
+class Val27 < Test; end
+class Val28 < Test; end
+class Val29 < Test; end
+class Val30 < Test; end
+class Val31 < Test; end
+class Val32 < Test; end
+class Val33 < Test; end
+class Val34 < Test; end
+class Val35 < Test; end
+class Val36 < Test; end
+class Val37 < Test; end
+class Val38 < Test; end
+class Val39 < Test; end
+class Val40 < Test; end
 
 class A
   extend T::Sig
@@ -142,9 +138,11 @@ class A
     @x4 = T.let(x, Test)
     @y4 = T.let(x, Test)
     @z4 = T.let(x, Test)
-
-    @metadata = T.let({x: x.serialize}, T::Hash[Symbol, T.any(String,Symbol)])
-
-    freeze
+    @a5 = T.let(x, Test)
+    @b5 = T.let(x, Test)
+    @c5 = T.let(x, Test)
+    @x5 = T.let(x, Test)
+    @y5 = T.let(x, Test)
+    @z5 = T.let(x, Test)
   end
 end
