@@ -688,7 +688,7 @@ public:
         auto currSym = ctx.state.lookupSymbol(scope, lhs->cnst);
         auto name = sym.exists() ? sym.data(ctx)->name : lhs->cnst;
         if (!sym.exists() && currSym.exists()) {
-            if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
+            if (auto e = ctx.state.beginError(sym.data(ctx)->loc(), core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx)->show(ctx));
                 e.addErrorLine(asgn->loc, "Previous definition");
             }
@@ -699,9 +699,9 @@ public:
             ENFORCE(currSym.exists());
             auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
             if (renamedSym.exists()) {
-                if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                if (auto e = ctx.state.beginError(sym.data(ctx)->loc(), core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", renamedSym.data(ctx)->name.show(ctx));
-                    e.addErrorLine(renamedSym.data(ctx)->loc(), "Previous definition");
+                    e.addErrorLine(asgn->loc, "Previous definition");
                 }
             }
         }
