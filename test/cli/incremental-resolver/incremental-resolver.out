@@ -39,7 +39,14 @@ test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Redefi
     test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:3: Previous definition
      3 |  class A; end
           ^^^^^^^
-Errors: 1
+
+test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:59: Redefining constant `A` https://srb.help/4012
+    59 |  A = nil
+          ^^^^^^^
+    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:58: Previous definition
+    58 |  class A; end
+          ^^^^^^^
+Errors: 2
 ----- test/cli/incremental-resolver/expect-failures/multiple_sigs.rb ---------------------
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Unused type annotation. No method def before next annotation https://srb.help/5040
      3 |  sig {void}
