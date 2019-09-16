@@ -791,8 +791,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                     retainedResult = make_shared<core::DispatchResult>(std::move(dispatched));
                 }
                 if (lspQueryMatch) {
-                    core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(bind.loc, retainedResult, send->fun));
+                    if (!(retainedResult->main.method.exists() && retainedResult->main.method.isSynthetic())) {
+                        core::lsp::QueryResponse::pushQueryResponse(
+                            ctx, core::lsp::SendResponse(bind.loc, retainedResult, send->fun));
+                    }
                 }
                 if (send->link) {
                     // This should eventually become ENFORCEs but currently they are wrong
