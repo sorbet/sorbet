@@ -37,7 +37,7 @@ end
 
 ## Final methods
 
-Final methods can't be overriden or redefined. This is a powerful guarantee: it
+Final methods can't be overridden or redefined. This is a powerful guarantee: it
 means that inheritance can't affect what code will be run when calling a method
 on a class.
 
@@ -116,7 +116,7 @@ final modules cannot be included or extended. But more than that, every method
 in a final class or module must be made into a final method.
 
 It might seem redundant to require final classes to mark all methods final too,
-("How could a method be overriden in a subclass if the act of subclassing is
+("How could a method be overridden in a subclass if the act of subclassing is
 prohibited?") but the answer is ([like many](gradual.md)) that this protects
 against untyped code. This guarantees that untyped or ignored code can't
 redefine methods at runtime in a class that is marked `final!` statically.
@@ -191,7 +191,7 @@ sig(:final) {void}
 The reason for this difference is that this gives us stronger runtime
 guarantees. In general, any Ruby method might be overridden at any time, with no
 warning. So the **absence** of an `overridable` or `abstract` attribute on a
-method signature does not guarantee that a method is never overriden. Given
+method signature does not guarantee that a method is never overridden. Given
 these circumstances, it's fine for override / abstract checks to be done lazily,
 because the stakes for eliding an error for them wrong is relatively low.
 
@@ -246,7 +246,7 @@ puts C.new.foo
 ```
 
 At runtime, this does not raise and prints 2, showing that a final method has
-been overriden. This is why we strongly recommend calling
+been overridden. This is why we strongly recommend calling
 `T::Configuration.enable_final_checks_on_hooks` before using final.
 
 ## Known static limitations

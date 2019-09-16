@@ -129,5 +129,5 @@ a file marked `# typed: true`, but this is an intentional part of Sorbet's
 implementation of [gradual typing](gradual.md). In the `# typed: true`
 strictness level, unannotated methods, instance variables, and constants are
 assumed to be `T.untyped`. This allows a programmer to write untyped or
-partially-typed definitions while still benefitting from type checking when
+partially-typed definitions while still benefiting from type checking when
 static type information is present.
