@@ -689,7 +689,7 @@ public:
         auto name = sym.exists() ? sym.data(ctx)->name : lhs->cnst;
         if (!sym.exists() && currSym.exists()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
-                e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx)->name.show(ctx));
+                e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx)->show(ctx));
                 e.addErrorLine(asgn->loc, "Previous definition");
             }
             ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
