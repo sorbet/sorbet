@@ -68,40 +68,38 @@
 annotations:</p>
 <ul>
 <li><code>overridable</code> means children can override this method</li>
-<li><code>override</code> means this method overrides a method on its parent (or ancestor)</li>
+<li><code>override</code> means this method overrides a method on its parent (or ancestor),
+which may or may not be an abstract or interface method</li>
 <li><code>abstract</code> means this method is abstract (has no implementation) and must be
 implemented by being overridden in all concrete subclasses.</li>
-<li><code>implementation</code> means this method implements an abstract method</li>
 </ul>
-<p>These annotations can be chained, for example <code>.implementation.overridable</code> lets
-a grandchild class override a concrete implementation of its parent.</p>
+<p>These annotations can be chained, for example <code>.override.overridable</code> lets a
+grandchild class override a concrete implementation of its parent.</p>
 <p>Use this table to track when annotations can be used, although the error
 messages are the canonical source of truth. ✅ means “this pairing is allowed”
-while ❌ means “this is an error” (most of these errors are static errors,
-though some are still only implemented in the runtime).</p>
+while ❌ means &quot;this is an error&quot;.</p>
 <blockquote>
 <p>Below, <code>standard</code> (for the child or parent) means “has a <code>sig</code>, but has none
 of the special modifiers.”</p>
 </blockquote>
 <table>
 <thead>
-<tr><th>↓Parent \ Child →</th><th style="text-align:center">no sig</th><th style="text-align:center"><code>standard</code></th><th style="text-align:center"><code>override</code></th><th style="text-align:center"><code>implementation</code></th></tr>
+<tr><th>↓Parent \ Child →</th><th style="text-align:center">no sig</th><th style="text-align:center"><code>standard</code></th><th style="text-align:center"><code>override</code></th></tr>
 </thead>
 <tbody>
-<tr><td>no sig</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td></tr>
-<tr><td><code>standard</code></td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
-<tr><td><code>overridable</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td></tr>
-<tr><td><code>override</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td></tr>
-<tr><td><code>implementation</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
-<tr><td><code>abstract</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
+<tr><td>no sig</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td><code>standard</code></td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td></tr>
+<tr><td><code>overridable</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
+<tr><td><code>override</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
+<tr><td><code>abstract</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
 </tbody>
 </table>
 <p>Some other things are checked that don’t fit into the above table:</p>
 <ul>
-<li>It is an error to mark a method <code>override</code> or <code>implementation</code> if the method
-doesn’t actually override anything.</li>
+<li>It is an error to mark a method <code>override</code> if the method doesn’t actually
+override anything.</li>
 <li>If the implementation methods are inherited–from either a class or mixin–the
-methods don’t need the <code>implementation</code> annotation.</li>
+methods don’t need the <code>override</code> annotation.</li>
 </ul>
 <p>Note that the <strong>absence</strong> of <code>abstract</code> or <code>overridable</code> does <strong>not</strong> mean that
 a method is never overridden. To declare that a method can never be overridden,
