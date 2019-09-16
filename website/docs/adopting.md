@@ -83,7 +83,7 @@ Now that we've initialized Sorbet, type checking Sorbet should be as simple as:
 ❯ srb tc
 ```
 
-<!-- TODO(jez) It's hard to describe succintly which files will be checked if we
+<!-- TODO(jez) It's hard to describe succinctly which files will be checked if we
      suggest-typed by default and ignore files -->
 
 By default, this will type check every Ruby file in the current folder. To

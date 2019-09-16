@@ -45,8 +45,8 @@ end
 ## Implementing an abstract method
 
 To implement an abstract method, define the method in the implementing class or
-module with an identicaly signature as the parent, except replacing `abstract`
-with `implementation`.
+module with an identical signature as the parent, except replacing `abstract`
+with `override`.
 
 ```ruby
 class HelloWorld
@@ -54,7 +54,7 @@ class HelloWorld
   include Runnable
 
   # This implements the abstract `main` method from our Runnable module:
-  sig {implementation.params(args: T::Array[String]).void}
+  sig {override.params(args: T::Array[String]).void}
   def main(args)
     puts 'Hello, world!'
   end
@@ -126,7 +126,7 @@ A.foo
 ```
 
 This is hard to statically analyze, as it involves looking into the body of the
-`self.included` method, which might have abritrary computation. As a compromise,
+`self.included` method, which might have arbitrary computation. As a compromise,
 Sorbet provides a new construct: `mixes_in_class_methods`. At runtime, it
 behaves as if we'd defined `self.included` like above, but will declare to `srb`
 statically what module is being extended.
@@ -162,7 +162,7 @@ class A # error: Missing definition for abstract method
 
   extend T::Sig
 
-  sig {implementation.void}
+  sig {override.void}
   def self.bar; end
 end
 

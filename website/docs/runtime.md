@@ -281,7 +281,7 @@ T::Configuration.enable_checking_for_sigs_marked_checked_tests
 ```
 
 For example, this should probably be placed as the first line of any `rake test`
-target, as well as any other entrypoint to a project's tests. If this line is
+target, as well as any other entry point to a project's tests. If this line is
 absent, `.checked(:tests)` sigs behave as if they had been `.checked(:never)`.
 
 ## What's next?

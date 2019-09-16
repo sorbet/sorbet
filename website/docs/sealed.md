@@ -107,7 +107,7 @@ exhaustiveness.
 ## Sealed classes vs sealed modules
 
 Throughout this doc we've been talking about sealed classes and sealed modules
-as if they were interchangable. But they're actually different in one key way:
+as if they were interchangeable. But they're actually different in one key way:
 
 - Sealed modules only require being declared `sealed!`
 - Sealed classes require being declared both `sealed!` and `abstract!`

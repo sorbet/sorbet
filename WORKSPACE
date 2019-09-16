@@ -1,8 +1,8 @@
 workspace(name = "com_stripe_ruby_typer")
 
-load(":third_party/externals.bzl", "externals")
+load(":third_party/externals.bzl", "register_sorbet_dependencies")
 
-externals()
+register_sorbet_dependencies()
 
 load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
 

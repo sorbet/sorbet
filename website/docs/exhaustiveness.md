@@ -117,7 +117,7 @@ actually do something with it!
 error. It lets us catch the problem statically before causing all sorts of
 problems down the line.
 
-We can enable exhaustivness checking in Sorbet using `T.absurd(...)`:
+We can enable exhaustiveness checking in Sorbet using `T.absurd(...)`:
 
 ```ruby
 sig {params(x: T.any(A, B, C)).void}
