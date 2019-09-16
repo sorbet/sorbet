@@ -92,7 +92,7 @@ T::Configuration.enable_final_checks_on_hooks
 <span class="hljs-keyword">end</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="final-methods"></a><a href="#final-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Final methods</h2>
-<p>Final methods can’t be overriden or redefined. This is a powerful guarantee: it
+<p>Final methods can’t be overridden or redefined. This is a powerful guarantee: it
 means that inheritance can’t affect what code will be run when calling a method
 on a class.</p>
 <p>For example, it might be a good idea to mark methods that acquire a lock to a
@@ -159,7 +159,7 @@ MyFeature.stubs(<span class="hljs-symbol">:enabled</span>).returns(<span class="
 final modules cannot be included or extended. But more than that, every method
 in a final class or module must be made into a final method.</p>
 <p>It might seem redundant to require final classes to mark all methods final too,
-(“How could a method be overriden in a subclass if the act of subclassing is
+(“How could a method be overridden in a subclass if the act of subclassing is
 prohibited?”) but the answer is (<a href="/docs/gradual">like many</a>) that this protects
 against untyped code. This guarantees that untyped or ignored code can’t
 redefine methods at runtime in a class that is marked <code>final!</code> statically.</p>
@@ -226,7 +226,7 @@ sig(<span class="hljs-symbol">:final</span>) {void}
 <p>The reason for this difference is that this gives us stronger runtime
 guarantees. In general, any Ruby method might be overridden at any time, with no
 warning. So the <strong>absence</strong> of an <code>overridable</code> or <code>abstract</code> attribute on a
-method signature does not guarantee that a method is never overriden. Given
+method signature does not guarantee that a method is never overridden. Given
 these circumstances, it’s fine for override / abstract checks to be done lazily,
 because the stakes for eliding an error for them wrong is relatively low.</p>
 <p>But for final methods, the stakes are higher for missing an error. We aspire to
@@ -270,7 +270,7 @@ of final, but the violation is not reported at runtime:</p>
 puts C.new.foo
 </code></pre>
 <p>At runtime, this does not raise and prints 2, showing that a final method has
-been overriden. This is why we strongly recommend calling
+been overridden. This is why we strongly recommend calling
 <code>T::Configuration.enable_final_checks_on_hooks</code> before using final.</p>
 <h2><a class="anchor" aria-hidden="true" id="known-static-limitations"></a><a href="#known-static-limitations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Known static limitations</h2>
 <p>Some of the guarantees of final are only implemented at runtime. This section

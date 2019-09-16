@@ -128,7 +128,7 @@ sig {returns(B)} <span class="hljs-comment"># error: Constant B is not a class o
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span>;</span> <span class="hljs-number">3</span>; <span class="hljs-keyword">end</span>
 </code></pre>
 <p>Note that because type aliases are a Sorbet construct, they cannot be used in
-certrain runtime contexts. For instance, it is not possible to match an
+certain runtime contexts. For instance, it is not possible to match an
 expression against a type alias in a <code>case</code> expression.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 extend T::Sig
