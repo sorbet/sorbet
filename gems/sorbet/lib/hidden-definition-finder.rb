@@ -191,7 +191,7 @@ class Sorbet::Private::HiddenMethodFinder
     ret = []
 
     rbi.each do |rbi_entry|
-      # skip aliased constants
+      # skip synthetic constants
       next if rbi_entry["name"]["kind"] == "UNIQUE"
 
       source_entry = source_by_name[rbi_entry["name"]["name"]]
