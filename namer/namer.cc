@@ -779,7 +779,7 @@ public:
             // there was a redefinition the first time, and in that case display the same error
             auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
             if (oldSym.exists()) {
-                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
                     e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                 }
@@ -792,7 +792,7 @@ public:
         }
         auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
         if (oldSym.exists()) {
-            if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
+            if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
                 e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
             }
@@ -813,7 +813,7 @@ public:
             oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
             if (oldSym.exists() &&
                 !(oldSym.data(ctx)->loc() == asgn->loc || oldSym.data(ctx)->loc().isTombStoned(ctx))) {
-                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", typeName->cnst.data(ctx)->show(ctx));
                     e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                 }
