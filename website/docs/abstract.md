@@ -46,7 +46,7 @@ end
 
 To implement an abstract method, define the method in the implementing class or
 module with an identical signature as the parent, except replacing `abstract`
-with `implementation`.
+with `override`.
 
 ```ruby
 class HelloWorld
@@ -54,7 +54,7 @@ class HelloWorld
   include Runnable
 
   # This implements the abstract `main` method from our Runnable module:
-  sig {implementation.params(args: T::Array[String]).void}
+  sig {override.params(args: T::Array[String]).void}
   def main(args)
     puts 'Hello, world!'
   end
@@ -162,7 +162,7 @@ class A # error: Missing definition for abstract method
 
   extend T::Sig
 
-  sig {implementation.void}
+  sig {override.void}
   def self.bar; end
 end
 

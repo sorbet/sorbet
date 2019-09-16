@@ -182,7 +182,6 @@ abstract methods:
 sig {overridable.void}
 sig {override.void}
 sig {abstract.void}
-sig {implementation.void}
 
 # But this one is outside the block:
 sig(:final) {void}
