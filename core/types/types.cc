@@ -214,7 +214,7 @@ TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass)
 }
 
 bool Types::canBeTruthy(Context ctx, const TypePtr &what) {
-    bool isTruthy = false;
+    bool isTruthy = true;
     typecase(
         what.get(), [&](OrType *o) { isTruthy = canBeTruthy(ctx, o->left) || canBeTruthy(ctx, o->right); },
         [&](AndType *a) { isTruthy = canBeTruthy(ctx, a->left) && canBeTruthy(ctx, a->right); },
@@ -228,7 +228,7 @@ bool Types::canBeTruthy(Context ctx, const TypePtr &what) {
             isTruthy = sym == core::Symbols::untyped() ||
                        (sym != core::Symbols::FalseClass() && sym != core::Symbols::NilClass());
         },
-        [&](ProxyType *c) { isTruthy = canBeTruthy(ctx, c->underlying()); }, [&](Type *) {});
+        [&](ProxyType *c) { isTruthy = canBeTruthy(ctx, c->underlying()); }, [&](Type *) { isTruthy = true; });
 
     return isTruthy;
 }
