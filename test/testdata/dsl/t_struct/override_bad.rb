@@ -1,5 +1,5 @@
 # typed: true
-# disable-fast-path: true
+
 # TODO enable on the fast path
 
 class OverrideBad < T::Struct

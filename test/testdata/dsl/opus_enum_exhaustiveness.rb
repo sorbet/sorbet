@@ -1,5 +1,5 @@
 # typed: strict
-# disable-fast-path: true
+
 extend T::Sig
 
 module Opus
