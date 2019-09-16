@@ -5,7 +5,7 @@
 #
 #   https://github.com/sorbet/sorbet-typed/edit/master/lib/bundler/all/bundler.rbi
 #
-# typed: true
+# typed: strong
 
 module Bundler
   FREEBSD = ::T.let(nil, ::T.untyped)

@@ -1,7 +1,7 @@
 # typed: strict
 
 # Because we have a type_member
-# disable-fast-path: true
+
 
 class Module
   include T::Sig

@@ -191,6 +191,9 @@ class Sorbet::Private::HiddenMethodFinder
     ret = []
 
     rbi.each do |rbi_entry|
+      # skip synthetic constants
+      next if rbi_entry["name"]["kind"] == "UNIQUE"
+
       source_entry = source_by_name[rbi_entry["name"]["name"]]
 
       ret << serialize_alias(source_entry, rbi_entry, klass, source_symbols, rbi_symbols)
