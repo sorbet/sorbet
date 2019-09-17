@@ -688,7 +688,7 @@ public:
         auto currSym = ctx.state.lookupSymbol(scope, lhs->cnst);
         auto name = sym.exists() ? sym.data(ctx)->name : lhs->cnst;
         if (!sym.exists() && currSym.exists()) {
-            if (auto e = ctx.state.beginError(sym.data(ctx)->loc(), core::errors::Namer::ModuleKindRedefinition)) {
+            if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx)->show(ctx));
                 e.addErrorLine(asgn->loc, "Previous definition");
             }
