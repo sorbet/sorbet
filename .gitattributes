@@ -1,0 +1,2 @@
+*.rbi linguist-language=Ruby
+test/**/*.out diff

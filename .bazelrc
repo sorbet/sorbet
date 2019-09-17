@@ -1,0 +1,250 @@
+##
+##  Workarounds for bugs and temporary things
+##
+
+try-import .bazelrc.local
+startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the default is to use 1/4 of memory, which makes flaky on 8G boxes
+common  --incompatible_package_name_is_a_function=false # https://github.com/protocolbuffers/protobuf/issues/5547
+
+# enable https://github.com/google/googletest/pull/1653
+common:build --define absl=1
+common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
+
+##
+##  Custom toolchain.
+##
+build --crosstool_top=@llvm_toolchain//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
+
+##
+##  Common build options across all build configurations
+##
+
+# C / C++ Options
+# Don't depend on system compiler
+build --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
+
+
+# Developer laptops run skylake, devboxes run skylake-avx512
+# however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor)
+build --copt=-march=sandybridge
+
+build --copt=-fno-omit-frame-pointer
+
+build --copt=-fstack-protector
+
+build --copt=-Werror --copt=-Wimplicit-fallthrough
+
+build --host_copt=-O1
+build --host_copt=-DFORCE_DEBUG
+build --host_cxxopt=-Wno-unused-variable --host_cxxopt=-Wno-overloaded-virtual --host_cxxopt=-Wno-unused-const-variable # ragel violates those and we want a silent build
+build --host_cxxopt=-Wno-pass-failed # host build doesn't have enough optimizations enabled for clang to vectorize this loop reliably
+
+# The MacOS CROSSTOOL in bazel defines _FORTIFY_SOURCE both on
+# <command line>:1:9: and <built-in>:355:9: so sadly we turn them all off
+build --copt=-Wno-macro-redefined
+
+##
+## debug configuration
+##
+build:dbg --copt=-O0
+build:dbg --compilation_mode=dbg
+build:dbg --config=debugsymbols
+
+build:coverage --config=forcedebug
+build:coverage --cxxopt=-Wno-pass-failed # coverage build fails vectorization
+test:coverage --spawn_strategy=standalone
+
+build --define=versioned=false
+build:versioned --workspace_status_command=tools/buildstamp/get_workspace_status --stamp --define=versioned=true
+
+##
+## Configurations used for releases
+##
+# release version: optimized, with debug symbols and version information
+build:release-common --define release=true
+build:release-common --define jemalloc=true
+build:release-common --compilation_mode=opt
+build:release-common --config=debugsymbols
+build:release-common --config=static-libs
+build:release-common --config=versioned
+
+# harden: mark relocation sections read-only
+build:release-linux --linkopt=-Wl,-z,relro,-z,now
+build:release-linux --config=lto-linux --config=release-common
+
+build:release-mac --config=release-common
+
+build:release-debug-linux --config=release-linux
+build:release-debug-linux --config=forcedebug
+build:release-debug-linux --config=dbg
+
+build:release-debug-mac --config=release-mac
+build:release-debug-mac --config=forcedebug
+build:release-debug-mac --config=dbg
+
+build:release-sanitized-linux --copt=-O2
+build:release-sanitized-linux --config=sanitize-linux
+build:release-sanitized-linux --define jemalloc=false
+build:release-sanitized-linux --config=debugsymbols
+build:release-sanitized-linux --config=forcedebug
+
+build:release-sanitized-mac --copt=-O2
+build:release-sanitized-mac --config=forcedebug
+build:release-sanitized-mac --config=debugsymbols
+build:release-sanitized-mac --config=sanitize-mac
+build:release-sanitized-mac --define jemalloc=false
+
+##
+## Configuration used to to as much testing as possible in CI
+##
+build:test-sanitized-linux --config=release-sanitized-linux --config=dbg --nostamp --define release=false
+test:test-sanitized-linux --test_env="UBSAN_OPTIONS=print_stacktrace=1"
+test:test-sanitized-linux --test_env="ASAN_OPTIONS=detect_leaks=0"
+
+build:test-sanitized-mac --config=release-sanitized-mac --config=dbg --nostamp --define release=false
+test:test-sanitized-mac --test_env="UBSAN_OPTIONS=print_stacktrace=1"
+
+build:reduce-intermediate-file-size-base --copt=-g0 --linkopt=-g0 # used by buildfarm to have less debug information on disk
+build:reduce-intermediate-file-size-base --strip=always
+build:reduce-intermediate-file-size-base --copt=-fno-standalone-debug --linkopt=-fno-standalone-debug # used by buildfarm to have less debug information on disk
+build:reduce-intermediate-file-size-base --config=shared-libs
+
+# extend reduce-intermediate-file-size with -Os
+build:reduce-intermediate-file-size --copt=-Os --linkopt=-Os --config=reduce-intermediate-file-size-base
+
+build:buildfarm --curses=no --config=reduce-intermediate-file-size
+test:buildfarm --curses=no
+test:buildfarm --test_output=errors
+build:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
+build:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm
+
+build:travis --config=test-sanitized-linux
+build:travis --curses=no
+test:travis --ram_utilization_factor=10
+test:travis --test_strategy=standalone
+test:travis --curses=no
+test:travis --test_output=errors
+
+# this is a variant of buildfarm that doen't specify -Os or any sanitizer flags
+build:buildfarm-ruby --curses=no
+build:buildfarm-ruby --define jemalloc=false
+build:buildfarm-ruby --copt=-O2
+# this includes --spawn_strategy=standalone --genrule_strategy=standalone, which
+# seems to break the snapshot tests
+# build:buildfarm-ruby --config=dbg 
+build:buildfarm-ruby --nostamp
+build:buildfarm-ruby --define release=false
+build:buildfarm-ruby --config=forcedebug
+build:buildfarm-ruby --config=reduce-intermediate-file-size-base
+test:buildfarm-ruby --curses=no --test_output=errors
+
+##
+## Shared fragments of configuration
+##
+
+# DEBUG_MODE is set by default for all builds except --config=release.
+# Use this flag to set DEBUG_MODE even for --config=release.
+build:forcedebug --copt=-DFORCE_DEBUG
+
+# LTO build. Much longer compilation time. Smaller size and better perf.
+build:lto --copt=-flto=thin
+build:lto --linkopt=-flto=thin
+build:lto --config=static-libs
+
+## flags that substantially increase Clang&LLVMs ability to devirtualize calls
+build:lto-linux --linkopt=-Wl,--icf=all
+build:lto-linux --config=lto
+
+# By default, we make static builds, but we can also use dynamic linking if asked to.
+# Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
+build --define=linkshared=false
+build:shared-libs --define=linkshared=true --copt=-fPIC --linkopt=-fPIC
+
+# By default, we make dynamicly linked builds, while release builds are statically linked.
+# Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
+# Still, we try to use it by default as it has lower iteration time in dev
+build --define=linkshared=true --copt=-fPIC --linkopt=-fPIC
+build:static-libs --define=linkshared=false --copt=-fno-PIC --linkopt=-fno-PIC
+build:static-libs --linkopt=-fno-pie --copt=-fno-pie
+
+# It's useful to be able to write `config_setting` rules for "this is
+# an unsanitized build", but we can't express "copt does not contain
+# -fsanitize". So we set this `--define` and unset it if we're using a
+# sanitizer.
+build --define unsanitized=true
+# sanitize build: run with ASAN and UBSAN. Catches most memory and
+# undefined-behavior errors, substantially larger and slower binary.
+build:sanitize --config=asan --config=ubsan
+
+build:asan --copt=-fsanitize=address --copt=-fsanitize-address-use-after-scope
+build:asan --linkopt=-fsanitize=address --linkopt=-fsanitize-address-use-after-scope
+build:asan --copt=-DADDRESS_SANITIZER # used by abseil
+build:asan --copt=-DHAS_SANITIZER
+build:asan --define unsanitized=false
+
+build:ubsan --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
+build:ubsan --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
+build:ubsan --define unsanitized=false
+build:ubsan --copt=-DHAS_SANITIZER
+
+# Bazel links C++ files with $CC, not $CXX, this breaks UBSan
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
+build:sanitize-linux --config=sanitize
+
+build:sanitize-mac --config=sanitize
+
+build:tsan --copt=-fsanitize=thread
+build:tsan --linkopt=-fsanitize=thread
+
+# Build optimized for executable size. Can be faster if size of executable code is a bottleneck.
+build:size --linkopt=-Os --config=lto
+build:size --copt=-Os --config=lto
+
+### Debug symbols on OS X. ###
+# From https://github.com/RobotLocomotion/drake/blob/master/tools/cc_toolchain/bazel.rc
+# See https://github.com/bazelbuild/bazel/issues/2537
+build:debugsymbols --copt=-g3 --copt=-fstandalone-debug --copt=-DDEBUG_SYMBOLS --copt=-glldb
+build:debugsymbols --linkopt=-g3 --linkopt=-fstandalone-debug --linkopt=-DDEBUG_SYMBOLS --linkopt=-glldb
+build:debugsymbols --spawn_strategy=standalone
+build:debugsymbols --genrule_strategy=standalone
+
+build --strip=never
+
+# Enable nice UIs. Taken from bazel.rc of Bazel itself.
+common --experimental_ui --experimental_ui_actions_shown 8
+common --show_progress_rate_limit=0.25
+
+##
+## Fuzzing
+##
+build:fuzz --copt=-fsanitize=fuzzer --linkopt=-fsanitize=fuzzer --config=asan
+build:fuzz --config=forcedebug --config=debugsymbols
+build:fuzz --copt=-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+
+##
+## Webasm config. Please use either of those depending on your platform
+##
+build:webasm-linux --crosstool_top=//tools/toolchain/webasm-linux --config=webasm
+build:webasm-darwin --crosstool_top=//tools/toolchain/webasm-darwin --config=webasm
+
+# common webasm config
+# Use --cpu as a differentiator.
+build:webasm --cpu=webasm --spawn_strategy=standalone --genrule_strategy=standalone --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
+build:webasm --define release=true
+build:webasm --compilation_mode=opt
+build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
+build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3
+# Specify a "sane" C++ toolchain for the host platform.
+build:webasm --host_crosstool_top=@llvm_toolchain//:toolchain
+
+##
+## Stripe's ci passes --config=ci, we need it to exist
+##
+common:stripeci --config=ci
+common:ci --color yes
+
+
+# enables a lot of features in mac instruments profiler
+build:instruments --linkopt=-framework --linkopt=CoreFoundation
