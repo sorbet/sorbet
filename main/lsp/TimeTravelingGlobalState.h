@@ -76,7 +76,7 @@ public:
     /**
      * Indicates that TTGS operations will happen on a new thread. Used to work around error queue ENFORCEs.
      */
-    void switchToNewThread();
+    void enableMultithreadingMode();
 
     const core::GlobalState &getGlobalState() const;
     const std::vector<core::FileHash> &getGlobalStateHashes() const;

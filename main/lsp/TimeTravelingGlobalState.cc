@@ -301,9 +301,11 @@ LSPFileUpdates TimeTravelingGlobalState::getCombinedUpdates(u4 fromId, u4 toId) 
     return merged;
 }
 
-void TimeTravelingGlobalState::switchToNewThread() {
+void TimeTravelingGlobalState::enableMultithreadingMode() {
     // Re-create error queue that is owned by new thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer);
+    // Initialize lspEpoch variable to enable slow path cancelation.
+    gs->lspEpoch = make_shared<atomic<u4>>();
 }
 
 } // namespace sorbet::realmain::lsp

@@ -95,8 +95,11 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
                 auto combinedUpdates = ttgs.getCombinedUpdates(state.latestVersion, params->updates.version);
                 if (combinedUpdates.canTakeFastPath) {
                     params->updates = move(combinedUpdates);
-                    // Tell typechecking thread to cancel slow path run.
-                    ttgs.getGlobalState().lspEpoch->store(combinedUpdates.version);
+                    auto &gs = ttgs.getGlobalState();
+                    if (gs.lspEpoch) {
+                        // Tell typechecking thread to cancel slow path run.
+                        gs.lspEpoch->store(combinedUpdates.version);
+                    }
                 }
                 return;
             } else if (!msg->isDelayable()) {
