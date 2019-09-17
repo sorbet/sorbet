@@ -145,8 +145,7 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
 // iff a `def` would be this wide or wider, expand it to be a multi-line def.
 constexpr int WIDTH_CUTOFF_FOR_MULTILINE_DEF = 80;
 
-string methodDefinition(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
-                        core::TypePtr retType, const unique_ptr<core::TypeConstraint> &constraint) {
+string methodDefinition(const core::GlobalState &gs, core::SymbolRef method) {
     ENFORCE(method.exists());
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
