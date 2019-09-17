@@ -11,6 +11,25 @@ using namespace std;
 
 namespace sorbet::dsl {
 
+namespace {
+unique_ptr<ast::Expression> addSigVoid(unique_ptr<ast::Expression> expr) {
+    ast::InsSeq::STATS_store stats;
+    stats.emplace_back(ast::MK::SigVoid(expr->loc, ast::MK::Hash0(expr->loc)));
+    return make_unique<ast::InsSeq>(expr->loc, std::move(stats), std::move(expr));
+}
+
+void flattenInto(vector<unique_ptr<ast::Expression>> &stats, unique_ptr<ast::Expression> expr) {
+    if (auto seq = ast::cast_tree<ast::InsSeq>(expr.get())) {
+        for (auto &exp : seq->stats) {
+            stats.emplace_back(std::move(exp));
+        }
+        stats.emplace_back(std::move(seq->expr));
+    } else {
+        stats.emplace_back(std::move(expr));
+    }
+}
+} // namespace
+
 unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body);
 
 unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
@@ -18,10 +37,23 @@ unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast
 
     auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get());
     if (bodySeq) {
+        vector<unique_ptr<ast::Expression>> stats;
         for (auto &exp : bodySeq->stats) {
-            exp = recurse(ctx, std::move(exp));
+            flattenInto(stats, recurse(ctx, std::move(exp)));
         }
-        bodySeq->expr = recurse(ctx, std::move(bodySeq->expr));
+
+        flattenInto(stats, recurse(ctx, std::move(bodySeq->expr)));
+
+        // at this point we know that the vector is at least one element long,
+        // so it's safe to refer to the end as the distinguished element of the
+        // InsSeq.
+        bodySeq->expr = std::move(stats.back());
+        stats.pop_back();
+
+        bodySeq->stats.clear();
+        for (auto &exp : stats) {
+            bodySeq->stats.emplace_back(std::move(exp));
+        }
     }
     return body;
 }
@@ -53,8 +85,9 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
     }
 
     if (send->args.empty() && send->fun == core::Names::before()) {
-        return ast::MK::Method0(send->loc, send->loc, core::Names::initialize(),
-                                prepareBody(ctx, std::move(send->block->body)), ast::MethodDef::DSLSynthesized);
+        return addSigVoid(ast::MK::Method0(send->loc, send->loc, core::Names::initialize(),
+                                           prepareBody(ctx, std::move(send->block->body)),
+                                           ast::MethodDef::DSLSynthesized));
     }
 
     if (send->args.size() != 1) {
@@ -63,7 +96,6 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
     auto &arg = send->args[0];
     auto argString = to_s(ctx, arg);
 
-    vector<unique_ptr<ast::Expression>> stats;
     if (send->fun == core::Names::describe()) {
         ast::ClassDef::ANCESTORS_store ancestors;
         ancestors.emplace_back(ast::MK::Self(arg->loc));
@@ -75,8 +107,9 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
                               ast::ClassDefKind::Class);
     } else if (send->fun == core::Names::it()) {
         auto name = ctx.state.enterNameUTF8("<test_" + argString + ">");
-        return ast::MK::Method0(send->loc, send->loc, std::move(name), prepareBody(ctx, std::move(send->block->body)),
-                                ast::MethodDef::DSLSynthesized);
+        return addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
+                                           prepareBody(ctx, std::move(send->block->body)),
+                                           ast::MethodDef::DSLSynthesized));
     }
 
     return nullptr;
@@ -102,7 +135,7 @@ vector<unique_ptr<ast::Expression>> Minitest::replaceDSL(core::MutableContext ct
 
     auto exp = replaceDSLSingle(ctx, send);
     if (exp != nullptr) {
-        stats.emplace_back(std::move(exp));
+        flattenInto(stats, std::move(exp));
     }
     return stats;
 }

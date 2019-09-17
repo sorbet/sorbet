@@ -4,8 +4,16 @@ class <emptyTree><<C <root>>> < ()
       <emptyTree>
     end
 
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
     def <test_works outside><<C <todo sym>>>(&<blk>)
       <self>.outside_method()
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
     end
 
     def <test_allows constants inside of IT><<C <todo sym>>>(&<blk>)
@@ -17,6 +25,9 @@ class <emptyTree><<C <root>>> < ()
         def inside_method<<C <todo sym>>>(&<blk>)
           <emptyTree>
         end
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
         def <test_works inside><<C <todo sym>>>(&<blk>)
           begin
             <self>.outside_method()
@@ -26,8 +37,16 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
     def initialize<<C <todo sym>>>(&<blk>)
       @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
     end
 
     def <test_can read foo><<C <todo sym>>>(&<blk>)
@@ -44,8 +63,14 @@ class <emptyTree><<C <root>>> < ()
 
     class <emptyTree>::<C <class_Object>><<C <todo sym>>> < (<self>)
       begin
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
         def <test_Object><<C <todo sym>>>(&<blk>)
           <emptyTree>
+        end
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
         end
         def <test_Object><<C <todo sym>>>(&<blk>)
           <emptyTree>
