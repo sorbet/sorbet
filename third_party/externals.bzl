@@ -88,12 +88,6 @@ def register_sorbet_dependencies():
         shallow_since = "1554252642 -0700",
     )
 
-    native.new_local_repository(
-        name = "progressbar",
-        path = "third_party/progressbar",
-        build_file = "@com_stripe_ruby_typer//third_party:progressbar.BUILD",
-    )
-
     new_git_repository(
         name = "concurrentqueue",
         remote = "https://github.com/cameron314/concurrentqueue.git",
@@ -143,12 +137,6 @@ package(default_visibility = ["//visibility:public"])
 """
         ),
         shallow_since = "1541620420 -0800",
-    )
-
-    native.new_local_repository(
-        name = "parser",
-        path = "third_party/parser",
-        build_file = "@com_stripe_ruby_typer//third_party:parser.BUILD",
     )
 
     # NOTE: using this branch:

@@ -86,6 +86,8 @@ compilation_database(
         "//ast/desugar:desugar_test",
         "//ast/desugar:desugar",
         "//parser:parser",
+        "//third_party/parser:parser",
+        "//third_party/parser:generate_diagnostics",
         "//ast/verifier:verifier",
         "//ast/treemap:treemap",
         "//ast:ast",
@@ -93,6 +95,7 @@ compilation_database(
         "//main/pipeline/semantic_extension:interface",
         "//common/concurrency:concurrency",
         "//common:common",
+        "//third_party/progressbar:progressbar",
         # END compile_commands targets
     ],
 )
