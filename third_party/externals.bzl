@@ -139,12 +139,6 @@ package(default_visibility = ["//visibility:public"])
         shallow_since = "1541620420 -0800",
     )
 
-    native.new_local_repository(
-        name = "parser",
-        path = "third_party/parser",
-        build_file = "@com_stripe_ruby_typer//third_party:parser.BUILD",
-    )
-
     # NOTE: using this branch:
     # https://github.com/DarkDimius/bazel-toolchain/tree/dp-srb-now
     git_repository(
