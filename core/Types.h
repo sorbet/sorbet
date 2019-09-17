@@ -470,6 +470,8 @@ private:
     friend TypePtr Types::lub(Context ctx, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass);
+    friend class Symbol; // the actual method is `recordSealedSubclass(MutableContext ctx, SymbolRef subclass)`,
+                         // but refering to it introduces a cycle
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
