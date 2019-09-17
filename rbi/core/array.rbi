@@ -773,7 +773,7 @@ class Array < Object
     )
     .returns(T::Array[T.any(Elem, T.type_parameter(:T))])
   end
-  def concat(arrays); end
+  def concat(*arrays); end
 
   # Returns the number of elements.
   #
