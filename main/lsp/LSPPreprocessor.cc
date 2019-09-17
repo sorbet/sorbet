@@ -96,9 +96,10 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
                 if (combinedUpdates.canTakeFastPath) {
                     params->updates = move(combinedUpdates);
                     auto &gs = ttgs.getGlobalState();
-                    if (gs.lspEpoch) {
+                    if (gs.lspEpoch != nullptr) {
                         // Tell typechecking thread to cancel slow path run.
                         gs.lspEpoch->store(combinedUpdates.version);
+                        logger->error("[PREPROCESSOR] Canceling typechecking!");
                     }
                 }
                 return;

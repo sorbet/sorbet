@@ -285,7 +285,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                         const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
                         processingQueue.latestVersion = params->updates.version;
                         processingQueue.runningSlowPath = !params->updates.canTakeFastPath;
-                        if (gs && gs->lspEpoch) {
+                        if (gs && gs->lspEpoch != nullptr) {
                             gs->lspEpoch->store(processingQueue.latestVersion);
                         }
                     }
