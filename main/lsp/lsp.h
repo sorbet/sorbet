@@ -215,6 +215,8 @@ bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, std::string
 bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym);
 std::string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
                          core::TypePtr retType, const std::unique_ptr<core::TypeConstraint> &constraint);
+std::string methodDefinition(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
+                             core::TypePtr retType, const std::unique_ptr<core::TypeConstraint> &constraint);
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const std::unique_ptr<core::TypeConstraint> &constr);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef);
