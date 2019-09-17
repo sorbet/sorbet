@@ -20,7 +20,7 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
             }
             contents = absl::StrCat(
                 contents, methodDetail(gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint),
-                "\n", methodDefinition(gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint));
+                "\n", methodDefinition(gs, dispatchComponent.method));
         }
         start = start->secondary.get();
     }
@@ -93,9 +93,11 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             response->result =
                 make_unique<Hover>(formatHoverText(config.clientHoverMarkupKind, methodInfo, documentation));
         } else if (auto defResp = resp->isDefinition()) {
-            response->result = make_unique<Hover>(formatHoverText(
-                config.clientHoverMarkupKind,
-                methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr), documentation));
+            string typeString =
+                absl::StrCat(methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr), "\n",
+                             methodDefinition(*gs, defResp->symbol));
+            response->result =
+                make_unique<Hover>(formatHoverText(config.clientHoverMarkupKind, typeString, documentation));
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(*gs);
             auto type = constResp->retType.type;

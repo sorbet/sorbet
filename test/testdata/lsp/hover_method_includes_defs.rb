@@ -7,11 +7,13 @@ module OuterModule
 
   sig {params(name: String).returns(Integer)}
   def module_method(name)
+    # ^ hover: def module_method(name)
     name.length
   end
 
   sig {params(name: String).returns(Integer)}
   def self.module_self_method(name)
+    # ^ hover: def self.module_self_method(name)
     name.length
   end
 
@@ -32,6 +34,7 @@ module OuterModule
     extend T::Sig
     sig {params(name: String).void}
     def initialize(name)
+      # ^ hover: def initialize(name)
       @name = name
     end
 
@@ -62,6 +65,7 @@ module OuterModule
 
     sig {params(fname: String, lname: String).returns(String)}
     def keyword_args_with_defaults(fname: "Jane", lname: "Doe")
+      # ^ hover: def keyword_args_with_defaults(fname:…, lname:…)
       "#{fname}:#{lname}"
     end
 
