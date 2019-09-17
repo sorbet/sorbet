@@ -1114,7 +1114,7 @@ cc_library(
 
 # core library #################################################################
 
-load("@//third_party/ruby:utils.bzl", "install_file", "install_dir")
+load("@com_stripe_ruby_typer//third_party/ruby:utils.bzl", "install_file", "install_dir")
 
 filegroup(
     name = "ruby_lib",
