@@ -28,7 +28,7 @@ LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<uniq
 
     LSPResult rv{move(gs), {}};
     for (auto &message : state.pendingRequests) {
-        auto rslt = processRequestInternal(move(rv.gs), *message);
+        auto rslt = processRequestInternal(mutex, state, move(rv.gs), *message);
         rv.gs = move(rslt.gs);
         rv.responses.insert(rv.responses.end(), make_move_iterator(rslt.responses.begin()),
                             make_move_iterator(rslt.responses.end()));
@@ -37,7 +37,8 @@ LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<uniq
     return rv;
 }
 
-LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
+LSPResult LSPLoop::processRequestInternal(absl::Mutex &mtx, QueueState &state, unique_ptr<core::GlobalState> gs,
+                                          const LSPMessage &msg) {
     // TODO(jvilk): Make Timer accept multiple FlowIds so we can show merged messages correctly.
     Timer timeit(logger, "process_request");
     const LSPMethod method = msg.method();
@@ -76,14 +77,14 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             prodCounterAdd("lsp.messages.merged", (counts->textDocumentDidChange + counts->textDocumentDidOpen +
                                                    counts->textDocumentDidClose + counts->sorbetWatchmanFileChange) -
                                                       1);
-            return commitTypecheckRun(runTypechecking(move(gs), move(editParams->updates)));
+            return commitTypecheckRun(runTypechecking(mtx, state, move(gs), move(editParams->updates)));
         } else if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
             auto &initParams = get<unique_ptr<InitializedParams>>(params);
             auto &updates = initParams->updates;
             globalStateHashes = move(updates.updatedFileHashes);
             indexed = move(updates.updatedFileIndexes);
-            LSPResult result = pushDiagnostics(runSlowPath(move(gs), move(updates)));
+            LSPResult result = pushDiagnostics(runSlowPath(mtx, state, move(gs), move(updates)));
             ENFORCE(result.gs);
             config.initialized = true;
             return result;
@@ -176,7 +177,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             return handleTextDocumentCompletion(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentCodeAction) {
             auto &params = get<unique_ptr<CodeActionParams>>(rawParams);
-            return handleTextDocumentCodeAction(move(gs), id, *params);
+            return handleTextDocumentCodeAction(mtx, state, move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentSignatureHelp) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
             return handleTextSignatureHelp(move(gs), id, *params);

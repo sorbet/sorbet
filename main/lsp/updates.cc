@@ -162,7 +162,8 @@ public:
 };
 } // namespace
 
-LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previousGS, LSPFileUpdates updates) const {
+LSPLoop::TypecheckRun LSPLoop::runSlowPath(absl::Mutex &mtx, QueueState &state,
+                                           unique_ptr<core::GlobalState> previousGS, LSPFileUpdates updates) const {
     ShowOperation slowPathOp(*this, "SlowPath", "Typechecking...");
     Timer timeit(logger, "slow_path");
     ENFORCE(!updates.canTakeFastPath || config.disableFastPath);
@@ -219,19 +220,33 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
         return TypecheckRun::makeCanceled(move(previousGS));
     }
 
+    // We've finished! But to avoid issues where preprocessor tries to commit something which is canceled,
+    // let's grab the mutex, flip the runningSlowPath boolean (to prevent the preprocessor from trying to cancel this
+    // slow path), and check if we're canceled. Note that we can't safely commit something that is canceled and
+    // re-process the same update, as if A and B take the slow path independently but A+B takes the fast path, then
+    // processing A followed by A+B will take the slow path. This is the common case in the parse error scenario.
+    {
+        absl::MutexLock lock(&mtx);
+        state.runningSlowPath = false;
+        if (finalGS->shouldCancelTypechecking()) {
+            return TypecheckRun::makeCanceled(move(previousGS));
+        }
+    }
+
     auto out = finalGS->errorQueue->drainWithQueryResponses();
     finalGS->lspTypecheckCount++;
     finalGS->lspQuery = core::lsp::Query::noQuery();
     return TypecheckRun(move(finalGS), move(out.first), move(affectedFiles), move(updates), false);
 }
 
-LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs, LSPFileUpdates updates) const {
+LSPLoop::TypecheckRun LSPLoop::runTypechecking(absl::Mutex &mtx, QueueState &state, unique_ptr<core::GlobalState> gs,
+                                               LSPFileUpdates updates) const {
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
     ENFORCE(gs->lspTypecheckCount > 0,
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
 
     if (!updates.canTakeFastPath) {
-        return runSlowPath(move(gs), move(updates));
+        return runSlowPath(mtx, state, move(gs), move(updates));
     }
 
     Timer timeit(logger, "fast_path");

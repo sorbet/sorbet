@@ -42,7 +42,7 @@ LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPCon
 }
 
 void LSPPreprocessor::mergeFileChanges(QueueState &state) {
-    u4 earliestVersionInQueue = nextVersion;
+    u4 earliestActiveEditVersion = state.runningSlowPath ? state.latestVersion : nextVersion;
     auto &pendingRequests = state.pendingRequests;
     const int originalSize = pendingRequests.size();
     int requestsMergedCounter = 0;
@@ -55,7 +55,7 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
         }
         auto &msgParams = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
         // See which newer requests we can enqueue. We want to merge them *backwards* into msgParams.
-        earliestVersionInQueue = min(earliestVersionInQueue, msgParams->updates.versionStart);
+        earliestActiveEditVersion = min(earliestActiveEditVersion, msgParams->updates.versionStart);
         it++;
         while (it != pendingRequests.end()) {
             auto &mergeMsg = **it;
@@ -82,8 +82,8 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
             requestsMergedCounter++;
         }
     }
-    // Prune history for all edits no longer in queue.
-    ttgs.pruneBefore(earliestVersionInQueue);
+    // Prune history for all messages no longer in queue or being processed by processor thread.
+    ttgs.pruneBefore(earliestActiveEditVersion);
     ENFORCE(pendingRequests.size() + requestsMergedCounter == originalSize);
 
     // Check if we should cancel the slow path.
@@ -94,12 +94,16 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
                 auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
                 auto combinedUpdates = ttgs.getCombinedUpdates(state.latestVersion, params->updates.version);
                 if (combinedUpdates.canTakeFastPath) {
-                    params->updates = move(combinedUpdates);
                     auto &gs = ttgs.getGlobalState();
+                    logger->error("[PREPROCESSOR] I want to cancel typechecking!");
                     if (gs.lspEpoch != nullptr) {
                         // Tell typechecking thread to cancel slow path run.
                         gs.lspEpoch->store(combinedUpdates.version);
                         logger->error("[PREPROCESSOR] Canceling typechecking!");
+                        params->updates = move(combinedUpdates);
+                    } else {
+                        logger->error("[PREPROCESSOR] Can't cancel typechecking?");
+                        // Don't send a combined update unless we can cancel.
                     }
                 }
                 return;

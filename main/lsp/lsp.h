@@ -155,10 +155,13 @@ class LSPLoop {
     };
 
     /** Conservatively reruns entire pipeline without caching any trees. If canceled, returns a TypecheckRun containing
-     * the previous global state. */
-    TypecheckRun runSlowPath(std::unique_ptr<core::GlobalState> previousGS, LSPFileUpdates updates) const;
+     * the previous global state. Updates `state.runningSlowPath` when slow path successfully completes or gets
+     * canceled. */
+    TypecheckRun runSlowPath(absl::Mutex &mtx, QueueState &state, std::unique_ptr<core::GlobalState> previousGS,
+                             LSPFileUpdates updates) const;
     /** Runs typechecking on the provided updates. */
-    TypecheckRun runTypechecking(std::unique_ptr<core::GlobalState> gs, LSPFileUpdates updates) const;
+    TypecheckRun runTypechecking(absl::Mutex &mtx, QueueState &state, std::unique_ptr<core::GlobalState> gs,
+                                 LSPFileUpdates updates) const;
     /** Runs the provided query against the given files, and returns matches. */
     QueryRun runQuery(std::unique_ptr<core::GlobalState> gs, const core::lsp::Query &q,
                       const std::vector<core::FileRef> &filesForQuery) const;
@@ -190,8 +193,8 @@ class LSPLoop {
                                                const TextDocumentPositionParams &params) const;
     LSPResult handleTextDocumentCompletion(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                            const CompletionParams &params) const;
-    LSPResult handleTextDocumentCodeAction(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                           const CodeActionParams &params) const;
+    LSPResult handleTextDocumentCodeAction(absl::Mutex &mtx, QueueState &state, std::unique_ptr<core::GlobalState> gs,
+                                           const MessageId &id, const CodeActionParams &params) const;
     std::unique_ptr<CompletionItem> getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
                                                       const core::TypeConstraint *constraint) const;
@@ -201,7 +204,18 @@ class LSPLoop {
     LSPResult handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                       const TextDocumentPositionParams &params) const;
 
-    LSPResult processRequestInternal(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
+    /**
+     * Internal interface for processRequest.
+     * - commitMtx: Controls access to `state`.
+     * - state: Contains the state of the message queue. Used to update `runningSlowPath` to prevent cancelations prior
+     * to committing a file update.
+     * - gs: The GlobalState object that should be used during typechecking. May not be used if `msg` contains a file
+     * edit that should be typechecked on the slow path, but will be returned if that slow path update later gets
+     * canceled.
+     * - msg: The message to process.
+     */
+    LSPResult processRequestInternal(absl::Mutex &commitMtx, QueueState &state, std::unique_ptr<core::GlobalState> gs,
+                                     const LSPMessage &msg);
 
     TypecheckRun handleSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs, LSPFileUpdates &updates) const;
 

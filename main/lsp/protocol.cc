@@ -260,6 +260,10 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
             {
                 absl::MutexLock lck(&processingMtx);
                 Timer timeit(logger, "idle");
+                // Safeguard: In case something went sideways, make sure we flip this flag so we don't go off the
+                // rails...
+                ENFORCE(!processingQueue.runningSlowPath);
+                processingQueue.runningSlowPath = false;
                 processingMtx.Await(absl::Condition(
                     +[](QueueState *processingQueue) -> bool {
                         return processingQueue->terminate ||
@@ -276,8 +280,8 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                         break;
                     }
                 }
-                msg = move(processingQueue.pendingRequests.front());
                 processingQueue.runningSlowPath = false;
+                msg = move(processingQueue.pendingRequests.front());
                 if (msg->isNotification()) {
                     auto method = msg->method();
                     exitProcessed = method == LSPMethod::Exit;
@@ -296,7 +300,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                 hasMoreMessages = !processingQueue.pendingRequests.empty();
             }
             prodCounterInc("lsp.messages.received");
-            auto result = processRequestInternal(move(gs), *msg);
+            auto result = processRequestInternal(processingMtx, processingQueue, move(gs), *msg);
             gs = move(result.gs);
             for (auto &msg : result.responses) {
                 sendMessage(*msg);

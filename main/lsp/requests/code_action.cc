@@ -4,8 +4,8 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                const CodeActionParams &params) const {
+LSPResult LSPLoop::handleTextDocumentCodeAction(absl::Mutex &mtx, QueueState &state, unique_ptr<core::GlobalState> gs,
+                                                const MessageId &id, const CodeActionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
     if (!config.opts.lspQuickFixEnabled) {
@@ -26,7 +26,7 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     updates.updatedFiles.push_back(make_shared<core::File>(string(file.data(*gs).path()),
                                                            string(file.data(*gs).source()), core::File::Type::Normal));
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
-    auto run = runTypechecking(move(gs), move(updates));
+    auto run = runTypechecking(mtx, state, move(gs), move(updates));
 
     auto loc = params.range->toLoc(*run.gs, file);
     for (auto &error : run.errors) {
