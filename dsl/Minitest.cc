@@ -13,9 +13,7 @@ namespace sorbet::dsl {
 
 namespace {
 unique_ptr<ast::Expression> addSigVoid(unique_ptr<ast::Expression> expr) {
-    ast::InsSeq::STATS_store stats;
-    stats.emplace_back(ast::MK::SigVoid(expr->loc, ast::MK::Hash0(expr->loc)));
-    return make_unique<ast::InsSeq>(expr->loc, std::move(stats), std::move(expr));
+    return ast::MK::InsSeq1(expr->loc, ast::MK::SigVoid(expr->loc, ast::MK::Hash0(expr->loc)), std::move(expr));
 }
 } // namespace
 
