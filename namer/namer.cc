@@ -783,7 +783,8 @@ public:
                     e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
                     e.addErrorLine(existingTypeMember.data(ctx)->loc(), "Also defined here");
                 }
-                if (auto e = ctx.state.beginError(existingTypeMember.data(ctx)->loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                if (auto e = ctx.state.beginError(existingTypeMember.data(ctx)->loc(),
+                                                  core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
                     e.addErrorLine(asgn->loc, "Also defined here");
                 }
