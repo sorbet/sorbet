@@ -4,20 +4,22 @@ class <emptyTree><<C <root>>> < ()
       <emptyTree>
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params({}).void()
+    begin
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+      def <test_works outside><<C <todo sym>>>(&<blk>)
+        <self>.outside_method()
+      end
     end
 
-    def <test_works outside><<C <todo sym>>>(&<blk>)
-      <self>.outside_method()
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params({}).void()
-    end
-
-    def <test_allows constants inside of IT><<C <todo sym>>>(&<blk>)
-      <emptyTree>::<C CONST> = 10
+    begin
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+      def <test_allows constants inside of IT><<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C CONST> = 10
+      end
     end
 
     class <emptyTree>::<C <class_some inner tests>><<C <todo sym>>> < (<self>)
@@ -25,32 +27,36 @@ class <emptyTree><<C <root>>> < ()
         def inside_method<<C <todo sym>>>(&<blk>)
           <emptyTree>
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
-          <self>.params({}).void()
-        end
-        def <test_works inside><<C <todo sym>>>(&<blk>)
-          begin
-            <self>.outside_method()
-            <self>.inside_method()
+        begin
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.params({}).void()
+          end
+          def <test_works inside><<C <todo sym>>>(&<blk>)
+            begin
+              <self>.outside_method()
+              <self>.inside_method()
+            end
           end
         end
       end
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params({}).void()
+    begin
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+      def initialize<<C <todo sym>>>(&<blk>)
+        @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
+      end
     end
 
-    def initialize<<C <todo sym>>>(&<blk>)
-      @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params({}).void()
-    end
-
-    def <test_can read foo><<C <todo sym>>>(&<blk>)
-      <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
+    begin
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+      def <test_can read foo><<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
+      end
     end
 
     def self.random_method<<C <todo sym>>>(&<blk>)
@@ -63,17 +69,21 @@ class <emptyTree><<C <root>>> < ()
 
     class <emptyTree>::<C <class_Object>><<C <todo sym>>> < (<self>)
       begin
-        ::T::Sig::WithoutRuntime.sig() do ||
-          <self>.params({}).void()
+        begin
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.params({}).void()
+          end
+          def <test_Object><<C <todo sym>>>(&<blk>)
+            <emptyTree>
+          end
         end
-        def <test_Object><<C <todo sym>>>(&<blk>)
-          <emptyTree>
-        end
-        ::T::Sig::WithoutRuntime.sig() do ||
-          <self>.params({}).void()
-        end
-        def <test_Object><<C <todo sym>>>(&<blk>)
-          <emptyTree>
+        begin
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.params({}).void()
+          end
+          def <test_Object><<C <todo sym>>>(&<blk>)
+            <emptyTree>
+          end
         end
       end
     end
