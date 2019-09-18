@@ -745,7 +745,7 @@ void readOptions(Options &opts,
             throw EarlyReturnWithCode(0);
         }
         if (raw["help"].as<bool>()) {
-            logger->info("{}", options.help({"", "advanced", "dev"}));
+            logger->info("{}", options.help(options.groups()));
             throw EarlyReturnWithCode(0);
         }
         if (raw["version"].as<bool>()) {
