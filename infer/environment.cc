@@ -790,11 +790,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 if (send->link || lspQueryMatch) {
                     retainedResult = make_shared<core::DispatchResult>(std::move(dispatched));
                 }
-                if (lspQueryMatch) {
-                    if (!(retainedResult->main.method.exists() && retainedResult->main.method.isSynthetic())) {
-                        core::lsp::QueryResponse::pushQueryResponse(
-                            ctx, core::lsp::SendResponse(bind.loc, retainedResult, send->fun));
-                    }
+                if (lspQueryMatch && retainedResult->main.method.exists() &&
+                    !retainedResult->main.method.isSynthetic()) {
+                    core::lsp::QueryResponse::pushQueryResponse(
+                        ctx, core::lsp::SendResponse(bind.loc, retainedResult, send->fun));
                 }
                 if (send->link) {
                     // This should eventually become ENFORCEs but currently they are wrong
@@ -1191,7 +1190,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
         }
         throw;
     }
-}
+} // namespace sorbet::infer
 
 void Environment::cloneFrom(const Environment &rhs) {
     this->isDead = rhs.isDead;
