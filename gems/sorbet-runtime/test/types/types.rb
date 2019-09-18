@@ -341,15 +341,6 @@ module Opus::Types::Test
         assert_nil(msg)
       end
 
-      it 'fails if the type is wrong' do
-        type = T::Enumerator[Float]
-        value = [1, 2, 3].each
-        msg = type.error_message_for_obj(value)
-        expected_error = "Expected type T::Enumerator[Float], " \
-                         "got T::Enumerator[Integer]"
-        assert_equal(expected_error, msg)
-      end
-
       it 'can have its metatype instantiated' do
         assert_equal([1, 2, 3], T::Enumerator[Integer].new do |x|
           x << 1
@@ -504,6 +495,13 @@ module Opus::Types::Test
       it 'does not check lazy enumerables (for now)' do
         type = T::Enumerable[Integer]
         value = ["bad"].lazy
+        msg = type.error_message_for_obj(value)
+        assert_nil(msg)
+      end
+
+      it 'does not check potentially non-finite enumerables' do
+        type = T::Enumerable[Integer]
+        value = ["bad"].cycle
         msg = type.error_message_for_obj(value)
         assert_nil(msg)
       end
