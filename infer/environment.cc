@@ -1190,7 +1190,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
         }
         throw;
     }
-} // namespace sorbet::infer
+}
 
 void Environment::cloneFrom(const Environment &rhs) {
     this->isDead = rhs.isDead;
