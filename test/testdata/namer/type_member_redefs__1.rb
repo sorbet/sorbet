@@ -17,3 +17,8 @@ class C
   R = 1
   R = type_member # error: Redefining constant `C::R`
 end
+
+class D
+  extend T::Generic
+  R = type_member
+end

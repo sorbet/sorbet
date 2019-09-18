@@ -775,8 +775,17 @@ public:
 
         auto existingTypeMember = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
         if (existingTypeMember.exists()) {
-            // we've already constructed the type member, which means the only thing we need to do is find out whether
-            // there was a redefinition the first time, and in that case display the same error
+            // if we already have a type member but it was constructed in a different file from the one we're looking
+            // at, then we need to raise an error
+            if (existingTypeMember.data(ctx)->loc().file() != asgn->loc.file()) {
+                if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
+                }
+            }
+
+            // otherwise, we're looking at a type member defined in this class in the same file, which means all we need
+            // to do is find out whether there was a redefinition the first time, and in that case display the same
+            // error
             auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
             if (oldSym.exists()) {
                 if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
