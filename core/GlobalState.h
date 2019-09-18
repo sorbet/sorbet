@@ -73,6 +73,9 @@ public:
     SymbolRef lookupSymbol(SymbolRef owner, NameRef name) {
         return lookupSymbolWithFlags(owner, name, 0);
     }
+    SymbolRef lookupTypeMemberSymbol(SymbolRef owner, NameRef name) {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER);
+    }
     SymbolRef lookupClassSymbol(SymbolRef owner, NameRef name) {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE);
     }

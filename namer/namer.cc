@@ -690,9 +690,20 @@ public:
         if (!sym.exists() && currSym.exists()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx)->show(ctx));
-                e.addErrorLine(currSym.data(ctx)->loc(), "Previous definition");
+                e.addErrorLine(asgn->loc, "Previous definition");
             }
             ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
+        }
+        if (sym.exists()) {
+            // if sym exists, then currSym should definitely exist
+            ENFORCE(currSym.exists());
+            auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
+            if (renamedSym.exists()) {
+                if (auto e = ctx.state.beginError(sym.data(ctx)->loc(), core::errors::Namer::ModuleKindRedefinition)) {
+                    e.setHeader("Redefining constant `{}`", renamedSym.data(ctx)->name.show(ctx));
+                    e.addErrorLine(asgn->loc, "Previous definition");
+                }
+            }
         }
         core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, name);
         auto loc = lhs->loc;
@@ -762,45 +773,65 @@ public:
             }
         }
 
-        auto members = onSymbol.data(ctx)->typeMembers();
-        auto it = absl::c_find_if(members, [&](auto mem) { return mem.data(ctx)->name == typeName->cnst; });
-        if (it != members.end() && !(it->data(ctx)->loc() == asgn->loc || it->data(ctx)->loc().isTombStoned(ctx))) {
-            if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
+        core::SymbolRef sym;
+        auto existingTypeMember = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
+        if (existingTypeMember.exists()) {
+            // if we already have a type member but it was constructed in a different file from the one we're looking
+            // at, then we need to raise an error
+            if (existingTypeMember.data(ctx)->loc().file() != asgn->loc.file()) {
+                if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
+                }
             }
-            return make_unique<ast::EmptyTree>();
-        }
-        auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
-        if (oldSym.exists() && !(oldSym.data(ctx)->loc() == asgn->loc || oldSym.data(ctx)->loc().isTombStoned(ctx))) {
-            if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
-                e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
-            }
-            ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
-        }
-        auto sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
 
-        // Ensure that every type member has a LambdaParam with bounds, but give
-        // both bounds as T.untyped. The reason for this is that the bounds will
-        // be fixed up in the resolver, but if the type is used out of order (as
-        // in test/testdata/todo/fixed_ordering.rb) `T.untyped` will be used for
-        // the value of the type, instead of `<any>`
-        auto untyped = core::Types::untyped(ctx, sym);
-        sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, untyped, untyped);
-
-        if (isTypeTemplate) {
-            auto context = ctx.owner.data(ctx)->enclosingClass(ctx);
-            oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
-            if (oldSym.exists() &&
-                !(oldSym.data(ctx)->loc() == asgn->loc || oldSym.data(ctx)->loc().isTombStoned(ctx))) {
-                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Redefining constant `{}`", typeName->cnst.data(ctx)->show(ctx));
+            // otherwise, we're looking at a type member defined in this class in the same file, which means all we need
+            // to do is find out whether there was a redefinition the first time, and in that case display the same
+            // error
+            auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
+            if (oldSym.exists()) {
+                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                    e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
                     e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                 }
-                ctx.state.mangleRenameSymbol(oldSym, typeName->cnst);
             }
-            auto alias = ctx.state.enterStaticFieldSymbol(asgn->loc, context, typeName->cnst);
-            alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
+            // if we have more than one type member with the same name, then we have messed up somewhere
+            ENFORCE(absl::c_find_if(onSymbol.data(ctx)->typeMembers(), [&](auto mem) {
+                        return mem.data(ctx)->name == existingTypeMember.data(ctx)->name;
+                    }) != onSymbol.data(ctx)->typeMembers().end());
+            sym = existingTypeMember;
+        } else {
+            auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
+            if (oldSym.exists()) {
+                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                    e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
+                    e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
+                }
+                ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
+            }
+            sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
+
+            // Ensure that every type member has a LambdaParam with bounds, but give
+            // both bounds as T.untyped. The reason for this is that the bounds will
+            // be fixed up in the resolver, but if the type is used out of order (as
+            // in test/testdata/todo/fixed_ordering.rb) `T.untyped` will be used for
+            // the value of the type, instead of `<any>`
+            auto untyped = core::Types::untyped(ctx, sym);
+            sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, untyped, untyped);
+
+            if (isTypeTemplate) {
+                auto context = ctx.owner.data(ctx)->enclosingClass(ctx);
+                oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
+                if (oldSym.exists() &&
+                    !(oldSym.data(ctx)->loc() == asgn->loc || oldSym.data(ctx)->loc().isTombStoned(ctx))) {
+                    if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                        e.setHeader("Redefining constant `{}`", typeName->cnst.data(ctx)->show(ctx));
+                        e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
+                    }
+                    ctx.state.mangleRenameSymbol(oldSym, typeName->cnst);
+                }
+                auto alias = ctx.state.enterStaticFieldSymbol(asgn->loc, context, typeName->cnst);
+                alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
+            }
         }
 
         if (!send->args.empty()) {

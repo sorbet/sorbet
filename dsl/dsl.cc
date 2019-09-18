@@ -17,6 +17,7 @@
 #include "dsl/Rails.h"
 #include "dsl/Regexp.h"
 #include "dsl/Struct.h"
+#include "dsl/TypeMembers.h"
 #include "dsl/attr_reader.h"
 #include "dsl/module_function.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
@@ -34,6 +35,7 @@ public:
         Rails::patchDSL(ctx, classDef.get());
         OpusEnum::patchDSL(ctx, classDef.get());
         Prop::patchDSL(ctx, classDef.get());
+        TypeMembers::patchDSL(ctx, classDef.get());
 
         ast::Expression *prevStat = nullptr;
         UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
