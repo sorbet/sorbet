@@ -17,7 +17,6 @@ This demoes and end-to-end flow. We should start replacing components of this wi
 
 ```
 > ruby extconf.rb
-> patch < Makefile.1
-> make
-> cat foobar.o
+> make foobar.ll
+> cat foobar.ll
 ```
