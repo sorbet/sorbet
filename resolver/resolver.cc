@@ -1842,13 +1842,11 @@ void Resolver::sanityCheck(core::MutableContext ctx, vector<ast::ParsedFile> &tr
 }
 
 vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
-    ctx.state.tracer().error("running tree passes");
     auto workers = WorkerPool::create(0, ctx.state.tracer());
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), *workers);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     trees = resolveTypeParams(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
-    finalizeSymbols(ctx.state);
     sanityCheck(ctx, trees);
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.
     // But it can be super useful to uncomment when debugging certain issues.
