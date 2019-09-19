@@ -456,7 +456,7 @@ private:
             auto classData = job.klass.data(ctx);
             auto fnd = find(classData->mixins().begin(), classData->mixins().end(), resolved);
             if (fnd == classData->mixins().end()) {
-                job.klass.data(ctx)->mixins().emplace_back(resolved);
+                classData->mixins().emplace_back(resolved);
             }
         }
 
