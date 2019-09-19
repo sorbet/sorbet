@@ -1,5 +1,4 @@
 # typed: true
-# disable-fast-path: true
 
 module R; def self.x; end; end
 R = 5 # error: Redefining constant `R`
