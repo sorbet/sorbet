@@ -104,9 +104,6 @@ LSPResult LSPLoop::processRequestInternal(absl::Mutex &mtx, QueueState &state, u
             // Forward to client. These are sent from the preprocessor.
             sendMessage(msg);
             return LSPResult{move(gs), {}};
-        } else if (method == LSPMethod::SorbetNop) {
-            // No-op.
-            return LSPResult{move(gs), {}};
         }
     } else if (msg.isRequest()) {
         Timer timeit(logger, "request", {{"method", convertLSPMethodToString(method)}});
