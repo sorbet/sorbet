@@ -11,6 +11,12 @@ using namespace std;
 
 namespace sorbet::dsl {
 
+namespace {
+unique_ptr<ast::Expression> addSigVoid(unique_ptr<ast::Expression> expr) {
+    return ast::MK::InsSeq1(expr->loc, ast::MK::SigVoid(expr->loc, ast::MK::Hash0(expr->loc)), std::move(expr));
+}
+} // namespace
+
 unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body);
 
 unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
@@ -21,6 +27,7 @@ unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast
         for (auto &exp : bodySeq->stats) {
             exp = recurse(ctx, std::move(exp));
         }
+
         bodySeq->expr = recurse(ctx, std::move(bodySeq->expr));
     }
     return body;
@@ -53,8 +60,9 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
     }
 
     if (send->args.empty() && send->fun == core::Names::before()) {
-        return ast::MK::Method0(send->loc, send->loc, core::Names::initialize(),
-                                prepareBody(ctx, std::move(send->block->body)), ast::MethodDef::DSLSynthesized);
+        return addSigVoid(ast::MK::Method0(send->loc, send->loc, core::Names::initialize(),
+                                           prepareBody(ctx, std::move(send->block->body)),
+                                           ast::MethodDef::DSLSynthesized));
     }
 
     if (send->args.size() != 1) {
@@ -63,7 +71,6 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
     auto &arg = send->args[0];
     auto argString = to_s(ctx, arg);
 
-    vector<unique_ptr<ast::Expression>> stats;
     if (send->fun == core::Names::describe()) {
         ast::ClassDef::ANCESTORS_store ancestors;
         ancestors.emplace_back(ast::MK::Self(arg->loc));
@@ -75,8 +82,9 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
                               ast::ClassDefKind::Class);
     } else if (send->fun == core::Names::it()) {
         auto name = ctx.state.enterNameUTF8("<test_" + argString + ">");
-        return ast::MK::Method0(send->loc, send->loc, std::move(name), prepareBody(ctx, std::move(send->block->body)),
-                                ast::MethodDef::DSLSynthesized);
+        return addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
+                                           prepareBody(ctx, std::move(send->block->body)),
+                                           ast::MethodDef::DSLSynthesized));
     }
 
     return nullptr;
