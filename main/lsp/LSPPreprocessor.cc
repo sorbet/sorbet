@@ -41,7 +41,8 @@ LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPCon
     finalGSErrorQueue->ignoreFlushes = true;
 }
 
-void LSPPreprocessor::mergeFileChanges(QueueState &state) {
+void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
+    mtx.AssertHeld();
     u4 earliestActiveEditVersion = state.runningSlowPath ? state.latestVersion : nextVersion;
     auto &pendingRequests = state.pendingRequests;
     const int originalSize = pendingRequests.size();
@@ -158,7 +159,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             absl::MutexLock lock(&stateMtx);
             cancelRequest(state.pendingRequests, *get<unique_ptr<CancelParams>>(msg->asNotification().params));
             // A canceled request can be moved around, so we may be able to merge more file changes.
-            mergeFileChanges(state);
+            mergeFileChanges(stateMtx, state);
             break;
         }
         case LSPMethod::PAUSE: {
@@ -263,7 +264,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             state.pendingRequests.push_back(move(msg));
         }
         if (shouldMerge) {
-            mergeFileChanges(state);
+            mergeFileChanges(stateMtx, state);
         }
     }
 }

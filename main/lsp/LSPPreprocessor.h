@@ -73,14 +73,7 @@ private:
      * Example: (E = edit, D = delayable non-edit, M = arbitrary non-edit)
      * {[M1][E1][E2][D1][E3]} => {[M1][E1-3][D1]}
      */
-    void mergeFileChanges(QueueState &state);
-
-    /**
-     * Checks if the processing thread is still processing `lastEncounteredSlowPath`, if defined.
-     *
-     * Updates `lastEncounteredSlowPath` and cancels typechecking when applicable.
-     */
-    void maybeCancelSlowPath(QueueState &state);
+    void mergeFileChanges(absl::Mutex &mtx, QueueState &state);
 
     std::unique_ptr<LSPMessage> makeAndCommitWorkspaceEdit(std::unique_ptr<SorbetWorkspaceEditParams> params,
                                                            std::unique_ptr<SorbetWorkspaceEditCounts> counts,
