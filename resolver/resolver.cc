@@ -1786,34 +1786,34 @@ public:
 };
 }; // namespace
 
-vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+ast::MaybeASTPassResult Resolver::run(core::MutableContext ctx, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), workers);
     if (ctx.state.shouldCancelTypechecking()) {
-        return {};
+        return ast::MaybeASTPassResult();
     }
     finalizeAncestors(ctx.state);
     if (ctx.state.shouldCancelTypechecking()) {
-        return {};
+        return ast::MaybeASTPassResult();
     }
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     if (ctx.state.shouldCancelTypechecking()) {
-        return {};
+        return ast::MaybeASTPassResult();
     }
     finalizeSymbols(ctx.state);
     if (ctx.state.shouldCancelTypechecking()) {
-        return {};
+        return ast::MaybeASTPassResult();
     }
     trees = resolveTypeParams(ctx, std::move(trees));
     if (ctx.state.shouldCancelTypechecking()) {
-        return {};
+        return ast::MaybeASTPassResult();
     }
     trees = resolveSigs(ctx, std::move(trees));
     if (ctx.state.shouldCancelTypechecking()) {
-        return {};
+        return ast::MaybeASTPassResult();
     }
     sanityCheck(ctx, trees);
 
-    return trees;
+    return ast::MaybeASTPassResult(move(trees));
 }
 
 vector<ast::ParsedFile> Resolver::resolveTypeParams(core::MutableContext ctx, vector<ast::ParsedFile> trees) {

@@ -508,8 +508,8 @@ int realmain(int argc, char *argv[]) {
             runAutogen(ctx, opts, autoloaderCfg, *workers, indexed);
 #endif
         } else {
-            indexed = pipeline::resolve(gs, move(indexed), opts, *workers);
-            indexed = pipeline::typecheck(gs, move(indexed), opts, *workers);
+            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers).result());
+            indexed = move(pipeline::typecheck(gs, move(indexed), opts, *workers).result());
         }
 
         if (opts.suggestTyped) {

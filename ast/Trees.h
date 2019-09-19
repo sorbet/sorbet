@@ -56,6 +56,23 @@ struct ParsedFile {
     core::FileRef file;
 };
 
+/**
+ * Stores the output of an AST pass. May be empty if pass was canceled or encountered an error.
+ * TODO: Modify to store reason if we ever have multiple reasons for a pass to stop. Currently, it's only empty if the
+ * pass is canceled in LSP mode.
+ */
+class MaybeASTPassResult final {
+private:
+    std::optional<std::vector<ParsedFile>> trees;
+
+public:
+    MaybeASTPassResult();
+    MaybeASTPassResult(std::vector<ParsedFile> trees);
+
+    bool hasResult() const;
+    std::vector<ParsedFile> &result();
+};
+
 template <class To> To *cast_tree(Expression *what) {
     static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
     static_assert(std::is_assignable<Expression *&, To *>::value, "Ill Formed To, has to be a subclass of Expression");

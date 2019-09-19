@@ -191,18 +191,19 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(absl::Mutex &mtx, QueueState &state,
     }
 
     ENFORCE(finalGS->lspQuery.isEmpty());
-    auto resolved = pipeline::resolve(finalGS, move(indexedCopies), config.opts, workers, config.skipConfigatron);
-    if (finalGS->shouldCancelTypechecking()) {
+    auto maybeResolved = pipeline::resolve(finalGS, move(indexedCopies), config.opts, workers, config.skipConfigatron);
+    if (!maybeResolved.hasResult()) {
         return TypecheckRun::makeCanceled(move(previousGS));
     }
 
+    auto &resolved = maybeResolved.result();
     vector<core::FileRef> affectedFiles;
     for (auto &tree : resolved) {
         ENFORCE(tree.file.exists());
         affectedFiles.push_back(tree.file);
     }
-    pipeline::typecheck(finalGS, move(resolved), config.opts, workers);
-    if (finalGS->shouldCancelTypechecking()) {
+    auto maybeTypechecked = pipeline::typecheck(finalGS, move(resolved), config.opts, workers);
+    if (!maybeTypechecked.hasResult()) {
         return TypecheckRun::makeCanceled(move(previousGS));
     }
 

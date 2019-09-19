@@ -1188,4 +1188,18 @@ string BlockArg::nodeName() {
     return "BlockArg";
 }
 
+MaybeASTPassResult::MaybeASTPassResult() : trees(nullopt){};
+MaybeASTPassResult::MaybeASTPassResult(std::vector<ParsedFile> trees) : trees(move(trees)) {}
+
+bool MaybeASTPassResult::hasResult() const {
+    return trees.has_value();
+}
+
+vector<ParsedFile> &MaybeASTPassResult::result() {
+    if (trees.has_value()) {
+        return trees.value();
+    }
+    Exception::raise("Attempted to retrieve result of an AST pass that did not complete.");
+}
+
 } // namespace sorbet::ast
