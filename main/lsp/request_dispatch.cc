@@ -18,7 +18,6 @@ LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, std::unique_
 }
 
 LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<unique_ptr<LSPMessage>> messages) {
-    // TODO: Memory leak -- prune TTGS history.
     QueueState state;
     absl::Mutex mutex;
     for (auto &message : messages) {
@@ -34,6 +33,8 @@ LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<uniq
                             make_move_iterator(rslt.responses.end()));
     }
     state.pendingRequests.clear();
+    // Clear time-travel history now that all messages are committed to GlobalState.
+    preprocessor.clearHistory();
     return rv;
 }
 
