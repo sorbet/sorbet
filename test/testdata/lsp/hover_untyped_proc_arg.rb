@@ -3,8 +3,8 @@
 def main
   a = T.let([], T.untyped)
   a.map do |foo, bar|
-          # ^ hover: sig {returns(T.untyped)}
-                # ^ hover: sig {returns(T.untyped)}
+    # TODO: ^ hover: T.untyped
+    # TODO:      ^ hover: T.untyped
   end
   b = T.let([], T::Array[T.untyped])
   b.map do |foo|
