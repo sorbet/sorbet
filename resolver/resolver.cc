@@ -453,7 +453,11 @@ private:
             }
         } else {
             ENFORCE(resolved.data(ctx)->isClassOrModule());
-            job.klass.data(ctx)->mixins().emplace_back(resolved);
+            auto classData = job.klass.data(ctx);
+            auto fnd = find(classData->mixins().begin(), classData->mixins().end(), resolved);
+            if (fnd == classData->mixins().end()) {
+                job.klass.data(ctx)->mixins().emplace_back(resolved);
+            }
         }
 
         return true;
@@ -1838,11 +1842,13 @@ void Resolver::sanityCheck(core::MutableContext ctx, vector<ast::ParsedFile> &tr
 }
 
 vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
+    ctx.state.tracer().error("running tree passes");
     auto workers = WorkerPool::create(0, ctx.state.tracer());
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), *workers);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     trees = resolveTypeParams(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
+    finalizeSymbols(ctx.state);
     sanityCheck(ctx, trees);
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.
     // But it can be super useful to uncomment when debugging certain issues.
