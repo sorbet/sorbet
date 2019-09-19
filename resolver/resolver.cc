@@ -454,7 +454,7 @@ private:
         } else {
             ENFORCE(resolved.data(ctx)->isClassOrModule());
             auto classData = job.klass.data(ctx);
-            auto fnd = find(classData->mixins().begin(), classData->mixins().end(), resolved);
+            auto fnd = absl::c_find(classData->mixins(), resolved);
             if (fnd == classData->mixins().end()) {
                 classData->mixins().emplace_back(resolved);
             }
