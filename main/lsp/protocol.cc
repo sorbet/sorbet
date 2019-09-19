@@ -134,6 +134,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
                     &incomingQueue));
                 // Only terminate once incoming queue is drained.
                 if (incomingQueue.terminate && incomingQueue.pendingRequests.empty()) {
+                    logger->debug("Preprocessor terminating");
                     return;
                 }
                 msg = move(incomingQueue.pendingRequests.front());
@@ -198,13 +199,14 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                     incomingQueue.pendingRequests.push_back(move(msg));
                 }
             },
-            [&incomingQueue, &incomingMtx](int watchmanExitCode) {
+            [&incomingQueue, &incomingMtx, logger = this->logger](int watchmanExitCode) {
                 {
                     absl::MutexLock lck(&incomingMtx);
                     if (!incomingQueue.terminate) {
                         incomingQueue.terminate = true;
                         incomingQueue.errorCode = watchmanExitCode;
                     }
+                    logger->debug("Watchman terminating");
                 }
             });
     }
@@ -238,6 +240,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
             } catch (FileReadException e) {
                 // Failed to read from input stream. Ignore. NotifyOnDestruction will take care of exiting cleanly.
             }
+            logger->debug("Reader thread terminating");
         });
 
     // Bridges the gap between the {reader, watchman} threads and the coordinator thread.
@@ -246,8 +249,10 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
     mainThreadId = this_thread::get_id();
     unique_ptr<core::GlobalState> gs;
     {
-        // Ensure Watchman thread gets unstuck when thread exits.
+        // Ensure Watchman thread gets unstuck when thread exits prior to initialization.
         NotifyNotificationOnDestruction notify(initializedNotification);
+        // Ensure preprocessor, reader, and watchman threads get unstuck when thread exits.
+        NotifyOnDestruction notifyIncoming(incomingMtx, incomingQueue.terminate);
         bool exitProcessed = false;
         while (true) {
             unique_ptr<LSPMessage> msg;
@@ -302,6 +307,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
         }
     }
 
+    logger->debug("Processor terminating");
     if (gs) {
         return gs;
     } else {
