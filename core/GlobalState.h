@@ -188,14 +188,13 @@ public:
     // Indicates the number of times LSP has run the type checker with this global state.
     // Used to ensure GlobalState is in the correct state to process requests.
     unsigned int lspTypecheckCount = 0;
-    // In LSP mode, contains an integer that increments every time an edit comes in. If lspEpoch changes
-    // mid-typechecking, then new user edits are available to typecheck. May wrap around. Used to implement canceling
-    // long-running typechecking operations.
-    // Defaults to a `nullptr`, which disables this functionality.
-    std::shared_ptr<std::atomic<u4>> lspEpoch;
-    // When a cancelable typechecking operation is active, contains the expected `lspEpoch` value. If it differs from
-    // `lspEpoch`, then typechecking should be canceled.
-    std::optional<u4> expectedLspEpoch = std::nullopt;
+    // In LSP mode: Contains the current edit version (epoch) that the processing thread is typechecking or has
+    // typechecked last. Is bumped by the typechecking thread.
+    std::shared_ptr<std::atomic<u4>> currentlyProcessingLSPEpoch;
+    // In LSP mode: should always be `>= currentlyProcessingLSPEpoch`(modulo overflows).
+    // If value in `lspEpochInvalidator` is different from `currentlyProcessingLSPEpoch`, then LSP wants the current
+    // request to be cancelled. Is bumped by the preprocessor thread (which determines cancellations).
+    std::shared_ptr<std::atomic<u4>> lspEpochInvalidator;
 
     bool shouldCancelTypechecking() const;
 

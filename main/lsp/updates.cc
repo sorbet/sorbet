@@ -147,19 +147,6 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
         t.tree = ast::TreeMap::apply(ctx, defLocSaver, move(t.tree));
     }
 }
-
-class ExpectedEpochSetter final {
-private:
-    core::GlobalState &gs;
-
-public:
-    ExpectedEpochSetter(u4 version, core::GlobalState &gs) : gs(gs) {
-        gs.expectedLspEpoch = version;
-    }
-    ~ExpectedEpochSetter() {
-        gs.expectedLspEpoch = nullopt;
-    }
-};
 } // namespace
 
 LSPLoop::TypecheckRun LSPLoop::runSlowPath(absl::Mutex &mtx, QueueState &state,
@@ -177,7 +164,6 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(absl::Mutex &mtx, QueueState &state,
     UnorderedSet<int> updatedFiles;
     vector<ast::ParsedFile> indexedCopies;
     auto finalGS = move(updates.updatedGS.value());
-    ExpectedEpochSetter setter(updates.version, *finalGS);
     // Index the updated files using finalGS.
     {
         core::UnfreezeFileTable fileTableAccess(*finalGS);
