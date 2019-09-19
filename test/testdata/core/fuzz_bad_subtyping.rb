@@ -1,5 +1,4 @@
 # typed: true
-# disable-fast-path: true
 # Found by fuzzer: https://github.com/sorbet/sorbet/issues/1132
 module MyEnumerable
 extend T::Generic

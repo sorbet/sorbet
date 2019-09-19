@@ -1,5 +1,4 @@
 # typed: true
-# disable-fast-path: true
 
 class R; end
 R = 5 # error: Redefining constant `R`
