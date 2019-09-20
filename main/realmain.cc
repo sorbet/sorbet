@@ -446,11 +446,11 @@ int realmain(int argc, char *argv[]) {
 #ifndef SORBET_REALMAIN_MIN
         gs->errorQueue->ignoreFlushes = true;
         logger->info("Starting sorbet version {} in LSP server mode. "
-                      "Talk ‘\\r\\n’-separated JSON-RPC to me. "
-                      "More details at https://microsoft.github.io/language-server-protocol/specification. "
-                      "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag, "
-                      "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
-                      Version::full_version_string);
+                     "Talk ‘\\r\\n’-separated JSON-RPC to me. "
+                     "More details at https://microsoft.github.io/language-server-protocol/specification. "
+                     "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag, "
+                     "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
+                     Version::full_version_string);
         lsp::LSPLoop loop(move(gs), lsp::LSPConfiguration(opts, logger), logger, *workers, STDIN_FILENO, cout);
         gs = loop.runLSP().value_or(nullptr);
 #endif
