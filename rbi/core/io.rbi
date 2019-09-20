@@ -1651,7 +1651,7 @@ class IO < Object
   # ```
   sig do
     params(
-        name: String,
+        name: T.any(String, Tempfile, File, Pathname),
         length: Integer,
         offset: Integer,
         external_encoding: String,
@@ -1693,7 +1693,7 @@ class IO < Object
   # details about open\_args.
   sig do
     params(
-        name: String,
+        name: T.any(String, Tempfile, File, Pathname),
         sep: String,
         limit: Integer,
         external_encoding: String,
@@ -1870,7 +1870,7 @@ class IO < Object
   # ```
   sig do
     params(
-        path: String,
+        path: T.any(String, Tempfile, File, Pathname),
         mode: String,
         perm: String,
     )
@@ -1944,7 +1944,7 @@ class IO < Object
   #     combination with other keys.
   sig do
     params(
-        name: String,
+        name: T.any(String, Tempfile, File, Pathname),
         arg0: String,
         offset: Integer,
         external_encoding: String,
