@@ -138,7 +138,7 @@ class Sorbet::Private::ConstantLookupCache
         rescue LoadError => err
           puts "Got #{err.class} when trying to get nested name #{name}::#{nested}"
           next
-        rescue NameError, ArgumentError => err
+        rescue NameError, ArgumentError, RuntimeError => err
           puts "Got #{err.class} when trying to get nested name #{name}::#{nested}_"
           # some stuff fails to load, like
           # `const_get': uninitialized constant YARD::Parser::Ruby::Legacy::RipperParser (NameError)
