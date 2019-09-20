@@ -453,11 +453,7 @@ private:
             }
         } else {
             ENFORCE(resolved.data(ctx)->isClassOrModule());
-            auto classData = job.klass.data(ctx);
-            auto fnd = absl::c_find(classData->mixins(), resolved);
-            if (fnd == classData->mixins().end()) {
-                classData->mixins().emplace_back(resolved);
-            }
+            job.klass.data(ctx)->mixins().emplace_back(resolved);
         }
 
         return true;
@@ -1845,6 +1841,7 @@ vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector
     auto workers = WorkerPool::create(0, ctx.state.tracer());
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), *workers);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
+    finalizeSymbols(ctx.state);
     trees = resolveTypeParams(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
