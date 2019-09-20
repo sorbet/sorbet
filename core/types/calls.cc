@@ -308,6 +308,7 @@ TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
     if (auto *metaType = cast_type<MetaType>(tp.get())) {
         return metaType->wrapped;
     }
+
     if (auto *classType = cast_type<ClassType>(tp.get())) {
         if (classType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum())) {
             // Opus::Enum instances are allowed to stand for themselves in type syntax positions.
@@ -316,6 +317,18 @@ TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
         }
 
         SymbolRef attachedClass = classType->symbol.data(ctx)->attachedClass(ctx);
+        if (!attachedClass.exists()) {
+            if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
+                e.setHeader("Unsupported usage of bare type");
+            }
+            return Types::untypedUntracked();
+        }
+
+        return attachedClass.data(ctx)->externalType(ctx);
+    }
+
+    if (auto *appType = cast_type<AppliedType>(tp.get())) {
+        SymbolRef attachedClass = appType->klass.data(ctx)->attachedClass(ctx);
         if (!attachedClass.exists()) {
             if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
