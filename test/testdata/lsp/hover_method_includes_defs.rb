@@ -74,14 +74,19 @@ module OuterModule
       names.join ':'
     end
 
+    sig {params(kwargs: String).returns(String)}
+    def double_splat_args(**kwargs)
+      kwargs.keys.join ':'
+    end
+
     sig {params(blk: T.proc.params(arg0: Integer).returns(String)).returns(String)}
     def block_args(&blk)
       blk.call(1)
     end
 
-    sig {params(pos: String, splat: String, required_key: String, optional_key: String, block_arg: T.proc.params(a: String).returns(String)).returns(String)}
-    def multiple_arg_types(pos, *splat, required_key:, optional_key: "Jane", &block_arg)
-      "#{pos} #{required_key} #{optional_key} #{splat.join ':'} #{block_arg.call(pos)}"
+    sig {params(pos: String, splat: String, required_key: String, optional_key: String, kwargs: T.untyped, block_arg: T.proc.params(a: String).returns(String)).returns(String)}
+    def multiple_arg_types(pos, *splat, required_key:, optional_key: "Jane", **kwargs, &block_arg)
+      "#{pos} #{required_key} #{optional_key} #{splat.join ':'} #{kwargs.to_s} #{block_arg.call(pos)}"
     end
 
     sig {returns T.untyped}
@@ -104,14 +109,17 @@ module OuterModule
         # ^ hover: def splat_args(*names)
         splat_args(s, s, s, s, s),
         # ^ hover: def splat_args(*names)
+        double_splat_args(a:s, b:s, c:s),
+        # ^ hover: def double_splat_args(**kwargs)
         block_args {|x| "blk#{x}"},
         # ^ hover: def block_args(&blk)
-        multiple_arg_types(s, s, s, s, required_key: s) {|x| x},
+        multiple_arg_types(s, s, s, s, required_key: s, dynamic_key: s) {|x| x},
         # ^ hover: def multiple_arg_types(
         # ^ hover:   pos,
         # ^ hover:   *splat,
         # ^ hover:   required_key:,
         # ^ hover:   optional_key:…,
+        # ^ hover:   **kwargs,
         # ^ hover:   &block_arg
         # ^ hover: )
         InnerClass::class_self_method(s),
@@ -128,12 +136,15 @@ module OuterModule
         #         ^ hover: def keyword_args_with_defaults(fname:…, lname:…)
         qualified.splat_args(s, s, s, s, s),
         #         ^ hover: def splat_args(*names)
-        qualified.multiple_arg_types(s, s, s, s, required_key: s) {|x| x},
+        qualified.double_splat_args(a: s, b: s, c: s),
+        #         ^ hover: def double_splat_args(**kwargs)
+        qualified.multiple_arg_types(s, s, s, s, required_key: s, dynamic_key: s) {|x| x},
         #         ^ hover: def multiple_arg_types(
         #         ^ hover:   pos,
         #         ^ hover:   *splat,
         #         ^ hover:   required_key:,
         #         ^ hover:   optional_key:…,
+        #         ^ hover:   **kwargs,
         #         ^ hover:   &block_arg
         #         ^ hover: )
       ]
