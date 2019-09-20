@@ -119,6 +119,7 @@ public:
 
     inline InlinedVector<SymbolRef, 4> &mixins() {
         ENFORCE(isClassOrModule());
+        unsetClassLinearizationComputed();
         return mixins_;
     }
 
@@ -449,6 +450,11 @@ public:
     inline void setClassLinearizationComputed() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED;
+    }
+
+    inline void unsetClassLinearizationComputed() {
+        ENFORCE(isClassOrModule());
+        flags &= ~Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED;
     }
 
     inline void setClassFinal() {
