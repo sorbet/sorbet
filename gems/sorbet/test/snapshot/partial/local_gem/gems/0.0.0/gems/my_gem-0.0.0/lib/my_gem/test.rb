@@ -1,8 +1,4 @@
-begin
-  require 'a-missing-gem'
-rescue LoadError
-  raise 'a runtime error'
-end
+raise 'a runtime error'
 
 module MyGem
   class Test
