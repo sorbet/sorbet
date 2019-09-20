@@ -173,7 +173,9 @@ string methodDefinition(const core::GlobalState &gs, core::SymbolRef method) {
         string prefix = "";
         string suffix = "";
         if (argSym.flags.isKeyword) {
-            if (argSym.flags.isDefault) {
+            if (argSym.flags.isRepeated) {
+                prefix = "**"; // variadic keyword args
+            } else if (argSym.flags.isDefault) {
                 suffix = ":…"; // optional keyword (has a default value)
             } else {
                 suffix = ":"; // required keyword
