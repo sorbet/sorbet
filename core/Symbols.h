@@ -119,7 +119,6 @@ public:
 
     inline InlinedVector<SymbolRef, 4> &mixins() {
         ENFORCE(isClassOrModule());
-        unsetClassLinearizationComputed();
         return mixins_;
     }
 
