@@ -54,7 +54,7 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
         }
         auto &msgParams = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
         // See which newer requests we can enqueue. We want to merge them *backwards* into msgParams.
-        earliestVersionInQueue = min(earliestVersionInQueue, msgParams->updates.version);
+        earliestVersionInQueue = min(earliestVersionInQueue, msgParams->updates.versionStart);
         it++;
         while (it != pendingRequests.end()) {
             auto &mergeMsg = **it;
@@ -81,7 +81,7 @@ void LSPPreprocessor::mergeFileChanges(QueueState &state) {
             requestsMergedCounter++;
         }
     }
-    // Prune history for all messages no longer in queue.
+    // Prune history for all edits no longer in queue.
     ttgs.pruneBefore(earliestVersionInQueue);
     ENFORCE(pendingRequests.size() + requestsMergedCounter == originalSize);
 }
@@ -276,7 +276,8 @@ string_view getFileContents(LSPFileUpdates &updates, const core::GlobalState &in
 
 void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentParams> changeParams,
                                         LSPFileUpdates &updates) const {
-    updates.version = v;
+    updates.versionStart = v;
+    updates.versionEnd = v;
     string_view uri = changeParams->textDocument->uri;
     if (absl::StartsWith(uri, config.rootUri)) {
         string localPath = config.remoteName2Local(uri);
@@ -310,7 +311,8 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentPa
 
 void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentParams> openParams,
                                         LSPFileUpdates &updates) const {
-    updates.version = v;
+    updates.versionStart = v;
+    updates.versionEnd = v;
     string_view uri = openParams->textDocument->uri;
     if (absl::StartsWith(uri, config.rootUri)) {
         string localPath = config.remoteName2Local(uri);
@@ -323,7 +325,8 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentPara
 
 void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentParams> closeParams,
                                         LSPFileUpdates &updates) const {
-    updates.version = v;
+    updates.versionStart = v;
+    updates.versionEnd = v;
     string_view uri = closeParams->textDocument->uri;
     if (absl::StartsWith(uri, config.rootUri)) {
         string localPath = config.remoteName2Local(uri);
@@ -337,7 +340,8 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentPar
 
 void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<WatchmanQueryResponse> queryResponse,
                                         LSPFileUpdates &updates) const {
-    updates.version = v;
+    updates.versionStart = v;
+    updates.versionEnd = v;
     for (auto file : queryResponse->files) {
         // Don't append rootPath if it is empty.
         string localPath = config.rootPath.size() > 0 ? absl::StrCat(config.rootPath, "/", file) : file;
@@ -354,7 +358,7 @@ void LSPPreprocessor::mergeEdits(LSPFileUpdates &to, LSPFileUpdates &from) {
     ENFORCE(sanityCheckUpdate(ttgs.getGlobalState(), from));
 
     // fromId must happen *after* toId.
-    ENFORCE(ttgs.comesBefore(to.version, from.version));
+    ENFORCE(ttgs.comesBefore(to.versionEnd, from.versionEnd));
     // 'from' has newer updates, so merge into from and then move into to.
     UnorderedSet<int> encounteredFiles;
     for (auto &index : from.updatedFileIndexes) {
@@ -377,11 +381,13 @@ void LSPPreprocessor::mergeEdits(LSPFileUpdates &to, LSPFileUpdates &from) {
     to.hasNewFiles = to.hasNewFiles || from.hasNewFiles;
 
     // Roll back to just before `to`.
-    ttgs.travel(to.version - 1);
+    ttgs.travel(to.versionStart - 1);
 
     to.canTakeFastPath = ttgs.canTakeFastPath(to);
     // `to` now includes the contents of `from`.
-    to.version = from.version;
+    to.versionEnd = from.versionEnd;
+    // No need to update versionStart, as to comes before from.
+    ENFORCE(ttgs.comesBefore(to.versionStart, from.versionStart));
     if (to.canTakeFastPath) {
         to.updatedGS = nullopt;
     } else if (from.updatedGS.has_value()) {
@@ -389,7 +395,7 @@ void LSPPreprocessor::mergeEdits(LSPFileUpdates &to, LSPFileUpdates &from) {
         to.updatedGS = move(from.updatedGS.value());
     } else {
         // Roll forward again so initial GS has changes from this update prior to copying.
-        ttgs.travel(from.version);
+        ttgs.travel(from.versionEnd);
         to.updatedGS = getTypecheckingGS();
     }
     ENFORCE(sanityCheckUpdate(ttgs.getGlobalState(), to));
