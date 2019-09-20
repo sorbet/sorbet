@@ -18,6 +18,6 @@ File.open('Makefile', 'at') do |mk|
 ### CUSTOM MODIFICATIONS
 %.ll : %.c
 	$(ECHO) building LLVM bitcode for $(<) into $@
-	$(Q) $(CC) -S -emit-llvm $(INCFLAGS) $(CPPFLAGS) $(CFLAGS) $(COUTFLAG)$@ $(CSRCFLAG)$<
+	$(Q) $(CC) -S -emit-llvm $(INCFLAGS) $(CPPFLAGS) $(CFLAGS) $(COUTFLAG)$@ -O0 $(CSRCFLAG)$<
 EOF
 end
