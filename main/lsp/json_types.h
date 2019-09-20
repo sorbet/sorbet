@@ -17,8 +17,9 @@ namespace sorbet::realmain::lsp {
  * Placed into json_types.h because it is referenced from InitializedParams.
  */
 struct LSPFileUpdates {
-    // Used to identify this specific edit.
-    u4 version = 0;
+    // This specific update contains versions [versionStart, versionEnd].
+    u4 versionEnd = 0;
+    u4 versionStart = 0;
     std::vector<std::shared_ptr<core::File>> updatedFiles;
     bool canTakeFastPath = false;
     // Indicates that this update contains a new file. Is a hack for TimeTravelingGlobalState.
