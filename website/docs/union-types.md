@@ -39,7 +39,7 @@ A.foo(true)
 
 Information can be learned about union types by examining its values in
 conditionals, or the `case` statement. For example, when using `Object#is_a?` in
-a conditional information Sorbet will learn information and propagate it down to
+a conditional, Sorbet will learn information and propagate it down to
 branches of the conditional:
 
 ```ruby
