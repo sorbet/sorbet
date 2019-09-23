@@ -453,8 +453,7 @@ private:
             }
         } else {
             ENFORCE(resolved.data(ctx)->isClassOrModule());
-            job.klass.data(ctx)->unsetClassLinearizationComputed();
-            job.klass.data(ctx)->mixins().emplace_back(resolved);
+            job.klass.data(ctx)->addMixin(resolved);
         }
 
         return true;
