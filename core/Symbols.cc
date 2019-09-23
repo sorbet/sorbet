@@ -826,6 +826,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     // a singleton class has `singletonClass` called on it, as it already has a
     // field named `AttachedClass`
     auto alias = findMember(gs, Names::Constants::AttachedClass());
+    ENFORCE(!alias.exists() || isSingletonClass(gs));
     if (!alias.exists()) {
         alias = gs.enterStaticFieldSymbol(Loc::none(), selfRef, Names::Constants::AttachedClass());
         alias.data(gs)->resultType = make_type<AliasType>(tp);
