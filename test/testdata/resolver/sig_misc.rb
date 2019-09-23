@@ -1,5 +1,4 @@
 # typed: true
-# disable-fast-path: true
 class T1; end
 class T2; end
 
