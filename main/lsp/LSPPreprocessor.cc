@@ -157,6 +157,8 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
     const LSPMethod method = msg->method();
     bool shouldEnqueue = false;
     bool shouldMerge = false;
+    // Ensure TTGS has file contents from previous edit.
+    ttgs.travel(nextVersion - 1);
     switch (method) {
         case LSPMethod::$CancelRequest: {
             absl::MutexLock lock(&stateMtx);

@@ -447,4 +447,44 @@ TEST(LSPPreprocessor, MakesCorrectFastPathDecisionsOnSimultaneousEdits) { // NOL
     EXPECT_FALSE(updates->canTakeFastPath);
 }
 
+TEST(SlowPathCancelation, CancelsRunningSlowPathWhenFastPathEditComesIn) { // NOLINT
+    auto preprocessor = makePreprocessor();
+    QueueState state;
+    absl::Mutex mtx;
+
+    // New file, slow path. Can't avoid, so emulate processing it.
+    string fooV1 = "# typed: true\ndef foo; end";
+    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", 1, fooV1), mtx);
+
+    // Grab GS.
+    unique_ptr<core::GlobalState> gs;
+    {
+        auto [updates, counts] = getUpdates(state, 0).value();
+        gs = move(updates->updatedGS.value());
+        state.pendingRequests.clear();
+    }
+
+    // Introduce a syntax error, which causes a slow path.
+    string fooV2 = "# typed: true\n{def foo; end";
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fooV2), mtx);
+    u4 epoch;
+    {
+        // Emulate processor thread: begin 'processing' this edit.
+        const auto [updates, counts] = getUpdates(state, 0).value();
+        epoch = updates->versionEnd;
+        gs->startCommitEpoch(epoch);
+        state.pendingRequests.clear();
+    }
+
+    // Introduce a fix to syntax error. Should course-correct to a fast path.
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV1), mtx);
+    EXPECT_TRUE(gs->isTypecheckingCanceled());
+
+    // Processor thread: Try to typecheck. Should cancel.
+    EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> bool { return true; }));
+
+    // GS should no longer register a cancellation, since the epoch didn't commit.
+    EXPECT_FALSE(gs->isTypecheckingCanceled());
+}
+
 } // namespace sorbet::realmain::lsp::test
