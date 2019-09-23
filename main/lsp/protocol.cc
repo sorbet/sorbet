@@ -279,22 +279,21 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                     }
                 }
                 msg = move(processingQueue.pendingRequests.front());
-                // While we're holding the queue lock (and preventing new messages from entering), start a commit for an
-                // epoch if this message will trigger a cancelable slow path.
-                if (opts.lspCancelableSlowPathEnabled && msg->isNotification()) {
-                    auto method = msg->method();
+                processingQueue.pendingRequests.pop_front();
+                hasMoreMessages = !processingQueue.pendingRequests.empty();
+
+                if (msg->isNotification()) {
+                    const auto method = msg->method();
                     exitProcessed = method == LSPMethod::Exit;
-                    if (method == LSPMethod::SorbetWorkspaceEdit) {
+                    if (opts.lspCancelableSlowPathEnabled && method == LSPMethod::SorbetWorkspaceEdit) {
+                        // While we're holding the queue lock (and preventing new messages from entering), start a
+                        // commit for an epoch if this message will trigger a cancelable slow path.
                         const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
                         if (!params->updates.canTakeFastPath) {
                             gs->startCommitEpoch(params->updates.versionEnd);
                         }
                     }
                 }
-
-                exitProcessed = msg->isNotification() && msg->method() == LSPMethod::Exit;
-                processingQueue.pendingRequests.pop_front();
-                hasMoreMessages = !processingQueue.pendingRequests.empty();
             }
             prodCounterInc("lsp.messages.received");
             auto result = processRequestInternal(move(gs), *msg);
