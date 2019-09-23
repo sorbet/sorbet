@@ -190,7 +190,7 @@ public:
     unsigned int lspTypecheckCount = 0;
     // [LSP] Run only from the typechecking thread.
     // Tries to commit the given epoch. Returns true if the commit succeeeded, or false if it was canceled.
-    bool tryCommitEpoch(u4 epoch, std::function<bool()> lambda);
+    bool tryCommitEpoch(u4 epoch, bool isCancelable, std::function<bool()> lambda);
     // [LSP] Run only from the typechecking thread.
     // Indicates an intent to begin committing a specific epoch.
     void startCommitEpoch(u4 epoch);

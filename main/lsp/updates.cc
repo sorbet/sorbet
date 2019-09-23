@@ -149,7 +149,8 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
 }
 } // namespace
 
-LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previousGS, LSPFileUpdates updates) const {
+LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previousGS, LSPFileUpdates updates,
+                                           bool isCancelable) const {
     ShowOperation slowPathOp(*this, "SlowPath", "Typechecking...");
     Timer timeit(logger, "slow_path");
     ENFORCE(!updates.canTakeFastPath || config.disableFastPath);
@@ -164,7 +165,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
     vector<ast::ParsedFile> indexedCopies;
     vector<core::FileRef> affectedFiles;
     auto finalGS = move(updates.updatedGS.value());
-    const bool committed = finalGS->tryCommitEpoch(updates.versionEnd, [&]() -> bool {
+    const bool committed = finalGS->tryCommitEpoch(updates.versionEnd, isCancelable, [&]() -> bool {
         // Index the updated files using finalGS.
         {
             core::UnfreezeFileTable fileTableAccess(*finalGS);
@@ -227,7 +228,7 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
 
     if (!updates.canTakeFastPath) {
-        return runSlowPath(move(gs), move(updates));
+        return runSlowPath(move(gs), move(updates), config.opts.lspCancelableSlowPathEnabled);
     }
 
     Timer timeit(logger, "fast_path");

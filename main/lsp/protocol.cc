@@ -281,7 +281,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                 msg = move(processingQueue.pendingRequests.front());
                 // While we're holding the queue lock (and preventing new messages from entering), start a commit for an
                 // epoch if this message will trigger a cancelable slow path.
-                if (msg->isNotification()) {
+                if (opts.lspCancelableSlowPathEnabled && msg->isNotification()) {
                     auto method = msg->method();
                     exitProcessed = method == LSPMethod::Exit;
                     if (method == LSPMethod::SorbetWorkspaceEdit) {

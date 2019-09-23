@@ -155,9 +155,9 @@ class LSPLoop {
     };
 
     /** Conservatively reruns entire pipeline without caching any trees. If canceled, returns a TypecheckRun containing
-     * the previous global state. Updates `state.runningSlowPath` when slow path successfully completes or gets
-     * canceled. */
-    TypecheckRun runSlowPath(std::unique_ptr<core::GlobalState> previousGS, LSPFileUpdates updates) const;
+     * the previous global state. */
+    TypecheckRun runSlowPath(std::unique_ptr<core::GlobalState> previousGS, LSPFileUpdates updates,
+                             bool isCancelable) const;
     /** Runs typechecking on the provided updates. */
     TypecheckRun runTypechecking(std::unique_ptr<core::GlobalState> gs, LSPFileUpdates updates) const;
     /** Runs the provided query against the given files, and returns matches. */

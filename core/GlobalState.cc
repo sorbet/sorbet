@@ -1454,7 +1454,11 @@ bool GlobalState::tryCancelSlowPath(u4 newEpoch) const {
     return true;
 }
 
-bool GlobalState::tryCommitEpoch(u4 epoch, function<bool()> lambda) {
+bool GlobalState::tryCommitEpoch(u4 epoch, bool isCancelable, function<bool()> lambda) {
+    if (!isCancelable) {
+        return lambda();
+    }
+
     // Should have called "startCommitEpoch" *before* this method.
     ENFORCE(currentlyProcessingLSPEpoch->load() == epoch);
     const bool canCommit = lambda();

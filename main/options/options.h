@@ -199,6 +199,7 @@ struct Options {
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspHoverEnabled = false;
+    bool lspCancelableSlowPathEnabled = false;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;

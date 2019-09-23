@@ -84,7 +84,9 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             auto &updates = initParams->updates;
             globalStateHashes = move(updates.updatedFileHashes);
             indexed = move(updates.updatedFileIndexes);
-            LSPResult result = pushDiagnostics(runSlowPath(move(gs), move(updates)));
+            // Initialization typecheck is not cancelable.
+            LSPResult result = pushDiagnostics(runSlowPath(move(gs), move(updates), /* isCancelable */ false));
+            ENFORCE(!result.canceled);
             ENFORCE(result.gs);
             config.initialized = true;
             return result;
