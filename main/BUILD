@@ -4,6 +4,7 @@ config_setting(
         "define": "jemalloc=true",
         "compilation_mode": "opt",
     },
+    visibility = ["//visibility:public"],
 )
 
 cc_binary(

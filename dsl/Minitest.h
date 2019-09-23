@@ -19,6 +19,7 @@ namespace sorbet::dsl {
  *
  *    class MyTest
  *      class <class_foo> < self
+ *        sig {void}
  *        def <test_bar>
  *          baz
  *        end

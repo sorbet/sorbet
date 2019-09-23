@@ -304,10 +304,27 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
     return fallback;
 } // namespace sorbet::core
 
+/**
+ * unwrapType is used to take an expression that's parsed at the value-level,
+ * and turn it into a type. For example, consider the following two expressions:
+ *
+ * > Integer.sqrt 10
+ * > T::Array[Integer].new
+ *
+ * In both lines, `Integer` is initially resolved as the singleton class of
+ * `Integer`. This is because it's not immediately clear if we want to refer
+ * to the type `Integer` or if we want the singleton class of Integer for
+ * calling singleton methods. In the first line this was the correct choice, as
+ * we're just invoking the singleton method `sqrt`. In the second case we need
+ * to fix up the `Integer` sub-expression, and turn it back into the type of
+ * integer values. This is what `unwrapType` does, it turns the value-level
+ * expression back into a type-level one.
+ */
 TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
     if (auto *metaType = cast_type<MetaType>(tp.get())) {
         return metaType->wrapped;
     }
+
     if (auto *classType = cast_type<ClassType>(tp.get())) {
         if (classType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum())) {
             // Opus::Enum instances are allowed to stand for themselves in type syntax positions.
@@ -316,6 +333,18 @@ TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
         }
 
         SymbolRef attachedClass = classType->symbol.data(ctx)->attachedClass(ctx);
+        if (!attachedClass.exists()) {
+            if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
+                e.setHeader("Unsupported usage of bare type");
+            }
+            return Types::untypedUntracked();
+        }
+
+        return attachedClass.data(ctx)->externalType(ctx);
+    }
+
+    if (auto *appType = cast_type<AppliedType>(tp.get())) {
+        SymbolRef attachedClass = appType->klass.data(ctx)->attachedClass(ctx);
         if (!attachedClass.exists()) {
             if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");

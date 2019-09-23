@@ -192,7 +192,7 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
     update.updatedFileHashes = computeStateHashes(update.updatedFiles);
     update.canTakeFastPath = canTakeFastPath(update);
 
-    TimeTravelUpdate newUpdate{update.version};
+    TimeTravelUpdate newUpdate{update.versionEnd};
     newUpdate.update.fileUpdates = update.updatedFiles;
     newUpdate.update.hashUpdates = update.updatedFileHashes;
 
@@ -213,7 +213,7 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
         }
     }
     auto frefs = applyUpdate(newUpdate, false);
-    latestVersion = update.version;
+    latestVersion = update.versionEnd;
 
     log.push_back(move(newUpdate));
 

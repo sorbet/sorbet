@@ -1,6 +1,5 @@
 # typed: true
 # Fast path causes duplicate errors.
-# disable-fast-path: true
 
 module AbstractMixin
   extend T::Sig

@@ -103,7 +103,8 @@ unique_ptr<LSPMessage> makeCancel(int id) {
 
 LSPFileUpdates makeUpdates(u4 &version, vector<pair<string, string>> files) {
     LSPFileUpdates updates;
-    updates.version = version++;
+    updates.versionStart = version++;
+    updates.versionEnd = updates.versionStart;
     for (auto &[path, contents] : files) {
         updates.updatedFiles.push_back(make_shared<core::File>(move(path), move(contents), core::File::Type::Normal));
     }
@@ -369,6 +370,12 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
     // New file. Should not be present in any cloned global states for earlier edits.
     preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", 1, barV1), mtx);
 
+    vector<pair<int, bool>> fastPathDecisions = {{0, false}, {2, true}, {4, true}, {6, true}};
+    for (auto &[messageId, canTakeFastPath] : fastPathDecisions) {
+        auto [updates, count] = getUpdates(state, messageId).value();
+        EXPECT_EQ(updates->canTakeFastPath, canTakeFastPath);
+    }
+
     // Cancel hover requests, and ensure that initialGS has the proper value of foo.rb
     vector<pair<int, string>> entries = {
         {0, fileV2},
@@ -403,4 +410,41 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
         EXPECT_EQ(gs.findFileByPath("bar.rb").data(gs).source(), barV1);
     }
 }
+
+// Ensures that we don't throw away undo history for merged edits.
+TEST(LSPPreprocessor, MakesCorrectFastPathDecisionsOnSimultaneousEdits) { // NOLINT
+    auto preprocessor = makePreprocessor();
+    QueueState state;
+    absl::Mutex mtx;
+
+    // V1: New file, slow path
+    string fooV1 = "# typed: true\ndef foo; end";
+    string barV1 = "# typed: true\ndef bar; end";
+
+    // Commit new files first. The 'new file flag' is handled specially.
+    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", 1, fooV1), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", 1, barV1), mtx);
+    // Clear out of queue to emulate processor thread 'processing' it.
+    state.pendingRequests.clear();
+
+    // barV1 => V2: Slow path
+    string barV2 = "# typed: true\ndef bar2; end";
+    // fooV1 => V2: Fast path
+    string fooV2 = "# typed: true\ndef foo; 1 + 2; end";
+    // fooV2 => V3: Fast path
+    string fooV3 = "# typed: true\ndef foo; 1 + 3; end";
+    // fooV3 => V4: Fast path
+    string fooV4 = "# typed: true\ndef foo; 1 + 4; end";
+
+    preprocessor.preprocessAndEnqueue(state, makeChange("bar.rb", 2, barV2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fooV2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
+    // With old buggy logic, preprocessor will 'forget' about the barV2 update, causing it to mistakenly think these
+    // four edits can take fast path.
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 4, fooV4), mtx);
+
+    const auto [updates, counts] = getUpdates(state, 0).value();
+    EXPECT_FALSE(updates->canTakeFastPath);
+}
+
 } // namespace sorbet::realmain::lsp::test
