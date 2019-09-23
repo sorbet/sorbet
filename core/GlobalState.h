@@ -188,15 +188,21 @@ public:
     // Indicates the number of times LSP has run the type checker with this global state.
     // Used to ensure GlobalState is in the correct state to process requests.
     unsigned int lspTypecheckCount = 0;
-    // In LSP mode: Contains the current edit version (epoch) that the processing thread is typechecking or has
-    // typechecked last. Is bumped by the typechecking thread.
-    std::shared_ptr<std::atomic<u4>> currentlyProcessingLSPEpoch;
-    // In LSP mode: should always be `>= currentlyProcessingLSPEpoch`(modulo overflows).
-    // If value in `lspEpochInvalidator` is different from `currentlyProcessingLSPEpoch`, then LSP wants the current
-    // request to be cancelled. Is bumped by the preprocessor thread (which determines cancellations).
-    std::shared_ptr<std::atomic<u4>> lspEpochInvalidator;
-
-    bool shouldCancelTypechecking() const;
+    // [LSP] Run only from the typechecking thread.
+    // Tries to commit the given epoch. Returns true if the commit succeeeded, or false if it was canceled.
+    bool tryCommitEpoch(u4 epoch, std::function<bool()> lambda);
+    // [LSP] Run only from the typechecking thread.
+    // Indicates an intent to begin committing a specific epoch.
+    void startCommitEpoch(u4 epoch);
+    // [LSP] Returns 'true' if the currently running typecheck run has been canceled.
+    bool isTypecheckingCanceled() const;
+    // [LSP] If a slow path is running on this GlobalState or its descendent, returns a pair of the committed
+    // epoch and the processing epoch.
+    std::optional<std::pair<u4, u4>> getRunningSlowPath() const;
+    // [LSP] Run only from preprocess thread.
+    // Tries to cancel a running slow path on this GlobalState or its descendent. Returns true if it succeeded, false if
+    // the slow path was unable to be canceled.
+    bool tryCancelSlowPath(u4 newEpoch) const;
 
     void trace(std::string_view msg) const;
 
@@ -237,6 +243,21 @@ private:
     UnorderedSet<int> onlyErrorClasses;
     UnorderedMap<NameRef, std::string> dslPlugins;
     bool wasModified_ = false;
+
+    // In LSP mode: Used to linearize operations involving lastCommittedLSPEpoch.
+    std::shared_ptr<absl::Mutex> epochMutex;
+    // In LSP mode: Contains the current edit version (epoch) that the processing thread is typechecking or has
+    // typechecked last. Is bumped by the typechecking thread.
+    std::shared_ptr<std::atomic<u4>> currentlyProcessingLSPEpoch;
+    // In LSP mode: should always be `>= currentlyProcessingLSPEpoch`(modulo overflows).
+    // If value in `lspEpochInvalidator` is different from `currentlyProcessingLSPEpoch`, then LSP wants the current
+    // request to be cancelled. Is bumped by the preprocessor thread (which determines cancellations).
+    std::shared_ptr<std::atomic<u4>> lspEpochInvalidator;
+    // In LSP mode: should always be >= currentlyProcessingLSPEpoch. Is bumped by the typechecking thread.
+    // Contains the versionEnd of the last committed slow path.
+    // If lastCommittedLSPEpoch != currentlyProcessingLSPEpoch, then GlobalState is currently running a slow path
+    // containing edits (lastCommittedLSPEpoch, currentlyProcessingLSPEpoch].
+    std::shared_ptr<std::atomic<u4>> lastCommittedLSPEpoch;
 
     bool freezeSymbolTable();
     bool freezeNameTable();

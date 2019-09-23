@@ -48,8 +48,9 @@ const int Symbols::MAX_PROC_ARITY;
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
     : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(std::move(errorQueue)),
-      lspQuery(lsp::Query::noQuery()), currentlyProcessingLSPEpoch(make_shared<atomic<u4>>(0)),
-      lspEpochInvalidator(make_shared<atomic<u4>>(0)) {
+      lspQuery(lsp::Query::noQuery()), epochMutex(make_shared<absl::Mutex>()),
+      currentlyProcessingLSPEpoch(make_shared<atomic<u4>>(0)), lspEpochInvalidator(make_shared<atomic<u4>>(0)),
+      lastCommittedLSPEpoch(make_shared<atomic<u4>>(0)) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
     unsigned int maxNameCount = 8192;
@@ -1269,8 +1270,10 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
     result->lspQuery = this->lspQuery;
+    result->epochMutex = this->epochMutex;
     result->currentlyProcessingLSPEpoch = this->currentlyProcessingLSPEpoch;
     result->lspEpochInvalidator = this->lspEpochInvalidator;
+    result->lastCommittedLSPEpoch = this->lastCommittedLSPEpoch;
     result->lspTypecheckCount = this->lspTypecheckCount;
     result->errorUrlBase = this->errorUrlBase;
     result->suppressedErrorClasses = this->suppressedErrorClasses;
@@ -1415,8 +1418,66 @@ bool GlobalState::wasModified() const {
     return wasModified_;
 }
 
-bool GlobalState::shouldCancelTypechecking() const {
+bool GlobalState::isTypecheckingCanceled() const {
     return lspEpochInvalidator->load() != currentlyProcessingLSPEpoch->load();
+}
+
+void GlobalState::startCommitEpoch(u4 epoch) {
+    absl::MutexLock lock(epochMutex.get());
+    currentlyProcessingLSPEpoch->store(epoch);
+    lspEpochInvalidator->store(epoch);
+    // These should always be different.
+    ENFORCE(epoch != lastCommittedLSPEpoch->load());
+}
+
+optional<pair<u4, u4>> GlobalState::getRunningSlowPath() const {
+    absl::MutexLock lock(epochMutex.get());
+    const u4 processing = currentlyProcessingLSPEpoch->load();
+    const u4 committed = lastCommittedLSPEpoch->load();
+    if (processing == committed) {
+        return nullopt;
+    }
+    return make_pair(committed, processing);
+}
+
+bool GlobalState::tryCancelSlowPath(u4 newEpoch) const {
+    absl::MutexLock lock(epochMutex.get());
+    const u4 processing = currentlyProcessingLSPEpoch->load();
+    ENFORCE(newEpoch != processing); // This would prevent a cancelation from happening.
+    const u4 committed = lastCommittedLSPEpoch->load();
+    // The second condition should never happen, but guard against it in production.
+    if (processing == committed || newEpoch == processing) {
+        return false;
+    }
+    // Cancel slow path by bumping invalidator.
+    lspEpochInvalidator->store(newEpoch);
+    return true;
+}
+
+bool GlobalState::tryCommitEpoch(u4 epoch, function<bool()> lambda) {
+    // Should have called "startCommitEpoch" *before* this method.
+    ENFORCE(currentlyProcessingLSPEpoch->load() == epoch);
+    const bool canCommit = lambda();
+    {
+        absl::MutexLock lock(epochMutex.get());
+        if (canCommit) {
+            // Try to commit.
+            const u4 processing = currentlyProcessingLSPEpoch->load();
+            const u4 invalidator = lspEpochInvalidator->load();
+            if (processing == invalidator) {
+                ENFORCE(lastCommittedLSPEpoch->load() != processing, "Trying to commit an already-committed epoch.");
+                // OK to commit!
+                lastCommittedLSPEpoch->store(currentlyProcessingLSPEpoch->load());
+                return true;
+            }
+            // Else, typechecking was canceled after lambda() ran.
+        }
+        // Typechecking was canceled.
+        const u4 lastCommitted = lastCommittedLSPEpoch->load();
+        currentlyProcessingLSPEpoch->store(lastCommitted);
+        lspEpochInvalidator->store(lastCommitted);
+    }
+    return false;
 }
 
 void GlobalState::trace(string_view msg) const {

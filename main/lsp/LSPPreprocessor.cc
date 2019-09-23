@@ -43,7 +43,7 @@ LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPCon
 
 void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
     mtx.AssertHeld();
-    u4 earliestActiveEditVersion = state.runningSlowPath ? state.latestVersion : nextVersion;
+    u4 earliestActiveEditVersion = nextVersion;
     auto &pendingRequests = state.pendingRequests;
     const int originalSize = pendingRequests.size();
     int requestsMergedCounter = 0;
@@ -83,23 +83,23 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
             requestsMergedCounter++;
         }
     }
-    // Prune history for all messages no longer in queue or being processed by processor thread.
-    ttgs.pruneBefore(earliestActiveEditVersion);
     ENFORCE(pendingRequests.size() + requestsMergedCounter == originalSize);
 
     // Check if we should cancel the slow path.
-    if (state.runningSlowPath) {
+    const auto &gs = ttgs.getGlobalState();
+    const auto runningSlowPath = gs.getRunningSlowPath();
+    if (runningSlowPath.has_value()) {
+        const auto &[committed, end] = runningSlowPath.value();
+        // Prune history for all messages no longer in queue or being processed by processor thread.
+        ttgs.pruneBefore(min(committed, earliestActiveEditVersion));
         for (auto it = pendingRequests.begin(); it != pendingRequests.end(); it++) {
             const auto &msg = *it;
             if (msg->isNotification() && msg->method() == LSPMethod::SorbetWorkspaceEdit) {
                 auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
-                auto combinedUpdates = ttgs.getCombinedUpdates(state.latestVersion, params->updates.versionEnd);
-                if (combinedUpdates.canTakeFastPath) {
-                    auto &gs = ttgs.getGlobalState();
-                    params->updates = move(combinedUpdates);
-                    // Tell typechecking thread to cancel slow path run.
-                    gs.lspEpochInvalidator->store(combinedUpdates.versionEnd);
+                auto combinedUpdates = ttgs.getCombinedUpdates(committed + 1, params->updates.versionEnd);
+                if (combinedUpdates.canTakeFastPath && gs.tryCancelSlowPath(params->updates.versionEnd)) {
                     logger->error("[PREPROCESSOR] Canceling typechecking!");
+                    params->updates = move(combinedUpdates);
                 }
                 return;
             } else if (!msg->isDelayable()) {
@@ -107,6 +107,9 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
                 return;
             }
         }
+    } else {
+        // Prune history for all messages no longer in queue.
+        ttgs.pruneBefore(earliestActiveEditVersion);
     }
 }
 

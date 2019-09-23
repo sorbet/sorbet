@@ -22,10 +22,6 @@ struct QueueState {
     bool terminate = false;
     bool paused = false;
     int errorCode = 0;
-    // The latest edit version to be processed on the processing thread.
-    u4 latestVersion = 0;
-    // If 'true', the processing thread is currently running a slow path.
-    bool runningSlowPath = false;
     // Counters collected from worker threads.
     CounterState counters;
 };

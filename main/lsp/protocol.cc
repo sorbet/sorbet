@@ -260,10 +260,8 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
             {
                 absl::MutexLock lck(&processingMtx);
                 Timer timeit(logger, "idle");
-                // Safeguard: In case something went sideways, make sure we flip this flag so we don't go off the
-                // rails...
-                ENFORCE(!processingQueue.runningSlowPath);
-                processingQueue.runningSlowPath = false;
+                // Ensure we don't have any leftover state from last slow path epoch.
+                ENFORCE(!gs || !gs->getRunningSlowPath().has_value());
                 processingMtx.Await(absl::Condition(
                     +[](QueueState *processingQueue) -> bool {
                         return processingQueue->terminate ||
@@ -280,17 +278,17 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                         break;
                     }
                 }
-                processingQueue.runningSlowPath = false;
                 msg = move(processingQueue.pendingRequests.front());
+                // While we're holding the queue lock (and preventing new messages from entering), start a commit for an
+                // epoch if this message will trigger a cancelable slow path.
                 if (msg->isNotification()) {
                     auto method = msg->method();
                     exitProcessed = method == LSPMethod::Exit;
                     if (method == LSPMethod::SorbetWorkspaceEdit) {
                         const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
-                        processingQueue.latestVersion = params->updates.versionEnd;
-                        processingQueue.runningSlowPath = !params->updates.canTakeFastPath;
-                        gs->currentlyProcessingLSPEpoch->store(processingQueue.latestVersion);
-                        gs->lspEpochInvalidator->store(processingQueue.latestVersion);
+                        if (!params->updates.canTakeFastPath) {
+                            gs->startCommitEpoch(params->updates.versionEnd);
+                        }
                     }
                 }
 
@@ -299,7 +297,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                 hasMoreMessages = !processingQueue.pendingRequests.empty();
             }
             prodCounterInc("lsp.messages.received");
-            auto result = processRequestInternal(processingMtx, processingQueue, move(gs), *msg);
+            auto result = processRequestInternal(move(gs), *msg);
             gs = move(result.gs);
             for (auto &msg : result.responses) {
                 sendMessage(*msg);

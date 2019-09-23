@@ -1788,27 +1788,27 @@ public:
 
 ast::MaybeASTPassResult Resolver::run(core::MutableContext ctx, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), workers);
-    if (ctx.state.shouldCancelTypechecking()) {
+    if (ctx.state.isTypecheckingCanceled()) {
         return ast::MaybeASTPassResult();
     }
     finalizeAncestors(ctx.state);
-    if (ctx.state.shouldCancelTypechecking()) {
+    if (ctx.state.isTypecheckingCanceled()) {
         return ast::MaybeASTPassResult();
     }
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
-    if (ctx.state.shouldCancelTypechecking()) {
+    if (ctx.state.isTypecheckingCanceled()) {
         return ast::MaybeASTPassResult();
     }
     finalizeSymbols(ctx.state);
-    if (ctx.state.shouldCancelTypechecking()) {
+    if (ctx.state.isTypecheckingCanceled()) {
         return ast::MaybeASTPassResult();
     }
     trees = resolveTypeParams(ctx, std::move(trees));
-    if (ctx.state.shouldCancelTypechecking()) {
+    if (ctx.state.isTypecheckingCanceled()) {
         return ast::MaybeASTPassResult();
     }
     trees = resolveSigs(ctx, std::move(trees));
-    if (ctx.state.shouldCancelTypechecking()) {
+    if (ctx.state.isTypecheckingCanceled()) {
         return ast::MaybeASTPassResult();
     }
     sanityCheck(ctx, trees);
