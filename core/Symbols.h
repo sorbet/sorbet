@@ -127,6 +127,12 @@ public:
         return mixins_;
     }
 
+    void addMixin(SymbolRef sym) {
+        ENFORCE(isClassOrModule());
+        mixins_.emplace_back(sym);
+        unsetClassLinearizationComputed();
+    }
+
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
         ENFORCE(isClassOrModule());
         return typeParams;
@@ -637,6 +643,11 @@ private:
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                            int maxDepth = 100) const;
+
+    inline void unsetClassLinearizationComputed() {
+        ENFORCE(isClassOrModule());
+        flags &= ~Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED;
+    }
 };
 // CheckSize(Symbol, 144, 8); // This is under too much churn to be worth checking
 

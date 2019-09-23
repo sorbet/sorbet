@@ -248,13 +248,13 @@ int maybeAddMixin(core::GlobalState &gs, core::SymbolRef forSym, InlinedVector<c
 // tails of class linearization aren't copied around.
 // In order to obtain Ruby-side ancestors, one would need to walk superclass chain and concatenate `mixins`.
 // The algorithm is harder to explain than to code, so just follow code & tests if `testdata/resolver/linearization`
-ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core::SymbolRef ofClass) {
+ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, core::SymbolRef ofClass) {
     ENFORCE(ofClass.exists());
     auto data = ofClass.data(gs);
     ENFORCE(data->isClassOrModule());
     if (!data->isClassOrModuleLinearizationComputed()) {
         if (data->superClass().exists()) {
-            computeLinearization(gs, data->superClass());
+            computeClassLinearization(gs, data->superClass());
         }
         InlinedVector<core::SymbolRef, 4> currentMixins = data->mixins();
         InlinedVector<core::SymbolRef, 4> newMixins;
@@ -268,7 +268,7 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
                 continue;
             }
             ENFORCE(mixin.data(gs)->isClassOrModule());
-            ParentLinearizationInformation mixinLinearization = computeLinearization(gs, mixin);
+            ParentLinearizationInformation mixinLinearization = computeClassLinearization(gs, mixin);
 
             if (!mixin.data(gs)->isClassOrModuleModule()) {
                 if (mixin != core::Symbols::BasicObject()) {
@@ -311,13 +311,13 @@ void fullLinearizationSlowImpl(core::GlobalState &gs, const ParentLinearizationI
             if (m.data(gs)->isClassOrModuleModule()) {
                 acc.emplace_back(m);
             } else {
-                fullLinearizationSlowImpl(gs, computeLinearization(gs, m), acc);
+                fullLinearizationSlowImpl(gs, computeClassLinearization(gs, m), acc);
             }
         }
     }
     if (info.superClass.exists()) {
         if (!absl::c_linear_search(acc, info.superClass)) {
-            fullLinearizationSlowImpl(gs, computeLinearization(gs, info.superClass), acc);
+            fullLinearizationSlowImpl(gs, computeClassLinearization(gs, info.superClass), acc);
         }
     }
 };
@@ -327,7 +327,7 @@ InlinedVector<core::SymbolRef, 4> ParentLinearizationInformation::fullLinearizat
     return res;
 }
 
-void computeLinearization(core::GlobalState &gs) {
+void Resolver::computeLinearization(core::GlobalState &gs) {
     Timer timer(gs.errorQueue->logger, "resolver.compute_linearization");
 
     // TODO: this does not support `prepend`
@@ -336,7 +336,7 @@ void computeLinearization(core::GlobalState &gs) {
         if (!data->isClassOrModule()) {
             continue;
         }
-        computeLinearization(gs, core::SymbolRef(&gs, i));
+        computeClassLinearization(gs, core::SymbolRef(&gs, i));
     }
 }
 
@@ -362,7 +362,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
             if (!singleton.exists()) {
                 singleton = sym.data(gs)->singletonClass(gs);
             }
-            singleton.data(gs)->mixins().emplace_back(classMethods);
+            singleton.data(gs)->addMixin(classMethods);
         }
     }
 

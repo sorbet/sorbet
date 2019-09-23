@@ -25,6 +25,7 @@ public:
 private:
     static void finalizeAncestors(core::GlobalState &gs);
     static void finalizeSymbols(core::GlobalState &gs);
+    static void computeLinearization(core::GlobalState &gs);
     static std::vector<ast::ParsedFile> resolveTypeParams(core::MutableContext ctx, std::vector<ast::ParsedFile> trees);
     static std::vector<ast::ParsedFile> resolveSigs(core::MutableContext ctx, std::vector<ast::ParsedFile> trees);
     static std::vector<ast::ParsedFile> resolveMixesInClassMethods(core::MutableContext ctx,
