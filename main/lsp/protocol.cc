@@ -287,7 +287,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                     exitProcessed = method == LSPMethod::Exit;
                     if (method == LSPMethod::SorbetWorkspaceEdit) {
                         const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
-                        processingQueue.latestVersion = params->updates.version;
+                        processingQueue.latestVersion = params->updates.versionEnd;
                         processingQueue.runningSlowPath = !params->updates.canTakeFastPath;
                         gs->currentlyProcessingLSPEpoch->store(processingQueue.latestVersion);
                         gs->lspEpochInvalidator->store(processingQueue.latestVersion);

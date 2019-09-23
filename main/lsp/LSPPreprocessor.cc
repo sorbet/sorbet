@@ -93,12 +93,12 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
             const auto &msg = *it;
             if (msg->isNotification() && msg->method() == LSPMethod::SorbetWorkspaceEdit) {
                 auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
-                auto combinedUpdates = ttgs.getCombinedUpdates(state.latestVersion, params->updates.version);
+                auto combinedUpdates = ttgs.getCombinedUpdates(state.latestVersion, params->updates.versionEnd);
                 if (combinedUpdates.canTakeFastPath) {
                     auto &gs = ttgs.getGlobalState();
                     params->updates = move(combinedUpdates);
                     // Tell typechecking thread to cancel slow path run.
-                    gs.lspEpochInvalidator->store(combinedUpdates.version);
+                    gs.lspEpochInvalidator->store(combinedUpdates.versionEnd);
                     logger->error("[PREPROCESSOR] Canceling typechecking!");
                 }
                 return;

@@ -276,7 +276,8 @@ LSPFileUpdates TimeTravelingGlobalState::getCombinedUpdates(u4 fromId, u4 toId) 
 
     UnorderedSet<string> encountered;
     LSPFileUpdates merged;
-    merged.version = toId;
+    merged.versionEnd = toId;
+    merged.versionStart = fromId;
     for (const auto ttu : ttus) {
         const auto &update = ttu->update;
         int i = -1;
