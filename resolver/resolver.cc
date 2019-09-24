@@ -1145,8 +1145,8 @@ private:
         ast::InsSeq::STATS_store lets;
 
         if (mdef->symbol.data(ctx)->isAbstract()) {
-            // TODO(jez) Check that abstract methods don't have defined bodies earlier (currently done in infer)
-            // so that we can unblock checking default arguments of abstract methods
+            // If we checked that abstract methods don't have defined bodies earlier (currently done in infer)
+            // we could also use this technique to check default arguments of abstract methods.
             return;
         }
 
