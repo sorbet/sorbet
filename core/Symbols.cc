@@ -820,7 +820,10 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singletonInfo->setIsModule(false);
 
     auto tp = gs.enterTypeMember(this->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
-    tp.data(gs)->resultType = make_type<LambdaParam>(tp, Types::bottom(), this->externalType(gs));
+
+    // Initialize the bounds of AttachedClass as top and bottom, as the upper
+    // bound will be fixed in the resolver's global pass.
+    tp.data(gs)->resultType = make_type<LambdaParam>(tp, Types::bottom(), Types::top());
 
     // Only create the alias if it doesn't already exist. This happens when
     // a singleton class has `singletonClass` called on it, as it already has a

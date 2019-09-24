@@ -997,6 +997,23 @@ class ResolveTypeParamsWalk {
                             memberType->upperBound->show(ctx));
             }
         }
+
+        // If the class is now fully resolved, fix its singleton's AttachedClass
+        // bounds.
+        if (isGenericResolved(ctx, ctx.owner)) {
+            auto singleton = ctx.owner.data(ctx)->singletonClass(ctx);
+            ENFORCE(singleton.exists());
+
+            // When AttachedClass is present on the singleton, update its upper
+            // bound now that all of the other type members have been defined.
+            auto attachedClass = singleton.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+            if (attachedClass.exists()) {
+                auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType.get());
+                ENFORCE(lambdaParam != nullptr);
+
+                lambdaParam->upperBound = lhs.data(ctx)->externalType(ctx);
+            }
+        }
     }
 
     static void resolveTypeAlias(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs) {
