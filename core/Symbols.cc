@@ -871,8 +871,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
     ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedSubclasses should always be Array");
     auto currentClasses = appliedType->targs[0];
-    // Abusing T.any to be list cons, with T.noreturn as the empty list.
-    // (Except it's not, because Types::lub is too smart, and drops the T.noreturn to prevent allocating a T.any)
+
     auto iter = currentClasses.get();
     OrType *orT = nullptr;
     while ((orT = cast_type<OrType>(iter))) {
