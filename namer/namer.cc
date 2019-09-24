@@ -486,7 +486,7 @@ public:
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                 if (sym != ctx.owner) {
-                    // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
+                    // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader(
                         "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
@@ -494,7 +494,7 @@ public:
                     e.addErrorLine(ctx.owner.data(ctx)->loc(), "Previous alias definition");
                     e.addErrorLine(sym.data(ctx)->loc(), "Dealiased definition");
                 } else {
-                    // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
+                    // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
                                 sym.show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);

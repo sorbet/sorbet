@@ -22,7 +22,6 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
     vector<unique_ptr<ast::Expression>> empty;
 
     if (ctx.state.runningUnderAutogen) {
-        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
         return empty;
     }
 
