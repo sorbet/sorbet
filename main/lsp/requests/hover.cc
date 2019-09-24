@@ -89,15 +89,15 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             if (constraint) {
                 retType = core::Types::instantiate(core::Context(*gs, core::Symbols::root()), retType, *constraint);
             }
+            string typeString;
             if (sendResp->dispatchResult->main.method.exists() && sendResp->dispatchResult->main.method.isSynthetic()) {
-                // For synthetic methods, limit hover to the return type
-                response->result = make_unique<Hover>(
-                    formatHoverText(config.clientHoverMarkupKind, retType->showWithMoreInfo(*gs), documentation));
+                // For synthetic methods, just show the return type
+                typeString = retType->showWithMoreInfo(*gs);
             } else {
-                auto methodInfo = methodInfoString(*gs, retType, *sendResp->dispatchResult, constraint);
-                response->result =
-                    make_unique<Hover>(formatHoverText(config.clientHoverMarkupKind, methodInfo, documentation));
+                typeString = methodInfoString(*gs, retType, *sendResp->dispatchResult, constraint);
             }
+            response->result =
+                make_unique<Hover>(formatHoverText(config.clientHoverMarkupKind, typeString, documentation));
         } else if (auto defResp = resp->isDefinition()) {
             string typeString =
                 absl::StrCat(methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr), "\n",
