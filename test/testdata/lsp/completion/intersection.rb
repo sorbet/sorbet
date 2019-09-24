@@ -34,6 +34,6 @@ def test
   nullary_or_unary = T.let(T.unsafe(nil), T.all(Nullary, Unary))
   nullary_or_unary.some_
 #                       ^ completion: some_method
-# ^^^^^^^^^^^^^^^^ error: does not exist on `Nullary`
-# ^^^^^^^^^^^^^^^^ error: does not exist on `Unary`
+# ^^^^^^^^^^^^^^^^^^^^^^ error: does not exist on `Nullary`
+# ^^^^^^^^^^^^^^^^^^^^^^ error: does not exist on `Unary`
 end
