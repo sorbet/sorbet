@@ -82,7 +82,7 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
-                                                      const unique_ptr<core::TypeConstraint> &constraint) const {
+                                                      const core::TypeConstraint *constraint) const {
     ENFORCE(what.exists());
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
     auto resultType = what.data(gs)->resultType;
@@ -188,8 +188,8 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
             for (auto &[methodName, methodSymbols] : methods) {
                 if (methodSymbols[0].exists()) {
                     fast_sort(methodSymbols, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                    items.push_back(
-                        getCompletionItem(*gs, methodSymbols[0], receiverType, sendResp->dispatchResult->main.constr));
+                    items.push_back(getCompletionItem(*gs, methodSymbols[0], receiverType,
+                                                      sendResp->dispatchResult->main.constr.get()));
                 }
             }
         } else if (auto identResp = resp->isIdent()) {
