@@ -178,7 +178,7 @@ class LSPLoop {
                                            const CodeActionParams &params) const;
     std::unique_ptr<CompletionItem> getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
-                                                      const std::unique_ptr<core::TypeConstraint> &constraint) const;
+                                                      const core::TypeConstraint *constraint) const;
     void findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
                                     std::vector<std::unique_ptr<CompletionItem>> &items) const;
     void sendShowMessageNotification(MessageType messageType, std::string_view message) const;
@@ -214,10 +214,10 @@ std::optional<std::string> findDocumentation(std::string_view sourceCode, int be
 bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, std::string_view pattern);
 bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym);
 std::string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
-                         core::TypePtr retType, const std::unique_ptr<core::TypeConstraint> &constraint);
+                         core::TypePtr retType, const core::TypeConstraint *constraint);
 std::string methodDefinition(const core::GlobalState &gs, core::SymbolRef method);
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
-                            core::TypePtr receiver, const std::unique_ptr<core::TypeConstraint> &constr);
+                            core::TypePtr receiver, const core::TypeConstraint *constr);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef);
 
 } // namespace sorbet::realmain::lsp

@@ -19,8 +19,9 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
                 contents += "\n";
             }
             contents = absl::StrCat(
-                contents, methodDetail(gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint),
-                "\n", methodDefinition(gs, dispatchComponent.method));
+                contents,
+                methodDetail(gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint.get()), "\n",
+                methodDefinition(gs, dispatchComponent.method));
         }
         start = start->secondary.get();
     }
