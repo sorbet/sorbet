@@ -1,5 +1,4 @@
 # typed: true
-# disable-fast-path: true
 # TODO enable on the fast path
 
 class DefaultBad < T::Struct
