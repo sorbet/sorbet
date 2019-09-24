@@ -1077,8 +1077,11 @@ private:
                 arg.loc = spec->loc;
                 arg.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
-            } else if (arg.type == nullptr) {
-                arg.type = core::Types::untyped(ctx, method);
+            } else {
+                if (arg.type == nullptr) {
+                    arg.type = core::Types::untyped(ctx, method);
+                }
+
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
                 bool isBlkArg = arg.name == core::Names::blkArg();
                 if (!isOverloaded && !isBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
