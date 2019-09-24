@@ -50,7 +50,6 @@ cxxopts::ParseResult ConfigParser::parseConfig(std::shared_ptr<spdlog::logger> l
     if (noConfigCount == 0) {
         auto configFilename = "sorbet/config";
         if (FileOps::exists(configFilename)) {
-            // TODO(jez) Recurse upwards to find file in parent directory
             readArgsFromFile(logger, configFilename, stringArgs);
         }
     }
