@@ -115,6 +115,8 @@ class LSPLoop {
     std::chrono::time_point<std::chrono::steady_clock> lastMetricUpdateTime;
     /** ID of the main thread, which actually processes LSP requests and performs typechecking. */
     std::thread::id mainThreadId;
+    /* If true, then the server is running across multiple threads. */
+    bool multithreadedMode = false;
 
     /* Send the given message to client */
     void sendMessage(const LSPMessage &msg) const;

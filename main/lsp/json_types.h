@@ -26,7 +26,7 @@ struct LSPFileUpdates {
     bool hasNewFiles = false;
     std::vector<core::FileHash> updatedFileHashes;
     std::vector<ast::ParsedFile> updatedFileIndexes;
-    // Updated on processor thread. Contains indexes processed with typechecking global state.
+    // Updated on typechecking thread. Contains indexes processed with typechecking global state.
     std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
     // (Optional) Updated global state object to use to typecheck this update.
     std::optional<std::unique_ptr<core::GlobalState>> updatedGS;

@@ -165,51 +165,55 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
     vector<ast::ParsedFile> indexedCopies;
     vector<core::FileRef> affectedFiles;
     auto finalGS = move(updates.updatedGS.value());
-    const bool committed = finalGS->tryCommitEpoch(updates.versionEnd, isCancelable, [&]() -> bool {
-        // Index the updated files using finalGS.
-        {
-            core::UnfreezeFileTable fileTableAccess(*finalGS);
-            for (auto &file : updates.updatedFiles) {
-                auto pair = updateFile(move(finalGS), file, config.opts);
-                finalGS = move(pair.first);
-                auto &ast = pair.second;
-                if (ast.tree) {
-                    indexedCopies.emplace_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
-                    updatedFiles.insert(ast.file.id());
+    // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
+    // cancelation feature is enabled.
+    const bool committed = finalGS->tryCommitEpoch(
+        updates.versionEnd, isCancelable && multithreadedMode && config.opts.lspCancelableSlowPathEnabled,
+        [&]() -> bool {
+            // Index the updated files using finalGS.
+            {
+                core::UnfreezeFileTable fileTableAccess(*finalGS);
+                for (auto &file : updates.updatedFiles) {
+                    auto pair = updateFile(move(finalGS), file, config.opts);
+                    finalGS = move(pair.first);
+                    auto &ast = pair.second;
+                    if (ast.tree) {
+                        indexedCopies.emplace_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
+                        updatedFiles.insert(ast.file.id());
+                    }
+                    updates.updatedFinalGSFileIndexes.push_back(move(ast));
                 }
-                updates.updatedFinalGSFileIndexes.push_back(move(ast));
             }
-        }
 
-        // Copy the indexes of unchanged files.
-        for (const auto &tree : indexed) {
-            // Note: indexed entries for payload files don't have any contents.
-            if (tree.tree && !updatedFiles.contains(tree.file.id())) {
-                indexedCopies.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
+            // Copy the indexes of unchanged files.
+            for (const auto &tree : indexed) {
+                // Note: indexed entries for payload files don't have any contents.
+                if (tree.tree && !updatedFiles.contains(tree.file.id())) {
+                    indexedCopies.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
+                }
             }
-        }
-        if (finalGS->isTypecheckingCanceled()) {
-            return false;
-        }
+            if (finalGS->isTypecheckingCanceled()) {
+                return false;
+            }
 
-        ENFORCE(finalGS->lspQuery.isEmpty());
-        auto maybeResolved =
-            pipeline::resolve(finalGS, move(indexedCopies), config.opts, workers, config.skipConfigatron);
-        if (!maybeResolved.hasResult()) {
-            return false;
-        }
+            ENFORCE(finalGS->lspQuery.isEmpty());
+            auto maybeResolved =
+                pipeline::resolve(finalGS, move(indexedCopies), config.opts, workers, config.skipConfigatron);
+            if (!maybeResolved.hasResult()) {
+                return false;
+            }
 
-        auto &resolved = maybeResolved.result();
-        for (auto &tree : resolved) {
-            ENFORCE(tree.file.exists());
-            affectedFiles.push_back(tree.file);
-        }
-        auto maybeTypechecked = pipeline::typecheck(finalGS, move(resolved), config.opts, workers);
-        if (!maybeTypechecked.hasResult()) {
-            return false;
-        }
-        return true;
-    });
+            auto &resolved = maybeResolved.result();
+            for (auto &tree : resolved) {
+                ENFORCE(tree.file.exists());
+                affectedFiles.push_back(tree.file);
+            }
+            auto maybeTypechecked = pipeline::typecheck(finalGS, move(resolved), config.opts, workers);
+            if (!maybeTypechecked.hasResult()) {
+                return false;
+            }
+            return true;
+        });
 
     auto out = finalGS->errorQueue->drainWithQueryResponses();
     finalGS->lspTypecheckCount++;
@@ -228,7 +232,7 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
 
     if (!updates.canTakeFastPath) {
-        return runSlowPath(move(gs), move(updates), config.opts.lspCancelableSlowPathEnabled);
+        return runSlowPath(move(gs), move(updates), true);
     }
 
     Timer timeit(logger, "fast_path");

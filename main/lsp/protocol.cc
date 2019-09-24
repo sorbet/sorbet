@@ -158,7 +158,9 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
 }
 
 optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
-    // Naming convention: thread that executes this function is called coordinator thread
+    multithreadedMode = true;
+
+    // Naming convention: thread that executes this function is called typechecking thread
 
     // Incoming queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
     // these messages (e.g., edits are not merged).
@@ -243,7 +245,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
             logger->debug("Reader thread terminating");
         });
 
-    // Bridges the gap between the {reader, watchman} threads and the coordinator thread.
+    // Bridges the gap between the {reader, watchman} threads and the typechecking thread.
     auto preprocessingThread = preprocessor.runPreprocessor(incomingQueue, incomingMtx, processingQueue, processingMtx);
 
     mainThreadId = this_thread::get_id();

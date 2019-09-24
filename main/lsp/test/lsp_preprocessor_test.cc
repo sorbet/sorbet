@@ -424,7 +424,7 @@ TEST(LSPPreprocessor, MakesCorrectFastPathDecisionsOnSimultaneousEdits) { // NOL
     // Commit new files first. The 'new file flag' is handled specially.
     preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", 1, fooV1), mtx);
     preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", 1, barV1), mtx);
-    // Clear out of queue to emulate processor thread 'processing' it.
+    // Clear out of queue to emulate typechecking thread 'processing' it.
     state.pendingRequests.clear();
 
     // barV1 => V2: Slow path
@@ -465,7 +465,7 @@ unique_ptr<core::GlobalState> initCancelSlowPathTest(LSPPreprocessor &preprocess
 }
 
 u4 emulateProcessEditAtHeadOfQueue(QueueState &state, core::GlobalState &gs) {
-    // Emulate processor thread: begin 'processing' this edit.
+    // Emulate typechecking thread: begin 'processing' this edit.
     const auto [updates, counts] = getUpdates(state, 0).value();
     auto epoch = updates->versionEnd;
     gs.startCommitEpoch(epoch);

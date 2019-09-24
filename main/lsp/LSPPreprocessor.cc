@@ -90,7 +90,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
     const auto runningSlowPath = gs.getRunningSlowPath();
     if (runningSlowPath.has_value()) {
         const auto &[committed, end] = runningSlowPath.value();
-        // Prune history for all messages no longer in queue or being processed by processor thread.
+        // Prune history for all messages no longer in queue or being processed by typechecking thread.
         ttgs.pruneBefore(min(committed, earliestActiveEditVersion));
         for (auto it = pendingRequests.begin(); it != pendingRequests.end(); it++) {
             const auto &msg = *it;
