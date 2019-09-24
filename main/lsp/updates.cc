@@ -158,7 +158,6 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
     if (!updates.updatedGS.has_value()) {
         Exception::raise("runSlowPath called with an update that lacks an updated global state.");
     }
-    prodCategoryCounterInc("lsp.updates", "slowpath");
     logger->debug("Taking slow path");
 
     UnorderedSet<int> updatedFiles;
@@ -220,8 +219,10 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
     finalGS->lspQuery = core::lsp::Query::noQuery();
 
     if (committed) {
+        prodCategoryCounterInc("lsp.updates", "slowpath");
         return TypecheckRun(move(finalGS), move(out.first), move(affectedFiles), move(updates), false);
     } else {
+        prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
         return TypecheckRun::makeCanceled(move(previousGS));
     }
 }
