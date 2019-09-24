@@ -122,7 +122,6 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
 
 void OpusEnum::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
     if (ctx.state.runningUnderAutogen) {
-        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
         return;
     }
 
