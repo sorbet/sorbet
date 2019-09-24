@@ -11,7 +11,7 @@ the type `T.untyped`, and methods that have not been given a signature with
 type `T.untyped`.
 
 Sorbet will not check any operations performed on values of type `T.untyped`: it
-will accept any method calls on it with any number of arguments of any types:
+will accept any method calls on them with any number of arguments of any types:
 
 ```ruby
 # typed: true
