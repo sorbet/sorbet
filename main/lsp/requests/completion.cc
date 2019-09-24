@@ -11,11 +11,11 @@ namespace {
 
 core::NameRef originalName(const core::GlobalState &gs, core::NameRef name) {
     switch (name.data(gs)->kind) {
-        case core::UTF8:
+        case core::NameKind::UTF8:
             return name;
-        case core::UNIQUE:
+        case core::NameKind::UNIQUE:
             return originalName(gs, name.data(gs)->unique.original);
-        case core::CONSTANT:
+        case core::NameKind::CONSTANT:
             return originalName(gs, name.data(gs)->cnst.original);
     }
 }
