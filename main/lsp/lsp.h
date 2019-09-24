@@ -202,16 +202,6 @@ class LSPLoop {
     LSPResult handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                       const TextDocumentPositionParams &params) const;
 
-    /**
-     * Internal interface for processRequest.
-     * - commitMtx: Controls access to `state`.
-     * - state: Contains the state of the message queue. Used to update `runningSlowPath` to prevent cancelations prior
-     * to committing a file update.
-     * - gs: The GlobalState object that should be used during typechecking. May not be used if `msg` contains a file
-     * edit that should be typechecked on the slow path, but will be returned if that slow path update later gets
-     * canceled.
-     * - msg: The message to process.
-     */
     LSPResult processRequestInternal(std::unique_ptr<core::GlobalState> gs, const LSPMessage &msg);
 
     TypecheckRun handleSorbetWorkspaceEdits(std::unique_ptr<core::GlobalState> gs, LSPFileUpdates &updates) const;

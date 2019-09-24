@@ -302,7 +302,7 @@ LSPFileUpdates TimeTravelingGlobalState::getCombinedUpdates(u4 fromId, u4 toId) 
     return merged;
 }
 
-void TimeTravelingGlobalState::enableMultithreadingMode() {
+void TimeTravelingGlobalState::switchToNewThread() {
     // Re-create error queue that is owned by new thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer);
 }
