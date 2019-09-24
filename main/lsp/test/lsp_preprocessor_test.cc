@@ -79,7 +79,7 @@ unique_ptr<LSPMessage> makeWatchman(vector<string> files) {
     return msg;
 }
 
-optional<pair<LSPFileUpdates *, SorbetWorkspaceEditCounts *>> getUpdates(QueueState &state, int i) {
+optional<LSPFileUpdates *> getUpdates(QueueState &state, int i) {
     EXPECT_LT(i, state.pendingRequests.size());
     if (i >= state.pendingRequests.size()) {
         return nullopt;
@@ -87,7 +87,7 @@ optional<pair<LSPFileUpdates *, SorbetWorkspaceEditCounts *>> getUpdates(QueueSt
     auto &msg = state.pendingRequests[i];
     EXPECT_TRUE(msg->isNotification() && msg->method() == LSPMethod::SorbetWorkspaceEdit);
     auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
-    return make_pair(&params->updates, params->counts.get());
+    return &params->updates;
 }
 
 unique_ptr<LSPMessage> makeHoverReq(int id, string_view file, int line = 0, int col = 0) {
@@ -236,10 +236,8 @@ TEST(LSPPreprocessor, IgnoresWatchmanUpdatesFromOpenFiles) { // NOLINT
 
     ASSERT_TRUE(state.pendingRequests.size() == 1);
 
-    const auto [updates, counts] = getUpdates(state, 0).value();
-    EXPECT_EQ(counts->textDocumentDidOpen, 1);
-    EXPECT_EQ(counts->sorbetWatchmanFileChange, 1);
-
+    const auto updates = getUpdates(state, 0).value();
+    EXPECT_EQ((updates->versionEnd - updates->versionStart + 1) == 2);
     EXPECT_FALSE(updates->canTakeFastPath);
     EXPECT_TRUE(updates->hasNewFiles);
     ASSERT_EQ(updates->updatedFiles.size(), 1);
@@ -269,7 +267,7 @@ TEST(LSPPreprocessor, ClonesTypecheckingGSAtCorrectLogicalTime) { // NOLINT
     state.pendingRequests.clear();
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fileV2), mtx);
     {
-        const auto [updates, counts] = getUpdates(state, 0).value();
+        const auto updates = getUpdates(state, 0).value();
         ASSERT_FALSE(updates->canTakeFastPath);
         // Should have the newest version of the update.
         EXPECT_EQ(updates->updatedFileIndexes[0].file.data(*updates->updatedGS.value()).source(), fileV2);
@@ -281,7 +279,7 @@ TEST(LSPPreprocessor, ClonesTypecheckingGSAtCorrectLogicalTime) { // NOLINT
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fileV3), mtx);
     {
         // Should have the newest version of the update.
-        const auto [updates, counts] = getUpdates(state, 0).value();
+        const auto updates = getUpdates(state, 0).value();
         ASSERT_FALSE(updates->canTakeFastPath);
         EXPECT_EQ(updates->updatedFileIndexes[0].file.data(*updates->updatedGS.value()).source(), fileV3);
     }
@@ -290,7 +288,7 @@ TEST(LSPPreprocessor, ClonesTypecheckingGSAtCorrectLogicalTime) { // NOLINT
     // V4 will take the slow path relative to V3, and the global state created for it should be re-used.
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 4, fileV4), mtx);
     {
-        const auto [updates, counts] = getUpdates(state, 0).value();
+        const auto updates = getUpdates(state, 0).value();
         ASSERT_FALSE(updates->canTakeFastPath);
         EXPECT_EQ(updates->updatedFileIndexes[0].file.data(*updates->updatedGS.value()).source(), fileV4);
     }
@@ -372,7 +370,7 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
 
     vector<pair<int, bool>> fastPathDecisions = {{0, false}, {2, true}, {4, true}, {6, true}};
     for (auto &[messageId, canTakeFastPath] : fastPathDecisions) {
-        auto [updates, count] = getUpdates(state, messageId).value();
+        auto updates = getUpdates(state, messageId).value();
         EXPECT_EQ(updates->canTakeFastPath, canTakeFastPath);
     }
 
@@ -389,7 +387,7 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
         preprocessor.preprocessAndEnqueue(state, makeCancel(hoverId), mtx);
         // Check that the next edit was merged into the first edit.
         ASSERT_EQ(state.pendingRequests[0]->method(), LSPMethod::SorbetWorkspaceEdit);
-        auto [updates, count] = getUpdates(state, 0).value();
+        auto updates = getUpdates(state, 0).value();
         EXPECT_EQ(count->textDocumentDidOpen, 1);
         EXPECT_EQ(count->textDocumentDidChange, i);
         EXPECT_EQ(updates->updatedFiles[0]->source(), fooContents);
@@ -403,7 +401,7 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 5, fileV5), mtx);
     {
         // Ensure GS for new edit has all previous edits, including the contents of bar.rb.
-        const auto [updates, counts] = getUpdates(state, state.pendingRequests.size() - 1).value();
+        const auto updates = getUpdates(state, state.pendingRequests.size() - 1).value();
         ASSERT_FALSE(updates->canTakeFastPath);
         const auto &gs = *updates->updatedGS.value();
         EXPECT_EQ(gs.findFileByPath("foo.rb").data(gs).source(), fileV5);
@@ -443,7 +441,7 @@ TEST(LSPPreprocessor, MakesCorrectFastPathDecisionsOnSimultaneousEdits) { // NOL
     // four edits can take fast path.
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 4, fooV4), mtx);
 
-    const auto [updates, counts] = getUpdates(state, 0).value();
+    const auto updates = getUpdates(state, 0).value();
     EXPECT_FALSE(updates->canTakeFastPath);
 }
 
@@ -457,7 +455,7 @@ unique_ptr<core::GlobalState> initCancelSlowPathTest(LSPPreprocessor &preprocess
     // Grab GS.
     unique_ptr<core::GlobalState> gs;
     {
-        auto [updates, counts] = getUpdates(state, 0).value();
+        auto updates = getUpdates(state, 0).value();
         gs = move(updates->updatedGS.value());
         state.pendingRequests.clear();
     }
@@ -466,7 +464,7 @@ unique_ptr<core::GlobalState> initCancelSlowPathTest(LSPPreprocessor &preprocess
 
 u4 emulateProcessEditAtHeadOfQueue(QueueState &state, core::GlobalState &gs) {
     // Emulate typechecking thread: begin 'processing' this edit.
-    const auto [updates, counts] = getUpdates(state, 0).value();
+    const auto updates = getUpdates(state, 0).value();
     auto epoch = updates->versionEnd;
     gs.startCommitEpoch(epoch);
     state.pendingRequests.clear();

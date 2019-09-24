@@ -72,7 +72,6 @@ private:
     void mergeFileChanges(absl::Mutex &mtx, QueueState &state);
 
     std::unique_ptr<LSPMessage> makeAndCommitWorkspaceEdit(std::unique_ptr<SorbetWorkspaceEditParams> params,
-                                                           std::unique_ptr<SorbetWorkspaceEditCounts> counts,
                                                            std::unique_ptr<LSPMessage> oldMsg);
 
     /* The following methods convert edits into LSPFileUpdates. */

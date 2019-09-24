@@ -73,7 +73,6 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
 
             // Merge updates, timers, and tracers.
             auto &mergeableParams = get<unique_ptr<SorbetWorkspaceEditParams>>(mergeMsg.asNotification().params);
-            msgParams->counts->merge(*mergeableParams->counts);
             mergeEdits(msgParams->updates, mergeableParams->updates);
             msg.timers.insert(msg.timers.end(), make_move_iterator(mergeMsg.timers.begin()),
                               make_move_iterator(mergeMsg.timers.end()));
@@ -135,7 +134,6 @@ unique_ptr<core::GlobalState> LSPPreprocessor::getTypecheckingGS() const {
 }
 
 unique_ptr<LSPMessage> LSPPreprocessor::makeAndCommitWorkspaceEdit(unique_ptr<SorbetWorkspaceEditParams> params,
-                                                                   unique_ptr<SorbetWorkspaceEditCounts> counts,
                                                                    unique_ptr<LSPMessage> oldMsg) {
     ttgs.commitEdits(params->updates);
     if (!params->updates.canTakeFastPath) {
@@ -217,42 +215,34 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
         case LSPMethod::TextDocumentDidOpen: {
             auto &params = get<unique_ptr<DidOpenTextDocumentParams>>(msg->asNotification().params);
             openFiles.insert(config.remoteName2Local(params->textDocument->uri));
-            auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
-            counts->textDocumentDidOpen++;
-            auto newParams = make_unique<SorbetWorkspaceEditParams>(move(counts));
+            auto newParams = make_unique<SorbetWorkspaceEditParams>();
             canonicalizeEdits(nextVersion++, move(params), newParams->updates);
-            msg = makeAndCommitWorkspaceEdit(move(newParams), move(counts), move(msg));
+            msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
             shouldEnqueue = shouldMerge = true;
             break;
         }
         case LSPMethod::TextDocumentDidClose: {
             auto &params = get<unique_ptr<DidCloseTextDocumentParams>>(msg->asNotification().params);
             openFiles.erase(config.remoteName2Local(params->textDocument->uri));
-            auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
-            counts->textDocumentDidClose++;
-            auto newParams = make_unique<SorbetWorkspaceEditParams>(move(counts));
+            auto newParams = make_unique<SorbetWorkspaceEditParams>();
             canonicalizeEdits(nextVersion++, move(params), newParams->updates);
-            msg = makeAndCommitWorkspaceEdit(move(newParams), move(counts), move(msg));
+            msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
             shouldEnqueue = shouldMerge = true;
             break;
         }
         case LSPMethod::TextDocumentDidChange: {
             auto &params = get<unique_ptr<DidChangeTextDocumentParams>>(msg->asNotification().params);
-            auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
-            counts->textDocumentDidChange++;
-            auto newParams = make_unique<SorbetWorkspaceEditParams>(move(counts));
+            auto newParams = make_unique<SorbetWorkspaceEditParams>();
             canonicalizeEdits(nextVersion++, move(params), newParams->updates);
-            msg = makeAndCommitWorkspaceEdit(move(newParams), move(counts), move(msg));
+            msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
             shouldEnqueue = shouldMerge = true;
             break;
         }
         case LSPMethod::SorbetWatchmanFileChange: {
             auto &params = get<unique_ptr<WatchmanQueryResponse>>(msg->asNotification().params);
-            auto counts = make_unique<SorbetWorkspaceEditCounts>(0, 0, 0, 0);
-            counts->sorbetWatchmanFileChange++;
-            auto newParams = make_unique<SorbetWorkspaceEditParams>(move(counts));
+            auto newParams = make_unique<SorbetWorkspaceEditParams>();
             canonicalizeEdits(nextVersion++, move(params), newParams->updates);
-            msg = makeAndCommitWorkspaceEdit(move(newParams), move(counts), move(msg));
+            msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
             shouldEnqueue = shouldMerge = true;
             break;
         }

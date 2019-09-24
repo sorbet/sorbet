@@ -67,17 +67,18 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         if (method == LSPMethod::SorbetWorkspaceEdit) {
             // Note: We increment `lsp.messages.processed` when the original requests were merged into this one.
             auto &editParams = get<unique_ptr<SorbetWorkspaceEditParams>>(params);
-            auto &counts = editParams->counts;
-            prodCategoryCounterAdd("lsp.messages.processed", "textDocument.didChange", counts->textDocumentDidChange);
-            prodCategoryCounterAdd("lsp.messages.processed", "textDocument.didOpen", counts->textDocumentDidOpen);
-            prodCategoryCounterAdd("lsp.messages.processed", "textDocument.didClose", counts->textDocumentDidClose);
-            prodCategoryCounterAdd("lsp.messages.processed", "sorbet/watchmanFileChange",
-                                   counts->sorbetWatchmanFileChange);
-            // Number of messages merged together into a workspace edit.
-            prodCounterAdd("lsp.messages.merged", (counts->textDocumentDidChange + counts->textDocumentDidOpen +
-                                                   counts->textDocumentDidClose + counts->sorbetWatchmanFileChange) -
-                                                      1);
-            return commitTypecheckRun(runTypechecking(move(gs), move(editParams->updates)));
+            const u4 end = editParams->updates.versionEnd;
+            const u4 start = editParams->updates.versionStart;
+            // Versions are sequential and wrap around. Use them to figure out how many edits are contained within this
+            // update.
+            const u4 merged = min(end - start, 0xFFFFFFFF - start + end);
+            auto run = runTypechecking(move(gs), move(editParams->updates));
+            // Only report stats if the edit was committed.
+            if (!run.canceled) {
+                prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
+                prodCategoryCounterAdd("lsp.messages.processed", "sorbet/mergedEdits", merged);
+            }
+            return commitTypecheckRun(move(run));
         } else if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
             auto &initParams = get<unique_ptr<InitializedParams>>(params);
