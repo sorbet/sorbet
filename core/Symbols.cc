@@ -1102,7 +1102,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
         if (!type) {
             type = Types::untypedUntracked();
         }
-        result = mix(result, type);
+        result = mix(result, type->hash(gs));
         result = mix(result, _hash(arg.name.data(gs)->shortName(gs)));
     }
     for (const auto &e : typeParams) {
