@@ -7,50 +7,122 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-UnorderedMap<core::NameRef, vector<core::SymbolRef>>
-mergeMaps(UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&first,
-          UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&second) {
-    for (auto &other : second) {
-        first[other.first].insert(first[other.first].end(), make_move_iterator(other.second.begin()),
-                                  make_move_iterator(other.second.end()));
+namespace {
+
+core::NameRef originalName(const core::GlobalState &gs, core::NameRef name) {
+    switch (name.data(gs)->kind) {
+        case core::NameKind::UTF8:
+            return name;
+        case core::NameKind::UNIQUE:
+            return originalName(gs, name.data(gs)->unique.original);
+        case core::NameKind::CONSTANT:
+            return originalName(gs, name.data(gs)->cnst.original);
     }
-    return std::move(first);
+}
+
+vector<core::SymbolRef> ancestorsImpl(const core::GlobalState &gs, core::SymbolRef sym, vector<core::SymbolRef> &&acc) {
+    // The implementation here is similar to Symbols::derivesFrom.
+    ENFORCE(sym.data(gs)->isClassOrModuleLinearizationComputed());
+    acc.emplace_back(sym);
+
+    for (auto mixin : sym.data(gs)->mixins()) {
+        acc.emplace_back(mixin);
+    }
+
+    if (sym.data(gs)->superClass().exists()) {
+        return ancestorsImpl(gs, sym.data(gs)->superClass(), move(acc));
+    } else {
+        return move(acc);
+    }
+}
+
+// Basically the same as Module#ancestors from Ruby--but don't depend on it being exactly equal.
+// For us, it's just something that's vaguely ordered from "most specific" to "least specific" ancestor.
+vector<core::SymbolRef> ancestors(const core::GlobalState &gs, core::SymbolRef receiver) {
+    return ancestorsImpl(gs, receiver, vector<core::SymbolRef>{});
+}
+
+struct SimilarMethod final {
+    int depth;
+    core::SymbolRef receiver;
+    core::SymbolRef method;
+
+    // Populated later
+    core::TypePtr receiverType = nullptr;
+    shared_ptr<core::TypeConstraint> constr = nullptr;
 };
 
-UnorderedMap<core::NameRef, vector<core::SymbolRef>> findSimilarMethodsIn(const core::GlobalState &gs,
-                                                                          core::TypePtr receiver, string_view name) {
-    UnorderedMap<core::NameRef, vector<core::SymbolRef>> result;
-    typecase(
-        receiver.get(),
-        [&](core::ClassType *c) {
-            const auto &owner = c->symbol.data(gs);
-            for (auto member : owner->membersStableOrderSlow(gs)) {
-                auto sym = member.second;
-                if (sym.data(gs)->isMethod() && hasSimilarName(gs, sym.data(gs)->name, name)) {
-                    result[sym.data(gs)->name].emplace_back(sym);
-                }
+// First of pair is "found at this depth in the ancestor hierarchy"
+// Second of pair is method symbol found at that depth, with name similar to prefix.
+vector<SimilarMethod> similarMethodsForClass(const core::GlobalState &gs, core::SymbolRef receiver,
+                                             string_view prefix) {
+    auto result = vector<SimilarMethod>{};
+
+    int depth = -1;
+    for (auto ancestor : ancestors(gs, receiver)) {
+        depth++;
+        for (auto [memberName, memberSymbol] : ancestor.data(gs)->members()) {
+            if (!memberSymbol.data(gs)->isMethod()) {
+                continue;
             }
-            for (auto mixin : owner->mixins()) {
-                result = mergeMaps(std::move(result),
-                                   findSimilarMethodsIn(gs, core::make_type<core::ClassType>(mixin), name));
+
+            if (hasSimilarName(gs, memberName, prefix)) {
+                result.emplace_back(SimilarMethod{depth, receiver, memberSymbol});
             }
-            if (owner->superClass().exists()) {
-                result =
-                    mergeMaps(std::move(result),
-                              findSimilarMethodsIn(gs, core::make_type<core::ClassType>(owner->superClass()), name));
-            }
-        },
-        [&](core::AndType *c) {
-            result = mergeMaps(findSimilarMethodsIn(gs, c->left, name), findSimilarMethodsIn(gs, c->right, name));
-        },
-        [&](core::AppliedType *c) {
-            result = findSimilarMethodsIn(gs, core::make_type<core::ClassType>(c->klass), name);
-        },
-        [&](core::ProxyType *c) { result = findSimilarMethodsIn(gs, c->underlying(), name); },
-        [&](core::Type *c) { return; });
+        }
+    }
+
     return result;
 }
-namespace {
+
+vector<SimilarMethod> mergeSimilarMethods(vector<SimilarMethod> &&left, vector<SimilarMethod> &&right) {
+    left.insert(left.end(), right.begin(), right.end());
+    return std::move(left);
+}
+
+vector<SimilarMethod> similarMethodsForReceiver(const core::GlobalState &gs, const core::TypePtr receiver,
+                                                string_view prefix) {
+    auto result = vector<SimilarMethod>{};
+
+    typecase(
+        receiver.get(), [&](core::ClassType *type) { result = similarMethodsForClass(gs, type->symbol, prefix); },
+        [&](core::AppliedType *type) { result = similarMethodsForClass(gs, type->klass, prefix); },
+        [&](core::AndType *type) {
+            // We take the union here rather than take the intersection. (Better to suggest a method that someone
+            // is looking for and then give a type error, rather than have them sit wondering why it's missing.)
+            result = mergeSimilarMethods(similarMethodsForReceiver(gs, type->left, prefix),
+                                         similarMethodsForReceiver(gs, type->right, prefix));
+        },
+        [&](core::ProxyType *type) { result = similarMethodsForReceiver(gs, type->underlying(), prefix); },
+        [&](core::Type *type) { return; });
+
+    return result;
+}
+
+// Walk a core::DispatchResult to find methods similar to `prefix` on any of its DispatchComponents' receivers.
+vector<SimilarMethod> allSimilarMethods(const core::GlobalState &gs, core::DispatchResult &dispatchResult,
+                                        string_view prefix) {
+    auto result = similarMethodsForReceiver(gs, dispatchResult.main.receiver, prefix);
+
+    // Convert to shared_ptr and take ownership
+    shared_ptr<core::TypeConstraint> constr = move(dispatchResult.main.constr);
+
+    for (auto &similarMethod : result) {
+        ENFORCE(similarMethod.receiverType == nullptr, "About to overwrite non-null receiverType");
+        similarMethod.receiverType = dispatchResult.main.receiver;
+
+        ENFORCE(similarMethod.constr == nullptr, "About to overwrite non-null constr");
+        similarMethod.constr = constr;
+    }
+
+    if (dispatchResult.secondary != nullptr) {
+        // Right now we completely ignore the secondaryKind (either AND or OR), and always union.
+        // (See comment for AndType in similarMethodsForReceiver.)
+        result = mergeSimilarMethods(move(result), allSimilarMethods(gs, *dispatchResult.secondary, prefix));
+    }
+
+    return result;
+}
 
 string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
@@ -172,25 +244,38 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
         auto resp = move(queryResponses[0]);
 
         if (auto sendResp = resp->isSend()) {
-            auto pattern = sendResp->callerSideName.data(*gs)->shortName(*gs);
-            auto receiverType = sendResp->dispatchResult->main.receiver;
-            logger->debug("Looking for method similar to {}", pattern);
-            auto methodsMap = findSimilarMethodsIn(*gs, receiverType, pattern);
-            auto methods = vector<pair<core::NameRef, vector<core::SymbolRef>>>(methodsMap.begin(), methodsMap.end());
-            fast_sort(methods, [&](auto leftPair, auto rightPair) -> bool {
-                auto leftShortName = leftPair.first.data(*gs)->shortName(*gs);
-                auto rightShortName = rightPair.first.data(*gs)->shortName(*gs);
+            auto prefix = sendResp->callerSideName.data(*gs)->shortName(*gs);
+            logger->debug("Looking for method similar to {}", prefix);
+
+            auto similarMethods = allSimilarMethods(*gs, *sendResp->dispatchResult, prefix);
+            fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
+                if (left.depth != right.depth) {
+                    return left.depth < right.depth;
+                }
+
+                auto leftShortName = left.method.data(*gs)->name.data(*gs)->shortName(*gs);
+                auto rightShortName = right.method.data(*gs)->name.data(*gs)->shortName(*gs);
                 if (leftShortName != rightShortName) {
                     return leftShortName < rightShortName;
                 }
-                return leftPair.first._id < rightPair.first._id;
+
+                return left.method._id < right.method._id;
             });
-            for (auto &[methodName, methodSymbols] : methods) {
-                if (methodSymbols[0].exists()) {
-                    fast_sort(methodSymbols, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                    items.push_back(getCompletionItem(*gs, methodSymbols[0], receiverType,
-                                                      sendResp->dispatchResult->main.constr.get()));
+
+            auto deduped = vector<SimilarMethod>{};
+            auto lastName = core::NameRef::noName();
+            for (auto &similarMethod : similarMethods) {
+                auto name = originalName(*gs, similarMethod.method.data(*gs)->name);
+
+                if (lastName != name) {
+                    deduped.emplace_back(similarMethod);
+                    lastName = name;
                 }
+            }
+
+            for (auto &similarMethod : deduped) {
+                items.push_back(getCompletionItem(*gs, similarMethod.method, similarMethod.receiverType,
+                                                  similarMethod.constr.get()));
             }
         } else if (auto identResp = resp->isIdent()) {
             findSimilarConstantOrIdent(*gs, identResp->retType.type, items);
