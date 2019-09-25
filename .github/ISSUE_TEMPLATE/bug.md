@@ -20,7 +20,7 @@ TODO: Replace this with the output in sorbet.run
 (sorbet.run output changes over time)
 ```
 
-<!-- TODO: For certain kinds of issues, it can be good to also include the observed runtime output. -->
+<!-- TODO: For issues where `srb tc` differs from the behavior of `sorbet-runtime`, please include the observed runtime output. -->
 
 #### Expected behavior
 
