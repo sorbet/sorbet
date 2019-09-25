@@ -4,6 +4,8 @@
 module T::Types
   # Modeling AttachedClass properly at runtime would require additional
   # tracking, so at runtime we permit all values and rely on the static checker.
+  # As AttachedClass is modeled statically as a type member on every singleton
+  # class, this is consistent with the runtime behavior for all type members.
   class AttachedClassType < Base
 
     def initialize(); end
