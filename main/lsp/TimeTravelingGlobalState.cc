@@ -231,11 +231,13 @@ bool TimeTravelingGlobalState::canTakeFastPath(u4 fromId, const LSPFileUpdates &
     travel(fromId);
     if (config.disableFastPath) {
         logger->debug("Taking slow path because fast path is disabled.");
+        prodCategoryCounterInc("lsp.slow_path_reason", "fast_path_disabled");
         return false;
     }
     // Path taken after the first time an update has been encountered. Hack since we can't roll back new files just yet.
     if (updates.hasNewFiles) {
         logger->debug("Taking slow path because update has a new file");
+        prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
         return false;
     }
     const auto &hashes = updates.updatedFileHashes;
@@ -250,16 +252,19 @@ bool TimeTravelingGlobalState::canTakeFastPath(u4 fromId, const LSPFileUpdates &
             auto fref = gs->findFileByPath(f->path());
             if (!fref.exists()) {
                 logger->debug("Taking slow path because {} is a new file", f->path());
+                prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
                 return false;
             } else {
                 auto &oldHash = globalStateHashes[fref.id()];
                 ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
                 if (hashes[i].definitions.hierarchyHash == core::GlobalStateHash::HASH_STATE_INVALID) {
                     logger->debug("Taking slow path because {} has a syntax error", f->path());
+                    prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
                     return false;
                 } else if (hashes[i].definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
                            hashes[i].definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
                     logger->debug("Taking slow path because {} has changed definitions", f->path());
+                    prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
                     return false;
                 }
             }
