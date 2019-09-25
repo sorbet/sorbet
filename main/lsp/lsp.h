@@ -115,8 +115,6 @@ class LSPLoop {
     std::chrono::time_point<std::chrono::steady_clock> lastMetricUpdateTime;
     /** ID of the main thread, which actually processes LSP requests and performs typechecking. */
     std::thread::id mainThreadId;
-    /* If true, then the server is running across multiple threads. */
-    bool multithreadedMode = false;
 
     /* Send the given message to client */
     void sendMessage(const LSPMessage &msg) const;
@@ -212,6 +210,9 @@ class LSPLoop {
     bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime) const;
     /** Sends counters to statsd. */
     void sendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
+    /** Helper method: If message is an edit taking the slow path, and slow path cancelation is enabled, signal to
+     * GlobalState that we will be starting a commit of the edits. */
+    void maybeStartCommitSlowPathEdit(core::GlobalState &gs, const LSPMessage &msg) const;
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> initialGS, LSPConfiguration config,

@@ -27,6 +27,7 @@ LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<uniq
 
     LSPResult rv{move(gs), {}};
     for (auto &message : state.pendingRequests) {
+        maybeStartCommitSlowPathEdit(*rv.gs, *message);
         auto rslt = processRequestInternal(move(rv.gs), *message);
         rv.gs = move(rslt.gs);
         rv.responses.insert(rv.responses.end(), make_move_iterator(rslt.responses.begin()),

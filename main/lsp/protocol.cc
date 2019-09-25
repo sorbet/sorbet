@@ -157,9 +157,19 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
     });
 }
 
-optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
-    multithreadedMode = true;
+void LSPLoop::maybeStartCommitSlowPathEdit(core::GlobalState &gs, const LSPMessage &msg) const {
+    if (config.opts.lspCancelableSlowPathEnabled && msg.isNotification() &&
+        msg.method() == LSPMethod::SorbetWorkspaceEdit) {
+        // While we're holding the queue lock (and preventing new messages from entering), start a
+        // commit for an epoch if this message will trigger a cancelable slow path.
+        const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
+        if (!params->updates.canTakeFastPath) {
+            gs.startCommitEpoch(params->updates.versionEnd);
+        }
+    }
+}
 
+optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called typechecking thread
 
     // Incoming queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
@@ -283,18 +293,9 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                 msg = move(processingQueue.pendingRequests.front());
                 processingQueue.pendingRequests.pop_front();
                 hasMoreMessages = !processingQueue.pendingRequests.empty();
-
-                if (msg->isNotification()) {
-                    const auto method = msg->method();
-                    exitProcessed = method == LSPMethod::Exit;
-                    if (opts.lspCancelableSlowPathEnabled && method == LSPMethod::SorbetWorkspaceEdit) {
-                        // While we're holding the queue lock (and preventing new messages from entering), start a
-                        // commit for an epoch if this message will trigger a cancelable slow path.
-                        const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
-                        if (!params->updates.canTakeFastPath) {
-                            gs->startCommitEpoch(params->updates.versionEnd);
-                        }
-                    }
+                exitProcessed = msg->isNotification() && msg->method() == LSPMethod::Exit;
+                if (gs) {
+                    maybeStartCommitSlowPathEdit(*gs, *msg);
                 }
             }
             prodCounterInc("lsp.messages.received");

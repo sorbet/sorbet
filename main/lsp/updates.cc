@@ -167,8 +167,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
     const bool committed = finalGS->tryCommitEpoch(
-        updates.versionEnd, isCancelable && multithreadedMode && config.opts.lspCancelableSlowPathEnabled,
-        [&]() -> bool {
+        updates.versionEnd, isCancelable && config.opts.lspCancelableSlowPathEnabled, [&]() -> bool {
             // Index the updated files using finalGS.
             {
                 core::UnfreezeFileTable fileTableAccess(*finalGS);
