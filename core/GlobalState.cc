@@ -1471,7 +1471,7 @@ bool GlobalState::tryCommitEpoch(u4 epoch, bool isCancelable, function<bool()> l
             if (processing == invalidator) {
                 ENFORCE(lastCommittedLSPEpoch->load() != processing, "Trying to commit an already-committed epoch.");
                 // OK to commit!
-                lastCommittedLSPEpoch->store(currentlyProcessingLSPEpoch->load());
+                lastCommittedLSPEpoch->store(processing);
                 return true;
             }
             // Else, typechecking was canceled after lambda() ran.
