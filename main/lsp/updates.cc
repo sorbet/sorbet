@@ -167,7 +167,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
     const bool committed = finalGS->tryCommitEpoch(
-        updates.versionEnd, isCancelable && config.opts.lspCancelableSlowPathEnabled, [&]() -> bool {
+        updates.versionEnd, isCancelable && config.opts.lspCancelableSlowPathEnabled, [&]() -> void {
             // Index the updated files using finalGS.
             {
                 core::UnfreezeFileTable fileTableAccess(*finalGS);
@@ -191,14 +191,14 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
                 }
             }
             if (finalGS->wasTypecheckingCanceled()) {
-                return false;
+                return;
             }
 
             ENFORCE(finalGS->lspQuery.isEmpty());
             auto maybeResolved =
                 pipeline::resolve(finalGS, move(indexedCopies), config.opts, workers, config.skipConfigatron);
             if (!maybeResolved.hasResult()) {
-                return false;
+                return;
             }
 
             auto &resolved = maybeResolved.result();
@@ -206,11 +206,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
                 ENFORCE(tree.file.exists());
                 affectedFiles.push_back(tree.file);
             }
-            auto maybeTypechecked = pipeline::typecheck(finalGS, move(resolved), config.opts, workers);
-            if (!maybeTypechecked.hasResult()) {
-                return false;
-            }
-            return true;
+            pipeline::typecheck(finalGS, move(resolved), config.opts, workers);
         });
 
     auto out = finalGS->errorQueue->drainWithQueryResponses();

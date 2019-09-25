@@ -487,7 +487,7 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathWhenFastPathEditComesIn) { // NO
     EXPECT_TRUE(gs->wasTypecheckingCanceled());
 
     // Processor thread: Try to typecheck. Should cancel.
-    EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> bool { return true; }));
+    EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
 
     // GS should no longer register a cancellation, since the epoch didn't commit.
     EXPECT_FALSE(gs->wasTypecheckingCanceled());
@@ -510,7 +510,7 @@ TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenSlowPathEditComesIn) {
     EXPECT_FALSE(gs->wasTypecheckingCanceled());
 
     // Processor thread: Try to typecheck. Should return true.
-    EXPECT_TRUE(gs->tryCommitEpoch(epoch, true, []() -> bool { return true; }));
+    EXPECT_TRUE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
 }
 
 TEST(SlowPathCancelation, CancelsRunningSlowPathAfterBlockingRequestGetsCanceled) { // NOLINT
@@ -537,7 +537,7 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathAfterBlockingRequestGetsCanceled
     EXPECT_TRUE(gs->wasTypecheckingCanceled());
 
     // Processor thread: Try to typecheck, but get denied because canceled.
-    EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> bool { return true; }));
+    EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
 }
 
 } // namespace sorbet::realmain::lsp::test

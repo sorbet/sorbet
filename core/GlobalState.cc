@@ -1453,27 +1453,25 @@ bool GlobalState::tryCancelSlowPath(u4 newEpoch) const {
     return true;
 }
 
-bool GlobalState::tryCommitEpoch(u4 epoch, bool isCancelable, function<bool()> lambda) {
+bool GlobalState::tryCommitEpoch(u4 epoch, bool isCancelable, function<void()> typecheck) {
     if (!isCancelable) {
-        return lambda();
+        typecheck();
+        return true;
     }
 
     // Should have called "startCommitEpoch" *before* this method.
     ENFORCE(currentlyProcessingLSPEpoch->load() == epoch);
-    const bool canCommit = lambda();
+    typecheck();
     {
         absl::MutexLock lock(epochMutex.get());
-        if (canCommit) {
-            // Try to commit.
-            const u4 processing = currentlyProcessingLSPEpoch->load();
-            const u4 invalidator = lspEpochInvalidator->load();
-            if (processing == invalidator) {
-                ENFORCE(lastCommittedLSPEpoch->load() != processing, "Trying to commit an already-committed epoch.");
-                // OK to commit!
-                lastCommittedLSPEpoch->store(currentlyProcessingLSPEpoch->load());
-                return true;
-            }
-            // Else, typechecking was canceled after lambda() ran.
+        // Try to commit.
+        const u4 processing = currentlyProcessingLSPEpoch->load();
+        const u4 invalidator = lspEpochInvalidator->load();
+        if (processing == invalidator) {
+            ENFORCE(lastCommittedLSPEpoch->load() != processing, "Trying to commit an already-committed epoch.");
+            // OK to commit!
+            lastCommittedLSPEpoch->store(processing);
+            return true;
         }
         // Typechecking was canceled.
         const u4 lastCommitted = lastCommittedLSPEpoch->load();
