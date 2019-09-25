@@ -158,8 +158,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
 }
 
 void LSPLoop::maybeStartCommitSlowPathEdit(core::GlobalState &gs, const LSPMessage &msg) const {
-    if (config.opts.lspCancelableSlowPathEnabled && msg.isNotification() &&
-        msg.method() == LSPMethod::SorbetWorkspaceEdit) {
+    if (msg.isNotification() && msg.method() == LSPMethod::SorbetWorkspaceEdit) {
         // While we're holding the queue lock (and preventing new messages from entering), start a
         // commit for an epoch if this message will trigger a cancelable slow path.
         const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);

@@ -87,7 +87,8 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
     // Check if we should cancel the slow path.
     const auto &gs = ttgs.getGlobalState();
     const auto runningSlowPath = gs.getRunningSlowPath();
-    if (runningSlowPath.has_value()) {
+    // Only try to cancel if the cancelation feature is enabled.
+    if (config.opts.lspCancelableSlowPathEnabled && runningSlowPath.has_value()) {
         const auto &[committed, end] = runningSlowPath.value();
         // Prune history for all messages no longer in queue or being processed by typechecking thread.
         ttgs.pruneBefore(min(committed, earliestActiveEditVersion));
