@@ -237,7 +237,7 @@ TEST(LSPPreprocessor, IgnoresWatchmanUpdatesFromOpenFiles) { // NOLINT
     ASSERT_TRUE(state.pendingRequests.size() == 1);
 
     const auto updates = getUpdates(state, 0).value();
-    EXPECT_EQ((updates->versionEnd - updates->versionStart + 1) == 2);
+    EXPECT_EQ(updates->versionEnd - updates->versionStart + 1, 2);
     EXPECT_FALSE(updates->canTakeFastPath);
     EXPECT_TRUE(updates->hasNewFiles);
     ASSERT_EQ(updates->updatedFiles.size(), 1);
@@ -388,8 +388,7 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
         // Check that the next edit was merged into the first edit.
         ASSERT_EQ(state.pendingRequests[0]->method(), LSPMethod::SorbetWorkspaceEdit);
         auto updates = getUpdates(state, 0).value();
-        EXPECT_EQ(count->textDocumentDidOpen, 1);
-        EXPECT_EQ(count->textDocumentDidChange, i);
+        EXPECT_EQ(updates->versionEnd - updates->versionStart + 1, 1 + i);
         EXPECT_EQ(updates->updatedFiles[0]->source(), fooContents);
         const auto &gs = *updates->updatedGS.value();
         EXPECT_EQ(gs.findFileByPath("foo.rb").data(gs).source(), fooContents);
