@@ -955,6 +955,12 @@ void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File
     ASSERT_TRUE(response.result.has_value());
 
     auto &completionList = get<unique_ptr<CompletionList>>(*response.result);
+    fast_sort(completionList->items, [&](const auto &left, const auto &right) -> bool {
+        string leftText = left->sortText.has_value() ? left->sortText.value() : left->label;
+        string rightText = right->sortText.has_value() ? right->sortText.value() : right->label;
+
+        return leftText < rightText;
+    });
 
     // TODO(jez) Add ability to expect CompletionItemKind of each item
     string actualMessage =

@@ -154,9 +154,14 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       core::TypePtr receiverType,
-                                                      const core::TypeConstraint *constraint) const {
+                                                      const core::TypeConstraint *constraint, size_t sortIdx) const {
     ENFORCE(what.exists());
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
+
+    // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
+    // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
+    item->sortText = fmt::format("{:06d}", sortIdx);
+
     auto resultType = what.data(gs)->resultType;
     if (!resultType) {
         resultType = core::Types::untypedUntracked();
@@ -209,7 +214,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
                     sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                     // hide singletons
                     hasSimilarName(gs, sym.data(gs)->name, pattern)) {
-                    items.push_back(getCompletionItem(gs, sym, receiverType, nullptr));
+                    items.push_back(getCompletionItem(gs, sym, receiverType, nullptr, items.size()));
                 }
             }
         } while (owner != core::Symbols::root());
@@ -275,7 +280,7 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
 
             for (auto &similarMethod : deduped) {
                 items.push_back(getCompletionItem(*gs, similarMethod.method, similarMethod.receiverType,
-                                                  similarMethod.constr.get()));
+                                                  similarMethod.constr.get(), items.size()));
             }
         } else if (auto identResp = resp->isIdent()) {
             findSimilarConstantOrIdent(*gs, identResp->retType.type, items);
