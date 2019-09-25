@@ -46,11 +46,13 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
 atomic<int> globalStateIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
 
-GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
+GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<absl::Mutex> epochMutex,
+                         shared_ptr<atomic<u4>> currentlyProcessingLSPEpoch, shared_ptr<atomic<u4>> lspEpochInvalidator,
+                         shared_ptr<atomic<u4>> lastCommittedLSPEpoch)
     : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(std::move(errorQueue)),
-      lspQuery(lsp::Query::noQuery()), epochMutex(make_shared<absl::Mutex>()),
-      currentlyProcessingLSPEpoch(make_shared<atomic<u4>>(0)), lspEpochInvalidator(make_shared<atomic<u4>>(0)),
-      lastCommittedLSPEpoch(make_shared<atomic<u4>>(0)) {
+      lspQuery(lsp::Query::noQuery()), epochMutex(std::move(epochMutex)),
+      currentlyProcessingLSPEpoch(move(currentlyProcessingLSPEpoch)), lspEpochInvalidator(move(lspEpochInvalidator)),
+      lastCommittedLSPEpoch(move(lastCommittedLSPEpoch)) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
     unsigned int maxNameCount = 8192;
@@ -1250,7 +1252,8 @@ bool GlobalState::unfreezeSymbolTable() {
 unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
-    auto result = make_unique<GlobalState>(this->errorQueue);
+    auto result = make_unique<GlobalState>(this->errorQueue, this->epochMutex, this->currentlyProcessingLSPEpoch,
+                                           this->lspEpochInvalidator, this->lastCommittedLSPEpoch);
 
     result->silenceErrors = this->silenceErrors;
     result->autocorrect = this->autocorrect;
@@ -1270,10 +1273,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
     result->lspQuery = this->lspQuery;
-    result->epochMutex = this->epochMutex;
-    result->currentlyProcessingLSPEpoch = this->currentlyProcessingLSPEpoch;
-    result->lspEpochInvalidator = this->lspEpochInvalidator;
-    result->lastCommittedLSPEpoch = this->lastCommittedLSPEpoch;
     result->lspTypecheckCount = this->lspTypecheckCount;
     result->errorUrlBase = this->errorUrlBase;
     result->suppressedErrorClasses = this->suppressedErrorClasses;

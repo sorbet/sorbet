@@ -46,7 +46,11 @@ class GlobalState final {
     friend struct NameRefDebugCheck;
 
 public:
-    GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
+    GlobalState(std::shared_ptr<ErrorQueue> errorQueue,
+                std::shared_ptr<absl::Mutex> epochMutex = std::make_shared<absl::Mutex>(),
+                std::shared_ptr<std::atomic<u4>> currentlyProcessingLSPEpoch = std::make_shared<std::atomic<u4>>(0),
+                std::shared_ptr<std::atomic<u4>> lspEpochInvalidator = std::make_shared<std::atomic<u4>>(0),
+                std::shared_ptr<std::atomic<u4>> lastCommittedLSPEpoch = std::make_shared<std::atomic<u4>>(0));
 
     void initEmpty();
     void installIntrinsics();
@@ -245,19 +249,19 @@ private:
     bool wasModified_ = false;
 
     // In LSP mode: Used to linearize operations involving lastCommittedLSPEpoch.
-    std::shared_ptr<absl::Mutex> epochMutex;
+    const std::shared_ptr<absl::Mutex> epochMutex;
     // In LSP mode: Contains the current edit version (epoch) that the processing thread is typechecking or has
     // typechecked last. Is bumped by the typechecking thread.
-    std::shared_ptr<std::atomic<u4>> currentlyProcessingLSPEpoch;
+    const std::shared_ptr<std::atomic<u4>> currentlyProcessingLSPEpoch;
     // In LSP mode: should always be `>= currentlyProcessingLSPEpoch`(modulo overflows).
     // If value in `lspEpochInvalidator` is different from `currentlyProcessingLSPEpoch`, then LSP wants the current
     // request to be cancelled. Is bumped by the preprocessor thread (which determines cancellations).
-    std::shared_ptr<std::atomic<u4>> lspEpochInvalidator;
+    const std::shared_ptr<std::atomic<u4>> lspEpochInvalidator;
     // In LSP mode: should always be >= currentlyProcessingLSPEpoch. Is bumped by the typechecking thread.
     // Contains the versionEnd of the last committed slow path.
     // If lastCommittedLSPEpoch != currentlyProcessingLSPEpoch, then GlobalState is currently running a slow path
     // containing edits (lastCommittedLSPEpoch, currentlyProcessingLSPEpoch].
-    std::shared_ptr<std::atomic<u4>> lastCommittedLSPEpoch;
+    const std::shared_ptr<std::atomic<u4>> lastCommittedLSPEpoch;
 
     bool freezeSymbolTable();
     bool freezeNameTable();
