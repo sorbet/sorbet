@@ -22,9 +22,9 @@ module T::Types
     private def subtype_of_single?(other)
       case other
       when AttachedClassType
-          true
-        else
-          false
+        true
+      else
+        false
       end
     end
   end
