@@ -90,7 +90,8 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
 
 LSPResult LSPLoop::commitTypecheckRun(TypecheckRun run) {
     if (run.canceled) {
-        logger->error("Typecheck run was canceled.");
+        logger->debug("[Typechecker] Typecheck run for edits {} thru {} was canceled.", run.updates.versionStart,
+                      run.updates.versionEnd);
         return LSPResult{move(run.gs), {}, true};
     }
 

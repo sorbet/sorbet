@@ -98,7 +98,8 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
                 auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
                 auto combinedUpdates = ttgs.getCombinedUpdates(committed + 1, params->updates.versionEnd);
                 if (combinedUpdates.canTakeFastPath && gs.tryCancelSlowPath(params->updates.versionEnd)) {
-                    logger->error("[PREPROCESSOR] Canceling typechecking!");
+                    logger->debug("[Preprocessor] Canceling typechecking, as edits {} thru {} can take fast path.",
+                                  params->updates.versionStart, params->updates.versionEnd);
                     params->updates = move(combinedUpdates);
                 }
                 return;
