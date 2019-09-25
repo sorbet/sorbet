@@ -201,7 +201,7 @@ public:
     // [LSP] Returns 'true' if the currently running typecheck run has been canceled.
     bool wasTypecheckingCanceled() const;
     // [LSP] If a slow path is running on this GlobalState or its descendent, returns a pair of the committed
-    // epoch and the processing epoch.
+    // epoch and the processing epoch. Otherwise, returns nullopt.
     std::optional<std::pair<u4, u4>> getRunningSlowPath() const;
     // [LSP] Run only from preprocess thread.
     // Tries to cancel a running slow path on this GlobalState or its descendent. Returns true if it succeeded, false if
