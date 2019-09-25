@@ -1814,6 +1814,24 @@ public:
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
+        // At this point, the type members have been fully processed, so the
+        // AttachedClass template can be resolved
+        auto klass = original->symbol;
+
+        // The resolve constants pass ensures that the singleton exists already
+        auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
+        ENFORCE(singleton.exists());
+
+        // When AttachedClass is present on the singleton, update its upper
+        // bound now that all of the other type members have been defined.
+        auto attachedClass = singleton.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+        if (attachedClass.exists()) {
+            auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType.get());
+            ENFORCE(lambdaParam != nullptr);
+
+            lambdaParam->upperBound = klass.data(ctx)->externalType(ctx);
+        }
+
         nestedBlockCounts.emplace_back(0);
         return original;
     }
