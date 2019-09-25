@@ -836,7 +836,7 @@ ast::MaybeASTPassResult resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
                                 const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
     try {
         what = name(*gs, move(what), opts, skipConfigatron);
-        if (gs->isTypecheckingCanceled()) {
+        if (gs->wasTypecheckingCanceled()) {
             return ast::MaybeASTPassResult();
         }
 
@@ -950,7 +950,7 @@ ast::MaybeASTPassResult typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                 int processedByThread = 0;
 
                 {
-                    for (auto result = fileq->try_pop(job); !result.done() && !ctx.state.isTypecheckingCanceled();
+                    for (auto result = fileq->try_pop(job); !result.done() && !ctx.state.wasTypecheckingCanceled();
                          result = fileq->try_pop(job)) {
                         if (result.gotItem()) {
                             processedByThread++;
@@ -983,7 +983,7 @@ ast::MaybeASTPassResult typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
                     gs->errorQueue->flushErrors();
-                    if (ctx.state.isTypecheckingCanceled()) {
+                    if (ctx.state.wasTypecheckingCanceled()) {
                         return ast::MaybeASTPassResult();
                     }
                 }

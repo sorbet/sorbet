@@ -484,13 +484,13 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathWhenFastPathEditComesIn) { // NO
     // Introduce a fix to syntax error. Should course-correct to a fast path.
     string fooV3 = "# typed: true\ndef foo; end";
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
-    EXPECT_TRUE(gs->isTypecheckingCanceled());
+    EXPECT_TRUE(gs->wasTypecheckingCanceled());
 
     // Processor thread: Try to typecheck. Should cancel.
     EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> bool { return true; }));
 
     // GS should no longer register a cancellation, since the epoch didn't commit.
-    EXPECT_FALSE(gs->isTypecheckingCanceled());
+    EXPECT_FALSE(gs->wasTypecheckingCanceled());
 }
 
 TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenSlowPathEditComesIn) { // NOLINT
@@ -507,7 +507,7 @@ TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenSlowPathEditComesIn) {
     // Introduce another slow path here: new method
     string fooV3 = "# typed: true\ndef foo; end\ndef bar;end";
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
-    EXPECT_FALSE(gs->isTypecheckingCanceled());
+    EXPECT_FALSE(gs->wasTypecheckingCanceled());
 
     // Processor thread: Try to typecheck. Should return true.
     EXPECT_TRUE(gs->tryCommitEpoch(epoch, true, []() -> bool { return true; }));
@@ -530,11 +530,11 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathAfterBlockingRequestGetsCanceled
     // Fixes parse error, but blocked by hover.
     string fooV3 = "# typed: true\ndef foo; end";
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
-    EXPECT_FALSE(gs->isTypecheckingCanceled());
+    EXPECT_FALSE(gs->wasTypecheckingCanceled());
 
     // Cancel hover, which should cause the slow path to be canceled.
     preprocessor.preprocessAndEnqueue(state, makeCancel(5), mtx);
-    EXPECT_TRUE(gs->isTypecheckingCanceled());
+    EXPECT_TRUE(gs->wasTypecheckingCanceled());
 
     // Processor thread: Try to typecheck, but get denied because canceled.
     EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> bool { return true; }));

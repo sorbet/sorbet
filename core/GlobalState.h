@@ -199,7 +199,7 @@ public:
     // Indicates an intent to begin committing a specific epoch.
     void startCommitEpoch(u4 epoch);
     // [LSP] Returns 'true' if the currently running typecheck run has been canceled.
-    bool isTypecheckingCanceled() const;
+    bool wasTypecheckingCanceled() const;
     // [LSP] If a slow path is running on this GlobalState or its descendent, returns a pair of the committed
     // epoch and the processing epoch.
     std::optional<std::pair<u4, u4>> getRunningSlowPath() const;

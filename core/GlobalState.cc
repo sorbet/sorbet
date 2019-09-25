@@ -1417,7 +1417,7 @@ bool GlobalState::wasModified() const {
     return wasModified_;
 }
 
-bool GlobalState::isTypecheckingCanceled() const {
+bool GlobalState::wasTypecheckingCanceled() const {
     return lspEpochInvalidator->load() != currentlyProcessingLSPEpoch->load();
 }
 

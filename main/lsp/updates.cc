@@ -190,7 +190,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
                     indexedCopies.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
                 }
             }
-            if (finalGS->isTypecheckingCanceled()) {
+            if (finalGS->wasTypecheckingCanceled()) {
                 return false;
             }
 
