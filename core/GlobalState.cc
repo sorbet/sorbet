@@ -1423,6 +1423,10 @@ bool GlobalState::wasTypecheckingCanceled() const {
 
 void GlobalState::startCommitEpoch(u4 epoch) {
     absl::MutexLock lock(epochMutex.get());
+    ENFORCE(epoch != currentlyProcessingLSPEpoch->load());
+    // epoch should be a version 'ahead' of currentlyProcessingLSPEpoch. The distance between the two is the number of
+    // fast path edits that have come in since the last slow path. Since epochs overflow, there's nothing that I can
+    // easily assert here to ensure that we are not moving backward in time.
     currentlyProcessingLSPEpoch->store(epoch);
     lspEpochInvalidator->store(epoch);
     // These should always be different.
