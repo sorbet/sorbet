@@ -30,4 +30,4 @@ module T::Types
   end
 end
 
-AttachedClass = T::Types::AttachedClassType.new
+AttachedClass = T.unsafe(T::Types::AttachedClassType.new)
