@@ -1461,6 +1461,8 @@ bool GlobalState::tryCommitEpoch(u4 epoch, bool isCancelable, function<void()> t
 
     // Should have called "startCommitEpoch" *before* this method.
     ENFORCE(currentlyProcessingLSPEpoch->load() == epoch);
+    // Typechecking does not run under the mutex, as it would prevent another thread from running `tryCancelSlowPath`
+    // during typechecking.
     typecheck();
     {
         absl::MutexLock lock(epochMutex.get());
