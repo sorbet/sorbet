@@ -108,11 +108,6 @@ public:
      */
     void preprocessAndEnqueue(QueueState &state, std::unique_ptr<LSPMessage> msg, absl::Mutex &stateMtx);
 
-    /**
-     * Clears the undo history. Used in single-threaded mode to signal when updates are safely committed.
-     */
-    void clearHistory();
-
     std::unique_ptr<Joinable> runPreprocessor(QueueState &incomingQueue, absl::Mutex &incomingMtx,
                                               QueueState &processingQueue, absl::Mutex &processingMtx);
 };

@@ -264,10 +264,6 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
     }
 }
 
-void LSPPreprocessor::clearHistory() {
-    ttgs.pruneBefore(nextVersion);
-}
-
 string readFile(string_view path, const FileSystem &fs) {
     try {
         return fs.readFile(path);

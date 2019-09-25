@@ -33,8 +33,6 @@ LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<uniq
                             make_move_iterator(rslt.responses.end()));
     }
     state.pendingRequests.clear();
-    // Clear time-travel history now that all messages are committed to GlobalState.
-    preprocessor.clearHistory();
     return rv;
 }
 
