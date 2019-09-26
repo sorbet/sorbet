@@ -50,14 +50,13 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
 
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
         auto &msg = **it;
+        it++;
         if (!msg.isNotification() || msg.method() != LSPMethod::SorbetWorkspaceEdit) {
-            it++;
             continue;
         }
         auto &msgParams = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
         // See which newer requests we can enqueue. We want to merge them *backwards* into msgParams.
         earliestActiveEditVersion = min(earliestActiveEditVersion, msgParams->updates.versionStart);
-        it++;
         while (it != pendingRequests.end()) {
             auto &mergeMsg = **it;
             const bool canMerge = mergeMsg.isNotification() && mergeMsg.method() == LSPMethod::SorbetWorkspaceEdit;
@@ -95,6 +94,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
         for (auto it = pendingRequests.begin(); it != pendingRequests.end(); it++) {
             const auto &msg = *it;
             if (msg->isNotification() && msg->method() == LSPMethod::SorbetWorkspaceEdit) {
+                Timer timeit(logger, "tryCancelSlowPath");
                 auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
                 auto combinedUpdates = ttgs.getCombinedUpdates(committed + 1, params->updates.versionEnd);
                 if (combinedUpdates.canTakeFastPath && gs.tryCancelSlowPath(params->updates.versionEnd)) {
@@ -405,12 +405,15 @@ void LSPPreprocessor::mergeEdits(LSPFileUpdates &to, LSPFileUpdates &from) {
     // No need to update versionStart, as to comes before from.
     ENFORCE(ttgs.comesBefore(to.versionStart, from.versionStart));
     if (to.canTakeFastPath) {
+        prodCategoryCounterInc("lsp.merge_edits", "fast_path");
         to.updatedGS = nullopt;
     } else if (from.updatedGS.has_value()) {
         // `from` has all file updates from `to` and `from` so its GS can be re-used if specified.
+        prodCategoryCounterInc("lsp.merge_edits", "slow_path_reuse_gs");
         to.updatedGS = move(from.updatedGS.value());
     } else {
         // Roll forward again so initial GS has changes from this update prior to copying.
+        prodCategoryCounterInc("lsp.merge_edits", "slow_path_new_gs");
         ttgs.travel(from.versionEnd);
         to.updatedGS = getTypecheckingGS();
     }
