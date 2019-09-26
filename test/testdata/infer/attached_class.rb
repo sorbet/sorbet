@@ -15,8 +15,8 @@ end
 class Child < Parent; end
 class GrandChild < Child; end
 
-T.reveal_type(Child.make) # error: Revealed type: `Child`
-T.reveal_type(GrandChild.make) # error: Revealed type: `GrandChild`
+T.reveal_type(Child.make) # error: Revealed type: `T.nilable(Child)`
+T.reveal_type(GrandChild.make) # error: Revealed type: `T.nilable(GrandChild)`
 
 T.reveal_type(T::Array[Integer].new) # error: Revealed type: `T::Array[Integer]`
 
