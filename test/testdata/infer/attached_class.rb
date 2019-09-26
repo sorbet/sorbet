@@ -1,18 +1,22 @@
 # typed: true
 
-class Model
+class Parent
+  extend T::Helpers
   extend T::Sig
 
-  sig {params(args: T.untyped).returns(AttachedClass)}
-  def self.load(args)
-    T.unsafe(nil)
+  abstract!
+
+  sig {returns(T.nilable(AttachedClass))}
+  def self.make()
+    nil
   end
 end
 
-class A < Model
-end
+class Child < Parent; end
+class GrandChild < Child; end
 
-T.reveal_type(A.load(:foo)) # error: Revealed type: `A`
+T.reveal_type(Child.make) # error: Revealed type: `Child`
+T.reveal_type(GrandChild.make) # error: Revealed type: `GrandChild`
 
 T.reveal_type(T::Array[Integer].new) # error: Revealed type: `T::Array[Integer]`
 
