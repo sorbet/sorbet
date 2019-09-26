@@ -1,12 +1,16 @@
 cc_binary(
     name = "kaleidoscope",
     srcs = ["kaleidoscope.cpp"],
-    deps = ["@org_llvm_darwin",
+    deps = [
+        "@org_llvm_darwin",
     ],
 )
 
 sh_test(
     name = "kaleidoscope_test",
-    data = [ ":kaleidoscope", "kaleidoscope_test.out" ],
-    srcs = [ "kaleidoscope_test.sh" ],
+    srcs = ["kaleidoscope_test.sh"],
+    data = [
+        "kaleidoscope_test.out",
+        ":kaleidoscope",
+    ],
 )

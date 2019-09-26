@@ -21,9 +21,8 @@ cc_binary(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "@com_stripe_ruby_typer//main:realmain",
         "//plugin_injector",
+        "@com_stripe_ruby_typer//main:realmain",
         "@com_stripe_ruby_typer//payload",
     ],
 )
-

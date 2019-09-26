@@ -5,6 +5,7 @@ load(":third_party/externals.bzl", "sorbet_llvm_externals")
 sorbet_llvm_externals()
 
 load("@com_stripe_ruby_typer//third_party:externals.bzl", "register_sorbet_dependencies")
+
 register_sorbet_dependencies()
 
 load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
