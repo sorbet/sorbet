@@ -1188,14 +1188,14 @@ string BlockArg::nodeName() {
     return "BlockArg";
 }
 
-MaybeASTPassResult::MaybeASTPassResult() : trees(nullopt){};
-MaybeASTPassResult::MaybeASTPassResult(std::vector<ParsedFile> trees) : trees(move(trees)) {}
+ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
+ParsedFilesOrCancelled::ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees) : trees(move(trees)) {}
 
-bool MaybeASTPassResult::hasResult() const {
+bool ParsedFilesOrCancelled::hasResult() const {
     return trees.has_value();
 }
 
-vector<ParsedFile> &MaybeASTPassResult::result() {
+vector<ParsedFile> &ParsedFilesOrCancelled::result() {
     if (trees.has_value()) {
         return trees.value();
     }

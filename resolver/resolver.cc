@@ -1786,34 +1786,35 @@ public:
 };
 }; // namespace
 
-ast::MaybeASTPassResult Resolver::run(core::MutableContext ctx, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+ast::ParsedFilesOrCancelled Resolver::run(core::MutableContext ctx, vector<ast::ParsedFile> trees,
+                                          WorkerPool &workers) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), workers);
     if (ctx.state.wasTypecheckingCanceled()) {
-        return ast::MaybeASTPassResult();
+        return ast::ParsedFilesOrCancelled();
     }
     finalizeAncestors(ctx.state);
     if (ctx.state.wasTypecheckingCanceled()) {
-        return ast::MaybeASTPassResult();
+        return ast::ParsedFilesOrCancelled();
     }
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     if (ctx.state.wasTypecheckingCanceled()) {
-        return ast::MaybeASTPassResult();
+        return ast::ParsedFilesOrCancelled();
     }
     finalizeSymbols(ctx.state);
     if (ctx.state.wasTypecheckingCanceled()) {
-        return ast::MaybeASTPassResult();
+        return ast::ParsedFilesOrCancelled();
     }
     trees = resolveTypeParams(ctx, std::move(trees));
     if (ctx.state.wasTypecheckingCanceled()) {
-        return ast::MaybeASTPassResult();
+        return ast::ParsedFilesOrCancelled();
     }
     trees = resolveSigs(ctx, std::move(trees));
     if (ctx.state.wasTypecheckingCanceled()) {
-        return ast::MaybeASTPassResult();
+        return ast::ParsedFilesOrCancelled();
     }
     sanityCheck(ctx, trees);
 
-    return ast::MaybeASTPassResult(move(trees));
+    return ast::ParsedFilesOrCancelled(move(trees));
 }
 
 vector<ast::ParsedFile> Resolver::resolveTypeParams(core::MutableContext ctx, vector<ast::ParsedFile> trees) {

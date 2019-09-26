@@ -832,12 +832,12 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return what;
 }
 
-ast::MaybeASTPassResult resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
+ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                    const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
     try {
         what = name(*gs, move(what), opts, skipConfigatron);
         if (gs->wasTypecheckingCanceled()) {
-            return ast::MaybeASTPassResult();
+            return ast::ParsedFilesOrCancelled();
         }
 
         for (auto &named : what) {
@@ -850,7 +850,7 @@ ast::MaybeASTPassResult resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         }
 
         if (opts.stopAfterPhase == options::Phase::NAMER) {
-            return ast::MaybeASTPassResult(move(what));
+            return ast::ParsedFilesOrCancelled(move(what));
         }
 
         core::MutableContext ctx(*gs, core::Symbols::root());
@@ -914,11 +914,11 @@ ast::MaybeASTPassResult resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         what = printMissingConstants(*gs, opts, move(what));
     }
 
-    return ast::MaybeASTPassResult(move(what));
+    return ast::ParsedFilesOrCancelled(move(what));
 }
 
-ast::MaybeASTPassResult typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                  const options::Options &opts, WorkerPool &workers) {
+ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                      const options::Options &opts, WorkerPool &workers) {
     vector<ast::ParsedFile> typecheck_result;
 
     {
@@ -984,7 +984,7 @@ ast::MaybeASTPassResult typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
                     gs->errorQueue->flushErrors();
                     if (ctx.state.wasTypecheckingCanceled()) {
-                        return ast::MaybeASTPassResult();
+                        return ast::ParsedFilesOrCancelled();
                     }
                 }
             }
@@ -1041,7 +1041,7 @@ ast::MaybeASTPassResult typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
             plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
         }
 #endif
-        return ast::MaybeASTPassResult(move(typecheck_result));
+        return ast::ParsedFilesOrCancelled(move(typecheck_result));
     }
 }
 

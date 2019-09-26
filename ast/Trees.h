@@ -57,17 +57,17 @@ struct ParsedFile {
 };
 
 /**
- * Stores the output of an AST pass. May be empty if pass was canceled or encountered an error.
+ * Stores a vector of `ParsedFile`s. May be empty if pass was canceled or encountered an error.
  * TODO: Modify to store reason if we ever have multiple reasons for a pass to stop. Currently, it's only empty if the
  * pass is canceled in LSP mode.
  */
-class MaybeASTPassResult final {
+class ParsedFilesOrCancelled final {
 private:
     std::optional<std::vector<ParsedFile>> trees;
 
 public:
-    MaybeASTPassResult();
-    MaybeASTPassResult(std::vector<ParsedFile> trees);
+    ParsedFilesOrCancelled();
+    ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees);
 
     bool hasResult() const;
     std::vector<ParsedFile> &result();
