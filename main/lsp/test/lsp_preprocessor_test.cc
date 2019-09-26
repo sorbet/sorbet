@@ -494,6 +494,29 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathWhenFastPathEditComesIn) { // NO
     EXPECT_FALSE(gs->wasTypecheckingCanceled());
 }
 
+TEST(SlowPathCancelation, DoesNotCancelsRunningSlowPathWhenFeatureIsDisabled) { // NOLINT
+    QueueState state;
+    absl::Mutex mtx;
+    auto options = makeOptions("");
+    options.lspCancelableSlowPathEnabled = false;
+    auto config = makeConfig(options);
+    auto preprocessor = makePreprocessor(config);
+    unique_ptr<core::GlobalState> gs = initCancelSlowPathTest(preprocessor, state, mtx);
+
+    // Introduce a syntax error, which causes a slow path.
+    string fooV2 = "# typed: true\n{def foo; end";
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fooV2), mtx);
+    u4 epoch = emulateProcessEditAtHeadOfQueue(state, *gs);
+
+    // Introduce a fix to syntax error. Should course-correct to a fast path -- but only if feature is enabled!
+    string fooV3 = "# typed: true\ndef foo; end";
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
+    EXPECT_FALSE(gs->wasTypecheckingCanceled());
+
+    // Processor thread: Try to typecheck. Should *not* cancel.
+    EXPECT_TRUE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
+}
+
 TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenSlowPathEditComesIn) { // NOLINT
     auto preprocessor = makePreprocessor();
     QueueState state;
