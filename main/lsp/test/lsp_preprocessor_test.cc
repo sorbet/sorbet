@@ -19,6 +19,7 @@ options::Options makeOptions(string_view rootPath) {
     options::Options opts;
     opts.rawInputDirNames.emplace_back(string(rootPath));
     opts.runLSP = true;
+    opts.lspCancelableSlowPathEnabled = true;
     opts.fs = make_shared<sorbet::test::MockFileSystem>(rootPath);
     return opts;
 }
