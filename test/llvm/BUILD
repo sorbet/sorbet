@@ -13,4 +13,5 @@ sh_test(
         "kaleidoscope_test.out",
         ":kaleidoscope",
     ],
+    visibility = ["//visibility:public"],
 )
