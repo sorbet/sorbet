@@ -11,5 +11,11 @@ def sorbet_llvm_externals():
         remote = "https://github.com/sorbet/sorbet.git",
         commit = "50873fc9c1fa29cc6be4953630f4cf794651af49",
     )
-    
-    # add new stuff here
+
+    http_archive(
+        name = "org_llvm_darwin",
+        url = "https://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-apple-darwin.tar.xz",
+        build_file = "//third_party:llvm.BUILD",
+        sha256 = "94ebeb70f17b6384e052c47fef24a6d70d3d949ab27b6c83d4ab7b298278ad6f",
+        strip_prefix = "clang+llvm-8.0.0-x86_64-apple-darwin",
+    )
