@@ -8,6 +8,9 @@ class Parent
 
   sig {returns(T.nilable(AttachedClass))}
   def self.make()
+    # TODO(trevor): It would be nice if this could be `new`, but that's running
+    # into problems when checking the concrete type returned by `Class#new`
+    # against the `AttachedClass` param.
     nil
   end
 end
