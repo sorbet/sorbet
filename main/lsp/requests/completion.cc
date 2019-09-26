@@ -9,17 +9,6 @@ namespace sorbet::realmain::lsp {
 
 namespace {
 
-core::NameRef originalName(const core::GlobalState &gs, core::NameRef name) {
-    switch (name.data(gs)->kind) {
-        case core::NameKind::UTF8:
-            return name;
-        case core::NameKind::UNIQUE:
-            return originalName(gs, name.data(gs)->unique.original);
-        case core::NameKind::CONSTANT:
-            return originalName(gs, name.data(gs)->cnst.original);
-    }
-}
-
 vector<core::SymbolRef> ancestorsImpl(const core::GlobalState &gs, core::SymbolRef sym, vector<core::SymbolRef> &&acc) {
     // The implementation here is similar to Symbols::derivesFrom.
     ENFORCE(sym.data(gs)->isClassOrModuleLinearizationComputed());
@@ -52,11 +41,12 @@ struct SimilarMethod final {
     shared_ptr<core::TypeConstraint> constr = nullptr;
 };
 
+using SimilarMethodsByName = UnorderedMap<core::NameRef, vector<SimilarMethod>>;
+
 // First of pair is "found at this depth in the ancestor hierarchy"
 // Second of pair is method symbol found at that depth, with name similar to prefix.
-vector<SimilarMethod> similarMethodsForClass(const core::GlobalState &gs, core::SymbolRef receiver,
-                                             string_view prefix) {
-    auto result = vector<SimilarMethod>{};
+SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::SymbolRef receiver, string_view prefix) {
+    auto result = SimilarMethodsByName{};
 
     int depth = -1;
     for (auto ancestor : ancestors(gs, receiver)) {
@@ -67,7 +57,8 @@ vector<SimilarMethod> similarMethodsForClass(const core::GlobalState &gs, core::
             }
 
             if (hasSimilarName(gs, memberName, prefix)) {
-                result.emplace_back(SimilarMethod{depth, receiver, memberSymbol});
+                // Creates the the list if it does not exist
+                result[memberName].emplace_back(SimilarMethod{depth, receiver, memberSymbol});
             }
         }
     }
@@ -75,21 +66,32 @@ vector<SimilarMethod> similarMethodsForClass(const core::GlobalState &gs, core::
     return result;
 }
 
-vector<SimilarMethod> mergeSimilarMethods(vector<SimilarMethod> &&left, vector<SimilarMethod> &&right) {
-    left.insert(left.end(), right.begin(), right.end());
-    return std::move(left);
+// Unconditionally creates an intersection of the methods
+// (for both union and intersection types, it's only valid to call a method by name if it exists on all components)
+SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName left, SimilarMethodsByName right) {
+    auto result = SimilarMethodsByName{};
+
+    for (auto [methodName, leftSimilarMethods] : left) {
+        if (right.find(methodName) != right.end()) {
+            for (auto similarMethod : leftSimilarMethods) {
+                result[methodName].emplace_back(similarMethod);
+            }
+            for (auto similarMethod : right[methodName]) {
+                result[methodName].emplace_back(similarMethod);
+            }
+        }
+    }
+    return result;
 }
 
-vector<SimilarMethod> similarMethodsForReceiver(const core::GlobalState &gs, const core::TypePtr receiver,
-                                                string_view prefix) {
-    auto result = vector<SimilarMethod>{};
+SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, const core::TypePtr receiver,
+                                               string_view prefix) {
+    auto result = SimilarMethodsByName{};
 
     typecase(
         receiver.get(), [&](core::ClassType *type) { result = similarMethodsForClass(gs, type->symbol, prefix); },
         [&](core::AppliedType *type) { result = similarMethodsForClass(gs, type->klass, prefix); },
         [&](core::AndType *type) {
-            // We take the union here rather than take the intersection. (Better to suggest a method that someone
-            // is looking for and then give a type error, rather than have them sit wondering why it's missing.)
             result = mergeSimilarMethods(similarMethodsForReceiver(gs, type->left, prefix),
                                          similarMethodsForReceiver(gs, type->right, prefix));
         },
@@ -100,25 +102,27 @@ vector<SimilarMethod> similarMethodsForReceiver(const core::GlobalState &gs, con
 }
 
 // Walk a core::DispatchResult to find methods similar to `prefix` on any of its DispatchComponents' receivers.
-vector<SimilarMethod> allSimilarMethods(const core::GlobalState &gs, core::DispatchResult &dispatchResult,
-                                        string_view prefix) {
+SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, core::DispatchResult &dispatchResult,
+                                       string_view prefix) {
     auto result = similarMethodsForReceiver(gs, dispatchResult.main.receiver, prefix);
 
     // Convert to shared_ptr and take ownership
     shared_ptr<core::TypeConstraint> constr = move(dispatchResult.main.constr);
 
-    for (auto &similarMethod : result) {
-        ENFORCE(similarMethod.receiverType == nullptr, "About to overwrite non-null receiverType");
-        similarMethod.receiverType = dispatchResult.main.receiver;
+    for (auto &[methodName, similarMethods] : result) {
+        for (auto &similarMethod : similarMethods) {
+            ENFORCE(similarMethod.receiverType == nullptr, "About to overwrite non-null receiverType");
+            similarMethod.receiverType = dispatchResult.main.receiver;
 
-        ENFORCE(similarMethod.constr == nullptr, "About to overwrite non-null constr");
-        similarMethod.constr = constr;
+            ENFORCE(similarMethod.constr == nullptr, "About to overwrite non-null constr");
+            similarMethod.constr = constr;
+        }
     }
 
     if (dispatchResult.secondary != nullptr) {
         // Right now we completely ignore the secondaryKind (either AND or OR), and always union.
-        // (See comment for AndType in similarMethodsForReceiver.)
-        result = mergeSimilarMethods(move(result), allSimilarMethods(gs, *dispatchResult.secondary, prefix));
+        // (See comment above mergeSimilarMethods)
+        result = mergeSimilarMethods(result, allSimilarMethods(gs, *dispatchResult.secondary, prefix));
     }
 
     return result;
@@ -252,8 +256,31 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
             auto prefix = sendResp->callerSideName.data(*gs)->shortName(*gs);
             logger->debug("Looking for method similar to {}", prefix);
 
-            auto similarMethods = allSimilarMethods(*gs, *sendResp->dispatchResult, prefix);
-            fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
+            auto similarMethodsByName = allSimilarMethods(*gs, *sendResp->dispatchResult, prefix);
+            for (auto &[methodName, similarMethods] : similarMethodsByName) {
+                fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
+                    if (left.depth != right.depth) {
+                        return left.depth < right.depth;
+                    }
+
+                    return left.method._id < right.method._id;
+                });
+            }
+
+            auto deduped = vector<SimilarMethod>{};
+            for (auto &[methodName, similarMethods] : similarMethodsByName) {
+                if (methodName.data(*gs)->kind == core::NameKind::UNIQUE &&
+                    methodName.data(*gs)->unique.uniqueNameKind == core::UniqueNameKind::MangleRename) {
+                    // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
+                    // unique names, because we want each overload to show up but those use unique names.
+                    continue;
+                }
+
+                // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
+                deduped.emplace_back(similarMethods[0]);
+            }
+
+            fast_sort(deduped, [&](const auto &left, const auto &right) -> bool {
                 if (left.depth != right.depth) {
                     return left.depth < right.depth;
                 }
@@ -266,17 +293,6 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
 
                 return left.method._id < right.method._id;
             });
-
-            auto deduped = vector<SimilarMethod>{};
-            auto lastName = core::NameRef::noName();
-            for (auto &similarMethod : similarMethods) {
-                auto name = originalName(*gs, similarMethod.method.data(*gs)->name);
-
-                if (lastName != name) {
-                    deduped.emplace_back(similarMethod);
-                    lastName = name;
-                }
-            }
 
             for (auto &similarMethod : deduped) {
                 items.push_back(getCompletionItem(*gs, similarMethod.method, similarMethod.receiverType,
