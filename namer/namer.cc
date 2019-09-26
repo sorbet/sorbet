@@ -76,7 +76,11 @@ class NameInserter {
     unique_ptr<ast::Expression> arg2Symbol(core::MutableContext ctx, int pos, ast::ParsedArg parsedArg) {
         if (pos < ctx.owner.data(ctx)->arguments().size()) {
             // TODO: check that flags match;
-            auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
+            unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
+            if (parsedArg.default_) {
+                localExpr = make_unique<ast::OptionalArg>(parsedArg.loc, move(localExpr), move(parsedArg.default_));
+            }
+
             ctx.owner.data(ctx)->arguments()[pos].loc = parsedArg.loc;
             return move(localExpr);
         }
