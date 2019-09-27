@@ -13,7 +13,7 @@ pipeline_tests(
     glob([
         "testdata/**/*.rb",
     ]),
-    "",
+    "PosTests",
 )
 
 sh_binary(
