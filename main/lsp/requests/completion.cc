@@ -1,3 +1,4 @@
+#include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
@@ -288,6 +289,13 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
                 auto leftShortName = left.method.data(*gs)->name.data(*gs)->shortName(*gs);
                 auto rightShortName = right.method.data(*gs)->name.data(*gs)->shortName(*gs);
                 if (leftShortName != rightShortName) {
+                    if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
+                        return true;
+                    }
+                    if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
+                        return false;
+                    }
+
                     return leftShortName < rightShortName;
                 }
 
