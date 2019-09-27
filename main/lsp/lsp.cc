@@ -73,6 +73,7 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg) cons
 }
 
 LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
+    ENFORCE(!run.canceled);
     const core::GlobalState &gs = *run.gs;
     const auto &filesTypechecked = run.filesTypechecked;
     vector<core::FileRef> errorFilesInNewRun;
@@ -214,8 +215,8 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     }
 }
 
-LSPResult LSPResult::make(unique_ptr<core::GlobalState> gs, unique_ptr<ResponseMessage> response) {
-    LSPResult rv{move(gs), {}};
+LSPResult LSPResult::make(unique_ptr<core::GlobalState> gs, unique_ptr<ResponseMessage> response, bool canceled) {
+    LSPResult rv{move(gs), {}, canceled};
     rv.responses.push_back(make_unique<LSPMessage>(move(response)));
     return rv;
 }

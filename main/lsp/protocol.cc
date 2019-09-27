@@ -157,8 +157,19 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
     });
 }
 
+void LSPLoop::maybeStartCommitSlowPathEdit(core::GlobalState &gs, const LSPMessage &msg) const {
+    if (msg.isNotification() && msg.method() == LSPMethod::SorbetWorkspaceEdit) {
+        // While we're holding the queue lock (and preventing new messages from entering), start a
+        // commit for an epoch if this message will trigger a cancelable slow path.
+        const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
+        if (!params->updates.canTakeFastPath) {
+            gs.startCommitEpoch(params->updates.versionEnd);
+        }
+    }
+}
+
 optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
-    // Naming convention: thread that executes this function is called coordinator thread
+    // Naming convention: thread that executes this function is called typechecking thread
 
     // Incoming queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
     // these messages (e.g., edits are not merged).
@@ -243,7 +254,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
             logger->debug("Reader thread terminating");
         });
 
-    // Bridges the gap between the {reader, watchman} threads and the coordinator thread.
+    // Bridges the gap between the {reader, watchman} threads and the typechecking thread.
     auto preprocessingThread = preprocessor.runPreprocessor(incomingQueue, incomingMtx, processingQueue, processingMtx);
 
     mainThreadId = this_thread::get_id();
@@ -260,6 +271,8 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
             {
                 absl::MutexLock lck(&processingMtx);
                 Timer timeit(logger, "idle");
+                // Ensure we don't have any leftover state from last slow path epoch.
+                ENFORCE(!gs || !gs->getRunningSlowPath().has_value());
                 processingMtx.Await(absl::Condition(
                     +[](QueueState *processingQueue) -> bool {
                         return processingQueue->terminate ||
@@ -277,9 +290,12 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP() {
                     }
                 }
                 msg = move(processingQueue.pendingRequests.front());
-                exitProcessed = msg->isNotification() && msg->method() == LSPMethod::Exit;
                 processingQueue.pendingRequests.pop_front();
                 hasMoreMessages = !processingQueue.pendingRequests.empty();
+                exitProcessed = msg->isNotification() && msg->method() == LSPMethod::Exit;
+                if (gs) {
+                    maybeStartCommitSlowPathEdit(*gs, *msg);
+                }
             }
             prodCounterInc("lsp.messages.received");
             auto result = processRequestInternal(move(gs), *msg);

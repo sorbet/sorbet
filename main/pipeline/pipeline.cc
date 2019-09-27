@@ -832,10 +832,13 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return what;
 }
 
-vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
+ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                    const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
     try {
         what = name(*gs, move(what), opts, skipConfigatron);
+        if (gs->wasTypecheckingCanceled()) {
+            return ast::ParsedFilesOrCancelled();
+        }
 
         for (auto &named : what) {
             if (opts.print.NameTree.enabled) {
@@ -847,7 +850,7 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         }
 
         if (opts.stopAfterPhase == options::Phase::NAMER) {
-            return what;
+            return ast::ParsedFilesOrCancelled(move(what));
         }
 
         core::MutableContext ctx(*gs, core::Symbols::root());
@@ -861,7 +864,11 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
             }
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
-            what = resolver::Resolver::run(ctx, move(what), workers);
+            auto maybeResult = resolver::Resolver::run(ctx, move(what), workers);
+            if (!maybeResult.hasResult()) {
+                return maybeResult;
+            }
+            what = move(maybeResult.result());
         }
         if (opts.stressIncrementalResolver) {
             auto symbolsBefore = gs->symbolsUsed();
@@ -907,11 +914,11 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         what = printMissingConstants(*gs, opts, move(what));
     }
 
-    return what;
+    return ast::ParsedFilesOrCancelled(move(what));
 }
 
-vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                  const options::Options &opts, WorkerPool &workers) {
+ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                      const options::Options &opts, WorkerPool &workers) {
     vector<ast::ParsedFile> typecheck_result;
 
     {
@@ -943,7 +950,8 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                 int processedByThread = 0;
 
                 {
-                    for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                    for (auto result = fileq->try_pop(job); !result.done() && !ctx.state.wasTypecheckingCanceled();
+                         result = fileq->try_pop(job)) {
                         if (result.gotItem()) {
                             processedByThread++;
                             core::FileRef file = job.file;
@@ -975,6 +983,9 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
                     gs->errorQueue->flushErrors();
+                    if (ctx.state.wasTypecheckingCanceled()) {
+                        return ast::ParsedFilesOrCancelled();
+                    }
                 }
             }
         }
@@ -1030,7 +1041,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
             plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
         }
 #endif
-        return typecheck_result;
+        return ast::ParsedFilesOrCancelled(move(typecheck_result));
     }
 }
 

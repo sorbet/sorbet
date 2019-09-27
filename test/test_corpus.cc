@@ -307,7 +307,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     } else {
         core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-        trees = resolver::Resolver::run(ctx, move(trees), *workers);
+        trees = move(resolver::Resolver::run(ctx, move(trees), *workers).result());
         auto newErrors = errorQueue->drainAllErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }

@@ -28,10 +28,10 @@ struct QueueState {
 
 /**
  * The LSP preprocessor typically runs on an independent thread and performs the following tasks:
- * - Preprocesses and merges contiguous file updates before they are sent to the processor thread.
+ * - Preprocesses and merges contiguous file updates before they are sent to the typechecking thread.
  * - Determines if edits should take the fast or slow path.
  * - Is the source-of-truth for the latest file updates.
- * - Clones initialGS so that the processor thread can perform typechecking on the clone.
+ * - Clones initialGS so that the typechecking thread can perform typechecking on the clone.
  */
 class LSPPreprocessor final {
 private:
@@ -69,10 +69,9 @@ private:
      * Example: (E = edit, D = delayable non-edit, M = arbitrary non-edit)
      * {[M1][E1][E2][D1][E3]} => {[M1][E1-3][D1]}
      */
-    void mergeFileChanges(QueueState &state);
+    void mergeFileChanges(absl::Mutex &mtx, QueueState &state);
 
     std::unique_ptr<LSPMessage> makeAndCommitWorkspaceEdit(std::unique_ptr<SorbetWorkspaceEditParams> params,
-                                                           std::unique_ptr<SorbetWorkspaceEditCounts> counts,
                                                            std::unique_ptr<LSPMessage> oldMsg);
 
     /* The following methods convert edits into LSPFileUpdates. */

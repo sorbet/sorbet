@@ -185,14 +185,12 @@ void TimeTravelingGlobalState::pruneBefore(u4 version) {
 }
 
 void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
-    travel(latestVersion);
-
     Timer timeit(logger, "ttgs_commit_edits");
     // Hash changes.
     update.updatedFileHashes = computeStateHashes(update.updatedFiles);
-    update.canTakeFastPath = canTakeFastPath(update);
+    update.canTakeFastPath = canTakeFastPath(latestVersion, update);
 
-    TimeTravelUpdate newUpdate{update.versionEnd};
+    TimeTravelUpdate newUpdate{update.versionEnd, update.hasNewFiles};
     newUpdate.update.fileUpdates = update.updatedFiles;
     newUpdate.update.hashUpdates = update.updatedFileHashes;
 
@@ -228,15 +226,18 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
     gs->errorQueue->drainWithQueryResponses();
 }
 
-bool TimeTravelingGlobalState::canTakeFastPath(const LSPFileUpdates &updates) const {
+bool TimeTravelingGlobalState::canTakeFastPath(u4 fromId, const LSPFileUpdates &updates) {
     Timer timeit(logger, "fast_path_decision");
+    travel(fromId);
     if (config.disableFastPath) {
         logger->debug("Taking slow path because fast path is disabled.");
+        prodCategoryCounterInc("lsp.slow_path_reason", "fast_path_disabled");
         return false;
     }
     // Path taken after the first time an update has been encountered. Hack since we can't roll back new files just yet.
     if (updates.hasNewFiles) {
         logger->debug("Taking slow path because update has a new file");
+        prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
         return false;
     }
     const auto &hashes = updates.updatedFileHashes;
@@ -251,16 +252,19 @@ bool TimeTravelingGlobalState::canTakeFastPath(const LSPFileUpdates &updates) co
             auto fref = gs->findFileByPath(f->path());
             if (!fref.exists()) {
                 logger->debug("Taking slow path because {} is a new file", f->path());
+                prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
                 return false;
             } else {
                 auto &oldHash = globalStateHashes[fref.id()];
                 ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
                 if (hashes[i].definitions.hierarchyHash == core::GlobalStateHash::HASH_STATE_INVALID) {
                     logger->debug("Taking slow path because {} has a syntax error", f->path());
+                    prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
                     return false;
                 } else if (hashes[i].definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
                            hashes[i].definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
                     logger->debug("Taking slow path because {} has changed definitions", f->path());
+                    prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
                     return false;
                 }
             }
@@ -268,6 +272,39 @@ bool TimeTravelingGlobalState::canTakeFastPath(const LSPFileUpdates &updates) co
     }
     logger->debug("Taking fast path");
     return true;
+}
+
+LSPFileUpdates TimeTravelingGlobalState::getCombinedUpdates(u4 fromId, u4 toId) {
+    auto ttus = updatesBetweenExclusive(fromId - 1, toId + 1);
+    // Apply backwards so later updates take precedence.
+    reverse(ttus.begin(), ttus.end());
+
+    UnorderedSet<string> encountered;
+    LSPFileUpdates merged;
+    merged.versionEnd = toId;
+    merged.versionStart = fromId;
+    for (const auto ttu : ttus) {
+        const auto &update = ttu->update;
+        int i = -1;
+        merged.hasNewFiles = merged.hasNewFiles || ttu->hasNewFiles;
+        for (const auto &file : update.fileUpdates) {
+            i++;
+            if (!encountered.contains(file->path())) {
+                encountered.insert(string(file->path()));
+                merged.updatedFiles.push_back(file);
+                merged.updatedFileHashes.push_back(update.hashUpdates[i]);
+            }
+        }
+    }
+    merged.canTakeFastPath = canTakeFastPath(fromId - 1, merged);
+
+    // TODO: Avoid re-indexing.
+    for (auto &file : merged.updatedFiles) {
+        auto fref = gs->findFileByPath(file->path());
+        merged.updatedFileIndexes.push_back(pipeline::indexOne(config.opts, *gs, fref, kvstore));
+    }
+
+    return merged;
 }
 
 void TimeTravelingGlobalState::switchToNewThread() {

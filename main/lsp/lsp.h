@@ -46,8 +46,10 @@ enum class LSPErrorCodes {
 struct LSPResult {
     std::unique_ptr<core::GlobalState> gs;
     std::vector<std::unique_ptr<LSPMessage>> responses;
+    const bool canceled = false;
 
-    static LSPResult make(std::unique_ptr<core::GlobalState> gs, std::unique_ptr<ResponseMessage> response);
+    static LSPResult make(std::unique_ptr<core::GlobalState> gs, std::unique_ptr<ResponseMessage> response,
+                          bool canceled = false);
 };
 
 /**
@@ -123,14 +125,27 @@ class LSPLoop {
                      const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses,
                      std::vector<std::unique_ptr<Location>> locations = {}) const;
 
-    struct TypecheckRun {
-        std::vector<std::unique_ptr<core::Error>> errors;
-        std::vector<core::FileRef> filesTypechecked;
+    class TypecheckRun {
+    public:
         // The global state, post-typechecking.
         std::unique_ptr<core::GlobalState> gs;
+        // Errors encountered during typechecking.
+        std::vector<std::unique_ptr<core::Error>> errors;
+        // The set of files that were typechecked for errors.
+        std::vector<core::FileRef> filesTypechecked;
         // The edit applied to `gs`.
         LSPFileUpdates updates;
-        bool tookFastPath = false;
+        // Specifies if the typecheck run took the fast or slow path.
+        bool tookFastPath;
+        // Specifies if the typecheck run was canceled.
+        bool canceled = false;
+
+        TypecheckRun(std::unique_ptr<core::GlobalState> gs, std::vector<std::unique_ptr<core::Error>> errors = {},
+                     std::vector<core::FileRef> filesTypechecked = {}, LSPFileUpdates updates = {},
+                     bool tookFastPath = false);
+
+        // Make a canceled TypecheckRun.
+        static TypecheckRun makeCanceled(std::unique_ptr<core::GlobalState> gs);
     };
     struct QueryRun {
         std::unique_ptr<core::GlobalState> gs;
@@ -139,8 +154,10 @@ class LSPLoop {
         std::unique_ptr<ResponseError> error = nullptr;
     };
 
-    /** Conservatively rerun entire pipeline without caching any trees */
-    TypecheckRun runSlowPath(LSPFileUpdates updates) const;
+    /** Conservatively reruns entire pipeline without caching any trees. If canceled, returns a TypecheckRun containing
+     * the previous global state. */
+    TypecheckRun runSlowPath(std::unique_ptr<core::GlobalState> previousGS, LSPFileUpdates updates,
+                             bool isCancelable) const;
     /** Runs typechecking on the provided updates. */
     TypecheckRun runTypechecking(std::unique_ptr<core::GlobalState> gs, LSPFileUpdates updates) const;
     /** Runs the provided query against the given files, and returns matches. */
@@ -193,6 +210,9 @@ class LSPLoop {
     bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime) const;
     /** Sends counters to statsd. */
     void sendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
+    /** Helper method: If message is an edit taking the slow path, and slow path cancelation is enabled, signal to
+     * GlobalState that we will be starting a commit of the edits. */
+    void maybeStartCommitSlowPathEdit(core::GlobalState &gs, const LSPMessage &msg) const;
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> initialGS, LSPConfiguration config,

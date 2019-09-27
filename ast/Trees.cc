@@ -1188,4 +1188,18 @@ string BlockArg::nodeName() {
     return "BlockArg";
 }
 
+ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
+ParsedFilesOrCancelled::ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees) : trees(move(trees)) {}
+
+bool ParsedFilesOrCancelled::hasResult() const {
+    return trees.has_value();
+}
+
+vector<ParsedFile> &ParsedFilesOrCancelled::result() {
+    if (trees.has_value()) {
+        return trees.value();
+    }
+    Exception::raise("Attempted to retrieve result of an AST pass that did not complete.");
+}
+
 } // namespace sorbet::ast

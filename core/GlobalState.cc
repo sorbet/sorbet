@@ -46,9 +46,13 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
 atomic<int> globalStateIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
 
-GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
+GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<absl::Mutex> epochMutex,
+                         shared_ptr<atomic<u4>> currentlyProcessingLSPEpoch, shared_ptr<atomic<u4>> lspEpochInvalidator,
+                         shared_ptr<atomic<u4>> lastCommittedLSPEpoch)
     : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(std::move(errorQueue)),
-      lspQuery(lsp::Query::noQuery()) {
+      lspQuery(lsp::Query::noQuery()), epochMutex(std::move(epochMutex)),
+      currentlyProcessingLSPEpoch(move(currentlyProcessingLSPEpoch)), lspEpochInvalidator(move(lspEpochInvalidator)),
+      lastCommittedLSPEpoch(move(lastCommittedLSPEpoch)) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
     unsigned int maxNameCount = 8192;
@@ -1248,7 +1252,8 @@ bool GlobalState::unfreezeSymbolTable() {
 unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
-    auto result = make_unique<GlobalState>(this->errorQueue);
+    auto result = make_unique<GlobalState>(this->errorQueue, this->epochMutex, this->currentlyProcessingLSPEpoch,
+                                           this->lspEpochInvalidator, this->lastCommittedLSPEpoch);
 
     result->silenceErrors = this->silenceErrors;
     result->autocorrect = this->autocorrect;
@@ -1410,6 +1415,76 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
 
 bool GlobalState::wasModified() const {
     return wasModified_;
+}
+
+bool GlobalState::wasTypecheckingCanceled() const {
+    return lspEpochInvalidator->load() != currentlyProcessingLSPEpoch->load();
+}
+
+void GlobalState::startCommitEpoch(u4 epoch) {
+    absl::MutexLock lock(epochMutex.get());
+    ENFORCE(epoch != currentlyProcessingLSPEpoch->load());
+    // epoch should be a version 'ahead' of currentlyProcessingLSPEpoch. The distance between the two is the number of
+    // fast path edits that have come in since the last slow path. Since epochs overflow, there's nothing that I can
+    // easily assert here to ensure that we are not moving backward in time.
+    currentlyProcessingLSPEpoch->store(epoch);
+    lspEpochInvalidator->store(epoch);
+    // These should always be different.
+    ENFORCE(epoch != lastCommittedLSPEpoch->load());
+}
+
+optional<pair<u4, u4>> GlobalState::getRunningSlowPath() const {
+    absl::MutexLock lock(epochMutex.get());
+    const u4 processing = currentlyProcessingLSPEpoch->load();
+    const u4 committed = lastCommittedLSPEpoch->load();
+    if (processing == committed) {
+        return nullopt;
+    }
+    return make_pair(committed, processing);
+}
+
+bool GlobalState::tryCancelSlowPath(u4 newEpoch) const {
+    absl::MutexLock lock(epochMutex.get());
+    const u4 processing = currentlyProcessingLSPEpoch->load();
+    ENFORCE(newEpoch != processing); // This would prevent a cancelation from happening.
+    const u4 committed = lastCommittedLSPEpoch->load();
+    // The second condition should never happen, but guard against it in production.
+    if (processing == committed || newEpoch == processing) {
+        return false;
+    }
+    // Cancel slow path by bumping invalidator.
+    lspEpochInvalidator->store(newEpoch);
+    return true;
+}
+
+bool GlobalState::tryCommitEpoch(u4 epoch, bool isCancelable, function<void()> typecheck) {
+    if (!isCancelable) {
+        typecheck();
+        return true;
+    }
+
+    // Should have called "startCommitEpoch" *before* this method.
+    ENFORCE(currentlyProcessingLSPEpoch->load() == epoch);
+    // Typechecking does not run under the mutex, as it would prevent another thread from running `tryCancelSlowPath`
+    // during typechecking.
+    typecheck();
+    {
+        absl::MutexLock lock(epochMutex.get());
+        // Try to commit.
+        const u4 processing = currentlyProcessingLSPEpoch->load();
+        const u4 invalidator = lspEpochInvalidator->load();
+        if (processing == invalidator) {
+            ENFORCE(lastCommittedLSPEpoch->load() != processing, "Trying to commit an already-committed epoch.");
+            // OK to commit!
+            lastCommittedLSPEpoch->store(processing);
+            return true;
+        }
+        // Typechecking was canceled.
+        const u4 lastCommitted = lastCommittedLSPEpoch->load();
+        currentlyProcessingLSPEpoch->store(lastCommitted);
+        lspEpochInvalidator->store(lastCommitted);
+    }
+    return false;
 }
 
 void GlobalState::trace(string_view msg) const {

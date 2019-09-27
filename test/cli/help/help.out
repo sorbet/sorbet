@@ -87,6 +87,9 @@ Usage:
                                 Help
       --enable-experimental-lsp-quick-fix
                                 Enable experimental LSP feature: Quick Fix
+      --enable-experimental-lsp-cancelable-slow-path
+                                Enable experimental LSP feature: Cancelable
+                                slow path
       --enable-all-experimental-lsp-features
                                 Enable every experimental LSP feature.
       --ignore string           Ignores input files that contain the given

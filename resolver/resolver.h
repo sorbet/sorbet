@@ -9,8 +9,8 @@ namespace sorbet::resolver {
 
 class Resolver final {
 public:
-    static std::vector<ast::ParsedFile> run(core::MutableContext ctx, std::vector<ast::ParsedFile> trees,
-                                            WorkerPool &workers);
+    static ast::ParsedFilesOrCancelled run(core::MutableContext ctx, std::vector<ast::ParsedFile> trees,
+                                           WorkerPool &workers);
     Resolver() = delete;
 
     /** Only runs tree passes, used for incremental changes that do not affect global state. Assumes that `run` was

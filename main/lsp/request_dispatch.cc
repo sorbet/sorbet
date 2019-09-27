@@ -18,7 +18,7 @@ LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, std::unique_
 }
 
 LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<unique_ptr<LSPMessage>> messages) {
-    QueueState state{{}, false, false, 0};
+    QueueState state;
     absl::Mutex mutex;
     for (auto &message : messages) {
         preprocessor.preprocessAndEnqueue(state, move(message), mutex);
@@ -27,6 +27,9 @@ LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<uniq
 
     LSPResult rv{move(gs), {}};
     for (auto &message : state.pendingRequests) {
+        if (rv.gs) {
+            maybeStartCommitSlowPathEdit(*rv.gs, *message);
+        }
         auto rslt = processRequestInternal(move(rv.gs), *message);
         rv.gs = move(rslt.gs);
         rv.responses.insert(rv.responses.end(), make_move_iterator(rslt.responses.begin()),
@@ -65,34 +68,34 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         if (method == LSPMethod::SorbetWorkspaceEdit) {
             // Note: We increment `lsp.messages.processed` when the original requests were merged into this one.
             auto &editParams = get<unique_ptr<SorbetWorkspaceEditParams>>(params);
-            auto &counts = editParams->counts;
-            prodCategoryCounterAdd("lsp.messages.processed", "textDocument.didChange", counts->textDocumentDidChange);
-            prodCategoryCounterAdd("lsp.messages.processed", "textDocument.didOpen", counts->textDocumentDidOpen);
-            prodCategoryCounterAdd("lsp.messages.processed", "textDocument.didClose", counts->textDocumentDidClose);
-            prodCategoryCounterAdd("lsp.messages.processed", "sorbet/watchmanFileChange",
-                                   counts->sorbetWatchmanFileChange);
-            // Number of messages merged together into a workspace edit.
-            prodCounterAdd("lsp.messages.merged", (counts->textDocumentDidChange + counts->textDocumentDidOpen +
-                                                   counts->textDocumentDidClose + counts->sorbetWatchmanFileChange) -
-                                                      1);
-            return commitTypecheckRun(runTypechecking(move(gs), move(editParams->updates)));
-        }
-        if (method == LSPMethod::Initialized) {
+            const u4 end = editParams->updates.versionEnd;
+            const u4 start = editParams->updates.versionStart;
+            // Versions are sequential and wrap around. Use them to figure out how many edits are contained within this
+            // update.
+            const u4 merged = min(end - start, 0xFFFFFFFF - start + end);
+            auto run = runTypechecking(move(gs), move(editParams->updates));
+            // Only report stats if the edit was committed.
+            if (!run.canceled) {
+                prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
+                prodCategoryCounterAdd("lsp.messages.processed", "sorbet/mergedEdits", merged);
+            }
+            return commitTypecheckRun(move(run));
+        } else if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
             auto &initParams = get<unique_ptr<InitializedParams>>(params);
             auto &updates = initParams->updates;
             globalStateHashes = move(updates.updatedFileHashes);
             indexed = move(updates.updatedFileIndexes);
-            LSPResult result = pushDiagnostics(runSlowPath(move(updates)));
+            // Initialization typecheck is not cancelable.
+            LSPResult result = pushDiagnostics(runSlowPath(move(gs), move(updates), /* isCancelable */ false));
+            ENFORCE(!result.canceled);
             ENFORCE(result.gs);
             config.initialized = true;
             return result;
-        }
-        if (method == LSPMethod::Exit) {
+        } else if (method == LSPMethod::Exit) {
             prodCategoryCounterInc("lsp.messages.processed", "exit");
             return LSPResult{move(gs), {}};
-        }
-        if (method == LSPMethod::SorbetError) {
+        } else if (method == LSPMethod::SorbetError) {
             auto &errorInfo = get<unique_ptr<SorbetErrorParams>>(params);
             if (errorInfo->code == (int)LSPErrorCodes::MethodNotFound) {
                 // Not an error; we just don't care about this notification type (e.g. TextDocumentDidSave).
@@ -101,8 +104,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
                 logger->error(errorInfo->message);
             }
             return LSPResult{move(gs), {}};
-        }
-        if (method == LSPMethod::SorbetShowOperation) {
+        } else if (method == LSPMethod::SorbetShowOperation) {
             // Forward to client. These are sent from the preprocessor.
             sendMessage(msg);
             return LSPResult{move(gs), {}};
