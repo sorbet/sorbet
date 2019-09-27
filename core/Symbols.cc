@@ -810,6 +810,16 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     }
     SymbolRef selfRef = this->ref(gs);
 
+    // WARNING: `alias` is intentionally defined before operations that might
+    // mutate the symbol table, as a symbol table reallocation that will
+    // invalidate the `this` pointer. Computing the alias before is safe, as
+    // it's just a SymbolRef.
+    auto alias = findMemberNoDealias(gs, Names::Constants::AttachedClass());
+    ENFORCE(!alias.exists() || isSingletonClass(gs));
+
+    // avoid using `this` after the call to gs.enterTypeMember
+    auto selfLoc = this->loc();
+
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
     singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
     SymbolData singletonInfo = singleton.data(gs);
@@ -819,7 +829,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
-    auto tp = gs.enterTypeMember(this->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+    auto tp = gs.enterTypeMember(selfLoc, singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
 
     // Initialize the bounds of AttachedClass as top and bottom, as the upper
     // bound will be updated to the result of `externalType` in the
@@ -829,10 +839,8 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     // Only create the alias if it doesn't already exist. This happens when
     // a singleton class has `singletonClass` called on it, as it already has a
     // field named `AttachedClass`
-    auto alias = findMemberNoDealias(gs, Names::Constants::AttachedClass());
-    ENFORCE(!alias.exists() || isSingletonClass(gs));
     if (!alias.exists()) {
-        alias = gs.enterStaticFieldSymbol(this->loc(), selfRef, Names::Constants::AttachedClass());
+        alias = gs.enterStaticFieldSymbol(selfLoc, selfRef, Names::Constants::AttachedClass());
         alias.data(gs)->resultType = make_type<AliasType>(tp);
     }
 
