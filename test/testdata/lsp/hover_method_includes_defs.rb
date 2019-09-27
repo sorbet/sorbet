@@ -7,13 +7,13 @@ module OuterModule
 
   sig {params(name: String).returns(Integer)}
   def module_method(name)
-    # ^ hover: def module_method(name)
+    # ^ hover: def module_method(name); end
     name.length
   end
 
   sig {params(name: String).returns(Integer)}
   def self.module_self_method(name)
-    # ^ hover: def self.module_self_method(name)
+    # ^ hover: def self.module_self_method(name); end
     name.length
   end
 
@@ -22,11 +22,11 @@ module OuterModule
     s = "Foo"
     [
       module_method(s),
-      # ^ hover: def module_method(name)
+      # ^ hover: def module_method(name); end
       OuterModule.module_self_method(s),
-      #           ^ hover: def self.module_self_method(name)
+      #           ^ hover: def self.module_self_method(name); end
       OuterModule::module_self_method(s),
-      #            ^ hover: def self.module_self_method(name)
+      #            ^ hover: def self.module_self_method(name); end
     ]
   end
 
@@ -34,7 +34,7 @@ module OuterModule
     extend T::Sig
     sig {params(name: String).void}
     def initialize(name)
-      # ^ hover: def initialize(name)
+      # ^ hover: def initialize(name); end
       @name = name
     end
 
@@ -42,7 +42,7 @@ module OuterModule
     def self.class_self_method(name)
       name.length
     end
-  
+
     sig {void}
     def no_args_return_void
       # no args
@@ -65,7 +65,7 @@ module OuterModule
 
     sig {params(fname: String, lname: String).returns(String)}
     def keyword_args_with_defaults(fname: "Jane", lname: "Doe")
-      # ^ hover: def keyword_args_with_defaults(fname:…, lname:…)
+      # ^ hover: def keyword_args_with_defaults(fname:…, lname:…); end
       "#{fname}:#{lname}"
     end
 
@@ -93,26 +93,26 @@ module OuterModule
     def class_usages
       s = "Foo"
       qualified = InnerClass.new(s)
-                             # ^ hover: def initialize(name)
+      #                        ^ hover: def initialize(name); end
       [
         no_args_return_void,
-        # ^ hover: def no_args_return_void
+        # ^ hover: def no_args_return_void; end
         no_args_return_value,
-        # ^ hover: def no_args_return_value
+        # ^ hover: def no_args_return_value; end
         positional_args(s, s),
-        # ^ hover: def positional_args(fname, lname)
+        # ^ hover: def positional_args(fname, lname); end
         keyword_args_no_defaults(fname: s, lname: s),
-        # ^ hover: def keyword_args_no_defaults(fname:, lname:)
+        # ^ hover: def keyword_args_no_defaults(fname:, lname:); end
         keyword_args_with_defaults,
-        # ^ hover: def keyword_args_with_defaults(fname:…, lname:…)
+        # ^ hover: def keyword_args_with_defaults(fname:…, lname:…); end
         splat_args,
-        # ^ hover: def splat_args(*names)
+        # ^ hover: def splat_args(*names); end
         splat_args(s, s, s, s, s),
-        # ^ hover: def splat_args(*names)
+        # ^ hover: def splat_args(*names); end
         double_splat_args(a:s, b:s, c:s),
-        # ^ hover: def double_splat_args(**kwargs)
+        # ^ hover: def double_splat_args(**kwargs); end
         block_args {|x| "blk#{x}"},
-        # ^ hover: def block_args(&blk)
+        # ^ hover: def block_args(&blk); end
         multiple_arg_types(s, s, s, s, required_key: s, dynamic_key: s) {|x| x},
         # ^ hover: def multiple_arg_types(
         # ^ hover:   pos,
@@ -122,22 +122,23 @@ module OuterModule
         # ^ hover:   **kwargs,
         # ^ hover:   &block_arg
         # ^ hover: )
+        # ^ hover: end
         InnerClass::class_self_method(s),
-        #           ^ hover: def self.class_self_method(name)
+        #           ^ hover: def self.class_self_method(name); end
         qualified.no_args_return_void,
-        #         ^ hover: def no_args_return_void
+        #         ^ hover: def no_args_return_void; end
         qualified.no_args_return_value,
-        #         ^ hover: def no_args_return_value
+        #         ^ hover: def no_args_return_value; end
         qualified.positional_args(s, s),
-        #         ^ hover: def positional_args(fname, lname)
+        #         ^ hover: def positional_args(fname, lname); end
         qualified.keyword_args_no_defaults(fname: s, lname: s),
-        #         ^ hover: def keyword_args_no_defaults(fname:, lname:)
+        #         ^ hover: def keyword_args_no_defaults(fname:, lname:); end
         qualified.keyword_args_with_defaults(fname: s, lname: s),
-        #         ^ hover: def keyword_args_with_defaults(fname:…, lname:…)
+        #         ^ hover: def keyword_args_with_defaults(fname:…, lname:…); end
         qualified.splat_args(s, s, s, s, s),
-        #         ^ hover: def splat_args(*names)
+        #         ^ hover: def splat_args(*names); end
         qualified.double_splat_args(a: s, b: s, c: s),
-        #         ^ hover: def double_splat_args(**kwargs)
+        #         ^ hover: def double_splat_args(**kwargs); end
         qualified.multiple_arg_types(s, s, s, s, required_key: s, dynamic_key: s) {|x| x},
         #         ^ hover: def multiple_arg_types(
         #         ^ hover:   pos,
@@ -147,6 +148,7 @@ module OuterModule
         #         ^ hover:   **kwargs,
         #         ^ hover:   &block_arg
         #         ^ hover: )
+        #         ^ hover: end
       ]
     end
   end
