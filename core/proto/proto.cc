@@ -23,40 +23,40 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
             break;
         case NameKind::UNIQUE:
             protoName.set_kind(com::stripe::rubytyper::Name::UNIQUE);
-            switch(name.data(gs)->unique.uniqueNameKind) {
-            case UniqueNameKind::Parser:
-                protoName.set_unique(com::stripe::rubytyper::Name::PARSER);
-                break;
-            case UniqueNameKind::Desugar:
-                protoName.set_unique(com::stripe::rubytyper::Name::DESUGAR);
-                break;
-            case UniqueNameKind::Namer:
-                protoName.set_unique(com::stripe::rubytyper::Name::NAMER);
-                break;
-            case UniqueNameKind::MangleRename:
-                protoName.set_unique(com::stripe::rubytyper::Name::MANGLE_RENAME);
-                break;
-            case UniqueNameKind::Singleton:
-                protoName.set_unique(com::stripe::rubytyper::Name::SINGLETON);
-                break;
-            case UniqueNameKind::Overload:
-                protoName.set_unique(com::stripe::rubytyper::Name::OVERLOAD);
-                break;
-            case UniqueNameKind::TypeVarName:
-                protoName.set_unique(com::stripe::rubytyper::Name::TYPE_VAR_NAME);
-                break;
-            case UniqueNameKind::PositionalArg:
-                protoName.set_unique(com::stripe::rubytyper::Name::POSITIONAL_ARG);
-                break;
-            case UniqueNameKind::MangledKeywordArg:
-                protoName.set_unique(com::stripe::rubytyper::Name::MANGLED_KEYWORD_ARG);
-                break;
-            case UniqueNameKind::ResolverMissingClass:
-                protoName.set_unique(com::stripe::rubytyper::Name::RESOLVER_MISSING_CLASS);
-                break;
-            case UniqueNameKind::OpusEnum:
-                protoName.set_unique(com::stripe::rubytyper::Name::OPUS_ENUM);
-                break;
+            switch (name.data(gs)->unique.uniqueNameKind) {
+                case UniqueNameKind::Parser:
+                    protoName.set_unique(com::stripe::rubytyper::Name::PARSER);
+                    break;
+                case UniqueNameKind::Desugar:
+                    protoName.set_unique(com::stripe::rubytyper::Name::DESUGAR);
+                    break;
+                case UniqueNameKind::Namer:
+                    protoName.set_unique(com::stripe::rubytyper::Name::NAMER);
+                    break;
+                case UniqueNameKind::MangleRename:
+                    protoName.set_unique(com::stripe::rubytyper::Name::MANGLE_RENAME);
+                    break;
+                case UniqueNameKind::Singleton:
+                    protoName.set_unique(com::stripe::rubytyper::Name::SINGLETON);
+                    break;
+                case UniqueNameKind::Overload:
+                    protoName.set_unique(com::stripe::rubytyper::Name::OVERLOAD);
+                    break;
+                case UniqueNameKind::TypeVarName:
+                    protoName.set_unique(com::stripe::rubytyper::Name::TYPE_VAR_NAME);
+                    break;
+                case UniqueNameKind::PositionalArg:
+                    protoName.set_unique(com::stripe::rubytyper::Name::POSITIONAL_ARG);
+                    break;
+                case UniqueNameKind::MangledKeywordArg:
+                    protoName.set_unique(com::stripe::rubytyper::Name::MANGLED_KEYWORD_ARG);
+                    break;
+                case UniqueNameKind::ResolverMissingClass:
+                    protoName.set_unique(com::stripe::rubytyper::Name::RESOLVER_MISSING_CLASS);
+                    break;
+                case UniqueNameKind::OpusEnum:
+                    protoName.set_unique(com::stripe::rubytyper::Name::OPUS_ENUM);
+                    break;
             }
             break;
         case NameKind::CONSTANT:
