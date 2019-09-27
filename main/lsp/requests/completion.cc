@@ -120,7 +120,7 @@ SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, core::Dispat
     }
 
     if (dispatchResult.secondary != nullptr) {
-        // Right now we completely ignore the secondaryKind (either AND or OR), and always union.
+        // Right now we completely ignore the secondaryKind (either AND or OR), and always intersect.
         // (See comment above mergeSimilarMethods)
         result = mergeSimilarMethods(result, allSimilarMethods(gs, *dispatchResult.secondary, prefix));
     }
