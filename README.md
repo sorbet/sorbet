@@ -521,6 +521,20 @@ Add the `, ...` suffix to the end of a partial list of completion results, and
 the test harness will ensure that the listed identifiers match a prefix of the
 completion items. This prefix must still be listed in order.
 
+If a location should report zero completion items, use the special message
+`(nothing)`:
+
+```ruby
+class A
+  def self.foo_1; end
+  def self.foo_2; end
+
+  zzz
+#    ^ completion: (nothing)
+end
+```
+
+
 #### Testing incremental typechecking
 
 In LSP mode, Sorbet runs file updates on a *fast path* or a *slow path*. It checks the structure of the

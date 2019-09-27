@@ -964,8 +964,10 @@ void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File
 
     // TODO(jez) Add ability to expect CompletionItemKind of each item
     string actualMessage =
-        fmt::format("{}", fmt::map_join(completionList->items.begin(), completionList->items.end(), ", ",
-                                        [](const auto &item) -> string { return item->label; }));
+        completionList->items.size() == 0
+            ? "(nothing)"
+            : fmt::format("{}", fmt::map_join(completionList->items.begin(), completionList->items.end(), ", ",
+                                              [](const auto &item) -> string { return item->label; }));
 
     auto partial = absl::EndsWith(this->message, ", ...");
     if (partial) {
