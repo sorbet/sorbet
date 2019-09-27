@@ -192,7 +192,7 @@ class Sorbet::Private::HiddenMethodFinder
 
     rbi.each do |rbi_entry|
       # skip duplicated constant fields
-      next if rbi_entry["name"]["kind"] == "UNIQUE" and rbi_entry["kind"] == "STATIC_FIELD"
+      next if rbi_entry["name"]["kind"] == "UNIQUE" and rbi_entry["name"]["unique"] == "MANGLE_RENAME"
 
       source_entry = source_by_name[rbi_entry["name"]["name"]]
 
