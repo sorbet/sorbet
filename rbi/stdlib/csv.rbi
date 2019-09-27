@@ -285,6 +285,30 @@ class CSV < Object
   end
   def initialize(io=T.unsafe(nil), options=T.unsafe(nil)); end
 
+  # This method wraps a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # you provide, or an empty default 
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), 
+  # in a [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) object which is passed 
+  # to the provided block. You can use the block to append 
+  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) rows to the 
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) and when 
+  # the block exits, the final String will be returned.
+  #
+  # # To a String
+  # csv_string = CSV.generate do |csv|
+  #   csv << ["row", "of", "CSV", "data"]
+  #   csv << ["another", "row"]
+  #   # ...
+  # end
+  sig do
+    params(
+        str: T.nilable(String),
+        options: T::Hash[Symbol, T.untyped],
+    )
+    .returns(T.nilable(String))
+  end
+  def self.generate(str=nil, options=T.unsafe(nil)); end
+
   # This method can be used to easily parse
   # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) out of a
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). You may either
