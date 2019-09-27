@@ -1080,7 +1080,12 @@ SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
 }
 
 u4 Symbol::hash(const GlobalState &gs) const {
-    u4 result = _hash(name.data(gs)->shortName(gs));
+    u4 result;
+    if (name.data(gs)->shortName(gs).find("bar") == 0) {
+        result = 1;
+    }
+
+    result = _hash(name.data(gs)->shortName(gs));
     result = mix(result, !this->resultType ? 0 : this->resultType->hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
