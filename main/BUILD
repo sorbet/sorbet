@@ -1,9 +1,9 @@
 cc_binary(
     name = "sorbet_llvm",
     srcs = [
-        "main.cc",
-        "llvm_main.h",
         "llvm_main.cc",
+        "llvm_main.h",
+        "main.cc",
     ],
     # When changing this, you should also update the REQUIRED_STACK_SIZE variable in common/os/os.cc.
     linkopts = select({

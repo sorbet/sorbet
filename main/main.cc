@@ -1,6 +1,6 @@
 #include "common/common.h"
-#include "main/options/options.h"
 #include "main/llvm_main.h"
+#include "main/options/options.h"
 int main(int argc, char *argv[]) {
     try {
         // Initialize the symbolizer to get a human-readable stack trace

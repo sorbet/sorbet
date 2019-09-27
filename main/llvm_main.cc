@@ -8,4 +8,4 @@ int main(int argc, char *argv[]) {
     return code;
 }
 
-}
+} // namespace sorbet::llvm::main
