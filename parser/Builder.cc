@@ -1,6 +1,7 @@
 #include "parser/Builder.h"
 #include "common/typecase.h"
 #include "core/Names.h"
+#include "core/errors/parser.h"
 #include "parser/Dedenter.h"
 #include "parser/parser.h"
 
@@ -398,6 +399,22 @@ public:
             method = gs_.enterNameUTF8(selector->string());
         }
 
+        if ((dot != nullptr) && dot->string() == "&.") {
+            return make_unique<CSend>(loc, std::move(receiver), method, std::move(args));
+        } else {
+            return make_unique<Send>(loc, std::move(receiver), method, std::move(args));
+        }
+    }
+
+    unique_ptr<Node> call_method_missing_fun(unique_ptr<Node> receiver, const token *dot) {
+        auto dotLoc = tokLoc(dot);
+        auto level = ruby_parser::dlevel::ERROR;
+        auto err = ruby_parser::dclass::UnexpectedToken;
+        driver_->external_diagnostic(level, err, dotLoc.endPos(), dotLoc.endPos(), "syntax error");
+
+        auto loc = receiver != nullptr ? receiver->loc.join(dotLoc) : dotLoc;
+        auto method = core::Names::missingFun();
+        auto args = sorbet::parser::NodeVec{};
         if ((dot != nullptr) && dot->string() == "&.") {
             return make_unique<CSend>(loc, std::move(receiver), method, std::move(args));
         } else {
@@ -1161,6 +1178,11 @@ ForeignPtr call_method(SelfPtr builder, ForeignPtr receiver, const token *dot, c
         build->call_method(build->cast_node(receiver), dot, selector, lparen, build->convertNodeList(args), rparen));
 }
 
+ForeignPtr call_method_missing_fun(SelfPtr builder, ForeignPtr receiver, const token *dot) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->call_method_missing_fun(build->cast_node(receiver), dot));
+}
+
 ForeignPtr case_(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *whenBodies,
                  const token *elseTok, ForeignPtr elseBody, const token *end) {
     auto build = cast_builder(builder);
@@ -1674,6 +1696,7 @@ struct ruby_parser::builder Builder::interface = {
     blockarg,
     callLambda,
     call_method,
+    call_method_missing_fun,
     case_,
     character,
     complex,

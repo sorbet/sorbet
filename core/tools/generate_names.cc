@@ -52,6 +52,7 @@ NameDef names[] = {
     {"defined_p", "defined?"},
     {"undef"},
     {"each"},
+    {"missingFun", "<missing-fun>"},
 
     // used in CFG for temporaries
     {"whileTemp", "<whileTemp>"},
