@@ -819,7 +819,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
-    auto tp = gs.enterTypeMember(this->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+    auto tp = gs.enterTypeMember(Loc::none(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
 
     // Initialize the bounds of AttachedClass as top and bottom, as the upper
     // bound will be updated to the result of `externalType` in the
@@ -832,7 +832,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     auto alias = findMember(gs, Names::Constants::AttachedClass());
     ENFORCE(!alias.exists() || isSingletonClass(gs));
     if (!alias.exists()) {
-        alias = gs.enterStaticFieldSymbol(this->loc(), selfRef, Names::Constants::AttachedClass());
+        alias = gs.enterStaticFieldSymbol(Loc::none(), selfRef, Names::Constants::AttachedClass());
         alias.data(gs)->resultType = make_type<AliasType>(tp);
     }
 
