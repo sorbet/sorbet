@@ -197,13 +197,13 @@ string methodDefinition(const core::GlobalState &gs, core::SymbolRef method) {
         argListSuffix = ")";
     }
 
-    auto result = fmt::format("def {}{}{}{}{}", methodNamePrefix, methodName, argListPrefix,
+    auto result = fmt::format("def {}{}{}{}{}; end", methodNamePrefix, methodName, argListPrefix,
                               fmt::join(arguments, argListSeparator), argListSuffix);
     if (arguments.size() > 0 && result.length() >= WIDTH_CUTOFF_FOR_MULTILINE_DEF) {
         argListPrefix = "(\n  ";
         argListSeparator = ",\n  ";
         argListSuffix = "\n)";
-        result = fmt::format("def {}{}{}{}{}", methodNamePrefix, methodName, argListPrefix,
+        result = fmt::format("def {}{}{}{}{}\nend", methodNamePrefix, methodName, argListPrefix,
                              fmt::join(arguments, argListSeparator), argListSuffix);
     }
     return result;
