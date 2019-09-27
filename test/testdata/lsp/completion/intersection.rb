@@ -19,18 +19,17 @@ module Unary
   def some_method(x); end
 end
 
-# The behavior here is the *same as* T.any. (Maybe you expected it to be the dual.)
-# See the comment in union.rb for more.
-
 def test
   ab = T.let(T.unsafe(nil), T.all(M, N))
   ab.foo_
-#        ^ completion: foo_common_1, foo_common_2, foo_only_on_a, foo_only_on_b
+#        ^ completion: foo_common_1, foo_common_2
 # ^^^^^^^ error: does not exist on `M`
 # ^^^^^^^ error: does not exist on `N`
 
   # TODO(jez) This is a weird case. There are two methods named `some_method`.
-  # We've decided to show *all* methods, but the arity on each component is different.
+  # We've decided to show all methods with the same name, but the arity on each
+  # component is different, so it'll be impossible to call even though we
+  # suggest it.
   nullary_or_unary = T.let(T.unsafe(nil), T.all(Nullary, Unary))
   nullary_or_unary.some_
 #                       ^ completion: some_method

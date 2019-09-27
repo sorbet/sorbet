@@ -12,6 +12,7 @@ end
 
 def test
   a = A.new
+  # TODO(jez) Assert that we get the right redefinition based on the sig.
   a.some_ # error: does not exist
 #        ^ completion: some_method
 end
