@@ -175,8 +175,9 @@ bool Name::isClassName(const GlobalState &gs) const {
         case NameKind::UTF8:
             return false;
         case NameKind::UNIQUE: {
-            return (this->unique.uniqueNameKind == Singleton || this->unique.uniqueNameKind == MangleRename ||
-                    this->unique.uniqueNameKind == OpusEnum) &&
+            return (this->unique.uniqueNameKind == UniqueNameKind::Singleton ||
+                    this->unique.uniqueNameKind == UniqueNameKind::MangleRename ||
+                    this->unique.uniqueNameKind == UniqueNameKind::OpusEnum) &&
                    this->unique.original.data(gs)->isClassName(gs);
         }
         case NameKind::CONSTANT:

@@ -244,7 +244,7 @@ void SerializerImpl::pickle(Pickler &p, const Name &what) {
             p.putStr(what.raw.utf8);
             break;
         case NameKind::UNIQUE:
-            p.putU1(what.unique.uniqueNameKind);
+            p.putU1(static_cast<u1>(what.unique.uniqueNameKind));
             p.putU4(what.unique.original._id);
             p.putU4(what.unique.num);
             break;
