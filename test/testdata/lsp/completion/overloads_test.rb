@@ -9,22 +9,8 @@ class A
   def my_method(x); end
 end
 
-A.new.my_metho # error: does not exist
-#             ^ completion: my_method
+# Not possible to see in the test, but in VS Code though these items have the
+# same name, they show up with different sigs.
 
-# TODO(jez) Eventually, we might want to expand this to show all overloads,
-# minus the one that we enter with UniqueNameKind::Overload.
-#
-# There are 3 symbols here. One of them was mangle renamed?
-# Looks like we mangleRenameSymbol in resolver before fillInInfoFromSig.
-#
-# class ::A < ::Object () @ overloads_test.rb:5
-#   method ::A#foo$1 (x, <blk>) @ overloads_test.rb:9
-#     argument x<> @ Loc {file=overloads_test.rb start=9:11 end=9:12}
-#     argument <blk><block> @ Loc {file=overloads_test.rb start=??? end=???}
-#   method ::A#foo (overload.1) (x, <blk>) -> Sorbet::Private::Static::Void @ overloads_test.rb:8
-#     argument x<> -> S @ Loc {file=overloads_test.rb start=8:15 end=8:16}
-#     argument <blk><block> -> T.untyped @ Loc {file=??? start=??? end=???}
-#   method ::A#foo (x, <blk>) -> Sorbet::Private::Static::Void @ overloads_test.rb:9
-#     argument x<> -> I @ Loc {file=overloads_test.rb start=7:15 end=7:16}
-#     argument <blk><block> -> T.untyped @ Loc {file=??? start=??? end=???}
+A.new.my_metho # error: does not exist
+#             ^ completion: my_method, my_method
