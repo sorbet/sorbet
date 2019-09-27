@@ -302,8 +302,8 @@ class CSV < Object
   # end
   sig do
     params(
-        str: T.nilable(String),
-        options: T::Hash[Symbol, T.untyped],
+      str: T.nilable(T.any(String,T::Hash[Symbol, T.untyped])),
+      options: T::Hash[Symbol, T.untyped],
     )
     .returns(T.nilable(String))
   end
