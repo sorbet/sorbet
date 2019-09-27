@@ -825,7 +825,8 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 return;
             }
 
-            auto ctype = core::make_type<core::ClassType>(corrected.data(ctx)->singletonClass(ctx));
+            auto correctedSingleton = corrected.data(ctx)->singletonClass(ctx);
+            auto ctype = core::make_type<core::ClassType>(correctedSingleton);
             core::CallLocs locs{
                 s->loc,
                 recvi->loc,
@@ -835,7 +836,16 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
             auto out = core::Types::dispatchCallWithoutBlock(ctx, ctype, dispatchArgs);
 
             if (out->isUntyped()) {
-                result.type = out;
+                // Using a generic untyped type here will lead to incorrect handling of global state hashing,
+                // where we won't see difference between types with generic arguments.
+                // Thus, while normally we would treat these as untyped, in `sig`s we treat them as proper types, so
+                // that we can correctly hash them.
+                vector<core::TypePtr> targPtrs;
+                targPtrs.reserve(targs.size());
+                for (auto &targ : targs) {
+                    targPtrs.push_back(targ->type);
+                }
+                result.type = core::make_type<core::UnresolvedAppliedType>(correctedSingleton, move(targPtrs));
                 return;
             }
             if (auto *mt = core::cast_type<core::MetaType>(out.get())) {
