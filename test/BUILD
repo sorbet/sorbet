@@ -1,6 +1,9 @@
 test_suite(
     name = "test",
-    tests = ["//test/llvm:kaleidoscope_test", "test_corpus"],
+    tests = [
+        "test_corpus",
+        "//test/llvm:kaleidoscope_test",
+    ],
 )
 
 load("@com_stripe_ruby_typer//test:pipeline_test.bzl", "pipeline_tests")
