@@ -409,7 +409,7 @@ public:
     unique_ptr<Node> call_method_missing_fun(unique_ptr<Node> receiver, const token *dot) {
         auto dotLoc = tokLoc(dot);
         auto level = ruby_parser::dlevel::ERROR;
-        auto err = ruby_parser::dclass::UnexpectedToken;
+        auto err = ruby_parser::dclass::MethodWithoutSelector;
         driver_->external_diagnostic(level, err, dotLoc.endPos(), dotLoc.endPos(), "syntax error");
 
         auto loc = receiver != nullptr ? receiver->loc.join(dotLoc) : dotLoc;
