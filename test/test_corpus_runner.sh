@@ -7,6 +7,6 @@ rbout=$(mktemp)
 ruby "$rb" > "$rbout" 2>&1
 
 srbout=$(mktemp)
-main/sorbet_llvm "$rb" > "$srbout" 2>&1
+main/sorbet_llvm --silence-dev-message --no-error-count "$rb" > "$srbout" 2>&1
 
 diff "$rbout" "$srbout"
