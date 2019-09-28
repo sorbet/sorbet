@@ -1,10 +1,10 @@
 #include "main/realmain.h"
 
-namespace sorbet::llvm::main {
+namespace sorbet::llvm::realmain {
 
-int main(int argc, char *argv[]) {
+int realmain(int argc, char *argv[]) {
     auto code = sorbet::realmain::realmain(argc, argv);
-    realmain::logger->error("hello world");
+    sorbet::realmain::logger->error("hello world");
     return code;
 }
 
