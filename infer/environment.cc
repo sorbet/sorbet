@@ -478,12 +478,12 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         const auto &argType = send->args[0].type;
 
         if (auto *argClass = core::cast_type<core::ClassType>(argType.get())) {
-            if (!argClass || !recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
+            if (!recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
                 !argClass->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
         } else if (auto *argClass = core::cast_type<core::AppliedType>(argType.get())) {
-            if (!argClass || !recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
+            if (!recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
                 !argClass->klass.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
