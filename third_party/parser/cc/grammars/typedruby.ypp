@@ -1,5 +1,6 @@
 %require "3.0"
 %skeleton "lalr1.cc"
+%token-table
 
 %code requires {
   #include <ruby_parser/builder.hh>
@@ -27,6 +28,7 @@ using namespace std::string_literals;
 %define api.value.type { union parser_value }
 %define api.token.constructor false
 %define parse.assert
+%define parse.error verbose
 
 // mirrored in inc/ruby_parser/token.hh
 // if any of these token values are changed here, the header must be updated
@@ -393,14 +395,24 @@ namespace typedruby25 {
 } while(false);
 
 void parser::error(const std::string &msg) {
+  std::string error_message = msg;
+
+  int token_type = static_cast<int>(driver.last_token->type());
+  const char* token_str_name = yytname_[yytranslate_(token_type)];
+
+  if (token_str_name != nullptr) {
+    error_message = token_str_name;
+  }
+
 	driver.diagnostics.emplace_back(
 		dlevel::ERROR, dclass::UnexpectedToken,
 		diagnostic::range(driver.lex.last_token_s, driver.lex.last_token_e),
-		msg);
+		error_message);
 }
 
 int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
 	auto token = driver.lex.advance();
+  driver.last_token = token;
 	int token_type = static_cast<int>(token->type());
 	assert(token_type >= 0);
 	lval->token = token;
