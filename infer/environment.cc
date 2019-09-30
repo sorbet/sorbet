@@ -487,6 +487,8 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
                 !argClass->klass.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
+        } else {
+            return;
         }
 
         auto &whoKnows = getKnowledge(local);
