@@ -65,6 +65,11 @@ module T
     T::Types::SelfType.new
   end
 
+  # Matches the instance type in a singleton-class context
+  def self.attached_class
+    T::Types::AttachedClassType.new
+  end
+
   # Matches any class that subclasses or includes the provided class
   # or module
   def self.class_of(klass)

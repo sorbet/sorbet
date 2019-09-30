@@ -55,6 +55,7 @@ module T
   def self.reveal_type(value); end
   def self.type_parameter(name); end
   def self.self_type; end
+  def self.attached_class; end
   def self.type_alias(type); end
 
   sig {params(arg: T.untyped).returns(T.untyped)}

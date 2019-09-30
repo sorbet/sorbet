@@ -31,8 +31,3 @@ module T::Types
     end
   end
 end
-
-# Type-checking the runtime complains that AttachedClass is being re-defined at
-# a different type without it, as it's expected to be a type member with an
-# upper bound of <root>.
-AttachedClass = T.unsafe(T::Types::AttachedClassType.new)

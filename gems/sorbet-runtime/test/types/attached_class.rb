@@ -8,7 +8,7 @@ module Opus::Types::Test
       class Base
         extend T::Sig
 
-        sig {returns(AttachedClass)}
+        sig {returns(T.attached_class)}
         def self.make
           new
         end
@@ -25,7 +25,7 @@ module Opus::Types::Test
       class Base
         extend T::Sig
 
-        sig {returns(AttachedClass)}
+        sig {returns(T.attached_class)}
         def self.make
           10
         end

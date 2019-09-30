@@ -6,11 +6,11 @@ class Parent
 
   abstract!
 
-  sig {returns(T.nilable(AttachedClass))}
+  sig {returns(T.nilable(T.attached_class))}
   def self.make()
     # TODO(trevor): It would be nice if this could be `new`, but that's running
     # into problems when checking the concrete type returned by `Class#new`
-    # against the `AttachedClass` param.
+    # against the `T.attached_class` param.
     nil
   end
 end
@@ -27,7 +27,7 @@ T.reveal_type(T::Array[Integer].new) # error: Revealed type: `T::Array[Integer]`
 T.reveal_type(Array.new) # error: Revealed type: `T::Array[T.untyped]`
 
 # File is an interesting case because its `Elem` type member is fixed as String.
-# When AttachedClass is bounded at the wrong time, the use of `externalType`
+# When `T.attached_class` is bounded at the wrong time, the use of `externalType`
 # will default this incorrectly, and the use of `File.new` without specifying
 # the parameters will cause this to turn into `T.untyped` instead.
 T.reveal_type(File.new("foo", "r").first) # error: Revealed type: `T.nilable(String)`
