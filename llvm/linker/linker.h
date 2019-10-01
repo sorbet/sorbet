@@ -5,6 +5,7 @@
 
 namespace sorbet::llvm::linker {
 void init();
+void setIROutputDir(std::string dir);
 void run(std::shared_ptr<spdlog::logger> logger);
 } // namespace sorbet::llvm::linker
 #endif

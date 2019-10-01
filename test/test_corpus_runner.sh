@@ -6,7 +6,10 @@ rb=${1/--single_test=/}
 rbout=$(mktemp)
 ruby "$rb" > "$rbout" 2>&1
 
+llvmir=$(mktemp -d)
+main/sorbet_llvm --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$rb"
+
 srbout=$(mktemp)
-main/sorbet_llvm --silence-dev-message --no-error-count "$rb" 2>&1 | tee "$srbout"
+cat "$llvmir/main.ll" > "$srbout"
 
 diff "$rbout" "$srbout"

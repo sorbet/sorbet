@@ -1,6 +1,7 @@
 cc_binary(
     name = "kaleidoscope",
     srcs = ["kaleidoscope.cpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "@org_llvm_darwin",
     ],
