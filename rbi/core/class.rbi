@@ -155,7 +155,6 @@ class Class < Module
   # BasicObject.superclass   #=> nil
   # ```
   sig {returns(T.nilable(Class))}
-  sig {returns(Class)}
   def superclass(); end
 
   sig {void}
