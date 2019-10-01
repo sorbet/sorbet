@@ -43,6 +43,8 @@ LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPCon
 
 void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
     mtx.AssertHeld();
+    // mergeFileChanges is the most expensive operation this thread performs while holding the mutex lock.
+    Timer timeit(logger, "lsp.mergeFileChanges");
     u4 earliestActiveEditVersion = nextVersion;
     auto &pendingRequests = state.pendingRequests;
     const int originalSize = pendingRequests.size();
@@ -86,32 +88,36 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
     // Check if we should cancel the slow path.
     const auto &gs = ttgs.getGlobalState();
     const auto runningSlowPath = gs.getRunningSlowPath();
-    // Only try to cancel if the cancelation feature is enabled.
+    // Only try to cancel if the cancelation feature is enabled AND the typechecking thread is running the slow path.
     if (config.opts.lspCancelableSlowPathEnabled && runningSlowPath.has_value()) {
         const auto &[committed, end] = runningSlowPath.value();
-        // Prune history for all messages no longer in queue or being processed by typechecking thread.
-        ttgs.pruneBefore(min(committed, earliestActiveEditVersion));
-        for (auto it = pendingRequests.begin(); it != pendingRequests.end(); it++) {
-            const auto &msg = *it;
-            if (msg->isNotification() && msg->method() == LSPMethod::SorbetWorkspaceEdit) {
-                Timer timeit(logger, "tryCancelSlowPath");
-                auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
-                auto combinedUpdates = ttgs.getCombinedUpdates(committed + 1, params->updates.versionEnd);
-                if (combinedUpdates.canTakeFastPath && gs.tryCancelSlowPath(params->updates.versionEnd)) {
-                    logger->debug("[Preprocessor] Canceling typechecking, as edits {} thru {} can take fast path.",
-                                  params->updates.versionStart, params->updates.versionEnd);
-                    params->updates = move(combinedUpdates);
+        earliestActiveEditVersion = min(committed, earliestActiveEditVersion);
+
+        // Avoid canceling if the currently-running slow path has already been canceled.
+        if (!gs.wasTypecheckingCanceled()) {
+            for (auto it = pendingRequests.begin(); it != pendingRequests.end(); it++) {
+                const auto &msg = *it;
+                if (msg->isNotification() && msg->method() == LSPMethod::SorbetWorkspaceEdit) {
+                    Timer timeit(logger, "tryCancelSlowPath");
+                    auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
+                    // Note: This line calls indexer to re-create the index trees, so it's somewhat expensive.
+                    auto combinedUpdates = ttgs.getCombinedUpdates(committed + 1, params->updates.versionEnd);
+                    if (combinedUpdates.canTakeFastPath && gs.tryCancelSlowPath(params->updates.versionEnd)) {
+                        logger->debug("[Preprocessor] Canceling typechecking, as edits {} thru {} can take fast path.",
+                                      params->updates.versionStart, params->updates.versionEnd);
+                        params->updates = move(combinedUpdates);
+                    }
+                    break;
+                } else if (!msg->isDelayable()) {
+                    // Message is not delayable, and is not an edit. Can't cancel the slow path.
+                    break;
                 }
-                return;
-            } else if (!msg->isDelayable()) {
-                // Message is not delayable, and is not an edit. Can't cancel the slow path.
-                return;
             }
         }
-    } else {
-        // Prune history for all messages no longer in queue.
-        ttgs.pruneBefore(earliestActiveEditVersion);
     }
+
+    // Prune history for all messages no longer in queue and no longer being typechecked.
+    ttgs.pruneBefore(earliestActiveEditVersion);
 }
 
 void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, const CancelParams &cancelParams) {
