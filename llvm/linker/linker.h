@@ -4,6 +4,7 @@
 #include "spdlog/spdlog.h"
 
 namespace sorbet::llvm::linker {
+void init();
 void run(std::shared_ptr<spdlog::logger> logger);
-}
+} // namespace sorbet::llvm::linker
 #endif
