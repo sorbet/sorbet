@@ -4,5 +4,5 @@ class A
   def foo; end
 end
 
-A.new. # error: Parse Error
+A.new. # error: unexpected token $end
 #     ^ completion: foo, ...

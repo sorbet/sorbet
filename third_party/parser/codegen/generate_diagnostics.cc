@@ -70,7 +70,7 @@ tuple<string, string> MESSAGES[] = {
     {"NotStaticCpathInGeninst", "Type name in generic instance must be a static constant path"},
 
     // Error messages from Sorbet trying to gracefully recover from parse errors
-    {"MethodWithoutSelector", "unexpected token: {}"},
+    {"MethodWithoutSelector", "unexpected token {}"},
 };
 
 void generateDclass() {
