@@ -92,7 +92,7 @@ private:
 
 public:
     LSPPreprocessor(std::unique_ptr<core::GlobalState> initialGS, LSPConfiguration config, WorkerPool &workers,
-                    const std::shared_ptr<spdlog::logger> &logger);
+                    const std::shared_ptr<spdlog::logger> &logger, u4 initialVersion = 0);
 
     /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.

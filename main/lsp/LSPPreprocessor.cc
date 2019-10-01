@@ -29,12 +29,10 @@ bool sanityCheckUpdate(const core::GlobalState &gs, const LSPFileUpdates &update
 }
 } // namespace
 
-constexpr u4 INITIAL_VERSION = 0;
-
 LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPConfiguration config, WorkerPool &workers,
-                                 const std::shared_ptr<spdlog::logger> &logger)
-    : ttgs(TimeTravelingGlobalState(config, logger, workers, move(initialGS), INITIAL_VERSION)), config(move(config)),
-      workers(workers), logger(logger), owner(this_thread::get_id()), nextVersion(INITIAL_VERSION + 1) {
+                                 const std::shared_ptr<spdlog::logger> &logger, u4 initialVersion)
+    : ttgs(TimeTravelingGlobalState(config, logger, workers, move(initialGS), initialVersion)), config(move(config)),
+      workers(workers), logger(logger), owner(this_thread::get_id()), nextVersion(initialVersion + 1) {
     const auto &gs = ttgs.getGlobalState();
     finalGSErrorQueue = make_shared<core::ErrorQueue>(gs.errorQueue->logger, gs.errorQueue->tracer);
     // Required for diagnostics to work.
@@ -58,7 +56,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
         }
         auto &msgParams = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
         // See which newer requests we can enqueue. We want to merge them *backwards* into msgParams.
-        earliestActiveEditVersion = min(earliestActiveEditVersion, msgParams->updates.versionStart);
+        earliestActiveEditVersion = ttgs.minVersion(earliestActiveEditVersion, msgParams->updates.versionStart);
         while (it != pendingRequests.end()) {
             auto &mergeMsg = **it;
             const bool canMerge = mergeMsg.isNotification() && mergeMsg.method() == LSPMethod::SorbetWorkspaceEdit;
@@ -91,7 +89,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
     // Only try to cancel if the cancelation feature is enabled AND the typechecking thread is running the slow path.
     if (config.opts.lspCancelableSlowPathEnabled && runningSlowPath.has_value()) {
         const auto &[committed, end] = runningSlowPath.value();
-        earliestActiveEditVersion = min(committed, earliestActiveEditVersion);
+        earliestActiveEditVersion = ttgs.minVersion(committed, earliestActiveEditVersion);
 
         // Avoid canceling if the currently-running slow path has already been canceled.
         if (!gs.wasTypecheckingCanceled()) {
