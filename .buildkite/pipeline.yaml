@@ -1,4 +1,21 @@
 steps:
+  - label: ":linux: linters.sh"
+  command: .buildkite/linters.sh
+  <<: &elastic
+    agents:
+      os: linux
+      queue: elastic
+    plugins:
+      - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
+          image: "darkdimius/sorbet-build-image:latest"
+          workdir: /app
+          init: true
+          propagate-environment: true
+          environment:
+            - "CODECOV_TOKEN"
+            - "SORBET_RUBYGEMS_API_KEY"
+          volumes:
+            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
   - label: ":mac: test"
     command: .buildkite/test.sh
     agents:
