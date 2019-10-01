@@ -406,11 +406,11 @@ public:
         }
     }
 
-    unique_ptr<Node> call_method_missing_fun(unique_ptr<Node> receiver, const token *dot) {
+    unique_ptr<Node> call_method_missing_fun(unique_ptr<Node> receiver, const token *dot, std::string last_token) {
         auto dotLoc = tokLoc(dot);
         auto level = ruby_parser::dlevel::ERROR;
         auto err = ruby_parser::dclass::MethodWithoutSelector;
-        driver_->external_diagnostic(level, err, dotLoc.endPos(), dotLoc.endPos(), "syntax error");
+        driver_->external_diagnostic(level, err, dotLoc.endPos(), dotLoc.endPos(), last_token);
 
         auto loc = receiver != nullptr ? receiver->loc.join(dotLoc) : dotLoc;
         auto method = core::Names::missingFun();
@@ -1178,9 +1178,9 @@ ForeignPtr call_method(SelfPtr builder, ForeignPtr receiver, const token *dot, c
         build->call_method(build->cast_node(receiver), dot, selector, lparen, build->convertNodeList(args), rparen));
 }
 
-ForeignPtr call_method_missing_fun(SelfPtr builder, ForeignPtr receiver, const token *dot) {
+ForeignPtr call_method_missing_fun(SelfPtr builder, ForeignPtr receiver, const token *dot, std::string next_token) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->call_method_missing_fun(build->cast_node(receiver), dot));
+    return build->toForeign(build->call_method_missing_fun(build->cast_node(receiver), dot, next_token));
 }
 
 ForeignPtr case_(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *whenBodies,

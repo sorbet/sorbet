@@ -31,27 +31,22 @@ public:
         u4 maxOff = file.data(gs).source().size();
         file.data(gs).hasParseErrors = true;
         for (auto &diag : diagnostics) {
-            string_view level = "unknown"sv;
             switch (diag.level()) {
                 case ruby_parser::dlevel::NOTE:
                 case ruby_parser::dlevel::WARNING:
                     continue;
                 case ruby_parser::dlevel::ERROR:
-                    level = "Error"sv;
-                    break;
                 case ruby_parser::dlevel::FATAL:
-                    level = "Fatal"sv;
                     break;
-                default:
-                    Exception::notImplemented();
             }
             core::Loc loc(file, translatePos(diag.location().beginPos, maxOff - 1),
                           translatePos(diag.location().endPos, maxOff));
+
             auto sorbetErrorClass = diag.error_class() == ruby_parser::dclass::MethodWithoutSelector
                                         ? core::errors::Parser::MethodWithoutSelector
                                         : core::errors::Parser::ParserError;
             if (auto e = gs.beginError(loc, sorbetErrorClass)) {
-                e.setHeader("Parse {}: {}", level, fmt::format(dclassStrings[(int)diag.error_class()], diag.data()));
+                e.setHeader("{}", fmt::format(dclassStrings[(int)diag.error_class()], diag.data()));
             }
         }
     }
