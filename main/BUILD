@@ -1,8 +1,6 @@
 cc_binary(
     name = "sorbet_llvm",
     srcs = [
-        "llvm_main.cc",
-        "llvm_main.h",
         "main.cc",
     ],
     # When changing this, you should also update the REQUIRED_STACK_SIZE variable in common/os/os.cc.
@@ -23,6 +21,7 @@ cc_binary(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//llvm/linker",
         "//plugin_injector",
         "@com_stripe_ruby_typer//main:realmain",
         "@com_stripe_ruby_typer//payload",
