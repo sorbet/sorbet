@@ -6,15 +6,6 @@ class Parent
 
   abstract!
 
-  # This should fail, as `T.attached_class` is not currently supported inside of
-  # method bodies.
-  sig {returns(T::Array[T.attached_class])}
-                      # ^^^^^^^^^^^^^^^^ error: Only top-level T.attached_class is supported
-  def self.bad_usage
-    []
-  end
-
-
   # This should fail, as `T.attached_class` doesn't make sense in an instance
   # method context.
   sig {returns(T.nilable(T.attached_class))}

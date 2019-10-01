@@ -507,14 +507,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             }
             return core::Types::untypedUntracked();
         case core::Names::attachedClass()._id:
-            // The conditions for using T.attached_class are the same as
-            // T.self_type, so we just piggy-back off of that flag.
-            if (!args.allowSelfType) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("Only top-level T.attached_class is supported");
-                }
-                return core::Types::untypedUntracked();
-            } else if (!ctx.owner.data(ctx)->isSingletonClass(ctx)) {
+            if (!ctx.owner.data(ctx)->isSingletonClass(ctx)) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("`{}` may only be used in a self context", "T.attached_class");
                 }
