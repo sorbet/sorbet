@@ -192,7 +192,7 @@ class Exception < Object
   # [`Exception#backtrace`](https://docs.ruby-lang.org/en/2.6.0/Exception.html#method-i-backtrace).
   sig do
     params(
-        arg0: T.any(String, T::Array[String]),
+        arg0: T.nilable(T.any(String, T::Array[String])),
     )
     .returns(T::Array[String])
   end
