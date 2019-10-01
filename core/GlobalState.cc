@@ -1421,16 +1421,18 @@ bool GlobalState::wasTypecheckingCanceled() const {
     return lspEpochInvalidator->load() != currentlyProcessingLSPEpoch->load();
 }
 
-void GlobalState::startCommitEpoch(u4 epoch) {
+void GlobalState::startCommitEpoch(u4 fromEpoch, u4 toEpoch) {
     absl::MutexLock lock(epochMutex.get());
-    ENFORCE(epoch != currentlyProcessingLSPEpoch->load());
+    ENFORCE(fromEpoch != toEpoch);
+    ENFORCE(toEpoch != currentlyProcessingLSPEpoch->load());
+    ENFORCE(toEpoch != lastCommittedLSPEpoch->load());
     // epoch should be a version 'ahead' of currentlyProcessingLSPEpoch. The distance between the two is the number of
     // fast path edits that have come in since the last slow path. Since epochs overflow, there's nothing that I can
     // easily assert here to ensure that we are not moving backward in time.
-    currentlyProcessingLSPEpoch->store(epoch);
-    lspEpochInvalidator->store(epoch);
-    // These should always be different.
-    ENFORCE(epoch != lastCommittedLSPEpoch->load());
+    currentlyProcessingLSPEpoch->store(toEpoch);
+    lspEpochInvalidator->store(toEpoch);
+    // Signifies that we have processed a bunch of epochs on the fast path before this one.
+    lastCommittedLSPEpoch->store(fromEpoch);
 }
 
 optional<pair<u4, u4>> GlobalState::getRunningSlowPath() const {
