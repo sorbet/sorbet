@@ -494,7 +494,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 }
                 return core::Types::untypedUntracked();
             }
-            return core::make_type<core::ClassType>(singleton);
+            return singleton.data(ctx)->externalType(ctx);
         }
         case core::Names::untyped()._id:
             return core::Types::untyped(ctx, args.untypedBlame);
