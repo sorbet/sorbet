@@ -6,7 +6,7 @@ class Parent
 
   abstract!
 
-  # This should fail, as `T.attach_class` is not currently supported inside of
+  # This should fail, as `T.attached_class` is not currently supported inside of
   # method bodies.
   sig {returns(T::Array[T.attached_class])}
                       # ^^^^^^^^^^^^^^^^ error: Only top-level T.attached_class is supported
