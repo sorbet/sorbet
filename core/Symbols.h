@@ -314,42 +314,42 @@ public:
 
     inline void setClassOrModule() {
         ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
-        flags = flags | Symbol::Flags::CLASS_OR_MODULE;
+        flags |= Symbol::Flags::CLASS_OR_MODULE;
     }
 
     inline void setStaticField() {
         ENFORCE(!isClassOrModule() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
-        flags = flags | Symbol::Flags::STATIC_FIELD;
+        flags |= Symbol::Flags::STATIC_FIELD;
     }
 
     inline void setField() {
         ENFORCE(!isClassOrModule() && !isStaticField() && !isMethod() && !isTypeArgument() && !isTypeMember());
-        flags = flags | Symbol::Flags::FIELD;
+        flags |= Symbol::Flags::FIELD;
     }
 
     inline void setMethod() {
         ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isTypeArgument() && !isTypeMember());
-        flags = flags | Symbol::Flags::METHOD;
+        flags |= Symbol::Flags::METHOD;
     }
 
     inline void setTypeArgument() {
         ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isMethod() && !isTypeMember());
-        flags = flags | Symbol::Flags::TYPE_ARGUMENT;
+        flags |= Symbol::Flags::TYPE_ARGUMENT;
     }
 
     inline void setTypeMember() {
         ENFORCE(!isClassOrModule() && !isStaticField() && !isField() && !isMethod() && !isTypeArgument());
-        flags = flags | Symbol::Flags::TYPE_MEMBER;
+        flags |= Symbol::Flags::TYPE_MEMBER;
     }
 
     inline void setIsModule(bool isModule) {
         ENFORCE(isClassOrModule());
         if (isModule) {
             ENFORCE((flags & Symbol::Flags::CLASS_OR_MODULE_CLASS) == 0);
-            flags = flags | Symbol::Flags::CLASS_OR_MODULE_MODULE;
+            flags |= Symbol::Flags::CLASS_OR_MODULE_MODULE;
         } else {
             ENFORCE((flags & Symbol::Flags::CLASS_OR_MODULE_MODULE) == 0);
-            flags = flags | Symbol::Flags::CLASS_OR_MODULE_CLASS;
+            flags |= Symbol::Flags::CLASS_OR_MODULE_CLASS;
         }
     }
 
