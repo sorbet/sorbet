@@ -810,13 +810,6 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     }
     SymbolRef selfRef = this->ref(gs);
 
-    // WARNING: `alias` is intentionally defined before operations that might
-    // mutate the symbol table, as a symbol table reallocation that will
-    // invalidate the `this` pointer. Computing the alias before is safe, as
-    // it's just a SymbolRef.
-    auto alias = findMemberNoDealias(gs, Names::Constants::AttachedClass());
-    ENFORCE(!alias.exists() || isSingletonClass(gs));
-
     // avoid using `this` after the call to gs.enterTypeMember
     auto selfLoc = this->loc();
 
@@ -835,14 +828,6 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     // bound will be updated to the result of `externalType` in the
     // ResolveSignaturesWalk pass of the resolver.
     tp.data(gs)->resultType = make_type<LambdaParam>(tp, Types::bottom(), Types::top());
-
-    // Only create the alias if it doesn't already exist. This happens when
-    // a singleton class has `singletonClass` called on it, as it already has a
-    // field named `AttachedClass`
-    if (!alias.exists()) {
-        alias = gs.enterStaticFieldSymbol(selfLoc, selfRef, Names::Constants::AttachedClass());
-        alias.data(gs)->resultType = make_type<AliasType>(tp);
-    }
 
     selfRef.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;
