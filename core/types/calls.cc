@@ -491,6 +491,9 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             return result;
         } else if (args.name == core::Names::super()) {
             return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::untyped());
+        } else if (args.name == Names::missingFun()) {
+            // We already emitted an error for this in the parser
+            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::untyped());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::UnknownMethod)) {

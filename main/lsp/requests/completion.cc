@@ -254,8 +254,10 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
         auto resp = move(queryResponses[0]);
 
         if (auto sendResp = resp->isSend()) {
-            auto prefix = sendResp->callerSideName.data(*gs)->shortName(*gs);
-            logger->debug("Looking for method similar to {}", prefix);
+            auto prefix = sendResp->callerSideName == core::Names::missingFun()
+                              ? ""
+                              : sendResp->callerSideName.data(*gs)->shortName(*gs);
+            logger->debug("Looking for method similar to '{}'", prefix);
 
             auto similarMethodsByName = allSimilarMethods(*gs, *sendResp->dispatchResult, prefix);
             for (auto &[methodName, similarMethods] : similarMethodsByName) {

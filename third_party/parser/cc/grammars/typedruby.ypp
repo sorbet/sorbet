@@ -2061,6 +2061,10 @@ opt_block_args_tail:
                     {
                       $$ = driver.build.index(self, $1, $2, $3, $4);
                     }
+                | primary_value call_op
+                    {
+                      $$ = driver.build.call_method_missing_fun(self, $1, $2);
+                    }
 
      brace_block: tLCURLY brace_body tRCURLY
                     {

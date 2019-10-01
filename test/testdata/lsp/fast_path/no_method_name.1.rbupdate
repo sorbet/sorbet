@@ -1,0 +1,7 @@
+# typed: true
+# assert-fast-path: no_method_name.rb
+class A
+  def foo; end
+end
+
+A.new. # error: Parse Error: unexpected token: syntax error

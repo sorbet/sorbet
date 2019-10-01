@@ -1,0 +1,9 @@
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def foo<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+  end
+
+  <emptyTree>::<C A>.new().<missing-fun>()
+end
