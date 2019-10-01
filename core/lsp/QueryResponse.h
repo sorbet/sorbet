@@ -10,11 +10,14 @@ class TypeConstraint;
 
 class SendResponse final {
 public:
-    SendResponse(core::Loc termLoc, std::shared_ptr<core::DispatchResult> dispatchResult, core::NameRef callerSideName)
-        : dispatchResult(std::move(dispatchResult)), callerSideName(callerSideName), termLoc(termLoc){};
+    SendResponse(core::Loc termLoc, std::shared_ptr<core::DispatchResult> dispatchResult, core::NameRef callerSideName,
+                 bool isPrivateOk)
+        : dispatchResult(std::move(dispatchResult)), callerSideName(callerSideName), termLoc(termLoc),
+          isPrivateOk(isPrivateOk){};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
     const core::NameRef callerSideName;
     const core::Loc termLoc;
+    const bool isPrivateOk;
 };
 
 class IdentResponse final {

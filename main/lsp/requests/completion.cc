@@ -280,7 +280,13 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
                 }
 
                 // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
-                deduped.emplace_back(similarMethods[0]);
+                auto similarMethod = similarMethods[0];
+
+                if (similarMethod.method.data(*gs)->isPrivate() && !sendResp->isPrivateOk) {
+                    continue;
+                }
+
+                deduped.emplace_back(similarMethod);
             }
 
             fast_sort(deduped, [&](const auto &left, const auto &right) -> bool {
