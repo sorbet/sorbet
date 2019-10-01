@@ -10,8 +10,7 @@ static ::llvm::LLVMContext TheContext;
 static ::llvm::IRBuilder<> Builder(TheContext);
 static ::llvm::Module TheModule("sorbet", TheContext);
 
-void init() {
-}
+void init() {}
 
 void run(std::shared_ptr<spdlog::logger> logger) {
     std::vector<::llvm::Type *> NoArgs(0, ::llvm::Type::getVoidTy(TheContext));
