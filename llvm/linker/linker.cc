@@ -6,4 +6,4 @@ void run(std::shared_ptr<spdlog::logger> logger) {
     logger->error("hello world");
 }
 
-}
+} // namespace sorbet::llvm::linker

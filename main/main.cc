@@ -1,7 +1,7 @@
 #include "common/common.h"
-#include "llvm/linker/linker.h"
 #include "main/options/options.h"
 #include "main/realmain.h"
+#include "llvm/linker/linker.h"
 int main(int argc, char *argv[]) {
     try {
         auto code = sorbet::realmain::realmain(argc, argv);
