@@ -16,5 +16,6 @@ cc_library(
         "-lpthread",
         "-lcurses",
         "-ldl",
+        "-lz",
     ],
 )

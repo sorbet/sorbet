@@ -11,14 +11,7 @@ cc_binary(
         ],
         "//conditions:default": [],
     }),
-    linkstatic = select({
-        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    malloc = select({
-        "@com_stripe_ruby_typer//main:jemalloc": "@jemalloc//:jemalloc",
-        "//conditions:default": "@bazel_tools//tools/cpp:malloc",
-    }),
+    linkstatic = 1,
     visibility = ["//visibility:public"],
     deps = [
         "//llvm/linker",
