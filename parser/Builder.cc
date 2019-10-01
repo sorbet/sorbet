@@ -406,22 +406,6 @@ public:
         }
     }
 
-    unique_ptr<Node> call_method_missing_fun(unique_ptr<Node> receiver, const token *dot, std::string last_token) {
-        auto dotLoc = tokLoc(dot);
-        auto level = ruby_parser::dlevel::ERROR;
-        auto err = ruby_parser::dclass::MethodWithoutSelector;
-        driver_->external_diagnostic(level, err, dotLoc.endPos(), dotLoc.endPos(), last_token);
-
-        auto loc = receiver != nullptr ? receiver->loc.join(dotLoc) : dotLoc;
-        auto method = core::Names::missingFun();
-        auto args = sorbet::parser::NodeVec{};
-        if ((dot != nullptr) && dot->string() == "&.") {
-            return make_unique<CSend>(loc, std::move(receiver), method, std::move(args));
-        } else {
-            return make_unique<Send>(loc, std::move(receiver), method, std::move(args));
-        }
-    }
-
     unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, sorbet::parser::NodeVec whenBodies,
                            const token *elseTok, unique_ptr<Node> elseBody, const token *end) {
         return make_unique<Case>(tokLoc(case_).join(tokLoc(end)), std::move(expr), std::move(whenBodies),
@@ -1178,11 +1162,6 @@ ForeignPtr call_method(SelfPtr builder, ForeignPtr receiver, const token *dot, c
         build->call_method(build->cast_node(receiver), dot, selector, lparen, build->convertNodeList(args), rparen));
 }
 
-ForeignPtr call_method_missing_fun(SelfPtr builder, ForeignPtr receiver, const token *dot, std::string next_token) {
-    auto build = cast_builder(builder);
-    return build->toForeign(build->call_method_missing_fun(build->cast_node(receiver), dot, next_token));
-}
-
 ForeignPtr case_(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *whenBodies,
                  const token *elseTok, ForeignPtr elseBody, const token *end) {
     auto build = cast_builder(builder);
@@ -1696,7 +1675,6 @@ struct ruby_parser::builder Builder::interface = {
     blockarg,
     callLambda,
     call_method,
-    call_method_missing_fun,
     case_,
     character,
     complex,

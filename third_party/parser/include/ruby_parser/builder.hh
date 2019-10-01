@@ -31,7 +31,6 @@ struct builder {
 	ForeignPtr(*blockarg)(SelfPtr builder, const token* amper, const token* name);
 	ForeignPtr(*callLambda)(SelfPtr builder, const token* lambda);
 	ForeignPtr(*call_method)(SelfPtr builder, ForeignPtr receiver, const token* dot, const token* selector, const token* lparen, const node_list* args, const token* rparen);
-	ForeignPtr(*call_method_missing_fun)(SelfPtr builder, ForeignPtr receiver, const token* dot, std::string last_token);
 	ForeignPtr(*case_)(SelfPtr builder, const token* case_, ForeignPtr expr, const node_list* whenBodies, const token* elseTok, ForeignPtr elseBody, const token* end);
 	ForeignPtr(*character)(SelfPtr builder, const token* char_);
 	ForeignPtr(*complex)(SelfPtr builder, const token* tok);
