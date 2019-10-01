@@ -1,3 +1,4 @@
+#include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "common/typecase.h"
@@ -9,6 +10,61 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 namespace {
+
+struct RubyKeyword {
+    string keyword;
+    string documentation;
+
+    RubyKeyword(string keyword, string documentation) : keyword(keyword), documentation(documentation){};
+};
+
+// Taken from https://docs.ruby-lang.org/en/2.6.0/keywords_rdoc.html
+// We might want to put this somewhere shareable if there are more places that want to use it.
+const RubyKeyword rubyKeywords[] = {
+    {"BEGIN", "Runs before any other code in the current file."},
+    {"END", "Runs after any other code in the current file."},
+    {"__ENCODING__", "The script encoding of the current file."},
+    {"__FILE__", "The path to the current file."},
+    {"__LINE__", "The line number of this keyword in the current file."},
+    {"alias", "Creates an alias between two methods (and other things)."},
+    {"and", "Short-circuit Boolean and with lower precedence than &&"},
+    {"begin", "Starts an exception handling block."},
+    {"break", "Leaves a block early."},
+    {"case", "Starts a case expression."},
+    {"class", "Creates or opens a class."},
+    {"def", "Defines a method."},
+    {"defined?", "Returns a string describing its argument."},
+    {"do", "Starts a block."},
+    {"else", "The unhandled condition in case, if and unless expressions."},
+    {"elsif", "An alternate condition for an if expression."},
+    {"end",
+     "The end of a syntax block. Used by classes, modules, methods, exception handling and control expressions."},
+    {"ensure", "Starts a section of code that is always run when an exception is raised."},
+    {"false", "Boolean false."},
+    {"for", "A loop that is similar to using the each method."},
+    {"if", "Used for if and modifier if expressions."},
+    {"in", "Used to separate the iterable object and iterator variable in a for loop."},
+    {"module", "Creates or opens a module."},
+    {"next", "Skips the rest of the block."},
+    {"nil", "A false value usually indicating “no value” or “unknown”."},
+    {"not", "Inverts the following boolean expression. Has a lower precedence than !"},
+    {"or", "Boolean or with lower precedence than ||"},
+    {"redo", "Restarts execution in the current block."},
+    {"rescue", "Starts an exception section of code in a begin block."},
+    {"retry", "Retries an exception block."},
+    {"return", "Exits a method."},
+    {"self", "The object the current method is attached to."},
+    {"super", "Calls the current method in a superclass."},
+    {"then", "Indicates the end of conditional blocks in control structures."},
+    {"true", "Boolean true."},
+    // This is also defined on Kernel
+    // {"undef", "Prevents a class or module from responding to a method call."},
+    {"unless", "Used for unless and modifier unless expressions."},
+    {"until", "Creates a loop that executes until the condition is true."},
+    {"when", "A condition in a case expression."},
+    {"while", "Creates a loop that executes while the condition is true."},
+    {"yield", "Starts execution of the block sent to the current method."},
+};
 
 vector<core::SymbolRef> ancestorsImpl(const core::GlobalState &gs, core::SymbolRef sym, vector<core::SymbolRef> &&acc) {
     // The implementation here is similar to Symbols::derivesFrom.
@@ -129,6 +185,21 @@ SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, core::Dispat
     return result;
 }
 
+vector<RubyKeyword> allSimilarKeywords(string_view prefix) {
+    ENFORCE(absl::c_is_sorted(rubyKeywords, [](auto &left, auto &right) { return left.keyword < right.keyword; }),
+            "rubyKeywords is not sorted by keyword; completion results will be out of order");
+
+    auto result = vector<RubyKeyword>{};
+    for (const auto &rubyKeyword : rubyKeywords) {
+        if (absl::StartsWith(rubyKeyword.keyword, prefix)) {
+            result.emplace_back(rubyKeyword);
+        }
+    }
+
+    // The result is trivially sorted because we walked rubyKeywords (which is sorted) in order.
+    return result;
+}
+
 string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
     vector<string> typeAndArgNames;
@@ -155,11 +226,25 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames, ", "), "${0}");
 }
 
+unique_ptr<CompletionItem> getCompletionItemForKeyword(const LSPConfiguration &config, const RubyKeyword &rubyKeyword,
+                                                       size_t sortIdx) {
+    auto label = rubyKeyword.keyword;
+    auto item = make_unique<CompletionItem>(label);
+    item->sortText = fmt::format("{:06d}", sortIdx);
+    item->kind = CompletionItemKind::Keyword;
+    item->insertTextFormat = InsertTextFormat::PlainText;
+    item->insertText = label;
+    item->documentation = make_unique<MarkupContent>(config.clientCompletionItemMarkupKind, rubyKeyword.documentation);
+
+    return item;
+}
+
 } // namespace
 
-unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
-                                                      core::TypePtr receiverType,
-                                                      const core::TypeConstraint *constraint, size_t sortIdx) const {
+unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::GlobalState &gs, core::SymbolRef what,
+                                                               core::TypePtr receiverType,
+                                                               const core::TypeConstraint *constraint,
+                                                               size_t sortIdx) const {
     ENFORCE(what.exists());
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
 
@@ -219,7 +304,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
                     sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                     // hide singletons
                     hasSimilarName(gs, sym.data(gs)->name, pattern)) {
-                    items.push_back(getCompletionItem(gs, sym, receiverType, nullptr, items.size()));
+                    items.push_back(getCompletionItemForSymbol(gs, sym, receiverType, nullptr, items.size()));
                 }
             }
         } while (owner != core::Symbols::root());
@@ -258,6 +343,9 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
                               ? ""
                               : sendResp->callerSideName.data(*gs)->shortName(*gs);
             logger->debug("Looking for method similar to '{}'", prefix);
+
+            // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
+            auto similarKeywords = sendResp->isPrivateOk ? allSimilarKeywords(prefix) : vector<RubyKeyword>{};
 
             auto similarMethodsByName = allSimilarMethods(*gs, *sendResp->dispatchResult, prefix);
             for (auto &[methodName, similarMethods] : similarMethodsByName) {
@@ -310,9 +398,13 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
                 return left.method._id < right.method._id;
             });
 
+            // TODO(jez) Do something smarter here than "all matching keywords always come first"
+            for (auto &similarKeyword : similarKeywords) {
+                items.push_back(getCompletionItemForKeyword(config, similarKeyword, items.size()));
+            }
             for (auto &similarMethod : deduped) {
-                items.push_back(getCompletionItem(*gs, similarMethod.method, similarMethod.receiverType,
-                                                  similarMethod.constr.get(), items.size()));
+                items.push_back(getCompletionItemForSymbol(*gs, similarMethod.method, similarMethod.receiverType,
+                                                           similarMethod.constr.get(), items.size()));
             }
         } else if (auto identResp = resp->isIdent()) {
             findSimilarConstantOrIdent(*gs, identResp->retType.type, items);
