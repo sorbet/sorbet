@@ -1,6 +1,6 @@
 #include "ast/ast.h"
-#include "llvm/linker/linker.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
+#include "llvm/linker/linker.h"
 #include <cxxopts.hpp>
 #include <optional>
 using namespace std;
