@@ -5,7 +5,7 @@
 #
 #   https://github.com/sorbet/sorbet-typed/edit/master/lib/ruby/all/resolv.rbi
 #
-# typed: true
+# typed: strong
 
 class Resolv
   sig { params(name: String).returns(String) }
@@ -523,7 +523,7 @@ class Resolv
     end
 
     class Alt
-      Regex = Regex = T.let(T.unsafe(nil), Regexp)
+      Regex = T.let(T.unsafe(nil), Regexp)
 
       sig { params(arg: T.any(String, Resolv::LOC::Alt)).returns(Resolv::LOC::Alt) }
       def self.create(arg); end
