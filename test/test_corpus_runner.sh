@@ -10,6 +10,8 @@ llvmir=$(mktemp -d)
 main/sorbet_llvm --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$rb"
 
 srbout=$(mktemp)
-cat "$llvmir/main.ll" > "$srbout"
+ruby -r "$llvmir/main.bundle" "$rb" 2>&1 | tee "$srbout"
 
 diff -a "$rbout" "$srbout"
+
+cat "$llvmir/main.ll"
