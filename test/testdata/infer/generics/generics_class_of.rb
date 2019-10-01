@@ -9,7 +9,7 @@ end
 class Test
   extend T::Sig
 
-  sig {params(arg: T.class_of(Test)).void}
+  sig {params(arg: T.class_of(A)).void}
   def arg_test(arg)
   end
 
@@ -24,7 +24,7 @@ class Test
 
     # Exercise the `Object#class` intrinsic, ensuring that it calls
     # `externalType` instead of just making a `ClassType` of the singleton.
-    self.arg_test(self.class)
+    self.arg_test(A.new.class)
   end
 
 end
