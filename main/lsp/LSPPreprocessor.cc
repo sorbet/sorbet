@@ -100,6 +100,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
                 if (msg->isNotification() && msg->method() == LSPMethod::SorbetWorkspaceEdit) {
                     Timer timeit(logger, "tryCancelSlowPath");
                     auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
+                    // Note: This line calls indexer to re-create the index trees, so it's somewhat expensive.
                     auto combinedUpdates = ttgs.getCombinedUpdates(committed + 1, params->updates.versionEnd);
                     if (combinedUpdates.canTakeFastPath && gs.tryCancelSlowPath(params->updates.versionEnd)) {
                         logger->debug("[Preprocessor] Canceling typechecking, as edits {} thru {} can take fast path.",
