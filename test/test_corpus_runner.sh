@@ -12,4 +12,4 @@ main/sorbet_llvm --silence-dev-message --no-error-count --llvm-ir-folder "$llvmi
 srbout=$(mktemp)
 cat "$llvmir/main.ll" > "$srbout"
 
-diff "$rbout" "$srbout"
+diff -a "$rbout" "$srbout"
