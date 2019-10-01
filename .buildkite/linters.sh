@@ -49,15 +49,6 @@ if [ "$err" -ne 0 ]; then
     globalErr=$err
 fi
 
-err=0
-echo $'```' > format_website
-./tools/scripts/format_website.sh -t &>> format_website || err=$?
-echo $'```' >> format_website
-if [ "$err" -ne 0 ]; then
-    buildkite-agent annotate --context tools/scripts/format_website.sh --style error --append < format_website
-    globalErr=$err
-fi
-
 if [ "$globalErr" -ne 0 ]; then
     exit $globalErr
 fi
