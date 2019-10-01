@@ -213,8 +213,7 @@ public:
         if (original->fun == core::Names::keepForIde()) {
             ignoring.emplace_back(original.get());
         }
-        if ((original->flags & ast::Send::PRIVATE_OK) != 0 && original->fun == core::Names::require() &&
-            original->args.size() == 1) {
+        if (original->isPrivateOk() && original->fun == core::Names::require() && original->args.size() == 1) {
             auto *lit = ast::cast_tree<ast::Literal>(original->args.front().get());
             if (lit && lit->isString(ctx)) {
                 requires.emplace_back(lit->asString(ctx));
