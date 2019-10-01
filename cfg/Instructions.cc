@@ -70,9 +70,10 @@ string LoadSelf::showRaw(core::Context ctx, int tabs) {
 }
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
-           const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::Loc, 2> argLocs,
+           const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::Loc, 2> argLocs, bool isPrivateOk,
            const shared_ptr<core::SendAndBlockLink> &link)
-    : recv(recv), fun(fun), receiverLoc(receiverLoc), argLocs(std::move(argLocs)), link(move(link)) {
+    : recv(recv), fun(fun), receiverLoc(receiverLoc), argLocs(std::move(argLocs)), isPrivateOk(isPrivateOk),
+      link(move(link)) {
     this->args.resize(args.size());
     int i = 0;
     for (const auto &e : args) {

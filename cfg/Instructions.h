@@ -87,16 +87,17 @@ public:
     core::Loc receiverLoc;
     InlinedVector<VariableUseSite, 2> args;
     InlinedVector<core::Loc, 2> argLocs;
+    bool isPrivateOk;
     std::shared_ptr<core::SendAndBlockLink> link;
 
     Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
          const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::Loc, 2> argLocs,
-         const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
+         bool isPrivateOk = false, const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
     virtual std::string toString(core::Context ctx);
     virtual std::string showRaw(core::Context ctx, int tabs = 0);
 };
-CheckSize(Send, 152, 8);
+CheckSize(Send, 160, 8);
 
 class Return final : public Instruction {
 public:
