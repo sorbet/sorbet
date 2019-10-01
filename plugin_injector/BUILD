@@ -8,5 +8,6 @@ cc_library(
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//main/pipeline/semantic_extension:interface",
         "@cxxopts",
+        "//llvm/linker",
     ],
 )

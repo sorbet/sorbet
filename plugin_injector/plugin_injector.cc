@@ -1,4 +1,5 @@
 #include "ast/ast.h"
+#include "llvm/linker/linker.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
 #include <optional>
@@ -11,6 +12,9 @@ class LLVMSemanticExtension : public SemanticExtension {
 public:
     LLVMSemanticExtension(optional<string> irOutputDir) {
         this->irOutputDir = move(irOutputDir);
+        if (irOutputDir) {
+            sorbet::llvm::linker::setIROutputDir(this->irOutputDir.value());
+        }
     }
     virtual void typecheck(const core::GlobalState &, cfg::CFG &, std::unique_ptr<ast::MethodDef> &) const override{};
     virtual std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::GlobalState &, ast::Send *) const override {
