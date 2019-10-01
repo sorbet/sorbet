@@ -1098,7 +1098,7 @@ public:
         SymbolRef self = unwrapSymbol(thisType);
         auto singleton = self.data(ctx)->lookupSingletonClass(ctx);
         if (singleton.exists()) {
-            res.returnType = make_type<ClassType>(singleton);
+            res.returnType = singleton.data(ctx)->externalType(ctx);
         } else {
             res.returnType = Types::classClass();
         }
