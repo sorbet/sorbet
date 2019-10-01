@@ -6,6 +6,23 @@ class Parent
 
   abstract!
 
+  # This should fail, as `T.attach_class` is not currently supported inside of
+  # method bodies.
+  sig {returns(T::Array[T.attached_class])}
+                      # ^^^^^^^^^^^^^^^^ error: Only top-level T.attached_class is supported
+  def self.bad_usage
+    []
+  end
+
+
+  # This should fail, as `T.attached_class` doesn't make sense in an instance
+  # method context.
+  sig {returns(T.nilable(T.attached_class))}
+                       # ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be
+  def bad_sig
+    nil
+  end
+
   sig {returns(T.nilable(T.attached_class))}
   def self.make()
     # TODO(trevor): It would be nice if this could be `new`, but that's running
