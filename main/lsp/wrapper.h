@@ -38,14 +38,12 @@ private:
                      bool disableFastPath);
 
 public:
-    // NOTE: Cancelable slow path is not listed here because it does not work in single-threaded mode.
     enum class LSPExperimentalFeature {
         Autocomplete = 4,
         WorkspaceSymbols = 5,
         DocumentSymbol = 6,
         SignatureHelp = 7,
         QuickFix = 8,
-        CancelableSlowPath = 9,
     };
 
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
