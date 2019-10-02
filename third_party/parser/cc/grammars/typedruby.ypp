@@ -2073,18 +2073,6 @@ opt_block_args_tail:
                     {
                       $$ = driver.build.index(self, $1, $2, $3, $4);
                     }
-                | primary_value call_op
-                    {
-                      std::string last_token = "syntax error";
-
-                      int token_type = static_cast<int>(driver.last_token->type());
-                      const char* token_str_name = yytname_[yytranslate_(token_type)];
-
-                      if (token_str_name != nullptr) {
-                        last_token = token_str_name;
-                      }
-                      $$ = driver.build.call_method_missing_fun(self, $1, $2, last_token);
-                    }
 
      brace_block: tLCURLY brace_body tRCURLY
                     {
