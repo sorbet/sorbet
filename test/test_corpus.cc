@@ -75,6 +75,13 @@ public:
     void TearDown() override {}
 };
 
+class WhitequarkParserTest : public testing::TestWithParam<Expectations> {
+public:
+    ~WhitequarkParserTest() override = default;
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
 #define PRINTF(...)                                                                        \
     do {                                                                                   \
         testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); \
@@ -106,10 +113,10 @@ public:
 };
 
 UnorderedSet<string> knownExpectations = {
-    "parse-tree",      "parse-tree-json",    "ast",       "ast-raw",       "dsl-tree",     "dsl-tree-raw",
-    "symbol-table",    "symbol-table-raw",   "name-tree", "name-tree-raw", "resolve-tree", "resolve-tree-raw",
-    "flattened-tree",  "flattened-tree-raw", "cfg",       "cfg-raw",       "cfg-json",     "autogen",
-    "document-symbols"};
+    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "ast",       "ast-raw",       "dsl-tree",
+    "dsl-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree", "name-tree-raw", "resolve-tree",
+    "resolve-tree-raw", "flattened-tree",  "flattened-tree-raw",    "cfg",       "cfg-raw",       "cfg-json",
+    "autogen",          "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -191,6 +198,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto expectation = test.expectations.find("parse-tree");
         if (expectation != test.expectations.end()) {
             got["parse-tree"].append(nodes->toString(gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("parse-tree-whitequark");
+        if (expectation != test.expectations.end()) {
+            got["parse-tree-whitequark"].append(nodes->toWhitequark(gs)).append("\n");
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
@@ -473,6 +487,117 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     if (expectation != test.expectations.end()) {
         string table = gs.showRaw() + '\n';
         EXPECT_EQ(got["symbol-table-raw"], table) << " symbol-table-raw should not be mutated by CFG+inference";
+    }
+
+    // Check warnings and errors
+    {
+        map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
+        for (auto &error : errors) {
+            if (error->isSilenced) {
+                continue;
+            }
+            auto diag = errorToDiagnostic(gs, *error);
+            if (diag == nullptr) {
+                continue;
+            }
+            auto path = error->loc.file().data(gs).path();
+            diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
+        }
+        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
+    }
+
+    // Allow later phases to have errors that we didn't test for
+    errorQueue->drainAllErrors();
+
+    TEST_COUT << "errors OK" << '\n';
+} // namespace sorbet::test
+
+TEST_P(WhitequarkParserTest, PerPhaseTest) { // NOLINT
+    vector<unique_ptr<core::Error>> errors;
+    Expectations test = GetParam();
+    auto inputPath = test.folder + test.basename;
+    auto rbName = test.basename + ".rb";
+    SCOPED_TRACE(inputPath);
+
+    for (auto &exp : test.expectations) {
+        auto it = knownExpectations.find(exp.first);
+        if (it == knownExpectations.end()) {
+            ADD_FAILURE() << "Unknown pass: " << exp.first;
+        }
+    }
+
+    auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
+    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
+    core::GlobalState gs(errorQueue);
+    gs.censorForSnapshotTests = true;
+    auto workers = WorkerPool::create(0, gs.tracer());
+
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+        gs.initEmpty();
+    } else {
+        core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+    }
+    core::MutableContext ctx(gs, core::Symbols::root());
+    // Parser
+    vector<core::FileRef> files;
+    constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
+    {
+        core::UnfreezeFileTable fileTableAccess(gs);
+
+        for (auto &sourceFile : test.sourceFiles) {
+            auto fref = gs.enterFile(test.sourceFileContents[test.folder + sourceFile]);
+            if (FileOps::getFileName(sourceFile) == whitelistedTypedNoneTest) {
+                fref.data(gs).strictLevel = core::StrictLevel::False;
+            }
+            files.emplace_back(fref);
+        }
+    }
+    vector<ast::ParsedFile> trees;
+    map<string, string> got;
+
+    vector<core::ErrorRegion> errs;
+    for (auto file : files) {
+        errs.emplace_back(gs, file);
+
+        if (FileOps::getFileName(file.data(ctx).path()) != whitelistedTypedNoneTest &&
+            file.data(ctx).source().find("# typed:") == string::npos) {
+            ADD_FAILURE_AT(file.data(gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
+        }
+        unique_ptr<parser::Node> nodes;
+        {
+            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+
+            // whitequark/parser declares these 3 meta variables to
+            // simplify testing cases around local variables
+            vector<string> initialLocals = {"foo", "bar", "baz"};
+            nodes = parser::Parser::run(gs, file, initialLocals);
+        }
+        {
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        auto expectation = test.expectations.find("parse-tree-whitequark");
+        if (expectation != test.expectations.end()) {
+            got["parse-tree-whitequark"].append(nodes->toWhitequark(gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+    }
+
+    for (auto &gotPhase : got) {
+        auto expectation = test.expectations.find(gotPhase.first);
+        ASSERT_TRUE(expectation != test.expectations.end()) << "missing expectation for " << gotPhase.first;
+        ASSERT_TRUE(expectation->second.size() == 1)
+            << "found unexpected multiple expectations of type " << gotPhase.first;
+
+        auto checker = test.folder + expectation->second.begin()->second;
+        auto expect = FileOps::read(checker.c_str());
+        EXPECT_EQ(expect, gotPhase.second) << "Mismatch on: " << checker;
+        if (expect == gotPhase.second) {
+            TEST_COUT << gotPhase.first << " OK" << '\n';
+        }
     }
 
     // Check warnings and errors
@@ -944,6 +1069,8 @@ TEST_P(LSPTest, All) {
 
 INSTANTIATE_TEST_SUITE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 INSTANTIATE_TEST_SUITE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_SUITE_P(WhitequarkParserTests, WhitequarkParserTest, ::testing::ValuesIn(getInputs(singleTest)),
+                         prettyPrintTest);
 
 bool compareNames(string_view left, string_view right) {
     auto lsplit = left.find("__");
