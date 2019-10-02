@@ -1,4 +1,5 @@
 # typed: true
+# disable-stress-incremental: true
 
 class I; end
 class S; end
