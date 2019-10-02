@@ -4,9 +4,8 @@
 #include "llvm/linker/linker.h"
 int main(int argc, char *argv[]) {
     try {
-        sorbet::llvm::linker::init();
+        sorbet::llvm::Linker::init();
         auto code = sorbet::realmain::realmain(argc, argv);
-        sorbet::llvm::linker::run(sorbet::realmain::logger);
         return code;
     } catch (sorbet::realmain::options::EarlyReturnWithCode &c) {
         return c.returnCode;

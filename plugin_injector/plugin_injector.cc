@@ -1,10 +1,25 @@
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+// ^^^ violate our poisons so they go first
 #include "ast/ast.h"
+#include "cfg/CFG.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "llvm/linker/linker.h"
+#include "llvm/payload/payload.h"
 #include <cxxopts.hpp>
 #include <optional>
 using namespace std;
 namespace sorbet::pipeline::semantic_extension {
+namespace {
+string funcName2moduleName(string sourceName) {
+    // TODO: make it reversible
+    absl::c_replace(sourceName, '.', '_');
+    absl::c_replace(sourceName, '<', '_');
+    absl::c_replace(sourceName, '>', '_');
+    absl::c_replace(sourceName, '-', '_');
+    return sourceName;
+}
+} // namespace
 
 class LLVMSemanticExtension : public SemanticExtension {
     optional<string> irOutputDir;
@@ -12,11 +27,18 @@ class LLVMSemanticExtension : public SemanticExtension {
 public:
     LLVMSemanticExtension(optional<string> irOutputDir) {
         this->irOutputDir = move(irOutputDir);
-        if (irOutputDir) {
-            sorbet::llvm::linker::setIROutputDir(this->irOutputDir.value());
-        }
     }
-    virtual void typecheck(const core::GlobalState &, cfg::CFG &, std::unique_ptr<ast::MethodDef> &) const override{};
+    virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
+                           std::unique_ptr<ast::MethodDef> &md) const override {
+        if (irOutputDir.has_value()) {
+            ::llvm::LLVMContext lctx;
+            string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
+            unique_ptr<::llvm::Module> module = sorbet::llvm::Payload::readDefaultModule(functionName.data(), lctx);
+            // TODO: call into actual IR generation here
+            string fileName = funcName2moduleName(functionName);
+            sorbet::llvm::Linker::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
+        }
+    };
     virtual std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::GlobalState &, ast::Send *) const override {
         return {};
     };

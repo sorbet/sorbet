@@ -2,10 +2,20 @@
 #define SORBET_LLVM_LINKER_H
 
 #include "spdlog/spdlog.h"
+#include <memory>
+#include <string_view>
 
-namespace sorbet::llvm::linker {
-void init();
-void setIROutputDir(std::string dir);
-void run(std::shared_ptr<spdlog::logger> logger);
-} // namespace sorbet::llvm::linker
+namespace llvm {
+class LLVMContext;
+class Module;
+} // namespace llvm
+
+namespace sorbet::llvm {
+class Linker {
+public:
+    static void init();
+    static void run(spdlog::logger &logger, ::llvm::LLVMContext &lctx, std::unique_ptr<::llvm::Module> module,
+                    std::string_view targetDir, std::string_view fileName);
+};
+} // namespace sorbet::llvm
 #endif

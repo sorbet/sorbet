@@ -11,63 +11,55 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
-#include "llvm/payload/payload.h"
-
+#include <string_view>
 using namespace std;
-namespace sorbet::llvm::linker {
+namespace sorbet::llvm {
 
-static ::llvm::LLVMContext TheContext;
-static ::llvm::IRBuilder<> Builder(TheContext);
+// static unique_ptr<::llvm::Module> TheModule = Payload::readDefaultModule("sorbet", TheContext);
 
-static unique_ptr<::llvm::Module> TheModule = Payload::readDefaultModule("sorbet", TheContext);
-
-static std::string dir;
-void setIROutputDir(std::string d) {
-    dir = d;
-}
-
-void init() {}
-
-void outputLLVM() {
-    std::error_code EC;
-    auto name = dir + "/main.ll";
-    ::llvm::raw_fd_ostream File(name, EC, ::llvm::sys::fs::F_Text);
-    TheModule->print(File, nullptr);
-}
-
-void outputObjectFile() {
+void Linker::init() {
     // Initialize the target registry etc.
     ::llvm::InitializeAllTargetInfos();
     ::llvm::InitializeAllTargets();
     ::llvm::InitializeAllTargetMCs();
     ::llvm::InitializeAllAsmParsers();
     ::llvm::InitializeAllAsmPrinters();
+}
 
-    auto TargetTriple = ::llvm::sys::getDefaultTargetTriple();
-    TheModule->setTargetTriple(TargetTriple);
+void outputLLVM(string_view dir, string_view fileNameWithoutExtension, const unique_ptr<::llvm::Module> &module) {
+    std::error_code EC;
+    auto name = ((string)dir) + "/" + (string)fileNameWithoutExtension + ".ll";
+    ::llvm::raw_fd_ostream File(name, EC, ::llvm::sys::fs::F_Text);
+    module->print(File, nullptr);
+}
 
-    std::string Error;
-    auto Target = ::llvm::TargetRegistry::lookupTarget(TargetTriple, Error);
+void outputObjectFile(string_view dir, string_view fileNameWithoutExtension, unique_ptr<::llvm::Module> module) {
+    auto targetTriple = ::llvm::sys::getDefaultTargetTriple();
+    module->setTargetTriple(targetTriple);
+
+    std::string error;
+    auto target = ::llvm::TargetRegistry::lookupTarget(targetTriple, error);
 
     // Print an error and exit if we couldn't find the requested target.
     // This generally occurs if we've forgotten to initialise the
     // TargetRegistry or we have a bogus target triple.
-    if (!Target) {
-        ::llvm::errs() << Error;
+    if (!target) {
+        ::llvm::errs() << error;
         return;
     }
 
-    auto CPU = "generic";
-    auto Features = "";
+    auto cpu = "generic";
+    auto features = "";
 
     ::llvm::TargetOptions opt;
-    auto RM = ::llvm::Optional<::llvm::Reloc::Model>();
-    auto TheTargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
+    auto relocationModel = ::llvm::Optional<::llvm::Reloc::Model>();
+    auto targetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, relocationModel);
 
-    TheModule->setDataLayout(TheTargetMachine->createDataLayout());
+    module->setDataLayout(targetMachine->createDataLayout());
 
     std::error_code EC;
-    ::llvm::raw_fd_ostream dest(dir + "/main.o", EC, ::llvm::sys::fs::OF_None);
+    auto fileName = ((string)dir) + "/" + (string)fileNameWithoutExtension + ".o";
+    ::llvm::raw_fd_ostream dest(fileName, EC, ::llvm::sys::fs::OF_None);
 
     if (EC) {
         ::llvm::errs() << "Could not open file: " << EC.message();
@@ -75,27 +67,30 @@ void outputObjectFile() {
     }
 
     ::llvm::legacy::PassManager pass;
-    auto FileType = ::llvm::TargetMachine::CGFT_ObjectFile;
+    auto fileType = ::llvm::TargetMachine::CGFT_ObjectFile;
 
-    if (TheTargetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
+    if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
         ::llvm::errs() << "TheTargetMachine can't emit a file of this type";
         return;
     }
 
-    pass.run(*TheModule);
+    pass.run(*module);
     dest.flush();
 }
 
-void run(std::shared_ptr<spdlog::logger> logger) {
-    std::vector<::llvm::Type *> NoArgs(0, ::llvm::Type::getVoidTy(TheContext));
-    auto FT = ::llvm::FunctionType::get(::llvm::Type::getVoidTy(TheContext), NoArgs, false);
-    auto TheFunction = ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "Init_main", *TheModule);
-    auto BB = ::llvm::BasicBlock::Create(TheContext, "entry", TheFunction);
+void Linker::run(spdlog::logger &logger, ::llvm::LLVMContext &lctx, unique_ptr<::llvm::Module> module, string_view dir,
+                 string_view objectName) {
+    ::llvm::IRBuilder<> Builder(lctx);
+    std::vector<::llvm::Type *> NoArgs(0, ::llvm::Type::getVoidTy(lctx));
+    auto FT = ::llvm::FunctionType::get(::llvm::Type::getVoidTy(lctx), NoArgs, false);
+    auto function = ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
+                                             ((string) "Init_" + (string)objectName), *module);
+    auto BB = ::llvm::BasicBlock::Create(lctx, "entry", function);
     Builder.SetInsertPoint(BB);
-    Builder.CreateRet(::llvm::ConstantInt::getTrue(TheContext));
+    Builder.CreateRet(::llvm::ConstantInt::getTrue(lctx));
 
-    outputLLVM();
-    outputObjectFile();
+    outputLLVM(dir, objectName, module);
+    outputObjectFile(dir, objectName, move(module));
 }
 
-} // namespace sorbet::llvm::linker
+} // namespace sorbet::llvm
