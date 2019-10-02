@@ -2067,6 +2067,11 @@ class String < Object
   end
   def slice(arg0, arg1=T.unsafe(nil)); end
 
+# Produces unescaped version of str. See also #dump because #undump does
+  # inverse of #dump.
+  #
+  # ```ruby
+  # "\"hello \\n ''\"".undump #=> "hello \n ''"
+  # ```
   sig {returns(String)}
   def undump; end
-end
