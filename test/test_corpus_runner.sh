@@ -1,22 +1,34 @@
 #!/bin/bash
-set -eo pipefail
+set -exo pipefail
 
 rb=${1/--single_test=/}
 
 rbout=$(mktemp)
+llvmir=$(mktemp -d)
+srbout=$(mktemp)
+
+cleanup() {
+    rm -r "$llvmir" "$rbout"
+}
+
+trap cleanup EXIT
+
 ruby "$rb" > "$rbout" 2>&1
 
-llvmir=$(mktemp -d)
 main/sorbet_llvm --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$rb"
-
+echo running ls 
+ls "$llvmir"
 bundle="$llvmir/main.bundle"
-object="$llvmir/main.o"
-external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$object" -undefined dynamic_lookup
+requires=""
+for objectFile in "$llvmir/"*.o do
+  bundle=${objectFile%.o}.bundle
+  external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$llvmir/"*.o -undefined dynamic_lookup
+  requires="${requires} -r ${bundle}"
+done
 
-srbout=$(mktemp)
 # TODO Remove the "$rb" once the bundle does something for real
-ruby -r "$llvmir/main.bundle" "$rb" 2>&1 | tee "$srbout"
+ruby ${requires} "$rb" 2>&1 | tee "$srbout"
 
 diff -a "$rbout" "$srbout"
 
-cat "$llvmir/main.ll"
+cat "$llvmir/"*.ll
