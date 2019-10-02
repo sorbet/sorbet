@@ -1431,7 +1431,11 @@ void GlobalState::startCommitEpoch(u4 fromEpoch, u4 toEpoch) {
     // easily assert here to ensure that we are not moving backward in time.
     currentlyProcessingLSPEpoch->store(toEpoch);
     lspEpochInvalidator->store(toEpoch);
-    // Signifies that we have processed a bunch of epochs on the fast path before this one.
+    // lastCommittedLSPEpoch currently contains the epoch of the last slow path we processed. Since then, we may have
+    // committed several fast paths. So, update it to the epoch of the last fast path committed.
+    // We do it this way rather than keep it up-to-date after every fast path to reduce footguns, especially in testing.
+    // With this design, when starting a commit epoch, you have to specify the (from, to] range, and it is compiler
+    // enforced.
     lastCommittedLSPEpoch->store(fromEpoch);
 }
 

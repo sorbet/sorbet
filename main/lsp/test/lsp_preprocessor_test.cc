@@ -656,7 +656,4 @@ TEST(SlowPathCancelation, DoesNotIncludeOldEditsInCombinedEdit) { // NOLINT
     ASSERT_EQ(updates->updatedFiles[0]->source(), fooV4);
 }
 
-// Fast path, barrier, slow path
-// New edit: Fast path given slow path.
-
 } // namespace sorbet::realmain::lsp::test
