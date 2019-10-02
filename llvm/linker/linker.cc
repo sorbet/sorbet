@@ -27,9 +27,9 @@ void Linker::init() {
 }
 
 void outputLLVM(string_view dir, string_view fileNameWithoutExtension, const unique_ptr<::llvm::Module> &module) {
-    std::error_code EC;
+    std::error_code ec;
     auto name = ((string)dir) + "/" + (string)fileNameWithoutExtension + ".ll";
-    ::llvm::raw_fd_ostream File(name, EC, ::llvm::sys::fs::F_Text);
+    ::llvm::raw_fd_ostream File(name, ec, ::llvm::sys::fs::F_Text);
     module->print(File, nullptr);
 }
 
@@ -57,12 +57,12 @@ void outputObjectFile(string_view dir, string_view fileNameWithoutExtension, uni
 
     module->setDataLayout(targetMachine->createDataLayout());
 
-    std::error_code EC;
+    std::error_code ec;
     auto fileName = ((string)dir) + "/" + (string)fileNameWithoutExtension + ".o";
-    ::llvm::raw_fd_ostream dest(fileName, EC, ::llvm::sys::fs::OF_None);
+    ::llvm::raw_fd_ostream dest(fileName, ec, ::llvm::sys::fs::OF_None);
 
-    if (EC) {
-        ::llvm::errs() << "Could not open file: " << EC.message();
+    if (ec) {
+        ::llvm::errs() << "Could not open file: " << ec.message();
         return;
     }
 
@@ -80,14 +80,14 @@ void outputObjectFile(string_view dir, string_view fileNameWithoutExtension, uni
 
 void Linker::run(spdlog::logger &logger, ::llvm::LLVMContext &lctx, unique_ptr<::llvm::Module> module, string_view dir,
                  string_view objectName) {
-    ::llvm::IRBuilder<> Builder(lctx);
+    ::llvm::IRBuilder<> builder(lctx);
     std::vector<::llvm::Type *> NoArgs(0, ::llvm::Type::getVoidTy(lctx));
-    auto FT = ::llvm::FunctionType::get(::llvm::Type::getVoidTy(lctx), NoArgs, false);
-    auto function = ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
+    auto ft = ::llvm::FunctionType::get(::llvm::Type::getVoidTy(lctx), NoArgs, false);
+    auto function = ::llvm::Function::Create(ft, ::llvm::Function::ExternalLinkage,
                                              ((string) "Init_" + (string)objectName), *module);
-    auto BB = ::llvm::BasicBlock::Create(lctx, "entry", function);
-    Builder.SetInsertPoint(BB);
-    Builder.CreateRet(::llvm::ConstantInt::getTrue(lctx));
+    auto bb = ::llvm::BasicBlock::Create(lctx, "entry", function);
+    builder.SetInsertPoint(bb);
+    builder.CreateRet(::llvm::ConstantInt::getTrue(lctx));
 
     outputLLVM(dir, objectName, module);
     outputObjectFile(dir, objectName, move(module));
