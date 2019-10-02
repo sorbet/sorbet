@@ -48,8 +48,8 @@ TimeTravelingGlobalState makeTTGS(const LSPConfiguration &config = nullConfig, u
     return TimeTravelingGlobalState(config, logger, *workers, makeGS(config.opts), initialVersion);
 }
 
-LSPPreprocessor makePreprocessor(const LSPConfiguration &config = nullConfig) {
-    return LSPPreprocessor(makeGS(config.opts), config, *workers, logger);
+LSPPreprocessor makePreprocessor(const LSPConfiguration &config = nullConfig, u4 initialVersion = 0) {
+    return LSPPreprocessor(makeGS(config.opts), config, *workers, logger, initialVersion);
 }
 
 bool comesBeforeSymmetric(const TimeTravelingGlobalState &ttgs, u4 a, u4 b) {
@@ -562,6 +562,58 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathAfterBlockingRequestGetsCanceled
 
     // Processor thread: Try to typecheck, but get denied because canceled.
     EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
+}
+
+// Ensure that the preprocessor prunes TTGS properly during the event of a version rollover.
+TEST(SlowPathCancelation, PruneDuringVersionRollover) { // NOLINT
+    QueueState state;
+    absl::Mutex mtx;
+    auto preprocessor = makePreprocessor(nullConfig, 0xFFFFFFFF - 4);
+
+    // Edit 0xFFFFFFFF-3, committed during this function, introduces new files.
+    unique_ptr<core::GlobalState> gs = initCancelSlowPathTest(preprocessor, state, mtx);
+
+    // Edit 0xFFFFFFFF-2 introduces barV1.
+    string barV1 = "# typed: true\ndef foo; end";
+    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", 1, barV1), mtx);
+
+    // Emulate typechecker thread: 'process' changes
+    emulateProcessEditAtHeadOfQueue(state, *gs);
+    ASSERT_TRUE(gs->tryCommitEpoch(0xFFFFFFFF - 2, true, []() -> void {}));
+
+    // These two get bundled together:
+    // Edit 0xFFFFFFFF-1 introduces syntax error into foo
+    string fooV2 = "# typed: true\ndef { foo; end";
+    // Edit 0xFFFFFFFF introduces fast path update to bar
+    string barV2 = "# typed: true\ndef foo; 1; end";
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fooV2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("bar.rb", 2, barV2), mtx);
+
+    // Emulate typechecker thread: claim that we are actively and concurrently typechecking these changes.
+    emulateProcessEditAtHeadOfQueue(state, *gs);
+
+    // Edit 0 fixes parse error and cancels slow path from previous bundle.
+    string fooV3 = "# typed: true\ndef foo; end";
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
+
+    EXPECT_TRUE(gs->wasTypecheckingCanceled());
+
+    // Without proper rollover, it'll forget about change to `barV2` because 0 < 0xFFFFFFFF.
+    const auto maybeUpdates = getUpdates(state, 0);
+    ASSERT_TRUE(maybeUpdates.has_value());
+    const auto updates = maybeUpdates.value();
+
+    EXPECT_EQ(updates->versionEnd, 0);
+    EXPECT_EQ(updates->versionStart, 0xFFFFFFFF - 1);
+    EXPECT_EQ(updates->canTakeFastPath, true);
+    ASSERT_EQ(updates->updatedFiles.size(), 2);
+
+    const bool fooFirst = updates->updatedFiles[0]->path() == "foo.rb";
+    const auto &foo = fooFirst ? updates->updatedFiles[0] : updates->updatedFiles[1];
+    const auto &bar = fooFirst ? updates->updatedFiles[1] : updates->updatedFiles[0];
+
+    EXPECT_EQ(foo->source(), fooV3);
+    EXPECT_EQ(bar->source(), barV2);
 }
 
 } // namespace sorbet::realmain::lsp::test

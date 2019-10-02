@@ -57,6 +57,13 @@ bool TimeTravelingGlobalState::comesBefore(u4 a, u4 b) const {
     }
 }
 
+u4 TimeTravelingGlobalState::minVersion(u4 a, u4 b) const {
+    if (comesBefore(a, b)) {
+        return a;
+    }
+    return b;
+}
+
 vector<TimeTravelingGlobalState::TimeTravelUpdate *> TimeTravelingGlobalState::updatesBetweenExclusive(u4 start,
                                                                                                        u4 end) {
     ENFORCE(comesBefore(start, end));

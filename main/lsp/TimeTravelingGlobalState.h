@@ -116,6 +116,11 @@ public:
      * Returns true if `a` comes before `b`.
      */
     bool comesBefore(u4 a, u4 b) const;
+
+    /**
+     * If version `a` comes before `b`, returns `a` else `b`.
+     */
+    u4 minVersion(u4 a, u4 b) const;
 };
 
 } // namespace sorbet::realmain::lsp
