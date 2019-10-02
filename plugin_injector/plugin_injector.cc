@@ -30,14 +30,16 @@ public:
     }
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
                            std::unique_ptr<ast::MethodDef> &md) const override {
-        if (irOutputDir.has_value()) {
-            ::llvm::LLVMContext lctx;
-            string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
-            unique_ptr<::llvm::Module> module = sorbet::llvm::Payload::readDefaultModule(functionName.data(), lctx);
-            // TODO: call into actual IR generation here
-            string fileName = funcName2moduleName(functionName);
-            sorbet::llvm::Linker::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
+        if (!irOutputDir.has_value()) {
+            return;
         }
+
+        ::llvm::LLVMContext lctx;
+        string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
+        unique_ptr<::llvm::Module> module = sorbet::llvm::Payload::readDefaultModule(functionName.data(), lctx);
+        // TODO: call into actual IR generation here
+        string fileName = funcName2moduleName(functionName);
+        sorbet::llvm::Linker::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
     };
     virtual std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::GlobalState &, ast::Send *) const override {
         return {};
