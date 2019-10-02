@@ -2066,4 +2066,7 @@ class String < Object
     .returns(T.nilable(String))
   end
   def slice(arg0, arg1=T.unsafe(nil)); end
+
+  sig {returns(String)}
+  def undump; end
 end
