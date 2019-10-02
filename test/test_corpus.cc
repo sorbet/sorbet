@@ -497,7 +497,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     // now we test the incremental resolver
 
-    auto disableStressIncremental = BooleanPropertyAssertion::getValue("disable-stress-incremental", assertions).value_or(false);
+    auto disableStressIncremental =
+        BooleanPropertyAssertion::getValue("disable-stress-incremental", assertions).value_or(false);
     auto isAutogenTest = test.expectations.find("autogen") != test.expectations.end();
     if (disableStressIncremental || isAutogenTest) {
         TEST_COUT << "errors OK" << '\n';
@@ -511,8 +512,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     for (auto &f : trees) {
         const int prohibitedLines = f.file.data(*gs).source().size();
         auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
-        auto newFile = make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource),
-                                               f.file.data(*gs).sourceType);
+        auto newFile =
+            make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource), f.file.data(*gs).sourceType);
         gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
 
         unique_ptr<KeyValueStore> kvstore;
@@ -598,7 +599,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
     }
 
-
     for (auto &gotPhase : got) {
         auto expectation = test.expectations.find(gotPhase.first);
         ASSERT_TRUE(expectation != test.expectations.end()) << "missing expectation for " << gotPhase.first;
@@ -616,8 +616,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     // and drain all the remaining errors
     errorQueue->drainAllErrors();
 
-    EXPECT_EQ(symbolsBefore, gs->symbolsUsed())
-        << "the incremental resolver should not add new symbols";
+    EXPECT_EQ(symbolsBefore, gs->symbolsUsed()) << "the incremental resolver should not add new symbols";
 
     TEST_COUT << "errors OK" << '\n';
 } // namespace sorbet::test
