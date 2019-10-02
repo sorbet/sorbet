@@ -542,8 +542,16 @@
   {
    "name": "cl",
    "type": {
-    "kind": "CLASS",
-    "class_full_name": "T.class_of(Top::Nested)"
+    "kind": "APPLIED",
+    "applied": {
+     "symbol_full_name": "T.class_of(Top::Nested)",
+     "type_args": [
+      {
+       "kind": "CLASS",
+       "class_full_name": "Top::Nested"
+      }
+     ]
+    }
    }
   },
   {
