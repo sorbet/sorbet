@@ -93,8 +93,12 @@ module T
   #
   # The name of the type alias is not preserved; Error messages will
   # be printed with reference to the underlying type.
-  def self.type_alias(type)
-    T::Utils.coerce(type)
+  def self.type_alias(type=nil, &blk) # TODO TODO TODO
+    if blk
+      T::Private::Types::TypeAlias.new(blk)
+    else
+      T::Utils.coerce(type)
+    end
   end
 
   # References a type paramater which was previously defined with
