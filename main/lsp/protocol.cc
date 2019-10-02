@@ -163,7 +163,7 @@ void LSPLoop::maybeStartCommitSlowPathEdit(core::GlobalState &gs, const LSPMessa
         // commit for an epoch if this message will trigger a cancelable slow path.
         const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
         if (!params->updates.canTakeFastPath) {
-            gs.startCommitEpoch(params->updates.versionEnd);
+            gs.startCommitEpoch(params->updates.versionStart - 1, params->updates.versionEnd);
         }
     }
 }

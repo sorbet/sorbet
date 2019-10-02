@@ -197,7 +197,7 @@ public:
     bool tryCommitEpoch(u4 epoch, bool isCancelable, std::function<void()> typecheck);
     // [LSP] Run only from the typechecking thread.
     // Indicates an intent to begin committing a specific epoch.
-    void startCommitEpoch(u4 epoch);
+    void startCommitEpoch(u4 fromEpoch, u4 toEpoch);
     // [LSP] Returns 'true' if the currently running typecheck run has been canceled.
     bool wasTypecheckingCanceled() const;
     // [LSP] If a slow path is running on this GlobalState or its descendent, returns a pair of the committed
