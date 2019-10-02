@@ -495,6 +495,147 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     // Allow later phases to have errors that we didn't test for
     errorQueue->drainAllErrors();
 
+    // now we test the incremental resolver
+
+    auto disableStressIncremental = BooleanPropertyAssertion::getValue("disable-stress-incremental", assertions).value_or(false);
+    auto isAutogenTest = test.expectations.find("autogen") != test.expectations.end();
+    if (disableStressIncremental || isAutogenTest) {
+        TEST_COUT << "errors OK" << '\n';
+        return;
+    }
+
+    got.clear();
+    auto symbolsBefore = gs->symbolsUsed();
+
+    vector<ast::ParsedFile> newTrees;
+    for (auto &f : trees) {
+        const int prohibitedLines = f.file.data(*gs).source().size();
+        auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
+        auto newFile = make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource),
+                                               f.file.data(*gs).sourceType);
+        gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
+
+        unique_ptr<KeyValueStore> kvstore;
+        // this replicates the logic of pipeline::indexOne
+
+        auto nodes = parser::Parser::run(*gs, f.file);
+        auto expectation = test.expectations.find("parse-tree");
+        if (expectation != test.expectations.end()) {
+            got["parse-tree"].append(nodes->toString(*gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("parse-tree-json");
+        if (expectation != test.expectations.end()) {
+            got["parse-tree-json"].append(nodes->toJSON(*gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        ast::ParsedFile file;
+        core::MutableContext ctx(*gs, core::Symbols::root());
+        file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
+
+        expectation = test.expectations.find("ast");
+        if (expectation != test.expectations.end()) {
+            got["ast"].append(file.tree->toString(*gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("ast-raw");
+        if (expectation != test.expectations.end()) {
+            got["ast-raw"].append(file.tree->showRaw(*gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        // DSL pass
+        file = testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(file.tree)), file.file});
+
+        expectation = test.expectations.find("dsl-tree");
+        if (expectation != test.expectations.end()) {
+            got["dsl-tree"].append(file.tree->toString(*gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("dsl-tree-raw");
+        if (expectation != test.expectations.end()) {
+            got["dsl-tree-raw"].append(file.tree->showRaw(*gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        // local vars
+        file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
+
+        // namer
+        {
+            core::UnfreezeSymbolTable symbolTableAccess(*gs);
+            vector<ast::ParsedFile> vTmp;
+            vTmp.emplace_back(move(file));
+            vTmp = namer::Namer::run(ctx, move(vTmp));
+            file = testSerialize(*gs, move(vTmp[0]));
+        }
+
+        expectation = test.expectations.find("name-tree");
+        if (expectation != test.expectations.end()) {
+            got["name-tree"].append(file.tree->toString(*gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("name-tree-raw");
+        if (expectation != test.expectations.end()) {
+            got["name-tree-raw"].append(file.tree->showRaw(*gs));
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        newTrees.emplace_back(move(file));
+    }
+
+    // resolver
+    trees = resolver::Resolver::runTreePasses(ctx, move(newTrees));
+    auto newErrors = errorQueue->drainAllErrors();
+    errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+
+    for (auto &resolvedTree : newTrees) {
+        expectation = test.expectations.find("resolve-tree");
+        if (expectation != test.expectations.end()) {
+            got["resolve-tree"].append(resolvedTree.tree->toString(*gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("resolve-tree-raw");
+        if (expectation != test.expectations.end()) {
+            got["resolve-tree-raw"].append(resolvedTree.tree->showRaw(*gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+    }
+
+
+    for (auto &gotPhase : got) {
+        auto expectation = test.expectations.find(gotPhase.first);
+        ASSERT_TRUE(expectation != test.expectations.end()) << "missing expectation for " << gotPhase.first;
+        ASSERT_TRUE(expectation->second.size() == 1)
+            << "found unexpected multiple expectations of type " << gotPhase.first;
+
+        auto checker = test.folder + expectation->second.begin()->second;
+        auto expect = FileOps::read(checker.c_str());
+        EXPECT_EQ(expect, gotPhase.second) << "Mismatch on: " << checker;
+        if (expect == gotPhase.second) {
+            TEST_COUT << gotPhase.first << " OK" << '\n';
+        }
+    }
+
+    EXPECT_EQ(symbolsBefore, gs->symbolsUsed())
+        << "the incremental resolver should not add new symbols";
+
     TEST_COUT << "errors OK" << '\n';
 } // namespace sorbet::test
 
