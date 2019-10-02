@@ -54,10 +54,16 @@ public:
     }
 };
 
-unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file) {
+unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file,
+                             std::vector<std::string> initialLocals) {
     Builder builder(gs, file);
     auto source = file.data(gs).source();
     ruby_parser::typedruby25 driver(string(source.begin(), source.end()), Builder::interface);
+
+    for (string local : initialLocals) {
+        driver.lex.declare(local);
+    }
+
     auto ast = unique_ptr<Node>(builder.build(&driver));
     ErrorToError::run(gs, file, driver.diagnostics);
 
@@ -70,9 +76,10 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file) 
     return ast;
 }
 
-unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, string_view path, string_view src) {
+unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, string_view path, string_view src,
+                             std::vector<std::string> initialLocals) {
     core::FileRef file = gs.enterFile(path, src);
-    return run(gs, file);
+    return run(gs, file, initialLocals);
 }
 
 }; // namespace sorbet::parser
