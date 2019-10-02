@@ -522,15 +522,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto expectation = test.expectations.find("parse-tree");
         if (expectation != test.expectations.end()) {
             got["parse-tree"].append(nodes->toString(*gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("parse-tree-json");
         if (expectation != test.expectations.end()) {
             got["parse-tree-json"].append(nodes->toJSON(*gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         ast::ParsedFile file;
@@ -540,15 +536,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("ast");
         if (expectation != test.expectations.end()) {
             got["ast"].append(file.tree->toString(*gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("ast-raw");
         if (expectation != test.expectations.end()) {
             got["ast-raw"].append(file.tree->showRaw(*gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         // DSL pass
@@ -557,15 +549,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("dsl-tree");
         if (expectation != test.expectations.end()) {
             got["dsl-tree"].append(file.tree->toString(*gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("dsl-tree-raw");
         if (expectation != test.expectations.end()) {
             got["dsl-tree-raw"].append(file.tree->showRaw(*gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         // local vars
@@ -583,15 +571,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("name-tree");
         if (expectation != test.expectations.end()) {
             got["name-tree"].append(file.tree->toString(*gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("name-tree-raw");
         if (expectation != test.expectations.end()) {
             got["name-tree-raw"].append(file.tree->showRaw(*gs));
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         newTrees.emplace_back(move(file));
@@ -606,15 +590,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("resolve-tree");
         if (expectation != test.expectations.end()) {
             got["resolve-tree"].append(resolvedTree.tree->toString(*gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("resolve-tree-raw");
         if (expectation != test.expectations.end()) {
             got["resolve-tree-raw"].append(resolvedTree.tree->showRaw(*gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
     }
 
@@ -632,6 +612,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             TEST_COUT << gotPhase.first << " OK" << '\n';
         }
     }
+
+    // and drain all the remaining errors
+    errorQueue->drainAllErrors();
 
     EXPECT_EQ(symbolsBefore, gs->symbolsUsed())
         << "the incremental resolver should not add new symbols";
