@@ -14,6 +14,7 @@ object="$llvmir/main.o"
 external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$object" -undefined dynamic_lookup
 
 srbout=$(mktemp)
+# TODO Remove the "$rb" once the bundle does something for real
 ruby -r "$llvmir/main.bundle" "$rb" 2>&1 | tee "$srbout"
 
 diff -a "$rbout" "$srbout"
