@@ -223,7 +223,11 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
         }
     }
 
-    return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames, ", "), "${0}");
+    if (typeAndArgNames.empty()) {
+        return fmt::format("{}{}", shortName, "${0}");
+    } else {
+        return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames, ", "), "${0}");
+    }
 }
 
 unique_ptr<CompletionItem> getCompletionItemForKeyword(const LSPConfiguration &config, const RubyKeyword &rubyKeyword,
