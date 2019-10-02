@@ -19,5 +19,8 @@ pipeline_tests(
 sh_binary(
     name = "test_corpus_runner",
     srcs = ["test_corpus_runner.sh"],
-    data = ["//main:sorbet_llvm"],
+    data = [
+        "//main:sorbet_llvm",
+        "@llvm_toolchain//:bin/ld",
+    ],
 )
