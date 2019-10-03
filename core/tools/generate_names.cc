@@ -111,6 +111,7 @@ NameDef names[] = {
     {"all"},
     {"any"},
     {"enum_", "enum"},
+    {"enums"},
     {"nilable"},
     {"proc"},
     {"untyped"},

@@ -12,12 +12,20 @@ namespace sorbet::dsl {
  *   Opus::Enum values are actually singleton instances of synthetic classes)
  * - allows using Opus::Enum values in type signatures directly.
  *
- * Given:
+ * Given either:
  *
  *   class MyEnum < Opus::Enum
  *     X = new
  *     Y = new('y')
  *     Z = T.let(new, Z)
+ *   end
+ *
+ *   class MyEnum < Opus::Enum
+ *     enums do
+ *       X = new
+ *       Y = new('y')
+ *       Z = T.let(new, Z)
+ *     end
  *   end
  *
  * Outputs:
