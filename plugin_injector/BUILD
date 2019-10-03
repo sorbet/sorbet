@@ -5,7 +5,7 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//llvm/linker",
+        "//compiler/linker",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",
         "@com_stripe_ruby_typer//main/pipeline/semantic_extension:interface",
