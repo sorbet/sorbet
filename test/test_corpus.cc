@@ -466,7 +466,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<ast::ParsedFile> newTrees;
     for (auto &f : trees) {
         const int prohibitedLines = f.file.data(*gs).source().size();
-        auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
+        auto newSource = absl::StrCat(string(prohibitedLines+1, '\n'), f.file.data(*gs).source());
         auto newFile =
             make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource), f.file.data(*gs).sourceType);
         gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
