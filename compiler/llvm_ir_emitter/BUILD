@@ -7,9 +7,9 @@ cc_library(
     linkstatic = 1,
     visibility = ["//visibility:public"],
     deps = [
-        "@org_llvm_darwin",
-        "@spdlog",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",
+        "@org_llvm_darwin",
+        "@spdlog",
     ],
 )
