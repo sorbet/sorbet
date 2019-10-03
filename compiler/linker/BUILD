@@ -7,7 +7,7 @@ cc_library(
     linkstatic = 1,
     visibility = ["//visibility:public"],
     deps = [
-        "//llvm/payload",
+        "//compiler/payload",
         "@org_llvm_darwin",
         "@spdlog",
     ],
