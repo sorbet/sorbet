@@ -596,7 +596,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     for (auto &gotPhase : got) {
         auto expectation = test.expectations.find(gotPhase.first);
-        ASSERT_TRUE(expectation != test.expectations.end()) << "[stress-incremental] missing expectation for " << gotPhase.first;
+        ASSERT_TRUE(expectation != test.expectations.end())
+            << "[stress-incremental] missing expectation for " << gotPhase.first;
         ASSERT_TRUE(expectation->second.size() == 1)
             << "[stress-incremental] found unexpected multiple expectations of type " << gotPhase.first;
 
