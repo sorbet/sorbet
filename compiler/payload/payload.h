@@ -7,6 +7,6 @@ class LLVMContext;
 namespace sorbet::compiler {
 class Payload {
 public:
-    static std::unique_ptr<::llvm::Module> readDefaultModule(const char *name, ::llvm::LLVMContext &);
+    static std::unique_ptr<llvm::Module> readDefaultModule(const char *name, llvm::LLVMContext &);
 };
 } // namespace sorbet::compiler

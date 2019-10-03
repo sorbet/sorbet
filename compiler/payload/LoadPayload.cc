@@ -7,11 +7,11 @@
 using namespace std;
 namespace sorbet::compiler {
 string_view getDefaultModuleBitcode();
-std::unique_ptr<::llvm::Module> Payload::readDefaultModule(const char *name, ::llvm::LLVMContext &lctx) {
+std::unique_ptr<llvm::Module> Payload::readDefaultModule(const char *name, llvm::LLVMContext &lctx) {
     auto bitCode = getDefaultModuleBitcode();
-    ::llvm::StringRef bitcodeAsStringRef(bitCode.data(), bitCode.size());
-    auto memoryBuffer = ::llvm::MemoryBuffer::getMemBuffer(bitcodeAsStringRef);
-    auto ret = ::llvm::parseBitcodeFile(*memoryBuffer, lctx);
+    llvm::StringRef bitcodeAsStringRef(bitCode.data(), bitCode.size());
+    auto memoryBuffer = llvm::MemoryBuffer::getMemBuffer(bitcodeAsStringRef);
+    auto ret = llvm::parseBitcodeFile(*memoryBuffer, lctx);
     return move(ret.get());
 }
 } // namespace sorbet::compiler
