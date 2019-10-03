@@ -24,6 +24,7 @@ for objectFile in "$llvmir/"*.o; do
   external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$llvmir/"*.o -undefined dynamic_lookup
   requires="$requires -r $bundle"
 done
+ls "$llvmir"
 
 # TODO Remove the "$rb" once the bundle does something for real
 ruby "$requires" "$rb" 2>&1 | tee "$srbout"
