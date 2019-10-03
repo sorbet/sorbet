@@ -1,5 +1,5 @@
-#ifndef SORBET_LLVM_LINKER_H
-#define SORBET_LLVM_LINKER_H
+#ifndef SORBET_COMPILER_OBJECT_FILE_EMITTER_H
+#define SORBET_COMPILER_OBJECT_FILE_EMITTER_H
 
 #include "spdlog/spdlog.h"
 #include <memory>
