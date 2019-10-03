@@ -11,8 +11,8 @@
 using namespace std;
 namespace sorbet::compiler {
 
-void LLVMIREmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, cfg::CFG &cfg,
-                        std::unique_ptr<ast::MethodDef> &md) {
+void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cfg::CFG &cfg,
+                        std::unique_ptr<ast::MethodDef> &md, const string &functionName, llvm::Module *module) {
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         if (bb == cfg.deadBlock()) {
