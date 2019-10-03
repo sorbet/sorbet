@@ -16,18 +16,18 @@ trap cleanup EXIT
 ruby "$rb" > "$rbout" 2>&1
 
 main/sorbet_llvm --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$rb"
-echo running ls 
+echo running ls
 ls "$llvmir"
 bundle="$llvmir/main.bundle"
 requires=""
-for objectFile in "$llvmir/"*.o do
+for objectFile in "$llvmir/"*.o; do
   bundle=${objectFile%.o}.bundle
   external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$llvmir/"*.o -undefined dynamic_lookup
-  requires="${requires} -r ${bundle}"
+  requires="$requires -r $bundle"
 done
 
 # TODO Remove the "$rb" once the bundle does something for real
-ruby ${requires} "$rb" 2>&1 | tee "$srbout"
+ruby "$requires" "$rb" 2>&1 | tee "$srbout"
 
 diff -a "$rbout" "$srbout"
 
