@@ -80,6 +80,16 @@ class <emptyTree><<C <root>>> < ()
 
     <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.instance(), <emptyTree>::<C Y$1>)
 
+    class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
+      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C EnumsDoEnum>})
+
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.instance(), <emptyTree>::<C Z$1>)
+
     def something_outside<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end

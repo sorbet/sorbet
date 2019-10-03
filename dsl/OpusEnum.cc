@@ -165,6 +165,7 @@ void OpusEnum::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
                 for (auto &stat : insSeq->stats) {
                     collectNewStats(ctx, klass, std::move(stat));
                 }
+                collectNewStats(ctx, klass, std::move(insSeq->expr));
             } else {
                 collectNewStats(ctx, klass, std::move(enumsDo->block->body));
             }
