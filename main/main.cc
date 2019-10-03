@@ -4,7 +4,7 @@
 #include "compiler/object_file_emitter/object_file_emitter.h"
 int main(int argc, char *argv[]) {
     try {
-        sorbet::compiler::Linker::init();
+        sorbet::compiler::ObjectFileEmitter::init();
         auto code = sorbet::realmain::realmain(argc, argv);
         return code;
     } catch (sorbet::realmain::options::EarlyReturnWithCode &c) {

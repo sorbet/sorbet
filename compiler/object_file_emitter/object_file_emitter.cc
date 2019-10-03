@@ -17,7 +17,7 @@ namespace sorbet::compiler {
 
 // static unique_ptr<::llvm::Module> TheModule = Payload::readDefaultModule("sorbet", TheContext);
 
-void Linker::init() {
+void ObjectFileEmitter::init() {
     // Initialize the target registry etc.
     ::llvm::InitializeAllTargetInfos();
     ::llvm::InitializeAllTargets();
@@ -78,7 +78,7 @@ void outputObjectFile(string_view dir, string_view fileNameWithoutExtension, uni
     dest.flush();
 }
 
-void Linker::run(spdlog::logger &logger, ::llvm::LLVMContext &lctx, unique_ptr<::llvm::Module> module, string_view dir,
+void ObjectFileEmitter::run(spdlog::logger &logger, ::llvm::LLVMContext &lctx, unique_ptr<::llvm::Module> module, string_view dir,
                  string_view objectName) {
     ::llvm::IRBuilder<> builder(lctx);
     std::vector<::llvm::Type *> NoArgs(0, ::llvm::Type::getVoidTy(lctx));
