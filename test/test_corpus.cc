@@ -143,7 +143,7 @@ public:
     ErrorHandler(vector<unique_ptr<core::Error>> &errors, Expectations &test, shared_ptr<core::ErrorQueue> errorQueue)
         : errors(errors), test(test), errorQueue(errorQueue){};
 
-    template <class MkExp> void checkExpectations(string expectationType, MkExp mkExp, bool addNewline = true) {
+    void checkExpectations(string expectationType, std::function<string()> mkExp, bool addNewline = true) {
         if (test.expectations.contains(expectationType)) {
             got[expectationType].append(mkExp());
             if (addNewline) {
