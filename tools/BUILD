@@ -14,7 +14,7 @@ compilation_database(
         "//main:sorbet_llvm",
         "//plugin_injector:plugin_injector",
         "//compiler/payload:generate_load_payload",
-        "//compiler/linker:linker",
+        "//compiler/object_file_emitter:object_file_emitter",
         "//compiler/payload:payload",
         # END compile_commands targets
     ],

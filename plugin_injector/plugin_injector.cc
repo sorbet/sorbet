@@ -4,7 +4,7 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
-#include "compiler/linker/linker.h"
+#include "compiler/object_file_emitter/object_file_emitter.h"
 #include "compiler/payload/payload.h"
 #include <cxxopts.hpp>
 #include <optional>

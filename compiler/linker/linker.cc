@@ -1,4 +1,4 @@
-#include "compiler/linker/linker.h"
+#include "compiler/object_file_emitter/object_file_emitter.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
