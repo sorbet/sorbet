@@ -22,8 +22,7 @@ requires=()
 for objectFile in "$llvmir/"*.o; do
   bundle=${objectFile%.o}.bundle
   external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$objectFile" -undefined dynamic_lookup
-  requires+=(-r)
-  requires+=("$bundle")
+  requires+=(-r "$bundle")
 done
 ls "$llvmir"
 
