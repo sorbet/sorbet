@@ -132,6 +132,56 @@ unique_ptr<Diagnostic> errorToDiagnostic(const core::GlobalState &gs, const core
     return make_unique<Diagnostic>(Range::fromLoc(gs, error.loc), error.header);
 }
 
+class ErrorHandler {
+    vector<unique_ptr<core::Error>> &errors;
+    Expectations &test;
+    shared_ptr<core::ErrorQueue> errorQueue;
+
+public:
+    map<string, string> got;
+
+    ErrorHandler(vector<unique_ptr<core::Error>> &errors, Expectations &test, shared_ptr<core::ErrorQueue> errorQueue)
+        : errors(errors), test(test), errorQueue(errorQueue){};
+
+    template <class MkExp> void checkExpectations(string expectationType, MkExp mkExp, bool addNewline = true) {
+        if (test.expectations.contains(expectationType)) {
+            got[expectationType].append(mkExp());
+            if (addNewline) {
+                got[expectationType].append("\n");
+            }
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+    }
+
+    void verifyAll(string prefix = "") {
+        for (auto &gotPhase : got) {
+            auto expectation = test.expectations.find(gotPhase.first);
+            ASSERT_TRUE(expectation != test.expectations.end())
+                << prefix << "missing expectation for " << gotPhase.first;
+            ASSERT_TRUE(expectation->second.size() == 1)
+                << prefix << "found unexpected multiple expectations of type " << gotPhase.first;
+
+            auto checker = test.folder + expectation->second.begin()->second;
+            auto expect = FileOps::read(checker.c_str());
+            EXPECT_EQ(expect, gotPhase.second) << prefix << "Mismatch on: " << checker;
+            if (expect == gotPhase.second) {
+                TEST_COUT << gotPhase.first << " OK" << '\n';
+            }
+        }
+    }
+
+    void drainErrors() {
+        auto newErrors = errorQueue->drainAllErrors();
+        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+    }
+
+    void clear() {
+        got.clear();
+        errorQueue->drainAllErrors();
+    }
+};
+
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<unique_ptr<core::Error>> errors;
     Expectations test = GetParam();
