@@ -115,8 +115,28 @@ expect it to work on Ruby 2.3 through 2.6.
 
 The static check is only tested on macOS 10.14 (Mojave) and Ubuntu 18 (Bionic
 Beaver). We expect it to work on macOS 10.10 (Yosemite) and most Linux
-distributions. We use static linking on both platforms, so it should not depend
-on system libraries.
+distributions where `glibc`, `git` and `bash` are present. We use static linking
+on both platforms, so it should not depend on system libraries.
+
+If you are using one of the official minimal Ruby Docker images you will need to
+install the extra dependencies yourself:
+
+```Dockerfile
+FROM ruby:2.6-alpine
+
+RUN apk add --no-cache --update \
+    git \
+    bash \
+    ca-certificates \
+    wget
+
+ENV GLIBC_RELEASE_VERSION 2.30-r0
+RUN wget -nv -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
+    wget -nv https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_RELEASE_VERSION}/glibc-${GLIBC_RELEASE_VERSION}.apk && \
+    apk add glibc-${GLIBC_RELEASE_VERSION}.apk && \
+    rm /etc/apk/keys/sgerrand.rsa.pub && \
+    rm glibc-${GLIBC_RELEASE_VERSION}.apk
+```
 
 There is currently no Windows support.
 

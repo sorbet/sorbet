@@ -20,6 +20,10 @@ gem 'sorbet-runtime'
 ❯ bundle install
 ```
 
+This should install cleanly in most Ruby development environments, but see
+["What platforms does Sorbet support?" in the FAQ](/docs/faq#what-platforms-does-sorbet-support)
+for some important caveats.
+
 ### Verify installation
 
 To test that everything is working so far, we can run these commands:
