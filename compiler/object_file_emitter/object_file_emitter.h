@@ -11,7 +11,7 @@ class Module;
 } // namespace llvm
 
 namespace sorbet::compiler {
-class Linker {
+class ObjectFileEmitter {
 public:
     static void init();
     static void run(spdlog::logger &logger, ::llvm::LLVMContext &lctx, std::unique_ptr<::llvm::Module> module,
