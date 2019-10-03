@@ -17,3 +17,14 @@ class NotAnEnum
   X = new
   Y = T.let(new, self)
 end
+
+class EnumsDoEnum < Opus::Enum
+  enums do
+    X = new
+    Y = new('y')
+    Z = T.let(new, self)
+  end
+
+  def something_outside; end
+  SomethingElseOutside = 1
+end

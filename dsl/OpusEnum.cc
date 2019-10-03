@@ -40,6 +40,16 @@ bool isOpusEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     return id->symbol == core::Symbols::root();
 }
 
+ast::Send *findEnumsDo(ast::Expression *stat) {
+    auto *send = ast::cast_tree<ast::Send>(stat);
+
+    if (send != nullptr && send->block != nullptr && send->fun == core::Names::enums()) {
+        return send;
+    } else {
+        return nullptr;
+    }
+}
+
 vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::Expression *stat) {
     auto *asgn = ast::cast_tree<ast::Assign>(stat);
     if (asgn == nullptr) {
@@ -118,6 +128,17 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
     return result;
 }
 
+void collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, unique_ptr<ast::Expression> stat) {
+    auto newStats = processStat(ctx, klass, stat.get());
+    if (newStats.empty()) {
+        klass->rhs.emplace_back(std::move(stat));
+    } else {
+        for (auto &newStat : newStats) {
+            klass->rhs.emplace_back(std::move(newStat));
+        }
+    }
+}
+
 } // namespace
 
 void OpusEnum::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
@@ -138,13 +159,18 @@ void OpusEnum::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareAbstract()));
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed()));
     for (auto &stat : oldRHS) {
-        auto newStats = processStat(ctx, klass, stat.get());
-        if (newStats.empty()) {
-            klass->rhs.emplace_back(std::move(stat));
-        } else {
-            for (auto &newStat : newStats) {
-                klass->rhs.emplace_back(std::move(newStat));
+        // TODO(jez) Clean this up when there is only one way to define enum variants
+        if (auto enumsDo = findEnumsDo(stat.get())) {
+            if (auto insSeq = ast::cast_tree<ast::InsSeq>(enumsDo->block->body.get())) {
+                for (auto &stat : insSeq->stats) {
+                    collectNewStats(ctx, klass, std::move(stat));
+                }
+                collectNewStats(ctx, klass, std::move(insSeq->expr));
+            } else {
+                collectNewStats(ctx, klass, std::move(enumsDo->block->body));
             }
+        } else {
+            collectNewStats(ctx, klass, std::move(stat));
         }
     }
 }
