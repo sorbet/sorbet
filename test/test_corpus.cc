@@ -596,13 +596,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     for (auto &gotPhase : got) {
         auto expectation = test.expectations.find(gotPhase.first);
-        ASSERT_TRUE(expectation != test.expectations.end()) << "missing expectation for " << gotPhase.first;
+        ASSERT_TRUE(expectation != test.expectations.end()) << "[stress-incremental] missing expectation for " << gotPhase.first;
         ASSERT_TRUE(expectation->second.size() == 1)
-            << "found unexpected multiple expectations of type " << gotPhase.first;
+            << "[stress-incremental] found unexpected multiple expectations of type " << gotPhase.first;
 
         auto checker = test.folder + expectation->second.begin()->second;
         auto expect = FileOps::read(checker.c_str());
-        EXPECT_EQ(expect, gotPhase.second) << "Mismatch on: " << checker;
+        EXPECT_EQ(expect, gotPhase.second) << "[stress-incremental] Mismatch on: " << checker;
         if (expect == gotPhase.second) {
             TEST_COUT << gotPhase.first << " OK" << '\n';
         }
