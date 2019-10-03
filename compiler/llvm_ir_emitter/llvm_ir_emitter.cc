@@ -20,10 +20,13 @@ void LLVMIREmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, cfg::CF
         }
         for (cfg::Binding &bind : bb->exprs) {
             typecase(
-                bind.value.get(), [&](cfg::Ident *i) {}, [&](cfg::Alias *i) {}, [&](cfg::SolveConstraint *i) {},
-                [&](cfg::Send *i) {}, [&](cfg::Return *i) {}, [&](cfg::BlockReturn *i) {}, [&](cfg::LoadSelf *i) {},
-                [&](cfg::Literal *i) {}, [&](cfg::Unanalyzable *i) {}, [&](cfg::LoadArg *i) {},
-                [&](cfg::LoadYieldParams *i) {}, [&](cfg::Cast *i) {}, [&](cfg::TAbsurd *i) {});
+                bind.value.get(), [&](cfg::Ident *i) { printf("Ident\n"); }, [&](cfg::Alias *i) { printf("Alias\n"); },
+                [&](cfg::SolveConstraint *i) { printf("SolveConstraint\n"); }, [&](cfg::Send *i) { printf("Send\n"); },
+                [&](cfg::Return *i) { printf("Return\n"); }, [&](cfg::BlockReturn *i) { printf("BlockReturn\n"); },
+                [&](cfg::LoadSelf *i) { printf("LoadSelf\n"); }, [&](cfg::Literal *i) { printf("Literal\n"); },
+                [&](cfg::Unanalyzable *i) { printf("Unanalyzable\n"); }, [&](cfg::LoadArg *i) { printf("LoadArg\n"); },
+                [&](cfg::LoadYieldParams *i) { printf("LoadYieldParams\n"); }, [&](cfg::Cast *i) { printf("Cast\n"); },
+                [&](cfg::TAbsurd *i) { printf("TAbsurd\n"); });
         }
     }
 }
