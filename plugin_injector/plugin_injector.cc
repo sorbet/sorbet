@@ -3,8 +3,8 @@
 // ^^^ violate our poisons so they go first
 #include "ast/ast.h"
 #include "cfg/CFG.h"
-#include "compiler/object_file_emitter/object_file_emitter.h"
 #include "compiler/llvm_ir_emitter/llvm_ir_emitter.h"
+#include "compiler/object_file_emitter/object_file_emitter.h"
 #include "compiler/payload/payload.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>

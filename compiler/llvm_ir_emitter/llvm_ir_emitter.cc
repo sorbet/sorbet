@@ -4,7 +4,6 @@
 using namespace std;
 namespace sorbet::compiler {
 
-void LLVMIREmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx) {
-}
+void LLVMIREmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx) {}
 
 } // namespace sorbet::compiler
