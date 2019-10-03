@@ -18,16 +18,17 @@ ruby "$rb" > "$rbout" 2>&1
 main/sorbet_llvm --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$rb"
 ls "$llvmir"
 bundle="$llvmir/main.bundle"
-requires=""
+requires=()
 for objectFile in "$llvmir/"*.o; do
   bundle=${objectFile%.o}.bundle
   external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$objectFile" -undefined dynamic_lookup
-  requires="$requires -r $bundle"
+  requires+=(-r)
+  requires+=("$bundle")
 done
 ls "$llvmir"
 
 # TODO Remove the "$rb" once the bundle does something for real
-ruby "$requires" "$rb" 2>&1 | tee "$srbout"
+ruby "${requires[@]}" "$rb" 2>&1 | tee "$srbout"
 
 diff -a "$rbout" "$srbout"
 
