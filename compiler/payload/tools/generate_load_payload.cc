@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
         ofstream out(argv[2], ios::trunc);
         auto data = sorbet::FileOps::read(argv[1]);
         out << "#include<string_view>" << '\n' << "\nusing namespace std;\n";
-        out << "namespace sorbet{" << '\n' << "namespace llvm{\n";
+        out << "namespace sorbet{" << '\n' << "namespace compiler{\n";
         out << "static char actualData[] = {";
         for (int i = 0; i < data.length(); i++) {
             out << (int)data[i] << ", ";
