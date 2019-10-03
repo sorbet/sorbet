@@ -21,7 +21,7 @@ bundle="$llvmir/main.bundle"
 requires=""
 for objectFile in "$llvmir/"*.o; do
   bundle=${objectFile%.o}.bundle
-  external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$llvmir/"*.o -undefined dynamic_lookup
+  external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$objectFile" -undefined dynamic_lookup
   requires="$requires -r $bundle"
 done
 ls "$llvmir"
