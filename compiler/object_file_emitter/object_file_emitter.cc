@@ -15,8 +15,6 @@
 using namespace std;
 namespace sorbet::compiler {
 
-// static unique_ptr<llvm::Module> TheModule = Payload::readDefaultModule("sorbet", TheContext);
-
 void ObjectFileEmitter::init() {
     // Initialize the target registry etc.
     llvm::InitializeAllTargetInfos();
