@@ -204,7 +204,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         expectation = test.expectations.find("parse-tree-whitequark");
         if (expectation != test.expectations.end()) {
-            got["parse-tree-whitequark"].append(nodes->toWhitequark(gs)).append("\n");
+            got["parse-tree-whitequark"].append(nodes->toWhitequark(*gs)).append("\n");
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
