@@ -516,9 +516,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource), f.file.data(*gs).sourceType);
         gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
 
-        unique_ptr<KeyValueStore> kvstore;
         // this replicates the logic of pipeline::indexOne
-
         auto nodes = parser::Parser::run(*gs, f.file);
         auto expectation = test.expectations.find("parse-tree");
         if (expectation != test.expectations.end()) {
@@ -530,9 +528,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             got["parse-tree-json"].append(nodes->toJSON(*gs)).append("\n");
         }
 
-        ast::ParsedFile file;
         core::MutableContext ctx(*gs, core::Symbols::root());
-        file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
+        ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
 
         expectation = test.expectations.find("ast");
         if (expectation != test.expectations.end()) {
@@ -584,8 +581,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     // resolver
     trees = resolver::Resolver::runTreePasses(ctx, move(newTrees));
-    auto newErrors = errorQueue->drainAllErrors();
-    errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
 
     for (auto &resolvedTree : newTrees) {
         expectation = test.expectations.find("resolve-tree");
