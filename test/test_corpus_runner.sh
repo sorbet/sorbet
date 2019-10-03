@@ -16,7 +16,6 @@ trap cleanup EXIT
 ruby "$rb" > "$rbout" 2>&1
 
 main/sorbet_llvm --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$rb"
-echo running ls
 ls "$llvmir"
 bundle="$llvmir/main.bundle"
 requires=""
