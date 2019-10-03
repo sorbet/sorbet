@@ -36,10 +36,10 @@ public:
 
         ::llvm::LLVMContext lctx;
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
-        unique_ptr<::llvm::Module> module = sorbet::llvm::Payload::readDefaultModule(functionName.data(), lctx);
+        unique_ptr<::llvm::Module> module = sorbet::compiler::Payload::readDefaultModule(functionName.data(), lctx);
         // TODO: call into actual IR generation here
         string fileName = funcName2moduleName(functionName);
-        sorbet::llvm::Linker::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
+        sorbet::compiler::Linker::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
     };
     virtual std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::GlobalState &, ast::Send *) const override {
         return {};

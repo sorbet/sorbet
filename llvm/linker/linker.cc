@@ -13,7 +13,7 @@
 #include "llvm/Target/TargetOptions.h"
 #include <string_view>
 using namespace std;
-namespace sorbet::llvm {
+namespace sorbet::compiler {
 
 // static unique_ptr<::llvm::Module> TheModule = Payload::readDefaultModule("sorbet", TheContext);
 
@@ -93,4 +93,4 @@ void Linker::run(spdlog::logger &logger, ::llvm::LLVMContext &lctx, unique_ptr<:
     outputObjectFile(dir, objectName, move(module));
 }
 
-} // namespace sorbet::llvm
+} // namespace sorbet::compiler

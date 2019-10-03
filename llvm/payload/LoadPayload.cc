@@ -5,7 +5,7 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include <string_view>
 using namespace std;
-namespace sorbet::llvm {
+namespace sorbet::compiler {
 string_view getDefaultModuleBitcode();
 std::unique_ptr<::llvm::Module> Payload::readDefaultModule(const char *name, ::llvm::LLVMContext &lctx) {
     auto bitCode = getDefaultModuleBitcode();
@@ -14,4 +14,4 @@ std::unique_ptr<::llvm::Module> Payload::readDefaultModule(const char *name, ::l
     auto ret = ::llvm::parseBitcodeFile(*memoryBuffer, lctx);
     return move(ret.get());
 }
-} // namespace sorbet::llvm
+} // namespace sorbet::compiler

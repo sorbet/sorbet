@@ -10,12 +10,12 @@ class LLVMContext;
 class Module;
 } // namespace llvm
 
-namespace sorbet::llvm {
+namespace sorbet::compiler {
 class Linker {
 public:
     static void init();
     static void run(spdlog::logger &logger, ::llvm::LLVMContext &lctx, std::unique_ptr<::llvm::Module> module,
                     std::string_view targetDir, std::string_view fileName);
 };
-} // namespace sorbet::llvm
+} // namespace sorbet::compiler
 #endif
