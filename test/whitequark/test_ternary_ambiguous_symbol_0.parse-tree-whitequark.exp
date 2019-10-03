@@ -1,0 +1,9 @@
+s(:begin,
+  s(:assign,
+    s(:lvasgn, :t),
+    s(:int, "1")),
+  s(:if,
+    s(:begin,
+      s(:lvar, :foo)),
+    s(:lvar, :t),
+    s(:const, nil, :T)))

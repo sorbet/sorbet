@@ -1,0 +1,4 @@
+s(:case, nil,
+  s(:when,
+    s(:lvar, :foo),
+    s(:str, "foo")), nil)

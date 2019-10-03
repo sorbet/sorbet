@@ -1,0 +1,3 @@
+s(:kwbegin,
+  s(:begin,
+    s(:int, "2")))

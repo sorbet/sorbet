@@ -1,0 +1,7 @@
+s(:masgn,
+  s(:mlhs,
+    s(:lvasgn, :a),
+    s(:splat,
+      s(:lvasgn, :b)),
+    s(:lvasgn, :c)),
+  s(:lvar, :bar))

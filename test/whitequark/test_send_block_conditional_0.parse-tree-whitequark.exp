@@ -1,0 +1,3 @@
+s(:block,
+  s(:csend,
+    s(:lvar, :foo), :bar), nil, nil)

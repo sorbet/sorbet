@@ -1,0 +1,2 @@
+s(:defs,
+  s(:const, nil, :String), :foo, nil, nil)

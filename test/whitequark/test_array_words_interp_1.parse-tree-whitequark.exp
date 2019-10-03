@@ -1,0 +1,7 @@
+s(:array,
+  s(:str, "foo"),
+  s(:dstr,
+    s(:begin,
+      s(:lvar, :bar)),
+    s(:str, "foo"),
+    s(:ivar, :@baz)))

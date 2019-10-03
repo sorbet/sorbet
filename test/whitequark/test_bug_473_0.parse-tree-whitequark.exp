@@ -1,0 +1,4 @@
+s(:send, nil, :m,
+  s(:dstr,
+    s(:begin,
+      s(:array))))

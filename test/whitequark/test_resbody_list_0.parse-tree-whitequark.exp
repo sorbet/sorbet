@@ -1,0 +1,7 @@
+s(:kwbegin,
+  s(:rescue,
+    s(:send, nil, :meth),
+    s(:resbody,
+      s(:array,
+        s(:const, nil, :Exception)), nil,
+      s(:lvar, :bar)), nil))

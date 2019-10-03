@@ -1,0 +1,3 @@
+s(:assign,
+  s(:gvasgn, :$var),
+  s(:int, "10"))

@@ -1,0 +1,3 @@
+s(:block,
+  s(:send, nil, :desc,
+    s(:str, "foo")), nil, nil)

@@ -1,0 +1,7 @@
+s(:block,
+  s(:send, nil, :a,
+    s(:block,
+      s(:send, nil, :b), nil,
+      s(:send, nil, :c,
+        s(:send, nil, :d))),
+    s(:sym, :e)), nil, nil)

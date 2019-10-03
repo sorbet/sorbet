@@ -1,0 +1,6 @@
+s(:masgn,
+  s(:mlhs,
+    s(:send,
+      s(:self), :a=),
+    s(:lvasgn, :foo)),
+  s(:lvar, :foo))

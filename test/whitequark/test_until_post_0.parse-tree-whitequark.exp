@@ -1,0 +1,4 @@
+s(:until_post,
+  s(:lvar, :foo),
+  s(:kwbegin,
+    s(:send, nil, :meth)))

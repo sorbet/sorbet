@@ -1,0 +1,3 @@
+s(:module,
+  s(:const,
+    s(:const, nil, :Bar), :Foo), nil)

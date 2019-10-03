@@ -1,0 +1,2 @@
+s(:send,
+  s(:lvar, :foo), :Fun)

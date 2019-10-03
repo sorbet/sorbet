@@ -1,0 +1,3 @@
+s(:def, :foo, nil,
+  s(:send, nil, :a,
+    s(:sym, :b)))

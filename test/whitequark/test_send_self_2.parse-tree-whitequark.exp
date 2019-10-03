@@ -1,0 +1,2 @@
+s(:send, nil, :fun,
+  s(:int, "1"))
