@@ -20,13 +20,16 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
         }
         for (cfg::Binding &bind : bb->exprs) {
             typecase(
-                bind.value.get(), [&](cfg::Ident *i) { printf("Ident\n"); }, [&](cfg::Alias *i) { printf("Alias\n"); },
-                [&](cfg::SolveConstraint *i) { printf("SolveConstraint\n"); }, [&](cfg::Send *i) { printf("Send\n"); },
-                [&](cfg::Return *i) { printf("Return\n"); }, [&](cfg::BlockReturn *i) { printf("BlockReturn\n"); },
-                [&](cfg::LoadSelf *i) { printf("LoadSelf\n"); }, [&](cfg::Literal *i) { printf("Literal\n"); },
-                [&](cfg::Unanalyzable *i) { printf("Unanalyzable\n"); }, [&](cfg::LoadArg *i) { printf("LoadArg\n"); },
-                [&](cfg::LoadYieldParams *i) { printf("LoadYieldParams\n"); }, [&](cfg::Cast *i) { printf("Cast\n"); },
-                [&](cfg::TAbsurd *i) { printf("TAbsurd\n"); });
+                bind.value.get(), [&](cfg::Ident *i) { gs.trace("Ident\n"); },
+                [&](cfg::Alias *i) { gs.trace("Alias\n"); },
+                [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
+                [&](cfg::Send *i) { gs.trace("Send\n"); }, [&](cfg::Return *i) { gs.trace("Return\n"); },
+                [&](cfg::BlockReturn *i) { gs.trace("BlockReturn\n"); },
+                [&](cfg::LoadSelf *i) { gs.trace("LoadSelf\n"); }, [&](cfg::Literal *i) { gs.trace("Literal\n"); },
+                [&](cfg::Unanalyzable *i) { gs.trace("Unanalyzable\n"); },
+                [&](cfg::LoadArg *i) { gs.trace("LoadArg\n"); },
+                [&](cfg::LoadYieldParams *i) { gs.trace("LoadYieldParams\n"); },
+                [&](cfg::Cast *i) { gs.trace("Cast\n"); }, [&](cfg::TAbsurd *i) { gs.trace("TAbsurd\n"); });
         }
     }
 }
