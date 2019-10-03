@@ -116,7 +116,7 @@ class <emptyTree><<C <root>>> < ()
 
   x.to_hash()
 
-  86
+  87
 
   while true
     nil

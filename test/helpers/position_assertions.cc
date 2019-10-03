@@ -28,6 +28,7 @@ const UnorderedMap<
         {"type", TypeAssertion::make},
         {"type-def", TypeDefAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
+        {"disable-stress-incremental", BooleanPropertyAssertion::make},
         {"exhaustive-apply-code-action", BooleanPropertyAssertion::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},

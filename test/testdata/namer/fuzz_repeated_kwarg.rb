@@ -1,4 +1,5 @@
 # typed: false
+# disable-stress-incremental: true
 # from fuzzer: https://github.com/sorbet/sorbet/issues/1133
 def f1(x, x); end # error: Duplicated argument name `x`
 def f2(x, x=0); end # error: Duplicated argument name `x`
