@@ -1219,18 +1219,19 @@ public:
     }
 };
 
-class ResolveAttachedClassWalk {
-public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
-        // At this point, the type members have been fully processed, so the
-        // AttachedClass template can be resolved
-        auto klass = original->symbol;
-
         // Because T::Utils::RuntimeProfiled shows up as `T.untyped`, we end up
         // with a tree that represents a definition of `T.untyped`. This avoids
         // the problems that show up with that, as `T.untyped` is its own
         // singleton class.
-        if (klass != core::Symbols::untyped()) {
+        if (original->symbol != core::Symbols::untyped()) {
+            classes.emplace_back(original->symbol);
+        }
+        return original;
+    }
+
+    void finalizeAttachedClass(core::MutableContext ctx) {
+        for (auto klass : classes) {
             // The resolve constants pass ensures that the singleton exists already
             auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
             ENFORCE(singleton.exists());
@@ -1243,7 +1244,7 @@ public:
             lambdaParam->upperBound = klass.data(ctx)->externalType(ctx);
         }
 
-        return original;
+        classes.clear();
     }
 };
 
@@ -2094,10 +2095,6 @@ ast::ParsedFilesOrCancelled Resolver::run(core::MutableContext ctx, vector<ast::
         return ast::ParsedFilesOrCancelled();
     }
     trees = ResolveTypeParamsWalk::run(ctx, std::move(trees));
-    if (ctx.state.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled();
-    }
-    trees = resolveAttachedClass(ctx, std::move(trees));
     if (ctx.state.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
