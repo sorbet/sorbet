@@ -38,8 +38,7 @@ public:
         llvm::LLVMContext lctx;
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
         unique_ptr<llvm::Module> module = sorbet::compiler::Payload::readDefaultModule(functionName.data(), lctx);
-        sorbet::compiler::LLVMIREmitter::run(gs.tracer(), lctx);
-        // TODO: call into actual IR generation here
+        sorbet::compiler::LLVMIREmitter::run(gs.tracer(), lctx, cfg, md);
         string fileName = funcName2moduleName(functionName);
         sorbet::compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
     };

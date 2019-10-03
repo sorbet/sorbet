@@ -8,10 +8,17 @@ class LLVMContext;
 class Module;
 } // namespace llvm
 
+namespace sorbet::cfg {
+    class CFG;
+}
+namespace sorbet::ast {
+    class MethodDef;
+}
+
 namespace sorbet::compiler {
 class LLVMIREmitter {
 public:
-    static void run(spdlog::logger &logger, llvm::LLVMContext &lctx);
+    static void run(spdlog::logger &logger, llvm::LLVMContext &lctx, cfg::CFG &cfg, std::unique_ptr<ast::MethodDef> &md);
 };
 } // namespace sorbet::compiler
 #endif

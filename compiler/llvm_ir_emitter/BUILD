@@ -9,5 +9,7 @@ cc_library(
     deps = [
         "@org_llvm_darwin",
         "@spdlog",
+        "@com_stripe_ruby_typer//ast",
+        "@com_stripe_ruby_typer//cfg",
     ],
 )
