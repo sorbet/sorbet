@@ -17,21 +17,13 @@ Begin {
               ]
             }
           ]
-          body = DString {
-            nodes = [
-              String {
-                val = <U foo>
-              }
-            ]
+          body = String {
+            val = <U foo>
           }
         }
       ]
-      else_ = DString {
-        nodes = [
-          String {
-            val = <U bar>
-          }
-        ]
+      else_ = String {
+        val = <U bar>
       }
     }
   ]

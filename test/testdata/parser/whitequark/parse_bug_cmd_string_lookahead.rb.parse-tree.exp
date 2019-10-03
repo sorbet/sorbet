@@ -16,12 +16,8 @@ Begin {
         receiver = NULL
         method = <U desc>
         args = [
-          DString {
-            nodes = [
-              String {
-                val = <U foo>
-              }
-            ]
+          String {
+            val = <U foo>
           }
         ]
       }

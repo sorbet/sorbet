@@ -17,31 +17,23 @@ Begin {
       args = [
         DString {
           nodes = [
-            DString {
-              nodes = [
-                String {
-                  val = <U   x
+            String {
+              val = <U   x
 >
-                }
+            }
+            String {
+              val = <U >
+            }
+            Begin {
+              stmts = [
                 String {
-                  val = <U >
-                }
-                Begin {
-                  stmts = [
-                    DString {
-                      nodes = [
-                        String {
-                          val = <U   y>
-                        }
-                      ]
-                    }
-                  ]
-                }
-                String {
-                  val = <U 
->
+                  val = <U   y>
                 }
               ]
+            }
+            String {
+              val = <U 
+>
             }
           ]
         }

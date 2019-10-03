@@ -12,12 +12,8 @@ Hash {
       key = Symbol {
         val = <U foo>
       }
-      value = DString {
-        nodes = [
-          String {
-            val = <U bar>
-          }
-        ]
+      value = String {
+        val = <U bar>
       }
     }
   ]

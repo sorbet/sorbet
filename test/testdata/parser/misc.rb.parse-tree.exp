@@ -172,12 +172,8 @@ Begin {
         ]
       }
     }
-    DString {
-      nodes = [
-        String {
-          val = <U x>
-        }
-      ]
+    String {
+      val = <U x>
     }
     Send {
       receiver = Integer {
@@ -580,19 +576,11 @@ Begin {
     }
     Array {
       elts = [
-        DString {
-          nodes = [
-            String {
-              val = <U a>
-            }
-          ]
+        String {
+          val = <U a>
         }
-        DString {
-          nodes = [
-            String {
-              val = <U b>
-            }
-          ]
+        String {
+          val = <U b>
         }
       ]
     }

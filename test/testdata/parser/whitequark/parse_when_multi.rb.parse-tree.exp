@@ -20,19 +20,11 @@ Begin {
       whens = [
         When {
           patterns = [
-            DString {
-              nodes = [
-                String {
-                  val = <U bar>
-                }
-              ]
+            String {
+              val = <U bar>
             }
-            DString {
-              nodes = [
-                String {
-                  val = <U baz>
-                }
-              ]
+            String {
+              val = <U baz>
             }
           ]
           body = Send {

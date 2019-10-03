@@ -1,7 +1,3 @@
-DString {
-  nodes = [
-    String {
-      val = <U a>
-    }
-  ]
+String {
+  val = <U a>
 }
