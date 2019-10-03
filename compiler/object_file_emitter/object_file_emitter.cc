@@ -78,13 +78,13 @@ void outputObjectFile(string_view dir, string_view fileNameWithoutExtension, uni
     dest.flush();
 }
 
-void ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module, string_view dir,
-                 string_view objectName) {
+void ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module,
+                            string_view dir, string_view objectName) {
     llvm::IRBuilder<> builder(lctx);
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
-    auto function = llvm::Function::Create(ft, llvm::Function::ExternalLinkage,
-                                             ((string) "Init_" + (string)objectName), *module);
+    auto function =
+        llvm::Function::Create(ft, llvm::Function::ExternalLinkage, ((string) "Init_" + (string)objectName), *module);
     auto bb = llvm::BasicBlock::Create(lctx, "entry", function);
     builder.SetInsertPoint(bb);
     builder.CreateRet(llvm::ConstantInt::getTrue(lctx));
