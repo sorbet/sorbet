@@ -1,4 +1,5 @@
 // These violate our poisons so have to happen first
+#include "llvm/IR/Attributes.h"
 #include "llvm/IR/DerivedTypes.h" // FunctionType, StructType
 #include "llvm/IR/IRBuilder.h"
 // ^^^ violate our poisons
@@ -54,7 +55,8 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                         std::unique_ptr<ast::MethodDef> &md, const string &functionName, llvm::Module *module) {
     auto functionType = getRubyFunctionTypeForSymbol(lctx, gs, cfg.symbol);
     auto func = llvm::Function::Create(functionType, llvm::Function::WeakAnyLinkage, functionName, module);
-
+    func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
+    func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
     llvm::IRBuilder<> builder(lctx);
 
     auto entryBlock = llvm::BasicBlock::Create(lctx, "entry", func);
