@@ -13,8 +13,9 @@ target triple = "x86_64-apple-macosx10.14.0"
 %struct.anon.2 = type { i64, %union.anon.3, i64* }
 %union.anon.3 = type { i64 }
 
-@.str = private unnamed_addr constant [11 x i8] c"DemoModule\00", align 1
-@.str.1 = private unnamed_addr constant [11 x i8] c"return_nil\00", align 1
+@.str = private unnamed_addr constant [7 x i8] c"12*1:&\00", align 1
+@.str.1 = private unnamed_addr constant [11 x i8] c"DemoModule\00", align 1
+@.str.2 = private unnamed_addr constant [11 x i8] c"return_nil\00", align 1
 @rb_cInteger = external global i64, align 8
 @rb_cFloat = external global i64, align 8
 @rb_cTrueClass = external global i64, align 8
@@ -612,6 +613,272 @@ define i8* @sorbet_getRubyClassName(i64) #0 {
 declare i8* @rb_obj_classname(i64) #2
 
 ; Function Attrs: nounwind ssp uwtable
+define zeroext i1 @sorbet_testIsTruthy(i64) #0 {
+  %2 = alloca i64, align 8
+  store i64 %0, i64* %2, align 8
+  %3 = load i64, i64* %2, align 8
+  %4 = and i64 %3, -9
+  %5 = icmp eq i64 %4, 0
+  %6 = xor i1 %5, true
+  ret i1 %6
+}
+
+; Function Attrs: nounwind ssp uwtable
+define zeroext i1 @sorbet_testIsTrue(i64) #0 {
+  %2 = alloca i64, align 8
+  store i64 %0, i64* %2, align 8
+  %3 = load i64, i64* %2, align 8
+  %4 = icmp eq i64 %3, 20
+  ret i1 %4
+}
+
+; Function Attrs: nounwind ssp uwtable
+define zeroext i1 @sorbet_testIsFalse(i64) #0 {
+  %2 = alloca i64, align 8
+  store i64 %0, i64* %2, align 8
+  %3 = load i64, i64* %2, align 8
+  %4 = icmp eq i64 %3, 0
+  ret i1 %4
+}
+
+; Function Attrs: nounwind ssp uwtable
+define zeroext i1 @sorbet_testIsNil(i64) #0 {
+  %2 = alloca i64, align 8
+  store i64 %0, i64* %2, align 8
+  %3 = load i64, i64* %2, align 8
+  %4 = icmp eq i64 %3, 8
+  ret i1 %4
+}
+
+; Function Attrs: nounwind ssp uwtable
+define zeroext i1 @sorbet_testIsUndef(i64) #0 {
+  %2 = alloca i64, align 8
+  store i64 %0, i64* %2, align 8
+  %3 = load i64, i64* %2, align 8
+  %4 = icmp eq i64 %3, 52
+  ret i1 %4
+}
+
+; Function Attrs: nounwind ssp uwtable
+define zeroext i1 @sorbet_testIsSymbol(i64) #0 {
+  %2 = alloca i64, align 8
+  store i64 %0, i64* %2, align 8
+  %3 = load i64, i64* %2, align 8
+  %4 = and i64 %3, 255
+  %5 = icmp eq i64 %4, 12
+  br i1 %5, label %24, label %6
+
+; <label>:6:                                      ; preds = %1
+  %7 = load i64, i64* %2, align 8
+  %8 = and i64 %7, 7
+  %9 = icmp ne i64 %8, 0
+  br i1 %9, label %22, label %10
+
+; <label>:10:                                     ; preds = %6
+  %11 = load i64, i64* %2, align 8
+  %12 = and i64 %11, -9
+  %13 = icmp eq i64 %12, 0
+  br i1 %13, label %22, label %14
+
+; <label>:14:                                     ; preds = %10
+  %15 = load i64, i64* %2, align 8
+  %16 = inttoptr i64 %15 to %struct.RBasic*
+  %17 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %16, i32 0, i32 0
+  %18 = load i64, i64* %17, align 8
+  %19 = and i64 %18, 31
+  %20 = trunc i64 %19 to i32
+  %21 = icmp eq i32 %20, 20
+  br label %22
+
+; <label>:22:                                     ; preds = %14, %10, %6
+  %23 = phi i1 [ false, %10 ], [ false, %6 ], [ %21, %14 ]
+  br label %24
+
+; <label>:24:                                     ; preds = %22, %1
+  %25 = phi i1 [ true, %1 ], [ %23, %22 ]
+  ret i1 %25
+}
+
+; Function Attrs: nounwind ssp uwtable
+define zeroext i1 @sorbet_testIsFloat(i64) #0 {
+  %2 = alloca i64, align 8
+  store i64 %0, i64* %2, align 8
+  %3 = load i64, i64* %2, align 8
+  %4 = trunc i64 %3 to i32
+  %5 = and i32 %4, 3
+  %6 = icmp eq i32 %5, 2
+  br i1 %6, label %25, label %7
+
+; <label>:7:                                      ; preds = %1
+  %8 = load i64, i64* %2, align 8
+  %9 = and i64 %8, 7
+  %10 = icmp ne i64 %9, 0
+  br i1 %10, label %23, label %11
+
+; <label>:11:                                     ; preds = %7
+  %12 = load i64, i64* %2, align 8
+  %13 = and i64 %12, -9
+  %14 = icmp eq i64 %13, 0
+  br i1 %14, label %23, label %15
+
+; <label>:15:                                     ; preds = %11
+  %16 = load i64, i64* %2, align 8
+  %17 = inttoptr i64 %16 to %struct.RBasic*
+  %18 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %17, i32 0, i32 0
+  %19 = load i64, i64* %18, align 8
+  %20 = and i64 %19, 31
+  %21 = trunc i64 %20 to i32
+  %22 = icmp eq i32 %21, 4
+  br label %23
+
+; <label>:23:                                     ; preds = %15, %11, %7
+  %24 = phi i1 [ false, %11 ], [ false, %7 ], [ %22, %15 ]
+  br label %25
+
+; <label>:25:                                     ; preds = %23, %1
+  %26 = phi i1 [ true, %1 ], [ %24, %23 ]
+  ret i1 %26
+}
+
+; Function Attrs: nounwind ssp uwtable
+define zeroext i1 @sorbet_testIsHash(i64) #0 {
+  %2 = alloca i64, align 8
+  store i64 %0, i64* %2, align 8
+  %3 = load i64, i64* %2, align 8
+  %4 = call i32 @rb_type(i64 %3)
+  %5 = icmp eq i32 %4, 8
+  ret i1 %5
+}
+
+; Function Attrs: nounwind ssp uwtable
+define internal i32 @rb_type(i64) #0 {
+  %2 = alloca i32, align 4
+  %3 = alloca i64, align 8
+  store i64 %0, i64* %3, align 8
+  %4 = load i64, i64* %3, align 8
+  %5 = and i64 %4, 7
+  %6 = icmp ne i64 %5, 0
+  br i1 %6, label %7, label %33
+
+; <label>:7:                                      ; preds = %1
+  %8 = load i64, i64* %3, align 8
+  %9 = trunc i64 %8 to i32
+  %10 = and i32 %9, 1
+  %11 = icmp ne i32 %10, 0
+  br i1 %11, label %12, label %13
+
+; <label>:12:                                     ; preds = %7
+  store i32 21, i32* %2, align 4
+  br label %54
+
+; <label>:13:                                     ; preds = %7
+  %14 = load i64, i64* %3, align 8
+  %15 = trunc i64 %14 to i32
+  %16 = and i32 %15, 3
+  %17 = icmp eq i32 %16, 2
+  br i1 %17, label %18, label %19
+
+; <label>:18:                                     ; preds = %13
+  store i32 4, i32* %2, align 4
+  br label %54
+
+; <label>:19:                                     ; preds = %13
+  %20 = load i64, i64* %3, align 8
+  %21 = icmp eq i64 %20, 20
+  br i1 %21, label %22, label %23
+
+; <label>:22:                                     ; preds = %19
+  store i32 18, i32* %2, align 4
+  br label %54
+
+; <label>:23:                                     ; preds = %19
+  %24 = load i64, i64* %3, align 8
+  %25 = and i64 %24, 255
+  %26 = icmp eq i64 %25, 12
+  br i1 %26, label %27, label %28
+
+; <label>:27:                                     ; preds = %23
+  store i32 20, i32* %2, align 4
+  br label %54
+
+; <label>:28:                                     ; preds = %23
+  %29 = load i64, i64* %3, align 8
+  %30 = icmp eq i64 %29, 52
+  br i1 %30, label %31, label %32
+
+; <label>:31:                                     ; preds = %28
+  store i32 22, i32* %2, align 4
+  br label %54
+
+; <label>:32:                                     ; preds = %28
+  br label %47
+
+; <label>:33:                                     ; preds = %1
+  %34 = load i64, i64* %3, align 8
+  %35 = and i64 %34, -9
+  %36 = icmp eq i64 %35, 0
+  br i1 %36, label %37, label %46
+
+; <label>:37:                                     ; preds = %33
+  %38 = load i64, i64* %3, align 8
+  %39 = icmp eq i64 %38, 8
+  br i1 %39, label %40, label %41
+
+; <label>:40:                                     ; preds = %37
+  store i32 17, i32* %2, align 4
+  br label %54
+
+; <label>:41:                                     ; preds = %37
+  %42 = load i64, i64* %3, align 8
+  %43 = icmp eq i64 %42, 0
+  br i1 %43, label %44, label %45
+
+; <label>:44:                                     ; preds = %41
+  store i32 19, i32* %2, align 4
+  br label %54
+
+; <label>:45:                                     ; preds = %41
+  br label %46
+
+; <label>:46:                                     ; preds = %45, %33
+  br label %47
+
+; <label>:47:                                     ; preds = %46, %32
+  %48 = load i64, i64* %3, align 8
+  %49 = inttoptr i64 %48 to %struct.RBasic*
+  %50 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %49, i32 0, i32 0
+  %51 = load i64, i64* %50, align 8
+  %52 = and i64 %51, 31
+  %53 = trunc i64 %52 to i32
+  store i32 %53, i32* %2, align 4
+  br label %54
+
+; <label>:54:                                     ; preds = %47, %44, %40, %31, %27, %22, %18, %12
+  %55 = load i32, i32* %2, align 4
+  ret i32 %55
+}
+
+; Function Attrs: nounwind ssp uwtable
+define zeroext i1 @sorbet_testIsArray(i64) #0 {
+  %2 = alloca i64, align 8
+  store i64 %0, i64* %2, align 8
+  %3 = load i64, i64* %2, align 8
+  %4 = call i32 @rb_type(i64 %3)
+  %5 = icmp eq i32 %4, 7
+  ret i1 %5
+}
+
+; Function Attrs: nounwind ssp uwtable
+define zeroext i1 @sorbet_testIsString(i64) #0 {
+  %2 = alloca i64, align 8
+  store i64 %0, i64* %2, align 8
+  %3 = load i64, i64* %2, align 8
+  %4 = call i32 @rb_type(i64 %3)
+  %5 = icmp eq i32 %4, 5
+  ret i1 %5
+}
+
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_instanceVariableGet(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -866,12 +1133,36 @@ define i64 @rb_return_nil() #0 {
 }
 
 ; Function Attrs: nounwind ssp uwtable
+define i64 @my_method(i32, i64*, i64) #0 {
+  %4 = alloca i32, align 4
+  %5 = alloca i64*, align 8
+  %6 = alloca i64, align 8
+  %7 = alloca i64, align 8
+  %8 = alloca i64, align 8
+  %9 = alloca i64, align 8
+  %10 = alloca i64, align 8
+  %11 = alloca i64, align 8
+  %12 = alloca i64, align 8
+  %13 = alloca i64, align 8
+  store i32 %0, i32* %4, align 4
+  store i64* %1, i64** %5, align 8
+  store i64 %2, i64* %6, align 8
+  %14 = load i32, i32* %4, align 4
+  %15 = load i64*, i64** %5, align 8
+  %16 = call i32 (i32, i64*, i8*, ...) @rb_scan_args(i32 %14, i64* %15, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @.str, i32 0, i32 0), i64* %7, i64* %9, i64* %10, i64* %11, i64* %8, i64* %12, i64* %13)
+  %17 = load i64, i64* %6, align 8
+  ret i64 %17
+}
+
+declare i32 @rb_scan_args(i32, i64*, i8*, ...) #2
+
+; Function Attrs: nounwind ssp uwtable
 define void @Init_foobar() #0 {
   %1 = alloca i64, align 8
-  %2 = call i64 @rb_define_module(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0))
+  %2 = call i64 @rb_define_module(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str.1, i32 0, i32 0))
   store i64 %2, i64* %1, align 8
   %3 = load i64, i64* %1, align 8
-  call void @rb_define_singleton_method(i64 %3, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str.1, i32 0, i32 0), i64 (...)* bitcast (i64 ()* @rb_return_nil to i64 (...)*), i32 0)
+  call void @rb_define_singleton_method(i64 %3, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str.2, i32 0, i32 0), i64 (...)* bitcast (i64 ()* @rb_return_nil to i64 (...)*), i32 0)
   ret void
 }
 
