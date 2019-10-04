@@ -75,12 +75,9 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
         auto selfArgRaw = (func->arg_end() - 1);
         boxRawValue(lctx, builder, llvmVariables[core::LocalVariable::selfVariable()], selfArgRaw);
     }
-    builder.CreateRet(unboxRawValue(
-        lctx, builder,
-        llvmVariables[core::LocalVariable::selfVariable()])); // we need to return something otherwise LLVM crashes.
-                                                              // Should be removed when we implement `return`
-                                                              // instruction(CFG always has `return nil` in the end
-                                                              //
+    // Should be removed when we implement `return`
+    // instruction(CFG always has `return nil` in the end
+    //
     // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments to extract arguments
     // and box them to "RV" type
 
@@ -105,7 +102,12 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                 },
                 [&](cfg::Alias *i) { gs.trace("Alias\n"); },
                 [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
-                [&](cfg::Send *i) { gs.trace("Send\n"); }, [&](cfg::Return *i) { gs.trace("Return\n"); },
+                [&](cfg::Send *i) { gs.trace("Send\n"); },
+                [&](cfg::Return *i) {
+                    builder.CreateRet(unboxRawValue(
+                        lctx, builder,
+                        llvmVariables[i->what.variable])); // we need to return something otherwise LLVM crashes.
+                },
                 [&](cfg::BlockReturn *i) { gs.trace("BlockReturn\n"); },
                 [&](cfg::LoadSelf *i) { gs.trace("LoadSelf\n"); }, [&](cfg::Literal *i) { gs.trace("Literal\n"); },
                 [&](cfg::Unanalyzable *i) { gs.trace("Unanalyzable\n"); },
