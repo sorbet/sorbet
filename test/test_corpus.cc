@@ -138,12 +138,12 @@ class ErrorHandler {
 
 public:
     vector<unique_ptr<core::Error>> errors;
-    map<string, string> got;
+    UnorderedMap<string_view, string> got;
 
     ErrorHandler(Expectations &test, shared_ptr<core::ErrorQueue>& errorQueue)
         : test(test), errorQueue(errorQueue){};
 
-    void checkExpectations(string expectationType, std::function<string()> mkExp, bool addNewline = true) {
+    void checkExpectations(string_view expectationType, std::function<string()> mkExp, bool addNewline = true) {
         if (test.expectations.contains(expectationType)) {
             got[expectationType].append(mkExp());
             if (addNewline) {
