@@ -39,7 +39,7 @@ void boxRawValue(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, llvm::Allo
     std::vector<llvm::Value *> indices(2);
     indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true));
     indices[1] = indices[0];
-    builder.CreateStore(rawData, builder.CreateGEP(target, indices)); // initialize with nil
+    builder.CreateStore(rawData, builder.CreateGEP(target, indices));
 }
 
 // boxed raw value from rawData into target. Assumes that types are compatible.
@@ -47,7 +47,7 @@ llvm::Value *unboxRawValue(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, 
     std::vector<llvm::Value *> indices(2);
     indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true));
     indices[1] = indices[0];
-    return builder.CreateLoad(builder.CreateGEP(target, indices)); // initialize with nil
+    return builder.CreateLoad(builder.CreateGEP(target, indices));
 }
 
 void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cfg::CFG &cfg,
