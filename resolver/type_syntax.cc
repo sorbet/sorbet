@@ -603,7 +603,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                                     sym.show(ctx));
                         // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
                         // if we're already looking at `T::Array` instead.
-                        auto typePrefix = isBuiltinGeneric ? "T::" : "";
+                        auto typePrefix = isBuiltinGeneric ? "" : "T::";
                         if (sym == core::Symbols::Hash() || sym == core::Symbols::T_Hash()) {
                             // Hash is special because it has arity 3 but you're only supposed to write the first 2
                             e.replaceWith("Add type arguments", i->loc, "{}{}[T.untyped, T.untyped]", typePrefix,
