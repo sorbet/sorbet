@@ -134,13 +134,13 @@ unique_ptr<Diagnostic> errorToDiagnostic(const core::GlobalState &gs, const core
 
 class ExpectationHandler {
     Expectations &test;
-    shared_ptr<core::ErrorQueue>& errorQueue;
+    shared_ptr<core::ErrorQueue> &errorQueue;
 
 public:
     vector<unique_ptr<core::Error>> errors;
     UnorderedMap<string_view, string> got;
 
-    ExpectationHandler(Expectations &test, shared_ptr<core::ErrorQueue>& errorQueue)
+    ExpectationHandler(Expectations &test, shared_ptr<core::ErrorQueue> &errorQueue)
         : test(test), errorQueue(errorQueue){};
 
     void addObserved(string_view expectationType, std::function<string()> mkExp, bool addNewline = true) {
