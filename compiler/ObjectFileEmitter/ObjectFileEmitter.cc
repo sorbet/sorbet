@@ -1,5 +1,6 @@
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/IRPrintingPasses.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
@@ -10,6 +11,8 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
+#include "llvm/Transforms/IPO.h"
+#include "llvm/Transforms/IPO/PassManagerBuilder.h"
 // ^^^ violate our poisons
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 
@@ -26,14 +29,11 @@ void ObjectFileEmitter::init() {
     llvm::InitializeAllAsmPrinters();
 }
 
-void outputLLVM(string_view dir, string_view fileNameWithoutExtension, const unique_ptr<llvm::Module> &module) {
-    std::error_code ec;
-    auto name = ((string)dir) + "/" + (string)fileNameWithoutExtension + ".ll";
-    llvm::raw_fd_ostream File(name, ec, llvm::sys::fs::F_Text);
-    module->print(File, nullptr);
-}
+void outputLLVM(llvm::legacy::PassManager &pm, string_view dir, string_view fileNameWithoutExtension,
+                const unique_ptr<llvm::Module> &module) {}
 
-void outputObjectFile(string_view dir, string_view fileNameWithoutExtension, unique_ptr<llvm::Module> module) {
+void outputObjectFile(llvm::legacy::PassManager &pm, string_view dir, string_view fileNameWithoutExtension,
+                      unique_ptr<llvm::Module> module) {
     auto targetTriple = llvm::sys::getDefaultTargetTriple();
     module->setTargetTriple(targetTriple);
 
@@ -67,15 +67,14 @@ void outputObjectFile(string_view dir, string_view fileNameWithoutExtension, uni
         return;
     }
 
-    llvm::legacy::PassManager pass;
     auto fileType = llvm::TargetMachine::CGFT_ObjectFile;
 
-    if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType, false /*disableVerify*/)) {
+    if (targetMachine->addPassesToEmitFile(pm, dest, nullptr, fileType, false /*disableVerify*/)) {
         llvm::errs() << "TheTargetMachine can't emit a file of this type";
         return;
     }
 
-    pass.run(*module);
+    pm.run(*module);
     dest.flush();
 }
 
@@ -106,8 +105,36 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     // sorbet_defineMethodSingleton
     builder.CreateRetVoid();
 
-    outputLLVM(dir, objectName, module);
-    outputObjectFile(dir, objectName, move(module));
+    /* run optimizations */
+
+    unique_ptr<llvm::legacy::PassManager> pm = make_unique<llvm::legacy::PassManager>();
+
+    // print unoptimized IR
+    std::error_code ec;
+    auto name = ((string)dir) + "/" + (string)objectName + ".ll";
+    llvm::raw_fd_ostream llFile(name, ec, llvm::sys::fs::F_Text);
+    pm->add(llvm::createPrintModulePass(llFile, ""));
+
+    // enable optimizations
+    llvm::PassManagerBuilder pmbuilder;
+    int optLevel = 2;
+    int sizeLevel = 0;
+    pmbuilder.OptLevel = optLevel;
+    pmbuilder.SizeLevel = sizeLevel;
+    pmbuilder.Inliner = llvm::createFunctionInliningPass(optLevel, sizeLevel, false);
+    pmbuilder.DisableUnitAtATime = false;
+    pmbuilder.DisableUnrollLoops = false;
+    pmbuilder.LoopVectorize = true;
+    pmbuilder.SLPVectorize = true;
+    pmbuilder.populateModulePassManager(*pm);
+
+    // print optimized IR
+    std::error_code ec1;
+    auto nameOpt = ((string)dir) + "/" + (string)objectName + ".llo";
+    llvm::raw_fd_ostream lloFile(nameOpt, ec1, llvm::sys::fs::F_Text);
+    pm->add(llvm::createPrintModulePass(lloFile, ""));
+
+    outputObjectFile(*pm, dir, objectName, move(module));
 }
 
 } // namespace sorbet::compiler
