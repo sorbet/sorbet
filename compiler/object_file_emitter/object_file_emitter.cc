@@ -85,7 +85,7 @@ void ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
         llvm::Function::Create(ft, llvm::Function::ExternalLinkage, ((string) "Init_" + (string)objectName), *module);
     auto bb = llvm::BasicBlock::Create(lctx, "entry", function);
     builder.SetInsertPoint(bb);
-    builder.CreateRet(llvm::ConstantInt::getTrue(lctx));
+    builder.CreateRetVoid();
 
     outputLLVM(dir, objectName, module);
     outputObjectFile(dir, objectName, move(module));
