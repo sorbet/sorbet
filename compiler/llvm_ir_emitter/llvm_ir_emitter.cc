@@ -87,68 +87,82 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
         if (b.get() == cfg.entry()) {
             llvmBlocks.emplace_back(entryBlock);
         } else {
-            llvmBlocks.emplace_back(llvm::BasicBlock::Create(lctx));
+            llvmBlocks.emplace_back(llvm::BasicBlock::Create(
+                lctx, "BB" + to_string(b->id), func)); // to_s is slow. We should only use it in debug builds
         }
     }
-
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         auto block = llvmBlocks[bb->id];
         builder.SetInsertPoint(block);
-        for (cfg::Binding &bind : bb->exprs) {
-            auto targetAlloca = llvmVariables[bind.bind.variable];
-            typecase(
-                bind.value.get(),
-                [&](cfg::Ident *i) { builder.CreateStore(builder.CreateLoad(llvmVariables[i->what]), targetAlloca); },
-                [&](cfg::Alias *i) { gs.trace("Alias\n"); },
-                [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
-                [&](cfg::Send *i) { gs.trace("Send\n"); },
-                [&](cfg::Return *i) {
-                    builder.CreateRet(unboxRawValue(
-                        lctx, builder,
-                        llvmVariables[i->what.variable])); // we need to return something otherwise LLVM crashes.
-                },
-                [&](cfg::BlockReturn *i) { gs.trace("BlockReturn\n"); },
-                [&](cfg::LoadSelf *i) { gs.trace("LoadSelf\n"); },
-                [&](cfg::Literal *i) {
-                    gs.trace("Literal\n");
-                    if (i->value->derivesFrom(gs, core::Symbols::NilClass())) {
-                        boxRawValue(lctx, builder, targetAlloca, nilValueRaw);
-                        return;
-                    }
-                    auto litType = core::cast_type<core::LiteralType>(i->value.get());
-                    ENFORCE(litType);
-                    switch (litType->literalKind) {
-                        case core::LiteralType::LiteralTypeKind::Integer: {
-                            auto rawInt = builder.CreateCall(
-                                module->getFunction("sorbet_longToRubyValue"),
-                                {llvm::ConstantInt::get(lctx, llvm::APInt(64, litType->value, true))});
-                            boxRawValue(lctx, builder, targetAlloca, rawInt);
-                            break;
+        if (bb != cfg.deadBlock()) {
+            for (cfg::Binding &bind : bb->exprs) {
+                auto targetAlloca = llvmVariables[bind.bind.variable];
+                typecase(
+                    bind.value.get(),
+                    [&](cfg::Ident *i) {
+                        builder.CreateStore(builder.CreateLoad(llvmVariables[i->what]), targetAlloca);
+                    },
+                    [&](cfg::Alias *i) { gs.trace("Alias\n"); },
+                    [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
+                    [&](cfg::Send *i) { gs.trace("Send\n"); },
+                    [&](cfg::Return *i) {
+                        builder.CreateRet(unboxRawValue(lctx, builder, llvmVariables[i->what.variable]));
+                    },
+                    [&](cfg::BlockReturn *i) { gs.trace("BlockReturn\n"); },
+                    [&](cfg::LoadSelf *i) { gs.trace("LoadSelf\n"); },
+                    [&](cfg::Literal *i) {
+                        gs.trace("Literal\n");
+                        if (i->value->derivesFrom(gs, core::Symbols::NilClass())) {
+                            boxRawValue(lctx, builder, targetAlloca, nilValueRaw);
+                            return;
                         }
-                        case core::LiteralType::LiteralTypeKind::True:
-                            boxRawValue(lctx, builder, targetAlloca, trueValueRaw);
-                            break;
-                        case core::LiteralType::LiteralTypeKind::False:
-                            boxRawValue(lctx, builder, targetAlloca, falseValueRaw);
-                            break;
-                        case core::LiteralType::LiteralTypeKind::String: {
-                            auto str = core::NameRef(gs, litType->value).data(gs)->shortName(gs);
-                            auto rawCString = builder.CreateGlobalStringPtr(llvm::StringRef(str.data(), str.length()));
-                            auto rawRubyString = builder.CreateCall(
-                                module->getFunction("sorbet_CPtrToRubyString"),
-                                {rawCString, llvm::ConstantInt::get(lctx, llvm::APInt(64, str.length(), true))});
-                            boxRawValue(lctx, builder, targetAlloca, rawRubyString);
-                            break;
+                        auto litType = core::cast_type<core::LiteralType>(i->value.get());
+                        ENFORCE(litType);
+                        switch (litType->literalKind) {
+                            case core::LiteralType::LiteralTypeKind::Integer: {
+                                auto rawInt = builder.CreateCall(
+                                    module->getFunction("sorbet_longToRubyValue"),
+                                    {llvm::ConstantInt::get(lctx, llvm::APInt(64, litType->value, true))});
+                                boxRawValue(lctx, builder, targetAlloca, rawInt);
+                                break;
+                            }
+                            case core::LiteralType::LiteralTypeKind::True:
+                                boxRawValue(lctx, builder, targetAlloca, trueValueRaw);
+                                break;
+                            case core::LiteralType::LiteralTypeKind::False:
+                                boxRawValue(lctx, builder, targetAlloca, falseValueRaw);
+                                break;
+                            case core::LiteralType::LiteralTypeKind::String: {
+                                auto str = core::NameRef(gs, litType->value).data(gs)->shortName(gs);
+                                auto rawCString =
+                                    builder.CreateGlobalStringPtr(llvm::StringRef(str.data(), str.length()));
+                                auto rawRubyString = builder.CreateCall(
+                                    module->getFunction("sorbet_CPtrToRubyString"),
+                                    {rawCString, llvm::ConstantInt::get(lctx, llvm::APInt(64, str.length(), true))});
+                                boxRawValue(lctx, builder, targetAlloca, rawRubyString);
+                                break;
+                            }
+                            default:
+                                gs.trace("UnsupportedLiteral");
                         }
-                        default:
-                            gs.trace("UnsupportedLiteral");
-                    }
-                },
-                [&](cfg::Unanalyzable *i) { gs.trace("Unanalyzable\n"); },
-                [&](cfg::LoadArg *i) { gs.trace("LoadArg\n"); },
-                [&](cfg::LoadYieldParams *i) { gs.trace("LoadYieldParams\n"); },
-                [&](cfg::Cast *i) { gs.trace("Cast\n"); }, [&](cfg::TAbsurd *i) { gs.trace("TAbsurd\n"); });
+                    },
+                    [&](cfg::Unanalyzable *i) { gs.trace("Unanalyzable\n"); },
+                    [&](cfg::LoadArg *i) { gs.trace("LoadArg\n"); },
+                    [&](cfg::LoadYieldParams *i) { gs.trace("LoadYieldParams\n"); },
+                    [&](cfg::Cast *i) { gs.trace("Cast\n"); }, [&](cfg::TAbsurd *i) { gs.trace("TAbsurd\n"); });
+            }
+            if (bb->bexit.thenb != bb->bexit.elseb) {
+                auto condValue =
+                    builder.CreateCall(module->getFunction("sorbet_testIsTruthy"),
+                                       {unboxRawValue(lctx, builder, llvmVariables[bb->bexit.cond.variable])});
+                builder.CreateCondBr(condValue, llvmBlocks[bb->bexit.thenb->id], llvmBlocks[bb->bexit.elseb->id]);
+            } else {
+                builder.CreateBr(llvmBlocks[bb->bexit.thenb->id]);
+            }
+        } else {
+            // handle dead block. TODO: this should throw
+            builder.CreateRet(nilValueRaw);
         }
     }
 }
