@@ -163,7 +163,7 @@ public:
                 << prefix << "found unexpected multiple expectations of type " << gotPhase.first;
 
             auto checker = test.folder + expectation->second.begin()->second;
-            auto expect = FileOps::read(checker.c_str());
+            auto expect = FileOps::read(checker);
             EXPECT_EQ(expect, gotPhase.second) << prefix << "Mismatch on: " << checker;
             if (expect == gotPhase.second) {
                 TEST_COUT << gotPhase.first << " OK" << '\n';
