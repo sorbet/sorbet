@@ -1,7 +1,5 @@
 #ifndef SORBET_COMPILER_LLVM_IR_EMITTER_H
 #define SORBET_COMPILER_LLVM_IR_EMITTER_H
-#include <memory>
-#include <string>
 
 namespace llvm {
 class LLVMContext;
