@@ -132,7 +132,7 @@ unique_ptr<Diagnostic> errorToDiagnostic(const core::GlobalState &gs, const core
     return make_unique<Diagnostic>(Range::fromLoc(gs, error.loc), error.header);
 }
 
-class ErrorHandler {
+class ExpectationHandler {
     Expectations &test;
     shared_ptr<core::ErrorQueue>& errorQueue;
 
@@ -140,10 +140,10 @@ public:
     vector<unique_ptr<core::Error>> errors;
     UnorderedMap<string_view, string> got;
 
-    ErrorHandler(Expectations &test, shared_ptr<core::ErrorQueue>& errorQueue)
+    ExpectationHandler(Expectations &test, shared_ptr<core::ErrorQueue>& errorQueue)
         : test(test), errorQueue(errorQueue){};
 
-    void checkExpectations(string_view expectationType, std::function<string()> mkExp, bool addNewline = true) {
+    void addObserved(string_view expectationType, std::function<string()> mkExp, bool addNewline = true) {
         if (test.expectations.contains(expectationType)) {
             got[expectationType].append(mkExp());
             if (addNewline) {
@@ -154,7 +154,7 @@ public:
         }
     }
 
-    void verifyAll(string prefix = "") {
+    void checkExpectations(string prefix = "") {
         for (auto &gotPhase : got) {
             auto expectation = test.expectations.find(gotPhase.first);
             ASSERT_TRUE(expectation != test.expectations.end())
@@ -222,7 +222,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
     }
     vector<ast::ParsedFile> trees;
-    ErrorHandler handler(test, errorQueue);
+    ExpectationHandler handler(test, errorQueue);
 
     vector<core::ErrorRegion> errs;
     for (auto file : files) {
@@ -240,9 +240,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         handler.drainErrors();
-        handler.checkExpectations("parse-tree", [&]() { return nodes->toString(*gs); });
-        handler.checkExpectations("parse-tree-whitequark", [&]() { return nodes->toWhitequark(*gs); });
-        handler.checkExpectations("parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+        handler.addObserved("parse-tree", [&]() { return nodes->toString(*gs); });
+        handler.addObserved("parse-tree-whitequark", [&]() { return nodes->toWhitequark(*gs); });
+        handler.addObserved("parse-tree-json", [&]() { return nodes->toJSON(*gs); });
 
         // Desugarer
         ast::ParsedFile desugared;
@@ -252,8 +252,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             desugared = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
         }
 
-        handler.checkExpectations("ast", [&]() { return desugared.tree->toString(*gs); });
-        handler.checkExpectations("ast-raw", [&]() { return desugared.tree->showRaw(*gs); });
+        handler.addObserved("ast", [&]() { return desugared.tree->toString(*gs); });
+        handler.addObserved("ast-raw", [&]() { return desugared.tree->showRaw(*gs); });
 
         ast::ParsedFile dslUnwound;
         ast::ParsedFile localNamed;
@@ -267,8 +267,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                     testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree)), desugared.file});
             }
 
-            handler.checkExpectations("dsl-tree", [&]() { return dslUnwound.tree->toString(*gs); });
-            handler.checkExpectations("dsl-tree-raw", [&]() { return dslUnwound.tree->showRaw(*gs); });
+            handler.addObserved("dsl-tree", [&]() { return dslUnwound.tree->toString(*gs); });
+            handler.addObserved("dsl-tree-raw", [&]() { return dslUnwound.tree->showRaw(*gs); });
 
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
         } else {
@@ -289,8 +289,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             namedTree = testSerialize(*gs, move(vTmp[0]));
         }
 
-        handler.checkExpectations("name-tree", [&]() { return namedTree.tree->toString(*gs); });
-        handler.checkExpectations("name-tree-raw", [&]() { return namedTree.tree->showRaw(*gs); });
+        handler.addObserved("name-tree", [&]() { return namedTree.tree->toString(*gs); });
+        handler.addObserved("name-tree-raw", [&]() { return namedTree.tree->showRaw(*gs); });
 
         trees.emplace_back(move(namedTree));
     }
@@ -302,7 +302,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
             trees = resolver::Resolver::runConstantResolution(ctx, move(trees), *workers);
         }
-        handler.checkExpectations(
+        handler.addObserved(
             "autogen",
             [&]() {
                 stringstream payload;
@@ -321,12 +321,12 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         handler.drainErrors();
     }
 
-    handler.checkExpectations("symbol-table", [&]() { return gs->toString(); });
-    handler.checkExpectations("symbol-table-raw", [&]() { return gs->showRaw(); });
+    handler.addObserved("symbol-table", [&]() { return gs->toString(); });
+    handler.addObserved("symbol-table-raw", [&]() { return gs->showRaw(); });
 
     for (auto &resolvedTree : trees) {
-        handler.checkExpectations("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.checkExpectations("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
     }
 
     // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work
@@ -343,8 +343,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         resolvedTree = flatten::runOne(ctx, move(resolvedTree));
 
-        handler.checkExpectations("flattened-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.checkExpectations("flattened-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved("flattened-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("flattened-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
 
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
@@ -369,7 +369,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
             resolvedTree.tree.reset();
 
-            handler.checkExpectations("cfg", [&]() {
+            handler.addObserved("cfg", [&]() {
                 stringstream dot;
                 dot << "digraph \"" << rbName << "\" {" << '\n';
                 for (auto &cfg : collector.cfgs) {
@@ -379,7 +379,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                 return dot.str();
             });
 
-            handler.checkExpectations("cfg-raw", [&]() {
+            handler.addObserved("cfg-raw", [&]() {
                 stringstream dot;
                 dot << "digraph \"" << rbName << "\" {" << '\n';
                 dot << "  graph [fontname = \"Courier\"];\n";
@@ -392,7 +392,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                 return dot.str();
             });
 
-            handler.checkExpectations(
+            handler.addObserved(
                 "cfg-json",
                 [&]() {
                     stringstream payload;
@@ -417,7 +417,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
     }
 
-    handler.verifyAll();
+    handler.checkExpectations();
 
     if (test.expectations.contains("symbol-table")) {
         string table = gs->toString() + '\n';
@@ -472,18 +472,18 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         // this replicates the logic of pipeline::indexOne
         auto nodes = parser::Parser::run(*gs, f.file);
-        handler.checkExpectations("parse-tree", [&]() { return nodes->toString(*gs); });
-        handler.checkExpectations("parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+        handler.addObserved("parse-tree", [&]() { return nodes->toString(*gs); });
+        handler.addObserved("parse-tree-json", [&]() { return nodes->toJSON(*gs); });
 
         core::MutableContext ctx(*gs, core::Symbols::root());
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
-        handler.checkExpectations("ast", [&]() { return file.tree->toString(*gs); });
-        handler.checkExpectations("ast-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved("ast", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("ast-raw", [&]() { return file.tree->showRaw(*gs); });
 
         // DSL pass
         file = testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(file.tree)), file.file});
-        handler.checkExpectations("dsl-tree", [&]() { return file.tree->toString(*gs); });
-        handler.checkExpectations("dsl-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved("dsl-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("dsl-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
         // local vars
         file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
@@ -497,8 +497,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             file = testSerialize(*gs, move(vTmp[0]));
         }
 
-        handler.checkExpectations("name-tree", [&]() { return file.tree->toString(*gs); });
-        handler.checkExpectations("name-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved("name-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("name-tree-raw", [&]() { return file.tree->showRaw(*gs); });
         newTrees.emplace_back(move(file));
     }
 
@@ -506,11 +506,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     trees = resolver::Resolver::runTreePasses(ctx, move(newTrees));
 
     for (auto &resolvedTree : newTrees) {
-        handler.checkExpectations("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.checkExpectations("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
     }
 
-    handler.verifyAll("[stress-incremental] ");
+    handler.checkExpectations("[stress-incremental] ");
 
     // and drain all the remaining errors
     errorQueue->drainAllErrors();
