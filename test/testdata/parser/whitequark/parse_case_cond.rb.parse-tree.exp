@@ -17,12 +17,8 @@ Begin {
               ]
             }
           ]
-          body = DString {
-            nodes = [
-              String {
-                val = <U foo>
-              }
-            ]
+          body = String {
+            val = <U foo>
           }
         }
       ]

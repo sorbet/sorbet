@@ -10,12 +10,8 @@ Array {
         opts = ""
       }
     }
-    DString {
-      nodes = [
-        String {
-          val = <U #>
-        }
-      ]
+    String {
+      val = <U #>
     }
   ]
 }

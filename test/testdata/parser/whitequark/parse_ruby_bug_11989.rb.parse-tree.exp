@@ -15,18 +15,10 @@ Begin {
       receiver = NULL
       method = <U p>
       args = [
-        DString {
-          nodes = [
-            DString {
-              nodes = [
-                String {
-                  val = <U x
+        String {
+          val = <U x
    y
 >
-                }
-              ]
-            }
-          ]
         }
       ]
     }

@@ -10,12 +10,8 @@ Assign {
       receiver = NULL
       method = <U raise>
       args = [
-        DString {
-          nodes = [
-            String {
-              val = <U x>
-            }
-          ]
+        String {
+          val = <U x>
         }
       ]
     }

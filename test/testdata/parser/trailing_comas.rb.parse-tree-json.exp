@@ -14,24 +14,14 @@
             "method" : "puts",
             "args" : [
               {
-                "type" : "DString",
-                "nodes" : [
-                  {
-                    "type" : "String",
-                    "val" : "hi"
-                  }
-                ]
+                "type" : "String",
+                "val" : "hi"
               }
             ]
           },
           {
-            "type" : "DString",
-            "nodes" : [
-              {
-                "type" : "String",
-                "val" : "bar"
-              }
-            ]
+            "type" : "String",
+            "val" : "bar"
           }
         ]
       }

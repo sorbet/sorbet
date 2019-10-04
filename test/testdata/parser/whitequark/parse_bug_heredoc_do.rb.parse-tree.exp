@@ -18,10 +18,6 @@ Begin {
         args = [
           DString {
             nodes = [
-              DString {
-                nodes = [
-                ]
-              }
             ]
           }
         ]

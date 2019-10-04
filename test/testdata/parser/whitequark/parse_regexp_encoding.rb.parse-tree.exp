@@ -11,12 +11,8 @@ Send {
   }
   method = <U =~>
   args = [
-    DString {
-      nodes = [
-        String {
-          val = <U >
-        }
-      ]
+    String {
+      val = <U >
     }
   ]
 }

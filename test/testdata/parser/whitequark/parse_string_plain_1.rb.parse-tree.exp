@@ -1,11 +1,3 @@
-DString {
-  nodes = [
-    DString {
-      nodes = [
-        String {
-          val = <U foobar>
-        }
-      ]
-    }
-  ]
+String {
+  val = <U foobar>
 }

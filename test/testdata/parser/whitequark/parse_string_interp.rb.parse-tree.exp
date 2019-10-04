@@ -7,25 +7,21 @@ Begin {
     }
     DString {
       nodes = [
-        DString {
-          nodes = [
-            String {
-              val = <U foo>
-            }
-            Begin {
-              stmts = [
-                Send {
-                  receiver = NULL
-                  method = <U bar>
-                  args = [
-                  ]
-                }
+        String {
+          val = <U foo>
+        }
+        Begin {
+          stmts = [
+            Send {
+              receiver = NULL
+              method = <U bar>
+              args = [
               ]
             }
-            String {
-              val = <U baz>
-            }
           ]
+        }
+        String {
+          val = <U baz>
         }
       ]
     }
