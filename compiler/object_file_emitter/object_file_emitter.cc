@@ -70,7 +70,7 @@ void outputObjectFile(string_view dir, string_view fileNameWithoutExtension, uni
     llvm::legacy::PassManager pass;
     auto fileType = llvm::TargetMachine::CGFT_ObjectFile;
 
-    if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
+    if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType, false /*disableVerify*/)) {
         llvm::errs() << "TheTargetMachine can't emit a file of this type";
         return;
     }
