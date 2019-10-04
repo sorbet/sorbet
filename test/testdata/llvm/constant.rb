@@ -1,0 +1,2 @@
+# typed: true
+puts(Integer)
