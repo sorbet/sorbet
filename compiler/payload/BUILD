@@ -1,8 +1,8 @@
 cc_library(
     name = "payload",
     srcs = [
-        "LoadPayload.cc",
-        "LoadPayload_gen.cc",
+        "Payload.cc",
+        "Payload_gen.cc",
         "payload.h",
     ],
     linkstatic = 1,
@@ -31,9 +31,9 @@ genrule(
     name = "generate_payload_gen_cc",
     srcs = ["payload.bc"],
     outs = [
-        "LoadPayload_gen.cc",
+        "Payload_gen.cc",
     ],
-    cmd = "$(location :generate_load_payload) $(location payload.bc) $(location LoadPayload_gen.cc)",
+    cmd = "$(location :generate_load_payload) $(location payload.bc) $(location Payload_gen.cc)",
     tools = [
         ":generate_load_payload",
     ],
