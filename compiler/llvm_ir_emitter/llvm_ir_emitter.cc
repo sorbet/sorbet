@@ -112,25 +112,26 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                         auto rawCString = builder.CreateGlobalStringPtr(llvm::StringRef(str.data(), str.length()));
                         auto rawID = builder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString});
                         // we should compute these ^^^ on load are reuse them
-                        auto argArray =
-                            builder.CreateAlloca(llvm::Type::getInt64Ty(lctx),
-                                                 llvm::ConstantInt::get(lctx, llvm::APInt(64, i->args.size(), true)));
+                        auto argArray = builder.CreateAlloca(
+                            llvm::ArrayType::get(llvm::Type::getInt64Ty(lctx), i->args.size()), nullptr);
 
                         // fill in args
                         {
                             int argId = -1;
                             for (auto &arg : i->args) {
                                 argId += 1;
-                                std::vector<llvm::Value *> indices(1);
-                                indices[0] =
+                                std::vector<llvm::Value *> indices(2);
+                                indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true));
+                                indices[1] =
 
                                     llvm::ConstantInt::get(lctx, llvm::APInt(64, argId, true));
                                 builder.CreateStore(unboxRawValue(lctx, builder, llvmVariables[arg.variable]),
                                                     builder.CreateGEP(argArray, indices));
                             }
                         }
-                        std::vector<llvm::Value *> indices(1);
+                        std::vector<llvm::Value *> indices(2);
                         indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(64, 0, true));
+                        indices[1] = indices[0];
 
                         auto rawCall =
                             builder.CreateCall(module->getFunction("sorbet_callFunc"),
