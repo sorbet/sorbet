@@ -585,6 +585,23 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
 
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
             if (sym.data(ctx)->isClassOrModule()) {
+                // this is a special-case because T_Array and co all have zero typeArguments() internally, but we want
+                // to subject them to the same checks we have down below if they get used with no type arguments at all
+                if (sym == core::Symbols::T_Hash() || sym == core::Symbols::T_Array() ||
+                    sym == core::Symbols::T_Set() || sym == core::Symbols::T_Range() ||
+                    sym == core::Symbols::T_Enumerable() || sym == core::Symbols::T_Enumerator()) {
+                    if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::GenericClassWithoutTypeArgs)) {
+                        e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
+                                    sym.show(ctx));
+                        if (sym == core::Symbols::T_Hash()) {
+                            // Hash is special because it has arity 3 but you're only supposed to write the first 2
+                            e.replaceWith("Add type arguments", i->loc, "{}[T.untyped, T.untyped]", i->loc.source(ctx));
+                        } else {
+                            e.replaceWith("Add type arguments", i->loc, "{}[T.untyped]", i->loc.source(ctx));
+                        }
+                    }
+                }
+
                 if (sym.data(ctx)->typeArity(ctx) > 0) {
                     // This set **should not** grow over time.
                     bool isStdlibWhitelisted = sym == core::Symbols::Hash() || sym == core::Symbols::Array() ||
