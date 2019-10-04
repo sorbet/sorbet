@@ -258,6 +258,13 @@ public:
                 }
             } else {
                 klass->symbol.data(ctx)->setIsModule(isModule);
+                auto renamed = ctx.state.findRenamedSymbol(klass->symbol.data(ctx)->owner, klass->symbol);
+                if (renamed.exists()) {
+                    if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                        e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx)->show(ctx));
+                        e.addErrorLine(renamed.data(ctx)->loc(), "Previous definition");
+                    }
+                }
             }
         }
         return klass;
