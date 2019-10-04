@@ -177,11 +177,12 @@ static inline const char *sorbet_getRubyClassName(VALUE object) {
 // ****
 // ****                       Tests
 // ****
-/*
+
 static inline bool sorbet_testIsTruthy(VALUE value) {
     return RB_TEST(value);
 }
 
+/*
 static inline bool sorbet_testIsTrue(VALUE value) {
     return value == RUBY_Qtrue;
 }
