@@ -1,5 +1,4 @@
-// Sorbet doesn't like a library that llvm pulls in... so we have to pull it in
-// beforehand
+// These violate our poisons so have to happen first
 #include "llvm/IR/DerivedTypes.h" // FunctionType, StructType
 #include "llvm/IR/IRBuilder.h"
 // ^^^ violate our poisons
