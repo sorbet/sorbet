@@ -13,9 +13,9 @@ compilation_database(
         "//test/llvm:kaleidoscope",
         "//main:sorbet_llvm",
         "//plugin_injector:plugin_injector",
-        "//compiler/payload:generate_load_payload",
+        "//compiler/Payload:generate_load_payload",
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",
-        "//compiler/payload:payload",
+        "//compiler/Payload:payload",
         "//compiler/LLVMIREmitter:LLVMIREmitter",
         # END compile_commands targets
     ],
