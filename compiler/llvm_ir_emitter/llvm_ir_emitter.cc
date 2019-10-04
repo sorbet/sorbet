@@ -39,13 +39,13 @@ llvm::FunctionType *getRubyFunctionTypeForSymbol(llvm::LLVMContext &lctx, const 
 void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cfg::CFG &cfg,
                         std::unique_ptr<ast::MethodDef> &md, const string &functionName, llvm::Module *module) {
     auto functionType = getRubyFunctionTypeForSymbol(lctx, gs, cfg.symbol);
-    auto function = llvm::Function::Create(functionType, llvm::Function::WeakAnyLinkage, functionName, module);
+    auto func = llvm::Function::Create(functionType, llvm::Function::WeakAnyLinkage, functionName, module);
 
     llvm::IRBuilder<> builder(lctx);
 
-    auto entryBlock = llvm::BasicBlock::Create(lctx, "entry", function);
+    auto entryBlock = llvm::BasicBlock::Create(lctx, "entry", func);
     builder.SetInsertPoint(entryBlock);
-    auto selfArg = (function->arg_end() - 1);
+    auto selfArg = (func->arg_end() - 1);
     builder.CreateRet(selfArg); // we need to return something otherwise LLVM crashes. Should be removed when we
                                 // implement `return` instruction(CFG always has `return nil` in the end
     // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments<Paste> to extract arguments
