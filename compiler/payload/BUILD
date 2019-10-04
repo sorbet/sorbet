@@ -1,5 +1,5 @@
 cc_library(
-    name = "payload",
+    name = "Payload",
     srcs = [
         "Payload.cc",
         "Payload_gen.cc",
