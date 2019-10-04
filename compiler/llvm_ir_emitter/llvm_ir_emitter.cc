@@ -78,9 +78,9 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
     builder.CreateRet(unboxRawValue(
         lctx, builder,
         llvmVariables[core::LocalVariable::selfVariable()])); // we need to return something otherwise LLVM crashes.
-                                                            // Should be removed when we implement `return`
-                                                            // instruction(CFG always has `return nil` in the end
-                                                            //
+                                                              // Should be removed when we implement `return`
+                                                              // instruction(CFG always has `return nil` in the end
+                                                              //
     // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments to extract arguments
     // and box them to "RV" type
 
