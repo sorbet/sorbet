@@ -105,7 +105,39 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                     },
                     [&](cfg::Alias *i) { gs.trace("Alias\n"); },
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
-                    [&](cfg::Send *i) { gs.trace("Send\n"); },
+                    [&](cfg::Send *i) {
+                        auto str = i->fun.data(gs)->shortName(gs);
+                        auto rawCString = builder.CreateGlobalStringPtr(llvm::StringRef(str.data(), str.length()));
+                        auto rawID = builder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString});
+                        // we should compute these ^^^ on load are reuse them
+                        auto argArray =
+                            builder.CreateAlloca(llvm::Type::getInt64Ty(lctx),
+                                                 llvm::ConstantInt::get(lctx, llvm::APInt(64, i->args.size(), true)));
+
+                        // fill in args
+                        {
+                            int argId = -1;
+                            for (auto &arg : i->args) {
+                                argId += 1;
+                                std::vector<llvm::Value *> indices(1);
+                                indices[0] =
+
+                                    llvm::ConstantInt::get(lctx, llvm::APInt(64, argId, true));
+                                builder.CreateStore(unboxRawValue(lctx, builder, llvmVariables[arg.variable]),
+                                                    builder.CreateGEP(argArray, indices));
+                            }
+                        }
+                        std::vector<llvm::Value *> indices(1);
+                        indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(64, 0, true));
+
+                        auto rawCall =
+                            builder.CreateCall(module->getFunction("sorbet_callFunc"),
+                                               {unboxRawValue(lctx, builder, llvmVariables[i->recv.variable]), rawID,
+                                                llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx),
+                                                                       llvm::APInt(32, i->args.size(), true)),
+                                                builder.CreateGEP(argArray, indices)});
+                        boxRawValue(lctx, builder, targetAlloca, rawCall);
+                    },
                     [&](cfg::Return *i) {
                         builder.CreateRet(unboxRawValue(lctx, builder, llvmVariables[i->what.variable]));
                     },
@@ -165,6 +197,6 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
             builder.CreateRet(nilValueRaw);
         }
     }
-}
+} // namespace sorbet::compiler
 
 } // namespace sorbet::compiler
