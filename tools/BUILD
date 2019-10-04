@@ -13,10 +13,10 @@ compilation_database(
         "//test/llvm:kaleidoscope",
         "//main:sorbet_llvm",
         "//plugin_injector:plugin_injector",
-        "//compiler/IRHelpers:generate_load_payload",
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",
-        "//compiler/IRHelpers:IRHelpers",
         "//compiler/LLVMIREmitter:LLVMIREmitter",
+        "//compiler/IRHelpers:generate_load_payload",
+        "//compiler/IRHelpers:IRHelpers",
         # END compile_commands targets
     ],
 )

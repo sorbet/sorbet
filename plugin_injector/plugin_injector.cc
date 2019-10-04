@@ -3,9 +3,9 @@
 // ^^^ violate our poisons so they go first
 #include "ast/ast.h"
 #include "cfg/CFG.h"
+#include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
-#include "compiler/IRHelpers/IRHelpers.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
 #include <optional>
