@@ -1,4 +1,3 @@
-#include "compiler/object_file_emitter/object_file_emitter.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
@@ -11,6 +10,9 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
+// ^^^ violate our poisons
+#include "compiler/object_file_emitter/object_file_emitter.h"
+
 #include <string_view>
 using namespace std;
 namespace sorbet::compiler {
@@ -76,8 +78,8 @@ void outputObjectFile(string_view dir, string_view fileNameWithoutExtension, uni
     dest.flush();
 }
 
-void ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module,
-                            string_view dir, string_view objectName) {
+void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module,
+                            core::SymbolRef sym, string_view dir, string_view objectName) {
     llvm::IRBuilder<> builder(lctx);
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
@@ -85,6 +87,22 @@ void ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
         llvm::Function::Create(ft, llvm::Function::ExternalLinkage, ((string) "Init_" + (string)objectName), *module);
     auto bb = llvm::BasicBlock::Create(lctx, "entry", function);
     builder.SetInsertPoint(bb);
+    auto rawCString = builder.CreateGlobalStringPtr("CompiledDemo");
+    auto moduleValue = builder.CreateCall(module->getFunction("sorbet_defineTopLevelModule"), {rawCString});
+    // todo: ^^^ use sorbet_getConstant to find the right constant instead
+
+    auto methodName = builder.CreateGlobalStringPtr("compiledMethod");
+    // todo: ^^^ use real method name
+    //
+    auto universalSignature = llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), true));
+    string functionName = sym.data(gs)->toStringFullName(gs);
+    auto ptr = builder.CreateBitCast(module->getFunction(functionName), universalSignature);
+
+    builder.CreateCall(module->getFunction("sorbet_defineMethodSingleton"),
+                       {moduleValue, methodName, ptr, llvm::ConstantInt::get(lctx, llvm::APInt(32, -1, true))});
+
+    // sorbet_defineTopLevelModule
+    // sorbet_defineMethodSingleton
     builder.CreateRetVoid();
 
     outputLLVM(dir, objectName, module);

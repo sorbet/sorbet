@@ -40,7 +40,7 @@ public:
         unique_ptr<llvm::Module> module = sorbet::compiler::Payload::readDefaultModule(functionName.data(), lctx);
         sorbet::compiler::LLVMIREmitter::run(gs, lctx, cfg, md, functionName, module.get());
         string fileName = funcName2moduleName(functionName);
-        sorbet::compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
+        sorbet::compiler::ObjectFileEmitter::run(gs, lctx, move(module), cfg.symbol, irOutputDir.value(), fileName);
     };
     virtual std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::GlobalState &, ast::Send *) const override {
         return {};

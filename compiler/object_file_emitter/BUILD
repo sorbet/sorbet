@@ -8,6 +8,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//compiler/payload",
+        "@com_stripe_ruby_typer//core",
         "@org_llvm_darwin",
         "@spdlog",
     ],
