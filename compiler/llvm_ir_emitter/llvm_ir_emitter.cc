@@ -45,12 +45,17 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
     auto entryBlock = llvm::BasicBlock::Create(lctx, "entry", func);
     builder.SetInsertPoint(entryBlock);
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
-    // TODO: iterate over cfg.minLoops to create local variables. Initialize all of them to `nil`.
-    // create them as `alloc`s and let SSA figure it out.
+    auto nilValueFunc = module->getFunction("rb_return_nil");
+    auto nilValueRaw = builder.CreateCall(nilValueFunc, {}, "nilValueRaw");
     for (const auto &entry : cfg.minLoops) {
         auto var = entry.first;
-        llvmVariables[var] =
-            builder.CreateAlloca(getValueType(lctx), nullptr, var.toString(gs)); // toString here is slow
+        auto alloca = llvmVariables[var] = builder.CreateAlloca(
+            getValueType(lctx), nullptr,
+            var.toString(gs)); // TODO: toString here is slow, we should probably only use it in debug builds
+        std::vector<llvm::Value *> indices(2);
+        indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true));
+        indices[1] = indices[0];
+        builder.CreateStore(nilValueRaw, builder.CreateGEP(alloca, indices)); // initialize with nil
     }
     auto selfArg = (func->arg_end() - 1);
     builder.CreateRet(selfArg); // we need to return something otherwise LLVM crashes. Should be removed when we
