@@ -1,6 +1,5 @@
 # typed: true
 
-
 R = 5
 module R; def self.x; end; end # error: Redefining constant `R`
 
