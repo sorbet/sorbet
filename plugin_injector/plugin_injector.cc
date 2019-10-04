@@ -5,7 +5,7 @@
 #include "cfg/CFG.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
-#include "compiler/payload/payload.h"
+#include "compiler/payload/Payload.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
 #include <optional>

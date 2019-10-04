@@ -3,7 +3,7 @@ cc_library(
     srcs = [
         "Payload.cc",
         "Payload_gen.cc",
-        "payload.h",
+        "Payload.h",
     ],
     linkstatic = 1,
     visibility = ["//visibility:public"],
