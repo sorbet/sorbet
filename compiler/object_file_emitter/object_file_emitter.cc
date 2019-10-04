@@ -84,9 +84,9 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     llvm::IRBuilder<> builder(lctx);
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
-    auto function =
+    auto func =
         llvm::Function::Create(ft, llvm::Function::ExternalLinkage, ((string) "Init_" + (string)objectName), *module);
-    auto bb = llvm::BasicBlock::Create(lctx, "entry", function);
+    auto bb = llvm::BasicBlock::Create(lctx, "entry", func);
     builder.SetInsertPoint(bb);
     auto rawCString = builder.CreateGlobalStringPtr("CompiledDemo");
     auto moduleValue = builder.CreateCall(module->getFunction("sorbet_defineTopLevelModule"), {rawCString});
