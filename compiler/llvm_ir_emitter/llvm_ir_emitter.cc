@@ -45,13 +45,18 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
 
     auto entryBlock = llvm::BasicBlock::Create(lctx, "entry", function);
     builder.SetInsertPoint(entryBlock);
+    UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
+    // TODO: iterate over cfg.minLoops to create local variables. Initialize all of them to `nil`.
+    // create them as `alloc`s and let SSA figure it out.
+    for (const auto &entry : cfg.minLoops) {
+        auto var = entry.first;
+        llvmVariables[var] =
+            builder.CreateAlloca(getValueType(lctx), nullptr, var.toString(gs)); // toString here is slow
+    }
     auto selfArg = (function->arg_end() - 1);
     builder.CreateRet(selfArg); // we need to return something otherwise LLVM crashes. Should be removed when we
                                 // implement `return` instruction(CFG always has `return nil` in the end
     // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments<Paste> to extract arguments
-
-    // TODO: iterate over cfg.minLoops to create local variables. Initialize all of them to `nil`.
-    // create them as `alloc`s and let SSA figure it out.
 
     vector<llvm::BasicBlock *> llvmBlocks;
     for (auto &b : cfg.basicBlocks) {
