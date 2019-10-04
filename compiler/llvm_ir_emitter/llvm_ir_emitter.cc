@@ -60,8 +60,9 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
     auto entryBlock = llvm::BasicBlock::Create(lctx, "entry", func);
     builder.SetInsertPoint(entryBlock);
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
-    auto nilValueFunc = module->getFunction("rb_return_nil");
-    auto nilValueRaw = builder.CreateCall(nilValueFunc, {}, "nilValueRaw");
+    auto nilValueRaw = builder.CreateCall(module->getFunction("sorbet_rubyNil"), {}, "nilValueRaw");
+    auto falseValueRaw = builder.CreateCall(module->getFunction("sorbet_rubyFalse"), {}, "falseValueRaw");
+    auto trueValueRaw = builder.CreateCall(module->getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
     for (const auto &entry : cfg.minLoops) {
         auto var = entry.first;
         auto alloca = llvmVariables[var] = builder.CreateAlloca(
@@ -95,11 +96,10 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
         auto block = llvmBlocks[bb->id];
         builder.SetInsertPoint(block);
         for (cfg::Binding &bind : bb->exprs) {
+            auto targetAlloca = llvmVariables[bind.bind.variable];
             typecase(
                 bind.value.get(),
-                [&](cfg::Ident *i) {
-                    builder.CreateStore(builder.CreateLoad(llvmVariables[i->what]), llvmVariables[bind.bind.variable]);
-                },
+                [&](cfg::Ident *i) { builder.CreateStore(builder.CreateLoad(llvmVariables[i->what]), targetAlloca); },
                 [&](cfg::Alias *i) { gs.trace("Alias\n"); },
                 [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                 [&](cfg::Send *i) { gs.trace("Send\n"); },
@@ -109,7 +109,42 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                         llvmVariables[i->what.variable])); // we need to return something otherwise LLVM crashes.
                 },
                 [&](cfg::BlockReturn *i) { gs.trace("BlockReturn\n"); },
-                [&](cfg::LoadSelf *i) { gs.trace("LoadSelf\n"); }, [&](cfg::Literal *i) { gs.trace("Literal\n"); },
+                [&](cfg::LoadSelf *i) { gs.trace("LoadSelf\n"); },
+                [&](cfg::Literal *i) {
+                    gs.trace("Literal\n");
+                    if (i->value->derivesFrom(gs, core::Symbols::NilClass())) {
+                        boxRawValue(lctx, builder, targetAlloca, nilValueRaw);
+                        return;
+                    }
+                    auto litType = core::cast_type<core::LiteralType>(i->value.get());
+                    ENFORCE(litType);
+                    switch (litType->literalKind) {
+                        case core::LiteralType::LiteralTypeKind::Integer: {
+                            auto rawInt = builder.CreateCall(
+                                module->getFunction("sorbet_longToRubyValue"),
+                                {llvm::ConstantInt::get(lctx, llvm::APInt(64, litType->value, true))});
+                            boxRawValue(lctx, builder, targetAlloca, rawInt);
+                            break;
+                        }
+                        case core::LiteralType::LiteralTypeKind::True:
+                            boxRawValue(lctx, builder, targetAlloca, trueValueRaw);
+                            break;
+                        case core::LiteralType::LiteralTypeKind::False:
+                            boxRawValue(lctx, builder, targetAlloca, falseValueRaw);
+                            break;
+                        case core::LiteralType::LiteralTypeKind::String: {
+                            auto str = core::NameRef(gs, litType->value).data(gs)->shortName(gs);
+                            auto rawCString = builder.CreateGlobalStringPtr(llvm::StringRef(str.data(), str.length()));
+                            auto rawRubyString = builder.CreateCall(
+                                module->getFunction("sorbet_CPtrToRubyString"),
+                                {rawCString, llvm::ConstantInt::get(lctx, llvm::APInt(64, str.length(), true))});
+                            boxRawValue(lctx, builder, targetAlloca, rawRubyString);
+                            break;
+                        }
+                        default:
+                            gs.trace("UnsupportedLiteral");
+                    }
+                },
                 [&](cfg::Unanalyzable *i) { gs.trace("Unanalyzable\n"); },
                 [&](cfg::LoadArg *i) { gs.trace("LoadArg\n"); },
                 [&](cfg::LoadYieldParams *i) { gs.trace("LoadYieldParams\n"); },
