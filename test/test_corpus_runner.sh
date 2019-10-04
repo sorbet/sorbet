@@ -31,4 +31,4 @@ ruby "${requires[@]}" "$rb" 2>&1 | tee "$srbout"
 
 diff -a "$rbout" "$srbout"
 
-cat "$llvmir/"*.ll
+# cat "$llvmir/"*.ll
