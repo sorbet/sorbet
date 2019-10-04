@@ -7,7 +7,7 @@ cc_library(
     linkstatic = 1,
     visibility = ["//visibility:public"],
     deps = [
-        "//compiler/Payload",
+        "//compiler/IRHelpers",
         "@com_stripe_ruby_typer//core",
         "@org_llvm_darwin",
         "@spdlog",

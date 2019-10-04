@@ -5,7 +5,7 @@ class LLVMContext;
 }; // namespace llvm
 
 namespace sorbet::compiler {
-class Payload {
+class IRHelpers {
 public:
     static std::unique_ptr<llvm::Module> readDefaultModule(const char *name, llvm::LLVMContext &);
 };

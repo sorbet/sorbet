@@ -5,7 +5,7 @@
 #include "cfg/CFG.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
-#include "compiler/Payload/Payload.h"
+#include "compiler/IRHelpers/IRHelpers.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
 #include <optional>
@@ -37,7 +37,7 @@ public:
 
         llvm::LLVMContext lctx;
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
-        unique_ptr<llvm::Module> module = sorbet::compiler::Payload::readDefaultModule(functionName.data(), lctx);
+        unique_ptr<llvm::Module> module = sorbet::compiler::IRHelpers::readDefaultModule(functionName.data(), lctx);
         sorbet::compiler::LLVMIREmitter::run(gs, lctx, cfg, md, functionName, module.get());
         string fileName = funcName2moduleName(functionName);
         sorbet::compiler::ObjectFileEmitter::run(gs, lctx, move(module), cfg.symbol, irOutputDir.value(), fileName);

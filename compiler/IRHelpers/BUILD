@@ -1,9 +1,9 @@
 cc_library(
-    name = "Payload",
+    name = "IRHelpers",
     srcs = [
-        "Payload.cc",
-        "Payload.h",
-        "Payload_gen.cc",
+        "IRHelpers.cc",
+        "IRHelpers.h",
+        "IRHelpers_gen.cc",
     ],
     linkstatic = 1,
     visibility = ["//visibility:public"],
@@ -31,9 +31,9 @@ genrule(
     name = "generate_payload_gen_cc",
     srcs = ["payload.bc"],
     outs = [
-        "Payload_gen.cc",
+        "IRHelpers_gen.cc",
     ],
-    cmd = "$(location :generate_load_payload) $(location payload.bc) $(location Payload_gen.cc)",
+    cmd = "$(location :generate_load_payload) $(location payload.bc) $(location IRHelpers_gen.cc)",
     tools = [
         ":generate_load_payload",
     ],

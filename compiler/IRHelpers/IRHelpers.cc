@@ -1,4 +1,4 @@
-#include "Payload.h"
+#include "IRHelpers.h"
 #include "llvm/Bitcode/BitcodeReader.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -7,7 +7,7 @@
 using namespace std;
 namespace sorbet::compiler {
 string_view getDefaultModuleBitcode();
-std::unique_ptr<llvm::Module> Payload::readDefaultModule(const char *name, llvm::LLVMContext &lctx) {
+std::unique_ptr<llvm::Module> IRHelpers::readDefaultModule(const char *name, llvm::LLVMContext &lctx) {
     auto bitCode = getDefaultModuleBitcode();
     llvm::StringRef bitcodeAsStringRef(bitCode.data(), bitCode.size());
     auto memoryBuffer = llvm::MemoryBuffer::getMemBuffer(bitcodeAsStringRef);
