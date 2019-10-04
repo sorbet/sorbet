@@ -6,6 +6,7 @@ RbConfig::MAKEFILE_CONFIG['cleanobjs'] = '*.ll' # nuke ll files in clean
 # force usage of clang
 ENV['CC'] ||= find_executable('clang')
 ENV['CXX'] ||= find_executable('clang++')
+$CFLAGS += " -std=c99 "
 RbConfig::MAKEFILE_CONFIG["CC"] = ENV["CC"] if ENV["CC"]
 RbConfig::MAKEFILE_CONFIG["CXX"] = ENV["CXX"] if ENV["CXX"]
 
