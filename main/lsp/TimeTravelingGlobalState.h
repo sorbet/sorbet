@@ -20,10 +20,12 @@ namespace sorbet::realmain::lsp {
  */
 class TimeTravelingGlobalState final {
 private:
-    // Contains file updates and their respective hash updates.
+    // Contains file updates and their respective hash+index updates.
     struct GlobalStateUpdate {
         std::vector<std::shared_ptr<core::File>> fileUpdates;
         std::vector<core::FileHash> hashUpdates;
+        // Note: Undo updates do not contain indexes.
+        std::vector<ast::ParsedFile> updatedFileIndexes;
     };
 
     /**
