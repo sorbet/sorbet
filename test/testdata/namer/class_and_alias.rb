@@ -1,5 +1,4 @@
 # typed: true
-# disable-fast-path: true
 A = 91
 class A # error: Redefining constant `A`
 end
