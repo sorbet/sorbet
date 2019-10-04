@@ -77,7 +77,10 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
         builder.SetInsertPoint(block);
         for (cfg::Binding &bind : bb->exprs) {
             typecase(
-                bind.value.get(), [&](cfg::Ident *i) { gs.trace("Ident\n"); },
+                bind.value.get(),
+                [&](cfg::Ident *i) {
+                    builder.CreateStore(builder.CreateLoad(llvmVariables[i->what]), llvmVariables[bind.bind.variable]);
+                },
                 [&](cfg::Alias *i) { gs.trace("Alias\n"); },
                 [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                 [&](cfg::Send *i) { gs.trace("Send\n"); }, [&](cfg::Return *i) { gs.trace("Return\n"); },
