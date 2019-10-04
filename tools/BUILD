@@ -15,7 +15,7 @@ compilation_database(
         "//plugin_injector:plugin_injector",
         "//compiler/Payload:generate_load_payload",
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",
-        "//compiler/Payload:payload",
+        "//compiler/Payload:Payload",
         "//compiler/LLVMIREmitter:LLVMIREmitter",
         # END compile_commands targets
     ],
