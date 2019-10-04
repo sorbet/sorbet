@@ -5,7 +5,7 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//compiler/llvm_ir_emitter",
+        "//compiler/LLVMIREmitter",
         "//compiler/ObjectFileEmitter",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",

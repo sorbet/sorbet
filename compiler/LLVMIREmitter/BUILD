@@ -1,8 +1,8 @@
 cc_library(
-    name = "llvm_ir_emitter",
+    name = "LLVMIREmitter",
     srcs = [
-        "llvm_ir_emitter.cc",
-        "llvm_ir_emitter.h",
+        "LLVMIREmitter.cc",
+        "LLVMIREmitter.h",
     ],
     linkstatic = 1,
     visibility = ["//visibility:public"],

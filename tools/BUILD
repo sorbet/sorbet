@@ -16,7 +16,7 @@ compilation_database(
         "//compiler/payload:generate_load_payload",
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",
         "//compiler/payload:payload",
-        "//compiler/llvm_ir_emitter:llvm_ir_emitter",
+        "//compiler/LLVMIREmitter:LLVMIREmitter",
         # END compile_commands targets
     ],
 )

@@ -3,7 +3,7 @@
 // ^^^ violate our poisons so they go first
 #include "ast/ast.h"
 #include "cfg/CFG.h"
-#include "compiler/llvm_ir_emitter/llvm_ir_emitter.h"
+#include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "compiler/payload/payload.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"

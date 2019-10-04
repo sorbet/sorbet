@@ -6,7 +6,7 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/typecase.h"
-#include "compiler/llvm_ir_emitter/llvm_ir_emitter.h"
+#include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include <string_view>
 
 using namespace std;
