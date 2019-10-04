@@ -108,6 +108,12 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(gs)->shortName(gs);
+                        /*
+                        if (isMagic(str)) {
+                            builder.CreateCall(module->getFunction("<static-init>"), {rawCString});
+                            return
+                        }
+                        */
                         auto rawCString = builder.CreateGlobalStringPtr(llvm::StringRef(str.data(), str.length()));
                         auto rawID = builder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString});
                         // we should compute these ^^^ on load are reuse them
