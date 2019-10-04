@@ -48,8 +48,8 @@ void outputObjectFile(string_view dir, string_view fileNameWithoutExtension, uni
         return;
     }
 
-    auto cpu = "penryn"; // this should probably not be hardcoded in future, but for now, this is what clang uses on mac
-                         // and thus brings us closer to their assembly
+    auto cpu = "generic"; // this should probably not be hardcoded in future, but for now, this is what llc uses on
+                          // mac and thus brings us closer to their assembly
     auto features = "";
 
     llvm::TargetOptions opt;
