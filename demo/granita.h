@@ -178,47 +178,45 @@ static inline const char *sorbet_getRubyClassName(VALUE object) {
 // ****                       Tests
 // ****
 
-static inline bool sorbet_testIsTruthy(VALUE value) {
+static inline _Bool sorbet_testIsTruthy(VALUE value) {
     return RB_TEST(value);
 }
 
-/*
-static inline bool sorbet_testIsTrue(VALUE value) {
+static inline _Bool sorbet_testIsTrue(VALUE value) {
     return value == RUBY_Qtrue;
 }
 
-static inline bool sorbet_testIsFalse(VALUE value) {
+static inline _Bool sorbet_testIsFalse(VALUE value) {
     return value == RUBY_Qfalse;
 }
 
-static inline bool sorbet_testIsNil(VALUE value) {
+static inline _Bool sorbet_testIsNil(VALUE value) {
     return value == RUBY_Qnil;
 }
 
-static inline bool sorbet_testIsUndef(VALUE value) {
+static inline _Bool sorbet_testIsUndef(VALUE value) {
     return value == RUBY_Qundef;
 }
 
-static inline bool sorbet_testIsSymbol(VALUE value) {
+static inline _Bool sorbet_testIsSymbol(VALUE value) {
     return RB_SYMBOL_P(value);
 }
 
-static inline bool sorbet_testIsFloat(VALUE value) {
+static inline _Bool sorbet_testIsFloat(VALUE value) {
     return RB_FLOAT_TYPE_P(value);
 }
 
-static inline bool sorbet_testIsHash(VALUE value) {
+static inline _Bool sorbet_testIsHash(VALUE value) {
     return TYPE(value) == RUBY_T_HASH;
 }
 
-static inline bool sorbet_testIsArray(VALUE value) {
+static inline _Bool sorbet_testIsArray(VALUE value) {
     return TYPE(value) == RUBY_T_ARRAY;
 }
 
-static inline bool sorbet_testIsString(VALUE value) {
+static inline _Bool sorbet_testIsString(VALUE value) {
     return TYPE(value) == RUBY_T_STRING;
 }
-*/
 
 // ****
 // ****                       Variables
