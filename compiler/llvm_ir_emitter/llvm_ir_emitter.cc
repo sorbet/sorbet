@@ -43,19 +43,29 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
 
     llvm::IRBuilder<> builder(lctx);
 
-    auto bb = llvm::BasicBlock::Create(lctx, "entry", function);
-    builder.SetInsertPoint(bb);
+    auto entryBlock = llvm::BasicBlock::Create(lctx, "entry", function);
+    builder.SetInsertPoint(entryBlock);
     auto selfArg = (function->arg_end() - 1);
+    builder.CreateRet(selfArg); // we need to return something otherwise LLVM crashes. Should be removed when we
+                                // implement `return` instruction(CFG always has `return nil` in the end
     // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments<Paste> to extract arguments
 
     // TODO: iterate over cfg.minLoops to create local variables. Initialize all of them to `nil`.
     // create them as `alloc`s and let SSA figure it out.
 
+    vector<llvm::BasicBlock *> llvmBlocks;
+    for (auto &b : cfg.basicBlocks) {
+        if (b.get() == cfg.entry()) {
+            llvmBlocks.emplace_back(entryBlock);
+        } else {
+            llvmBlocks.emplace_back(llvm::BasicBlock::Create(lctx));
+        }
+    }
+
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
-        if (bb == cfg.deadBlock()) {
-            continue;
-        }
+        auto block = llvmBlocks[bb->id];
+        builder.SetInsertPoint(block);
         for (cfg::Binding &bind : bb->exprs) {
             typecase(
                 bind.value.get(), [&](cfg::Ident *i) { gs.trace("Ident\n"); },
@@ -70,9 +80,6 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                 [&](cfg::Cast *i) { gs.trace("Cast\n"); }, [&](cfg::TAbsurd *i) { gs.trace("TAbsurd\n"); });
         }
     }
-
-    builder.CreateRet(selfArg); // we need to return something otherwise LLVM crashes. Should be removed when we
-                                // implement `return` instruction(CFG always has `return nil` in the end
 }
 
 } // namespace sorbet::compiler
