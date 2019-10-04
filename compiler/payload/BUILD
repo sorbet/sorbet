@@ -2,8 +2,8 @@ cc_library(
     name = "Payload",
     srcs = [
         "Payload.cc",
-        "Payload_gen.cc",
         "Payload.h",
+        "Payload_gen.cc",
     ],
     linkstatic = 1,
     visibility = ["//visibility:public"],
