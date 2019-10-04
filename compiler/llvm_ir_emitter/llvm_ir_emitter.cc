@@ -97,6 +97,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         auto block = llvmBlocks[bb->id];
+        bool isTerminated = false;
         builder.SetInsertPoint(block);
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
@@ -143,6 +144,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                         boxRawValue(lctx, builder, targetAlloca, rawCall);
                     },
                     [&](cfg::Return *i) {
+                        isTerminated = true;
                         builder.CreateRet(unboxRawValue(lctx, builder, llvmVariables[i->what.variable]));
                     },
                     [&](cfg::BlockReturn *i) { gs.trace("BlockReturn\n"); },
@@ -187,14 +189,19 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                     [&](cfg::LoadArg *i) { gs.trace("LoadArg\n"); },
                     [&](cfg::LoadYieldParams *i) { gs.trace("LoadYieldParams\n"); },
                     [&](cfg::Cast *i) { gs.trace("Cast\n"); }, [&](cfg::TAbsurd *i) { gs.trace("TAbsurd\n"); });
+                if (isTerminated) {
+                    break;
+                }
             }
-            if (bb->bexit.thenb != bb->bexit.elseb) {
-                auto condValue =
-                    builder.CreateCall(module->getFunction("sorbet_testIsTruthy"),
-                                       {unboxRawValue(lctx, builder, llvmVariables[bb->bexit.cond.variable])});
-                builder.CreateCondBr(condValue, llvmBlocks[bb->bexit.thenb->id], llvmBlocks[bb->bexit.elseb->id]);
-            } else {
-                builder.CreateBr(llvmBlocks[bb->bexit.thenb->id]);
+            if (!isTerminated) {
+                if (bb->bexit.thenb != bb->bexit.elseb) {
+                    auto condValue =
+                        builder.CreateCall(module->getFunction("sorbet_testIsTruthy"),
+                                           {unboxRawValue(lctx, builder, llvmVariables[bb->bexit.cond.variable])});
+                    builder.CreateCondBr(condValue, llvmBlocks[bb->bexit.thenb->id], llvmBlocks[bb->bexit.elseb->id]);
+                } else {
+                    builder.CreateBr(llvmBlocks[bb->bexit.thenb->id]);
+                }
             }
         } else {
             // handle dead block. TODO: this should throw
