@@ -22,22 +22,22 @@ target triple = "x86_64-apple-macosx10.14.0"
 @rb_cNilClass = external global i64, align 8
 @rb_cFalseClass = external global i64, align 8
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_rubyTrue() #0 {
   ret i64 20
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_rubyFalse() #0 {
   ret i64 0
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_rubyNil() #0 {
   ret i64 8
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_rubyValueToLong(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -46,7 +46,7 @@ define i64 @sorbet_rubyValueToLong(i64) #0 {
   ret i64 %4
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_longToRubyValue(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -56,7 +56,7 @@ define i64 @sorbet_longToRubyValue(i64) #0 {
   ret i64 %5
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define double @sorbet_rubyValueToDouble(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -68,7 +68,7 @@ define double @sorbet_rubyValueToDouble(i64) #0 {
 ; Function Attrs: nounwind readonly
 declare double @rb_float_value(i64) #1
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_doubleToRubyValue(double) #0 {
   %2 = alloca double, align 8
   store double %0, double* %2, align 8
@@ -79,7 +79,7 @@ define i64 @sorbet_doubleToRubyValue(double) #0 {
 
 declare i64 @rb_float_new(double) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_Integer_plus_Integer(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -94,7 +94,7 @@ define i64 @sorbet_Integer_plus_Integer(i64, i64) #0 {
   ret i64 %10
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_Integer_minus_Integer(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -109,7 +109,7 @@ define i64 @sorbet_Integer_minus_Integer(i64, i64) #0 {
   ret i64 %10
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_Integer_less_Integer(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -125,7 +125,7 @@ define i64 @sorbet_Integer_less_Integer(i64, i64) #0 {
   ret i64 %11
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_Integer_greater_Integer(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -141,7 +141,7 @@ define i64 @sorbet_Integer_greater_Integer(i64, i64) #0 {
   ret i64 %11
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_Integer_greatereq_Integer(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -157,7 +157,7 @@ define i64 @sorbet_Integer_greatereq_Integer(i64, i64) #0 {
   ret i64 %11
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_Integer_lesseq_Integer(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -173,7 +173,7 @@ define i64 @sorbet_Integer_lesseq_Integer(i64, i64) #0 {
   ret i64 %11
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_Integer_eq_Integer(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -189,7 +189,7 @@ define i64 @sorbet_Integer_eq_Integer(i64, i64) #0 {
   ret i64 %11
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_Integer_neq_Integer(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -205,7 +205,7 @@ define i64 @sorbet_Integer_neq_Integer(i64, i64) #0 {
   ret i64 %11
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i8* @sorbet_rubyStringToCPtr(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -239,7 +239,7 @@ define i8* @sorbet_rubyStringToCPtr(i64) #0 {
   ret i8* %23
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_rubyStringLength(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -274,7 +274,7 @@ define i64 @sorbet_rubyStringLength(i64) #0 {
   ret i64 %24
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_CPtrToRubyString(i8*, i64) #0 {
   %3 = alloca i8*, align 8
   %4 = alloca i64, align 8
@@ -291,7 +291,7 @@ define i64 @sorbet_CPtrToRubyString(i8*, i64) #0 {
 
 declare i64 @rb_str_new(i8*, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_stringPlus(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -305,7 +305,7 @@ define i64 @sorbet_stringPlus(i64, i64) #0 {
 
 declare i64 @rb_str_plus(i64, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_rubyArrayLen(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -314,7 +314,7 @@ define i64 @sorbet_rubyArrayLen(i64) #0 {
   ret i64 %4
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define internal i64 @rb_array_len(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -349,7 +349,7 @@ define internal i64 @rb_array_len(i64) #0 {
   ret i64 %24
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_newRubyArray() #0 {
   %1 = call i64 @rb_ary_new()
   ret i64 %1
@@ -357,7 +357,7 @@ define i64 @sorbet_newRubyArray() #0 {
 
 declare i64 @rb_ary_new() #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_newRubyArrayWithElems(i64, i64*) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64*, align 8
@@ -371,7 +371,7 @@ define i64 @sorbet_newRubyArrayWithElems(i64, i64*) #0 {
 
 declare i64 @rb_ary_new_from_values(i64, i64*) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define void @sorbet_arrayPush(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -385,7 +385,7 @@ define void @sorbet_arrayPush(i64, i64) #0 {
 
 declare i64 @rb_ary_push(i64, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define void @sorbet_arrayStore(i64, i64, i64) #0 {
   %4 = alloca i64, align 8
   %5 = alloca i64, align 8
@@ -402,7 +402,7 @@ define void @sorbet_arrayStore(i64, i64, i64) #0 {
 
 declare void @rb_ary_store(i64, i64, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_arrayGet(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -416,7 +416,7 @@ define i64 @sorbet_arrayGet(i64, i64) #0 {
 
 declare i64 @rb_ary_entry(i64, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_newRubyHash() #0 {
   %1 = call i64 @rb_hash_new()
   ret i64 %1
@@ -424,7 +424,7 @@ define i64 @sorbet_newRubyHash() #0 {
 
 declare i64 @rb_hash_new() #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define void @sorbet_hashStore(i64, i64, i64) #0 {
   %4 = alloca i64, align 8
   %5 = alloca i64, align 8
@@ -441,7 +441,7 @@ define void @sorbet_hashStore(i64, i64, i64) #0 {
 
 declare i64 @rb_hash_aset(i64, i64, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_hashGet(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -455,7 +455,7 @@ define i64 @sorbet_hashGet(i64, i64) #0 {
 
 declare i64 @rb_hash_aref(i64, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_IDIntern(i8*) #0 {
   %2 = alloca i8*, align 8
   store i8* %0, i8** %2, align 8
@@ -466,7 +466,7 @@ define i64 @sorbet_IDIntern(i8*) #0 {
 
 declare i64 @rb_intern(i8*) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_symToID(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -477,7 +477,7 @@ define i64 @sorbet_symToID(i64) #0 {
 
 declare i64 @rb_sym2id(i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_IDToSym(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -488,7 +488,7 @@ define i64 @sorbet_IDToSym(i64) #0 {
 
 declare i64 @rb_id2sym(i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sobet_getRubyClassOf(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -497,7 +497,7 @@ define i64 @sobet_getRubyClassOf(i64) #0 {
   ret i64 %4
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define internal i64 @rb_class_of(i64) #0 {
   %2 = alloca i64, align 8
   %3 = alloca i64, align 8
@@ -600,7 +600,7 @@ define internal i64 @rb_class_of(i64) #0 {
   ret i64 %55
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i8* @sorbet_getRubyClassName(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -611,7 +611,7 @@ define i8* @sorbet_getRubyClassName(i64) #0 {
 
 declare i8* @rb_obj_classname(i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_instanceVariableGet(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -625,7 +625,7 @@ define i64 @sorbet_instanceVariableGet(i64, i64) #0 {
 
 declare i64 @rb_ivar_get(i64, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_instanceVariableSet(i64, i64, i64) #0 {
   %4 = alloca i64, align 8
   %5 = alloca i64, align 8
@@ -642,7 +642,7 @@ define i64 @sorbet_instanceVariableSet(i64, i64, i64) #0 {
 
 declare i64 @rb_ivar_set(i64, i64, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_classVariableGet(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -656,7 +656,7 @@ define i64 @sorbet_classVariableGet(i64, i64) #0 {
 
 declare i64 @rb_cvar_get(i64, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define void @sorbet_classVariableSet(i64, i64, i64) #0 {
   %4 = alloca i64, align 8
   %5 = alloca i64, align 8
@@ -673,7 +673,7 @@ define void @sorbet_classVariableSet(i64, i64, i64) #0 {
 
 declare void @rb_cvar_set(i64, i64, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define void @sorbet_defineTopLevelConstant(i8*, i64) #0 {
   %3 = alloca i8*, align 8
   %4 = alloca i64, align 8
@@ -687,7 +687,7 @@ define void @sorbet_defineTopLevelConstant(i8*, i64) #0 {
 
 declare void @rb_define_global_const(i8*, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define void @sorbet_defineNestedCosntant(i64, i8*, i64) #0 {
   %4 = alloca i64, align 8
   %5 = alloca i8*, align 8
@@ -704,7 +704,7 @@ define void @sorbet_defineNestedCosntant(i64, i8*, i64) #0 {
 
 declare void @rb_define_const(i64, i8*, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_getConstant(i64, i64) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i64, align 8
@@ -718,7 +718,7 @@ define i64 @sorbet_getConstant(i64, i64) #0 {
 
 declare i64 @rb_const_get_at(i64, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_defineTopLevelModule(i8*) #0 {
   %2 = alloca i8*, align 8
   store i8* %0, i8** %2, align 8
@@ -729,7 +729,7 @@ define i64 @sorbet_defineTopLevelModule(i8*) #0 {
 
 declare i64 @rb_define_module(i8*) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_defineNestedModule(i64, i8*) #0 {
   %3 = alloca i64, align 8
   %4 = alloca i8*, align 8
@@ -743,7 +743,7 @@ define i64 @sorbet_defineNestedModule(i64, i8*) #0 {
 
 declare i64 @rb_define_module_under(i64, i8*) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_defineTopLevelClass(i8*, i64) #0 {
   %3 = alloca i8*, align 8
   %4 = alloca i64, align 8
@@ -757,7 +757,7 @@ define i64 @sorbet_defineTopLevelClass(i8*, i64) #0 {
 
 declare i64 @rb_define_class(i8*, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_defineNestedClass(i64, i8*, i64) #0 {
   %4 = alloca i64, align 8
   %5 = alloca i8*, align 8
@@ -774,7 +774,7 @@ define i64 @sorbet_defineNestedClass(i64, i8*, i64) #0 {
 
 declare i64 @rb_define_class_under(i64, i8*, i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define void @sorbet_defineMethod(i64, i8*, i64 (...)*, i32) #0 {
   %5 = alloca i64, align 8
   %6 = alloca i8*, align 8
@@ -794,7 +794,7 @@ define void @sorbet_defineMethod(i64, i8*, i64 (...)*, i32) #0 {
 
 declare void @rb_define_method(i64, i8*, i64 (...)*, i32) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define void @sorbet_defineMethodSingleton(i64, i8*, i64 (...)*, i32) #0 {
   %5 = alloca i64, align 8
   %6 = alloca i8*, align 8
@@ -814,7 +814,7 @@ define void @sorbet_defineMethodSingleton(i64, i8*, i64 (...)*, i32) #0 {
 
 declare void @rb_define_singleton_method(i64, i8*, i64 (...)*, i32) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_callSuper(i32, i64*) #0 {
   %3 = alloca i32, align 4
   %4 = alloca i64*, align 8
@@ -828,7 +828,7 @@ define i64 @sorbet_callSuper(i32, i64*) #0 {
 
 declare i64 @rb_call_super(i32, i64*) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_callBlock(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
@@ -839,7 +839,7 @@ define i64 @sorbet_callBlock(i64) #0 {
 
 declare i64 @rb_yield_splat(i64) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @sorbet_callFunc(i64, i64, i32, i64*) #0 {
   %5 = alloca i64, align 8
   %6 = alloca i64, align 8
@@ -859,13 +859,13 @@ define i64 @sorbet_callFunc(i64, i64, i32, i64*) #0 {
 
 declare i64 @rb_funcallv(i64, i64, i32, i64*) #2
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define i64 @rb_return_nil() #0 {
   %1 = call i64 @sorbet_rubyNil()
   ret i64 %1
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
+; Function Attrs: nounwind ssp uwtable
 define void @Init_foobar() #0 {
   %1 = alloca i64, align 8
   %2 = call i64 @rb_define_module(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0))
@@ -875,7 +875,7 @@ define void @Init_foobar() #0 {
   ret void
 }
 
-attributes #0 = { noinline nounwind optnone ssp uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #0 = { nounwind ssp uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #1 = { nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #2 = { "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #3 = { nounwind readonly }
