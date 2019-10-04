@@ -48,11 +48,12 @@ void outputObjectFile(string_view dir, string_view fileNameWithoutExtension, uni
         return;
     }
 
-    auto cpu = "generic";
+    auto cpu = "penryn"; // this should probably not be hardcoded in future, but for now, this is what clang uses on mac
+                         // and thus brings us closer to their assembly
     auto features = "";
 
     llvm::TargetOptions opt;
-    auto relocationModel = llvm::Optional<llvm::Reloc::Model>();
+    auto relocationModel = llvm::Optional<llvm::Reloc::Model>(llvm::Reloc::PIC_);
     auto targetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, relocationModel);
 
     module->setDataLayout(targetMachine->createDataLayout());

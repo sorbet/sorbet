@@ -54,7 +54,8 @@ llvm::Value *unboxRawValue(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, 
 void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cfg::CFG &cfg,
                         std::unique_ptr<ast::MethodDef> &md, const string &functionName, llvm::Module *module) {
     auto functionType = getRubyFunctionTypeForSymbol(lctx, gs, cfg.symbol);
-    auto func = llvm::Function::Create(functionType, llvm::Function::WeakAnyLinkage, functionName, module);
+    auto func = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, functionName, module);
+    func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
     func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
     llvm::IRBuilder<> builder(lctx);
