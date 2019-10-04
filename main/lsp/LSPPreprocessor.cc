@@ -248,6 +248,10 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             auto &params = get<unique_ptr<WatchmanQueryResponse>>(msg->asNotification().params);
             auto newParams = make_unique<SorbetWorkspaceEditParams>();
             canonicalizeEdits(nextVersion++, move(params), newParams->updates);
+            if (newParams->updates.updatedFiles.empty()) {
+                // No need to commit; these file system updates are ignored.
+                return;
+            }
             msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
             shouldEnqueue = shouldMerge = true;
             break;

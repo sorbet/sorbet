@@ -237,7 +237,8 @@ TEST(LSPPreprocessor, IgnoresWatchmanUpdatesFromOpenFiles) { // NOLINT
     ASSERT_TRUE(state.pendingRequests.size() == 1);
 
     const auto updates = getUpdates(state, 0).value();
-    EXPECT_EQ(updates->versionEnd - updates->versionStart + 1, 2);
+    // Version didn't change because it ignored the watchman update.
+    EXPECT_EQ(updates->versionEnd - updates->versionStart, 0);
     EXPECT_FALSE(updates->canTakeFastPath);
     EXPECT_TRUE(updates->hasNewFiles);
     ASSERT_EQ(updates->updatedFiles.size(), 1);
