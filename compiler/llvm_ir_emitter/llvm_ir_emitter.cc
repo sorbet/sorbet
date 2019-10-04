@@ -1,5 +1,4 @@
-// Sorbet doesn't like a library that llvm pulls in... so we have to pull it in
-// beforehand
+// These violate our poisons so have to happen first
 #include "llvm/IR/DerivedTypes.h" // FunctionType, StructType
 #include "llvm/IR/IRBuilder.h"
 // ^^^ violate our poisons
@@ -39,11 +38,11 @@ llvm::FunctionType *getRubyFunctionTypeForSymbol(llvm::LLVMContext &lctx, const 
 void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cfg::CFG &cfg,
                         std::unique_ptr<ast::MethodDef> &md, const string &functionName, llvm::Module *module) {
     auto functionType = getRubyFunctionTypeForSymbol(lctx, gs, cfg.symbol);
-    auto function = llvm::Function::Create(functionType, llvm::Function::WeakAnyLinkage, functionName, module);
+    auto func = llvm::Function::Create(functionType, llvm::Function::WeakAnyLinkage, functionName, module);
 
     llvm::IRBuilder<> builder(lctx);
 
-    auto entryBlock = llvm::BasicBlock::Create(lctx, "entry", function);
+    auto entryBlock = llvm::BasicBlock::Create(lctx, "entry", func);
     builder.SetInsertPoint(entryBlock);
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
     // TODO: iterate over cfg.minLoops to create local variables. Initialize all of them to `nil`.
@@ -53,7 +52,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
         llvmVariables[var] =
             builder.CreateAlloca(getValueType(lctx), nullptr, var.toString(gs)); // toString here is slow
     }
-    auto selfArg = (function->arg_end() - 1);
+    auto selfArg = (func->arg_end() - 1);
     builder.CreateRet(selfArg); // we need to return something otherwise LLVM crashes. Should be removed when we
                                 // implement `return` instruction(CFG always has `return nil` in the end
     // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments<Paste> to extract arguments
