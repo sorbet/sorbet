@@ -133,15 +133,15 @@ unique_ptr<Diagnostic> errorToDiagnostic(const core::GlobalState &gs, const core
 }
 
 class ErrorHandler {
-    vector<unique_ptr<core::Error>> &errors;
     Expectations &test;
     shared_ptr<core::ErrorQueue> errorQueue;
 
 public:
+    vector<unique_ptr<core::Error>> errors;
     map<string, string> got;
 
-    ErrorHandler(vector<unique_ptr<core::Error>> &errors, Expectations &test, shared_ptr<core::ErrorQueue> errorQueue)
-        : errors(errors), test(test), errorQueue(errorQueue){};
+    ErrorHandler(Expectations &test, shared_ptr<core::ErrorQueue> errorQueue)
+        : test(test), errorQueue(errorQueue){};
 
     void checkExpectations(string expectationType, std::function<string()> mkExp, bool addNewline = true) {
         if (test.expectations.contains(expectationType)) {
@@ -183,7 +183,6 @@ public:
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
-    vector<unique_ptr<core::Error>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.basename;
     auto rbName = test.basename + ".rb";
@@ -223,7 +222,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
     }
     vector<ast::ParsedFile> trees;
-    ErrorHandler handler(errors, test, errorQueue);
+    ErrorHandler handler(test, errorQueue);
 
     vector<core::ErrorRegion> errs;
     for (auto file : files) {
@@ -433,7 +432,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     // Check warnings and errors
     {
         map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
-        for (auto &error : errors) {
+        for (auto &error : handler.errors) {
             if (error->isSilenced) {
                 continue;
             }
