@@ -24,16 +24,31 @@ llvm::Type *getValueType(llvm::LLVMContext &lctx) {
 
 llvm::FunctionType *getRubyFunctionTypeForSymbol(llvm::LLVMContext &lctx, const core::GlobalState &gs,
                                                  core::SymbolRef sym) {
-    auto valueType = getValueType(lctx);
     vector<llvm::Type *> args{
-        llvm::Type::getInt32Ty(lctx),            // arg count
-        llvm::PointerType::getUnqual(valueType), // argArray
-        valueType                                // self
+        llvm::Type::getInt32Ty(lctx),                               // arg count
+        llvm::PointerType::getUnqual(llvm::Type::getInt64Ty(lctx)), // argArray
+        llvm::Type::getInt64Ty(lctx)                                // self
     };
-    return llvm::FunctionType::get(valueType, args, false /*not varargs*/);
+    return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
 } // namespace
+
+// boxed raw value from rawData into target. Assumes that types are compatible.
+void boxRawValue(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, llvm::AllocaInst *target, llvm::Value *rawData) {
+    std::vector<llvm::Value *> indices(2);
+    indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true));
+    indices[1] = indices[0];
+    builder.CreateStore(rawData, builder.CreateGEP(target, indices)); // initialize with nil
+}
+
+// boxed raw value from rawData into target. Assumes that types are compatible.
+llvm::Value *unboxRawValue(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, llvm::AllocaInst *target) {
+    std::vector<llvm::Value *> indices(2);
+    indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true));
+    indices[1] = indices[0];
+    return builder.CreateLoad(builder.CreateGEP(target, indices)); // initialize with nil
+}
 
 void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cfg::CFG &cfg,
                         std::unique_ptr<ast::MethodDef> &md, const string &functionName, llvm::Module *module) {
@@ -52,15 +67,22 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
         auto alloca = llvmVariables[var] = builder.CreateAlloca(
             getValueType(lctx), nullptr,
             var.toString(gs)); // TODO: toString here is slow, we should probably only use it in debug builds
-        std::vector<llvm::Value *> indices(2);
-        indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true));
-        indices[1] = indices[0];
-        builder.CreateStore(nilValueRaw, builder.CreateGEP(alloca, indices)); // initialize with nil
+        boxRawValue(lctx, builder, alloca, nilValueRaw);
     }
-    auto selfArg = (func->arg_end() - 1);
-    builder.CreateRet(selfArg); // we need to return something otherwise LLVM crashes. Should be removed when we
-                                // implement `return` instruction(CFG always has `return nil` in the end
-    // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments<Paste> to extract arguments
+    // auto argCountRaw = func->arg_begin();
+    {
+        // box `self`
+        auto selfArgRaw = (func->arg_end() - 1);
+        boxRawValue(lctx, builder, llvmVariables[core::LocalVariable::selfVariable()], selfArgRaw);
+    }
+    builder.CreateRet(unboxRawValue(
+        lctx, builder,
+        llvmVariables[core::LocalVariable::selfVariable()])); // we need to return something otherwise LLVM crashes.
+                                                            // Should be removed when we implement `return`
+                                                            // instruction(CFG always has `return nil` in the end
+                                                            //
+    // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments to extract arguments
+    // and box them to "RV" type
 
     vector<llvm::BasicBlock *> llvmBlocks;
     for (auto &b : cfg.basicBlocks) {
