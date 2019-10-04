@@ -1,8 +1,8 @@
 cc_library(
-    name = "object_file_emitter",
+    name = "ObjectFileEmitter",
     srcs = [
-        "object_file_emitter.cc",
-        "object_file_emitter.h",
+        "ObjectFileEmitter.cc",
+        "ObjectFileEmitter.h",
     ],
     linkstatic = 1,
     visibility = ["//visibility:public"],

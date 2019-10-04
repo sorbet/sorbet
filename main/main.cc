@@ -1,5 +1,5 @@
 #include "common/common.h"
-#include "compiler/object_file_emitter/object_file_emitter.h"
+#include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "main/options/options.h"
 #include "main/realmain.h"
 int main(int argc, char *argv[]) {

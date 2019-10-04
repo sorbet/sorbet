@@ -11,7 +11,7 @@
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
 // ^^^ violate our poisons
-#include "compiler/object_file_emitter/object_file_emitter.h"
+#include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 
 #include <string_view>
 using namespace std;

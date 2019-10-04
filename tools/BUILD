@@ -14,7 +14,7 @@ compilation_database(
         "//main:sorbet_llvm",
         "//plugin_injector:plugin_injector",
         "//compiler/payload:generate_load_payload",
-        "//compiler/object_file_emitter:object_file_emitter",
+        "//compiler/ObjectFileEmitter:ObjectFileEmitter",
         "//compiler/payload:payload",
         "//compiler/llvm_ir_emitter:llvm_ir_emitter",
         # END compile_commands targets

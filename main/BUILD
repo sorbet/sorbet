@@ -14,7 +14,7 @@ cc_binary(
     linkstatic = 1,
     visibility = ["//visibility:public"],
     deps = [
-        "//compiler/object_file_emitter",
+        "//compiler/ObjectFileEmitter",
         "//plugin_injector",
         "@com_stripe_ruby_typer//main:realmain",
         "@com_stripe_ruby_typer//payload",
