@@ -4,6 +4,7 @@
 namespace llvm {
 class LLVMContext;
 class Module;
+class BasicBlock;
 } // namespace llvm
 
 namespace sorbet::core {
@@ -20,7 +21,8 @@ namespace sorbet::compiler {
 class LLVMIREmitter {
 public:
     static void run(const core::GlobalState &, llvm::LLVMContext &lctx, cfg::CFG &cfg,
-                    std::unique_ptr<ast::MethodDef> &md, const std::string &functionName, llvm::Module *);
+                    std::unique_ptr<ast::MethodDef> &md, const std::string &functionName, llvm::Module *,
+                    llvm::BasicBlock *globalInitializers);
 };
 } // namespace sorbet::compiler
 #endif

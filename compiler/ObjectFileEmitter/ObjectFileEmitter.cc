@@ -79,15 +79,19 @@ void outputObjectFile(llvm::legacy::PassManager &pm, string_view dir, string_vie
 }
 
 void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module,
-                            core::SymbolRef sym, string_view dir, string_view objectName) {
+                            core::SymbolRef sym, string_view dir, string_view objectName,
+                            llvm::BasicBlock *globalInitializers) {
     llvm::IRBuilder<> builder(lctx);
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
     auto entryFunc =
         llvm::Function::Create(ft, llvm::Function::ExternalLinkage, ((string) "Init_" + (string)objectName), *module);
-    auto bb = llvm::BasicBlock::Create(lctx, "entry", entryFunc);
-    builder.SetInsertPoint(bb);
+    globalInitializers->insertInto(entryFunc);
 
+    builder.SetInsertPoint(globalInitializers);
+    auto bb = llvm::BasicBlock::Create(lctx, "entry", entryFunc);
+    builder.CreateBr(bb);
+    builder.SetInsertPoint(bb);
     ENFORCE(sym.data(gs)->isMethod());
     // auto owner = findOwningModule(sym);
     auto rawCString = builder.CreateGlobalStringPtr("CompiledDemo");

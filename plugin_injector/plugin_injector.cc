@@ -38,9 +38,11 @@ public:
         llvm::LLVMContext lctx;
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
         unique_ptr<llvm::Module> module = sorbet::compiler::IRHelpers::readDefaultModule(functionName.data(), lctx);
-        sorbet::compiler::LLVMIREmitter::run(gs, lctx, cfg, md, functionName, module.get());
+        llvm::BasicBlock *globalInitializers = llvm::BasicBlock::Create(lctx, "initializeGlobals");
+        sorbet::compiler::LLVMIREmitter::run(gs, lctx, cfg, md, functionName, module.get(), globalInitializers);
         string fileName = funcName2moduleName(functionName);
-        sorbet::compiler::ObjectFileEmitter::run(gs, lctx, move(module), cfg.symbol, irOutputDir.value(), fileName);
+        sorbet::compiler::ObjectFileEmitter::run(gs, lctx, move(module), cfg.symbol, irOutputDir.value(), fileName,
+                                                 globalInitializers);
     };
     virtual std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::GlobalState &, ast::Send *) const override {
         return {};
