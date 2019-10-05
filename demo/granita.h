@@ -87,7 +87,7 @@ long sorbet_rubyStringLength(VALUE value) {
     return RSTRING_LEN(value);
 }
 
-VALUE sorbet_CPtrToRubyString(const char *ptr, long length) __attribute__((noinline)) {
+VALUE sorbet_CPtrToRubyString(const char *ptr, long length) {
     return rb_str_new(ptr, length);
 }
 
@@ -155,7 +155,7 @@ VALUE in), VALUE closure) { return rb_hash_foreach(hash, func, closure);
 // ****                       Operations on Ruby ID's
 // ****
 
-ID sorbet_IDIntern(const char *value) __attribute__((noinline)) {
+ID sorbet_IDIntern(const char *value) {
     return rb_intern(value);
 }
 
@@ -315,7 +315,8 @@ VALUE sorbet_callBlock(VALUE array) {
     return rb_yield_splat(array);
 }
 
-VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE * const argv) __attribute__((noinline)) {
+VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv)
+    __attribute__((noinline)) {
     // TODO: use LLVM magic to make argv stack allocated
     return rb_funcallv(recv, func, argc, argv);
 }

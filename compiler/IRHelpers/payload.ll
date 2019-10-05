@@ -1108,7 +1108,7 @@ define internal i64 @sorbet_callBlock(i64) #0 {
 declare i64 @rb_yield_splat(i64) #2
 
 ; Function Attrs: ssp uwtable
-define internal i64 @sorbet_callFunc(i64, i64, i32, i64* nocapture) #0 {
+define internal i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture) #0 {
   %5 = alloca i64, align 8
   %6 = alloca i64, align 8
   %7 = alloca i32, align 4
@@ -1125,7 +1125,7 @@ define internal i64 @sorbet_callFunc(i64, i64, i32, i64* nocapture) #0 {
   ret i64 %13
 }
 
-declare i64 @rb_funcallv(i64, i64, i32, i64*) #2
+declare i64 @rb_funcallv(i64, i64, i32, i64* noalias nocapture) #2
 
 ; Function Attrs: ssp uwtable
 define internal i64 @rb_arity_error_new(i32, i32, i32) #0 {
