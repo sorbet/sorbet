@@ -315,7 +315,7 @@ VALUE sorbet_callBlock(VALUE array) {
     return rb_yield_splat(array);
 }
 
-VALUE sorbet_callFunc(VALUE recv, ID func, int argc, const VALUE *argv) __attribute__((noinline)) {
+VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE * const argv) __attribute__((noinline)) {
     // TODO: use LLVM magic to make argv stack allocated
     return rb_funcallv(recv, func, argc, argv);
 }
