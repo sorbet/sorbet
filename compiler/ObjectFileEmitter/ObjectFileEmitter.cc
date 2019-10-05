@@ -48,7 +48,7 @@ void outputObjectFile(llvm::legacy::PassManager &pm, string_view dir, string_vie
         return;
     }
 
-    auto cpu = "generic"; // this should probably not be hardcoded in future, but for now, this is what llc uses on
+    auto cpu = "skylake"; // this should probably not be hardcoded in future, but for now, this is what llc uses on
                           // mac and thus brings us closer to their assembly
     auto features = "";
 
