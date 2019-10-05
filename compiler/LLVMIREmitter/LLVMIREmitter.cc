@@ -68,12 +68,13 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
     auto nilValueRaw = builder.CreateCall(module->getFunction("sorbet_rubyNil"), {}, "nilValueRaw");
     auto falseValueRaw = builder.CreateCall(module->getFunction("sorbet_rubyFalse"), {}, "falseValueRaw");
     auto trueValueRaw = builder.CreateCall(module->getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
+    auto valueType = getValueType(lctx);
 
     // nill out variables.
     for (const auto &entry : cfg.minLoops) {
         auto var = entry.first;
         auto alloca = llvmVariables[var] = builder.CreateAlloca(
-            getValueType(lctx), nullptr,
+            valueType, nullptr,
             var.toString(gs)); // TODO: toString here is slow, we should probably only use it in debug builds
         boxRawValue(lctx, builder, alloca, nilValueRaw);
     }
@@ -131,13 +132,13 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
     //
     builder.CreateBr(userBodyEntry);
 
-    vector<llvm::BasicBlock *> llvmBlocks;
+    vector<llvm::BasicBlock *> llvmBlocks(cfg.maxBasicBlockId);
     for (auto &b : cfg.basicBlocks) {
         if (b.get() == cfg.entry()) {
-            llvmBlocks.emplace_back(userBodyEntry);
+            llvmBlocks[b->id] = userBodyEntry;
         } else {
-            llvmBlocks.emplace_back(llvm::BasicBlock::Create(
-                lctx, "BB" + to_string(b->id), func)); // to_s is slow. We should only use it in debug builds
+            llvmBlocks[b->id] = llvm::BasicBlock::Create(lctx, "BB" + to_string(b->id),
+                                                         func); // to_s is slow. We should only use it in debug builds
         }
     }
 
