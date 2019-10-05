@@ -240,6 +240,10 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                         indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(64, 0, true));
                         indices[1] = indices[0];
 
+                        // TODO: call
+                        // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
+                        // to get inline caching.
+                        // before this, perf will not be good
                         auto rawCall =
                             builder.CreateCall(module->getFunction("sorbet_callFunc"),
                                                {unboxRawValue(lctx, builder, llvmVariables[i->recv.variable]), rawId,
