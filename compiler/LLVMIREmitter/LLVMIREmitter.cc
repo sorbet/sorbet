@@ -52,9 +52,46 @@ llvm::Value *unboxRawValue(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, 
     return builder.CreateLoad(builder.CreateGEP(target, indices));
 }
 
+llvm::Value *getIdFor(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, string_view idName,
+                      UnorderedMap<string_view, llvm::Value *> &rubyIdRegistry, llvm::BasicBlock *globalInitializers,
+                      llvm::BasicBlock *functionEntry, llvm::Module *module) {
+    auto &global = rubyIdRegistry[idName];
+    auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(lctx), 0);
+
+    auto name = llvm::StringRef(idName.data(), idName.length());
+    llvm::Constant *indices[] = {zero};
+    if (!global) {
+        string rawName = "rubySym_" + (string)idName;
+        auto tp = llvm::Type::getInt64Ty(lctx);
+        auto globalDeclaration = static_cast<llvm::GlobalVariable *>(module->getOrInsertGlobal(rawName, tp, [&] {
+            auto ret =
+                new llvm::GlobalVariable(*module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
+            ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+            ret->setAlignment(8);
+            return ret;
+        }));
+
+        llvm::IRBuilder<> globalInitBuilder(lctx);
+        llvm::Constant *indicesString[] = {zero, zero};
+        globalInitBuilder.SetInsertPoint(globalInitializers);
+        auto gv = builder.CreateGlobalString(name, "", 0);
+        auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(gv->getValueType(), gv, indicesString);
+        auto rawID = globalInitBuilder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "rubyID");
+        globalInitBuilder.CreateStore(rawID, llvm::ConstantExpr::getInBoundsGetElementPtr(
+                                                 globalDeclaration->getValueType(), globalDeclaration, indices));
+        globalInitBuilder.SetInsertPoint(functionEntry);
+        global = globalInitBuilder.CreateLoad(
+            llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
+            llvm::Twine("rubyID_", name));
+    }
+    return global;
+}
+
 void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cfg::CFG &cfg,
                         std::unique_ptr<ast::MethodDef> &md, const string &functionName, llvm::Module *module,
                         llvm::BasicBlock *globalInitializers) {
+    UnorderedMap<string_view, llvm::Value *> rubyIDRegistry;
+
     auto functionType = getRubyFunctionTypeForSymbol(lctx, gs, cfg.symbol);
     auto func = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, functionName, module);
     func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
@@ -62,6 +99,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
     llvm::IRBuilder<> builder(lctx);
 
+    auto readGlobals = llvm::BasicBlock::Create(lctx, "readGlobals", func);
     auto rawEntryBlock = llvm::BasicBlock::Create(lctx, "entry", func);
     auto userBodyEntry = llvm::BasicBlock::Create(lctx, "userBody", func);
     builder.SetInsertPoint(rawEntryBlock);
@@ -166,9 +204,8 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                             return
                         }
                         */
-                        auto rawCString = builder.CreateGlobalStringPtr(llvm::StringRef(str.data(), str.length()));
-                        auto rawID = builder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString});
-                        // we should compute these ^^^ on load are reuse them
+                        auto rawId =
+                            getIdFor(lctx, builder, str, rubyIDRegistry, globalInitializers, readGlobals, module);
                         auto argArray = builder.CreateAlloca(
                             llvm::ArrayType::get(llvm::Type::getInt64Ty(lctx), i->args.size()), nullptr);
 
@@ -263,6 +300,9 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
             builder.CreateRet(nilValueRaw);
         }
     }
-} // namespace sorbet::compiler
+
+    builder.SetInsertPoint(readGlobals);
+    builder.CreateBr(rawEntryBlock);
+}
 
 } // namespace sorbet::compiler
