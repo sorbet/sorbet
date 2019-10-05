@@ -83,6 +83,8 @@ llvm::Value *getIdFor(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, strin
         global = globalInitBuilder.CreateLoad(
             llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
             llvm::Twine("rubyID_", name));
+
+        // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     }
     return global;
 }
@@ -132,7 +134,8 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
             "isWrongArgCount");
 
         builder.CreateCondBr(isWrongArgCount, argCountFailBlock,
-                             argCountSuccessBlock); // todo: add expected information
+                             argCountSuccessBlock); // todo(perf): add expected information with
+                                                    // https://llvm.org/docs/LangRef.html#llvm-expect-intrinsic
         builder.SetInsertPoint(argCountFailBlock);
         builder.CreateCall(
             module->getFunction("rb_error_arity"),
@@ -240,10 +243,14 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                         indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(64, 0, true));
                         indices[1] = indices[0];
 
-                        // TODO: call
+                        // TODO(perf): call
                         // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
                         // to get inline caching.
                         // before this, perf will not be good
+                        //
+                        //
+                        // todo(perf): mark the arguments with
+                        // https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic for duration of the call
                         auto rawCall =
                             builder.CreateCall(module->getFunction("sorbet_callFunc"),
                                                {unboxRawValue(lctx, builder, llvmVariables[i->recv.variable]), rawId,
