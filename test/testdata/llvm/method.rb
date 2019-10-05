@@ -1,4 +1,8 @@
 # typed: true
 def hello(name)
-   puts("hello " + name)
+   i = 0
+   while (i < 10)
+     puts("hello " + name)
+     i += 1
+   end
 end
