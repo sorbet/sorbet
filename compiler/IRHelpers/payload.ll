@@ -13,6 +13,10 @@ target triple = "x86_64-apple-macosx10.14.0"
 %struct.anon.2 = type { i64, %union.anon.3, i64* }
 %union.anon.3 = type { i64 }
 
+@.str = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
+@.str.1 = private unnamed_addr constant [51 x i8] c"wrong number of arguments (given %d, expected %d+)\00", align 1
+@.str.2 = private unnamed_addr constant [54 x i8] c"wrong number of arguments (given %d, expected %d..%d)\00", align 1
+@rb_eArgError = external global i64, align 8
 @rb_cInteger = external global i64, align 8
 @rb_cFloat = external global i64, align 8
 @rb_cTrueClass = external global i64, align 8
@@ -59,7 +63,7 @@ define internal double @sorbet_rubyValueToDouble(i64) #0 {
   %2 = alloca i64, align 8
   store i64 %0, i64* %2, align 8
   %3 = load i64, i64* %2, align 8
-  %4 = call double @rb_float_value(i64 %3) #3
+  %4 = call double @rb_float_value(i64 %3) #5
   ret double %4
 }
 
@@ -1123,10 +1127,90 @@ define internal i64 @sorbet_callFunc(i64, i64, i32, i64*) #0 {
 
 declare i64 @rb_funcallv(i64, i64, i32, i64*) #2
 
+; Function Attrs: ssp uwtable
+define internal i64 @rb_arity_error_new(i32, i32, i32) #0 {
+  %4 = alloca i32, align 4
+  %5 = alloca i32, align 4
+  %6 = alloca i32, align 4
+  %7 = alloca i64, align 8
+  store i32 %0, i32* %4, align 4
+  store i32 %1, i32* %5, align 4
+  store i32 %2, i32* %6, align 4
+  store i64 0, i64* %7, align 8
+  %8 = load i32, i32* %5, align 4
+  %9 = load i32, i32* %6, align 4
+  %10 = icmp eq i32 %8, %9
+  br i1 %10, label %11, label %15
+
+; <label>:11:                                     ; preds = %3
+  %12 = load i32, i32* %4, align 4
+  %13 = load i32, i32* %5, align 4
+  %14 = call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str, i32 0, i32 0), i32 %12, i32 %13)
+  store i64 %14, i64* %7, align 8
+  br label %28
+
+; <label>:15:                                     ; preds = %3
+  %16 = load i32, i32* %6, align 4
+  %17 = icmp eq i32 %16, -1
+  br i1 %17, label %18, label %22
+
+; <label>:18:                                     ; preds = %15
+  %19 = load i32, i32* %4, align 4
+  %20 = load i32, i32* %5, align 4
+  %21 = call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([51 x i8], [51 x i8]* @.str.1, i32 0, i32 0), i32 %19, i32 %20)
+  store i64 %21, i64* %7, align 8
+  br label %27
+
+; <label>:22:                                     ; preds = %15
+  %23 = load i32, i32* %4, align 4
+  %24 = load i32, i32* %5, align 4
+  %25 = load i32, i32* %6, align 4
+  %26 = call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([54 x i8], [54 x i8]* @.str.2, i32 0, i32 0), i32 %23, i32 %24, i32 %25)
+  store i64 %26, i64* %7, align 8
+  br label %27
+
+; <label>:27:                                     ; preds = %22, %18
+  br label %28
+
+; <label>:28:                                     ; preds = %27, %11
+  %29 = load i64, i64* @rb_eArgError, align 8
+  %30 = load i64, i64* %7, align 8
+  %31 = call i64 @rb_exc_new_str(i64 %29, i64 %30)
+  ret i64 %31
+}
+
+declare i64 @rb_sprintf(i8*, ...) #2
+
+declare i64 @rb_exc_new_str(i64, i64) #2
+
+; Function Attrs: noinline noreturn nounwind optnone ssp uwtable
+define internal void @rb_error_arity(i32, i32, i32) #3 {
+  %4 = alloca i32, align 4
+  %5 = alloca i32, align 4
+  %6 = alloca i32, align 4
+  store i32 %0, i32* %4, align 4
+  store i32 %1, i32* %5, align 4
+  store i32 %2, i32* %6, align 4
+  %7 = load i32, i32* %4, align 4
+  %8 = load i32, i32* %5, align 4
+  %9 = load i32, i32* %6, align 4
+  %10 = call i64 @rb_arity_error_new(i32 %7, i32 %8, i32 %9)
+  call void @rb_exc_raise(i64 %10) #6
+  unreachable
+                                                  ; No predecessors!
+  unreachable
+}
+
+; Function Attrs: noreturn
+declare void @rb_exc_raise(i64) #4
+
 attributes #0 = { ssp uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #1 = { nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #2 = { "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #3 = { nounwind readonly }
+attributes #3 = { noinline noreturn nounwind optnone ssp uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #4 = { noreturn "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #5 = { nounwind readonly }
+attributes #6 = { noreturn }
 
 !llvm.module.flags = !{!0, !1}
 !llvm.ident = !{!2}
