@@ -3,6 +3,7 @@
 #include "llvm/IR/DerivedTypes.h" // FunctionType, StructType
 #include "llvm/IR/IRBuilder.h"
 // ^^^ violate our poisons
+#include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/typecase.h"
@@ -60,12 +61,15 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
     llvm::IRBuilder<> builder(lctx);
 
-    auto entryBlock = llvm::BasicBlock::Create(lctx, "entry", func);
-    builder.SetInsertPoint(entryBlock);
+    auto rawEntryBlock = llvm::BasicBlock::Create(lctx, "entry", func);
+    auto userBodyEntry = llvm::BasicBlock::Create(lctx, "userBody", func);
+    builder.SetInsertPoint(rawEntryBlock);
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
     auto nilValueRaw = builder.CreateCall(module->getFunction("sorbet_rubyNil"), {}, "nilValueRaw");
     auto falseValueRaw = builder.CreateCall(module->getFunction("sorbet_rubyFalse"), {}, "falseValueRaw");
     auto trueValueRaw = builder.CreateCall(module->getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
+
+    // nill out variables.
     for (const auto &entry : cfg.minLoops) {
         auto var = entry.first;
         auto alloca = llvmVariables[var] = builder.CreateAlloca(
@@ -73,24 +77,70 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
             var.toString(gs)); // TODO: toString here is slow, we should probably only use it in debug builds
         boxRawValue(lctx, builder, alloca, nilValueRaw);
     }
-    // auto argCountRaw = func->arg_begin();
+
+    auto argCountRaw = func->arg_begin();
+    auto argArrayRaw = func->arg_begin() + 1;
+    auto requiredArgumentCount =
+        md->args.size() - 1; // todo: make optional arguments actually optional. -1 because of block args
+    {
+        // validate arg count
+        auto argCountSuccessBlock = llvm::BasicBlock::Create(lctx, "argCountSuccess", func);
+        auto argCountFailBlock = llvm::BasicBlock::Create(lctx, "argCountFailBlock", func);
+        auto isWrongArgCount = builder.CreateICmpNE(
+            argCountRaw,
+            llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), llvm::APInt(32, requiredArgumentCount, true)),
+            "isWrongArgCount");
+
+        builder.CreateCondBr(isWrongArgCount, argCountFailBlock,
+                             argCountSuccessBlock); // todo: add expected information
+        builder.SetInsertPoint(argCountFailBlock);
+        builder.CreateCall(
+            module->getFunction("rb_error_arity"),
+            {argCountRaw,
+             llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), llvm::APInt(32, requiredArgumentCount, true)),
+             llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), llvm::APInt(32, requiredArgumentCount, true))
+
+            });
+        builder.CreateUnreachable();
+        builder.SetInsertPoint(argCountSuccessBlock);
+    }
+    {
+        // box required args
+        int argId = -1;
+        for (const auto &arg : md->args) {
+            argId += 1;
+            if (argId == requiredArgumentCount) {
+                // block arg isn't passed in args
+                break;
+            }
+
+            auto *a = ast::MK::arg2Local(arg.get());
+            std::vector<llvm::Value *> indices(1);
+            indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, argId, true));
+            auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices));
+            boxRawValue(lctx, builder, llvmVariables[a->localVariable], rawValue);
+        }
+    }
     {
         // box `self`
-        auto selfArgRaw = (func->arg_end() - 1);
+        auto selfArgRaw = (func->arg_begin() + 2);
         boxRawValue(lctx, builder, llvmVariables[core::LocalVariable::selfVariable()], selfArgRaw);
     }
     // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments to extract arguments
     // and box them to "RV" type
+    //
+    builder.CreateBr(userBodyEntry);
 
     vector<llvm::BasicBlock *> llvmBlocks;
     for (auto &b : cfg.basicBlocks) {
         if (b.get() == cfg.entry()) {
-            llvmBlocks.emplace_back(entryBlock);
+            llvmBlocks.emplace_back(userBodyEntry);
         } else {
             llvmBlocks.emplace_back(llvm::BasicBlock::Create(
                 lctx, "BB" + to_string(b->id), func)); // to_s is slow. We should only use it in debug builds
         }
     }
+
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         auto block = llvmBlocks[bb->id];
