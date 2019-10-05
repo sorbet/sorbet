@@ -181,6 +181,21 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
         }
     }
 
+    int maxSendArgCount = 0;
+    for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
+        cfg::BasicBlock *bb = *it;
+        for (cfg::Binding &bind : bb->exprs) {
+            if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
+                if (maxSendArgCount < snd->args.size()) {
+                    maxSendArgCount = snd->args.size();
+                }
+            }
+        }
+    }
+    builder.SetInsertPoint(readGlobals);
+    auto sendArgArray =
+        builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(lctx), maxSendArgCount), nullptr, "callArgs");
+
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         auto block = llvmBlocks[bb->id];
@@ -206,8 +221,6 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                         */
                         auto rawId =
                             getIdFor(lctx, builder, str, rubyIDRegistry, globalInitializers, readGlobals, module);
-                        auto argArray = builder.CreateAlloca(
-                            llvm::ArrayType::get(llvm::Type::getInt64Ty(lctx), i->args.size()), nullptr, "callArgs");
 
                         // fill in args
                         {
@@ -220,7 +233,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
 
                                     llvm::ConstantInt::get(lctx, llvm::APInt(64, argId, true));
                                 builder.CreateStore(unboxRawValue(lctx, builder, llvmVariables[arg.variable]),
-                                                    builder.CreateGEP(argArray, indices, "callArgsAddr"));
+                                                    builder.CreateGEP(sendArgArray, indices, "callArgsAddr"));
                             }
                         }
                         std::vector<llvm::Value *> indices(2);
@@ -232,7 +245,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                                                {unboxRawValue(lctx, builder, llvmVariables[i->recv.variable]), rawId,
                                                 llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx),
                                                                        llvm::APInt(32, i->args.size(), true)),
-                                                builder.CreateGEP(argArray, indices)},
+                                                builder.CreateGEP(sendArgArray, indices)},
                                                "rawSendResult");
                         boxRawValue(lctx, builder, targetAlloca, rawCall);
                     },
