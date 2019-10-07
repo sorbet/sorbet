@@ -220,13 +220,27 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
     auto frefs = applyUpdate(newUpdate, false);
     latestVersion = update.versionEnd;
 
-    log.push_back(move(newUpdate));
-
-    // Index changes.
-    // TODO: Use pipeline::index for parallelism. Currently, it sorts output by file id.
+    // Index changes. pipeline::index sorts output by file id, but we need to reorder to match the order of other
+    // fields.
+    UnorderedMap<u2, int> fileToPos;
+    int i = -1;
     for (auto fref : frefs) {
-        update.updatedFileIndexes.push_back(pipeline::indexOne(config.opts, *gs, fref, kvstore));
+        // We should have ensured before reaching here that there are no duplicates.
+        ENFORCE(!fileToPos.contains(fref.id()));
+        i++;
+        fileToPos[fref.id()] = i;
     }
+
+    auto trees = pipeline::index(gs, frefs, config.opts, workers, kvstore);
+    update.updatedFileIndexes.resize(trees.size());
+    newUpdate.update.updatedFileIndexes.resize(trees.size());
+    for (auto &ast : trees) {
+        const int i = fileToPos[ast.file.id()];
+        newUpdate.update.updatedFileIndexes[i] = ast::ParsedFile{ast.tree->deepCopy(), ast.file};
+        update.updatedFileIndexes[i] = move(ast);
+    }
+
+    log.push_back(move(newUpdate));
 
     // Clear error queue.
     // (Note: Flushing is disabled in LSP mode, so we have to drain.)
@@ -300,16 +314,12 @@ LSPFileUpdates TimeTravelingGlobalState::getCombinedUpdates(u4 fromId, u4 toId) 
                 encountered.insert(string(file->path()));
                 merged.updatedFiles.push_back(file);
                 merged.updatedFileHashes.push_back(update.hashUpdates[i]);
+                auto &ast = update.updatedFileIndexes[i];
+                merged.updatedFileIndexes.push_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
             }
         }
     }
     merged.canTakeFastPath = canTakeFastPath(fromId - 1, merged);
-
-    // TODO: Avoid re-indexing.
-    for (auto &file : merged.updatedFiles) {
-        auto fref = gs->findFileByPath(file->path());
-        merged.updatedFileIndexes.push_back(pipeline::indexOne(config.opts, *gs, fref, kvstore));
-    }
 
     return merged;
 }
