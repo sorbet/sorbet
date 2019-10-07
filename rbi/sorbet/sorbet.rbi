@@ -181,7 +181,6 @@ end
 ::Sorbet::Private::Static::IOLike = T.type_alias(
   T.any(
     IO,
-    StringIO,
-    Tempfile
+    StringIO
   )
 )
