@@ -1,0 +1,107 @@
+source_filename = "foobar.c"
+target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-apple-darwin18.7.0"
+
+@.str = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
+@.str.1 = private unnamed_addr constant [51 x i8] c"wrong number of arguments (given %d, expected %d+)\00", align 1
+@.str.2 = private unnamed_addr constant [54 x i8] c"wrong number of arguments (given %d, expected %d..%d)\00", align 1
+@rb_eArgError = external local_unnamed_addr global i64, align 8
+@0 = private unnamed_addr constant [12 x i8] c"hello world\00", align 1
+@rubySym_puts = internal unnamed_addr global i64 0, align 8
+@1 = private unnamed_addr constant [5 x i8] c"puts\00", align 1
+@2 = private unnamed_addr constant [13 x i8] c"CompiledDemo\00", align 1
+@3 = private unnamed_addr constant [14 x i8] c"<static-init>\00", align 1
+
+declare i64 @rb_str_new(i8*, i64) local_unnamed_addr
+
+declare i64 @rb_intern(i8*) local_unnamed_addr
+
+declare i64 @rb_define_module(i8*) local_unnamed_addr
+
+declare void @rb_define_singleton_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr
+
+declare i64 @rb_funcallv(i64, i64, i32, i64* noalias nocapture) local_unnamed_addr
+
+; Function Attrs: cold
+define internal fastcc i64 @rb_arity_error_new(i32, i32, i32) unnamed_addr #0 {
+  %4 = icmp eq i32 %1, %2
+  br i1 %4, label %5, label %7
+
+; <label>:5:                                      ; preds = %3
+  %6 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str, i64 0, i64 0), i32 %0, i32 %1)
+  br label %13
+
+; <label>:7:                                      ; preds = %3
+  %8 = icmp eq i32 %2, -1
+  br i1 %8, label %9, label %11
+
+; <label>:9:                                      ; preds = %7
+  %10 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([51 x i8], [51 x i8]* @.str.1, i64 0, i64 0), i32 %0, i32 %1)
+  br label %13
+
+; <label>:11:                                     ; preds = %7
+  %12 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([54 x i8], [54 x i8]* @.str.2, i64 0, i64 0), i32 %0, i32 %1, i32 %2)
+  br label %13
+
+; <label>:13:                                     ; preds = %9, %11, %5
+  %.1 = phi i64 [ %6, %5 ], [ %10, %9 ], [ %12, %11 ]
+  %14 = load i64, i64* @rb_eArgError, align 8
+  %15 = tail call i64 @rb_exc_new_str(i64 %14, i64 %.1)
+  ret i64 %15
+}
+
+declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr
+
+declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr
+
+; Function Attrs: cold noreturn
+define internal fastcc void @rb_error_arity(i32) unnamed_addr #1 {
+  %2 = tail call fastcc i64 @rb_arity_error_new(i32 %0, i32 0, i32 0)
+  tail call void @rb_exc_raise(i64 %2) #2
+  unreachable
+}
+
+; Function Attrs: noreturn
+declare void @rb_exc_raise(i64) local_unnamed_addr #2
+
+; Function Attrs: nounwind sspreq uwtable
+define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) #3 {
+readGlobals:
+  %callArgs = alloca [1 x i64], align 8
+  %isWrongArgCount = icmp eq i32 %0, 0
+  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
+
+argCountSuccess:                                  ; preds = %readGlobals
+  %rubyID_puts = load i64, i64* @rubySym_puts, align 8
+  %3 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @0, i64 0, i64 0), i64 11) #4
+  %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
+  store i64 %3, i64* %callArgsAddr, align 8
+  %4 = call i64 @rb_funcallv(i64 %2, i64 %rubyID_puts, i32 1, i64* nonnull %callArgsAddr) #4
+  ret i64 %4
+
+argCountFailBlock:                                ; preds = %readGlobals
+  tail call fastcc void @rb_error_arity(i32 %0) #4
+  unreachable
+}
+
+define void @"Init__S _C _U _root___ $1__N _U _static_init__ $110_"() local_unnamed_addr {
+initializeGlobals:
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @1, i64 0, i64 0))
+  store i64 %0, i64* @rubySym_puts, align 8
+  %1 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @2, i64 0, i64 0))
+  tail call void @rb_define_singleton_method(i64 %1, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @3, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U <root>>> $1><N <U <static-init>> $110>" to i64 (...)*), i32 -1)
+  ret void
+}
+
+attributes #0 = { cold }
+attributes #1 = { cold noreturn }
+attributes #2 = { noreturn }
+attributes #3 = { nounwind sspreq uwtable }
+attributes #4 = { nounwind }
+
+!llvm.module.flags = !{!0, !1}
+!llvm.ident = !{!2}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{i32 7, !"PIC Level", i32 2}
+!2 = !{!"Apple clang version 11.0.0 (clang-1100.0.33.8)"}
