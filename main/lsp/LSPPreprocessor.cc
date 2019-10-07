@@ -249,6 +249,8 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             canonicalizeEdits(nextVersion++, move(params), newParams->updates);
             if (newParams->updates.updatedFiles.empty()) {
                 // No need to commit; these file system updates are ignored.
+                // Reclaim edit version, as we didn't actually use this one.
+                nextVersion--;
                 return;
             }
             msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
