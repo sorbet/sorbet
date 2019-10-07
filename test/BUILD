@@ -6,14 +6,12 @@ test_suite(
     ],
 )
 
-load("@com_stripe_ruby_typer//test:pipeline_test.bzl", "pipeline_tests")
+load(":compiler_tests.bzl", "compiler_tests")
 
-pipeline_tests(
-    "test_corpus",
+compiler_tests(
     glob([
         "testdata/**/*.rb",
     ]),
-    "PosTests",
 )
 
 sh_binary(
