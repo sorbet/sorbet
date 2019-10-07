@@ -62,8 +62,12 @@ argCountFailBlock:                                ; preds = %readGlobals
   unreachable
 }
 
+<<<<<<< HEAD
 ; Function Attrs: nounwind ssp
 define void @"Init__S _C _U _root___ $1__N _U _static_init__ $110_"() local_unnamed_addr #5 {
+=======
+define void @Init_hello() local_unnamed_addr {
+>>>>>>> make a single .bundle file for each .rb file
 initializeGlobals:
   %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0)) #6
   store i64 %0, i64* @rubyId_global_puts, align 8

@@ -14,6 +14,7 @@
 #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 // ^^^ violate our poisons
+#include "common/FileOps.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 
 #include <string_view>
@@ -88,8 +89,12 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     llvm::IRBuilder<> builder(lctx);
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
-    auto entryFunc =
-        llvm::Function::Create(ft, llvm::Function::ExternalLinkage, {"Init_", (string)objectName}, *module);
+    auto baseName = objectName;
+    if (sym.data(gs)->name.data(gs)->unique.original == core::Names::staticInit()) {
+        baseName = FileOps::getFileName(sym.data(gs)->loc().file().data(gs).path());
+        baseName = baseName.substr(0, baseName.rfind(".rb"));
+    }
+    auto entryFunc = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, {"Init_", (string)baseName}, *module);
     globalInitializers->insertInto(entryFunc);
 
     builder.SetInsertPoint(globalInitializers);
@@ -124,7 +129,7 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
 
     // print unoptimized IR
     std::error_code ec;
-    auto name = ((string)dir) + "/" + (string)objectName + ".ll";
+    auto name = ((string)dir) + "/" + (string)baseName + ".ll";
     llvm::raw_fd_ostream llFile(name, ec, llvm::sys::fs::F_Text);
     pm->add(llvm::createPrintModulePass(llFile, ""));
 
@@ -144,11 +149,11 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     pmbuilder.populateLTOPassManager(*pm);
     // print optimized IR
     std::error_code ec1;
-    auto nameOpt = ((string)dir) + "/" + (string)objectName + ".llo";
+    auto nameOpt = ((string)dir) + "/" + (string)baseName + ".llo";
     llvm::raw_fd_ostream lloFile(nameOpt, ec1, llvm::sys::fs::F_Text);
     pm->add(llvm::createPrintModulePass(lloFile, ""));
 
-    outputObjectFile(*pm, dir, objectName, move(module));
+    outputObjectFile(*pm, dir, baseName, move(module));
 }
 
 } // namespace sorbet::compiler
