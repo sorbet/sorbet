@@ -1,4 +1,5 @@
 # typed: true
+# disable-fast-path: true
 
 class B < A
   extend T::Generic
