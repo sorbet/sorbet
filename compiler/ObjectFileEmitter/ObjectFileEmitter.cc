@@ -136,7 +136,6 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     pmbuilder.LoopVectorize = true;
     pmbuilder.SLPVectorize = true;
     pmbuilder.VerifyInput = debug_mode;
-    pmbuilder.VerifyInput = debug_mode;
     pmbuilder.populateModulePassManager(*pm);
     pmbuilder.populateLTOPassManager(*pm);
     // print optimized IR
