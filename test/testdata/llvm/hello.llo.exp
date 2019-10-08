@@ -23,7 +23,7 @@ declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #0
 ; Function Attrs: nounwind ssp uwtable
 define internal fastcc i64 @sorbet_rb_arity_error_new(i32) unnamed_addr #1 {
   %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str, i64 0, i64 0), i32 %0, i32 0) #6
-  %3 = load i64, i64* @rb_eArgError, align 8, !tbaa !4
+  %3 = load i64, i64* @rb_eArgError, align 8, !tbaa !0
   %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #6
   ret i64 %4
 }
@@ -81,14 +81,7 @@ attributes #5 = { nounwind ssp }
 attributes #6 = { nounwind }
 attributes #7 = { noreturn nounwind }
 
-!llvm.module.flags = !{!0, !1, !2}
-!llvm.ident = !{!3}
-
-!0 = !{i32 1, !"wchar_size", i32 4}
-!1 = !{i32 7, !"PIC Level", i32 2}
-!2 = !{i32 1, !"EnableSplitLTOUnit", i32 0}
-!3 = !{!"clang version 8.0.0 (tags/RELEASE_800/final)"}
-!4 = !{!5, !5, i64 0}
-!5 = !{!"long", !6, i64 0}
-!6 = !{!"omnipotent char", !7, i64 0}
-!7 = !{!"Simple C/C++ TBAA"}
+!0 = !{!1, !1, i64 0}
+!1 = !{!"long", !2, i64 0}
+!2 = !{!"omnipotent char", !3, i64 0}
+!3 = !{!"Simple C/C++ TBAA"}
