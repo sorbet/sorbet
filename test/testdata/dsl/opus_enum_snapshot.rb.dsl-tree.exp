@@ -6,6 +6,10 @@ class <emptyTree><<C <root>>> < ()
       def initialize<<C <todo sym>>>(x = nil, &<blk>)
         <emptyTree>
       end
+
+      def self.enums<<C <todo sym>>>(&blk)
+        <emptyTree>
+      end
     end
   end
 
@@ -48,9 +52,12 @@ class <emptyTree><<C <root>>> < ()
   end
 
   class <emptyTree>::<C NotAnEnum><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C X> = <self>.new()
-
-    <emptyTree>::<C Y> = <emptyTree>::<C T>.let(<self>.new(), <self>)
+    <self>.enums() do ||
+      begin
+        <emptyTree>::<C X> = <self>.new()
+        <emptyTree>::<C Y> = <emptyTree>::<C T>.let(<self>.new(), <self>)
+      end
+    end
   end
 
   class <emptyTree>::<C EnumsDoEnum><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Enum>)

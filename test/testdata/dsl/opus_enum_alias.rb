@@ -7,11 +7,15 @@ module Opus
     extend T::Generic
     def initialize(x = nil)
     end
+    def self.enums(&blk)
+    end
   end
 end
 
 class MyEnum < Opus::Enum
+  enums do
   X = new
+  end
 end
 
 # We probably never want to allow this

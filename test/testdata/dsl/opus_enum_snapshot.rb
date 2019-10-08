@@ -4,18 +4,24 @@ module Opus
     extend T::Generic
     def initialize(x = nil)
     end
+    def self.enums(&blk)
+    end
   end
 end
 
 class MyEnum < Opus::Enum
+  enums do
   X = new
   Y = new('y')
   Z = T.let(new, self)
+  end
 end
 
 class NotAnEnum
+  enums do # error: does not exist
   X = new
   Y = T.let(new, self)
+  end
 end
 
 class EnumsDoEnum < Opus::Enum
