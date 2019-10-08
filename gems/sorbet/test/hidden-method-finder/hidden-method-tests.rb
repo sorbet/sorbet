@@ -15,6 +15,7 @@ module Sorbet::Private::HiddenMethodFinder::Test; end
 
 TEST_CASES = [
   "simple",
+  "thorough",
 ]
 
 class Sorbet::Private::HiddenMethodFinder::Test::Simple < MiniTest::Spec
