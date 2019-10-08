@@ -1,4 +1,5 @@
 # typed: true
+# disable-fast-path: true
 
 class Parent
   Elem = 3
