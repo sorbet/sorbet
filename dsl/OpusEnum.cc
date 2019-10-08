@@ -56,6 +56,14 @@ ast::Send *asEnumsDo(ast::Expression *stat) {
     }
 }
 
+vector<unique_ptr<ast::Expression>> badConst(core::MutableContext ctx, core::Loc headerLoc, core::Loc line1Loc) {
+    if (auto e = ctx.state.beginError(headerLoc, core::errors::DSL::OpusEnumConstNotEnumValue)) {
+        e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "Opus::Enum");
+        e.addErrorLine(line1Loc, "Enclosing definition here");
+    }
+    return {};
+}
+
 vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::Expression *stat,
                                                 FromWhere fromWhere) {
     auto *asgn = ast::cast_tree<ast::Assign>(stat);
@@ -70,34 +78,40 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
 
     auto *rhs = ast::cast_tree<ast::Send>(asgn->rhs.get());
     if (rhs == nullptr) {
+        return badConst(ctx, stat->loc, klass->loc);
+    }
+
+    if (rhs->fun == core::Names::typeTemplate()) {
+        // This is the one kind of non-enum-value constant we allow for now.
+        // TODO(jez) Remove this when we remove `Elem = type_template` from Opus::Enum
         return {};
     }
 
     if (rhs->fun != core::Names::new_() && rhs->fun != core::Names::let()) {
-        return {};
+        return badConst(ctx, stat->loc, klass->loc);
     }
 
     if (rhs->fun == core::Names::new_() && !rhs->recv->isSelfReference()) {
-        return {};
+        return badConst(ctx, stat->loc, klass->loc);
     }
 
     if (rhs->fun == core::Names::let()) {
         auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(rhs->recv.get());
         if (recv == nullptr) {
-            return {};
+            return badConst(ctx, stat->loc, klass->loc);
         }
 
         if (rhs->args.size() != 2) {
-            return {};
+            return badConst(ctx, stat->loc, klass->loc);
         }
 
         auto arg0 = ast::cast_tree<ast::Send>(rhs->args[0].get());
         if (arg0 == nullptr) {
-            return {};
+            return badConst(ctx, stat->loc, klass->loc);
         }
 
         if (!(arg0->fun == core::Names::new_() && arg0->recv->isSelfReference())) {
-            return {};
+            return badConst(ctx, stat->loc, klass->loc);
         }
     }
 
@@ -109,9 +123,9 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
 
     if (fromWhere != FromWhere::Inside) {
         if (auto e = ctx.state.beginError(stat->loc, core::errors::DSL::OpusEnumOutsideEnumsDo)) {
-            e.setHeader("Definition of enum value `{}` must be within the `{}` block for this `{}` child",
+            e.setHeader("Definition of enum value `{}` must be within the `{}` block for this `{}`",
                         lhs->cnst.show(ctx), "enums do", "Opus::Enum");
-            e.addErrorLine(klass->declLoc, "`Opus::Enum` child defined here");
+            e.addErrorLine(klass->declLoc, "Enclosing definition here");
         }
     }
 

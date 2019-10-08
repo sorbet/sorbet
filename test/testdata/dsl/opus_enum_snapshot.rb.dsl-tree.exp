@@ -100,8 +100,6 @@ class <emptyTree><<C <root>>> < ()
     def something_outside<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
-
-    <emptyTree>::<C SomethingElseOutside> = 1
   end
 
   class <emptyTree>::<C BadConsts><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Enum>)
@@ -121,6 +119,8 @@ class <emptyTree><<C <root>>> < ()
 
     <emptyTree>::<C Before> = ::T.let(<emptyTree>::<C Before$1>.instance(), <emptyTree>::<C Before$1>)
 
+    <emptyTree>::<C StaticField1> = 1
+
     class <emptyTree>::<C Inside$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
       <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C BadConsts>})
 
@@ -131,6 +131,8 @@ class <emptyTree><<C <root>>> < ()
 
     <emptyTree>::<C Inside> = ::T.let(<emptyTree>::<C Inside$1>.instance(), <emptyTree>::<C Inside$1>)
 
+    <emptyTree>::<C StaticField2> = 2
+
     class <emptyTree>::<C After$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
       <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C BadConsts>})
 
@@ -140,5 +142,11 @@ class <emptyTree><<C <root>>> < ()
     end
 
     <emptyTree>::<C After> = ::T.let(<emptyTree>::<C After$1>.instance(), <emptyTree>::<C After$1>)
+
+    <emptyTree>::<C StaticField3> = 3
+
+    <emptyTree>::<C StaticField4> = <emptyTree>::<C T>.let(1, <emptyTree>::<C Integer>)
+
+    <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <self>})
   end
 end
