@@ -103,7 +103,7 @@ cc_library(
         "enc/trans",
         "enc/unicode/12.1.0",
     ],
-    visibility = [ "//visibility:private" ],
+    visibility = [ "//visibility:public" ],
 )
 
 cc_library(
@@ -117,7 +117,7 @@ cc_library(
     ":darwin": [],
   }),
   deps = [ ":ruby_headers" ],
-  visibility = [ "//visibility:private" ],
+  visibility = [ "//visibility:public" ],
 )
 
 RUBY_COPTS = [
@@ -147,7 +147,7 @@ cc_library(
     hdrs = [
         "coroutine/amd64/Context.h",
     ],
-    visibility = [ "//visibility:private" ],
+    visibility = [ "//visibility:public" ],
 )
 
 
@@ -1191,7 +1191,7 @@ filegroup(
 
         RBCONFIG,
 
-    visibility = ["//visibility:private"],
+    visibility = ["//visibility:public"],
 )
 
 
