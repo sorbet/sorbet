@@ -103,4 +103,42 @@ class <emptyTree><<C <root>>> < ()
 
     <emptyTree>::<C SomethingElseOutside> = 1
   end
+
+  class <emptyTree>::<C BadConsts><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Enum>)
+    <self>.extend(::T::Helpers)
+
+    <self>.abstract!()
+
+    <self>.sealed!()
+
+    class <emptyTree>::<C Before$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
+      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C BadConsts>})
+
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C Before> = ::T.let(<emptyTree>::<C Before$1>.instance(), <emptyTree>::<C Before$1>)
+
+    class <emptyTree>::<C Inside$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
+      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C BadConsts>})
+
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C Inside> = ::T.let(<emptyTree>::<C Inside$1>.instance(), <emptyTree>::<C Inside$1>)
+
+    class <emptyTree>::<C After$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
+      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C BadConsts>})
+
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C After> = ::T.let(<emptyTree>::<C After$1>.instance(), <emptyTree>::<C After$1>)
+  end
 end

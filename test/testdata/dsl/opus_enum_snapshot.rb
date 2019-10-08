@@ -34,3 +34,11 @@ class EnumsDoEnum < Opus::Enum
   def something_outside; end
   SomethingElseOutside = 1
 end
+
+class BadConsts < Opus::Enum
+  Before = new # error: must be within the `enums do` block
+  enums do
+    Inside = new
+  end
+  After = new # error: must be within the `enums do` block
+end
