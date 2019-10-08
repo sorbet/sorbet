@@ -847,6 +847,9 @@ class ResolveTypeParamsWalk {
     // A type_member, type_template, or T.type_alias that needs to have types
     // resolved.
     struct ResolveAssignItem {
+        // The owner at the time the assignment was encountered.
+        core::SymbolRef owner;
+
         // The symbol being populated, either a type alias or an individual
         // type_member.
         core::SymbolRef lhs;
@@ -1019,12 +1022,12 @@ class ResolveTypeParamsWalk {
                     return false;
                 }
 
-                resolveTypeMember(ctx, job.lhs, job.rhs);
+                resolveTypeMember(ctx.withOwner(job.owner), job.lhs, job.rhs);
                 break;
             }
 
             case core::Names::typeAlias()._id:
-                resolveTypeAlias(ctx, job.lhs, job.rhs);
+                resolveTypeAlias(ctx.withOwner(job.owner), job.lhs, job.rhs);
                 break;
         }
 
@@ -1129,7 +1132,7 @@ public:
             ENFORCE(send->fun == core::Names::typeAlias() || send->fun == core::Names::typeMember() ||
                     send->fun == core::Names::typeTemplate());
 
-            auto job = ResolveAssignItem{sym, send, dependencies_};
+            auto job = ResolveAssignItem{ctx.owner, sym, send, dependencies_};
             if (!resolveJob(ctx, job)) {
                 todoAssigns_.emplace_back(std::move(job));
             }
