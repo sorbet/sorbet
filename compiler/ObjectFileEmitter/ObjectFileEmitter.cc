@@ -69,7 +69,7 @@ void outputObjectFile(llvm::legacy::PassManager &pm, string_view dir, string_vie
 
     auto fileType = llvm::TargetMachine::CGFT_ObjectFile;
 
-    if (targetMachine->addPassesToEmitFile(pm, dest, nullptr, fileType, false /*disableVerify*/)) {
+    if (targetMachine->addPassesToEmitFile(pm, dest, nullptr, fileType, !debug_mode)) {
         llvm::errs() << "TheTargetMachine can't emit a file of this type";
         return;
     }
@@ -135,6 +135,8 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     pmbuilder.DisableUnrollLoops = false;
     pmbuilder.LoopVectorize = true;
     pmbuilder.SLPVectorize = true;
+    pmbuilder.VerifyInput = debug_mode;
+    pmbuilder.VerifyInput = debug_mode;
     pmbuilder.populateModulePassManager(*pm);
 
     // print optimized IR
