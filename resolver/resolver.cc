@@ -870,8 +870,6 @@ class ResolveTypeParamsWalk {
         return !classOfDepth_.empty() && classOfDepth_.back();
     }
 
-    void clearTypeContext(bool tracking) {}
-
     static bool isTodo(core::TypePtr type) {
         auto *todo = core::cast_type<core::ClassType>(type.get());
         return todo != nullptr && todo->symbol == core::Symbols::todo();
@@ -1114,6 +1112,20 @@ public:
         auto data = sym.data(ctx);
         if (data->isTypeAlias() || data->isTypeMember()) {
             ENFORCE(!data->isTypeMember() || send->recv->isSelfReference());
+
+            // This is for a special case that happens with the generation of
+            // reflection.rbi: it re-creates the type aliases of the payload,
+            // without the knowledge that they are type aliases. The manifestation
+            // of this, is that there are entries like:
+            //
+            // > module T
+            // >   Boolean = T.let(nil, T.untyped)
+            // > end
+            if (data->isTypeAlias() && send->fun == core::Names::let()) {
+                data->resultType = core::Types::untypedUntracked();
+                return asgn;
+            }
+
             ENFORCE(send->fun == core::Names::typeAlias() || send->fun == core::Names::typeMember() ||
                     send->fun == core::Names::typeTemplate());
 
