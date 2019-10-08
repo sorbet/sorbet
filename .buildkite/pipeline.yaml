@@ -14,7 +14,7 @@ steps:
         queue: elastic
       plugins:
         - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
-            image: "darkdimius/sorbet-build-image:latest"
+            image: "sorbet/sorbet-build-image:latest"
             workdir: /app
             init: true
             propagate-environment: true
