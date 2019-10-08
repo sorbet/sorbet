@@ -16,3 +16,7 @@ sed -i '.bak' 's/define void @sorbet_/define internal void @sorbet_/g' "$payload
 sed -i '.bak' '/llvm\.module\.flags/d' "$payload"
 sed -i '.bak' '/llvm\.ident/d' "$payload"
 sed -i '.bak' '/^\^/d' "$payload"
+
+# remove free-form atts
+sed -i '.bak' 's/".*"=".*"//g' "$payload"
+sed -i '.bak' 's/{  }/{ "addedToSilenceEmptyAttrsError" }/g' "$payload"

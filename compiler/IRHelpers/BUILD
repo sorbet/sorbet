@@ -39,6 +39,9 @@ cc_library(
         "-flto=thin",
         "-emit-llvm",
         "-std=c99",
+        "-O1",
+        "-g",
+        "-march=x86-64",
     ],
     linkstatic = 1,  # we are doing this only for llvm ir
     deps = [
