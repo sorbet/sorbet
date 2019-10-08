@@ -61,7 +61,7 @@ genrule(
     outs = [
         "payload.bc.orig",
     ],
-    cmd = "$(location :llvm-ar) -x $(location :pseudo_lib) payload.o && mv payload.o $(location payload.bc.orig)",
+    cmd = "$(location :llvm-ar) -x $(locations :pseudo_lib) payload.o && mv payload.o $(location payload.bc.orig)",
     tools = [
         ":llvm-ar",
         ":pseudo_lib",
