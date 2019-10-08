@@ -38,7 +38,7 @@ public:
         TypeMembers::patchDSL(ctx, classDef.get());
 
         for (auto &extension : ctx.state.semanticExtensions) {
-            extension->patchDSL(ctx, classDef.get());
+            classDef = extension->patchDSL(ctx, classDef);
         }
 
         ast::Expression *prevStat = nullptr;
