@@ -5,6 +5,6 @@
    "substring": "class C2\n  def self.m_four()"
   },
   {"assertion": "contains",
-   "substring": "class C3\n  X = ::T.let(nil, ::T.untyped)"
+   "substring": "class Bad\n  X = ::T.let(nil, ::T.untyped)"
   }
 ]
