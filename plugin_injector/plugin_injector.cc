@@ -3,6 +3,7 @@
 // ^^^ violate our poisons so they go first
 #include "ast/ast.h"
 #include "cfg/CFG.h"
+#include "compiler/DefinitionRewriter/DefinitionRewriter.h"
 #include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
@@ -44,7 +45,13 @@ public:
         sorbet::compiler::ObjectFileEmitter::run(gs, lctx, move(module), cfg.symbol, irOutputDir.value(), fileName,
                                                  globalInitializers);
     };
-    virtual void patchDSL(const core::GlobalState &, ast::ClassDef *) const override{};
+    virtual void patchDSL(core::MutableContext &gs, ast::ClassDef *klass) const override {
+        if (!ast::isa_tree<ast::EmptyTree>(klass->name.get())) {
+            return;
+        }
+
+        sorbet::compiler::DefinitionRewriter::run(gs, klass);
+    };
     virtual ~LLVMSemanticExtension(){};
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) override {
         return make_unique<LLVMSemanticExtension>(this->irOutputDir);
