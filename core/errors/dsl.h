@@ -8,5 +8,6 @@ constexpr ErrorClass BadWrapInstance{3502, StrictLevel::True};
 constexpr ErrorClass PrivateMethodMismatch{3503, StrictLevel::False};
 constexpr ErrorClass BadAttrType{3504, StrictLevel::True};
 constexpr ErrorClass BadModuleFunction{3505, StrictLevel::True};
+constexpr ErrorClass OpusEnumOutsideEnumsDo{3506, StrictLevel::False};
 } // namespace sorbet::core::errors::DSL
 #endif
