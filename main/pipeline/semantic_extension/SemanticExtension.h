@@ -11,6 +11,7 @@ namespace sorbet {
 namespace core {
 class GlobalState;
 class GlobalSubstitution;
+class MutableContext;
 } // namespace core
 
 namespace ast {
@@ -26,7 +27,7 @@ namespace pipeline::semantic_extension {
 class SemanticExtension {
 public:
     virtual void typecheck(const core::GlobalState &, cfg::CFG &, std::unique_ptr<ast::MethodDef> &) const = 0;
-    virtual void patchDSL(const core::GlobalState &, ast::ClassDef *) const = 0;
+    virtual void patchDSL(core::MutableContext &, ast::ClassDef *) const = 0;
     virtual ~SemanticExtension() = default;
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) = 0;
     virtual void merge(const core::GlobalState &from, core::GlobalState &to, core::GlobalSubstitution &subst) = 0;
