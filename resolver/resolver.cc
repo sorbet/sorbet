@@ -869,8 +869,15 @@ class ResolveTypeParamsWalk {
     vector<bool> classOfDepth_;
     vector<core::SymbolRef> dependencies_;
 
-    bool isInsideClassOf() const {
-        return !classOfDepth_.empty() && classOfDepth_.back();
+    void extendClassOfDepth(unique_ptr<ast::Send> &send) {
+        if (trackDependencies_) {
+            classOfDepth_.emplace_back(isT(send->recv) && send->fun == core::Names::classOf());
+        }
+    }
+
+    static bool isT(unique_ptr<ast::Expression> &expr) {
+        auto *tMod = ast::cast_tree<ast::ConstantLit>(expr.get());
+        return tMod && tMod->symbol == core::Symbols::T();
     }
 
     static bool isTodo(core::TypePtr type) {
@@ -892,9 +899,12 @@ class ResolveTypeParamsWalk {
     }
 
     static bool isGenericResolved(core::MutableContext ctx, core::SymbolRef sym) {
-        ENFORCE(sym.data(ctx)->isClassOrModule());
-
-        return absl::c_all_of(sym.data(ctx)->typeMembers(), [&](core::SymbolRef tm) { return isLHSResolved(ctx, tm); });
+        if (sym.data(ctx)->isClassOrModule()) {
+            return absl::c_all_of(sym.data(ctx)->typeMembers(),
+                                  [&](core::SymbolRef tm) { return isLHSResolved(ctx, tm); });
+        } else {
+            return isLHSResolved(ctx, sym);
+        }
     }
 
     static void resolveTypeMember(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs) {
@@ -1037,44 +1047,54 @@ class ResolveTypeParamsWalk {
 public:
     unique_ptr<ast::Send> preTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
         switch (send->fun._id) {
+            case core::Names::typeAlias()._id:
             case core::Names::typeMember()._id:
             case core::Names::typeTemplate()._id:
-            case core::Names::typeAlias()._id:
-                trackDependencies_ = true;
-                classOfDepth_.clear();
-                dependencies_.clear();
                 break;
 
             default:
-                if (trackDependencies_) {
-                    classOfDepth_.emplace_back(send->fun._id == core::Names::classOf()._id);
-                }
-                break;
+                extendClassOfDepth(send);
+                return send;
         }
 
+        if (send->fun == core::Names::typeAlias()) {
+            // don't track dependencies if this is some other method named `type_alias`
+            if (!isT(send->recv)) {
+                extendClassOfDepth(send);
+                return send;
+            }
+        }
+
+        trackDependencies_ = true;
+        classOfDepth_.clear();
+        dependencies_.clear();
         return send;
     }
 
     unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ast::ConstantLit> lit) {
         if (trackDependencies_) {
             core::SymbolRef symbol = lit->symbol;
-            if (symbol == core::Symbols::T() || !symbol.data(ctx)->isClassOrModule()) {
+            if (symbol == core::Symbols::T()) {
                 return lit;
             }
 
-            // crawl up uses of `T.class_of` to find the right singleton symbol.
-            // This is for cases like `T.class_of(T.class_of(A))`.
-            for (auto it = classOfDepth_.rbegin(); it != classOfDepth_.rend() && *it; ++it) {
-                // ignore this as a potential dependency if the singleton
-                // doesn't exist -- this is an indication that there are no type
-                // members on the singleton.
-                symbol = symbol.data(ctx)->lookupSingletonClass(ctx);
-                if (!symbol.exists()) {
-                    return lit;
+            if (symbol.data(ctx)->isClassOrModule()) {
+                // crawl up uses of `T.class_of` to find the right singleton symbol.
+                // This is for cases like `T.class_of(T.class_of(A))`.
+                for (auto it = classOfDepth_.rbegin(); it != classOfDepth_.rend() && *it; ++it) {
+                    // ignore this as a potential dependency if the singleton
+                    // doesn't exist -- this is an indication that there are no type
+                    // members on the singleton.
+                    symbol = symbol.data(ctx)->lookupSingletonClass(ctx);
+                    if (!symbol.exists()) {
+                        return lit;
+                    }
                 }
-            }
 
-            if (!symbol.data(ctx)->typeMembers().empty()) {
+                if (!symbol.data(ctx)->typeMembers().empty()) {
+                    dependencies_.emplace_back(symbol);
+                }
+            } else if (symbol.data(ctx)->isTypeAlias()) {
                 dependencies_.emplace_back(symbol);
             }
         }
