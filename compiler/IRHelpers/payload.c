@@ -1,7 +1,8 @@
 #ifndef GRANITA_H
 #define GRANITA_H
 #include "ruby.h"
-
+#include "internal.h"
+#include "vm_core.h"
 // for explanation of WTF is happening here, see ruby.h and
 // https://silverhammermba.github.io/emberb/c/ and
 // http://clalance.blogspot.com/2011/01/writing-ruby-extensions-in-c-part-9.html
@@ -342,5 +343,11 @@ void sorbet_rb_error_arity(int argc, int min, int max) {
     rb_exc_raise(sorbet_rb_arity_error_new(argc, min, max));
 }
 
-#endif
+// ****
+// **** Optimized versions of callFunc.
+// **** Should use the same calling concention.
+// **** Call it ending with `_no_type_guard` if implementation has a backed in slowpath
+// ****
+// ****
 
+#endif
