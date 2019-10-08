@@ -35,10 +35,20 @@ test/cli/incremental-resolver/expect-failures/constant_override.rb:3: Redefining
      2 |B = e
         ^
 
+test/cli/incremental-resolver/expect-failures/constant_override.rb:111: Redefining constant `B` https://srb.help/4012
+     111 |module B
+     112 |  extend T::Sig
+     113 |  sig { returns(T.all(B,T)) }
+     114 |  def foo; T.unsafe(nil); end
+     115 |end
+    test/cli/incremental-resolver/expect-failures/constant_override.rb:13: Previous definition
+    13 |
+    14 |
+
 test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Method `e` does not exist on `T.class_of(<root>)` https://srb.help/7003
      110 |B = e
               ^
-Errors: 2
+Errors: 3
 ----- test/cli/incremental-resolver/expect-failures/constant_redefinition.rb ---------------------
 test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Redefining constant `A` https://srb.help/4012
      4 |  A = nil
