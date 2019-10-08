@@ -1,4 +1,4 @@
-source_filename = "foobar.c"
+source_filename = "compiler/IRHelpers/payload.c"
 target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-apple-darwin18.7.0"
 
@@ -10,39 +10,40 @@ target triple = "x86_64-apple-darwin18.7.0"
 @moduleName = private unnamed_addr constant [13 x i8] c"CompiledDemo\00", align 1
 @methodName = private unnamed_addr constant [14 x i8] c"<static-init>\00", align 1
 
-declare i64 @rb_str_new(i8*, i64) local_unnamed_addr
+declare i64 @rb_str_new(i8*, i64) local_unnamed_addr #0
 
-declare i64 @rb_intern(i8*) local_unnamed_addr
+declare i64 @rb_intern(i8*) local_unnamed_addr #0
 
-declare i64 @rb_define_module(i8*) local_unnamed_addr
+declare i64 @rb_define_module(i8*) local_unnamed_addr #0
 
-declare void @rb_define_singleton_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr
+declare void @rb_define_singleton_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr #0
 
-declare i64 @rb_funcallv(i64, i64, i32, i64* noalias nocapture) local_unnamed_addr
+declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #0
 
-define internal fastcc i64 @rb_arity_error_new(i32) unnamed_addr {
-  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str, i64 0, i64 0), i32 %0, i32 0)
-  %3 = load i64, i64* @rb_eArgError, align 8
-  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2)
+; Function Attrs: nounwind ssp uwtable
+define internal fastcc i64 @sorbet_rb_arity_error_new(i32) unnamed_addr #1 {
+  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str, i64 0, i64 0), i32 %0, i32 0) #6
+  %3 = load i64, i64* @rb_eArgError, align 8, !tbaa !4
+  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #6
   ret i64 %4
 }
 
-declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr
+declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #0
 
-declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr
+declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr #0
 
-; Function Attrs: noreturn
-define internal fastcc void @rb_error_arity(i32) unnamed_addr #0 {
-  %2 = tail call fastcc i64 @rb_arity_error_new(i32 %0)
-  tail call void @rb_exc_raise(i64 %2) #0
+; Function Attrs: noreturn nounwind ssp uwtable
+define internal fastcc void @sorbet_rb_error_arity(i32) unnamed_addr #2 {
+  %2 = tail call fastcc i64 @sorbet_rb_arity_error_new(i32 %0)
+  tail call void @rb_exc_raise(i64 %2) #7
   unreachable
 }
 
 ; Function Attrs: noreturn
-declare void @rb_exc_raise(i64) local_unnamed_addr #0
+declare void @rb_exc_raise(i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) #1 {
+define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) #4 {
 readGlobals:
   %callArgs = alloca [1 x i64], align 8
   %isWrongArgCount = icmp eq i32 %0, 0
@@ -50,33 +51,44 @@ readGlobals:
 
 argCountSuccess:                                  ; preds = %readGlobals
   %rubyID_puts = load i64, i64* @rubyId_global_puts, align 8
-  %3 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"userStr_hello world", i64 0, i64 0), i64 11) #2
+  %3 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"userStr_hello world", i64 0, i64 0), i64 11) #6
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
   store i64 %3, i64* %callArgsAddr, align 8
-  %4 = call i64 @rb_funcallv(i64 %2, i64 %rubyID_puts, i32 1, i64* nonnull %callArgsAddr) #2
+  %4 = call i64 @rb_funcallv(i64 %2, i64 %rubyID_puts, i32 1, i64* nonnull %callArgsAddr) #6
   ret i64 %4
 
 argCountFailBlock:                                ; preds = %readGlobals
-  tail call fastcc void @rb_error_arity(i32 %0) #2
+  tail call fastcc void @sorbet_rb_error_arity(i32 %0)
   unreachable
 }
 
-define void @"Init__S _C _U _root___ $1__N _U _static_init__ $110_"() local_unnamed_addr {
+; Function Attrs: nounwind ssp
+define void @"Init__S _C _U _root___ $1__N _U _static_init__ $110_"() local_unnamed_addr #5 {
 initializeGlobals:
-  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0))
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0)) #6
   store i64 %0, i64* @rubyId_global_puts, align 8
-  %1 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @moduleName, i64 0, i64 0))
-  tail call void @rb_define_singleton_method(i64 %1, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @methodName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U <root>>> $1><N <U <static-init>> $110>" to i64 (...)*), i32 -1)
+  %1 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @moduleName, i64 0, i64 0)) #6
+  tail call void @rb_define_singleton_method(i64 %1, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @methodName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U <root>>> $1><N <U <static-init>> $110>" to i64 (...)*), i32 -1) #6
   ret void
 }
 
-attributes #0 = { noreturn }
-attributes #1 = { nounwind sspreq uwtable }
-attributes #2 = { nounwind }
+attributes #0 = { "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #1 = { nounwind ssp uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #2 = { noreturn nounwind ssp uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #3 = { noreturn "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #4 = { nounwind sspreq uwtable }
+attributes #5 = { nounwind ssp }
+attributes #6 = { nounwind }
+attributes #7 = { noreturn nounwind }
 
-!llvm.module.flags = !{!0, !1}
-!llvm.ident = !{!2}
+!llvm.module.flags = !{!0, !1, !2}
+!llvm.ident = !{!3}
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"PIC Level", i32 2}
-!2 = !{!"Apple clang version 11.0.0 (clang-1100.0.33.8)"}
+!2 = !{i32 1, !"EnableSplitLTOUnit", i32 0}
+!3 = !{!"clang version 8.0.0 (tags/RELEASE_800/final)"}
+!4 = !{!5, !5, i64 0}
+!5 = !{!"long", !6, i64 0}
+!6 = !{!"omnipotent char", !7, i64 0}
+!7 = !{!"Simple C/C++ TBAA"}
