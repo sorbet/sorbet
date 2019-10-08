@@ -1,2 +1,2 @@
 # typed: false
-B = T.type_alias # error: No argument given to `T.type_alias`
+B = T.type_alias # error: No block given to `T.type_alias`
