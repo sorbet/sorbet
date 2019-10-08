@@ -97,6 +97,7 @@ cc_library(
         "*.inc",
         "enc/shift_jis.c",
         "enc/jis/*.h",
+        "ccan/**/*.h",
     ]),
     includes = [
         "enc",
@@ -248,9 +249,7 @@ cc_binary(
           "addr2line.c",
       ],
       ":darwin": [],
-    }) + glob([
-        "ccan/**/*.h",
-    ]),
+    }),
 
     deps = [
         ":miniruby_private_headers",
@@ -482,9 +481,7 @@ cc_binary(
             "addr2line.c",
         ],
         ":darwin": [],
-    }) + glob([
-        "ccan/**/*.h",
-    ]),
+    }),
 
     deps = [
         ":miniruby_private_headers",
