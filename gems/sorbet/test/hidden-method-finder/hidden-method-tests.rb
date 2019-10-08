@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # typed: ignore
 
+require 'json'
 require 'minitest/autorun'
 require 'minitest/spec'
 require 'mocha/minitest'
@@ -18,24 +19,42 @@ TEST_CASES = [
 
 class Sorbet::Private::HiddenMethodFinder::Test::Simple < MiniTest::Spec
   TEST_CASES.each do |path|
-    it "works on the `#{path}' example" do
+    it "works on the #{path} example" do
 
       Dir.mktmpdir do |dir|
         FileUtils.cp_r(File.join(__dir__, path), dir)
         olddir = __dir__
-        Dir.chdir(File.join(dir, path))
+        Dir.chdir(File.join(dir, path)) do |_|
 
-        IO.popen(
-          olddir + '/../../lib/hidden-definition-finder.rb',
-        ) {|io| io.read}
+          # we'll swallow all the output unless there's an error, in
+          # which case we'll print it out
+          trace = IO.popen(
+            olddir + '/../../lib/hidden-definition-finder.rb',
+            err: [:child, :out]
+          ) {|io| io.read}
+          success = $?.success?
 
-        assert_equal(true, $?.success?)
-        # Some day these can be snapshot tests, but this isn't stable enough for
-        # that yet
-        # assert_equal(File.read(olddir + '/simple.errors.txt'), File.read('rbi/hidden-definitions/errors.txt'))
-        # assert_equal(File.read(olddir + '/simple.hidden.rbi'), File.read('rbi/hidden-definitions/hidden.rbi'))
-        assert_match("class Foo\n  def bar()", File.read('sorbet/rbi/hidden-definitions/hidden.rbi'))
-        refute_match("ClassOverride", File.read('sorbet/rbi/hidden-definitions/hidden.rbi'))
+          unless success
+            puts trace
+          end
+          assert_equal(true, success)
+
+          # we encode the expects contents into a JSON file in the test directory
+          expectations = JSON.parse(File.read(File.join(dir, path, "expectations.json")))
+          expectations.each do |exp|
+            hidden = File.read('sorbet/rbi/hidden-definitions/hidden.rbi')
+            # we might expect some substring to /definitely/ appear in hidden.rbi
+            if exp["assertion"] == "contains"
+              assert_match(exp["substring"], hidden)
+            # we also might expect some substring to definitely /not/ appear in hidden.rbi
+            elsif exp["assertion"] == "omits"
+              refute_match(exp["substring"], hidden)
+            # we should also fail loudly if someone mistypeed one of the assertions
+            else
+              assert(false, "Unknown assertion: #{exp['assertion']}")
+            end
+          end
+        end
       end
     end
   end
