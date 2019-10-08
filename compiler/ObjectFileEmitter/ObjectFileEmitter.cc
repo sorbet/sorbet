@@ -85,7 +85,7 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
     auto entryFunc =
-        llvm::Function::Create(ft, llvm::Function::ExternalLinkage, ((string) "Init_" + (string)objectName), *module);
+        llvm::Function::Create(ft, llvm::Function::ExternalLinkage, {"Init_", (string)objectName}, *module);
     globalInitializers->insertInto(entryFunc);
 
     builder.SetInsertPoint(globalInitializers);
@@ -94,11 +94,11 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     builder.SetInsertPoint(bb);
     ENFORCE(sym.data(gs)->isMethod());
     // auto owner = findOwningModule(sym);
-    auto rawCString = builder.CreateGlobalStringPtr("CompiledDemo");
+    auto rawCString = builder.CreateGlobalStringPtr("CompiledDemo", "moduleName");
     auto moduleValue = builder.CreateCall(module->getFunction("sorbet_defineTopLevelModule"), {rawCString});
     // todo: ^^^ use sorbet_getConstant to find the right constant instead
 
-    auto methodName = builder.CreateGlobalStringPtr(sym.data(gs)->name.show(gs));
+    auto methodName = builder.CreateGlobalStringPtr(sym.data(gs)->name.show(gs), "methodName");
     auto universalSignature = llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), true));
 
     // This name has to match what we emit in LLVMIREmitter::run
