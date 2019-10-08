@@ -59,7 +59,7 @@ llvm::Value *getIdFor(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, strin
     auto name = llvm::StringRef(idName.data(), idName.length());
     llvm::Constant *indices[] = {zero};
     if (!global) {
-        string rawName = "rubySym_" + (string)idName;
+        string rawName = "rubyId_global_" + (string)idName;
         auto tp = llvm::Type::getInt64Ty(lctx);
         auto globalDeclaration = static_cast<llvm::GlobalVariable *>(module->getOrInsertGlobal(rawName, tp, [&] {
             auto ret =
@@ -72,7 +72,7 @@ llvm::Value *getIdFor(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, strin
         llvm::IRBuilder<> globalInitBuilder(lctx);
         llvm::Constant *indicesString[] = {zero, zero};
         globalInitBuilder.SetInsertPoint(globalInitializers);
-        auto gv = builder.CreateGlobalString(name, "", 0);
+        auto gv = builder.CreateGlobalString(name, {"str_global_", name}, 0);
         auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(gv->getValueType(), gv, indicesString);
         auto rawID = globalInitBuilder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "rubyID");
         globalInitBuilder.CreateStore(rawID, llvm::ConstantExpr::getInBoundsGetElementPtr(
