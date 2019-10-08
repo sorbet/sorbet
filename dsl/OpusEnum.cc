@@ -4,6 +4,7 @@
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
+#include "core/errors/dsl.h"
 #include "dsl/dsl.h"
 
 using namespace std;
@@ -11,6 +12,11 @@ using namespace std;
 namespace sorbet::dsl {
 
 namespace {
+
+enum class FromWhere {
+    Inside,
+    Outside,
+};
 
 bool isOpusEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     if (klass->kind != ast::Class || klass->ancestors.empty()) {
@@ -40,7 +46,7 @@ bool isOpusEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     return id->symbol == core::Symbols::root();
 }
 
-ast::Send *findEnumsDo(ast::Expression *stat) {
+ast::Send *asEnumsDo(ast::Expression *stat) {
     auto *send = ast::cast_tree<ast::Send>(stat);
 
     if (send != nullptr && send->block != nullptr && send->fun == core::Names::enums()) {
@@ -50,7 +56,16 @@ ast::Send *findEnumsDo(ast::Expression *stat) {
     }
 }
 
-vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::Expression *stat) {
+vector<unique_ptr<ast::Expression>> badConst(core::MutableContext ctx, core::Loc headerLoc, core::Loc line1Loc) {
+    if (auto e = ctx.state.beginError(headerLoc, core::errors::DSL::OpusEnumConstNotEnumValue)) {
+        e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "Opus::Enum");
+        e.addErrorLine(line1Loc, "Enclosing definition here");
+    }
+    return {};
+}
+
+vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::Expression *stat,
+                                                FromWhere fromWhere) {
     auto *asgn = ast::cast_tree<ast::Assign>(stat);
     if (asgn == nullptr) {
         return {};
@@ -63,34 +78,40 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
 
     auto *rhs = ast::cast_tree<ast::Send>(asgn->rhs.get());
     if (rhs == nullptr) {
+        return badConst(ctx, stat->loc, klass->loc);
+    }
+
+    if (rhs->fun == core::Names::typeTemplate()) {
+        // This is the one kind of non-enum-value constant we allow for now.
+        // TODO(jez) Remove this when we remove `Elem = type_template` from Opus::Enum
         return {};
     }
 
     if (rhs->fun != core::Names::new_() && rhs->fun != core::Names::let()) {
-        return {};
+        return badConst(ctx, stat->loc, klass->loc);
     }
 
     if (rhs->fun == core::Names::new_() && !rhs->recv->isSelfReference()) {
-        return {};
+        return badConst(ctx, stat->loc, klass->loc);
     }
 
     if (rhs->fun == core::Names::let()) {
         auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(rhs->recv.get());
         if (recv == nullptr) {
-            return {};
+            return badConst(ctx, stat->loc, klass->loc);
         }
 
         if (rhs->args.size() != 2) {
-            return {};
+            return badConst(ctx, stat->loc, klass->loc);
         }
 
         auto arg0 = ast::cast_tree<ast::Send>(rhs->args[0].get());
         if (arg0 == nullptr) {
-            return {};
+            return badConst(ctx, stat->loc, klass->loc);
         }
 
         if (!(arg0->fun == core::Names::new_() && arg0->recv->isSelfReference())) {
-            return {};
+            return badConst(ctx, stat->loc, klass->loc);
         }
     }
 
@@ -99,6 +120,14 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
     //   A = new | T.let(new, ...)
     //
     // So we're good to process this thing as a new Opus::Enum value.
+
+    if (fromWhere != FromWhere::Inside) {
+        if (auto e = ctx.state.beginError(stat->loc, core::errors::DSL::OpusEnumOutsideEnumsDo)) {
+            e.setHeader("Definition of enum value `{}` must be within the `{}` block for this `{}`",
+                        lhs->cnst.show(ctx), "enums do", "Opus::Enum");
+            e.addErrorLine(klass->declLoc, "Enclosing definition here");
+        }
+    }
 
     auto name = ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::OpusEnum, lhs->cnst, 1));
     auto classCnst = ast::MK::UnresolvedConstant(lhs->loc, ast::MK::EmptyTree(), name);
@@ -128,8 +157,9 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
     return result;
 }
 
-void collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, unique_ptr<ast::Expression> stat) {
-    auto newStats = processStat(ctx, klass, stat.get());
+void collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, unique_ptr<ast::Expression> stat,
+                     FromWhere fromWhere) {
+    auto newStats = processStat(ctx, klass, stat.get(), fromWhere);
     if (newStats.empty()) {
         klass->rhs.emplace_back(std::move(stat));
     } else {
@@ -160,17 +190,17 @@ void OpusEnum::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed()));
     for (auto &stat : oldRHS) {
         // TODO(jez) Clean this up when there is only one way to define enum variants
-        if (auto enumsDo = findEnumsDo(stat.get())) {
+        if (auto enumsDo = asEnumsDo(stat.get())) {
             if (auto insSeq = ast::cast_tree<ast::InsSeq>(enumsDo->block->body.get())) {
                 for (auto &stat : insSeq->stats) {
-                    collectNewStats(ctx, klass, std::move(stat));
+                    collectNewStats(ctx, klass, std::move(stat), FromWhere::Inside);
                 }
-                collectNewStats(ctx, klass, std::move(insSeq->expr));
+                collectNewStats(ctx, klass, std::move(insSeq->expr), FromWhere::Inside);
             } else {
-                collectNewStats(ctx, klass, std::move(enumsDo->block->body));
+                collectNewStats(ctx, klass, std::move(enumsDo->block->body), FromWhere::Inside);
             }
         } else {
-            collectNewStats(ctx, klass, std::move(stat));
+            collectNewStats(ctx, klass, std::move(stat), FromWhere::Outside);
         }
     }
 }
