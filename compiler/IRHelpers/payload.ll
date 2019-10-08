@@ -1128,7 +1128,7 @@ define internal i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture) #0 {
 declare i64 @rb_funcallv(i64, i64, i32, i64* noalias nocapture)
 
 ; Function Attrs: ssp uwtable
-define internal i64 @rb_arity_error_new(i32, i32, i32) #3 {
+define internal i64 @rb_arity_error_new(i32, i32, i32) {
   %4 = alloca i32, align 4
   %5 = alloca i32, align 4
   %6 = alloca i32, align 4
@@ -1184,7 +1184,7 @@ declare i64 @rb_sprintf(i8*, ...)
 declare i64 @rb_exc_new_str(i64, i64)
 
 ; Function Attrs: noinline noreturn nounwind optnone ssp uwtable
-define internal void @rb_error_arity(i32, i32, i32) #3 {
+define internal void @rb_error_arity(i32, i32, i32) #4 {
   %4 = alloca i32, align 4
   %5 = alloca i32, align 4
   %6 = alloca i32, align 4
@@ -1206,7 +1206,6 @@ declare void @rb_exc_raise(i64) #4
 
 attributes #0 = { alwaysinline }
 attributes #1 = { nounwind readonly }
-attributes #3 = { cold }
 attributes #4 = { noreturn }
 
 !llvm.module.flags = !{!0, !1}

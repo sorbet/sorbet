@@ -133,9 +133,11 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
             llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), llvm::APInt(32, requiredArgumentCount, true)),
             "isWrongArgCount");
 
-        builder.CreateCondBr(isWrongArgCount, argCountFailBlock,
-                             argCountSuccessBlock); // todo(perf): add expected information with
-                                                    // https://llvm.org/docs/LangRef.html#llvm-expect-intrinsic
+        builder.CreateCall(
+            llvm::Intrinsic::getDeclaration(module, llvm::Intrinsic::ID::expect, {llvm::Type::getInt1Ty(lctx)}),
+            {isWrongArgCount, llvm::ConstantInt::get(llvm::Type::getInt1Ty(lctx), llvm::APInt(1, 0, true))});
+        builder.CreateCondBr(isWrongArgCount, argCountFailBlock, argCountSuccessBlock);
+
         builder.SetInsertPoint(argCountFailBlock);
         builder.CreateCall(
             module->getFunction("rb_error_arity"),
