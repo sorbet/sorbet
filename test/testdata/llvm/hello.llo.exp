@@ -1,6 +1,6 @@
 source_filename = "compiler/IRHelpers/payload.c"
 target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
-target triple = "x86_64-apple-darwin18.7.0"
+target triple = "x86_64-apple-darwin18.2.0"
 
 @.str = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8

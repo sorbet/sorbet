@@ -44,6 +44,7 @@ cc_library(
         "-march=x86-64",
     ],
     linkstatic = 1,  # we are doing this only for llvm ir
+    visibility = ["//visibility:public"],
     deps = [
         "@ruby_2_4_3//:ruby_headers",
         "@ruby_2_4_3//:ruby_private_headers",
@@ -60,11 +61,12 @@ genrule(
     outs = [
         "payload.bc.orig",
     ],
-    cmd = "$(location :llvm-ar) -x $(location :pseudo_lib) payload.o && mv payload.o $(location payload.bc.orig)",
+    cmd = "$(location :llvm-ar) -x $(locations :pseudo_lib) payload.o && mv payload.o $(location payload.bc.orig)",
     tools = [
         ":llvm-ar",
         ":pseudo_lib",
     ],
+    visibility = ["//visibility:public"],
 )
 
 genrule(

@@ -14,7 +14,7 @@ source .buildkite/tools/setup-bazel.sh
 
 err=0
 
-./bazel test //... --test_summary=terse || err=$?
+./bazel test //... --test_summary=terse --test_output=errors || err=$?
 
 echo "--- uploading test results"
 
@@ -37,13 +37,20 @@ function cleanup {
 
 trap cleanup EXIT
 
-
 .buildkite/tools/annotate.rb _tmp_/log/junit > "$annotation_path"
-
 cat "$annotation_path"
 
 if grep -q "<details>" "$annotation_path"; then
   echo "--- :buildkite: Creating annotation"
+
+  brew install wget
+  wget -O - https://github.com/buildkite/terminal-to-html/releases/download/v3.2.0/terminal-to-html-3.2.0-linux-amd64.gz | gunzip -c > ./terminal-to-html
+  chmod u+x ./terminal-to-html
+
+  # https://buildkite.com/docs/agent/v3/cli-annotate
+  annotation_path_wrapped="${annotation_dir}/annotation_wrapped.md"
+  (echo '<pre class="term"><code>'; ./terminal-to-html < "$annotation_path"; echo '</code></pre>') > "$annotation_path_wrapped"
+
   # shellcheck disable=SC2002
   cat "$annotation_path" | buildkite-agent annotate --context junit-${platform} --style error --append
 fi

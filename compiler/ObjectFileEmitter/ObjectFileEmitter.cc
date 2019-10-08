@@ -34,7 +34,11 @@ void outputLLVM(llvm::legacy::PassManager &pm, string_view dir, string_view file
 
 void outputObjectFile(llvm::legacy::PassManager &pm, string_view dir, string_view fileNameWithoutExtension,
                       unique_ptr<llvm::Module> module) {
-    auto targetTriple = llvm::sys::getDefaultTargetTriple();
+    // We encode this value in our `.exp` files right now so we have to hard
+    // code it to something that doesn't chance accross sytems.
+    // TODO stop putting it in our .exp files and then unhardcode this
+    auto targetTriple = "x86_64-apple-darwin18.2.0";
+    // auto targetTriple = llvm::sys::getDefaultTargetTriple();
     module->setTargetTriple(targetTriple);
 
     std::string error;
@@ -135,7 +139,6 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     pmbuilder.DisableUnrollLoops = false;
     pmbuilder.LoopVectorize = true;
     pmbuilder.SLPVectorize = true;
-    pmbuilder.VerifyInput = debug_mode;
     pmbuilder.VerifyInput = debug_mode;
     pmbuilder.populateModulePassManager(*pm);
     pmbuilder.populateLTOPassManager(*pm);
