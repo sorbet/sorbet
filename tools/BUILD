@@ -15,6 +15,7 @@ compilation_database(
         "//plugin_injector:plugin_injector",
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",
         "//compiler/LLVMIREmitter:LLVMIREmitter",
+        "//compiler/IRHelpers:pseudo_lib",
         "//compiler/IRHelpers:generate_load_payload",
         "//compiler/IRHelpers:IRHelpers",
         # END compile_commands targets
