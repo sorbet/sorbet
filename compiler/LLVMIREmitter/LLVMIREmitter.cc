@@ -112,9 +112,9 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
     // nill out variables.
     for (const auto &entry : cfg.minLoops) {
         auto var = entry.first;
-        auto alloca = llvmVariables[var] = builder.CreateAlloca(
-            valueType, nullptr,
-            var.toString(gs)); // TODO: toString here is slow, we should probably only use it in debug builds
+        auto svName = var._name.data(gs)->shortName(gs);
+        auto alloca = llvmVariables[var] =
+            builder.CreateAlloca(valueType, nullptr, llvm::StringRef(svName.data(), svName.length()));
         boxRawValue(lctx, builder, alloca, nilValueRaw);
     }
 
@@ -178,7 +178,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
         if (b.get() == cfg.entry()) {
             llvmBlocks[b->id] = userBodyEntry;
         } else {
-            llvmBlocks[b->id] = llvm::BasicBlock::Create(lctx, "BB" + to_string(b->id),
+            llvmBlocks[b->id] = llvm::BasicBlock::Create(lctx, {"BB", to_string(b->id)},
                                                          func); // to_s is slow. We should only use it in debug builds
         }
     }
