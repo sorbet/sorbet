@@ -138,7 +138,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
 
         builder.SetInsertPoint(argCountFailBlock);
         builder.CreateCall(
-            module->getFunction("rb_error_arity"),
+            module->getFunction("sorbet_rb_error_arity"),
             {argCountRaw,
              llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), llvm::APInt(32, requiredArgumentCount, true)),
              llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), llvm::APInt(32, requiredArgumentCount, true))
