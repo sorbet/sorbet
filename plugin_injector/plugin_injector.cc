@@ -44,7 +44,7 @@ public:
         sorbet::compiler::ObjectFileEmitter::run(gs, lctx, move(module), cfg.symbol, irOutputDir.value(), fileName,
                                                  globalInitializers);
     };
-    virtual void patchDSL(const core::GlobalState &, ast::ClassDef *) const override { };
+    virtual void patchDSL(const core::GlobalState &, ast::ClassDef *) const override{};
     virtual ~LLVMSemanticExtension(){};
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) override {
         return make_unique<LLVMSemanticExtension>(this->irOutputDir);
