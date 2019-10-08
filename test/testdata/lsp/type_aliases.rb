@@ -7,7 +7,7 @@ end
 BigFooAlias = T.type_alias {BigFoo}
 # ^ hover: <Type: BigFoo>
 # ^ def: BigFooAlias
-                         # ^ usage: BigFoo
+                          # ^ usage: BigFoo
 
 def main
   l = T.let(nil, T.nilable(BigFooAlias))

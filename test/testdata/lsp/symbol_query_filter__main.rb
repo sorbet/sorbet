@@ -46,7 +46,7 @@ end
 
 AliasForClass = T.type_alias {WillGetAliased}
 # ^ def: AliasForClass
-                           # ^ usage: WillGetAliased
+                            # ^ usage: WillGetAliased
 
 class InheritsClassAndIvars < DefinesInstanceAndClassVars
   def references_vars
