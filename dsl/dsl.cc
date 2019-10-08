@@ -37,6 +37,10 @@ public:
         Prop::patchDSL(ctx, classDef.get());
         TypeMembers::patchDSL(ctx, classDef.get());
 
+        for (auto &extension : ctx.state.semanticExtensions) {
+            extension->patchDSL(ctx, classDef.get());
+        }
+
         ast::Expression *prevStat = nullptr;
         UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
         for (auto &stat : classDef->rhs) {
@@ -70,14 +74,6 @@ public:
 
                 [&](ast::Send *send) {
                     vector<unique_ptr<ast::Expression>> nodes;
-
-                    for (auto &extension : ctx.state.semanticExtensions) {
-                        nodes = extension->replaceDSL(ctx.state, send);
-                        if (!nodes.empty()) {
-                            replaceNodes[stat.get()] = std::move(nodes);
-                            return;
-                        }
-                    }
 
                     nodes = MixinEncryptedProp::replaceDSL(ctx, send);
                     if (!nodes.empty()) {
