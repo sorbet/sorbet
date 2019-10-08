@@ -13,7 +13,7 @@ cleanup() {
 
 trap cleanup EXIT
 
-ruby "$rb" > "$rbout" 2>&1
+ruby "$rb" 2>&1 | tee "$rbout"
 
 main/sorbet_llvm --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$rb"
 bundle="$llvmir/main.bundle"
