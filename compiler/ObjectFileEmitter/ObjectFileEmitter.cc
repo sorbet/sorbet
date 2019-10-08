@@ -138,7 +138,7 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     pmbuilder.VerifyInput = debug_mode;
     pmbuilder.VerifyInput = debug_mode;
     pmbuilder.populateModulePassManager(*pm);
-
+    pmbuilder.populateLTOPassManager(*pm);
     // print optimized IR
     std::error_code ec1;
     auto nameOpt = ((string)dir) + "/" + (string)objectName + ".llo";
