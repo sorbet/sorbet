@@ -1219,35 +1219,6 @@ public:
     }
 };
 
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
-        // Because T::Utils::RuntimeProfiled shows up as `T.untyped`, we end up
-        // with a tree that represents a definition of `T.untyped`. This avoids
-        // the problems that show up with that, as `T.untyped` is its own
-        // singleton class.
-        if (original->symbol != core::Symbols::untyped()) {
-            classes.emplace_back(original->symbol);
-        }
-        return original;
-    }
-
-    void finalizeAttachedClass(core::MutableContext ctx) {
-        for (auto klass : classes) {
-            // The resolve constants pass ensures that the singleton exists already
-            auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
-            ENFORCE(singleton.exists());
-
-            // Update the upper bound of AttachedClass now that all of the other
-            // type members have been defined.
-            auto attachedClass = singleton.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
-            auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType.get());
-            ENFORCE(lambdaParam != nullptr);
-            lambdaParam->upperBound = klass.data(ctx)->externalType(ctx);
-        }
-
-        classes.clear();
-    }
-};
-
 class ResolveSignaturesWalk {
 private:
     std::vector<int> nestedBlockCounts;
