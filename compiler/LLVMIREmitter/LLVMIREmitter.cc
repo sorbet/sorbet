@@ -80,7 +80,7 @@ llvm::Value *getIdFor(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, strin
         globalInitBuilder.SetInsertPoint(functionEntry);
         global = globalInitBuilder.CreateLoad(
             llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
-            llvm::Twine("rubyID_", name));
+            {"rubyID_", name});
 
         // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     }
