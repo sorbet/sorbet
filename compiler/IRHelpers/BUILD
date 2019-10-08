@@ -66,6 +66,7 @@ genrule(
         ":llvm-ar",
         ":pseudo_lib",
     ],
+    visibility = ["//visibility:public"],
 )
 
 genrule(
