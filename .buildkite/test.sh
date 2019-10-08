@@ -41,6 +41,10 @@ trap cleanup EXIT
 .buildkite/tools/annotate.rb _tmp_/log/junit > "$annotation_path"
 
 cat "$annotation_path"
+# https://buildkite.com/docs/agent/v3/cli-annotate
+annotation_path_wrapped="${annotation_dir}/annotation_wrapped.md"
+(echo '<pre class="term"><code>'; cat "$annotation_path"; echo '</code></pre>') > "$annotation_path_wrapped"
+
 
 if grep -q "<details>" "$annotation_path"; then
   echo "--- :buildkite: Creating annotation"
