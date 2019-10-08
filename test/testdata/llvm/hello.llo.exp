@@ -4,11 +4,11 @@ target triple = "x86_64-apple-darwin18.7.0"
 
 @.str = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
-@0 = private unnamed_addr constant [12 x i8] c"hello world\00", align 1
+@"userStr_hello world" = private unnamed_addr constant [12 x i8] c"hello world\00", align 1
 @rubyId_global_puts = internal unnamed_addr global i64 0, align 8
 @str_global_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
-@1 = private unnamed_addr constant [13 x i8] c"CompiledDemo\00", align 1
-@2 = private unnamed_addr constant [14 x i8] c"<static-init>\00", align 1
+@0 = private unnamed_addr constant [13 x i8] c"CompiledDemo\00", align 1
+@1 = private unnamed_addr constant [14 x i8] c"<static-init>\00", align 1
 
 declare i64 @rb_str_new(i8*, i64) local_unnamed_addr
 
@@ -50,7 +50,7 @@ readGlobals:
 
 argCountSuccess:                                  ; preds = %readGlobals
   %rubyID_puts = load i64, i64* @rubyId_global_puts, align 8
-  %3 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @0, i64 0, i64 0), i64 11) #2
+  %3 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"userStr_hello world", i64 0, i64 0), i64 11) #2
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
   store i64 %3, i64* %callArgsAddr, align 8
   %4 = call i64 @rb_funcallv(i64 %2, i64 %rubyID_puts, i32 1, i64* nonnull %callArgsAddr) #2
@@ -65,8 +65,8 @@ define void @"Init__S _C _U _root___ $1__N _U _static_init__ $110_"() local_unna
 initializeGlobals:
   %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0))
   store i64 %0, i64* @rubyId_global_puts, align 8
-  %1 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @1, i64 0, i64 0))
-  tail call void @rb_define_singleton_method(i64 %1, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @2, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U <root>>> $1><N <U <static-init>> $110>" to i64 (...)*), i32 -1)
+  %1 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @0, i64 0, i64 0))
+  tail call void @rb_define_singleton_method(i64 %1, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @1, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U <root>>> $1><N <U <static-init>> $110>" to i64 (...)*), i32 -1)
   ret void
 }
 

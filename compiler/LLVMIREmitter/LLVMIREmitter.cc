@@ -286,8 +286,8 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                                 break;
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(gs, litType->value).data(gs)->shortName(gs);
-                                auto rawCString =
-                                    builder.CreateGlobalStringPtr(llvm::StringRef(str.data(), str.length()));
+                                llvm::StringRef userStr(str.data(), str.length());
+                                auto rawCString = builder.CreateGlobalStringPtr(userStr, {"userStr_", userStr});
                                 auto rawRubyString = builder.CreateCall(
                                     module->getFunction("sorbet_CPtrToRubyString"),
                                     {rawCString, llvm::ConstantInt::get(lctx, llvm::APInt(64, str.length(), true))},
