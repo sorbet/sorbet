@@ -1024,21 +1024,15 @@ class ResolveTypeParamsWalk {
             return false;
         }
 
-        switch (job.rhs->fun._id) {
-            case core::Names::typeTemplate()._id:
-            case core::Names::typeMember()._id: {
-                auto superclass = job.lhs.data(ctx)->owner.data(ctx)->superClass();
-                if (!isGenericResolved(ctx, superclass)) {
-                    return false;
-                }
-
-                resolveTypeMember(ctx.withOwner(job.owner), job.lhs, job.rhs);
-                break;
+        if (job.lhs.data(ctx)->isTypeMember()) {
+            auto superclass = job.lhs.data(ctx)->owner.data(ctx)->superClass();
+            if (!isGenericResolved(ctx, superclass)) {
+                return false;
             }
 
-            case core::Names::typeAlias()._id:
-                resolveTypeAlias(ctx.withOwner(job.owner), job.lhs, job.rhs);
-                break;
+            resolveTypeMember(ctx.withOwner(job.owner), job.lhs, job.rhs);
+        } else {
+            resolveTypeAlias(ctx.withOwner(job.owner), job.lhs, job.rhs);
         }
 
         return true;
