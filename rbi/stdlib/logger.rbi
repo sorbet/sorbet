@@ -336,14 +336,14 @@ class Logger
   sig { params(datetime_format: T.nilable(String)).void }
   def datetime_format=(datetime_format); end
 
-  FormatterProcType = T.type_alias(
+  FormatterProcType = T.type_alias do
     T.proc.params(
       severity: Integer,
       time: Time,
       progname: T.nilable(String),
       msg: T.untyped
     ).returns(T.untyped)
-  )
+  end
 
   # Logging formatter, as a `Proc` that will take four arguments and return the
   # formatted message. The arguments are:

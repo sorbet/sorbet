@@ -112,7 +112,7 @@ end
 module T::CFGExport
 end
 
-T::Boolean = T.type_alias(T.any(TrueClass, FalseClass))
+T::Boolean = T.type_alias {T.any(TrueClass, FalseClass)}
 
 module T::Configuration
   def self.call_validation_error_handler(signature, opts); end
