@@ -21,6 +21,7 @@ public:
                                             classDef->name->deepCopy());
                 i++;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
+                continue;
             }
 
             auto methodDef = ast::cast_tree<ast::MethodDef>(stat.get());
@@ -29,6 +30,7 @@ public:
                                             rootClassDef->name->deepCopy(), ast::MK::Symbol(loc, methodDef->name));
                 i++;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
+                continue;
             }
         }
         return rootClassDef;
