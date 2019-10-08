@@ -26,10 +26,10 @@ llvm::Type *getValueType(llvm::LLVMContext &lctx) {
 
 llvm::FunctionType *getRubyFunctionTypeForSymbol(llvm::LLVMContext &lctx, const core::GlobalState &gs,
                                                  core::SymbolRef sym) {
-    vector<llvm::Type *> args{
-        llvm::Type::getInt32Ty(lctx),                               // arg count
-        llvm::PointerType::getUnqual(llvm::Type::getInt64Ty(lctx)), // argArray
-        llvm::Type::getInt64Ty(lctx)                                // self
+    llvm::Type *args[] = {
+        llvm::Type::getInt32Ty(lctx),    // arg count
+        llvm::Type::getInt64PtrTy(lctx), // argArray
+        llvm::Type::getInt64Ty(lctx)     // self
     };
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
@@ -38,17 +38,15 @@ llvm::FunctionType *getRubyFunctionTypeForSymbol(llvm::LLVMContext &lctx, const 
 
 // boxed raw value from rawData into target. Assumes that types are compatible.
 void boxRawValue(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, llvm::AllocaInst *target, llvm::Value *rawData) {
-    std::vector<llvm::Value *> indices(2);
-    indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true));
-    indices[1] = indices[0];
+    llvm::Value *indices[] = {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
+                              llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true))};
     builder.CreateStore(rawData, builder.CreateGEP(target, indices));
 }
 
 // boxed raw value from rawData into target. Assumes that types are compatible.
 llvm::Value *unboxRawValue(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, llvm::AllocaInst *target) {
-    std::vector<llvm::Value *> indices(2);
-    indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true));
-    indices[1] = indices[0];
+    llvm::Value *indices[] = {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
+                              llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true))};
     return builder.CreateLoad(builder.CreateGEP(target, indices), "rawRubyValue");
 }
 
@@ -160,8 +158,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
             }
 
             auto *a = ast::MK::arg2Local(arg.get());
-            std::vector<llvm::Value *> indices(1);
-            indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, argId, true));
+            llvm::Value *indices[] = {llvm::ConstantInt::get(lctx, llvm::APInt(32, argId, true))};
             auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "rawArgValue");
             boxRawValue(lctx, builder, llvmVariables[a->localVariable], rawValue);
         }
@@ -232,18 +229,14 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                             int argId = -1;
                             for (auto &arg : i->args) {
                                 argId += 1;
-                                std::vector<llvm::Value *> indices(2);
-                                indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true));
-                                indices[1] =
-
-                                    llvm::ConstantInt::get(lctx, llvm::APInt(64, argId, true));
+                                llvm::Value *indices[] = {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
+                                                          llvm::ConstantInt::get(lctx, llvm::APInt(64, argId, true))};
                                 builder.CreateStore(unboxRawValue(lctx, builder, llvmVariables[arg.variable]),
                                                     builder.CreateGEP(sendArgArray, indices, "callArgsAddr"));
                             }
                         }
-                        std::vector<llvm::Value *> indices(2);
-                        indices[0] = llvm::ConstantInt::get(lctx, llvm::APInt(64, 0, true));
-                        indices[1] = indices[0];
+                        llvm::Value *indices[] = {llvm::ConstantInt::get(lctx, llvm::APInt(64, 0, true)),
+                                                  llvm::ConstantInt::get(lctx, llvm::APInt(64, 0, true))};
 
                         // TODO(perf): call
                         // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
