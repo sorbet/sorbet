@@ -1,6 +1,6 @@
 # typed: true
 A1 = 1
-A2 = T.type_alias(Integer)
+A2 = T.type_alias {Integer}
 
 extend T::Sig
 

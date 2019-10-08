@@ -4,7 +4,7 @@ class BigFoo
   extend T::Sig
 end
 
-BigFooAlias = T.type_alias(BigFoo)
+BigFooAlias = T.type_alias {BigFoo}
 # ^ hover: <Type: BigFoo>
 # ^ def: BigFooAlias
                          # ^ usage: BigFoo

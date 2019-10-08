@@ -44,7 +44,7 @@ class SomeClass < AnotherModule::NestedModule
         # ^ usage: AnotherModule3
 end
 
-AliasForClass = T.type_alias(WillGetAliased)
+AliasForClass = T.type_alias {WillGetAliased}
 # ^ def: AliasForClass
                            # ^ usage: WillGetAliased
 
