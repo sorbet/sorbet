@@ -40,10 +40,22 @@ class Sorbet::Private::HiddenMethodFinder::Test::Simple < MiniTest::Spec
           end
           assert_equal(true, success)
 
-          # we encode the expects contents into a JSON file in the test directory
+          # the hidden definitions file itself
+          hidden = File.read('sorbet/rbi/hidden-definitions/hidden.rbi')
+
+          # first we compare against a generated version
+
+          # we encode the expects contents into a JSON file in the
+          # test directory: while this is redundant with the full
+          # generated file, this also keeps us robust against
+          # accidentally committing a changed expectation file which
+          # has removed something relevant we cared about (as expected
+          # hidden.rbi files are rather large even for trivial
+          # examples!)
+          assert_equal(hidden, File.read(File.join(olddir, path, 'hidden.rbi.exp')))
+
           expectations = JSON.parse(File.read(File.join(dir, path, "expectations.json")))
           expectations.each do |exp|
-            hidden = File.read('sorbet/rbi/hidden-definitions/hidden.rbi')
             # we might expect some substring to /definitely/ appear in hidden.rbi
             if exp["assertion"] == "contains"
               assert_match(exp["substring"], hidden)
