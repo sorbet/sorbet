@@ -7,6 +7,7 @@ source .buildkite/tools/setup-bazel.sh
 apt-get update
 apt-get install -yy wget
 wget -O - https://github.com/buildkite/terminal-to-html/releases/download/v3.2.0/terminal-to-html-3.2.0-linux-amd64.gz | gunzip -c > ./terminal-to-html
+chmod u+x ./terminal-to-html
 
 set -x
 err=0
