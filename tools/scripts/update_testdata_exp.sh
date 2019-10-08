@@ -39,6 +39,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
 
   if [ -n "$basename" ]; then
     llvmir=$(mktemp -d)
+    # shellcheck disable=SC1010
     echo f\(\) \{ \
       bazel-bin/main/sorbet_llvm --silence-dev-message \
         --no-error-count \
