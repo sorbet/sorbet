@@ -44,6 +44,7 @@ cc_library(
         "-march=x86-64",
     ],
     linkstatic = 1,  # we are doing this only for llvm ir
+    visibility = ["//visibility:public"],
     deps = [
         "@ruby_2_4_3//:ruby_headers",
         "@ruby_2_4_3//:ruby_private_headers",
