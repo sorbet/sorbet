@@ -103,7 +103,7 @@ cc_library(
         "enc/trans",
         "enc/unicode/9.0.0",
     ],
-    visibility = [ "//visibility:private" ],
+    visibility = [ "//visibility:public" ],
 )
 
 cc_library(
@@ -117,7 +117,7 @@ cc_library(
     ":darwin": [],
   }),
   deps = [ ":ruby_headers" ],
-  visibility = [ "//visibility:private" ],
+  visibility = [ "//visibility:public" ],
 )
 
 RUBY_COPTS = [
@@ -1166,7 +1166,7 @@ filegroup(
 
         RBCONFIG,
 
-    visibility = ["//visibility:private"],
+    visibility = ["//visibility:public"],
 )
 
 
