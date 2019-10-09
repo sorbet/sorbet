@@ -24,7 +24,7 @@ external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$llvmir"/*.o -undefined dyn
 for ext in "llo"; do
     exp=${rb%.rb}.$ext.exp
     if [ -f "$exp" ]; then
-        diff "$llvmir"/*.$ext "$exp";
+        diff "$llvmir/${base%.rb}.$ext" "$exp";
     fi
 done
 
