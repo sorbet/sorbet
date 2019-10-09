@@ -909,9 +909,10 @@ class ResolveTypeParamsWalk {
 
     static void resolveTypeMember(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs) {
         auto data = lhs.data(ctx);
+        auto owner = data->owner;
 
         core::LambdaParam *parentType = nullptr;
-        auto parentMember = data->owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
+        auto parentMember = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
         if (parentMember.exists()) {
             if (parentMember.data(ctx)->isTypeMember()) {
                 parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType.get());
@@ -998,20 +999,29 @@ class ResolveTypeParamsWalk {
             }
         }
 
-        // If the class is now fully resolved, fix its singleton's AttachedClass
-        // bounds.
-        if (isGenericResolved(ctx, ctx.owner)) {
-            auto singleton = ctx.owner.data(ctx)->singletonClass(ctx);
-            ENFORCE(singleton.exists());
+        // Once the owner has had all of its type members resolved, resolve the
+        // AttachedClass on its singleton.
+        if (isGenericResolved(ctx, owner)) {
+            resolveAttachedClass(ctx, owner);
+        }
+    }
 
-            // When AttachedClass is present on the singleton, update its upper
-            // bound now that all of the other type members have been defined.
-            auto attachedClass = singleton.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
-            if (attachedClass.exists()) {
-                auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType.get());
-                ENFORCE(lambdaParam != nullptr);
+    static void resolveAttachedClass(core::MutableContext ctx, core::SymbolRef sym) {
+        ENFORCE(sym.data(ctx)->isClassOrModule());
 
-                lambdaParam->upperBound = lhs.data(ctx)->externalType(ctx);
+        auto singleton = sym.data(ctx)->singletonClass(ctx);
+
+        // NOTE: AttachedClass will not exist on `T.untyped`, which is a problem
+        // because RuntimeProfiled is used as a synonym for `T.untyped`
+        // internally.
+        auto attachedClass = singleton.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+        if (attachedClass.exists()) {
+            auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType.get());
+            ENFORCE(lambdaParam != nullptr);
+
+            if (isTodo(lambdaParam->lowerBound)) {
+                lambdaParam->upperBound = sym.data(ctx)->externalType(ctx);
+                lambdaParam->lowerBound = core::Types::bottom();
             }
         }
     }
@@ -1056,6 +1066,17 @@ class ResolveTypeParamsWalk {
     }
 
 public:
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
+        // If this is a class with no type members defined, resolve attached
+        // class immediately. Otherwise, it will be resolved once all type
+        // members have been resolved as well.
+        if (isGenericResolved(ctx, klass->symbol)) {
+            resolveAttachedClass(ctx, klass->symbol);
+        }
+
+        return klass;
+    }
+
     unique_ptr<ast::Send> preTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
         switch (send->fun._id) {
             case core::Names::typeAlias()._id:
@@ -1179,6 +1200,11 @@ public:
     static vector<ast::ParsedFile> run(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
         ResolveTypeParamsWalk params;
         Timer timeit(ctx.state.errorQueue->logger, "resolver.type_params");
+
+        // handle some special cases that are defined in the payload
+        resolveAttachedClass(ctx, core::Symbols::OpusEnum());
+        resolveAttachedClass(ctx, core::Symbols::Magic());
+
         for (auto &tree : trees) {
             tree.tree = ast::TreeMap::apply(ctx, params, std::move(tree.tree));
         }
