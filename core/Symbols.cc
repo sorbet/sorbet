@@ -1196,19 +1196,19 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
         auto rhsShort = rhs.first.data(gs)->shortName(gs);
         auto compareShort = lhsShort.compare(rhsShort);
         if (compareShort != 0) {
-            return compareShort;
+            return compareShort < 0;
         }
         auto lhsRaw = lhs.first.data(gs)->showRaw(gs);
         auto rhsRaw = rhs.first.data(gs)->showRaw(gs);
         auto compareRaw = lhsRaw.compare(rhsRaw);
         if (compareRaw != 0) {
-            return compareRaw;
+            return compareRaw < 0;
         }
         auto lhsSym = lhs.second.data(gs)->showRaw(gs);
         auto rhsSym = rhs.second.data(gs)->showRaw(gs);
         auto compareSym = lhsSym.compare(rhsSym);
         if (compareSym != 0) {
-            return compareSym;
+            return compareSym < 0;
         }
         ENFORCE(false, "no stable sort");
         return 0;
