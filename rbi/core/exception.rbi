@@ -169,7 +169,7 @@ class Exception < Object
 
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, NilClass),
     )
     .void
   end
