@@ -12,7 +12,7 @@ class Hello
 end
 
 def main
-  puts Helo.new
+  puts Gem.new
   #    ^^^^ error: Unable to resolve constant `Helo`
   #    ^^^^ apply-code-action: [A] Replace with `Gem`
 end
