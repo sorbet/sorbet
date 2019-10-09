@@ -45,8 +45,8 @@ void DefinitionRewriter::run(core::MutableContext &ctx, ast::ClassDef *klass) {
     ast::MethodDef::ARGS_store args;
     auto loc = klass->loc;
     args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc,
-                loc, core::Names::magic(), std::move(args), ast::MK::EmptyTree()));
+    klass->rhs.insert(klass->rhs.begin(),
+                      ast::MK::Method(loc, loc, core::Names::magic(), std::move(args), ast::MK::EmptyTree()));
     unique_ptr<ast::ClassDef> uniqueClass(klass);
     auto ret = ast::TreeMap::apply(ctx, definitionRewriterWalker, std::move(uniqueClass));
     klass = static_cast<ast::ClassDef *>(ret.release());
