@@ -151,6 +151,11 @@ class Sorbet::Private::Static::ENVClass
     .returns(T::Hash[String, T.nilable(String)])
   end
   def update(key, &blk); end
+
+  sig do
+    returns(T::Array[String])
+  end
+  def keys; end
 end
 # [`ENV`](https://docs.ruby-lang.org/en/2.6.0/ENV.html) is a hash-like accessor
 # for environment variables.
