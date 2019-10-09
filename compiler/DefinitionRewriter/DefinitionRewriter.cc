@@ -40,33 +40,14 @@ private:
     DefinitionRewriterWalker() = default;
 };
 
-void defineMagic(ast::ClassDef *klass) {
+void DefinitionRewriter::run(core::MutableContext &ctx, ast::ClassDef *klass) {
+    DefinitionRewriterWalker definitionRewriterWalker;
     ast::MethodDef::ARGS_store args;
     auto loc = klass->loc;
     args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-    klass->rhs.insert(klass->rhs.begin(),
-                      ast::MK::Method(loc, loc, core::Names::magic(), std::move(args), ast::MK::EmptyTree()));
-}
-
-// This is really a deficiency in Sorbet's AST and should probably be upstreamed
-// into the desugarer
-unique_ptr<ast::ClassDef> wrapInClass(ast::ClassDef *klass) {
-    if (ast::isa_tree<ast::EmptyTree>(klass->name.get())) {
-        return unique_ptr<ast::ClassDef>(klass);
-    }
-    auto loc = klass->loc;
-    ast::ClassDef::ANCESTORS_store ancestors;
-    ast::ClassDef::RHS_store rhs;
-    rhs.emplace_back(klass);
-    return ast::MK::Class(loc, loc, ast::MK::EmptyTree(), std::move(ancestors), std::move(rhs),
-                          ast::ClassDefKind::Module);
-}
-
-void DefinitionRewriter::run(core::MutableContext &ctx, ast::ClassDef *klass) {
-    auto uniqueClass = wrapInClass(klass);
-    defineMagic(uniqueClass.get());
-
-    DefinitionRewriterWalker definitionRewriterWalker;
+    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc,
+                loc, core::Names::magic(), std::move(args), ast::MK::EmptyTree()));
+    unique_ptr<ast::ClassDef> uniqueClass(klass);
     auto ret = ast::TreeMap::apply(ctx, definitionRewriterWalker, std::move(uniqueClass));
     klass = static_cast<ast::ClassDef *>(ret.release());
     ENFORCE(klass);

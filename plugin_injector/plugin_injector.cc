@@ -46,6 +46,10 @@ public:
                                                  globalInitializers);
     };
     virtual void patchDSL(core::MutableContext &gs, ast::ClassDef *klass) const override {
+        if (!ast::isa_tree<ast::EmptyTree>(klass->name.get())) {
+            return;
+        }
+
         sorbet::compiler::DefinitionRewriter::run(gs, klass);
     };
     virtual ~LLVMSemanticExtension(){};
