@@ -1047,13 +1047,14 @@ class ResolveTypeParamsWalk {
 
     static void resolveTypeAlias(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs) {
         // this is provided by ResolveConstantsWalk
-        ENFORCE(!rhs->args.empty());
+        ENFORCE(rhs->block);
+        ENFORCE(rhs->block->body);
 
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
         lhs.data(ctx)->resultType = TypeSyntax::getResultType(
-            ctx, *(rhs->args[0]), ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
+            ctx, *(rhs->block->body), ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
     }
 
     static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job) {
