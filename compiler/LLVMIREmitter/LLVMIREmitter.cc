@@ -87,6 +87,13 @@ llvm::Value *getIdFor(llvm::LLVMContext &lctx, llvm::IRBuilder<> &builder, strin
     return global;
 }
 
+void addExpectedBool(llvm::LLVMContext &lctx, llvm::Module *module, llvm::IRBuilder<> &builder, llvm::Value *value,
+                     bool expected) {
+    builder.CreateCall(
+        llvm::Intrinsic::getDeclaration(module, llvm::Intrinsic::ID::expect, {llvm::Type::getInt1Ty(lctx)}),
+        {value, llvm::ConstantInt::get(llvm::Type::getInt1Ty(lctx), llvm::APInt(1, expected ? 1 : 0, true))});
+}
+
 void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cfg::CFG &cfg,
                         std::unique_ptr<ast::MethodDef> &md, const string &functionName, llvm::Module *module,
                         llvm::BasicBlock *globalInitializers) {
@@ -130,10 +137,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
             argCountRaw,
             llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), llvm::APInt(32, requiredArgumentCount, true)),
             "isWrongArgCount");
-
-        builder.CreateCall(
-            llvm::Intrinsic::getDeclaration(module, llvm::Intrinsic::ID::expect, {llvm::Type::getInt1Ty(lctx)}),
-            {isWrongArgCount, llvm::ConstantInt::get(llvm::Type::getInt1Ty(lctx), llvm::APInt(1, 0, true))});
+        addExpectedBool(lctx, module, builder, isWrongArgCount, false);
         builder.CreateCondBr(isWrongArgCount, argCountFailBlock, argCountSuccessBlock);
 
         builder.SetInsertPoint(argCountFailBlock);
