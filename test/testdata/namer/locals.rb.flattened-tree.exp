@@ -1,5 +1,12 @@
 begin
-  ::Sorbet::Private::Static.keep_for_ide(::TestLocals)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::Sorbet::Private::Static.keep_for_ide(::TestLocals)
+        <emptyTree>
+      end
+    end
+  end
   class ::TestLocals<<C TestLocals>> < (::<todo sym>)
     def method<method>(<blk>)
       begin

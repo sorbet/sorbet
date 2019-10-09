@@ -1,10 +1,12 @@
-class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-  def take_arguments<<C <todo sym>>>(a, b = 1, *c, d:, e: = 2, *f:, &g)
-    begin
-      [a, b, c, d, e, f, g]
-      h = 1
-      <self>.proc() do |a, b = 1, *c, d:, e: = 2, *f:, &g; h|
-        [a, b, c, d, e, f, g, h]
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def take_arguments<<C <todo sym>>>(a, b = 1, *c, d:, e: = 2, *f:, &g)
+      begin
+        [a, b, c, d, e, f, g]
+        h = 1
+        <self>.proc() do |a, b = 1, *c, d:, e: = 2, *f:, &g; h|
+          [a, b, c, d, e, f, g, h]
+        end
       end
     end
   end

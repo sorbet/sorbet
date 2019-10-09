@@ -1,5 +1,12 @@
 begin
-  ::Sorbet::Private::Static.keep_for_ide(::TestCasts)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::Sorbet::Private::Static.keep_for_ide(::TestCasts)
+        <emptyTree>
+      end
+    end
+  end
   class ::TestCasts<<C TestCasts>> < (::<todo sym>)
     <emptyTree>
 

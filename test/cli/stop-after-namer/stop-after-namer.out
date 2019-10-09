@@ -1,6 +1,9 @@
 No errors! Great job.
-class ::<root> ()
+class ::<root> < ::<todo sym> () @ test/cli/stop-after-namer/stop-after-namer.rb:3
   field #$global @ test/cli/stop-after-namer/stop-after-namer.rb:7
+  class ::<Class:<root>> < ::<todo sym> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/stop-after-namer/stop-after-namer.rb:3
+      argument <blk><block> @ Loc {file=test/cli/stop-after-namer/stop-after-namer.rb start=??? end=???}
   class ::A < ::<todo sym> () @ test/cli/stop-after-namer/stop-after-namer.rb:3
     method ::A#method (method_arg, <blk>) @ test/cli/stop-after-namer/stop-after-namer.rb:4
       argument method_arg<> @ Loc {file=test/cli/stop-after-namer/stop-after-namer.rb start=4:14 end=4:24}

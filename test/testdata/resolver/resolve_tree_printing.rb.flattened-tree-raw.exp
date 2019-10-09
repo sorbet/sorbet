@@ -1,19 +1,38 @@
 InsSeq{
   stats = [
-    Send{
-      recv = ConstantLit{
-        orig = nullptr
-        symbol = ::Sorbet::Private::Static
-      }
-      fun = <U keep_for_ide>
-      block = nullptr
-      args = [
-        ConstantLit{
-          orig = UnresolvedConstantLit{
-            scope = EmptyTree
-            cnst = <C <U A>>
+    ClassDef{
+      kind = class
+      name = EmptyTree<<C <U <root>>>>
+      ancestors = []
+      rhs = [
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Sorbet::Private::Static
+                }
+                fun = <U keep_for_ide>
+                block = nullptr
+                args = [
+                  ConstantLit{
+                    orig = UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U A>>
+                    }
+                    symbol = ::A
+                  }
+                ]
+              }
+            ],
+            expr = EmptyTree
           }
-          symbol = ::A
         }
       ]
     }

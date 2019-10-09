@@ -1,88 +1,90 @@
-class <emptyTree>::<C Examples><<C <todo sym>>> < (::<todo sym>)
-  def i_like_ifs<<C <todo sym>>>(&<blk>)
-    if true
-      return 1
-    else
-      return 2
-    end
-  end
-
-  def i_like_exps<<C <todo sym>>>(&<blk>)
-    if true
-      1
-    else
-      2
-    end
-  end
-
-  def return_in_one_branch1<<C <todo sym>>>(&<blk>)
-    if true
-      return 1
-    else
-      2
-    end
-  end
-
-  def return_in_one_branch2<<C <todo sym>>>(&<blk>)
-    if true
-      1
-    else
-      return 2
-    end
-  end
-
-  def variables<<C <todo sym>>>(&<blk>)
-    begin
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C Examples><<C <todo sym>>> < (::<todo sym>)
+    def i_like_ifs<<C <todo sym>>>(&<blk>)
       if true
-        a = 1
+        return 1
       else
-        a = 2
+        return 2
       end
+    end
+
+    def i_like_exps<<C <todo sym>>>(&<blk>)
+      if true
+        1
+      else
+        2
+      end
+    end
+
+    def return_in_one_branch1<<C <todo sym>>>(&<blk>)
+      if true
+        return 1
+      else
+        2
+      end
+    end
+
+    def return_in_one_branch2<<C <todo sym>>>(&<blk>)
+      if true
+        1
+      else
+        return 2
+      end
+    end
+
+    def variables<<C <todo sym>>>(&<blk>)
+      begin
+        if true
+          a = 1
+        else
+          a = 2
+        end
+        if false
+          b = 1
+        else
+          b = 2
+        end
+        a.+(b)
+      end
+    end
+
+    def variables_and_loop<<C <todo sym>>>(cond, &<blk>)
+      begin
+        if true
+          a = 1
+        else
+          a = 2
+        end
+        while true
+          if cond
+            b = 1
+          else
+            b = 2
+          end
+        end
+        b
+      end
+    end
+
+    def variables_loop_if<<C <todo sym>>>(cond, &<blk>)
+      begin
+        while true
+          if cond
+            b = 1
+          else
+            b = 2
+          end
+        end
+        b
+      end
+    end
+
+    def take_arguments<<C <todo sym>>>(i, &<blk>)
       if false
-        b = 1
+        2
       else
-        b = 2
+        i
       end
-      a.+(b)
-    end
-  end
-
-  def variables_and_loop<<C <todo sym>>>(cond, &<blk>)
-    begin
-      if true
-        a = 1
-      else
-        a = 2
-      end
-      while true
-        if cond
-          b = 1
-        else
-          b = 2
-        end
-      end
-      b
-    end
-  end
-
-  def variables_loop_if<<C <todo sym>>>(cond, &<blk>)
-    begin
-      while true
-        if cond
-          b = 1
-        else
-          b = 2
-        end
-      end
-      b
-    end
-  end
-
-  def take_arguments<<C <todo sym>>>(i, &<blk>)
-    if false
-      2
-    else
-      i
     end
   end
 end
