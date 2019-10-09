@@ -256,6 +256,8 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
                     }
                 }
                 gs = core::GlobalState::replaceFile(move(gs), fref, f);
+                // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
+                fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config.opts);
                 subset.emplace_back(fref);
             }
         }
