@@ -7,10 +7,10 @@ def smoke_tests(versions):
                 "vendor/cache/cantor-1.2.1.gem",
                 "Gemfile",
                 "Gemfile.lock",
+                "@{}//:ruby".format(version),
             ],
             deps = [
                 "@bazel_tools//tools/bash/runfiles",
-                "@{}//:ruby".format(version),
             ],
             srcs = ["smoke_test.sh"],
             args = [version],
