@@ -512,7 +512,7 @@ class Numeric < Object
     )
     .returns(Numeric)
   end
-  def round(arg0); end
+  def round(arg0 = 0); end
 
   sig do
     params(
