@@ -94,6 +94,10 @@ module T::Types
         return true
       end
 
+      if t1.is_a?(T::Private::Types::TypeAlias)
+        return t1.aliased_type.subtype_of?(t2)
+      end
+
       # Rest of (1)
       subtype_of_single?(t2)
     end
