@@ -120,8 +120,13 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             response->result = make_unique<Hover>(
                 formatHoverText(config.clientHoverMarkupKind, type->showWithMoreInfo(*gs), documentation));
         } else {
-            response->result = make_unique<Hover>(formatHoverText(
-                config.clientHoverMarkupKind, resp->getRetType()->showWithMoreInfo(*gs), documentation));
+            core::TypePtr retType = resp->getRetType();
+            // Some untyped arguments have null types.
+            if (!retType) {
+                retType = core::Types::untypedUntracked();
+            }
+            response->result = make_unique<Hover>(
+                formatHoverText(config.clientHoverMarkupKind, retType->showWithMoreInfo(*gs), documentation));
         }
     }
     return LSPResult::make(move(gs), move(response));
