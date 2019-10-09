@@ -1009,20 +1009,32 @@ class ResolveTypeParamsWalk {
     static void resolveAttachedClass(core::MutableContext ctx, core::SymbolRef sym) {
         ENFORCE(sym.data(ctx)->isClassOrModule());
 
-        auto singleton = sym.data(ctx)->singletonClass(ctx);
+        auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
+        if (!singleton.exists()) {
+            return;
+        }
 
         // NOTE: AttachedClass will not exist on `T.untyped`, which is a problem
         // because RuntimeProfiled is used as a synonym for `T.untyped`
         // internally.
         auto attachedClass = singleton.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
-        if (attachedClass.exists()) {
-            auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType.get());
-            ENFORCE(lambdaParam != nullptr);
+        if (!attachedClass.exists()) {
+            return;
+        }
 
-            if (isTodo(lambdaParam->lowerBound)) {
-                lambdaParam->upperBound = sym.data(ctx)->externalType(ctx);
-                lambdaParam->lowerBound = core::Types::bottom();
-            }
+        auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType.get());
+        ENFORCE(lambdaParam != nullptr);
+
+        if (isTodo(lambdaParam->lowerBound)) {
+            lambdaParam->upperBound = sym.data(ctx)->externalType(ctx);
+            lambdaParam->lowerBound = core::Types::bottom();
+        }
+
+        // Since we've resolved the singleton's AttachedClass type member, check
+        // to see if there's another singleton above that must also be resolved.
+        auto parent = singleton.data(ctx)->lookupSingletonClass(ctx);
+        if (parent.exists()) {
+            resolveAttachedClass(ctx, singleton);
         }
     }
 
@@ -1200,10 +1212,6 @@ public:
     static vector<ast::ParsedFile> run(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
         ResolveTypeParamsWalk params;
         Timer timeit(ctx.state.errorQueue->logger, "resolver.type_params");
-
-        // handle some special cases that are defined in the payload
-        resolveAttachedClass(ctx, core::Symbols::OpusEnum());
-        resolveAttachedClass(ctx, core::Symbols::Magic());
 
         for (auto &tree : trees) {
             tree.tree = ast::TreeMap::apply(ctx, params, std::move(tree.tree));

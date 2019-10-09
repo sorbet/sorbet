@@ -155,6 +155,23 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
             }
         }
     }
+
+    // If this class has no type members, fix attached class early.
+    if (sym.data(gs)->typeMembers().empty()) {
+        auto singleton = sym.data(gs)->lookupSingletonClass(gs);
+        if (singleton.exists()) {
+            // AttachedClass doesn't exist on `T.untyped`, which is a problem
+            // with RuntimeProfiled.
+            auto attachedClass = singleton.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
+            if (attachedClass.exists()) {
+                auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(gs)->resultType.get());
+                ENFORCE(lambdaParam != nullptr);
+
+                lambdaParam->lowerBound = core::Types::bottom();
+                lambdaParam->upperBound = sym.data(gs)->externalType(gs);
+            }
+        }
+    }
 }
 
 }; // namespace
