@@ -1,2 +1,1 @@
-# typed: true
 puts(Integer)

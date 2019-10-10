@@ -15,7 +15,7 @@ cleanup() {
 
 ruby "$rb" 2>&1 | tee "$rbout"
 
-main/sorbet_llvm --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$rb"
+main/sorbet_llvm --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$rb"
 
 base=$(basename "$rb")
 bundle="$llvmir/${base%.rb}.bundle"
