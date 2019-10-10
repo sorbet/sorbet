@@ -32,8 +32,7 @@ for ext in "llo"; do
     fi
 done
 
-# TODO Remove the "$rb" once the bundle does something for real
-ruby -r "$bundle" "$rb" 2>&1 | tee "$srbout"
+ruby -r "$bundle" 2>&1 | tee "$srbout"
 
 diff -a "$rbout" "$srbout"
 
