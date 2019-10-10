@@ -105,7 +105,6 @@ def _hidden_methods_test(test_path, ruby):
             "$(location {})".format(actual),
             test_path,
             ruby,
-            "$(location {})".format(expected),
         ],
 
         # NOTE: these tags cause this test to be skipped by `bazel test //...`,
