@@ -101,26 +101,6 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     auto bb = llvm::BasicBlock::Create(lctx, "entry", entryFunc);
     builder.CreateBr(bb);
     builder.SetInsertPoint(bb);
-    ENFORCE(sym.data(gs)->isMethod());
-    // auto owner = findOwningModule(sym);
-    auto rawCString = builder.CreateGlobalStringPtr("CompiledDemo", "moduleName");
-    auto moduleValue = builder.CreateCall(module->getFunction("sorbet_defineTopLevelModule"), {rawCString});
-    // todo: ^^^ use sorbet_getConstant to find the right constant instead
-
-    auto methodName = builder.CreateGlobalStringPtr(sym.data(gs)->name.show(gs), "methodName");
-    auto universalSignature = llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), true));
-
-    // This name has to match what we emit in LLVMIREmitter::run
-    string functionName = sym.data(gs)->toStringFullName(gs);
-    auto func = module->getFunction(functionName);
-    ENFORCE(func);
-    auto ptr = builder.CreateBitCast(func, universalSignature);
-
-    builder.CreateCall(module->getFunction("sorbet_defineMethodSingleton"),
-                       {moduleValue, methodName, ptr, llvm::ConstantInt::get(lctx, llvm::APInt(32, -1, true))});
-
-    // sorbet_defineTopLevelModule
-    // sorbet_defineMethodSingleton
     builder.CreateRetVoid();
 
     /* run optimizations */
