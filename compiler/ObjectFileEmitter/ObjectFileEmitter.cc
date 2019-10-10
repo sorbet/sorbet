@@ -4,6 +4,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
+#include "llvm/IR/Verifier.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Host.h"
 #include "llvm/Support/TargetRegistry.h"
@@ -102,6 +103,8 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     builder.CreateBr(bb);
     builder.SetInsertPoint(bb);
     builder.CreateRetVoid();
+
+    ENFORCE(!llvm::verifyFunction(*entryFunc, &llvm::errs()), "see above");
 
     /* run optimizations */
 
