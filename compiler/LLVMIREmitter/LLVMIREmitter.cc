@@ -8,6 +8,7 @@
 #include "cfg/CFG.h"
 #include "common/typecase.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
+#include "compiler/Names/Names.h"
 #include <string_view>
 
 using namespace std;
@@ -219,7 +220,10 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(gs)->shortName(gs);
-                        if (i->fun == core::Names::magic()) {
+                        if (i->fun == Names::registerClass) {
+                            return;
+                        }
+                        if (i->fun == Names::registerMethod) {
                             return;
                         }
                         auto rawId =

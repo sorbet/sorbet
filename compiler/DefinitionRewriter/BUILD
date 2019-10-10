@@ -9,6 +9,7 @@ cc_library(
     deps = [
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//ast/treemap",
+        "//compiler/Names",
         "@spdlog",
     ],
 )

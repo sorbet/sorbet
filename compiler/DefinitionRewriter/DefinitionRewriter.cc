@@ -1,4 +1,5 @@
 #include "compiler/DefinitionRewriter/DefinitionRewriter.h"
+#include "compiler/Names/Names.h"
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 
@@ -17,7 +18,7 @@ public:
             auto loc = stat->loc;
             auto classDef = ast::cast_tree<ast::ClassDef>(stat.get());
             if (classDef) {
-                auto magic = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::root()), DefinitionRewriter::registerClass,
+                auto magic = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::root()), Names::registerClass,
                                             classDef->name->deepCopy());
                 i++;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
@@ -26,7 +27,7 @@ public:
 
             auto methodDef = ast::cast_tree<ast::MethodDef>(stat.get());
             if (methodDef) {
-                auto magic = ast::MK::Send2(loc, ast::MK::Constant(loc, core::Symbols::root()), DefinitionRewriter::registerMethod,
+                auto magic = ast::MK::Send2(loc, ast::MK::Constant(loc, core::Symbols::root()), Names::registerMethod,
                                             rootClassDef->name->deepCopy(), ast::MK::Symbol(loc, methodDef->name));
                 i++;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
@@ -42,28 +43,24 @@ private:
 
 void registerMagicMethods(core::MutableContext &ctx, ast::ClassDef *klass) {
     auto loc = klass->loc;
-    DefinitionRewriter::registerClass = ctx.state.enterNameUTF8("<registerClass>");
-    DefinitionRewriter::registerMethod = ctx.state.enterNameUTF8("<registerMethod>");
 
     ast::MethodDef::ARGS_store classArgs;
     classArgs.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc, loc, DefinitionRewriter::registerClass, std::move(classArgs), ast::MK::EmptyTree()));
+    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc, loc, Names::registerClass, std::move(classArgs), ast::MK::EmptyTree()));
 
     ast::MethodDef::ARGS_store methodArgs;
     methodArgs.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc, loc, DefinitionRewriter::registerMethod, std::move(methodArgs), ast::MK::EmptyTree()));
+    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc, loc, Names::registerMethod, std::move(methodArgs), ast::MK::EmptyTree()));
 }
 
 void DefinitionRewriter::run(core::MutableContext &ctx, ast::ClassDef *klass) {
     DefinitionRewriterWalker definitionRewriterWalker;
+    Names::init(ctx);
     registerMagicMethods(ctx, klass);
     unique_ptr<ast::ClassDef> uniqueClass(klass);
     auto ret = ast::TreeMap::apply(ctx, definitionRewriterWalker, std::move(uniqueClass));
     klass = static_cast<ast::ClassDef *>(ret.release());
     ENFORCE(klass);
 }
-
-core::NameRef DefinitionRewriter::registerClass;
-core::NameRef DefinitionRewriter::registerMethod;
 
 } // namespace sorbet::compiler

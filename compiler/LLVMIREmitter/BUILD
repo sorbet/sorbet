@@ -11,5 +11,6 @@ cc_library(
         "@com_stripe_ruby_typer//cfg",
         "@org_llvm_darwin",
         "@spdlog",
+        "//compiler/Names",
     ],
 )

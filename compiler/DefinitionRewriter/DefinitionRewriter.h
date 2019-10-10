@@ -14,8 +14,6 @@ namespace sorbet::compiler {
 class DefinitionRewriter {
 public:
     static void run(core::MutableContext &ctx, ast::ClassDef *klass);
-    static core::NameRef registerClass;
-    static core::NameRef registerMethod;
 };
 } // namespace sorbet::compiler
 #endif
