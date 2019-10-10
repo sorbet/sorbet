@@ -1030,11 +1030,17 @@ class ResolveTypeParamsWalk {
             lambdaParam->lowerBound = core::Types::bottom();
         }
 
-        // Since we've resolved the singleton's AttachedClass type member, check
-        // to see if there's another singleton above that must also be resolved.
-        auto parent = singleton.data(ctx)->lookupSingletonClass(ctx);
-        if (parent.exists()) {
-            resolveAttachedClass(ctx, singleton);
+        // If all of the singleton members have been resolved, attempt to
+        // resolve the singleton of the singleton, if it exists. This case is
+        // not redund with resolveTypeMember, as it will cover the case where
+        // there are no non-AttachedClass type members defined on the singleton.
+        if (isGenericResolved(ctx, singleton)) {
+            // Since we've resolved the singleton's AttachedClass type member, check
+            // to see if there's another singleton above that must also be resolved.
+            auto parent = singleton.data(ctx)->lookupSingletonClass(ctx);
+            if (parent.exists()) {
+                resolveAttachedClass(ctx, singleton);
+            }
         }
     }
 
