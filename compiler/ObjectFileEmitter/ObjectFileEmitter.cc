@@ -90,8 +90,13 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     llvm::IRBuilder<> builder(lctx);
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
-    auto baseName = objectName;
+    bool isSpecialEntrypoint = false;
     if (sym.data(gs)->name.data(gs)->unique.original == core::Names::staticInit()) {
+        isSpecialEntrypoint = true;
+    }
+
+    auto baseName = objectName;
+    if (isSpecialEntrypoint) {
         baseName = FileOps::getFileName(sym.data(gs)->loc().file().data(gs).path());
         baseName = baseName.substr(0, baseName.rfind(".rb"));
     }
@@ -102,6 +107,23 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     auto bb = llvm::BasicBlock::Create(lctx, "entry", entryFunc);
     builder.CreateBr(bb);
     builder.SetInsertPoint(bb);
+
+    // Call the LLVM method that was made by LLVMIREmitter from this Init_ method
+    auto staticInitFunc = module->getFunction((string)objectName);
+    if (isSpecialEntrypoint) {
+        ENFORCE(!staticInitFunc);
+        staticInitFunc =
+            module->getFunction(gs.lookupStaticInitForFile(sym.data(gs)->loc()).data(gs)->toStringFullName(gs));
+        ENFORCE(staticInitFunc);
+    }
+    if (staticInitFunc) {
+        builder.CreateCall(staticInitFunc,
+                           {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
+                            llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(lctx)),
+                            llvm::ConstantInt::get(lctx, llvm::APInt(64, 0, true))},
+                           (string)objectName);
+    }
+
     builder.CreateRetVoid();
 
     ENFORCE(!llvm::verifyFunction(*entryFunc, &llvm::errs()), "see above");
