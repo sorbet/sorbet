@@ -16,9 +16,9 @@ declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #0
 
 ; Function Attrs: nounwind ssp uwtable
 define internal fastcc i64 @sorbet_rb_arity_error_new(i32) unnamed_addr #1 {
-  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str, i64 0, i64 0), i32 %0, i32 0) #6
+  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str, i64 0, i64 0), i32 %0, i32 0) #7
   %3 = load i64, i64* @rb_eArgError, align 8, !tbaa !0
-  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #6
+  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #7
   ret i64 %4
 }
 
@@ -29,7 +29,7 @@ declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr #0
 ; Function Attrs: noreturn nounwind ssp uwtable
 define internal fastcc void @sorbet_rb_error_arity(i32) unnamed_addr #2 {
   %2 = tail call fastcc i64 @sorbet_rb_arity_error_new(i32 %0)
-  tail call void @rb_exc_raise(i64 %2) #7
+  tail call void @rb_exc_raise(i64 %2) #8
   unreachable
 }
 
@@ -45,10 +45,10 @@ readGlobals:
 
 argCountSuccess:                                  ; preds = %readGlobals
   %rubyID_puts = load i64, i64* @rubyId_global_puts, align 8
-  %3 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"userStr_hello world", i64 0, i64 0), i64 11) #6
+  %3 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"userStr_hello world", i64 0, i64 0), i64 11) #7
   %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
   store i64 %3, i64* %callArgsAddr, align 8
-  %4 = call i64 @rb_funcallv(i64 %2, i64 %rubyID_puts, i32 1, i64* nonnull %callArgsAddr) #6
+  %4 = call i64 @rb_funcallv(i64 %2, i64 %rubyID_puts, i32 1, i64* nonnull %callArgsAddr) #7
   ret i64 8
 
 argCountFailBlock:                                ; preds = %readGlobals
@@ -56,22 +56,37 @@ argCountFailBlock:                                ; preds = %readGlobals
   unreachable
 }
 
-; Function Attrs: nounwind ssp
+; Function Attrs: nounwind sspreq
 define void @Init_hello() local_unnamed_addr #5 {
 initializeGlobals:
-  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0)) #6
+  %callArgs.i = alloca [2 x i64], align 8
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0)) #7
   store i64 %0, i64* @rubyId_global_puts, align 8
+  %1 = bitcast [2 x i64]* %callArgs.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %1)
+  %2 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"userStr_hello world", i64 0, i64 0), i64 11) #7
+  %callArgsAddr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
+  store i64 %2, i64* %callArgsAddr.i, align 8
+  %3 = call i64 @rb_funcallv(i64 0, i64 %0, i32 1, i64* nonnull %callArgsAddr.i) #7
+  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %1)
   ret void
 }
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.start.p0i8(i64, i8* nocapture) #6
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.end.p0i8(i64, i8* nocapture) #6
 
 attributes #0 = { "addedToSilenceEmptyAttrsError" }
 attributes #1 = { nounwind ssp uwtable }
 attributes #2 = { noreturn nounwind ssp uwtable }
 attributes #3 = { noreturn }
 attributes #4 = { nounwind sspreq uwtable }
-attributes #5 = { nounwind ssp }
-attributes #6 = { nounwind }
-attributes #7 = { noreturn nounwind }
+attributes #5 = { nounwind sspreq }
+attributes #6 = { argmemonly nounwind }
+attributes #7 = { nounwind }
+attributes #8 = { noreturn nounwind }
 
 !0 = !{!1, !1, i64 0}
 !1 = !{!"long", !2, i64 0}

@@ -41,7 +41,7 @@ argCountFailBlock:                                ; preds = %readGlobals
   unreachable
 }
 
-; Function Attrs: norecurse nounwind readnone
+; Function Attrs: norecurse nounwind readnone sspreq
 define void @Init_method() local_unnamed_addr #5 {
 initializeGlobals:
   ret void
@@ -52,7 +52,7 @@ attributes #1 = { "addedToSilenceEmptyAttrsError" }
 attributes #2 = { noreturn nounwind ssp uwtable }
 attributes #3 = { noreturn }
 attributes #4 = { nounwind sspreq uwtable }
-attributes #5 = { norecurse nounwind readnone }
+attributes #5 = { norecurse nounwind readnone sspreq }
 attributes #6 = { nounwind }
 attributes #7 = { noreturn nounwind }
 
