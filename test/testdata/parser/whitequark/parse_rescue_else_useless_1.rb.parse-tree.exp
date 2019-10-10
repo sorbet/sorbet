@@ -3,8 +3,12 @@ Kwbegin {
     Integer {
       val = "1"
     }
-    Integer {
-      val = "2"
+    Begin {
+      stmts = [
+        Integer {
+          val = "2"
+        }
+      ]
     }
   ]
 }

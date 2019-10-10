@@ -175,7 +175,7 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>
   end
 
-  {x => y, "foo".intern() => 1}
+  {x => y, :"foo" => 1}
 
   <emptyTree>
 

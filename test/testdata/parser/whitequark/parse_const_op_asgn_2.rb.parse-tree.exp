@@ -1,5 +1,5 @@
 OpAsgn {
-  left = Const {
+  left = ConstLhs {
     scope = Const {
       scope = NULL
       name = <C <U B>>

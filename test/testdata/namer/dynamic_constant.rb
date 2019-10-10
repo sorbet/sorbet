@@ -3,6 +3,6 @@
 class A
   def self.foo
     X = 10
-  # ^^^^^^ error: Dynamic constant assignment
+#   ^ error: dynamic constant assignment
   end
 end

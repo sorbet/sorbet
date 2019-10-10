@@ -1,3 +1,3 @@
 # typed: false
-break 1 do # error: No body in block
+break 1 do # error: unexpected token kDO
 end

@@ -13,29 +13,33 @@ Begin {
     If {
       condition = Begin {
         stmts = [
-          Send {
-            receiver = NULL
-            method = <U bar>
-            args = [
+          Begin {
+            stmts = [
+              Send {
+                receiver = NULL
+                method = <U bar>
+                args = [
+                ]
+              }
+              Masgn {
+                lhs = Mlhs {
+                  exprs = [
+                    LVarLhs {
+                      name = <U a>
+                    }
+                    LVarLhs {
+                      name = <U b>
+                    }
+                  ]
+                }
+                rhs = Send {
+                  receiver = NULL
+                  method = <U foo>
+                  args = [
+                  ]
+                }
+              }
             ]
-          }
-          Masgn {
-            lhs = Mlhs {
-              exprs = [
-                LVarLhs {
-                  name = <U a>
-                }
-                LVarLhs {
-                  name = <U b>
-                }
-              ]
-            }
-            rhs = Send {
-              receiver = NULL
-              method = <U foo>
-              args = [
-              ]
-            }
           }
         ]
       }

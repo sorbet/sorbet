@@ -2,7 +2,7 @@ DefMethod {
   name = <U x>
   args = NULL
   body = OrAsgn {
-    left = Const {
+    left = ConstLhs {
       scope = Self {
       }
       name = <C <U A>>

@@ -1,24 +1,16 @@
 Hash {
   pairs = [
     Pair {
-      key = DSymbol {
-        nodes = [
-          String {
-            val = <U foo>
-          }
-        ]
+      key = Symbol {
+        val = <U foo>
       }
       value = Integer {
         val = "2"
       }
     }
     Pair {
-      key = DSymbol {
-        nodes = [
-          String {
-            val = <U bar>
-          }
-        ]
+      key = Symbol {
+        val = <U bar>
       }
       value = Hash {
         pairs = [

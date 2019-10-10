@@ -3,8 +3,8 @@ class A
 
   def self.foo
     foo do
-    C = 1 # this is parse error in Ruby, but not in Sorbet
-  # ^^^^^ error: Dynamic constant assignment
+    C = 1
+#   ^ error: dynamic constant assignment
     C # error: Unable to resolve constant
     end
   end

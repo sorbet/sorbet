@@ -1,7 +1,11 @@
 Kwbegin {
   stmts = [
-    Integer {
-      val = "2"
+    Begin {
+      stmts = [
+        Integer {
+          val = "2"
+        }
+      ]
     }
   ]
 }

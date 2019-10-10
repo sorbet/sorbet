@@ -66,7 +66,7 @@ NodeDef nodes[] = {
     // Used for $`, $& etc magic regex globals
     {
         "Backref",
-        "backref",
+        "back_ref",
         vector<FieldDef>({{"name", Name}}),
     },
     {
@@ -337,15 +337,10 @@ NodeDef nodes[] = {
         "lvar",
         vector<FieldDef>({{"name", Name}}),
     },
-    {
-        "LVarAsgn",
-        "lvasgn",
-        vector<FieldDef>({{"name", Name}, {"expr", Node}}),
-    },
     // invalid_rules in `@rules, invalid_rules = ...`
     {
         "LVarLhs",
-        "lvar",
+        "lvasgn",
         vector<FieldDef>({{"name", Name}}),
     },
     // [regex literal] =~ value; autovivifies local vars from match grops
@@ -528,7 +523,7 @@ NodeDef nodes[] = {
     },
     {
         "SplatLhs",
-        "splat_lhs",
+        "splat",
         vector<FieldDef>({{"var", Node}}),
     },
     // string literal
@@ -545,7 +540,7 @@ NodeDef nodes[] = {
     // symbol literal
     {
         "Symbol",
-        "symbol",
+        "sym",
         vector<FieldDef>({{"val", Name}}),
     },
     {
@@ -790,7 +785,11 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     for (auto &arg : node.fields) {
         switch (arg.type) {
             case Name:
-                out << "    fmt::format_to(buf, \", :\" + JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
+                if (node.whitequarkName == "str") {
+                    out << "    fmt::format_to(buf, \", \\\"{}\\\"\", " << arg.name << ".toString(gs));\n";
+                } else {
+                    out << "    fmt::format_to(buf, \", :\" + JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
+                }
                 break;
             case Node:
                 out << "    fmt::format_to(buf, \",\");\n";
