@@ -7,16 +7,10 @@ target triple = "x86_64-apple-darwin18.2.0"
 @"userStr_hello world" = private unnamed_addr constant [12 x i8] c"hello world\00", align 1
 @rubyId_global_puts = internal unnamed_addr global i64 0, align 8
 @str_global_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
-@moduleName = private unnamed_addr constant [13 x i8] c"CompiledDemo\00", align 1
-@methodName = private unnamed_addr constant [14 x i8] c"<static-init>\00", align 1
 
 declare i64 @rb_str_new(i8*, i64) local_unnamed_addr #0
 
 declare i64 @rb_intern(i8*) local_unnamed_addr #0
-
-declare i64 @rb_define_module(i8*) local_unnamed_addr #0
-
-declare void @rb_define_singleton_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr #0
 
 declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #0
 
@@ -43,7 +37,7 @@ define internal fastcc void @sorbet_rb_error_arity(i32) unnamed_addr #2 {
 declare void @rb_exc_raise(i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) #4 {
+define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #4 {
 readGlobals:
   %callArgs = alloca [2 x i64], align 8
   %isWrongArgCount = icmp eq i32 %0, 0
@@ -67,8 +61,6 @@ define void @Init_hello() local_unnamed_addr #5 {
 initializeGlobals:
   %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0)) #6
   store i64 %0, i64* @rubyId_global_puts, align 8
-  %1 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @moduleName, i64 0, i64 0)) #6
-  tail call void @rb_define_singleton_method(i64 %1, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @methodName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U <root>>> $1><N <U <static-init>> $110>" to i64 (...)*), i32 -1) #6
   ret void
 }
 
