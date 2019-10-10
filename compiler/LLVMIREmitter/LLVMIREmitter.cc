@@ -219,12 +219,9 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(gs)->shortName(gs);
-                        /*
-                        if (isMagic(str)) {
-                            builder.CreateCall(module->getFunction("<static-init>"), {rawCString});
-                            return
+                        if (i->fun == core::Names::magic()) {
+                            return;
                         }
-                        */
                         auto rawId =
                             getIdFor(lctx, builder, str, rubyIDRegistry, globalInitializers, readGlobals, module);
 
