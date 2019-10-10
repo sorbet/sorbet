@@ -17,7 +17,6 @@ public:
             auto loc = stat->loc;
             auto classDef = ast::cast_tree<ast::ClassDef>(stat.get());
             if (classDef) {
-                DefinitionRewriter::registerClass = ctx.state.enterNameUTF8("<registerClass>");
                 auto magic = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::root()), DefinitionRewriter::registerClass,
                                             classDef->name->deepCopy());
                 i++;
@@ -27,7 +26,6 @@ public:
 
             auto methodDef = ast::cast_tree<ast::MethodDef>(stat.get());
             if (methodDef) {
-                DefinitionRewriter::registerMethod = ctx.state.enterNameUTF8("<registerMethod>");
                 auto magic = ast::MK::Send2(loc, ast::MK::Constant(loc, core::Symbols::root()), DefinitionRewriter::registerMethod,
                                             rootClassDef->name->deepCopy(), ast::MK::Symbol(loc, methodDef->name));
                 i++;
@@ -42,13 +40,23 @@ private:
     DefinitionRewriterWalker() = default;
 };
 
+void registerMagicMethods(core::MutableContext &ctx, ast::ClassDef *klass) {
+    auto loc = klass->loc;
+    DefinitionRewriter::registerClass = ctx.state.enterNameUTF8("<registerClass>");
+    DefinitionRewriter::registerMethod = ctx.state.enterNameUTF8("<registerMethod>");
+
+    ast::MethodDef::ARGS_store classArgs;
+    classArgs.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
+    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc, loc, DefinitionRewriter::registerClass, std::move(classArgs), ast::MK::EmptyTree()));
+
+    ast::MethodDef::ARGS_store methodArgs;
+    methodArgs.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
+    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc, loc, DefinitionRewriter::registerMethod, std::move(methodArgs), ast::MK::EmptyTree()));
+}
+
 void DefinitionRewriter::run(core::MutableContext &ctx, ast::ClassDef *klass) {
     DefinitionRewriterWalker definitionRewriterWalker;
-    ast::MethodDef::ARGS_store args;
-    auto loc = klass->loc;
-    args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc,
-                loc, core::Names::magic(), std::move(args), ast::MK::EmptyTree()));
+    registerMagicMethods(ctx, klass);
     unique_ptr<ast::ClassDef> uniqueClass(klass);
     auto ret = ast::TreeMap::apply(ctx, definitionRewriterWalker, std::move(uniqueClass));
     klass = static_cast<ast::ClassDef *>(ret.release());
