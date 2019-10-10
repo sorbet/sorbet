@@ -4,8 +4,6 @@ target triple = "x86_64-apple-darwin18.2.0"
 
 @.str = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
-@"rubyId_global_<magic>" = internal unnamed_addr global i64 0, align 8
-@"str_global_<magic>" = private unnamed_addr constant [8 x i8] c"<magic>\00", align 1
 @"userStr_hello world" = private unnamed_addr constant [12 x i8] c"hello world\00", align 1
 @rubyId_global_puts = internal unnamed_addr global i64 0, align 8
 @str_global_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
@@ -53,15 +51,10 @@ readGlobals:
 
 argCountSuccess:                                  ; preds = %readGlobals
   %rubyID_puts = load i64, i64* @rubyId_global_puts, align 8
-  %"rubyID_<magic>" = load i64, i64* @"rubyId_global_<magic>", align 8
+  %3 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"userStr_hello world", i64 0, i64 0), i64 11) #6
   %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
-  store i64 8, i64* %callArgsAddr, align 8
-  %callArgsAddr8 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 1
-  store i64 8, i64* %callArgsAddr8, align 8
-  %3 = call i64 @rb_funcallv(i64 8, i64 %"rubyID_<magic>", i32 2, i64* nonnull %callArgsAddr) #6
-  %4 = call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"userStr_hello world", i64 0, i64 0), i64 11) #6
-  store i64 %4, i64* %callArgsAddr, align 8
-  %5 = call i64 @rb_funcallv(i64 %2, i64 %rubyID_puts, i32 1, i64* nonnull %callArgsAddr) #6
+  store i64 %3, i64* %callArgsAddr, align 8
+  %4 = call i64 @rb_funcallv(i64 %2, i64 %rubyID_puts, i32 1, i64* nonnull %callArgsAddr) #6
   ret i64 8
 
 argCountFailBlock:                                ; preds = %readGlobals
@@ -72,12 +65,10 @@ argCountFailBlock:                                ; preds = %readGlobals
 ; Function Attrs: nounwind ssp
 define void @Init_hello() local_unnamed_addr #5 {
 initializeGlobals:
-  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"str_global_<magic>", i64 0, i64 0)) #6
-  store i64 %0, i64* @"rubyId_global_<magic>", align 8
-  %1 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0)) #6
-  store i64 %1, i64* @rubyId_global_puts, align 8
-  %2 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @moduleName, i64 0, i64 0)) #6
-  tail call void @rb_define_singleton_method(i64 %2, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @methodName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U <root>>> $1><N <U <static-init>> $110>" to i64 (...)*), i32 -1) #6
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0)) #6
+  store i64 %0, i64* @rubyId_global_puts, align 8
+  %1 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @moduleName, i64 0, i64 0)) #6
+  tail call void @rb_define_singleton_method(i64 %1, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @methodName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U <root>>> $1><N <U <static-init>> $110>" to i64 (...)*), i32 -1) #6
   ret void
 }
 
