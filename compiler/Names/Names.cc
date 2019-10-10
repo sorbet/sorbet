@@ -11,4 +11,4 @@ void Names::init(core::GlobalState &gs) {
 core::NameRef Names::registerClass;
 core::NameRef Names::registerMethod;
 
-}
+} // namespace sorbet::compiler

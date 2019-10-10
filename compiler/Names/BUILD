@@ -1,8 +1,8 @@
 cc_library(
     name = "Names",
     srcs = [
-        "Names.h",
         "Names.cc",
+        "Names.h",
     ],
     linkstatic = 1,
     visibility = ["//visibility:public"],

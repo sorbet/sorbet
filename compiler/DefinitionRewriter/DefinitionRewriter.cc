@@ -1,7 +1,7 @@
 #include "compiler/DefinitionRewriter/DefinitionRewriter.h"
-#include "compiler/Names/Names.h"
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
+#include "compiler/Names/Names.h"
 
 using namespace std;
 
@@ -46,11 +46,13 @@ void registerMagicMethods(core::MutableContext &ctx, ast::ClassDef *klass) {
 
     ast::MethodDef::ARGS_store classArgs;
     classArgs.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc, loc, Names::registerClass, std::move(classArgs), ast::MK::EmptyTree()));
+    klass->rhs.insert(klass->rhs.begin(),
+                      ast::MK::Method(loc, loc, Names::registerClass, std::move(classArgs), ast::MK::EmptyTree()));
 
     ast::MethodDef::ARGS_store methodArgs;
     methodArgs.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc, loc, Names::registerMethod, std::move(methodArgs), ast::MK::EmptyTree()));
+    klass->rhs.insert(klass->rhs.begin(),
+                      ast::MK::Method(loc, loc, Names::registerMethod, std::move(methodArgs), ast::MK::EmptyTree()));
 }
 
 void DefinitionRewriter::run(core::MutableContext &ctx, ast::ClassDef *klass) {
