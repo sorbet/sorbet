@@ -18,7 +18,7 @@ public:
             auto loc = stat->loc;
             auto classDef = ast::cast_tree<ast::ClassDef>(stat.get());
             if (classDef) {
-                auto magic = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::root()), Names::registerClass,
+                auto magic = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::root()), Names::sorbet_defineTopLevelClass,
                                             classDef->name->deepCopy());
                 i++;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
@@ -27,7 +27,7 @@ public:
 
             auto methodDef = ast::cast_tree<ast::MethodDef>(stat.get());
             if (methodDef) {
-                auto magic = ast::MK::Send2(loc, ast::MK::Constant(loc, core::Symbols::root()), Names::registerMethod,
+                auto magic = ast::MK::Send2(loc, ast::MK::Constant(loc, core::Symbols::root()), Names::sorbet_defineMethod,
                                             rootClassDef->name->deepCopy(), ast::MK::Symbol(loc, methodDef->name));
                 i++;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
@@ -41,18 +41,21 @@ private:
     DefinitionRewriterWalker() = default;
 };
 
-void registerMagicMethods(core::MutableContext &ctx, ast::ClassDef *klass) {
+void registerMagicMethod(core::MutableContext &ctx, ast::ClassDef *klass, core::NameRef name) {
     auto loc = klass->loc;
-
-    ast::MethodDef::ARGS_store classArgs;
-    classArgs.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
+    ast::MethodDef::ARGS_store args;
+    args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
     klass->rhs.insert(klass->rhs.begin(),
-                      ast::MK::Method(loc, loc, Names::registerClass, std::move(classArgs), ast::MK::EmptyTree()));
+                      ast::MK::Method(loc, loc, name, std::move(args), ast::MK::EmptyTree()));
+}
 
-    ast::MethodDef::ARGS_store methodArgs;
-    methodArgs.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-    klass->rhs.insert(klass->rhs.begin(),
-                      ast::MK::Method(loc, loc, Names::registerMethod, std::move(methodArgs), ast::MK::EmptyTree()));
+void registerMagicMethods(core::MutableContext &ctx, ast::ClassDef *klass) {
+    registerMagicMethod(ctx, klass, Names::sorbet_defineTopLevelModule);
+    registerMagicMethod(ctx, klass, Names::sorbet_defineNestedModule);
+    registerMagicMethod(ctx, klass, Names::sorbet_defineTopLevelClass);
+    registerMagicMethod(ctx, klass, Names::sorbet_defineNestedClass);
+    registerMagicMethod(ctx, klass, Names::sorbet_defineMethod);
+    registerMagicMethod(ctx, klass, Names::sorbet_defineMethodSingleton);
 }
 
 void DefinitionRewriter::run(core::MutableContext &ctx, ast::ClassDef *klass) {

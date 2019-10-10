@@ -220,10 +220,22 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(gs)->shortName(gs);
-                        if (i->fun == Names::registerClass) {
+                        if (i->fun == Names::sorbet_defineTopLevelModule) {
                             return;
                         }
-                        if (i->fun == Names::registerMethod) {
+                        if (i->fun == Names::sorbet_defineNestedModule) {
+                            return;
+                        }
+                        if (i->fun == Names::sorbet_defineTopLevelClass) {
+                            return;
+                        }
+                        if (i->fun == Names::sorbet_defineNestedClass) {
+                            return;
+                        }
+                        if (i->fun == Names::sorbet_defineMethod) {
+                            return;
+                        }
+                        if (i->fun == Names::sorbet_defineMethodSingleton) {
                             return;
                         }
                         auto rawId =
