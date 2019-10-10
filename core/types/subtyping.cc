@@ -1029,7 +1029,13 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, Untyped
                     return false;
                 }
             } else {
-                return self1->definition == self2->definition;
+                if (self1->definition == self2->definition) {
+                    return true;
+                }
+
+                auto *lambda1 = cast_type<LambdaParam>(self1->definition.data(ctx)->resultType.get());
+                auto *lambda2 = cast_type<LambdaParam>(self2->definition.data(ctx)->resultType.get());
+                return lambda1 && lambda2 && Types::isSubTypeUnderConstraint(ctx, constr, lambda1->upperBound, lambda2->lowerBound, mode);
             }
         }
     }
