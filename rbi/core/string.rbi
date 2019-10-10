@@ -2075,3 +2075,4 @@ class String < Object
   # ```
   sig {returns(String)}
   def undump; end
+end
