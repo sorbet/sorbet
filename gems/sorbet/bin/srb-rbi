@@ -215,7 +215,7 @@ If instead you want to explore your files locally, here are some things to try:
       make_step(Sorbet::Private::FindGemRBIs)
 
     else
-      puts "Unknown comand: #{argv[0]}"
+      puts "Unknown command: #{argv[0]}"
       puts self.usage
       exit(1)
     end
