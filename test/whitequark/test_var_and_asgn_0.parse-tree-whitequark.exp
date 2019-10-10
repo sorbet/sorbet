@@ -1,0 +1,3 @@
+s(:and_asgn,
+  s(:lvasgn, :a),
+  s(:int, "1"))

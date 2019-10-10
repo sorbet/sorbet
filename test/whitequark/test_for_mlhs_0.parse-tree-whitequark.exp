@@ -1,0 +1,8 @@
+s(:for,
+  s(:mlhs,
+    s(:lvasgn, :a),
+    s(:lvasgn, :b)),
+  s(:lvar, :foo),
+  s(:send, nil, :p,
+    s(:lvar, :a),
+    s(:lvar, :b)))

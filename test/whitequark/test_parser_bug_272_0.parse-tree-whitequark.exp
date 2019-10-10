@@ -1,0 +1,5 @@
+s(:block,
+  s(:send, nil, :a,
+    s(:ivar, :@b)),
+  s(:args,
+    s(:arg, :c)), nil)

@@ -1,0 +1,2 @@
+s(:break,
+  s(:lvar, :foo))

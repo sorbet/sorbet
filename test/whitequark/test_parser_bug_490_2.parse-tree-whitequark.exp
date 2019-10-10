@@ -1,0 +1,6 @@
+s(:def, :m, nil,
+  s(:sclass,
+    s(:self),
+    s(:assign,
+      s(:casgn, nil, :A),
+      s(:nil))))

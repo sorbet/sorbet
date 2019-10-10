@@ -1,0 +1,5 @@
+s(:send, nil, :assert,
+  s(:hash,
+    s(:pair,
+      s(:sym, :do),
+      s(:true))))

@@ -1,0 +1,4 @@
+s(:assign,
+  s(:casgn,
+    s(:cbase), :Foo),
+  s(:int, "10"))

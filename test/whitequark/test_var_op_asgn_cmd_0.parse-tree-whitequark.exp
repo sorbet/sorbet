@@ -1,0 +1,4 @@
+s(:op_asgn,
+  s(:lvasgn, :foo), :+,
+  s(:send, nil, :m,
+    s(:lvar, :foo)))

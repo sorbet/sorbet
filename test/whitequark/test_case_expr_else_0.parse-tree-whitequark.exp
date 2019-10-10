@@ -1,0 +1,6 @@
+s(:case,
+  s(:lvar, :foo),
+  s(:when,
+    s(:str, "bar"),
+    s(:lvar, :bar)),
+  s(:lvar, :baz))

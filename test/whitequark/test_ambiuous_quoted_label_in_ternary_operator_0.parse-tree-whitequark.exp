@@ -1,0 +1,6 @@
+s(:if,
+  s(:send, nil, :a),
+  s(:send,
+    s(:send, nil, :b), :&,
+    s(:str, "")),
+  s(:nil))

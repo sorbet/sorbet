@@ -1,0 +1,5 @@
+s(:while,
+  s(:def, :foo, nil,
+    s(:block,
+      s(:send, nil, :tap), nil, nil)),
+  s(:break))

@@ -1,0 +1,2 @@
+s(:send, nil, :assert,
+  s(:send, nil, :dogs))

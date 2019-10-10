@@ -1,0 +1,6 @@
+s(:array,
+  s(:int, "1"),
+  s(:hash,
+    s(:pair,
+      s(:int, "2"),
+      s(:int, "3"))))

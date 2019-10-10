@@ -1,0 +1,3 @@
+s(:assign,
+  s(:casgn, nil, :Foo),
+  s(:int, "10"))

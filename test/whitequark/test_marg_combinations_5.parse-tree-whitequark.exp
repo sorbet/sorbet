@@ -1,0 +1,6 @@
+s(:def, :f,
+  s(:args,
+    s(:mlhs,
+      s(:arg, :a),
+      s(:restarg, :*),
+      s(:arg, :p))), nil)

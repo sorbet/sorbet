@@ -1,0 +1,2 @@
+s(:const,
+  s(:const, nil, :Bar), :Foo)
