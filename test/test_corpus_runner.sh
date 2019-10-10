@@ -21,6 +21,10 @@ base=$(basename "$rb")
 bundle="$llvmir/${base%.rb}.bundle"
 external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$llvmir"/*.o -undefined dynamic_lookup
 
+for i in "$llvmir"/*.llo; do
+    external/llvm_toolchain/bin/opt "$i"
+done
+
 for ext in "llo"; do
     exp=${rb%.rb}.$ext.exp
     if [ -f "$exp" ]; then

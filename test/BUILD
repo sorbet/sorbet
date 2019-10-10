@@ -20,5 +20,6 @@ sh_binary(
     data = [
         "//main:sorbet_llvm",
         "@llvm_toolchain//:bin/ld",
+        "@llvm_toolchain//:bin/opt",
     ],
 )
