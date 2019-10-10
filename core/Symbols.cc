@@ -628,7 +628,8 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                 for (const auto loc : locs_) {
                     sortedLocs.emplace_back(loc);
                 }
-                fast_sort(sortedLocs, [&](const Loc& lhs, const Loc& rhs){ return lhs.showRaw(gs) < rhs.showRaw(gs); });
+                fast_sort(sortedLocs,
+                          [&](const Loc &lhs, const Loc &rhs) { return lhs.showRaw(gs) < rhs.showRaw(gs); });
                 for (const auto loc : sortedLocs) {
                     if (absl::StartsWith(loc.file().data(gs).path(), payloadPathPrefix)) {
                         continue;
