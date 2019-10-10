@@ -11,7 +11,7 @@ cleanup() {
     rm -r "$llvmir" "$rbout"
 }
 
-trap cleanup EXIT
+# trap cleanup EXIT
 
 ruby "$rb" 2>&1 | tee "$rbout"
 
@@ -32,8 +32,10 @@ for ext in "llo"; do
     fi
 done
 
-ruby -r "$bundle" 2>&1 | tee "$srbout"
+if [[ $rb != *"no-run"* ]]; then
+    ruby -r "$bundle" 2>&1 | tee "$srbout"
 
-diff -a "$rbout" "$srbout"
+    diff -a "$rbout" "$srbout"
+fi
 
 # cat "$llvmir/"*.ll
