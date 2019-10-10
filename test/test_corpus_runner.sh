@@ -22,7 +22,7 @@ bundle="$llvmir/${base%.rb}.bundle"
 external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$llvmir"/*.o -undefined dynamic_lookup
 
 for i in "$llvmir"/*.llo; do
-    external/llvm_toolchain/bin/opt "$i"
+    external/llvm_toolchain/bin/opt -analyze "$i"
 done
 
 for ext in "llo"; do
