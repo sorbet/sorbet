@@ -33,7 +33,7 @@ hidden_methods_tests(
 )
 
 test_suite(
-    name = "hidden-method-finder",
+    name = "hidden-methods-finder",
     tags = ["manual"],
     tests = [
         ":hidden-methods-ruby_2_4_3",
