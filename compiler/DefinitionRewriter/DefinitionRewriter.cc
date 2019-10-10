@@ -18,8 +18,8 @@ public:
             auto loc = stat->loc;
             auto classDef = ast::cast_tree<ast::ClassDef>(stat.get());
             if (classDef) {
-                auto magic = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::root()), Names::sorbet_defineTopLevelClass,
-                                            classDef->name->deepCopy());
+                auto magic = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::root()),
+                                            Names::sorbet_defineTopLevelClass, classDef->name->deepCopy());
                 i++;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
                 continue;
@@ -27,8 +27,9 @@ public:
 
             auto methodDef = ast::cast_tree<ast::MethodDef>(stat.get());
             if (methodDef) {
-                auto magic = ast::MK::Send2(loc, ast::MK::Constant(loc, core::Symbols::root()), Names::sorbet_defineMethod,
-                                            rootClassDef->name->deepCopy(), ast::MK::Symbol(loc, methodDef->name));
+                auto magic =
+                    ast::MK::Send2(loc, ast::MK::Constant(loc, core::Symbols::root()), Names::sorbet_defineMethod,
+                                   rootClassDef->name->deepCopy(), ast::MK::Symbol(loc, methodDef->name));
                 i++;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
                 continue;
@@ -45,8 +46,7 @@ void registerMagicMethod(core::MutableContext &ctx, ast::ClassDef *klass, core::
     auto loc = klass->loc;
     ast::MethodDef::ARGS_store args;
     args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-    klass->rhs.insert(klass->rhs.begin(),
-                      ast::MK::Method(loc, loc, name, std::move(args), ast::MK::EmptyTree()));
+    klass->rhs.insert(klass->rhs.begin(), ast::MK::Method(loc, loc, name, std::move(args), ast::MK::EmptyTree()));
 }
 
 void registerMagicMethods(core::MutableContext &ctx, ast::ClassDef *klass) {

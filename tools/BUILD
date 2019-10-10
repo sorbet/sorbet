@@ -19,6 +19,7 @@ compilation_database(
         "//compiler/IRHelpers:generate_load_payload",
         "//compiler/IRHelpers:IRHelpers",
         "//compiler/DefinitionRewriter:DefinitionRewriter",
+        "//compiler/Names:Names",
         # END compile_commands targets
     ],
 )
