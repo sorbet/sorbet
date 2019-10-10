@@ -1,5 +1,12 @@
 begin
-  ::Sorbet::Private::Static.keep_for_ide(::Main)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::Sorbet::Private::Static.keep_for_ide(::Main)
+        <emptyTree>
+      end
+    end
+  end
   class ::Main<<C Main>> < (::<todo sym>)
     <emptyTree>
 

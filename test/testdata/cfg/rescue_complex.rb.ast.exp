@@ -1,130 +1,132 @@
-class <emptyTree>::<C TestRescue><<C <todo sym>>> < (::<todo sym>)
-  def meth<<C <todo sym>>>(&<blk>)
-    0
-  end
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C TestRescue><<C <todo sym>>> < (::<todo sym>)
+    def meth<<C <todo sym>>>(&<blk>)
+      0
+    end
 
-  def foo<<C <todo sym>>>(&<blk>)
-    1
-  end
+    def foo<<C <todo sym>>>(&<blk>)
+      1
+    end
 
-  def bar<<C <todo sym>>>(&<blk>)
-    2
-  end
+    def bar<<C <todo sym>>>(&<blk>)
+      2
+    end
 
-  def baz<<C <todo sym>>>(&<blk>)
-    3
-  end
+    def baz<<C <todo sym>>>(&<blk>)
+      3
+    end
 
-  def take_arg<<C <todo sym>>>(x, &<blk>)
-    x
-  end
+    def take_arg<<C <todo sym>>>(x, &<blk>)
+      x
+    end
 
-  def initialize<<C <todo sym>>>(&<blk>)
-    @ex = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C StandardError>))
-  end
+    def initialize<<C <todo sym>>>(&<blk>)
+      @ex = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C StandardError>))
+    end
 
-  def multiple_rescue<<C <todo sym>>>(&<blk>)
-    <self>.meth()
-  rescue => <rescueTemp>$2
-    <self>.baz()
-  rescue => <rescueTemp>$3
-    <self>.bar()
-  end
-
-  def multiple_rescue_classes<<C <todo sym>>>(&<blk>)
-    <self>.meth()
-  rescue <emptyTree>::<C Foo>, <emptyTree>::<C Bar> => baz
-    baz
-  end
-
-  def parse_rescue_ensure<<C <todo sym>>>(&<blk>)
-    <self>.meth()
-  rescue => <rescueTemp>$2
-    <self>.baz()
-  ensure
-    <self>.bar()
-  end
-
-  def parse_bug_rescue_empty_else<<C <todo sym>>>(&<blk>)
-    <emptyTree>
-  rescue <emptyTree>::<C LoadError> => <rescueTemp>$2
-    <emptyTree>
-  end
-
-  def parse_ruby_bug_12686<<C <todo sym>>>(&<blk>)
-    <self>.take_arg(<self>.bar()
+    def multiple_rescue<<C <todo sym>>>(&<blk>)
+      <self>.meth()
     rescue => <rescueTemp>$2
-      nil)
-  end
-
-  def parse_rescue_mod<<C <todo sym>>>(&<blk>)
-    <self>.meth()
-  rescue => <rescueTemp>$2
-    <self>.bar()
-  end
-
-  def parse_resbody_list_var<<C <todo sym>>>(&<blk>)
-    <self>.meth()
-  rescue <self>.foo() => ex
-    <self>.bar()
-  end
-
-  def parse_rescue_else_ensure<<C <todo sym>>>(&<blk>)
-    <self>.meth()
-  rescue => <rescueTemp>$2
-    <self>.baz()
-  else
-    <self>.foo()
-  ensure
-    <self>.bar()
-  end
-
-  def parse_rescue<<C <todo sym>>>(&<blk>)
-    <self>.meth()
-  rescue => <rescueTemp>$2
-    <self>.foo()
-  end
-
-  def parse_resbody_var<<C <todo sym>>>(&<blk>)
-    <self>.meth()
-  rescue => ex
-    <self>.bar()
-  end
-
-  def parse_resbody_var_1<<C <todo sym>>>(&<blk>)
-    <self>.meth()
-  rescue => <rescueTemp>$2
-    begin
-      @ex = <rescueTemp>$2
+      <self>.baz()
+    rescue => <rescueTemp>$3
       <self>.bar()
     end
-  end
 
-  def parse_rescue_mod_op_assign<<C <todo sym>>>(&<blk>)
-    foo = foo.+(<self>.meth()
+    def multiple_rescue_classes<<C <todo sym>>>(&<blk>)
+      <self>.meth()
+    rescue <emptyTree>::<C Foo>, <emptyTree>::<C Bar> => baz
+      baz
+    end
+
+    def parse_rescue_ensure<<C <todo sym>>>(&<blk>)
+      <self>.meth()
     rescue => <rescueTemp>$2
-      <self>.bar())
-  end
+      <self>.baz()
+    ensure
+      <self>.bar()
+    end
 
-  def parse_ruby_bug_12402<<C <todo sym>>>(&<blk>)
-    foo = <self>.raise(<self>.bar())
-  rescue => <rescueTemp>$2
-    nil
-  end
+    def parse_bug_rescue_empty_else<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    rescue <emptyTree>::<C LoadError> => <rescueTemp>$2
+      <emptyTree>
+    end
 
-  def parse_ruby_bug_12402_1<<C <todo sym>>>(&<blk>)
-    foo = foo.+(<self>.raise(<self>.bar())
+    def parse_ruby_bug_12686<<C <todo sym>>>(&<blk>)
+      <self>.take_arg(<self>.bar()
+      rescue => <rescueTemp>$2
+        nil)
+    end
+
+    def parse_rescue_mod<<C <todo sym>>>(&<blk>)
+      <self>.meth()
     rescue => <rescueTemp>$2
-      nil)
-  end
+      <self>.bar()
+    end
 
-  def parse_ruby_bug_12402_2<<C <todo sym>>>(&<blk>)
-    begin
-      []$3 = <self>.foo()
-      []$4 = 0
-      []$3.[]=([]$4, []$3.[]([]$4).+(<self>.raise(<self>.bar())
-        rescue => <rescueTemp>$2
-          nil))
+    def parse_resbody_list_var<<C <todo sym>>>(&<blk>)
+      <self>.meth()
+    rescue <self>.foo() => ex
+      <self>.bar()
+    end
+
+    def parse_rescue_else_ensure<<C <todo sym>>>(&<blk>)
+      <self>.meth()
+    rescue => <rescueTemp>$2
+      <self>.baz()
+    else
+      <self>.foo()
+    ensure
+      <self>.bar()
+    end
+
+    def parse_rescue<<C <todo sym>>>(&<blk>)
+      <self>.meth()
+    rescue => <rescueTemp>$2
+      <self>.foo()
+    end
+
+    def parse_resbody_var<<C <todo sym>>>(&<blk>)
+      <self>.meth()
+    rescue => ex
+      <self>.bar()
+    end
+
+    def parse_resbody_var_1<<C <todo sym>>>(&<blk>)
+      <self>.meth()
+    rescue => <rescueTemp>$2
+      begin
+        @ex = <rescueTemp>$2
+        <self>.bar()
+      end
+    end
+
+    def parse_rescue_mod_op_assign<<C <todo sym>>>(&<blk>)
+      foo = foo.+(<self>.meth()
+      rescue => <rescueTemp>$2
+        <self>.bar())
+    end
+
+    def parse_ruby_bug_12402<<C <todo sym>>>(&<blk>)
+      foo = <self>.raise(<self>.bar())
+    rescue => <rescueTemp>$2
+      nil
+    end
+
+    def parse_ruby_bug_12402_1<<C <todo sym>>>(&<blk>)
+      foo = foo.+(<self>.raise(<self>.bar())
+      rescue => <rescueTemp>$2
+        nil)
+    end
+
+    def parse_ruby_bug_12402_2<<C <todo sym>>>(&<blk>)
+      begin
+        []$3 = <self>.foo()
+        []$4 = 0
+        []$3.[]=([]$4, []$3.[]([]$4).+(<self>.raise(<self>.bar())
+          rescue => <rescueTemp>$2
+            nil))
+      end
     end
   end
 end

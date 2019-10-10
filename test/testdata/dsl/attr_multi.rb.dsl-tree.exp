@@ -1,99 +1,101 @@
-class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
-  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-  <self>.sig() do ||
-    <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
-  end
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
 
-  def a<<C <todo sym>>>(&<blk>)
-    @a
-  end
+    def a<<C <todo sym>>>(&<blk>)
+      @a
+    end
 
-  <self>.sig() do ||
-    <self>.params({:"a" => <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
-  end
+    <self>.sig() do ||
+      <self>.params({:"a" => <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
 
-  def a=<<C <todo sym>>>(a, &<blk>)
-    @a = ::T.let(a, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
-  end
+    def a=<<C <todo sym>>>(a, &<blk>)
+      @a = ::T.let(a, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
 
-  <self>.sig() do ||
-    <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
-  end
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
 
-  def b<<C <todo sym>>>(&<blk>)
-    @b
-  end
+    def b<<C <todo sym>>>(&<blk>)
+      @b
+    end
 
-  <self>.sig() do ||
-    <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
-  end
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
 
-  def c<<C <todo sym>>>(&<blk>)
-    @c
-  end
+    def c<<C <todo sym>>>(&<blk>)
+      @c
+    end
 
-  <self>.sig() do ||
-    <self>.params({:"b" => <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
-  end
+    <self>.sig() do ||
+      <self>.params({:"b" => <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
 
-  def b=<<C <todo sym>>>(b, &<blk>)
-    @b = ::T.let(b, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
-  end
+    def b=<<C <todo sym>>>(b, &<blk>)
+      @b = ::T.let(b, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
 
-  <self>.sig() do ||
-    <self>.params({:"c" => <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
-  end
+    <self>.sig() do ||
+      <self>.params({:"c" => <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
 
-  def c=<<C <todo sym>>>(c, &<blk>)
-    @c = ::T.let(c, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
-  end
+    def c=<<C <todo sym>>>(c, &<blk>)
+      @c = ::T.let(c, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
 
-  <self>.sig() do ||
-    <self>.returns(<emptyTree>::<C String>)
-  end
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
 
-  def d<<C <todo sym>>>(&<blk>)
-    @d
-  end
+    def d<<C <todo sym>>>(&<blk>)
+      @d
+    end
 
-  <self>.sig() do ||
-    <self>.returns(<emptyTree>::<C String>)
-  end
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
 
-  def e<<C <todo sym>>>(&<blk>)
-    @e
-  end
+    def e<<C <todo sym>>>(&<blk>)
+      @e
+    end
 
-  <self>.sig() do ||
-    <self>.returns(<emptyTree>::<C String>)
-  end
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
 
-  def f<<C <todo sym>>>(&<blk>)
-    @f
-  end
+    def f<<C <todo sym>>>(&<blk>)
+      @f
+    end
 
-  <self>.sig() do ||
-    <self>.params({:"g" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
-  end
+    <self>.sig() do ||
+      <self>.params({:"g" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
 
-  def g=<<C <todo sym>>>(g, &<blk>)
-    @g = g
-  end
+    def g=<<C <todo sym>>>(g, &<blk>)
+      @g = g
+    end
 
-  <self>.sig() do ||
-    <self>.params({:"h" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
-  end
+    <self>.sig() do ||
+      <self>.params({:"h" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
 
-  def h=<<C <todo sym>>>(h, &<blk>)
-    @h = h
-  end
+    def h=<<C <todo sym>>>(h, &<blk>)
+      @h = h
+    end
 
-  <self>.sig() do ||
-    <self>.params({:"i" => <emptyTree>::<C String>}).params({:"h" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
-  end
+    <self>.sig() do ||
+      <self>.params({:"i" => <emptyTree>::<C String>}).params({:"h" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
 
-  def i=<<C <todo sym>>>(i, &<blk>)
-    @i = i
+    def i=<<C <todo sym>>>(i, &<blk>)
+      @i = i
+    end
   end
 end

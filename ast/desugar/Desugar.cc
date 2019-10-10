@@ -1708,10 +1708,6 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
 }
 
 unique_ptr<Expression> liftTopLevel(DesugarContext dctx, core::Loc loc, unique_ptr<Expression> what) {
-    if (isa_tree<ClassDef>(what.get())) {
-        return what;
-    }
-
     ClassDef::RHS_store rhs;
     auto insSeq = cast_tree<InsSeq>(what.get());
     if (insSeq) {

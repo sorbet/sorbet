@@ -623,7 +623,14 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                 }
 
                 bool first = true;
+                vector<Loc> sortedLocs;
+                sortedLocs.reserve(locs_.size());
                 for (const auto loc : locs_) {
+                    sortedLocs.emplace_back(loc);
+                }
+                fast_sort(sortedLocs,
+                          [&](const Loc &lhs, const Loc &rhs) { return lhs.showRaw(gs) < rhs.showRaw(gs); });
+                for (const auto loc : sortedLocs) {
                     if (absl::StartsWith(loc.file().data(gs).path(), payloadPathPrefix)) {
                         continue;
                     }
@@ -1194,8 +1201,24 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
     fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
         auto lhsShort = lhs.first.data(gs)->shortName(gs);
         auto rhsShort = rhs.first.data(gs)->shortName(gs);
-        return lhsShort < rhsShort ||
-               (lhsShort == rhsShort && lhs.first.data(gs)->showRaw(gs) < rhs.first.data(gs)->showRaw(gs));
+        auto compareShort = lhsShort.compare(rhsShort);
+        if (compareShort != 0) {
+            return compareShort < 0;
+        }
+        auto lhsRaw = lhs.first.data(gs)->showRaw(gs);
+        auto rhsRaw = rhs.first.data(gs)->showRaw(gs);
+        auto compareRaw = lhsRaw.compare(rhsRaw);
+        if (compareRaw != 0) {
+            return compareRaw < 0;
+        }
+        auto lhsSym = lhs.second.data(gs)->showRaw(gs);
+        auto rhsSym = rhs.second.data(gs)->showRaw(gs);
+        auto compareSym = lhsSym.compare(rhsSym);
+        if (compareSym != 0) {
+            return compareSym < 0;
+        }
+        ENFORCE(false, "no stable sort");
+        return 0;
     });
     return result;
 }

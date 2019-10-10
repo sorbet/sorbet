@@ -1,5 +1,12 @@
 begin
-  ::Sorbet::Private::Static.keep_for_ide(::Destructure)
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::Sorbet::Private::Static.keep_for_ide(::Destructure)
+        <emptyTree>
+      end
+    end
+  end
   class ::Destructure<<C Destructure>> < (::<todo sym>)
     def f<f>((x,y), z, <blk>)
       begin
