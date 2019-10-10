@@ -2,6 +2,7 @@
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/DerivedTypes.h" // FunctionType, StructType
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Verifier.h"
 // ^^^ violate our poisons
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -342,6 +343,8 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
 
     builder.SetInsertPoint(readGlobals);
     builder.CreateBr(rawEntryBlock);
+    /* run verifier */
+    ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
 }
 
 } // namespace sorbet::compiler
