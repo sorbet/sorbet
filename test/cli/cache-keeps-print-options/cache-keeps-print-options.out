@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1, https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1)
+class ::<root> < ::Object () @ (... removed core rbi locs ..., https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1)
   class ::<Class:<root>> < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
       argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
@@ -7,7 +7,7 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/cache-ke
     method ::<Class:CCCCCCCCC>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
       argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
 
-class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1, https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1)
+class ::<root> < ::Object () @ (... removed core rbi locs ..., https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1)
   class ::<Class:<root>> < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
       argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
