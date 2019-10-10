@@ -438,4 +438,49 @@ void sorbet_rb_error_arity(int argc, int min, int max) {
 // ****
 // ****
 
+// ****
+// **** Closures
+// ****
+
+// this specifies to use ruby default free for freeing(which is just xfree). Thus objects should be allocated with
+// xmalloc
+
+struct sorbet_Closure{
+  const int size;
+  VALUE closureData[]; // this is a rarely known feature of C99 https://en.wikipedia.org/wiki/Flexible_array_member
+}
+
+struct sorbet_Closure *sorbet_Closure_alloc(int elemCount) {
+    return (struct sorbet_Closure *)xmalloc(sizeof(sorbet_Closure) + sizeof(VALUE) * elemCount);
+}
+
+
+void sorbet_Closure_mark(void *closurePtr){
+    // this might be possible to make more efficient using rb_mark_tbl
+    struct sorbet_Closure *ptr = (struct sorbet_Closure *) closurePtr;
+    rb_gc_mark_values(ptr->size, &ptr->closureData[0]);
+}
+
+size_t sorbet_Closure_size(void *closurePtr){
+    // this might be possible to make more efficient using rb_mark_tbl
+    struct sorbet_Closure *ptr = (struct sorbet_Closure *) closurePtr;
+    return sizeof(sorbet_Closure) + ptr->size * sizeof(VALUE);
+}
+
+const rb_data_type_t closureInfo = {
+    "CompiledClosure", // this shouldn't ever be visible to users
+    {
+        /* mark = */ sorbet_Closure_mark,
+        /* free = */ RUBY_DEFAULT_FREE, // this uses xfree and optimzies it
+        /* size = */ sorbet_closure_size /*, compact */
+    },
+    /* parent = */ NULL,
+    /* arbitrary data = */ NULL,
+    /* flags = */ RUBY_TYPED_FREE_IMMEDIATELY /* deferred free */,
+};
+
+VALUE allocClosureAsValue(int elemCount) {
+    return TypedData_Wrap_Struct(rb_cData, data_type, sval);
+}
+
 #endif
