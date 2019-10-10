@@ -1014,10 +1014,30 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, Untyped
         auto *self1 = cast_type<SelfTypeParam>(t1.get());
         auto *self2 = cast_type<SelfTypeParam>(t2.get());
         if (self1 != nullptr || self2 != nullptr) {
-            if (self1 == nullptr || self2 == nullptr) {
-                return false;
+            // NOTE: SelfTypeParam is used both with LambdaParam and TypeVar, so
+            // we can only check bounds when a LambdaParam is present.
+            if (self1 == nullptr) {
+                if (auto *lambdaParam = cast_type<LambdaParam>(self2->definition.data(ctx)->resultType.get())) {
+                    return Types::isSubTypeUnderConstraint(ctx, constr, t1, lambdaParam->lowerBound, mode);
+                } else {
+                    return false;
+                }
+            } else if (self2 == nullptr) {
+                if (auto *lambdaParam = cast_type<LambdaParam>(self1->definition.data(ctx)->resultType.get())) {
+                    return Types::isSubTypeUnderConstraint(ctx, constr, lambdaParam->upperBound, t2, mode);
+                } else {
+                    return false;
+                }
+            } else {
+                if (self1->definition == self2->definition) {
+                    return true;
+                }
+
+                auto *lambda1 = cast_type<LambdaParam>(self1->definition.data(ctx)->resultType.get());
+                auto *lambda2 = cast_type<LambdaParam>(self2->definition.data(ctx)->resultType.get());
+                return lambda1 && lambda2 &&
+                       Types::isSubTypeUnderConstraint(ctx, constr, lambda1->upperBound, lambda2->lowerBound, mode);
             }
-            return self1->definition == self2->definition;
         }
     }
 
