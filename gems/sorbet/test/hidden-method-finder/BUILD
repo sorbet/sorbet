@@ -33,7 +33,7 @@ hidden_methods_tests(
 )
 
 test_suite(
-    name = "hidden-methods-finder",
+    name = "hidden-method-finder",
     tags = ["manual"],
     tests = [
         ":hidden-methods-ruby_2_4_3",
@@ -42,7 +42,7 @@ test_suite(
 )
 
 test_suite(
-    name = "hidden-methods-update",
+    name = "hidden-method-update",
     tags = ["manual"],
     tests = [
         ":hidden-methods-update-ruby_2_4_3",
