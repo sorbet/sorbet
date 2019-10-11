@@ -578,6 +578,11 @@ class SyncRDoc
     store.complete(:private)
 
     argv.each do |dir|
+      if File.exist?(dir) && File.extname(dir) == '.rbi'
+        process_file!(RBIFile.new(dir))
+        next
+      end
+
       Dir.glob(File.join('**', '*.rbi'), base: dir) do |path|
         process_file!(RBIFile.new(File.join(dir, path)))
       end
