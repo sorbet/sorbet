@@ -127,22 +127,22 @@ public:
 
     // These methods are here to make it easier to print the symbol table in lldb.
     // (don't have to remember the default args)
-    std::string toString() {
+    std::string toString() const {
         bool showFull = false;
         bool showRaw = false;
         return toStringWithOptions(showFull, showRaw);
     }
-    std::string toStringFull() {
+    std::string toStringFull() const {
         bool showFull = true;
         bool showRaw = false;
         return toStringWithOptions(showFull, showRaw);
     }
-    std::string showRaw() {
+    std::string showRaw() const {
         bool showFull = false;
         bool showRaw = true;
         return toStringWithOptions(showFull, showRaw);
     }
-    std::string showRawFull() {
+    std::string showRawFull() const {
         bool showFull = true;
         bool showRaw = true;
         return toStringWithOptions(showFull, showRaw);
