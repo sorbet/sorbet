@@ -330,6 +330,7 @@ class T::Props::Decorator
     .void
   end
   def prop_defined(name, cls, rules={})
+    cls = T::Utils.resolve_alias(cls)
     if rules[:optional] == true
       T::Configuration.hard_assert_handler(
         'Use of `optional: true` is deprecated, please use `T.nilable(...)` instead.',
