@@ -19,6 +19,7 @@
 #include <algorithm> // std::unique, std::distance
 
 using namespace std;
+using namespace std::chrono_literals;
 
 namespace sorbet::realmain::lsp {
 
@@ -195,6 +196,9 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
         }
 
         ENFORCE(finalGS->lspQuery.isEmpty());
+        if (finalGS->sleepInSlowPath) {
+            Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
+        }
         auto maybeResolved =
             pipeline::resolve(finalGS, move(indexedCopies), config.opts, workers, config.skipConfigatron);
         if (!maybeResolved.hasResult()) {
@@ -205,6 +209,9 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
         for (auto &tree : resolved) {
             ENFORCE(tree.file.exists());
             affectedFiles.push_back(tree.file);
+        }
+        if (finalGS->sleepInSlowPath) {
+            Timer::timedSleep(3000ms, *logger, "slow_path.typecheck.sleep");
         }
         pipeline::typecheck(finalGS, move(resolved), config.opts, workers);
     });

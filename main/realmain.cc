@@ -419,6 +419,9 @@ int realmain(int argc, char *argv[]) {
     if (opts.censorForSnapshotTests) {
         gs->censorForSnapshotTests = true;
     }
+    if (opts.sleepInSlowPath) {
+        gs->sleepInSlowPath = true;
+    }
     if (opts.reserveMemKiB > 0) {
         gs->reserveMemory(opts.reserveMemKiB);
     }
