@@ -234,9 +234,46 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                             return;
                         }
                         if (i->fun == Names::sorbet_defineMethod) {
+                            ENFORCE(i->args.size() == 2);
+                            auto ownerType = i->args[0].type;
+                            core::SymbolRef ownerSym;
+                            if (auto typ = core::cast_type<core::ClassType>(ownerType.get())) {
+                                ownerSym = typ->symbol;
+                            } else if (auto typ = core::cast_type<core::AppliedType>(ownerType.get())) {
+                                ownerSym = typ->klass;
+                            } else {
+                                ENFORCE(false);
+                            }
+
+                            auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
+                            ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+                            core::NameRef funcNameRef(gs, lit->value);
+                            auto funcSym = ownerSym.data(gs)->findMember(gs, funcNameRef);
+
+                            auto ownerName = builder.CreateGlobalStringPtr(ownerSym.showRaw(gs), "ownerName");
+                            auto owner = builder.CreateCall(
+                                module->getFunction("sorbet_getConstant"),
+                                {builder.CreateCall(module->getFunction("sorbet_rb_cObject")), ownerName});
+                            auto functionName = builder.CreateGlobalStringPtr(funcNameRef.showRaw(gs), "functionName");
+
+                            auto func = module->getFunction(funcSym.data(gs)->toStringFullName(gs));
+                            ENFORCE(func);
+                            auto universalSignature = llvm::PointerType::getUnqual(
+                                llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), true));
+                            auto ptr = builder.CreateBitCast(func, universalSignature);
+
+                            builder.CreateCall(module->getFunction("sorbet_defineMethod"), {owner, functionName, ptr});
                             return;
                         }
                         if (i->fun == Names::sorbet_defineMethodSingleton) {
+                            return;
+                        }
+                        // TODO: Should only be ::Sorbet::Private::Static.keep_for_ide
+                        if (i->fun == core::Names::keepForIde()) {
+                            return;
+                        }
+                        // TODO: Should only be T.unsafe
+                        if (i->fun == core::Names::unsafe()) {
                             return;
                         }
                         auto rawId =
