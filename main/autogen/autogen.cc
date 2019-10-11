@@ -16,11 +16,11 @@
 using namespace std;
 namespace sorbet::autogen {
 
-Definition &DefinitionRef::data(ParsedFile &pf) {
+const Definition &DefinitionRef::data(const ParsedFile &pf) const {
     return pf.defs[_id];
 }
 
-Reference &ReferenceRef::data(ParsedFile &pf) {
+const Reference &ReferenceRef::data(const ParsedFile &pf) const {
     return pf.refs[_id];
 }
 
@@ -248,7 +248,7 @@ ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree) {
     return pf;
 }
 
-vector<core::NameRef> ParsedFile::showFullName(core::Context ctx, DefinitionRef id) {
+vector<core::NameRef> ParsedFile::showFullName(core::Context ctx, DefinitionRef id) const {
     auto &def = id.data(*this);
     if (!def.defining_ref.exists()) {
         return {};
@@ -259,7 +259,7 @@ vector<core::NameRef> ParsedFile::showFullName(core::Context ctx, DefinitionRef 
     return scope;
 }
 
-string ParsedFile::toString(core::Context ctx) {
+string ParsedFile::toString(core::Context ctx) const {
     fmt::memory_buffer out;
     auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
 

@@ -33,8 +33,8 @@ public:
 class Instruction {
 public:
     virtual ~Instruction() = default;
-    virtual std::string toString(core::Context ctx) = 0;
-    virtual std::string showRaw(core::Context ctx, int tabs = 0) = 0;
+    virtual std::string toString(core::Context ctx) const = 0;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const = 0;
     Instruction() = default;
     bool isSynthetic = false;
 };
@@ -55,8 +55,8 @@ public:
     core::LocalVariable what;
 
     Ident(core::LocalVariable what);
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(Ident, 24, 8);
 
@@ -66,8 +66,8 @@ public:
 
     Alias(core::SymbolRef what);
 
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(Alias, 16, 8);
 
@@ -75,8 +75,8 @@ class SolveConstraint final : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
     SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link){};
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(SolveConstraint, 32, 8);
 
@@ -94,8 +94,8 @@ public:
          const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::Loc, 2> argLocs,
          bool isPrivateOk = false, const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(Send, 160, 8);
 
@@ -104,8 +104,8 @@ public:
     VariableUseSite what;
 
     Return(core::LocalVariable what);
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(Return, 40, 8);
 
@@ -115,8 +115,8 @@ public:
     VariableUseSite what;
 
     BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, core::LocalVariable what);
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(BlockReturn, 56, 8);
 
@@ -125,8 +125,8 @@ public:
     std::shared_ptr<core::SendAndBlockLink> link;
     core::LocalVariable fallback;
     LoadSelf(std::shared_ptr<core::SendAndBlockLink> link, core::LocalVariable fallback);
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(LoadSelf, 40, 8);
 
@@ -135,8 +135,8 @@ public:
     core::TypePtr value;
 
     Literal(const core::TypePtr &value);
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(Literal, 32, 8);
 
@@ -145,8 +145,8 @@ public:
     Unanalyzable() {
         categoryCounterInc("cfg", "unanalyzable");
     };
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(Unanalyzable, 16, 8);
 
@@ -157,8 +157,8 @@ public:
     NotSupported(std::string_view why) : why(why) {
         categoryCounterInc("cfg", "notsupported");
     };
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(NotSupported, 40, 8);
 
@@ -172,8 +172,8 @@ public:
     };
 
     const core::ArgInfo &argument(const core::GlobalState &gs) const;
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(LoadArg, 24, 8);
 
@@ -184,8 +184,8 @@ public:
     LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link) {
         categoryCounterInc("cfg", "loadarg");
     };
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(LoadYieldParams, 32, 8);
 
@@ -198,8 +198,8 @@ public:
     Cast(core::LocalVariable value, const core::TypePtr &type, core::NameRef cast)
         : value(value), type(type), cast(cast) {}
 
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(Cast, 64, 8);
 
@@ -211,8 +211,8 @@ public:
         categoryCounterInc("cfg", "tabsurd");
     }
 
-    virtual std::string toString(core::Context ctx);
-    virtual std::string showRaw(core::Context ctx, int tabs = 0);
+    virtual std::string toString(core::Context ctx) const;
+    virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
 CheckSize(TAbsurd, 40, 8);
 

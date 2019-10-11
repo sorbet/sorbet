@@ -63,14 +63,14 @@ struct Path {
 
     Path(Path *parent, string selector) : parent(parent), selector(move(selector)){};
 
-    string toString() {
+    string toString() const {
         if (parent) {
             return parent->toString() + "." + selector;
         };
         return selector;
     }
 
-    string show(core::GlobalState &gs) {
+    string show(core::GlobalState &gs) const {
         fmt::memory_buffer buf;
         if (myType) {
             fmt::format_to(buf, "{} -> {}", toString(), myType->toString(gs));
