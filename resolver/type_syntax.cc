@@ -521,7 +521,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
         case core::Names::attachedClass()._id:
             if (!ctx.owner.data(ctx)->isSingletonClass(ctx)) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("`{}` may only be used in a self context", "T.attached_class");
+                    e.setHeader("`{}` may only be used in a singleton class method context", "T.attached_class");
                 }
                 return core::Types::untypedUntracked();
             } else {
