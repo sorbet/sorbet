@@ -46,6 +46,9 @@ public:
                                                  globalInitializers);
     };
     virtual void patchDSL(core::MutableContext &gs, ast::ClassDef *klass) const override {
+        if (!irOutputDir.has_value()) {
+            return;
+        }
         if (!ast::isa_tree<ast::EmptyTree>(klass->name.get())) {
             return;
         }
