@@ -87,134 +87,6 @@ class Bundler::BundlerError
   def self.status_code(code); end
 end
 
-class Bundler::CLI
-  def add(*gems); end
-
-  def binstubs(*gems); end
-
-  def cache(); end
-
-  def check(); end
-
-  def clean(); end
-
-  def cli_help(); end
-
-  def config(*args); end
-
-  def console(group=T.unsafe(nil)); end
-
-  def doctor(); end
-
-  def env(); end
-
-  def exec(*args); end
-
-  def help(cli=T.unsafe(nil)); end
-
-  def info(gem_name); end
-
-  def init(); end
-
-  def initialize(*args); end
-
-  def inject(name, version); end
-
-  def install(); end
-
-  def issue(); end
-
-  def licenses(); end
-
-  def lock(); end
-
-  def open(name); end
-
-  def outdated(*gems); end
-
-  def package(); end
-
-  def platform(); end
-
-  def plugin(*args); end
-
-  def pristine(*gems); end
-
-  def remove(*gems); end
-
-  def show(gem_name=T.unsafe(nil)); end
-
-  def update(*gems); end
-
-  def version(); end
-
-  def viz(); end
-  AUTO_INSTALL_CMDS = ::T.let(nil, ::T.untyped)
-  PARSEABLE_COMMANDS = ::T.let(nil, ::T.untyped)
-end
-
-module Bundler::CLI::Common
-end
-
-module Bundler::CLI::Common
-  def self.ask_for_spec_from(specs); end
-
-  def self.clean_after_install?(); end
-
-  def self.configure_gem_version_promoter(definition, options); end
-
-  def self.ensure_all_gems_in_lockfile!(names, locked_gems=T.unsafe(nil)); end
-
-  def self.gem_not_found_message(missing_gem_name, alternatives); end
-
-  def self.output_post_install_messages(messages); end
-
-  def self.output_without_groups_message(); end
-
-  def self.patch_level_options(options); end
-
-  def self.print_post_install_message(name, msg); end
-
-  def self.select_spec(name, regex_match=T.unsafe(nil)); end
-
-  def self.without_groups_message(); end
-end
-
-class Bundler::CLI::Exec
-  def args(); end
-
-  def cmd(); end
-
-  def initialize(options, args); end
-
-  def options(); end
-
-  def run(); end
-  TRAPPED_SIGNALS = ::T.let(nil, ::T.untyped)
-end
-
-class Bundler::CLI::Exec
-end
-
-class Bundler::CLI::Plugin
-  def install(*plugins); end
-end
-
-class Bundler::CLI::Plugin
-end
-
-class Bundler::CLI
-  def self.deprecated_option(*args, &blk); end
-
-  def self.dispatch(*_); end
-
-  def self.reformatted_help_args(args); end
-
-  def self.source_root(); end
-
-  def self.start(*_); end
-end
-
 class Bundler::CurrentRuby
   def jruby?(); end
 
@@ -237,8 +109,6 @@ class Bundler::CurrentRuby
   def jruby_25?(); end
 
   def jruby_26?(); end
-
-  def jruby_27?(); end
 
   def jruby_2?(); end
 
@@ -264,8 +134,6 @@ class Bundler::CurrentRuby
 
   def maglev_26?(); end
 
-  def maglev_27?(); end
-
   def maglev_2?(); end
 
   def mingw?(); end
@@ -289,8 +157,6 @@ class Bundler::CurrentRuby
   def mingw_25?(); end
 
   def mingw_26?(); end
-
-  def mingw_27?(); end
 
   def mingw_2?(); end
 
@@ -316,8 +182,6 @@ class Bundler::CurrentRuby
 
   def mri_26?(); end
 
-  def mri_27?(); end
-
   def mri_2?(); end
 
   def mswin64?(); end
@@ -341,8 +205,6 @@ class Bundler::CurrentRuby
   def mswin64_25?(); end
 
   def mswin64_26?(); end
-
-  def mswin64_27?(); end
 
   def mswin64_2?(); end
 
@@ -368,8 +230,6 @@ class Bundler::CurrentRuby
 
   def mswin_26?(); end
 
-  def mswin_27?(); end
-
   def mswin_2?(); end
 
   def on_18?(); end
@@ -391,8 +251,6 @@ class Bundler::CurrentRuby
   def on_25?(); end
 
   def on_26?(); end
-
-  def on_27?(); end
 
   def on_2?(); end
 
@@ -418,8 +276,6 @@ class Bundler::CurrentRuby
 
   def rbx_26?(); end
 
-  def rbx_27?(); end
-
   def rbx_2?(); end
 
   def ruby?(); end
@@ -443,8 +299,6 @@ class Bundler::CurrentRuby
   def ruby_25?(); end
 
   def ruby_26?(); end
-
-  def ruby_27?(); end
 
   def ruby_2?(); end
 
@@ -470,8 +324,6 @@ class Bundler::CurrentRuby
 
   def truffleruby_26?(); end
 
-  def truffleruby_27?(); end
-
   def truffleruby_2?(); end
 
   def x64_mingw?(); end
@@ -495,8 +347,6 @@ class Bundler::CurrentRuby
   def x64_mingw_25?(); end
 
   def x64_mingw_26?(); end
-
-  def x64_mingw_27?(); end
 
   def x64_mingw_2?(); end
   KNOWN_MAJOR_VERSIONS = ::T.let(nil, ::T.untyped)
@@ -821,8 +671,6 @@ class Bundler::FeatureFlag
   def initialize(bundler_version); end
 
   def list_command?(); end
-
-  def lockfile_upgrade_warning?(); end
 
   def lockfile_uses_separate_rubygems_sources?(); end
 
@@ -1260,19 +1108,6 @@ module Bundler::FileUtils
   def self.touch(list, noop: T.unsafe(nil), verbose: T.unsafe(nil), mtime: T.unsafe(nil), nocreate: T.unsafe(nil)); end
 
   def self.uptodate?(new, old_list); end
-end
-
-module Bundler::FriendlyErrors
-end
-
-module Bundler::FriendlyErrors
-  def self.exit_status(error); end
-
-  def self.issues_url(exception); end
-
-  def self.log_error(error); end
-
-  def self.request_issue_report_for(e); end
 end
 
 class Bundler::GemHelper
@@ -1713,6 +1548,20 @@ class Bundler::LockfileError
 end
 
 class Bundler::LockfileError
+end
+
+class Bundler::LockfileGenerator
+  def definition(); end
+
+  def generate!(); end
+
+  def initialize(definition); end
+
+  def out(); end
+end
+
+class Bundler::LockfileGenerator
+  def self.generate(definition); end
 end
 
 class Bundler::LockfileParser
@@ -3547,15 +3396,17 @@ end
 class Bundler::SpecSet
   include ::Enumerable
   include ::TSort
-  def <<(spec); end
+  def <<(*args, &block); end
 
   def [](key); end
 
   def []=(key, value); end
 
-  def each(&b); end
+  def add(*args, &block); end
 
-  def empty?(); end
+  def each(*args, &block); end
+
+  def empty?(*args, &block); end
 
   def find_by_name_and_platform(name, platform); end
 
@@ -3563,7 +3414,7 @@ class Bundler::SpecSet
 
   def initialize(specs); end
 
-  def length(); end
+  def length(*args, &block); end
 
   def materialize(deps, missing_specs=T.unsafe(nil)); end
 
@@ -3571,7 +3422,9 @@ class Bundler::SpecSet
 
   def merge(set); end
 
-  def size(); end
+  def remove(*args, &block); end
+
+  def size(*args, &block); end
 
   def sort!(); end
 
@@ -3585,6 +3438,7 @@ class Bundler::SpecSet
 end
 
 class Bundler::SpecSet
+  extend ::Forwardable
 end
 
 class Bundler::StubSpecification
@@ -3636,771 +3490,6 @@ class Bundler::TemporaryResourceError
 end
 
 class Bundler::TemporaryResourceError
-end
-
-class Bundler::Thor
-  include ::Bundler::Thor::Base
-  include ::Bundler::Thor::Invocation
-  include ::Bundler::Thor::Shell
-  def help(command=T.unsafe(nil), subcommand=T.unsafe(nil)); end
-  HELP_MAPPINGS = ::T.let(nil, ::T.untyped)
-  TEMPLATE_EXTNAME = ::T.let(nil, ::T.untyped)
-  THOR_RESERVED_WORDS = ::T.let(nil, ::T.untyped)
-end
-
-module Bundler::Thor::Actions
-  def _cleanup_options_and_set(options, key); end
-
-  def _shared_configuration(); end
-
-  def action(instance); end
-
-  def add_file(destination, *args, &block); end
-
-  def add_link(destination, *args); end
-
-  def append_file(path, *args, &block); end
-
-  def append_to_file(path, *args, &block); end
-
-  def apply(path, config=T.unsafe(nil)); end
-
-  def behavior(); end
-
-  def behavior=(behavior); end
-
-  def chmod(path, mode, config=T.unsafe(nil)); end
-
-  def comment_lines(path, flag, *args); end
-
-  def copy_file(source, *args, &block); end
-
-  def create_file(destination, *args, &block); end
-
-  def create_link(destination, *args); end
-
-  def destination_root(); end
-
-  def destination_root=(root); end
-
-  def directory(source, *args, &block); end
-
-  def empty_directory(destination, config=T.unsafe(nil)); end
-
-  def find_in_source_paths(file); end
-
-  def get(source, *args, &block); end
-
-  def gsub_file(path, flag, *args, &block); end
-
-  def in_root(); end
-
-  def initialize(args=T.unsafe(nil), options=T.unsafe(nil), config=T.unsafe(nil)); end
-
-  def inject_into_class(path, klass, *args, &block); end
-
-  def inject_into_file(destination, *args, &block); end
-
-  def inject_into_module(path, module_name, *args, &block); end
-
-  def insert_into_file(destination, *args, &block); end
-
-  def inside(dir=T.unsafe(nil), config=T.unsafe(nil), &block); end
-
-  def link_file(source, *args); end
-
-  def prepend_file(path, *args, &block); end
-
-  def prepend_to_file(path, *args, &block); end
-
-  def relative_to_original_destination_root(path, remove_dot=T.unsafe(nil)); end
-
-  def remove_dir(path, config=T.unsafe(nil)); end
-
-  def remove_file(path, config=T.unsafe(nil)); end
-
-  def run(command, config=T.unsafe(nil)); end
-
-  def run_ruby_script(command, config=T.unsafe(nil)); end
-
-  def source_paths(); end
-
-  def template(source, *args, &block); end
-
-  def thor(command, *args); end
-
-  def uncomment_lines(path, flag, *args); end
-end
-
-class Bundler::Thor::Actions::CapturableERB
-end
-
-class Bundler::Thor::Actions::CapturableERB
-end
-
-module Bundler::Thor::Actions::ClassMethods
-  def add_runtime_options!(); end
-
-  def source_paths(); end
-
-  def source_paths_for_search(); end
-
-  def source_root(path=T.unsafe(nil)); end
-end
-
-module Bundler::Thor::Actions::ClassMethods
-end
-
-class Bundler::Thor::Actions::CreateFile
-  def data(); end
-
-  def force_on_collision?(); end
-
-  def force_or_skip_or_conflict(force, skip, &block); end
-
-  def identical?(); end
-
-  def initialize(base, destination, data, config=T.unsafe(nil)); end
-
-  def on_conflict_behavior(&block); end
-
-  def render(); end
-end
-
-class Bundler::Thor::Actions::CreateFile
-end
-
-class Bundler::Thor::Actions::CreateLink
-end
-
-class Bundler::Thor::Actions::CreateLink
-end
-
-class Bundler::Thor::Actions::Directory
-  def execute!(); end
-
-  def file_level_lookup(previous_lookup); end
-
-  def files(lookup); end
-
-  def initialize(base, source, destination=T.unsafe(nil), config=T.unsafe(nil), &block); end
-
-  def source(); end
-end
-
-class Bundler::Thor::Actions::Directory
-end
-
-class Bundler::Thor::Actions::EmptyDirectory
-  def base(); end
-
-  def config(); end
-
-  def convert_encoded_instructions(filename); end
-
-  def destination(); end
-
-  def destination=(destination); end
-
-  def exists?(); end
-
-  def given_destination(); end
-
-  def initialize(base, destination, config=T.unsafe(nil)); end
-
-  def invoke!(); end
-
-  def invoke_with_conflict_check(&block); end
-
-  def on_conflict_behavior(); end
-
-  def on_file_clash_behavior(); end
-
-  def pretend?(); end
-
-  def relative_destination(); end
-
-  def revoke!(); end
-
-  def say_status(status, color); end
-end
-
-class Bundler::Thor::Actions::EmptyDirectory
-end
-
-class Bundler::Thor::Actions::InjectIntoFile
-  def behavior(); end
-
-  def flag(); end
-
-  def initialize(base, destination, data, config); end
-
-  def replace!(regexp, string, force); end
-
-  def replacement(); end
-
-  def say_status(behavior); end
-end
-
-class Bundler::Thor::Actions::InjectIntoFile
-end
-
-module Bundler::Thor::Actions
-  def self.included(base); end
-end
-
-class Bundler::Thor::AmbiguousCommandError
-end
-
-class Bundler::Thor::AmbiguousCommandError
-end
-
-Bundler::Thor::AmbiguousTaskError = Bundler::Thor::AmbiguousCommandError
-
-class Bundler::Thor::Argument
-  def banner(); end
-
-  def default(); end
-
-  def default_banner(); end
-
-  def description(); end
-
-  def enum(); end
-
-  def human_name(); end
-
-  def initialize(name, options=T.unsafe(nil)); end
-
-  def name(); end
-
-  def required(); end
-
-  def required?(); end
-
-  def show_default?(); end
-
-  def type(); end
-
-  def usage(); end
-
-  def valid_type?(type); end
-
-  def validate!(); end
-  VALID_TYPES = ::T.let(nil, ::T.untyped)
-end
-
-class Bundler::Thor::Argument
-end
-
-class Bundler::Thor::Arguments
-  def initialize(arguments=T.unsafe(nil)); end
-
-  def parse(args); end
-
-  def remaining(); end
-  NUMERIC = ::T.let(nil, ::T.untyped)
-end
-
-class Bundler::Thor::Arguments
-  def self.parse(*args); end
-
-  def self.split(args); end
-end
-
-module Bundler::Thor::Base
-  def args(); end
-
-  def args=(args); end
-
-  def initialize(args=T.unsafe(nil), local_options=T.unsafe(nil), config=T.unsafe(nil)); end
-
-  def options(); end
-
-  def options=(options); end
-
-  def parent_options(); end
-
-  def parent_options=(parent_options); end
-end
-
-module Bundler::Thor::Base
-  def self.included(base); end
-
-  def self.register_klass_file(klass); end
-
-  def self.shell(); end
-
-  def self.shell=(shell); end
-
-  def self.subclass_files(); end
-
-  def self.subclasses(); end
-end
-
-class Bundler::Thor::Command
-  def formatted_usage(klass, namespace=T.unsafe(nil), subcommand=T.unsafe(nil)); end
-
-  def handle_argument_error?(instance, error, caller); end
-
-  def handle_no_method_error?(instance, error, caller); end
-
-  def hidden?(); end
-
-  def initialize(name, description, long_description, usage, options=T.unsafe(nil)); end
-
-  def local_method?(instance, name); end
-
-  def not_debugging?(instance); end
-
-  def private_method?(instance); end
-
-  def public_method?(instance); end
-
-  def required_options(); end
-
-  def run(instance, args=T.unsafe(nil)); end
-
-  def sans_backtrace(backtrace, caller); end
-  FILE_REGEXP = ::T.let(nil, ::T.untyped)
-end
-
-class Bundler::Thor::Command
-end
-
-module Bundler::Thor::CoreExt
-end
-
-class Bundler::Thor::CoreExt::HashWithIndifferentAccess
-  def [](key); end
-
-  def []=(key, value); end
-
-  def convert_key(key); end
-
-  def delete(key); end
-
-  def fetch(key, *args); end
-
-  def initialize(hash=T.unsafe(nil)); end
-
-  def key?(key); end
-
-  def merge(other); end
-
-  def merge!(other); end
-
-  def method_missing(method, *args); end
-
-  def replace(other_hash); end
-
-  def reverse_merge(other); end
-
-  def reverse_merge!(other_hash); end
-
-  def values_at(*indices); end
-end
-
-class Bundler::Thor::CoreExt::HashWithIndifferentAccess
-end
-
-class Bundler::Thor::CoreExt::OrderedHash
-end
-
-class Bundler::Thor::CoreExt::OrderedHash
-end
-
-module Bundler::Thor::CoreExt
-end
-
-class Bundler::Thor::DynamicCommand
-  def initialize(name, options=T.unsafe(nil)); end
-end
-
-class Bundler::Thor::DynamicCommand
-end
-
-Bundler::Thor::DynamicTask = Bundler::Thor::DynamicCommand
-
-class Bundler::Thor::Error
-end
-
-class Bundler::Thor::Error
-end
-
-class Bundler::Thor::Group
-  include ::Bundler::Thor::Base
-  include ::Bundler::Thor::Invocation
-  include ::Bundler::Thor::Shell
-  def _invoke_for_class_method(klass, command=T.unsafe(nil), *args, &block); end
-end
-
-class Bundler::Thor::Group
-  def self.banner(); end
-
-  def self.desc(description=T.unsafe(nil)); end
-
-  def self.get_options_from_invocations(group_options, base_options); end
-
-  def self.handle_argument_error(command, error, _args, arity); end
-
-  def self.help(shell); end
-
-  def self.invocation_blocks(); end
-
-  def self.invocations(); end
-
-  def self.invoke(*names, &block); end
-
-  def self.invoke_from_option(*names, &block); end
-
-  def self.printable_commands(*_); end
-
-  def self.printable_tasks(*_); end
-
-  def self.remove_invocation(*names); end
-
-  def self.self_command(); end
-
-  def self.self_task(); end
-end
-
-class Bundler::Thor::HiddenCommand
-end
-
-class Bundler::Thor::HiddenCommand
-end
-
-Bundler::Thor::HiddenTask = Bundler::Thor::HiddenCommand
-
-module Bundler::Thor::Invocation
-  def _parse_initialization_options(args, opts, config); end
-
-  def _retrieve_class_and_command(name, sent_command=T.unsafe(nil)); end
-
-  def _retrieve_class_and_task(name, sent_command=T.unsafe(nil)); end
-
-  def _shared_configuration(); end
-
-  def current_command_chain(); end
-
-  def initialize(args=T.unsafe(nil), options=T.unsafe(nil), config=T.unsafe(nil), &block); end
-
-  def invoke(name=T.unsafe(nil), *args); end
-
-  def invoke_all(); end
-
-  def invoke_command(command, *args); end
-
-  def invoke_task(command, *args); end
-
-  def invoke_with_padding(*args); end
-end
-
-module Bundler::Thor::Invocation
-  def self.included(base); end
-end
-
-class Bundler::Thor::InvocationError
-end
-
-class Bundler::Thor::InvocationError
-end
-
-module Bundler::Thor::LineEditor
-end
-
-class Bundler::Thor::LineEditor::Basic
-  def initialize(prompt, options); end
-
-  def options(); end
-
-  def prompt(); end
-
-  def readline(); end
-end
-
-class Bundler::Thor::LineEditor::Basic
-  def self.available?(); end
-end
-
-class Bundler::Thor::LineEditor::Readline
-end
-
-class Bundler::Thor::LineEditor::Readline::PathCompletion
-  def initialize(text); end
-
-  def matches(); end
-end
-
-class Bundler::Thor::LineEditor::Readline::PathCompletion
-end
-
-class Bundler::Thor::LineEditor::Readline
-end
-
-module Bundler::Thor::LineEditor
-  def self.best_available(); end
-
-  def self.readline(prompt, options=T.unsafe(nil)); end
-end
-
-class Bundler::Thor::MalformattedArgumentError
-end
-
-class Bundler::Thor::MalformattedArgumentError
-end
-
-class Bundler::Thor::Option
-  def aliases(); end
-
-  def array?(); end
-
-  def boolean?(); end
-
-  def dasherize(str); end
-
-  def dasherized?(); end
-
-  def group(); end
-
-  def hash?(); end
-
-  def hide(); end
-
-  def lazy_default(); end
-
-  def numeric?(); end
-
-  def string?(); end
-
-  def switch_name(); end
-
-  def undasherize(str); end
-
-  def usage(padding=T.unsafe(nil)); end
-
-  def validate_default_type!(); end
-  VALID_TYPES = ::T.let(nil, ::T.untyped)
-end
-
-class Bundler::Thor::Option
-  def self.parse(key, value); end
-end
-
-class Bundler::Thor::Options
-  def check_unknown!(); end
-
-  def current_is_switch?(); end
-
-  def current_is_switch_formatted?(); end
-
-  def initialize(hash_options=T.unsafe(nil), defaults=T.unsafe(nil), stop_on_unknown=T.unsafe(nil), disable_required_check=T.unsafe(nil)); end
-
-  def normalize_switch(arg); end
-
-  def parse_boolean(switch); end
-
-  def parse_peek(switch, option); end
-
-  def parsing_options?(); end
-
-  def switch?(arg); end
-
-  def switch_option(arg); end
-  EQ_RE = ::T.let(nil, ::T.untyped)
-  LONG_RE = ::T.let(nil, ::T.untyped)
-  OPTS_END = ::T.let(nil, ::T.untyped)
-  SHORT_NUM = ::T.let(nil, ::T.untyped)
-  SHORT_RE = ::T.let(nil, ::T.untyped)
-  SHORT_SQ_RE = ::T.let(nil, ::T.untyped)
-end
-
-class Bundler::Thor::Options
-  def self.to_switches(options); end
-end
-
-class Bundler::Thor::RequiredArgumentMissingError
-end
-
-class Bundler::Thor::RequiredArgumentMissingError
-end
-
-module Bundler::Thor::Sandbox
-end
-
-module Bundler::Thor::Sandbox
-end
-
-module Bundler::Thor::Shell
-  def _shared_configuration(); end
-
-  def ask(*args, &block); end
-
-  def error(*args, &block); end
-
-  def file_collision(*args, &block); end
-
-  def initialize(args=T.unsafe(nil), options=T.unsafe(nil), config=T.unsafe(nil)); end
-
-  def no?(*args, &block); end
-
-  def print_in_columns(*args, &block); end
-
-  def print_table(*args, &block); end
-
-  def print_wrapped(*args, &block); end
-
-  def say(*args, &block); end
-
-  def say_status(*args, &block); end
-
-  def set_color(*args, &block); end
-
-  def shell(); end
-
-  def shell=(shell); end
-
-  def terminal_width(*args, &block); end
-
-  def with_padding(); end
-
-  def yes?(*args, &block); end
-  SHELL_DELEGATED_METHODS = ::T.let(nil, ::T.untyped)
-end
-
-module Bundler::Thor::Shell
-end
-
-Bundler::Thor::Task = Bundler::Thor::Command
-
-class Bundler::Thor::UndefinedCommandError
-end
-
-class Bundler::Thor::UndefinedCommandError
-end
-
-Bundler::Thor::UndefinedTaskError = Bundler::Thor::UndefinedCommandError
-
-class Bundler::Thor::UnknownArgumentError
-end
-
-class Bundler::Thor::UnknownArgumentError
-end
-
-module Bundler::Thor::Util
-end
-
-module Bundler::Thor::Util
-  def self.camel_case(str); end
-
-  def self.escape_globs(path); end
-
-  def self.find_by_namespace(namespace); end
-
-  def self.find_class_and_command_by_namespace(namespace, fallback=T.unsafe(nil)); end
-
-  def self.find_class_and_task_by_namespace(namespace, fallback=T.unsafe(nil)); end
-
-  def self.globs_for(path); end
-
-  def self.load_thorfile(path, content=T.unsafe(nil), debug=T.unsafe(nil)); end
-
-  def self.namespace_from_thor_class(constant); end
-
-  def self.namespaces_in_content(contents, file=T.unsafe(nil)); end
-
-  def self.ruby_command(); end
-
-  def self.snake_case(str); end
-
-  def self.thor_classes_in(klass); end
-
-  def self.thor_root(); end
-
-  def self.thor_root_glob(); end
-
-  def self.user_home(); end
-end
-
-class Bundler::Thor
-  def self.banner(command, namespace=T.unsafe(nil), subcommand=T.unsafe(nil)); end
-
-  def self.check_unknown_options!(options=T.unsafe(nil)); end
-
-  def self.command_help(shell, command_name); end
-
-  def self.default_command(meth=T.unsafe(nil)); end
-
-  def self.default_task(meth=T.unsafe(nil)); end
-
-  def self.desc(usage, description, options=T.unsafe(nil)); end
-
-  def self.disable_required_check(); end
-
-  def self.disable_required_check!(*command_names); end
-
-  def self.disable_required_check?(command); end
-
-  def self.dispatch(meth, given_args, given_opts, config); end
-
-  def self.dynamic_command_class(); end
-
-  def self.find_command_possibilities(meth); end
-
-  def self.find_task_possibilities(meth); end
-
-  def self.help(shell, subcommand=T.unsafe(nil)); end
-
-  def self.long_desc(long_description, options=T.unsafe(nil)); end
-
-  def self.map(mappings=T.unsafe(nil)); end
-
-  def self.method_option(name, options=T.unsafe(nil)); end
-
-  def self.method_options(options=T.unsafe(nil)); end
-
-  def self.normalize_command_name(meth); end
-
-  def self.normalize_task_name(meth); end
-
-  def self.option(name, options=T.unsafe(nil)); end
-
-  def self.options(options=T.unsafe(nil)); end
-
-  def self.package_name(name, _=T.unsafe(nil)); end
-
-  def self.printable_commands(all=T.unsafe(nil), subcommand=T.unsafe(nil)); end
-
-  def self.printable_tasks(all=T.unsafe(nil), subcommand=T.unsafe(nil)); end
-
-  def self.register(klass, subcommand_name, usage, description, options=T.unsafe(nil)); end
-
-  def self.retrieve_command_name(args); end
-
-  def self.retrieve_task_name(args); end
-
-  def self.stop_on_unknown_option(); end
-
-  def self.stop_on_unknown_option!(*command_names); end
-
-  def self.stop_on_unknown_option?(command); end
-
-  def self.subcommand(subcommand, subcommand_class); end
-
-  def self.subcommand_classes(); end
-
-  def self.subcommand_help(cmd); end
-
-  def self.subcommands(); end
-
-  def self.subtask(subcommand, subcommand_class); end
-
-  def self.subtask_help(cmd); end
-
-  def self.subtasks(); end
-
-  def self.task_help(shell, command_name); end
 end
 
 class Bundler::ThreadCreationError
@@ -4597,17 +3686,6 @@ end
 class Bundler::VirtualProtocolError
 end
 
-module Bundler::YAMLSerializer
-  ARRAY_REGEX = ::T.let(nil, ::T.untyped)
-  HASH_REGEX = ::T.let(nil, ::T.untyped)
-end
-
-module Bundler::YAMLSerializer
-  def self.dump(hash); end
-
-  def self.load(str); end
-end
-
 class Bundler::YamlSyntaxError
   def initialize(orig_exception, msg); end
 
@@ -4730,58 +3808,7 @@ module Bundler
 
   def self.with_clean_env(); end
 
-  def self.with_friendly_errors(); end
-
   def self.with_original_env(); end
-end
-
-module CGI::HtmlExtension
-  def a(href=T.unsafe(nil)); end
-
-  def base(href=T.unsafe(nil)); end
-
-  def blockquote(cite=T.unsafe(nil)); end
-
-  def caption(align=T.unsafe(nil)); end
-
-  def checkbox(name=T.unsafe(nil), value=T.unsafe(nil), checked=T.unsafe(nil)); end
-
-  def checkbox_group(name=T.unsafe(nil), *values); end
-
-  def file_field(name=T.unsafe(nil), size=T.unsafe(nil), maxlength=T.unsafe(nil)); end
-
-  def form(method=T.unsafe(nil), action=T.unsafe(nil), enctype=T.unsafe(nil)); end
-
-  def hidden(name=T.unsafe(nil), value=T.unsafe(nil)); end
-
-  def html(attributes=T.unsafe(nil)); end
-
-  def image_button(src=T.unsafe(nil), name=T.unsafe(nil), alt=T.unsafe(nil)); end
-
-  def img(src=T.unsafe(nil), alt=T.unsafe(nil), width=T.unsafe(nil), height=T.unsafe(nil)); end
-
-  def multipart_form(action=T.unsafe(nil), enctype=T.unsafe(nil)); end
-
-  def password_field(name=T.unsafe(nil), value=T.unsafe(nil), size=T.unsafe(nil), maxlength=T.unsafe(nil)); end
-
-  def popup_menu(name=T.unsafe(nil), *values); end
-
-  def radio_button(name=T.unsafe(nil), value=T.unsafe(nil), checked=T.unsafe(nil)); end
-
-  def radio_group(name=T.unsafe(nil), *values); end
-
-  def reset(value=T.unsafe(nil), name=T.unsafe(nil)); end
-
-  def scrolling_list(name=T.unsafe(nil), *values); end
-
-  def submit(value=T.unsafe(nil), name=T.unsafe(nil)); end
-
-  def text_field(name=T.unsafe(nil), value=T.unsafe(nil), size=T.unsafe(nil), maxlength=T.unsafe(nil)); end
-
-  def textarea(name=T.unsafe(nil), cols=T.unsafe(nil), rows=T.unsafe(nil)); end
-end
-
-module CGI::HtmlExtension
 end
 
 class Class
@@ -4846,14 +3873,6 @@ class Dir
   def self.exists?(_); end
 
   def self.tmpdir(); end
-end
-
-class ERB
-  def def_method(mod, methodname, fname=T.unsafe(nil)); end
-
-  def def_module(methodname=T.unsafe(nil)); end
-
-  def result_with_hash(hash); end
 end
 
 class Encoding
@@ -5245,6 +4264,33 @@ class Foo
   def bar(); end
 
   def baz(); end
+end
+
+module Forwardable
+  def def_delegator(accessor, method, ali=T.unsafe(nil)); end
+
+  def def_delegators(accessor, *methods); end
+
+  def def_instance_delegator(accessor, method, ali=T.unsafe(nil)); end
+
+  def def_instance_delegators(accessor, *methods); end
+
+  def delegate(hash); end
+
+  def instance_delegate(hash); end
+  VERSION = ::T.let(nil, ::T.untyped)
+end
+
+module Forwardable
+  def self._compile_method(src, file, line); end
+
+  def self._delegator_method(obj, accessor, method, ali); end
+
+  def self._valid_method?(method); end
+
+  def self.debug(); end
+
+  def self.debug=(debug); end
 end
 
 class FrozenError
@@ -9734,6 +8780,20 @@ class SignalException
   def signm(); end
 
   def signo(); end
+end
+
+module SingleForwardable
+  def def_delegator(accessor, method, ali=T.unsafe(nil)); end
+
+  def def_delegators(accessor, *methods); end
+
+  def def_single_delegator(accessor, method, ali=T.unsafe(nil)); end
+
+  def def_single_delegators(accessor, *methods); end
+
+  def delegate(hash); end
+
+  def single_delegate(hash); end
 end
 
 class Sorbet::Private::ConstantLookupCache

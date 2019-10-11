@@ -67,22 +67,7 @@ export PATH
 info "├─ ruby:           $(command -v ruby)"
 info "├─ ruby --version: $(ruby --version)"
 
-# Add bundler to the path
-BUNDLER_LOC="${repo_root}/$(dirname "$(rlocation gems/bundler/bundle)")"
-PATH="$BUNDLER_LOC:$PATH"
-export PATH
-
-info "├─ bundle:           $(command -v bundle)"
-info "├─ bundle --version: $(bundle --version)"
-
-# Use the sorbet executable built by bazel
-SRB_SORBET_EXE="${repo_root}/$(rlocation com_stripe_ruby_typer/main/sorbet)"
-export SRB_SORBET_EXE
-
 hidden_method_finder="${repo_root}/gems/sorbet/lib/hidden-definition-finder.rb"
-
-info "├─ sorbet:           $SRB_SORBET_EXE"
-info "├─ sorbet --version: $("$SRB_SORBET_EXE" --version)"
 
 # ----- Build the test sandbox -----
 
@@ -103,31 +88,12 @@ trap cleanup EXIT
 (
   cd "$actual"
 
-  ruby_loc=$(bundle exec which ruby)
-  if [[ "$ruby_loc" == "$RUBY_WRAPPER_LOC" ]] ; then
-    info "├─ Bundle was able to find ruby"
-  else
-    attn "├─ ruby in path:  ${ruby_loc}"
-    attn "├─ expected ruby: ${RUBY_WRAPPER_LOC}"
-    error "└─ Bundle failed to find ruby"
-    exit 1
-  fi
-
-  # Configuring output to vendor/bundle
-  # Passing --local to never consult rubygems.org
-  # Passing --no-prune to not delete unused gems in vendor/cache
-  info "├─ Installing dependencies to vendor/bundle"
-  bundle install --local --no-prune
-
-  info "├─ Checking installation"
-  bundle check
-
   # Uses /dev/null for stdin so any binding.pry would exit immediately
   # (otherwise, pry will be waiting for input, but it's impossible to tell
   # because the pry output is hiding in the *.log files)
   #
   # note: redirects stderr before the pipe
-  if ! bundle exec "$hidden_method_finder" < /dev/null 2> "err.log" > "out.log"; then
+  if ! "$RUBY_WRAPPER_LOC" "$hidden_method_finder" < /dev/null 2> "err.log" > "out.log"; then
     error "├─ hidden method finder failed."
     error "├─ stdout (out.log):"
     cat "out.log"
