@@ -67,6 +67,10 @@ export PATH
 info "├─ ruby:           $(command -v ruby)"
 info "├─ ruby --version: $(ruby --version)"
 
+# Use the sorbet executable built by bazel
+SRB_SORBET_EXE="${repo_root}/$(rlocation com_stripe_ruby_typer/main/sorbet)"
+export SRB_SORBET_EXE
+
 hidden_method_finder="${repo_root}/gems/sorbet/lib/hidden-definition-finder.rb"
 
 info "├─ sorbet:           $SRB_SORBET_EXE"
