@@ -862,6 +862,33 @@ class String < Object
   sig {returns(T::Boolean)}
   def empty?(); end
 
+  # The one-encoding form returns a copy of str transcoded to encoding
+  # encoding. The two-encoding form returns a copy of str transcoded
+  # from src_encoding to dst_encoding. The final, zero-encoding form
+  # returns a copy of str transcoded to `Encoding.default_internal`.
+  sig do
+    params(
+      arg0: T.any(String, Encoding),
+      arg1: T.any(String, Encoding),
+      arg2: T::Hash[Symbol, T.untyped]
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+      arg0: T.any(String, Encoding),
+      arg1: T::Hash[Symbol, T.untyped]
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+      arg0: T::Hash[Symbol, T.untyped]
+    )
+    .returns(String)
+  end
+  def encode(arg0=T.unsafe(nil), arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
+
   # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
   # object that represents the encoding of obj.
   sig {returns(Encoding)}
