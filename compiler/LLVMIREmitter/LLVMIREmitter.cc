@@ -260,11 +260,13 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                                 {builder.CreateCall(module->getFunction("sorbet_rb_cObject")), ownerName});
                             auto functionName = builder.CreateGlobalStringPtr(funcNameRef.showRaw(gs), "functionName");
 
-                            auto func = module->getFunction(funcSym.data(gs)->toStringFullName(gs));
-                            ENFORCE(func);
+                            auto funcHandle =
+                                module->getOrInsertFunction(funcSym.data(gs)->toStringFullName(gs),
+                                                            getRubyFunctionTypeForSymbol(lctx, gs, funcSym));
+                            ENFORCE(funcHandle);
                             auto universalSignature = llvm::PointerType::getUnqual(
                                 llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), true));
-                            auto ptr = builder.CreateBitCast(func, universalSignature);
+                            auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
                             builder.CreateCall(module->getFunction("sorbet_defineMethod"), {owner, functionName, ptr});
                             return;
