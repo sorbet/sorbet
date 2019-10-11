@@ -13,7 +13,7 @@ expected="${ruby_version}_hidden.rbi.exp"
 repo_root="$PWD"
 test_dir="$repo_root/gems/sorbet/test/hidden-method-finder/$test_name"
 # move to the test_dir
-pushd ${test_dir}
+pushd "${test_dir}"
 
 info "├─ hidden_methods_path: $hidden_path"
 info "├─ test_name:           $test_name"

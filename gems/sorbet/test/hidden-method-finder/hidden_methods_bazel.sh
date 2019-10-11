@@ -69,7 +69,6 @@ info "├─ ruby --version: $(ruby --version)"
 
 # Add bundler to the path
 BUNDLER_LOC="${repo_root}/$(dirname "$(rlocation gems/bundler/bundle)")"
-GEMS_LOC="$(dirname "$BUNDLER_LOC")/gems"
 PATH="$BUNDLER_LOC:$PATH"
 export PATH
 

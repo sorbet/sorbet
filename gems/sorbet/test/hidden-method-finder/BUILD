@@ -24,12 +24,18 @@ sh_binary(
 
 hidden_methods_tests(
     ruby = "ruby_2_4_3",
-    tests = ["simple", "thorough"],
+    tests = [
+        "simple",
+        "thorough",
+    ],
 )
 
 hidden_methods_tests(
     ruby = "ruby_2_6_3",
-    tests = ["simple", "thorough"],
+    tests = [
+        "simple",
+        "thorough",
+    ],
 )
 
 test_suite(
