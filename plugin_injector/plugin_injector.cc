@@ -8,6 +8,7 @@
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
+#include "core/errors/errors.h"
 #include <cxxopts.hpp>
 #include <optional>
 using namespace std;
@@ -45,15 +46,20 @@ public:
         sorbet::compiler::ObjectFileEmitter::run(gs, lctx, move(module), cfg.symbol, irOutputDir.value(), fileName,
                                                  globalInitializers);
     };
-    virtual void patchDSL(core::MutableContext &gs, ast::ClassDef *klass) const override {
+    virtual void patchDSL(core::MutableContext &ctx, ast::ClassDef *klass) const override {
         if (!irOutputDir.has_value()) {
             return;
+        }
+        if (klass->loc.file().data(ctx).strictLevel < core::StrictLevel::True) {
+            if (auto e = ctx.state.beginError(klass->loc, core::errors::Internal::InternalError)) {
+                e.setHeader("File must be `typed: true` or higher to be compiled");
+            }
         }
         if (!ast::isa_tree<ast::EmptyTree>(klass->name.get())) {
             return;
         }
 
-        sorbet::compiler::DefinitionRewriter::run(gs, klass);
+        sorbet::compiler::DefinitionRewriter::run(ctx, klass);
     };
     virtual ~LLVMSemanticExtension(){};
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) override {
