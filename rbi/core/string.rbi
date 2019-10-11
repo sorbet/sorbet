@@ -862,17 +862,6 @@ class String < Object
   sig {returns(T::Boolean)}
   def empty?(); end
 
-  # The first form returns a copy of str transcoded to encoding encoding.
-  # TODO: support other forms @ https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-encode
-  sig do
-    params(
-      encoding: T.nilable(String),
-      options: T.untyped
-    )
-    .returns(T::Boolean)
-  end
-  def encode(encoding = T.unsafe(nil), options = T.unsafe({})); end
-
   # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
   # object that represents the encoding of obj.
   sig {returns(Encoding)}
