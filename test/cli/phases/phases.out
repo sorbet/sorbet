@@ -56,14 +56,14 @@ ClassDef{
 --- index-tree-raw end ---
 --- symbol-table start ---
 class ::<root> < ::Object () @ (... removed core rbi locs ..., -e:1, https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1)
-  class ::<Class:<root>> < ::<Class:Object> ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ -e:1
       argument <blk><block> @ Loc {file=-e start=??? end=???}
 
 --- symbol-table end ---
 --- symbol-table-raw start ---
 class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=-e start=1:1 end=1:2}, Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4})
-  class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=-e start=1:1 end=1:2}
       argument <blk><block> @ Loc {file=-e start=??? end=???}
 
@@ -107,7 +107,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
