@@ -869,7 +869,7 @@ class String < Object
       encoding: T.nilable(String),
       options: T.untyped
     )
-    .returns(T::Boolean)
+    .returns(String)
   end
   def encode(encoding = T.unsafe(nil), options = T.unsafe({})); end
 
