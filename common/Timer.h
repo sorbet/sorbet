@@ -4,6 +4,7 @@
 #include <chrono>
 #include <memory>
 #include <string>
+#include <thread>
 
 namespace sorbet {
 class Timer {
@@ -21,6 +22,15 @@ public:
           std::initializer_list<std::pair<ConstExprStr, std::string>> args);
     ~Timer();
     FlowId getFlowEdge();
+
+    // TODO We could add more overloads for this if we need them (to create other kinds of Timers)
+    // We could also make this more generic to allow more sleep duration types.
+    static void timedSleep(const std::chrono::microseconds &sleep_duration, spdlog::logger &log, ConstExprStr name) {
+        Timer timer(log, name);
+        auto dur = std::chrono::duration<double, std::milli>(sleep_duration);
+        log.debug("{}: sleeping for {}ms", name.str, dur.count());
+        std::this_thread::sleep_for(sleep_duration);
+    }
 
 private:
     spdlog::logger &log;
