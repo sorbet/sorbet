@@ -25,19 +25,19 @@ Return::Return(core::LocalVariable what) : what(what) {
     categoryCounterInc("cfg", "return");
 }
 
-string SolveConstraint::toString(core::Context ctx) {
+string SolveConstraint::toString(core::Context ctx) const {
     return fmt::format("Solve<{}>", this->link->fun.toString(ctx));
 }
 
-string SolveConstraint::showRaw(core::Context ctx, int tabs) {
+string SolveConstraint::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("Solve {{ link = {} }}", this->link->fun.showRaw(ctx));
 }
 
-string Return::toString(core::Context ctx) {
+string Return::toString(core::Context ctx) const {
     return fmt::format("return {}", this->what.toString(ctx));
 }
 
-string Return::showRaw(core::Context ctx, int tabs) {
+string Return::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("Return {{\n{0}&nbsp;what = {1},\n{0}}}", spacesForTabLevel(tabs),
                        this->what.showRaw(ctx, tabs + 1));
 }
@@ -47,11 +47,11 @@ BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, core::LocalVar
     categoryCounterInc("cfg", "blockreturn");
 }
 
-string BlockReturn::toString(core::Context ctx) {
+string BlockReturn::toString(core::Context ctx) const {
     return fmt::format("blockreturn<{}> {}", this->link->fun.toString(ctx), this->what.toString(ctx));
 }
 
-string BlockReturn::showRaw(core::Context ctx, int tabs) {
+string BlockReturn::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("BlockReturn {{\n{0}&nbsp;link = {1},\n{0}&nbsp;what = {2},\n{0}}}", spacesForTabLevel(tabs),
                        this->link->fun.showRaw(ctx), this->what.showRaw(ctx, tabs + 1));
 }
@@ -61,11 +61,11 @@ LoadSelf::LoadSelf(shared_ptr<core::SendAndBlockLink> link, core::LocalVariable 
     categoryCounterInc("cfg", "loadself");
 }
 
-string LoadSelf::toString(core::Context ctx) {
+string LoadSelf::toString(core::Context ctx) const {
     return "loadSelf";
 }
 
-string LoadSelf::showRaw(core::Context ctx, int tabs) {
+string LoadSelf::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("LoadSelf {{}}", spacesForTabLevel(tabs));
 }
 
@@ -88,7 +88,7 @@ Literal::Literal(const core::TypePtr &value) : value(move(value)) {
     categoryCounterInc("cfg", "literal");
 }
 
-string Literal::toString(core::Context ctx) {
+string Literal::toString(core::Context ctx) const {
     string res;
     typecase(
         this->value.get(), [&](core::LiteralType *l) { res = l->showValue(ctx); },
@@ -107,7 +107,7 @@ string Literal::toString(core::Context ctx) {
     return res;
 }
 
-string Literal::showRaw(core::Context ctx, int tabs) {
+string Literal::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("Literal {{ value = {} }}", this->value->show(ctx));
 }
 
@@ -119,39 +119,39 @@ Alias::Alias(core::SymbolRef what) : what(what) {
     categoryCounterInc("cfg", "alias");
 }
 
-string Ident::toString(core::Context ctx) {
+string Ident::toString(core::Context ctx) const {
     return this->what.toString(ctx);
 }
 
-string Ident::showRaw(core::Context ctx, int tabs) {
+string Ident::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("Ident {{\n{0}&nbsp;what = {1},\n{0}}}", spacesForTabLevel(tabs), this->what.showRaw(ctx));
 }
 
-string Alias::toString(core::Context ctx) {
+string Alias::toString(core::Context ctx) const {
     return fmt::format("alias {}", this->what.data(ctx)->name.data(ctx)->toString(ctx));
 }
 
-string Alias::showRaw(core::Context ctx, int tabs) {
+string Alias::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("Alias {{ what = {} }}", this->what.data(ctx)->show(ctx));
 }
 
-string Send::toString(core::Context ctx) {
+string Send::toString(core::Context ctx) const {
     return fmt::format("{}.{}({})", this->recv.toString(ctx), this->fun.data(ctx)->toString(ctx),
                        fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(ctx); }));
 }
 
-string Send::showRaw(core::Context ctx, int tabs) {
+string Send::showRaw(core::Context ctx, int tabs) const {
     return fmt::format(
         "Send {{\n{0}&nbsp;recv = {1},\n{0}&nbsp;fun = {2},\n{0}&nbsp;args = ({3}),\n{0}}}", spacesForTabLevel(tabs),
         this->recv.toString(ctx), this->fun.data(ctx)->showRaw(ctx),
         fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.showRaw(ctx, tabs + 1); }));
 }
 
-string LoadArg::toString(core::Context ctx) {
+string LoadArg::toString(core::Context ctx) const {
     return fmt::format("load_arg({})", this->argument(ctx).argumentName(ctx));
 }
 
-string LoadArg::showRaw(core::Context ctx, int tabs) {
+string LoadArg::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("LoadArg {{ argument = {} }}", this->argument(ctx).argumentName(ctx));
 }
 
@@ -159,45 +159,45 @@ const core::ArgInfo &LoadArg::argument(const core::GlobalState &gs) const {
     return this->method.data(gs)->arguments()[this->argId];
 }
 
-string LoadYieldParams::toString(core::Context ctx) {
+string LoadYieldParams::toString(core::Context ctx) const {
     return fmt::format("load_yield_params({})", this->link->fun.toString(ctx));
 }
 
-string LoadYieldParams::showRaw(core::Context ctx, int tabs) {
+string LoadYieldParams::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("LoadYieldParams {{ link = {0} }}", this->link->fun.showRaw(ctx));
 }
 
-string Unanalyzable::toString(core::Context ctx) {
+string Unanalyzable::toString(core::Context ctx) const {
     return "<unanalyzable>";
 }
 
-string Unanalyzable::showRaw(core::Context ctx, int tabs) {
+string Unanalyzable::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("Unanalyzable {{}}", spacesForTabLevel(tabs));
 }
 
-string NotSupported::toString(core::Context ctx) {
+string NotSupported::toString(core::Context ctx) const {
     return fmt::format("NotSupported({})", why);
 }
 
-string NotSupported::showRaw(core::Context ctx, int tabs) {
+string NotSupported::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("NotSupported {{\n{0}&nbsp;why = {1},\n{0}}}", spacesForTabLevel(tabs), why);
 }
 
-string Cast::toString(core::Context ctx) {
+string Cast::toString(core::Context ctx) const {
     return fmt::format("cast({}, {});", this->value.toString(ctx), this->type->toString(ctx));
 }
 
-string Cast::showRaw(core::Context ctx, int tabs) {
+string Cast::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("Cast {{\n{0}&nbsp;cast = T.{1},\n{0}&nbsp;value = {2},\n{0}&nbsp;type = {3},\n{0}}}",
                        spacesForTabLevel(tabs), this->cast.data(ctx)->show(ctx), this->value.showRaw(ctx, tabs + 1),
                        this->type->show(ctx));
 }
 
-string TAbsurd::toString(core::Context ctx) {
+string TAbsurd::toString(core::Context ctx) const {
     return fmt::format("T.absurd({})", this->what.toString(ctx));
 }
 
-string TAbsurd::showRaw(core::Context ctx, int tabs) {
+string TAbsurd::showRaw(core::Context ctx, int tabs) const {
     return fmt::format("TAbsurd {{\n{0}&nbsp;what = {1},\n{0}}}", spacesForTabLevel(tabs),
                        this->what.showRaw(ctx, tabs + 1));
 }

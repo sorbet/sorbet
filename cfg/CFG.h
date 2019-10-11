@@ -64,8 +64,8 @@ public:
         counterInc("basicblocks");
     };
 
-    std::string toString(core::Context ctx);
-    std::string showRaw(core::Context ctx);
+    std::string toString(core::Context ctx) const;
+    std::string showRaw(core::Context ctx) const;
 };
 
 class CFGContext;
@@ -96,9 +96,9 @@ public:
     };
 
     // Abbreviated debug output, useful if you already know what you're looking at
-    std::string toString(core::Context ctx);
+    std::string toString(core::Context ctx) const;
     // Verbose debug output
-    std::string showRaw(core::Context ctx);
+    std::string showRaw(core::Context ctx) const;
 
     // Flags
     static constexpr int LOOP_HEADER = 1 << 0;
