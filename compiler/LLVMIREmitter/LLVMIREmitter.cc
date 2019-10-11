@@ -244,6 +244,10 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                             } else {
                                 ENFORCE(false);
                             }
+                            if (ownerSym == core::Symbols::root() || ownerSym == core::Symbols::rootSingleton()) {
+                                // Root methods end up going on object
+                                ownerSym = core::Symbols::Object();
+                            }
 
                             auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
                             ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
