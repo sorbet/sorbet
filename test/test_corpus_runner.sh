@@ -38,4 +38,4 @@ if [[ $rb != *"no-run"* ]]; then
     diff -a "$rbout" "$srbout"
 fi
 
-# cat "$llvmir/"*.ll
+cleanup 
