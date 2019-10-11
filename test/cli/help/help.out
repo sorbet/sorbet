@@ -163,6 +163,8 @@ Usage:
       --stress-incremental-resolver
                                 Force incremental updates to discover
                                 resolver & namer bugs
+      --sleep-in-slow-path      Add some sleeps to slow path to artificially
+                                slow it down
       --simulate-crash          Crash on start
       --silence-dev-message     Silence "You are running a development build"
                                 message
