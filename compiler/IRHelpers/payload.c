@@ -243,6 +243,10 @@ void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) __attribute_
 // ****                       Constants, Classes and Modules
 // ****
 
+VALUE sorbet_rb_cObject() {
+  return rb_cObject;
+}
+
 void sorbet_defineTopLevelConstant(const char *name, VALUE value) __attribute__((always_inline)) {
     rb_define_global_const(name, value);
 }

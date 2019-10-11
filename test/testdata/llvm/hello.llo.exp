@@ -2,6 +2,7 @@ source_filename = "compiler/IRHelpers/payload.c"
 target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-apple-darwin18.2.0"
 
+@rb_cObject = external local_unnamed_addr global i64, align 8
 @.str = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
 @"userStr_hello world" = private unnamed_addr constant [12 x i8] c"hello world\00", align 1
@@ -62,13 +63,14 @@ initializeGlobals:
   %callArgs.i = alloca [2 x i64], align 8
   %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0)) #7
   store i64 %0, i64* @rubyId_global_puts, align 8
-  %1 = bitcast [2 x i64]* %callArgs.i to i8*
-  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %1)
-  %2 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"userStr_hello world", i64 0, i64 0), i64 11) #7
+  %1 = load i64, i64* @rb_cObject, align 8, !tbaa !0
+  %2 = bitcast [2 x i64]* %callArgs.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %2)
+  %3 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"userStr_hello world", i64 0, i64 0), i64 11) #7
   %callArgsAddr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 %2, i64* %callArgsAddr.i, align 8
-  %3 = call i64 @rb_funcallv(i64 0, i64 %0, i32 1, i64* nonnull %callArgsAddr.i) #7
-  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %1)
+  store i64 %3, i64* %callArgsAddr.i, align 8
+  %4 = call i64 @rb_funcallv(i64 %1, i64 %0, i32 1, i64* nonnull %callArgsAddr.i) #7
+  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %2)
   ret void
 }
 

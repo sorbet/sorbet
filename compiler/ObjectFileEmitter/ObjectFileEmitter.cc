@@ -120,7 +120,7 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
         builder.CreateCall(staticInitFunc,
                            {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
                             llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(lctx)),
-                            llvm::ConstantInt::get(lctx, llvm::APInt(64, 0, true))},
+                            builder.CreateCall(module->getFunction("sorbet_rb_cObject"))},
                            (string)objectName);
     }
 
