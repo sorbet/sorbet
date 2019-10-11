@@ -862,6 +862,10 @@ class String < Object
   sig {returns(T::Boolean)}
   def empty?(); end
 
+  # The one-encoding form returns a copy of str transcoded to encoding
+  # encoding. The two-encoding form returns a copy of str transcoded
+  # from src_encoding to dst_encoding. The final, zero-encoding form
+  # returns a copy of str transcoded to `Encoding.default_internal`.
   sig do
     params(
       arg0: T.any(String, Encoding),
