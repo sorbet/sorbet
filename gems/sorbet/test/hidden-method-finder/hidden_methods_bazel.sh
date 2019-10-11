@@ -69,6 +69,9 @@ info "├─ ruby --version: $(ruby --version)"
 
 hidden_method_finder="${repo_root}/gems/sorbet/lib/hidden-definition-finder.rb"
 
+info "├─ sorbet:           $SRB_SORBET_EXE"
+info "├─ sorbet --version: $("$SRB_SORBET_EXE" --version)"
+
 # ----- Build the test sandbox -----
 
 # NOTE: this builds a replica of the `src` tree in the `actual` directory, and
