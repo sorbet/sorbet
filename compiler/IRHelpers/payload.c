@@ -483,4 +483,8 @@ VALUE allocClosureAsValue(int elemCount) {
     return TypedData_Wrap_Struct(rb_cData, data_type, sval);
 }
 
+VALUE *getClosureElem(VALUE closure, int elemId) {
+  return &(((struct sorbet_Closure *)RTYPEDDATA_DATA(closure))->closureData[elemId])
+}
+
 #endif
