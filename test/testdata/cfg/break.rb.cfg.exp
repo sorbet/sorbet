@@ -64,7 +64,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<statTemp>$5: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$3: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$5: T.untyped)\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).sig()\l<selfRestore>$10: T.class_of(<root>) = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$3: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$5: T.untyped)\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).sig()\l<selfRestore>$10: T.class_of(<root>) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];

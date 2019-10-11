@@ -542,8 +542,16 @@
   {
    "name": "cl",
    "type": {
-    "kind": "CLASS",
-    "class_full_name": "T.class_of(Top::Nested)"
+    "kind": "APPLIED",
+    "applied": {
+     "symbol_full_name": "T.class_of(Top::Nested)",
+     "type_args": [
+      {
+       "kind": "CLASS",
+       "class_full_name": "Top::Nested"
+      }
+     ]
+    }
    }
   },
   {
@@ -1036,8 +1044,16 @@
      "bind": {
       "unique_name": "keep_for_ide$7",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(Top)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(Top)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "Top"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -1062,8 +1078,16 @@
      "bind": {
       "unique_name": "keep_for_ide$6",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(Top::Nested)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(Top::Nested)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "Top::Nested"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -1724,8 +1748,16 @@
      "bind": {
       "unique_name": "\u003cexceptionClassTemp\u003e$27",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(StandardError)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(StandardError)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "StandardError"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -1769,8 +1801,16 @@
         {
          "unique_name": "\u003cexceptionClassTemp\u003e$27",
          "type": {
-          "kind": "CLASS",
-          "class_full_name": "T.class_of(StandardError)"
+          "kind": "APPLIED",
+          "applied": {
+           "symbol_full_name": "T.class_of(StandardError)",
+           "type_args": [
+            {
+             "kind": "CLASS",
+             "class_full_name": "StandardError"
+            }
+           ]
+          }
          }
         }
        ]

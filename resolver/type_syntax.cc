@@ -179,14 +179,26 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                         break;
                     }
 
+                    bool validBind = false;
                     auto bind = getResultType(ctx, *(send->args.front()), *parent, args);
-                    auto classType = core::cast_type<core::ClassType>(bind.get());
-                    if (!classType) {
+                    if (auto classType = core::cast_type<core::ClassType>(bind.get())) {
+                        sig.bind = classType->symbol;
+                        validBind = true;
+                    } else if (auto appType = core::cast_type<core::AppliedType>(bind.get())) {
+                        // When `T.proc.bind` is used with `T.class_of`, pass it
+                        // through as long as it only has the AttachedClass type
+                        // member.
+                        if (appType->klass.data(ctx)->isSingletonClass(ctx) &&
+                            appType->klass.data(ctx)->typeMembers().size() == 1) {
+                            sig.bind = appType->klass;
+                            validBind = true;
+                        }
+                    }
+
+                    if (!validBind) {
                         if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed `{}`: Can only bind to simple class names", send->fun.show(ctx));
                         }
-                    } else {
-                        sig.bind = classType->symbol;
                     }
 
                     break;
@@ -506,6 +518,19 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 e.setHeader("Only top-level T.self_type is supported");
             }
             return core::Types::untypedUntracked();
+        case core::Names::attachedClass()._id:
+            if (!ctx.owner.data(ctx)->isSingletonClass(ctx)) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("`T.{}` may only be used in a singleton class method context",
+                                core::Names::attachedClass().show(ctx));
+                }
+                return core::Types::untypedUntracked();
+            } else {
+                // All singletons have an AttachedClass type member, created by
+                // `singletonClass`
+                auto attachedClass = ctx.owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+                return attachedClass.data(ctx)->resultType;
+            }
         case core::Names::noreturn()._id:
             return core::Types::bottom();
 

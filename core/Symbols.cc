@@ -810,6 +810,9 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     }
     SymbolRef selfRef = this->ref(gs);
 
+    // avoid using `this` after the call to gs.enterTypeMember
+    auto selfLoc = this->loc();
+
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
     singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
     SymbolData singletonInfo = singleton.data(gs);
@@ -818,6 +821,14 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singletonInfo->members()[Names::attached()] = selfRef;
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
+
+    auto tp = gs.enterTypeMember(selfLoc, singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+
+    // Initialize the bounds of AttachedClass as todo, as they will be updated
+    // to the externalType of the attached class for the upper bound, and bottom
+    // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
+    auto todo = make_type<ClassType>(Symbols::todo());
+    tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
 
     selfRef.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;

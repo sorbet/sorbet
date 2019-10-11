@@ -63,8 +63,13 @@
      "bind": {
       "unique_name": "\u003cself\u003e",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(Example)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(Example)",
+        "type_args": [
+         {}
+        ]
+       }
       }
      },
      "instruction": {
@@ -78,8 +83,13 @@
         }
        },
        "type": {
-        "kind": "CLASS",
-        "class_full_name": "T.class_of(Example)"
+        "kind": "APPLIED",
+        "applied": {
+         "symbol_full_name": "T.class_of(Example)",
+         "type_args": [
+          {}
+         ]
+        }
        }
       }
      },
@@ -448,8 +458,13 @@
      "bind": {
       "unique_name": "\u003cself\u003e",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(Example)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(Example)",
+        "type_args": [
+         {}
+        ]
+       }
       }
      },
      "instruction": {
@@ -463,8 +478,13 @@
         }
        },
        "type": {
-        "kind": "CLASS",
-        "class_full_name": "T.class_of(Example)"
+        "kind": "APPLIED",
+        "applied": {
+         "symbol_full_name": "T.class_of(Example)",
+         "type_args": [
+          {}
+         ]
+        }
        }
       }
      },
@@ -496,8 +516,13 @@
        "receiver": {
         "unique_name": "\u003cself\u003e",
         "type": {
-         "kind": "CLASS",
-         "class_full_name": "T.class_of(Example)"
+         "kind": "APPLIED",
+         "applied": {
+          "symbol_full_name": "T.class_of(Example)",
+          "type_args": [
+           {}
+          ]
+         }
         }
        },
        "method": "sig",
@@ -522,8 +547,13 @@
      "bind": {
       "unique_name": "\u003cselfRestore\u003e$6",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(Example)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(Example)",
+        "type_args": [
+         {}
+        ]
+       }
       }
      },
      "instruction": {
@@ -630,8 +660,16 @@
      "bind": {
       "unique_name": "\u003cstatTemp\u003e$24",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(Sorbet::Private::Static)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(Sorbet::Private::Static)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "Sorbet::Private::Static"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -650,8 +688,16 @@
      "bind": {
       "unique_name": "keep_for_ide$26",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(T)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(T)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "T"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -676,8 +722,16 @@
      "bind": {
       "unique_name": "\u003cstatTemp\u003e$25",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(T::Sig)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(T::Sig)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "T::Sig"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -712,8 +766,16 @@
        "receiver": {
         "unique_name": "\u003cstatTemp\u003e$24",
         "type": {
-         "kind": "CLASS",
-         "class_full_name": "T.class_of(Sorbet::Private::Static)"
+         "kind": "APPLIED",
+         "applied": {
+          "symbol_full_name": "T.class_of(Sorbet::Private::Static)",
+          "type_args": [
+           {
+            "kind": "CLASS",
+            "class_full_name": "Sorbet::Private::Static"
+           }
+          ]
+         }
         }
        },
        "method": "keep_for_ide",
@@ -721,8 +783,16 @@
         {
          "unique_name": "\u003cstatTemp\u003e$25",
          "type": {
-          "kind": "CLASS",
-          "class_full_name": "T.class_of(T::Sig)"
+          "kind": "APPLIED",
+          "applied": {
+           "symbol_full_name": "T.class_of(T::Sig)",
+           "type_args": [
+            {
+             "kind": "CLASS",
+             "class_full_name": "T::Sig"
+            }
+           ]
+          }
          }
         }
        ]
@@ -740,8 +810,16 @@
      "bind": {
       "unique_name": "\u003cstatTemp\u003e$28",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(Sorbet::Private::Static)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(Sorbet::Private::Static)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "Sorbet::Private::Static"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -760,8 +838,16 @@
      "bind": {
       "unique_name": "keep_for_ide$30",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(T)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(T)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "T"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -786,8 +872,16 @@
      "bind": {
       "unique_name": "\u003cstatTemp\u003e$29",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(T::CFGExport)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(T::CFGExport)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "T::CFGExport"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -822,8 +916,16 @@
        "receiver": {
         "unique_name": "\u003cstatTemp\u003e$28",
         "type": {
-         "kind": "CLASS",
-         "class_full_name": "T.class_of(Sorbet::Private::Static)"
+         "kind": "APPLIED",
+         "applied": {
+          "symbol_full_name": "T.class_of(Sorbet::Private::Static)",
+          "type_args": [
+           {
+            "kind": "CLASS",
+            "class_full_name": "Sorbet::Private::Static"
+           }
+          ]
+         }
         }
        },
        "method": "keep_for_ide",
@@ -831,8 +933,16 @@
         {
          "unique_name": "\u003cstatTemp\u003e$29",
          "type": {
-          "kind": "CLASS",
-          "class_full_name": "T.class_of(T::CFGExport)"
+          "kind": "APPLIED",
+          "applied": {
+           "symbol_full_name": "T.class_of(T::CFGExport)",
+           "type_args": [
+            {
+             "kind": "CLASS",
+             "class_full_name": "T::CFGExport"
+            }
+           ]
+          }
          }
         }
        ]
@@ -956,8 +1066,16 @@
      "bind": {
       "unique_name": "keep_for_ide$15",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(T)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(T)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "T"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -1040,8 +1158,16 @@
      "bind": {
       "unique_name": "\u003chashTemp\u003e$17",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(Integer)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(Integer)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "Integer"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -1101,8 +1227,16 @@
      "bind": {
       "unique_name": "\u003chashTemp\u003e$19",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(Integer)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(Integer)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "Integer"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -1127,8 +1261,16 @@
      "bind": {
       "unique_name": "\u003cmagic\u003e$20",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(\u003cMagic\u003e)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(\u003cMagic\u003e)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "\u003cMagic\u003e"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -1175,12 +1317,28 @@
         "values": [
          {},
          {
-          "kind": "CLASS",
-          "class_full_name": "T.class_of(Integer)"
+          "kind": "APPLIED",
+          "applied": {
+           "symbol_full_name": "T.class_of(Integer)",
+           "type_args": [
+            {
+             "kind": "CLASS",
+             "class_full_name": "Integer"
+            }
+           ]
+          }
          },
          {
-          "kind": "CLASS",
-          "class_full_name": "T.class_of(Integer)"
+          "kind": "APPLIED",
+          "applied": {
+           "symbol_full_name": "T.class_of(Integer)",
+           "type_args": [
+            {
+             "kind": "CLASS",
+             "class_full_name": "Integer"
+            }
+           ]
+          }
          }
         ]
        }
@@ -1192,8 +1350,16 @@
        "receiver": {
         "unique_name": "\u003cmagic\u003e$20",
         "type": {
-         "kind": "CLASS",
-         "class_full_name": "T.class_of(\u003cMagic\u003e)"
+         "kind": "APPLIED",
+         "applied": {
+          "symbol_full_name": "T.class_of(\u003cMagic\u003e)",
+          "type_args": [
+           {
+            "kind": "CLASS",
+            "class_full_name": "\u003cMagic\u003e"
+           }
+          ]
+         }
         }
        },
        "method": "\u003cbuild-hash\u003e",
@@ -1225,8 +1391,16 @@
         {
          "unique_name": "\u003chashTemp\u003e$17",
          "type": {
-          "kind": "CLASS",
-          "class_full_name": "T.class_of(Integer)"
+          "kind": "APPLIED",
+          "applied": {
+           "symbol_full_name": "T.class_of(Integer)",
+           "type_args": [
+            {
+             "kind": "CLASS",
+             "class_full_name": "Integer"
+            }
+           ]
+          }
          }
         },
         {
@@ -1242,8 +1416,16 @@
         {
          "unique_name": "\u003chashTemp\u003e$19",
          "type": {
-          "kind": "CLASS",
-          "class_full_name": "T.class_of(Integer)"
+          "kind": "APPLIED",
+          "applied": {
+           "symbol_full_name": "T.class_of(Integer)",
+           "type_args": [
+            {
+             "kind": "CLASS",
+             "class_full_name": "Integer"
+            }
+           ]
+          }
          }
         }
        ]
@@ -1314,12 +1496,28 @@
            "values": [
             {},
             {
-             "kind": "CLASS",
-             "class_full_name": "T.class_of(Integer)"
+             "kind": "APPLIED",
+             "applied": {
+              "symbol_full_name": "T.class_of(Integer)",
+              "type_args": [
+               {
+                "kind": "CLASS",
+                "class_full_name": "Integer"
+               }
+              ]
+             }
             },
             {
-             "kind": "CLASS",
-             "class_full_name": "T.class_of(Integer)"
+             "kind": "APPLIED",
+             "applied": {
+              "symbol_full_name": "T.class_of(Integer)",
+              "type_args": [
+               {
+                "kind": "CLASS",
+                "class_full_name": "Integer"
+               }
+              ]
+             }
             }
            ]
           }
@@ -1346,8 +1544,16 @@
      "bind": {
       "unique_name": "\u003cstatTemp\u003e$21",
       "type": {
-       "kind": "CLASS",
-       "class_full_name": "T.class_of(Integer)"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(Integer)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "Integer"
+         }
+        ]
+       }
       }
      },
      "instruction": {
@@ -1391,8 +1597,16 @@
         {
          "unique_name": "\u003cstatTemp\u003e$21",
          "type": {
-          "kind": "CLASS",
-          "class_full_name": "T.class_of(Integer)"
+          "kind": "APPLIED",
+          "applied": {
+           "symbol_full_name": "T.class_of(Integer)",
+           "type_args": [
+            {
+             "kind": "CLASS",
+             "class_full_name": "Integer"
+            }
+           ]
+          }
          }
         }
        ]

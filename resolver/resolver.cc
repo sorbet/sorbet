@@ -909,9 +909,10 @@ class ResolveTypeParamsWalk {
 
     static void resolveTypeMember(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs) {
         auto data = lhs.data(ctx);
+        auto owner = data->owner;
 
         core::LambdaParam *parentType = nullptr;
-        auto parentMember = data->owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
+        auto parentMember = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
         if (parentMember.exists()) {
             if (parentMember.data(ctx)->isTypeMember()) {
                 parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType.get());
@@ -997,6 +998,50 @@ class ResolveTypeParamsWalk {
                             memberType->upperBound->show(ctx));
             }
         }
+
+        // Once the owner has had all of its type members resolved, resolve the
+        // AttachedClass on its singleton.
+        if (isGenericResolved(ctx, owner)) {
+            resolveAttachedClass(ctx, owner);
+        }
+    }
+
+    static void resolveAttachedClass(core::MutableContext ctx, core::SymbolRef sym) {
+        ENFORCE(sym.data(ctx)->isClassOrModule());
+
+        auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
+        if (!singleton.exists()) {
+            return;
+        }
+
+        // NOTE: AttachedClass will not exist on `T.untyped`, which is a problem
+        // because RuntimeProfiled is used as a synonym for `T.untyped`
+        // internally.
+        auto attachedClass = singleton.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+        if (!attachedClass.exists()) {
+            return;
+        }
+
+        auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType.get());
+        ENFORCE(lambdaParam != nullptr);
+
+        if (isTodo(lambdaParam->lowerBound)) {
+            lambdaParam->upperBound = sym.data(ctx)->externalType(ctx);
+            lambdaParam->lowerBound = core::Types::bottom();
+        }
+
+        // If all of the singleton members have been resolved, attempt to
+        // resolve the singleton of the singleton, if it exists. This case is
+        // not redundant with resolveTypeMember, as it will cover the case where
+        // there are no non-AttachedClass type members defined on the singleton.
+        if (isGenericResolved(ctx, singleton)) {
+            // Since we've resolved the singleton's AttachedClass type member, check
+            // to see if there's another singleton above that must also be resolved.
+            auto parent = singleton.data(ctx)->lookupSingletonClass(ctx);
+            if (parent.exists()) {
+                resolveAttachedClass(ctx, singleton);
+            }
+        }
     }
 
     static void resolveTypeAlias(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs) {
@@ -1039,6 +1084,17 @@ class ResolveTypeParamsWalk {
     }
 
 public:
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
+        // If this is a class with no type members defined, resolve attached
+        // class immediately. Otherwise, it will be resolved once all type
+        // members have been resolved as well.
+        if (isGenericResolved(ctx, klass->symbol)) {
+            resolveAttachedClass(ctx, klass->symbol);
+        }
+
+        return klass;
+    }
+
     unique_ptr<ast::Send> preTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
         switch (send->fun._id) {
             case core::Names::typeAlias()._id:
@@ -1162,6 +1218,7 @@ public:
     static vector<ast::ParsedFile> run(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
         ResolveTypeParamsWalk params;
         Timer timeit(ctx.state.errorQueue->logger, "resolver.type_params");
+
         for (auto &tree : trees) {
             tree.tree = ast::TreeMap::apply(ctx, params, std::move(tree.tree));
         }
