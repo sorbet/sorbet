@@ -263,7 +263,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                             auto owner = builder.CreateCall(
                                 module->getFunction("sorbet_getConstant"),
                                 {builder.CreateCall(module->getFunction("sorbet_rb_cObject")), ownerName});
-                            auto functionName = builder.CreateGlobalStringPtr(funcNameRef.showRaw(gs), "functionName");
+                            auto functionName = builder.CreateGlobalStringPtr(funcNameRef.show(gs), "functionName");
 
                             auto funcHandle =
                                 module->getOrInsertFunction(funcSym.data(gs)->toStringFullName(gs),
