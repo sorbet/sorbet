@@ -254,7 +254,9 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                             core::NameRef funcNameRef(gs, lit->value);
                             auto funcSym = ownerSym.data(gs)->findMember(gs, funcNameRef);
 
-                            auto ownerName = builder.CreateGlobalStringPtr(ownerSym.showRaw(gs), "ownerName");
+                            auto rawCString = builder.CreateGlobalStringPtr(ownerSym.showRaw(gs), "ownerName");
+                            auto ownerName =
+                                builder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "rubyID");
                             auto owner = builder.CreateCall(
                                 module->getFunction("sorbet_getConstant"),
                                 {builder.CreateCall(module->getFunction("sorbet_rb_cObject")), ownerName});
@@ -268,7 +270,9 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                                 llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), true));
                             auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
-                            builder.CreateCall(module->getFunction("sorbet_defineMethod"), {owner, functionName, ptr, llvm::ConstantInt::get(lctx, llvm::APInt(32, -1, true))});
+                            builder.CreateCall(
+                                module->getFunction("sorbet_defineMethod"),
+                                {owner, functionName, ptr, llvm::ConstantInt::get(lctx, llvm::APInt(32, -1, true))});
                             return;
                         }
                         if (i->fun == Names::sorbet_defineMethodSingleton) {
