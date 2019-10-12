@@ -5,7 +5,7 @@ target triple = "x86_64-apple-darwin18.2.0"
 @rb_cObject = external local_unnamed_addr global i64, align 8
 @.str = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
-@ownerName = private unnamed_addr constant [467 x i8] c"class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/external/com_stripe_ruby_typer/rbi/core/object.rbi start=27:1 end=27:27}\0A  method <C <U Object>><U hello> (name, <blk>) @ Loc {file=test/testdata/llvm/method.rb start=1:1 end=1:16}\0A    argument name<> @ Loc {file=test/testdata/llvm/method.rb start=1:11 end=1:15}\0A    argument <blk><block> @ Loc {file=test/testdata/llvm/method.rb start=??? end=???}\0A\00", align 1
+@ownerName = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 @functionName = private unnamed_addr constant [10 x i8] c"<U hello>\00", align 1
 
 declare i64 @rb_intern(i8*) local_unnamed_addr #0
@@ -43,7 +43,7 @@ readGlobals:
   br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
 
 argCountSuccess:                                  ; preds = %readGlobals
-  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([467 x i8], [467 x i8]* @ownerName, i64 0, i64 0)) #6
+  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @ownerName, i64 0, i64 0)) #6
   %4 = load i64, i64* @rb_cObject, align 8, !tbaa !0
   %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #6
   tail call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @functionName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #6
@@ -59,7 +59,7 @@ declare i64 @"<C <U Object>><U hello>"(i32, i64*, i64)
 ; Function Attrs: nounwind sspreq
 define void @Init_method() local_unnamed_addr #5 {
 initializeGlobals:
-  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([467 x i8], [467 x i8]* @ownerName, i64 0, i64 0)) #6
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @ownerName, i64 0, i64 0)) #6
   %1 = load i64, i64* @rb_cObject, align 8, !tbaa !0
   %2 = tail call i64 @rb_const_get_at(i64 %1, i64 %0) #6
   tail call void @rb_define_method(i64 %2, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @functionName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #6
