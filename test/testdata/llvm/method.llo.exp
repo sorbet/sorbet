@@ -6,7 +6,6 @@ target triple = "x86_64-apple-darwin18.2.0"
 @.str = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
 @ownerName = private unnamed_addr constant [7 x i8] c"Object\00", align 1
-@functionName = private unnamed_addr constant [10 x i8] c"<U hello>\00", align 1
 @userStr_sorbet = private unnamed_addr constant [7 x i8] c"sorbet\00", align 1
 @rubyId_global_hello = internal unnamed_addr global i64 0, align 8
 @str_global_hello = private unnamed_addr constant [6 x i8] c"hello\00", align 1
@@ -55,7 +54,7 @@ argCountSuccess:                                  ; preds = %readGlobals
   %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @ownerName, i64 0, i64 0)) #7
   %4 = load i64, i64* @rb_cObject, align 8, !tbaa !0
   %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #7
-  tail call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @functionName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #7
+  tail call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_global_hello, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #7
   %6 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @userStr_sorbet, i64 0, i64 0), i64 6) #7
   %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
   store i64 %6, i64* %callArgsAddr, align 8
@@ -81,7 +80,7 @@ initializeGlobals:
   %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @ownerName, i64 0, i64 0)) #7
   %4 = load i64, i64* @rb_cObject, align 8, !tbaa !0
   %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #7
-  tail call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @functionName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #7
+  tail call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_global_hello, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #7
   %6 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @userStr_sorbet, i64 0, i64 0), i64 6) #7
   %callArgsAddr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %6, i64* %callArgsAddr.i, align 8
