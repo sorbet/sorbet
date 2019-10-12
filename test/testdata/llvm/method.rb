@@ -5,4 +5,3 @@ def hello(name)
      i += 1
    end
 end
-hello("sorbet")
