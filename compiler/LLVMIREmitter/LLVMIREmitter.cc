@@ -248,13 +248,16 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                                 // Root methods end up going on object
                                 ownerSym = core::Symbols::Object();
                             }
+                            ENFORCE(ownerSym.data(gs)->isClassOrModule());
 
                             auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
                             ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
                             core::NameRef funcNameRef(gs, lit->value);
                             auto funcSym = ownerSym.data(gs)->findMember(gs, funcNameRef);
+                            ENFORCE(funcSym.data(gs)->isMethod());
 
-                            auto rawCString = builder.CreateGlobalStringPtr(ownerSym.showRaw(gs), "ownerName");
+                            auto rawCString =
+                                builder.CreateGlobalStringPtr(ownerSym.data(gs)->name.show(gs), "ownerName");
                             auto ownerName =
                                 builder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "rubyID");
                             auto owner = builder.CreateCall(
