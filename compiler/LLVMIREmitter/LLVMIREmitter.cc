@@ -266,8 +266,8 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                             auto functionName = builder.CreateGlobalStringPtr(funcNameRef.show(gs), "functionName");
 
                             auto llvmFuncName = funcSym.data(gs)->toStringFullName(gs);
-                            auto funcHandle =
-                                module->getOrInsertFunction(llvmFuncName, getRubyFunctionTypeForSymbol(lctx, gs, funcSym));
+                            auto funcHandle = module->getOrInsertFunction(
+                                llvmFuncName, getRubyFunctionTypeForSymbol(lctx, gs, funcSym));
                             ENFORCE(funcHandle);
                             auto universalSignature = llvm::PointerType::getUnqual(
                                 llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), true));
