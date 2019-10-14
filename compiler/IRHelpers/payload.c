@@ -11,7 +11,7 @@
 // ****                       Internal Helper Functions
 // ****
 
-void sorbet_validate_id(ID value, char * name) {
+void dbg_sorbet_validate_id(ID value, char * name) __attribute__((weak)) {
     if (UNLIKELY(value == 0)) {
         printf("ERROR: %s is 0\n", name);
         abort();
@@ -176,7 +176,7 @@ ID sorbet_symToID(VALUE sym) __attribute__((always_inline)) {
 }
 
 ID sorbet_IDToSym(ID id) __attribute__((always_inline)) {
-    sorbet_validate_id(id, "id");
+    dbg_sorbet_validate_id(id, "id");
     return ID2SYM(id);
 }
 
@@ -236,22 +236,22 @@ _Bool sorbet_testIsString(VALUE value) __attribute__((always_inline)) {
 // ****
 
 VALUE sorbet_instanceVariableGet(VALUE receiver, ID name) __attribute__((always_inline)) {
-    sorbet_validate_id(name, "name");
+    dbg_sorbet_validate_id(name, "name");
     return rb_ivar_get(receiver, name);
 }
 
 VALUE sorbet_instanceVariableSet(VALUE receiver, ID name, VALUE newValue) __attribute__((always_inline)) {
-    sorbet_validate_id(name, "name");
+    dbg_sorbet_validate_id(name, "name");
     return rb_ivar_set(receiver, name, newValue);
 }
 
 VALUE sorbet_classVariableGet(VALUE _class, ID name) __attribute__((always_inline)) {
-    sorbet_validate_id(name, "name");
+    dbg_sorbet_validate_id(name, "name");
     return rb_cvar_get(_class, name);
 }
 
 void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) __attribute__((always_inline)) {
-    sorbet_validate_id(name, "name");
+    dbg_sorbet_validate_id(name, "name");
     rb_cvar_set(_class, name, newValue);
 }
 
@@ -273,7 +273,7 @@ void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) __a
 
 // DOES NOT walk superclasses. Invokes const_missing
 VALUE sorbet_getConstant(VALUE owner, ID name) __attribute__((always_inline)) {
-    sorbet_validate_id(name, "name");
+    dbg_sorbet_validate_id(name, "name");
     return rb_const_get_at(owner, name);
 }
 
@@ -338,7 +338,7 @@ VALUE sorbet_callBlock(VALUE array) __attribute__((always_inline)) {
 }
 
 VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv) __attribute__((always_inline)) {
-    sorbet_validate_id(func, "func");
+    dbg_sorbet_validate_id(func, "func");
     // TODO: use LLVM magic to make argv stack allocated
     return rb_funcallv(recv, func, argc, argv);
 }
