@@ -36,6 +36,14 @@ llvm::FunctionType *getRubyFunctionTypeForSymbol(llvm::LLVMContext &lctx, const 
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
+llvm::CallInst *resolveSymbol(const core::GlobalState &gs, core::SymbolRef sym, llvm::IRBuilder<> &builder,
+                              llvm::Module *module) {
+    auto rawCString = builder.CreateGlobalStringPtr(sym.data(gs)->name.show(gs), "sym");
+    auto id = builder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "rubyID");
+    return builder.CreateCall(module->getFunction("sorbet_getConstant"),
+                              {builder.CreateCall(module->getFunction("sorbet_rb_cObject")), id});
+}
+
 } // namespace
 
 // boxed raw value from rawData into target. Assumes that types are compatible.
@@ -256,13 +264,6 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                             auto funcSym = ownerSym.data(gs)->findMember(gs, funcNameRef);
                             ENFORCE(funcSym.data(gs)->isMethod());
 
-                            auto rawCString =
-                                builder.CreateGlobalStringPtr(ownerSym.data(gs)->name.show(gs), "ownerName");
-                            auto ownerName =
-                                builder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "rubyID");
-                            auto owner = builder.CreateCall(
-                                module->getFunction("sorbet_getConstant"),
-                                {builder.CreateCall(module->getFunction("sorbet_rb_cObject")), ownerName});
                             auto functionName = builder.CreateGlobalStringPtr(funcNameRef.show(gs), "functionName");
 
                             auto llvmFuncName = funcSym.data(gs)->toStringFullName(gs);
@@ -273,9 +274,9 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                                 llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), true));
                             auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
-                            builder.CreateCall(
-                                module->getFunction("sorbet_defineMethod"),
-                                {owner, functionName, ptr, llvm::ConstantInt::get(lctx, llvm::APInt(32, -1, true))});
+                            builder.CreateCall(module->getFunction("sorbet_defineMethod"),
+                                               {resolveSymbol(gs, ownerSym, builder, module), functionName, ptr,
+                                                llvm::ConstantInt::get(lctx, llvm::APInt(32, -1, true))});
 
                             std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
                             auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
