@@ -95,7 +95,7 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
         isSpecialEntrypoint = true;
     }
 
-    auto baseName = objectName;
+    auto baseName = sym.data(gs)->toStringFullName(gs);
     if (isSpecialEntrypoint) {
         baseName = FileOps::getFileName(sym.data(gs)->loc().file().data(gs).path());
         baseName = baseName.substr(0, baseName.rfind(".rb"));

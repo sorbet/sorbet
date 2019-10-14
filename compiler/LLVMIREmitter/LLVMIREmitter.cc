@@ -265,9 +265,9 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                                 {builder.CreateCall(module->getFunction("sorbet_rb_cObject")), ownerName});
                             auto functionName = builder.CreateGlobalStringPtr(funcNameRef.show(gs), "functionName");
 
+                            auto llvmFuncName = funcSym.data(gs)->toStringFullName(gs);
                             auto funcHandle =
-                                module->getOrInsertFunction(funcSym.data(gs)->toStringFullName(gs),
-                                                            getRubyFunctionTypeForSymbol(lctx, gs, funcSym));
+                                module->getOrInsertFunction(llvmFuncName, getRubyFunctionTypeForSymbol(lctx, gs, funcSym));
                             ENFORCE(funcHandle);
                             auto universalSignature = llvm::PointerType::getUnqual(
                                 llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), true));
@@ -276,6 +276,12 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                             builder.CreateCall(
                                 module->getFunction("sorbet_defineMethod"),
                                 {owner, functionName, ptr, llvm::ConstantInt::get(lctx, llvm::APInt(32, -1, true))});
+
+                            std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
+                            auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
+                            auto initFunc = module->getOrInsertFunction("Init_" + llvmFuncName, ft);
+                            ENFORCE(initFunc);
+                            builder.CreateCall(initFunc, {});
                             return;
                         }
                         if (i->fun == Names::sorbet_defineMethodSingleton) {
