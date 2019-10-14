@@ -64,6 +64,7 @@ sorbet_getConstant.exit:                          ; preds = %argCountSuccess
   %7 = load i64, i64* @rb_cObject, align 8, !tbaa !0
   %8 = tail call i64 @rb_const_get_at(i64 %7, i64 %3) #0
   tail call void @rb_define_method(i64 %8, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @functionName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #0
+  tail call void @"Init_<C <U Object>><U hello>"() #0
   ret i64 8
 
 argCountFailBlock:                                ; preds = %readGlobals
@@ -72,6 +73,8 @@ argCountFailBlock:                                ; preds = %readGlobals
 }
 
 declare i64 @"<C <U Object>><U hello>"(i32, i64*, i64)
+
+declare void @"Init_<C <U Object>><U hello>"() local_unnamed_addr
 
 ; Function Attrs: nounwind sspreq
 define void @Init_method() local_unnamed_addr #6 {
@@ -89,6 +92,7 @@ initializeGlobals:
   %4 = load i64, i64* @rb_cObject, align 8, !tbaa !0
   %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %0) #0
   tail call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @functionName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #0
+  tail call void @"Init_<C <U Object>><U hello>"() #0
   ret void
 }
 
