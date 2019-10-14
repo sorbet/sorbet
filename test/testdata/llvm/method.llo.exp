@@ -152,7 +152,7 @@ target triple = "x86_64-apple-darwin18.2.0"
 @.str.3 = private unnamed_addr constant [5 x i8] c"func\00", align 1
 @.str.4 = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
-@ownerName = private unnamed_addr constant [7 x i8] c"Object\00", align 1
+@sym = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 @userStr_sorbet = private unnamed_addr constant [7 x i8] c"sorbet\00", align 1
 @rubyId_global_hello = internal unnamed_addr global i64 0, align 8
 @str_global_hello = private unnamed_addr constant [6 x i8] c"hello\00", align 1
@@ -204,7 +204,7 @@ readGlobals:
   br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
 
 argCountSuccess:                                  ; preds = %readGlobals
-  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @ownerName, i64 0, i64 0)) #0
+  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @sym, i64 0, i64 0)) #0
   %4 = icmp eq i64 %3, 0
   br i1 %4, label %5, label %sorbet_getConstant.exit
 
