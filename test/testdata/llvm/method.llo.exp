@@ -2,51 +2,68 @@ source_filename = "compiler/IRHelpers/payload.c"
 target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-apple-darwin18.2.0"
 
+@.str = private unnamed_addr constant [16 x i8] c"ERROR: %s is 0\0A\00", align 1
+@.str.2 = private unnamed_addr constant [5 x i8] c"name\00", align 1
 @rb_cObject = external local_unnamed_addr global i64, align 8
-@.str = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
+@.str.4 = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
 @ownerName = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 @functionName = private unnamed_addr constant [6 x i8] c"hello\00", align 1
 
-declare i64 @rb_intern(i8*) local_unnamed_addr #0
+; Function Attrs: nounwind
+declare i32 @printf(i8* nocapture readonly, ...) local_unnamed_addr #0
 
-declare i64 @rb_const_get_at(i64, i64) local_unnamed_addr #0
+; Function Attrs: noreturn
+declare void @abort() local_unnamed_addr #1
 
-declare void @rb_define_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr #0
+declare i64 @rb_intern(i8*) local_unnamed_addr #2
+
+declare i64 @rb_const_get_at(i64, i64) local_unnamed_addr #2
+
+declare void @rb_define_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr #2
 
 ; Function Attrs: nounwind ssp uwtable
-define internal fastcc i64 @sorbet_rb_arity_error_new(i32) unnamed_addr #1 {
-  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str, i64 0, i64 0), i32 %0, i32 0) #6
+define internal fastcc i64 @sorbet_rb_arity_error_new(i32) unnamed_addr #3 {
+  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str.4, i64 0, i64 0), i32 %0, i32 0) #0
   %3 = load i64, i64* @rb_eArgError, align 8, !tbaa !0
-  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #6
+  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #0
   ret i64 %4
 }
 
-declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #0
+declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #2
 
-declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr #0
+declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr #2
 
 ; Function Attrs: noreturn nounwind ssp uwtable
-define internal fastcc void @sorbet_rb_error_arity(i32) unnamed_addr #2 {
+define internal fastcc void @sorbet_rb_error_arity(i32) unnamed_addr #4 {
   %2 = tail call fastcc i64 @sorbet_rb_arity_error_new(i32 %0)
   tail call void @rb_exc_raise(i64 %2) #7
   unreachable
 }
 
 ; Function Attrs: noreturn
-declare void @rb_exc_raise(i64) local_unnamed_addr #3
+declare void @rb_exc_raise(i64) local_unnamed_addr #1
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #4 {
+define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #5 {
 readGlobals:
   %isWrongArgCount = icmp eq i32 %0, 0
   br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
 
 argCountSuccess:                                  ; preds = %readGlobals
-  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @ownerName, i64 0, i64 0)) #6
-  %4 = load i64, i64* @rb_cObject, align 8, !tbaa !0
-  %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #6
-  tail call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @functionName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #6
+  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @ownerName, i64 0, i64 0)) #0
+  %4 = icmp eq i64 %3, 0
+  br i1 %4, label %5, label %sorbet_getConstant.exit
+
+; <label>:5:                                      ; preds = %argCountSuccess
+  %6 = tail call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str, i64 0, i64 0), i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.2, i64 0, i64 0)) #0
+  tail call void @abort() #7
+  unreachable
+
+sorbet_getConstant.exit:                          ; preds = %argCountSuccess
+  %7 = load i64, i64* @rb_cObject, align 8, !tbaa !0
+  %8 = tail call i64 @rb_const_get_at(i64 %7, i64 %3) #0
+  tail call void @rb_define_method(i64 %8, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @functionName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #0
   ret i64 8
 
 argCountFailBlock:                                ; preds = %readGlobals
@@ -57,22 +74,31 @@ argCountFailBlock:                                ; preds = %readGlobals
 declare i64 @"<C <U Object>><U hello>"(i32, i64*, i64)
 
 ; Function Attrs: nounwind sspreq
-define void @Init_method() local_unnamed_addr #5 {
+define void @Init_method() local_unnamed_addr #6 {
 initializeGlobals:
-  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @ownerName, i64 0, i64 0)) #6
-  %1 = load i64, i64* @rb_cObject, align 8, !tbaa !0
-  %2 = tail call i64 @rb_const_get_at(i64 %1, i64 %0) #6
-  tail call void @rb_define_method(i64 %2, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @functionName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #6
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @ownerName, i64 0, i64 0)) #0
+  %1 = icmp eq i64 %0, 0
+  br i1 %1, label %2, label %"<S <C <U <root>>> $1><N <U <static-init>> $110>.exit"
+
+; <label>:2:                                      ; preds = %initializeGlobals
+  %3 = tail call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str, i64 0, i64 0), i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.2, i64 0, i64 0)) #0
+  tail call void @abort() #7
+  unreachable
+
+"<S <C <U <root>>> $1><N <U <static-init>> $110>.exit": ; preds = %initializeGlobals
+  %4 = load i64, i64* @rb_cObject, align 8, !tbaa !0
+  %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %0) #0
+  tail call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @functionName, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #0
   ret void
 }
 
-attributes #0 = { "addedToSilenceEmptyAttrsError" }
-attributes #1 = { nounwind ssp uwtable }
-attributes #2 = { noreturn nounwind ssp uwtable }
-attributes #3 = { noreturn }
-attributes #4 = { nounwind sspreq uwtable }
-attributes #5 = { nounwind sspreq }
-attributes #6 = { nounwind }
+attributes #0 = { nounwind }
+attributes #1 = { noreturn }
+attributes #2 = { "addedToSilenceEmptyAttrsError" }
+attributes #3 = { nounwind ssp uwtable }
+attributes #4 = { noreturn nounwind ssp uwtable }
+attributes #5 = { nounwind sspreq uwtable }
+attributes #6 = { nounwind sspreq }
 attributes #7 = { noreturn nounwind }
 
 !0 = !{!1, !1, i64 0}
