@@ -86,20 +86,6 @@ string_view getLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFi
     return file->getLine(loc.range->start->line + 1);
 }
 
-string filePathToUri(string_view prefixUrl, string_view filePath) {
-    return fmt::format("{}/{}", prefixUrl, filePath);
-}
-
-string uriToFilePath(string_view prefixUrl, string_view uri) {
-    if (uri.substr(0, prefixUrl.length()) != prefixUrl) {
-        ADD_FAILURE() << fmt::format(
-            "Unrecognized URI: `{}` is not contained in root URI `{}`, and thus does not correspond to a test file.",
-            uri, prefixUrl);
-        return "";
-    }
-    return string(uri.substr(prefixUrl.length() + 1));
-}
-
 void assertLocationsMatch(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, string_view uriPrefix,
                           string_view symbol, const vector<shared_ptr<RangeAssertion>> &allLocs, int line,
                           int character, string_view locSourceLine, string_view locFilename,
@@ -943,25 +929,8 @@ void CompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &ass
 
 void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                                 LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
-    auto uri = filePathToUri(uriPrefix, filename);
-    auto pos = make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(uri), range->start->copy());
-    auto id = nextId++;
-    auto msg =
-        make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion, move(pos)));
-    auto responses = wrapper.getLSPResponsesFor(move(msg));
-    ASSERT_EQ(responses.size(), 1);
-    auto &responseMsg = responses.at(0);
-    ASSERT_TRUE(responseMsg->isResponse());
-    auto &response = responseMsg->asResponse();
-    ASSERT_TRUE(response.result.has_value());
-
-    auto &completionList = get<unique_ptr<CompletionList>>(*response.result);
-    fast_sort(completionList->items, [&](const auto &left, const auto &right) -> bool {
-        string leftText = left->sortText.has_value() ? left->sortText.value() : left->label;
-        string rightText = right->sortText.has_value() ? right->sortText.value() : right->label;
-
-        return leftText < rightText;
-    });
+    auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename, uriPrefix);
+    ASSERT_NE(completionList, nullptr) << "doTextDocumentCompletion failed; see error above.";
 
     // TODO(jez) Add ability to expect CompletionItemKind of each item
     string actualMessage =
