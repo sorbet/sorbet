@@ -152,6 +152,7 @@ end
 module T::Utils
   def self.arity(method); end
   def self.coerce(val); end
+  def self.resolve_alias(type); end
   def self.run_all_sig_blocks; end
   def self.signature_for_instance_method(mod, method_name); end
   def self.unwrap_nilable(type); end
