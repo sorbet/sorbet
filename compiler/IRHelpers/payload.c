@@ -12,7 +12,7 @@
 // ****
 
 void sorbet_validate_id(ID value, char * name) {
-    if (value == 0) {
+    if (UNLIKELY(value == 0)) {
         printf("ERROR: %s is 0\n", name);
         abort();
     }
