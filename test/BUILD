@@ -21,5 +21,6 @@ sh_binary(
         "//main:sorbet_llvm",
         "@llvm_toolchain//:bin/ld",
         "@llvm_toolchain//:bin/opt",
+        "preamble.rb",
     ],
 )

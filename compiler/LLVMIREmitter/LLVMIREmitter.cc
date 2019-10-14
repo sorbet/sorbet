@@ -292,14 +292,6 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                         if (i->fun == Names::sorbet_defineMethodSingleton) {
                             return;
                         }
-                        // TODO: Should only be ::Sorbet::Private::Static.keep_for_ide
-                        if (i->fun == core::Names::keepForIde()) {
-                            return;
-                        }
-                        // TODO: Should only be T.unsafe
-                        if (i->fun == core::Names::unsafe()) {
-                            return;
-                        }
                         auto rawId =
                             getIdFor(lctx, builder, str, rubyIDRegistry, globalInitializers, readGlobals, module);
 
