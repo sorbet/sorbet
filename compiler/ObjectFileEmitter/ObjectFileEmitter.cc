@@ -109,14 +109,10 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     builder.SetInsertPoint(bb);
 
     // Call the LLVM method that was made by LLVMIREmitter from this Init_ method
-    auto staticInitFunc = module->getFunction((string)objectName);
     if (isSpecialEntrypoint) {
-        ENFORCE(!staticInitFunc);
-        staticInitFunc =
+        auto staticInitFunc =
             module->getFunction(gs.lookupStaticInitForFile(sym.data(gs)->loc()).data(gs)->toStringFullName(gs));
         ENFORCE(staticInitFunc);
-    }
-    if (staticInitFunc) {
         builder.CreateCall(staticInitFunc,
                            {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
                             llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(lctx)),
