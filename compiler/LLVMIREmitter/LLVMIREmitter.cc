@@ -223,6 +223,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
+                        // Magical call. Others use boxRawValue.
                         builder.CreateStore(builder.CreateLoad(llvmVariables[i->what]), targetAlloca);
                     },
                     [&](cfg::Alias *i) {
