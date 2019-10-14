@@ -225,7 +225,10 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                     [&](cfg::Ident *i) {
                         builder.CreateStore(builder.CreateLoad(llvmVariables[i->what]), targetAlloca);
                     },
-                    [&](cfg::Alias *i) { gs.trace("Alias\n"); },
+                    [&](cfg::Alias *i) {
+                        auto rawCall = resolveSymbol(gs, i->what, builder, module);
+                        boxRawValue(lctx, builder, targetAlloca, rawCall);
+                    },
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(gs)->shortName(gs);
