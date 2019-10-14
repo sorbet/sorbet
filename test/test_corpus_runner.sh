@@ -25,17 +25,17 @@ for i in "$llvmir"/*.llo; do
     external/llvm_toolchain/bin/opt -analyze "$i"
 done
 
+if [[ $rb != *"no-run"* ]]; then
+    ruby -r "$bundle" 2>&1 | tee "$srbout"
+
+    diff -a "$rbout" "$srbout"
+fi
+
 for ext in "llo"; do
     exp=${rb%.rb}.$ext.exp
     if [ -f "$exp" ]; then
         diff "$llvmir/${base%.rb}.$ext" "$exp";
     fi
 done
-
-if [[ $rb != *"no-run"* ]]; then
-    ruby -r "$bundle" 2>&1 | tee "$srbout"
-
-    diff -a "$rbout" "$srbout"
-fi
 
 cleanup 
