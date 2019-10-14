@@ -38,4 +38,4 @@ for ext in "llo"; do
     fi
 done
 
-cleanup 
+cleanup
