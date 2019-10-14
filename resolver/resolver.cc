@@ -580,8 +580,16 @@ public:
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeAlias)) {
                     e.setHeader("No block given to `{}`", "T.type_alias");
                     if (send->args.size() == 1) {
-                        e.replaceWith("Convert to lazy type alias", send->loc, "T.type_alias {{{}}}",
-                                      send->args[0]->loc.source(ctx));
+                        auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+                        if (hash && hash->loc.source(ctx)[0] != '{') {
+                            // Insert extra {}'s when a hash literal does not have them.
+                            // Example: `T.type_alias(a: Integer,  b: String)`
+                            e.replaceWith("Convert to lazy type alias", send->loc, "T.type_alias {{{{{}}}}}",
+                                          send->args[0]->loc.source(ctx));
+                        } else {
+                            e.replaceWith("Convert to lazy type alias", send->loc, "T.type_alias {{{}}}",
+                                          send->args[0]->loc.source(ctx));
+                        }
                     }
                 }
             }
