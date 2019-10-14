@@ -34,7 +34,7 @@ fi
 for ext in "llo"; do
     exp=${rb%.rb}.$ext.exp
     if [ -f "$exp" ]; then
-        diff "$llvmir/${base%.rb}.$ext" "$exp";
+        diff <(cat "$llvmir/"*".$ext") "$exp";
     fi
 done
 

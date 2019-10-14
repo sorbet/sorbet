@@ -39,7 +39,6 @@ for this_src in "${rb_src[@]}" DUMMY; do
 
   if [ -n "$basename" ]; then
     llvmir=$(mktemp -d)
-    rb=$(basename "$basename")
     # shellcheck disable=SC1010
     echo f\(\) \{ \
       bazel-bin/main/sorbet_llvm --silence-dev-message \
@@ -52,7 +51,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
         for ext in "llo"\; do \
           exp=${basename%.rb}.\$ext.exp\; \
           if [ -f \$exp ]\; then \
-            cp "$llvmir/${rb%.rb}.\$ext" \$exp\; \
+            cat "$llvmir/*.\$ext" \> \$exp\; \
           fi\; \
         done >> "$COMMAND_FILE" \
         \}\; f >> "$COMMAND_FILE"
