@@ -579,6 +579,10 @@ public:
                 // an arity mismatch for `T.untyped` in the future, so report the arity mismatch now
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeAlias)) {
                     e.setHeader("No block given to `{}`", "T.type_alias");
+                    if (send->args.size() == 1) {
+                        e.replaceWith("Convert to lazy type alias", send->loc, "T.type_alias {{{}}}",
+                                      send->args[0]->loc.source(ctx));
+                    }
                 }
             }
             auto typeAliasItem = TypeAliasResolutionItem{id->symbol, send->block->body.get()};
