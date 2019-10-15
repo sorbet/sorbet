@@ -7,7 +7,7 @@ target triple = "x86_64-apple-darwin18.2.0"
 @.str.4 = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
 @className_Bar = private unnamed_addr constant [4 x i8] c"Bar\00", align 1
-@rubyID_Object = private unnamed_addr constant [7 x i8] c"Object\00", align 1
+@str_Object = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 
 ; Function Attrs: nounwind ssp uwtable
 define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
@@ -64,7 +64,7 @@ functionEntryInitializers:
   br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
 
 argCountSuccess:                                  ; preds = %functionEntryInitializers
-  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Object, i64 0, i64 0)) #1
+  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #1
   %4 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #1
   %6 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Bar, i64 0, i64 0), i64 %5) #1
@@ -104,9 +104,9 @@ target triple = "x86_64-apple-darwin18.2.0"
 @.str.4 = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
 @className_Foo = private unnamed_addr constant [4 x i8] c"Foo\00", align 1
-@rubyID_Module = private unnamed_addr constant [7 x i8] c"Module\00", align 1
+@str_Module = private unnamed_addr constant [7 x i8] c"Module\00", align 1
 @className_Baz = private unnamed_addr constant [4 x i8] c"Baz\00", align 1
-@rubyID_Object = private unnamed_addr constant [7 x i8] c"Object\00", align 1
+@str_Object = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 
 ; Function Attrs: nounwind ssp uwtable
 define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
@@ -163,11 +163,11 @@ functionEntryInitializers:
   br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
 
 argCountSuccess:                                  ; preds = %functionEntryInitializers
-  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Module, i64 0, i64 0)) #1
+  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Module, i64 0, i64 0)) #1
   %4 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #1
   %6 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Foo, i64 0, i64 0), i64 %5) #1
-  %7 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Object, i64 0, i64 0)) #1
+  %7 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #1
   %8 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %9 = tail call i64 @rb_const_get_at(i64 %8, i64 %7) #1
   %10 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Baz, i64 0, i64 0), i64 %9) #1
@@ -181,11 +181,11 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 ; Function Attrs: nounwind sspreq
 define void @Init_class() local_unnamed_addr #6 {
 initializeGlobals:
-  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Module, i64 0, i64 0)) #1
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Module, i64 0, i64 0)) #1
   %1 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %2 = tail call i64 @rb_const_get_at(i64 %1, i64 %0) #1
   %3 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Foo, i64 0, i64 0), i64 %2) #1
-  %4 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Object, i64 0, i64 0)) #1
+  %4 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #1
   %5 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %6 = tail call i64 @rb_const_get_at(i64 %5, i64 %4) #1
   %7 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Baz, i64 0, i64 0), i64 %6) #1
