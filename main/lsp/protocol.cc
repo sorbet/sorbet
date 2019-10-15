@@ -111,7 +111,7 @@ CounterState mergeCounters(CounterState counters) {
 void tagNewRequest(const std::shared_ptr<spd::logger> &logger, LSPMessage &msg) {
     Timer timeit(logger, "tagNewRequest");
     msg.startTracers.push_back(timeit.getFlowEdge());
-    msg.timers.push_back(make_unique<Timer>(logger, "processing_time"));
+    msg.timer = make_unique<Timer>(logger, "processing_time");
 }
 
 unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue, absl::Mutex &incomingMtx,

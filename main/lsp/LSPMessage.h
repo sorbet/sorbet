@@ -58,9 +58,9 @@ public:
     /** A tracer for following LSP message in time traces. May contain multiple tracers if other messages were merged
      * into this one.*/
     std::vector<FlowId> startTracers;
-    /** Used to calculate latency of message processing. May contain multiple timers if other messages were merged into
-     * this one. */
-    std::vector<std::unique_ptr<Timer>> timers;
+    /** Used to calculate latency of message processing. If this message represents multiple edits, it contains the
+     * oldest timer.*/
+    std::unique_ptr<Timer> timer;
 
     /** If `true`, then this LSPMessage contains a canceled LSP request. */
     bool canceled = false;
