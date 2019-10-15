@@ -233,7 +233,6 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
 
                             auto llvmFuncName = funcSym.data(gs)->toStringFullName(gs);
                             auto funcHandle = gs.module->getOrInsertFunction(llvmFuncName, gs.getRubyFFIType());
-                            ENFORCE(funcHandle);
                             auto universalSignature =
                                 llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(gs), true));
                             auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
@@ -244,9 +243,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
 
                             std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(gs));
                             auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(gs), NoArgs, false);
-                            auto initFunc = gs.module->getOrInsertFunction("Init_" + llvmFuncName, ft);
-                            ENFORCE(initFunc);
-                            builder.CreateCall(initFunc, {});
+                            builder.CreateCall(gs.module->getOrInsertFunction("Init_" + llvmFuncName, ft), {});
                             return;
                         }
                         if (i->fun == Names::sorbet_defineMethodSingleton) {
