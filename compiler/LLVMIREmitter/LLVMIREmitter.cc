@@ -40,9 +40,7 @@ llvm::CallInst *resolveSymbol(const core::GlobalState &gs, core::SymbolRef sym, 
                               llvm::Module *module) {
     auto str = sym.data(gs)->name.show(gs);
     auto rawCString = builder.CreateGlobalStringPtr(str, "rubyID_" + str);
-    auto id = builder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "rubyID");
-    return builder.CreateCall(module->getFunction("sorbet_getConstant"),
-                              {builder.CreateCall(module->getFunction("sorbet_rb_cObject")), id});
+    return builder.CreateCall(module->getFunction("sorbet_getConstant"), {rawCString});
 }
 
 } // namespace

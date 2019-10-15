@@ -272,9 +272,9 @@ void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) __a
 }
 
 // DOES NOT walk superclasses. Invokes const_missing
-VALUE sorbet_getConstant(VALUE owner, ID name) __attribute__((always_inline)) {
-    dbg_sorbet_validate_id(name, "name");
-    return rb_const_get_at(owner, name);
+VALUE sorbet_getConstant(const char* name) __attribute__((always_inline)) {
+    ID id = sorbet_IDIntern(name);
+    return rb_const_get_at(sorbet_rb_cObject(), id);
 }
 
 /*
