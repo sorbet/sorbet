@@ -25,7 +25,7 @@ class Sorbet::Private::HiddenMethodFinder::Test::Simple < MiniTest::Spec
       Dir.mktmpdir do |dir|
         FileUtils.cp_r(File.join(__dir__, path), dir)
         olddir = __dir__
-        Dir.chdir(File.join(dir, path)) do |_|
+        Dir.chdir(File.join(dir, path, 'src')) do |_|
 
           # we'll swallow all the output unless there's an error, in
           # which case we'll print it out
