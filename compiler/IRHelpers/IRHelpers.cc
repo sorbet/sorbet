@@ -104,4 +104,34 @@ llvm::Value *CompilerState::getIsTruthyU1(llvm::IRBuilderBase &builder, llvm::Va
     return builderCast(builder).CreateCall(module->getFunction("sorbet_testIsTruthy"), {val}, "cond");
 }
 
+llvm::Value *CompilerState::getRubyIdFor(llvm::IRBuilderBase &builder, std::string_view idName) {
+    auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(lctx), 0);
+    auto name = llvm::StringRef(idName.data(), idName.length());
+    llvm::Constant *indices[] = {zero};
+    string rawName = "rubyId_global_" + (string)idName;
+    auto tp = llvm::Type::getInt64Ty(lctx);
+    auto globalDeclaration = static_cast<llvm::GlobalVariable *>(module->getOrInsertGlobal(rawName, tp, [&] {
+        auto ret =
+            new llvm::GlobalVariable(*module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
+        ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+        ret->setAlignment(8);
+        return ret;
+    }));
+
+    llvm::IRBuilder<> globalInitBuilder(lctx);
+    llvm::Constant *indicesString[] = {zero, zero};
+    globalInitBuilder.SetInsertPoint(globalInitializers);
+    auto gv = builder.CreateGlobalString(name, {"str_global_", name}, 0);
+    auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(gv->getValueType(), gv, indicesString);
+    auto rawID = globalInitBuilder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "rubyID");
+    globalInitBuilder.CreateStore(rawID, llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(),
+                                                                                      globalDeclaration, indices));
+    globalInitBuilder.SetInsertPoint(functionEntryInitializers);
+    auto global = globalInitBuilder.CreateLoad(
+        llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
+        {"rubyID_", name});
+
+    // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
+    return global;
+}
 } // namespace sorbet::compiler
