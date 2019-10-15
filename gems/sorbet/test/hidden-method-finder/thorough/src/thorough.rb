@@ -103,7 +103,7 @@ class Socket < BasicSocket
   SO_WANTOOBFLAG = ::T.let(nil, ::T.untyped)
   TCP_NOOPT = ::T.let(nil, ::T.untyped)
   TCP_NOPUSH = ::T.let(nil, ::T.untyped)
-  SO_BFP_EXTENSIONS = ::T.let(nil, ::T.untyped)
+  SO_BPF_EXTENSIONS = ::T.let(nil, ::T.untyped)
 end
 
 class BasicSocket < IO
