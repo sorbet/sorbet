@@ -38,6 +38,9 @@ llvm::FunctionType *getRubyFunctionTypeForSymbol(llvm::LLVMContext &lctx, const 
 
 llvm::CallInst *resolveSymbol(const core::GlobalState &gs, core::SymbolRef sym, llvm::IRBuilder<> &builder,
                               llvm::Module *module) {
+    if (sym == core::Symbols::root()) {
+        sym = core::Symbols::Object();
+    }
     auto str = sym.data(gs)->name.show(gs);
     auto rawCString = builder.CreateGlobalStringPtr(str, "rubyID_" + str);
     return builder.CreateCall(module->getFunction("sorbet_getConstant"), {rawCString});
