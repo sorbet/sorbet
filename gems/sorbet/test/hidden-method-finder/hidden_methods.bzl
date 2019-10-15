@@ -40,6 +40,7 @@ def _hidden_methods_test(test_path, ruby):
             "//main:sorbet",
             "//gems/sorbet:sorbet",
             expected,
+            "shims.rb",
 
             # TODO: how do we ask for the environment of the c compiler here,
             # for supporting gems with native code? (An example of this is the
