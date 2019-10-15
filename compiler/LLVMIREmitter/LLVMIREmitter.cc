@@ -62,7 +62,13 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
 llvm::AllocaInst *varGet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder,
                          UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
                          UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
-    return llvmVariables[var];
+    auto ret = llvmVariables[var];
+    if (!aliases.contains(ret)) {
+        return ret;
+    }
+
+    resolveSymbol(gs.gs, aliases[ret], builder, gs.module);
+    return ret;
 }
 
 // void varSet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder, UnorderedMap<core::LocalVariable,
