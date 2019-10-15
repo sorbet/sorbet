@@ -20,8 +20,8 @@ public:
             if (classDef) {
                 auto magic = ast::MK::Send1(loc, ast::MK::Unsafe(loc, ast::MK::Constant(loc, core::Symbols::root())),
                                             Names::sorbet_defineTopLevelClass, classDef->name->deepCopy());
-                i++;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
+                i++;
                 continue;
             }
 
@@ -30,8 +30,8 @@ public:
                 auto magic = ast::MK::Send2(loc, ast::MK::Unsafe(loc, ast::MK::Constant(loc, core::Symbols::root())),
                                             Names::sorbet_defineMethod, ast::MK::Self(loc),
                                             ast::MK::Symbol(loc, methodDef->name));
-                i++;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
+                i++;
                 continue;
             }
         }
