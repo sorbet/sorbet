@@ -41,11 +41,7 @@ public:
             }
             core::Loc loc(file, translatePos(diag.location().beginPos, maxOff - 1),
                           translatePos(diag.location().endPos, maxOff));
-
-            auto sorbetErrorClass = diag.error_class() == ruby_parser::dclass::MethodWithoutSelector
-                                        ? core::errors::Parser::MethodWithoutSelector
-                                        : core::errors::Parser::ParserError;
-            if (auto e = gs.beginError(loc, sorbetErrorClass)) {
+            if (auto e = gs.beginError(loc, core::errors::Parser::ParserError)) {
                 e.setHeader("{}", fmt::format(dclassStrings[(int)diag.error_class()], diag.data()));
             }
         }
