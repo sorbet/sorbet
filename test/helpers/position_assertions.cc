@@ -34,6 +34,7 @@ const UnorderedMap<
         {"assert-slow-path", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
         {"completion", CompletionAssertion::make},
+        {"apply-completion", ApplyCompletionAssertion::make},
         {"apply-code-action", ApplyCodeActionAssertion::make},
         {"no-stdlib", BooleanPropertyAssertion::make},
 };
@@ -962,6 +963,85 @@ void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File
 
 string CompletionAssertion::toString() const {
     return fmt::format("completion: {}", message);
+}
+
+shared_ptr<ApplyCompletionAssertion> ApplyCompletionAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                                    int assertionLine, string_view assertionContents,
+                                                                    string_view assertionType) {
+    static const regex versionIndexRegex(R"(^\[(\w+)\]\s+item:\s+(\d+)$)");
+
+    smatch matches;
+    string assertionContentsString = string(assertionContents);
+    if (regex_search(assertionContentsString, matches, versionIndexRegex)) {
+        auto version = matches[1].str();
+        auto index = stoi(matches[2].str());
+        return make_shared<ApplyCompletionAssertion>(filename, range, assertionLine, version, index);
+    }
+
+    ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
+        << fmt::format("Improperly formatted apply-completion assertion. Expected '[<version>] <index>'. Found '{}'",
+                       assertionContents);
+
+    return nullptr;
+}
+
+ApplyCompletionAssertion::ApplyCompletionAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                   string_view version, int index)
+    : RangeAssertion(filename, range, assertionLine), version(string(version)), index(index) {}
+
+void ApplyCompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
+                                        const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                        LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<ApplyCompletionAssertion>(assertion)) {
+            assertionOfType->check(sourceFileContents, wrapper, nextId, uriPrefix, errorPrefix);
+        }
+    }
+}
+
+void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                                     LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix,
+                                     std::string errorPrefix) {
+    auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename, uriPrefix);
+    ASSERT_NE(completionList, nullptr) << "doTextDocumentCompletion failed; see error above.";
+
+    auto &items = completionList->items;
+    ASSERT_LE(0, this->index);
+    ASSERT_LT(this->index, items.size());
+
+    auto &completionItem = items[this->index];
+
+    auto it = sourceFileContents.find(this->filename);
+    ASSERT_NE(it, sourceFileContents.end()) << fmt::format("Unable to find source file `{}`", this->filename);
+    auto &file = it->second;
+
+    auto expectedUpdatedFilePath =
+        fmt::format("{}.{}.rbedited", this->filename.substr(0, this->filename.size() - strlen(".rb")), this->version);
+
+    string expectedEditedFileContents;
+    try {
+        expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
+    } catch (FileNotFoundException e) {
+        ADD_FAILURE_AT(filename.c_str(), this->assertionLine + 1) << fmt::format(
+            "Missing {} which should contain test file after applying code actions.", expectedUpdatedFilePath);
+        return;
+    }
+
+    auto line = static_cast<u4>(this->range->start->line + 1);
+    auto column = static_cast<u4>(this->range->start->character + 1);
+    auto offset = core::Loc::pos2Offset(*file, {line, column});
+
+    string actualEditedFileContents = string(file->source());
+    ASSERT_NE(completionItem->insertText, nullopt);
+    actualEditedFileContents.insert(offset, completionItem->insertText.value());
+
+    EXPECT_EQ(expectedEditedFileContents, actualEditedFileContents) << fmt::format(
+        "The expected (rbedited) file contents for this completion did not match the actual file contents post-edit",
+        expectedUpdatedFilePath);
+}
+
+string ApplyCompletionAssertion::toString() const {
+    return fmt::format("apply-completion: [{}] item: {}", version, index);
 }
 
 shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view filename, unique_ptr<Range> &range,

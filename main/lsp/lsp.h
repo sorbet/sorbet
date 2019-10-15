@@ -196,7 +196,7 @@ class LSPLoop {
     std::unique_ptr<CompletionItem> getCompletionItemForSymbol(const core::GlobalState &gs, core::SymbolRef what,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
-                                                               size_t sortIdx) const;
+                                                               std::string_view prefix, size_t sortIdx) const;
     void findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
                                     std::vector<std::unique_ptr<CompletionItem>> &items) const;
     void sendShowMessageNotification(MessageType messageType, std::string_view message) const;
