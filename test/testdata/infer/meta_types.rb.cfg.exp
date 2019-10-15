@@ -42,7 +42,7 @@ subgraph "cluster_::TestMetaType#testit" {
     "bb::TestMetaType#testit_1" [shape = parallelogram];
 
     "bb::TestMetaType#testit_0" [
-        label = "block[id=0]()\l<self>: TestMetaType = cast(<self>: NilClass, TestMetaType);\lkeep_for_ide$7: T.class_of(T) = alias <C T>\l<statTemp>$6: T.class_of(T::Array) = alias <C Array>\l<statTemp>$8: T.class_of(String) = alias <C String>\l<statTemp>$5: <Type: T::Array[String]> = <statTemp>$6: T.class_of(T::Array).[](<statTemp>$8: T.class_of(String))\l<statTemp>$3: NilClass = <self>: TestMetaType.puts(<statTemp>$5: <Type: T::Array[String]>)\l<ifTemp>$12: T.untyped = <self>: TestMetaType._()\l<ifTemp>$12: T.untyped\l"
+        label = "block[id=0]()\l<self>: TestMetaType = cast(<self>: NilClass, TestMetaType);\l<statTemp>$6: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$7: T.class_of(T) = alias <C T>\l<statTemp>$8: T.class_of(String) = alias <C String>\l<statTemp>$5: <Type: T::Array[String]> = <statTemp>$6: T.class_of(T::Array).[](<statTemp>$8: T.class_of(String))\l<statTemp>$3: NilClass = <self>: TestMetaType.puts(<statTemp>$5: <Type: T::Array[String]>)\l<ifTemp>$12: T.untyped = <self>: TestMetaType._()\l<ifTemp>$12: T.untyped\l"
     ];
 
     "bb::TestMetaType#testit_0" -> "bb::TestMetaType#testit_2" [style="bold"];
@@ -54,7 +54,7 @@ subgraph "cluster_::TestMetaType#testit" {
 
     "bb::TestMetaType#testit_1" -> "bb::TestMetaType#testit_1" [style="bold"];
     "bb::TestMetaType#testit_2" [
-        label = "block[id=2](<self>: TestMetaType)\lkeep_for_ide$15: T.class_of(T) = alias <C T>\l<statTemp>$14: T.class_of(T::Array) = alias <C Array>\l<statTemp>$16: T.class_of(String) = alias <C String>\l<statTemp>$11: <Type: T::Array[String]> = <statTemp>$14: T.class_of(T::Array).[](<statTemp>$16: T.class_of(String))\l<unconditional>\l"
+        label = "block[id=2](<self>: TestMetaType)\l<statTemp>$14: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$15: T.class_of(T) = alias <C T>\l<statTemp>$16: T.class_of(String) = alias <C String>\l<statTemp>$11: <Type: T::Array[String]> = <statTemp>$14: T.class_of(T::Array).[](<statTemp>$16: T.class_of(String))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_2" -> "bb::TestMetaType#testit_4" [style="bold"];
@@ -71,12 +71,12 @@ subgraph "cluster_::TestMetaType#testit" {
     "bb::TestMetaType#testit_4" -> "bb::TestMetaType#testit_6" [style="tapered"];
 
     "bb::TestMetaType#testit_5" [
-        label = "block[id=5](<self>: TestMetaType)\lkeep_for_ide$22: T.class_of(T) = alias <C T>\l<statTemp>$21: T.class_of(T::Array) = alias <C Array>\l<statTemp>$23: T.class_of(String) = alias <C String>\l<statTemp>$18: <Type: T::Array[String]> = <statTemp>$21: T.class_of(T::Array).[](<statTemp>$23: T.class_of(String))\l<unconditional>\l"
+        label = "block[id=5](<self>: TestMetaType)\l<statTemp>$21: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$22: T.class_of(T) = alias <C T>\l<statTemp>$23: T.class_of(String) = alias <C String>\l<statTemp>$18: <Type: T::Array[String]> = <statTemp>$21: T.class_of(T::Array).[](<statTemp>$23: T.class_of(String))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_5" -> "bb::TestMetaType#testit_7" [style="bold"];
     "bb::TestMetaType#testit_6" [
-        label = "block[id=6](<self>: TestMetaType)\lkeep_for_ide$25: T.class_of(T) = alias <C T>\l<statTemp>$24: T.class_of(T::Array) = alias <C Array>\l<statTemp>$26: T.class_of(Float) = alias <C Float>\l<statTemp>$18: <Type: T::Array[Float]> = <statTemp>$24: T.class_of(T::Array).[](<statTemp>$26: T.class_of(Float))\l<unconditional>\l"
+        label = "block[id=6](<self>: TestMetaType)\l<statTemp>$24: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$25: T.class_of(T) = alias <C T>\l<statTemp>$26: T.class_of(Float) = alias <C Float>\l<statTemp>$18: <Type: T::Array[Float]> = <statTemp>$24: T.class_of(T::Array).[](<statTemp>$26: T.class_of(Float))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_6" -> "bb::TestMetaType#testit_7" [style="bold"];

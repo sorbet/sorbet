@@ -506,7 +506,7 @@ subgraph "cluster_::<Class:ControlFlow>#<static-init>" {
     "bb::<Class:ControlFlow>#<static-init>_34" -> "bb::<Class:ControlFlow>#<static-init>_35" [style="tapered"];
 
     "bb::<Class:ControlFlow>#<static-init>_35" [
-        label = "block[id=35](<selfRestore>$147: T.class_of(ControlFlow))\l<statTemp>$144: Sorbet::Private::Static::Void = Solve<sig>\l<statTemp>$163: T.class_of(Sorbet::Private::Static) = alias <C Static>\lkeep_for_ide$165: T.class_of(T) = alias <C T>\l<statTemp>$164: T.class_of(T::Sig) = alias <C Sig>\l<statTemp>$162: Sorbet::Private::Static::Void = <statTemp>$163: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$164: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=35](<selfRestore>$147: T.class_of(ControlFlow))\l<statTemp>$144: Sorbet::Private::Static::Void = Solve<sig>\l<statTemp>$163: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$164: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$165: T.class_of(T) = alias <C T>\l<statTemp>$162: Sorbet::Private::Static::Void = <statTemp>$163: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$164: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:ControlFlow>#<static-init>_35" -> "bb::<Class:ControlFlow>#<static-init>_1" [style="bold"];
