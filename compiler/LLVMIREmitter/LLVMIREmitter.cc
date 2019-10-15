@@ -205,8 +205,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                         builder.CreateStore(builder.CreateLoad(llvmVariables[i->what]), targetAlloca);
                     },
                     [&](cfg::Alias *i) {
-                        auto rawCall = resolveSymbol(gs, i->what, builder, gs.module);
-                        gs.boxRawValue(builder, targetAlloca, rawCall);
+                        gs.trace("Alias\n");
                     },
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
