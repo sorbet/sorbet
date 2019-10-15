@@ -218,11 +218,12 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                             return;
                         }
                         if (i->fun == Names::sorbet_defineTopLevelClass) {
-                            auto ownerSym = typeToSym(gs, i->args[0].type);
-                            ENFORCE(ownerSym.data(gs)->name.data(gs)->kind == core::NameKind::UNIQUE);
-                            auto className = ownerSym.data(gs)->name.data(gs)->unique.original.data(gs)->show(gs);
+                            auto sym = typeToSym(gs, i->args[0].type);
+                            auto name = sym.data(gs)->name;
+                            ENFORCE(name.data(gs)->kind == core::NameKind::UNIQUE);
+                            auto className = name.data(gs)->unique.original.data(gs)->show(gs);
                             auto classNameCStr = builder.CreateGlobalStringPtr(className, {"className_", className});
-                            auto rawCall = resolveSymbol(gs, ownerSym.data(gs)->superClass(), builder, gs.module);
+                            auto rawCall = resolveSymbol(gs, sym.data(gs)->superClass(), builder, gs.module);
                             builder.CreateCall(gs.module->getFunction("sorbet_defineTopLevelClass"), {classNameCStr, rawCall});
                             return;
                         }
