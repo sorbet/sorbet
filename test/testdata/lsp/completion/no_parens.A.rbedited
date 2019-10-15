@@ -1,0 +1,8 @@
+# typed: true
+
+class A
+  def foo_1; end
+end
+
+A.new.foo_1()${0} # error: does not exist
+#         ^ apply-completion: [A] item: 0
