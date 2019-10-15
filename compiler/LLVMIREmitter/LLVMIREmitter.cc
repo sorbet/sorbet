@@ -59,12 +59,14 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     return sym;
 }
 
-
-llvm::AllocaInst * varGet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder, UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables, UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
+llvm::AllocaInst *varGet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder,
+                         UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
+                         UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
     return llvmVariables[var];
 }
 
-// void varSet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder, UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables, UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) { }
+// void varSet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder, UnorderedMap<core::LocalVariable,
+// llvm::AllocaInst *> &llvmVariables, UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) { }
 
 } // namespace
 
@@ -183,9 +185,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                         // Magical call. Others use boxRawValue.
                         builder.CreateStore(builder.CreateLoad(var), targetAlloca);
                     },
-                    [&](cfg::Alias *i) {
-                        aliases[targetAlloca] = i->what;
-                    },
+                    [&](cfg::Alias *i) { aliases[targetAlloca] = i->what; },
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(gs)->shortName(gs);
@@ -332,8 +332,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
             if (!isTerminated) {
                 if (bb->bexit.thenb != bb->bexit.elseb) {
                     auto var = varGet(gs, bb->bexit.cond.variable, builder, llvmVariables, aliases);
-                    auto condValue =
-                        gs.getIsTruthyU1(builder, gs.unboxRawValue(builder, var));
+                    auto condValue = gs.getIsTruthyU1(builder, gs.unboxRawValue(builder, var));
 
                     builder.CreateCondBr(condValue, llvmBlocks[bb->bexit.thenb->id], llvmBlocks[bb->bexit.elseb->id]);
                 } else {
