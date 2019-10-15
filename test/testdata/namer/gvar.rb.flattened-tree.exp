@@ -1,9 +1,11 @@
 begin
+  <emptyTree>
   class <emptyTree><<C <root>>> < ()
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         #$a = 1
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
