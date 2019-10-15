@@ -212,9 +212,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                         // Magical call. Others use boxRawValue.
                         builder.CreateStore(builder.CreateLoad(llvmVariables[i->what]), targetAlloca);
                     },
-                    [&](cfg::Alias *i) {
-                        gs.trace("Alias\n");
-                    },
+                    [&](cfg::Alias *i) { gs.trace("Alias\n"); },
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(gs)->shortName(gs);
@@ -229,7 +227,8 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                             auto className = showClassName(gs, sym);
                             auto classNameCStr = builder.CreateGlobalStringPtr(className, {"className_", className});
                             auto rawCall = resolveSymbol(gs, sym.data(gs)->superClass(), builder, gs.module);
-                            builder.CreateCall(gs.module->getFunction("sorbet_defineTopLevelClass"), {classNameCStr, rawCall});
+                            builder.CreateCall(gs.module->getFunction("sorbet_defineTopLevelClass"),
+                                               {classNameCStr, rawCall});
                             return;
                         }
                         if (i->fun == Names::sorbet_defineNestedClass) {
