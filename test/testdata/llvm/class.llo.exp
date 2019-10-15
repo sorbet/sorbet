@@ -1,0 +1,255 @@
+source_filename = "compiler/IRHelpers/payload.c"
+target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-apple-darwin18.2.0"
+
+@.str = private unnamed_addr constant [16 x i8] c"ERROR: %s is 0\0A\00", align 1
+@rb_cObject = external local_unnamed_addr global i64, align 8
+@.str.4 = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
+@rb_eArgError = external local_unnamed_addr global i64, align 8
+@rubyID_Static = private unnamed_addr constant [7 x i8] c"Static\00", align 1
+@rubyID_T = private unnamed_addr constant [2 x i8] c"T\00", align 1
+@rubyID_Object = private unnamed_addr constant [7 x i8] c"Object\00", align 1
+@rubyID_Bar.1 = private unnamed_addr constant [4 x i8] c"Bar\00", align 1
+@"className_<Class:Bar>" = private unnamed_addr constant [12 x i8] c"<Class:Bar>\00", align 1
+@"rubyID_<Class:Object>" = private unnamed_addr constant [15 x i8] c"<Class:Object>\00", align 1
+
+; Function Attrs: nounwind ssp uwtable
+define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
+  %3 = icmp eq i64 %0, 0
+  br i1 %3, label %4, label %6, !prof !0
+
+; <label>:4:                                      ; preds = %2
+  %5 = tail call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str, i64 0, i64 0), i8* %1)
+  tail call void @abort() #7
+  unreachable
+
+; <label>:6:                                      ; preds = %2
+  ret void
+}
+
+; Function Attrs: nounwind
+declare i32 @printf(i8* nocapture readonly, ...) local_unnamed_addr #1
+
+; Function Attrs: noreturn
+declare void @abort() local_unnamed_addr #2
+
+declare i64 @rb_intern(i8*) local_unnamed_addr #3
+
+declare i64 @rb_const_get_at(i64, i64) local_unnamed_addr #3
+
+declare i64 @rb_define_class(i8*, i64) local_unnamed_addr #3
+
+; Function Attrs: nounwind ssp uwtable
+define internal fastcc i64 @sorbet_rb_arity_error_new(i32) unnamed_addr #0 {
+  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str.4, i64 0, i64 0), i32 %0, i32 0) #1
+  %3 = load i64, i64* @rb_eArgError, align 8, !tbaa !1
+  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #1
+  ret i64 %4
+}
+
+declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #3
+
+declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr #3
+
+; Function Attrs: noreturn nounwind ssp uwtable
+define internal fastcc void @sorbet_rb_error_arity(i32) unnamed_addr #4 {
+  %2 = tail call fastcc i64 @sorbet_rb_arity_error_new(i32 %0)
+  tail call void @rb_exc_raise(i64 %2) #7
+  unreachable
+}
+
+; Function Attrs: noreturn
+declare void @rb_exc_raise(i64) local_unnamed_addr #2
+
+; Function Attrs: nounwind sspreq uwtable
+define i64 @"<S <C <U Foo>> $1><U <static-init>>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #5 {
+functionEntryInitializers:
+  %isWrongArgCount = icmp eq i32 %0, 0
+  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
+
+argCountSuccess:                                  ; preds = %functionEntryInitializers
+  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Static, i64 0, i64 0)) #1
+  %4 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #1
+  %6 = tail call i64 @rb_intern(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @rubyID_Bar.1, i64 0, i64 0)) #1
+  %7 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %8 = tail call i64 @rb_const_get_at(i64 %7, i64 %6) #1
+  %9 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @rubyID_T, i64 0, i64 0)) #1
+  %10 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %11 = tail call i64 @rb_const_get_at(i64 %10, i64 %9) #1
+  %12 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Object, i64 0, i64 0)) #1
+  %13 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %14 = tail call i64 @rb_const_get_at(i64 %13, i64 %12) #1
+  %15 = tail call i64 @rb_intern(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @rubyID_Bar.1, i64 0, i64 0)) #1
+  %16 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %17 = tail call i64 @rb_const_get_at(i64 %16, i64 %15) #1
+  %18 = tail call i64 @rb_intern(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"rubyID_<Class:Object>", i64 0, i64 0)) #1
+  %19 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %20 = tail call i64 @rb_const_get_at(i64 %19, i64 %18) #1
+  %21 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"className_<Class:Bar>", i64 0, i64 0), i64 %20) #1
+  ret i64 8
+
+argCountFailBlock:                                ; preds = %functionEntryInitializers
+  tail call fastcc void @sorbet_rb_error_arity(i32 %0)
+  unreachable
+}
+
+; Function Attrs: norecurse nounwind readnone
+define void @"Init_<S <C <U Foo>> $1><U <static-init>>"() local_unnamed_addr #6 {
+initializeGlobals:
+  ret void
+}
+
+attributes #0 = { nounwind ssp uwtable }
+attributes #1 = { nounwind }
+attributes #2 = { noreturn }
+attributes #3 = { "addedToSilenceEmptyAttrsError" }
+attributes #4 = { noreturn nounwind ssp uwtable }
+attributes #5 = { nounwind sspreq uwtable }
+attributes #6 = { norecurse nounwind readnone }
+attributes #7 = { noreturn nounwind }
+
+!0 = !{!"branch_weights", i32 1, i32 2000}
+!1 = !{!2, !2, i64 0}
+!2 = !{!"long", !3, i64 0}
+!3 = !{!"omnipotent char", !4, i64 0}
+!4 = !{!"Simple C/C++ TBAA"}
+source_filename = "compiler/IRHelpers/payload.c"
+target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-apple-darwin18.2.0"
+
+@.str = private unnamed_addr constant [16 x i8] c"ERROR: %s is 0\0A\00", align 1
+@rb_cObject = external local_unnamed_addr global i64, align 8
+@.str.4 = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
+@rb_eArgError = external local_unnamed_addr global i64, align 8
+@rubyID_Foo.1 = private unnamed_addr constant [4 x i8] c"Foo\00", align 1
+@"className_<Class:Foo>" = private unnamed_addr constant [12 x i8] c"<Class:Foo>\00", align 1
+@rubyID_Module = private unnamed_addr constant [7 x i8] c"Module\00", align 1
+@rubyID_Static.2 = private unnamed_addr constant [7 x i8] c"Static\00", align 1
+@rubyID_T.3 = private unnamed_addr constant [2 x i8] c"T\00", align 1
+@rubyID_Object.4 = private unnamed_addr constant [7 x i8] c"Object\00", align 1
+@rubyID_Baz.5 = private unnamed_addr constant [4 x i8] c"Baz\00", align 1
+@"className_<Class:Baz>" = private unnamed_addr constant [12 x i8] c"<Class:Baz>\00", align 1
+@"rubyID_<Class:Object>" = private unnamed_addr constant [15 x i8] c"<Class:Object>\00", align 1
+
+; Function Attrs: nounwind ssp uwtable
+define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
+  %3 = icmp eq i64 %0, 0
+  br i1 %3, label %4, label %6, !prof !0
+
+; <label>:4:                                      ; preds = %2
+  %5 = tail call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str, i64 0, i64 0), i8* %1)
+  tail call void @abort() #7
+  unreachable
+
+; <label>:6:                                      ; preds = %2
+  ret void
+}
+
+; Function Attrs: nounwind
+declare i32 @printf(i8* nocapture readonly, ...) local_unnamed_addr #1
+
+; Function Attrs: noreturn
+declare void @abort() local_unnamed_addr #2
+
+declare i64 @rb_intern(i8*) local_unnamed_addr #3
+
+declare i64 @rb_const_get_at(i64, i64) local_unnamed_addr #3
+
+declare i64 @rb_define_class(i8*, i64) local_unnamed_addr #3
+
+; Function Attrs: nounwind ssp uwtable
+define internal fastcc i64 @sorbet_rb_arity_error_new(i32) unnamed_addr #0 {
+  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str.4, i64 0, i64 0), i32 %0, i32 0) #1
+  %3 = load i64, i64* @rb_eArgError, align 8, !tbaa !1
+  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #1
+  ret i64 %4
+}
+
+declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #3
+
+declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr #3
+
+; Function Attrs: noreturn nounwind ssp uwtable
+define internal fastcc void @sorbet_rb_error_arity(i32) unnamed_addr #4 {
+  %2 = tail call fastcc i64 @sorbet_rb_arity_error_new(i32 %0)
+  tail call void @rb_exc_raise(i64 %2) #7
+  unreachable
+}
+
+; Function Attrs: noreturn
+declare void @rb_exc_raise(i64) local_unnamed_addr #2
+
+; Function Attrs: nounwind sspreq uwtable
+define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #5 {
+functionEntryInitializers:
+  %isWrongArgCount = icmp eq i32 %0, 0
+  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
+
+argCountSuccess:                                  ; preds = %functionEntryInitializers
+  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Static.2, i64 0, i64 0)) #1
+  %4 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #1
+  %6 = tail call i64 @rb_intern(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @rubyID_Foo.1, i64 0, i64 0)) #1
+  %7 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %8 = tail call i64 @rb_const_get_at(i64 %7, i64 %6) #1
+  %9 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @rubyID_T.3, i64 0, i64 0)) #1
+  %10 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %11 = tail call i64 @rb_const_get_at(i64 %10, i64 %9) #1
+  %12 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Object.4, i64 0, i64 0)) #1
+  %13 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %14 = tail call i64 @rb_const_get_at(i64 %13, i64 %12) #1
+  %15 = tail call i64 @rb_intern(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @rubyID_Foo.1, i64 0, i64 0)) #1
+  %16 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %17 = tail call i64 @rb_const_get_at(i64 %16, i64 %15) #1
+  %18 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Module, i64 0, i64 0)) #1
+  %19 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %20 = tail call i64 @rb_const_get_at(i64 %19, i64 %18) #1
+  %21 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"className_<Class:Foo>", i64 0, i64 0), i64 %20) #1
+  %22 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Static.2, i64 0, i64 0)) #1
+  %23 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %24 = tail call i64 @rb_const_get_at(i64 %23, i64 %22) #1
+  %25 = tail call i64 @rb_intern(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @rubyID_Baz.5, i64 0, i64 0)) #1
+  %26 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %27 = tail call i64 @rb_const_get_at(i64 %26, i64 %25) #1
+  %28 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @rubyID_T.3, i64 0, i64 0)) #1
+  %29 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %30 = tail call i64 @rb_const_get_at(i64 %29, i64 %28) #1
+  %31 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @rubyID_Object.4, i64 0, i64 0)) #1
+  %32 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %33 = tail call i64 @rb_const_get_at(i64 %32, i64 %31) #1
+  %34 = tail call i64 @rb_intern(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @rubyID_Baz.5, i64 0, i64 0)) #1
+  %35 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %36 = tail call i64 @rb_const_get_at(i64 %35, i64 %34) #1
+  %37 = tail call i64 @rb_intern(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"rubyID_<Class:Object>", i64 0, i64 0)) #1
+  %38 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %39 = tail call i64 @rb_const_get_at(i64 %38, i64 %37) #1
+  %40 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"className_<Class:Baz>", i64 0, i64 0), i64 %39) #1
+  ret i64 8
+
+argCountFailBlock:                                ; preds = %functionEntryInitializers
+  tail call fastcc void @sorbet_rb_error_arity(i32 %0)
+  unreachable
+}
+
+; Function Attrs: nounwind ssp
+define void @Init_class() local_unnamed_addr #6 {
+initializeGlobals:
+  %"_S _C _U _root___ $1__N _U _static_init__ $110_" = tail call i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32 0, i64* undef, i64 undef)
+  ret void
+}
+
+attributes #0 = { nounwind ssp uwtable }
+attributes #1 = { nounwind }
+attributes #2 = { noreturn }
+attributes #3 = { "addedToSilenceEmptyAttrsError" }
+attributes #4 = { noreturn nounwind ssp uwtable }
+attributes #5 = { nounwind sspreq uwtable }
+attributes #6 = { nounwind ssp }
+attributes #7 = { noreturn nounwind }
+
+!0 = !{!"branch_weights", i32 1, i32 2000}
+!1 = !{!2, !2, i64 0}
+!2 = !{!"long", !3, i64 0}
+!3 = !{!"omnipotent char", !4, i64 0}
+!4 = !{!"Simple C/C++ TBAA"}
