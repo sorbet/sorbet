@@ -41,7 +41,8 @@ public:
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
         unique_ptr<llvm::Module> module = sorbet::compiler::IRHelpers::readDefaultModule(functionName.data(), lctx);
         llvm::BasicBlock *globalInitializers = llvm::BasicBlock::Create(lctx, "initializeGlobals");
-        sorbet::compiler::LLVMIREmitter::run(gs, lctx, cfg, md, functionName, module.get(), globalInitializers);
+        compiler::CompilerState state(gs, lctx, module.get(), globalInitializers);
+        sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
         string fileName = funcName2moduleName(functionName);
         sorbet::compiler::ObjectFileEmitter::run(gs, lctx, move(module), cfg.symbol, irOutputDir.value(), fileName,
                                                  globalInitializers);

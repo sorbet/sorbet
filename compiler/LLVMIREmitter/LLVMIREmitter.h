@@ -18,11 +18,11 @@ class MethodDef;
 }
 
 namespace sorbet::compiler {
+class CompilerState;
 class LLVMIREmitter {
 public:
-    static void run(const core::GlobalState &, llvm::LLVMContext &lctx, cfg::CFG &cfg,
-                    std::unique_ptr<ast::MethodDef> &md, const std::string &functionName, llvm::Module *,
-                    llvm::BasicBlock *globalInitializers);
+    static void run(CompilerState &, cfg::CFG &cfg, std::unique_ptr<ast::MethodDef> &md,
+                    const std::string &functionName);
 };
 } // namespace sorbet::compiler
 #endif
