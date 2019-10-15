@@ -369,13 +369,12 @@ public:
                 }
             }
         }
-        ast::InsSeq::STATS_store ideSeqs;
         if (ast::isa_tree<ast::ConstantLit>(klass->name.get())) {
-            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->name->deepCopy()));
+            klass->rhs.emplace_back(ast::MK::KeepForIDE(klass->name->deepCopy()));
         }
         if (klass->kind == ast::Class && !klass->ancestors.empty() &&
             shouldLeaveAncestorForIDE(klass->ancestors.front())) {
-            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()));
+            klass->rhs.emplace_back(ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()));
         }
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
@@ -400,14 +399,7 @@ public:
             }
         }
 
-        ast::InsSeq::STATS_store retSeqs;
-        retSeqs.emplace_back(std::move(klass));
-        for (auto &stat : ideSeqs) {
-            retSeqs.emplace_back(std::move(stat));
-        }
-        // TODO: We might need to actually return the class def here insted of
-        // EmptyTree
-        return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
+        return klass;
     }
 
     ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ast::ParsedArg> parsedArgs) {
