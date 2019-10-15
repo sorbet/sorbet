@@ -59,6 +59,13 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     return sym;
 }
 
+
+llvm::AllocaInst * varGet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder, UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables, UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
+    return llvmVariables[var];
+}
+
+// void varSet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder, UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables, UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) { }
+
 } // namespace
 
 void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::MethodDef> &md,
@@ -77,6 +84,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
     auto userBodyEntry = llvm::BasicBlock::Create(gs, "userBody", func);
     builder.SetInsertPoint(rawEntryBlock);
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
+    UnorderedMap<llvm::AllocaInst *, core::SymbolRef> aliases;
     {
         // nill out variables.
         auto valueType = gs.getValueType();
@@ -171,10 +179,13 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
+                        auto var = varGet(gs, i->what, builder, llvmVariables, aliases);
                         // Magical call. Others use boxRawValue.
-                        builder.CreateStore(builder.CreateLoad(llvmVariables[i->what]), targetAlloca);
+                        builder.CreateStore(builder.CreateLoad(var), targetAlloca);
                     },
-                    [&](cfg::Alias *i) { gs.trace("Alias\n"); },
+                    [&](cfg::Alias *i) {
+                        aliases[targetAlloca] = i->what;
+                    },
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(gs)->shortName(gs);
@@ -247,7 +258,8 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                                 argId += 1;
                                 llvm::Value *indices[] = {llvm::ConstantInt::get(gs, llvm::APInt(32, 0, true)),
                                                           llvm::ConstantInt::get(gs, llvm::APInt(64, argId, true))};
-                                builder.CreateStore(gs.unboxRawValue(builder, llvmVariables[arg.variable]),
+                                auto var = varGet(gs, arg.variable, builder, llvmVariables, aliases);
+                                builder.CreateStore(gs.unboxRawValue(builder, var),
                                                     builder.CreateGEP(sendArgArray, indices, "callArgsAddr"));
                             }
                         }
@@ -262,9 +274,10 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                         //
                         // todo(perf): mark the arguments with
                         // https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic for duration of the call
+                        auto var = varGet(gs, i->recv.variable, builder, llvmVariables, aliases);
                         auto rawCall = builder.CreateCall(
                             gs.module->getFunction("sorbet_callFunc"),
-                            {gs.unboxRawValue(builder, llvmVariables[i->recv.variable]), rawId,
+                            {gs.unboxRawValue(builder, var), rawId,
                              llvm::ConstantInt::get(llvm::Type::getInt32Ty(gs), llvm::APInt(32, i->args.size(), true)),
                              builder.CreateGEP(sendArgArray, indices)},
                             "rawSendResult");
@@ -272,7 +285,8 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                     },
                     [&](cfg::Return *i) {
                         isTerminated = true;
-                        builder.CreateRet(gs.unboxRawValue(builder, llvmVariables[i->what.variable]));
+                        auto var = varGet(gs, i->what.variable, builder, llvmVariables, aliases);
+                        builder.CreateRet(gs.unboxRawValue(builder, var));
                     },
                     [&](cfg::BlockReturn *i) { gs.trace("BlockReturn\n"); },
                     [&](cfg::LoadSelf *i) { gs.trace("LoadSelf\n"); },
@@ -317,8 +331,9 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
             }
             if (!isTerminated) {
                 if (bb->bexit.thenb != bb->bexit.elseb) {
+                    auto var = varGet(gs, bb->bexit.cond.variable, builder, llvmVariables, aliases);
                     auto condValue =
-                        gs.getIsTruthyU1(builder, gs.unboxRawValue(builder, llvmVariables[bb->bexit.cond.variable]));
+                        gs.getIsTruthyU1(builder, gs.unboxRawValue(builder, var));
 
                     builder.CreateCondBr(condValue, llvmBlocks[bb->bexit.thenb->id], llvmBlocks[bb->bexit.elseb->id]);
                 } else {
