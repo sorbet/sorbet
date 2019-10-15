@@ -189,48 +189,11 @@ class Enumerator::Lazy
   def slice_when(*_); end
 end
 
-class Errno::EAUTH
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::EAUTH
-end
-
-class Errno::EBADRPC
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::EBADRPC
-end
-
 Errno::ECAPMODE = Errno::NOERROR
-
-Errno::EDEADLOCK = Errno::NOERROR
 
 Errno::EDOOFUS = Errno::NOERROR
 
-class Errno::EFTYPE
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::EFTYPE
-end
-
 Errno::EIPSEC = Errno::NOERROR
-
-class Errno::ENEEDAUTH
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::ENEEDAUTH
-end
-
-class Errno::ENOATTR
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::ENOATTR
-end
 
 Errno::ENOTCAPABLE = Errno::NOERROR
 
@@ -239,41 +202,6 @@ class Errno::ENOTSUP
 end
 
 class Errno::ENOTSUP
-end
-
-class Errno::EPROCLIM
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::EPROCLIM
-end
-
-class Errno::EPROCUNAVAIL
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::EPROCUNAVAIL
-end
-
-class Errno::EPROGMISMATCH
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::EPROGMISMATCH
-end
-
-class Errno::EPROGUNAVAIL
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::EPROGUNAVAIL
-end
-
-class Errno::ERPCMISMATCH
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::ERPCMISMATCH
 end
 
 class Exception
@@ -3381,12 +3309,6 @@ class Proc
   def clone(); end
 
   def yield(*_); end
-end
-
-module Process
-  CLOCK_MONOTONIC_RAW_APPROX = ::T.let(nil, ::T.untyped)
-  CLOCK_UPTIME_RAW = ::T.let(nil, ::T.untyped)
-  CLOCK_UPTIME_RAW_APPROX = ::T.let(nil, ::T.untyped)
 end
 
 module Process::Sys
