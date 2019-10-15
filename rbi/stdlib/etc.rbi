@@ -376,7 +376,7 @@ module Etc
   # #=> #<struct Etc::Passwd name="root", passwd="x", uid=0, gid=0, gecos="root",dir="/root", shell="/bin/bash">
   # ```
   sig do
-    params(uid: String).returns(T.nilable(Etc::Passwd))
+    params(uid: Integer).returns(T.nilable(Etc::Passwd))
   end
   def self.getpwuid(uid); end
 
