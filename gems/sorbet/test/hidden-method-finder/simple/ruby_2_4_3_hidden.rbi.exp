@@ -177,13 +177,6 @@ class Enumerator::Lazy
   def slice_when(*_); end
 end
 
-class Errno::EAUTH
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::EAUTH
-end
-
 Errno::ECAPMODE = Errno::NOERROR
 
 Errno::EDOOFUS = Errno::NOERROR
