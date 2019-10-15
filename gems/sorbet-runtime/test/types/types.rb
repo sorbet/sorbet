@@ -82,6 +82,11 @@ module Opus::Types::Test
         type = T.any(Integer, Class.new, String)
         assert_equal("T.any(Integer, String)", type.name)
       end
+
+      it "unwraps aliased types" do
+        type = T.any(String, Integer, T::Private::Types::TypeAlias.new(-> {Integer}))
+        assert_equal("T.any(Integer, String)", type.name)
+      end
     end
 
     describe "Intersection" do
@@ -121,6 +126,12 @@ module Opus::Types::Test
           "T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2, String)",
           type.name
         )
+      end
+
+      it "unwraps aliased types" do
+        type_alias = T::Private::Types::TypeAlias.new(-> {Mixin1})
+        type = T.all(@type, type_alias)
+        assert_equal("T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2)", type.name)
       end
     end
 
@@ -518,6 +529,45 @@ module Opus::Types::Test
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Enumerable[Integer], got T::Array[T.untyped]"
         assert_equal(expected_error, msg)
+      end
+    end
+
+    describe 'TypeAlias' do
+      # TODO nroman get rid of this helper after `T.type_alias` accepts a block.
+      def make_type_alias(&blk)
+        T::Private::Types::TypeAlias.new(blk)
+      end
+
+      it 'delegates name' do
+        type = make_type_alias {T.any(Integer, String)}
+        assert_equal('T.any(Integer, String)', type.name)
+      end
+
+      it 'delegates equality' do
+        assert(T.any(Integer, String) == make_type_alias {T.any(Integer, String)})
+        assert(make_type_alias {T.any(Integer, String)} == T.any(Integer, String))
+        assert(make_type_alias {T.any(Integer, String)} == make_type_alias {T.any(Integer, String)})
+
+        refute(make_type_alias {T.any(Integer, Float)} == make_type_alias {T.any(Integer, String)})
+      end
+
+      it 'passes a validation' do
+        type = make_type_alias {T.any(Integer, String)}
+        msg = type.error_message_for_obj(1)
+        assert_nil(msg)
+      end
+
+      it 'provides errors on failed validation' do
+        type = make_type_alias {T.any(Integer, String)}
+        msg = type.error_message_for_obj(true)
+        assert_equal('Expected type T.any(Integer, String), got type TrueClass', msg)
+      end
+
+      it 'defers block evaluation' do
+        crash_type = make_type_alias {raise 'crash'}
+        assert_raises(RuntimeError) do
+          crash_type.error_message_for_obj(1)
+        end
       end
     end
 

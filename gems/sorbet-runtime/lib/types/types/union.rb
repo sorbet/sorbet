@@ -8,6 +8,7 @@ module T::Types
 
     def initialize(types)
       @types = types.flat_map do |type|
+        type = T::Utils.resolve_alias(type)
         if type.is_a?(Union)
           # Simplify nested unions (mostly so `name` returns a nicer value)
           type.types

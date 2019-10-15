@@ -4,7 +4,9 @@
 module T::Utils
   # Used to convert from a type specification to a `T::Types::Base`.
   def self.coerce(val)
-    if val.is_a?(T::Types::Base)
+    if val.is_a?(T::Private::Types::TypeAlias)
+      val.aliased_type
+    elsif val.is_a?(T::Types::Base)
       val
     elsif val == ::Array
       T::Array[T.untyped]
@@ -74,6 +76,16 @@ module T::Utils
   # Unwraps all the sigs.
   def self.run_all_sig_blocks
     T::Private::Methods.run_all_sig_blocks
+  end
+
+  # Return the underlying type for a type alias. Otherwise returns type.
+  def self.resolve_alias(type)
+    case type
+    when T::Private::Types::TypeAlias
+      type.aliased_type
+    else
+      type
+    end
   end
 
   # Give a type which is a subclass of T::Types::Base, determines if the type is a simple nilable type (union of NilClass and something else).
