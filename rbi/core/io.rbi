@@ -1945,7 +1945,7 @@ class IO < Object
   sig do
     params(
         name: T.any(String, Tempfile, File, Pathname),
-        arg0: String,
+        string: String,
         offset: Integer,
         external_encoding: String,
         internal_encoding: String,
@@ -1954,10 +1954,11 @@ class IO < Object
         binmode: BasicObject,
         autoclose: BasicObject,
         mode: String,
+        perm: Integer
     )
     .returns(Integer)
   end
-  def self.write(name, arg0, offset=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil)); end
+  def self.write(name, string, offset=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil), perm: T.unsafe(nil)); end
 
   # Synonym for `IO.new`.
   sig do
