@@ -74,6 +74,10 @@ void varSet(CompilerState &gs, llvm::AllocaInst *alloca, llvm::Value *var, llvm:
             UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
             UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
     gs.boxRawValue(builder, alloca, var);
+    if (!aliases.contains(alloca)) {
+        return;
+    }
+    // TODO do const_set for the alias
 }
 
 } // namespace
