@@ -1,5 +1,8 @@
 # typed: false
 
+class BasicSocket < IO
+end
+
 C1 = Class.new do
   define_method(:m_three) do; end
 end

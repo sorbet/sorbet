@@ -43,17 +43,11 @@ class Sorbet::Private::HiddenMethodFinder::Test::Simple < MiniTest::Spec
           # the hidden definitions file itself
           hidden = File.read('sorbet/rbi/hidden-definitions/hidden.rbi')
 
-          # first we compare against a generated version
-
-          # we encode the expects contents into a JSON file in the
-          # test directory: while this is redundant with the full
-          # generated file, this also keeps us robust against
-          # accidentally committing a changed expectation file which
-          # has removed something relevant we cared about (as expected
-          # hidden.rbi files are rather large even for trivial
-          # examples!)
-          assert_equal(hidden, File.read(File.join(olddir, path, 'hidden.rbi.exp')))
-
+          # because we can't guarantee that this test is run in a
+          # consistent Ruby or OS environment, we can't make
+          # guarantees about the full file (which might have
+          # e.g. different socket protocol constants) and so we
+          # instead encode a set of substrings we expect to see
           expectations = JSON.parse(File.read(File.join(dir, path, "expectations.json")))
           expectations.each do |exp|
             # we might expect some substring to /definitely/ appear in hidden.rbi

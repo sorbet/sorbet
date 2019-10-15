@@ -10,6 +10,8 @@ end
 # the following are included to avoid including these in
 # hidden-definitions, as they differ between OS X and Linux
 
+class BasicSocket < IO
+end
 
 class Socket < BasicSocket
   AF_CCITT = ::T.let(nil, ::T.untyped)
