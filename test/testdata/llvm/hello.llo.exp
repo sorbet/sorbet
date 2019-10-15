@@ -8,7 +8,7 @@ target triple = "x86_64-apple-darwin18.2.0"
 @.str.4 = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
 @"userStr_hello world" = private unnamed_addr constant [12 x i8] c"hello world\00", align 1
-@rubyId_global_puts = internal unnamed_addr global i64 0, align 8
+@str_global_puts = internal unnamed_addr global i64 0, align 8
 @str_global_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
 
 ; Function Attrs: nounwind ssp uwtable
@@ -63,7 +63,7 @@ declare void @rb_exc_raise(i64) local_unnamed_addr #2
 define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #5 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
-  %str_puts = load i64, i64* @rubyId_global_puts, align 8
+  %str_puts = load i64, i64* @str_global_puts, align 8
   %isWrongArgCount = icmp eq i32 %0, 0
   br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
 
@@ -85,7 +85,7 @@ define void @Init_hello() local_unnamed_addr #6 {
 initializeGlobals:
   %callArgs.i = alloca [1 x i64], align 8
   %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0)) #1
-  store i64 %0, i64* @rubyId_global_puts, align 8
+  store i64 %0, i64* @str_global_puts, align 8
   %1 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %2 = bitcast [1 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %2)
