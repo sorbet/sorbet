@@ -9,9 +9,9 @@ def sorbet_llvm_externals():
     git_repository(
         name = "com_stripe_ruby_typer",
         remote = "https://github.com/sorbet/sorbet.git",
-        commit = "b9a88f57864d1b99299e6698bd561c35b945913b",
+        commit = "ff5a329bca539f49d69735ea299b61b28d648fab",
         # git log -n 1 --pretty=format:"%cd" --date=raw origin/master
-        shallow_since = "1570726482 -0700",
+        shallow_since = "1571173768 -0700",
     )
 
     http_archive(
