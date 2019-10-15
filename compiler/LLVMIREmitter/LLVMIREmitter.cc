@@ -182,8 +182,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                     bind.value.get(),
                     [&](cfg::Ident *i) {
                         auto var = varGet(gs, i->what, builder, llvmVariables, aliases);
-                        // Magical call. Others use boxRawValue.
-                        builder.CreateStore(builder.CreateLoad(var), targetAlloca);
+                        gs.boxRawValue(builder, targetAlloca, gs.unboxRawValue(builder, var));
                     },
                     [&](cfg::Alias *i) { aliases[targetAlloca] = i->what; },
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
