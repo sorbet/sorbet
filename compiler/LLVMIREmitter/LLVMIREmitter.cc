@@ -41,7 +41,7 @@ llvm::CallInst *resolveSymbol(const core::GlobalState &gs, core::SymbolRef sym, 
                               llvm::Module *module) {
     sym = removeRoot(sym);
     auto str = showClassName(gs, sym);
-    auto rawCString = builder.CreateGlobalStringPtr(str, "rubyID_" + str);
+    auto rawCString = builder.CreateGlobalStringPtr(str, "str_" + str);
     return builder.CreateCall(module->getFunction("sorbet_getConstant"), {rawCString});
 }
 
