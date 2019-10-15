@@ -400,6 +400,7 @@ public:
         }
 
         ast::InsSeq::STATS_store retSeqs;
+        auto loc = klass->declLoc;
         retSeqs.emplace_back(std::move(klass));
         for (auto &stat : ideSeqs) {
             retSeqs.emplace_back(std::move(stat));
