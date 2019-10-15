@@ -46,12 +46,3 @@ test_suite(
         ":hidden-methods-ruby_2_6_3",
     ],
 )
-
-test_suite(
-    name = "hidden-method-update",
-    tags = ["manual"],
-    tests = [
-        ":hidden-methods-update-ruby_2_4_3",
-        ":hidden-methods-update-ruby_2_6_3",
-    ],
-)
