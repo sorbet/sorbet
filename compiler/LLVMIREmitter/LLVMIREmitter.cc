@@ -60,8 +60,8 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
 }
 
 llvm::Value *varGet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder,
-                         UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-                         UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
+                    UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
+                    UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
     auto ret = llvmVariables[var];
     if (!aliases.contains(ret)) {
         return gs.unboxRawValue(builder, ret);
@@ -70,8 +70,11 @@ llvm::Value *varGet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<
     return resolveSymbol(gs.gs, aliases[ret], builder, gs.module);
 }
 
-// void varSet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder, UnorderedMap<core::LocalVariable,
-// llvm::AllocaInst *> &llvmVariables, UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) { }
+void varSet(CompilerState &gs, llvm::AllocaInst *alloca, llvm::Value *var, llvm::IRBuilder<> &builder,
+            UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
+            UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
+    gs.boxRawValue(builder, alloca, var);
+}
 
 } // namespace
 
@@ -187,7 +190,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                     bind.value.get(),
                     [&](cfg::Ident *i) {
                         auto var = varGet(gs, i->what, builder, llvmVariables, aliases);
-                        gs.boxRawValue(builder, targetAlloca, var);
+                        varSet(gs, targetAlloca, var, builder, llvmVariables, aliases);
                     },
                     [&](cfg::Alias *i) { aliases[targetAlloca] = i->what; },
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
@@ -284,7 +287,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                              llvm::ConstantInt::get(llvm::Type::getInt32Ty(gs), llvm::APInt(32, i->args.size(), true)),
                              builder.CreateGEP(sendArgArray, indices)},
                             "rawSendResult");
-                        gs.boxRawValue(builder, targetAlloca, rawCall);
+                        varSet(gs, targetAlloca, rawCall, builder, llvmVariables, aliases);
                     },
                     [&](cfg::Return *i) {
                         isTerminated = true;
@@ -296,7 +299,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                     [&](cfg::Literal *i) {
                         gs.trace("Literal\n");
                         if (i->value->derivesFrom(gs, core::Symbols::NilClass())) {
-                            gs.boxRawValue(builder, targetAlloca, gs.getRubyNilRaw(builder));
+                            varSet(gs, targetAlloca, gs.getRubyNilRaw(builder), builder, llvmVariables, aliases);
                             return;
                         }
                         auto litType = core::cast_type<core::LiteralType>(i->value.get());
@@ -304,20 +307,20 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
                                 auto rawInt = gs.getRubyIntRaw(builder, litType->value);
-                                gs.boxRawValue(builder, targetAlloca, rawInt);
+                                varSet(gs, targetAlloca, rawInt, builder, llvmVariables, aliases);
 
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::True:
-                                gs.boxRawValue(builder, targetAlloca, gs.getRubyTrueRaw(builder));
+                                varSet(gs, targetAlloca, gs.getRubyTrueRaw(builder), builder, llvmVariables, aliases);
                                 break;
                             case core::LiteralType::LiteralTypeKind::False:
-                                gs.boxRawValue(builder, targetAlloca, gs.getRubyFalseRaw(builder));
+                                varSet(gs, targetAlloca, gs.getRubyFalseRaw(builder), builder, llvmVariables, aliases);
                                 break;
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(gs, litType->value).data(gs)->shortName(gs);
                                 auto rawRubyString = gs.getRubyStringRaw(builder, str);
-                                gs.boxRawValue(builder, targetAlloca, rawRubyString);
+                                varSet(gs, targetAlloca, rawRubyString, builder, llvmVariables, aliases);
                                 break;
                             }
                             default:
