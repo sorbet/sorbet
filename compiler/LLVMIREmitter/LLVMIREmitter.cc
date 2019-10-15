@@ -207,6 +207,10 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                             auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
                             builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelClass"),
                                                {classNameCStr, rawCall});
+
+                            auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
+                            auto llvmFuncName = funcSym.data(cs)->toStringFullName(cs);
+                            builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
                             return;
                         }
                         if (i->fun == Names::sorbet_defineNestedClass) {
@@ -345,10 +349,14 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
     }
 }
 
-llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::SymbolRef sym) {
+bool isStaticInit(CompilerState &cs, core::SymbolRef sym) {
     auto name = sym.data(cs)->name;
-    if ((name == core::Names::staticInit()) || (name.data(cs)->kind == core::NameKind::UNIQUE &&
-                                                name.data(cs)->unique.original == core::Names::staticInit())) {
+    return (name.data(cs)->kind == core::NameKind::UTF8 ? name : name.data(cs)->unique.original) ==
+           core::Names::staticInit();
+}
+
+llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::SymbolRef sym) {
+    if (isStaticInit(cs, sym)) {
         // this is top level code that shoudln't be callable externally.
         // Even more, sorbet reuses symbols used for these and thus if we mark them non-private we'll get link errors
         return llvm::Function::InternalLinkage;
@@ -405,15 +413,13 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
 
 void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym) {
     llvm::IRBuilder<> builder(cs);
-    bool isSpecialEntrypoint = false;
-    if (sym.data(cs)->owner == core::Symbols::rootSingleton() &&
-        sym.data(cs)->name.data(cs)->unique.original == core::Names::staticInit()) {
-        isSpecialEntrypoint = true;
-    }
 
     auto baseName = sym.data(cs)->toStringFullName(cs);
     auto linkageType = llvm::Function::InternalLinkage;
-    if (isSpecialEntrypoint) {
+    auto owner = sym.data(cs)->owner;
+    auto isRoot = owner == core::Symbols::rootSingleton();
+
+    if (isStaticInit(cs, sym) && isRoot) {
         baseName = FileOps::getFileName(sym.data(cs)->loc().file().data(cs).path());
         baseName = baseName.substr(0, baseName.rfind(".rb"));
         linkageType = llvm::Function::ExternalLinkage;
@@ -423,16 +429,24 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym) 
     auto bb = llvm::BasicBlock::Create(cs, "entry", entryFunc);
     builder.SetInsertPoint(bb);
 
-    if (isSpecialEntrypoint) {
+    if (isStaticInit(cs, sym)) {
+        core::SymbolRef staticInit;
+        auto attachedClass = owner.data(cs)->attachedClass(cs);
+        if (isRoot) {
+            staticInit = cs.gs.lookupStaticInitForFile(attachedClass.data(cs)->loc());
+        } else {
+            staticInit = cs.gs.lookupStaticInitForClass(attachedClass);
+        }
+
         // Call the LLVM method that was made by run() from this Init_ method
-        auto staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc()).data(cs)->toStringFullName(cs);
-        auto staticInitFunc = cs.module->getFunction(staticInit);
+        auto staticInitName = staticInit.data(cs)->toStringFullName(cs);
+        auto staticInitFunc = cs.module->getFunction(staticInitName);
         ENFORCE(staticInitFunc);
         builder.CreateCall(staticInitFunc,
                            {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                             llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
                             builder.CreateCall(cs.module->getFunction("sorbet_rb_cObject"))},
-                           (string)staticInit);
+                           staticInitName);
     }
 
     builder.CreateRetVoid();
