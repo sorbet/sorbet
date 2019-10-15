@@ -378,7 +378,7 @@ module Etc
   sig do
     params(uid: Integer).returns(T.nilable(Etc::Passwd))
   end
-  def self.getpwuid(uid); end
+  def self.getpwuid(uid=T.unsafe(nil)); end
 
   # Provides a convenient Ruby iterator which executes a block for each entry in
   # the /etc/group file.
