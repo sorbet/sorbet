@@ -1,6 +1,8 @@
 # typed: __STDLIB_INTERNAL
 
-module T; end
+module T
+  def self.unsafe(value); end
+end
 module T::Sig
   def sig(arg=nil, &blk); end
 end
