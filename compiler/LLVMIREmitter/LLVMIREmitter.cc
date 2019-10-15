@@ -29,10 +29,18 @@ core::SymbolRef removeRoot(core::SymbolRef sym) {
     return sym;
 }
 
+std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
+    auto name = sym.data(gs)->name;
+    if (name.data(gs)->kind == core::NameKind::UNIQUE) {
+        return name.data(gs)->unique.original.data(gs)->show(gs);
+    }
+    return name.data(gs)->show(gs);
+}
+
 llvm::CallInst *resolveSymbol(const core::GlobalState &gs, core::SymbolRef sym, llvm::IRBuilder<> &builder,
                               llvm::Module *module) {
     sym = removeRoot(sym);
-    auto str = sym.data(gs)->name.show(gs);
+    auto str = showClassName(gs, sym);
     auto rawCString = builder.CreateGlobalStringPtr(str, "rubyID_" + str);
     return builder.CreateCall(module->getFunction("sorbet_getConstant"), {rawCString});
 }
@@ -218,9 +226,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                         }
                         if (i->fun == Names::sorbet_defineTopLevelClass) {
                             auto sym = typeToSym(gs, i->args[0].type);
-                            auto name = sym.data(gs)->name;
-                            ENFORCE(name.data(gs)->kind == core::NameKind::UNIQUE);
-                            auto className = name.data(gs)->unique.original.data(gs)->show(gs);
+                            auto className = showClassName(gs, sym);
                             auto classNameCStr = builder.CreateGlobalStringPtr(className, {"className_", className});
                             auto rawCall = resolveSymbol(gs, sym.data(gs)->superClass(), builder, gs.module);
                             builder.CreateCall(gs.module->getFunction("sorbet_defineTopLevelClass"), {classNameCStr, rawCall});
