@@ -405,6 +405,8 @@ public:
         for (auto &stat : ideSeqs) {
             retSeqs.emplace_back(std::move(stat));
         }
+        // TODO: We might need to actually return the class def here insted of
+        // EmptyTree
         return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
