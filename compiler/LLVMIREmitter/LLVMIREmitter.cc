@@ -36,14 +36,34 @@ llvm::FunctionType *getRubyFunctionTypeForSymbol(llvm::LLVMContext &lctx, const 
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
-llvm::CallInst *resolveSymbol(const core::GlobalState &gs, core::SymbolRef sym, llvm::IRBuilder<> &builder,
-                              llvm::Module *module) {
-    if (sym == core::Symbols::root()) {
+core::SymbolRef removeRoot(core::SymbolRef sym) {
+    if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
+        // Root methods end up going on object
         sym = core::Symbols::Object();
     }
+    return sym;
+}
+
+llvm::CallInst *resolveSymbol(const core::GlobalState &gs, core::SymbolRef sym, llvm::IRBuilder<> &builder,
+                              llvm::Module *module) {
+    sym = removeRoot(sym);
     auto str = sym.data(gs)->name.show(gs);
     auto rawCString = builder.CreateGlobalStringPtr(str, "rubyID_" + str);
     return builder.CreateCall(module->getFunction("sorbet_getConstant"), {rawCString});
+}
+
+core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
+    core::SymbolRef sym;
+    if (auto classType = core::cast_type<core::ClassType>(typ.get())) {
+        sym = classType->symbol;
+    } else if (auto appliedType = core::cast_type<core::AppliedType>(typ.get())) {
+        sym = appliedType->klass;
+    } else {
+        ENFORCE(false);
+    }
+    sym = removeRoot(sym);
+    ENFORCE(sym.data(gs)->isClassOrModule());
+    return sym;
 }
 
 } // namespace
@@ -249,20 +269,7 @@ void LLVMIREmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, cf
                         }
                         if (i->fun == Names::sorbet_defineMethod) {
                             ENFORCE(i->args.size() == 2);
-                            auto ownerType = i->args[0].type;
-                            core::SymbolRef ownerSym;
-                            if (auto typ = core::cast_type<core::ClassType>(ownerType.get())) {
-                                ownerSym = typ->symbol;
-                            } else if (auto typ = core::cast_type<core::AppliedType>(ownerType.get())) {
-                                ownerSym = typ->klass;
-                            } else {
-                                ENFORCE(false);
-                            }
-                            if (ownerSym == core::Symbols::root() || ownerSym == core::Symbols::rootSingleton()) {
-                                // Root methods end up going on object
-                                ownerSym = core::Symbols::Object();
-                            }
-                            ENFORCE(ownerSym.data(gs)->isClassOrModule());
+                            auto ownerSym = typeToSym(gs, i->args[0].type);
 
                             auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
                             ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
