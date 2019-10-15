@@ -277,26 +277,6 @@ VALUE sorbet_getConstant(const char* name) __attribute__((always_inline)) {
     return rb_const_get_at(sorbet_rb_cObject(), id);
 }
 
-/*
-VALUE sorbet_get_constant(std::string_view name) {
-    if (name.size() < 2) {
-        abort();
-    }
-    if (name[0] != ':' || name[1] != ':') {
-        abort();
-    }
-    VALUE cnst = rb_cObject;
-    std::size_t it = 2;
-    std::size_t nexIt = name.find("::", it);
-    while (nexIt != std::string_view::npos) {
-        cnst = sorbet_getConstant(cnst,
-sorbet_IDIntern(std::string(name.substr(it, nexIt)).c_str())); it = nexIt + 2;
-        nexIt = name.find("::", it);
-    }
-    return cnst;
-}
-*/
-
 VALUE sorbet_defineTopLevelModule(const char *name) __attribute__((always_inline)) {
     return rb_define_module(name);
 }
