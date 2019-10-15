@@ -12,8 +12,8 @@ namespace sorbet::realmain::lsp {
 namespace {
 
 struct RubyKeyword {
-    string keyword;
-    string documentation;
+    const string keyword;
+    const string documentation;
 
     RubyKeyword(string keyword, string documentation) : keyword(keyword), documentation(documentation){};
 };
@@ -227,13 +227,20 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
 }
 
 unique_ptr<CompletionItem> getCompletionItemForKeyword(const LSPConfiguration &config, const RubyKeyword &rubyKeyword,
-                                                       size_t sortIdx) {
+                                                       string_view prefix, size_t sortIdx) {
     auto label = rubyKeyword.keyword;
     auto item = make_unique<CompletionItem>(label);
     item->sortText = fmt::format("{:06d}", sortIdx);
     item->kind = CompletionItemKind::Keyword;
+
+    // TODO(jez) Replace insertText with proper textEdit (replace the entire `fun`, to handle fuzzy prefixes)
+    auto insertText = label;
+    if (absl::StartsWith(insertText, prefix)) {
+        insertText = label.substr(prefix.size(), insertText.size() - prefix.size());
+    }
+    item->insertText = insertText;
     item->insertTextFormat = InsertTextFormat::PlainText;
-    item->insertText = label;
+
     item->documentation = make_unique<MarkupContent>(config.clientCompletionItemMarkupKind, rubyKeyword.documentation);
 
     return item;
@@ -244,7 +251,7 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const LSPConfiguration &c
 unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::GlobalState &gs, core::SymbolRef what,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
-                                                               size_t sortIdx) const {
+                                                               string_view prefix, size_t sortIdx) const {
     ENFORCE(what.exists());
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
 
@@ -261,12 +268,21 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
         if (what.exists()) {
             item->detail = methodDetail(gs, what, receiverType, nullptr, constraint);
         }
+
+        // TODO(jez) Replace insertText with proper textEdit (replace the entire `fun`, to handle fuzzy prefixes)
+        string insertText;
         if (config.clientCompletionItemSnippetSupport) {
             item->insertTextFormat = InsertTextFormat::Snippet;
-            item->insertText = methodSnippet(gs, what);
+            insertText = methodSnippet(gs, what);
         } else {
             item->insertTextFormat = InsertTextFormat::PlainText;
-            item->insertText = string(what.data(gs)->name.data(gs)->shortName(gs));
+            insertText = string(what.data(gs)->name.data(gs)->shortName(gs));
+        }
+
+        if (absl::StartsWith(insertText, prefix)) {
+            item->insertText = insertText.substr(prefix.size(), insertText.size() - prefix.size());
+        } else {
+            item->insertText = insertText;
         }
 
         optional<string> documentation = nullopt;
@@ -304,7 +320,8 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
                     sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                     // hide singletons
                     hasSimilarName(gs, sym.data(gs)->name, pattern)) {
-                    items.push_back(getCompletionItemForSymbol(gs, sym, receiverType, nullptr, items.size()));
+                    auto prefix = ""; // TODO(jez) Also handle stripping prefix (or making textEdit) for constants
+                    items.push_back(getCompletionItemForSymbol(gs, sym, receiverType, nullptr, prefix, items.size()));
                 }
             }
         } while (owner != core::Symbols::root());
@@ -400,11 +417,11 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
 
             // TODO(jez) Do something smarter here than "all matching keywords always come first"
             for (auto &similarKeyword : similarKeywords) {
-                items.push_back(getCompletionItemForKeyword(config, similarKeyword, items.size()));
+                items.push_back(getCompletionItemForKeyword(config, similarKeyword, prefix, items.size()));
             }
             for (auto &similarMethod : deduped) {
                 items.push_back(getCompletionItemForSymbol(*gs, similarMethod.method, similarMethod.receiverType,
-                                                           similarMethod.constr.get(), items.size()));
+                                                           similarMethod.constr.get(), prefix, items.size()));
             }
         } else if (auto identResp = resp->isIdent()) {
             findSimilarConstantOrIdent(*gs, identResp->retType.type, items);
