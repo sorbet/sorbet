@@ -13,6 +13,7 @@ class FunctionType;
 class IRBuilderBase;
 class BasicBlock;
 class Value;
+class AllocaInst;
 }; // namespace llvm
 
 namespace sorbet::compiler {
@@ -34,6 +35,9 @@ public:
     // api for actual code emission
     llvm::Value getRubyIdFor(llvm::IRBuilderBase &builder, std::string_view idName);
     void setExpectedBool(llvm::IRBuilderBase &builder, llvm::Value *boolean, bool expected);
+    // boxed raw value from rawData into target. Assumes that types are compatible.
+    void boxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *storeTarget, llvm::Value *rawData);
+    llvm::Value *unboxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *storeTarget);
 
     // conversion to Sorbet state
     operator const sorbet::core::GlobalState &() const {

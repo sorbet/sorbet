@@ -53,20 +53,6 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
 
 } // namespace
 
-// boxed raw value from rawData into target. Assumes that types are compatible.
-void boxRawValue(CompilerState &gs, llvm::IRBuilder<> &builder, llvm::AllocaInst *target, llvm::Value *rawData) {
-    llvm::Value *indices[] = {llvm::ConstantInt::get(gs, llvm::APInt(32, 0, true)),
-                              llvm::ConstantInt::get(gs, llvm::APInt(32, 0, true))};
-    builder.CreateStore(rawData, builder.CreateGEP(target, indices));
-}
-
-// boxed raw value from rawData into target. Assumes that types are compatible.
-llvm::Value *unboxRawValue(CompilerState &gs, llvm::IRBuilder<> &builder, llvm::AllocaInst *target) {
-    llvm::Value *indices[] = {llvm::ConstantInt::get(gs, llvm::APInt(32, 0, true)),
-                              llvm::ConstantInt::get(gs, llvm::APInt(32, 0, true))};
-    return builder.CreateLoad(builder.CreateGEP(target, indices), "rawRubyValue");
-}
-
 llvm::Value *getIdFor(CompilerState &gs, llvm::IRBuilder<> &builder, string_view idName,
                       UnorderedMap<string_view, llvm::Value *> &rubyIdRegistry) {
     auto &global = rubyIdRegistry[idName];
@@ -103,13 +89,6 @@ llvm::Value *getIdFor(CompilerState &gs, llvm::IRBuilder<> &builder, string_view
     return global;
 }
 
-void addExpectedBool(CompilerState &gs, llvm::Module *module, llvm::IRBuilder<> &builder, llvm::Value *value,
-                     bool expected) {
-    builder.CreateCall(
-        llvm::Intrinsic::getDeclaration(module, llvm::Intrinsic::ID::expect, {llvm::Type::getInt1Ty(gs)}),
-        {value, llvm::ConstantInt::get(llvm::Type::getInt1Ty(gs), llvm::APInt(1, expected ? 1 : 0, true))});
-}
-
 void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::MethodDef> &md,
                         const string &functionName) {
     UnorderedMap<string_view, llvm::Value *> rubyIDRegistry;
@@ -139,7 +118,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
         auto svName = var._name.data(gs)->shortName(gs);
         auto alloca = llvmVariables[var] =
             builder.CreateAlloca(valueType, nullptr, llvm::StringRef(svName.data(), svName.length()));
-        boxRawValue(gs, builder, alloca, nilValueRaw);
+        gs.boxRawValue(builder, alloca, nilValueRaw);
     }
 
     auto argCountRaw = func->arg_begin();
@@ -154,7 +133,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
             argCountRaw,
             llvm::ConstantInt::get(llvm::Type::getInt32Ty(gs), llvm::APInt(32, requiredArgumentCount, true)),
             "isWrongArgCount");
-        addExpectedBool(gs, gs.module, builder, isWrongArgCount, false);
+        gs.setExpectedBool(builder, isWrongArgCount, false);
         builder.CreateCondBr(isWrongArgCount, argCountFailBlock, argCountSuccessBlock);
 
         builder.SetInsertPoint(argCountFailBlock);
@@ -181,13 +160,13 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
             auto *a = ast::MK::arg2Local(arg.get());
             llvm::Value *indices[] = {llvm::ConstantInt::get(gs, llvm::APInt(32, argId, true))};
             auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "rawArgValue");
-            boxRawValue(gs, builder, llvmVariables[a->localVariable], rawValue);
+            gs.boxRawValue(builder, llvmVariables[a->localVariable], rawValue);
         }
     }
     {
         // box `self`
         auto selfArgRaw = (func->arg_begin() + 2);
-        boxRawValue(gs, builder, llvmVariables[core::LocalVariable::selfVariable()], selfArgRaw);
+        gs.boxRawValue(builder, llvmVariables[core::LocalVariable::selfVariable()], selfArgRaw);
     }
     // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments to extract arguments
     // and box them to "RV" type
@@ -235,7 +214,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                     },
                     [&](cfg::Alias *i) {
                         auto rawCall = resolveSymbol(gs, i->what, builder, gs.module);
-                        boxRawValue(gs, builder, targetAlloca, rawCall);
+                        gs.boxRawValue(builder, targetAlloca, rawCall);
                     },
                     [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
@@ -302,7 +281,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                                 argId += 1;
                                 llvm::Value *indices[] = {llvm::ConstantInt::get(gs, llvm::APInt(32, 0, true)),
                                                           llvm::ConstantInt::get(gs, llvm::APInt(64, argId, true))};
-                                builder.CreateStore(unboxRawValue(gs, builder, llvmVariables[arg.variable]),
+                                builder.CreateStore(gs.unboxRawValue(builder, llvmVariables[arg.variable]),
                                                     builder.CreateGEP(sendArgArray, indices, "callArgsAddr"));
                             }
                         }
@@ -319,22 +298,22 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                         // https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic for duration of the call
                         auto rawCall = builder.CreateCall(
                             gs.module->getFunction("sorbet_callFunc"),
-                            {unboxRawValue(gs, builder, llvmVariables[i->recv.variable]), rawId,
+                            {gs.unboxRawValue(builder, llvmVariables[i->recv.variable]), rawId,
                              llvm::ConstantInt::get(llvm::Type::getInt32Ty(gs), llvm::APInt(32, i->args.size(), true)),
                              builder.CreateGEP(sendArgArray, indices)},
                             "rawSendResult");
-                        boxRawValue(gs, builder, targetAlloca, rawCall);
+                        gs.boxRawValue(builder, targetAlloca, rawCall);
                     },
                     [&](cfg::Return *i) {
                         isTerminated = true;
-                        builder.CreateRet(unboxRawValue(gs, builder, llvmVariables[i->what.variable]));
+                        builder.CreateRet(gs.unboxRawValue(builder, llvmVariables[i->what.variable]));
                     },
                     [&](cfg::BlockReturn *i) { gs.trace("BlockReturn\n"); },
                     [&](cfg::LoadSelf *i) { gs.trace("LoadSelf\n"); },
                     [&](cfg::Literal *i) {
                         gs.trace("Literal\n");
                         if (i->value->derivesFrom(gs, core::Symbols::NilClass())) {
-                            boxRawValue(gs, builder, targetAlloca, nilValueRaw);
+                            gs.boxRawValue(builder, targetAlloca, nilValueRaw);
                             return;
                         }
                         auto litType = core::cast_type<core::LiteralType>(i->value.get());
@@ -344,14 +323,14 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                                 auto rawInt = builder.CreateCall(
                                     gs.module->getFunction("sorbet_longToRubyValue"),
                                     {llvm::ConstantInt::get(gs, llvm::APInt(64, litType->value, true))}, "rawRubyInt");
-                                boxRawValue(gs, builder, targetAlloca, rawInt);
+                                gs.boxRawValue(builder, targetAlloca, rawInt);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::True:
-                                boxRawValue(gs, builder, targetAlloca, trueValueRaw);
+                                gs.boxRawValue(builder, targetAlloca, trueValueRaw);
                                 break;
                             case core::LiteralType::LiteralTypeKind::False:
-                                boxRawValue(gs, builder, targetAlloca, falseValueRaw);
+                                gs.boxRawValue(builder, targetAlloca, falseValueRaw);
                                 break;
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(gs, litType->value).data(gs)->shortName(gs);
@@ -361,7 +340,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                                     gs.module->getFunction("sorbet_CPtrToRubyString"),
                                     {rawCString, llvm::ConstantInt::get(gs, llvm::APInt(64, str.length(), true))},
                                     "rawRubyStr");
-                                boxRawValue(gs, builder, targetAlloca, rawRubyString);
+                                gs.boxRawValue(builder, targetAlloca, rawRubyString);
                                 break;
                             }
                             default:
@@ -378,9 +357,9 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
             }
             if (!isTerminated) {
                 if (bb->bexit.thenb != bb->bexit.elseb) {
-                    auto condValue = builder.CreateCall(
-                        gs.module->getFunction("sorbet_testIsTruthy"),
-                        {unboxRawValue(gs, builder, llvmVariables[bb->bexit.cond.variable])}, "cond");
+                    auto condValue =
+                        builder.CreateCall(gs.module->getFunction("sorbet_testIsTruthy"),
+                                           {gs.unboxRawValue(builder, llvmVariables[bb->bexit.cond.variable])}, "cond");
                     builder.CreateCondBr(condValue, llvmBlocks[bb->bexit.thenb->id], llvmBlocks[bb->bexit.elseb->id]);
                 } else {
                     builder.CreateBr(llvmBlocks[bb->bexit.thenb->id]);
