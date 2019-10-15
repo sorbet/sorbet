@@ -345,7 +345,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
             if (!isTerminated) {
                 if (bb->bexit.thenb != bb->bexit.elseb) {
                     auto condValue =
-                        gs.getIsTruthyU1(builder,gs.unboxRawValue(builder, llvmVariables[bb->bexit.cond.variable]));
+                        gs.getIsTruthyU1(builder, gs.unboxRawValue(builder, llvmVariables[bb->bexit.cond.variable]));
 
                     builder.CreateCondBr(condValue, llvmBlocks[bb->bexit.thenb->id], llvmBlocks[bb->bexit.elseb->id]);
                 } else {
