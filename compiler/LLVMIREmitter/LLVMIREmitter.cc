@@ -107,9 +107,9 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
     auto userBodyEntry = llvm::BasicBlock::Create(gs, "userBody", func);
     builder.SetInsertPoint(rawEntryBlock);
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
-    auto nilValueRaw = builder.CreateCall(gs.module->getFunction("sorbet_rubyNil"), {}, "nilValueRaw");
-    auto falseValueRaw = builder.CreateCall(gs.module->getFunction("sorbet_rubyFalse"), {}, "falseValueRaw");
-    auto trueValueRaw = builder.CreateCall(gs.module->getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
+    auto nilValueRaw = gs.getRubyNilRaw(builder);
+    auto falseValueRaw = gs.getRubyFalseRaw(builder);
+    auto trueValueRaw = gs.getRubyTrueRaw(builder);
     auto valueType = gs.getValueType();
 
     // nill out variables.
@@ -137,14 +137,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
         builder.CreateCondBr(isWrongArgCount, argCountFailBlock, argCountSuccessBlock);
 
         builder.SetInsertPoint(argCountFailBlock);
-        builder.CreateCall(
-            gs.module->getFunction("sorbet_rb_error_arity"),
-            {argCountRaw,
-             llvm::ConstantInt::get(llvm::Type::getInt32Ty(gs), llvm::APInt(32, requiredArgumentCount, true)),
-             llvm::ConstantInt::get(llvm::Type::getInt32Ty(gs), llvm::APInt(32, requiredArgumentCount, true))
-
-            });
-        builder.CreateUnreachable();
+        gs.emitArgumentMismatch(builder, argCountRaw, requiredArgumentCount, requiredArgumentCount);
         builder.SetInsertPoint(argCountSuccessBlock);
     }
     {
@@ -320,10 +313,9 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                         ENFORCE(litType);
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
-                                auto rawInt = builder.CreateCall(
-                                    gs.module->getFunction("sorbet_longToRubyValue"),
-                                    {llvm::ConstantInt::get(gs, llvm::APInt(64, litType->value, true))}, "rawRubyInt");
+                                auto rawInt = gs.getRubyIntRaw(builder, litType->value);
                                 gs.boxRawValue(builder, targetAlloca, rawInt);
+
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::True:
@@ -334,12 +326,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                                 break;
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(gs, litType->value).data(gs)->shortName(gs);
-                                llvm::StringRef userStr(str.data(), str.length());
-                                auto rawCString = builder.CreateGlobalStringPtr(userStr, {"userStr_", userStr});
-                                auto rawRubyString = builder.CreateCall(
-                                    gs.module->getFunction("sorbet_CPtrToRubyString"),
-                                    {rawCString, llvm::ConstantInt::get(gs, llvm::APInt(64, str.length(), true))},
-                                    "rawRubyStr");
+                                auto rawRubyString = gs.getRubyStringRaw(builder, str);
                                 gs.boxRawValue(builder, targetAlloca, rawRubyString);
                                 break;
                             }
@@ -358,8 +345,8 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
             if (!isTerminated) {
                 if (bb->bexit.thenb != bb->bexit.elseb) {
                     auto condValue =
-                        builder.CreateCall(gs.module->getFunction("sorbet_testIsTruthy"),
-                                           {gs.unboxRawValue(builder, llvmVariables[bb->bexit.cond.variable])}, "cond");
+                        gs.getIsTruthyU1(builder,gs.unboxRawValue(builder, llvmVariables[bb->bexit.cond.variable]));
+
                     builder.CreateCondBr(condValue, llvmBlocks[bb->bexit.thenb->id], llvmBlocks[bb->bexit.elseb->id]);
                 } else {
                     builder.CreateBr(llvmBlocks[bb->bexit.thenb->id]);

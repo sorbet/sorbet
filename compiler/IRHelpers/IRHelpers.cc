@@ -23,6 +23,11 @@ std::unique_ptr<llvm::Module> IRHelpers::readDefaultModule(const char *name, llv
 CompilerState::CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module,
                              llvm::BasicBlock *globalInits)
     : gs(gs), lctx(lctx), globalInitializers(globalInits), functionEntryInitializers(nullptr), module(module) {}
+namespace {
+llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
+    return static_cast<llvm::IRBuilder<> &>(builder);
+};
+} // namespace
 
 llvm::StructType *CompilerState::getValueType() {
     auto intType = llvm::Type::getInt64Ty(lctx);
@@ -43,7 +48,7 @@ llvm::FunctionType *CompilerState::getRubyFFIType() {
 }
 
 void CompilerState::setExpectedBool(llvm::IRBuilderBase &builder, llvm::Value *value, bool expected) {
-    static_cast<llvm::IRBuilder<> &>(builder).CreateCall(
+    builderCast(builder).CreateCall(
         llvm::Intrinsic::getDeclaration(module, llvm::Intrinsic::ID::expect, {llvm::Type::getInt1Ty(lctx)}),
         {value, llvm::ConstantInt::get(llvm::Type::getInt1Ty(lctx), llvm::APInt(1, expected ? 1 : 0, true))});
 }
@@ -51,15 +56,52 @@ void CompilerState::setExpectedBool(llvm::IRBuilderBase &builder, llvm::Value *v
 void CompilerState::boxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *target, llvm::Value *rawData) {
     llvm::Value *indices[] = {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
                               llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true))};
-    static_cast<llvm::IRBuilder<> &>(builder).CreateStore(
-        rawData, static_cast<llvm::IRBuilder<> &>(builder).CreateGEP(target, indices));
+    builderCast(builder).CreateStore(rawData, builderCast(builder).CreateGEP(target, indices));
 }
 
 llvm::Value *CompilerState::unboxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *target) {
     llvm::Value *indices[] = {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
                               llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true))};
-    return static_cast<llvm::IRBuilder<> &>(builder).CreateLoad(
-        static_cast<llvm::IRBuilder<> &>(builder).CreateGEP(target, indices), "rawRubyValue");
+    return builderCast(builder).CreateLoad(builderCast(builder).CreateGEP(target, indices), "rawRubyValue");
+}
+
+llvm::Value *CompilerState::getRubyNilRaw(llvm::IRBuilderBase &builder) {
+    return builderCast(builder).CreateCall(module->getFunction("sorbet_rubyNil"), {}, "nilValueRaw");
+}
+
+llvm::Value *CompilerState::getRubyFalseRaw(llvm::IRBuilderBase &builder) {
+    return builderCast(builder).CreateCall(module->getFunction("sorbet_rubyFalse"), {}, "falseValueRaw");
+}
+
+llvm::Value *CompilerState::getRubyTrueRaw(llvm::IRBuilderBase &builder) {
+    return builderCast(builder).CreateCall(module->getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
+}
+
+void CompilerState::emitArgumentMismatch(llvm::IRBuilderBase &builder, llvm::Value *currentArgCount, int minArgs,
+                                         int maxArgs) {
+    builderCast(builder).CreateCall(
+        module->getFunction("sorbet_rb_error_arity"),
+        {currentArgCount, llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), llvm::APInt(32, minArgs, true)),
+         llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), llvm::APInt(32, maxArgs, true))
+
+        });
+    builderCast(builder).CreateUnreachable();
+}
+llvm::Value *CompilerState::getRubyIntRaw(llvm::IRBuilderBase &builder, long num) {
+    return builderCast(builder).CreateCall(module->getFunction("sorbet_longToRubyValue"),
+                                           {llvm::ConstantInt::get(lctx, llvm::APInt(64, num, true))}, "rawRubyInt");
+}
+
+llvm::Value *CompilerState::getRubyStringRaw(llvm::IRBuilderBase &builder, std::string_view str) {
+    llvm::StringRef userStr(str.data(), str.length());
+    auto rawCString = builderCast(builder).CreateGlobalStringPtr(userStr, {"userStr_", userStr});
+    return builderCast(builder).CreateCall(
+        module->getFunction("sorbet_CPtrToRubyString"),
+        {rawCString, llvm::ConstantInt::get(lctx, llvm::APInt(64, str.length(), true))}, "rawRubyStr");
+}
+
+llvm::Value *CompilerState::getIsTruthyU1(llvm::IRBuilderBase &builder, llvm::Value *val) {
+    return builderCast(builder).CreateCall(module->getFunction("sorbet_testIsTruthy"), {val}, "cond");
 }
 
 } // namespace sorbet::compiler

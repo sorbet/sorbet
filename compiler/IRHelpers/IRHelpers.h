@@ -33,11 +33,19 @@ public:
     llvm::FunctionType *getRubyFFIType();
 
     // api for actual code emission
-    llvm::Value getRubyIdFor(llvm::IRBuilderBase &builder, std::string_view idName);
+    llvm::Value *getRubyIdFor(llvm::IRBuilderBase &builder, std::string_view idName);
     void setExpectedBool(llvm::IRBuilderBase &builder, llvm::Value *boolean, bool expected);
     // boxed raw value from rawData into target. Assumes that types are compatible.
     void boxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *storeTarget, llvm::Value *rawData);
     llvm::Value *unboxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *storeTarget);
+
+    llvm::Value *getRubyNilRaw(llvm::IRBuilderBase &builder);
+    llvm::Value *getRubyFalseRaw(llvm::IRBuilderBase &builder);
+    llvm::Value *getRubyTrueRaw(llvm::IRBuilderBase &builder);
+    void emitArgumentMismatch(llvm::IRBuilderBase &builder, llvm::Value *currentArgCount, int minArgs, int maxArgs);
+    llvm::Value *getRubyIntRaw(llvm::IRBuilderBase &builder, long num);
+    llvm::Value *getRubyStringRaw(llvm::IRBuilderBase &builder, std::string_view str);
+    llvm::Value *getIsTruthyU1(llvm::IRBuilderBase &builder, llvm::Value *val);
 
     // conversion to Sorbet state
     operator const sorbet::core::GlobalState &() const {
