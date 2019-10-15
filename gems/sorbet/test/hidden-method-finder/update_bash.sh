@@ -12,7 +12,7 @@ versions=("ruby_2_4_3" "ruby_2_6_3")
 if ! bazel test //gems/sorbet/test/hidden-method-finder; then
     for test_dir in bazel-genfiles/gems/sorbet/test/hidden-method-finder/*; do
         suite="$(basename "${test_dir}")"
-        for version in ${versions[@]}; do
+        for version in "${versions[@]}"; do
             updated="${test_dir}/actual_${version}.rbi"
             previous="${base_dir}/${suite}/${version}_hidden.rbi.exp"
             if ! diff "$updated" "$previous" >/dev/null ; then
