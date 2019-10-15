@@ -398,7 +398,14 @@ public:
                 }
             }
         }
-        return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
+
+        ast::InsSeq::STATS_store retSeqs;
+        auto loc = klass->declLoc;
+        retSeqs.emplace_back(std::move(klass));
+        for (auto &stat : ideSeqs) {
+            retSeqs.emplace_back(std::move(stat));
+        }
+        return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
     ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ast::ParsedArg> parsedArgs) {

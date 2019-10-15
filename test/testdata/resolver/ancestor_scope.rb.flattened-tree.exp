@@ -1,12 +1,15 @@
 begin
+  <emptyTree>
   class <emptyTree><<C <root>>> < ()
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Other)
           <emptyTree>
         end
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Test)
           ::Sorbet::Private::Static.keep_for_ide(::Other)
           <emptyTree>
@@ -32,10 +35,12 @@ begin
     def self.<static-init><<static-init>>(<blk>)
       begin
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Test::Mixin)
           <emptyTree>
         end
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Test::Other)
           <emptyTree>
         end

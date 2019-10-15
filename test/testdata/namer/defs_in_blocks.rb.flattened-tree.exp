@@ -1,13 +1,17 @@
-class <emptyTree><<C <root>>> < ()
+begin
   <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    <emptyTree>
 
-  def self.<static-init><<static-init>$CENSORED>(<blk>)
-    <self>.foobar() do ||
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      <self>.foobar() do ||
+        <emptyTree>
+      end
+    end
+
+    def a_method<a_method>(<blk>)
       <emptyTree>
     end
   end
-
-  def a_method<a_method>(<blk>)
-    <emptyTree>
-  end
+  <emptyTree>
 end

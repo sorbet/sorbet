@@ -1,4 +1,5 @@
 begin
+  <emptyTree>
   class <emptyTree><<C <root>>> < ()
     <emptyTree>
 
@@ -20,31 +21,38 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::B)
           <emptyTree>
         end
         #$c = ::Object.new()
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::D)
           <emptyTree>
         end
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::E)
           <emptyTree>
         end
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::F)
           <emptyTree>
         end
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::G)
           <emptyTree>
         end
         begin
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::H)
           <emptyTree>
         end
@@ -55,7 +63,12 @@ begin
   end
   class ::A<<C A>> < (::<todo sym>)  end
   class ::B<<C B>> < (::<todo sym>)
-    <emptyTree>
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+      end
+    end
   end
   class <singleton class><<Class:B>> < ()
     def b<b>(<blk>)
@@ -63,10 +76,20 @@ begin
     end
   end
   class ::D<<C D>> < (::<todo sym>)
-    <emptyTree>
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+      end
+    end
   end
   class <singleton class><<Class:D>> < ()
-    <emptyTree>
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+      end
+    end
   end
   class <singleton class><<Class:<Class:D>>> < ()
     def d<d>(<blk>)
@@ -74,12 +97,15 @@ begin
     end
   end
   class ::E<<C E>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
     def self.<static-init><<static-init>>(<blk>)
-      <self>.wrapper()
+      begin
+        begin
+          <emptyTree>
+          <emptyTree>
+        end
+        <self>.wrapper()
+        <emptyTree>
+      end
     end
   end
   class <singleton class><<Class:E>> < ()
@@ -94,7 +120,12 @@ begin
     end
   end
   class ::F<<C F>> < (::<todo sym>)
-    <emptyTree>
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+      end
+    end
   end
   class <singleton class><<Class:F>> < ()
     <emptyTree>
@@ -131,7 +162,10 @@ begin
 
     def wrapper<wrapper>(<blk>)
       begin
-        <emptyTree>
+        begin
+          <emptyTree>
+          <emptyTree>
+        end
         <self>.inner()
       end
     end
@@ -146,11 +180,17 @@ begin
     end
   end
   class ::H<<C H>> < (::<todo sym>)
-    <emptyTree>
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+      end
+    end
   end
   class <singleton class><<Class:H>> < ()
     def self.<static-init><<static-init>>(<blk>)
       begin
+        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::<Class:H>::H2)
         <emptyTree>
       end

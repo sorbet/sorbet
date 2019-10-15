@@ -1,5 +1,6 @@
 InsSeq{
   stats = [
+    EmptyTree
     ClassDef{
       kind = class
       name = EmptyTree<<C <U <root>>>>
@@ -13,6 +14,7 @@ InsSeq{
             }]
           rhs = InsSeq{
             stats = [
+              EmptyTree
               Send{
                 recv = ConstantLit{
                   orig = nullptr

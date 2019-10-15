@@ -69,33 +69,49 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
 
 --- symbol-table-raw end ---
 --- name-tree start ---
-class <emptyTree><<C <root>>> < ()
-  1
+begin
+  class <emptyTree><<C <root>>> < ()
+    1
+  end
+  <emptyTree>
 end
 --- name-tree end ---
 --- name-tree-raw start ---
-ClassDef{
-  kind = class
-  name = EmptyTree<<C <U <root>>>>
-  ancestors = []
-  rhs = [
-    Literal{ value = 1 }
-  ]
+InsSeq{
+  stats = [
+    ClassDef{
+      kind = class
+      name = EmptyTree<<C <U <root>>>>
+      ancestors = []
+      rhs = [
+        Literal{ value = 1 }
+      ]
+    }
+  ],
+  expr = EmptyTree
 }
 --- name-tree-raw end ---
 --- resolve-tree start ---
-class <emptyTree><<C <root>>> < ()
-  1
+begin
+  class <emptyTree><<C <root>>> < ()
+    1
+  end
+  <emptyTree>
 end
 --- resolve-tree end ---
 --- resolve-tree-raw start ---
-ClassDef{
-  kind = class
-  name = EmptyTree<<C <U <root>>>>
-  ancestors = []
-  rhs = [
-    Literal{ value = 1 }
-  ]
+InsSeq{
+  stats = [
+    ClassDef{
+      kind = class
+      name = EmptyTree<<C <U <root>>>>
+      ancestors = []
+      rhs = [
+        Literal{ value = 1 }
+      ]
+    }
+  ],
+  expr = EmptyTree
 }
 --- resolve-tree-raw end ---
 --- cfg start ---
