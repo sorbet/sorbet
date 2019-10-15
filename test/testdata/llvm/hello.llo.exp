@@ -18,7 +18,7 @@ define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
 
 ; <label>:4:                                      ; preds = %2
   %5 = tail call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str, i64 0, i64 0), i8* %1)
-  tail call void @abort() #9
+  tail call void @abort() #8
   unreachable
 
 ; <label>:6:                                      ; preds = %2
@@ -28,7 +28,7 @@ define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
 ; Function Attrs: nounwind
 declare i32 @printf(i8* nocapture readonly, ...) local_unnamed_addr #1
 
-; Function Attrs: cold noreturn
+; Function Attrs: noreturn
 declare void @abort() local_unnamed_addr #2
 
 declare i64 @rb_str_new(i8*, i64) local_unnamed_addr #3
@@ -52,15 +52,15 @@ declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr #3
 ; Function Attrs: noreturn nounwind ssp uwtable
 define internal fastcc void @sorbet_rb_error_arity(i32) unnamed_addr #4 {
   %2 = tail call fastcc i64 @sorbet_rb_arity_error_new(i32 %0)
-  tail call void @rb_exc_raise(i64 %2) #10
+  tail call void @rb_exc_raise(i64 %2) #8
   unreachable
 }
 
 ; Function Attrs: noreturn
-declare void @rb_exc_raise(i64) local_unnamed_addr #5
+declare void @rb_exc_raise(i64) local_unnamed_addr #2
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #6 {
+define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #5 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
   %rubyID_puts = load i64, i64* @rubyId_global_puts, align 8
@@ -81,7 +81,7 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_hello() local_unnamed_addr #7 {
+define void @Init_hello() local_unnamed_addr #6 {
 initializeGlobals:
   %callArgs.i = alloca [1 x i64], align 8
   %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_global_puts, i64 0, i64 0)) #1
@@ -99,22 +99,20 @@ initializeGlobals:
 }
 
 ; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.start.p0i8(i64, i8* nocapture) #8
+declare void @llvm.lifetime.start.p0i8(i64, i8* nocapture) #7
 
 ; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.end.p0i8(i64, i8* nocapture) #8
+declare void @llvm.lifetime.end.p0i8(i64, i8* nocapture) #7
 
 attributes #0 = { nounwind ssp uwtable }
 attributes #1 = { nounwind }
-attributes #2 = { cold noreturn }
+attributes #2 = { noreturn }
 attributes #3 = { "addedToSilenceEmptyAttrsError" }
 attributes #4 = { noreturn nounwind ssp uwtable }
-attributes #5 = { noreturn }
-attributes #6 = { nounwind sspreq uwtable }
-attributes #7 = { nounwind sspreq }
-attributes #8 = { argmemonly nounwind }
-attributes #9 = { cold noreturn nounwind }
-attributes #10 = { noreturn nounwind }
+attributes #5 = { nounwind sspreq uwtable }
+attributes #6 = { nounwind sspreq }
+attributes #7 = { argmemonly nounwind }
+attributes #8 = { noreturn nounwind }
 
 !0 = !{!"branch_weights", i32 1, i32 2000}
 !1 = !{!2, !2, i64 0}
