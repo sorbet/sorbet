@@ -12,11 +12,6 @@ end
 
 # Not possible to see in the test, but in VS Code though these items have the
 # same name, they show up with different sigs.
-#
-# The order here doesn't particularly matter; if you're here because you made a
-# change to the order that broke this test, feel free to update the test.
 
 A.new.my_metho # error: does not exist
 #             ^ completion: my_method, my_method
-#             ^ apply-completion: [A] item: 0
-#             ^ apply-completion: [B] item: 1
