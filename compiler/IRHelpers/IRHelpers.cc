@@ -123,13 +123,13 @@ llvm::Value *CompilerState::getRubyIdFor(llvm::IRBuilderBase &builder, std::stri
     globalInitBuilder.SetInsertPoint(globalInitializers);
     auto gv = builder.CreateGlobalString(name, {"str_global_", name}, 0);
     auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(gv->getValueType(), gv, indicesString);
-    auto rawID = globalInitBuilder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "rubyID");
+    auto rawID = globalInitBuilder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "str");
     globalInitBuilder.CreateStore(rawID, llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(),
                                                                                       globalDeclaration, indices));
     globalInitBuilder.SetInsertPoint(functionEntryInitializers);
     auto global = globalInitBuilder.CreateLoad(
         llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
-        {"rubyID_", name});
+        {"str_", name});
 
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     return global;
