@@ -61,46 +61,40 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
 
 } // namespace
 
-llvm::Value *getIdFor(CompilerState &gs, llvm::IRBuilder<> &builder, string_view idName,
-                      UnorderedMap<string_view, llvm::Value *> &rubyIdRegistry) {
-    auto &global = rubyIdRegistry[idName];
+llvm::Value *getIdFor(CompilerState &gs, llvm::IRBuilder<> &builder, string_view idName) {
     auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(gs), 0);
 
     auto name = llvm::StringRef(idName.data(), idName.length());
     llvm::Constant *indices[] = {zero};
-    if (!global) {
-        string rawName = "rubyId_global_" + (string)idName;
-        auto tp = llvm::Type::getInt64Ty(gs);
-        auto globalDeclaration = static_cast<llvm::GlobalVariable *>(gs.module->getOrInsertGlobal(rawName, tp, [&] {
-            auto ret =
-                new llvm::GlobalVariable(*gs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
-            ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-            ret->setAlignment(8);
-            return ret;
-        }));
+    string rawName = "rubyId_global_" + (string)idName;
+    auto tp = llvm::Type::getInt64Ty(gs);
+    auto globalDeclaration = static_cast<llvm::GlobalVariable *>(gs.module->getOrInsertGlobal(rawName, tp, [&] {
+        auto ret =
+            new llvm::GlobalVariable(*gs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
+        ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+        ret->setAlignment(8);
+        return ret;
+    }));
 
-        llvm::IRBuilder<> globalInitBuilder(gs);
-        llvm::Constant *indicesString[] = {zero, zero};
-        globalInitBuilder.SetInsertPoint(gs.globalInitializers);
-        auto gv = builder.CreateGlobalString(name, {"str_global_", name}, 0);
-        auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(gv->getValueType(), gv, indicesString);
-        auto rawID = globalInitBuilder.CreateCall(gs.module->getFunction("sorbet_IDIntern"), {rawCString}, "rubyID");
-        globalInitBuilder.CreateStore(rawID, llvm::ConstantExpr::getInBoundsGetElementPtr(
-                                                 globalDeclaration->getValueType(), globalDeclaration, indices));
-        globalInitBuilder.SetInsertPoint(gs.functionEntryInitializers);
-        global = globalInitBuilder.CreateLoad(
-            llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
-            {"rubyID_", name});
+    llvm::IRBuilder<> globalInitBuilder(gs);
+    llvm::Constant *indicesString[] = {zero, zero};
+    globalInitBuilder.SetInsertPoint(gs.globalInitializers);
+    auto gv = builder.CreateGlobalString(name, {"str_global_", name}, 0);
+    auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(gv->getValueType(), gv, indicesString);
+    auto rawID = globalInitBuilder.CreateCall(gs.module->getFunction("sorbet_IDIntern"), {rawCString}, "rubyID");
+    globalInitBuilder.CreateStore(rawID, llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(),
+                                                                                      globalDeclaration, indices));
+    globalInitBuilder.SetInsertPoint(gs.functionEntryInitializers);
+    auto global = globalInitBuilder.CreateLoad(
+        llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
+        {"rubyID_", name});
 
-        // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
-    }
+    // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     return global;
 }
 
 void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::MethodDef> &md,
                         const string &functionName) {
-    UnorderedMap<string_view, llvm::Value *> rubyIDRegistry;
-
     auto functionType = gs.getRubyFFIType();
     auto func = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, functionName, gs.module);
     func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
@@ -276,7 +270,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                         if (i->fun == core::Names::unsafe()) {
                             return;
                         }
-                        auto rawId = getIdFor(gs, builder, str, rubyIDRegistry);
+                        auto rawId = getIdFor(gs, builder, str);
 
                         // fill in args
                         {
