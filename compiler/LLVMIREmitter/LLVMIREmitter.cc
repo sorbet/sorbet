@@ -107,18 +107,17 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
     auto userBodyEntry = llvm::BasicBlock::Create(gs, "userBody", func);
     builder.SetInsertPoint(rawEntryBlock);
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
-    auto nilValueRaw = gs.getRubyNilRaw(builder);
-    auto falseValueRaw = gs.getRubyFalseRaw(builder);
-    auto trueValueRaw = gs.getRubyTrueRaw(builder);
-    auto valueType = gs.getValueType();
-
-    // nill out variables.
-    for (const auto &entry : cfg.minLoops) {
-        auto var = entry.first;
-        auto svName = var._name.data(gs)->shortName(gs);
-        auto alloca = llvmVariables[var] =
-            builder.CreateAlloca(valueType, nullptr, llvm::StringRef(svName.data(), svName.length()));
-        gs.boxRawValue(builder, alloca, nilValueRaw);
+    {
+        // nill out variables.
+        auto valueType = gs.getValueType();
+        auto nilValueRaw = gs.getRubyNilRaw(builder);
+        for (const auto &entry : cfg.minLoops) {
+            auto var = entry.first;
+            auto svName = var._name.data(gs)->shortName(gs);
+            auto alloca = llvmVariables[var] =
+                builder.CreateAlloca(valueType, nullptr, llvm::StringRef(svName.data(), svName.length()));
+            gs.boxRawValue(builder, alloca, nilValueRaw);
+        }
     }
 
     auto argCountRaw = func->arg_begin();
@@ -306,7 +305,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                     [&](cfg::Literal *i) {
                         gs.trace("Literal\n");
                         if (i->value->derivesFrom(gs, core::Symbols::NilClass())) {
-                            gs.boxRawValue(builder, targetAlloca, nilValueRaw);
+                            gs.boxRawValue(builder, targetAlloca, gs.getRubyNilRaw(builder));
                             return;
                         }
                         auto litType = core::cast_type<core::LiteralType>(i->value.get());
@@ -319,10 +318,10 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::True:
-                                gs.boxRawValue(builder, targetAlloca, trueValueRaw);
+                                gs.boxRawValue(builder, targetAlloca, gs.getRubyTrueRaw(builder));
                                 break;
                             case core::LiteralType::LiteralTypeKind::False:
-                                gs.boxRawValue(builder, targetAlloca, falseValueRaw);
+                                gs.boxRawValue(builder, targetAlloca, gs.getRubyFalseRaw(builder));
                                 break;
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(gs, litType->value).data(gs)->shortName(gs);
@@ -354,7 +353,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
             }
         } else {
             // handle dead block. TODO: this should throw
-            builder.CreateRet(nilValueRaw);
+            builder.CreateRet(gs.getRubyNilRaw(builder));
         }
     }
 
