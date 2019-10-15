@@ -1,5 +1,7 @@
 #ifndef GRANITA_H
 #define GRANITA_H
+// Paul's and Dmitry's laptops have different attributes for this function in system libraries.
+void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 #include "ruby.h"
 #include "internal.h"
 #include "vm_core.h"
