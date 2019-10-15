@@ -27,6 +27,13 @@ bool sanityCheckUpdate(const core::GlobalState &gs, const LSPFileUpdates &update
     }
     return true;
 }
+
+void cancelTimer(std::unique_ptr<Timer> &timer) {
+    // Protect against nullptrs.
+    if (timer) {
+        timer->cancel();
+    }
+}
 } // namespace
 
 LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPConfiguration config, WorkerPool &workers,
@@ -73,8 +80,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
             // Merge updates and tracers, and cancel its timer to avoid a distorted latency metric.
             auto &mergeableParams = get<unique_ptr<SorbetWorkspaceEditParams>>(mergeMsg.asNotification().params);
             mergeEdits(msgParams->updates, mergeableParams->updates);
-            ENFORCE(msg.timer);
-            msg.timer->cancel();
+            cancelTimer(msg.timer);
             msg.startTracers.insert(msg.startTracers.end(), mergeMsg.startTracers.begin(), mergeMsg.startTracers.end());
             // Delete the update we just merged and move on to next item.
             it = pendingRequests.erase(it);
@@ -125,8 +131,7 @@ void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, con
                 // We didn't start processing it yet -- great! Cancel it and return.
                 current->canceled = true;
                 // Don't report a latency metric for canceled requests.
-                ENFORCE(current->timer);
-                current->timer->cancel();
+                cancelTimer(current->timer);
                 return;
             }
         }
