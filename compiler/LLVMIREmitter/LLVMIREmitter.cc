@@ -218,6 +218,12 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                             return;
                         }
                         if (i->fun == Names::sorbet_defineTopLevelClass) {
+                            auto ownerSym = typeToSym(gs, i->args[0].type);
+                            ENFORCE(ownerSym.data(gs)->name.data(gs)->kind == core::NameKind::UNIQUE);
+                            auto className = ownerSym.data(gs)->name.data(gs)->unique.original.data(gs)->show(gs);
+                            auto classNameCStr = builder.CreateGlobalStringPtr(className, {"className_", className});
+                            auto rawCall = resolveSymbol(gs, ownerSym.data(gs)->superClass(), builder, gs.module);
+                            builder.CreateCall(gs.module->getFunction("sorbet_defineTopLevelClass"), {classNameCStr, rawCall});
                             return;
                         }
                         if (i->fun == Names::sorbet_defineNestedClass) {
@@ -233,7 +239,8 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                             auto funcSym = ownerSym.data(gs)->findMember(gs, funcNameRef);
                             ENFORCE(funcSym.data(gs)->isMethod());
 
-                            auto functionName = builder.CreateGlobalStringPtr(funcNameRef.show(gs), "functionName");
+                            auto funcName = funcNameRef.show(gs);
+                            auto funcNameCStr = builder.CreateGlobalStringPtr(funcName, {"funcName_", funcName});
 
                             auto llvmFuncName = funcSym.data(gs)->toStringFullName(gs);
                             auto funcHandle = gs.module->getOrInsertFunction(llvmFuncName, gs.getRubyFFIType());
@@ -243,7 +250,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
                             auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
                             builder.CreateCall(gs.module->getFunction("sorbet_defineMethod"),
-                                               {resolveSymbol(gs, ownerSym, builder, gs.module), functionName, ptr,
+                                               {resolveSymbol(gs, ownerSym, builder, gs.module), funcNameCStr, ptr,
                                                 llvm::ConstantInt::get(gs, llvm::APInt(32, -1, true))});
 
                             std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(gs));
