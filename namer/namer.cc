@@ -385,20 +385,27 @@ public:
             ctx.state.staticInitForClass(klass->symbol, klass->loc);
         }
 
-        if (klass->symbol != core::Symbols::root() && !klass->declLoc.file().data(ctx).isRBI() &&
+        auto loc = klass->declLoc;
+        if (klass->symbol != core::Symbols::root() && !loc.file().data(ctx).isRBI() &&
             ast::BehaviorHelpers::checkClassDefinesBehavior(klass)) {
             // TODO(dmitry) This won't find errors in fast-incremental mode.
             auto prevLoc = classBehaviorLocs.find(klass->symbol);
             if (prevLoc == classBehaviorLocs.end()) {
-                classBehaviorLocs[klass->symbol] = klass->declLoc;
-            } else if (prevLoc->second.file() != klass->declLoc.file()) {
-                if (auto e = ctx.state.beginError(klass->declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
+                classBehaviorLocs[klass->symbol] = loc;
+            } else if (prevLoc->second.file() != loc.file()) {
+                if (auto e = ctx.state.beginError(loc, core::errors::Namer::MultipleBehaviorDefs)) {
                     e.setHeader("`{}` has behavior defined in multiple files", klass->symbol.data(ctx)->show(ctx));
                     e.addErrorLine(prevLoc->second, "Previous definition");
                 }
             }
         }
-        return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
+
+        ast::InsSeq::STATS_store retSeqs;
+        retSeqs.emplace_back(std::move(klass));
+        for (auto &stat : ideSeqs) {
+            retSeqs.emplace_back(std::move(stat));
+        }
+        return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
     ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ast::ParsedArg> parsedArgs) {
