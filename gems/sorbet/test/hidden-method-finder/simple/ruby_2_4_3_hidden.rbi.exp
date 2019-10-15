@@ -185,13 +185,6 @@ Errno::EIPSEC = Errno::NOERROR
 
 Errno::ENOTCAPABLE = Errno::NOERROR
 
-class Errno::ENOTSUP
-  Errno = ::T.let(nil, ::T.untyped)
-end
-
-class Errno::ENOTSUP
-end
-
 class Exception
   def self.exception(*_); end
 end
