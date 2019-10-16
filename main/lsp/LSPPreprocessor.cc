@@ -27,6 +27,13 @@ bool sanityCheckUpdate(const core::GlobalState &gs, const LSPFileUpdates &update
     }
     return true;
 }
+
+void cancelTimer(std::unique_ptr<Timer> &timer) {
+    // Protect against nullptrs.
+    if (timer) {
+        timer->cancel();
+    }
+}
 } // namespace
 
 LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPConfiguration config, WorkerPool &workers,
@@ -70,11 +77,10 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
                 }
             }
 
-            // Merge updates, timers, and tracers.
+            // Merge updates and tracers, and cancel its timer to avoid a distorted latency metric.
             auto &mergeableParams = get<unique_ptr<SorbetWorkspaceEditParams>>(mergeMsg.asNotification().params);
             mergeEdits(msgParams->updates, mergeableParams->updates);
-            msg.timers.insert(msg.timers.end(), make_move_iterator(mergeMsg.timers.begin()),
-                              make_move_iterator(mergeMsg.timers.end()));
+            cancelTimer(msg.timer);
             msg.startTracers.insert(msg.startTracers.end(), mergeMsg.startTracers.begin(), mergeMsg.startTracers.end());
             // Delete the update we just merged and move on to next item.
             it = pendingRequests.erase(it);
@@ -124,6 +130,8 @@ void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, con
             if (request.id == cancelParams.id) {
                 // We didn't start processing it yet -- great! Cancel it and return.
                 current->canceled = true;
+                // Don't report a latency metric for canceled requests.
+                cancelTimer(current->timer);
                 return;
             }
         }
@@ -146,7 +154,7 @@ unique_ptr<LSPMessage> LSPPreprocessor::makeAndCommitWorkspaceEdit(unique_ptr<So
     }
     auto newMsg =
         make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWorkspaceEdit, move(params)));
-    newMsg->timers = move(oldMsg->timers);
+    newMsg->timer = move(oldMsg->timer);
     newMsg->startTracers = move(oldMsg->startTracers);
     return newMsg;
 }
