@@ -60,18 +60,18 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
 }
 
 llvm::Value *varGet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder,
-                    UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-                    UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
-    auto ret = llvmVariables[var];
+                    const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
+                    const UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
+    auto ret = llvmVariables.at(var);
     if (!aliases.contains(ret)) {
         return gs.unboxRawValue(builder, ret);
     }
 
-    return resolveSymbol(gs.gs, aliases[ret], builder, gs.module);
+    return resolveSymbol(gs.gs, aliases.at(ret), builder, gs.module);
 }
 
 void varSet(CompilerState &gs, llvm::AllocaInst *alloca, llvm::Value *var, llvm::IRBuilder<> &builder,
-            UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
+            const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
             UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
     gs.boxRawValue(builder, alloca, var);
     if (!aliases.contains(alloca)) {
@@ -175,13 +175,13 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
 
     auto rawEntryBlock = llvm::BasicBlock::Create(gs, "setupLocalsAndArguments", func);
     builder.SetInsertPoint(rawEntryBlock);
-    UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
+    const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
         setupArgumentsAndLocalVariables(gs, builder, cfg, md, func);
 
     auto userBodyEntry = llvm::BasicBlock::Create(gs, "userBody", func);
     builder.CreateBr(userBodyEntry);
 
-    vector<llvm::BasicBlock *> llvmBlocks = getSorbetBlocks2LLVMBlockMapping(gs, cfg, func, userBodyEntry);
+    const vector<llvm::BasicBlock *> llvmBlocks = getSorbetBlocks2LLVMBlockMapping(gs, cfg, func, userBodyEntry);
 
     int maxSendArgCount = 0;
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
@@ -205,7 +205,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
         builder.SetInsertPoint(block);
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
-                auto targetAlloca = llvmVariables[bind.bind.variable];
+                auto targetAlloca = llvmVariables.at(bind.bind.variable);
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
