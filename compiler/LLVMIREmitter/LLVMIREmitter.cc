@@ -80,25 +80,13 @@ void varSet(CompilerState &gs, llvm::AllocaInst *alloca, llvm::Value *var, llvm:
     // TODO do const_set for the alias
 }
 
-} // namespace
-
-void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::MethodDef> &md,
-                        const string &functionName) {
-    auto functionType = gs.getRubyFFIType();
-    auto func = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, functionName, gs.module);
-    func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
-    func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
-    func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
-    llvm::IRBuilder<> builder(gs);
-
-    ENFORCE(gs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
-
-    gs.functionEntryInitializers = llvm::BasicBlock::Create(gs, "functionEntryInitializers", func);
-    auto rawEntryBlock = llvm::BasicBlock::Create(gs, "entry", func);
-    auto userBodyEntry = llvm::BasicBlock::Create(gs, "userBody", func);
-    builder.SetInsertPoint(rawEntryBlock);
+// Create local allocas for local variables, initialize them all to `nil`.
+// load arguments, check their count
+// load self
+UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
+setupArgumentsAndLocalVariables(CompilerState &gs, llvm::IRBuilder<> &builder, cfg::CFG &cfg,
+                                unique_ptr<ast::MethodDef> &md, llvm::Function *func) {
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
-    UnorderedMap<llvm::AllocaInst *, core::SymbolRef> aliases;
     {
         // nill out variables.
         auto valueType = gs.getValueType();
@@ -111,13 +99,12 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
             gs.boxRawValue(builder, alloca, nilValueRaw);
         }
     }
-
-    auto argCountRaw = func->arg_begin();
     auto argArrayRaw = func->arg_begin() + 1;
     auto requiredArgumentCount =
         md->args.size() - 1; // todo: make optional arguments actually optional. -1 because of block args
     {
         // validate arg count
+        auto argCountRaw = func->arg_begin();
         auto argCountSuccessBlock = llvm::BasicBlock::Create(gs, "argCountSuccess", func);
         auto argCountFailBlock = llvm::BasicBlock::Create(gs, "argCountFailBlock", func);
         auto isWrongArgCount = builder.CreateICmpNE(
@@ -152,6 +139,29 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, std::unique_ptr<ast::M
         auto selfArgRaw = (func->arg_begin() + 2);
         gs.boxRawValue(builder, llvmVariables[core::LocalVariable::selfVariable()], selfArgRaw);
     }
+
+    return llvmVariables;
+}
+} // namespace
+
+void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
+    auto functionType = gs.getRubyFFIType();
+    auto func = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, functionName, gs.module);
+    func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
+    func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
+    func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
+    llvm::IRBuilder<> builder(gs);
+
+    ENFORCE(gs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
+
+    gs.functionEntryInitializers = llvm::BasicBlock::Create(gs, "functionEntryInitializers", func);
+    auto rawEntryBlock = llvm::BasicBlock::Create(gs, "entry", func);
+    auto userBodyEntry = llvm::BasicBlock::Create(gs, "userBody", func);
+    builder.SetInsertPoint(rawEntryBlock);
+    UnorderedMap<llvm::AllocaInst *, core::SymbolRef> aliases;
+
+    UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
+        setupArgumentsAndLocalVariables(gs, builder, cfg, md, func);
     // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments to extract arguments
     // and box them to "RV" type
     //
