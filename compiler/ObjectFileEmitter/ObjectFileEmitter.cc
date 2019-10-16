@@ -91,7 +91,8 @@ void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
     bool isSpecialEntrypoint = false;
-    if (sym.data(gs)->name.data(gs)->unique.original == core::Names::staticInit()) {
+    if (sym.data(gs)->owner == core::Symbols::rootSingleton() &&
+        sym.data(gs)->name.data(gs)->unique.original == core::Names::staticInit()) {
         isSpecialEntrypoint = true;
     }
 
