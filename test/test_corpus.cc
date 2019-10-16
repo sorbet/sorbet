@@ -993,6 +993,7 @@ TEST_P(LSPTest, All) {
 
     // Completion assertions
     CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+    ApplyCompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
 
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
