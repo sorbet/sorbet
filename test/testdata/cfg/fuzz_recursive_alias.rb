@@ -1,4 +1,5 @@
 # typed: true
-alias foo foo
-def foo; end # error-with-dupes: Too many alias expansions for symbol ::Object#foo, the alias is either too long or infinite.
 
+# This isn't expected to error now, as we don't record self-aliases
+alias foo foo
+def foo; end
