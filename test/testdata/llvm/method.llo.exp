@@ -140,20 +140,6 @@ BB5:                                              ; preds = %argCountSuccess, %B
   br i1 %12, label %BB3, label %BB5
 }
 
-; Function Attrs: nounwind ssp
-define void @"Init_<C <U Object>><U hello>"() local_unnamed_addr #7 {
-initializeGlobals:
-  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_<.1", i64 0, i64 0)) #1
-  store i64 %0, i64* @"str_<", align 8
-  %1 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+.4", i64 0, i64 0)) #1
-  store i64 %1, i64* @"str_+", align 8
-  %2 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts.3, i64 0, i64 0)) #1
-  store i64 %2, i64* @str_puts, align 8
-  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+.4", i64 0, i64 0)) #1
-  store i64 %3, i64* @"str_+", align 8
-  ret void
-}
-
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #6 {
 functionEntryInitializers:
