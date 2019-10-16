@@ -87,7 +87,7 @@ public:
         compiler::CompilerState state(gs, lctx, module.get(), globalInitializers);
         sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
         string fileName = funcName2InitName(functionName);
-        sorbet::compiler::LLVMIREmitter::buildInitFor(gs, lctx, module.get(), cfg.symbol, globalInitializers, fileName);
+        sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol, globalInitializers, fileName);
     };
     virtual void patchDSL(core::MutableContext &ctx, ast::ClassDef *klass) const override {
         if (!irOutputDir.has_value()) {

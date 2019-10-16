@@ -380,12 +380,11 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
     ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
 }
 
-void LLVMIREmitter::buildInitFor(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module,
-                                 const core::SymbolRef &sym, llvm::BasicBlock *globalInitializers,
+void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym, llvm::BasicBlock *globalInitializers,
                                  string_view objectName) {
-    llvm::IRBuilder<> builder(lctx);
-    std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
-    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
+    llvm::IRBuilder<> builder(gs);
+    std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(gs));
+    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(gs), NoArgs, false);
     bool isSpecialEntrypoint = false;
     if (sym.data(gs)->owner == core::Symbols::rootSingleton() &&
         sym.data(gs)->name.data(gs)->unique.original == core::Names::staticInit()) {
@@ -397,23 +396,24 @@ void LLVMIREmitter::buildInitFor(const core::GlobalState &gs, llvm::LLVMContext 
         baseName = FileOps::getFileName(sym.data(gs)->loc().file().data(gs).path());
         baseName = baseName.substr(0, baseName.rfind(".rb"));
     }
-    auto entryFunc = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, {"Init_", (string)baseName}, *module);
+    auto entryFunc =
+        llvm::Function::Create(ft, llvm::Function::ExternalLinkage, {"Init_", (string)baseName}, *gs.module);
     globalInitializers->insertInto(entryFunc);
 
     builder.SetInsertPoint(globalInitializers);
-    auto bb = llvm::BasicBlock::Create(lctx, "entry", entryFunc);
+    auto bb = llvm::BasicBlock::Create(gs, "entry", entryFunc);
     builder.CreateBr(bb);
     builder.SetInsertPoint(bb);
 
     // Call the LLVM method that was made by LLVMIREmitter from this Init_ method
     if (isSpecialEntrypoint) {
         auto staticInitFunc =
-            module->getFunction(gs.lookupStaticInitForFile(sym.data(gs)->loc()).data(gs)->toStringFullName(gs));
+            gs.module->getFunction(gs.gs.lookupStaticInitForFile(sym.data(gs)->loc()).data(gs)->toStringFullName(gs));
         ENFORCE(staticInitFunc);
         builder.CreateCall(staticInitFunc,
-                           {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
-                            llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(lctx)),
-                            builder.CreateCall(module->getFunction("sorbet_rb_cObject"))},
+                           {llvm::ConstantInt::get(gs, llvm::APInt(32, 0, true)),
+                            llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(gs)),
+                            builder.CreateCall(gs.module->getFunction("sorbet_rb_cObject"))},
                            (string)objectName);
     }
 
