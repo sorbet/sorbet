@@ -156,48 +156,12 @@ vector<llvm::BasicBlock *> getSorbetBlocks2LLVMBlockMapping(CompilerState &gs, c
     }
     return llvmBlocks;
 }
-} // namespace
 
-void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
-    auto functionType = gs.getRubyFFIType();
-    auto func = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, functionName, gs.module);
-    func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
-    func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
-    func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
-    llvm::IRBuilder<> builder(gs);
-
-    ENFORCE(gs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
-
-    gs.functionEntryInitializers = llvm::BasicBlock::Create(
-        gs, "functionEntryInitializers",
-        func); // we will build a link for this block later, after we finish building expressions into it
+void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBlock *> llvmBlocks,
+                  const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables,
+                  llvm::AllocaInst *sendArgArray) {
     UnorderedMap<llvm::AllocaInst *, core::SymbolRef> aliases;
-
-    auto rawEntryBlock = llvm::BasicBlock::Create(gs, "setupLocalsAndArguments", func);
-    builder.SetInsertPoint(rawEntryBlock);
-    const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
-        setupArgumentsAndLocalVariables(gs, builder, cfg, md, func);
-
-    auto userBodyEntry = llvm::BasicBlock::Create(gs, "userBody", func);
-    builder.CreateBr(userBodyEntry);
-
-    const vector<llvm::BasicBlock *> llvmBlocks = getSorbetBlocks2LLVMBlockMapping(gs, cfg, func, userBodyEntry);
-
-    int maxSendArgCount = 0;
-    for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
-        cfg::BasicBlock *bb = *it;
-        for (cfg::Binding &bind : bb->exprs) {
-            if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
-                if (maxSendArgCount < snd->args.size()) {
-                    maxSendArgCount = snd->args.size();
-                }
-            }
-        }
-    }
-    builder.SetInsertPoint(gs.functionEntryInitializers);
-    auto sendArgArray =
-        builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(gs), maxSendArgCount), nullptr, "callArgs");
-
+    llvm::IRBuilder<> builder(gs);
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         auto block = llvmBlocks[bb->id];
@@ -367,7 +331,48 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
             builder.CreateRet(gs.getRubyNilRaw(builder));
         }
     }
+}
+} // namespace
 
+void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
+    auto functionType = gs.getRubyFFIType();
+    auto func = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, functionName, gs.module);
+    func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
+    func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
+    func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
+    llvm::IRBuilder<> builder(gs);
+
+    ENFORCE(gs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
+
+    gs.functionEntryInitializers = llvm::BasicBlock::Create(
+        gs, "functionEntryInitializers",
+        func); // we will build a link for this block later, after we finish building expressions into it
+
+    auto rawEntryBlock = llvm::BasicBlock::Create(gs, "setupLocalsAndArguments", func);
+    builder.SetInsertPoint(rawEntryBlock);
+    const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
+        setupArgumentsAndLocalVariables(gs, builder, cfg, md, func);
+
+    auto userBodyEntry = llvm::BasicBlock::Create(gs, "userBody", func);
+    builder.CreateBr(userBodyEntry);
+
+    const vector<llvm::BasicBlock *> llvmBlocks = getSorbetBlocks2LLVMBlockMapping(gs, cfg, func, userBodyEntry);
+
+    int maxSendArgCount = 0;
+    for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
+        cfg::BasicBlock *bb = *it;
+        for (cfg::Binding &bind : bb->exprs) {
+            if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
+                if (maxSendArgCount < snd->args.size()) {
+                    maxSendArgCount = snd->args.size();
+                }
+            }
+        }
+    }
+    builder.SetInsertPoint(gs.functionEntryInitializers);
+    auto sendArgArray =
+        builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(gs), maxSendArgCount), nullptr, "callArgs");
+    emitUserBody(gs, cfg, llvmBlocks, llvmVariables, sendArgArray);
     builder.SetInsertPoint(gs.functionEntryInitializers);
     builder.CreateBr(rawEntryBlock);
     /* run verifier */
