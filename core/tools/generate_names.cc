@@ -202,6 +202,7 @@ NameDef names[] = {
     {"describe"},
     {"it"},
     {"before"},
+    {"after"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
