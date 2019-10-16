@@ -1988,6 +1988,11 @@ public:
                 return send;
             }
 
+            // No need to make an alias when they're already the same symbol.
+            if (fromMethod == toMethod) {
+                return send;
+            }
+
             core::SymbolRef alias = ctx.state.enterMethodSymbol(send->loc, owner, fromName);
             alias.data(ctx)->resultType = core::make_type<core::AliasType>(toMethod);
 
