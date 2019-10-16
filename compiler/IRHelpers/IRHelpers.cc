@@ -113,21 +113,23 @@ llvm::Value *CompilerState::getRubyIdFor(llvm::IRBuilderBase &builder, std::stri
     llvm::Constant *indices[] = {zero};
     string rawName = "str_" + (string)idName;
     auto tp = llvm::Type::getInt64Ty(lctx);
+    llvm::IRBuilder<> globalInitBuilder(lctx);
     auto globalDeclaration = static_cast<llvm::GlobalVariable *>(module->getOrInsertGlobal(rawName, tp, [&] {
         auto ret = new llvm::GlobalVariable(*module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
         ret->setAlignment(8);
+        // create initialization code
+        llvm::Constant *indicesString[] = {zero, zero};
+        globalInitBuilder.SetInsertPoint(globalInitializers);
+        auto gv = builder.CreateGlobalString(name, {"str_", name}, 0);
+        auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(gv->getValueType(), gv, indicesString);
+        auto rawID = globalInitBuilder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "str");
+        globalInitBuilder.CreateStore(rawID,
+                                      llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
+
         return ret;
     }));
 
-    llvm::IRBuilder<> globalInitBuilder(lctx);
-    llvm::Constant *indicesString[] = {zero, zero};
-    globalInitBuilder.SetInsertPoint(globalInitializers);
-    auto gv = builder.CreateGlobalString(name, {"str_", name}, 0);
-    auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(gv->getValueType(), gv, indicesString);
-    auto rawID = globalInitBuilder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "str");
-    globalInitBuilder.CreateStore(rawID, llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(),
-                                                                                      globalDeclaration, indices));
     globalInitBuilder.SetInsertPoint(functionEntryInitializers);
     auto global = globalInitBuilder.CreateLoad(
         llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),

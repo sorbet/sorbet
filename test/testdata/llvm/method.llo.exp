@@ -11,12 +11,12 @@ target triple = "x86_64-apple-darwin18.2.0"
 @"str_<.1" = private unnamed_addr constant [2 x i8] c"<\00", align 1
 @"userStr_hello " = private unnamed_addr constant [7 x i8] c"hello \00", align 1
 @"str_+" = internal unnamed_addr global i64 0, align 8
+@"str_+.2" = private unnamed_addr constant [2 x i8] c"+\00", align 1
 @str_puts = internal unnamed_addr global i64 0, align 8
 @str_puts.3 = private unnamed_addr constant [5 x i8] c"puts\00", align 1
-@"str_+.4" = private unnamed_addr constant [2 x i8] c"+\00", align 1
 @str_Object = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 @userStr_sorbet = private unnamed_addr constant [7 x i8] c"sorbet\00", align 1
-@str_hello.5 = private unnamed_addr constant [6 x i8] c"hello\00", align 1
+@str_hello.4 = private unnamed_addr constant [6 x i8] c"hello\00", align 1
 
 ; Function Attrs: nounwind ssp uwtable
 define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
@@ -121,27 +121,25 @@ BB5:                                              ; preds = %argCountSuccess, %B
 define void @Init_method() local_unnamed_addr #7 {
 initializeGlobals:
   %callArgs.i = alloca [2 x i64], align 8
-  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.5, i64 0, i64 0)) #1
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.4, i64 0, i64 0)) #1
   %1 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %2 = bitcast [2 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %2)
   %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #1
   %4 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #1
-  tail call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.5, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #1
+  tail call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.4, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #1
   %6 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_<.1", i64 0, i64 0)) #1
   store i64 %6, i64* @"str_<", align 8
-  %7 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+.4", i64 0, i64 0)) #1
+  %7 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+.2", i64 0, i64 0)) #1
   store i64 %7, i64* @"str_+", align 8
   %8 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts.3, i64 0, i64 0)) #1
   store i64 %8, i64* @str_puts, align 8
-  %9 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+.4", i64 0, i64 0)) #1
-  store i64 %9, i64* @"str_+", align 8
-  %10 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @userStr_sorbet, i64 0, i64 0), i64 6) #1
+  %9 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @userStr_sorbet, i64 0, i64 0), i64 6) #1
   %callArgsAddr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 %10, i64* %callArgsAddr.i, align 8
+  store i64 %9, i64* %callArgsAddr.i, align 8
   tail call void @dbg_sorbet_validate_id(i64 %0, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.3, i64 0, i64 0)) #1, !noalias !17
-  %11 = call i64 @rb_funcallv(i64 %1, i64 %0, i32 1, i64* nonnull %callArgsAddr.i) #1
+  %10 = call i64 @rb_funcallv(i64 %1, i64 %0, i32 1, i64* nonnull %callArgsAddr.i) #1
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %2)
   ret void
 }
