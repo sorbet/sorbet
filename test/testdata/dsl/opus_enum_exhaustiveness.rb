@@ -5,7 +5,6 @@ extend T::Sig
 module Opus
   class Enum
     extend T::Sig
-    extend T::Generic
 
     sig {params(x: T.nilable(String)).void}
     def initialize(x = nil)

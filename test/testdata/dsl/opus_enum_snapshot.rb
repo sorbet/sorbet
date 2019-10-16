@@ -1,7 +1,6 @@
 # typed: true
 module Opus
   class Enum
-    extend T::Generic
     def initialize(x = nil)
     end
     def self.enums(&blk)
@@ -44,5 +43,4 @@ class BadConsts < Opus::Enum
   After = new # error: must be within the `enums do` block
   StaticField3 = 3 # error: must be unique instances of the enum
   StaticField4 = T.let(1, Integer) # error: must be unique instances of the enum
-  Elem = type_template(fixed: self)
 end

@@ -1,8 +1,6 @@
 class <emptyTree><<C <root>>> < ()
   module <emptyTree>::<C Opus><<C <todo sym>>> < ()
     class <emptyTree>::<C Enum><<C <todo sym>>> < (::<todo sym>)
-      <self>.extend(<emptyTree>::<C T>::<C Generic>)
-
       def initialize<<C <todo sym>>>(x = nil, &<blk>)
         <emptyTree>
       end
@@ -21,8 +19,6 @@ class <emptyTree><<C <root>>> < ()
     <self>.sealed!()
 
     class <emptyTree>::<C X$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
-      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C MyEnum>})
-
       <self>.include(::Singleton)
 
       <self>.final!()
@@ -31,8 +27,6 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.instance(), <emptyTree>::<C X$1>)
 
     class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
-      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C MyEnum>})
-
       <self>.include(::Singleton)
 
       <self>.final!()
@@ -41,8 +35,6 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.instance(), <emptyTree>::<C Y$1>)
 
     class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
-      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C MyEnum>})
-
       <self>.include(::Singleton)
 
       <self>.final!()
@@ -68,8 +60,6 @@ class <emptyTree><<C <root>>> < ()
     <self>.sealed!()
 
     class <emptyTree>::<C X$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
-      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C EnumsDoEnum>})
-
       <self>.include(::Singleton)
 
       <self>.final!()
@@ -78,8 +68,6 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.instance(), <emptyTree>::<C X$1>)
 
     class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
-      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C EnumsDoEnum>})
-
       <self>.include(::Singleton)
 
       <self>.final!()
@@ -88,8 +76,6 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.instance(), <emptyTree>::<C Y$1>)
 
     class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
-      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C EnumsDoEnum>})
-
       <self>.include(::Singleton)
 
       <self>.final!()
@@ -110,8 +96,6 @@ class <emptyTree><<C <root>>> < ()
     <self>.sealed!()
 
     class <emptyTree>::<C Before$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
-      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C BadConsts>})
-
       <self>.include(::Singleton)
 
       <self>.final!()
@@ -122,8 +106,6 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>::<C StaticField1> = 1
 
     class <emptyTree>::<C Inside$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
-      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C BadConsts>})
-
       <self>.include(::Singleton)
 
       <self>.final!()
@@ -134,8 +116,6 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>::<C StaticField2> = 2
 
     class <emptyTree>::<C After$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
-      <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <emptyTree>::<C BadConsts>})
-
       <self>.include(::Singleton)
 
       <self>.final!()
@@ -146,7 +126,5 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>::<C StaticField3> = 3
 
     <emptyTree>::<C StaticField4> = <emptyTree>::<C T>.let(1, <emptyTree>::<C Integer>)
-
-    <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <self>})
   end
 end

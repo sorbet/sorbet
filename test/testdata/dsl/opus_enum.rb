@@ -3,17 +3,9 @@
 module Opus
   class Enum
     extend T::Sig
-    extend T::Generic
-    extend Enumerable
-
-    Elem = type_template
-
     sig {params(x: T.nilable(String)).void}
     def initialize(x = nil)
     end
-
-    sig {override.params(blk: T.untyped).returns(T.untyped)}
-    def self.each(&blk); end
 
     sig {params(blk: T.proc.void).void}
     def self.enums(&blk); end
@@ -21,8 +13,6 @@ module Opus
 end
 
 class MyEnum < Opus::Enum
-  Elem = type_template
-
   enums do
   X = new
   Y = new('y')
