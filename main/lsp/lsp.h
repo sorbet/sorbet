@@ -196,8 +196,10 @@ class LSPLoop {
     std::unique_ptr<CompletionItem> getCompletionItemForSymbol(const core::GlobalState &gs, core::SymbolRef what,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
+                                                               const core::Loc queryLoc, std::string_view prefix,
                                                                size_t sortIdx) const;
     void findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
+                                    const core::Loc queryLoc,
                                     std::vector<std::unique_ptr<CompletionItem>> &items) const;
     void sendShowMessageNotification(MessageType messageType, std::string_view message) const;
     LSPResult handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs, const MessageId &id,

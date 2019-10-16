@@ -12,8 +12,8 @@ namespace sorbet::realmain::lsp {
 namespace {
 
 struct RubyKeyword {
-    string keyword;
-    string documentation;
+    const string keyword;
+    const string documentation;
 
     RubyKeyword(string keyword, string documentation) : keyword(keyword), documentation(documentation){};
 };
@@ -226,14 +226,28 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames, ", "), "${0}");
 }
 
-unique_ptr<CompletionItem> getCompletionItemForKeyword(const LSPConfiguration &config, const RubyKeyword &rubyKeyword,
-                                                       size_t sortIdx) {
+unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &gs, const LSPConfiguration &config,
+                                                       const RubyKeyword &rubyKeyword, const core::Loc queryLoc,
+                                                       string_view prefix, size_t sortIdx) {
     auto label = rubyKeyword.keyword;
     auto item = make_unique<CompletionItem>(label);
     item->sortText = fmt::format("{:06d}", sortIdx);
     item->kind = CompletionItemKind::Keyword;
+
+    // TODO(jez) This should probably be a helper function (see getCompletionItemForSymbol)
+    u4 queryStart = queryLoc.beginPos();
+    u4 prefixSize = prefix.size();
+    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
+    auto replacementRange = Range::fromLoc(gs, replacementLoc);
+    auto replacementText = label;
+    if (replacementRange != nullptr) {
+        item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
+    } else {
+        // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
+        item->insertText = replacementText;
+    }
     item->insertTextFormat = InsertTextFormat::PlainText;
-    item->insertText = label;
+
     item->documentation = make_unique<MarkupContent>(config.clientCompletionItemMarkupKind, rubyKeyword.documentation);
 
     return item;
@@ -244,6 +258,7 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const LSPConfiguration &c
 unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::GlobalState &gs, core::SymbolRef what,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
+                                                               const core::Loc queryLoc, string_view prefix,
                                                                size_t sortIdx) const {
     ENFORCE(what.exists());
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
@@ -261,12 +276,26 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
         if (what.exists()) {
             item->detail = methodDetail(gs, what, receiverType, nullptr, constraint);
         }
+
+        u4 queryStart = queryLoc.beginPos();
+        u4 prefixSize = prefix.size();
+        auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
+        auto replacementRange = Range::fromLoc(gs, replacementLoc);
+
+        string replacementText;
         if (config.clientCompletionItemSnippetSupport) {
             item->insertTextFormat = InsertTextFormat::Snippet;
-            item->insertText = methodSnippet(gs, what);
+            replacementText = methodSnippet(gs, what);
         } else {
             item->insertTextFormat = InsertTextFormat::PlainText;
-            item->insertText = string(what.data(gs)->name.data(gs)->shortName(gs));
+            replacementText = string(what.data(gs)->name.data(gs)->shortName(gs));
+        }
+
+        if (replacementRange != nullptr) {
+            item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
+        } else {
+            // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
+            item->insertText = replacementText;
         }
 
         optional<string> documentation = nullopt;
@@ -291,7 +320,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
 }
 
 void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
-                                         vector<unique_ptr<CompletionItem>> &items) const {
+                                         const core::Loc queryLoc, vector<unique_ptr<CompletionItem>> &items) const {
     if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
         auto pattern = c->symbol.data(gs)->name.data(gs)->shortName(gs);
         logger->debug("Looking for constant similar to {}", pattern);
@@ -304,7 +333,8 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
                     sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                     // hide singletons
                     hasSimilarName(gs, sym.data(gs)->name, pattern)) {
-                    items.push_back(getCompletionItemForSymbol(gs, sym, receiverType, nullptr, items.size()));
+                    items.push_back(
+                        getCompletionItemForSymbol(gs, sym, receiverType, nullptr, queryLoc, pattern, items.size()));
                 }
             }
         } while (owner != core::Symbols::root());
@@ -323,8 +353,11 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
 
-    auto result =
-        setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position, LSPMethod::TextDocumentCompletion);
+    auto uri = params.textDocument->uri;
+    auto fref = config.uri2FileRef(*gs, uri);
+    auto pos = *params.position;
+    auto queryLoc = config.lspPos2Loc(fref, pos, *gs);
+    auto result = setupLSPQueryByLoc(move(gs), uri, pos, LSPMethod::TextDocumentCompletion);
     gs = move(result.gs);
 
     if (result.error) {
@@ -398,16 +431,17 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
 
             // TODO(jez) Do something smarter here than "all matching keywords always come first"
             for (auto &similarKeyword : similarKeywords) {
-                items.push_back(getCompletionItemForKeyword(config, similarKeyword, items.size()));
+                items.push_back(
+                    getCompletionItemForKeyword(*gs, config, similarKeyword, queryLoc, prefix, items.size()));
             }
             for (auto &similarMethod : deduped) {
                 items.push_back(getCompletionItemForSymbol(*gs, similarMethod.method, similarMethod.receiverType,
-                                                           similarMethod.constr.get(), items.size()));
+                                                           similarMethod.constr.get(), queryLoc, prefix, items.size()));
             }
         } else if (auto identResp = resp->isIdent()) {
-            findSimilarConstantOrIdent(*gs, identResp->retType.type, items);
+            findSimilarConstantOrIdent(*gs, identResp->retType.type, queryLoc, items);
         } else if (auto constantResp = resp->isConstant()) {
-            findSimilarConstantOrIdent(*gs, constantResp->retType.type, items);
+            findSimilarConstantOrIdent(*gs, constantResp->retType.type, queryLoc, items);
         }
     }
 
