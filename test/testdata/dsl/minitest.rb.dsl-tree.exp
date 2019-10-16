@@ -41,12 +41,31 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
+    def instance_helper<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
     begin
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({}).void()
       end
       def initialize<<C <todo sym>>>(&<blk>)
-        @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
+        begin
+          @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+          <self>.instance_helper()
+        end
+      end
+    end
+
+    begin
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+      def initialize<<C <todo sym>>>(&<blk>)
+        begin
+          @foo = nil
+          <self>.instance_helper()
+        end
       end
     end
 
@@ -55,7 +74,10 @@ class <emptyTree><<C <root>>> < ()
         <self>.params({}).void()
       end
       def <test_can read foo><<C <todo sym>>>(&<blk>)
-        <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
+        begin
+          <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+          <self>.instance_helper()
+        end
       end
     end
 
