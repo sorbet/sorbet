@@ -6,8 +6,6 @@ target triple = "x86_64-apple-darwin18.2.0"
 @rb_cObject = external local_unnamed_addr global i64, align 8
 @.str.3 = private unnamed_addr constant [5 x i8] c"func\00", align 1
 @.str.4 = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
-@.str.5 = private unnamed_addr constant [51 x i8] c"wrong number of arguments (given %d, expected %d+)\00", align 1
-@.str.6 = private unnamed_addr constant [54 x i8] c"wrong number of arguments (given %d, expected %d..%d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
 @"str_<" = internal unnamed_addr global i64 0, align 8
 @"str_<.1" = private unnamed_addr constant [2 x i8] c"<\00", align 1
@@ -18,7 +16,6 @@ target triple = "x86_64-apple-darwin18.2.0"
 @"str_+.4" = private unnamed_addr constant [2 x i8] c"+\00", align 1
 @str_Object = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 @userStr_sorbet = private unnamed_addr constant [7 x i8] c"sorbet\00", align 1
-@str_hello = internal unnamed_addr global i64 0, align 8
 @str_hello.5 = private unnamed_addr constant [6 x i8] c"hello\00", align 1
 
 ; Function Attrs: nounwind ssp uwtable
@@ -28,7 +25,7 @@ define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
 
 ; <label>:4:                                      ; preds = %2
   %5 = tail call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str, i64 0, i64 0), i8* %1)
-  tail call void @abort() #8
+  tail call void @abort() #9
   unreachable
 
 ; <label>:6:                                      ; preds = %2
@@ -52,31 +49,11 @@ declare void @rb_define_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr #3
 declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #3
 
 ; Function Attrs: nounwind ssp uwtable
-define internal fastcc i64 @sorbet_rb_arity_error_new(i32, i32, i32) unnamed_addr #0 {
-  %4 = icmp eq i32 %1, %2
-  br i1 %4, label %5, label %7
-
-; <label>:5:                                      ; preds = %3
-  %6 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str.4, i64 0, i64 0), i32 %0, i32 %1) #1
-  br label %13
-
-; <label>:7:                                      ; preds = %3
-  %8 = icmp eq i32 %2, -1
-  br i1 %8, label %9, label %11
-
-; <label>:9:                                      ; preds = %7
-  %10 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([51 x i8], [51 x i8]* @.str.5, i64 0, i64 0), i32 %0, i32 %1) #1
-  br label %13
-
-; <label>:11:                                     ; preds = %7
-  %12 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([54 x i8], [54 x i8]* @.str.6, i64 0, i64 0), i32 %0, i32 %1, i32 %2) #1
-  br label %13
-
-; <label>:13:                                     ; preds = %11, %9, %5
-  %14 = phi i64 [ %6, %5 ], [ %10, %9 ], [ %12, %11 ]
-  %15 = load i64, i64* @rb_eArgError, align 8, !tbaa !1
-  %16 = tail call i64 @rb_exc_new_str(i64 %15, i64 %14) #1
-  ret i64 %16
+define internal fastcc i64 @sorbet_rb_arity_error_new(i32) unnamed_addr #0 {
+  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str.4, i64 0, i64 0), i32 %0, i32 1) #1
+  %3 = load i64, i64* @rb_eArgError, align 8, !tbaa !1
+  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #1
+  ret i64 %4
 }
 
 declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #3
@@ -84,9 +61,9 @@ declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #3
 declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr #3
 
 ; Function Attrs: noreturn nounwind ssp uwtable
-define internal fastcc void @sorbet_rb_error_arity(i32, i32, i32) unnamed_addr #4 {
-  %4 = tail call fastcc i64 @sorbet_rb_arity_error_new(i32 %0, i32 %1, i32 %2)
-  tail call void @rb_exc_raise(i64 %4) #9
+define internal fastcc void @sorbet_rb_error_arity(i32) unnamed_addr #4 {
+  %2 = tail call fastcc i64 @sorbet_rb_arity_error_new(i32 %0)
+  tail call void @rb_exc_raise(i64 %2) #10
   unreachable
 }
 
@@ -114,7 +91,7 @@ argCountSuccess:                                  ; preds = %functionEntryInitia
   br i1 %5, label %BB3, label %BB5
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call fastcc void @sorbet_rb_error_arity(i32 %0, i32 1, i32 1)
+  tail call fastcc void @sorbet_rb_error_arity(i32 %0)
   unreachable
 
 BB3:                                              ; preds = %BB5, %argCountSuccess
@@ -140,15 +117,14 @@ BB5:                                              ; preds = %argCountSuccess, %B
   br i1 %12, label %BB3, label %BB5
 }
 
-; Function Attrs: nounwind sspreq uwtable
-define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #6 {
-functionEntryInitializers:
-  %callArgs = alloca [2 x i64], align 8
-  %isWrongArgCount = icmp eq i32 %0, 0
-  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
-
-argCountSuccess:                                  ; preds = %functionEntryInitializers
-  %str_hello = load i64, i64* @str_hello, align 8
+; Function Attrs: nounwind sspreq
+define void @Init_method() local_unnamed_addr #7 {
+initializeGlobals:
+  %callArgs.i = alloca [2 x i64], align 8
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.5, i64 0, i64 0)) #1
+  %1 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %2 = bitcast [2 x i64]* %callArgs.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %2)
   %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #1
   %4 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #1
@@ -162,26 +138,19 @@ argCountSuccess:                                  ; preds = %functionEntryInitia
   %9 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+.4", i64 0, i64 0)) #1
   store i64 %9, i64* @"str_+", align 8
   %10 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @userStr_sorbet, i64 0, i64 0), i64 6) #1
-  %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
-  store i64 %10, i64* %callArgsAddr, align 8
-  tail call void @dbg_sorbet_validate_id(i64 %str_hello, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.3, i64 0, i64 0)) #1, !noalias !17
-  %11 = call i64 @rb_funcallv(i64 %2, i64 %str_hello, i32 1, i64* nonnull %callArgsAddr) #1
-  ret i64 8
-
-argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call fastcc void @sorbet_rb_error_arity(i32 %0, i32 0, i32 0)
-  unreachable
-}
-
-; Function Attrs: nounwind ssp
-define void @Init_method() local_unnamed_addr #7 {
-initializeGlobals:
-  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.5, i64 0, i64 0)) #1
-  store i64 %0, i64* @str_hello, align 8
-  %1 = load i64, i64* @rb_cObject, align 8, !tbaa !1
-  %"_S _C _U _root___ $1__N _U _static_init__ $110_" = tail call i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32 0, i64* undef, i64 %1)
+  %callArgsAddr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
+  store i64 %10, i64* %callArgsAddr.i, align 8
+  tail call void @dbg_sorbet_validate_id(i64 %0, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.3, i64 0, i64 0)) #1, !noalias !17
+  %11 = call i64 @rb_funcallv(i64 %1, i64 %0, i32 1, i64* nonnull %callArgsAddr.i) #1
+  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %2)
   ret void
 }
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.start.p0i8(i64, i8* nocapture) #8
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.end.p0i8(i64, i8* nocapture) #8
 
 attributes #0 = { nounwind ssp uwtable }
 attributes #1 = { nounwind }
@@ -190,9 +159,10 @@ attributes #3 = { "addedToSilenceEmptyAttrsError" }
 attributes #4 = { noreturn nounwind ssp uwtable }
 attributes #5 = { noreturn }
 attributes #6 = { nounwind sspreq uwtable }
-attributes #7 = { nounwind ssp }
-attributes #8 = { cold noreturn nounwind }
-attributes #9 = { noreturn nounwind }
+attributes #7 = { nounwind sspreq }
+attributes #8 = { argmemonly nounwind }
+attributes #9 = { cold noreturn nounwind }
+attributes #10 = { noreturn nounwind }
 
 !0 = !{!"branch_weights", i32 1, i32 2000}
 !1 = !{!2, !2, i64 0}

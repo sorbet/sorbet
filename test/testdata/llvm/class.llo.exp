@@ -60,30 +60,8 @@ define internal fastcc void @sorbet_rb_error_arity(i32) unnamed_addr #4 {
 ; Function Attrs: noreturn
 declare void @rb_exc_raise(i64) local_unnamed_addr #5
 
-; Function Attrs: nounwind sspreq uwtable
-define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #6 {
-functionEntryInitializers:
-  %isWrongArgCount = icmp eq i32 %0, 0
-  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
-
-argCountSuccess:                                  ; preds = %functionEntryInitializers
-  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Module, i64 0, i64 0)) #1
-  %4 = load i64, i64* @rb_cObject, align 8, !tbaa !1
-  %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #1
-  %6 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Foo, i64 0, i64 0), i64 %5) #1
-  %7 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.1, i64 0, i64 0)) #1
-  %8 = load i64, i64* @rb_cObject, align 8, !tbaa !1
-  %9 = tail call i64 @rb_const_get_at(i64 %8, i64 %7) #1
-  %10 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Baz, i64 0, i64 0), i64 %9) #1
-  ret i64 8
-
-argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call fastcc void @sorbet_rb_error_arity(i32 %0)
-  unreachable
-}
-
 ; Function Attrs: nounwind sspreq
-define void @Init_class() local_unnamed_addr #7 {
+define void @Init_class() local_unnamed_addr #6 {
 initializeGlobals:
   %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Module, i64 0, i64 0)) #1
   %1 = load i64, i64* @rb_cObject, align 8, !tbaa !1
@@ -97,7 +75,7 @@ initializeGlobals:
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"<S <C <U Foo>> $1><U <static-init>>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #6 {
+define i64 @"<S <C <U Foo>> $1><U <static-init>>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #7 {
 functionEntryInitializers:
   %isWrongArgCount = icmp eq i32 %0, 0
   br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
@@ -120,8 +98,8 @@ attributes #2 = { cold noreturn }
 attributes #3 = { "addedToSilenceEmptyAttrsError" }
 attributes #4 = { noreturn nounwind ssp uwtable }
 attributes #5 = { noreturn }
-attributes #6 = { nounwind sspreq uwtable }
-attributes #7 = { nounwind sspreq }
+attributes #6 = { nounwind sspreq }
+attributes #7 = { nounwind sspreq uwtable }
 attributes #8 = { cold noreturn nounwind }
 attributes #9 = { noreturn nounwind }
 
