@@ -3,9 +3,12 @@
 #include "llvm/IR/DerivedTypes.h" // FunctionType, StructType
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
 #include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Transforms/IPO.h"
+#include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include <string_view>
 // ^^^ violate poisons
 #include "core/core.h"
@@ -133,4 +136,22 @@ llvm::Value *CompilerState::getRubyIdFor(llvm::IRBuilderBase &builder, std::stri
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     return global;
 }
+
+void CompilerState::runCheapOptimizations(llvm::Function *func) {
+    llvm::legacy::FunctionPassManager pm(module);
+    llvm::PassManagerBuilder pmbuilder;
+    int optLevel = 2;
+    int sizeLevel = 0;
+    pmbuilder.OptLevel = optLevel;
+    pmbuilder.SizeLevel = sizeLevel;
+    pmbuilder.Inliner = llvm::createFunctionInliningPass(optLevel, sizeLevel, false);
+    pmbuilder.DisableUnitAtATime = false;
+    pmbuilder.DisableUnrollLoops = false;
+    pmbuilder.LoopVectorize = true;
+    pmbuilder.SLPVectorize = true;
+    pmbuilder.VerifyInput = debug_mode;
+    pmbuilder.populateFunctionPassManager(pm);
+    pm.run(*func);
+}
+
 } // namespace sorbet::compiler

@@ -13,6 +13,7 @@ class FunctionType;
 class IRBuilderBase;
 class BasicBlock;
 class Value;
+class Function;
 class AllocaInst;
 }; // namespace llvm
 
@@ -47,6 +48,9 @@ public:
     llvm::Value *getRubyStringRaw(llvm::IRBuilderBase &builder, std::string_view str);
     llvm::Value *getIsTruthyU1(llvm::IRBuilderBase &builder, llvm::Value *val);
 
+    /* run optimizations that are super cheap which are expected to be run on each function immediately as it is
+     * generated */
+    void runCheapOptimizations(llvm::Function *);
     // conversion to Sorbet state
     operator const sorbet::core::GlobalState &() const {
         return gs;

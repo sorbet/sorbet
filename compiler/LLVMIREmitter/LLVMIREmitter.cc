@@ -378,6 +378,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
     builder.CreateBr(rawEntryBlock);
     /* run verifier */
     ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
+    gs.runCheapOptimizations(func);
 }
 
 void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym, llvm::BasicBlock *globalInitializers,
@@ -420,6 +421,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym, 
     builder.CreateRetVoid();
 
     ENFORCE(!llvm::verifyFunction(*entryFunc, &llvm::errs()), "see above");
+    gs.runCheapOptimizations(entryFunc);
 }
 
 } // namespace sorbet::compiler
