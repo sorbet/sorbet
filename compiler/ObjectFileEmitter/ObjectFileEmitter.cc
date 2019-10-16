@@ -84,9 +84,8 @@ void outputObjectFile(llvm::legacy::PassManager &pm, string_view dir, string_vie
     dest.flush();
 }
 
-void ObjectFileEmitter::run(const core::GlobalState &gs, llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module,
-                            core::SymbolRef sym, string_view dir, string_view objectName,
-                            llvm::BasicBlock *globalInitializers) {
+void ObjectFileEmitter::run(llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module, string_view dir,
+                            string_view objectName) {
     /* run optimizations */
 
     unique_ptr<llvm::legacy::PassManager> pm = make_unique<llvm::legacy::PassManager>();

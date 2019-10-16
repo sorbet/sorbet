@@ -72,8 +72,7 @@ public:
         sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
         string fileName = funcName2moduleName(functionName);
         sorbet::compiler::LLVMIREmitter::buildInitFor(gs, lctx, module.get(), cfg.symbol, globalInitializers, fileName);
-        sorbet::compiler::ObjectFileEmitter::run(gs, lctx, move(module), cfg.symbol, irOutputDir.value(), fileName,
-                                                 globalInitializers);
+        sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
     };
     virtual void patchDSL(core::MutableContext &ctx, ast::ClassDef *klass) const override {
         if (!irOutputDir.has_value()) {

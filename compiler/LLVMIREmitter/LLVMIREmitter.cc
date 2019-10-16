@@ -379,6 +379,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
     /* run verifier */
     ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
 }
+
 void LLVMIREmitter::buildInitFor(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module,
                                  const core::SymbolRef &sym, llvm::BasicBlock *globalInitializers,
                                  string_view objectName) {

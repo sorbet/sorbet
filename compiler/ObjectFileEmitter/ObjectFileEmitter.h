@@ -1,7 +1,6 @@
 #ifndef SORBET_COMPILER_OBJECT_FILE_EMITTER_H
 #define SORBET_COMPILER_OBJECT_FILE_EMITTER_H
 
-#include "core/core.h"
 #include <memory>
 #include <string_view>
 
@@ -15,9 +14,8 @@ namespace sorbet::compiler {
 class ObjectFileEmitter {
 public:
     static void init();
-    static void run(const core::GlobalState &gs, llvm::LLVMContext &lctx, std::unique_ptr<llvm::Module> module,
-                    core::SymbolRef sym, std::string_view targetDir, std::string_view fileName,
-                    llvm::BasicBlock *globalInitializers);
+    static void run(llvm::LLVMContext &lctx, std::unique_ptr<llvm::Module> module, std::string_view targetDir,
+                    std::string_view fileName);
 };
 } // namespace sorbet::compiler
 #endif
