@@ -3672,8 +3672,6 @@ class String
 
   def casecmp?(_); end
 
-  def encode(*_); end
-
   def encode!(*_); end
 
   def reverse!(); end
