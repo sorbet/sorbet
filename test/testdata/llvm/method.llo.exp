@@ -158,11 +158,11 @@ initializeGlobals:
 define i64 @"<S <C <U <root>>> $1><N <U <static-init>> $110>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #6 {
 functionEntryInitializers:
   %callArgs = alloca [2 x i64], align 8
-  %str_hello = load i64, i64* @str_hello, align 8
   %isWrongArgCount = icmp eq i32 %0, 0
   br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
 
 argCountSuccess:                                  ; preds = %functionEntryInitializers
+  %str_hello = load i64, i64* @str_hello, align 8
   %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #1
   %4 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #1
