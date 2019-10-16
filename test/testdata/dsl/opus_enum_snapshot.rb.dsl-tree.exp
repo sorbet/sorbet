@@ -126,7 +126,5 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>::<C StaticField3> = 3
 
     <emptyTree>::<C StaticField4> = <emptyTree>::<C T>.let(1, <emptyTree>::<C Integer>)
-
-    <emptyTree>::<C Elem> = <self>.type_template({:"fixed" => <self>})
   end
 end
