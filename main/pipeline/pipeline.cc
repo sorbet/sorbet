@@ -712,6 +712,9 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         {
             core::ErrorRegion errs(ctx, f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->finishTypecheckFile(ctx.state, f);
+            }
         }
         if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("}}\n\n");
