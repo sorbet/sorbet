@@ -494,7 +494,7 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathWhenFastPathEditComesIn) { // NO
     EXPECT_FALSE(gs->wasTypecheckingCanceled());
 }
 
-TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenSlowPathEditComesIn) { // NOLINT
+TEST(SlowPathCancelation, CancelsRunningSlowPathWhenSlowPathEditComesIn) { // NOLINT
     auto preprocessor = makePreprocessor();
     QueueState state;
     absl::Mutex mtx;
@@ -508,9 +508,29 @@ TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenSlowPathEditComesIn) {
     // Introduce another slow path here: new method
     string fooV3 = "# typed: true\ndef foo; end\ndef bar;end";
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
+    EXPECT_TRUE(gs->wasTypecheckingCanceled());
+
+    // Processor thread: Try to typecheck. Should return false because it has been canceled.
+    EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
+}
+
+TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenFastPathEditComesIn) { // NOLINT
+    auto preprocessor = makePreprocessor();
+    QueueState state;
+    absl::Mutex mtx;
+    unique_ptr<core::GlobalState> gs = initCancelSlowPathTest(preprocessor, state, mtx);
+
+    // Introduce a new method, which causes a slow path.
+    string fooV2 = "# typed: true\ndef foo; end\ndef bar; end";
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fooV2), mtx);
+    u4 epoch = emulateProcessEditAtHeadOfQueue(state, *gs);
+
+    // Edit the body of the new method which should take the fast path.
+    string fooV3 = "# typed: true\ndef foo; end\ndef bar; 1 + 1; end";
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
     EXPECT_FALSE(gs->wasTypecheckingCanceled());
 
-    // Processor thread: Try to typecheck. Should return true.
+    // Processor thread: Try to typecheck. Should return true because typechecking hasn't been canceled.
     EXPECT_TRUE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
 }
 
