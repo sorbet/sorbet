@@ -1,6 +1,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 // ^^^ violate our poisons so they go first
+#include "absl/synchronization/mutex.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "compiler/DefinitionRewriter/DefinitionRewriter.h"
@@ -24,20 +25,46 @@ string funcName2moduleName(string sourceName) {
 }
 } // namespace
 
+class ThreadState {
+public:
+    llvm::LLVMContext lctx;
+    unique_ptr<llvm::Module> combinedModule;
+};
+
 class LLVMSemanticExtension : public SemanticExtension {
     optional<string> irOutputDir;
+    mutable struct {
+        UnorderedMap<std::thread::id, shared_ptr<ThreadState>> states;
+        absl::Mutex mtx;
+    } mutableState;
+
+    shared_ptr<ThreadState> getThreadState() const {
+        {
+            absl::ReaderMutexLock lock(&mutableState.mtx);
+            if (mutableState.states.contains(std::this_thread::get_id())) {
+                return mutableState.states.at(std::this_thread::get_id());
+            }
+        }
+        {
+            absl::WriterMutexLock lock(&mutableState.mtx);
+            return mutableState.states[std::this_thread::get_id()] = make_shared<ThreadState>();
+        }
+    }
 
 public:
     LLVMSemanticExtension(optional<string> irOutputDir) {
         this->irOutputDir = move(irOutputDir);
     }
+
+    virtual void finishTypecheckFile(const core::GlobalState &, const core::FileRef &) const override{};
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
                            std::unique_ptr<ast::MethodDef> &md) const override {
         if (!irOutputDir.has_value()) {
             return;
         }
 
-        llvm::LLVMContext lctx;
+        auto threadState = getThreadState();
+        llvm::LLVMContext &lctx = threadState->lctx;
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
         unique_ptr<llvm::Module> module = sorbet::compiler::IRHelpers::readDefaultModule(functionName.data(), lctx);
         llvm::BasicBlock *globalInitializers = llvm::BasicBlock::Create(lctx, "initializeGlobals");
