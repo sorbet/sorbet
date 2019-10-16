@@ -21,6 +21,7 @@
 #include "rewriter/Struct.h"
 #include "rewriter/TypeMembers.h"
 #include "rewriter/attr_reader.h"
+#include "rewriter/flatten.h"
 #include "rewriter/module_function.h"
 
 using namespace std;
@@ -165,6 +166,7 @@ unique_ptr<ast::Expression> Rewriter::run(core::MutableContext ctx, unique_ptr<a
     Rewriterer rewriter;
     ast = ast::TreeMap::apply(ctx, rewriter, std::move(ast));
     auto verifiedResult = ast::Verifier::run(ctx, std::move(ast));
+    verifiedResult = Flatten::patchFile(ctx, std::move(verifiedResult));
     return verifiedResult;
 }
 
