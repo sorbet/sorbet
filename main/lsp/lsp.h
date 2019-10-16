@@ -9,6 +9,7 @@
 #include "core/core.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPPreprocessor.h"
 #include <chrono>
 #include <deque>
@@ -52,40 +53,8 @@ struct LSPResult {
                           bool canceled = false);
 };
 
-/**
- * A version of ShowOperation that works on the preprocessor thread.
- */
-class ShowOperationPreprocessorThread final {
-private:
-    const LSPConfiguration &config;
-    absl::Mutex &mtx;
-    std::deque<std::unique_ptr<LSPMessage>> &queue;
-    const std::string operationName;
-    const std::string description;
-
-public:
-    ShowOperationPreprocessorThread(const LSPConfiguration &config, absl::Mutex &mtx,
-                                    std::deque<std::unique_ptr<LSPMessage>> &queue, std::string_view operationName,
-                                    std::string_view description);
-    ~ShowOperationPreprocessorThread();
-};
 class LSPLoop {
     friend class LSPWrapper;
-
-    /**
-     * Object that uses the RAII pattern to notify the client when a *slow* operation
-     * starts and ends. Is used to provide user feedback in the status line of VS Code.
-     */
-    class ShowOperation final {
-    private:
-        const LSPLoop &loop;
-        const std::string operationName;
-        const std::string description;
-
-    public:
-        ShowOperation(const LSPLoop &loop, std::string_view operationName, std::string_view description);
-        ~ShowOperation();
-    };
 
     /** Encapsulates the active configuration for the language server. */
     LSPConfiguration config;
@@ -105,19 +74,14 @@ class LSPLoop {
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     std::shared_ptr<spdlog::logger> logger;
     WorkerPool &workers;
-    /** Input file descriptor; used by runLSP to receive LSP messages */
-    int inputFd = 0;
-    /** Output stream; used by LSP to output messages */
-    std::ostream &outputStream;
+    /** Used to send asynchronous notifications to the client. */
+    LSPOutput &output;
     /**
      * The time that LSP last sent metrics to statsd -- if `opts.statsdHost` was specified.
      */
     std::chrono::time_point<std::chrono::steady_clock> lastMetricUpdateTime;
     /** ID of the main thread, which actually processes LSP requests and performs typechecking. */
     std::thread::id mainThreadId;
-
-    /* Send the given message to client */
-    void sendMessage(const LSPMessage &msg) const;
 
     void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc) const;
     std::vector<std::unique_ptr<Location>>
@@ -201,7 +165,6 @@ class LSPLoop {
     void findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
                                     const core::Loc queryLoc,
                                     std::vector<std::unique_ptr<CompletionItem>> &items) const;
-    void sendShowMessageNotification(MessageType messageType, std::string_view message) const;
     LSPResult handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs, const MessageId &id,
                                       const TextDocumentPositionParams &params) const;
 
@@ -219,12 +182,14 @@ class LSPLoop {
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> initialGS, LSPConfiguration config,
-            const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, int inputFd, std::ostream &output);
+            const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, LSPOutput &output);
     /**
      * Runs the language server on a dedicated thread. Returns the final global state if it exits cleanly, or nullopt
      * on error.
+     *
+     * Reads input messages from inputFd.
      */
-    std::optional<std::unique_ptr<core::GlobalState>> runLSP();
+    std::optional<std::unique_ptr<core::GlobalState>> runLSP(int inputFd);
     LSPResult processRequest(std::unique_ptr<core::GlobalState> gs, std::unique_ptr<LSPMessage> msg);
     LSPResult processRequest(std::unique_ptr<core::GlobalState> gs, const std::string &json);
     /**

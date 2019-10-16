@@ -2,13 +2,21 @@
 #include "core/errors/namer.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
-#include <iostream>
 #include <regex>
 
 using namespace std;
+
 namespace sorbet::realmain::lsp {
 
 const std::string LSPWrapper::EMPTY_STRING = "";
+
+void LSPWrapper::LSPOutputToVector::rawWrite(unique_ptr<LSPMessage> msg) {
+    output.push_back(move(msg));
+}
+
+vector<unique_ptr<LSPMessage>> LSPWrapper::LSPOutputToVector::getOutput() {
+    return move(output);
+}
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMessage> message) {
     const bool isInitialize = message->isNotification() && message->method() == LSPMethod::Initialize;
@@ -20,6 +28,11 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMess
     if (isInitialize) {
         initialized = true;
     }
+
+    // Retrieve any notifications that would normally be sent asynchronously in a multithreaded scenario.
+    auto notifs = output.getOutput();
+    result.responses.insert(result.responses.end(), make_move_iterator(notifs.begin()),
+                            make_move_iterator(notifs.end()));
 
     return move(result.responses);
 }
@@ -57,10 +70,9 @@ void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared
                              bool disableFastPath) {
     ENFORCE(gs->errorQueue->ignoreFlushes); // LSP needs this
     workers = WorkerPool::create(0, *logger);
-    // N.B.: stdin will not actually be used the way we are driving LSP.
     // Configure LSPLoop to disable configatron.
     lspLoop = make_unique<LSPLoop>(std::move(gs), LSPConfiguration(opts, logger, true, disableFastPath), logger,
-                                   *workers.get(), STDIN_FILENO, lspOstream);
+                                   *workers.get(), output);
 }
 
 LSPWrapper::LSPWrapper(options::Options &&options, std::string_view rootPath, bool disableFastPath)

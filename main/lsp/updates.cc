@@ -13,6 +13,7 @@
 #include "lsp.h"
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/LocalVarSaver.h"
+#include "main/lsp/ShowOperation.h"
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "resolver/resolver.h"
@@ -22,44 +23,6 @@ using namespace std;
 using namespace std::chrono_literals;
 
 namespace sorbet::realmain::lsp {
-
-unique_ptr<LSPMessage> makeShowOperation(std::string_view operationName, std::string_view description,
-                                         SorbetOperationStatus status) {
-    return make_unique<LSPMessage>(make_unique<NotificationMessage>(
-        "2.0", LSPMethod::SorbetShowOperation,
-        make_unique<SorbetShowOperationParams>(string(operationName), string(description), status)));
-}
-
-LSPLoop::ShowOperation::ShowOperation(const LSPLoop &loop, string_view operationName, string_view description)
-    : loop(loop), operationName(string(operationName)), description(string(description)) {
-    if (loop.config.enableOperationNotifications) {
-        loop.sendMessage(*makeShowOperation(this->operationName, this->description, SorbetOperationStatus::Start));
-    }
-}
-
-LSPLoop::ShowOperation::~ShowOperation() {
-    if (loop.config.enableOperationNotifications) {
-        loop.sendMessage(*makeShowOperation(this->operationName, this->description, SorbetOperationStatus::End));
-    }
-}
-
-ShowOperationPreprocessorThread::ShowOperationPreprocessorThread(const LSPConfiguration &config, absl::Mutex &mtx,
-                                                                 std::deque<std::unique_ptr<LSPMessage>> &queue,
-                                                                 std::string_view operationName,
-                                                                 std::string_view description)
-    : config(config), mtx(mtx), queue(queue), operationName(string(operationName)), description(string(description)) {
-    if (config.enableOperationNotifications) {
-        absl::MutexLock lck(&this->mtx);
-        this->queue.push_back(makeShowOperation(this->operationName, this->description, SorbetOperationStatus::Start));
-    }
-}
-
-ShowOperationPreprocessorThread::~ShowOperationPreprocessorThread() {
-    if (config.enableOperationNotifications) {
-        absl::MutexLock lck(&this->mtx);
-        this->queue.push_back(makeShowOperation(this->operationName, this->description, SorbetOperationStatus::End));
-    }
-}
 
 LSPLoop::TypecheckRun::TypecheckRun(unique_ptr<core::GlobalState> gs, vector<unique_ptr<core::Error>> errors,
                                     vector<core::FileRef> filesTypechecked, LSPFileUpdates updates, bool tookFastPath)
@@ -153,7 +116,7 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
 
 LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previousGS, LSPFileUpdates updates,
                                            bool isCancelable) const {
-    ShowOperation slowPathOp(*this, "SlowPath", "Typechecking...");
+    ShowOperation slowPathOp(output, config, "SlowPath", "Typechecking...");
     Timer timeit(logger, "slow_path");
     ENFORCE(!updates.canTakeFastPath || config.disableFastPath);
     ENFORCE(updates.updatedGS.has_value());

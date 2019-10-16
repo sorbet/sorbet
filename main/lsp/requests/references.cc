@@ -1,5 +1,6 @@
 #include "absl/strings/match.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/ShowOperation.h"
 #include "main/lsp/lsp.h"
 
 using namespace std;
@@ -20,7 +21,7 @@ LSPLoop::getReferencesToSymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef
 LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                 const ReferenceParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
-    ShowOperation op(*this, "References", "Finding all references...");
+    ShowOperation op(output, config, "References", "Finding all references...");
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.references");
 
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
