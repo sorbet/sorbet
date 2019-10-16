@@ -7,6 +7,7 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
+#include "common/FileOps.h"
 #include "common/typecase.h"
 #include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
@@ -377,6 +378,47 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
     builder.CreateBr(rawEntryBlock);
     /* run verifier */
     ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
+}
+void LLVMIREmitter::buildInitFor(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module,
+                                 const core::SymbolRef &sym, llvm::BasicBlock *globalInitializers,
+                                 string_view objectName) {
+    llvm::IRBuilder<> builder(lctx);
+    std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
+    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
+    bool isSpecialEntrypoint = false;
+    if (sym.data(gs)->owner == core::Symbols::rootSingleton() &&
+        sym.data(gs)->name.data(gs)->unique.original == core::Names::staticInit()) {
+        isSpecialEntrypoint = true;
+    }
+
+    auto baseName = sym.data(gs)->toStringFullName(gs);
+    if (isSpecialEntrypoint) {
+        baseName = FileOps::getFileName(sym.data(gs)->loc().file().data(gs).path());
+        baseName = baseName.substr(0, baseName.rfind(".rb"));
+    }
+    auto entryFunc = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, {"Init_", (string)baseName}, *module);
+    globalInitializers->insertInto(entryFunc);
+
+    builder.SetInsertPoint(globalInitializers);
+    auto bb = llvm::BasicBlock::Create(lctx, "entry", entryFunc);
+    builder.CreateBr(bb);
+    builder.SetInsertPoint(bb);
+
+    // Call the LLVM method that was made by LLVMIREmitter from this Init_ method
+    if (isSpecialEntrypoint) {
+        auto staticInitFunc =
+            module->getFunction(gs.lookupStaticInitForFile(sym.data(gs)->loc()).data(gs)->toStringFullName(gs));
+        ENFORCE(staticInitFunc);
+        builder.CreateCall(staticInitFunc,
+                           {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
+                            llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(lctx)),
+                            builder.CreateCall(module->getFunction("sorbet_rb_cObject"))},
+                           (string)objectName);
+    }
+
+    builder.CreateRetVoid();
+
+    ENFORCE(!llvm::verifyFunction(*entryFunc, &llvm::errs()), "see above");
 }
 
 } // namespace sorbet::compiler

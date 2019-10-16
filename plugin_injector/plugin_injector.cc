@@ -71,6 +71,7 @@ public:
         compiler::CompilerState state(gs, lctx, module.get(), globalInitializers);
         sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
         string fileName = funcName2moduleName(functionName);
+        sorbet::compiler::LLVMIREmitter::buildInitFor(gs, lctx, module.get(), cfg.symbol, globalInitializers, fileName);
         sorbet::compiler::ObjectFileEmitter::run(gs, lctx, move(module), cfg.symbol, irOutputDir.value(), fileName,
                                                  globalInitializers);
     };
