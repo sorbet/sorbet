@@ -216,6 +216,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = current;
             },
             [&](ast::ConstantLit *a) {
+                if (a->symbol == core::Symbols::StubModule()) {
+                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(core::Symbols::untyped()));
+                } else {
+                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(a->symbol));
+                }
+
                 if (a->original) {
                     if (auto nested = ast::cast_tree<ast::ConstantLit>(a->original->scope.get())) {
                         core::LocalVariable deadSym = cctx.newTemporary(core::Names::keepForIde());
@@ -223,11 +229,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
                 }
 
-                if (a->symbol == core::Symbols::StubModule()) {
-                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(core::Symbols::untyped()));
-                } else {
-                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(a->symbol));
-                }
                 ret = current;
             },
             [&](ast::Local *a) {

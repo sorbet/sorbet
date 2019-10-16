@@ -1042,23 +1042,17 @@
     },
     {
      "bind": {
-      "unique_name": "keep_for_ide$7",
+      "unique_name": "j",
       "type": {
-       "kind": "APPLIED",
-       "applied": {
-        "symbol_full_name": "T.class_of(Top)",
-        "type_args": [
-         {
-          "kind": "CLASS",
-          "class_full_name": "Top"
-         }
-        ]
+       "kind": "LITERAL",
+       "literal": {
+        "integer": "30"
        }
       }
      },
      "instruction": {
       "kind": "ALIAS",
-      "alias_full_name": "Top"
+      "alias_full_name": "Top::Nested::Const"
      },
      "location": {
       "path": "test/testdata/cfg/export.rb",
@@ -1069,7 +1063,7 @@
        },
        "end": {
         "line": 50,
-        "column": 12
+        "column": 27
        }
       }
      }
@@ -1110,17 +1104,23 @@
     },
     {
      "bind": {
-      "unique_name": "j",
+      "unique_name": "keep_for_ide$7",
       "type": {
-       "kind": "LITERAL",
-       "literal": {
-        "integer": "30"
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(Top)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "Top"
+         }
+        ]
        }
       }
      },
      "instruction": {
       "kind": "ALIAS",
-      "alias_full_name": "Top::Nested::Const"
+      "alias_full_name": "Top"
      },
      "location": {
       "path": "test/testdata/cfg/export.rb",
@@ -1131,7 +1131,7 @@
        },
        "end": {
         "line": 50,
-        "column": 27
+        "column": 12
        }
       }
      }

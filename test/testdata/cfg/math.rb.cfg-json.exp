@@ -686,40 +686,6 @@
     },
     {
      "bind": {
-      "unique_name": "keep_for_ide$26",
-      "type": {
-       "kind": "APPLIED",
-       "applied": {
-        "symbol_full_name": "T.class_of(T)",
-        "type_args": [
-         {
-          "kind": "CLASS",
-          "class_full_name": "T"
-         }
-        ]
-       }
-      }
-     },
-     "instruction": {
-      "kind": "ALIAS",
-      "alias_full_name": "T"
-     },
-     "location": {
-      "path": "test/testdata/cfg/math.rb",
-      "position": {
-       "start": {
-        "line": 3,
-        "column": 10
-       },
-       "end": {
-        "line": 3,
-        "column": 11
-       }
-      }
-     }
-    },
-    {
-     "bind": {
       "unique_name": "\u003cstatTemp\u003e$25",
       "type": {
        "kind": "APPLIED",
@@ -748,6 +714,40 @@
        "end": {
         "line": 3,
         "column": 16
+       }
+      }
+     }
+    },
+    {
+     "bind": {
+      "unique_name": "keep_for_ide$26",
+      "type": {
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(T)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "T"
+         }
+        ]
+       }
+      }
+     },
+     "instruction": {
+      "kind": "ALIAS",
+      "alias_full_name": "T"
+     },
+     "location": {
+      "path": "test/testdata/cfg/math.rb",
+      "position": {
+       "start": {
+        "line": 3,
+        "column": 10
+       },
+       "end": {
+        "line": 3,
+        "column": 11
        }
       }
      }
@@ -836,40 +836,6 @@
     },
     {
      "bind": {
-      "unique_name": "keep_for_ide$30",
-      "type": {
-       "kind": "APPLIED",
-       "applied": {
-        "symbol_full_name": "T.class_of(T)",
-        "type_args": [
-         {
-          "kind": "CLASS",
-          "class_full_name": "T"
-         }
-        ]
-       }
-      }
-     },
-     "instruction": {
-      "kind": "ALIAS",
-      "alias_full_name": "T"
-     },
-     "location": {
-      "path": "test/testdata/cfg/math.rb",
-      "position": {
-       "start": {
-        "line": 4,
-        "column": 10
-       },
-       "end": {
-        "line": 4,
-        "column": 11
-       }
-      }
-     }
-    },
-    {
-     "bind": {
       "unique_name": "\u003cstatTemp\u003e$29",
       "type": {
        "kind": "APPLIED",
@@ -898,6 +864,40 @@
        "end": {
         "line": 4,
         "column": 22
+       }
+      }
+     }
+    },
+    {
+     "bind": {
+      "unique_name": "keep_for_ide$30",
+      "type": {
+       "kind": "APPLIED",
+       "applied": {
+        "symbol_full_name": "T.class_of(T)",
+        "type_args": [
+         {
+          "kind": "CLASS",
+          "class_full_name": "T"
+         }
+        ]
+       }
+      }
+     },
+     "instruction": {
+      "kind": "ALIAS",
+      "alias_full_name": "T"
+     },
+     "location": {
+      "path": "test/testdata/cfg/math.rb",
+      "position": {
+       "start": {
+        "line": 4,
+        "column": 10
+       },
+       "end": {
+        "line": 4,
+        "column": 11
        }
       }
      }
@@ -1064,6 +1064,29 @@
     },
     {
      "bind": {
+      "unique_name": "\u003chashTemp\u003e$14",
+      "type": {}
+     },
+     "instruction": {
+      "kind": "ALIAS",
+      "alias_full_name": "T::Boolean"
+     },
+     "location": {
+      "path": "test/testdata/cfg/math.rb",
+      "position": {
+       "start": {
+        "line": 6,
+        "column": 23
+       },
+       "end": {
+        "line": 6,
+        "column": 33
+       }
+      }
+     }
+    },
+    {
+     "bind": {
       "unique_name": "keep_for_ide$15",
       "type": {
        "kind": "APPLIED",
@@ -1092,29 +1115,6 @@
        "end": {
         "line": 6,
         "column": 24
-       }
-      }
-     }
-    },
-    {
-     "bind": {
-      "unique_name": "\u003chashTemp\u003e$14",
-      "type": {}
-     },
-     "instruction": {
-      "kind": "ALIAS",
-      "alias_full_name": "T::Boolean"
-     },
-     "location": {
-      "path": "test/testdata/cfg/math.rb",
-      "position": {
-       "start": {
-        "line": 6,
-        "column": 23
-       },
-       "end": {
-        "line": 6,
-        "column": 33
        }
       }
      }
