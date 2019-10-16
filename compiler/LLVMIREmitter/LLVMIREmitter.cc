@@ -142,6 +142,20 @@ setupArgumentsAndLocalVariables(CompilerState &gs, llvm::IRBuilder<> &builder, c
 
     return llvmVariables;
 }
+
+vector<llvm::BasicBlock *> getSorbetBlocks2LLVMBlockMapping(CompilerState &gs, cfg::CFG &cfg, llvm::Function *func,
+                                                            llvm::BasicBlock *llvmFuncEntry) {
+    vector<llvm::BasicBlock *> llvmBlocks(cfg.maxBasicBlockId);
+    for (auto &b : cfg.basicBlocks) {
+        if (b.get() == cfg.entry()) {
+            llvmBlocks[b->id] = llvmFuncEntry;
+        } else {
+            llvmBlocks[b->id] = llvm::BasicBlock::Create(gs, {"BB", to_string(b->id)},
+                                                         func); // to_s is slow. We should only use it in debug builds
+        }
+    }
+    return llvmBlocks;
+}
 } // namespace
 
 void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
@@ -154,28 +168,20 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
 
     ENFORCE(gs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
-    gs.functionEntryInitializers = llvm::BasicBlock::Create(gs, "functionEntryInitializers", func);
-    auto rawEntryBlock = llvm::BasicBlock::Create(gs, "entry", func);
-    auto userBodyEntry = llvm::BasicBlock::Create(gs, "userBody", func);
-    builder.SetInsertPoint(rawEntryBlock);
+    gs.functionEntryInitializers = llvm::BasicBlock::Create(
+        gs, "functionEntryInitializers",
+        func); // we will build a link for this block later, after we finish building expressions into it
     UnorderedMap<llvm::AllocaInst *, core::SymbolRef> aliases;
 
+    auto rawEntryBlock = llvm::BasicBlock::Create(gs, "setupLocalsAndArguments", func);
+    builder.SetInsertPoint(rawEntryBlock);
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
         setupArgumentsAndLocalVariables(gs, builder, cfg, md, func);
-    // TODO: use https://silverhammermba.github.io/emberb/c/#parsing-arguments to extract arguments
-    // and box them to "RV" type
-    //
+
+    auto userBodyEntry = llvm::BasicBlock::Create(gs, "userBody", func);
     builder.CreateBr(userBodyEntry);
 
-    vector<llvm::BasicBlock *> llvmBlocks(cfg.maxBasicBlockId);
-    for (auto &b : cfg.basicBlocks) {
-        if (b.get() == cfg.entry()) {
-            llvmBlocks[b->id] = userBodyEntry;
-        } else {
-            llvmBlocks[b->id] = llvm::BasicBlock::Create(gs, {"BB", to_string(b->id)},
-                                                         func); // to_s is slow. We should only use it in debug builds
-        }
-    }
+    vector<llvm::BasicBlock *> llvmBlocks = getSorbetBlocks2LLVMBlockMapping(gs, cfg, func, userBodyEntry);
 
     int maxSendArgCount = 0;
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
