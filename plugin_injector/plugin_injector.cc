@@ -15,7 +15,12 @@
 using namespace std;
 namespace sorbet::pipeline::semantic_extension {
 namespace {
-string funcName2moduleName(string sourceName) {
+string fileName2ObjectName(string sourceFile) {
+    absl::c_replace(sourceFile, '/', '_');
+    return sourceFile;
+}
+
+string funcName2InitName(string sourceName) {
     // TODO: make it reversible
     absl::c_replace(sourceName, '.', '_');
     absl::c_replace(sourceName, '<', '_');
@@ -56,7 +61,15 @@ public:
         this->irOutputDir = move(irOutputDir);
     }
 
-    virtual void finishTypecheckFile(const core::GlobalState &, const core::FileRef &) const override{};
+    virtual void finishTypecheckFile(const core::GlobalState &gs, const core::FileRef &f) const override {
+        auto threadState = getThreadState();
+        llvm::LLVMContext &lctx = threadState->lctx;
+        unique_ptr<llvm::Module> &module = threadState->combinedModule;
+        if (module) {
+            string fileName = fileName2ObjectName((string)f.data(gs).path());
+            sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
+        }
+    };
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
                            std::unique_ptr<ast::MethodDef> &md) const override {
         if (!irOutputDir.has_value()) {
@@ -66,13 +79,15 @@ public:
         auto threadState = getThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
-        unique_ptr<llvm::Module> module = sorbet::compiler::IRHelpers::readDefaultModule(functionName.data(), lctx);
+        unique_ptr<llvm::Module> &module = threadState->combinedModule;
+        if (!module) {
+            module = sorbet::compiler::IRHelpers::readDefaultModule(functionName.data(), lctx);
+        }
         llvm::BasicBlock *globalInitializers = llvm::BasicBlock::Create(lctx, "initializeGlobals");
         compiler::CompilerState state(gs, lctx, module.get(), globalInitializers);
         sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
-        string fileName = funcName2moduleName(functionName);
+        string fileName = funcName2InitName(functionName);
         sorbet::compiler::LLVMIREmitter::buildInitFor(gs, lctx, module.get(), cfg.symbol, globalInitializers, fileName);
-        sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
     };
     virtual void patchDSL(core::MutableContext &ctx, ast::ClassDef *klass) const override {
         if (!irOutputDir.has_value()) {
