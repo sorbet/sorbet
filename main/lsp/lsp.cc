@@ -12,43 +12,46 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config)
-    : config(config), preprocessor(move(initialGS), config), lastMetricUpdateTime(chrono::steady_clock::now()) {}
+    : config(config), preprocessor(move(initialGS), config), typechecker(config),
+      lastMetricUpdateTime(chrono::steady_clock::now()) {}
 
-LSPLoop::QueryRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
-                                              const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
+LSPQueryResult LSPLoop::queryByLoc(const LSPTypecheckerOps &ops, string_view uri, const Position &pos,
+                                   const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
+    const auto &gs = ops.gs;
     Timer timeit(config->logger, "setupLSPQueryByLoc");
-    auto fref = config->uri2FileRef(*gs, uri);
+    auto fref = config->uri2FileRef(gs, uri);
     if (!fref.exists()) {
         auto error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidParams,
             fmt::format("Did not find file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
-        return LSPLoop::QueryRun{move(gs), {}, move(error)};
+        return LSPQueryResult{{}, move(error)};
     }
 
-    if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::True) {
+    if (errorIfFileIsUntyped && fref.data(gs).strictLevel < core::StrictLevel::True) {
         config->logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
-        return QueryRun{move(gs), {}};
+        return LSPQueryResult{{}};
     }
 
-    auto loc = config->lspPos2Loc(fref, pos, *gs);
-    return runQuery(move(gs), core::lsp::Query::createLocQuery(loc), {fref});
+    auto loc = config->lspPos2Loc(fref, pos, gs);
+    return ops.query(core::lsp::Query::createLocQuery(loc), {fref});
 }
 
-LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) const {
+LSPQueryResult LSPLoop::queryBySymbol(const LSPTypecheckerOps &ops, core::SymbolRef sym) const {
     Timer timeit(config->logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<core::FileRef> frefs;
-    const core::NameHash symNameHash(*gs, sym.data(*gs)->name.data(*gs));
+    const core::GlobalState &gs = ops.gs;
+    const core::NameHash symNameHash(gs, sym.data(gs)->name.data(gs));
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
     int i = -1;
-    for (auto &hash : globalStateHashes) {
+    for (auto &hash : ops.getFileHashes()) {
         i++;
         const auto &usedSends = hash.usages.sends;
         const auto &usedConstants = hash.usages.constants;
         auto ref = core::FileRef(i);
 
-        const bool fileIsValid = ref.exists() && ref.data(*gs).sourceType == core::File::Type::Normal;
+        const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
         if (fileIsValid &&
             (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
              std::find(usedConstants.begin(), usedConstants.end(), symNameHash) != usedConstants.end())) {
@@ -56,127 +59,7 @@ LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> g
         }
     }
 
-    return runQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), frefs);
-}
-
-LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
-    ENFORCE(!run.canceled);
-    const core::GlobalState &gs = *run.gs;
-    const auto &filesTypechecked = run.filesTypechecked;
-    vector<core::FileRef> errorFilesInNewRun;
-    UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
-    vector<unique_ptr<LSPMessage>> responses;
-
-    if (config->getClientConfig().enableTypecheckInfo) {
-        vector<string> pathsTypechecked;
-        for (auto &f : filesTypechecked) {
-            pathsTypechecked.emplace_back(f.data(gs).path());
-        }
-        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(run.tookFastPath, move(pathsTypechecked));
-        responses.push_back(make_unique<LSPMessage>(
-            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
-    }
-
-    for (auto &e : run.errors) {
-        if (e->isSilenced) {
-            continue;
-        }
-        auto file = e->loc.file();
-        errorsAccumulated[file].emplace_back(std::move(e));
-    }
-
-    for (auto &accumulated : errorsAccumulated) {
-        errorFilesInNewRun.push_back(accumulated.first);
-    }
-
-    vector<core::FileRef> filesToUpdateErrorListFor = errorFilesInNewRun;
-
-    UnorderedSet<core::FileRef> filesTypecheckedAsSet;
-    filesTypecheckedAsSet.insert(filesTypechecked.begin(), filesTypechecked.end());
-
-    for (auto f : this->filesThatHaveErrors) {
-        if (filesTypecheckedAsSet.find(f) != filesTypecheckedAsSet.end()) {
-            // we've retypechecked this file. We can override the fact it has an error
-            // thus, we will update the error list for this file on client
-            filesToUpdateErrorListFor.push_back(f);
-        } else {
-            // we're not typecking this file, we need to remember that it had error
-            errorFilesInNewRun.push_back(f);
-        }
-    }
-
-    fast_sort(filesToUpdateErrorListFor);
-    filesToUpdateErrorListFor.erase(unique(filesToUpdateErrorListFor.begin(), filesToUpdateErrorListFor.end()),
-                                    filesToUpdateErrorListFor.end());
-
-    fast_sort(errorFilesInNewRun);
-    errorFilesInNewRun.erase(unique(errorFilesInNewRun.begin(), errorFilesInNewRun.end()), errorFilesInNewRun.end());
-
-    this->filesThatHaveErrors = errorFilesInNewRun;
-
-    for (auto file : filesToUpdateErrorListFor) {
-        if (file.exists()) {
-            string uri;
-            { // uri
-                if (file.data(gs).sourceType == core::File::Type::Payload) {
-                    uri = string(file.data(gs).path());
-                } else {
-                    uri = config->fileRef2Uri(gs, file);
-                }
-            }
-
-            vector<unique_ptr<Diagnostic>> diagnostics;
-            {
-                // diagnostics
-                if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
-                    for (auto &e : errorsAccumulated[file]) {
-                        auto range = Range::fromLoc(gs, e->loc);
-                        if (range == nullptr) {
-                            continue;
-                        }
-                        auto diagnostic = make_unique<Diagnostic>(std::move(range), e->header);
-                        diagnostic->code = e->what.code;
-                        diagnostic->severity = DiagnosticSeverity::Error;
-
-                        typecase(e.get(), [&](core::Error *ce) {
-                            vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
-                            for (auto &section : ce->sections) {
-                                string sectionHeader = section.header;
-
-                                for (auto &errorLine : section.messages) {
-                                    string message;
-                                    if (errorLine.formattedMessage.length() > 0) {
-                                        message = errorLine.formattedMessage;
-                                    } else {
-                                        message = sectionHeader;
-                                    }
-                                    auto location = config->loc2Location(gs, errorLine.loc);
-                                    if (location == nullptr) {
-                                        continue;
-                                    }
-                                    relatedInformation.push_back(
-                                        make_unique<DiagnosticRelatedInformation>(std::move(location), message));
-                                }
-                            }
-                            // Add link to error documentation.
-                            relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
-                                make_unique<Location>(
-                                    absl::StrCat(config->opts.errorUrlBase, e->what.code),
-                                    make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
-                                "Click for more information on this error."));
-                            diagnostic->relatedInformation = move(relatedInformation);
-                        });
-                        diagnostics.push_back(move(diagnostic));
-                    }
-                }
-            }
-
-            responses.push_back(make_unique<LSPMessage>(
-                make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentPublishDiagnostics,
-                                                 make_unique<PublishDiagnosticsParams>(uri, move(diagnostics)))));
-        }
-    }
-    return LSPResult{move(run.gs), move(responses)};
+    return ops.query(core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
@@ -202,8 +85,8 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     }
 }
 
-LSPResult LSPResult::make(unique_ptr<core::GlobalState> gs, unique_ptr<ResponseMessage> response, bool canceled) {
-    LSPResult rv{move(gs), {}, canceled};
+LSPResult LSPResult::make(unique_ptr<ResponseMessage> response, bool canceled) {
+    LSPResult rv{{}, canceled};
     rv.responses.push_back(make_unique<LSPMessage>(move(response)));
     return rv;
 }

@@ -5,19 +5,19 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const string &json) {
+LSPResult LSPLoop::processRequest(const string &json) {
     vector<unique_ptr<LSPMessage>> messages;
     messages.push_back(LSPMessage::fromClient(json));
-    return LSPLoop::processRequests(move(gs), move(messages));
+    return LSPLoop::processRequests(move(messages));
 }
 
-LSPResult LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, std::unique_ptr<LSPMessage> msg) {
+LSPResult LSPLoop::processRequest(std::unique_ptr<LSPMessage> msg) {
     vector<unique_ptr<LSPMessage>> messages;
     messages.push_back(move(msg));
-    return processRequests(move(gs), move(messages));
+    return processRequests(move(messages));
 }
 
-LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<unique_ptr<LSPMessage>> messages) {
+LSPResult LSPLoop::processRequests(vector<unique_ptr<LSPMessage>> messages) {
     QueueState state;
     absl::Mutex mutex;
     for (auto &message : messages) {
@@ -25,13 +25,10 @@ LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<uniq
     }
     ENFORCE(state.paused == false, "__PAUSE__ not supported in single-threaded mode.");
 
-    LSPResult rv{move(gs), {}};
+    LSPResult rv{{}};
     for (auto &message : state.pendingRequests) {
-        if (rv.gs) {
-            maybeStartCommitSlowPathEdit(*rv.gs, *message);
-        }
-        auto rslt = processRequestInternal(move(rv.gs), *message);
-        rv.gs = move(rslt.gs);
+        maybeStartCommitSlowPathEdit(*message);
+        auto rslt = processRequestInternal(*message);
         rv.responses.insert(rv.responses.end(), make_move_iterator(rslt.responses.begin()),
                             make_move_iterator(rslt.responses.end()));
     }
@@ -61,27 +58,21 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             // Versions are sequential and wrap around. Use them to figure out how many edits are contained within this
             // update.
             const u4 merged = min(end - start, 0xFFFFFFFF - start + end);
-            auto run = runTypechecking(move(gs), move(editParams->updates));
             // Only report stats if the edit was committed.
-            if (!run.canceled) {
+            if (!typechecker.typecheck(move(editParams->updates), output)) {
                 prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
                 prodCategoryCounterAdd("lsp.messages.processed", "sorbet/mergedEdits", merged);
             }
-            return commitTypecheckRun(move(run));
+            return LSPResult();
         } else if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
             auto &initParams = get<unique_ptr<InitializedParams>>(params);
             auto &updates = initParams->updates;
-            globalStateHashes = move(updates.updatedFileHashes);
-            indexed = move(updates.updatedFileIndexes);
-            // Initialization typecheck is not cancelable.
-            LSPResult result = pushDiagnostics(runSlowPath(move(gs), move(updates), /* isCancelable */ false));
-            ENFORCE(!result.canceled);
-            ENFORCE(result.gs);
-            return result;
+            typechecker.initialize(move(updates), output);
+            return LSPResult();
         } else if (method == LSPMethod::Exit) {
             prodCategoryCounterInc("lsp.messages.processed", "exit");
-            return LSPResult{move(gs), {}};
+            return LSPResult();
         } else if (method == LSPMethod::SorbetError) {
             auto &errorInfo = get<unique_ptr<SorbetErrorParams>>(params);
             if (errorInfo->code == (int)LSPErrorCodes::MethodNotFound) {
@@ -90,7 +81,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             } else {
                 logger->error(errorInfo->message);
             }
-            return LSPResult{move(gs), {}};
+            return LSPResult();
         }
     } else if (msg.isRequest()) {
         Timer timeit(logger, "request", {{"method", convertLSPMethodToString(method)}});
@@ -102,7 +93,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         if (msg.canceled) {
             prodCounterInc("lsp.messages.canceled");
             response->error = make_unique<ResponseError>((int)LSPErrorCodes::RequestCancelled, "Request was canceled");
-            return LSPResult::make(move(gs), move(response));
+            return LSPResult::make(move(response));
         }
 
         auto &rawParams = requestMessage.params;
@@ -137,46 +128,75 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             }
 
             response->result = make_unique<InitializeResult>(move(serverCap));
-            return LSPResult::make(move(gs), move(response));
+            return LSPResult::make(move(response));
         } else if (method == LSPMethod::TextDocumentDocumentSymbol) {
             auto &params = get<unique_ptr<DocumentSymbolParams>>(rawParams);
-            return handleTextDocumentDocumentSymbol(move(gs), id, *params);
+            LSPResult result;
+            typechecker.enterCriticalSection(
+                [&](const auto &ops) -> void { result = handleTextDocumentDocumentSymbol(ops, id, *params); });
+            return result;
         } else if (method == LSPMethod::WorkspaceSymbol) {
             auto &params = get<unique_ptr<WorkspaceSymbolParams>>(rawParams);
-            return handleWorkspaceSymbols(move(gs), id, *params);
+            LSPResult result;
+            typechecker.enterCriticalSection(
+                [&](const auto &ops) -> void { result = handleWorkspaceSymbols(ops, id, *params); });
+            return result;
         } else if (method == LSPMethod::TextDocumentDefinition) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
-            return handleTextDocumentDefinition(move(gs), id, *params);
+            LSPResult result;
+            typechecker.enterCriticalSection(
+                [&](const auto &ops) -> void { result = handleTextDocumentDefinition(ops, id, *params); });
+            return result;
         } else if (method == LSPMethod::TextDocumentTypeDefinition) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
-            return handleTextDocumentTypeDefinition(move(gs), id, *params);
+            LSPResult result;
+            typechecker.enterCriticalSection(
+                [&](const auto &ops) -> void { result = handleTextDocumentTypeDefinition(ops, id, *params); });
+            return result;
         } else if (method == LSPMethod::TextDocumentHover) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
-            return handleTextDocumentHover(move(gs), id, *params);
+            LSPResult result;
+            typechecker.enterCriticalSection(
+                [&](const auto &ops) -> void { result = handleTextDocumentHover(ops, id, *params); });
+            return result;
         } else if (method == LSPMethod::TextDocumentCompletion) {
             auto &params = get<unique_ptr<CompletionParams>>(rawParams);
-            return handleTextDocumentCompletion(move(gs), id, *params);
+            LSPResult result;
+            typechecker.enterCriticalSection(
+                [&](const auto &ops) -> void { result = handleTextDocumentCompletion(ops, id, *params); });
+            return result;
         } else if (method == LSPMethod::TextDocumentCodeAction) {
             auto &params = get<unique_ptr<CodeActionParams>>(rawParams);
-            return handleTextDocumentCodeAction(move(gs), id, *params);
+            LSPResult result;
+            typechecker.enterCriticalSection(
+                [&](const auto &ops) -> void { result = move(handleTextDocumentCodeAction(ops, id, *params)); });
+            return result;
         } else if (method == LSPMethod::TextDocumentSignatureHelp) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
-            return handleTextSignatureHelp(move(gs), id, *params);
+            LSPResult result;
+            typechecker.enterCriticalSection(
+                [&](const auto &ops) -> void { result = move(handleTextSignatureHelp(ops, id, *params)); });
+            return result;
         } else if (method == LSPMethod::TextDocumentReferences) {
             auto &params = get<unique_ptr<ReferenceParams>>(rawParams);
-            return handleTextDocumentReferences(move(gs), id, *params);
+            LSPResult result;
+            typechecker.enterCriticalSection(
+                [&](const auto &ops) -> void { result = move(handleTextDocumentReferences(ops, id, *params)); });
+            return result;
         } else if (method == LSPMethod::SorbetReadFile) {
             auto &params = get<unique_ptr<TextDocumentIdentifier>>(rawParams);
-            auto fref = config->uri2FileRef(*gs, params->uri);
-            if (fref.exists()) {
-                response->result =
-                    make_unique<TextDocumentItem>(params->uri, "ruby", 0, string(fref.data(*gs).source()));
-            } else {
-                response->error = make_unique<ResponseError>(
-                    (int)LSPErrorCodes::InvalidParams,
-                    fmt::format("Did not find file at uri {} in {}", params->uri, convertLSPMethodToString(method)));
-            }
-            return LSPResult::make(move(gs), move(response));
+            typechecker.enterCriticalSection([&](auto &ops) -> void {
+                auto fref = config->uri2FileRef(ops.gs, params->uri);
+                if (fref.exists()) {
+                    response->result =
+                        make_unique<TextDocumentItem>(params->uri, "ruby", 0, string(fref.data(ops.gs).source()));
+                } else {
+                    response->error = make_unique<ResponseError>(
+                        (int)LSPErrorCodes::InvalidParams, fmt::format("Did not find file at uri {} in {}", params->uri,
+                                                                       convertLSPMethodToString(method)));
+                }
+            });
+            return LSPResult::make(move(response));
         } else if (method == LSPMethod::Shutdown) {
             prodCategoryCounterInc("lsp.messages.processed", "shutdown");
             response->result = JSONNullObject();
@@ -191,10 +211,10 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
                 (int)LSPErrorCodes::MethodNotFound,
                 fmt::format("Notification method sent as request: {}", convertLSPMethodToString(method)));
         }
-        return LSPResult::make(move(gs), move(response));
+        return LSPResult::make(move(response));
     } else {
         logger->debug("Unable to process request {}; LSP message is not a request.", convertLSPMethodToString(method));
     }
-    return LSPResult{move(gs), {}};
+    return LSPResult();
 }
 } // namespace sorbet::realmain::lsp

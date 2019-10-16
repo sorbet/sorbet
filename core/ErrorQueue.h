@@ -18,7 +18,7 @@ private:
     std::vector<std::unique_ptr<ErrorQueueMessage>> drainFlushed();
     void collectForFile(core::FileRef whatFile, std::vector<std::unique_ptr<core::ErrorQueueMessage>> &out);
     ErrorFlusher errorFlusher;
-    const std::thread::id owner;
+    std::thread::id owner;
     UnorderedMap<core::FileRef, std::vector<core::ErrorQueueMessage>> collected;
     ConcurrentUnBoundedQueue<core::ErrorQueueMessage> queue;
 
@@ -42,6 +42,7 @@ public:
     bool isEmpty();
     /** Extract all errors. This discards all query responses currently present in error Queue */
     std::vector<std::unique_ptr<core::Error>> drainAllErrors();
+    void changeOwnerToCurrentThread();
 
     void flushErrors(bool all = false);
     void flushErrorCount();

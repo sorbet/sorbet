@@ -11,12 +11,7 @@ namespace sorbet::realmain::lsp {
 const std::string LSPWrapper::EMPTY_STRING = "";
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMessage> message) {
-    auto result = lspLoop->processRequest(move(gs), move(message));
-    gs = move(result.gs);
-
-    // Should always run typechecking at least once for each request post-initialization.
-    ENFORCE(!config->isInitialized() || gs->lspTypecheckCount > 0,
-            "Fatal error: LSPLoop did not typecheck GlobalState.");
+    auto result = lspLoop->processRequest(move(message));
 
     // Retrieve any notifications that would normally be sent asynchronously in a multithreaded scenario.
     auto notifs = output->getOutput();
@@ -27,13 +22,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMess
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<LSPMessage>> &messages) {
-    auto result = lspLoop->processRequests(move(gs), move(messages));
-    gs = move(result.gs);
-
-    // Should always run typechecking at least once for each request post-initialization.
-    ENFORCE(!config->isInitialized() || gs->lspTypecheckCount > 0,
-            "Fatal error: LSPLoop did not typecheck GlobalState.");
-
+    auto result = lspLoop->processRequests(move(messages));
     return move(result.responses);
 }
 
@@ -86,13 +75,6 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, options::Options &&opti
 // Define so we can properly destruct unique_ptr<LSPOutputToVector> (which the default destructor can't delete since we
 // forward decl it in the header)
 LSPWrapper::~LSPWrapper() {}
-
-int LSPWrapper::getTypecheckCount() const {
-    if (gs) {
-        return gs->lspTypecheckCount;
-    }
-    return 0;
-}
 
 void LSPWrapper::enableAllExperimentalFeatures() {
     enableExperimentalFeature(LSPExperimentalFeature::Autocomplete);

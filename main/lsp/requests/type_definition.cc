@@ -35,13 +35,13 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, core::TypePtr type) {
 }
 } // namespace
 
-LSPResult LSPLoop::handleTextDocumentTypeDefinition(unique_ptr<core::GlobalState> gs, const MessageId &id,
+LSPResult LSPLoop::handleTextDocumentTypeDefinition(const LSPTypecheckerOps &ops, const MessageId &id,
                                                     const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentTypeDefinition);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.typeDefinition");
-    auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
-                                     LSPMethod::TextDocumentTypeDefinition, false);
-    gs = move(result.gs);
+    const core::GlobalState &gs = ops.gs;
+    auto result =
+        queryByLoc(ops, params.textDocument->uri, *params.position, LSPMethod::TextDocumentTypeDefinition, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -50,23 +50,23 @@ LSPResult LSPLoop::handleTextDocumentTypeDefinition(unique_ptr<core::GlobalState
         vector<unique_ptr<Location>> result;
         if (!queryResponses.empty()) {
             const bool fileIsTyped =
-                config->uri2FileRef(*gs, params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
+                config->uri2FileRef(gs, params.textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
 
             // Only support go-to-type-definition on constants in untyped files.
             if (resp->isConstant() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
-                for (auto loc : locsForType(*gs, resp->getRetType())) {
-                    addLocIfExists(*gs, result, loc);
+                for (auto loc : locsForType(gs, resp->getRetType())) {
+                    addLocIfExists(gs, result, loc);
                 }
             } else if (fileIsTyped && resp->isSend()) {
                 auto sendResp = resp->isSend();
-                for (auto loc : locsForType(*gs, sendResp->dispatchResult->returnType)) {
-                    addLocIfExists(*gs, result, loc);
+                for (auto loc : locsForType(gs, sendResp->dispatchResult->returnType)) {
+                    addLocIfExists(gs, result, loc);
                 }
             }
         }
         response->result = move(result);
     }
-    return LSPResult::make(move(gs), move(response));
+    return LSPResult::make(move(response));
 }
 } // namespace sorbet::realmain::lsp

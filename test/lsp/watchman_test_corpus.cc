@@ -110,14 +110,7 @@ TEST_F(ProtocolTest, MergesMultipleWatchmanUpdates) {
                                                 {"baz.rb", 3, "Expected `Integer`"},
                                             });
 
-    // getTypecheckCount tracks the number of times typechecking has run on the same clone from LSPLoop's
-    // initialGS. It's reset to 1 after each slow path run, and incremented after every fast path.
-    // We expect the merged case to run 1 slow path (where typecheck count would be 1), and the unmerged case to run 3
-    // slow paths and 2 fast paths (where typecheck count would be 3).
-    EXPECT_EQ(lspWrapper->getTypecheckCount(), 1)
-        << fmt::format("Expected Sorbet to apply multiple Watchman updates in one typechecking run, but Sorbet ran "
-                       "typechecking {} times.",
-                       lspWrapper->getTypecheckCount());
+    // TODO: Assert number of typechecking runs.
 }
 
 } // namespace sorbet::test::lsp

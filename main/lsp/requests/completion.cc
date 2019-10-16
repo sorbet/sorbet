@@ -346,29 +346,29 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
     }
 }
 
-LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs, const MessageId &id,
+LSPResult LSPLoop::handleTextDocumentCompletion(const LSPTypecheckerOps &ops, const MessageId &id,
                                                 const CompletionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     if (!config->opts.lspAutocompleteEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Autocomplete` LSP feature is experimental and disabled by default.");
-        return LSPResult::make(move(gs), move(response));
+        return LSPResult::make(move(response));
     }
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
 
+    const core::GlobalState &gs = ops.gs;
     auto uri = params.textDocument->uri;
-    auto fref = config->uri2FileRef(*gs, uri);
+    auto fref = config->uri2FileRef(gs, uri);
     auto pos = *params.position;
-    auto queryLoc = config->lspPos2Loc(fref, pos, *gs);
-    auto result = setupLSPQueryByLoc(move(gs), uri, pos, LSPMethod::TextDocumentCompletion);
-    gs = move(result.gs);
+    auto queryLoc = config.lspPos2Loc(fref, pos, gs);
+    auto result = queryByLoc(ops, uri, pos, LSPMethod::TextDocumentCompletion);
 
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
-        return LSPResult::make(move(gs), move(response));
+        return LSPResult::make(move(response));
     }
 
     auto &queryResponses = result.responses;
@@ -377,13 +377,13 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
         auto resp = move(queryResponses[0]);
 
         if (auto sendResp = resp->isSend()) {
-            auto prefix = sendResp->callerSideName.data(*gs)->shortName(*gs);
+            auto prefix = sendResp->callerSideName.data(gs)->shortName(gs);
             config->logger->debug("Looking for method similar to {}", prefix);
 
             // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
             auto similarKeywords = sendResp->isPrivateOk ? allSimilarKeywords(prefix) : vector<RubyKeyword>{};
 
-            auto similarMethodsByName = allSimilarMethods(*gs, *sendResp->dispatchResult, prefix);
+            auto similarMethodsByName = allSimilarMethods(gs, *sendResp->dispatchResult, prefix);
             for (auto &[methodName, similarMethods] : similarMethodsByName) {
                 fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
                     if (left.depth != right.depth) {
@@ -396,8 +396,8 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
 
             auto deduped = vector<SimilarMethod>{};
             for (auto &[methodName, similarMethods] : similarMethodsByName) {
-                if (methodName.data(*gs)->kind == core::NameKind::UNIQUE &&
-                    methodName.data(*gs)->unique.uniqueNameKind == core::UniqueNameKind::MangleRename) {
+                if (methodName.data(gs)->kind == core::NameKind::UNIQUE &&
+                    methodName.data(gs)->unique.uniqueNameKind == core::UniqueNameKind::MangleRename) {
                     // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
                     // unique names, because we want each overload to show up but those use unique names.
                     continue;
@@ -406,7 +406,7 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
                 // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
                 auto similarMethod = similarMethods[0];
 
-                if (similarMethod.method.data(*gs)->isPrivate() && !sendResp->isPrivateOk) {
+                if (similarMethod.method.data(gs)->isPrivate() && !sendResp->isPrivateOk) {
                     continue;
                 }
 
@@ -418,8 +418,8 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
                     return left.depth < right.depth;
                 }
 
-                auto leftShortName = left.method.data(*gs)->name.data(*gs)->shortName(*gs);
-                auto rightShortName = right.method.data(*gs)->name.data(*gs)->shortName(*gs);
+                auto leftShortName = left.method.data(gs)->name.data(gs)->shortName(gs);
+                auto rightShortName = right.method.data(gs)->name.data(gs)->shortName(gs);
                 if (leftShortName != rightShortName) {
                     if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
                         return true;
@@ -437,21 +437,21 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
             // TODO(jez) Do something smarter here than "all matching keywords always come first"
             for (auto &similarKeyword : similarKeywords) {
                 items.push_back(
-                    getCompletionItemForKeyword(*gs, *config, similarKeyword, queryLoc, prefix, items.size()));
+                    getCompletionItemForKeyword(gs, *config, similarKeyword, queryLoc, prefix, items.size()));
             }
             for (auto &similarMethod : deduped) {
-                items.push_back(getCompletionItemForSymbol(*gs, similarMethod.method, similarMethod.receiverType,
+                items.push_back(getCompletionItemForSymbol(gs, similarMethod.method, similarMethod.receiverType,
                                                            similarMethod.constr.get(), queryLoc, prefix, items.size()));
             }
         } else if (auto identResp = resp->isIdent()) {
-            findSimilarConstantOrIdent(*gs, identResp->retType.type, queryLoc, items);
+            findSimilarConstantOrIdent(gs, identResp->retType.type, queryLoc, items);
         } else if (auto constantResp = resp->isConstant()) {
-            findSimilarConstantOrIdent(*gs, constantResp->retType.type, queryLoc, items);
+            findSimilarConstantOrIdent(gs, constantResp->retType.type, queryLoc, items);
         }
     }
 
     response->result = make_unique<CompletionList>(false, move(items));
-    return LSPResult::make(move(gs), move(response));
+    return LSPResult::make(move(response));
 }
 
 } // namespace sorbet::realmain::lsp

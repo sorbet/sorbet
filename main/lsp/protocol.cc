@@ -157,13 +157,14 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
     });
 }
 
-void LSPLoop::maybeStartCommitSlowPathEdit(core::GlobalState &gs, const LSPMessage &msg) const {
+void LSPLoop::maybeStartCommitSlowPathEdit(LSPMessage &msg) const {
     if (msg.isNotification() && msg.method() == LSPMethod::SorbetWorkspaceEdit) {
         // While we're holding the queue lock (and preventing new messages from entering), start a
         // commit for an epoch if this message will trigger a cancelable slow path.
         const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
-        if (!params->updates.canTakeFastPath) {
-            gs.startCommitEpoch(params->updates.versionStart - 1, params->updates.versionEnd);
+        if (!params->updates.canTakeFastPath && params->updates.updatedGS.has_value()) {
+            auto &gs = params->updates.updatedGS.value();
+            gs->startCommitEpoch(params->updates.versionStart - 1, params->updates.versionEnd);
         }
     }
 }
@@ -183,6 +184,8 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
     // Processing queue contains preprocessed messages that are ready to be processed (e.g., edits are merged).
     absl::Mutex processingMtx;
     QueueState processingQueue;
+
+    auto typecheckThread = typechecker.runTypechecker();
 
     unique_ptr<watchman::WatchmanProcess> watchmanProcess;
     const auto &opts = config->opts;
@@ -258,7 +261,6 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
     auto preprocessingThread = preprocessor.runPreprocessor(incomingQueue, incomingMtx, processingQueue, processingMtx);
 
     mainThreadId = this_thread::get_id();
-    unique_ptr<core::GlobalState> gs;
     {
         // Ensure Watchman thread gets unstuck when thread exits prior to initialization.
         NotifyNotificationOnDestruction notify(initializedNotification);
@@ -272,7 +274,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
                 absl::MutexLock lck(&processingMtx);
                 Timer timeit(logger, "idle");
                 // Ensure we don't have any leftover state from last slow path epoch.
-                ENFORCE(!gs || !gs->getRunningSlowPath().has_value());
+                // ENFORCE(!gs || !gs->getRunningSlowPath().has_value());
                 processingMtx.Await(absl::Condition(
                     +[](QueueState *processingQueue) -> bool {
                         return processingQueue->terminate ||
@@ -283,6 +285,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
                 if (processingQueue.terminate) {
                     if (processingQueue.errorCode != 0) {
                         // Abnormal termination.
+                        typechecker.shutdown();
                         throw options::EarlyReturnWithCode(processingQueue.errorCode);
                     } else if (exitProcessed || processingQueue.pendingRequests.empty()) {
                         // Normal termination. Wait until all pending requests finish or we process an exit.
@@ -293,13 +296,10 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
                 processingQueue.pendingRequests.pop_front();
                 hasMoreMessages = !processingQueue.pendingRequests.empty();
                 exitProcessed = msg->isNotification() && msg->method() == LSPMethod::Exit;
-                if (gs) {
-                    maybeStartCommitSlowPathEdit(*gs, *msg);
-                }
+                maybeStartCommitSlowPathEdit(*msg);
             }
             prodCounterInc("lsp.messages.received");
-            auto result = processRequestInternal(move(gs), *msg);
-            gs = move(result.gs);
+            auto result = processRequestInternal(*msg);
             for (auto &msg : result.responses) {
                 config->output->write(move(msg));
             }
@@ -324,6 +324,9 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
     }
 
     logger->debug("Processor terminating");
+    typechecker.shutdown();
+
+    auto gs = typechecker.destroyAndReturnGlobalState();
     if (gs) {
         return gs;
     } else {
