@@ -333,11 +333,21 @@ void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBloc
         }
     }
 }
+
+llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &gs, core::SymbolRef sym) {
+    auto name = sym.data(gs)->name;
+    if (name.data(gs)->kind == core::NameKind::UNIQUE && name.data(gs)->unique.original == core::Names::staticInit()) {
+        // this is top level code that shoudln't be callable externally.
+        // Even more, sorbet reuses symbols used for these and thus if we mark them non-private we'll get link errors
+        return llvm::Function::InternalLinkage;
+    }
+    return llvm::Function::ExternalLinkage;
+}
 } // namespace
 
 void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
     auto functionType = gs.getRubyFFIType();
-    auto func = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, functionName, gs.module);
+    auto func = llvm::Function::Create(functionType, getFunctionLinkageType(gs, md->symbol), functionName, gs.module);
     func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
     func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
