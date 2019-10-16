@@ -393,12 +393,13 @@ void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym, 
     }
 
     auto baseName = sym.data(gs)->toStringFullName(gs);
+    auto linkageType = llvm::Function::InternalLinkage;
     if (isSpecialEntrypoint) {
         baseName = FileOps::getFileName(sym.data(gs)->loc().file().data(gs).path());
         baseName = baseName.substr(0, baseName.rfind(".rb"));
+        linkageType = llvm::Function::ExternalLinkage;
     }
-    auto entryFunc =
-        llvm::Function::Create(ft, llvm::Function::ExternalLinkage, {"Init_", (string)baseName}, *gs.module);
+    auto entryFunc = llvm::Function::Create(ft, linkageType, {"Init_", (string)baseName}, *gs.module);
     globalInitializers->insertInto(entryFunc);
 
     builder.SetInsertPoint(globalInitializers);
