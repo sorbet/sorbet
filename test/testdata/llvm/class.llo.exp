@@ -92,6 +92,34 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable
 }
 
+; Function Attrs: nounwind sspreq uwtable
+define i64 @"<C <U Foo>><S <C <U Bar>> $1><U <static-init>>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #7 {
+functionEntryInitializers:
+  %isWrongArgCount = icmp eq i32 %0, 0
+  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
+
+argCountSuccess:                                  ; preds = %functionEntryInitializers
+  ret i64 8
+
+argCountFailBlock:                                ; preds = %functionEntryInitializers
+  tail call fastcc void @sorbet_rb_error_arity(i32 %0)
+  unreachable
+}
+
+; Function Attrs: nounwind sspreq uwtable
+define i64 @"<S <C <U Baz>> $1><U <static-init>>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #7 {
+functionEntryInitializers:
+  %isWrongArgCount = icmp eq i32 %0, 0
+  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
+
+argCountSuccess:                                  ; preds = %functionEntryInitializers
+  ret i64 8
+
+argCountFailBlock:                                ; preds = %functionEntryInitializers
+  tail call fastcc void @sorbet_rb_error_arity(i32 %0)
+  unreachable
+}
+
 attributes #0 = { nounwind ssp uwtable }
 attributes #1 = { nounwind }
 attributes #2 = { cold noreturn }
