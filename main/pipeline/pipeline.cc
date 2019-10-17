@@ -154,11 +154,11 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
         ast = ast::desugar::node2Tree(ctx, move(parseTree));
     }
-    if (print.Desugared.enabled) {
-        print.Desugared.fmt("{}\n", ast->toStringWithTabs(gs, 0));
+    if (print.DesugarTree.enabled) {
+        print.DesugarTree.fmt("{}\n", ast->toStringWithTabs(gs, 0));
     }
-    if (print.DesugaredRaw.enabled) {
-        print.DesugaredRaw.fmt("{}\n", ast->showRaw(gs));
+    if (print.DesugarTreeRaw.enabled) {
+        print.DesugarTreeRaw.fmt("{}\n", ast->showRaw(gs));
     }
     return ast;
 }

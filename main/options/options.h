@@ -46,8 +46,8 @@ struct Printers {
     PrinterConfig ParseTree;
     PrinterConfig ParseTreeJson;
     PrinterConfig ParseTreeWhitequark;
-    PrinterConfig Desugared;
-    PrinterConfig DesugaredRaw;
+    PrinterConfig DesugarTree;
+    PrinterConfig DesugarTreeRaw;
     PrinterConfig DSLTree;
     PrinterConfig DSLTreeRaw;
     PrinterConfig IndexTree;
