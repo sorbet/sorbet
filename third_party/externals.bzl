@@ -6,13 +6,20 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # works around https://github.com/bazelbuild/bazel/issues/1465 when
 # passing `build_file` to the `new_git_repository`.
 def sorbet_llvm_externals():
-    git_repository(
-        name = "com_stripe_ruby_typer",
-        remote = "https://github.com/sorbet/sorbet.git",
-        commit = "a9fdd7031034e7736afe80a58d153d82e2e8250c",
-        # git log -n 1 --pretty=format:"%cd" --date=raw origin/master
-        shallow_since = "1571173768 -0700",
-    )
+    use_local = False
+    if not use_local:
+        git_repository(
+            name = "com_stripe_ruby_typer",
+            remote = "https://github.com/sorbet/sorbet.git",
+            commit = "a9fdd7031034e7736afe80a58d153d82e2e8250c",
+            # git log -n 1 --pretty=format:"%cd" --date=raw origin/master
+            shallow_since = "1571173768 -0700",
+        )
+    else:
+        native.local_repository(
+            name = "com_stripe_ruby_typer",
+            path = "../sorbet/",
+        )
 
     http_archive(
         name = "org_llvm_darwin",
