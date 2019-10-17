@@ -119,11 +119,12 @@ another or make modifications within the IR they were given.
 |     |                                  | source files        |                                   |
 | 1   | [Parser], `-p parse-tree`        |                     |                                   |
 |     |                                  | [`parser::Node`]    |                                   |
-| 2   | [Desugar], `-p ast`              |                     |                                   |
+| 2   | [Desugar], `-p desugar-tree`     |                     |                                   |
 | 3   |                                  | [`ast::Expression`] | [DSL]                             |
 | 4   |                                  | [`ast::Expression`] | [LocalVars], `-p dsl-tree`        |
 | 5   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
 | 6   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
+| 6   |                                  | [`ast::Expression`] | [Flatten], `-p flatten-tree` (*)  |
 | 7   | [CFG], `-p cfg --stop-after cfg` |                     |                                   |
 | 8   |                                  | [`cfg::CFG`]        | [Infer], `-p cfg`                 |
 
@@ -183,8 +184,8 @@ Some examples of things we desugar in this pass:
 - compound assignment operators (`+=`) become normal assignments (`x = x + 1`)
 - `unless <cond>` becomes `if !<cond>`
 
-If you pass the `-p ast` or `-p ast-raw` option to `sorbet`, you can see what a
-Ruby program looks like after being desugared.
+If you pass the `-p desugar-tree` or `-p desugar-tree-raw` option to `sorbet`,
+you can see what a Ruby program looks like after being desugared.
 
 
 ### DSL
