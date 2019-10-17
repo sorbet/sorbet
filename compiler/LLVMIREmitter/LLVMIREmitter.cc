@@ -392,7 +392,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
     gs.runCheapOptimizations(func);
 }
 
-void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym, string_view objectName) {
+void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym) {
     llvm::IRBuilder<> builder(gs);
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(gs));
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(gs), NoArgs, false);
@@ -416,14 +416,14 @@ void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym, 
 
     // Call the LLVM method that was made by LLVMIREmitter from this Init_ method
     if (isSpecialEntrypoint) {
-        auto staticInitFunc =
-            gs.module->getFunction(gs.gs.lookupStaticInitForFile(sym.data(gs)->loc()).data(gs)->toStringFullName(gs));
+        auto staticInit = gs.gs.lookupStaticInitForFile(sym.data(gs)->loc()).data(gs)->toStringFullName(gs);
+        auto staticInitFunc = gs.module->getFunction(staticInit);
         ENFORCE(staticInitFunc);
         builder.CreateCall(staticInitFunc,
                            {llvm::ConstantInt::get(gs, llvm::APInt(32, 0, true)),
                             llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(gs)),
                             builder.CreateCall(gs.module->getFunction("sorbet_rb_cObject"))},
-                           (string)objectName);
+                           (string)staticInit);
     }
 
     builder.CreateRetVoid();

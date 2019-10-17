@@ -25,7 +25,7 @@ class LLVMIREmitter {
 public:
     static void run(CompilerState &, cfg::CFG &cfg, std::unique_ptr<ast::MethodDef> &md,
                     const std::string &functionName);
-    static void buildInitFor(CompilerState &gs, const core::SymbolRef &sym, std::string_view objectName);
+    static void buildInitFor(CompilerState &gs, const core::SymbolRef &sym);
 };
 } // namespace sorbet::compiler
 #endif

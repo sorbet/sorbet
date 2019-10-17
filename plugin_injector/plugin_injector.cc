@@ -19,15 +19,6 @@ string fileName2ObjectName(string sourceFile) {
     absl::c_replace(sourceFile, '/', '_');
     return sourceFile;
 }
-
-string funcName2InitName(string sourceName) {
-    // TODO: make it reversible
-    absl::c_replace(sourceName, '.', '_');
-    absl::c_replace(sourceName, '<', '_');
-    absl::c_replace(sourceName, '>', '_');
-    absl::c_replace(sourceName, '-', '_');
-    return sourceName;
-}
 } // namespace
 
 class ThreadState {
@@ -85,8 +76,7 @@ public:
         }
         compiler::CompilerState state(gs, lctx, module.get());
         sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
-        string fileName = funcName2InitName(functionName);
-        sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol, fileName);
+        sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol);
     };
     virtual void patchDSL(core::MutableContext &ctx, ast::ClassDef *klass) const override {
         if (!irOutputDir.has_value()) {
