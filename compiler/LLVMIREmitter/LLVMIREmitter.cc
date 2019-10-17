@@ -38,12 +38,11 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
     return name.data(gs)->show(gs);
 }
 
-llvm::CallInst *resolveSymbol(const core::GlobalState &gs, core::SymbolRef sym, llvm::IRBuilder<> &builder,
-                              llvm::Module *module) {
+llvm::CallInst *resolveSymbol(CompilerState &gs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
     sym = removeRoot(sym);
     auto str = showClassName(gs, sym);
     auto rawCString = builder.CreateGlobalStringPtr(str, "str_" + str);
-    return builder.CreateCall(module->getFunction("sorbet_getConstant"), {rawCString});
+    return builder.CreateCall(gs.module->getFunction("sorbet_getConstant"), {rawCString});
 }
 
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
@@ -68,7 +67,7 @@ llvm::Value *varGet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<
         return gs.unboxRawValue(builder, ret);
     }
 
-    return resolveSymbol(gs.gs, aliases.at(ret), builder, gs.module);
+    return resolveSymbol(gs, aliases.at(ret), builder);
 }
 
 void varSet(CompilerState &gs, llvm::AllocaInst *alloca, llvm::Value *var, llvm::IRBuilder<> &builder,
@@ -191,7 +190,7 @@ void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                             auto sym = typeToSym(gs, i->args[0].type);
                             auto className = showClassName(gs, sym);
                             auto classNameCStr = builder.CreateGlobalStringPtr(className, {"className_", className});
-                            auto rawCall = resolveSymbol(gs, sym.data(gs)->superClass(), builder, gs.module);
+                            auto rawCall = resolveSymbol(gs, sym.data(gs)->superClass(), builder);
                             builder.CreateCall(gs.module->getFunction("sorbet_defineTopLevelClass"),
                                                {classNameCStr, rawCall});
                             return;
@@ -219,7 +218,7 @@ void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                             auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
                             builder.CreateCall(gs.module->getFunction("sorbet_defineMethod"),
-                                               {resolveSymbol(gs, ownerSym, builder, gs.module), funcNameCStr, ptr,
+                                               {resolveSymbol(gs, ownerSym, builder), funcNameCStr, ptr,
                                                 llvm::ConstantInt::get(gs, llvm::APInt(32, -1, true))});
 
                             std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(gs));
