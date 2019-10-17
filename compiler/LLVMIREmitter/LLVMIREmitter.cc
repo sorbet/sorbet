@@ -423,8 +423,8 @@ void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym) 
     auto bb = llvm::BasicBlock::Create(gs, "entry", entryFunc);
     builder.SetInsertPoint(bb);
 
-    // Call the LLVM method that was made by LLVMIREmitter from this Init_ method
     if (isSpecialEntrypoint) {
+        // Call the LLVM method that was made by run() from this Init_ method
         auto staticInit = gs.gs.lookupStaticInitForFile(sym.data(gs)->loc()).data(gs)->toStringFullName(gs);
         auto staticInitFunc = gs.module->getFunction(staticInit);
         ENFORCE(staticInitFunc);
