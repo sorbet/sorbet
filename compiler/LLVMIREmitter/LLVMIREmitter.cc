@@ -336,7 +336,8 @@ void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBloc
 
 llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &gs, core::SymbolRef sym) {
     auto name = sym.data(gs)->name;
-    if (name.data(gs)->kind == core::NameKind::UNIQUE && name.data(gs)->unique.original == core::Names::staticInit()) {
+    if ((name == core::Names::staticInit()) || (name.data(gs)->kind == core::NameKind::UNIQUE &&
+                                                name.data(gs)->unique.original == core::Names::staticInit())) {
         // this is top level code that shoudln't be callable externally.
         // Even more, sorbet reuses symbols used for these and thus if we mark them non-private we'll get link errors
         return llvm::Function::InternalLinkage;
