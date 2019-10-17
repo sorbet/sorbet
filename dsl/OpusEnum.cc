@@ -33,7 +33,7 @@ bool isOpusEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     if (scope == nullptr) {
         return false;
     }
-    if (scope->cnst != core::Names::Constants::Opus()) {
+    if (scope->cnst != core::Names::Constants::Opus() && scope->cnst != core::Names::Constants::T()) {
         return false;
     }
     if (ast::isa_tree<ast::EmptyTree>(scope->scope.get())) {
@@ -56,6 +56,7 @@ ast::Send *asEnumsDo(ast::Expression *stat) {
     }
 }
 
+// TODO(jez) Change this error message after making everything T::Enum
 vector<unique_ptr<ast::Expression>> badConst(core::MutableContext ctx, core::Loc headerLoc, core::Loc line1Loc) {
     if (auto e = ctx.state.beginError(headerLoc, core::errors::DSL::OpusEnumConstNotEnumValue)) {
         e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "Opus::Enum");
