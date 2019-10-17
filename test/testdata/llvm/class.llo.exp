@@ -62,7 +62,7 @@ declare void @rb_exc_raise(i64) local_unnamed_addr #5
 
 ; Function Attrs: nounwind sspreq
 define void @Init_class() local_unnamed_addr #6 {
-initializeGlobals:
+entry:
   %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Module, i64 0, i64 0)) #1
   %1 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %2 = tail call i64 @rb_const_get_at(i64 %1, i64 %0) #1
