@@ -4,6 +4,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_replace.h"
 #include "common/Counters_impl.h"
+#include "common/JSON.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "version/version.h"
 #include <chrono>
@@ -52,7 +53,8 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
         string maybeArgs;
         if (!e.args.empty()) {
             maybeArgs = fmt::format(",\"args\":{{{}}}", fmt::map_join(e.args, ",", [](const auto &nameValue) -> string {
-                                        return fmt::format("\"{}\":\"{}\"", nameValue.first, nameValue.second);
+                                        return fmt::format("\"{}\":\"{}\"", JSON::escape(nameValue.first),
+                                                           JSON::escape(nameValue.second));
                                     }));
         }
 
