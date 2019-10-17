@@ -41,6 +41,10 @@ begin
       end
     end
   end
-  class ::T1<<C T1>> < (::<todo sym>)  end
+  class ::T1<<C T1>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
   <emptyTree>
 end

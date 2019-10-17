@@ -24,6 +24,8 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
     def yielder<yielder>(<blk>)
       begin
         a = <blk>.call(1)
@@ -64,6 +66,10 @@ begin
         ::<Magic>.<call-with-block>(<self>, :"mixed", l)
         ::<Magic>.<call-with-block>(<self>, :"blockyield", l)
       end
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
     end
   end
   <emptyTree>

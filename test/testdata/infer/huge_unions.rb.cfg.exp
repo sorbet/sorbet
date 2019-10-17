@@ -17,6 +17,474 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
+subgraph "cluster_::<Class:C1>#<static-init>" {
+    label = "::<Class:C1>#<static-init>";
+    color = blue;
+    "bb::<Class:C1>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C1>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C1>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C1) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C1>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C1>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C1>#<static-init>_0" -> "bb::<Class:C1>#<static-init>_1" [style="bold"];
+    "bb::<Class:C1>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C1>#<static-init>_1" -> "bb::<Class:C1>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C2>#<static-init>" {
+    label = "::<Class:C2>#<static-init>";
+    color = blue;
+    "bb::<Class:C2>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C2>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C2>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C2) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C2>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C2>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C2>#<static-init>_0" -> "bb::<Class:C2>#<static-init>_1" [style="bold"];
+    "bb::<Class:C2>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C2>#<static-init>_1" -> "bb::<Class:C2>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C3>#<static-init>" {
+    label = "::<Class:C3>#<static-init>";
+    color = blue;
+    "bb::<Class:C3>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C3>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C3>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C3) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C3>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C3>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C3>#<static-init>_0" -> "bb::<Class:C3>#<static-init>_1" [style="bold"];
+    "bb::<Class:C3>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C3>#<static-init>_1" -> "bb::<Class:C3>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C4>#<static-init>" {
+    label = "::<Class:C4>#<static-init>";
+    color = blue;
+    "bb::<Class:C4>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C4>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C4>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C4) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C4>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C4>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C4>#<static-init>_0" -> "bb::<Class:C4>#<static-init>_1" [style="bold"];
+    "bb::<Class:C4>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C4>#<static-init>_1" -> "bb::<Class:C4>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C5>#<static-init>" {
+    label = "::<Class:C5>#<static-init>";
+    color = blue;
+    "bb::<Class:C5>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C5>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C5>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C5) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C5>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C5>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C5>#<static-init>_0" -> "bb::<Class:C5>#<static-init>_1" [style="bold"];
+    "bb::<Class:C5>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C5>#<static-init>_1" -> "bb::<Class:C5>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C6>#<static-init>" {
+    label = "::<Class:C6>#<static-init>";
+    color = blue;
+    "bb::<Class:C6>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C6>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C6>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C6) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C6>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C6>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C6>#<static-init>_0" -> "bb::<Class:C6>#<static-init>_1" [style="bold"];
+    "bb::<Class:C6>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C6>#<static-init>_1" -> "bb::<Class:C6>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C7>#<static-init>" {
+    label = "::<Class:C7>#<static-init>";
+    color = blue;
+    "bb::<Class:C7>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C7>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C7>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C7) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C7>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C7>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C7>#<static-init>_0" -> "bb::<Class:C7>#<static-init>_1" [style="bold"];
+    "bb::<Class:C7>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C7>#<static-init>_1" -> "bb::<Class:C7>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C8>#<static-init>" {
+    label = "::<Class:C8>#<static-init>";
+    color = blue;
+    "bb::<Class:C8>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C8>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C8>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C8) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C8>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C8>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C8>#<static-init>_0" -> "bb::<Class:C8>#<static-init>_1" [style="bold"];
+    "bb::<Class:C8>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C8>#<static-init>_1" -> "bb::<Class:C8>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C9>#<static-init>" {
+    label = "::<Class:C9>#<static-init>";
+    color = blue;
+    "bb::<Class:C9>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C9>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C9>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C9) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C9>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C9>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C9>#<static-init>_0" -> "bb::<Class:C9>#<static-init>_1" [style="bold"];
+    "bb::<Class:C9>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C9>#<static-init>_1" -> "bb::<Class:C9>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C10>#<static-init>" {
+    label = "::<Class:C10>#<static-init>";
+    color = blue;
+    "bb::<Class:C10>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C10>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C10>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C10) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C10>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C10>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C10>#<static-init>_0" -> "bb::<Class:C10>#<static-init>_1" [style="bold"];
+    "bb::<Class:C10>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C10>#<static-init>_1" -> "bb::<Class:C10>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C11>#<static-init>" {
+    label = "::<Class:C11>#<static-init>";
+    color = blue;
+    "bb::<Class:C11>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C11>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C11>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C11) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C11>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C11>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C11>#<static-init>_0" -> "bb::<Class:C11>#<static-init>_1" [style="bold"];
+    "bb::<Class:C11>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C11>#<static-init>_1" -> "bb::<Class:C11>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C12>#<static-init>" {
+    label = "::<Class:C12>#<static-init>";
+    color = blue;
+    "bb::<Class:C12>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C12>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C12>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C12) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C12>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C12>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C12>#<static-init>_0" -> "bb::<Class:C12>#<static-init>_1" [style="bold"];
+    "bb::<Class:C12>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C12>#<static-init>_1" -> "bb::<Class:C12>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C13>#<static-init>" {
+    label = "::<Class:C13>#<static-init>";
+    color = blue;
+    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C13>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+    "bb::<Class:C13>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_1" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C13>#<static-init>" {
+    label = "::<Class:C13>#<static-init>";
+    color = blue;
+    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C13>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+    "bb::<Class:C13>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_1" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C13>#<static-init>" {
+    label = "::<Class:C13>#<static-init>";
+    color = blue;
+    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C13>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+    "bb::<Class:C13>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_1" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C13>#<static-init>" {
+    label = "::<Class:C13>#<static-init>";
+    color = blue;
+    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C13>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+    "bb::<Class:C13>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_1" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C13>#<static-init>" {
+    label = "::<Class:C13>#<static-init>";
+    color = blue;
+    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C13>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+    "bb::<Class:C13>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_1" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C13>#<static-init>" {
+    label = "::<Class:C13>#<static-init>";
+    color = blue;
+    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C13>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+    "bb::<Class:C13>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_1" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C13>#<static-init>" {
+    label = "::<Class:C13>#<static-init>";
+    color = blue;
+    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C13>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+    "bb::<Class:C13>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C13>#<static-init>_1" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C14>#<static-init>" {
+    label = "::<Class:C14>#<static-init>";
+    color = blue;
+    "bb::<Class:C14>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C14>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C14>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C14) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C14>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C14>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C14>#<static-init>_0" -> "bb::<Class:C14>#<static-init>_1" [style="bold"];
+    "bb::<Class:C14>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C14>#<static-init>_1" -> "bb::<Class:C14>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C15>#<static-init>" {
+    label = "::<Class:C15>#<static-init>";
+    color = blue;
+    "bb::<Class:C15>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C15>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C15>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C15) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C15>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C15>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C15>#<static-init>_0" -> "bb::<Class:C15>#<static-init>_1" [style="bold"];
+    "bb::<Class:C15>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C15>#<static-init>_1" -> "bb::<Class:C15>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C16>#<static-init>" {
+    label = "::<Class:C16>#<static-init>";
+    color = blue;
+    "bb::<Class:C16>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C16>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C16>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C16) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C16>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C16>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C16>#<static-init>_0" -> "bb::<Class:C16>#<static-init>_1" [style="bold"];
+    "bb::<Class:C16>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C16>#<static-init>_1" -> "bb::<Class:C16>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C17>#<static-init>" {
+    label = "::<Class:C17>#<static-init>";
+    color = blue;
+    "bb::<Class:C17>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C17>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C17>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C17) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C17>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C17>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C17>#<static-init>_0" -> "bb::<Class:C17>#<static-init>_1" [style="bold"];
+    "bb::<Class:C17>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C17>#<static-init>_1" -> "bb::<Class:C17>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C18>#<static-init>" {
+    label = "::<Class:C18>#<static-init>";
+    color = blue;
+    "bb::<Class:C18>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C18>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C18>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C18) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C18>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C18>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C18>#<static-init>_0" -> "bb::<Class:C18>#<static-init>_1" [style="bold"];
+    "bb::<Class:C18>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C18>#<static-init>_1" -> "bb::<Class:C18>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C19>#<static-init>" {
+    label = "::<Class:C19>#<static-init>";
+    color = blue;
+    "bb::<Class:C19>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C19>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C19>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C19) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C19>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C19>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C19>#<static-init>_0" -> "bb::<Class:C19>#<static-init>_1" [style="bold"];
+    "bb::<Class:C19>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C19>#<static-init>_1" -> "bb::<Class:C19>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:C20>#<static-init>" {
+    label = "::<Class:C20>#<static-init>";
+    color = blue;
+    "bb::<Class:C20>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:C20>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:C20>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(C20) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C20>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C20>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C20>#<static-init>_0" -> "bb::<Class:C20>#<static-init>_1" [style="bold"];
+    "bb::<Class:C20>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:C20>#<static-init>_1" -> "bb::<Class:C20>#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::<Class:A>#send_beta_invitation" {
     label = "::<Class:A>#send_beta_invitation";
     color = blue;
@@ -278,6 +746,24 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     ];
 
     "bb::<Class:A>#send_beta_invitation_61" -> "bb::<Class:A>#send_beta_invitation_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:A>#<static-init>" {
+    label = "::<Class:A>#<static-init>";
+    color = blue;
+    "bb::<Class:A>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:A>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:A>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
+    "bb::<Class:A>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:A>#<static-init>_1" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
 }
 
 }

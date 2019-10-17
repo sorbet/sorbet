@@ -20,6 +20,8 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
     def b<b>(<blk>)
       <emptyTree>
     end
@@ -89,6 +91,10 @@ begin
           end
         end
       end
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
     end
   end
   <emptyTree>

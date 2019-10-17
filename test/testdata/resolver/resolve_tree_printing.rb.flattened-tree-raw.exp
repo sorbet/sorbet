@@ -68,6 +68,8 @@ InsSeq{
 
         EmptyTree
 
+        EmptyTree
+
         MethodDef{
           flags = 0
           name = <U has_while><<U has_while>>
@@ -224,6 +226,15 @@ InsSeq{
             }
 
           }
+        }
+
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<U <static-init>>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = EmptyTree
         }
       ]
     }

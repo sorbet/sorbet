@@ -33,8 +33,16 @@ begin
       end
     end
   end
-  module ::Mixin1<<C Mixin1>> < ()  end
-  module ::Mixin2<<C Mixin2>> < ()  end
+  module ::Mixin1<<C Mixin1>> < ()
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  module ::Mixin2<<C Mixin2>> < ()
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
   class ::Parent<<C Parent>> < (::<todo sym>, ::Mixin1)
     def self.<static-init><<static-init>>(<blk>)
       ::Sorbet::Private::Static.keep_for_ide(::Mixin1)

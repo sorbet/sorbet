@@ -14,6 +14,8 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
     def untyped<untyped>(<blk>)
       <emptyTree>
     end
@@ -56,6 +58,10 @@ begin
         s.+("hi")
         s.+(3)
       end
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
     end
   end
   <emptyTree>

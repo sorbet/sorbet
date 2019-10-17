@@ -26,6 +26,8 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
     def i_like_ifs<i_like_ifs>(<blk>)
       if true
         return 1
@@ -111,6 +113,10 @@ begin
       else
         i
       end
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
     end
   end
   <emptyTree>
