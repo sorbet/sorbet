@@ -265,7 +265,7 @@ module JSON
 
   sig do
     params(
-      json: ::T.untyped,
+      json: String,
       args: ::T.untyped,
     )
     .returns(::T.untyped)
