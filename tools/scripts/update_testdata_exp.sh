@@ -30,8 +30,8 @@ passes=(
   cfg
   cfg-raw
   cfg-json
-  flattened-tree
-  flattened-tree-raw
+  flatten-tree
+  flatten-tree-raw
   autogen
   document-symbols
 )

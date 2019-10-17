@@ -115,7 +115,7 @@ public:
 UnorderedSet<string> knownExpectations = {
     "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "ast",       "ast-raw",       "dsl-tree",
     "dsl-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree", "name-tree-raw", "resolve-tree",
-    "resolve-tree-raw", "flattened-tree",  "flattened-tree-raw",    "cfg",       "cfg-raw",       "cfg-json",
+    "resolve-tree-raw", "flatten-tree",  "flatten-tree-raw",    "cfg",       "cfg-raw",       "cfg-json",
     "autogen",          "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
@@ -343,8 +343,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         resolvedTree = flatten::runOne(ctx, move(resolvedTree));
 
-        handler.addObserved("flattened-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.addObserved("flattened-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved("flatten-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("flatten-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
 
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
