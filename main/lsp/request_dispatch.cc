@@ -106,7 +106,8 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             return LSPResult{move(gs), {}};
         } else if (method == LSPMethod::SorbetShowOperation) {
             // Forward to client. These are sent from the preprocessor.
-            sendMessage(msg);
+            // TODO: Use a more efficient way to copy this object.
+            output.write(LSPMessage::fromClient(msg.toJSON()));
             return LSPResult{move(gs), {}};
         }
     } else if (msg.isRequest()) {

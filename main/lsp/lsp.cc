@@ -12,9 +12,9 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, LSPConfiguration config,
-                 const shared_ptr<spd::logger> &logger, WorkerPool &workers, int inputFd, std::ostream &outputStream)
+                 const shared_ptr<spd::logger> &logger, WorkerPool &workers, LSPOutput &output)
     : config(config), preprocessor(move(initialGS), config, workers, logger), logger(logger), workers(workers),
-      inputFd(inputFd), outputStream(outputStream), lastMetricUpdateTime(chrono::steady_clock::now()) {}
+      output(output), lastMetricUpdateTime(chrono::steady_clock::now()) {}
 
 LSPLoop::QueryRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
                                               const LSPMethod forMethod, bool errorIfFileIsUntyped) const {

@@ -2,13 +2,29 @@
 #include "core/errors/namer.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
-#include <iostream>
 #include <regex>
 
 using namespace std;
+
 namespace sorbet::realmain::lsp {
 
 const std::string LSPWrapper::EMPTY_STRING = "";
+
+class LSPWrapper::LSPOutputToVector final : public LSPOutput {
+private:
+    vector<unique_ptr<LSPMessage>> output;
+
+public:
+    LSPOutputToVector() = default;
+
+    void rawWrite(unique_ptr<LSPMessage> msg) override {
+        output.push_back(move(msg));
+    }
+
+    std::vector<unique_ptr<LSPMessage>> getOutput() {
+        return move(output);
+    }
+};
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMessage> message) {
     const bool isInitialize = message->isNotification() && message->method() == LSPMethod::Initialize;
@@ -20,6 +36,11 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMess
     if (isInitialize) {
         initialized = true;
     }
+
+    // Retrieve any notifications that would normally be sent asynchronously in a multithreaded scenario.
+    auto notifs = output->getOutput();
+    result.responses.insert(result.responses.end(), make_move_iterator(notifs.begin()),
+                            make_move_iterator(notifs.end()));
 
     return move(result.responses);
 }
@@ -55,12 +76,12 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &json
 
 void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,
                              bool disableFastPath) {
+    output = make_unique<LSPWrapper::LSPOutputToVector>();
     ENFORCE(gs->errorQueue->ignoreFlushes); // LSP needs this
     workers = WorkerPool::create(0, *logger);
-    // N.B.: stdin will not actually be used the way we are driving LSP.
     // Configure LSPLoop to disable configatron.
     lspLoop = make_unique<LSPLoop>(std::move(gs), LSPConfiguration(opts, logger, true, disableFastPath), logger,
-                                   *workers.get(), STDIN_FILENO, lspOstream);
+                                   *workers.get(), *output);
 }
 
 LSPWrapper::LSPWrapper(options::Options &&options, std::string_view rootPath, bool disableFastPath)
@@ -94,6 +115,10 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, options::Options &&opti
     : opts(std::move(options)) {
     instantiate(std::move(gs), logger, disableFastPath);
 }
+
+// Define so we can properly destruct unique_ptr<LSPOutputToVector> (which the default destructor can't delete since we
+// forward decl it in the header)
+LSPWrapper::~LSPWrapper() {}
 
 int LSPWrapper::getTypecheckCount() const {
     if (gs) {
