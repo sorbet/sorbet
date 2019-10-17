@@ -46,26 +46,20 @@ struct Printers {
     PrinterConfig ParseTree;
     PrinterConfig ParseTreeJson;
     PrinterConfig ParseTreeWhitequark;
-    PrinterConfig Desugared;
-    PrinterConfig DesugaredRaw;
+    PrinterConfig DesugarTree;
+    PrinterConfig DesugarTreeRaw;
     PrinterConfig DSLTree;
     PrinterConfig DSLTreeRaw;
     PrinterConfig IndexTree;
     PrinterConfig IndexTreeRaw;
     PrinterConfig NameTree;
     PrinterConfig NameTreeRaw;
-    PrinterConfig SymbolTable;
-    PrinterConfig SymbolTableRaw;
-    PrinterConfig SymbolTableJson;
-    PrinterConfig SymbolTableFull;
-    PrinterConfig SymbolTableFullRaw;
-    PrinterConfig SymbolTableFullJson;
-    PrinterConfig FileTableJson;
     PrinterConfig ResolveTree;
     PrinterConfig ResolveTreeRaw;
-    PrinterConfig MissingConstants;
-    PrinterConfig FlattenedTree;
-    PrinterConfig FlattenedTreeRaw;
+    PrinterConfig FlattenTree;
+    PrinterConfig FlattenTreeRaw;
+    PrinterConfig AST;
+    PrinterConfig ASTRaw;
     PrinterConfig CFG;
     PrinterConfig CFGRaw;
     // cfg-json format outputs a JSON object for each CFG, separated by newlines.
@@ -75,12 +69,20 @@ struct Printers {
     // See CFG.proto for details
     PrinterConfig CFGProto;
     PrinterConfig TypedSource;
+    PrinterConfig SymbolTable;
+    PrinterConfig SymbolTableRaw;
+    PrinterConfig SymbolTableJson;
+    PrinterConfig SymbolTableFull;
+    PrinterConfig SymbolTableFullRaw;
+    PrinterConfig SymbolTableFullJson;
+    PrinterConfig FileTableJson;
+    PrinterConfig MissingConstants;
+    PrinterConfig PluginGeneratedCode;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
     PrinterConfig AutogenClasslist;
     PrinterConfig AutogenAutoloader;
     PrinterConfig AutogenSubclasses;
-    PrinterConfig PluginGeneratedCode;
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();

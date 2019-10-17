@@ -17,8 +17,8 @@ trap 'rm -f "$COMMAND_FILE"' EXIT
 passes=(
   parse-tree
   parse-tree-json
-  ast
-  ast-raw
+  desugar-tree
+  desugar-tree-raw
   dsl-tree
   dsl-tree-raw
   symbol-table
@@ -27,11 +27,13 @@ passes=(
   name-tree-raw
   resolve-tree
   resolve-tree-raw
+  flatten-tree
+  flatten-tree-raw
+  ast
+  ast-raw
   cfg
   cfg-raw
   cfg-json
-  flattened-tree
-  flattened-tree-raw
   autogen
   document-symbols
 )
