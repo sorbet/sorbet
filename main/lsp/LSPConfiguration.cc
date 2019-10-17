@@ -86,7 +86,14 @@ core::Loc LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position 
     core::Loc::Detail reqPos;
     reqPos.line = pos.line + 1;
     reqPos.column = pos.character + 1;
-    auto offset = core::Loc::pos2Offset(fref.data(gs), reqPos);
+    auto file = fref.data(gs);
+    auto l = reqPos.line - 1;
+    auto &lineBreaks = file.lineBreaks();
+    if (!(0 <= l && l < lineBreaks.size())) {
+        return core::Loc::none(fref);
+    }
+    auto lineOffset = lineBreaks[l];
+    auto offset = lineOffset + reqPos.column;
     return core::Loc{fref, offset, offset};
 }
 
