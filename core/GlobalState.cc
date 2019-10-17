@@ -288,6 +288,10 @@ void GlobalState::initEmpty() {
     id.data(*this)->setIsModule(false);
     ENFORCE(id == Symbols::OpusEnum());
 
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum());
+    id.data(*this)->setIsModule(false);
+    ENFORCE(id == Symbols::T_Enum());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
