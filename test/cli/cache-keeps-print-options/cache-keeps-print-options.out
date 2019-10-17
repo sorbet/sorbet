@@ -18,15 +18,41 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., https://github.co
     method ::<Class:CCCCCCCCC>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
       argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
 
-class <emptyTree><<C <root>>> < ()
-  class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$110>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::CCCCCCCCC)
+        <emptyTree>
+      end
+    end
   end
+  class ::CCCCCCCCC<<C CCCCCCCCC>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
 end
-class <emptyTree><<C <root>>> < ()
-  class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$110>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::CCCCCCCCC)
+        <emptyTree>
+      end
+    end
   end
+  class ::CCCCCCCCC<<C CCCCCCCCC>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
 end
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
