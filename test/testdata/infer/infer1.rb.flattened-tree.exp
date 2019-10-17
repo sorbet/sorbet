@@ -17,6 +17,8 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
     def baz1<baz1>(<blk>)
       begin
         a = "foo"
@@ -76,6 +78,10 @@ begin
       while true
         b = 1
       end
+    end
+
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      <emptyTree>
     end
   end
   <emptyTree>

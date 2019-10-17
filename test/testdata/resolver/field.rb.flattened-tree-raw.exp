@@ -6,6 +6,10 @@ InsSeq{
       name = EmptyTree<<C <U <root>>>>
       ancestors = []
       rhs = [
+        EmptyTree
+
+        EmptyTree
+
         MethodDef{
           flags = 0
           name = <U foo><<U foo>>
@@ -23,6 +27,15 @@ InsSeq{
               localVariable = <U a>
             }
           }
+        }
+
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = EmptyTree
         }
       ]
     }

@@ -10,6 +10,10 @@ begin
     end
   end
   class ::TestLocals<<C TestLocals>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
     def method<method>(<blk>)
       begin
         a = 1
@@ -28,6 +32,10 @@ begin
           a$3.+(b$3)
         end
       end
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
     end
   end
   <emptyTree>

@@ -26,6 +26,10 @@ begin
       end
     end
   end
-  class ::A::Foo<<C Foo>> < (::<todo sym>)  end
+  class ::A::Foo<<C Foo>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
   <emptyTree>
 end

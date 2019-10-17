@@ -46,7 +46,7 @@ unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::
     }
 
     if (inits.empty()) {
-        return nullptr;
+        return ast::MK::EmptyTree();
     }
     if (inits.size() == 1) {
         return std::move(inits.front());
@@ -72,18 +72,16 @@ public:
         classes.emplace_back();
 
         auto inits = extractClassInit(ctx, classDef);
-        if (inits == nullptr) {
-            return classDef;
-        }
 
         core::SymbolRef sym;
+        auto loc = classDef->declLoc;
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
             //
             // NOTE(nelhage): In general, we potentially need to do this for
             // every class, since Ruby allows reopening classes. However, since
             // pay-server bans that behavior, this should be OK here.
-            sym = ctx.state.lookupStaticInitForFile(inits->loc);
+            sym = ctx.state.lookupStaticInitForFile(loc);
         } else {
             sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
         }
@@ -95,12 +93,12 @@ public:
         // Synthesize a block argument for this <static-init> block. This is rather fiddly,
         // because we have to know exactly what invariants desugar and namer set up about
         // methods and block arguments before us.
-        auto blkLoc = core::Loc::none(inits->loc.file());
+        auto blkLoc = core::Loc::none(loc.file());
         core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
         ast::MethodDef::ARGS_store args;
         args.emplace_back(make_unique<ast::Local>(blkLoc, blkLocalVar));
 
-        auto init = make_unique<ast::MethodDef>(inits->loc, inits->loc, sym, core::Names::staticInit(), std::move(args),
+        auto init = make_unique<ast::MethodDef>(loc, loc, sym, core::Names::staticInit(), std::move(args),
                                                 std::move(inits), true);
 
         classDef->rhs.emplace_back(std::move(init));

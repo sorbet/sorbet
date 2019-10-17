@@ -17,6 +17,24 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
+subgraph "cluster_::<Class:Object>#<static-init>" {
+    label = "::<Class:Object>#<static-init>";
+    color = blue;
+    "bb::<Class:Object>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Object>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:Object>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(Object) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Object>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Object>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Object>#<static-init>_0" -> "bb::<Class:Object>#<static-init>_1" [style="bold"];
+    "bb::<Class:Object>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Object>#<static-init>_1" -> "bb::<Class:Object>#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::Trigger#trigger" {
     label = "::Trigger#trigger";
     color = blue;
@@ -33,6 +51,60 @@ subgraph "cluster_::Trigger#trigger" {
     ];
 
     "bb::Trigger#trigger_1" -> "bb::Trigger#trigger_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:Trigger>#<static-init>" {
+    label = "::<Class:Trigger>#<static-init>";
+    color = blue;
+    "bb::<Class:Trigger>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Trigger>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:Trigger>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(Trigger) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Trigger>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Trigger>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Trigger>#<static-init>_0" -> "bb::<Class:Trigger>#<static-init>_1" [style="bold"];
+    "bb::<Class:Trigger>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Trigger>#<static-init>_1" -> "bb::<Class:Trigger>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:Foo>#<static-init>" {
+    label = "::<Class:Foo>#<static-init>";
+    color = blue;
+    "bb::<Class:Foo>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Foo>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:Foo>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(Foo) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Foo>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Foo>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Foo>#<static-init>_0" -> "bb::<Class:Foo>#<static-init>_1" [style="bold"];
+    "bb::<Class:Foo>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Foo>#<static-init>_1" -> "bb::<Class:Foo>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:Bar>#<static-init>" {
+    label = "::<Class:Bar>#<static-init>";
+    color = blue;
+    "bb::<Class:Bar>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Bar>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:Bar>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(Bar) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Bar>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Bar>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Bar>#<static-init>_0" -> "bb::<Class:Bar>#<static-init>_1" [style="bold"];
+    "bb::<Class:Bar>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Bar>#<static-init>_1" -> "bb::<Class:Bar>#<static-init>_1" [style="bold"];
 }
 
 }

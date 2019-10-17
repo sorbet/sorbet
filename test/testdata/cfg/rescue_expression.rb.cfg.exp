@@ -77,5 +77,23 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
+subgraph "cluster_::<Class:MyException>#<static-init>" {
+    label = "::<Class:MyException>#<static-init>";
+    color = blue;
+    "bb::<Class:MyException>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:MyException>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:MyException>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(MyException) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U MyException>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U MyException>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:MyException>#<static-init>_0" -> "bb::<Class:MyException>#<static-init>_1" [style="bold"];
+    "bb::<Class:MyException>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:MyException>#<static-init>_1" -> "bb::<Class:MyException>#<static-init>_1" [style="bold"];
+}
+
 }
 

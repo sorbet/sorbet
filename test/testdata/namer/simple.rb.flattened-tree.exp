@@ -74,8 +74,16 @@ begin
       end
     end
   end
-  class ::NormalClass::InnerClass<<C InnerClass>> < (::<todo sym>)  end
-  module ::NormalClass::InnerModule<<C InnerModule>> < ()  end
+  class ::NormalClass::InnerClass<<C InnerClass>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  module ::NormalClass::InnerModule<<C InnerModule>> < ()
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
   module ::ANamespace<<C ANamespace>> < ()
     def self.<static-init><<static-init>>(<blk>)
       begin
@@ -85,11 +93,31 @@ begin
       end
     end
   end
-  class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)  end
-  class ::ANamespace::ClassInNamespace<<C ClassInNamespace>> < (::<todo sym>)  end
-  class ::Parent<<C Parent>> < (::<todo sym>)  end
-  module ::Mixin<<C Mixin>> < ()  end
-  module ::OtherMixin<<C OtherMixin>> < ()  end
+  class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  class ::ANamespace::ClassInNamespace<<C ClassInNamespace>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  class ::Parent<<C Parent>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  module ::Mixin<<C Mixin>> < ()
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  module ::OtherMixin<<C OtherMixin>> < ()
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
   class ::Child<<C Child>> < (::Parent, ::Mixin)
     def self.<static-init><<static-init>>(<blk>)
       begin

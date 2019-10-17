@@ -10,6 +10,10 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
     def take_arguments<take_arguments>(a, b, c, d, e, f, g)
       begin
         [a, b, c, d, e, f, g]
@@ -18,6 +22,10 @@ begin
           [a$1, b$1, c$1, d$1, e$1, f$1, g$1, h$1]
         end
       end
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
     end
   end
   <emptyTree>

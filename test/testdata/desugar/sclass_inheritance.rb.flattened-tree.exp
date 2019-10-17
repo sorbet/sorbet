@@ -41,7 +41,11 @@ begin
       end
     end
   end
-  module ::MM<<C MM>> < ()  end
+  module ::MM<<C MM>> < ()
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
   class ::A<<C A>> < (::<todo sym>)
     def self.<static-init><<static-init>>(<blk>)
       begin
@@ -52,8 +56,16 @@ begin
     end
   end
   class <singleton class><<Class:A>> < (::MM)
+    <emptyTree>
+
+    <emptyTree>
+
     def newer<newer>(<blk>)
       <self>.new()
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
     end
   end
   class ::B<<C B>> < (::<todo sym>)
@@ -78,8 +90,16 @@ begin
     end
   end
   class <singleton class><<Class:C>> < ()
+    <emptyTree>
+
+    <emptyTree>
+
     def newerer<newerer>(<blk>)
       <self>.newer()
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
     end
   end
   <emptyTree>

@@ -52,6 +52,10 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
+        EmptyTree
+
+        EmptyTree
+
         MethodDef{
           flags = 0
           name = <U take_arguments><<U take_arguments>>
@@ -181,6 +185,15 @@ InsSeq{
               ]
             }
           }
+        }
+
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<U <static-init>>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = EmptyTree
         }
       ]
     }
