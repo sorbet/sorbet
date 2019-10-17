@@ -454,7 +454,7 @@ int realmain(int argc, char *argv[]) {
                       "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag,"
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       Version::full_version_string);
-        lsp::LSPStdout output([logger = logger](string str) -> void { logger->debug(str); });
+        lsp::LSPStdout output([logger = logger](string str) -> void { logger->debug(move(str)); });
         lsp::LSPLoop loop(move(gs), lsp::LSPConfiguration(opts, logger), logger, *workers, output);
         gs = loop.runLSP(STDIN_FILENO).value_or(nullptr);
 #endif
