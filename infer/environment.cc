@@ -1061,13 +1061,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                                                                  ty.origins2Explanations(ctx)));
                         }
                     }
-                } else {
+                } else if (!c->isSynthetic) {
                     if (castType->isUntyped()) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Please use `T.unsafe(...)` to cast to T.untyped");
                         }
-                    } else if (!c->isSynthetic && !ty.type->isUntyped() &&
-                               core::Types::isSubType(ctx, ty.type, castType)) {
+                    } else if (!ty.type->isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Useless cast: inferred type `{}` is already a subtype of `{}`",
                                         ty.type->show(ctx), castType->show(ctx));
