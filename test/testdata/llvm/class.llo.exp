@@ -4,13 +4,10 @@ target triple = "x86_64-apple-darwin18.2.0"
 
 @.str = private unnamed_addr constant [16 x i8] c"ERROR: %s is 0\0A\00", align 1
 @rb_cObject = external local_unnamed_addr global i64, align 8
-@.str.4 = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
-@rb_eArgError = external local_unnamed_addr global i64, align 8
 @className_Foo = private unnamed_addr constant [4 x i8] c"Foo\00", align 1
 @str_Module = private unnamed_addr constant [7 x i8] c"Module\00", align 1
 @className_Baz = private unnamed_addr constant [4 x i8] c"Baz\00", align 1
-@className_Bar = private unnamed_addr constant [4 x i8] c"Bar\00", align 1
-@str_Object.1 = private unnamed_addr constant [7 x i8] c"Object\00", align 1
+@str_Object = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 
 ; Function Attrs: nounwind ssp uwtable
 define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
@@ -19,7 +16,7 @@ define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
 
 ; <label>:4:                                      ; preds = %2
   %5 = tail call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str, i64 0, i64 0), i8* %1)
-  tail call void @abort() #8
+  tail call void @abort() #5
   unreachable
 
 ; <label>:6:                                      ; preds = %2
@@ -38,98 +35,26 @@ declare i64 @rb_const_get_at(i64, i64) local_unnamed_addr #3
 
 declare i64 @rb_define_class(i8*, i64) local_unnamed_addr #3
 
-; Function Attrs: nounwind ssp uwtable
-define internal fastcc i64 @sorbet_rb_arity_error_new(i32) unnamed_addr #0 {
-  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str.4, i64 0, i64 0), i32 %0, i32 0) #1
-  %3 = load i64, i64* @rb_eArgError, align 8, !tbaa !1
-  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #1
-  ret i64 %4
-}
-
-declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #3
-
-declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr #3
-
-; Function Attrs: noreturn nounwind ssp uwtable
-define internal fastcc void @sorbet_rb_error_arity(i32) unnamed_addr #4 {
-  %2 = tail call fastcc i64 @sorbet_rb_arity_error_new(i32 %0)
-  tail call void @rb_exc_raise(i64 %2) #9
-  unreachable
-}
-
-; Function Attrs: noreturn
-declare void @rb_exc_raise(i64) local_unnamed_addr #5
-
 ; Function Attrs: nounwind sspreq
-define void @Init_class() local_unnamed_addr #6 {
+define void @Init_class() local_unnamed_addr #4 {
 entry:
   %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Module, i64 0, i64 0)) #1
   %1 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %2 = tail call i64 @rb_const_get_at(i64 %1, i64 %0) #1
   %3 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Foo, i64 0, i64 0), i64 %2) #1
-  %4 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.1, i64 0, i64 0)) #1
+  %4 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #1
   %5 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %6 = tail call i64 @rb_const_get_at(i64 %5, i64 %4) #1
   %7 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Baz, i64 0, i64 0), i64 %6) #1
   ret void
 }
 
-; Function Attrs: nounwind sspreq uwtable
-define i64 @"<S <C <U Foo>> $1><U <static-init>>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #7 {
-functionEntryInitializers:
-  %isWrongArgCount = icmp eq i32 %0, 0
-  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
-
-argCountSuccess:                                  ; preds = %functionEntryInitializers
-  %3 = tail call i64 @rb_intern(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.1, i64 0, i64 0)) #1
-  %4 = load i64, i64* @rb_cObject, align 8, !tbaa !1
-  %5 = tail call i64 @rb_const_get_at(i64 %4, i64 %3) #1
-  %6 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Bar, i64 0, i64 0), i64 %5) #1
-  ret i64 8
-
-argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call fastcc void @sorbet_rb_error_arity(i32 %0)
-  unreachable
-}
-
-; Function Attrs: nounwind sspreq uwtable
-define i64 @"<C <U Foo>><S <C <U Bar>> $1><U <static-init>>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #7 {
-functionEntryInitializers:
-  %isWrongArgCount = icmp eq i32 %0, 0
-  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
-
-argCountSuccess:                                  ; preds = %functionEntryInitializers
-  ret i64 8
-
-argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call fastcc void @sorbet_rb_error_arity(i32 %0)
-  unreachable
-}
-
-; Function Attrs: nounwind sspreq uwtable
-define i64 @"<S <C <U Baz>> $1><U <static-init>>"(i32, i64* nocapture readnone, i64) local_unnamed_addr #7 {
-functionEntryInitializers:
-  %isWrongArgCount = icmp eq i32 %0, 0
-  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
-
-argCountSuccess:                                  ; preds = %functionEntryInitializers
-  ret i64 8
-
-argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call fastcc void @sorbet_rb_error_arity(i32 %0)
-  unreachable
-}
-
 attributes #0 = { nounwind ssp uwtable }
 attributes #1 = { nounwind }
 attributes #2 = { cold noreturn }
 attributes #3 = { "addedToSilenceEmptyAttrsError" }
-attributes #4 = { noreturn nounwind ssp uwtable }
-attributes #5 = { noreturn }
-attributes #6 = { nounwind sspreq }
-attributes #7 = { nounwind sspreq uwtable }
-attributes #8 = { cold noreturn nounwind }
-attributes #9 = { noreturn nounwind }
+attributes #4 = { nounwind sspreq }
+attributes #5 = { cold noreturn nounwind }
 
 !0 = !{!"branch_weights", i32 1, i32 2000}
 !1 = !{!2, !2, i64 0}
