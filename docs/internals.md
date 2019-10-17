@@ -124,7 +124,7 @@ another or make modifications within the IR they were given.
 | 4   |                                  | [`ast::Expression`] | [LocalVars], `-p dsl-tree`        |
 | 5   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
 | 6   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
-| 6   |                                  | [`ast::Expression`] | [Flatten], `-p flatten-tree` (*)  |
+| 6   |                                  | [`ast::Expression`] | [Flattener], `-p flatten-tree`    |
 | 7   | [CFG], `-p cfg --stop-after cfg` |                     |                                   |
 | 8   |                                  | [`cfg::CFG`]        | [Infer], `-p cfg`                 |
 
@@ -344,6 +344,17 @@ passes to tease apart some implicit dependencies to achieve more parallelism and
 more modularity. In particular, it's feasible that we enter `Symbol`s for
 constants and then resolve constants before entering `Symbol`s for methods and
 resolving sigs.
+
+### Flattener
+
+The flattener is (currently) the final pass that processes the ast. The goal
+here is to move around all the nodes so that the final result only had top level
+classes and they only contain method definitions. All the bodies of the classes
+are moved to special `<static-init>` methods. The top level statements in
+the file are moved to a `<static-init>` method on the synthetic `<root>` object.
+
+You can always view the final result of all ast transforms with `-p ast`.
+
 
 ### CFG
 
