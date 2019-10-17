@@ -10,18 +10,9 @@
 namespace sorbet::realmain::lsp {
 
 class LSPWrapper {
-private:
     static const std::string EMPTY_STRING;
 
-    class LSPOutputToVector : public LSPOutput {
-    private:
-        std::vector<std::unique_ptr<LSPMessage>> output;
-
-    public:
-        void rawWrite(std::unique_ptr<LSPMessage> msg) override;
-
-        std::vector<std::unique_ptr<LSPMessage>> getOutput();
-    };
+    class LSPOutputToVector;
 
     /** If true, then LSPLoop is initialized and is ready to receive requests. */
     bool initialized = false;
@@ -38,7 +29,7 @@ private:
     std::unique_ptr<WorkerPool> workers;
     std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
     std::shared_ptr<spd::logger> typeErrorsConsole;
-    LSPOutputToVector output;
+    std::unique_ptr<LSPOutputToVector> output;
 
     /** Contains shared constructor logic. */
     void instantiate(std::unique_ptr<core::GlobalState> gs, const std::shared_ptr<spdlog::logger> &logger,

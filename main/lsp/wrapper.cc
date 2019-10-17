@@ -10,13 +10,21 @@ namespace sorbet::realmain::lsp {
 
 const std::string LSPWrapper::EMPTY_STRING = "";
 
-void LSPWrapper::LSPOutputToVector::rawWrite(unique_ptr<LSPMessage> msg) {
-    output.push_back(move(msg));
-}
+class LSPWrapper::LSPOutputToVector final : public LSPOutput {
+private:
+    vector<unique_ptr<LSPMessage>> output;
 
-vector<unique_ptr<LSPMessage>> LSPWrapper::LSPOutputToVector::getOutput() {
-    return move(output);
-}
+public:
+    LSPOutputToVector() = default;
+
+    void rawWrite(unique_ptr<LSPMessage> msg) override {
+        output.push_back(move(msg));
+    }
+
+    std::vector<unique_ptr<LSPMessage>> getOutput() {
+        return move(output);
+    }
+};
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMessage> message) {
     const bool isInitialize = message->isNotification() && message->method() == LSPMethod::Initialize;
@@ -30,7 +38,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMess
     }
 
     // Retrieve any notifications that would normally be sent asynchronously in a multithreaded scenario.
-    auto notifs = output.getOutput();
+    auto notifs = output->getOutput();
     result.responses.insert(result.responses.end(), make_move_iterator(notifs.begin()),
                             make_move_iterator(notifs.end()));
 
@@ -68,11 +76,12 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &json
 
 void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,
                              bool disableFastPath) {
+    output = make_unique<LSPWrapper::LSPOutputToVector>();
     ENFORCE(gs->errorQueue->ignoreFlushes); // LSP needs this
     workers = WorkerPool::create(0, *logger);
     // Configure LSPLoop to disable configatron.
     lspLoop = make_unique<LSPLoop>(std::move(gs), LSPConfiguration(opts, logger, true, disableFastPath), logger,
-                                   *workers.get(), output);
+                                   *workers.get(), *output);
 }
 
 LSPWrapper::LSPWrapper(options::Options &&options, std::string_view rootPath, bool disableFastPath)

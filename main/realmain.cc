@@ -162,15 +162,6 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
 }
 
 #ifndef SORBET_REALMAIN_MIN
-class LSPStdout final : public lsp::LSPOutput {
-    void rawWrite(std::unique_ptr<lsp::LSPMessage> msg) {
-        auto json = msg->toJSON();
-        string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", json.length(), json);
-        logger->debug("Write: {}\n", json);
-        cout << outResult << flush;
-    }
-};
-
 struct AutogenResult {
     struct Serialized {
         // Selectively populated based on print options
@@ -463,7 +454,7 @@ int realmain(int argc, char *argv[]) {
                       "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag,"
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       Version::full_version_string);
-        LSPStdout output;
+        lsp::LSPStdout output([logger = logger](string str) -> void { logger->debug(str); });
         lsp::LSPLoop loop(move(gs), lsp::LSPConfiguration(opts, logger), logger, *workers, output);
         gs = loop.runLSP(STDIN_FILENO).value_or(nullptr);
 #endif

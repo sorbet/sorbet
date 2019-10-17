@@ -7,7 +7,6 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 namespace {
-using namespace sorbet::realmain::lsp;
 // Is this a notification the server should be sending?
 bool isServerNotification(const LSPMethod method) {
     switch (method) {
@@ -23,7 +22,7 @@ bool isServerNotification(const LSPMethod method) {
 }
 } // namespace
 
-void LSPOutput::write(std::unique_ptr<LSPMessage> msg) {
+void LSPOutput::write(unique_ptr<LSPMessage> msg) {
     // Sanity check that message is acceptable.
     if (msg->isResponse()) {
         ENFORCE(msg->asResponse().result || msg->asResponse().error,
@@ -32,6 +31,15 @@ void LSPOutput::write(std::unique_ptr<LSPMessage> msg) {
         ENFORCE(isServerNotification(msg->method()));
     }
     rawWrite(move(msg));
+}
+
+LSPStdout::LSPStdout(function<void(std::string)> log) : log(log) {}
+
+void LSPStdout::rawWrite(unique_ptr<LSPMessage> msg) {
+    auto json = msg->toJSON();
+    string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", json.length(), json);
+    log(fmt::format("Write: {}\n", json));
+    cout << outResult << flush;
 }
 
 } // namespace sorbet::realmain::lsp

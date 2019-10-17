@@ -6,16 +6,16 @@
 namespace sorbet::realmain::lsp {
 using namespace std;
 
-unique_ptr<LSPMessage> makeShowOperation(std::string_view operationName, std::string_view description,
+unique_ptr<LSPMessage> makeShowOperation(std::string operationName, std::string description,
                                          SorbetOperationStatus status) {
     return make_unique<LSPMessage>(make_unique<NotificationMessage>(
         "2.0", LSPMethod::SorbetShowOperation,
-        make_unique<SorbetShowOperationParams>(string(operationName), string(description), status)));
+        make_unique<SorbetShowOperationParams>(move(operationName), move(description), status)));
 }
 
-ShowOperation::ShowOperation(LSPOutput &output, const LSPConfiguration &config, std::string_view operationName,
-                             std::string_view description)
-    : output(output), config(config), operationName(string(operationName)), description(string(description)) {
+ShowOperation::ShowOperation(LSPOutput &output, const LSPConfiguration &config, std::string operationName,
+                             std::string description)
+    : output(output), config(config), operationName(move(operationName)), description(move(description)) {
     if (config.enableOperationNotifications) {
         output.write(makeShowOperation(this->operationName, this->description, SorbetOperationStatus::Start));
     }
