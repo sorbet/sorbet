@@ -512,6 +512,12 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathWhenSlowPathEditComesIn) { // NO
 
     // Processor thread: Try to typecheck. Should return false because it has been canceled.
     EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
+
+    // Ensure that new update has a new global state defined.
+    auto maybeUpdates = getUpdates(state, 0);
+    ASSERT_TRUE(maybeUpdates.has_value());
+    auto &updates = maybeUpdates.value();
+    EXPECT_TRUE(updates->updatedGS.has_value());
 }
 
 TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenFastPathEditComesIn) { // NOLINT
