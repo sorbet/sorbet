@@ -20,11 +20,10 @@ class AllocaInst;
 namespace sorbet::compiler {
 class CompilerState {
 public:
-    CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *, llvm::BasicBlock *globalInits);
+    CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *);
 
     const core::GlobalState &gs;
     llvm::LLVMContext &lctx;
-    llvm::BasicBlock *globalInitializers;
     llvm::BasicBlock *functionEntryInitializers;
     llvm::Module *module;
 

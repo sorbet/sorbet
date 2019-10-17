@@ -83,11 +83,10 @@ public:
         if (!module) {
             module = sorbet::compiler::IRHelpers::readDefaultModule(functionName.data(), lctx);
         }
-        llvm::BasicBlock *globalInitializers = llvm::BasicBlock::Create(lctx, "initializeGlobals");
-        compiler::CompilerState state(gs, lctx, module.get(), globalInitializers);
+        compiler::CompilerState state(gs, lctx, module.get());
         sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
         string fileName = funcName2InitName(functionName);
-        sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol, globalInitializers, fileName);
+        sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol, fileName);
     };
     virtual void patchDSL(core::MutableContext &ctx, ast::ClassDef *klass) const override {
         if (!irOutputDir.has_value()) {

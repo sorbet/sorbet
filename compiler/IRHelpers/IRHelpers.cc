@@ -9,6 +9,7 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
+#include "llvm/Transforms/Utils/ModuleUtils.h" // appendToGlobalCtors
 #include <string_view>
 // ^^^ violate poisons
 #include "core/core.h"
@@ -23,9 +24,8 @@ std::unique_ptr<llvm::Module> IRHelpers::readDefaultModule(const char *name, llv
     return move(ret.get());
 }
 
-CompilerState::CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module,
-                             llvm::BasicBlock *globalInits)
-    : gs(gs), lctx(lctx), globalInitializers(globalInits), functionEntryInitializers(nullptr), module(module) {}
+CompilerState::CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module)
+    : gs(gs), lctx(lctx), functionEntryInitializers(nullptr), module(module) {}
 namespace {
 llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
     return static_cast<llvm::IRBuilder<> &>(builder);
@@ -118,14 +118,21 @@ llvm::Value *CompilerState::getRubyIdFor(llvm::IRBuilderBase &builder, std::stri
         auto ret = new llvm::GlobalVariable(*module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
         ret->setAlignment(8);
-        // create initialization code
+        // create constructor
+        std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(lctx));
+        auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), NoArgs, false);
+        auto constr = llvm::Function::Create(ft, llvm::Function::InternalLinkage, {"Constr_", rawName}, *module);
+
+        auto bb = llvm::BasicBlock::Create(lctx, "constr", constr);
+        globalInitBuilder.SetInsertPoint(bb);
         llvm::Constant *indicesString[] = {zero, zero};
-        globalInitBuilder.SetInsertPoint(globalInitializers);
         auto gv = builder.CreateGlobalString(name, {"str_", name}, 0);
         auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(gv->getValueType(), gv, indicesString);
         auto rawID = globalInitBuilder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "str");
         globalInitBuilder.CreateStore(rawID,
                                       llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
+        globalInitBuilder.CreateRetVoid();
+        llvm::appendToGlobalCtors(*module, constr, 0, ret);
 
         return ret;
     }));

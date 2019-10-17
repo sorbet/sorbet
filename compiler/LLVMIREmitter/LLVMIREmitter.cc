@@ -391,8 +391,7 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
     gs.runCheapOptimizations(func);
 }
 
-void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym, llvm::BasicBlock *globalInitializers,
-                                 string_view objectName) {
+void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym, string_view objectName) {
     llvm::IRBuilder<> builder(gs);
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(gs));
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(gs), NoArgs, false);
@@ -410,11 +409,8 @@ void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym, 
         linkageType = llvm::Function::ExternalLinkage;
     }
     auto entryFunc = llvm::Function::Create(ft, linkageType, {"Init_", (string)baseName}, *gs.module);
-    globalInitializers->insertInto(entryFunc);
 
-    builder.SetInsertPoint(globalInitializers);
     auto bb = llvm::BasicBlock::Create(gs, "entry", entryFunc);
-    builder.CreateBr(bb);
     builder.SetInsertPoint(bb);
 
     // Call the LLVM method that was made by LLVMIREmitter from this Init_ method
