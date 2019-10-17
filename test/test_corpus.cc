@@ -115,7 +115,7 @@ public:
 UnorderedSet<string> knownExpectations = {
     "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "ast",       "ast-raw",       "dsl-tree",
     "dsl-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree", "name-tree-raw", "resolve-tree",
-    "resolve-tree-raw", "flatten-tree",  "flatten-tree-raw",    "cfg",       "cfg-raw",       "cfg-json",
+    "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",       "cfg-raw",       "cfg-json",
     "autogen",          "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
