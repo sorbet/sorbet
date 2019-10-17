@@ -683,10 +683,10 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
 
     resolved = flatten::runOne(ctx, move(resolved));
 
-    if (opts.print.FlattenTree.enabled) {
+    if (opts.print.FlattenTree.enabled || opts.print.AST.enabled) {
         opts.print.FlattenTree.fmt("{}\n", resolved.tree->toString(ctx));
     }
-    if (opts.print.FlattenTreeRaw.enabled) {
+    if (opts.print.FlattenTreeRaw.enabled || opts.print.ASTRaw.enabled) {
         opts.print.FlattenTreeRaw.fmt("{}\n", resolved.tree->showRaw(ctx));
     }
 
