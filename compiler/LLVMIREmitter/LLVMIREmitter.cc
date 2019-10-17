@@ -235,7 +235,9 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                                 llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
                             auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
-                            builder.CreateCall(cs.module->getFunction("sorbet_defineMethod"),
+                            auto method = ownerSym.data(cs)->isSingletonClass(cs) ? "sorbet_defineMethodSingleton"
+                                                                                  : "sorbet_defineMethod";
+                            builder.CreateCall(cs.module->getFunction(method),
                                                {resolveSymbol(cs, ownerSym, builder), funcNameCStr, ptr,
                                                 llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
