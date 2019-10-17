@@ -144,7 +144,6 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::WorkspaceSymbol:
         // These requests involve a specific file location, and should never be delayed.
         case LSPMethod::TextDocumentHover:
-        case LSPMethod::TextDocumentCompletion:
         case LSPMethod::TextDocumentSignatureHelp:
         // These are file updates. They shouldn't be delayed (but they can be combined/expedited).
         case LSPMethod::TextDocumentDidOpen:
@@ -167,6 +166,9 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::TextDocumentPublishDiagnostics:
         case LSPMethod::SorbetShowOperation:
         case LSPMethod::SorbetTypecheckRunInfo:
+        // This request involes a specific file location and SHOULD never be delayed but we need completion to be fast.
+        // TODO(jez) Check if we still need this after pre-emptible slow path
+        case LSPMethod::TextDocumentCompletion:
             return true;
     }
 }
