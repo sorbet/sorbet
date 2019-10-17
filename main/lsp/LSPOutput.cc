@@ -1,6 +1,7 @@
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/json_types.h"
+#include "spdlog/spdlog.h"
 
 using namespace std;
 
@@ -33,12 +34,12 @@ void LSPOutput::write(unique_ptr<LSPMessage> msg) {
     rawWrite(move(msg));
 }
 
-LSPStdout::LSPStdout(function<void(std::string)> log) : log(log) {}
+LSPStdout::LSPStdout(shared_ptr<spdlog::logger> &logger) : logger(logger) {}
 
 void LSPStdout::rawWrite(unique_ptr<LSPMessage> msg) {
     auto json = msg->toJSON();
     string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", json.length(), json);
-    log(fmt::format("Write: {}\n", json));
+    logger->debug("Write: {}\n", json);
     cout << outResult << flush;
 }
 

@@ -1,8 +1,11 @@
 #ifndef RUBY_TYPER_LSP_LSPOUTPUT_H
 #define RUBY_TYPER_LSP_LSPOUTPUT_H
 
-#include <functional>
 #include <memory>
+
+namespace spdlog {
+class logger;
+};
 
 namespace sorbet::realmain::lsp {
 class LSPMessage;
@@ -24,13 +27,14 @@ public:
  * An implementation of LSPOutput that writes to stdout.
  */
 class LSPStdout final : public LSPOutput {
-    std::function<void(std::string)> log;
+    // Used for debug output.
+    std::shared_ptr<spdlog::logger> logger;
 
 protected:
     void rawWrite(std::unique_ptr<LSPMessage> msg) override;
 
 public:
-    LSPStdout(std::function<void(std::string)> log);
+    LSPStdout(std::shared_ptr<spdlog::logger> &logger);
 };
 
 } // namespace sorbet::realmain::lsp
