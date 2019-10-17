@@ -54,16 +54,8 @@ struct Printers {
     PrinterConfig IndexTreeRaw;
     PrinterConfig NameTree;
     PrinterConfig NameTreeRaw;
-    PrinterConfig SymbolTable;
-    PrinterConfig SymbolTableRaw;
-    PrinterConfig SymbolTableJson;
-    PrinterConfig SymbolTableFull;
-    PrinterConfig SymbolTableFullRaw;
-    PrinterConfig SymbolTableFullJson;
-    PrinterConfig FileTableJson;
     PrinterConfig ResolveTree;
     PrinterConfig ResolveTreeRaw;
-    PrinterConfig MissingConstants;
     PrinterConfig FlattenTree;
     PrinterConfig FlattenTreeRaw;
     PrinterConfig AST;
@@ -77,12 +69,20 @@ struct Printers {
     // See CFG.proto for details
     PrinterConfig CFGProto;
     PrinterConfig TypedSource;
+    PrinterConfig SymbolTable;
+    PrinterConfig SymbolTableRaw;
+    PrinterConfig SymbolTableJson;
+    PrinterConfig SymbolTableFull;
+    PrinterConfig SymbolTableFullRaw;
+    PrinterConfig SymbolTableFullJson;
+    PrinterConfig FileTableJson;
+    PrinterConfig MissingConstants;
+    PrinterConfig PluginGeneratedCode;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
     PrinterConfig AutogenClasslist;
     PrinterConfig AutogenAutoloader;
     PrinterConfig AutogenSubclasses;
-    PrinterConfig PluginGeneratedCode;
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
