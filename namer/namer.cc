@@ -748,8 +748,9 @@ public:
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
                 e.setHeader("`{}` cannot be used at the top-level", "type_member");
             }
-            auto send =
-                ast::MK::Send1(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(), ast::MK::Untyped(asgn->loc));
+            auto send = ast::MK::Send0Block(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(),
+                                            ast::MK::Block0(asgn->loc, ast::MK::Untyped(asgn->loc)));
+
             return handleAssignment(ctx, make_unique<ast::Assign>(asgn->loc, std::move(asgn->lhs), std::move(send)));
         }
 
