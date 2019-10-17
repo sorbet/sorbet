@@ -22,3 +22,5 @@ Now you can start it in `lldb` like so:
 Now when you run it there are some useful functions for debugging:
 
 * `rb_id2name` - Print the underlaying data from an `ID`
+* `*(RString*)str` - Print the string contents of a `VALUE` which already is a String
+* `*(RString*)rb_class_name(klass)` - Print the name of a `VALUE` which is a Class
