@@ -9,7 +9,7 @@
 #include <string_view>
 namespace sorbet::realmain::lsp {
 
-class LSPWrapper {
+class LSPWrapper final {
     static const std::string EMPTY_STRING;
 
     class LSPOutputToVector;
@@ -51,6 +51,7 @@ public:
     LSPWrapper(options::Options &&options, std::string_view rootPath = EMPTY_STRING, bool disableFastPath = false);
     LSPWrapper(std::unique_ptr<core::GlobalState> gs, options::Options &&options,
                const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath);
+    ~LSPWrapper();
 
     /**
      * Send a message to LSP, and returns any responses.

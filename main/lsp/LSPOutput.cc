@@ -2,6 +2,7 @@
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/json_types.h"
 #include "spdlog/spdlog.h"
+#include <iostream>
 
 using namespace std;
 

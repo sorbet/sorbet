@@ -116,6 +116,10 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, options::Options &&opti
     instantiate(std::move(gs), logger, disableFastPath);
 }
 
+// Define so we can properly destruct unique_ptr<LSPOutputToVector> (which the default destructor can't delete since we
+// forward decl it in the header)
+LSPWrapper::~LSPWrapper() {}
+
 int LSPWrapper::getTypecheckCount() const {
     if (gs) {
         return gs->lspTypecheckCount;
