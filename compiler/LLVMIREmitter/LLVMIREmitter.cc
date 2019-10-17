@@ -80,6 +80,20 @@ void varSet(CompilerState &gs, llvm::AllocaInst *alloca, llvm::Value *var, llvm:
     // TODO do const_set for the alias
 }
 
+llvm::Function *getInitFunction(CompilerState &gs, std::string baseName,
+                                llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage) {
+    auto name = "Init_" + baseName;
+
+    auto func = gs.module->getFunction(name);
+    if (func) {
+        return func;
+    }
+
+    std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(gs));
+    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(gs), NoArgs, false);
+    return llvm::Function::Create(ft, linkageType, name, *gs.module);
+}
+
 // Create local allocas for local variables, initialize them all to `nil`.
 // load arguments, check their count
 // load self
@@ -221,9 +235,7 @@ void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                                                {resolveSymbol(gs, ownerSym, builder), funcNameCStr, ptr,
                                                 llvm::ConstantInt::get(gs, llvm::APInt(32, -1, true))});
 
-                            std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(gs));
-                            auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(gs), NoArgs, false);
-                            builder.CreateCall(gs.module->getOrInsertFunction("Init_" + llvmFuncName, ft), {});
+                            builder.CreateCall(getInitFunction(gs, llvmFuncName), {});
                             return;
                         }
                         if (i->fun == Names::sorbet_defineMethodSingleton) {
@@ -393,8 +405,6 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
 
 void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym) {
     llvm::IRBuilder<> builder(gs);
-    std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(gs));
-    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(gs), NoArgs, false);
     bool isSpecialEntrypoint = false;
     if (sym.data(gs)->owner == core::Symbols::rootSingleton() &&
         sym.data(gs)->name.data(gs)->unique.original == core::Names::staticInit()) {
@@ -408,7 +418,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym) 
         baseName = baseName.substr(0, baseName.rfind(".rb"));
         linkageType = llvm::Function::ExternalLinkage;
     }
-    auto entryFunc = llvm::Function::Create(ft, linkageType, {"Init_", (string)baseName}, *gs.module);
+    auto entryFunc = getInitFunction(gs, baseName, linkageType);
 
     auto bb = llvm::BasicBlock::Create(gs, "entry", entryFunc);
     builder.SetInsertPoint(bb);
