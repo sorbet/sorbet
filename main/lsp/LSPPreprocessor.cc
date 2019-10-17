@@ -118,6 +118,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
                                 "[Preprocessor] Canceling typechecking, as new edits {} thru {} will just take "
                                 "the slow path again.",
                                 params->updates.versionStart, params->updates.versionEnd);
+                            combinedUpdates.updatedGS = getTypecheckingGS();
                         }
                         params->updates = move(combinedUpdates);
                     }
