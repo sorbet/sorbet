@@ -38,11 +38,11 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
     return name.data(gs)->show(gs);
 }
 
-llvm::CallInst *resolveSymbol(CompilerState &gs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
+llvm::CallInst *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
     sym = removeRoot(sym);
-    auto str = showClassName(gs, sym);
+    auto str = showClassName(cs, sym);
     auto rawCString = builder.CreateGlobalStringPtr(str, "str_" + str);
-    return builder.CreateCall(gs.module->getFunction("sorbet_getConstant"), {rawCString});
+    return builder.CreateCall(cs.module->getFunction("sorbet_getConstant"), {rawCString});
 }
 
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
@@ -59,58 +59,58 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     return sym;
 }
 
-llvm::Value *varGet(CompilerState &gs, core::LocalVariable var, llvm::IRBuilder<> &builder,
+llvm::Value *varGet(CompilerState &cs, core::LocalVariable var, llvm::IRBuilder<> &builder,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
                     const UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
     auto ret = llvmVariables.at(var);
     if (!aliases.contains(ret)) {
-        return gs.unboxRawValue(builder, ret);
+        return cs.unboxRawValue(builder, ret);
     }
 
-    return resolveSymbol(gs, aliases.at(ret), builder);
+    return resolveSymbol(cs, aliases.at(ret), builder);
 }
 
-void varSet(CompilerState &gs, llvm::AllocaInst *alloca, llvm::Value *var, llvm::IRBuilder<> &builder,
+void varSet(CompilerState &cs, llvm::AllocaInst *alloca, llvm::Value *var, llvm::IRBuilder<> &builder,
             const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
             UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
-    gs.boxRawValue(builder, alloca, var);
+    cs.boxRawValue(builder, alloca, var);
     if (!aliases.contains(alloca)) {
         return;
     }
     // TODO do const_set for the alias
 }
 
-llvm::Function *getInitFunction(CompilerState &gs, std::string baseName,
+llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
                                 llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage) {
     auto name = "Init_" + baseName;
 
-    auto func = gs.module->getFunction(name);
+    auto func = cs.module->getFunction(name);
     if (func) {
         return func;
     }
 
-    std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(gs));
-    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(gs), NoArgs, false);
-    return llvm::Function::Create(ft, linkageType, name, *gs.module);
+    std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
+    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
+    return llvm::Function::Create(ft, linkageType, name, *cs.module);
 }
 
 // Create local allocas for local variables, initialize them all to `nil`.
 // load arguments, check their count
 // load self
 UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
-setupArgumentsAndLocalVariables(CompilerState &gs, llvm::IRBuilder<> &builder, cfg::CFG &cfg,
+setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, cfg::CFG &cfg,
                                 unique_ptr<ast::MethodDef> &md, llvm::Function *func) {
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
     {
         // nill out variables.
-        auto valueType = gs.getValueType();
-        auto nilValueRaw = gs.getRubyNilRaw(builder);
+        auto valueType = cs.getValueType();
+        auto nilValueRaw = cs.getRubyNilRaw(builder);
         for (const auto &entry : cfg.minLoops) {
             auto var = entry.first;
-            auto svName = var._name.data(gs)->shortName(gs);
+            auto svName = var._name.data(cs)->shortName(cs);
             auto alloca = llvmVariables[var] =
                 builder.CreateAlloca(valueType, nullptr, llvm::StringRef(svName.data(), svName.length()));
-            gs.boxRawValue(builder, alloca, nilValueRaw);
+            cs.boxRawValue(builder, alloca, nilValueRaw);
         }
     }
     auto argArrayRaw = func->arg_begin() + 1;
@@ -119,17 +119,17 @@ setupArgumentsAndLocalVariables(CompilerState &gs, llvm::IRBuilder<> &builder, c
     {
         // validate arg count
         auto argCountRaw = func->arg_begin();
-        auto argCountSuccessBlock = llvm::BasicBlock::Create(gs, "argCountSuccess", func);
-        auto argCountFailBlock = llvm::BasicBlock::Create(gs, "argCountFailBlock", func);
+        auto argCountSuccessBlock = llvm::BasicBlock::Create(cs, "argCountSuccess", func);
+        auto argCountFailBlock = llvm::BasicBlock::Create(cs, "argCountFailBlock", func);
         auto isWrongArgCount = builder.CreateICmpNE(
             argCountRaw,
-            llvm::ConstantInt::get(llvm::Type::getInt32Ty(gs), llvm::APInt(32, requiredArgumentCount, true)),
+            llvm::ConstantInt::get(llvm::Type::getInt32Ty(cs), llvm::APInt(32, requiredArgumentCount, true)),
             "isWrongArgCount");
-        gs.setExpectedBool(builder, isWrongArgCount, false);
+        cs.setExpectedBool(builder, isWrongArgCount, false);
         builder.CreateCondBr(isWrongArgCount, argCountFailBlock, argCountSuccessBlock);
 
         builder.SetInsertPoint(argCountFailBlock);
-        gs.emitArgumentMismatch(builder, argCountRaw, requiredArgumentCount, requiredArgumentCount);
+        cs.emitArgumentMismatch(builder, argCountRaw, requiredArgumentCount, requiredArgumentCount);
         builder.SetInsertPoint(argCountSuccessBlock);
     }
     {
@@ -143,39 +143,39 @@ setupArgumentsAndLocalVariables(CompilerState &gs, llvm::IRBuilder<> &builder, c
             }
 
             auto *a = ast::MK::arg2Local(arg.get());
-            llvm::Value *indices[] = {llvm::ConstantInt::get(gs, llvm::APInt(32, argId, true))};
+            llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, argId, true))};
             auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "rawArgValue");
-            gs.boxRawValue(builder, llvmVariables[a->localVariable], rawValue);
+            cs.boxRawValue(builder, llvmVariables[a->localVariable], rawValue);
         }
     }
     {
         // box `self`
         auto selfArgRaw = (func->arg_begin() + 2);
-        gs.boxRawValue(builder, llvmVariables[core::LocalVariable::selfVariable()], selfArgRaw);
+        cs.boxRawValue(builder, llvmVariables[core::LocalVariable::selfVariable()], selfArgRaw);
     }
 
     return llvmVariables;
 }
 
-vector<llvm::BasicBlock *> getSorbetBlocks2LLVMBlockMapping(CompilerState &gs, cfg::CFG &cfg, llvm::Function *func,
+vector<llvm::BasicBlock *> getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Function *func,
                                                             llvm::BasicBlock *llvmFuncEntry) {
     vector<llvm::BasicBlock *> llvmBlocks(cfg.maxBasicBlockId);
     for (auto &b : cfg.basicBlocks) {
         if (b.get() == cfg.entry()) {
             llvmBlocks[b->id] = llvmFuncEntry;
         } else {
-            llvmBlocks[b->id] = llvm::BasicBlock::Create(gs, {"BB", to_string(b->id)},
+            llvmBlocks[b->id] = llvm::BasicBlock::Create(cs, {"BB", to_string(b->id)},
                                                          func); // to_s is slow. We should only use it in debug builds
         }
     }
     return llvmBlocks;
 }
 
-void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBlock *> llvmBlocks,
+void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBlock *> llvmBlocks,
                   const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables,
                   llvm::AllocaInst *sendArgArray) {
     UnorderedMap<llvm::AllocaInst *, core::SymbolRef> aliases;
-    llvm::IRBuilder<> builder(gs);
+    llvm::IRBuilder<> builder(cs);
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         auto block = llvmBlocks[bb->id];
@@ -187,13 +187,13 @@ void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
-                        auto var = varGet(gs, i->what, builder, llvmVariables, aliases);
-                        varSet(gs, targetAlloca, var, builder, llvmVariables, aliases);
+                        auto var = varGet(cs, i->what, builder, llvmVariables, aliases);
+                        varSet(cs, targetAlloca, var, builder, llvmVariables, aliases);
                     },
                     [&](cfg::Alias *i) { aliases[targetAlloca] = i->what; },
-                    [&](cfg::SolveConstraint *i) { gs.trace("SolveConstraint\n"); },
+                    [&](cfg::SolveConstraint *i) { cs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
-                        auto str = i->fun.data(gs)->shortName(gs);
+                        auto str = i->fun.data(cs)->shortName(cs);
                         if (i->fun == Names::sorbet_defineTopLevelModule) {
                             return;
                         }
@@ -201,11 +201,11 @@ void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                             return;
                         }
                         if (i->fun == Names::sorbet_defineTopLevelClass) {
-                            auto sym = typeToSym(gs, i->args[0].type);
-                            auto className = showClassName(gs, sym);
+                            auto sym = typeToSym(cs, i->args[0].type);
+                            auto className = showClassName(cs, sym);
                             auto classNameCStr = builder.CreateGlobalStringPtr(className, {"className_", className});
-                            auto rawCall = resolveSymbol(gs, sym.data(gs)->superClass(), builder);
-                            builder.CreateCall(gs.module->getFunction("sorbet_defineTopLevelClass"),
+                            auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
+                            builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelClass"),
                                                {classNameCStr, rawCall});
                             return;
                         }
@@ -214,28 +214,28 @@ void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                         }
                         if (i->fun == Names::sorbet_defineMethod) {
                             ENFORCE(i->args.size() == 2);
-                            auto ownerSym = typeToSym(gs, i->args[0].type);
+                            auto ownerSym = typeToSym(cs, i->args[0].type);
 
                             auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
                             ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-                            core::NameRef funcNameRef(gs, lit->value);
-                            auto funcSym = ownerSym.data(gs)->findMember(gs, funcNameRef);
-                            ENFORCE(funcSym.data(gs)->isMethod());
+                            core::NameRef funcNameRef(cs, lit->value);
+                            auto funcSym = ownerSym.data(cs)->findMember(cs, funcNameRef);
+                            ENFORCE(funcSym.data(cs)->isMethod());
 
-                            auto funcName = funcNameRef.show(gs);
+                            auto funcName = funcNameRef.show(cs);
                             auto funcNameCStr = builder.CreateGlobalStringPtr(funcName, {"funcName_", funcName});
 
-                            auto llvmFuncName = funcSym.data(gs)->toStringFullName(gs);
-                            auto funcHandle = gs.module->getOrInsertFunction(llvmFuncName, gs.getRubyFFIType());
+                            auto llvmFuncName = funcSym.data(cs)->toStringFullName(cs);
+                            auto funcHandle = cs.module->getOrInsertFunction(llvmFuncName, cs.getRubyFFIType());
                             auto universalSignature =
-                                llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(gs), true));
+                                llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
                             auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
-                            builder.CreateCall(gs.module->getFunction("sorbet_defineMethod"),
-                                               {resolveSymbol(gs, ownerSym, builder), funcNameCStr, ptr,
-                                                llvm::ConstantInt::get(gs, llvm::APInt(32, -1, true))});
+                            builder.CreateCall(cs.module->getFunction("sorbet_defineMethod"),
+                                               {resolveSymbol(cs, ownerSym, builder), funcNameCStr, ptr,
+                                                llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
-                            builder.CreateCall(getInitFunction(gs, llvmFuncName), {});
+                            builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
                             return;
                         }
                         if (i->fun == Names::sorbet_defineMethodSingleton) {
@@ -249,21 +249,21 @@ void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                         if (i->fun == core::Names::unsafe()) {
                             return;
                         }
-                        auto rawId = gs.getRubyIdFor(builder, str);
+                        auto rawId = cs.getRubyIdFor(builder, str);
 
                         // fill in args
                         {
                             int argId = -1;
                             for (auto &arg : i->args) {
                                 argId += 1;
-                                llvm::Value *indices[] = {llvm::ConstantInt::get(gs, llvm::APInt(32, 0, true)),
-                                                          llvm::ConstantInt::get(gs, llvm::APInt(64, argId, true))};
-                                auto var = varGet(gs, arg.variable, builder, llvmVariables, aliases);
+                                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+                                                          llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
+                                auto var = varGet(cs, arg.variable, builder, llvmVariables, aliases);
                                 builder.CreateStore(var, builder.CreateGEP(sendArgArray, indices, "callArgsAddr"));
                             }
                         }
-                        llvm::Value *indices[] = {llvm::ConstantInt::get(gs, llvm::APInt(64, 0, true)),
-                                                  llvm::ConstantInt::get(gs, llvm::APInt(64, 0, true))};
+                        llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
+                                                  llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
 
                         // TODO(perf): call
                         // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
@@ -273,65 +273,65 @@ void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                         //
                         // todo(perf): mark the arguments with
                         // https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic for duration of the call
-                        auto var = varGet(gs, i->recv.variable, builder, llvmVariables, aliases);
+                        auto var = varGet(cs, i->recv.variable, builder, llvmVariables, aliases);
                         auto rawCall = builder.CreateCall(
-                            gs.module->getFunction("sorbet_callFunc"),
+                            cs.module->getFunction("sorbet_callFunc"),
                             {var, rawId,
-                             llvm::ConstantInt::get(llvm::Type::getInt32Ty(gs), llvm::APInt(32, i->args.size(), true)),
+                             llvm::ConstantInt::get(llvm::Type::getInt32Ty(cs), llvm::APInt(32, i->args.size(), true)),
                              builder.CreateGEP(sendArgArray, indices)},
                             "rawSendResult");
-                        varSet(gs, targetAlloca, rawCall, builder, llvmVariables, aliases);
+                        varSet(cs, targetAlloca, rawCall, builder, llvmVariables, aliases);
                     },
                     [&](cfg::Return *i) {
                         isTerminated = true;
-                        auto var = varGet(gs, i->what.variable, builder, llvmVariables, aliases);
+                        auto var = varGet(cs, i->what.variable, builder, llvmVariables, aliases);
                         builder.CreateRet(var);
                     },
-                    [&](cfg::BlockReturn *i) { gs.trace("BlockReturn\n"); },
-                    [&](cfg::LoadSelf *i) { gs.trace("LoadSelf\n"); },
+                    [&](cfg::BlockReturn *i) { cs.trace("BlockReturn\n"); },
+                    [&](cfg::LoadSelf *i) { cs.trace("LoadSelf\n"); },
                     [&](cfg::Literal *i) {
-                        gs.trace("Literal\n");
-                        if (i->value->derivesFrom(gs, core::Symbols::NilClass())) {
-                            varSet(gs, targetAlloca, gs.getRubyNilRaw(builder), builder, llvmVariables, aliases);
+                        cs.trace("Literal\n");
+                        if (i->value->derivesFrom(cs, core::Symbols::NilClass())) {
+                            varSet(cs, targetAlloca, cs.getRubyNilRaw(builder), builder, llvmVariables, aliases);
                             return;
                         }
                         auto litType = core::cast_type<core::LiteralType>(i->value.get());
                         ENFORCE(litType);
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
-                                auto rawInt = gs.getRubyIntRaw(builder, litType->value);
-                                varSet(gs, targetAlloca, rawInt, builder, llvmVariables, aliases);
+                                auto rawInt = cs.getRubyIntRaw(builder, litType->value);
+                                varSet(cs, targetAlloca, rawInt, builder, llvmVariables, aliases);
 
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::True:
-                                varSet(gs, targetAlloca, gs.getRubyTrueRaw(builder), builder, llvmVariables, aliases);
+                                varSet(cs, targetAlloca, cs.getRubyTrueRaw(builder), builder, llvmVariables, aliases);
                                 break;
                             case core::LiteralType::LiteralTypeKind::False:
-                                varSet(gs, targetAlloca, gs.getRubyFalseRaw(builder), builder, llvmVariables, aliases);
+                                varSet(cs, targetAlloca, cs.getRubyFalseRaw(builder), builder, llvmVariables, aliases);
                                 break;
                             case core::LiteralType::LiteralTypeKind::String: {
-                                auto str = core::NameRef(gs, litType->value).data(gs)->shortName(gs);
-                                auto rawRubyString = gs.getRubyStringRaw(builder, str);
-                                varSet(gs, targetAlloca, rawRubyString, builder, llvmVariables, aliases);
+                                auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
+                                auto rawRubyString = cs.getRubyStringRaw(builder, str);
+                                varSet(cs, targetAlloca, rawRubyString, builder, llvmVariables, aliases);
                                 break;
                             }
                             default:
-                                gs.trace("UnsupportedLiteral");
+                                cs.trace("UnsupportedLiteral");
                         }
                     },
-                    [&](cfg::Unanalyzable *i) { gs.trace("Unanalyzable\n"); },
-                    [&](cfg::LoadArg *i) { gs.trace("LoadArg\n"); },
-                    [&](cfg::LoadYieldParams *i) { gs.trace("LoadYieldParams\n"); },
-                    [&](cfg::Cast *i) { gs.trace("Cast\n"); }, [&](cfg::TAbsurd *i) { gs.trace("TAbsurd\n"); });
+                    [&](cfg::Unanalyzable *i) { cs.trace("Unanalyzable\n"); },
+                    [&](cfg::LoadArg *i) { cs.trace("LoadArg\n"); },
+                    [&](cfg::LoadYieldParams *i) { cs.trace("LoadYieldParams\n"); },
+                    [&](cfg::Cast *i) { cs.trace("Cast\n"); }, [&](cfg::TAbsurd *i) { cs.trace("TAbsurd\n"); });
                 if (isTerminated) {
                     break;
                 }
             }
             if (!isTerminated) {
                 if (bb->bexit.thenb != bb->bexit.elseb) {
-                    auto var = varGet(gs, bb->bexit.cond.variable, builder, llvmVariables, aliases);
-                    auto condValue = gs.getIsTruthyU1(builder, var);
+                    auto var = varGet(cs, bb->bexit.cond.variable, builder, llvmVariables, aliases);
+                    auto condValue = cs.getIsTruthyU1(builder, var);
 
                     builder.CreateCondBr(condValue, llvmBlocks[bb->bexit.thenb->id], llvmBlocks[bb->bexit.elseb->id]);
                 } else {
@@ -340,15 +340,15 @@ void emitUserBody(CompilerState &gs, cfg::CFG &cfg, const vector<llvm::BasicBloc
             }
         } else {
             // handle dead block. TODO: this should throw
-            builder.CreateRet(gs.getRubyNilRaw(builder));
+            builder.CreateRet(cs.getRubyNilRaw(builder));
         }
     }
 }
 
-llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &gs, core::SymbolRef sym) {
-    auto name = sym.data(gs)->name;
-    if ((name == core::Names::staticInit()) || (name.data(gs)->kind == core::NameKind::UNIQUE &&
-                                                name.data(gs)->unique.original == core::Names::staticInit())) {
+llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::SymbolRef sym) {
+    auto name = sym.data(cs)->name;
+    if ((name == core::Names::staticInit()) || (name.data(cs)->kind == core::NameKind::UNIQUE &&
+                                                name.data(cs)->unique.original == core::Names::staticInit())) {
         // this is top level code that shoudln't be callable externally.
         // Even more, sorbet reuses symbols used for these and thus if we mark them non-private we'll get link errors
         return llvm::Function::InternalLinkage;
@@ -357,29 +357,29 @@ llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &gs, core::
 }
 } // namespace
 
-void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
-    auto functionType = gs.getRubyFFIType();
-    auto func = llvm::Function::Create(functionType, getFunctionLinkageType(gs, md->symbol), functionName, gs.module);
+void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
+    auto functionType = cs.getRubyFFIType();
+    auto func = llvm::Function::Create(functionType, getFunctionLinkageType(cs, md->symbol), functionName, cs.module);
     func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
     func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
-    llvm::IRBuilder<> builder(gs);
+    llvm::IRBuilder<> builder(cs);
 
-    ENFORCE(gs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
+    ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
-    gs.functionEntryInitializers = llvm::BasicBlock::Create(
-        gs, "functionEntryInitializers",
+    cs.functionEntryInitializers = llvm::BasicBlock::Create(
+        cs, "functionEntryInitializers",
         func); // we will build a link for this block later, after we finish building expressions into it
 
-    auto rawEntryBlock = llvm::BasicBlock::Create(gs, "setupLocalsAndArguments", func);
+    auto rawEntryBlock = llvm::BasicBlock::Create(cs, "setupLocalsAndArguments", func);
     builder.SetInsertPoint(rawEntryBlock);
     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
-        setupArgumentsAndLocalVariables(gs, builder, cfg, md, func);
+        setupArgumentsAndLocalVariables(cs, builder, cfg, md, func);
 
-    auto userBodyEntry = llvm::BasicBlock::Create(gs, "userBody", func);
+    auto userBodyEntry = llvm::BasicBlock::Create(cs, "userBody", func);
     builder.CreateBr(userBodyEntry);
 
-    const vector<llvm::BasicBlock *> llvmBlocks = getSorbetBlocks2LLVMBlockMapping(gs, cfg, func, userBodyEntry);
+    const vector<llvm::BasicBlock *> llvmBlocks = getSorbetBlocks2LLVMBlockMapping(cs, cfg, func, userBodyEntry);
 
     int maxSendArgCount = 0;
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
@@ -392,53 +392,53 @@ void LLVMIREmitter::run(CompilerState &gs, cfg::CFG &cfg, unique_ptr<ast::Method
             }
         }
     }
-    builder.SetInsertPoint(gs.functionEntryInitializers);
+    builder.SetInsertPoint(cs.functionEntryInitializers);
     auto sendArgArray =
-        builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(gs), maxSendArgCount), nullptr, "callArgs");
-    emitUserBody(gs, cfg, llvmBlocks, llvmVariables, sendArgArray);
-    builder.SetInsertPoint(gs.functionEntryInitializers);
+        builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(cs), maxSendArgCount), nullptr, "callArgs");
+    emitUserBody(cs, cfg, llvmBlocks, llvmVariables, sendArgArray);
+    builder.SetInsertPoint(cs.functionEntryInitializers);
     builder.CreateBr(rawEntryBlock);
     /* run verifier */
     ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
-    gs.runCheapOptimizations(func);
+    cs.runCheapOptimizations(func);
 }
 
-void LLVMIREmitter::buildInitFor(CompilerState &gs, const core::SymbolRef &sym) {
-    llvm::IRBuilder<> builder(gs);
+void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym) {
+    llvm::IRBuilder<> builder(cs);
     bool isSpecialEntrypoint = false;
-    if (sym.data(gs)->owner == core::Symbols::rootSingleton() &&
-        sym.data(gs)->name.data(gs)->unique.original == core::Names::staticInit()) {
+    if (sym.data(cs)->owner == core::Symbols::rootSingleton() &&
+        sym.data(cs)->name.data(cs)->unique.original == core::Names::staticInit()) {
         isSpecialEntrypoint = true;
     }
 
-    auto baseName = sym.data(gs)->toStringFullName(gs);
+    auto baseName = sym.data(cs)->toStringFullName(cs);
     auto linkageType = llvm::Function::InternalLinkage;
     if (isSpecialEntrypoint) {
-        baseName = FileOps::getFileName(sym.data(gs)->loc().file().data(gs).path());
+        baseName = FileOps::getFileName(sym.data(cs)->loc().file().data(cs).path());
         baseName = baseName.substr(0, baseName.rfind(".rb"));
         linkageType = llvm::Function::ExternalLinkage;
     }
-    auto entryFunc = getInitFunction(gs, baseName, linkageType);
+    auto entryFunc = getInitFunction(cs, baseName, linkageType);
 
-    auto bb = llvm::BasicBlock::Create(gs, "entry", entryFunc);
+    auto bb = llvm::BasicBlock::Create(cs, "entry", entryFunc);
     builder.SetInsertPoint(bb);
 
     if (isSpecialEntrypoint) {
         // Call the LLVM method that was made by run() from this Init_ method
-        auto staticInit = gs.gs.lookupStaticInitForFile(sym.data(gs)->loc()).data(gs)->toStringFullName(gs);
-        auto staticInitFunc = gs.module->getFunction(staticInit);
+        auto staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc()).data(cs)->toStringFullName(cs);
+        auto staticInitFunc = cs.module->getFunction(staticInit);
         ENFORCE(staticInitFunc);
         builder.CreateCall(staticInitFunc,
-                           {llvm::ConstantInt::get(gs, llvm::APInt(32, 0, true)),
-                            llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(gs)),
-                            builder.CreateCall(gs.module->getFunction("sorbet_rb_cObject"))},
+                           {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+                            llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
+                            builder.CreateCall(cs.module->getFunction("sorbet_rb_cObject"))},
                            (string)staticInit);
     }
 
     builder.CreateRetVoid();
 
     ENFORCE(!llvm::verifyFunction(*entryFunc, &llvm::errs()), "see above");
-    gs.runCheapOptimizations(entryFunc);
+    cs.runCheapOptimizations(entryFunc);
 }
 
 } // namespace sorbet::compiler
