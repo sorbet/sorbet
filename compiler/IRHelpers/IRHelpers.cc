@@ -111,7 +111,7 @@ llvm::Value *CompilerState::getRubyIdFor(llvm::IRBuilderBase &builder, std::stri
     auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(lctx), 0);
     auto name = llvm::StringRef(idName.data(), idName.length());
     llvm::Constant *indices[] = {zero};
-    string rawName = "str_" + (string)idName;
+    string rawName = "rubyIdPrecomputed_" + (string)idName;
     auto tp = llvm::Type::getInt64Ty(lctx);
     llvm::IRBuilder<> globalInitBuilder(lctx);
     auto globalDeclaration = static_cast<llvm::GlobalVariable *>(module->getOrInsertGlobal(rawName, tp, [&] {
