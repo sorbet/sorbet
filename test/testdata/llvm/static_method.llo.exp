@@ -43,7 +43,7 @@ declare i64 @rb_const_get_at(i64, i64) local_unnamed_addr #3
 
 declare i64 @rb_define_class(i8*, i64) local_unnamed_addr #3
 
-declare void @rb_define_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr #3
+declare void @rb_define_singleton_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr #3
 
 declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #3
 
@@ -101,7 +101,7 @@ entry:
   %6 = tail call i64 @rb_intern(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.1, i64 0, i64 0)) #1
   %7 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %8 = tail call i64 @rb_const_get_at(i64 %7, i64 %6) #1
-  tail call void @rb_define_method(i64 %8, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @funcName_bar, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U Foo>> $1><U bar>" to i64 (...)*), i32 -1) #1
+  tail call void @rb_define_singleton_method(i64 %8, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @funcName_bar, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U Foo>> $1><U bar>" to i64 (...)*), i32 -1) #1
   %9 = tail call i64 @rb_intern(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.1, i64 0, i64 0)) #1
   %10 = load i64, i64* @rb_cObject, align 8, !tbaa !1
   %11 = tail call i64 @rb_const_get_at(i64 %10, i64 %9) #1
