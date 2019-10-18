@@ -31,6 +31,7 @@ if [[ $rb != *"no-run"* ]]; then
     srbout=$(mktemp)
     echo "require './test/preamble.rb'; require '$bundle';" > "$runfile"
     echo "Run Code: ruby $runfile"
+    echo "Run LLDB: lldb ./bazel-out/darwin-dbg/bin/external/ruby_2_4_3/bin/ruby -- $runfile"
     ruby "$runfile" | tee "$srbout"
 
     diff -a "$rbout" "$srbout"
