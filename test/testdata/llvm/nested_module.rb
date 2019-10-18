@@ -1,9 +1,15 @@
 module A
   module B
   end
+  class C
+  end
 end
-module A::C
+module A::D
+end
+class A::E
 end
 
-puts A::B
-puts A::C
+puts A::B.class
+puts A::C.class
+puts A::D.class
+puts A::E.class
