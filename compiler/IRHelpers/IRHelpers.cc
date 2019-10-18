@@ -57,15 +57,11 @@ void CompilerState::setExpectedBool(llvm::IRBuilderBase &builder, llvm::Value *v
 }
 
 void CompilerState::boxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *target, llvm::Value *rawData) {
-    llvm::Value *indices[] = {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
-                              llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true))};
-    builderCast(builder).CreateStore(rawData, builderCast(builder).CreateGEP(target, indices));
+    builderCast(builder).CreateStore(rawData, builderCast(builder).CreateStructGEP(target, 0));
 }
 
 llvm::Value *CompilerState::unboxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *target) {
-    llvm::Value *indices[] = {llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true)),
-                              llvm::ConstantInt::get(lctx, llvm::APInt(32, 0, true))};
-    return builderCast(builder).CreateLoad(builderCast(builder).CreateGEP(target, indices), "rawRubyValue");
+    return builderCast(builder).CreateLoad(builderCast(builder).CreateStructGEP(target, 0), "rawRubyValue");
 }
 
 llvm::Value *CompilerState::getRubyNilRaw(llvm::IRBuilderBase &builder) {
