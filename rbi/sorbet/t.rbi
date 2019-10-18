@@ -56,7 +56,7 @@ module T
   def self.type_parameter(name); end
   def self.self_type; end
   def self.experimental_attached_class; end
-  def self.type_alias(&blk); end
+  def self.type_alias(type=nil, &blk); end
 
   sig {params(arg: T.untyped).returns(T.untyped)}
   def self.must(arg); end

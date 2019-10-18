@@ -93,8 +93,14 @@ module T
   #
   # The name of the type alias is not preserved; Error messages will
   # be printed with reference to the underlying type.
-  def self.type_alias(&blk)
-    T::Private::Types::TypeAlias.new(blk)
+  #
+  # TODO Remove `type` parameter. This was left in to make life easier while migrating.
+  def self.type_alias(type=nil, &blk)
+    if blk
+      T::Private::Types::TypeAlias.new(blk)
+    else
+      T::Utils.coerce(type)
+    end
   end
 
   # References a type paramater which was previously defined with
