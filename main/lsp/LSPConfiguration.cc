@@ -32,19 +32,18 @@ MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
 LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<LSPOutput> &output,
                                    WorkerPool &workers, const shared_ptr<spdlog::logger> &logger, bool skipConfigatron,
                                    bool disableFastPath)
-    : opts(opts), output(output), workers(workers), logger(logger), skipConfigatron(skipConfigatron),
-      disableFastPath(disableFastPath), rootPath(getRootPath(opts, logger)), initialized(false) {}
+    : initialized(atomic<bool>(false)), opts(opts), output(output), workers(workers), logger(logger),
+      skipConfigatron(skipConfigatron), disableFastPath(disableFastPath), rootPath(getRootPath(opts, logger)) {}
 
-void LSPConfiguration::assertInitialized() const {
-    if (!initialized.load()) {
-        Exception::raise("LSPConfiguration is not initialized.");
+void LSPConfiguration::assertClientConfig() const {
+    if (!clientConfig) {
+        Exception::raise("clientConfig is not initialized.");
     }
 }
 
 void LSPConfiguration::clientInitialize(const InitializeParams &params) {
     // Note: We don't need clientInitialize to be atomic since only the LSPPreprocessor thread calls this function.
-    // However, other threads check the atomic boolean to ensure that clientConfig is available.
-    if (initialized.load()) {
+    if (clientConfig) {
         Exception::raise("Cannot call clientInitialize multiple times in one session.");
     }
 
@@ -86,7 +85,6 @@ void LSPConfiguration::clientInitialize(const InitializeParams &params) {
         cconfig.enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
     }
     clientConfig = make_unique<LSPClientConfiguration>(move(cconfig));
-    initialized.store(true);
 }
 
 // LSP Spec: line / col in Position are 0-based
@@ -106,7 +104,7 @@ core::Loc LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position 
 
 string LSPConfiguration::localName2Remote(string_view filePath) const {
     ENFORCE(absl::StartsWith(filePath, rootPath));
-    assertInitialized();
+    assertClientConfig();
     string_view relativeUri = filePath.substr(rootPath.length());
     if (relativeUri.at(0) == '/') {
         relativeUri = relativeUri.substr(1);
@@ -126,7 +124,7 @@ string LSPConfiguration::localName2Remote(string_view filePath) const {
 }
 
 string LSPConfiguration::remoteName2Local(string_view uri) const {
-    assertInitialized();
+    assertClientConfig();
     const bool isSorbetURI = absl::StartsWith(uri, sorbetScheme);
     if (!absl::StartsWith(uri, clientConfig->rootUri) && !clientConfig->enableSorbetURIs && !isSorbetURI) {
         logger->error("Unrecognized URI received from client: {}", uri);
@@ -155,7 +153,7 @@ string LSPConfiguration::remoteName2Local(string_view uri) const {
 }
 
 core::FileRef LSPConfiguration::uri2FileRef(const core::GlobalState &gs, string_view uri) const {
-    assertInitialized();
+    assertClientConfig();
     if (!absl::StartsWith(uri, clientConfig->rootUri) && !absl::StartsWith(uri, sorbetScheme)) {
         return core::FileRef();
     }
@@ -164,7 +162,7 @@ core::FileRef LSPConfiguration::uri2FileRef(const core::GlobalState &gs, string_
 }
 
 string LSPConfiguration::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) const {
-    assertInitialized();
+    assertClientConfig();
     string uri;
     if (!file.exists()) {
         uri = "???";
@@ -184,7 +182,7 @@ string LSPConfiguration::fileRef2Uri(const core::GlobalState &gs, core::FileRef 
 }
 
 unique_ptr<Location> LSPConfiguration::loc2Location(const core::GlobalState &gs, core::Loc loc) const {
-    assertInitialized();
+    assertClientConfig();
     auto range = Range::fromLoc(gs, loc);
     if (range == nullptr) {
         return nullptr;
@@ -214,8 +212,21 @@ bool LSPConfiguration::isFileIgnored(string_view filePath) const {
 }
 
 bool LSPConfiguration::isUriInWorkspace(string_view uri) const {
-    assertInitialized();
+    assertClientConfig();
     return absl::StartsWith(uri, clientConfig->rootUri);
+}
+
+void LSPConfiguration::markInitialized() {
+    initialized.store(true);
+}
+
+bool LSPConfiguration::isInitialized() const {
+    return initialized.load();
+}
+
+const LSPClientConfiguration &LSPConfiguration::getClientConfig() const {
+    assertClientConfig();
+    return *clientConfig;
 }
 
 } // namespace sorbet::realmain::lsp

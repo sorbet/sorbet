@@ -127,8 +127,6 @@ class LSPLoop {
     LSPResult commitTypecheckRun(TypecheckRun run);
     LSPResult pushDiagnostics(TypecheckRun run);
 
-    bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg) const;
-
     LSPLoop::QueryRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri,
                                          const Position &pos, const LSPMethod forMethod,
                                          bool errorIfFileIsUntyped = true) const;

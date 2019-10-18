@@ -15,13 +15,13 @@ unique_ptr<LSPMessage> makeShowOperation(std::string operationName, std::string 
 
 ShowOperation::ShowOperation(const LSPConfiguration &config, std::string operationName, std::string description)
     : config(config), operationName(move(operationName)), description(move(description)) {
-    if (config.clientConfig->enableOperationNotifications) {
+    if (config.getClientConfig().enableOperationNotifications) {
         config.output->write(makeShowOperation(this->operationName, this->description, SorbetOperationStatus::Start));
     }
 }
 
 ShowOperation::~ShowOperation() {
-    if (config.clientConfig->enableOperationNotifications) {
+    if (config.getClientConfig().enableOperationNotifications) {
         config.output->write(makeShowOperation(this->operationName, this->description, SorbetOperationStatus::End));
     }
 }

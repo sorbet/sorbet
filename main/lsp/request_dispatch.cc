@@ -44,21 +44,6 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
     // TODO(jvilk): Make Timer accept multiple FlowIds so we can show merged messages correctly.
     Timer timeit(logger, "process_request");
     const LSPMethod method = msg.method();
-
-    if (!ensureInitialized(method, msg)) {
-        logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
-        vector<unique_ptr<LSPMessage>> responses;
-        if (!msg.isNotification()) {
-            auto id = msg.id().value_or(0);
-            auto response = make_unique<ResponseMessage>("2.0", id, msg.method());
-            response->error = make_unique<ResponseError>((int)LSPErrorCodes::ServerNotInitialized,
-                                                         "IDE did not initialize Sorbet correctly. No requests should "
-                                                         "be made before Initialize & Initialized have been completed");
-            responses.push_back(make_unique<LSPMessage>(move(response)));
-        }
-        return LSPResult{move(gs), move(responses)};
-    }
-
     if (msg.isNotification()) {
         Timer timeit(logger, "notification", {{"method", convertLSPMethodToString(method)}});
         // The preprocessor should canonicalize these messages into SorbetWorkspaceEdits, so they should never appear

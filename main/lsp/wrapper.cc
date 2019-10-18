@@ -10,28 +10,13 @@ namespace sorbet::realmain::lsp {
 
 const std::string LSPWrapper::EMPTY_STRING = "";
 
-class LSPWrapper::LSPOutputToVector final : public LSPOutput {
-private:
-    vector<unique_ptr<LSPMessage>> output;
-
-public:
-    LSPOutputToVector() = default;
-
-    void rawWrite(unique_ptr<LSPMessage> msg) override {
-        output.push_back(move(msg));
-    }
-
-    std::vector<unique_ptr<LSPMessage>> getOutput() {
-        return move(output);
-    }
-};
-
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMessage> message) {
     auto result = lspLoop->processRequest(move(gs), move(message));
     gs = move(result.gs);
 
     // Should always run typechecking at least once for each request post-initialization.
-    ENFORCE(!config->initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
+    ENFORCE(!config->isInitialized() || gs->lspTypecheckCount > 0,
+            "Fatal error: LSPLoop did not typecheck GlobalState.");
 
     // Retrieve any notifications that would normally be sent asynchronously in a multithreaded scenario.
     auto notifs = output->getOutput();
@@ -46,7 +31,8 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<
     gs = move(result.gs);
 
     // Should always run typechecking at least once for each request post-initialization.
-    ENFORCE(!config->initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
+    ENFORCE(!config->isInitialized() || gs->lspTypecheckCount > 0,
+            "Fatal error: LSPLoop did not typecheck GlobalState.");
 
     return move(result.responses);
 }
@@ -57,7 +43,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &json
 
 void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,
                              bool disableFastPath) {
-    output = make_shared<LSPWrapper::LSPOutputToVector>();
+    output = make_shared<LSPOutputToVector>();
     ENFORCE(gs->errorQueue->ignoreFlushes); // LSP needs this
     workers = WorkerPool::create(0, *logger);
     config = make_shared<LSPConfiguration>(opts, output, *workers, logger, true, disableFastPath);

@@ -87,6 +87,8 @@ class LSPPreprocessor final {
      */
     std::unique_ptr<core::GlobalState> getTypecheckingGS() const;
 
+    bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg) const;
+
 public:
     LSPPreprocessor(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config,
                     u4 initialVersion = 0);

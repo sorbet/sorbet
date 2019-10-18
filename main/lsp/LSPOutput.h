@@ -3,6 +3,7 @@
 
 #include "absl/synchronization/mutex.h"
 #include <memory>
+#include <vector>
 
 namespace spdlog {
 class logger;
@@ -45,6 +46,18 @@ protected:
 
 public:
     LSPStdout(std::shared_ptr<spdlog::logger> &logger);
+};
+
+class LSPOutputToVector final : public LSPOutput {
+    std::vector<std::unique_ptr<LSPMessage>> output;
+
+protected:
+    void rawWrite(std::unique_ptr<LSPMessage> msg) override;
+
+public:
+    LSPOutputToVector() = default;
+
+    std::vector<std::unique_ptr<LSPMessage>> getOutput();
 };
 
 } // namespace sorbet::realmain::lsp

@@ -77,7 +77,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             }
         }
 
-        auto clientHoverMarkupKind = config->clientConfig->clientHoverMarkupKind;
+        auto clientHoverMarkupKind = config->getClientConfig().clientHoverMarkupKind;
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
             auto start = sendResp->dispatchResult.get();

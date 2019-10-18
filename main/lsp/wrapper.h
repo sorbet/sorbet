@@ -9,10 +9,10 @@
 #include <string_view>
 namespace sorbet::realmain::lsp {
 
+class LSPOutputToVector;
+
 class LSPWrapper final {
     static const std::string EMPTY_STRING;
-
-    class LSPOutputToVector;
 
     /** The LSP 'server', which runs in the same thread as LSPWrapper. */
     std::unique_ptr<LSPLoop> lspLoop;

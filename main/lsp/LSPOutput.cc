@@ -55,4 +55,12 @@ void LSPStdout::rawWrite(unique_ptr<LSPMessage> msg) {
     cout << outResult << flush;
 }
 
+void LSPOutputToVector::rawWrite(unique_ptr<LSPMessage> msg) {
+    output.push_back(move(msg));
+}
+
+vector<unique_ptr<LSPMessage>> LSPOutputToVector::getOutput() {
+    return move(output);
+}
+
 } // namespace sorbet::realmain::lsp

@@ -44,7 +44,9 @@ struct LSPClientConfiguration {
  * The language server's configuration information.
  */
 class LSPConfiguration {
-    void assertInitialized() const;
+    std::shared_ptr<const LSPClientConfiguration> clientConfig;
+    std::atomic<bool> initialized;
+    void assertClientConfig() const;
 
 public:
     // The following properties are configured when the language server is created.
@@ -63,19 +65,19 @@ public:
 
     // The following properties are configured during initialization.
 
-    /**
-     * If 'true', then the initialization routine is complete and clientConfig is available.
-     */
-    std::atomic<bool> initialized;
-    std::unique_ptr<const LSPClientConfiguration> clientConfig;
-
     LSPConfiguration(const options::Options &opts, const std::shared_ptr<LSPOutput> &output, WorkerPool &workers,
                      const std::shared_ptr<spdlog::logger> &logger, bool skipConfigatron = false,
                      bool disableFastPath = false);
 
-    // Note: Should only be called from LSPPreprocessor.
     void clientInitialize(const InitializeParams &initializeParams);
+    void markInitialized();
 
+    /**
+     * If 'true', then the initialization routine is complete.
+     */
+    bool isInitialized() const;
+
+    const LSPClientConfiguration &getClientConfig() const;
     core::FileRef uri2FileRef(const core::GlobalState &gs, std::string_view uri) const;
     std::string fileRef2Uri(const core::GlobalState &gs, const core::FileRef) const;
     std::string remoteName2Local(std::string_view uri) const;

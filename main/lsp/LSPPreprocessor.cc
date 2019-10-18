@@ -174,6 +174,24 @@ unique_ptr<LSPMessage> LSPPreprocessor::makeAndCommitWorkspaceEdit(unique_ptr<So
     return newMsg;
 }
 
+bool LSPPreprocessor::ensureInitialized(LSPMethod method, const LSPMessage &msg) const {
+    if (config->isInitialized() || method == LSPMethod::Initialize || method == LSPMethod::Initialized ||
+        method == LSPMethod::Exit || method == LSPMethod::Shutdown || method == LSPMethod::SorbetError) {
+        return true;
+    }
+    config->logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
+    vector<unique_ptr<LSPMessage>> responses;
+    if (!msg.isNotification()) {
+        auto id = msg.id().value_or(0);
+        auto response = make_unique<ResponseMessage>("2.0", id, msg.method());
+        response->error = make_unique<ResponseError>((int)LSPErrorCodes::ServerNotInitialized,
+                                                     "IDE did not initialize Sorbet correctly. No requests should "
+                                                     "be made before Initialize & Initialized have been completed");
+        config->output->write(move(response));
+    }
+    return false;
+}
+
 void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMessage> msg, absl::Mutex &stateMtx) {
     ENFORCE(owner == this_thread::get_id());
     if (msg->isResponse()) {
@@ -181,6 +199,11 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
     }
 
     const LSPMethod method = msg->method();
+    if (!ensureInitialized(method, *msg)) {
+        // msg is invalid. Error sent to client.
+        return;
+    }
+
     auto &logger = config->logger;
     bool shouldEnqueue = false;
     bool shouldMerge = false;
@@ -233,7 +256,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
                 params.updates.updatedFileIndexes = ttgs.indexFromFileSystem();
                 params.updates.updatedFileHashes = ttgs.getGlobalStateHashes();
             }
-            config->initialized = true;
+            config->markInitialized();
             params.updates.canTakeFastPath = false;
             params.updates.updatedGS = getTypecheckingGS();
             shouldEnqueue = true;

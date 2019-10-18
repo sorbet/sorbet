@@ -253,7 +253,7 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
     item->insertTextFormat = InsertTextFormat::PlainText;
 
     item->documentation =
-        make_unique<MarkupContent>(config.clientConfig->clientCompletionItemMarkupKind, rubyKeyword.documentation);
+        make_unique<MarkupContent>(config.getClientConfig().clientCompletionItemMarkupKind, rubyKeyword.documentation);
 
     return item;
 }
@@ -288,7 +288,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
         auto replacementRange = Range::fromLoc(gs, replacementLoc);
 
         string replacementText;
-        if (config->clientConfig->clientCompletionItemSnippetSupport) {
+        if (config->getClientConfig().clientCompletionItemSnippetSupport) {
             item->insertTextFormat = InsertTextFormat::Snippet;
             replacementText = methodSnippet(gs, what);
         } else {
@@ -312,8 +312,8 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
             if (documentation->find("@deprecated") != documentation->npos) {
                 item->deprecated = true;
             }
-            item->documentation =
-                make_unique<MarkupContent>(config->clientConfig->clientCompletionItemMarkupKind, documentation.value());
+            item->documentation = make_unique<MarkupContent>(config->getClientConfig().clientCompletionItemMarkupKind,
+                                                             documentation.value());
         }
     } else if (what.data(gs)->isStaticField()) {
         item->kind = CompletionItemKind::Constant;

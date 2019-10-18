@@ -59,17 +59,6 @@ LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> g
     return runQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
-bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg) const {
-    // Note: During initialization, the preprocessor sends ShowOperation notifications to the main thread to forward to
-    // the client ("Indexing..."). So, whitelist those messages as OK to process prior to initialization.
-    if (config->initialized || forMethod == LSPMethod::Initialize || forMethod == LSPMethod::Initialized ||
-        forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown || forMethod == LSPMethod::SorbetError ||
-        forMethod == LSPMethod::SorbetShowOperation) {
-        return true;
-    }
-    return false;
-}
-
 LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
     ENFORCE(!run.canceled);
     const core::GlobalState &gs = *run.gs;
@@ -78,7 +67,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
     vector<unique_ptr<LSPMessage>> responses;
 
-    if (config->clientConfig->enableTypecheckInfo) {
+    if (config->getClientConfig().enableTypecheckInfo) {
         vector<string> pathsTypechecked;
         for (auto &f : filesTypechecked) {
             pathsTypechecked.emplace_back(f.data(gs).path());

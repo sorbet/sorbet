@@ -304,7 +304,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
                 config->output->write(move(msg));
             }
 
-            if (config->initialized && !initializedNotification.HasBeenNotified()) {
+            if (config->isInitialized() && !initializedNotification.HasBeenNotified()) {
                 initializedNotification.Notify();
             }
 
