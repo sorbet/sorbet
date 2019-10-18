@@ -18,7 +18,7 @@ main/sorbet_llvm --silence-dev-message --no-error-count --typed=true --llvm-ir-f
 
 base=$(basename "$rb")
 bundle="$llvmir/${base%.rb}.bundle"
-external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$llvmir"/*.o -undefined dynamic_lookup
+external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$llvmir"/*.o -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
 
 for i in "$llvmir"/*.llo; do
     external/llvm_toolchain/bin/opt -analyze "$i"
