@@ -9,6 +9,7 @@ cc_binary(
 
 sh_test(
     name = "kaleidoscope_test",
+    size = "small",
     srcs = ["kaleidoscope_test.sh"],
     data = [
         "kaleidoscope_test.out",
