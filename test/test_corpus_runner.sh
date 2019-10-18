@@ -26,7 +26,9 @@ for i in "$llvmir"/*.llo; do
 done
 
 if [[ $rb != *"no-run"* ]]; then
-    ruby -e "require './test/preamble.rb'; require '$bundle';" 2>&1 | tee "$srbout"
+    runfile=$(mktemp)
+    echo "require './test/preamble.rb'; require '$bundle';" > "$runfile"
+    ruby "$runfile" | tee "$srbout"
 
     diff -a "$rbout" "$srbout"
 fi
