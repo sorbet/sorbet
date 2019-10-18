@@ -204,7 +204,24 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
                                   llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
     builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
-    return;
+}
+
+void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
+    auto sym = typeToSym(cs, i->args[0].type);
+    auto className = showClassName(cs, sym);
+    auto classNameCStr = builder.CreateGlobalStringPtr(className, {"className_", className});
+
+    if (sym.data(cs)->superClass() == core::Symbols::Module()) {
+        builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
+    } else {
+        auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
+        builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelClass"),
+                           {classNameCStr, rawCall});
+    }
+
+    auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
+    auto llvmFuncName = funcSym.data(cs)->toStringFullName(cs);
+    builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
 }
 
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBlock *> llvmBlocks,
@@ -237,16 +254,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                             return;
                         }
                         if (i->fun == Names::sorbet_defineTopLevelClass) {
-                            auto sym = typeToSym(cs, i->args[0].type);
-                            auto className = showClassName(cs, sym);
-                            auto classNameCStr = builder.CreateGlobalStringPtr(className, {"className_", className});
-                            auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
-                            builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelClass"),
-                                               {classNameCStr, rawCall});
-
-                            auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
-                            auto llvmFuncName = funcSym.data(cs)->toStringFullName(cs);
-                            builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
+                            defineClass(cs, i, builder);
                             return;
                         }
                         if (i->fun == Names::sorbet_defineNestedClass) {
