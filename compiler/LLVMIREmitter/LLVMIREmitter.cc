@@ -30,12 +30,18 @@ core::SymbolRef removeRoot(core::SymbolRef sym) {
     return sym;
 }
 
-std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
+std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
     auto name = sym.data(gs)->name;
     if (name.data(gs)->kind == core::NameKind::UNIQUE) {
         return name.data(gs)->unique.original.data(gs)->show(gs);
     }
     return name.data(gs)->show(gs);
+}
+
+std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
+    bool includeOwner = sym.data(gs)->owner.exists() && sym.data(gs)->owner != core::Symbols::root();
+    string owner = includeOwner ? showClassName(gs, sym.data(gs)->owner) + "::" : "";
+    return owner + showClassNameWithoutOwner(gs, sym);
 }
 
 llvm::CallInst *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
@@ -208,7 +214,7 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
 
 void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
     auto sym = typeToSym(cs, i->args[0].type);
-    auto className = showClassName(cs, sym);
+    auto className = showClassNameWithoutOwner(cs, sym);
     auto classNameCStr = builder.CreateGlobalStringPtr(className, {"className_", className});
 
     if (sym.data(cs)->owner != core::Symbols::root()) {
