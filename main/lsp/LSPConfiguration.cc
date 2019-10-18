@@ -84,7 +84,7 @@ void LSPConfiguration::clientInitialize(const InitializeParams &params) {
         cconfig.enableTypecheckInfo = initOptions->enableTypecheckInfo.value_or(false);
         cconfig.enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
     }
-    clientConfig = make_unique<LSPClientConfiguration>(move(cconfig));
+    clientConfig = make_shared<LSPClientConfiguration>(move(cconfig));
 }
 
 // LSP Spec: line / col in Position are 0-based
