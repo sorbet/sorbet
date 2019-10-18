@@ -12,7 +12,11 @@ cleanup() {
 
 # trap cleanup EXIT
 
-ruby "$rb" 2>&1 | tee "$rbout"
+ruby="/Users/$(whoami)/.rbenv/shims/ruby"
+
+rbrunfile=$(mktemp)
+echo "require './test/preamble.rb'; require './$rb';" > "$rbrunfile"
+$ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
 main/sorbet_llvm --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$rb"
 
@@ -30,9 +34,9 @@ if [[ $rb != *"no-run"* ]]; then
     runfile=$(mktemp)
     srbout=$(mktemp)
     echo "require './test/preamble.rb'; require '$bundle';" > "$runfile"
-    echo "Run Code: ruby $runfile"
+    echo "Run Code: $ruby $runfile"
     echo "Run LLDB: lldb ./bazel-out/darwin-dbg/bin/external/ruby_2_4_3/bin/ruby -- $runfile"
-    ruby "$runfile" | tee "$srbout"
+    $ruby "$runfile" | tee "$srbout"
 
     diff -a "$rbout" "$srbout"
 fi
