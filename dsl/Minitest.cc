@@ -83,7 +83,7 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
                               ast::ClassDefKind::Class);
     } else if (send->fun == core::Names::it() || send->fun == core::Names::after()) {
         auto name = (send->fun == core::Names::after()) ?
-          ctx.state.enterNameUTF8("<after_" + argString + ">") :
+          ctx.state.enterNameUTF8("<after>") :
           ctx.state.enterNameUTF8("<test_" + argString + ">");
         return addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
                                            prepareBody(ctx, std::move(send->block->body)),
