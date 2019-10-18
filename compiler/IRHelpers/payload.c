@@ -275,7 +275,7 @@ void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) __a
 
 // Trying to be a copy of rb_mod_const_get
 static const char wrong_constant_name[] = "wrong constant name %1$s";
-VALUE sorbet_getConstant(const char* path) __attribute__((always_inline)) {
+VALUE sorbet_getConstant(const char* path) __attribute__((noinline)) {
     VALUE name, mod;
     rb_encoding *enc;
     const char *pbeg, *p, *pend;
