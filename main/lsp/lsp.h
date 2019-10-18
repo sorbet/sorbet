@@ -10,7 +10,7 @@
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPPreprocessor.h"
-#include "main/lsp/LSPTypechecker.h"
+#include "main/lsp/LSPTypecheckerCoordinator.h"
 #include <chrono>
 #include <deque>
 #include <optional>
@@ -41,16 +41,6 @@ enum class LSPErrorCodes {
     RequestCancelled = -32800,
 };
 
-/**
- * The result from processing one or more messages from the client.
- */
-struct LSPResult {
-    std::vector<std::unique_ptr<LSPMessage>> responses;
-    bool canceled = false;
-
-    static LSPResult make(std::unique_ptr<ResponseMessage> response, bool canceled = false);
-};
-
 class LSPLoop {
     friend class LSPWrapper;
 
@@ -58,8 +48,8 @@ class LSPLoop {
     std::shared_ptr<const LSPConfiguration> config;
     /** The LSP preprocessor standardizes incoming messages and combines edits. */
     LSPPreprocessor preprocessor;
-    /** The LSP typechecker is responsible for typechecking file updates and running queries. */
-    LSPTypechecker typechecker;
+    /** The LSP typechecker coordinator typechecks file updates and runs queries. */
+    LSPTypecheckerCoordinator typecheckerCoord;
     /**
      * The time that LSP last sent metrics to statsd -- if `opts.statsdHost` was specified.
      */
@@ -73,28 +63,28 @@ class LSPLoop {
                      const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses,
                      std::vector<std::unique_ptr<Location>> locations = {}) const;
 
-    LSPQueryResult queryByLoc(const LSPTypecheckerOps &ops, std::string_view uri, const Position &pos,
+    LSPQueryResult queryByLoc(LSPTypechecker &typechecker, std::string_view uri, const Position &pos,
                               const LSPMethod forMethod, bool errorIfFileIsUntyped = true) const;
-    LSPQueryResult queryBySymbol(const LSPTypecheckerOps &ops, core::SymbolRef symbol) const;
-    LSPResult handleTextDocumentHover(const LSPTypecheckerOps &ops, const MessageId &id,
-                                      const TextDocumentPositionParams &params) const;
-    LSPResult handleTextDocumentDocumentSymbol(const LSPTypecheckerOps &ops, const MessageId &id,
-                                               const DocumentSymbolParams &params) const;
-    LSPResult handleWorkspaceSymbols(const LSPTypecheckerOps &ops, const MessageId &id,
-                                     const WorkspaceSymbolParams &params) const;
+    LSPQueryResult queryBySymbol(LSPTypechecker &typechecker, core::SymbolRef symbol) const;
+    std::unique_ptr<ResponseMessage> handleTextDocumentHover(LSPTypechecker &typechecker, const MessageId &id,
+                                                             const TextDocumentPositionParams &params) const;
+    std::unique_ptr<ResponseMessage> handleTextDocumentDocumentSymbol(LSPTypechecker &typechecker, const MessageId &id,
+                                                                      const DocumentSymbolParams &params) const;
+    std::unique_ptr<ResponseMessage> handleWorkspaceSymbols(LSPTypechecker &typechecker, const MessageId &id,
+                                                            const WorkspaceSymbolParams &params) const;
     std::vector<std::unique_ptr<Location>>
-    getReferencesToSymbol(const LSPTypecheckerOps &ops, core::SymbolRef symbol,
+    getReferencesToSymbol(LSPTypechecker &typechecker, core::SymbolRef symbol,
                           std::vector<std::unique_ptr<Location>> locations = {}) const;
-    LSPResult handleTextDocumentReferences(const LSPTypecheckerOps &ops, const MessageId &id,
-                                           const ReferenceParams &params) const;
-    LSPResult handleTextDocumentDefinition(const LSPTypecheckerOps &ops, const MessageId &id,
-                                           const TextDocumentPositionParams &params) const;
-    LSPResult handleTextDocumentTypeDefinition(const LSPTypecheckerOps &ops, const MessageId &id,
-                                               const TextDocumentPositionParams &params) const;
-    LSPResult handleTextDocumentCompletion(const LSPTypecheckerOps &ops, const MessageId &id,
-                                           const CompletionParams &params) const;
-    LSPResult handleTextDocumentCodeAction(const LSPTypecheckerOps &ops, const MessageId &id,
-                                           const CodeActionParams &params) const;
+    std::unique_ptr<ResponseMessage> handleTextDocumentReferences(LSPTypechecker &typechecker, const MessageId &id,
+                                                                  const ReferenceParams &params) const;
+    std::unique_ptr<ResponseMessage> handleTextDocumentDefinition(LSPTypechecker &typechecker, const MessageId &id,
+                                                                  const TextDocumentPositionParams &params) const;
+    std::unique_ptr<ResponseMessage> handleTextDocumentTypeDefinition(LSPTypechecker &typechecker, const MessageId &id,
+                                                                      const TextDocumentPositionParams &params) const;
+    std::unique_ptr<ResponseMessage> handleTextDocumentCompletion(LSPTypechecker &typechecker, const MessageId &id,
+                                                                  const CompletionParams &params) const;
+    std::unique_ptr<ResponseMessage> handleTextDocumentCodeAction(LSPTypechecker &typechecker, const MessageId &id,
+                                                                  const CodeActionParams &params) const;
     std::unique_ptr<CompletionItem> getCompletionItemForSymbol(const core::GlobalState &gs, core::SymbolRef what,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
@@ -103,10 +93,10 @@ class LSPLoop {
     void findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
                                     const core::Loc queryLoc,
                                     std::vector<std::unique_ptr<CompletionItem>> &items) const;
-    LSPResult handleTextSignatureHelp(const LSPTypecheckerOps &ops, const MessageId &id,
-                                      const TextDocumentPositionParams &params) const;
+    std::unique_ptr<ResponseMessage> handleTextSignatureHelp(LSPTypechecker &typechecker, const MessageId &id,
+                                                             const TextDocumentPositionParams &params) const;
 
-    LSPResult processRequestInternal(const LSPMessage &msg);
+    void processRequestInternal(LSPMessage &msg);
 
     /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
     bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime) const;
@@ -125,12 +115,12 @@ public:
      * Reads input messages from inputFd.
      */
     std::optional<std::unique_ptr<core::GlobalState>> runLSP(int inputFd);
-    LSPResult processRequest(std::unique_ptr<LSPMessage> msg);
-    LSPResult processRequest(const std::string &json);
+    void processRequest(std::unique_ptr<LSPMessage> msg);
+    void processRequest(const std::string &json);
     /**
      * Processes a batch of requests. Performs pre-processing to avoid unnecessary work.
      */
-    LSPResult processRequests(std::vector<std::unique_ptr<LSPMessage>> messages);
+    void processRequests(std::vector<std::unique_ptr<LSPMessage>> messages);
 };
 
 std::optional<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);

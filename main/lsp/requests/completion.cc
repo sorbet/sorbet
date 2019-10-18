@@ -346,29 +346,29 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
     }
 }
 
-LSPResult LSPLoop::handleTextDocumentCompletion(const LSPTypecheckerOps &ops, const MessageId &id,
-                                                const CompletionParams &params) const {
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker &typechecker, const MessageId &id,
+                                                                  const CompletionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     if (!config->opts.lspAutocompleteEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Autocomplete` LSP feature is experimental and disabled by default.");
-        return LSPResult::make(move(response));
+        return response;
     }
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
 
-    const core::GlobalState &gs = ops.gs;
+    const core::GlobalState &gs = typechecker.state();
     auto uri = params.textDocument->uri;
     auto fref = config->uri2FileRef(gs, uri);
     auto pos = *params.position;
-    auto queryLoc = config.lspPos2Loc(fref, pos, gs);
-    auto result = queryByLoc(ops, uri, pos, LSPMethod::TextDocumentCompletion);
+    auto queryLoc = config->lspPos2Loc(fref, pos, gs);
+    auto result = queryByLoc(typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
 
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
-        return LSPResult::make(move(response));
+        return response;
     }
 
     auto &queryResponses = result.responses;
@@ -451,7 +451,7 @@ LSPResult LSPLoop::handleTextDocumentCompletion(const LSPTypecheckerOps &ops, co
     }
 
     response->result = make_unique<CompletionList>(false, move(items));
-    return LSPResult::make(move(response));
+    return response;
 }
 
 } // namespace sorbet::realmain::lsp

@@ -68,17 +68,17 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     return result;
 }
 
-LSPResult LSPLoop::handleTextDocumentDocumentSymbol(const LSPTypecheckerOps &ops, const MessageId &id,
-                                                    const DocumentSymbolParams &params) const {
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentDocumentSymbol(LSPTypechecker &typechecker, const MessageId &id,
+                                                                      const DocumentSymbolParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
     if (!config->opts.lspDocumentSymbolEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Document Symbol` LSP feature is experimental and disabled by default.");
-        return LSPResult::make(move(response));
+        return response;
     }
 
-    const core::GlobalState &gs = ops.gs;
+    const core::GlobalState &gs = typechecker.state();
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.documentSymbol");
     vector<unique_ptr<DocumentSymbol>> result;
     string_view uri = params.textDocument->uri;
@@ -100,7 +100,7 @@ LSPResult LSPLoop::handleTextDocumentDocumentSymbol(const LSPTypecheckerOps &ops
         }
     }
     response->result = move(result);
-    return LSPResult::make(move(response));
+    return response;
 }
 
 } // namespace sorbet::realmain::lsp

@@ -9,6 +9,7 @@
 #include "core/core.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/TimeTravelingGlobalState.h"
 #include <chrono>
 #include <deque>

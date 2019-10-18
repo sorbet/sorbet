@@ -41,48 +41,14 @@ public:
     static TypecheckRun makeCanceled();
 };
 
-class LSPTypechecker;
-
 /**
  * Provides lambdas with a set of operations that they are allowed to do with the LSPTypechecker.
  */
-class LSPTypecheckerOps final {
-private:
-    friend class LSPTypechecker;
-    LSPTypechecker &typechecker;
-
-    LSPTypecheckerOps(LSPTypechecker &typechecker, const core::GlobalState &gs);
-    ~LSPTypecheckerOps() = default;
-
-public:
-    const core::GlobalState &gs;
-
-    /** Runs the provided query against the given files, and returns matches. */
-    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
-
-    /** Typechecks the provided files on the fast path. */
-    TypecheckRun fastPathTypecheck(LSPFileUpdates updates, LSPOutput &output) const;
-
-    const ast::ParsedFile &getIndex(core::FileRef fref) const;
-
-    const std::vector<core::FileHash> &getFileHashes() const;
-};
-
-/**
- * Handles typechecking and other queries. Can either operate in async mode (in which it runs on a dedicated thread)
- * or sync mode.
- */
 class LSPTypechecker final {
-    friend class LSPTypecheckerOps;
-
-    /** Protects lambda and wasShutdown. */
-    absl::Mutex mtx;
-    /** Contains a lambda that needs to be run to completion next. */
-    std::optional<std::function<void()>> lambda GUARDED_BY(mtx);
-    /** If 'true', then the typechecker has shut down. */
-    bool wasShutdown GUARDED_BY(mtx);
-    /** Active global state instance used for typechecking. Mutable because fast path/query updates replace it, but are
-     * innocuous. */
+    /** Contains the ID of the thread responsible for typechecking. */
+    std::thread::id typecheckerThreadId;
+    /** GlobalState used for typechecking. Mutable because typechecking routines, even when not changing the GlobalState
+     * instance, actively consume and replace GlobalState. */
     mutable std::unique_ptr<core::GlobalState> gs;
     /** Trees that have been indexed (with initialGS) and can be reused between different runs */
     std::vector<ast::ParsedFile> indexed;
@@ -92,67 +58,76 @@ class LSPTypechecker final {
     std::vector<core::FileHash> globalStateHashes;
     /** List of files that have had errors in last run*/
     std::vector<core::FileRef> filesThatHaveErrors;
-    /** Contains the ID of the thread responsible for typechecking. */
-    std::thread::id typecheckerThreadId;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
 
-    std::shared_ptr<spd::logger> logger;
-    WorkerPool &workers;
-    LSPConfiguration config;
+    std::shared_ptr<const LSPConfiguration> config;
 
     /** Conservatively reruns entire pipeline without caching any trees. If canceled, returns a TypecheckRun containing
      * the previous global state. */
-    TypecheckRun runSlowPath(LSPFileUpdates updates, bool cancelable, LSPOutput &output) const;
+    TypecheckRun runSlowPath(LSPFileUpdates updates, bool cancelable) const;
     /** Runs typechecking on the provided updates. */
-    TypecheckRun runTypechecking(LSPFileUpdates updates, LSPOutput &output) const;
-
-    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
+    TypecheckRun runTypechecking(LSPFileUpdates updates) const;
 
     /**
-     * Runs the provided function on the typechecker thread. Blocks until complete.
+     * Sends diagnostics from a typecheck run to the client.
      */
-    void runOnTypecheckerThread(std::function<void()> lambda);
-
-    void pushDiagnostics(TypecheckRun run, LSPOutput &output);
+    void pushDiagnostics(TypecheckRun run);
 
     /** Officially 'commits' the output of a `TypecheckRun` by updating the relevant state on LSPLoop and, if specified,
      * sending diagnostics to the editor. */
-    void commitTypecheckRun(TypecheckRun run, LSPOutput &output);
+    void commitTypecheckRun(TypecheckRun run);
 
 public:
-    LSPTypechecker(const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, LSPConfiguration config);
+    LSPTypechecker(const std::shared_ptr<const LSPConfiguration> &config);
     ~LSPTypechecker() = default;
 
     /**
-     * Conducts the first typechecking pass of the session, and initializes `gs`, `index`, and `globalStatehashes`
-     * variables. Must be called before typecheck and other functions work. This method always blocks and runs to
-     * completion.
+     * Conducts the first typechecking pass of the session, and initializes `gs`, `index`, and `globalStateHashes`
+     * variables. Must be called before typecheck and other functions work.
      *
      * Writes all diagnostic messages to LSPOutput.
      */
-    void initialize(LSPFileUpdates updates, LSPOutput &output);
+    void initialize(LSPFileUpdates updates);
 
     /**
-     * Typecheck the given file updates, and write any diagnostics to output. Returns 'true' if typecheck completed,
-     * 'false' if it was canceled.
-     *
-     * This function currently always blocks, but it will eventually become asynchronous when using a dedicated
-     * typechecking thread.
+     * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
+     * canceled.
      */
-    bool typecheck(LSPFileUpdates updates, LSPOutput &output);
+    bool typecheck(LSPFileUpdates updates);
 
     /**
-     * Runs lambda with exclusive access to GlobalState. lambda runs on typechecker thread, but this method blocks
-     * until the lambda runs.
+     * Re-typechecks the provided input to re-produce error messages. Input *must* match already committed state!
+     * Provided to facilitate code actions.
      */
-    void enterCriticalSection(std::function<void(const LSPTypecheckerOps &)> lambda);
+    TypecheckRun retypecheck(LSPFileUpdates updates) const;
 
-    void shutdown();
+    /** Runs the provided query against the given files, and returns matches. */
+    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
 
-    std::unique_ptr<core::GlobalState> destroyAndReturnGlobalState();
+    /**
+     * Returns the parsed file for the given file.
+     */
+    const ast::ParsedFile &getIndex(core::FileRef fref) const;
 
-    /** Runs the typechecker in a new thread. */
-    std::unique_ptr<Joinable> runTypechecker();
+    /**
+     * Returns the hashes of all committed files.
+     */
+    const std::vector<core::FileHash> &getFileHashes() const;
+
+    /**
+     * Returns the currently active GlobalState.
+     */
+    const core::GlobalState &state() const;
+
+    /**
+     * Called by LSPTypecheckerCoordinator to indicate that typechecking will occur on the current thread.
+     */
+    void changeThread();
+
+    /**
+     * Returns the typechecker's internal global state, which effectively destroys the typechecker for further use.
+     */
+    std::unique_ptr<core::GlobalState> destroy();
 };
 
 } // namespace sorbet::realmain::lsp

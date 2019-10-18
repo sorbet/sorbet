@@ -11,19 +11,13 @@ namespace sorbet::realmain::lsp {
 const std::string LSPWrapper::EMPTY_STRING = "";
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMessage> message) {
-    auto result = lspLoop->processRequest(move(message));
-
-    // Retrieve any notifications that would normally be sent asynchronously in a multithreaded scenario.
-    auto notifs = output->getOutput();
-    result.responses.insert(result.responses.end(), make_move_iterator(notifs.begin()),
-                            make_move_iterator(notifs.end()));
-
-    return move(result.responses);
+    lspLoop->processRequest(move(message));
+    return output->getOutput();
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<LSPMessage>> &messages) {
-    auto result = lspLoop->processRequests(move(messages));
-    return move(result.responses);
+    lspLoop->processRequests(move(messages));
+    return output->getOutput();
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &json) {

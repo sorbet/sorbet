@@ -45,13 +45,13 @@ unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typ
     return make_unique<MarkupContent>(markupKind, move(content));
 }
 
-LSPResult LSPLoop::handleTextDocumentHover(const LSPTypecheckerOps &ops, const MessageId &id,
-                                           const TextDocumentPositionParams &params) const {
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypechecker &typechecker, const MessageId &id,
+                                                             const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.hover");
 
-    const core::GlobalState &gs = ops.gs;
-    auto result = queryByLoc(ops, params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover);
+    const core::GlobalState &gs = typechecker.state();
+    auto result = queryByLoc(typechecker, params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -60,7 +60,7 @@ LSPResult LSPLoop::handleTextDocumentHover(const LSPTypecheckerOps &ops, const M
         if (queryResponses.empty()) {
             // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
             response->result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
-            return LSPResult::make(move(response));
+            return response;
         }
 
         auto resp = move(queryResponses[0]);
@@ -126,6 +126,6 @@ LSPResult LSPLoop::handleTextDocumentHover(const LSPTypecheckerOps &ops, const M
                 formatHoverText(clientHoverMarkupKind, retType->showWithMoreInfo(gs), documentation));
         }
     }
-    return LSPResult::make(move(response));
+    return response;
 }
 } // namespace sorbet::realmain::lsp

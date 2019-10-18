@@ -27,14 +27,14 @@ unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const LSPConfiguration
     return result;
 }
 
-LSPResult LSPLoop::handleWorkspaceSymbols(const LSPTypecheckerOps &ops, const MessageId &id,
-                                          const WorkspaceSymbolParams &params) const {
+unique_ptr<ResponseMessage> LSPLoop::handleWorkspaceSymbols(LSPTypechecker &typechecker, const MessageId &id,
+                                                            const WorkspaceSymbolParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::WorkspaceSymbol);
     if (!config->opts.lspWorkspaceSymbolsEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Workspace Symbols` LSP feature is experimental and disabled by default.");
-        return LSPResult::make(move(response));
+        return response;
     }
 
     prodCategoryCounterInc("lsp.messages.processed", "workspace.symbols");
@@ -43,7 +43,7 @@ LSPResult LSPLoop::handleWorkspaceSymbols(const LSPTypecheckerOps &ops, const Me
     string_view searchString = params.query;
     ShowOperation op(*config, "WorkspaceSymbols", fmt::format("Searching for symbol `{}`...", searchString));
 
-    const core::GlobalState &gs = ops.gs;
+    const core::GlobalState &gs = typechecker.state();
     for (u4 idx = 1; idx < gs.symbolsUsed(); idx++) {
         core::SymbolRef ref(gs, idx);
         if (hasSimilarName(gs, ref.data(gs)->name, searchString)) {
@@ -54,6 +54,6 @@ LSPResult LSPLoop::handleWorkspaceSymbols(const LSPTypecheckerOps &ops, const Me
         }
     }
     response->result = move(result);
-    return LSPResult::make(move(response));
+    return response;
 }
 } // namespace sorbet::realmain::lsp

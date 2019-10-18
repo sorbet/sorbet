@@ -4,31 +4,31 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-LSPResult LSPLoop::handleTextDocumentCodeAction(const LSPTypecheckerOps &ops, const MessageId &id,
-                                                const CodeActionParams &params) const {
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCodeAction(LSPTypechecker &typechecker, const MessageId &id,
+                                                                  const CodeActionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
     if (!config->opts.lspQuickFixEnabled) {
         response->error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidRequest, "The `Quick Fix` LSP feature is experimental and disabled by default.");
-        return LSPResult::make(move(response));
+        return response;
     }
 
     vector<unique_ptr<CodeAction>> result;
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.codeAction");
 
-    const core::GlobalState &gs = ops.gs;
+    const core::GlobalState &gs = typechecker.state();
     core::FileRef file = config->uri2FileRef(gs, params.textDocument->uri);
     LSPFileUpdates updates;
     updates.canTakeFastPath = true;
-    const auto &globalStateHashes = ops.getFileHashes();
+    const auto &globalStateHashes = typechecker.getFileHashes();
     ENFORCE(file.id() < globalStateHashes.size());
     updates.updatedFileHashes = {globalStateHashes[file.id()]};
     updates.updatedFiles.push_back(make_shared<core::File>(string(file.data(gs).path()), string(file.data(gs).source()),
                                                            core::File::Type::Normal));
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
-    auto run = ops.fastPathTypecheck(move(updates), output);
+    auto run = typechecker.retypecheck(move(updates));
     auto loc = params.range->toLoc(gs, file);
     for (auto &error : run.errors) {
         if (!error->isSilenced && !error->autocorrects.empty()) {
@@ -79,7 +79,6 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(const LSPTypecheckerOps &ops, co
     result.erase(last, result.end());
 
     response->result = move(result);
-
-    return LSPResult::make(move(response));
+    return response;
 }
 } // namespace sorbet::realmain::lsp

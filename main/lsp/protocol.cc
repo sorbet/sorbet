@@ -185,7 +185,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
     absl::Mutex processingMtx;
     QueueState processingQueue;
 
-    auto typecheckThread = typechecker.runTypechecker();
+    auto typecheckThread = typecheckerCoord.startTypecheckerThread();
 
     unique_ptr<watchman::WatchmanProcess> watchmanProcess;
     const auto &opts = config->opts;
@@ -285,7 +285,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
                 if (processingQueue.terminate) {
                     if (processingQueue.errorCode != 0) {
                         // Abnormal termination.
-                        typechecker.shutdown();
+                        typecheckerCoord.shutdown();
                         throw options::EarlyReturnWithCode(processingQueue.errorCode);
                     } else if (exitProcessed || processingQueue.pendingRequests.empty()) {
                         // Normal termination. Wait until all pending requests finish or we process an exit.
@@ -299,10 +299,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
                 maybeStartCommitSlowPathEdit(*msg);
             }
             prodCounterInc("lsp.messages.received");
-            auto result = processRequestInternal(*msg);
-            for (auto &msg : result.responses) {
-                config->output->write(move(msg));
-            }
+            processRequestInternal(*msg);
 
             if (config->isInitialized() && !initializedNotification.HasBeenNotified()) {
                 initializedNotification.Notify();
@@ -324,9 +321,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
     }
 
     logger->debug("Processor terminating");
-    typechecker.shutdown();
-
-    auto gs = typechecker.destroyAndReturnGlobalState();
+    auto gs = typecheckerCoord.shutdown();
     if (gs) {
         return gs;
     } else {

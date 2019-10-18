@@ -12,13 +12,13 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config)
-    : config(config), preprocessor(move(initialGS), config), typechecker(config),
+    : config(config), preprocessor(move(initialGS), config), typecheckerCoord(config),
       lastMetricUpdateTime(chrono::steady_clock::now()) {}
 
-LSPQueryResult LSPLoop::queryByLoc(const LSPTypecheckerOps &ops, string_view uri, const Position &pos,
+LSPQueryResult LSPLoop::queryByLoc(LSPTypechecker &typechecker, string_view uri, const Position &pos,
                                    const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
-    const auto &gs = ops.gs;
     Timer timeit(config->logger, "setupLSPQueryByLoc");
+    const core::GlobalState &gs = typechecker.state();
     auto fref = config->uri2FileRef(gs, uri);
     if (!fref.exists()) {
         auto error = make_unique<ResponseError>(
@@ -34,18 +34,18 @@ LSPQueryResult LSPLoop::queryByLoc(const LSPTypecheckerOps &ops, string_view uri
     }
 
     auto loc = config->lspPos2Loc(fref, pos, gs);
-    return ops.query(core::lsp::Query::createLocQuery(loc), {fref});
+    return typechecker.query(core::lsp::Query::createLocQuery(loc), {fref});
 }
 
-LSPQueryResult LSPLoop::queryBySymbol(const LSPTypecheckerOps &ops, core::SymbolRef sym) const {
+LSPQueryResult LSPLoop::queryBySymbol(LSPTypechecker &typechecker, core::SymbolRef sym) const {
     Timer timeit(config->logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<core::FileRef> frefs;
-    const core::GlobalState &gs = ops.gs;
+    const core::GlobalState &gs = typechecker.state();
     const core::NameHash symNameHash(gs, sym.data(gs)->name.data(gs));
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
     int i = -1;
-    for (auto &hash : ops.getFileHashes()) {
+    for (auto &hash : typechecker.getFileHashes()) {
         i++;
         const auto &usedSends = hash.usages.sends;
         const auto &usedConstants = hash.usages.constants;
@@ -59,7 +59,7 @@ LSPQueryResult LSPLoop::queryBySymbol(const LSPTypecheckerOps &ops, core::Symbol
         }
     }
 
-    return ops.query(core::lsp::Query::createSymbolQuery(sym), frefs);
+    return typechecker.query(core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
@@ -83,12 +83,6 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     if (!opts.webTraceFile.empty()) {
         web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
     }
-}
-
-LSPResult LSPResult::make(unique_ptr<ResponseMessage> response, bool canceled) {
-    LSPResult rv{{}, canceled};
-    rv.responses.push_back(make_unique<LSPMessage>(move(response)));
-    return rv;
 }
 
 } // namespace sorbet::realmain::lsp

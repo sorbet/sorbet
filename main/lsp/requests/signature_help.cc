@@ -47,20 +47,21 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
     sigs.push_back(move(sig));
 }
 
-LSPResult LSPLoop::handleTextSignatureHelp(const LSPTypecheckerOps &ops, const MessageId &id,
-                                           const TextDocumentPositionParams &params) const {
+unique_ptr<ResponseMessage> LSPLoop::handleTextSignatureHelp(LSPTypechecker &typechecker, const MessageId &id,
+                                                             const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentSignatureHelp);
     if (!config->opts.lspSignatureHelpEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Signature Help` LSP feature is experimental and disabled by default.");
-        return LSPResult::make(move(response));
+        return response;
     }
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.signatureHelp");
 
-    const core::GlobalState &gs = ops.gs;
-    auto result = queryByLoc(ops, params.textDocument->uri, *params.position, LSPMethod::TextDocumentSignatureHelp);
+    const core::GlobalState &gs = typechecker.state();
+    auto result =
+        queryByLoc(typechecker, params.textDocument->uri, *params.position, LSPMethod::TextDocumentSignatureHelp);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -76,8 +77,10 @@ LSPResult LSPLoop::handleTextSignatureHelp(const LSPTypecheckerOps &ops, const M
 
                 auto fref = config->uri2FileRef(gs, params.textDocument->uri);
                 if (!fref.exists()) {
-                    // TODO(jvilk): This should probably return *something*; it's a request!
-                    return LSPResult();
+                    response->error =
+                        make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                   fmt::format("Unknown file: `{}`", params.textDocument->uri));
+                    return response;
                 }
                 auto src = fref.data(gs).source();
                 auto loc = config->lspPos2Loc(fref, *params.position, gs);
@@ -98,6 +101,6 @@ LSPResult LSPLoop::handleTextSignatureHelp(const LSPTypecheckerOps &ops, const M
         }
         response->result = move(result);
     }
-    return LSPResult::make(move(response));
+    return response;
 }
 } // namespace sorbet::realmain::lsp

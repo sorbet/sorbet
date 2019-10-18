@@ -11,12 +11,13 @@ void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Loca
     }
 }
 
-LSPResult LSPLoop::handleTextDocumentDefinition(const LSPTypecheckerOps &ops, const MessageId &id,
-                                                const TextDocumentPositionParams &params) const {
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentDefinition(LSPTypechecker &typechecker, const MessageId &id,
+                                                                  const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDefinition);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.definition");
-    const core::GlobalState &gs = ops.gs;
-    auto result = queryByLoc(ops, params.textDocument->uri, *params.position, LSPMethod::TextDocumentDefinition, false);
+    const core::GlobalState &gs = typechecker.state();
+    auto result =
+        queryByLoc(typechecker, params.textDocument->uri, *params.position, LSPMethod::TextDocumentDefinition, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -49,7 +50,7 @@ LSPResult LSPLoop::handleTextDocumentDefinition(const LSPTypecheckerOps &ops, co
         }
         response->result = move(result);
     }
-    return LSPResult::make(move(response));
+    return response;
 }
 
 } // namespace sorbet::realmain::lsp

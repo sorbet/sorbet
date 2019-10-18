@@ -35,13 +35,13 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, core::TypePtr type) {
 }
 } // namespace
 
-LSPResult LSPLoop::handleTextDocumentTypeDefinition(const LSPTypecheckerOps &ops, const MessageId &id,
-                                                    const TextDocumentPositionParams &params) const {
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentTypeDefinition(LSPTypechecker &typechecker, const MessageId &id,
+                                                                      const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentTypeDefinition);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.typeDefinition");
-    const core::GlobalState &gs = ops.gs;
-    auto result =
-        queryByLoc(ops, params.textDocument->uri, *params.position, LSPMethod::TextDocumentTypeDefinition, false);
+    const core::GlobalState &gs = typechecker.state();
+    auto result = queryByLoc(typechecker, params.textDocument->uri, *params.position,
+                             LSPMethod::TextDocumentTypeDefinition, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -67,6 +67,6 @@ LSPResult LSPLoop::handleTextDocumentTypeDefinition(const LSPTypecheckerOps &ops
         }
         response->result = move(result);
     }
-    return LSPResult::make(move(response));
+    return response;
 }
 } // namespace sorbet::realmain::lsp
