@@ -556,6 +556,9 @@ class T::Props::Decorator
   if defined?(Opus) && defined?(Opus::Enum)
     TYPES_NOT_NEEDING_CLONE << Opus::Enum
   end
+  if defined?(T::Enum)
+    TYPES_NOT_NEEDING_CLONE << T::Enum
+  end
 
   sig {params(type: PropType).returns(T::Boolean)}
   private def shallow_clone_ok(type)

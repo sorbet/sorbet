@@ -28,6 +28,8 @@ module T::Props::Utils
       # being defined.
       if defined?(Opus) && defined?(Opus::Enum) && what.class == Opus::Enum
         what
+      elsif defined?(T::Enum) && what.class == T::Enum
+        what
       else
         what.clone
       end
