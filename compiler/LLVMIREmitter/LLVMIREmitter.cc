@@ -211,11 +211,21 @@ void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
     auto className = showClassName(cs, sym);
     auto classNameCStr = builder.CreateGlobalStringPtr(className, {"className_", className});
 
-    if (sym.data(cs)->superClass() == core::Symbols::Module()) {
-        builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
+    if (sym.data(cs)->owner != core::Symbols::root()) {
+        auto getOwner = resolveSymbol(cs, sym.data(cs)->owner, builder);
+        if (sym.data(cs)->superClass() == core::Symbols::Module()) {
+            builder.CreateCall(cs.module->getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
+        } else {
+            auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
+            builder.CreateCall(cs.module->getFunction("sorbet_defineNestedClass"), {getOwner, classNameCStr, rawCall});
+        }
     } else {
-        auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
-        builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelClass"), {classNameCStr, rawCall});
+        if (sym.data(cs)->superClass() == core::Symbols::Module()) {
+            builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
+        } else {
+            auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
+            builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelClass"), {classNameCStr, rawCall});
+        }
     }
 
     auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
