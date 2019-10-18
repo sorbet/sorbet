@@ -162,7 +162,7 @@ class Hash < Object
   # ```
   sig do
     type_parameters(:U, :V).params(
-      arg0: T::Array[[T.type_parameter(:U), T.type_parameter(:V)]],
+      arg0: T.any(T::Array[[T.type_parameter(:U), T.type_parameter(:V)]], T::Hash[T.type_parameter(:U), T.type_parameter(:V)]),
     )
     .returns(T::Hash[T.type_parameter(:U), T.type_parameter(:V)])
   end
