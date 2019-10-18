@@ -215,8 +215,7 @@ void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
         builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
     } else {
         auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
-        builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelClass"),
-                           {classNameCStr, rawCall});
+        builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelClass"), {classNameCStr, rawCall});
     }
 
     auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
