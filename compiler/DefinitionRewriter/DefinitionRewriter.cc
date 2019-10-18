@@ -27,9 +27,9 @@ public:
 
             auto methodDef = ast::cast_tree<ast::MethodDef>(stat.get());
             if (methodDef) {
+                auto method = methodDef->isSelf() ? Names::sorbet_defineMethodSingleton : Names::sorbet_defineMethod;
                 auto magic = ast::MK::Send2(loc, ast::MK::Unsafe(loc, ast::MK::Constant(loc, core::Symbols::root())),
-                                            Names::sorbet_defineMethod, ast::MK::Self(loc),
-                                            ast::MK::Symbol(loc, methodDef->name));
+                                            method, ast::MK::Self(loc), ast::MK::Symbol(loc, methodDef->name));
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
                 i++;
                 continue;

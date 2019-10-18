@@ -173,6 +173,40 @@ vector<llvm::BasicBlock *> getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, c
     return llvmBlocks;
 }
 
+void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<> builder) {
+    ENFORCE(i->args.size() == 2);
+    auto ownerSym = typeToSym(cs, i->args[0].type);
+
+    auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
+    ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+    core::NameRef funcNameRef(cs, lit->value);
+
+    auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
+    if (ownerSym == core::Symbols::Object() && !isSelf) {
+        // TODO Figure out if this speicial case is right
+        lookupSym = core::Symbols::Object();
+    }
+    auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
+    ENFORCE(funcSym.exists());
+    ENFORCE(funcSym.data(cs)->isMethod());
+
+    auto funcName = funcNameRef.show(cs);
+    auto funcNameCStr = builder.CreateGlobalStringPtr(funcName, {"funcName_", funcName});
+
+    auto llvmFuncName = funcSym.data(cs)->toStringFullName(cs);
+    auto funcHandle = cs.module->getOrInsertFunction(llvmFuncName, cs.getRubyFFIType());
+    auto universalSignature = llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
+    auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
+
+    auto rubyFunc = cs.module->getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
+    ENFORCE(rubyFunc);
+    builder.CreateCall(rubyFunc, {resolveSymbol(cs, ownerSym, builder), funcNameCStr, ptr,
+                                  llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
+
+    builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
+    return;
+}
+
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBlock *> llvmBlocks,
                   const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables,
                   llvm::AllocaInst *sendArgArray) {
@@ -219,34 +253,11 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                             return;
                         }
                         if (i->fun == Names::sorbet_defineMethod) {
-                            ENFORCE(i->args.size() == 2);
-                            auto ownerSym = typeToSym(cs, i->args[0].type);
-
-                            auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
-                            ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-                            core::NameRef funcNameRef(cs, lit->value);
-                            auto funcSym = ownerSym.data(cs)->findMember(cs, funcNameRef);
-                            ENFORCE(funcSym.data(cs)->isMethod());
-
-                            auto funcName = funcNameRef.show(cs);
-                            auto funcNameCStr = builder.CreateGlobalStringPtr(funcName, {"funcName_", funcName});
-
-                            auto llvmFuncName = funcSym.data(cs)->toStringFullName(cs);
-                            auto funcHandle = cs.module->getOrInsertFunction(llvmFuncName, cs.getRubyFFIType());
-                            auto universalSignature =
-                                llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
-                            auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
-
-                            auto method = ownerSym.data(cs)->isSingletonClass(cs) ? "sorbet_defineMethodSingleton"
-                                                                                  : "sorbet_defineMethod";
-                            builder.CreateCall(cs.module->getFunction(method),
-                                               {resolveSymbol(cs, ownerSym, builder), funcNameCStr, ptr,
-                                                llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
-
-                            builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
+                            defineMethod(cs, i, false, builder);
                             return;
                         }
                         if (i->fun == Names::sorbet_defineMethodSingleton) {
+                            defineMethod(cs, i, true, builder);
                             return;
                         }
                         // TODO: Should only be ::Sorbet::Private::Static.keep_for_ide
