@@ -59,7 +59,8 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
         return nullptr;
     }
 
-    if (send->args.empty() && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
+    if (send->args.empty() && send->fun == core::Names::before()) {
+        // treat `before`(s) as constructors for ivars initialization
         return addSigVoid(ast::MK::Method0(send->loc, send->loc, core::Names::initialize(),
                                            prepareBody(ctx, std::move(send->block->body)),
                                            ast::MethodDef::DSLSynthesized));
@@ -80,8 +81,10 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
                                                 ctx.state.enterNameConstant("<class_" + argString + ">"));
         return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs),
                               ast::ClassDefKind::Class);
-    } else if (send->fun == core::Names::it()) {
-        auto name = ctx.state.enterNameUTF8("<test_" + argString + ">");
+    } else if (send->fun == core::Names::it() || send->fun == core::Names::after()) {
+        auto name = (send->fun == core::Names::after()) ?
+          ctx.state.enterNameUTF8("<after_" + argString + ">") :
+          ctx.state.enterNameUTF8("<test_" + argString + ">");
         return addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
                                            prepareBody(ctx, std::move(send->block->body)),
                                            ast::MethodDef::DSLSynthesized));
