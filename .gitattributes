@@ -1,4 +1,3 @@
 *.rbi linguist-language=Ruby
 test/**/*.out diff
-*.llo.exp linguist-language=LLVM
-*.ll.exp linguist-language=LLVM
+*.exp linguist-language=LLVM
