@@ -3,7 +3,7 @@ target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-apple-darwin18.2.0"
 
 @.str = private unnamed_addr constant [16 x i8] c"ERROR: %s is 0\0A\00", align 1
-@rb_cObject = external local_unnamed_addr global i64, align 8
+@rb_cObject = external local_unnamed_addr constant i64, align 8
 @.str.3 = private unnamed_addr constant [5 x i8] c"func\00", align 1
 @"userStr_hello world" = private unnamed_addr constant [12 x i8] c"hello world\00", align 1
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
