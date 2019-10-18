@@ -273,11 +273,90 @@ void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) __a
     rb_define_const(owner, name, value);
 }
 
-// DOES NOT walk superclasses. Invokes const_missing
-VALUE sorbet_getConstant(const char* name) __attribute__((always_inline)) {
-    ID id = sorbet_IDIntern(name);
-    return rb_const_get_at(sorbet_rb_cObject(), id);
+// Trying to be a copy of rb_mod_const_get
+static const char wrong_constant_name[] = "wrong constant name %1$s";
+VALUE sorbet_getConstant(const char* path) __attribute__((always_inline)) {
+    VALUE name, mod;
+    rb_encoding *enc;
+    const char *pbeg, *p, *pend;
+    ID id;
+    int recur = 1;
+
+    id = sorbet_IDIntern(path);
+    name = ID2SYM(id);
+    mod = sorbet_rb_cObject();
+    enc = rb_enc_get(name);
+
+    pbeg = p = path;
+    pend = path + strlen(path);
+
+    if (p >= pend || !*p) {
+wrong_name:
+        rb_name_err_raise(wrong_constant_name, mod, name);
+    }
+
+    if (p + 2 < pend && p[0] == ':' && p[1] == ':') {
+        mod = rb_cObject;
+        p += 2;
+        pbeg = p;
+    }
+
+    while (p < pend) {
+        VALUE part;
+        long len, beglen;
+
+        while (p < pend && *p != ':') p++;
+
+        if (pbeg == p) goto wrong_name;
+
+        id = rb_check_id_cstr(pbeg, len = p-pbeg, enc);
+        beglen = pbeg-path;
+
+        if (p < pend && p[0] == ':') {
+            if (p + 2 >= pend || p[1] != ':') goto wrong_name;
+            p += 2;
+            pbeg = p;
+        }
+
+        if (!RB_TYPE_P(mod, T_MODULE) && !RB_TYPE_P(mod, T_CLASS)) {
+            rb_raise(rb_eTypeError, "%"PRIsVALUE" does not refer to class/module",
+                    QUOTE(name));
+        }
+
+        if (!id) {
+            part = rb_str_subseq(name, beglen, len);
+            OBJ_FREEZE(part);
+            if (!rb_is_const_name(part)) {
+                name = part;
+                goto wrong_name;
+            }
+            else if (!rb_method_basic_definition_p(CLASS_OF(mod), idConst_missing)) {
+                part = rb_str_intern(part);
+                mod = rb_const_missing(mod, part);
+                continue;
+            }
+            else {
+                rb_mod_const_missing(mod, part);
+            }
+        }
+        if (!rb_is_const_id(id)) {
+            name = ID2SYM(id);
+            goto wrong_name;
+        }
+        if (!recur) {
+            mod = rb_const_get_at(mod, id);
+        }
+        else if (beglen == 0) {
+            mod = rb_const_get(mod, id);
+        }
+        else {
+            mod = rb_const_get_from(mod, id);
+        }
+    }
+
+    return mod;
 }
+// End copy of rb_mod_const_get
 
 VALUE sorbet_defineTopLevelModule(const char *name) __attribute__((always_inline)) {
     return rb_define_module(name);
