@@ -144,7 +144,9 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
 
             auto *a = ast::MK::arg2Local(arg.get());
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, argId, true))};
-            auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "rawArgValue");
+            auto name = a->localVariable._name.data(cs)->shortName(cs);
+            llvm::StringRef nameRef(name.data(), name.length());
+            auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
             cs.boxRawValue(builder, llvmVariables[a->localVariable], rawValue);
         }
     }
