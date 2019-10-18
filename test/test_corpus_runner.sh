@@ -5,7 +5,6 @@ rb=${1/--single_test=/}
 
 rbout=$(mktemp)
 llvmir=$(mktemp -d)
-srbout=$(mktemp)
 
 cleanup() {
     rm -r "$llvmir" "$rbout"
@@ -27,6 +26,7 @@ done
 
 if [[ $rb != *"no-run"* ]]; then
     runfile=$(mktemp)
+    srbout=$(mktemp)
     echo "require './test/preamble.rb'; require '$bundle';" > "$runfile"
     ruby "$runfile" | tee "$srbout"
 
