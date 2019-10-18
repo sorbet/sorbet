@@ -13,17 +13,16 @@ unique_ptr<LSPMessage> makeShowOperation(std::string operationName, std::string 
         make_unique<SorbetShowOperationParams>(move(operationName), move(description), status)));
 }
 
-ShowOperation::ShowOperation(LSPOutput &output, const LSPConfiguration &config, std::string operationName,
-                             std::string description)
-    : output(output), config(config), operationName(move(operationName)), description(move(description)) {
-    if (config.enableOperationNotifications) {
-        output.write(makeShowOperation(this->operationName, this->description, SorbetOperationStatus::Start));
+ShowOperation::ShowOperation(const LSPConfiguration &config, std::string operationName, std::string description)
+    : config(config), operationName(move(operationName)), description(move(description)) {
+    if (config.clientConfig->enableOperationNotifications) {
+        config.output->write(makeShowOperation(this->operationName, this->description, SorbetOperationStatus::Start));
     }
 }
 
 ShowOperation::~ShowOperation() {
-    if (config.enableOperationNotifications) {
-        output.write(makeShowOperation(this->operationName, this->description, SorbetOperationStatus::End));
+    if (config.clientConfig->enableOperationNotifications) {
+        config.output->write(makeShowOperation(this->operationName, this->description, SorbetOperationStatus::End));
     }
 }
 } // namespace sorbet::realmain::lsp

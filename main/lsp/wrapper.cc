@@ -27,15 +27,11 @@ public:
 };
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMessage> message) {
-    const bool isInitialize = message->isNotification() && message->method() == LSPMethod::Initialize;
     auto result = lspLoop->processRequest(move(gs), move(message));
     gs = move(result.gs);
 
     // Should always run typechecking at least once for each request post-initialization.
-    ENFORCE(!initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
-    if (isInitialize) {
-        initialized = true;
-    }
+    ENFORCE(!config->initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
 
     // Retrieve any notifications that would normally be sent asynchronously in a multithreaded scenario.
     auto notifs = output->getOutput();
@@ -46,26 +42,11 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMess
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<LSPMessage>> &messages) {
-    // Determine boolean before moving messages.
-    bool foundPostInitializationRequest = !messages.empty();
-    if (!initialized) {
-        foundPostInitializationRequest = false;
-        for (auto &message : messages) {
-            if (initialized) {
-                foundPostInitializationRequest = true;
-                break;
-            } else if (message->isNotification() && message->method() == LSPMethod::Initialized) {
-                initialized = true;
-            }
-        }
-    }
-
     auto result = lspLoop->processRequests(move(gs), move(messages));
     gs = move(result.gs);
 
     // Should always run typechecking at least once for each request post-initialization.
-    ENFORCE(!initialized || !foundPostInitializationRequest || gs->lspTypecheckCount > 0,
-            "Fatal error: LSPLoop did not typecheck GlobalState.");
+    ENFORCE(!config->initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
 
     return move(result.responses);
 }
@@ -76,12 +57,12 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &json
 
 void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,
                              bool disableFastPath) {
-    output = make_unique<LSPWrapper::LSPOutputToVector>();
+    output = make_shared<LSPWrapper::LSPOutputToVector>();
     ENFORCE(gs->errorQueue->ignoreFlushes); // LSP needs this
     workers = WorkerPool::create(0, *logger);
+    config = make_shared<LSPConfiguration>(opts, output, *workers, logger, true, disableFastPath);
     // Configure LSPLoop to disable configatron.
-    lspLoop = make_unique<LSPLoop>(std::move(gs), LSPConfiguration(opts, logger, true, disableFastPath), logger,
-                                   *workers.get(), *output);
+    lspLoop = make_unique<LSPLoop>(std::move(gs), config);
 }
 
 LSPWrapper::LSPWrapper(options::Options &&options, std::string_view rootPath, bool disableFastPath)

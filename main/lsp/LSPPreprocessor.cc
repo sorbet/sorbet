@@ -36,25 +36,12 @@ void cancelTimer(unique_ptr<Timer> &timer) {
     }
 }
 
-class QueueOutput final : public LSPOutput {
-private:
-    absl::Mutex &mtx;
-    deque<unique_ptr<LSPMessage>> &queue;
-
-public:
-    QueueOutput(absl::Mutex &mtx, deque<unique_ptr<LSPMessage>> &queue) : mtx(mtx), queue(queue) {}
-    void rawWrite(unique_ptr<LSPMessage> msg) override {
-        absl::MutexLock lck(&this->mtx);
-        this->queue.push_back(move(msg));
-    }
-};
-
 } // namespace
 
-LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPConfiguration config, WorkerPool &workers,
-                                 const std::shared_ptr<spdlog::logger> &logger, u4 initialVersion)
-    : ttgs(TimeTravelingGlobalState(config, logger, workers, move(initialGS), initialVersion)), config(move(config)),
-      workers(workers), logger(logger), owner(this_thread::get_id()), nextVersion(initialVersion + 1) {
+LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, const shared_ptr<LSPConfiguration> &config,
+                                 u4 initialVersion)
+    : ttgs(TimeTravelingGlobalState(config, move(initialGS), initialVersion)), config(config),
+      owner(this_thread::get_id()), nextVersion(initialVersion + 1) {
     const auto &gs = ttgs.getGlobalState();
     finalGSErrorQueue = make_shared<core::ErrorQueue>(gs.errorQueue->logger, gs.errorQueue->tracer);
     // Required for diagnostics to work.
@@ -63,6 +50,7 @@ LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, LSPCon
 
 void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
     mtx.AssertHeld();
+    auto &logger = config->logger;
     // mergeFileChanges is the most expensive operation this thread performs while holding the mutex lock.
     Timer timeit(logger, "lsp.mergeFileChanges");
     u4 earliestActiveEditVersion = nextVersion;
@@ -193,6 +181,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
     }
 
     const LSPMethod method = msg->method();
+    auto &logger = config->logger;
     bool shouldEnqueue = false;
     bool shouldMerge = false;
     // Ensure TTGS has file contents from previous edit.
@@ -232,7 +221,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
         case LSPMethod::Initialize: {
             // Update configuration object. Needed to intelligently process edits.
             const auto &params = get<unique_ptr<InitializeParams>>(msg->asRequest().params);
-            config.configure(*params);
+            config->clientInitialize(*params);
             shouldEnqueue = true;
             break;
         }
@@ -240,12 +229,11 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             InitializedParams &params = *get<unique_ptr<InitializedParams>>(msg->asNotification().params);
             {
                 Timer timeit(logger, "initial_index");
-                QueueOutput output(stateMtx, state.pendingRequests);
-                ShowOperation op(output, config, "Indexing", "Indexing files...");
+                ShowOperation op(*config, "Indexing", "Indexing files...");
                 params.updates.updatedFileIndexes = ttgs.indexFromFileSystem();
                 params.updates.updatedFileHashes = ttgs.getGlobalStateHashes();
             }
-            config.initialized = true;
+            config->initialized = true;
             params.updates.canTakeFastPath = false;
             params.updates.updatedGS = getTypecheckingGS();
             shouldEnqueue = true;
@@ -254,7 +242,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
         /* For file update events, convert to a SorbetWorkspaceEdit and commit the changes to GlobalState. */
         case LSPMethod::TextDocumentDidOpen: {
             auto &params = get<unique_ptr<DidOpenTextDocumentParams>>(msg->asNotification().params);
-            openFiles.insert(config.remoteName2Local(params->textDocument->uri));
+            openFiles.insert(config->remoteName2Local(params->textDocument->uri));
             auto newParams = make_unique<SorbetWorkspaceEditParams>();
             canonicalizeEdits(nextVersion++, move(params), newParams->updates);
             msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
@@ -263,7 +251,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
         }
         case LSPMethod::TextDocumentDidClose: {
             auto &params = get<unique_ptr<DidCloseTextDocumentParams>>(msg->asNotification().params);
-            openFiles.erase(config.remoteName2Local(params->textDocument->uri));
+            openFiles.erase(config->remoteName2Local(params->textDocument->uri));
             auto newParams = make_unique<SorbetWorkspaceEditParams>();
             canonicalizeEdits(nextVersion++, move(params), newParams->updates);
             msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
@@ -344,9 +332,9 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentPa
     updates.versionStart = v;
     updates.versionEnd = v;
     string_view uri = changeParams->textDocument->uri;
-    if (absl::StartsWith(uri, config.rootUri)) {
-        string localPath = config.remoteName2Local(uri);
-        if (config.isFileIgnored(localPath)) {
+    if (config->isUriInWorkspace(uri)) {
+        string localPath = config->remoteName2Local(uri);
+        if (config->isFileIgnored(localPath)) {
             return;
         }
         string fileContents;
@@ -379,9 +367,9 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentPara
     updates.versionStart = v;
     updates.versionEnd = v;
     string_view uri = openParams->textDocument->uri;
-    if (absl::StartsWith(uri, config.rootUri)) {
-        string localPath = config.remoteName2Local(uri);
-        if (!config.isFileIgnored(localPath)) {
+    if (config->isUriInWorkspace(uri)) {
+        string localPath = config->remoteName2Local(uri);
+        if (!config->isFileIgnored(localPath)) {
             updates.updatedFiles.push_back(make_shared<core::File>(
                 move(localPath), move(openParams->textDocument->text), core::File::Type::Normal));
         }
@@ -393,12 +381,12 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentPar
     updates.versionStart = v;
     updates.versionEnd = v;
     string_view uri = closeParams->textDocument->uri;
-    if (absl::StartsWith(uri, config.rootUri)) {
-        string localPath = config.remoteName2Local(uri);
-        if (!config.isFileIgnored(localPath)) {
+    if (config->isUriInWorkspace(uri)) {
+        string localPath = config->remoteName2Local(uri);
+        if (!config->isFileIgnored(localPath)) {
             // Use contents of file on disk.
             updates.updatedFiles.push_back(make_shared<core::File>(
-                move(localPath), readFile(localPath, *config.opts.fs), core::File::Type::Normal));
+                move(localPath), readFile(localPath, *config->opts.fs), core::File::Type::Normal));
         }
     }
 }
@@ -409,11 +397,11 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<WatchmanQueryResponse> 
     updates.versionEnd = v;
     for (auto file : queryResponse->files) {
         // Don't append rootPath if it is empty.
-        string localPath = config.rootPath.size() > 0 ? absl::StrCat(config.rootPath, "/", file) : file;
+        string localPath = config->rootPath.size() > 0 ? absl::StrCat(config->rootPath, "/", file) : file;
         // Editor contents supercede file system updates.
-        if (!config.isFileIgnored(localPath) && !openFiles.contains(localPath)) {
+        if (!config->isFileIgnored(localPath) && !openFiles.contains(localPath)) {
             updates.updatedFiles.push_back(make_shared<core::File>(
-                move(localPath), readFile(localPath, *config.opts.fs), core::File::Type::Normal));
+                move(localPath), readFile(localPath, *config->opts.fs), core::File::Type::Normal));
         }
     }
 }

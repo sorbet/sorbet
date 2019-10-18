@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_LSP_LSPOUTPUT_H
 #define RUBY_TYPER_LSP_LSPOUTPUT_H
 
+#include "absl/synchronization/mutex.h"
 #include <memory>
 
 namespace spdlog {
@@ -9,18 +10,27 @@ class logger;
 
 namespace sorbet::realmain::lsp {
 class LSPMessage;
+class ResponseMessage;
+class NotificationMessage;
 
 /**
  * Interface for sending messages back to the client.
  */
 class LSPOutput {
+    absl::Mutex mtx;
+
 protected:
-    virtual void rawWrite(std::unique_ptr<LSPMessage> msg) = 0;
+    virtual void rawWrite(std::unique_ptr<LSPMessage> msg) EXCLUSIVE_LOCKS_REQUIRED(mtx) = 0;
 
 public:
     LSPOutput() = default;
     virtual ~LSPOutput() = default;
+    /**
+     * Write the given message to the output. Thread-safe via mutex.
+     */
     void write(std::unique_ptr<LSPMessage> msg);
+    void write(std::unique_ptr<ResponseMessage> msg);
+    void write(std::unique_ptr<NotificationMessage> msg);
 };
 
 /**

@@ -77,6 +77,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             }
         }
 
+        auto clientHoverMarkupKind = config->clientConfig->clientHoverMarkupKind;
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
             auto start = sendResp->dispatchResult.get();
@@ -97,14 +98,12 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
             } else {
                 typeString = methodInfoString(*gs, retType, *sendResp->dispatchResult, constraint);
             }
-            response->result =
-                make_unique<Hover>(formatHoverText(config.clientHoverMarkupKind, typeString, documentation));
+            response->result = make_unique<Hover>(formatHoverText(clientHoverMarkupKind, typeString, documentation));
         } else if (auto defResp = resp->isDefinition()) {
             string typeString =
                 absl::StrCat(methodDetail(*gs, defResp->symbol, nullptr, defResp->retType.type, nullptr), "\n",
                              methodDefinition(*gs, defResp->symbol));
-            response->result =
-                make_unique<Hover>(formatHoverText(config.clientHoverMarkupKind, typeString, documentation));
+            response->result = make_unique<Hover>(formatHoverText(clientHoverMarkupKind, typeString, documentation));
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(*gs);
             auto type = constResp->retType.type;
@@ -117,8 +116,8 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 // `Foo`.
                 type = core::make_type<core::MetaType>(type);
             }
-            response->result = make_unique<Hover>(
-                formatHoverText(config.clientHoverMarkupKind, type->showWithMoreInfo(*gs), documentation));
+            response->result =
+                make_unique<Hover>(formatHoverText(clientHoverMarkupKind, type->showWithMoreInfo(*gs), documentation));
         } else {
             core::TypePtr retType = resp->getRetType();
             // Some untyped arguments have null types.
@@ -126,7 +125,7 @@ LSPResult LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs, con
                 retType = core::Types::untypedUntracked();
             }
             response->result = make_unique<Hover>(
-                formatHoverText(config.clientHoverMarkupKind, retType->showWithMoreInfo(*gs), documentation));
+                formatHoverText(clientHoverMarkupKind, retType->showWithMoreInfo(*gs), documentation));
         }
     }
     return LSPResult::make(move(gs), move(response));

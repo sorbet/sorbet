@@ -1,36 +1,17 @@
 #ifndef RUBY_TYPER_LSPCONFIGURATION_H
 #define RUBY_TYPER_LSPCONFIGURATION_H
 
+#include "common/concurrency/WorkerPool.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "main/options/options.h"
 
 namespace sorbet::realmain::lsp {
 
 /**
- * The language server's configuration information.
- * Note: Some information is only populated during initialization.
+ * Client options sent during initialization.
  */
-class LSPConfiguration {
-public:
-    // The following properties are configured when the language server is created.
-
-    /** Command line options. */
-    const options::Options &opts;
-    std::shared_ptr<spdlog::logger> logger;
-    /** If true, LSPLoop will skip configatron during type checking */
-    const bool skipConfigatron;
-    /** If true, all queries will hit the slow path. */
-    const bool disableFastPath;
-    /** File system root of LSP client workspace. May be empty if it is the current working directory. */
-    const std::string rootPath;
-
-    // The following properties are configured during initialization.
-
-    /**
-     * Set to true once the server is initialized.
-     * TODO(jvilk): Use to raise server not initialized errors.
-     */
-    bool initialized = false;
+struct LSPClientConfiguration {
     /** Root of LSP client workspace. May be different than rootPath. At Stripe, editing happens locally but Sorbet
      * runs on a remote server. */
     std::string rootUri = "";
@@ -57,11 +38,43 @@ public:
     MarkupKind clientHoverMarkupKind = MarkupKind::Plaintext;
     /** What completion item markup should we send to the client? */
     MarkupKind clientCompletionItemMarkupKind = MarkupKind::Plaintext;
+};
 
-    LSPConfiguration(const options::Options &opts, const std::shared_ptr<spdlog::logger> &logger,
-                     bool skipConfigatron = false, bool disableFastPath = false);
+/**
+ * The language server's configuration information.
+ */
+class LSPConfiguration {
+    void assertInitialized() const;
 
-    void configure(const InitializeParams &initializeParams);
+public:
+    // The following properties are configured when the language server is created.
+
+    /** Command line / startup options. */
+    const options::Options &opts;
+    const std::shared_ptr<LSPOutput> output;
+    WorkerPool &workers;
+    const std::shared_ptr<spdlog::logger> logger;
+    /** If true, LSPLoop will skip configatron during type checking */
+    const bool skipConfigatron;
+    /** If true, all queries will hit the slow path. */
+    const bool disableFastPath;
+    /** File system root of LSP client workspace. May be empty if it is the current working directory. */
+    const std::string rootPath;
+
+    // The following properties are configured during initialization.
+
+    /**
+     * If 'true', then the initialization routine is complete and clientConfig is available.
+     */
+    std::atomic<bool> initialized;
+    std::unique_ptr<const LSPClientConfiguration> clientConfig;
+
+    LSPConfiguration(const options::Options &opts, const std::shared_ptr<LSPOutput> &output, WorkerPool &workers,
+                     const std::shared_ptr<spdlog::logger> &logger, bool skipConfigatron = false,
+                     bool disableFastPath = false);
+
+    // Note: Should only be called from LSPPreprocessor.
+    void clientInitialize(const InitializeParams &initializeParams);
 
     core::FileRef uri2FileRef(const core::GlobalState &gs, std::string_view uri) const;
     std::string fileRef2Uri(const core::GlobalState &gs, const core::FileRef) const;
@@ -71,6 +84,7 @@ public:
     // returns nullptr if this loc doesn't exist
     std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc) const;
     bool isFileIgnored(std::string_view filePath) const;
+    bool isUriInWorkspace(std::string_view uri) const;
 };
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPCONFIGURATION_H

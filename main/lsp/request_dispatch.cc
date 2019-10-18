@@ -40,6 +40,7 @@ LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<uniq
 }
 
 LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
+    auto &logger = config->logger;
     // TODO(jvilk): Make Timer accept multiple FlowIds so we can show merged messages correctly.
     Timer timeit(logger, "process_request");
     const LSPMethod method = msg.method();
@@ -90,7 +91,6 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             LSPResult result = pushDiagnostics(runSlowPath(move(gs), move(updates), /* isCancelable */ false));
             ENFORCE(!result.canceled);
             ENFORCE(result.gs);
-            config.initialized = true;
             return result;
         } else if (method == LSPMethod::Exit) {
             prodCategoryCounterInc("lsp.messages.processed", "exit");
@@ -103,11 +103,6 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             } else {
                 logger->error(errorInfo->message);
             }
-            return LSPResult{move(gs), {}};
-        } else if (method == LSPMethod::SorbetShowOperation) {
-            // Forward to client. These are sent from the preprocessor.
-            // TODO: Use a more efficient way to copy this object.
-            output.write(LSPMessage::fromClient(msg.toJSON()));
             return LSPResult{move(gs), {}};
         }
     } else if (msg.isRequest()) {
@@ -126,10 +121,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         auto &rawParams = requestMessage.params;
         if (method == LSPMethod::Initialize) {
             prodCategoryCounterInc("lsp.messages.processed", "initialize");
-            const auto &params = get<unique_ptr<InitializeParams>>(rawParams);
-            config.configure(*params);
-
-            const auto &opts = config.opts;
+            const auto &opts = config->opts;
             auto serverCap = make_unique<ServerCapabilities>();
             serverCap->textDocumentSync = TextDocumentSyncKind::Full;
             serverCap->definitionProvider = true;
@@ -188,7 +180,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             return handleTextDocumentReferences(move(gs), id, *params);
         } else if (method == LSPMethod::SorbetReadFile) {
             auto &params = get<unique_ptr<TextDocumentIdentifier>>(rawParams);
-            auto fref = config.uri2FileRef(*gs, params->uri);
+            auto fref = config->uri2FileRef(*gs, params->uri);
             if (fref.exists()) {
                 response->result =
                     make_unique<TextDocumentItem>(params->uri, "ruby", 0, string(fref.data(*gs).source()));

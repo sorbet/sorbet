@@ -32,7 +32,18 @@ void LSPOutput::write(unique_ptr<LSPMessage> msg) {
     } else if (msg->isNotification()) {
         ENFORCE(isServerNotification(msg->method()));
     }
-    rawWrite(move(msg));
+    {
+        absl::MutexLock lock(&mtx);
+        rawWrite(move(msg));
+    }
+}
+
+void LSPOutput::write(unique_ptr<ResponseMessage> msg) {
+    write(make_unique<LSPMessage>(move(msg)));
+}
+
+void LSPOutput::write(unique_ptr<NotificationMessage> msg) {
+    write(make_unique<LSPMessage>(move(msg)));
 }
 
 LSPStdout::LSPStdout(shared_ptr<spdlog::logger> &logger) : logger(logger) {}

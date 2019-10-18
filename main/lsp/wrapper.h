@@ -14,9 +14,6 @@ class LSPWrapper final {
 
     class LSPOutputToVector;
 
-    /** If true, then LSPLoop is initialized and is ready to receive requests. */
-    bool initialized = false;
-
     /** The LSP 'server', which runs in the same thread as LSPWrapper. */
     std::unique_ptr<LSPLoop> lspLoop;
 
@@ -29,7 +26,8 @@ class LSPWrapper final {
     std::unique_ptr<WorkerPool> workers;
     std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
     std::shared_ptr<spd::logger> typeErrorsConsole;
-    std::unique_ptr<LSPOutputToVector> output;
+    std::shared_ptr<LSPConfiguration> config;
+    std::shared_ptr<LSPOutputToVector> output;
 
     /** Contains shared constructor logic. */
     void instantiate(std::unique_ptr<core::GlobalState> gs, const std::shared_ptr<spdlog::logger> &logger,

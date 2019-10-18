@@ -21,7 +21,7 @@ LSPLoop::getReferencesToSymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef
 LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                 const ReferenceParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
-    ShowOperation op(output, config, "References", "Finding all references...");
+    ShowOperation op(*config, "References", "Finding all references...");
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.references");
 
     auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
@@ -37,7 +37,7 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
         auto &queryResponses = result.responses;
         if (!queryResponses.empty()) {
             const bool fileIsTyped =
-                config.uri2FileRef(*gs, params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
+                config->uri2FileRef(*gs, params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
             // N.B.: Ignores literals.
             // If file is untyped, only supports find reference requests from constants and class definitions.

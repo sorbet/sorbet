@@ -53,6 +53,7 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
 }
 
 LSPResult LSPLoop::commitTypecheckRun(TypecheckRun run) {
+    auto &logger = config->logger;
     if (run.canceled) {
         logger->debug("[Typechecker] Typecheck run for edits {} thru {} was canceled.", run.updates.versionStart,
                       run.updates.versionEnd);
@@ -116,9 +117,10 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
 
 LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previousGS, LSPFileUpdates updates,
                                            bool isCancelable) const {
-    ShowOperation slowPathOp(output, config, "SlowPath", "Typechecking...");
+    ShowOperation slowPathOp(*config, "SlowPath", "Typechecking...");
+    auto &logger = config->logger;
     Timer timeit(logger, "slow_path");
-    ENFORCE(!updates.canTakeFastPath || config.disableFastPath);
+    ENFORCE(!updates.canTakeFastPath || config->disableFastPath);
     ENFORCE(updates.updatedGS.has_value());
     if (!updates.updatedGS.has_value()) {
         Exception::raise("runSlowPath called with an update that lacks an updated global state.");
@@ -136,7 +138,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
         {
             core::UnfreezeFileTable fileTableAccess(*finalGS);
             for (auto &file : updates.updatedFiles) {
-                auto pair = updateFile(move(finalGS), file, config.opts);
+                auto pair = updateFile(move(finalGS), file, config->opts);
                 finalGS = move(pair.first);
                 auto &ast = pair.second;
                 if (ast.tree) {
@@ -163,7 +165,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
             Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
         }
         auto maybeResolved =
-            pipeline::resolve(finalGS, move(indexedCopies), config.opts, workers, config.skipConfigatron);
+            pipeline::resolve(finalGS, move(indexedCopies), config->opts, config->workers, config->skipConfigatron);
         if (!maybeResolved.hasResult()) {
             return;
         }
@@ -176,7 +178,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(unique_ptr<core::GlobalState> previou
         if (finalGS->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.typecheck.sleep");
         }
-        pipeline::typecheck(finalGS, move(resolved), config.opts, workers);
+        pipeline::typecheck(finalGS, move(resolved), config->opts, config->workers);
     });
 
     auto out = finalGS->errorQueue->drainWithQueryResponses();
@@ -201,6 +203,7 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
         return runSlowPath(move(gs), move(updates), true);
     }
 
+    auto &logger = config->logger;
     Timer timeit(logger, "fast_path");
     vector<core::FileRef> subset;
     vector<core::NameHash> changedHashes;
@@ -227,7 +230,7 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
                 }
                 gs = core::GlobalState::replaceFile(move(gs), fref, f);
                 // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
-                fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config.opts);
+                fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
                 subset.emplace_back(fref);
             }
         }
@@ -258,14 +261,14 @@ LSPLoop::TypecheckRun LSPLoop::runTypechecking(unique_ptr<core::GlobalState> gs,
         unique_ptr<KeyValueStore> kvstore; // nullptr
         // TODO: Thread through kvstore.
         ENFORCE(this->kvstore == nullptr);
-        auto t = pipeline::indexOne(config.opts, *gs, f, kvstore);
+        auto t = pipeline::indexOne(config->opts, *gs, f, kvstore);
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree->deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
     }
 
     ENFORCE(gs->lspQuery.isEmpty());
-    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config.opts);
-    pipeline::typecheck(gs, move(resolved), config.opts, workers);
+    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
+    pipeline::typecheck(gs, move(resolved), config->opts, config->workers);
     auto out = gs->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
     return TypecheckRun(move(gs), move(out.first), move(subset), move(updates), true);
@@ -277,7 +280,7 @@ LSPLoop::QueryRun LSPLoop::runQuery(unique_ptr<core::GlobalState> gs, const core
     ENFORCE(gs->lspTypecheckCount > 0,
             "Tried to run a query with a GlobalState object that never had inferencer and resolver runs.");
 
-    Timer timeit(logger, "query");
+    Timer timeit(config->logger, "query");
     prodCategoryCounterInc("lsp.updates", "query");
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
@@ -292,10 +295,10 @@ LSPLoop::QueryRun LSPLoop::runQuery(unique_ptr<core::GlobalState> gs, const core
 
     ENFORCE(gs->lspQuery.isEmpty());
     gs->lspQuery = q;
-    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config.opts);
+    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
-    pipeline::typecheck(gs, move(resolved), config.opts, workers);
+    pipeline::typecheck(gs, move(resolved), config->opts, config->workers);
     auto out = gs->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();

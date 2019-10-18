@@ -50,7 +50,7 @@ LSPResult LSPLoop::handleTextDocumentTypeDefinition(unique_ptr<core::GlobalState
         vector<unique_ptr<Location>> result;
         if (!queryResponses.empty()) {
             const bool fileIsTyped =
-                config.uri2FileRef(*gs, params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
+                config->uri2FileRef(*gs, params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
 
             // Only support go-to-type-definition on constants in untyped files.
