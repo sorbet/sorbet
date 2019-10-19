@@ -39,9 +39,7 @@ private:
         GlobalStateUpdate update;
         GlobalStateUpdate undoUpdate;
     };
-    const LSPConfiguration config;
-    std::shared_ptr<spdlog::logger> logger;
-    WorkerPool &workers;
+    std::shared_ptr<const LSPConfiguration> config;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     std::unique_ptr<core::GlobalState> gs;
 
@@ -67,8 +65,8 @@ private:
     std::vector<core::FileHash> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
 
 public:
-    TimeTravelingGlobalState(const LSPConfiguration &config, const std::shared_ptr<spdlog::logger> &logger,
-                             WorkerPool &workers, std::unique_ptr<core::GlobalState> gs, u4 initialVersion);
+    TimeTravelingGlobalState(const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<core::GlobalState> gs,
+                             u4 initialVersion);
 
     /**
      * Travels GlobalState forwards and backwards in time. No-op if version == current version.

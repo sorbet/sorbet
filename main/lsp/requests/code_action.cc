@@ -8,7 +8,7 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
                                                 const CodeActionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
-    if (!config.opts.lspQuickFixEnabled) {
+    if (!config->opts.lspQuickFixEnabled) {
         response->error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidRequest, "The `Quick Fix` LSP feature is experimental and disabled by default.");
         return LSPResult::make(move(gs), move(response));
@@ -18,7 +18,7 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.codeAction");
 
-    core::FileRef file = config.uri2FileRef(*gs, params.textDocument->uri);
+    core::FileRef file = config->uri2FileRef(*gs, params.textDocument->uri);
     LSPFileUpdates updates;
     updates.canTakeFastPath = true;
     ENFORCE(file.id() < globalStateHashes.size());
@@ -45,7 +45,7 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
                 for (auto &edit : autocorrect.edits) {
                     auto range = Range::fromLoc(*run.gs, edit.loc);
                     if (range != nullptr) {
-                        editsByFile[config.fileRef2Uri(*run.gs, edit.loc.file())].emplace_back(
+                        editsByFile[config->fileRef2Uri(*run.gs, edit.loc.file())].emplace_back(
                             make_unique<TextEdit>(std::move(range), edit.replacement));
                     }
                 }

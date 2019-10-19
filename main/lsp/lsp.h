@@ -2,7 +2,6 @@
 #define RUBY_TYPER_LSPLOOP_H
 
 #include "ast/ast.h"
-#include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/ErrorQueue.h"
 #include "core/NameHash.h"
@@ -57,7 +56,7 @@ class LSPLoop {
     friend class LSPWrapper;
 
     /** Encapsulates the active configuration for the language server. */
-    LSPConfiguration config;
+    std::shared_ptr<const LSPConfiguration> config;
     /** The LSP preprocessor standardizes incoming messages and combines edits. */
     LSPPreprocessor preprocessor;
     /** Trees that have been indexed (with initialGS) and can be reused between different runs */
@@ -72,10 +71,6 @@ class LSPLoop {
     /** Concrete error queue shared by all global states */
     std::shared_ptr<core::ErrorQueue> errorQueue;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
-    std::shared_ptr<spdlog::logger> logger;
-    WorkerPool &workers;
-    /** Used to send asynchronous notifications to the client. */
-    LSPOutput &output;
     /**
      * The time that LSP last sent metrics to statsd -- if `opts.statsdHost` was specified.
      */
@@ -132,8 +127,6 @@ class LSPLoop {
     LSPResult commitTypecheckRun(TypecheckRun run);
     LSPResult pushDiagnostics(TypecheckRun run);
 
-    bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg) const;
-
     LSPLoop::QueryRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, std::string_view uri,
                                          const Position &pos, const LSPMethod forMethod,
                                          bool errorIfFileIsUntyped = true) const;
@@ -181,8 +174,7 @@ class LSPLoop {
     void maybeStartCommitSlowPathEdit(core::GlobalState &gs, const LSPMessage &msg) const;
 
 public:
-    LSPLoop(std::unique_ptr<core::GlobalState> initialGS, LSPConfiguration config,
-            const std::shared_ptr<spd::logger> &logger, WorkerPool &workers, LSPOutput &output);
+    LSPLoop(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config);
     /**
      * Runs the language server on a dedicated thread. Returns the final global state if it exits cleanly, or nullopt
      * on error.

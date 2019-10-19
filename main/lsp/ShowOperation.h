@@ -13,14 +13,12 @@ class LSPConfiguration;
  * starts and ends. Is used to provide user feedback in the status line of VS Code.
  */
 class ShowOperation final {
-    LSPOutput &output;
     const LSPConfiguration &config;
     const std::string operationName;
     const std::string description;
 
 public:
-    ShowOperation(LSPOutput &output, const LSPConfiguration &config, std::string operationName,
-                  std::string description);
+    ShowOperation(const LSPConfiguration &config, std::string operationName, std::string description);
     ~ShowOperation();
 };
 } // namespace sorbet::realmain::lsp

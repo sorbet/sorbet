@@ -5,7 +5,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Location>> &locs, core::Loc loc) const {
-    auto location = config.loc2Location(gs, loc);
+    auto location = config->loc2Location(gs, loc);
     if (location != nullptr) {
         locs.push_back(std::move(location));
     }
@@ -26,7 +26,7 @@ LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs
         vector<unique_ptr<Location>> result;
         if (!queryResponses.empty()) {
             const bool fileIsTyped =
-                config.uri2FileRef(*gs, params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
+                config->uri2FileRef(*gs, params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
 
             // Only support go-to-definition on constants in untyped files.

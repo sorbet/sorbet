@@ -6,11 +6,9 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-TimeTravelingGlobalState::TimeTravelingGlobalState(const LSPConfiguration &config,
-                                                   const std::shared_ptr<spdlog::logger> &logger, WorkerPool &workers,
+TimeTravelingGlobalState::TimeTravelingGlobalState(const shared_ptr<LSPConfiguration> &config,
                                                    unique_ptr<core::GlobalState> gs, u4 initialVersion)
-    : config(config), logger(logger), workers(workers), gs(move(gs)), activeVersion(initialVersion),
-      latestVersion(initialVersion) {
+    : config(config), gs(move(gs)), activeVersion(initialVersion), latestVersion(initialVersion) {
     auto errorQueue = dynamic_pointer_cast<core::ErrorQueue>(this->gs->errorQueue);
     ENFORCE(errorQueue, "TimeTravelingGlobalState got an unexpected error queue");
     ENFORCE(errorQueue->ignoreFlushes, "TimeTravelingGlobalState's error queue is not ignoring flushes, which will "
@@ -32,7 +30,7 @@ vector<core::FileRef> TimeTravelingGlobalState::applyUpdate(TimeTravelUpdate &tt
             gs = core::GlobalState::replaceFile(move(gs), fref, file);
         } else {
             fref = gs->enterFile(file);
-            fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config.opts);
+            fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
             if (fref.id() >= globalStateHashes.size()) {
                 globalStateHashes.resize(fref.id() + 1);
             }
@@ -106,9 +104,9 @@ const vector<core::FileHash> &TimeTravelingGlobalState::getGlobalStateHashes() c
 vector<ast::ParsedFile> TimeTravelingGlobalState::indexFromFileSystem() {
     vector<ast::ParsedFile> indexed;
     {
-        Timer timeit(logger, "reIndexFromFileSystem");
-        vector<core::FileRef> inputFiles = pipeline::reserveFiles(gs, config.opts.inputFileNames);
-        for (auto &t : pipeline::index(gs, inputFiles, config.opts, workers, kvstore)) {
+        Timer timeit(config->logger, "reIndexFromFileSystem");
+        vector<core::FileRef> inputFiles = pipeline::reserveFiles(gs, config->opts.inputFileNames);
+        for (auto &t : pipeline::index(gs, inputFiles, config->opts, config->workers, kvstore)) {
             int id = t.file.id();
             if (id >= indexed.size()) {
                 indexed.resize(id + 1);
@@ -124,7 +122,7 @@ vector<ast::ParsedFile> TimeTravelingGlobalState::indexFromFileSystem() {
 }
 
 vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector<shared_ptr<core::File>> &files) const {
-    Timer timeit(logger, "computeStateHashes");
+    Timer timeit(config->logger, "computeStateHashes");
     vector<core::FileHash> res(files.size());
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
     for (int i = 0; i < files.size(); i++) {
@@ -132,13 +130,14 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector
         fileq->push(move(copy), 1);
     }
 
-    logger->debug("Computing state hashes for {} files", files.size());
+    auto &logger = *config->logger;
+    logger.debug("Computing state hashes for {} files", files.size());
 
     res.resize(files.size());
 
     shared_ptr<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>> resultq =
         make_shared<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>>(files.size());
-    workers.multiplexJob("lspStateHash", [fileq, resultq, files, logger = this->logger]() {
+    config->workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
         vector<pair<int, core::FileHash>> threadResult;
         int processedByThread = 0;
         int job;
@@ -154,7 +153,7 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector
                         threadResult.emplace_back(job, core::FileHash{});
                         continue;
                     }
-                    auto hash = pipeline::computeFileHash(files[job], *logger);
+                    auto hash = pipeline::computeFileHash(files[job], logger);
                     threadResult.emplace_back(job, move(hash));
                 }
             }
@@ -167,8 +166,8 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector
 
     {
         vector<pair<int, core::FileHash>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), *logger); !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), *logger)) {
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
                     res[a.first] = move(a.second);
@@ -192,7 +191,7 @@ void TimeTravelingGlobalState::pruneBefore(u4 version) {
 }
 
 void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
-    Timer timeit(logger, "ttgs_commit_edits");
+    Timer timeit(config->logger, "ttgs_commit_edits");
     // Hash changes.
     update.updatedFileHashes = computeStateHashes(update.updatedFiles);
     update.canTakeFastPath = canTakeFastPath(latestVersion, update);
@@ -213,7 +212,7 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
             update.hasNewFiles = true;
             // Reversal of a new file is... an empty file...
             auto emptyFile = make_shared<core::File>(string(file->path()), "", core::File::Type::Normal);
-            newUpdate.undoUpdate.hashUpdates.push_back(pipeline::computeFileHash(emptyFile, *logger));
+            newUpdate.undoUpdate.hashUpdates.push_back(pipeline::computeFileHash(emptyFile, *config->logger));
             newUpdate.undoUpdate.fileUpdates.push_back(move(emptyFile));
         }
     }
@@ -231,7 +230,7 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
         fileToPos[fref.id()] = i;
     }
 
-    auto trees = pipeline::index(gs, frefs, config.opts, workers, kvstore);
+    auto trees = pipeline::index(gs, frefs, config->opts, config->workers, kvstore);
     update.updatedFileIndexes.resize(trees.size());
     newUpdate.update.updatedFileIndexes.resize(trees.size());
     for (auto &ast : trees) {
@@ -248,22 +247,23 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
 }
 
 bool TimeTravelingGlobalState::canTakeFastPath(u4 fromId, const LSPFileUpdates &updates) {
-    Timer timeit(logger, "fast_path_decision");
+    Timer timeit(config->logger, "fast_path_decision");
+    auto &logger = *config->logger;
     travel(fromId);
-    if (config.disableFastPath) {
-        logger->debug("Taking slow path because fast path is disabled.");
+    if (config->disableFastPath) {
+        logger.debug("Taking slow path because fast path is disabled.");
         prodCategoryCounterInc("lsp.slow_path_reason", "fast_path_disabled");
         return false;
     }
     // Path taken after the first time an update has been encountered. Hack since we can't roll back new files just yet.
     if (updates.hasNewFiles) {
-        logger->debug("Taking slow path because update has a new file");
+        logger.debug("Taking slow path because update has a new file");
         prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
         return false;
     }
     const auto &hashes = updates.updatedFileHashes;
     auto &changedFiles = updates.updatedFiles;
-    logger->debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
+    logger.debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
 
     ENFORCE(changedFiles.size() == hashes.size());
     int i = -1;
@@ -272,26 +272,26 @@ bool TimeTravelingGlobalState::canTakeFastPath(u4 fromId, const LSPFileUpdates &
             ++i;
             auto fref = gs->findFileByPath(f->path());
             if (!fref.exists()) {
-                logger->debug("Taking slow path because {} is a new file", f->path());
+                logger.debug("Taking slow path because {} is a new file", f->path());
                 prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
                 return false;
             } else {
                 auto &oldHash = globalStateHashes[fref.id()];
                 ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
                 if (hashes[i].definitions.hierarchyHash == core::GlobalStateHash::HASH_STATE_INVALID) {
-                    logger->debug("Taking slow path because {} has a syntax error", f->path());
+                    logger.debug("Taking slow path because {} has a syntax error", f->path());
                     prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
                     return false;
                 } else if (hashes[i].definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
                            hashes[i].definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
-                    logger->debug("Taking slow path because {} has changed definitions", f->path());
+                    logger.debug("Taking slow path because {} has changed definitions", f->path());
                     prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
                     return false;
                 }
             }
         }
     }
-    logger->debug("Taking fast path");
+    logger.debug("Taking fast path");
     return true;
 }
 

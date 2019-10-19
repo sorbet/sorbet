@@ -134,7 +134,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
                     &incomingQueue));
                 // Only terminate once incoming queue is drained.
                 if (incomingQueue.terminate && incomingQueue.pendingRequests.empty()) {
-                    logger->debug("Preprocessor terminating");
+                    config->logger->debug("Preprocessor terminating");
                     return;
                 }
                 msg = move(incomingQueue.pendingRequests.front());
@@ -185,7 +185,8 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
     QueueState processingQueue;
 
     unique_ptr<watchman::WatchmanProcess> watchmanProcess;
-    const auto &opts = config.opts;
+    const auto &opts = config->opts;
+    auto &logger = config->logger;
     if (!opts.disableWatchman) {
         if (opts.rawInputDirNames.size() != 1 || !opts.rawInputFileNames.empty()) {
             logger->error("Watchman support currently only works when Sorbet is run with a single input directory. If "
@@ -196,7 +197,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
         // The lambda below intentionally does not capture `this`.
         watchmanProcess = make_unique<watchman::WatchmanProcess>(
             logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
-            [&incomingQueue, &incomingMtx, logger = this->logger,
+            [&incomingQueue, &incomingMtx, logger = logger,
              &initializedNotification](std::unique_ptr<WatchmanQueryResponse> response) {
                 auto notifMsg =
                     make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
@@ -210,7 +211,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
                     incomingQueue.pendingRequests.push_back(move(msg));
                 }
             },
-            [&incomingQueue, &incomingMtx, logger = this->logger](int watchmanExitCode) {
+            [&incomingQueue, &incomingMtx, logger = logger](int watchmanExitCode) {
                 {
                     absl::MutexLock lck(&incomingMtx);
                     if (!incomingQueue.terminate) {
@@ -222,7 +223,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
             });
     }
 
-    auto readerThread = runInAThread("lspReader", [&incomingQueue, &incomingMtx, logger = this->logger, inputFd] {
+    auto readerThread = runInAThread("lspReader", [&incomingQueue, &incomingMtx, logger = logger, inputFd] {
         // Thread that executes this lambda is called reader thread.
         // This thread _intentionally_ does not capture `this`.
         NotifyOnDestruction notify(incomingMtx, incomingQueue.terminate);
@@ -300,10 +301,10 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
             auto result = processRequestInternal(move(gs), *msg);
             gs = move(result.gs);
             for (auto &msg : result.responses) {
-                output.write(move(msg));
+                config->output->write(move(msg));
             }
 
-            if (config.initialized && !initializedNotification.HasBeenNotified()) {
+            if (config->isInitialized() && !initializedNotification.HasBeenNotified()) {
                 initializedNotification.Notify();
             }
 
