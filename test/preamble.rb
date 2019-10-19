@@ -25,12 +25,3 @@ end
 
 class Sorbet::Private::Static::ImplicitModuleSuperclass < BasicObject
 end
-
-# TODO This is very wrong but we need it until we fix something with resolution
-module Static
-  def self.keep_for_ide(expr)
-  end
-
-  def self.keep_for_typechecking(expr)
-  end
-end
