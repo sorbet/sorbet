@@ -15,6 +15,7 @@ cleanup() {
 ruby="/Users/$(whoami)/.rbenv/shims/ruby"
 
 rbrunfile=$(mktemp)
+echo "Ruby: $rb"
 echo "require './test/preamble.rb'; require './$rb';" > "$rbrunfile"
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
