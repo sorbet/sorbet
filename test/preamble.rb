@@ -25,3 +25,8 @@ end
 
 class Sorbet::Private::Static::ImplicitModuleSuperclass < BasicObject
 end
+
+def pry
+  require 'pry-byebug'
+  binding.pry
+end
