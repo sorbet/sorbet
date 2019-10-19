@@ -11,7 +11,8 @@ namespace sorbet::realmain::lsp {
 /**
  * Client options sent during initialization.
  */
-struct LSPClientConfiguration {
+class LSPClientConfiguration final {
+public:
     /** Root of LSP client workspace. May be different than rootPath. At Stripe, editing happens locally but Sorbet
      * runs on a remote server. */
     std::string rootUri = "";
@@ -38,15 +39,30 @@ struct LSPClientConfiguration {
     MarkupKind clientHoverMarkupKind = MarkupKind::Plaintext;
     /** What completion item markup should we send to the client? */
     MarkupKind clientCompletionItemMarkupKind = MarkupKind::Plaintext;
+
+    LSPClientConfiguration(const InitializeParams &initializeParams);
 };
 
 /**
  * The language server's configuration information.
+ *
+ * Shared among multiple threads, e.g.:
+ * - Preprocessor thread
+ * - Watchman thread
+ * - Typechecking thread
+ *
+ * Only the preprocessor thread has mutable access to LSPConfiguration, which it uses to update clientConfig and the
+ * initialized boolean. All other threads have read-only access.
  */
 class LSPConfiguration {
+    // Raw access to clientConfig is restricted to avoid race conditions. `getClientConfig` safely mediates read-only
+    // access to this object. Object is `const` to avoid mutations post-initialization.
+    // clientConfig is set by the LSPPreprocessor.
     std::shared_ptr<const LSPClientConfiguration> clientConfig;
+    // If 'true', then the client<->server initialization handshake has *completed*. Set by the LSPPreprocessor.
     std::atomic<bool> initialized;
-    void assertClientConfig() const;
+    // Throws if clientConfig is not set. Must be called before accessing `clientConfig` in LSPConfiguration methods.
+    void assertHasClientConfig() const;
 
 public:
     // The following properties are configured when the language server is created.
@@ -69,7 +85,9 @@ public:
                      const std::shared_ptr<spdlog::logger> &logger, bool skipConfigatron = false,
                      bool disableFastPath = false);
 
-    void clientInitialize(const InitializeParams &initializeParams);
+    // Note: These two methods should only be called from the LSPPreprocessor thread, which is the only place that
+    // should have mutable access to LSPConfiguration.
+    void setClientConfig(const std::shared_ptr<const LSPClientConfiguration> &clientConfig);
     void markInitialized();
 
     /**

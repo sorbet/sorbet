@@ -32,6 +32,8 @@ struct QueueState {
  * - Determines if edits should take the fast or slow path.
  * - Is the source-of-truth for the latest file updates.
  * - Clones initialGS so that the typechecking thread can perform typechecking on the clone.
+ * - Early rejects messages that are sent prior to initialization completion.
+ * - Determines if a running slow path should be canceled, and undertakes canceling if so.
  */
 class LSPPreprocessor final {
     /**

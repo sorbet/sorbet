@@ -35,7 +35,7 @@ shared_ptr<LSPConfiguration> makeConfig(const options::Options &opts = nullOpts,
     InitializeParams initParams("", "", make_unique<ClientCapabilities>());
     initParams.initializationOptions = make_unique<SorbetInitializationOptions>();
     initParams.initializationOptions.value()->supportsOperationNotifications = enableShowOpNotifs;
-    config->clientInitialize(initParams);
+    config->setClientConfig(make_shared<LSPClientConfiguration>(initParams));
     if (initialize) {
         config->markInitialized();
     }

@@ -40,6 +40,8 @@ LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<uniq
 }
 
 LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
+    // Note: Before this function runs, LSPPreprocessor has already early-rejected any invalid messages sent prior to
+    // the initialization handshake. So, we know that `msg` is valid to process given the current state of the server.
     auto &logger = config->logger;
     // TODO(jvilk): Make Timer accept multiple FlowIds so we can show merged messages correctly.
     Timer timeit(logger, "process_request");

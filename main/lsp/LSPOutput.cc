@@ -33,6 +33,7 @@ void LSPOutput::write(unique_ptr<LSPMessage> msg) {
         ENFORCE(isServerNotification(msg->method()));
     }
     {
+        // Protect with a lock to make it possible for multiple threads to concurrently write to the same output object.
         absl::MutexLock lock(&mtx);
         rawWrite(move(msg));
     }

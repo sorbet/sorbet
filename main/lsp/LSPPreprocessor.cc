@@ -244,7 +244,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
         case LSPMethod::Initialize: {
             // Update configuration object. Needed to intelligently process edits.
             const auto &params = get<unique_ptr<InitializeParams>>(msg->asRequest().params);
-            config->clientInitialize(*params);
+            config->setClientConfig(make_shared<LSPClientConfiguration>(*params));
             shouldEnqueue = true;
             break;
         }

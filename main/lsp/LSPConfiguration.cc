@@ -35,24 +35,19 @@ LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_pt
     : initialized(atomic<bool>(false)), opts(opts), output(output), workers(workers), logger(logger),
       skipConfigatron(skipConfigatron), disableFastPath(disableFastPath), rootPath(getRootPath(opts, logger)) {}
 
-void LSPConfiguration::assertClientConfig() const {
+void LSPConfiguration::assertHasClientConfig() const {
     if (!clientConfig) {
         Exception::raise("clientConfig is not initialized.");
     }
 }
 
-void LSPConfiguration::clientInitialize(const InitializeParams &params) {
-    // Note: We don't need clientInitialize to be atomic since only the LSPPreprocessor thread calls this function.
-    if (clientConfig) {
-        Exception::raise("Cannot call clientInitialize multiple times in one session.");
-    }
-
-    LSPClientConfiguration cconfig;
+LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
+    // Note: Default values for fields are set in class definition.
     if (auto rootUriString = get_if<string>(&params.rootUri)) {
         if (absl::EndsWith(*rootUriString, "/")) {
-            cconfig.rootUri = rootUriString->substr(0, rootUriString->length() - 1);
+            rootUri = rootUriString->substr(0, rootUriString->length() - 1);
         } else {
-            cconfig.rootUri = *rootUriString;
+            rootUri = *rootUriString;
         }
     }
 
@@ -62,9 +57,9 @@ void LSPConfiguration::clientInitialize(const InitializeParams &params) {
             auto &completion = *textDocument->completion;
             if (completion->completionItem) {
                 auto &completionItem = (*completion->completionItem);
-                cconfig.clientCompletionItemSnippetSupport = completionItem->snippetSupport.value_or(false);
+                clientCompletionItemSnippetSupport = completionItem->snippetSupport.value_or(false);
                 if (completionItem->documentationFormat != nullopt) {
-                    cconfig.clientCompletionItemMarkupKind =
+                    clientCompletionItemMarkupKind =
                         getPreferredMarkupKind(completionItem->documentationFormat.value());
                 }
             }
@@ -73,18 +68,24 @@ void LSPConfiguration::clientInitialize(const InitializeParams &params) {
             auto &hover = *textDocument->hover;
             if (hover->contentFormat) {
                 auto &contentFormat = *hover->contentFormat;
-                cconfig.clientHoverMarkupKind = getPreferredMarkupKind(contentFormat);
+                clientHoverMarkupKind = getPreferredMarkupKind(contentFormat);
             }
         }
     }
 
     if (params.initializationOptions) {
         auto &initOptions = *params.initializationOptions;
-        cconfig.enableOperationNotifications = initOptions->supportsOperationNotifications.value_or(false);
-        cconfig.enableTypecheckInfo = initOptions->enableTypecheckInfo.value_or(false);
-        cconfig.enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
+        enableOperationNotifications = initOptions->supportsOperationNotifications.value_or(false);
+        enableTypecheckInfo = initOptions->enableTypecheckInfo.value_or(false);
+        enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
     }
-    clientConfig = make_shared<LSPClientConfiguration>(move(cconfig));
+}
+
+void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfiguration> &clientConfig) {
+    if (this->clientConfig) {
+        Exception::raise("Cannot call setClientConfig twice in one session!");
+    }
+    this->clientConfig = clientConfig;
 }
 
 // LSP Spec: line / col in Position are 0-based
@@ -104,7 +105,7 @@ core::Loc LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position 
 
 string LSPConfiguration::localName2Remote(string_view filePath) const {
     ENFORCE(absl::StartsWith(filePath, rootPath));
-    assertClientConfig();
+    assertHasClientConfig();
     string_view relativeUri = filePath.substr(rootPath.length());
     if (relativeUri.at(0) == '/') {
         relativeUri = relativeUri.substr(1);
@@ -124,7 +125,7 @@ string LSPConfiguration::localName2Remote(string_view filePath) const {
 }
 
 string LSPConfiguration::remoteName2Local(string_view uri) const {
-    assertClientConfig();
+    assertHasClientConfig();
     const bool isSorbetURI = absl::StartsWith(uri, sorbetScheme);
     if (!absl::StartsWith(uri, clientConfig->rootUri) && !clientConfig->enableSorbetURIs && !isSorbetURI) {
         logger->error("Unrecognized URI received from client: {}", uri);
@@ -153,7 +154,7 @@ string LSPConfiguration::remoteName2Local(string_view uri) const {
 }
 
 core::FileRef LSPConfiguration::uri2FileRef(const core::GlobalState &gs, string_view uri) const {
-    assertClientConfig();
+    assertHasClientConfig();
     if (!absl::StartsWith(uri, clientConfig->rootUri) && !absl::StartsWith(uri, sorbetScheme)) {
         return core::FileRef();
     }
@@ -162,7 +163,7 @@ core::FileRef LSPConfiguration::uri2FileRef(const core::GlobalState &gs, string_
 }
 
 string LSPConfiguration::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) const {
-    assertClientConfig();
+    assertHasClientConfig();
     string uri;
     if (!file.exists()) {
         uri = "???";
@@ -182,7 +183,7 @@ string LSPConfiguration::fileRef2Uri(const core::GlobalState &gs, core::FileRef 
 }
 
 unique_ptr<Location> LSPConfiguration::loc2Location(const core::GlobalState &gs, core::Loc loc) const {
-    assertClientConfig();
+    assertHasClientConfig();
     auto range = Range::fromLoc(gs, loc);
     if (range == nullptr) {
         return nullptr;
@@ -212,7 +213,7 @@ bool LSPConfiguration::isFileIgnored(string_view filePath) const {
 }
 
 bool LSPConfiguration::isUriInWorkspace(string_view uri) const {
-    assertClientConfig();
+    assertHasClientConfig();
     return absl::StartsWith(uri, clientConfig->rootUri);
 }
 
@@ -225,7 +226,7 @@ bool LSPConfiguration::isInitialized() const {
 }
 
 const LSPClientConfiguration &LSPConfiguration::getClientConfig() const {
-    assertClientConfig();
+    assertHasClientConfig();
     return *clientConfig;
 }
 
