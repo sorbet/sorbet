@@ -1967,14 +1967,14 @@ class Array < Object
     params(
         arg0: T::Range[Integer],
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(T::Array[Elem]))
   end
   sig do
     params(
         arg0: Integer,
         arg1: Integer,
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(T::Array[Elem]))
   end
   sig do
     params(
