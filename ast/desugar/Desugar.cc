@@ -1188,7 +1188,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                                 lastMerge = std::move(var);
                             }
                         } else {
-                            unique_ptr<Expression> current = make_unique<Array>(loc, std::move(elems));
+                            unique_ptr<Expression> current = MK::Array(loc, std::move(elems));
                             /* reassign instead of clear to work around https://bugs.llvm.org/show_bug.cgi?id=37553 */
                             elems = Array::ENTRY_store();
                             if (lastMerge != nullptr) {
@@ -1210,10 +1210,10 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         res = std::move(lastMerge);
                     } else {
                         // Empty array
-                        res = make_unique<Array>(loc, std::move(elems));
+                        res = MK::Array(loc, std::move(elems));
                     }
                 } else {
-                    res = make_unique<Array>(loc, std::move(elems));
+                    res = MK::Array(loc, std::move(elems));
                     if (lastMerge != nullptr) {
                         res = MK::Send1(loc, std::move(lastMerge), core::Names::concat(), std::move(res));
                     }
@@ -1351,7 +1351,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         }
                         elems.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                     };
-                    unique_ptr<Expression> arr = make_unique<Array>(loc, std::move(elems));
+                    unique_ptr<Expression> arr = MK::Array(loc, std::move(elems));
                     unique_ptr<Expression> res = MK::Return(loc, std::move(arr));
                     result.swap(res);
                 } else if (ret->exprs.size() == 1) {
@@ -1384,7 +1384,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         }
                         elems.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                     };
-                    unique_ptr<Expression> arr = make_unique<Array>(loc, std::move(elems));
+                    unique_ptr<Expression> arr = MK::Array(loc, std::move(elems));
                     unique_ptr<Expression> res = MK::Break(loc, std::move(arr));
                     result.swap(res);
                 } else if (ret->exprs.size() == 1) {
@@ -1417,7 +1417,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         }
                         elems.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                     };
-                    unique_ptr<Expression> arr = make_unique<Array>(loc, std::move(elems));
+                    unique_ptr<Expression> arr = MK::Array(loc, std::move(elems));
                     unique_ptr<Expression> res = MK::Next(loc, std::move(arr));
                     result.swap(res);
                 } else if (ret->exprs.size() == 1) {
