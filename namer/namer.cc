@@ -742,7 +742,7 @@ public:
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Types must be defined in class or module scopes");
             }
-            return make_unique<ast::EmptyTree>();
+            return ast::MK::EmptyTree();
         }
         if (ctx.owner == core::Symbols::root()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::RootTypeMember)) {

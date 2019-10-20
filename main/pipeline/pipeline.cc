@@ -178,7 +178,7 @@ ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
 }
 
 ast::ParsedFile emptyParsedFile(core::FileRef file) {
-    return {make_unique<ast::EmptyTree>(), file};
+    return {ast::MK::EmptyTree(), file};
 }
 
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
@@ -676,7 +676,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
 }
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts) {
-    ast::ParsedFile result{make_unique<ast::EmptyTree>(), resolved.file};
+    ast::ParsedFile result{ast::MK::EmptyTree(), resolved.file};
     core::FileRef f = resolved.file;
 
     resolved = definition_validator::runOne(ctx, std::move(resolved));
