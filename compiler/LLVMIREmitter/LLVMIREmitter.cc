@@ -283,6 +283,21 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                     [&](cfg::SolveConstraint *i) { cs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(cs)->shortName(cs);
+                        if (i->fun == core::Names::buildHash()) {
+                            auto ret = builder.CreateCall(cs.module->getFunction("rb_hash_new"), {}, "rawHashLiteral");
+                            // TODO(perf): in 2.7 use rb_hash_bulk_insert will give 2x speedup
+                            int argc = 0;
+                            while (argc < i->args.size()) {
+                                auto key = i->args[argc].variable;
+                                auto value = i->args[argc + 1].variable;
+                                builder.CreateCall(cs.module->getFunction("rb_hash_aset"),
+                                                   {ret, varGet(cs, key, builder, llvmVariables, aliases),
+                                                    varGet(cs, value, builder, llvmVariables, aliases)});
+                                argc += 2;
+                            }
+                            varSet(cs, targetAlloca, ret, builder, llvmVariables, aliases);
+                            return;
+                        }
                         if (i->fun == Names::sorbet_defineTopClassOrModule) {
                             defineClass(cs, i, builder);
                             return;
