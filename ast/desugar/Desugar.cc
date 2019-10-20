@@ -238,13 +238,11 @@ unique_ptr<Block> symbol2Proc(DesugarContext dctx, unique_ptr<Expression> expr) 
 
     // &:foo => {|temp| temp.foo() }
     core::NameRef name(dctx.ctx, core::cast_type<core::LiteralType>(lit->value.get())->value);
-    MethodDef::ARGS_store args;
     // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
     core::Loc zeroLengthLoc = loc.copyWithZeroLength();
-    args.emplace_back(MK::Local(zeroLengthLoc, temp));
     unique_ptr<Expression> recv = MK::Local(zeroLengthLoc, temp);
     unique_ptr<Expression> body = MK::Send0(loc, std::move(recv), name);
-    return make_unique<Block>(loc, std::move(args), std::move(body));
+    return MK::Block1(loc, std::move(body), MK::Local(zeroLengthLoc, temp));
 }
 
 unique_ptr<Expression> unsupportedNode(DesugarContext dctx, parser::Node *node) {
@@ -1004,7 +1002,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto desugaredBody = desugarBody(dctx, loc, block->body, std::move(destructures));
 
                 // TODO the send->block's loc is too big and includes the whole send
-                send->block = make_unique<Block>(loc, std::move(args), std::move(desugaredBody));
+                send->block = MK::Block(loc, std::move(desugaredBody), std::move(args));
                 result.swap(res);
             },
             [&](parser::While *wl) {
@@ -1116,9 +1114,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 stats.emplace_back(node2TreeImpl(dctx, std::move(masgn)));
                 auto body = make_unique<InsSeq>(loc, std::move(stats), node2TreeImpl(dctx, std::move(for_->body)));
 
-                MethodDef::ARGS_store blockArgs;
-                blockArgs.emplace_back(make_unique<RestArg>(loc, MK::Local(loc, temp)));
-                auto block = make_unique<Block>(loc, std::move(blockArgs), std::move(body));
+                auto block = MK::Block1(loc, std::move(body), make_unique<RestArg>(loc, MK::Local(loc, temp)));
 
                 Send::ARGS_store noargs;
                 auto res = MK::Send(loc, node2TreeImpl(dctx, std::move(for_->expr)), core::Names::each(),

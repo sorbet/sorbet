@@ -23,6 +23,12 @@ public:
         return Block(loc, std::move(body), std::move(args));
     }
 
+    static std::unique_ptr<ast::Block> Block1(core::Loc loc, std::unique_ptr<Expression> body, std::unique_ptr<Expression> arg1) {
+        MethodDef::ARGS_store args;
+        args.emplace_back(move(arg1));
+        return Block(loc, std::move(body), std::move(args));
+    }
+
     static std::unique_ptr<Expression> Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
                                             Send::ARGS_store args, u4 flags = 0,
                                             std::unique_ptr<ast::Block> blk = nullptr) {
