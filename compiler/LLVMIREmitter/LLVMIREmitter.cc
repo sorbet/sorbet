@@ -44,11 +44,14 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
     return owner + showClassNameWithoutOwner(gs, sym);
 }
 
+llvm::Constant *toCString(std::string str, llvm::IRBuilder<> &builder) {
+    return builder.CreateGlobalStringPtr(str, "str_" + str);
+}
+
 llvm::CallInst *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
     sym = removeRoot(sym);
     auto str = showClassName(cs, sym);
-    auto rawCString = builder.CreateGlobalStringPtr(str, "str_" + str);
-    return builder.CreateCall(cs.module->getFunction("sorbet_getConstant"), {rawCString});
+    return builder.CreateCall(cs.module->getFunction("sorbet_getConstant"), {toCString(str, builder)});
 }
 
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
@@ -87,9 +90,8 @@ void varSet(CompilerState &cs, llvm::AllocaInst *alloca, llvm::Value *var, llvm:
     auto sym = aliases.at(alloca);
     auto name = sym.data(cs.gs)->name.show(cs.gs);
     auto owner = sym.data(cs.gs)->owner;
-    auto rawCString = builder.CreateGlobalStringPtr(name, "str_" + name);
     builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
-                       {resolveSymbol(cs, owner, builder), rawCString, var});
+                       {resolveSymbol(cs, owner, builder), toCString(name, builder), var});
 }
 
 llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
@@ -202,9 +204,6 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
     ENFORCE(funcSym.exists());
     ENFORCE(funcSym.data(cs)->isMethod());
 
-    auto funcName = funcNameRef.show(cs);
-    auto funcNameCStr = builder.CreateGlobalStringPtr(funcName, {"funcName_", funcName});
-
     auto llvmFuncName = funcSym.data(cs)->toStringFullName(cs);
     auto funcHandle = cs.module->getOrInsertFunction(llvmFuncName, cs.getRubyFFIType());
     auto universalSignature = llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
@@ -212,7 +211,7 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
 
     auto rubyFunc = cs.module->getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
     ENFORCE(rubyFunc);
-    builder.CreateCall(rubyFunc, {resolveSymbol(cs, ownerSym, builder), funcNameCStr, ptr,
+    builder.CreateCall(rubyFunc, {resolveSymbol(cs, ownerSym, builder), toCString(funcNameRef.show(cs), builder), ptr,
                                   llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
     builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
@@ -220,8 +219,7 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
 
 void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
     auto sym = typeToSym(cs, i->args[0].type);
-    auto className = showClassNameWithoutOwner(cs, sym);
-    auto classNameCStr = builder.CreateGlobalStringPtr(className, {"className_", className});
+    auto classNameCStr = toCString(showClassNameWithoutOwner(cs, sym), builder);
 
     if (sym.data(cs)->owner != core::Symbols::root()) {
         auto getOwner = resolveSymbol(cs, sym.data(cs)->owner, builder);
