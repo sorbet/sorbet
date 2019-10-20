@@ -3,4 +3,4 @@ def my_name(name, prefix="Mr")
 end
 
 puts my_name("Paul", "Master")
-puts my_name("Paul")
+# puts my_name("Paul")
