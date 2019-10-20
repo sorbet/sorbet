@@ -6,10 +6,7 @@
 namespace sorbet::compiler {
 class Names {
 public:
-    static core::NameRef sorbet_defineTopLevelModule;
-    static core::NameRef sorbet_defineNestedModule;
     static core::NameRef sorbet_defineTopClassOrModule;
-    static core::NameRef sorbet_defineNestedClass;
     static core::NameRef sorbet_defineMethod;
     static core::NameRef sorbet_defineMethodSingleton;
 

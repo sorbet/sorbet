@@ -266,17 +266,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                     [&](cfg::SolveConstraint *i) { cs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(cs)->shortName(cs);
-                        if (i->fun == Names::sorbet_defineTopLevelModule) {
-                            return;
-                        }
-                        if (i->fun == Names::sorbet_defineNestedModule) {
-                            return;
-                        }
                         if (i->fun == Names::sorbet_defineTopClassOrModule) {
                             defineClass(cs, i, builder);
-                            return;
-                        }
-                        if (i->fun == Names::sorbet_defineNestedClass) {
                             return;
                         }
                         if (i->fun == Names::sorbet_defineMethod) {
