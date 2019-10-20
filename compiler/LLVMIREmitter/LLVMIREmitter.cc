@@ -128,21 +128,37 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
         }
     }
     auto argArrayRaw = func->arg_begin() + 1;
-    auto requiredArgumentCount = md->args.size() - 1; // -1 because of block args
+    auto maxArgCount = 0;
+    auto minArgCount = 0;
+    {
+        for (auto &arg : md->args) {
+            if (ast::isa_tree<ast::OptionalArg>(arg.get())) {
+                maxArgCount += 1;
+                continue;
+            }
+            auto local = ast::cast_tree<ast::Local>(arg.get());
+            ENFORCE(local);
+            if (local->localVariable._name == core::Names::blkArg()) {
+                continue;
+            }
+            maxArgCount += 1;
+            minArgCount += 1;
+        }
+    }
     {
         // validate arg count
         auto argCountRaw = func->arg_begin();
         auto argCountSuccessBlock = llvm::BasicBlock::Create(cs, "argCountSuccess", func);
         auto argCountFailBlock = llvm::BasicBlock::Create(cs, "argCountFailBlock", func);
-        auto isWrongArgCount = builder.CreateICmpNE(
+        auto tooManyArgs = builder.CreateICmpUGT(
             argCountRaw,
-            llvm::ConstantInt::get(llvm::Type::getInt32Ty(cs), llvm::APInt(32, requiredArgumentCount, true)),
-            "isWrongArgCount");
-        cs.setExpectedBool(builder, isWrongArgCount, false);
-        builder.CreateCondBr(isWrongArgCount, argCountFailBlock, argCountSuccessBlock);
+            llvm::ConstantInt::get(llvm::Type::getInt32Ty(cs), llvm::APInt(32, maxArgCount, true)),
+            "tooManyArgs");
+        cs.setExpectedBool(builder, tooManyArgs, false);
+        builder.CreateCondBr(tooManyArgs, argCountFailBlock, argCountSuccessBlock);
 
         builder.SetInsertPoint(argCountFailBlock);
-        cs.emitArgumentMismatch(builder, argCountRaw, requiredArgumentCount, requiredArgumentCount);
+        cs.emitArgumentMismatch(builder, argCountRaw, minArgCount, maxArgCount);
         builder.SetInsertPoint(argCountSuccessBlock);
     }
     {
@@ -150,7 +166,7 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
         int argId = -1;
         for (const auto &arg : md->args) {
             argId += 1;
-            if (argId == requiredArgumentCount) {
+            if (argId == maxArgCount) {
                 // block arg isn't passed in args
                 break;
             }
