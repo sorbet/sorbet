@@ -1110,9 +1110,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 unique_ptr<parser::Node> masgn =
                     make_unique<parser::Masgn>(loc, std::move(mlhsNode), make_unique<parser::LVar>(loc, temp));
 
-                InsSeq::STATS_store stats;
-                stats.emplace_back(node2TreeImpl(dctx, std::move(masgn)));
-                auto body = make_unique<InsSeq>(loc, std::move(stats), node2TreeImpl(dctx, std::move(for_->body)));
+                auto body = MK::InsSeq1(loc, node2TreeImpl(dctx, std::move(masgn)), node2TreeImpl(dctx, std::move(for_->body)));
 
                 auto block = MK::Block1(loc, std::move(body), make_unique<RestArg>(loc, MK::Local(loc, temp)));
 
