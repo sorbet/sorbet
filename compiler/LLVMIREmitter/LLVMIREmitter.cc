@@ -287,14 +287,6 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                             defineMethod(cs, i, true, builder);
                             return;
                         }
-                        // TODO: Should only be ::Sorbet::Private::Static.keep_for_ide
-                        if (i->fun == core::Names::keepForIde()) {
-                            return;
-                        }
-                        // TODO: Should only be T.unsafe
-                        if (i->fun == core::Names::unsafe()) {
-                            return;
-                        }
                         auto rawId = cs.getRubyIdFor(builder, str);
 
                         // fill in args
