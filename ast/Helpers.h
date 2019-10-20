@@ -38,8 +38,7 @@ public:
     }
 
     static std::unique_ptr<Literal> Literal(core::Loc loc, const core::TypePtr &tpe) {
-        auto lit = std::make_unique<ast::Literal>(loc, tpe);
-        return lit;
+        return std::make_unique<ast::Literal>(loc, tpe);
     }
 
     static std::unique_ptr<Expression> Return(core::Loc loc, std::unique_ptr<Expression> expr) {
