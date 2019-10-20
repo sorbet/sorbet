@@ -36,7 +36,8 @@ ast::ParsedFilesOrCancelled typecheck(std::unique_ptr<core::GlobalState> &gs, st
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts);
 
-core::FileHash computeFileHash(std::shared_ptr<core::File> forWhat, spdlog::logger &logger);
+core::FileHash computeFileHash(std::shared_ptr<core::File> forWhat, spdlog::logger &logger,
+                               bool lspParseErrorsTakeFastPath);
 
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts);
