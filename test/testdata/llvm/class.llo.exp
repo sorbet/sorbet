@@ -11,10 +11,10 @@ target triple = "x86_64-apple-darwin18.2.0"
 @wrong_constant_name = internal constant [25 x i8] c"wrong constant name %1$s\00", align 16
 @rb_eTypeError = external local_unnamed_addr global i64, align 8
 @.str.3 = private unnamed_addr constant [36 x i8] c"%li\0B does not refer to class/module\00", align 1
-@className_Baz = private unnamed_addr constant [4 x i8] c"Baz\00", align 1
-@className_Bar = private unnamed_addr constant [4 x i8] c"Bar\00", align 1
-@str_Foo = private unnamed_addr constant [4 x i8] c"Foo\00", align 1
-@str_Object.1 = private unnamed_addr constant [7 x i8] c"Object\00", align 1
+@str_Baz = private unnamed_addr constant [4 x i8] c"Baz\00", align 1
+@str_Bar = private unnamed_addr constant [4 x i8] c"Bar\00", align 1
+@str_Foo.1 = private unnamed_addr constant [4 x i8] c"Foo\00", align 1
+@str_Object.2 = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 
 ; Function Attrs: nounwind ssp uwtable
 define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
@@ -297,12 +297,12 @@ declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
 ; Function Attrs: nounwind sspreq
 define void @Init_class() local_unnamed_addr #8 {
 entry:
-  %0 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo, i64 0, i64 0)) #1
-  %1 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo, i64 0, i64 0)) #1
-  %2 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.1, i64 0, i64 0)) #1
-  %3 = tail call i64 @rb_define_class_under(i64 %1, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Bar, i64 0, i64 0), i64 %2) #1
-  %4 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.1, i64 0, i64 0)) #1
-  %5 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @className_Baz, i64 0, i64 0), i64 %4) #1
+  %0 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.1, i64 0, i64 0)) #1
+  %1 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.1, i64 0, i64 0)) #1
+  %2 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.2, i64 0, i64 0)) #1
+  %3 = tail call i64 @rb_define_class_under(i64 %1, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Bar, i64 0, i64 0), i64 %2) #1
+  %4 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.2, i64 0, i64 0)) #1
+  %5 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Baz, i64 0, i64 0), i64 %4) #1
   ret void
 }
 
