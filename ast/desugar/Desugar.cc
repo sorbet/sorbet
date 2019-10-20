@@ -1272,8 +1272,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     if (lastMerge != nullptr) {
                         res = std::move(lastMerge);
                     } else {
-                        // Empty array
-                        res = MK::Hash(loc, std::move(keys), std::move(values));
+                        res = MK::Hash0(loc);
                     }
                 } else {
                     res = MK::Hash(loc, std::move(keys), std::move(values));
