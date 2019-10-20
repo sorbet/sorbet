@@ -336,25 +336,27 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                     [&](cfg::LoadSelf *i) { cs.trace("LoadSelf\n"); },
                     [&](cfg::Literal *i) {
                         cs.trace("Literal\n");
+                        if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {
+                            varSet(cs, targetAlloca, cs.getRubyFalseRaw(builder), builder, llvmVariables, aliases);
+                            return;
+                        }
+                        if (i->value->derivesFrom(cs, core::Symbols::TrueClass())) {
+                            varSet(cs, targetAlloca, cs.getRubyTrueRaw(builder), builder, llvmVariables, aliases);
+                            return;
+                        }
                         if (i->value->derivesFrom(cs, core::Symbols::NilClass())) {
                             varSet(cs, targetAlloca, cs.getRubyNilRaw(builder), builder, llvmVariables, aliases);
                             return;
                         }
+
                         auto litType = core::cast_type<core::LiteralType>(i->value.get());
                         ENFORCE(litType);
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
                                 auto rawInt = cs.getRubyIntRaw(builder, litType->value);
                                 varSet(cs, targetAlloca, rawInt, builder, llvmVariables, aliases);
-
                                 break;
                             }
-                            case core::LiteralType::LiteralTypeKind::True:
-                                varSet(cs, targetAlloca, cs.getRubyTrueRaw(builder), builder, llvmVariables, aliases);
-                                break;
-                            case core::LiteralType::LiteralTypeKind::False:
-                                varSet(cs, targetAlloca, cs.getRubyFalseRaw(builder), builder, llvmVariables, aliases);
-                                break;
                             case core::LiteralType::LiteralTypeKind::Symbol: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
                                 auto rawId = cs.getRubyIdFor(builder, str);
