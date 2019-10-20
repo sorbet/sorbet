@@ -1354,7 +1354,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         elems.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                     };
                     unique_ptr<Expression> arr = make_unique<Array>(loc, std::move(elems));
-                    unique_ptr<Expression> res = make_unique<Return>(loc, std::move(arr));
+                    unique_ptr<Expression> res = MK::Return(loc, std::move(arr));
                     result.swap(res);
                 } else if (ret->exprs.size() == 1) {
                     if (parser::isa_node<parser::BlockPass>(ret->exprs[0].get())) {
@@ -1365,11 +1365,11 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         result.swap(res);
                     } else {
                         unique_ptr<Expression> res =
-                            make_unique<Return>(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
+                            MK::Return(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
                         result.swap(res);
                     }
                 } else {
-                    unique_ptr<Expression> res = make_unique<Return>(loc, MK::EmptyTree());
+                    unique_ptr<Expression> res = MK::Return(loc, MK::EmptyTree());
                     result.swap(res);
                 }
             },
