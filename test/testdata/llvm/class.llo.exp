@@ -339,8 +339,8 @@ entry:
   %4 = call i64 @rb_define_module(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.9, i64 0, i64 0)) #1
   %5 = bitcast [1 x i64]* %callArgs.i.i.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %5) #1
-  %rubyId_keep_for_ide.i.i.i = load i64, i64* @rubyIdPrecomputed_keep_for_ide, align 8
   %rubyId_unsafe.i.i.i = load i64, i64* @rubyIdPrecomputed_unsafe, align 8
+  %rubyId_keep_for_ide.i.i.i = load i64, i64* @rubyIdPrecomputed_keep_for_ide, align 8
   %6 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.10, i64 0, i64 0)) #1
   %callArgsAddr.i.i.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i.i.i, i64 0, i64 0
   store i64 %6, i64* %callArgsAddr.i.i.i, align 8
