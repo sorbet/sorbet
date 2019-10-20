@@ -128,8 +128,7 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
         }
     }
     auto argArrayRaw = func->arg_begin() + 1;
-    auto requiredArgumentCount =
-        md->args.size() - 1; // todo: make optional arguments actually optional. -1 because of block args
+    auto requiredArgumentCount = md->args.size() - 1; // -1 because of block args
     {
         // validate arg count
         auto argCountRaw = func->arg_begin();
