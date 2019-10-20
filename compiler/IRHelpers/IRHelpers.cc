@@ -52,7 +52,7 @@ llvm::FunctionType *CompilerState::getRubyFFIType() {
 
 void CompilerState::setExpectedBool(llvm::IRBuilderBase &builder, llvm::Value *value, bool expected) {
     builderCast(builder).CreateIntrinsic(llvm::Intrinsic::ID::expect, {llvm::Type::getInt1Ty(lctx)},
-        {value, llvm::ConstantInt::get(lctx, llvm::APInt(1, expected ? 1 : 0))});
+                                         {value, llvm::ConstantInt::get(lctx, llvm::APInt(1, expected ? 1 : 0))});
 }
 
 void CompilerState::boxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *target, llvm::Value *rawData) {
@@ -77,12 +77,11 @@ llvm::Value *CompilerState::getRubyTrueRaw(llvm::IRBuilderBase &builder) {
 
 void CompilerState::emitArgumentMismatch(llvm::IRBuilderBase &builder, llvm::Value *currentArgCount, int minArgs,
                                          int maxArgs) {
-    builderCast(builder).CreateCall(
-        module->getFunction("sorbet_rb_error_arity"),
-        {currentArgCount, llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), llvm::APInt(32, minArgs, true)),
-         llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), llvm::APInt(32, maxArgs, true))
+    builderCast(builder).CreateCall(module->getFunction("sorbet_rb_error_arity"),
+                                    {currentArgCount, llvm::ConstantInt::get(lctx, llvm::APInt(32, minArgs, true)),
+                                     llvm::ConstantInt::get(lctx, llvm::APInt(32, maxArgs, true))
 
-        });
+                                    });
     builderCast(builder).CreateUnreachable();
 }
 llvm::Value *CompilerState::getRubyIntRaw(llvm::IRBuilderBase &builder, long num) {
@@ -103,7 +102,7 @@ llvm::Value *CompilerState::getIsTruthyU1(llvm::IRBuilderBase &builder, llvm::Va
 }
 
 llvm::Value *CompilerState::getRubyIdFor(llvm::IRBuilderBase &builder, std::string_view idName) {
-    auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(lctx), 0);
+    auto zero = llvm::ConstantInt::get(lctx, llvm::APInt(64, 0));
     auto name = llvm::StringRef(idName.data(), idName.length());
     llvm::Constant *indices[] = {zero};
     string rawName = "rubyIdPrecomputed_" + (string)idName;
