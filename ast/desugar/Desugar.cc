@@ -1251,7 +1251,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                                 lastMerge = std::move(expr);
                             }
                         } else {
-                            unique_ptr<Expression> current = make_unique<Hash>(loc, std::move(keys), std::move(values));
+                            unique_ptr<Expression> current = MK::Hash(loc, std::move(keys), std::move(values));
                             /* reassign instead of clear to work around https://bugs.llvm.org/show_bug.cgi?id=37553 */
                             keys = Hash::ENTRY_store();
                             values = Hash::ENTRY_store();
@@ -1273,10 +1273,10 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         res = std::move(lastMerge);
                     } else {
                         // Empty array
-                        res = make_unique<Hash>(loc, std::move(keys), std::move(values));
+                        res = MK::Hash(loc, std::move(keys), std::move(values));
                     }
                 } else {
-                    res = make_unique<Hash>(loc, std::move(keys), std::move(values));
+                    res = MK::Hash(loc, std::move(keys), std::move(values));
                     if (lastMerge != nullptr) {
                         res = MK::Send1(loc, std::move(lastMerge), core::Names::merge(), std::move(res));
                     }
