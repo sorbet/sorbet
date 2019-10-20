@@ -355,6 +355,14 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                             case core::LiteralType::LiteralTypeKind::False:
                                 varSet(cs, targetAlloca, cs.getRubyFalseRaw(builder), builder, llvmVariables, aliases);
                                 break;
+                            case core::LiteralType::LiteralTypeKind::Symbol: {
+                                auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
+                                auto rawId = cs.getRubyIdFor(builder, str);
+                                auto rawRubySym =
+                                    builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
+                                varSet(cs, targetAlloca, rawRubySym, builder, llvmVariables, aliases);
+                                break;
+                            }
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
                                 auto rawRubyString = cs.getRubyStringRaw(builder, str);
