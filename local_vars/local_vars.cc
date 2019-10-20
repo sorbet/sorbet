@@ -35,11 +35,11 @@ class LocalNameInserter {
             },
             [&](ast::RestArg *rest) {
                 named = nameArg(move(rest->expr));
-                named.expr = make_unique<ast::RestArg>(arg->loc, move(named.expr));
+                named.expr = ast::MK::RestArg(arg->loc, move(named.expr));
             },
             [&](ast::KeywordArg *kw) {
                 named = nameArg(move(kw->expr));
-                named.expr = make_unique<ast::KeywordArg>(arg->loc, move(named.expr));
+                named.expr = ast::MK::KeywordArg(arg->loc, move(named.expr));
             },
             [&](ast::OptionalArg *opt) {
                 named = nameArg(move(opt->expr));
@@ -47,11 +47,11 @@ class LocalNameInserter {
             },
             [&](ast::BlockArg *blk) {
                 named = nameArg(move(blk->expr));
-                named.expr = make_unique<ast::BlockArg>(arg->loc, move(named.expr));
+                named.expr = ast::MK::BlockArg(arg->loc, move(named.expr));
             },
             [&](ast::ShadowArg *shadow) {
                 named = nameArg(move(shadow->expr));
-                named.expr = make_unique<ast::ShadowArg>(arg->loc, move(named.expr));
+                named.expr = ast::MK::ShadowArg(arg->loc, move(named.expr));
             },
             [&](ast::Local *local) {
                 named.name = local->localVariable._name;

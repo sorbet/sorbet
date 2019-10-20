@@ -109,6 +109,14 @@ public:
         return std::make_unique<ast::RestArg>(loc, std::move(inner));
     }
 
+    static std::unique_ptr<Reference> BlockArg(core::Loc loc, std::unique_ptr<Reference> inner) {
+        return std::make_unique<ast::BlockArg>(loc, std::move(inner));
+    }
+
+    static std::unique_ptr<Reference> ShadowArg(core::Loc loc, std::unique_ptr<Reference> inner) {
+        return std::make_unique<ast::ShadowArg>(loc, std::move(inner));
+    }
+
     static std::unique_ptr<Reference> Instance(core::Loc loc, core::NameRef name) {
         return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Instance, name);
     }
@@ -222,9 +230,9 @@ public:
     static std::unique_ptr<MethodDef> Method(core::Loc loc, core::Loc declLoc, core::NameRef name,
                                              MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs,
                                              u4 flags = 0) {
-        if (args.empty() || (!isa_tree<ast::Local>(args.back().get()) && !isa_tree<BlockArg>(args.back().get()))) {
+        if (args.empty() || (!isa_tree<ast::Local>(args.back().get()) && !isa_tree<ast::BlockArg>(args.back().get()))) {
             auto blkLoc = core::Loc::none(declLoc.file());
-            args.emplace_back(std::make_unique<BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
+            args.emplace_back(std::make_unique<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
         }
         return std::make_unique<MethodDef>(loc, declLoc, core::Symbols::todo(), name, std::move(args), std::move(rhs),
                                            flags);
@@ -367,8 +375,8 @@ public:
             typecase(
                 arg, [&](class RestArg *rest) { arg = rest->expr.get(); },
                 [&](class KeywordArg *kw) { arg = kw->expr.get(); },
-                [&](class OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *blk) { arg = blk->expr.get(); },
-                [&](ShadowArg *shadow) { arg = shadow->expr.get(); },
+                [&](class OptionalArg *opt) { arg = opt->expr.get(); }, [&](class BlockArg *blk) { arg = blk->expr.get(); },
+                [&](class ShadowArg *shadow) { arg = shadow->expr.get(); },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
                 [&](UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
                 [&](Expression *expr) { ENFORCE(false, "Unexpected node type in argument position."); });
