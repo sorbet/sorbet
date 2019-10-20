@@ -88,7 +88,8 @@ void varSet(CompilerState &cs, llvm::AllocaInst *alloca, llvm::Value *var, llvm:
     auto name = sym.data(cs.gs)->name.show(cs.gs);
     auto owner = sym.data(cs.gs)->owner;
     auto rawCString = builder.CreateGlobalStringPtr(name, "str_" + name);
-    builder.CreateCall(cs.module->getFunction("sorbet_setConstant"), {resolveSymbol(cs, owner, builder), rawCString, var});
+    builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
+                       {resolveSymbol(cs, owner, builder), rawCString, var});
 }
 
 llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
