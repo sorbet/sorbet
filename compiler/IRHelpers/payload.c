@@ -371,7 +371,7 @@ VALUE sorbet_defineNestedModule(VALUE owner, const char *name) __attribute__((al
     return rb_define_module_under(owner, name);
 }
 
-VALUE sorbet_defineTopLevelClass(const char *name, VALUE super) __attribute__((always_inline)) {
+VALUE sorbet_defineTopClassOrModule(const char *name, VALUE super) __attribute__((always_inline)) {
     return rb_define_class(name, super);
 }
 

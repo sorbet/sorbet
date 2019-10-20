@@ -283,7 +283,7 @@ VALUE sorbet_defineNestedModule(VALUE owner, const char *name) {
     return rb_define_module_under(owner, name);
 }
 
-VALUE sorbet_defineTopLevelClass(const char *name, VALUE super) {
+VALUE sorbet_defineTopClassOrModule(const char *name, VALUE super) {
     return rb_define_class(name, super);
 }
 

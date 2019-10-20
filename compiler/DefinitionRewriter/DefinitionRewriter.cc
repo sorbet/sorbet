@@ -19,7 +19,7 @@ public:
             auto classDef = ast::cast_tree<ast::ClassDef>(stat.get());
             if (classDef) {
                 auto magic = ast::MK::Send1(loc, ast::MK::Unsafe(loc, ast::MK::Constant(loc, core::Symbols::root())),
-                                            Names::sorbet_defineTopLevelClass, classDef->name->deepCopy());
+                                            Names::sorbet_defineTopClassOrModule, classDef->name->deepCopy());
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
                 i++;
                 continue;

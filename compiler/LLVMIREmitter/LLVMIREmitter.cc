@@ -234,7 +234,7 @@ void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
             builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
         } else {
             auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
-            builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelClass"), {classNameCStr, rawCall});
+            builder.CreateCall(cs.module->getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
         }
     }
 
@@ -272,7 +272,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                         if (i->fun == Names::sorbet_defineNestedModule) {
                             return;
                         }
-                        if (i->fun == Names::sorbet_defineTopLevelClass) {
+                        if (i->fun == Names::sorbet_defineTopClassOrModule) {
                             defineClass(cs, i, builder);
                             return;
                         }
