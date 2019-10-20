@@ -169,8 +169,8 @@ VALUE in), VALUE closure) { return rb_hash_foreach(hash, func, closure);
 // ****                       Operations on Ruby ID's
 // ****
 
-ID sorbet_IDIntern(const char *value) __attribute__((always_inline)) {
-    return rb_intern(value);
+ID sorbet_IDIntern(const char *value, long length) __attribute__((always_inline)) {
+    return rb_intern2(value, length);
 }
 
 ID sorbet_symToID(VALUE sym) __attribute__((always_inline)) {
@@ -282,7 +282,7 @@ VALUE sorbet_getConstant(const char* path) __attribute__((noinline)) {
     ID id;
     int recur = 1;
 
-    id = sorbet_IDIntern(path);
+    id = rb_intern(path);
     name = ID2SYM(id);
     mod = sorbet_rb_cObject();
     enc = rb_enc_get(name);
@@ -359,7 +359,7 @@ wrong_name:
 // End copy of rb_mod_const_get
 
 void sorbet_setConstant(VALUE mod, const char* name, VALUE value) __attribute__((noinline)) {
-    ID id = sorbet_IDIntern(name);
+    ID id = rb_intern(name);
     return rb_const_set(mod, id, value);
 }
 

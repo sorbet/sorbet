@@ -122,7 +122,9 @@ llvm::Value *CompilerState::getRubyIdFor(llvm::IRBuilderBase &builder, std::stri
         llvm::Constant *indicesString[] = {zero, zero};
         auto gv = builder.CreateGlobalString(name, {"str_", name}, 0);
         auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(gv->getValueType(), gv, indicesString);
-        auto rawID = globalInitBuilder.CreateCall(module->getFunction("sorbet_IDIntern"), {rawCString}, "rawId");
+        auto rawID = globalInitBuilder.CreateCall(
+            module->getFunction("sorbet_IDIntern"),
+            {rawCString, llvm::ConstantInt::get(lctx, llvm::APInt(64, idName.length()))}, "rawId");
         globalInitBuilder.CreateStore(rawID,
                                       llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
         globalInitBuilder.CreateRetVoid();
