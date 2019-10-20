@@ -90,7 +90,7 @@ public:
 
     static std::unique_ptr<ConstantLit> Constant(core::Loc loc, core::SymbolRef symbol) {
         ENFORCE(symbol.exists());
-        return std::make_unique<ast::ConstantLit>(loc, symbol, nullptr);
+        return std::make_unique<ConstantLit>(loc, symbol, nullptr);
     }
 
     static std::unique_ptr<Reference> Local(core::Loc loc, core::NameRef name) {
@@ -209,7 +209,7 @@ public:
 
     static std::unique_ptr<UnresolvedConstantLit> UnresolvedConstant(core::Loc loc, std::unique_ptr<Expression> scope,
                                                                      core::NameRef name) {
-        return std::make_unique<ast::UnresolvedConstantLit>(loc, std::move(scope), name);
+        return std::make_unique<UnresolvedConstantLit>(loc, std::move(scope), name);
     }
 
     static std::unique_ptr<Expression> Int(core::Loc loc, int64_t val) {
@@ -389,7 +389,7 @@ public:
 class BehaviorHelpers final {
 public:
     // Recursively check if all children of an expression are EmptyTree's or InsSeq's that only contain EmptyTree's
-    static bool checkEmptyDeep(const std::unique_ptr<ast::Expression> &);
+    static bool checkEmptyDeep(const std::unique_ptr<Expression> &);
 
     // Does a class/module definition define "behavior"? A class definition that only serves as a
     // namespace for inner-definitions is not considered to have behavior.
@@ -400,7 +400,7 @@ public:
     //     def m; end <-- Behavior in A::B
     //   end
     // end
-    static bool checkClassDefinesBehavior(const std::unique_ptr<ast::ClassDef> &);
+    static bool checkClassDefinesBehavior(const std::unique_ptr<ClassDef> &);
 };
 
 } // namespace sorbet::ast
