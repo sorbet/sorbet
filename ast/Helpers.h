@@ -37,22 +37,6 @@ public:
         return send;
     }
 
-    static std::unique_ptr<Literal> Literal(core::Loc loc, const core::TypePtr &tpe) {
-        return std::make_unique<ast::Literal>(loc, tpe);
-    }
-
-    static std::unique_ptr<Expression> Return(core::Loc loc, std::unique_ptr<Expression> expr) {
-        return std::make_unique<ast::Return>(loc, std::move(expr));
-    }
-
-    static std::unique_ptr<Expression> Next(core::Loc loc, std::unique_ptr<Expression> expr) {
-        return std::make_unique<ast::Next>(loc, std::move(expr));
-    }
-
-    static std::unique_ptr<Expression> Break(core::Loc loc, std::unique_ptr<Expression> expr) {
-        return std::make_unique<ast::Break>(loc, std::move(expr));
-    }
-
     static std::unique_ptr<Expression> Send0(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun) {
         Send::ARGS_store nargs;
         return Send(loc, std::move(recv), fun, std::move(nargs));
@@ -81,6 +65,22 @@ public:
         nargs.emplace_back(std::move(arg2));
         nargs.emplace_back(std::move(arg3));
         return Send(loc, std::move(recv), fun, std::move(nargs));
+    }
+
+    static std::unique_ptr<Literal> Literal(core::Loc loc, const core::TypePtr &tpe) {
+        return std::make_unique<ast::Literal>(loc, tpe);
+    }
+
+    static std::unique_ptr<Expression> Return(core::Loc loc, std::unique_ptr<Expression> expr) {
+        return std::make_unique<ast::Return>(loc, std::move(expr));
+    }
+
+    static std::unique_ptr<Expression> Next(core::Loc loc, std::unique_ptr<Expression> expr) {
+        return std::make_unique<ast::Next>(loc, std::move(expr));
+    }
+
+    static std::unique_ptr<Expression> Break(core::Loc loc, std::unique_ptr<Expression> expr) {
+        return std::make_unique<ast::Break>(loc, std::move(expr));
     }
 
     static std::unique_ptr<Expression> Nil(core::Loc loc) {
