@@ -3,6 +3,15 @@ target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-apple-darwin18.2.0"
 
 @.str = private unnamed_addr constant [16 x i8] c"ERROR: %s is 0\0A\00", align 1
+@rb_cObject = external local_unnamed_addr constant i64, align 8
+@.str.4 = private unnamed_addr constant [5 x i8] c"func\00", align 1
+@rubyIdPrecomputed_a = internal unnamed_addr global i64 0, align 8
+@str_a = private unnamed_addr constant [2 x i8] c"a\00", align 1
+@rubyIdPrecomputed_b = internal unnamed_addr global i64 0, align 8
+@str_b = private unnamed_addr constant [2 x i8] c"b\00", align 1
+@rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
+@str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
+@llvm.global_ctors = appending global [3 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_a, i8* bitcast (i64* @rubyIdPrecomputed_a to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_b, i8* bitcast (i64* @rubyIdPrecomputed_b to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }]
 
 ; Function Attrs: nounwind ssp uwtable
 define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
@@ -11,7 +20,7 @@ define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
 
 ; <label>:4:                                      ; preds = %2
   %5 = tail call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str, i64 0, i64 0), i8* %1)
-  tail call void @abort() #4
+  tail call void @abort() #7
   unreachable
 
 ; <label>:6:                                      ; preds = %2
@@ -24,16 +33,83 @@ declare i32 @printf(i8* nocapture readonly, ...) local_unnamed_addr #1
 ; Function Attrs: cold noreturn
 declare void @abort() local_unnamed_addr #2
 
-; Function Attrs: norecurse nounwind readnone
-define void @Init_hashes() local_unnamed_addr #3 {
-entry:
+declare i64 @rb_hash_new() local_unnamed_addr #3
+
+declare i64 @rb_hash_aset(i64, i64, i64) local_unnamed_addr #3
+
+declare i64 @rb_intern(i8*) local_unnamed_addr #3
+
+declare i64 @rb_id2sym(i64) local_unnamed_addr #3
+
+declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #3
+
+; Function Attrs: nounwind ssp
+define internal void @Constr_rubyIdPrecomputed_a() #4 {
+constr:
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_a, i64 0, i64 0)) #1
+  store i64 %0, i64* @rubyIdPrecomputed_a, align 8
   ret void
 }
+
+; Function Attrs: nounwind ssp
+define internal void @Constr_rubyIdPrecomputed_b() #4 {
+constr:
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_b, i64 0, i64 0)) #1
+  store i64 %0, i64* @rubyIdPrecomputed_b, align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal void @Constr_rubyIdPrecomputed_puts() #4 {
+constr:
+  %0 = tail call i64 @rb_intern(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts, i64 0, i64 0)) #1
+  store i64 %0, i64* @rubyIdPrecomputed_puts, align 8
+  ret void
+}
+
+; Function Attrs: nounwind sspreq
+define void @Init_hashes() local_unnamed_addr #5 {
+entry:
+  %callArgs.i = alloca [4 x i64], align 8
+  %0 = load i64, i64* @rb_cObject, align 8, !tbaa !1
+  %1 = bitcast [4 x i64]* %callArgs.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 32, i8* nonnull %1)
+  %rubyId_a.i = load i64, i64* @rubyIdPrecomputed_a, align 8
+  %rubyId_b.i = load i64, i64* @rubyIdPrecomputed_b, align 8
+  %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
+  %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_a.i) #1
+  %rawSym5.i = tail call i64 @rb_id2sym(i64 %rubyId_b.i) #1
+  %rawHashLiteral.i = tail call i64 @rb_hash_new() #1
+  %2 = tail call i64 @rb_hash_aset(i64 %rawHashLiteral.i, i64 %rawSym.i, i64 3) #1
+  %3 = tail call i64 @rb_hash_aset(i64 %rawHashLiteral.i, i64 %rawSym5.i, i64 5) #1
+  %callArgsAddr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 0
+  store i64 %rawHashLiteral.i, i64* %callArgsAddr.i, align 8
+  tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #1, !noalias !5
+  %4 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #1
+  call void @llvm.lifetime.end.p0i8(i64 32, i8* nonnull %1)
+  ret void
+}
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.start.p0i8(i64, i8* nocapture) #6
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.end.p0i8(i64, i8* nocapture) #6
 
 attributes #0 = { nounwind ssp uwtable }
 attributes #1 = { nounwind }
 attributes #2 = { cold noreturn }
-attributes #3 = { norecurse nounwind readnone }
-attributes #4 = { cold noreturn nounwind }
+attributes #3 = { "addedToSilenceEmptyAttrsError" }
+attributes #4 = { nounwind ssp }
+attributes #5 = { nounwind sspreq }
+attributes #6 = { argmemonly nounwind }
+attributes #7 = { cold noreturn nounwind }
 
 !0 = !{!"branch_weights", i32 1, i32 2000}
+!1 = !{!2, !2, i64 0}
+!2 = !{!"long", !3, i64 0}
+!3 = !{!"omnipotent char", !4, i64 0}
+!4 = !{!"Simple C/C++ TBAA"}
+!5 = !{!6}
+!6 = distinct !{!6, !7, !"sorbet_callFunc: argument 0"}
+!7 = distinct !{!7, !"sorbet_callFunc"}
