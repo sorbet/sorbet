@@ -166,11 +166,6 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
         int argId = -1;
         for (const auto &arg : md->args) {
             argId += 1;
-            if (argId == maxArgCount) {
-                // block arg isn't passed in args
-                break;
-            }
-
             auto *a = ast::MK::arg2Local(arg.get());
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, argId, true))};
             auto name = a->localVariable._name.data(cs)->shortName(cs);
