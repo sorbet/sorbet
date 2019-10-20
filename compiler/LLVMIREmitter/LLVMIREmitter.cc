@@ -151,18 +151,14 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
         auto argCountSecondCheckBlock = llvm::BasicBlock::Create(cs, "argCountSecondCheckBlock", func);
         auto argCountSuccessBlock = llvm::BasicBlock::Create(cs, "argCountSuccess", func);
 
-        auto tooManyArgs = builder.CreateICmpUGT(
-            argCountRaw,
-            llvm::ConstantInt::get(llvm::Type::getInt32Ty(cs), llvm::APInt(32, maxArgCount, true)),
-            "tooManyArgs");
+        auto tooManyArgs =
+            builder.CreateICmpUGT(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgCount)), "tooManyArgs");
         cs.setExpectedBool(builder, tooManyArgs, false);
         builder.CreateCondBr(tooManyArgs, argCountFailBlock, argCountSecondCheckBlock);
 
         builder.SetInsertPoint(argCountSecondCheckBlock);
-        auto tooFewArgs = builder.CreateICmpULT(
-            argCountRaw,
-            llvm::ConstantInt::get(llvm::Type::getInt32Ty(cs), llvm::APInt(32, minArgCount, true)),
-            "tooFewArgs");
+        auto tooFewArgs =
+            builder.CreateICmpULT(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgCount)), "tooFewArgs");
         cs.setExpectedBool(builder, tooFewArgs, false);
         builder.CreateCondBr(tooFewArgs, argCountFailBlock, argCountSuccessBlock);
 
@@ -326,8 +322,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                         auto var = varGet(cs, i->recv.variable, builder, llvmVariables, aliases);
                         auto rawCall = builder.CreateCall(
                             cs.module->getFunction("sorbet_callFunc"),
-                            {var, rawId,
-                             llvm::ConstantInt::get(llvm::Type::getInt32Ty(cs), llvm::APInt(32, i->args.size(), true)),
+                            {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
                              builder.CreateGEP(sendArgArray, indices)},
                             "rawSendResult");
                         varSet(cs, targetAlloca, rawCall, builder, llvmVariables, aliases);

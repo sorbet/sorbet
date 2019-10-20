@@ -53,7 +53,7 @@ llvm::FunctionType *CompilerState::getRubyFFIType() {
 void CompilerState::setExpectedBool(llvm::IRBuilderBase &builder, llvm::Value *value, bool expected) {
     builderCast(builder).CreateCall(
         llvm::Intrinsic::getDeclaration(module, llvm::Intrinsic::ID::expect, {llvm::Type::getInt1Ty(lctx)}),
-        {value, llvm::ConstantInt::get(llvm::Type::getInt1Ty(lctx), llvm::APInt(1, expected ? 1 : 0, true))});
+        {value, llvm::ConstantInt::get(lctx, llvm::APInt(1, expected ? 1 : 0))});
 }
 
 void CompilerState::boxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *target, llvm::Value *rawData) {
