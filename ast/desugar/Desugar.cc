@@ -405,7 +405,7 @@ unique_ptr<Expression> doUntil(DesugarContext dctx, core::Loc loc, unique_ptr<Ex
                                unique_ptr<Expression> body) {
     auto breaker = MK::If(loc, std::move(cond), MK::Break(loc, MK::EmptyTree()), MK::EmptyTree());
     auto breakWithBody = MK::InsSeq1(loc, std::move(body), std::move(breaker));
-    return make_unique<While>(loc, MK::True(loc), std::move(breakWithBody));
+    return MK::While(loc, MK::True(loc), std::move(breakWithBody));
 }
 
 unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
@@ -1008,7 +1008,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             [&](parser::While *wl) {
                 auto cond = node2TreeImpl(dctx, std::move(wl->cond));
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
-                unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
+                unique_ptr<Expression> res = MK::While(loc, std::move(cond), std::move(body));
                 result.swap(res);
             },
             [&](parser::WhilePost *wl) {
@@ -1019,14 +1019,14 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 unique_ptr<Expression> res =
                     isKwbegin
                         ? doUntil(dctx, loc, MK::Send0(loc, std::move(cond), core::Names::bang()), std::move(body))
-                        : make_unique<While>(loc, std::move(cond), std::move(body));
+                        : MK::While(loc, std::move(cond), std::move(body));
                 result.swap(res);
             },
             [&](parser::Until *wl) {
                 auto cond = node2TreeImpl(dctx, std::move(wl->cond));
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
                 unique_ptr<Expression> res =
-                    make_unique<While>(loc, MK::Send0(loc, std::move(cond), core::Names::bang()), std::move(body));
+                    MK::While(loc, MK::Send0(loc, std::move(cond), core::Names::bang()), std::move(body));
                 result.swap(res);
             },
             // This is the same as WhilePost, but the cond negation is in the other branch.
@@ -1036,7 +1036,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
                 unique_ptr<Expression> res =
                     isKwbegin ? doUntil(dctx, loc, std::move(cond), std::move(body))
-                              : make_unique<While>(loc, MK::Send0(loc, std::move(cond), core::Names::bang()),
+                              : MK::While(loc, MK::Send0(loc, std::move(cond), core::Names::bang()),
                                                    std::move(body));
                 result.swap(res);
             },
