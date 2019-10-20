@@ -324,8 +324,8 @@ declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @"<C <U Object>><U foo>"(i32, i64* nocapture readnone, i64) #9 {
 functionEntryInitializers:
-  %isWrongArgCount = icmp eq i32 %0, 0
-  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
+  %tooManyArgs = icmp eq i32 %0, 0
+  br i1 %tooManyArgs, label %argCountSuccess, label %argCountFailBlock
 
 argCountSuccess:                                  ; preds = %functionEntryInitializers
   ret i64 3
@@ -339,8 +339,8 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 define i64 @"<C <U Object>><U bar>"(i32, i64* nocapture readnone, i64) #9 {
 functionEntryInitializers:
   %callArgs = alloca [0 x i64], align 8
-  %isWrongArgCount = icmp eq i32 %0, 0
-  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
+  %tooManyArgs = icmp eq i32 %0, 0
+  br i1 %tooManyArgs, label %argCountSuccess, label %argCountFailBlock
 
 argCountSuccess:                                  ; preds = %functionEntryInitializers
   %rubyId_foo = load i64, i64* @rubyIdPrecomputed_foo, align 8

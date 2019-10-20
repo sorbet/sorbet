@@ -334,8 +334,8 @@ functionEntryInitializers:
   %"rubyId_<" = load i64, i64* @"rubyIdPrecomputed_<", align 8
   %"rubyId_+" = load i64, i64* @"rubyIdPrecomputed_+", align 8
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
-  %isWrongArgCount = icmp eq i32 %0, 1
-  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
+  %tooManyArgs = icmp ugt i32 %0, 1
+  br i1 %tooManyArgs, label %argCountFailBlock, label %argCountSuccess
 
 argCountSuccess:                                  ; preds = %functionEntryInitializers
   %rawArg_name = load i64, i64* %1, align 8

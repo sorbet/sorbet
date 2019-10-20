@@ -408,8 +408,8 @@ entry:
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @"<S <C <U Foo>> $1><U bar>"(i32, i64* nocapture readnone, i64) #11 {
 functionEntryInitializers:
-  %isWrongArgCount = icmp eq i32 %0, 0
-  br i1 %isWrongArgCount, label %argCountSuccess, label %argCountFailBlock
+  %tooManyArgs = icmp eq i32 %0, 0
+  br i1 %tooManyArgs, label %argCountSuccess, label %argCountFailBlock
 
 argCountSuccess:                                  ; preds = %functionEntryInitializers
   %3 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.6, i64 0, i64 0), i64 3) #1
