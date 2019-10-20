@@ -161,7 +161,7 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
         builder.SetInsertPoint(argCountSecondCheckBlock);
         auto tooFewArgs = builder.CreateICmpULT(
             argCountRaw,
-            llvm::ConstantInt::get(llvm::Type::getInt32Ty(cs), llvm::APInt(32, maxArgCount, true)),
+            llvm::ConstantInt::get(llvm::Type::getInt32Ty(cs), llvm::APInt(32, minArgCount, true)),
             "tooFewArgs");
         cs.setExpectedBool(builder, tooFewArgs, false);
         builder.CreateCondBr(tooFewArgs, argCountFailBlock, argCountSuccessBlock);
