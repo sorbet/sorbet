@@ -147,17 +147,28 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
     {
         // validate arg count
         auto argCountRaw = func->arg_begin();
-        auto argCountSuccessBlock = llvm::BasicBlock::Create(cs, "argCountSuccess", func);
         auto argCountFailBlock = llvm::BasicBlock::Create(cs, "argCountFailBlock", func);
+        auto argCountSecondCheckBlock = llvm::BasicBlock::Create(cs, "argCountSecondCheckBlock", func);
+        auto argCountSuccessBlock = llvm::BasicBlock::Create(cs, "argCountSuccess", func);
+
         auto tooManyArgs = builder.CreateICmpUGT(
             argCountRaw,
             llvm::ConstantInt::get(llvm::Type::getInt32Ty(cs), llvm::APInt(32, maxArgCount, true)),
             "tooManyArgs");
         cs.setExpectedBool(builder, tooManyArgs, false);
-        builder.CreateCondBr(tooManyArgs, argCountFailBlock, argCountSuccessBlock);
+        builder.CreateCondBr(tooManyArgs, argCountFailBlock, argCountSecondCheckBlock);
+
+        builder.SetInsertPoint(argCountSecondCheckBlock);
+        auto tooFewArgs = builder.CreateICmpULT(
+            argCountRaw,
+            llvm::ConstantInt::get(llvm::Type::getInt32Ty(cs), llvm::APInt(32, maxArgCount, true)),
+            "tooFewArgs");
+        cs.setExpectedBool(builder, tooFewArgs, false);
+        builder.CreateCondBr(tooFewArgs, argCountFailBlock, argCountSuccessBlock);
 
         builder.SetInsertPoint(argCountFailBlock);
         cs.emitArgumentMismatch(builder, argCountRaw, minArgCount, maxArgCount);
+
         builder.SetInsertPoint(argCountSuccessBlock);
     }
     {
