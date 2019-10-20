@@ -4,6 +4,7 @@
 #include "common/typecase.h"
 #include "core/core.h"
 #include "core/errors/namer.h"
+#include "ast/Helpers.h"
 
 using namespace std;
 
