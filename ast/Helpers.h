@@ -10,7 +10,7 @@ namespace sorbet::ast {
 class MK {
 public:
     static std::unique_ptr<Expression> EmptyTree() {
-        return std::ast::MK::EmptyTree();
+        return std::make_unique<ast::EmptyTree>();
     }
 
     static std::unique_ptr<Block> Block(core::Loc loc, std::unique_ptr<Expression> body, MethodDef::ARGS_store args) {
