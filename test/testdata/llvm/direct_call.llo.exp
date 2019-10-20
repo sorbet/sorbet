@@ -19,8 +19,8 @@ target triple = "x86_64-apple-darwin18.2.0"
 @str_unsafe = private unnamed_addr constant [7 x i8] c"unsafe\00", align 1
 @str_foo.2 = private unnamed_addr constant [4 x i8] c"foo\00", align 1
 @str_T.4 = private unnamed_addr constant [2 x i8] c"T\00", align 1
-@str_Object.5 = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 @rubyIdPrecomputed_bar = internal unnamed_addr global i64 0, align 8
+@str_Object.5 = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 @str_bar.6 = private unnamed_addr constant [4 x i8] c"bar\00", align 1
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
@@ -394,6 +394,7 @@ entry:
   %1 = bitcast [2 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %1)
   %rubyId_unsafe.i = load i64, i64* @rubyIdPrecomputed_unsafe, align 8
+  %rubyId_foo.i = load i64, i64* @rubyIdPrecomputed_foo, align 8
   %rubyId_bar.i = load i64, i64* @rubyIdPrecomputed_bar, align 8
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %2 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.5, i64 0, i64 0)) #1
@@ -402,6 +403,7 @@ entry:
   %3 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.4, i64 0, i64 0)) #1
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #1, !noalias !12
   %4 = call i64 @rb_funcallv(i64 %3, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #1
+  %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_foo.i) #1
   %5 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.5, i64 0, i64 0)) #1
   call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo.2, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U foo>" to i64 (...)*), i32 -1) #1
   %6 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.5, i64 0, i64 0)) #1
@@ -409,6 +411,7 @@ entry:
   %7 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.4, i64 0, i64 0)) #1
   call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #1, !noalias !15
   %8 = call i64 @rb_funcallv(i64 %7, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #1
+  %rawSym19.i = call i64 @rb_id2sym(i64 %rubyId_bar.i) #1
   %9 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.5, i64 0, i64 0)) #1
   call void @rb_define_method(i64 %9, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.6, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U bar>" to i64 (...)*), i32 -1) #1
   call void @dbg_sorbet_validate_id(i64 %rubyId_bar.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #1, !noalias !18

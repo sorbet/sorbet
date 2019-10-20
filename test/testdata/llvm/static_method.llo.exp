@@ -381,12 +381,14 @@ entry:
   %6 = bitcast [2 x i64]* %callArgs.i.i.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %6) #1
   %rubyId_unsafe.i.i.i = load i64, i64* @rubyIdPrecomputed_unsafe, align 8
+  %rubyId_bar.i.i.i = load i64, i64* @rubyIdPrecomputed_bar, align 8
   %7 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.3, i64 0, i64 0)) #1
   %callArgsAddr.i.i.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i.i.i, i64 0, i64 0
   store i64 %7, i64* %callArgsAddr.i.i.i, align 8
   %8 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.4, i64 0, i64 0)) #1
   call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i.i.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #1, !noalias !12
   %9 = call i64 @rb_funcallv(i64 %8, i64 %rubyId_unsafe.i.i.i, i32 1, i64* nonnull %callArgsAddr.i.i.i) #1
+  %rawSym.i.i.i = call i64 @rb_id2sym(i64 %rubyId_bar.i.i.i) #1
   %10 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.5, i64 0, i64 0)) #1
   call void @rb_define_singleton_method(i64 %10, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.6, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U Foo>> $1><U bar>" to i64 (...)*), i32 -1) #1
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %6) #1
