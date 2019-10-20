@@ -109,7 +109,7 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
         if (keywordInit) {
             argName = ast::MK::KeywordArg(loc, move(argName));
         }
-        newArgs.emplace_back(make_unique<ast::OptionalArg>(loc, move(argName), ast::MK::Nil(loc)));
+        newArgs.emplace_back(ast::MK::OptionalArg(loc, move(argName), ast::MK::Nil(loc)));
 
         body.emplace_back(ast::MK::Method0(loc, loc, name, ast::MK::EmptyTree(), ast::MethodDef::DSLSynthesized));
         body.emplace_back(ast::MK::Method1(loc, loc, name.addEq(ctx), ast::MK::Local(loc, core::Names::arg0()),

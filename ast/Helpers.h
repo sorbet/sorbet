@@ -98,7 +98,7 @@ public:
 
     static std::unique_ptr<Reference> OptionalArg(core::Loc loc, std::unique_ptr<Reference> inner,
                                                   std::unique_ptr<Expression> default_) {
-        return std::make_unique<ast::OptionalArg>(loc, std::move(inner), std::move(default_));
+        return std::ast::MK::OptionalArg(loc, std::move(inner), std::move(default_));
     }
 
     static std::unique_ptr<Reference> KeywordArg(core::Loc loc, std::unique_ptr<Reference> inner) {

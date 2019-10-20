@@ -42,7 +42,7 @@ class LocalNameInserter {
             },
             [&](ast::OptionalArg *opt) {
                 named = nameArg(move(opt->expr));
-                named.expr = make_unique<ast::OptionalArg>(arg->loc, move(named.expr), move(opt->default_));
+                named.expr = ast::MK::OptionalArg(arg->loc, move(named.expr), move(opt->default_));
             },
             [&](ast::BlockArg *blk) {
                 named = nameArg(move(blk->expr));

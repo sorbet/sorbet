@@ -78,7 +78,7 @@ class NameInserter {
             // TODO: check that flags match;
             unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
             if (parsedArg.default_) {
-                localExpr = make_unique<ast::OptionalArg>(parsedArg.loc, move(localExpr), move(parsedArg.default_));
+                localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr), move(parsedArg.default_));
             }
 
             ctx.owner.data(ctx)->arguments()[pos].loc = parsedArg.loc;
@@ -114,7 +114,7 @@ class NameInserter {
 
         if (parsedArg.default_) {
             argInfo.flags.isDefault = true;
-            localExpr = make_unique<ast::OptionalArg>(parsedArg.loc, move(localExpr), move(parsedArg.default_));
+            localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr), move(parsedArg.default_));
         }
 
         if (parsedArg.keyword) {
