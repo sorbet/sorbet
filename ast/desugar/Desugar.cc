@@ -1361,7 +1361,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         if (auto e = dctx.ctx.state.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
                             e.setHeader("Block argument should not be given");
                         }
-                        unique_ptr<Expression> res = make_unique<Break>(loc, MK::EmptyTree());
+                        unique_ptr<Expression> res = MK::Break(loc, MK::EmptyTree());
                         result.swap(res);
                     } else {
                         unique_ptr<Expression> res =
@@ -1387,22 +1387,22 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         elems.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                     };
                     unique_ptr<Expression> arr = make_unique<Array>(loc, std::move(elems));
-                    unique_ptr<Expression> res = make_unique<Break>(loc, std::move(arr));
+                    unique_ptr<Expression> res = MK::Break(loc, std::move(arr));
                     result.swap(res);
                 } else if (ret->exprs.size() == 1) {
                     if (parser::isa_node<parser::BlockPass>(ret->exprs[0].get())) {
                         if (auto e = dctx.ctx.state.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
                             e.setHeader("Block argument should not be given");
                         }
-                        unique_ptr<Expression> res = make_unique<Break>(loc, MK::EmptyTree());
+                        unique_ptr<Expression> res = MK::Break(loc, MK::EmptyTree());
                         result.swap(res);
                     } else {
                         unique_ptr<Expression> res =
-                            make_unique<Break>(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
+                            MK::Break(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
                         result.swap(res);
                     }
                 } else {
-                    unique_ptr<Expression> res = make_unique<Break>(loc, MK::EmptyTree());
+                    unique_ptr<Expression> res = MK::Break(loc, MK::EmptyTree());
                     result.swap(res);
                 }
             },
@@ -1427,7 +1427,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         if (auto e = dctx.ctx.state.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
                             e.setHeader("Block argument should not be given");
                         }
-                        unique_ptr<Expression> res = make_unique<Break>(loc, MK::EmptyTree());
+                        unique_ptr<Expression> res = MK::Break(loc, MK::EmptyTree());
                         result.swap(res);
                     } else {
                         unique_ptr<Expression> res =
