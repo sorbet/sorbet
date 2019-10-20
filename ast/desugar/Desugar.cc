@@ -211,7 +211,7 @@ unique_ptr<MethodDef> buildMethod(DesugarContext dctx, core::Loc loc, core::Loc 
 
     if (args.empty() || !isa_tree<BlockArg>(args.back().get())) {
         auto blkLoc = core::Loc::none(loc.file());
-        args.emplace_back(make_unique<BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
+        args.emplace_back(MK::BlockArg(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
     }
 
     const auto &blkArg = cast_tree<BlockArg>(args.back().get());
@@ -898,35 +898,34 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(res);
             },
             [&](parser::Restarg *arg) {
-                unique_ptr<Expression> res = make_unique<RestArg>(loc, MK::Local(arg->nameLoc, arg->name));
+                unique_ptr<Expression> res = MK::RestArg(loc, MK::Local(arg->nameLoc, arg->name));
                 result.swap(res);
             },
             [&](parser::Kwrestarg *arg) {
-                unique_ptr<Expression> res =
-                    make_unique<RestArg>(loc, make_unique<KeywordArg>(loc, MK::Local(loc, arg->name)));
+                unique_ptr<Expression> res = MK::RestArg(loc, MK::KeywordArg(loc, MK::Local(loc, arg->name)));
                 result.swap(res);
             },
             [&](parser::Kwarg *arg) {
-                unique_ptr<Expression> res = make_unique<KeywordArg>(loc, MK::Local(loc, arg->name));
+                unique_ptr<Expression> res = MK::KeywordArg(loc, MK::Local(loc, arg->name));
                 result.swap(res);
             },
             [&](parser::Blockarg *arg) {
-                unique_ptr<Expression> res = make_unique<BlockArg>(loc, MK::Local(loc, arg->name));
+                unique_ptr<Expression> res = MK::BlockArg(loc, MK::Local(loc, arg->name));
                 result.swap(res);
             },
             [&](parser::Kwoptarg *arg) {
                 unique_ptr<Expression> res =
-                    make_unique<OptionalArg>(loc, make_unique<KeywordArg>(loc, MK::Local(arg->nameLoc, arg->name)),
-                                             node2TreeImpl(dctx, std::move(arg->default_)));
+                    MK::OptionalArg(loc, MK::KeywordArg(loc, MK::Local(arg->nameLoc, arg->name)),
+                                    node2TreeImpl(dctx, std::move(arg->default_)));
                 result.swap(res);
             },
             [&](parser::Optarg *arg) {
-                unique_ptr<Expression> res = make_unique<OptionalArg>(loc, MK::Local(arg->nameLoc, arg->name),
-                                                                      node2TreeImpl(dctx, std::move(arg->default_)));
+                unique_ptr<Expression> res = MK::OptionalArg(loc, MK::Local(arg->nameLoc, arg->name),
+                                                             node2TreeImpl(dctx, std::move(arg->default_)));
                 result.swap(res);
             },
             [&](parser::Shadowarg *arg) {
-                unique_ptr<Expression> res = make_unique<ShadowArg>(loc, MK::Local(loc, arg->name));
+                unique_ptr<Expression> res = MK::ShadowArg(loc, MK::Local(loc, arg->name));
                 result.swap(res);
             },
             [&](parser::DefMethod *method) {
@@ -1112,7 +1111,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto body =
                     MK::InsSeq1(loc, node2TreeImpl(dctx, std::move(masgn)), node2TreeImpl(dctx, std::move(for_->body)));
 
-                auto block = MK::Block1(loc, std::move(body), make_unique<RestArg>(loc, MK::Local(loc, temp)));
+                auto block = MK::Block1(loc, std::move(body), MK::RestArg(loc, MK::Local(loc, temp)));
 
                 Send::ARGS_store noargs;
                 auto res = MK::Send(loc, node2TreeImpl(dctx, std::move(for_->expr)), core::Names::each(),
