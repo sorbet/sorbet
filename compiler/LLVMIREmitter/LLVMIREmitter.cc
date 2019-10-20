@@ -127,7 +127,6 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
             cs.boxRawValue(builder, alloca, nilValueRaw);
         }
     }
-    auto argArrayRaw = func->arg_begin() + 1;
     auto maxArgCount = 0;
     auto minArgCount = 0;
     {
@@ -170,6 +169,7 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, argId, true))};
             auto name = a->localVariable._name.data(cs)->shortName(cs);
             llvm::StringRef nameRef(name.data(), name.length());
+            auto argArrayRaw = func->arg_begin() + 1;
             auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
             cs.boxRawValue(builder, llvmVariables[a->localVariable], rawValue);
         }
