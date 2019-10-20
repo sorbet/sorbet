@@ -275,20 +275,20 @@ void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) __a
 
 // Trying to be a copy of rb_mod_const_get
 static const char wrong_constant_name[] = "wrong constant name %1$s";
-VALUE sorbet_getConstant(const char* path) __attribute__((noinline)) {
+VALUE sorbet_getConstant(const char* path, long pathLen) __attribute__((noinline)) {
     VALUE name, mod;
     rb_encoding *enc;
     const char *pbeg, *p, *pend;
     ID id;
     int recur = 1;
 
-    id = rb_intern(path);
+    id = rb_intern2(path, pathLen);
     name = ID2SYM(id);
     mod = sorbet_rb_cObject();
     enc = rb_enc_get(name);
 
     pbeg = p = path;
-    pend = path + strlen(path);
+    pend = path + pathLen;
 
     if (p >= pend || !*p) {
 wrong_name:
@@ -358,8 +358,8 @@ wrong_name:
 }
 // End copy of rb_mod_const_get
 
-void sorbet_setConstant(VALUE mod, const char* name, VALUE value) __attribute__((noinline)) {
-    ID id = rb_intern(name);
+void sorbet_setConstant(VALUE mod, const char* name, long nameLen, VALUE value) __attribute__((noinline)) {
+    ID id = rb_intern2(name, nameLen);
     return rb_const_set(mod, id, value);
 }
 

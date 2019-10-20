@@ -51,7 +51,8 @@ llvm::Constant *toCString(std::string str, llvm::IRBuilder<> &builder) {
 llvm::CallInst *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
     sym = removeRoot(sym);
     auto str = showClassName(cs, sym);
-    return builder.CreateCall(cs.module->getFunction("sorbet_getConstant"), {toCString(str, builder)});
+    return builder.CreateCall(cs.module->getFunction("sorbet_getConstant"),
+                              {toCString(str, builder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
 }
 
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
@@ -91,7 +92,8 @@ void varSet(CompilerState &cs, llvm::AllocaInst *alloca, llvm::Value *var, llvm:
     auto name = sym.data(cs.gs)->name.show(cs.gs);
     auto owner = sym.data(cs.gs)->owner;
     builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
-                       {resolveSymbol(cs, owner, builder), toCString(name, builder), var});
+                       {resolveSymbol(cs, owner, builder), toCString(name, builder),
+                        llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
 }
 
 llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
