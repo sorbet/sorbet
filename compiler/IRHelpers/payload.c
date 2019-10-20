@@ -358,6 +358,11 @@ wrong_name:
 }
 // End copy of rb_mod_const_get
 
+void sorbet_setConstant(VALUE mod, const char* name, VALUE value) __attribute__((noinline)) {
+    ID id = sorbet_IDIntern(name);
+    return rb_const_set(mod, id, value);
+}
+
 VALUE sorbet_defineTopLevelModule(const char *name) __attribute__((always_inline)) {
     return rb_define_module(name);
 }
