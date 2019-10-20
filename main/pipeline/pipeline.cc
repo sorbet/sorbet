@@ -12,8 +12,8 @@
 #include "ProgressIndicator.h"
 #include "absl/strings/escaping.h" // BytesToHexString
 #include "absl/strings/match.h"
-#include "ast/desugar/Desugar.h"
 #include "ast/Helpers.h"
+#include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"

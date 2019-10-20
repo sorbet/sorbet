@@ -1,10 +1,10 @@
 #include "local_vars.h"
 #include "absl/strings/match.h"
+#include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "common/typecase.h"
 #include "core/core.h"
 #include "core/errors/namer.h"
-#include "ast/Helpers.h"
 
 using namespace std;
 

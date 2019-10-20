@@ -23,7 +23,8 @@ public:
         return Block(loc, std::move(body), std::move(args));
     }
 
-    static std::unique_ptr<ast::Block> Block1(core::Loc loc, std::unique_ptr<Expression> body, std::unique_ptr<Expression> arg1) {
+    static std::unique_ptr<ast::Block> Block1(core::Loc loc, std::unique_ptr<Expression> body,
+                                              std::unique_ptr<Expression> arg1) {
         MethodDef::ARGS_store args;
         args.emplace_back(move(arg1));
         return Block(loc, std::move(body), std::move(args));
@@ -375,7 +376,8 @@ public:
             typecase(
                 arg, [&](class RestArg *rest) { arg = rest->expr.get(); },
                 [&](class KeywordArg *kw) { arg = kw->expr.get(); },
-                [&](class OptionalArg *opt) { arg = opt->expr.get(); }, [&](class BlockArg *blk) { arg = blk->expr.get(); },
+                [&](class OptionalArg *opt) { arg = opt->expr.get(); },
+                [&](class BlockArg *blk) { arg = blk->expr.get(); },
                 [&](class ShadowArg *shadow) { arg = shadow->expr.get(); },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
                 [&](UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },

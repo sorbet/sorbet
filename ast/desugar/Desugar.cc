@@ -875,9 +875,9 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             [&](parser::Module *module) {
                 ClassDef::RHS_store body = scopeNodeToBody(dctx, std::move(module->body));
                 ClassDef::ANCESTORS_store ancestors;
-                unique_ptr<Expression> res = MK::Class(
-                    module->loc, module->declLoc, node2TreeImpl(dctx, std::move(module->name)),
-                    std::move(ancestors), std::move(body), ClassDefKind::Module);
+                unique_ptr<Expression> res =
+                    MK::Class(module->loc, module->declLoc, node2TreeImpl(dctx, std::move(module->name)),
+                              std::move(ancestors), std::move(body), ClassDefKind::Module);
                 result.swap(res);
             },
             [&](parser::Class *claz) {
@@ -888,9 +888,9 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 } else {
                     ancestors.emplace_back(node2TreeImpl(dctx, std::move(claz->superclass)));
                 }
-                unique_ptr<Expression> res = MK::Class(
-                    claz->loc, claz->declLoc, node2TreeImpl(dctx, std::move(claz->name)),
-                    std::move(ancestors), std::move(body), ClassDefKind::Class);
+                unique_ptr<Expression> res =
+                    MK::Class(claz->loc, claz->declLoc, node2TreeImpl(dctx, std::move(claz->name)),
+                              std::move(ancestors), std::move(body), ClassDefKind::Class);
                 result.swap(res);
             },
             [&](parser::Arg *arg) {
@@ -1036,8 +1036,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto body = node2TreeImpl(dctx, std::move(wl->body));
                 unique_ptr<Expression> res =
                     isKwbegin ? doUntil(dctx, loc, std::move(cond), std::move(body))
-                              : MK::While(loc, MK::Send0(loc, std::move(cond), core::Names::bang()),
-                                                   std::move(body));
+                              : MK::While(loc, MK::Send0(loc, std::move(cond), core::Names::bang()), std::move(body));
                 result.swap(res);
             },
             [&](parser::Nil *wl) {
@@ -1110,7 +1109,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 unique_ptr<parser::Node> masgn =
                     make_unique<parser::Masgn>(loc, std::move(mlhsNode), make_unique<parser::LVar>(loc, temp));
 
-                auto body = MK::InsSeq1(loc, node2TreeImpl(dctx, std::move(masgn)), node2TreeImpl(dctx, std::move(for_->body)));
+                auto body =
+                    MK::InsSeq1(loc, node2TreeImpl(dctx, std::move(masgn)), node2TreeImpl(dctx, std::move(for_->body)));
 
                 auto block = MK::Block1(loc, std::move(body), make_unique<RestArg>(loc, MK::Local(loc, temp)));
 
@@ -1361,8 +1361,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         unique_ptr<Expression> res = MK::Break(loc, MK::EmptyTree());
                         result.swap(res);
                     } else {
-                        unique_ptr<Expression> res =
-                            MK::Return(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
+                        unique_ptr<Expression> res = MK::Return(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
                         result.swap(res);
                     }
                 } else {
@@ -1394,8 +1393,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         unique_ptr<Expression> res = MK::Break(loc, MK::EmptyTree());
                         result.swap(res);
                     } else {
-                        unique_ptr<Expression> res =
-                            MK::Break(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
+                        unique_ptr<Expression> res = MK::Break(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
                         result.swap(res);
                     }
                 } else {
@@ -1427,8 +1425,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         unique_ptr<Expression> res = MK::Break(loc, MK::EmptyTree());
                         result.swap(res);
                     } else {
-                        unique_ptr<Expression> res =
-                            MK::Next(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
+                        unique_ptr<Expression> res = MK::Next(loc, node2TreeImpl(dctx, std::move(ret->exprs[0])));
                         result.swap(res);
                     }
                 } else {
