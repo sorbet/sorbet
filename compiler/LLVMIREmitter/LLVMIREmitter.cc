@@ -51,6 +51,7 @@ llvm::Constant *toCString(std::string str, llvm::IRBuilder<> &builder) {
 llvm::CallInst *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
     sym = removeRoot(sym);
     auto str = showClassName(cs, sym);
+    ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
     return builder.CreateCall(cs.module->getFunction("sorbet_getConstant"),
                               {toCString(str, builder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
 }

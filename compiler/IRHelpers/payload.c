@@ -281,6 +281,7 @@ VALUE sorbet_getConstant(const char* path, long pathLen) __attribute__((noinline
     const char *pbeg, *p, *pend;
     ID id;
     int recur = 1;
+    int DISABLED_CODE = 0;
 
     id = rb_intern2(path, pathLen);
     name = ID2SYM(id);
@@ -290,12 +291,12 @@ VALUE sorbet_getConstant(const char* path, long pathLen) __attribute__((noinline
     pbeg = p = path;
     pend = path + pathLen;
 
-    if (p >= pend || !*p) {
+    if (DISABLED_CODE && (p >= pend || !*p)) {
 wrong_name:
         rb_name_err_raise(wrong_constant_name, mod, name);
     }
 
-    if (p + 2 < pend && p[0] == ':' && p[1] == ':') {
+    if (DISABLED_CODE && (p + 2 < pend && p[0] == ':' && p[1] == ':')) {
         mod = rb_cObject;
         p += 2;
         pbeg = p;
