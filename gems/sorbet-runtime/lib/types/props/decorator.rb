@@ -143,22 +143,40 @@ class T::Props::Decorator
       end
 
       if rules[:raise_on_nil_write]
-        T::Private::Casts.cast(val, type, "T::Struct.set")
+        raise T::Props::InvalidValueError.new("Can't set #{@class.name}.#{prop} to #{val.inspect} " \
+        "(instance of #{val.class}) - need a #{type}")
       end
     end
 
     # T::Props::CustomType is not a real object based class so that we can not run real type check call.
     # T::Props::CustomType.valid?() is only a helper function call.
+    valid =
+      if type.is_a?(T::Props::CustomType) && T::Props::Utils.optional_prop?(rules)
+        type.valid?(val)
+      else
+        type_object.valid?(val)
+      end
 
-    # TODO: understand the value of type here and whether we can just feed it to Casts or not
-    # T::Private::Casts.cast(val, type, "T::Struct.set")
-    # valid =
-    #   if type.is_a?(T::Props::CustomType) && T::Props::Utils.optional_prop?(rules)
-    #     type.valid?(val)
-    #   else
-    #     type_object.valid?(val)
-    #   end
-    T::Private::Casts.cast(val, type, "T::Struct.set")
+    if !valid
+      raise T::Props::InvalidValueError.new("Can't set #{@class.name}.#{prop} to #{val.inspect} " \
+        "(instance of #{val.class}) - need a #{type_object}")
+    end
+  rescue T::Props::InvalidValueError => err
+    caller_loc = T.must(caller_locations(8, 1))[0]
+
+    pretty_message = "Parameter '#{prop}': #{err.message}\n" \
+      "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n"
+
+    T::Configuration.call_validation_error_handler(
+      rules,
+      message: err.message,
+      pretty_message: pretty_message,
+      kind: 'Parameter',
+      name: prop,
+      type: type,
+      value: val,
+      location: caller_loc,
+    )
   end
 
   # For performance, don't use named params here.
