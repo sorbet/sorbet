@@ -241,12 +241,12 @@ outside of the class scope. In the second, <code>@x</code> is declared outside o
 <p>A class was defined as the subclass of a <code>type_alias</code>. It also occurs if a
 <code>type_alias</code> mixin is used in a class.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
-A = T.type_alias(Integer)
+A = T.type_alias {Integer}
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span> &lt; A;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error: Superclasses and mixins may not be type aliases</span>
 
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">M</span>;</span> <span class="hljs-keyword">end</span>
 
-AliasModule = T.type_alias(M)
+AliasModule = T.type_alias {M}
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span></span>
   <span class="hljs-keyword">include</span> AliasModule <span class="hljs-comment"># error: Superclasses and mixins may not be type aliases</span>
 <span class="hljs-keyword">end</span>
@@ -328,12 +328,12 @@ with a <code>T.let</code>.</p>
 <p>Sorbet does not support creating normal Ruby constant aliases to type aliases.
 Once a type alias is created, all subsequent aliases must also be type aliases.</p>
 <p>Concretely, this is not allowed:</p>
-<pre><code class="hljs css language-ruby">A = T.type_alias(Integer)
+<pre><code class="hljs css language-ruby">A = T.type_alias {Integer}
 B = A <span class="hljs-comment"># error: Reassigning a type alias is not allowed</span>
 </code></pre>
 <p>while this is:</p>
-<pre><code class="hljs css language-ruby">A = T.type_alias(Integer)
-B = T.type_alias(A)
+<pre><code class="hljs css language-ruby">A = T.type_alias {Integer}
+B = T.type_alias {A}
 </code></pre>
 <p>(Why? This is due to design tradeoffs to enforce stronger internal invariants.
 Basically, Sorbet can emit more reliable warnings when users declare their

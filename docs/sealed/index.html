@@ -101,7 +101,7 @@ this class.” Consider code that looks like this:</p>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Paid</span>;</span>      ...; <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Failed</span>;</span>    ...; <span class="hljs-keyword">end</span>
 
-ChargeAttemptResult = T.type_alias(T.any(NotNeeded, Paid, Failed))
+ChargeAttemptResult = T.type_alias {T.any(NotNeeded, Paid, Failed)}
 </code></pre>
 <p>We might be annoyed that the definitions for <code>NotNeeded</code>, <code>Paid</code>, and <code>Failed</code>
 are not intrinsically connected to each other… It’s only after defining them

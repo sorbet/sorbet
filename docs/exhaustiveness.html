@@ -80,7 +80,7 @@ extend T::Sig
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span>;</span> <span class="hljs-keyword">end</span>
 
 <span class="hljs-comment"># (1) Define a type alias as a union type of A, B, or C</span>
-AorBorC = T.type_alias(T.any(A, B, C))
+AorBorC = T.type_alias {T.any(A, B, C)}
 
 sig {params(<span class="hljs-symbol">x:</span> AorBorC).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
@@ -179,7 +179,7 @@ discriminates on.</p>
 <p>And as one last tip, we can use <a href="/docs/type-aliases">Type Aliases</a> to give a name
 to <code>T.any(A, B, C)</code> and reuse it throughout our codebase. This means we can
 update the alias in one place, instead of at every individual method!</p>
-<pre><code class="hljs css language-ruby">AorBorC = T.type_alias(T.any(A, B, C))
+<pre><code class="hljs css language-ruby">AorBorC = T.type_alias {T.any(A, B, C)}
 
 sig {params(<span class="hljs-symbol">x:</span> AorBorC).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
