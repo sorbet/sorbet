@@ -49,6 +49,8 @@ llvm::Constant *toCString(std::string str, llvm::IRBuilder<> &builder) {
 }
 
 llvm::CallInst *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
+    // TODO(perf): use something similar to
+    // https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_insnhelper.c#L3258-L3275
     sym = removeRoot(sym);
     auto str = showClassName(cs, sym);
     ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
@@ -333,10 +335,6 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                         // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
                         // to get inline caching.
                         // before this, perf will not be good
-                        //
-                        //
-                        // todo(perf): mark the arguments with
-                        // https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic for duration of the call
                         auto var = varGet(cs, i->recv.variable, builder, llvmVariables, aliases);
                         auto rawCall = builder.CreateCall(
                             cs.module->getFunction("sorbet_callFunc"),
