@@ -104,7 +104,7 @@ class LSPLoop {
     void sendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
     /** Helper method: If message is an edit taking the slow path, and slow path cancelation is enabled, signal to
      * GlobalState that we will be starting a commit of the edits. */
-    void maybeStartCommitSlowPathEdit(LSPMessage &msg) const;
+    void maybeStartCommitSlowPathEdit(const LSPMessage &msg) const;
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config);

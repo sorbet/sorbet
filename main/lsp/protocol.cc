@@ -157,7 +157,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
     });
 }
 
-void LSPLoop::maybeStartCommitSlowPathEdit(LSPMessage &msg) const {
+void LSPLoop::maybeStartCommitSlowPathEdit(const LSPMessage &msg) const {
     if (msg.isNotification() && msg.method() == LSPMethod::SorbetWorkspaceEdit) {
         // While we're holding the queue lock (and preventing new messages from entering), start a
         // commit for an epoch if this message will trigger a cancelable slow path.
@@ -273,8 +273,6 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
             {
                 absl::MutexLock lck(&processingMtx);
                 Timer timeit(logger, "idle");
-                // Ensure we don't have any leftover state from last slow path epoch.
-                // ENFORCE(!gs || !gs->getRunningSlowPath().has_value());
                 processingMtx.Await(absl::Condition(
                     +[](QueueState *processingQueue) -> bool {
                         return processingQueue->terminate ||

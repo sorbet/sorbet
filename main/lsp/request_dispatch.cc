@@ -47,9 +47,9 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
         if (method == LSPMethod::SorbetWorkspaceEdit) {
             // Note: We increment `lsp.messages.processed` when the original requests were merged into this one.
             shared_ptr<SorbetWorkspaceEditParams> editParams = move(get<unique_ptr<SorbetWorkspaceEditParams>>(params));
-            // Typecheck asynchronously. Since std::function is copyable, we have to promote captured unique_ptrs into
-            // shared_ptrs.
-            typecheckerCoord.asyncRun([editParams](LSPTypechecker &typechecker) -> void {
+            // Since std::function is copyable, we have to promote captured unique_ptrs into shared_ptrs.
+            // TODO(jvilk): Switch to asyncRun once I sort out how this interplays with cancelable slow path.
+            typecheckerCoord.syncRun([editParams](LSPTypechecker &typechecker) -> void {
                 const u4 end = editParams->updates.versionEnd;
                 const u4 start = editParams->updates.versionStart;
                 // Versions are sequential and wrap around. Use them to figure out how many edits are contained

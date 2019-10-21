@@ -5,8 +5,9 @@
 
 namespace sorbet::realmain::lsp {
 /**
- * Handles typechecking and other queries. Can either operate in async mode (in which it runs on a dedicated thread)
- * or sync mode.
+ * Handles typechecking and other queries. Can either operate in single-threaded mode (in which lambdas passed to
+ * syncRun/asyncRun run-to-completion immediately) or dedicated-thread mode (in which lambdas are enqueued to execute on
+ * thread).
  */
 class LSPTypecheckerCoordinator final {
     /** Contains a queue of functions to run on the typechecking thread. */
