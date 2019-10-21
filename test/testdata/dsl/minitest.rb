@@ -25,11 +25,17 @@ class MyTest
 
     before do
         @foo = T.let(3, T.nilable(Integer))
+    end
+
+    before do
         instance_helper
     end
 
     after do
         @foo = nil
+    end
+
+    after do
         instance_helper
     end
 
