@@ -1462,8 +1462,8 @@ private:
             if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(argExp.get())) {
                 // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the
                 // body.
-                auto let = make_unique<ast::Cast>(optArgExp->loc, argType, move(optArgExp->default_),
-                                                  core::Names::let());
+                auto let =
+                    make_unique<ast::Cast>(optArgExp->loc, argType, move(optArgExp->default_), core::Names::let());
                 lets.emplace_back(std::move(let));
             }
         }
