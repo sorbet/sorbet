@@ -1,0 +1,13 @@
+class <emptyTree><<C <root>>> < ()
+  def foo<<C <todo sym>>>(a = 1, b = 2, &<blk>)
+    <emptyTree>
+  end
+
+  def foo$1<<C <todo sym>>>(a = 1, b = 2, &<blk>)
+    1
+  end
+
+  def foo$2<<C <todo sym>>>(a = 1, b = 2, &<blk>)
+    2
+  end
+end
