@@ -2081,6 +2081,11 @@ public:
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
         ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 original->toString(ctx));
+        for (auto &arg: original->args) {
+            if (auto optionalArg = ast::cast_tree<ast::OptionalArg>(arg.get())) {
+                ENFORCE(!optionalArg->default_);
+            }
+        }
         return original;
     }
     unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
