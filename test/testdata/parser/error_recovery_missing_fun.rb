@@ -2,12 +2,12 @@
 
 def test_method_without_fun_name(x)
   x.
-end
+end # error: unexpected token
 
 def test_method_without_fun_name_plus_before(x)
   before = 1
   x.
-end
+end # error: unexpected token
 
 def test_method_without_fun_name_plus_after(x)
   x.
@@ -18,4 +18,4 @@ def test_method_without_fun_name_before_and_after(x)
   before = 1
   x.
   after = 1
-end # error: unexpected token
+end
