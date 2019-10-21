@@ -121,6 +121,10 @@ public:
      * Processes a batch of requests. Performs pre-processing to avoid unnecessary work.
      */
     void processRequests(std::vector<std::unique_ptr<LSPMessage>> messages);
+    /**
+     * (For tests only) Retrieve the number of times typechecking has run.
+     */
+    int getTypecheckCount();
 };
 
 std::optional<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);

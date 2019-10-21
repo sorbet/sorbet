@@ -98,4 +98,8 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
     }
 }
 
+int LSPWrapper::getTypecheckCount() {
+    return lspLoop->getTypecheckCount();
+}
+
 } // namespace sorbet::realmain::lsp

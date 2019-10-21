@@ -85,4 +85,10 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     }
 }
 
+int LSPLoop::getTypecheckCount() {
+    int count = 0;
+    typecheckerCoord.syncRun([&count](const auto &tc) -> void { count = tc.state().lspTypecheckCount; });
+    return count;
+}
+
 } // namespace sorbet::realmain::lsp

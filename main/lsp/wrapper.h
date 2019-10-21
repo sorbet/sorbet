@@ -74,6 +74,11 @@ public:
      * Note: Use this method *before* the client performs initialization with the server.
      */
     void enableAllExperimentalFeatures();
+
+    /**
+     * (For tests only) Retrieve the number of times typechecking has run.
+     */
+    int getTypecheckCount();
 };
 
 } // namespace sorbet::realmain::lsp
