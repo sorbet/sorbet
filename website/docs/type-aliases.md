@@ -6,7 +6,7 @@ title: Type Aliases
 > TODO: This page is still a fragment. Contributions welcome!
 
 ```ruby
-Alias = T.type_alias(Type)
+Alias = T.type_alias {Type}
 ```
 
 This creates a type alias of `Type` called `Alias`. In the context of Sorbet,
@@ -19,8 +19,8 @@ Note that the type alias will not show up in error messages.
 # typed: true
 extend T::Sig
 
-Int = T.type_alias(Integer)
-Str = T.type_alias(String)
+Int = T.type_alias {Integer}
+Str = T.type_alias {String}
 
 sig {params(x: Int).returns(Str)}
 def foo(x)
@@ -41,8 +41,8 @@ When creating a type alias from another type alias, you [must use `T.type_alias`
 again][1]:
 
 ```ruby
-A = T.type_alias(Integer)
-B = T.type_alias(A)
+A = T.type_alias {Integer}
+B = T.type_alias {A}
 ```
 
 For simple use cases, type aliases are nearly identical to just making a new
@@ -52,7 +52,7 @@ constant:
 # typed: true
 extend T::Sig
 
-A = T.type_alias(Integer)
+A = T.type_alias {Integer}
 sig {returns(A)}
 def foo; 3; end
 
@@ -67,7 +67,7 @@ However, when the type is more complex, you must use type aliases:
 # typed: true
 extend T::Sig
 
-A = T.type_alias(T.any(Integer, String))
+A = T.type_alias {T.any(Integer, String)}
 sig {returns(A)}
 def foo; 3; end
 
@@ -88,7 +88,7 @@ class A; end
 class B; end
 class C; end
 
-AB = T.type_alias(T.any(A, B))
+AB = T.type_alias {T.any(A, B)}
 sig {params(x: T.any(AB, C)).returns(Integer)}
 def invalid(x) # error: Returning value that does not conform to method result type
   case x

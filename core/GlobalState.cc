@@ -288,6 +288,10 @@ void GlobalState::initEmpty() {
     id.data(*this)->setIsModule(false);
     ENFORCE(id == Symbols::OpusEnum());
 
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum());
+    id.data(*this)->setIsModule(false);
+    ENFORCE(id == Symbols::T_Enum());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
@@ -1596,8 +1600,8 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto prevCount = this->symbolsUsed();
     auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
-    auto blkLoc = core::Loc::none(loc.file());
     if (prevCount != this->symbolsUsed()) {
+        auto blkLoc = core::Loc::none(loc.file());
         auto &blkSym = this->enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
         blkSym.flags.isBlock = true;
     }

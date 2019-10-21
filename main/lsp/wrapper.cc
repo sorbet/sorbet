@@ -2,48 +2,36 @@
 #include "core/errors/namer.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
-#include <iostream>
 #include <regex>
 
 using namespace std;
+
 namespace sorbet::realmain::lsp {
 
 const std::string LSPWrapper::EMPTY_STRING = "";
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMessage> message) {
-    const bool isInitialize = message->isNotification() && message->method() == LSPMethod::Initialize;
     auto result = lspLoop->processRequest(move(gs), move(message));
     gs = move(result.gs);
 
     // Should always run typechecking at least once for each request post-initialization.
-    ENFORCE(!initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
-    if (isInitialize) {
-        initialized = true;
-    }
+    ENFORCE(!config->isInitialized() || gs->lspTypecheckCount > 0,
+            "Fatal error: LSPLoop did not typecheck GlobalState.");
+
+    // Retrieve any notifications that would normally be sent asynchronously in a multithreaded scenario.
+    auto notifs = output->getOutput();
+    result.responses.insert(result.responses.end(), make_move_iterator(notifs.begin()),
+                            make_move_iterator(notifs.end()));
 
     return move(result.responses);
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<LSPMessage>> &messages) {
-    // Determine boolean before moving messages.
-    bool foundPostInitializationRequest = !messages.empty();
-    if (!initialized) {
-        foundPostInitializationRequest = false;
-        for (auto &message : messages) {
-            if (initialized) {
-                foundPostInitializationRequest = true;
-                break;
-            } else if (message->isNotification() && message->method() == LSPMethod::Initialized) {
-                initialized = true;
-            }
-        }
-    }
-
     auto result = lspLoop->processRequests(move(gs), move(messages));
     gs = move(result.gs);
 
     // Should always run typechecking at least once for each request post-initialization.
-    ENFORCE(!initialized || !foundPostInitializationRequest || gs->lspTypecheckCount > 0,
+    ENFORCE(!config->isInitialized() || gs->lspTypecheckCount > 0,
             "Fatal error: LSPLoop did not typecheck GlobalState.");
 
     return move(result.responses);
@@ -55,12 +43,12 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &json
 
 void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared_ptr<spdlog::logger> &logger,
                              bool disableFastPath) {
+    output = make_shared<LSPOutputToVector>();
     ENFORCE(gs->errorQueue->ignoreFlushes); // LSP needs this
     workers = WorkerPool::create(0, *logger);
-    // N.B.: stdin will not actually be used the way we are driving LSP.
+    config = make_shared<LSPConfiguration>(opts, output, *workers, logger, true, disableFastPath);
     // Configure LSPLoop to disable configatron.
-    lspLoop = make_unique<LSPLoop>(std::move(gs), LSPConfiguration(opts, logger, true, disableFastPath), logger,
-                                   *workers.get(), STDIN_FILENO, lspOstream);
+    lspLoop = make_unique<LSPLoop>(std::move(gs), config);
 }
 
 LSPWrapper::LSPWrapper(options::Options &&options, std::string_view rootPath, bool disableFastPath)
@@ -94,6 +82,10 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, options::Options &&opti
     : opts(std::move(options)) {
     instantiate(std::move(gs), logger, disableFastPath);
 }
+
+// Define so we can properly destruct unique_ptr<LSPOutputToVector> (which the default destructor can't delete since we
+// forward decl it in the header)
+LSPWrapper::~LSPWrapper() {}
 
 int LSPWrapper::getTypecheckCount() const {
     if (gs) {

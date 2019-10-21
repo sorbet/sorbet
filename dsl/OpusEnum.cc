@@ -33,7 +33,7 @@ bool isOpusEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     if (scope == nullptr) {
         return false;
     }
-    if (scope->cnst != core::Names::Constants::Opus()) {
+    if (scope->cnst != core::Names::Constants::Opus() && scope->cnst != core::Names::Constants::T()) {
         return false;
     }
     if (ast::isa_tree<ast::EmptyTree>(scope->scope.get())) {
@@ -56,6 +56,7 @@ ast::Send *asEnumsDo(ast::Expression *stat) {
     }
 }
 
+// TODO(jez) Change this error message after making everything T::Enum
 vector<unique_ptr<ast::Expression>> badConst(core::MutableContext ctx, core::Loc headerLoc, core::Loc line1Loc) {
     if (auto e = ctx.state.beginError(headerLoc, core::errors::DSL::OpusEnumConstNotEnumValue)) {
         e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "Opus::Enum");
@@ -79,12 +80,6 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
     auto *rhs = ast::cast_tree<ast::Send>(asgn->rhs.get());
     if (rhs == nullptr) {
         return badConst(ctx, stat->loc, klass->loc);
-    }
-
-    if (rhs->fun == core::Names::typeTemplate()) {
-        // This is the one kind of non-enum-value constant we allow for now.
-        // TODO(jez) Remove this when we remove `Elem = type_template` from Opus::Enum
-        return {};
     }
 
     if (rhs->fun != core::Names::new_() && rhs->fun != core::Names::let()) {
@@ -134,11 +129,6 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
     ast::ClassDef::ANCESTORS_store parent;
     parent.emplace_back(klass->name->deepCopy());
     ast::ClassDef::RHS_store classRhs;
-    classRhs.emplace_back(ast::MK::Assign(
-        stat->loc, ast::MK::UnresolvedConstant(stat->loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
-        ast::MK::Send1(
-            stat->loc, ast::MK::Self(stat->loc), core::Names::typeTemplate(),
-            ast::MK::Hash1(stat->loc, ast::MK::Symbol(stat->loc, core::Names::fixed()), klass->name->deepCopy()))));
     classRhs.emplace_back(ast::MK::Send1(stat->loc, ast::MK::Self(stat->loc), core::Names::include(),
                                          ast::MK::Constant(stat->loc, core::Symbols::Singleton())));
     classRhs.emplace_back(ast::MK::Send0(stat->loc, ast::MK::Self(stat->loc), core::Names::declareFinal()));

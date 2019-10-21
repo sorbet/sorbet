@@ -113,9 +113,9 @@ public:
 };
 
 UnorderedSet<string> knownExpectations = {
-    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "ast",       "ast-raw",       "dsl-tree",
-    "dsl-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree", "name-tree-raw", "resolve-tree",
-    "resolve-tree-raw", "flattened-tree",  "flattened-tree-raw",    "cfg",       "cfg-raw",       "cfg-json",
+    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "dsl-tree",
+    "dsl-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
+    "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",          "cfg-raw",          "cfg-json",
     "autogen",          "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
@@ -252,8 +252,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             desugared = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
         }
 
-        handler.addObserved("ast", [&]() { return desugared.tree->toString(*gs); });
-        handler.addObserved("ast-raw", [&]() { return desugared.tree->showRaw(*gs); });
+        handler.addObserved("desugar-tree", [&]() { return desugared.tree->toString(*gs); });
+        handler.addObserved("desugar-tree-raw", [&]() { return desugared.tree->showRaw(*gs); });
 
         ast::ParsedFile dslUnwound;
         ast::ParsedFile localNamed;
@@ -343,8 +343,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         resolvedTree = flatten::runOne(ctx, move(resolvedTree));
 
-        handler.addObserved("flattened-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.addObserved("flattened-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved("flatten-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("flatten-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
 
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
@@ -477,8 +477,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         core::MutableContext ctx(*gs, core::Symbols::root());
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
-        handler.addObserved("ast", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved("ast-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved("desguar-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
         // DSL pass
         file = testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(file.tree)), file.file});

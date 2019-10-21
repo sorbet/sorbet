@@ -53,6 +53,12 @@ public:
         return Send(loc, std::move(recv), fun, std::move(nargs));
     }
 
+    static std::unique_ptr<Expression> Send0Block(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
+                                                  std::unique_ptr<ast::Block> blk) {
+        Send::ARGS_store nargs;
+        return Send(loc, std::move(recv), fun, std::move(nargs), 0, std::move(blk));
+    }
+
     static std::unique_ptr<Expression> Send1(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
                                              std::unique_ptr<Expression> arg1) {
         Send::ARGS_store nargs;

@@ -47,7 +47,7 @@ class NotNeeded; ...; end
 class Paid;      ...; end
 class Failed;    ...; end
 
-ChargeAttemptResult = T.type_alias(T.any(NotNeeded, Paid, Failed))
+ChargeAttemptResult = T.type_alias {T.any(NotNeeded, Paid, Failed)}
 ```
 
 We might be annoyed that the definitions for `NotNeeded`, `Paid`, and `Failed`

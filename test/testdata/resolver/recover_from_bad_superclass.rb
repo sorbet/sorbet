@@ -13,7 +13,7 @@ class B < DynamicParent # error: Superclasses and mixins may only use class alia
 end
 T.let(B, Class)
 
-Alias = T.type_alias(Object)
+Alias = T.type_alias {Object}
 class C < Alias # error: Superclasses and mixins may not be type aliases
 end
 T.let(C, Class)

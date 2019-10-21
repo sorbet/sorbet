@@ -6,16 +6,13 @@
 #include "lsp.h"
 #include "main/lsp/LSPMessage.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
-#include <sstream>
 #include <string_view>
 namespace sorbet::realmain::lsp {
 
-class LSPWrapper {
-private:
-    static const std::string EMPTY_STRING;
+class LSPOutputToVector;
 
-    /** If true, then LSPLoop is initialized and is ready to receive requests. */
-    bool initialized = false;
+class LSPWrapper final {
+    static const std::string EMPTY_STRING;
 
     /** The LSP 'server', which runs in the same thread as LSPWrapper. */
     std::unique_ptr<LSPLoop> lspLoop;
@@ -29,9 +26,8 @@ private:
     std::unique_ptr<WorkerPool> workers;
     std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
     std::shared_ptr<spd::logger> typeErrorsConsole;
-
-    /** The output stream used by LSP. Completely unused, but for legacy reasons LSP requires it. */
-    std::stringstream lspOstream;
+    std::shared_ptr<LSPConfiguration> config;
+    std::shared_ptr<LSPOutputToVector> output;
 
     /** Contains shared constructor logic. */
     void instantiate(std::unique_ptr<core::GlobalState> gs, const std::shared_ptr<spdlog::logger> &logger,
@@ -53,6 +49,7 @@ public:
     LSPWrapper(options::Options &&options, std::string_view rootPath = EMPTY_STRING, bool disableFastPath = false);
     LSPWrapper(std::unique_ptr<core::GlobalState> gs, options::Options &&options,
                const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath);
+    ~LSPWrapper();
 
     /**
      * Send a message to LSP, and returns any responses.

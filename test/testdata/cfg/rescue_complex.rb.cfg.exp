@@ -1031,5 +1031,23 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_2" {
     "bb::TestRescue#parse_ruby_bug_12402_2_10" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
 }
 
+subgraph "cluster_::<Class:TestRescue>#<static-init>" {
+    label = "::<Class:TestRescue>#<static-init>";
+    color = blue;
+    "bb::<Class:TestRescue>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:TestRescue>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:TestRescue>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(TestRescue) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U TestRescue>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestRescue>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:TestRescue>#<static-init>_0" -> "bb::<Class:TestRescue>#<static-init>_1" [style="bold"];
+    "bb::<Class:TestRescue>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:TestRescue>#<static-init>_1" -> "bb::<Class:TestRescue>#<static-init>_1" [style="bold"];
+}
+
 }
 

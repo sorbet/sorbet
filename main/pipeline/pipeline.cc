@@ -154,11 +154,11 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
         ast = ast::desugar::node2Tree(ctx, move(parseTree));
     }
-    if (print.Desugared.enabled) {
-        print.Desugared.fmt("{}\n", ast->toStringWithTabs(gs, 0));
+    if (print.DesugarTree.enabled) {
+        print.DesugarTree.fmt("{}\n", ast->toStringWithTabs(gs, 0));
     }
-    if (print.DesugaredRaw.enabled) {
-        print.DesugaredRaw.fmt("{}\n", ast->showRaw(gs));
+    if (print.DesugarTreeRaw.enabled) {
+        print.DesugarTreeRaw.fmt("{}\n", ast->showRaw(gs));
     }
     return ast;
 }
@@ -683,11 +683,11 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
 
     resolved = flatten::runOne(ctx, move(resolved));
 
-    if (opts.print.FlattenedTree.enabled) {
-        opts.print.FlattenedTree.fmt("{}\n", resolved.tree->toString(ctx));
+    if (opts.print.FlattenTree.enabled || opts.print.AST.enabled) {
+        opts.print.FlattenTree.fmt("{}\n", resolved.tree->toString(ctx));
     }
-    if (opts.print.FlattenedTreeRaw.enabled) {
-        opts.print.FlattenedTreeRaw.fmt("{}\n", resolved.tree->showRaw(ctx));
+    if (opts.print.FlattenTreeRaw.enabled || opts.print.ASTRaw.enabled) {
+        opts.print.FlattenTreeRaw.fmt("{}\n", resolved.tree->showRaw(ctx));
     }
 
     if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::RESOLVER) {
@@ -712,6 +712,9 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         {
             core::ErrorRegion errs(ctx, f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->finishTypecheckFile(ctx.state, f);
+            }
         }
         if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("}}\n\n");

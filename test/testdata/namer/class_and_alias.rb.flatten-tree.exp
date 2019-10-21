@@ -1,0 +1,33 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::A = 91
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::B)
+          <emptyTree>
+        end
+        ::B = 91
+        <emptyTree>
+      end
+    end
+  end
+  class ::A<<C A>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  class ::B<B$1> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

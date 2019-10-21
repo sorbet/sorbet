@@ -252,7 +252,8 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
     }
     item->insertTextFormat = InsertTextFormat::PlainText;
 
-    item->documentation = make_unique<MarkupContent>(config.clientCompletionItemMarkupKind, rubyKeyword.documentation);
+    item->documentation =
+        make_unique<MarkupContent>(config.getClientConfig().clientCompletionItemMarkupKind, rubyKeyword.documentation);
 
     return item;
 }
@@ -287,7 +288,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
         auto replacementRange = Range::fromLoc(gs, replacementLoc);
 
         string replacementText;
-        if (config.clientCompletionItemSnippetSupport) {
+        if (config->getClientConfig().clientCompletionItemSnippetSupport) {
             item->insertTextFormat = InsertTextFormat::Snippet;
             replacementText = methodSnippet(gs, what);
         } else {
@@ -311,8 +312,8 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
             if (documentation->find("@deprecated") != documentation->npos) {
                 item->deprecated = true;
             }
-            item->documentation =
-                make_unique<MarkupContent>(config.clientCompletionItemMarkupKind, documentation.value());
+            item->documentation = make_unique<MarkupContent>(config->getClientConfig().clientCompletionItemMarkupKind,
+                                                             documentation.value());
         }
     } else if (what.data(gs)->isStaticField()) {
         item->kind = CompletionItemKind::Constant;
@@ -327,7 +328,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
                                          const core::Loc queryLoc, vector<unique_ptr<CompletionItem>> &items) const {
     if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
         auto pattern = c->symbol.data(gs)->name.data(gs)->shortName(gs);
-        logger->debug("Looking for constant similar to {}", pattern);
+        config->logger->debug("Looking for constant similar to {}", pattern);
         core::SymbolRef owner = c->symbol;
         do {
             owner = owner.data(gs)->owner;
@@ -348,7 +349,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
 LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs, const MessageId &id,
                                                 const CompletionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
-    if (!config.opts.lspAutocompleteEnabled) {
+    if (!config->opts.lspAutocompleteEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Autocomplete` LSP feature is experimental and disabled by default.");
@@ -358,9 +359,9 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
 
     auto uri = params.textDocument->uri;
-    auto fref = config.uri2FileRef(*gs, uri);
+    auto fref = config->uri2FileRef(*gs, uri);
     auto pos = *params.position;
-    auto queryLoc = config.lspPos2Loc(fref, pos, *gs);
+    auto queryLoc = config->lspPos2Loc(fref, pos, *gs);
     auto result = setupLSPQueryByLoc(move(gs), uri, pos, LSPMethod::TextDocumentCompletion);
     gs = move(result.gs);
 
@@ -377,7 +378,7 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
 
         if (auto sendResp = resp->isSend()) {
             auto prefix = sendResp->callerSideName.data(*gs)->shortName(*gs);
-            logger->debug("Looking for method similar to {}", prefix);
+            config->logger->debug("Looking for method similar to {}", prefix);
 
             // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
             auto similarKeywords = sendResp->isPrivateOk ? allSimilarKeywords(prefix) : vector<RubyKeyword>{};
@@ -436,7 +437,7 @@ LSPResult LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs
             // TODO(jez) Do something smarter here than "all matching keywords always come first"
             for (auto &similarKeyword : similarKeywords) {
                 items.push_back(
-                    getCompletionItemForKeyword(*gs, config, similarKeyword, queryLoc, prefix, items.size()));
+                    getCompletionItemForKeyword(*gs, *config, similarKeyword, queryLoc, prefix, items.size()));
             }
             for (auto &similarMethod : deduped) {
                 items.push_back(getCompletionItemForSymbol(*gs, similarMethod.method, similarMethod.receiverType,

@@ -4,7 +4,6 @@ extend T::Sig
 module Opus
   class Enum
     extend T::Sig
-    extend T::Generic
     sig {params(blk: T.proc.void).void}
     def self.enums(&blk); end
   end

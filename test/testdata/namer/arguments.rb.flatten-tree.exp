@@ -1,0 +1,32 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::A)
+        <emptyTree>
+      end
+    end
+  end
+  class ::A<<C A>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    def take_arguments<take_arguments>(a, b, c, d, e, f, g)
+      begin
+        [a, b, c, d, e, f, g]
+        h = 1
+        <self>.proc() do |a$1, b$1 = 1, *c$1, d$1:, e$1: = 2, *f$1:, &g$1; h$1|
+          [a$1, b$1, c$1, d$1, e$1, f$1, g$1, h$1]
+        end
+      end
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

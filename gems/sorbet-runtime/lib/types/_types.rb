@@ -80,11 +80,11 @@ module T
   ## END OF THE METHODS TO PASS TO `sig`.
 
 
-  # Constructs a type alias. Used to create a short name for a larger
-  # type. In Ruby this is just equivalent to assignment, but this is
-  # needed for support by the static checker. Example usage:
+  # Constructs a type alias. Used to create a short name for a larger type. In Ruby this returns a
+  # wrapper that contains a proc that is evaluated to get the underlying type. This syntax however
+  # is needed for support by the static checker. Example usage:
   #
-  #  NilableString = T.type_alias(T.nilable(String))
+  #  NilableString = T.type_alias {T.nilable(String)}
   #
   #  sig {params(arg: NilableString, default: String).returns(String)}
   #  def or_else(arg, default)
@@ -93,8 +93,14 @@ module T
   #
   # The name of the type alias is not preserved; Error messages will
   # be printed with reference to the underlying type.
-  def self.type_alias(type)
-    T::Utils.coerce(type)
+  #
+  # TODO Remove `type` parameter. This was left in to make life easier while migrating.
+  def self.type_alias(type=nil, &blk)
+    if blk
+      T::Private::Types::TypeAlias.new(blk)
+    else
+      T::Utils.coerce(type)
+    end
   end
 
   # References a type paramater which was previously defined with

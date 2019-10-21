@@ -11,15 +11,13 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, LSPConfiguration config,
-                 const shared_ptr<spd::logger> &logger, WorkerPool &workers, int inputFd, std::ostream &outputStream)
-    : config(config), preprocessor(move(initialGS), config, workers, logger), logger(logger), workers(workers),
-      inputFd(inputFd), outputStream(outputStream), lastMetricUpdateTime(chrono::steady_clock::now()) {}
+LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config)
+    : config(config), preprocessor(move(initialGS), config), lastMetricUpdateTime(chrono::steady_clock::now()) {}
 
 LSPLoop::QueryRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, string_view uri, const Position &pos,
                                               const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
-    Timer timeit(logger, "setupLSPQueryByLoc");
-    auto fref = config.uri2FileRef(*gs, uri);
+    Timer timeit(config->logger, "setupLSPQueryByLoc");
+    auto fref = config->uri2FileRef(*gs, uri);
     if (!fref.exists()) {
         auto error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidParams,
@@ -28,17 +26,17 @@ LSPLoop::QueryRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, 
     }
 
     if (errorIfFileIsUntyped && fref.data(*gs).strictLevel < core::StrictLevel::True) {
-        logger->info("Ignoring request on untyped file `{}`", uri);
+        config->logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
         return QueryRun{move(gs), {}};
     }
 
-    auto loc = config.lspPos2Loc(fref, pos, *gs);
+    auto loc = config->lspPos2Loc(fref, pos, *gs);
     return runQuery(move(gs), core::lsp::Query::createLocQuery(loc), {fref});
 }
 
 LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym) const {
-    Timer timeit(logger, "setupLSPQueryBySymbol");
+    Timer timeit(config->logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<core::FileRef> frefs;
     const core::NameHash symNameHash(*gs, sym.data(*gs)->name.data(*gs));
@@ -61,17 +59,6 @@ LSPLoop::QueryRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> g
     return runQuery(move(gs), core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
-bool LSPLoop::ensureInitialized(LSPMethod forMethod, const LSPMessage &msg) const {
-    // Note: During initialization, the preprocessor sends ShowOperation notifications to the main thread to forward to
-    // the client ("Indexing..."). So, whitelist those messages as OK to process prior to initialization.
-    if (config.initialized || forMethod == LSPMethod::Initialize || forMethod == LSPMethod::Initialized ||
-        forMethod == LSPMethod::Exit || forMethod == LSPMethod::Shutdown || forMethod == LSPMethod::SorbetError ||
-        forMethod == LSPMethod::SorbetShowOperation) {
-        return true;
-    }
-    return false;
-}
-
 LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
     ENFORCE(!run.canceled);
     const core::GlobalState &gs = *run.gs;
@@ -80,7 +67,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
     vector<unique_ptr<LSPMessage>> responses;
 
-    if (config.enableTypecheckInfo) {
+    if (config->getClientConfig().enableTypecheckInfo) {
         vector<string> pathsTypechecked;
         for (auto &f : filesTypechecked) {
             pathsTypechecked.emplace_back(f.data(gs).path());
@@ -134,7 +121,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                 if (file.data(gs).sourceType == core::File::Type::Payload) {
                     uri = string(file.data(gs).path());
                 } else {
-                    uri = config.fileRef2Uri(gs, file);
+                    uri = config->fileRef2Uri(gs, file);
                 }
             }
 
@@ -163,7 +150,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                                     } else {
                                         message = sectionHeader;
                                     }
-                                    auto location = config.loc2Location(gs, errorLine.loc);
+                                    auto location = config->loc2Location(gs, errorLine.loc);
                                     if (location == nullptr) {
                                         continue;
                                     }
@@ -174,7 +161,7 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
                             // Add link to error documentation.
                             relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
                                 make_unique<Location>(
-                                    absl::StrCat(config.opts.errorUrlBase, e->what.code),
+                                    absl::StrCat(config->opts.errorUrlBase, e->what.code),
                                     make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
                                 "Click for more information on this error."));
                             diagnostic->relatedInformation = move(relatedInformation);
@@ -195,12 +182,12 @@ LSPResult LSPLoop::pushDiagnostics(TypecheckRun run) {
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
 
 bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) const {
-    return !config.opts.statsdHost.empty() && (currentTime - lastMetricUpdateTime) > STATSD_INTERVAL;
+    return !config->opts.statsdHost.empty() && (currentTime - lastMetricUpdateTime) > STATSD_INTERVAL;
 }
 
 void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
     ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
-    const auto &opts = config.opts;
+    const auto &opts = config->opts;
     // Record rusage-related stats.
     StatsD::addRusageStats();
     auto counters = getAndClearThreadCounters();

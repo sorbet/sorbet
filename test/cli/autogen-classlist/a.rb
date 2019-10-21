@@ -17,7 +17,7 @@ module A
   def foo(x); 1; end
 
   # None of the following should appear in the output:
-  TypeAlias = T.type_alias(Integer)
+  TypeAlias = T.type_alias {Integer}
   ClassAlias = Integer
   Anon = Class.new
 end

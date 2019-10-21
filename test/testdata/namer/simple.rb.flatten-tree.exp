@@ -1,0 +1,134 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::NormalClass)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::ANamespace)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::ANamespace::ClassInNamespace)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Mixin)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::OtherMixin)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Child)
+          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <emptyTree>
+        end
+        <emptyTree>
+      end
+    end
+  end
+  class ::NormalClass<<C NormalClass>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def normal_method<normal_method>(<blk>)
+      <emptyTree>
+    end
+
+    def self.normal_static_method<normal_static_method>(<blk>)
+      <emptyTree>
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerClass)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerModule)
+          <emptyTree>
+        end
+        <emptyTree>
+      end
+    end
+  end
+  class ::NormalClass::InnerClass<<C InnerClass>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  module ::NormalClass::InnerModule<<C InnerModule>> < ()
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  module ::ANamespace<<C ANamespace>> < ()
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::ANamespace::ObviousChild)
+        <emptyTree>
+      end
+    end
+  end
+  class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  class ::ANamespace::ClassInNamespace<<C ClassInNamespace>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  class ::Parent<<C Parent>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  module ::Mixin<<C Mixin>> < ()
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  module ::OtherMixin<<C OtherMixin>> < ()
+    def self.<static-init><<static-init>>(<blk>)
+      <emptyTree>
+    end
+  end
+  class ::Child<<C Child>> < (::Parent, ::Mixin)
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        <self>.include(::Mixin) do ||
+          <emptyTree>
+        end
+        <self>.whatever().include(::OtherMixin)
+        ::Sorbet::Private::Static.keep_for_ide(::Mixin)
+        <emptyTree>
+      end
+    end
+  end
+  <emptyTree>
+end

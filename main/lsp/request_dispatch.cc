@@ -40,24 +40,12 @@ LSPResult LSPLoop::processRequests(unique_ptr<core::GlobalState> gs, vector<uniq
 }
 
 LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, const LSPMessage &msg) {
+    // Note: Before this function runs, LSPPreprocessor has already early-rejected any invalid messages sent prior to
+    // the initialization handshake. So, we know that `msg` is valid to process given the current state of the server.
+    auto &logger = config->logger;
     // TODO(jvilk): Make Timer accept multiple FlowIds so we can show merged messages correctly.
     Timer timeit(logger, "process_request");
     const LSPMethod method = msg.method();
-
-    if (!ensureInitialized(method, msg)) {
-        logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
-        vector<unique_ptr<LSPMessage>> responses;
-        if (!msg.isNotification()) {
-            auto id = msg.id().value_or(0);
-            auto response = make_unique<ResponseMessage>("2.0", id, msg.method());
-            response->error = make_unique<ResponseError>((int)LSPErrorCodes::ServerNotInitialized,
-                                                         "IDE did not initialize Sorbet correctly. No requests should "
-                                                         "be made before Initialize & Initialized have been completed");
-            responses.push_back(make_unique<LSPMessage>(move(response)));
-        }
-        return LSPResult{move(gs), move(responses)};
-    }
-
     if (msg.isNotification()) {
         Timer timeit(logger, "notification", {{"method", convertLSPMethodToString(method)}});
         // The preprocessor should canonicalize these messages into SorbetWorkspaceEdits, so they should never appear
@@ -90,7 +78,6 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             LSPResult result = pushDiagnostics(runSlowPath(move(gs), move(updates), /* isCancelable */ false));
             ENFORCE(!result.canceled);
             ENFORCE(result.gs);
-            config.initialized = true;
             return result;
         } else if (method == LSPMethod::Exit) {
             prodCategoryCounterInc("lsp.messages.processed", "exit");
@@ -103,10 +90,6 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             } else {
                 logger->error(errorInfo->message);
             }
-            return LSPResult{move(gs), {}};
-        } else if (method == LSPMethod::SorbetShowOperation) {
-            // Forward to client. These are sent from the preprocessor.
-            sendMessage(msg);
             return LSPResult{move(gs), {}};
         }
     } else if (msg.isRequest()) {
@@ -125,10 +108,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
         auto &rawParams = requestMessage.params;
         if (method == LSPMethod::Initialize) {
             prodCategoryCounterInc("lsp.messages.processed", "initialize");
-            const auto &params = get<unique_ptr<InitializeParams>>(rawParams);
-            config.configure(*params);
-
-            const auto &opts = config.opts;
+            const auto &opts = config->opts;
             auto serverCap = make_unique<ServerCapabilities>();
             serverCap->textDocumentSync = TextDocumentSyncKind::Full;
             serverCap->definitionProvider = true;
@@ -187,7 +167,7 @@ LSPResult LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs, cons
             return handleTextDocumentReferences(move(gs), id, *params);
         } else if (method == LSPMethod::SorbetReadFile) {
             auto &params = get<unique_ptr<TextDocumentIdentifier>>(rawParams);
-            auto fref = config.uri2FileRef(*gs, params->uri);
+            auto fref = config->uri2FileRef(*gs, params->uri);
             if (fref.exists()) {
                 response->result =
                     make_unique<TextDocumentItem>(params->uri, "ruby", 0, string(fref.data(*gs).source()));

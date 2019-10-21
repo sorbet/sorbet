@@ -29,8 +29,17 @@ static auto typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", null
 static auto nullOpts = makeOptions("");
 static auto workers = WorkerPool::create(0, *logger);
 
-LSPConfiguration makeConfig(const options::Options &opts = nullOpts) {
-    return LSPConfiguration(opts, logger, true, false);
+shared_ptr<LSPConfiguration> makeConfig(const options::Options &opts = nullOpts, bool enableShowOpNotifs = false,
+                                        bool initialize = true) {
+    auto config = make_shared<LSPConfiguration>(opts, make_shared<LSPOutputToVector>(), *workers, logger, true, false);
+    InitializeParams initParams("", "", make_unique<ClientCapabilities>());
+    initParams.initializationOptions = make_unique<SorbetInitializationOptions>();
+    initParams.initializationOptions.value()->supportsOperationNotifications = enableShowOpNotifs;
+    config->setClientConfig(make_shared<LSPClientConfiguration>(initParams));
+    if (initialize) {
+        config->markInitialized();
+    }
+    return config;
 }
 
 unique_ptr<core::GlobalState> makeGS(const options::Options &opts = nullOpts) {
@@ -43,12 +52,12 @@ unique_ptr<core::GlobalState> makeGS(const options::Options &opts = nullOpts) {
 
 static auto nullConfig = makeConfig();
 
-TimeTravelingGlobalState makeTTGS(const LSPConfiguration &config = nullConfig, u4 initialVersion = 0) {
-    return TimeTravelingGlobalState(config, logger, *workers, makeGS(config.opts), initialVersion);
+TimeTravelingGlobalState makeTTGS(const shared_ptr<LSPConfiguration> &config = nullConfig, u4 initialVersion = 0) {
+    return TimeTravelingGlobalState(config, makeGS(config->opts), initialVersion);
 }
 
-LSPPreprocessor makePreprocessor(const LSPConfiguration &config = nullConfig, u4 initialVersion = 0) {
-    return LSPPreprocessor(makeGS(config.opts), config, *workers, logger, initialVersion);
+LSPPreprocessor makePreprocessor(const shared_ptr<LSPConfiguration> &config = nullConfig, u4 initialVersion = 0) {
+    return LSPPreprocessor(makeGS(config->opts), config, initialVersion);
 }
 
 bool comesBeforeSymmetric(const TimeTravelingGlobalState &ttgs, u4 a, u4 b) {
@@ -234,7 +243,7 @@ TEST(LSPPreprocessor, IgnoresWatchmanUpdatesFromOpenFiles) { // NOLINT
     preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", 1, fileContents), mtx);
     preprocessor.preprocessAndEnqueue(state, makeWatchman({"foo.rb"}), mtx);
 
-    ASSERT_TRUE(state.pendingRequests.size() == 1);
+    ASSERT_EQ(1, state.pendingRequests.size());
 
     const auto updates = getUpdates(state, 0).value();
     // Version didn't change because it ignored the watchman update.
@@ -326,17 +335,30 @@ TEST(LSPPreprocessor, Initialized) { // NOLINT
     QueueState state;
     absl::Mutex mtx;
     auto options = makeOptions("");
-    auto config = makeConfig(options);
-    config.enableOperationNotifications = true;
+    auto config = makeConfig(options, true, false);
     auto preprocessor = makePreprocessor(config);
+    auto output = dynamic_pointer_cast<LSPOutputToVector>(config->output);
+
+    // Sending a request prior to initialization should cause an error.
+    EXPECT_FALSE(config->isInitialized());
+    preprocessor.preprocessAndEnqueue(state, makeHoverReq(1, "foo.rb", 1, 1), mtx);
+    auto errorMsgs = output->getOutput();
+    ASSERT_EQ(1, errorMsgs.size());
+    ASSERT_TRUE(errorMsgs[0]->isResponse());
+    ASSERT_TRUE(errorMsgs[0]->asResponse().error.has_value());
+
     auto msg = make_unique<LSPMessage>(
         make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>()));
     preprocessor.preprocessAndEnqueue(state, move(msg), mtx);
+    EXPECT_TRUE(config->isInitialized());
 
-    ASSERT_EQ(3, state.pendingRequests.size());
-    EXPECT_EQ(state.pendingRequests[0]->method(), LSPMethod::SorbetShowOperation);
-    EXPECT_EQ(state.pendingRequests[1]->method(), LSPMethod::SorbetShowOperation);
-    EXPECT_EQ(state.pendingRequests[2]->method(), LSPMethod::Initialized);
+    ASSERT_EQ(1, state.pendingRequests.size());
+    EXPECT_EQ(state.pendingRequests[0]->method(), LSPMethod::Initialized);
+
+    auto outputMsgs = output->getOutput();
+    ASSERT_EQ(2, outputMsgs.size());
+    EXPECT_EQ(outputMsgs[0]->method(), LSPMethod::SorbetShowOperation);
+    EXPECT_EQ(outputMsgs[1]->method(), LSPMethod::SorbetShowOperation);
 }
 
 // When a request in the queue is canceled, the preprocessor should merge any edits that happen immediately before and
@@ -512,6 +534,12 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathWhenSlowPathEditComesIn) { // NO
 
     // Processor thread: Try to typecheck. Should return false because it has been canceled.
     EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
+
+    // Ensure that new update has a new global state defined.
+    auto maybeUpdates = getUpdates(state, 0);
+    ASSERT_TRUE(maybeUpdates.has_value());
+    auto &updates = maybeUpdates.value();
+    EXPECT_TRUE(updates->updatedGS.has_value());
 }
 
 TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenFastPathEditComesIn) { // NOLINT
