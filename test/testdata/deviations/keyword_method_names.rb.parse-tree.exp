@@ -1,0 +1,381 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U method_named_alias>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_and>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_begin>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_break>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_case>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_class>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_defined?>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_do>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_else>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_elsif>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_ensure>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = Ensure {
+        body = NULL
+        ensure = NULL
+      }
+    }
+    DefMethod {
+      name = <U method_named_false>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_for>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_if>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_in>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_module>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_next>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_nil>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_not>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_or>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_redo>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_rescue>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_retry>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_return>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_self>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_super>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_then>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_true>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_unless>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_until>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_when>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_while>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_yield>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U method_named_end>
+      args = Args {
+        args = [
+          Arg {
+            name = <U x>
+          }
+        ]
+      }
+      body = NULL
+    }
+  ]
+}
