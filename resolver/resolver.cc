@@ -502,7 +502,7 @@ private:
         } else if (ancestor->isSelfReference()) {
             auto loc = ancestor->loc;
             auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
-            auto nw = make_unique<ast::UnresolvedConstantLit>(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
+            auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
             auto out = make_unique<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
             job.ancestor = out.get();
             ancestor = std::move(out);

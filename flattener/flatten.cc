@@ -51,7 +51,7 @@ unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::
     if (inits.size() == 1) {
         return std::move(inits.front());
     }
-    return make_unique<ast::InsSeq>(klass->declLoc, std::move(inits), make_unique<ast::EmptyTree>());
+    return ast::MK::InsSeq(klass->declLoc, std::move(inits), ast::MK::EmptyTree());
 }
 
 class FlattenWalk {
@@ -121,7 +121,7 @@ public:
         classDef->rhs = addMethods(ctx, std::move(classDef->rhs));
         classes[classStack.back()] = std::move(classDef);
         classStack.pop_back();
-        return make_unique<ast::EmptyTree>();
+        return ast::MK::EmptyTree();
     };
 
     unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
@@ -132,7 +132,7 @@ public:
 
         methods.methods[methods.stack.back()] = std::move(methodDef);
         methods.stack.pop_back();
-        return make_unique<ast::EmptyTree>();
+        return ast::MK::EmptyTree();
     };
 
     unique_ptr<ast::Expression> addClasses(core::Context ctx, unique_ptr<ast::Expression> tree) {
@@ -175,7 +175,7 @@ public:
         auto insSeq = ast::cast_tree<ast::InsSeq>(tree.get());
         if (insSeq == nullptr) {
             ast::InsSeq::STATS_store stats;
-            tree = make_unique<ast::InsSeq>(tree->loc, std::move(stats), std::move(tree));
+            tree = ast::MK::InsSeq(tree->loc, std::move(stats), std::move(tree));
             return addMethods(ctx, std::move(tree));
         }
 

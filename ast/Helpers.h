@@ -23,29 +23,19 @@ public:
         return Block(loc, std::move(body), std::move(args));
     }
 
+    static std::unique_ptr<ast::Block> Block1(core::Loc loc, std::unique_ptr<Expression> body,
+                                              std::unique_ptr<Expression> arg1) {
+        MethodDef::ARGS_store args;
+        args.emplace_back(move(arg1));
+        return Block(loc, std::move(body), std::move(args));
+    }
+
     static std::unique_ptr<Expression> Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
                                             Send::ARGS_store args, u4 flags = 0,
                                             std::unique_ptr<ast::Block> blk = nullptr) {
         auto send = std::make_unique<ast::Send>(loc, std::move(recv), fun, std::move(args), std::move(blk));
         send->flags = flags;
         return send;
-    }
-
-    static std::unique_ptr<Literal> Literal(core::Loc loc, const core::TypePtr &tpe) {
-        auto lit = std::make_unique<ast::Literal>(loc, tpe);
-        return lit;
-    }
-
-    static std::unique_ptr<Expression> Return(core::Loc loc, std::unique_ptr<Expression> expr) {
-        return std::make_unique<ast::Return>(loc, std::move(expr));
-    }
-
-    static std::unique_ptr<Expression> Next(core::Loc loc, std::unique_ptr<Expression> expr) {
-        return std::make_unique<ast::Next>(loc, std::move(expr));
-    }
-
-    static std::unique_ptr<Expression> Break(core::Loc loc, std::unique_ptr<Expression> expr) {
-        return std::make_unique<ast::Break>(loc, std::move(expr));
     }
 
     static std::unique_ptr<Expression> Send0(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun) {
@@ -84,13 +74,29 @@ public:
         return Send(loc, std::move(recv), fun, std::move(nargs));
     }
 
+    static std::unique_ptr<Literal> Literal(core::Loc loc, const core::TypePtr &tpe) {
+        return std::make_unique<ast::Literal>(loc, tpe);
+    }
+
+    static std::unique_ptr<Expression> Return(core::Loc loc, std::unique_ptr<Expression> expr) {
+        return std::make_unique<ast::Return>(loc, std::move(expr));
+    }
+
+    static std::unique_ptr<Expression> Next(core::Loc loc, std::unique_ptr<Expression> expr) {
+        return std::make_unique<ast::Next>(loc, std::move(expr));
+    }
+
+    static std::unique_ptr<Expression> Break(core::Loc loc, std::unique_ptr<Expression> expr) {
+        return std::make_unique<ast::Break>(loc, std::move(expr));
+    }
+
     static std::unique_ptr<Expression> Nil(core::Loc loc) {
         return std::make_unique<ast::Literal>(loc, core::Types::nilClass());
     }
 
     static std::unique_ptr<ConstantLit> Constant(core::Loc loc, core::SymbolRef symbol) {
         ENFORCE(symbol.exists());
-        return std::make_unique<ast::ConstantLit>(loc, symbol, nullptr);
+        return std::make_unique<ConstantLit>(loc, symbol, nullptr);
     }
 
     static std::unique_ptr<Reference> Local(core::Loc loc, core::NameRef name) {
@@ -108,6 +114,14 @@ public:
 
     static std::unique_ptr<Reference> RestArg(core::Loc loc, std::unique_ptr<Reference> inner) {
         return std::make_unique<ast::RestArg>(loc, std::move(inner));
+    }
+
+    static std::unique_ptr<Reference> BlockArg(core::Loc loc, std::unique_ptr<Reference> inner) {
+        return std::make_unique<ast::BlockArg>(loc, std::move(inner));
+    }
+
+    static std::unique_ptr<Reference> ShadowArg(core::Loc loc, std::unique_ptr<Reference> inner) {
+        return std::make_unique<ast::ShadowArg>(loc, std::move(inner));
     }
 
     static std::unique_ptr<Reference> Instance(core::Loc loc, core::NameRef name) {
@@ -201,7 +215,7 @@ public:
 
     static std::unique_ptr<UnresolvedConstantLit> UnresolvedConstant(core::Loc loc, std::unique_ptr<Expression> scope,
                                                                      core::NameRef name) {
-        return std::make_unique<ast::UnresolvedConstantLit>(loc, std::move(scope), name);
+        return std::make_unique<UnresolvedConstantLit>(loc, std::move(scope), name);
     }
 
     static std::unique_ptr<Expression> Int(core::Loc loc, int64_t val) {
@@ -223,9 +237,9 @@ public:
     static std::unique_ptr<MethodDef> Method(core::Loc loc, core::Loc declLoc, core::NameRef name,
                                              MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs,
                                              u4 flags = 0) {
-        if (args.empty() || (!isa_tree<ast::Local>(args.back().get()) && !isa_tree<BlockArg>(args.back().get()))) {
+        if (args.empty() || (!isa_tree<ast::Local>(args.back().get()) && !isa_tree<ast::BlockArg>(args.back().get()))) {
             auto blkLoc = core::Loc::none(declLoc.file());
-            args.emplace_back(std::make_unique<BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
+            args.emplace_back(std::make_unique<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
         }
         return std::make_unique<MethodDef>(loc, declLoc, core::Symbols::todo(), name, std::move(args), std::move(rhs),
                                            flags);
@@ -368,8 +382,9 @@ public:
             typecase(
                 arg, [&](class RestArg *rest) { arg = rest->expr.get(); },
                 [&](class KeywordArg *kw) { arg = kw->expr.get(); },
-                [&](class OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *blk) { arg = blk->expr.get(); },
-                [&](ShadowArg *shadow) { arg = shadow->expr.get(); },
+                [&](class OptionalArg *opt) { arg = opt->expr.get(); },
+                [&](class BlockArg *blk) { arg = blk->expr.get(); },
+                [&](class ShadowArg *shadow) { arg = shadow->expr.get(); },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
                 [&](UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
                 [&](Expression *expr) { ENFORCE(false, "Unexpected node type in argument position."); });
@@ -380,7 +395,7 @@ public:
 class BehaviorHelpers final {
 public:
     // Recursively check if all children of an expression are EmptyTree's or InsSeq's that only contain EmptyTree's
-    static bool checkEmptyDeep(const std::unique_ptr<ast::Expression> &);
+    static bool checkEmptyDeep(const std::unique_ptr<Expression> &);
 
     // Does a class/module definition define "behavior"? A class definition that only serves as a
     // namespace for inner-definitions is not considered to have behavior.
@@ -391,7 +406,7 @@ public:
     //     def m; end <-- Behavior in A::B
     //   end
     // end
-    static bool checkClassDefinesBehavior(const std::unique_ptr<ast::ClassDef> &);
+    static bool checkClassDefinesBehavior(const std::unique_ptr<ClassDef> &);
 };
 
 } // namespace sorbet::ast
