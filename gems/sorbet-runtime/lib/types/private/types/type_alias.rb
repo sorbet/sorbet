@@ -9,6 +9,10 @@ module T::Private::Types
       @callable = callable
     end
 
+    def aliased_type
+      @aliased_type ||= T::Utils.coerce(@callable.call)
+    end
+
     # @override Base
     def name
       aliased_type.name
@@ -17,10 +21,6 @@ module T::Private::Types
     # @override Base
     def valid?(obj)
       aliased_type.valid?(obj)
-    end
-
-    def aliased_type
-      @aliased_type ||= T::Utils.coerce(@callable.call)
     end
   end
 end

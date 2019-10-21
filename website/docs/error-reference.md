@@ -241,12 +241,12 @@ A class was defined as the subclass of a `type_alias`. It also occurs if a
 
 ```ruby
 # typed: true
-A = T.type_alias(Integer)
+A = T.type_alias {Integer}
 class B < A; end # error: Superclasses and mixins may not be type aliases
 
 module M; end
 
-AliasModule = T.type_alias(M)
+AliasModule = T.type_alias {M}
 class C
   include AliasModule # error: Superclasses and mixins may not be type aliases
 end
@@ -367,15 +367,15 @@ Once a type alias is created, all subsequent aliases must also be type aliases.
 Concretely, this is not allowed:
 
 ```ruby
-A = T.type_alias(Integer)
+A = T.type_alias {Integer}
 B = A # error: Reassigning a type alias is not allowed
 ```
 
 while this is:
 
 ```ruby
-A = T.type_alias(Integer)
-B = T.type_alias(A)
+A = T.type_alias {Integer}
+B = T.type_alias {A}
 ```
 
 (Why? This is due to design tradeoffs to enforce stronger internal invariants.

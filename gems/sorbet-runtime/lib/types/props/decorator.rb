@@ -10,11 +10,11 @@
 class T::Props::Decorator
   extend T::Sig
 
-  Rules = T.type_alias(T::Hash[Symbol, T.untyped])
-  DecoratedClass = T.type_alias(T.untyped) # T.class_of(T::Props), but that produces circular reference errors in some circumstances
-  DecoratedInstance = T.type_alias(T.untyped) # Would be T::Props, but that produces circular reference errors in some circumstances
-  PropType = T.type_alias(T.any(T::Types::Base, T::Props::CustomType))
-  PropTypeOrClass = T.type_alias(T.any(PropType, Module))
+  Rules = T.type_alias {T::Hash[Symbol, T.untyped]}
+  DecoratedClass = T.type_alias {T.untyped} # T.class_of(T::Props), but that produces circular reference errors in some circumstances
+  DecoratedInstance = T.type_alias {T.untyped} # Would be T::Props, but that produces circular reference errors in some circumstances
+  PropType = T.type_alias {T.any(T::Types::Base, T::Props::CustomType)}
+  PropTypeOrClass = T.type_alias {T.any(PropType, Module)}
 
   class NoRulesError < StandardError; end
 
@@ -330,6 +330,7 @@ class T::Props::Decorator
     .void
   end
   def prop_defined(name, cls, rules={})
+    cls = T::Utils.resolve_alias(cls)
     if rules[:optional] == true
       T::Configuration.hard_assert_handler(
         'Use of `optional: true` is deprecated, please use `T.nilable(...)` instead.',

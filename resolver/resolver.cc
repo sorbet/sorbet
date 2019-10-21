@@ -7,6 +7,7 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
+#include "resolver/CorrectTypeAlias.h"
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
@@ -364,7 +365,7 @@ private:
             if (auto e = ctx.state.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
                 e.setHeader("Reassigning a type alias is not allowed");
                 e.addErrorLine(rhsData->loc(), "Originally defined here");
-                e.replaceWith("Declare as type alias", it.rhs->loc, "T.type_alias({})", it.rhs->loc.source(ctx));
+                e.replaceWith("Declare as type alias", it.rhs->loc, "T.type_alias {{{}}}", it.rhs->loc.source(ctx));
             }
             it.lhs.data(ctx)->resultType = core::Types::untypedUntracked();
             return true;
@@ -567,20 +568,22 @@ public:
 
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
         if (send != nullptr && send->fun == core::Names::typeAlias()) {
-            if (send->args.size() == 0) {
+            if (!send->block) {
                 // if we have an invalid (i.e. nullary) call to TypeAlias, then we'll treat it as a type alias for
                 // Untyped and report an error here: otherwise, we end up in a state at the end of constant resolution
                 // that won't match our expected invariants (and in fact will fail our sanity checks)
-                auto temporaryUntyped = ast::MK::Untyped(asgn->lhs.get()->loc);
-                send->args.emplace_back(std::move(temporaryUntyped));
+                // auto temporaryUntyped = ast::MK::Untyped(asgn->lhs.get()->loc);
+                auto temporaryUntyped = ast::MK::Block0(asgn->lhs.get()->loc, ast::MK::Untyped(asgn->lhs.get()->loc));
+                send->block = std::move(temporaryUntyped);
 
                 // because we're synthesizing a fake "untyped" here and actually adding it to the AST, we won't report
                 // an arity mismatch for `T.untyped` in the future, so report the arity mismatch now
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeAlias)) {
-                    e.setHeader("No argument given to `{}`", "T.type_alias");
+                    e.setHeader("No block given to `{}`", "T.type_alias");
+                    CorrectTypeAlias::eagerToLazy(ctx, e, send);
                 }
             }
-            auto typeAliasItem = TypeAliasResolutionItem{id->symbol, send->args[0].get()};
+            auto typeAliasItem = TypeAliasResolutionItem{id->symbol, send->block->body.get()};
             this->todoTypeAliases_.emplace_back(std::move(typeAliasItem));
 
             // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
@@ -1046,13 +1049,14 @@ class ResolveTypeParamsWalk {
 
     static void resolveTypeAlias(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs) {
         // this is provided by ResolveConstantsWalk
-        ENFORCE(!rhs->args.empty());
+        ENFORCE(rhs->block);
+        ENFORCE(rhs->block->body);
 
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
         lhs.data(ctx)->resultType = TypeSyntax::getResultType(
-            ctx, *(rhs->args[0]), ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
+            ctx, *(rhs->block->body), ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
     }
 
     static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job) {

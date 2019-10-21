@@ -183,9 +183,9 @@ end
 # types in the Ruby stdlib are descendants of IO. These include
 # pipes and sockets. These descendants are intentionally omitted
 # here.
-::Sorbet::Private::Static::IOLike = T.type_alias(
+::Sorbet::Private::Static::IOLike = T.type_alias do
   T.any(
     IO,
     StringIO
   )
-)
+end
