@@ -156,10 +156,27 @@ class T::Props::Decorator
       else
         type_object.valid?(val)
       end
+
     if !valid
       raise T::Props::InvalidValueError.new("Can't set #{@class.name}.#{prop} to #{val.inspect} " \
         "(instance of #{val.class}) - need a #{type_object}")
     end
+  rescue T::Props::InvalidValueError => err
+    caller_loc = T.must(caller_locations(8, 1))[0]
+
+    pretty_message = "Parameter '#{prop}': #{err.message}\n" \
+      "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n"
+
+    T::Configuration.call_validation_error_handler(
+      nil,
+      message: err.message,
+      pretty_message: pretty_message,
+      kind: 'Parameter',
+      name: prop,
+      type: type,
+      value: val,
+      location: caller_loc,
+    )
   end
 
   # For performance, don't use named params here.
