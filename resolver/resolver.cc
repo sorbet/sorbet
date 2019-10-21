@@ -1462,8 +1462,7 @@ private:
             if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(argExp.get())) {
                 // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the
                 // body.
-                auto let = make_unique<ast::Cast>(optArgExp->loc, argType, optArgExp->default_->deepCopy(),
-                                                  core::Names::let());
+                auto let = ast::MK::Let(optArgExp->loc, argType, optArgExp->default_->deepCopy());
                 lets.emplace_back(std::move(let));
             }
         }
