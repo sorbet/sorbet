@@ -168,7 +168,7 @@ class T::Props::Decorator
       "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n"
 
     T::Configuration.call_validation_error_handler(
-      rules,
+      nil,
       message: err.message,
       pretty_message: pretty_message,
       kind: 'Parameter',
