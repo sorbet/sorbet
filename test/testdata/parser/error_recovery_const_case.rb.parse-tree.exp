@@ -7,8 +7,5 @@ DefMethod {
       }
     ]
   }
-  body = Const {
-    scope = NULL
-    name = <C <U Integer>>
-  }
+  body = NULL
 }
