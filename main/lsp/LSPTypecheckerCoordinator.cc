@@ -37,10 +37,10 @@ void LSPTypecheckerCoordinator::syncRun(function<void(LSPTypechecker &)> &&lambd
             }
             notification.Notify();
         });
+    notification.WaitForNotification();
     if (isMultithreaded) {
         counterConsume(move(typecheckerCounters));
     }
-    notification.WaitForNotification();
 }
 
 unique_ptr<core::GlobalState> LSPTypecheckerCoordinator::shutdown() {
