@@ -73,6 +73,7 @@ TEST(OptionsTest, DefaultConstructorMatchesReadOptions) {
     EXPECT_EQ(empty.lspWorkspaceSymbolsEnabled, opts.lspWorkspaceSymbolsEnabled);
     EXPECT_EQ(empty.lspDocumentSymbolEnabled, opts.lspDocumentSymbolEnabled);
     EXPECT_EQ(empty.lspSignatureHelpEnabled, opts.lspSignatureHelpEnabled);
+    EXPECT_EQ(empty.lspParseErrorsTakeFastPath, opts.lspParseErrorsTakeFastPath);
     EXPECT_EQ(empty.inlineInput, opts.inlineInput);
     EXPECT_EQ(empty.debugLogFile, opts.debugLogFile);
     EXPECT_EQ(empty.webTraceFile, opts.webTraceFile);

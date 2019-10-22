@@ -1107,7 +1107,8 @@ core::UsageHash getAllNames(const core::GlobalState &gs, unique_ptr<ast::Express
     return move(collector.acc);
 };
 
-core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
+core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger,
+                               bool lspParseErrorsTakeFastPath) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
     unique_ptr<core::GlobalState> lgs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
@@ -1125,11 +1126,13 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
 
     single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore));
     auto errs = lgs->errorQueue->drainAllErrors();
-    for (auto &e : errs) {
-        if (e->what == core::errors::Parser::ParserError) {
-            core::GlobalStateHash invalid;
-            invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
-            return {move(invalid), {}};
+    if (!lspParseErrorsTakeFastPath) {
+        for (auto &e : errs) {
+            if (e->what == core::errors::Parser::ParserError) {
+                core::GlobalStateHash invalid;
+                invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
+                return {move(invalid), {}};
+            }
         }
     }
     auto allNames = getAllNames(*lgs, single[0].tree);
