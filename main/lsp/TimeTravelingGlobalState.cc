@@ -141,9 +141,6 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector
         vector<pair<int, core::FileHash>> threadResult;
         int processedByThread = 0;
         int job;
-        options::Options emptyOpts;
-        emptyOpts.runLSP = true;
-
         {
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
