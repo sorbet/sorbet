@@ -80,107 +80,149 @@ InsSeq{
             }]
           rhs = InsSeq{
             stats = [
-              Array{
-                elems = [
-                  Local{
-                    localVariable = <U a>
+              If{
+                cond = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
                   }
-                  Local{
+                  fun = <U untyped>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                thenp = Assign{
+                  lhs = Local{
                     localVariable = <U b>
                   }
-                  Local{
-                    localVariable = <U c>
+                  rhs = Literal{ value = 1 }
+                }
+                elsep = EmptyTree
+              }
+              If{
+                cond = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
                   }
-                  Local{
-                    localVariable = <U d>
-                  }
-                  Local{
+                  fun = <U untyped>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                thenp = Assign{
+                  lhs = Local{
                     localVariable = <U e>
                   }
-                  Local{
-                    localVariable = <U f>
-                  }
-                  Local{
-                    localVariable = <U g>
-                  }
-                ]
-              }
-              Assign{
-                lhs = Local{
-                  localVariable = <U h>
+                  rhs = Literal{ value = 2 }
                 }
-                rhs = Literal{ value = 1 }
+                elsep = EmptyTree
               }
             ],
-            expr = Send{
-              recv = Local{
-                localVariable = <U <self>>
-              }
-              fun = <U proc>
-              block = Block {
-                args = [
-                  Local{
-                    localVariable = <U a>$1
-                  }
-                  OptionalArg{
-                    expr = Local{
-                      localVariable = <U b>$1
-                    }
-                    default_ = Literal{ value = 1 }
-                  }
-                  RestArg{ expr = Local{
-                    localVariable = <U c>$1
-                  } }
-                  KeywordArg{ expr = Local{
-                    localVariable = <U d>$1
-                  } }
-                  OptionalArg{
-                    expr = KeywordArg{ expr = Local{
-                      localVariable = <U e>$1
-                    } }
-                    default_ = Literal{ value = 2 }
-                  }
-                  RestArg{ expr = KeywordArg{ expr = Local{
-                    localVariable = <U f>$1
-                  } } }
-                  BlockArg{ expr = Local{
-                    localVariable = <U g>$1
-                  } }
-                  ShadowArg{ expr = Local{
-                    localVariable = <U h>$1
-                  } }
-                ]
-                body = Array{
+            expr = InsSeq{
+              stats = [
+                Array{
                   elems = [
                     Local{
-                      localVariable = <U a>$1
+                      localVariable = <U a>
                     }
                     Local{
-                      localVariable = <U b>$1
+                      localVariable = <U b>
                     }
                     Local{
-                      localVariable = <U c>$1
+                      localVariable = <U c>
                     }
                     Local{
-                      localVariable = <U d>$1
+                      localVariable = <U d>
                     }
                     Local{
-                      localVariable = <U e>$1
+                      localVariable = <U e>
                     }
                     Local{
-                      localVariable = <U f>$1
+                      localVariable = <U f>
                     }
                     Local{
-                      localVariable = <U g>$1
-                    }
-                    Local{
-                      localVariable = <U h>$1
+                      localVariable = <U g>
                     }
                   ]
                 }
+                Assign{
+                  lhs = Local{
+                    localVariable = <U h>
+                  }
+                  rhs = Literal{ value = 1 }
+                }
+              ],
+              expr = Send{
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U proc>
+                block = Block {
+                  args = [
+                    Local{
+                      localVariable = <U a>$1
+                    }
+                    OptionalArg{
+                      expr = Local{
+                        localVariable = <U b>$1
+                      }
+                      default_ = Literal{ value = 1 }
+                    }
+                    RestArg{ expr = Local{
+                      localVariable = <U c>$1
+                    } }
+                    KeywordArg{ expr = Local{
+                      localVariable = <U d>$1
+                    } }
+                    OptionalArg{
+                      expr = KeywordArg{ expr = Local{
+                        localVariable = <U e>$1
+                      } }
+                      default_ = Literal{ value = 2 }
+                    }
+                    RestArg{ expr = KeywordArg{ expr = Local{
+                      localVariable = <U f>$1
+                    } } }
+                    BlockArg{ expr = Local{
+                      localVariable = <U g>$1
+                    } }
+                    ShadowArg{ expr = Local{
+                      localVariable = <U h>$1
+                    } }
+                  ]
+                  body = Array{
+                    elems = [
+                      Local{
+                        localVariable = <U a>$1
+                      }
+                      Local{
+                        localVariable = <U b>$1
+                      }
+                      Local{
+                        localVariable = <U c>$1
+                      }
+                      Local{
+                        localVariable = <U d>$1
+                      }
+                      Local{
+                        localVariable = <U e>$1
+                      }
+                      Local{
+                        localVariable = <U f>$1
+                      }
+                      Local{
+                        localVariable = <U g>$1
+                      }
+                      Local{
+                        localVariable = <U h>$1
+                      }
+                    ]
+                  }
+                }
+                args = [
+                ]
               }
-              args = [
-              ]
             }
           }
         }
