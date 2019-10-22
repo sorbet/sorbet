@@ -6,54 +6,54 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<rescueStartTemp>$3: T.untyped = <unanalyzable>\l<rescueStartTemp>$3: T.untyped\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<rescueStartTemp>$3: T.untyped = <unanalyzable>\l<rescueStartTemp>$3: T.untyped\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
     "bb::Object#foo_0" -> "bb::Object#foo_4" [style="tapered"];
 
     "bb::Object#foo_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3](<returnMethodTemp>$2: NilClass)\le: T.untyped = <unanalyzable>\l<statTemp>$10: T.class_of(MyException) = alias <C MyException>\l<statTemp>$9: MyException = <statTemp>$10: T.class_of(MyException).new()\l<exceptionClassTemp>$8: T.class_of(MyException) = <statTemp>$9: MyException.class()\l<isaCheckTemp>$11: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$8: T.class_of(MyException))\l<isaCheckTemp>$11: T.untyped\l"
+        label = "block[id=3, rubyBlockId=0](<returnMethodTemp>$2: NilClass)\le: T.untyped = <unanalyzable>\l<statTemp>$10: T.class_of(MyException) = alias <C MyException>\l<statTemp>$9: MyException = <statTemp>$10: T.class_of(MyException).new()\l<exceptionClassTemp>$8: T.class_of(MyException) = <statTemp>$9: MyException.class()\l<isaCheckTemp>$11: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$8: T.class_of(MyException))\l<isaCheckTemp>$11: T.untyped\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_8" [style="bold"];
     "bb::Object#foo_3" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_4" [
-        label = "block[id=4](<self>: Object)\l<statTemp>$6: T.class_of(MyException) = alias <C MyException>\l<statTemp>$5: MyException = <statTemp>$6: T.class_of(MyException).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$5: MyException)\l<rescueEndTemp>$7 = <unanalyzable>\l<rescueEndTemp>$7\l"
+        label = "block[id=4, rubyBlockId=0](<self>: Object)\l<statTemp>$6: T.class_of(MyException) = alias <C MyException>\l<statTemp>$5: MyException = <statTemp>$6: T.class_of(MyException).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$5: MyException)\l<rescueEndTemp>$7 = <unanalyzable>\l<rescueEndTemp>$7\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];
     "bb::Object#foo_4" -> "bb::Object#foo_6" [style="tapered"];
 
     "bb::Object#foo_6" [
-        label = "block[id=6](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$12: NilClass)\l<gotoDeadTemp>$12\l"
+        label = "block[id=6, rubyBlockId=0](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$12: NilClass)\l<gotoDeadTemp>$12\l"
     ];
 
     "bb::Object#foo_6" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_6" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_8" [
-        label = "block[id=8]()\l<returnMethodTemp>$2: Integer(3) = 3\l<gotoDeadTemp>$12: NilClass\l"
+        label = "block[id=8, rubyBlockId=0]()\l<returnMethodTemp>$2: Integer(3) = 3\l<gotoDeadTemp>$12: NilClass\l"
     ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_8" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_9" [
-        label = "block[id=9](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<gotoDeadTemp>$12: TrueClass(true)\l"
+        label = "block[id=9, rubyBlockId=0](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<gotoDeadTemp>$12: TrueClass(true)\l"
     ];
 
     "bb::Object#foo_9" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_9" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_10" [
-        label = "block[id=10](<returnMethodTemp>$2: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(3)\l<unconditional>\l"
+        label = "block[id=10, rubyBlockId=0](<returnMethodTemp>$2: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(3)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_10" -> "bb::Object#foo_1" [style="bold"];
@@ -66,12 +66,12 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: T.class_of(MyException) = alias <C MyException>\l<statTemp>$5: Sorbet::Private::Static::Void = <statTemp>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$7: T.class_of(MyException))\l<statTemp>$9: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$10: T.class_of(Exception) = alias <C Exception>\l<statTemp>$8: Sorbet::Private::Static::Void = <statTemp>$9: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$10: T.class_of(Exception))\l<statTemp>$13: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$11: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$13: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: T.class_of(MyException) = alias <C MyException>\l<statTemp>$5: Sorbet::Private::Static::Void = <statTemp>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$7: T.class_of(MyException))\l<statTemp>$9: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$10: T.class_of(Exception) = alias <C Exception>\l<statTemp>$8: Sorbet::Private::Static::Void = <statTemp>$9: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$10: T.class_of(Exception))\l<statTemp>$13: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$11: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$13: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -84,12 +84,12 @@ subgraph "cluster_::<Class:MyException>#<static-init>" {
     "bb::<Class:MyException>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:MyException>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(MyException) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U MyException>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U MyException>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(MyException) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U MyException>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U MyException>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:MyException>#<static-init>_0" -> "bb::<Class:MyException>#<static-init>_1" [style="bold"];
     "bb::<Class:MyException>#<static-init>_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::<Class:MyException>#<static-init>_1" -> "bb::<Class:MyException>#<static-init>_1" [style="bold"];
