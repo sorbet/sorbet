@@ -126,6 +126,12 @@ CFGContext CFGContext::withTarget(core::LocalVariable target) {
     return ret;
 }
 
+CFGContext CFGContext::withRubyBlockId(int blockId) {
+    auto ret = CFGContext(*this);
+    ret.rubyBlockId = blockId;
+    return ret;
+}
+
 CFGContext CFGContext::withBlockBreakTarget(core::LocalVariable blockBreakTarget) {
     auto ret = CFGContext(*this);
     ret.blockBreakTarget = blockBreakTarget;
