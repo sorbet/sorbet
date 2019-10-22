@@ -1460,11 +1460,15 @@ private:
             auto argType = argSym.type;
 
             if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(argExp.get())) {
-                // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the
-                // body.
-                auto let =
-                    make_unique<ast::Cast>(optArgExp->loc, argType, move(optArgExp->default_), core::Names::let());
-                lets.emplace_back(std::move(let));
+                if (!argType) {
+                    optArgExp->default_ = nullptr;
+                } else {
+                    // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the
+                    // body.
+                    auto let =
+                        make_unique<ast::Cast>(optArgExp->loc, argType, move(optArgExp->default_), core::Names::let());
+                    lets.emplace_back(std::move(let));
+                }
             }
         }
 
@@ -1640,13 +1644,11 @@ private:
                         i++;
                     }
 
-                    if (!isOverloaded) {
-                        injectOptionalArgs(ctx, mdef);
-                    }
-
                     // OVERLOAD
                     lastSigs.clear();
                 }
+
+                injectOptionalArgs(ctx, mdef);
 
                 if (mdef->symbol.data(ctx)->isAbstract()) {
                     if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
