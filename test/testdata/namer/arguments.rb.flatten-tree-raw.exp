@@ -65,7 +65,6 @@ InsSeq{
               expr = Local{
                 localVariable = <U b>
               }
-              default_ = Literal{ value = 1 }
             }, Local{
               localVariable = <U c>
             }, Local{
@@ -74,7 +73,6 @@ InsSeq{
               expr = Local{
                 localVariable = <U e>
               }
-              default_ = Literal{ value = 2 }
             }, Local{
               localVariable = <U f>
             }, Local{
