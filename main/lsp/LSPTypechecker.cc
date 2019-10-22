@@ -150,7 +150,9 @@ TypecheckRun LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool isCancelab
     vector<ast::ParsedFile> indexedCopies;
     vector<core::FileRef> affectedFiles;
     auto finalGS = move(updates.updatedGS.value());
-    finalGS->errorQueue->changeOwnerToCurrentThread();
+    // Replace error queue with one that is owned by this thread.
+    finalGS->errorQueue = make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer);
+    finalGS->errorQueue->ignoreFlushes = true;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
     const bool committed = finalGS->tryCommitEpoch(updates.versionEnd, isCancelable, [&]() -> void {

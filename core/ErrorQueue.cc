@@ -153,8 +153,4 @@ vector<unique_ptr<core::ErrorQueueMessage>> ErrorQueue::drainAll() {
     return out;
 }
 
-void ErrorQueue::changeOwnerToCurrentThread() {
-    owner = this_thread::get_id();
-}
-
 } // namespace sorbet::core
