@@ -3,14 +3,16 @@ begin
   class <emptyTree><<C <root>>> < ()
     <emptyTree>
 
+    <emptyTree>
+
+    def a_method<a_method>(<blk>)
+      <emptyTree>
+    end
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       <self>.foobar() do ||
         <emptyTree>
       end
-    end
-
-    def a_method(<blk>)
-      <emptyTree>
     end
   end
   <emptyTree>

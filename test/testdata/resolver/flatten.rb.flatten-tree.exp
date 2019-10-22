@@ -1,13 +1,17 @@
 begin
+  <emptyTree>
   class <emptyTree><<C <root>>> < ()
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
+        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::A)
         <emptyTree>
       end
     end
   end
   class ::A<<C A>> < (::<todo sym>)
+    <emptyTree>
+
     <emptyTree>
 
     <emptyTree>
@@ -45,6 +49,10 @@ begin
     end
 
     def self.sfoos<sfoos>(<blk>)
+      <emptyTree>
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
       <emptyTree>
     end
   end
