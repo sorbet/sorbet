@@ -1447,12 +1447,6 @@ private:
     void injectOptionalArgs(core::MutableContext ctx, ast::MethodDef *mdef) {
         ast::InsSeq::STATS_store lets;
 
-        if (mdef->symbol.data(ctx)->isAbstract()) {
-            // If we checked that abstract methods don't have defined bodies earlier (currently done in infer)
-            // we could also use this technique to check default arguments of abstract methods.
-            return;
-        }
-
         int i = -1;
         for (auto &argSym : mdef->symbol.data(ctx)->arguments()) {
             i++;
@@ -1460,15 +1454,19 @@ private:
             auto argType = argSym.type;
 
             if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(argExp.get())) {
-                // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the
-                // body.
-                auto let = make_unique<ast::Cast>(optArgExp->loc, argType, optArgExp->default_->deepCopy(),
-                                                  core::Names::let());
-                lets.emplace_back(std::move(let));
+                if (!argType) {
+                    optArgExp->default_ = nullptr;
+                } else {
+                    // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the
+                    // body.
+                    auto let =
+                        make_unique<ast::Cast>(optArgExp->loc, argType, move(optArgExp->default_), core::Names::let());
+                    lets.emplace_back(std::move(let));
+                }
             }
         }
 
-        if (!lets.empty()) {
+        if (!lets.empty() && !mdef->symbol.data(ctx)->isAbstract()) {
             auto loc = mdef->rhs->loc;
             mdef->rhs = ast::MK::InsSeq(loc, std::move(lets), std::move(mdef->rhs));
         }
@@ -1640,13 +1638,11 @@ private:
                         i++;
                     }
 
-                    if (!isOverloaded) {
-                        injectOptionalArgs(ctx, mdef);
-                    }
-
                     // OVERLOAD
                     lastSigs.clear();
                 }
+
+                injectOptionalArgs(ctx, mdef);
 
                 if (mdef->symbol.data(ctx)->isAbstract()) {
                     if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
@@ -2081,6 +2077,11 @@ public:
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
         ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 original->toString(ctx));
+        for (auto &arg : original->args) {
+            if (auto optionalArg = ast::cast_tree<ast::OptionalArg>(arg.get())) {
+                ENFORCE(!optionalArg->default_);
+            }
+        }
         return original;
     }
     unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
