@@ -53,6 +53,7 @@ struct UsageHash {
 };
 
 struct FileHash {
+    u4 version;
     GlobalStateHash definitions;
     UsageHash usages;
 };

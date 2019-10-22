@@ -54,6 +54,8 @@ public:
 struct ParsedFile {
     std::unique_ptr<ast::Expression> tree;
     core::FileRef file;
+    // Used by LSP in assertions.
+    u4 fileVersion = 0;
 };
 
 /**

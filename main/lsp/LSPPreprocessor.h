@@ -64,7 +64,7 @@ class LSPPreprocessor final {
      * Example: (E = edit, D = delayable non-edit, M = arbitrary non-edit)
      * {[M1][E1][E2][D1][E3]} => {[M1][E1-3][D1]}
      */
-    void mergeFileChanges(absl::Mutex &mtx, QueueState &state);
+    void mergeFileChanges(absl::Mutex &stateMtx, QueueState &state);
 
     std::unique_ptr<LSPMessage> makeAndCommitWorkspaceEdit(std::unique_ptr<SorbetWorkspaceEditParams> params,
                                                            std::unique_ptr<LSPMessage> oldMsg);
@@ -85,7 +85,7 @@ class LSPPreprocessor final {
      */
     std::unique_ptr<core::GlobalState> getTypecheckingGS() const;
 
-    bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg) const;
+    bool ensureInitialized(LSPMethod forMethod, const LSPMessage &msg) const;
 
 public:
     LSPPreprocessor(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config,
@@ -101,7 +101,7 @@ public:
      * * Indexes all files on filesystem if client sends an `initialized` message. If configured, will also send
      * progress notifications.
      *
-     * It grabs the mutex before reading/writing `state`.
+     * It grabs stateMutex before reading/writing `state`.
      */
     void preprocessAndEnqueue(QueueState &state, std::unique_ptr<LSPMessage> msg, absl::Mutex &stateMtx);
 

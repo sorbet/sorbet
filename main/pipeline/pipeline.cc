@@ -926,11 +926,16 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 }
 
 ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                      const options::Options &opts, WorkerPool &workers) {
+                                      const options::Options &opts, WorkerPool &workers, bool preemptible) {
     vector<ast::ParsedFile> typecheck_result;
 
     {
         Timer timeit(gs->tracer(), "typecheck");
+
+        if (preemptible) {
+            // Before kicking off typechecking, check if we need to preempt.
+            gs->tryRunPreemptionFunction();
+        }
 
         shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile>> fileq;
         shared_ptr<BlockingBoundedQueue<typecheck_thread_result>> resultq;
@@ -952,32 +957,38 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob("typecheck", [ctx, &opts, fileq, resultq]() {
-                typecheck_thread_result threadResult;
-                ast::ParsedFile job;
-                int processedByThread = 0;
-
-                {
-                    for (auto result = fileq->try_pop(job); !result.done() && !ctx.state.wasTypecheckingCanceled();
-                         result = fileq->try_pop(job)) {
-                        if (result.gotItem()) {
-                            processedByThread++;
-                            core::FileRef file = job.file;
-                            try {
-                                threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
-                            } catch (SorbetException &) {
-                                Exception::failInFuzzer();
-                                ctx.state.tracer().error("Exception typing file: {} (backtrace is above)",
-                                                         file.data(ctx).path());
+            workers.multiplexJob(
+                "typecheck", [ctx, &opts, &typecheckMutex = gs->typecheckMutex, fileq, resultq, preemptible]() {
+                    typecheck_thread_result threadResult;
+                    ast::ParsedFile job;
+                    int processedByThread = 0;
+                    {
+                        for (auto result = fileq->try_pop(job); !result.done() && !ctx.state.wasTypecheckingCanceled();
+                             result = fileq->try_pop(job)) {
+                            unique_ptr<absl::ReaderMutexLock> lock;
+                            if (preemptible) {
+                                // Acquire a reader lock here. Parks the thread if the typechecker thread is trying to
+                                // grab the lock to preempt typechecking.
+                                lock = make_unique<absl::ReaderMutexLock>(typecheckMutex.get());
+                            }
+                            if (result.gotItem()) {
+                                processedByThread++;
+                                core::FileRef file = job.file;
+                                try {
+                                    threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
+                                } catch (SorbetException &) {
+                                    Exception::failInFuzzer();
+                                    ctx.state.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                             file.data(ctx).path());
+                                }
                             }
                         }
                     }
-                }
-                if (processedByThread > 0) {
-                    threadResult.counters = getAndClearThreadCounters();
-                    resultq->push(move(threadResult), processedByThread);
-                }
-            });
+                    if (processedByThread > 0) {
+                        threadResult.counters = getAndClearThreadCounters();
+                        resultq->push(move(threadResult), processedByThread);
+                    }
+                });
 
             typecheck_thread_result threadResult;
             {
@@ -993,6 +1004,10 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                     gs->errorQueue->flushErrors();
                     if (ctx.state.wasTypecheckingCanceled()) {
                         return ast::ParsedFilesOrCancelled();
+                    }
+
+                    if (preemptible) {
+                        gs->tryRunPreemptionFunction();
                     }
                 }
             }
@@ -1114,7 +1129,7 @@ core::UsageHash getAllNames(const core::GlobalState &gs, unique_ptr<ast::Express
     return move(collector.acc);
 };
 
-core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
+core::FileHash computeFileHash(u4 version, shared_ptr<core::File> forWhat, spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
     unique_ptr<core::GlobalState> lgs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
@@ -1136,7 +1151,7 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     auto workers = WorkerPool::create(0, lgs->tracer());
     pipeline::resolve(lgs, move(single), emptyOpts, *workers, true);
 
-    return {move(*lgs->hash()), move(allNames)};
+    return {version, move(*lgs->hash()), move(allNames)};
 }
 
 } // namespace sorbet::realmain::pipeline

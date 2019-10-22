@@ -105,7 +105,7 @@ void LSPLoop::maybeStartCommitSlowPathEdit(const LSPMessage &msg) const {
 }
 
 optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> input) {
-    // Naming convention: thread that executes this function is called typechecking thread
+    // Naming convention: thread that executes this function is called coordinator thread
 
     // Incoming queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
     // these messages (e.g., edits are not merged).

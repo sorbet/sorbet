@@ -105,8 +105,9 @@ vector<ast::ParsedFile> TimeTravelingGlobalState::indexFromFileSystem() {
     vector<ast::ParsedFile> indexed;
     {
         Timer timeit(config->logger, "reIndexFromFileSystem");
+        auto workers = WorkerPool::create(0, *config->logger);
         vector<core::FileRef> inputFiles = pipeline::reserveFiles(gs, config->opts.inputFileNames);
-        for (auto &t : pipeline::index(gs, inputFiles, config->opts, config->workers, kvstore)) {
+        for (auto &t : pipeline::index(gs, inputFiles, config->opts, *workers, kvstore)) {
             int id = t.file.id();
             if (id >= indexed.size()) {
                 indexed.resize(id + 1);
@@ -117,11 +118,20 @@ vector<ast::ParsedFile> TimeTravelingGlobalState::indexFromFileSystem() {
         // (Note: Flushing is disabled in LSP mode, so we have to drain.)
         gs->errorQueue->drainWithQueryResponses();
     }
-    globalStateHashes = computeStateHashes(gs->getFiles());
+
+    globalStateHashes = computeStateHashes(0, gs->getFiles());
+
+    // When inputFileNames is 0 (as in tests), indexed ends up being size 0 because we don't index payload files.
+    // Resize the indexed array accordingly.
+    if (indexed.size() < globalStateHashes.size()) {
+        indexed.resize(globalStateHashes.size());
+    }
+
     return indexed;
 }
 
-vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector<shared_ptr<core::File>> &files) const {
+vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(u4 version,
+                                                                    const vector<shared_ptr<core::File>> &files) const {
     Timer timeit(config->logger, "computeStateHashes");
     vector<core::FileHash> res(files.size());
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
@@ -137,7 +147,10 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector
 
     shared_ptr<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>> resultq =
         make_shared<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>>(files.size());
-    config->workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
+
+    // TODO: Use workers later?
+    auto workers = WorkerPool::create(0, *config->logger);
+    workers->multiplexJob("lspStateHash", [fileq, resultq, files, version, &logger]() {
         vector<pair<int, core::FileHash>> threadResult;
         int processedByThread = 0;
         int job;
@@ -150,7 +163,7 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector
                         threadResult.emplace_back(job, core::FileHash{});
                         continue;
                     }
-                    auto hash = pipeline::computeFileHash(files[job], logger);
+                    auto hash = pipeline::computeFileHash(version, files[job], logger);
                     threadResult.emplace_back(job, move(hash));
                 }
             }
@@ -190,7 +203,7 @@ void TimeTravelingGlobalState::pruneBefore(u4 version) {
 void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
     Timer timeit(config->logger, "ttgs_commit_edits");
     // Hash changes.
-    update.updatedFileHashes = computeStateHashes(update.updatedFiles);
+    update.updatedFileHashes = computeStateHashes(update.versionEnd, update.updatedFiles);
     update.canTakeFastPath = canTakeFastPath(latestVersion, update);
 
     TimeTravelUpdate newUpdate{update.versionEnd, update.hasNewFiles};
@@ -209,7 +222,7 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
             update.hasNewFiles = true;
             // Reversal of a new file is... an empty file...
             auto emptyFile = make_shared<core::File>(string(file->path()), "", core::File::Type::Normal);
-            newUpdate.undoUpdate.hashUpdates.push_back(pipeline::computeFileHash(emptyFile, *config->logger));
+            newUpdate.undoUpdate.hashUpdates.push_back(pipeline::computeFileHash(0, emptyFile, *config->logger));
             newUpdate.undoUpdate.fileUpdates.push_back(move(emptyFile));
         }
     }

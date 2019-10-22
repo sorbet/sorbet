@@ -17,7 +17,6 @@ bool sanityCheckUpdate(const core::GlobalState &gs, const LSPFileUpdates &update
     ENFORCE(updates.updatedFiles.size() == updates.updatedFileIndexes.size());
     for (int i = 0; i < updates.updatedFiles.size(); i++) {
         const auto &f = updates.updatedFiles[i];
-        // const auto &h = updates.updatedFileHashes[i];
         const auto &ast = updates.updatedFileIndexes[i];
         ENFORCE(f->path() == ast.file.data(gs).path());
         ENFORCE(!encounteredFiles.contains(f->path()));
@@ -90,8 +89,8 @@ LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, const 
     : ttgs(TimeTravelingGlobalState(config, move(initialGS), initialVersion)), config(config),
       owner(this_thread::get_id()), nextVersion(initialVersion + 1) {}
 
-void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
-    mtx.AssertHeld();
+void LSPPreprocessor::mergeFileChanges(absl::Mutex &stateMtx, QueueState &state) {
+    stateMtx.AssertHeld();
     auto &logger = config->logger;
     // mergeFileChanges is the most expensive operation this thread performs while holding the mutex lock.
     Timer timeit(logger, "lsp.mergeFileChanges");
@@ -164,6 +163,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
                                 params->updates.versionStart, params->updates.versionEnd);
                             combinedUpdates.updatedGS = getTypecheckingGS();
                         }
+                        combinedUpdates.canceledSlowPath = true;
                         params->updates = move(combinedUpdates);
                     }
                     break;
@@ -278,6 +278,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
                 ShowOperation op(*config, "Indexing", "Indexing files...");
                 params.updates.updatedFileIndexes = ttgs.indexFromFileSystem();
                 params.updates.updatedFileHashes = ttgs.getGlobalStateHashes();
+                ENFORCE(params.updates.updatedFileIndexes.size() == params.updates.updatedFileHashes.size());
             }
             config->markInitialized();
             params.updates.canTakeFastPath = false;
@@ -457,6 +458,7 @@ void LSPPreprocessor::mergeEdits(LSPFileUpdates &to, LSPFileUpdates &from) {
     to.updatedFileHashes = move(from.updatedFileHashes);
     to.hasNewFiles = to.hasNewFiles || from.hasNewFiles;
     to.canTakeFastPath = ttgs.canTakeFastPath(to.versionStart - 1, to);
+    to.canceledSlowPath = to.canceledSlowPath || from.canceledSlowPath;
     // `to` now includes the contents of `from`.
     to.versionEnd = from.versionEnd;
     // No need to update versionStart, as to comes before from.

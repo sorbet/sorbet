@@ -22,6 +22,9 @@ struct LSPFileUpdates {
     u4 versionStart = 0;
     std::vector<std::shared_ptr<core::File>> updatedFiles;
     bool canTakeFastPath = false;
+    // Indicates that this update contains edits that canceled a previously-running slow path. Used to indicate that
+    // LSPTypechecker should roll back changes from that slow path.
+    bool canceledSlowPath = false;
     // Indicates that this update contains a new file. Is a hack for TimeTravelingGlobalState.
     bool hasNewFiles = false;
     std::vector<core::FileHash> updatedFileHashes;
@@ -30,6 +33,9 @@ struct LSPFileUpdates {
     std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
     // (Optional) Updated global state object to use to typecheck this update.
     std::optional<std::unique_ptr<core::GlobalState>> updatedGS;
+    // (Tests only) Indicates that the slow path expects to be preempted this many times. The slow path will wait until
+    // either this happens, or a timeout occurs.
+    int expectedPreemptions = 0;
 };
 
 class DeserializationError : public std::runtime_error {

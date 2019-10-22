@@ -62,7 +62,8 @@ private:
     // Internal function: Applies given update (or undoes it) and appropriately updates `activeVersion`.
     std::vector<core::FileRef> applyUpdate(TimeTravelUpdate &update, bool undo);
 
-    std::vector<core::FileHash> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
+    std::vector<core::FileHash> computeStateHashes(u4 version,
+                                                   const std::vector<std::shared_ptr<core::File>> &files) const;
 
 public:
     TimeTravelingGlobalState(const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<core::GlobalState> gs,

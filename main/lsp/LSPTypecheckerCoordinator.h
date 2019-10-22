@@ -4,6 +4,7 @@
 #include "main/lsp/LSPTypechecker.h"
 
 namespace sorbet::realmain::lsp {
+
 /**
  * Handles typechecking and other queries. Can either operate in single-threaded mode (in which lambdas passed to
  * syncRun/asyncRun run-to-completion immediately) or dedicated-thread mode (in which lambdas are enqueued to execute on
@@ -23,20 +24,22 @@ class LSPTypecheckerCoordinator final {
     /**
      * Runs the provided function on the typechecker thread.
      */
-    void asyncRunInternal(std::function<void()> &&lambda);
+    void asyncRunInternal(std::function<void()> &&lambda, bool canPreemptSlowPath);
 
 public:
     LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config);
 
     /**
-     * Runs lambda with exclusive access to GlobalState. lambda runs on typechecker thread.
+     * Runs lambda with exclusive access to GlobalState. lambda runs on typechecker thread. These cannot preeempt the
+     * slow path because we do not support having a queue of preempting lambdas.
+     * If `waitUntilTaskStarts` is `true`, then this method will block until lambda starts running.
      */
-    void asyncRun(std::function<void(LSPTypechecker &)> &&lambda);
+    void asyncRun(std::function<void(LSPTypechecker &)> &&lambda, bool waitUntilTaskStarts);
 
     /**
-     * Like asyncRun, but blocks until `lambda` completes.
+     * Like asyncRun, but blocks until `lambda` completes. These can preeempt a currently running slow path.
      */
-    void syncRun(std::function<void(LSPTypechecker &)> &&lambda);
+    void syncRun(std::function<void(LSPTypechecker &)> &&lambda, bool canPreemptSlowPath);
 
     /**
      * Safely shuts down the typechecker and returns the final GlobalState object. Blocks until typechecker completes
