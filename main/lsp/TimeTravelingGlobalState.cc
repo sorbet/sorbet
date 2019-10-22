@@ -137,7 +137,7 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector
 
     shared_ptr<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>> resultq =
         make_shared<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>>(files.size());
-    auto lspParseErrorsTakeFastPath = config.opts.lspParseErrorsTakeFastPath;
+    auto lspParseErrorsTakeFastPath = config->opts.lspParseErrorsTakeFastPath;
     config->workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger, lspParseErrorsTakeFastPath]() {
         vector<pair<int, core::FileHash>> threadResult;
         int processedByThread = 0;
@@ -211,7 +211,7 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
             // Reversal of a new file is... an empty file...
             auto emptyFile = make_shared<core::File>(string(file->path()), "", core::File::Type::Normal);
             newUpdate.undoUpdate.hashUpdates.push_back(
-                pipeline::computeFileHash(emptyFile, *config->logger, config.opts.lspParseErrorsTakeFastPath));
+                pipeline::computeFileHash(emptyFile, *config->logger, config->opts.lspParseErrorsTakeFastPath));
             newUpdate.undoUpdate.fileUpdates.push_back(move(emptyFile));
         }
     }
