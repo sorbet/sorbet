@@ -1455,7 +1455,9 @@ private:
 
             if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(argExp.get())) {
                 if (!argType) {
-                    optArgExp->default_ = nullptr;
+                    auto assign =
+                        ast::MK::Assign(optArgExp->loc, optArgExp->expr->deepCopy(), move(optArgExp->default_));
+                    lets.emplace_back(std::move(assign));
                 } else {
                     // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the
                     // body.
