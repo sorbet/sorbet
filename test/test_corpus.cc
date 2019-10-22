@@ -829,7 +829,7 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
         get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
 
     // Simple string comparison, just like other *.exp files.
-    EXPECT_EQ(documentSymbolsToString(receivedSymbolResponse), documentSymbolsToString(expectedSymbolResponse))
+    EXPECT_EQ(documentSymbolsToString(expectedSymbolResponse), documentSymbolsToString(receivedSymbolResponse))
         << "Mismatch on: " << expectedSymbolsPath;
 }
 
