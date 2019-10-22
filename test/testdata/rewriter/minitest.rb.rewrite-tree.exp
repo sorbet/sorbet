@@ -1,89 +1,53 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
-    def outside_method<<C <todo sym>>>(&<blk>)
+    <emptyTree>
+
+    begin
+      <emptyTree>
       <emptyTree>
     end
 
     begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def <test_works outside><<C <todo sym>>>(&<blk>)
-        <self>.outside_method()
-      end
-    end
-
-    begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def <test_allows constants inside of IT><<C <todo sym>>>(&<blk>)
-        <emptyTree>::<C CONST> = 10
-      end
+      <emptyTree>
+      <emptyTree>
     end
 
     class <emptyTree>::<C <class_some inner tests>><<C <todo sym>>> < (<self>)
       begin
-        def inside_method<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+        begin
+          <emptyTree>
           <emptyTree>
         end
+      end
+
+      def inside_method<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+
+      def <test_works inside><<C <todo sym>>>(&<blk>)
         begin
-          ::T::Sig::WithoutRuntime.sig() do ||
-            <self>.params({}).void()
-          end
-          def <test_works inside><<C <todo sym>>>(&<blk>)
-            begin
-              <self>.outside_method()
-              <self>.inside_method()
-            end
-          end
+          <self>.outside_method()
+          <self>.inside_method()
         end
       end
     end
 
-    def instance_helper<<C <todo sym>>>(&<blk>)
+    begin
+      <emptyTree>
       <emptyTree>
     end
 
     begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def initialize<<C <todo sym>>>(&<blk>)
-        begin
-          @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
-          <self>.instance_helper()
-        end
-      end
-    end
-
-    begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def <after><<C <todo sym>>>(&<blk>)
-        begin
-          @foo = nil
-          <self>.instance_helper()
-        end
-      end
-    end
-
-    begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def <test_can read foo><<C <todo sym>>>(&<blk>)
-        begin
-          <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
-          <self>.instance_helper()
-        end
-      end
-    end
-
-    def self.random_method<<C <todo sym>>>(&<blk>)
+      <emptyTree>
       <emptyTree>
     end
+
+    <emptyTree>
 
     <self>.random_method() do ||
       @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
@@ -92,34 +56,86 @@ class <emptyTree><<C <root>>> < ()
     class <emptyTree>::<C <class_Object>><<C <todo sym>>> < (<self>)
       begin
         begin
-          ::T::Sig::WithoutRuntime.sig() do ||
-            <self>.params({}).void()
-          end
-          def <test_Object><<C <todo sym>>>(&<blk>)
-            <emptyTree>
-          end
+          <emptyTree>
+          <emptyTree>
         end
         begin
-          ::T::Sig::WithoutRuntime.sig() do ||
-            <self>.params({}).void()
-          end
-          def <test_Object><<C <todo sym>>>(&<blk>)
-            <emptyTree>
-          end
+          <emptyTree>
+          <emptyTree>
         end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+
+      def <test_Object><<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+
+      def <test_Object><<C <todo sym>>>(&<blk>)
+        <emptyTree>
       end
     end
 
-    def self.it<<C <todo sym>>>(*args, &<blk>)
-      <emptyTree>
-    end
+    <emptyTree>
 
     <self>.it("ignores methods without a block")
 
     <self>.junk().it("ignores non-self calls") do ||
       <self>.junk()
     end
+
+    def outside_method<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <test_works outside><<C <todo sym>>>(&<blk>)
+      <self>.outside_method()
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <test_allows constants inside of IT><<C <todo sym>>>(&<blk>)
+      <emptyTree>::<C CONST> = 10
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def initialize<<C <todo sym>>>(&<blk>)
+      @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <test_can read foo><<C <todo sym>>>(&<blk>)
+      <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
+    end
+
+    def self.random_method<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    def self.it<<C <todo sym>>>(*args, &<blk>)
+      <emptyTree>
+    end
   end
+
+  <emptyTree>
 
   def junk<<C <todo sym>>>(&<blk>)
     <emptyTree>

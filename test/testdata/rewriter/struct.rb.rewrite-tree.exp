@@ -15,6 +15,20 @@ class <emptyTree><<C <root>>> < ()
 
   class <emptyTree>::<C RealStruct><<C <todo sym>>> < (::<todo sym>)
     class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
+
+      <emptyTree>
+
+      <emptyTree>
+
       def foo<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
@@ -30,8 +44,6 @@ class <emptyTree><<C <root>>> < ()
       def bar=<<C <todo sym>>>(arg0, &<blk>)
         arg0
       end
-
-      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
@@ -43,6 +55,20 @@ class <emptyTree><<C <root>>> < ()
     end
 
     class <emptyTree>::<C KeywordInit><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
+
+      <emptyTree>
+
+      <emptyTree>
+
       def foo<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
@@ -58,8 +84,6 @@ class <emptyTree><<C <root>>> < ()
       def bar=<<C <todo sym>>>(arg0, &<blk>)
         arg0
       end
-
-      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
@@ -74,6 +98,18 @@ class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C RealStructDesugar><<C <todo sym>>> < (::<todo sym>)
     class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C Struct>)
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>
 
       def foo<<C <todo sym>>>(&<blk>)
         <emptyTree>
@@ -119,6 +155,16 @@ class <emptyTree><<C <root>>> < ()
 
   class <emptyTree>::<C TwoStructs><<C <todo sym>>> < (::<todo sym>)
     class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
+
+      <emptyTree>
+
+      <emptyTree>
+
       def foo<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
@@ -126,8 +172,6 @@ class <emptyTree><<C <root>>> < ()
       def foo=<<C <todo sym>>>(arg0, &<blk>)
         arg0
       end
-
-      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"foo" => ::BasicObject}).void()
@@ -139,6 +183,16 @@ class <emptyTree><<C <root>>> < ()
     end
 
     class <emptyTree>::<C B><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
+
+      <emptyTree>
+
+      <emptyTree>
+
       def foo<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
@@ -146,8 +200,6 @@ class <emptyTree><<C <root>>> < ()
       def foo=<<C <todo sym>>>(arg0, &<blk>)
         arg0
       end
-
-      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"foo" => ::BasicObject}).void()
@@ -165,6 +217,20 @@ class <emptyTree><<C <root>>> < ()
     end
 
     class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>
+
+      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
+
+      <emptyTree>
+
+      <emptyTree>
+
       def foo<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
@@ -180,8 +246,6 @@ class <emptyTree><<C <root>>> < ()
       def bar=<<C <todo sym>>>(arg0, &<blk>)
         arg0
       end
-
-      <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
@@ -201,13 +265,9 @@ class <emptyTree><<C <root>>> < ()
     end
 
     class <emptyTree>::<C MyStruct><<C <todo sym>>> < (::<root>::<C Struct>)
-      def x<<C <todo sym>>>(&<blk>)
-        <emptyTree>
-      end
+      <emptyTree>
 
-      def x=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
-      end
+      <emptyTree>
 
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
@@ -216,6 +276,18 @@ class <emptyTree><<C <root>>> < ()
       <self>.new().x()
 
       <self>.new().foo()
+
+      <emptyTree>
+
+      <emptyTree>
+
+      def x<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      def x=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
+      end
 
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"x" => ::BasicObject}).void()
@@ -227,13 +299,9 @@ class <emptyTree><<C <root>>> < ()
     end
 
     class <emptyTree>::<C MyKeywordInitStruct><<C <todo sym>>> < (::<root>::<C Struct>)
-      def x<<C <todo sym>>>(&<blk>)
-        <emptyTree>
-      end
+      <emptyTree>
 
-      def x=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
-      end
+      <emptyTree>
 
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
@@ -246,6 +314,18 @@ class <emptyTree><<C <root>>> < ()
       <self>.new(1, 2)
 
       <self>.new({:"giberish" => 1})
+
+      <emptyTree>
+
+      <emptyTree>
+
+      def x<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      def x=<<C <todo sym>>>(arg0, &<blk>)
+        arg0
+      end
 
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"x" => ::BasicObject}).void()

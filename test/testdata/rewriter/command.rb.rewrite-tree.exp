@@ -4,6 +4,14 @@ class <emptyTree><<C <root>>> < ()
   end
 
   class <emptyTree>::<C MyCommand><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Command>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     <self>.sig() do ||
       <self>.params({:"x" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C String>)
     end
@@ -24,6 +32,14 @@ class <emptyTree><<C <root>>> < ()
   <emptyTree>::<C T>.assert_type!(<emptyTree>::<C MyCommand>.call(7), <emptyTree>::<C String>)
 
   class <emptyTree>::<C OtherCommand><<C <todo sym>>> < (::<root>::<C Opus>::<C Command>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     <self>.sig() do ||
       <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C Integer>)
     end
@@ -45,6 +61,10 @@ class <emptyTree><<C <root>>> < ()
 
   class <emptyTree>::<C NotACommand><<C <todo sym>>> < (<emptyTree>::<C Llamas>::<C Opus>::<C Command>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <emptyTree>
+
+    <emptyTree>
 
     <self>.sig() do ||
       <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C Integer>)

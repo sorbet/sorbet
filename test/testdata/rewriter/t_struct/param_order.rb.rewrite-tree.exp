@@ -1,5 +1,25 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C ParamOrder><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"bar" => <emptyTree>::<C Integer>, :"foo" => <emptyTree>::<C Integer>}).void()
     end

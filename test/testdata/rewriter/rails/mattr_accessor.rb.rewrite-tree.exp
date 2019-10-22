@@ -2,6 +2,102 @@ class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C GoodUsages><<C <todo sym>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <self>.both()
+
+    <self>.both=(1)
+
+    <self>.no_instance()
+
+    <self>.no_instance=(1)
+
+    <self>.no_instance_reader()
+
+    <self>.no_instance_reader=(1)
+
+    <self>.no_instance_writer()
+
+    <self>.no_instance_writer=(1)
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(::T.untyped())
     end
@@ -170,22 +266,6 @@ class <emptyTree><<C <root>>> < ()
         <self>.no_instance_writer=(1)
       end
     end
-
-    <self>.both()
-
-    <self>.both=(1)
-
-    <self>.no_instance()
-
-    <self>.no_instance=(1)
-
-    <self>.no_instance_reader()
-
-    <self>.no_instance_reader=(1)
-
-    <self>.no_instance_writer()
-
-    <self>.no_instance_writer=(1)
   end
 
   class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)

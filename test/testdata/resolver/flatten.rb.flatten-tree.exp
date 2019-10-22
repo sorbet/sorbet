@@ -1,9 +1,7 @@
 begin
-  <emptyTree>
   class <emptyTree><<C <root>>> < ()
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::A)
         <emptyTree>
       end
@@ -16,37 +14,37 @@ begin
 
     <emptyTree>
 
-    def foo(<blk>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def foo<foo>(<blk>)
       begin
-        <emptyTree>
         <emptyTree>
       end
     end
 
-    def food(<blk>)
+    def food<food>(<blk>)
       <emptyTree>
     end
 
-    def self.foos(<blk>)
+    def self.foos<foos>(<blk>)
       <emptyTree>
     end
 
-    def self.sfoo(<blk>)
+    def self.sfoo<sfoo>(<blk>)
       begin
-        <emptyTree>
         <emptyTree>
       end
     end
 
-    def sfood(<blk>)
+    def sfood<sfood>(<blk>)
       <emptyTree>
     end
 
-    def self.sfoos(<blk>)
-      <emptyTree>
-    end
-
-    def self.<static-init>(<blk>)
+    def self.sfoos<sfoos>(<blk>)
       <emptyTree>
     end
   end

@@ -2,6 +2,44 @@ class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C GoodUsages><<C <todo sym>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <self>.both()
+
+    <self>.no_instance()
+
+    <self>.no_reader()
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(::T.untyped())
     end
@@ -69,12 +107,6 @@ class <emptyTree><<C <root>>> < ()
         <self>.no_reader()
       end
     end
-
-    <self>.both()
-
-    <self>.no_instance()
-
-    <self>.no_reader()
   end
 
   class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)
