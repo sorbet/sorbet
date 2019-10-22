@@ -10,4 +10,4 @@ test/cli/autogen-classlist/b.rb:5: class definition in method body https://srb.h
      5 |    class InMethod; end # Not allowed
             ^^^^^
 Errors: 1
-
+Foo

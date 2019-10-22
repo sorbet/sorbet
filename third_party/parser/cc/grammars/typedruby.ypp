@@ -493,9 +493,9 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                       $1->emplace_back($3);
                       $$ = $1;
                     }
-                | error stmt
+                | error
                     {
-                      $$ = driver.alloc.node_list($2);
+                      $$ = driver.alloc.node_list();
                     }
 
    stmt_or_begin: stmt
