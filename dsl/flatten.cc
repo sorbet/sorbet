@@ -42,18 +42,19 @@ public:
     /// Returns `true` if the method is one of the modifier names in Ruby (e.g. 'private' or 'protected' or
     /// similar). This does not need to know about `module_function` because we have already re-written it in a previous
     /// DSL pass.
-    bool isMethodModifier(core::NameRef fun) {
-        return fun == core::Names::private_() || fun == core::Names::protected_() || fun == core::Names::public_() ||
-               fun == core::Names::privateClassMethod();
+    bool isMethodModifier(ast::Send& send) {
+        auto fun = send.fun;
+        return (fun == core::Names::private_() || fun == core::Names::protected_() || fun == core::Names::public_() ||
+                fun == core::Names::privateClassMethod()) && send.args.size() == 1 && ast::isa_tree<ast::MethodDef>(send.args[0].get());
     }
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
-        if (send->fun == core::Names::sig() || isMethodModifier(send->fun)) {
+        if (send->fun == core::Names::sig() || isMethodModifier(*send)) {
             auto &methods = curMethodSet();
             methods.stack.emplace_back(methods.methods.size());
             methods.methods.emplace_back();
 
-            if (isMethodModifier(send->fun) && send->args.size() >= 1) {
+            if (isMethodModifier(*send) && send->args.size() >= 1) {
                 skipMethods.insert(send->args[0].get());
             }
         }
@@ -61,7 +62,7 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
-        if (send->fun == core::Names::sig() || isMethodModifier(send->fun)) {
+        if (send->fun == core::Names::sig() || isMethodModifier(*send)) {
             auto &methods = curMethodSet();
             ENFORCE(!methods.stack.empty());
             ENFORCE(methods.methods.size() > methods.stack.back());
