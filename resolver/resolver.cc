@@ -1447,12 +1447,6 @@ private:
     void injectOptionalArgs(core::MutableContext ctx, ast::MethodDef *mdef) {
         ast::InsSeq::STATS_store lets;
 
-        if (mdef->symbol.data(ctx)->isAbstract()) {
-            // If we checked that abstract methods don't have defined bodies earlier (currently done in infer)
-            // we could also use this technique to check default arguments of abstract methods.
-            return;
-        }
-
         int i = -1;
         for (auto &argSym : mdef->symbol.data(ctx)->arguments()) {
             i++;
@@ -1472,7 +1466,7 @@ private:
             }
         }
 
-        if (!lets.empty()) {
+        if (!lets.empty() && !mdef->symbol.data(ctx)->isAbstract()) {
             auto loc = mdef->rhs->loc;
             mdef->rhs = ast::MK::InsSeq(loc, std::move(lets), std::move(mdef->rhs));
         }
