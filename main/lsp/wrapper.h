@@ -40,6 +40,7 @@ public:
         DocumentSymbol = 6,
         SignatureHelp = 7,
         QuickFix = 8,
+        ParseErrorsTakeFastPath = 9,
     };
 
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
