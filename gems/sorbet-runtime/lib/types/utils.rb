@@ -32,6 +32,9 @@ module T::Utils
       T::Types::OpusEnum.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
     elsif defined?(::T::Enum) && val.is_a?(::T::Enum)
       T::Types::OpusEnum.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
+    elsif val.is_a?(::String)
+      raise "Invalid String literal for type constraint. Must be an #{T::Types::Base}, a " \
+            "class/module, or an array. Got a String with value `#{val}`."
     else
       raise "Invalid value for type constraint. Must be an #{T::Types::Base}, a " \
             "class/module, or an array. Got a `#{val.class}`."
