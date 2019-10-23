@@ -90,17 +90,17 @@ subgraph "cluster_::Object#baz5" {
 
     "bb::Object#baz5_1" -> "bb::Object#baz5_1" [style="bold"];
     "bb::Object#baz5_2" [
-        label = "block[id=2, rubyBlockId=539111519]()\lb: Integer(1) = 1\l<unconditional>\l"
+        label = "block[id=2, rubyBlockId=0]()\lb: Integer(1) = 1\l<unconditional>\l"
     ];
 
     "bb::Object#baz5_2" -> "bb::Object#baz5_4" [style="bold"];
     "bb::Object#baz5_3" [
-        label = "block[id=3, rubyBlockId=539111519]()\lb: String(\"foo\") = \"foo\"\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0]()\lb: String(\"foo\") = \"foo\"\l<unconditional>\l"
     ];
 
     "bb::Object#baz5_3" -> "bb::Object#baz5_4" [style="bold"];
     "bb::Object#baz5_4" [
-        label = "block[id=4, rubyBlockId=539111519](b: T.any(Integer, String))\l<statTemp>$5: T.any(Integer, String) = b\l<statTemp>$6: Integer(1) = 1\lb: T.untyped = <statTemp>$5: T.any(Integer, String).getbyte(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = b\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=0](b: T.any(Integer, String))\l<statTemp>$5: T.any(Integer, String) = b\l<statTemp>$6: Integer(1) = 1\lb: T.untyped = <statTemp>$5: T.any(Integer, String).getbyte(<statTemp>$6: Integer(1))\l<returnMethodTemp>$2: T.untyped = b\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#baz5_4" -> "bb::Object#baz5_1" [style="bold"];
@@ -160,12 +160,12 @@ subgraph "cluster_::Object#baz7" {
 
     "bb::Object#baz7_1" -> "bb::Object#baz7_1" [style="bold"];
     "bb::Object#baz7_2" [
-        label = "block[id=2, rubyBlockId=539111519]()\lb: Integer(1) = 1\l<unconditional>\l"
+        label = "block[id=2, rubyBlockId=0]()\lb: Integer(1) = 1\l<unconditional>\l"
     ];
 
     "bb::Object#baz7_2" -> "bb::Object#baz7_4" [style="bold"];
     "bb::Object#baz7_4" [
-        label = "block[id=4, rubyBlockId=539111519](b: T.nilable(Integer))\l<statTemp>$5: String(\"foo\") = \"foo\"\l<statTemp>$6: T.nilable(Integer) = b\lb: T.nilable(Integer) = <statTemp>$5: String(\"foo\").getbyte(<statTemp>$6: T.nilable(Integer))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=0](b: T.nilable(Integer))\l<statTemp>$5: String(\"foo\") = \"foo\"\l<statTemp>$6: T.nilable(Integer) = b\lb: T.nilable(Integer) = <statTemp>$5: String(\"foo\").getbyte(<statTemp>$6: T.nilable(Integer))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
     ];
 
     "bb::Object#baz7_4" -> "bb::Object#baz7_1" [style="bold"];
@@ -188,19 +188,19 @@ subgraph "cluster_::Object#baz8" {
 
     "bb::Object#baz8_1" -> "bb::Object#baz8_1" [style="bold"];
     "bb::Object#baz8_2" [
-        label = "block[id=2, rubyBlockId=539111519]()\louterLoops: 1\l<whileTemp>$3: TrueClass = true\l<whileTemp>$3: TrueClass\l"
+        label = "block[id=2, rubyBlockId=0]()\louterLoops: 1\l<whileTemp>$3: TrueClass = true\l<whileTemp>$3: TrueClass\l"
     ];
 
     "bb::Object#baz8_2" -> "bb::Object#baz8_5" [style="bold"];
     "bb::Object#baz8_2" -> "bb::Object#baz8_3" [style="tapered"];
 
     "bb::Object#baz8_3" [
-        label = "block[id=3, rubyBlockId=539111519]()\l<returnMethodTemp>$2 = nil\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0]()\l<returnMethodTemp>$2 = nil\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Object#baz8_3" -> "bb::Object#baz8_1" [style="bold"];
     "bb::Object#baz8_5" [
-        label = "block[id=5, rubyBlockId=539111519]()\louterLoops: 1\lb: Integer(1) = 1\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=0]()\louterLoops: 1\lb: Integer(1) = 1\l<unconditional>\l"
     ];
 
     "bb::Object#baz8_5" -> "bb::Object#baz8_2" [style="bold"];

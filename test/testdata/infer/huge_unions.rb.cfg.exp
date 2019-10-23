@@ -504,245 +504,245 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_1" -> "bb::<Class:A>#send_beta_invitation_1" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_2" [
-        label = "block[id=2, rubyBlockId=1768843565]()\lr: T.class_of(C1) = alias <C C1>\l<unconditional>\l"
+        label = "block[id=2, rubyBlockId=0]()\lr: T.class_of(C1) = alias <C C1>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_2" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_3" [
-        label = "block[id=3, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$9: Integer(2) = 2\l<ifTemp>$8: T::Boolean = <statTemp>$9: Integer(2).===(invite: T.untyped)\l<ifTemp>$8: T::Boolean\l"
+        label = "block[id=3, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$9: Integer(2) = 2\l<ifTemp>$8: T::Boolean = <statTemp>$9: Integer(2).===(invite: T.untyped)\l<ifTemp>$8: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_3" -> "bb::<Class:A>#send_beta_invitation_4" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_3" -> "bb::<Class:A>#send_beta_invitation_5" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_4" [
-        label = "block[id=4, rubyBlockId=1768843565]()\lr: T.class_of(C2) = alias <C C2>\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=0]()\lr: T.class_of(C2) = alias <C C2>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_4" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_5" [
-        label = "block[id=5, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$12: Integer(3) = 3\l<ifTemp>$11: T::Boolean = <statTemp>$12: Integer(3).===(invite: T.untyped)\l<ifTemp>$11: T::Boolean\l"
+        label = "block[id=5, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$12: Integer(3) = 3\l<ifTemp>$11: T::Boolean = <statTemp>$12: Integer(3).===(invite: T.untyped)\l<ifTemp>$11: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_5" -> "bb::<Class:A>#send_beta_invitation_6" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_5" -> "bb::<Class:A>#send_beta_invitation_7" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_6" [
-        label = "block[id=6, rubyBlockId=1768843565]()\lr: T.class_of(C3) = alias <C C3>\l<unconditional>\l"
+        label = "block[id=6, rubyBlockId=0]()\lr: T.class_of(C3) = alias <C C3>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_6" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_7" [
-        label = "block[id=7, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$15: Integer(4) = 4\l<ifTemp>$14: T::Boolean = <statTemp>$15: Integer(4).===(invite: T.untyped)\l<ifTemp>$14: T::Boolean\l"
+        label = "block[id=7, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$15: Integer(4) = 4\l<ifTemp>$14: T::Boolean = <statTemp>$15: Integer(4).===(invite: T.untyped)\l<ifTemp>$14: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_7" -> "bb::<Class:A>#send_beta_invitation_8" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_7" -> "bb::<Class:A>#send_beta_invitation_9" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_8" [
-        label = "block[id=8, rubyBlockId=1768843565]()\lr: T.class_of(C4) = alias <C C4>\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=0]()\lr: T.class_of(C4) = alias <C C4>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_8" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_9" [
-        label = "block[id=9, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$18: Integer(5) = 5\l<ifTemp>$17: T::Boolean = <statTemp>$18: Integer(5).===(invite: T.untyped)\l<ifTemp>$17: T::Boolean\l"
+        label = "block[id=9, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$18: Integer(5) = 5\l<ifTemp>$17: T::Boolean = <statTemp>$18: Integer(5).===(invite: T.untyped)\l<ifTemp>$17: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_9" -> "bb::<Class:A>#send_beta_invitation_10" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_9" -> "bb::<Class:A>#send_beta_invitation_11" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_10" [
-        label = "block[id=10, rubyBlockId=1768843565]()\lr: T.class_of(C5) = alias <C C5>\l<unconditional>\l"
+        label = "block[id=10, rubyBlockId=0]()\lr: T.class_of(C5) = alias <C C5>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_10" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_11" [
-        label = "block[id=11, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$21: Integer(6) = 6\l<ifTemp>$20: T::Boolean = <statTemp>$21: Integer(6).===(invite: T.untyped)\l<ifTemp>$20: T::Boolean\l"
+        label = "block[id=11, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$21: Integer(6) = 6\l<ifTemp>$20: T::Boolean = <statTemp>$21: Integer(6).===(invite: T.untyped)\l<ifTemp>$20: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_11" -> "bb::<Class:A>#send_beta_invitation_12" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_11" -> "bb::<Class:A>#send_beta_invitation_13" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_12" [
-        label = "block[id=12, rubyBlockId=1768843565]()\lr: T.class_of(C6) = alias <C C6>\l<unconditional>\l"
+        label = "block[id=12, rubyBlockId=0]()\lr: T.class_of(C6) = alias <C C6>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_12" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_13" [
-        label = "block[id=13, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$24: Integer(7) = 7\l<ifTemp>$23: T::Boolean = <statTemp>$24: Integer(7).===(invite: T.untyped)\l<ifTemp>$23: T::Boolean\l"
+        label = "block[id=13, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$24: Integer(7) = 7\l<ifTemp>$23: T::Boolean = <statTemp>$24: Integer(7).===(invite: T.untyped)\l<ifTemp>$23: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_13" -> "bb::<Class:A>#send_beta_invitation_14" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_13" -> "bb::<Class:A>#send_beta_invitation_15" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_14" [
-        label = "block[id=14, rubyBlockId=1768843565]()\lr: T.class_of(C7) = alias <C C7>\l<unconditional>\l"
+        label = "block[id=14, rubyBlockId=0]()\lr: T.class_of(C7) = alias <C C7>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_14" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_15" [
-        label = "block[id=15, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$27: Integer(8) = 8\l<ifTemp>$26: T::Boolean = <statTemp>$27: Integer(8).===(invite: T.untyped)\l<ifTemp>$26: T::Boolean\l"
+        label = "block[id=15, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$27: Integer(8) = 8\l<ifTemp>$26: T::Boolean = <statTemp>$27: Integer(8).===(invite: T.untyped)\l<ifTemp>$26: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_15" -> "bb::<Class:A>#send_beta_invitation_16" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_15" -> "bb::<Class:A>#send_beta_invitation_17" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_16" [
-        label = "block[id=16, rubyBlockId=1768843565]()\lr: T.class_of(C8) = alias <C C8>\l<unconditional>\l"
+        label = "block[id=16, rubyBlockId=0]()\lr: T.class_of(C8) = alias <C C8>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_16" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_17" [
-        label = "block[id=17, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$30: Integer(9) = 9\l<ifTemp>$29: T::Boolean = <statTemp>$30: Integer(9).===(invite: T.untyped)\l<ifTemp>$29: T::Boolean\l"
+        label = "block[id=17, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$30: Integer(9) = 9\l<ifTemp>$29: T::Boolean = <statTemp>$30: Integer(9).===(invite: T.untyped)\l<ifTemp>$29: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_17" -> "bb::<Class:A>#send_beta_invitation_18" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_17" -> "bb::<Class:A>#send_beta_invitation_19" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_18" [
-        label = "block[id=18, rubyBlockId=1768843565]()\lr: T.class_of(C9) = alias <C C9>\l<unconditional>\l"
+        label = "block[id=18, rubyBlockId=0]()\lr: T.class_of(C9) = alias <C C9>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_18" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_19" [
-        label = "block[id=19, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$33: Integer(10) = 10\l<ifTemp>$32: T::Boolean = <statTemp>$33: Integer(10).===(invite: T.untyped)\l<ifTemp>$32: T::Boolean\l"
+        label = "block[id=19, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$33: Integer(10) = 10\l<ifTemp>$32: T::Boolean = <statTemp>$33: Integer(10).===(invite: T.untyped)\l<ifTemp>$32: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_19" -> "bb::<Class:A>#send_beta_invitation_20" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_19" -> "bb::<Class:A>#send_beta_invitation_21" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_20" [
-        label = "block[id=20, rubyBlockId=1768843565]()\lr: T.class_of(C10) = alias <C C10>\l<unconditional>\l"
+        label = "block[id=20, rubyBlockId=0]()\lr: T.class_of(C10) = alias <C C10>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_20" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_21" [
-        label = "block[id=21, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$36: Integer(11) = 11\l<ifTemp>$35: T::Boolean = <statTemp>$36: Integer(11).===(invite: T.untyped)\l<ifTemp>$35: T::Boolean\l"
+        label = "block[id=21, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$36: Integer(11) = 11\l<ifTemp>$35: T::Boolean = <statTemp>$36: Integer(11).===(invite: T.untyped)\l<ifTemp>$35: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_21" -> "bb::<Class:A>#send_beta_invitation_22" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_21" -> "bb::<Class:A>#send_beta_invitation_23" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_22" [
-        label = "block[id=22, rubyBlockId=1768843565]()\lr: T.class_of(C11) = alias <C C11>\l<unconditional>\l"
+        label = "block[id=22, rubyBlockId=0]()\lr: T.class_of(C11) = alias <C C11>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_22" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_23" [
-        label = "block[id=23, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$39: Integer(12) = 12\l<ifTemp>$38: T::Boolean = <statTemp>$39: Integer(12).===(invite: T.untyped)\l<ifTemp>$38: T::Boolean\l"
+        label = "block[id=23, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$39: Integer(12) = 12\l<ifTemp>$38: T::Boolean = <statTemp>$39: Integer(12).===(invite: T.untyped)\l<ifTemp>$38: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_23" -> "bb::<Class:A>#send_beta_invitation_24" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_23" -> "bb::<Class:A>#send_beta_invitation_25" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_24" [
-        label = "block[id=24, rubyBlockId=1768843565]()\lr: T.class_of(C12) = alias <C C12>\l<unconditional>\l"
+        label = "block[id=24, rubyBlockId=0]()\lr: T.class_of(C12) = alias <C C12>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_24" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_25" [
-        label = "block[id=25, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$42: Integer(13) = 13\l<ifTemp>$41: T::Boolean = <statTemp>$42: Integer(13).===(invite: T.untyped)\l<ifTemp>$41: T::Boolean\l"
+        label = "block[id=25, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$42: Integer(13) = 13\l<ifTemp>$41: T::Boolean = <statTemp>$42: Integer(13).===(invite: T.untyped)\l<ifTemp>$41: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_25" -> "bb::<Class:A>#send_beta_invitation_26" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_25" -> "bb::<Class:A>#send_beta_invitation_27" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_26" [
-        label = "block[id=26, rubyBlockId=1768843565]()\lr: T.class_of(C13) = alias <C C13>\l<unconditional>\l"
+        label = "block[id=26, rubyBlockId=0]()\lr: T.class_of(C13) = alias <C C13>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_26" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_27" [
-        label = "block[id=27, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$45: Integer(14) = 14\l<ifTemp>$44: T::Boolean = <statTemp>$45: Integer(14).===(invite: T.untyped)\l<ifTemp>$44: T::Boolean\l"
+        label = "block[id=27, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$45: Integer(14) = 14\l<ifTemp>$44: T::Boolean = <statTemp>$45: Integer(14).===(invite: T.untyped)\l<ifTemp>$44: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_27" -> "bb::<Class:A>#send_beta_invitation_28" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_27" -> "bb::<Class:A>#send_beta_invitation_29" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_28" [
-        label = "block[id=28, rubyBlockId=1768843565]()\lr: T.class_of(C14) = alias <C C14>\l<unconditional>\l"
+        label = "block[id=28, rubyBlockId=0]()\lr: T.class_of(C14) = alias <C C14>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_28" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_29" [
-        label = "block[id=29, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$48: Integer(15) = 15\l<ifTemp>$47: T::Boolean = <statTemp>$48: Integer(15).===(invite: T.untyped)\l<ifTemp>$47: T::Boolean\l"
+        label = "block[id=29, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$48: Integer(15) = 15\l<ifTemp>$47: T::Boolean = <statTemp>$48: Integer(15).===(invite: T.untyped)\l<ifTemp>$47: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_29" -> "bb::<Class:A>#send_beta_invitation_30" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_29" -> "bb::<Class:A>#send_beta_invitation_31" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_30" [
-        label = "block[id=30, rubyBlockId=1768843565]()\lr: T.class_of(C15) = alias <C C15>\l<unconditional>\l"
+        label = "block[id=30, rubyBlockId=0]()\lr: T.class_of(C15) = alias <C C15>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_30" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_31" [
-        label = "block[id=31, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$51: Integer(16) = 16\l<ifTemp>$50: T::Boolean = <statTemp>$51: Integer(16).===(invite: T.untyped)\l<ifTemp>$50: T::Boolean\l"
+        label = "block[id=31, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$51: Integer(16) = 16\l<ifTemp>$50: T::Boolean = <statTemp>$51: Integer(16).===(invite: T.untyped)\l<ifTemp>$50: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_31" -> "bb::<Class:A>#send_beta_invitation_32" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_31" -> "bb::<Class:A>#send_beta_invitation_33" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_32" [
-        label = "block[id=32, rubyBlockId=1768843565]()\lr: T.class_of(C16) = alias <C C16>\l<unconditional>\l"
+        label = "block[id=32, rubyBlockId=0]()\lr: T.class_of(C16) = alias <C C16>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_32" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_33" [
-        label = "block[id=33, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$54: Integer(17) = 17\l<ifTemp>$53: T::Boolean = <statTemp>$54: Integer(17).===(invite: T.untyped)\l<ifTemp>$53: T::Boolean\l"
+        label = "block[id=33, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$54: Integer(17) = 17\l<ifTemp>$53: T::Boolean = <statTemp>$54: Integer(17).===(invite: T.untyped)\l<ifTemp>$53: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_33" -> "bb::<Class:A>#send_beta_invitation_34" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_33" -> "bb::<Class:A>#send_beta_invitation_35" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_34" [
-        label = "block[id=34, rubyBlockId=1768843565]()\lr: T.class_of(C17) = alias <C C17>\l<unconditional>\l"
+        label = "block[id=34, rubyBlockId=0]()\lr: T.class_of(C17) = alias <C C17>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_34" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_35" [
-        label = "block[id=35, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$57: Integer(18) = 18\l<ifTemp>$56: T::Boolean = <statTemp>$57: Integer(18).===(invite: T.untyped)\l<ifTemp>$56: T::Boolean\l"
+        label = "block[id=35, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$57: Integer(18) = 18\l<ifTemp>$56: T::Boolean = <statTemp>$57: Integer(18).===(invite: T.untyped)\l<ifTemp>$56: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_35" -> "bb::<Class:A>#send_beta_invitation_36" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_35" -> "bb::<Class:A>#send_beta_invitation_37" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_36" [
-        label = "block[id=36, rubyBlockId=1768843565]()\lr: T.class_of(C18) = alias <C C18>\l<unconditional>\l"
+        label = "block[id=36, rubyBlockId=0]()\lr: T.class_of(C18) = alias <C C18>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_36" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_37" [
-        label = "block[id=37, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$60: Integer(19) = 19\l<ifTemp>$59: T::Boolean = <statTemp>$60: Integer(19).===(invite: T.untyped)\l<ifTemp>$59: T::Boolean\l"
+        label = "block[id=37, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$60: Integer(19) = 19\l<ifTemp>$59: T::Boolean = <statTemp>$60: Integer(19).===(invite: T.untyped)\l<ifTemp>$59: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_37" -> "bb::<Class:A>#send_beta_invitation_38" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_37" -> "bb::<Class:A>#send_beta_invitation_39" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_38" [
-        label = "block[id=38, rubyBlockId=1768843565]()\lr: T.class_of(C19) = alias <C C19>\l<unconditional>\l"
+        label = "block[id=38, rubyBlockId=0]()\lr: T.class_of(C19) = alias <C C19>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_38" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_39" [
-        label = "block[id=39, rubyBlockId=1768843565](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$63: Integer(20) = 20\l<ifTemp>$62: T::Boolean = <statTemp>$63: Integer(20).===(invite: T.untyped)\l<ifTemp>$62: T::Boolean\l"
+        label = "block[id=39, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$63: Integer(20) = 20\l<ifTemp>$62: T::Boolean = <statTemp>$63: Integer(20).===(invite: T.untyped)\l<ifTemp>$62: T::Boolean\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_39" -> "bb::<Class:A>#send_beta_invitation_40" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_39" -> "bb::<Class:A>#send_beta_invitation_41" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_40" [
-        label = "block[id=40, rubyBlockId=1768843565]()\lr: T.class_of(C20) = alias <C C20>\l<unconditional>\l"
+        label = "block[id=40, rubyBlockId=0]()\lr: T.class_of(C20) = alias <C C20>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_40" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_41" [
-        label = "block[id=41, rubyBlockId=1768843565](<self>: T.class_of(A))\l<statTemp>$66: String(\"Bla bla bla\") = \"Bla bla bla\"\l<statTemp>$3: T.noreturn = <self>: T.class_of(A).raise(<statTemp>$66: String(\"Bla bla bla\"))\l<unconditional>\l"
+        label = "block[id=41, rubyBlockId=0](<self>: T.class_of(A))\l<statTemp>$66: String(\"Bla bla bla\") = \"Bla bla bla\"\l<statTemp>$3: T.noreturn = <self>: T.class_of(A).raise(<statTemp>$66: String(\"Bla bla bla\"))\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_41" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_61" [
-        label = "block[id=61, rubyBlockId=1768843565](r: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)))\ls: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)) = r\l<returnMethodTemp>$2: T.noreturn = return s: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20))\l<unconditional>\l"
+        label = "block[id=61, rubyBlockId=0](r: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)))\ls: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)) = r\l<returnMethodTemp>$2: T.noreturn = return s: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20))\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_61" -> "bb::<Class:A>#send_beta_invitation_1" [style="bold"];
