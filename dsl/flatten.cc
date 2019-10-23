@@ -38,9 +38,9 @@ public:
         return methodDef;
     }
 
-    /// Returns `true` if the method is one of the modifier names in Ruby (e.g. 'private' or 'protected' or
-    /// similar). This does not need to know about `module_function` because we have already re-written it in a previous
-    /// DSL pass.
+    // Returns `true` if the method is one of the modifier names in Ruby (e.g. 'private' or 'protected' or
+    // similar). This does not need to know about `module_function` because we have already re-written it in a previous
+    // DSL pass.
     bool isMethodModifier(ast::Send &send) {
         auto fun = send.fun;
         return (fun == core::Names::private_() || fun == core::Names::protected_() || fun == core::Names::public_() ||
@@ -48,6 +48,8 @@ public:
                send.args.size() == 1 && ast::isa_tree<ast::MethodDef>(send.args[0].get());
     }
 
+    // We might want to move sends as well: either if they're method modifiers like `private` or `protected` or if
+    // they're `sig`s. If so, then we'll treat them like we treat methods on our method stack
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
         if (send->fun == core::Names::sig() || isMethodModifier(*send)) {
             auto &methods = curMethodSet();
@@ -56,7 +58,14 @@ public:
             methods.methods.emplace_back();
 
             if (isMethodModifier(*send) && send->args.size() >= 1) {
+                // if this is a method modifier like `private` or `protected`, then we don't need to add a new scope
+                // when we traverse the method itself, so add it to the ignore set...
                 skipMethods.insert(send->args[0].get());
+                // but we want /this/ stack frame to be a static frame if the method def it wraps is, so we should
+                // update our stack frame metadata accordingly
+                if (auto methodDef = ast::cast_tree<ast::MethodDef>(send->args[0].get())) {
+                    methods.stack.back().isStatic |= methodDef->isSelf();
+                }
             }
         }
         return send;
@@ -153,7 +162,19 @@ private:
     };
 
     struct MethodData {
+        // This is an index into the methods stack
         int idx;
+        // we need to keep information around about whether we're in a static outer context: for example, if we have
+        //
+        //   def self.foo; def bar; end; end
+        //
+        // then we should flatten it to
+        //
+        //  def self.foo; end
+        //  def self.bar; end
+        //
+        // which means when we get to `bar` we need to know that the outer context `foo` is static. We pass that down
+        // the current stack by means of this `isStatic` variable.
         bool isStatic;
         MethodData(int idx, bool isStatic) : idx(idx), isStatic(isStatic){};
     };
@@ -173,11 +194,6 @@ private:
         ENFORCE(!methodScopes.empty());
         methodScopes.pop_back();
     }
-
-    struct ClassScope {
-        int index;
-        ClassScope(int index) : index(index) {};
-    };
 
     // We flatten methods so that we have an arbitrary hierarchy of classes each of which has a flat list of
     // methods. This prevents methods from existing deeper inside the hierarchy, enabling later traversals to stop
