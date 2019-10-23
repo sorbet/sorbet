@@ -46,13 +46,8 @@ module T::Types
           return false if !key_type.valid?(key) || !value_type.valid?(val)
         end
         return true
-      when Enumerator::Lazy
-        # Users don't want these walked
-        return true
       when Enumerator
-        obj.each do |elem|
-          return false unless @type.valid?(elem)
-        end
+        # Enumerators can be unbounded: see `[:foo, :bar].cycle`
         return true
       when Range
         @type.valid?(obj.first) && @type.valid?(obj.last)
