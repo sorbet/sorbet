@@ -6,12 +6,12 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Foo) = alias <C Foo>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(Foo))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Foo) = alias <C Foo>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(Foo))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -24,12 +24,12 @@ subgraph "cluster_::Foo#bar" {
     "bb::Foo#bar_1" [shape = parallelogram];
 
     "bb::Foo#bar_0" [
-        label = "block[id=0]()\l<self>: Foo = cast(<self>: NilClass, Foo);\l<blk>: T.untyped = load_arg(<blk>)\l<statTemp>$4: Integer(1) = 1\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(<statTemp>$4: Integer(1))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Foo = cast(<self>: NilClass, Foo);\l<blk>: T.untyped = load_arg(<blk>)\l<statTemp>$4: Integer(1) = 1\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(<statTemp>$4: Integer(1))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_0" -> "bb::Foo#bar_1" [style="bold"];
     "bb::Foo#bar_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_1" -> "bb::Foo#bar_1" [style="bold"];
@@ -42,29 +42,29 @@ subgraph "cluster_::Foo#baz" {
     "bb::Foo#baz_1" [shape = parallelogram];
 
     "bb::Foo#baz_0" [
-        label = "block[id=0]()\l<self>: Foo = cast(<self>: NilClass, Foo);\l<block-pre-call-temp>$4: Sorbet::Private::Static::Void = <self>: Foo.bar()\l<selfRestore>$5: Foo = <self>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Foo = cast(<self>: NilClass, Foo);\l<block-pre-call-temp>$4: Sorbet::Private::Static::Void = <self>: Foo.bar()\l<selfRestore>$5: Foo = <self>\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_0" -> "bb::Foo#baz_2" [style="bold"];
     "bb::Foo#baz_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_1" -> "bb::Foo#baz_1" [style="bold"];
     "bb::Foo#baz_2" [
-        label = "block[id=2](<self>: Foo, <selfRestore>$5: Foo)\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2, rubyBlockId=1](<self>: Foo, <selfRestore>$5: Foo)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Foo#baz_2" -> "bb::Foo#baz_5" [style="bold"];
     "bb::Foo#baz_2" -> "bb::Foo#baz_3" [style="tapered"];
 
     "bb::Foo#baz_3" [
-        label = "block[id=3](<selfRestore>$5: Foo)\l<returnMethodTemp>$2: T.untyped = Solve<bar>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<selfRestore>$5: Foo)\l<returnMethodTemp>$2: T.untyped = Solve<bar>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_3" -> "bb::Foo#baz_1" [style="bold"];
     "bb::Foo#baz_5" [
-        label = "block[id=5](<self>: Foo, <selfRestore>$5: Foo)\louterLoops: 1\l<self>: Foo = loadSelf\l<blk>$6: T.untyped = load_yield_params(bar)\l<blk>$7: Integer(0) = 0\lr$1: T.untyped = <blk>$6: T.untyped.[](<blk>$7: Integer(0))\l<blockReturnTemp>$8: NilClass = <self>: Foo.puts(r$1: T.untyped)\l<blockReturnTemp>$11: T.noreturn = blockreturn<bar> <blockReturnTemp>$8: NilClass\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: Foo, <selfRestore>$5: Foo)\louterLoops: 1\l<self>: Foo = loadSelf\l<blk>$6: T.untyped = load_yield_params(bar)\l<blk>$7: Integer(0) = 0\lr$1: T.untyped = <blk>$6: T.untyped.[](<blk>$7: Integer(0))\l<blockReturnTemp>$8: NilClass = <self>: Foo.puts(r$1: T.untyped)\l<blockReturnTemp>$11: T.noreturn = blockreturn<bar> <blockReturnTemp>$8: NilClass\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_5" -> "bb::Foo#baz_2" [style="bold"];
@@ -77,12 +77,12 @@ subgraph "cluster_::<Class:Foo>#<static-init>" {
     "bb::<Class:Foo>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Foo>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(Foo) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Foo>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Foo>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Foo) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Foo>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Foo>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:Foo>#<static-init>_0" -> "bb::<Class:Foo>#<static-init>_1" [style="bold"];
     "bb::<Class:Foo>#<static-init>_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::<Class:Foo>#<static-init>_1" -> "bb::<Class:Foo>#<static-init>_1" [style="bold"];

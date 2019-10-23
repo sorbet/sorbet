@@ -11,17 +11,18 @@ using namespace std;
 
 namespace sorbet::cfg {
 
-BasicBlock *CFG::freshBlock(int outerLoops) {
+BasicBlock *CFG::freshBlock(int outerLoops, int rubyBlockId) {
     int id = this->maxBasicBlockId++;
     auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
     r->id = id;
     r->outerLoops = outerLoops;
+    r->rubyBlockId = rubyBlockId;
     return r.get();
 }
 
 CFG::CFG() {
-    freshBlock(0); // entry;
-    freshBlock(0); // dead code;
+    freshBlock(0, 0); // entry;
+    freshBlock(0, 0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond.variable = core::LocalVariable::noVariable();
@@ -205,7 +206,7 @@ string CFG::showRaw(core::Context ctx) const {
 string BasicBlock::toString(core::Context ctx) const {
     fmt::memory_buffer buf;
     fmt::format_to(
-        buf, "block[id={}]({})\n", this->id,
+        buf, "block[id={}, rubyBlockId={}]({})\n", this->id, this->rubyBlockId,
         fmt::map_join(
             this->args.begin(), this->args.end(), ", ", [&](const auto &arg) -> auto { return arg.toString(ctx); }));
 
