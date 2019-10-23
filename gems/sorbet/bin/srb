@@ -72,10 +72,19 @@ typecheck() {
     gems_path="${without_bin_srb%/sorbet*}"
     # /path/to/gems/sorbet-static-0.0.1-darwin-17/libexec/sorbet
     # (assumes people only have one platform-depdendent gem installed per version)
-    sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/sorbet)
+    guess_sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/sorbet)
+
+    if [[ -f "${guess_sorbet[0]}" ]]; then
+      sorbet="${guess_sorbet[0]}"
+    else
+      # 0.0.1
+      version="${version_suffix#-}"
+      # Resort to locating using the GEM_PATH, this takes ~200ms
+      sorbet="$(VISUAL=echo gem open sorbet-static -v "${version}")/libexec/sorbet"
+    fi
 
     # shellcheck disable=SC2086
-    "${sorbet[0]}" "${args[@]}"
+    "${sorbet}" "${args[@]}"
   fi
 }
 
