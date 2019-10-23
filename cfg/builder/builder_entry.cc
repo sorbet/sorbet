@@ -20,7 +20,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     u4 temporaryCounter = 1;
     UnorderedMap<core::SymbolRef, core::LocalVariable> aliases;
     UnorderedMap<core::NameRef, core::LocalVariable> discoveredUndeclaredFields;
-    CFGContext cctx(ctx, *res.get(), core::LocalVariable(), 0, nullptr, nullptr, nullptr, aliases,
+    CFGContext cctx(ctx, *res.get(), core::LocalVariable(), 0, 0, nullptr, nullptr, nullptr, aliases,
                     discoveredUndeclaredFields, temporaryCounter);
 
     core::LocalVariable retSym = cctx.newTemporary(core::Names::returnMethodTemp());
