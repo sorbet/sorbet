@@ -53,10 +53,6 @@ class LSPPreprocessor final {
     // standard format.
     UnorderedSet<std::string> openFiles;
 
-    // ErrorQueue used for finalGS. Separate from initialGS's ErrorQueue to prevent indexing errors from making it to
-    // the client.
-    std::shared_ptr<core::ErrorQueue> finalGSErrorQueue;
-
     // Indicates the next version to use on an incoming edit. Used to refer to edits by ID.
     u4 nextVersion = 1;
 

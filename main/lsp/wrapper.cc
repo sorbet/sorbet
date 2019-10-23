@@ -11,30 +11,13 @@ namespace sorbet::realmain::lsp {
 const std::string LSPWrapper::EMPTY_STRING = "";
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMessage> message) {
-    auto result = lspLoop->processRequest(move(gs), move(message));
-    gs = move(result.gs);
-
-    // Should always run typechecking at least once for each request post-initialization.
-    ENFORCE(!config->isInitialized() || gs->lspTypecheckCount > 0,
-            "Fatal error: LSPLoop did not typecheck GlobalState.");
-
-    // Retrieve any notifications that would normally be sent asynchronously in a multithreaded scenario.
-    auto notifs = output->getOutput();
-    result.responses.insert(result.responses.end(), make_move_iterator(notifs.begin()),
-                            make_move_iterator(notifs.end()));
-
-    return move(result.responses);
+    lspLoop->processRequest(move(message));
+    return output->getOutput();
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<LSPMessage>> &messages) {
-    auto result = lspLoop->processRequests(move(gs), move(messages));
-    gs = move(result.gs);
-
-    // Should always run typechecking at least once for each request post-initialization.
-    ENFORCE(!config->isInitialized() || gs->lspTypecheckCount > 0,
-            "Fatal error: LSPLoop did not typecheck GlobalState.");
-
-    return move(result.responses);
+    lspLoop->processRequests(move(messages));
+    return output->getOutput();
 }
 
 vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(const string &json) {
@@ -87,13 +70,6 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, options::Options &&opti
 // forward decl it in the header)
 LSPWrapper::~LSPWrapper() {}
 
-int LSPWrapper::getTypecheckCount() const {
-    if (gs) {
-        return gs->lspTypecheckCount;
-    }
-    return 0;
-}
-
 void LSPWrapper::enableAllExperimentalFeatures() {
     enableExperimentalFeature(LSPExperimentalFeature::Autocomplete);
     enableExperimentalFeature(LSPExperimentalFeature::WorkspaceSymbols);
@@ -124,6 +100,10 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
             opts.lspParseErrorsTakeFastPath = true;
             break;
     }
+}
+
+int LSPWrapper::getTypecheckCount() {
+    return lspLoop->getTypecheckCount();
 }
 
 } // namespace sorbet::realmain::lsp

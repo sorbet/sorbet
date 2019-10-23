@@ -11,6 +11,8 @@ cc_library(
         "LSPMessage.h",
         "LSPOutput.h",
         "LSPPreprocessor.h",
+        "LSPTypechecker.h",
+        "LSPTypecheckerCoordinator.h",
         "LocalVarSaver.h",
         "ShowOperation.h",
         "TimeTravelingGlobalState.h",

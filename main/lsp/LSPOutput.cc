@@ -15,8 +15,8 @@ bool isServerNotification(const LSPMethod method) {
         case LSPMethod::$CancelRequest:
         case LSPMethod::TextDocumentPublishDiagnostics:
         case LSPMethod::WindowShowMessage:
-        case LSPMethod::SorbetShowOperation:
         case LSPMethod::SorbetTypecheckRunInfo:
+        case LSPMethod::SorbetShowOperation:
             return true;
         default:
             return false;

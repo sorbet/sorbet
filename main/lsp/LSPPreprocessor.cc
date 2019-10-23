@@ -41,12 +41,7 @@ void cancelTimer(unique_ptr<Timer> &timer) {
 LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, const shared_ptr<LSPConfiguration> &config,
                                  u4 initialVersion)
     : ttgs(TimeTravelingGlobalState(config, move(initialGS), initialVersion)), config(config),
-      owner(this_thread::get_id()), nextVersion(initialVersion + 1) {
-    const auto &gs = ttgs.getGlobalState();
-    finalGSErrorQueue = make_shared<core::ErrorQueue>(gs.errorQueue->logger, gs.errorQueue->tracer);
-    // Required for diagnostics to work.
-    finalGSErrorQueue->ignoreFlushes = true;
-}
+      owner(this_thread::get_id()), nextVersion(initialVersion + 1) {}
 
 void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
     mtx.AssertHeld();
@@ -156,9 +151,7 @@ void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, con
 }
 
 unique_ptr<core::GlobalState> LSPPreprocessor::getTypecheckingGS() const {
-    auto finalGS = ttgs.getGlobalState().deepCopy();
-    finalGS->errorQueue = finalGSErrorQueue;
-    return finalGS;
+    return ttgs.getGlobalState().deepCopy();
 }
 
 unique_ptr<LSPMessage> LSPPreprocessor::makeAndCommitWorkspaceEdit(unique_ptr<SorbetWorkspaceEditParams> params,

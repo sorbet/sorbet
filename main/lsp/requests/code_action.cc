@@ -4,31 +4,32 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                const CodeActionParams &params) const {
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCodeAction(LSPTypechecker &typechecker, const MessageId &id,
+                                                                  const CodeActionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
     if (!config->opts.lspQuickFixEnabled) {
         response->error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidRequest, "The `Quick Fix` LSP feature is experimental and disabled by default.");
-        return LSPResult::make(move(gs), move(response));
+        return response;
     }
 
     vector<unique_ptr<CodeAction>> result;
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.codeAction");
 
-    core::FileRef file = config->uri2FileRef(*gs, params.textDocument->uri);
+    const core::GlobalState &gs = typechecker.state();
+    core::FileRef file = config->uri2FileRef(gs, params.textDocument->uri);
     LSPFileUpdates updates;
     updates.canTakeFastPath = true;
+    const auto &globalStateHashes = typechecker.getFileHashes();
     ENFORCE(file.id() < globalStateHashes.size());
     updates.updatedFileHashes = {globalStateHashes[file.id()]};
-    updates.updatedFiles.push_back(make_shared<core::File>(string(file.data(*gs).path()),
-                                                           string(file.data(*gs).source()), core::File::Type::Normal));
+    updates.updatedFiles.push_back(make_shared<core::File>(string(file.data(gs).path()), string(file.data(gs).source()),
+                                                           core::File::Type::Normal));
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
-    auto run = runTypechecking(move(gs), move(updates));
-
-    auto loc = params.range->toLoc(*run.gs, file);
+    auto run = typechecker.retypecheck(move(updates));
+    auto loc = params.range->toLoc(gs, file);
     for (auto &error : run.errors) {
         if (!error->isSilenced && !error->autocorrects.empty()) {
             // We return code actions corresponding to any error that encloses the request's range. Matching request
@@ -43,9 +44,9 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
             for (auto &autocorrect : error->autocorrects) {
                 UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
                 for (auto &edit : autocorrect.edits) {
-                    auto range = Range::fromLoc(*run.gs, edit.loc);
+                    auto range = Range::fromLoc(gs, edit.loc);
                     if (range != nullptr) {
-                        editsByFile[config->fileRef2Uri(*run.gs, edit.loc.file())].emplace_back(
+                        editsByFile[config->fileRef2Uri(gs, edit.loc.file())].emplace_back(
                             make_unique<TextEdit>(std::move(range), edit.replacement));
                     }
                 }
@@ -78,7 +79,6 @@ LSPResult LSPLoop::handleTextDocumentCodeAction(unique_ptr<core::GlobalState> gs
     result.erase(last, result.end());
 
     response->result = move(result);
-
-    return LSPResult::make(move(run.gs), move(response));
+    return response;
 }
 } // namespace sorbet::realmain::lsp
