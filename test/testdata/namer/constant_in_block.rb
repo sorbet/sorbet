@@ -1,16 +1,9 @@
 # typed: true
-class A
+tap do
+  C # error: Unable to resolve constant
+end
 
-  def self.foo
-    foo do
-    C = 1
-#   ^ error: dynamic constant assignment
-    C # error: Unable to resolve constant
-    end
-  end
-
-  [].each do
-    B = 1
-    B
-  end
+[].each do
+  B = 1
+  B
 end
