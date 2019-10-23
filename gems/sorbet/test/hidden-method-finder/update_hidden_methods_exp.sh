@@ -9,7 +9,7 @@ cd ../../../..
 
 versions=("ruby_2_4_3" "ruby_2_6_3")
 
-if ! bazel test //gems/sorbet/test/hidden-method-finder; then
+if ! bazel test //gems/sorbet/test/hidden-method-finder -c opt "$@" ; then
     for test_dir in bazel-genfiles/gems/sorbet/test/hidden-method-finder/*; do
         suite="$(basename "${test_dir}")"
         for version in "${versions[@]}"; do

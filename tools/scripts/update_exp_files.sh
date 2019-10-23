@@ -12,7 +12,7 @@ bazel build \
   -c opt "$@"
 
 tools/scripts/update_testdata_exp.sh
-gems/sorbet/test/hidden-method-finder/update_hidden_methods_exp.sh
+gems/sorbet/test/hidden-method-finder/update_hidden_methods_exp.sh "$@"
 
 bazel test \
   //gems/sorbet/test/snapshot:update \
