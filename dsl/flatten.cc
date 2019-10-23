@@ -30,11 +30,14 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
+        auto &methods = curMethodSet();
         if (skipMethods.contains(methodDef.get())) {
+            ENFORCE(!methods.stack.empty());
+            methods.stack.back().isStatic = methodDef->isSelf();
             return methodDef;
         }
-        auto &methods = curMethodSet();
-        methods.stack.emplace_back(methods.methods.size());
+        bool isStatic = methodDef->isSelf() || (methods.stack.size() > 0 && methods.stack.back().isStatic);
+        methods.stack.emplace_back(methods.methods.size(), isStatic);
         methods.methods.emplace_back();
         return methodDef;
     }
@@ -42,16 +45,18 @@ public:
     /// Returns `true` if the method is one of the modifier names in Ruby (e.g. 'private' or 'protected' or
     /// similar). This does not need to know about `module_function` because we have already re-written it in a previous
     /// DSL pass.
-    bool isMethodModifier(ast::Send& send) {
+    bool isMethodModifier(ast::Send &send) {
         auto fun = send.fun;
         return (fun == core::Names::private_() || fun == core::Names::protected_() || fun == core::Names::public_() ||
-                fun == core::Names::privateClassMethod()) && send.args.size() == 1 && ast::isa_tree<ast::MethodDef>(send.args[0].get());
+                fun == core::Names::privateClassMethod()) &&
+               send.args.size() == 1 && ast::isa_tree<ast::MethodDef>(send.args[0].get());
     }
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
         if (send->fun == core::Names::sig() || isMethodModifier(*send)) {
             auto &methods = curMethodSet();
-            methods.stack.emplace_back(methods.methods.size());
+            bool isStatic = methods.stack.size() > 0 && methods.stack.back().isStatic;
+            methods.stack.emplace_back(methods.methods.size(), isStatic);
             methods.methods.emplace_back();
 
             if (isMethodModifier(*send) && send->args.size() >= 1) {
@@ -65,10 +70,10 @@ public:
         if (send->fun == core::Names::sig() || isMethodModifier(*send)) {
             auto &methods = curMethodSet();
             ENFORCE(!methods.stack.empty());
-            ENFORCE(methods.methods.size() > methods.stack.back());
-            ENFORCE(methods.methods[methods.stack.back()] == nullptr);
+            ENFORCE(methods.methods.size() > methods.stack.back().idx);
+            ENFORCE(methods.methods[methods.stack.back().idx] == nullptr);
 
-            methods.methods[methods.stack.back()] = std::move(send);
+            methods.methods[methods.stack.back().idx] = std::move(send);
             methods.stack.pop_back();
 
             return make_unique<ast::EmptyTree>();
@@ -92,10 +97,14 @@ public:
         }
         auto &methods = curMethodSet();
         ENFORCE(!methods.stack.empty());
-        ENFORCE(methods.methods.size() > methods.stack.back());
-        ENFORCE(methods.methods[methods.stack.back()] == nullptr);
+        ENFORCE(methods.methods.size() > methods.stack.back().idx);
+        ENFORCE(methods.methods[methods.stack.back().idx] == nullptr);
 
-        methods.methods[methods.stack.back()] = std::move(methodDef);
+        if (methods.stack.back().isStatic) {
+            methodDef->flags |= ast::MethodDef::SelfMethod;
+        }
+
+        methods.methods[methods.stack.back().idx] = std::move(methodDef);
         methods.stack.pop_back();
         return make_unique<ast::EmptyTree>();
     };
@@ -149,9 +158,14 @@ private:
         return ret;
     };
 
+    struct MethodData {
+        int idx;
+        bool isStatic;
+        MethodData(int idx, bool isStatic) : idx(idx), isStatic(isStatic){};
+    };
     struct Methods {
         vector<unique_ptr<ast::Expression>> methods;
-        vector<int> stack;
+        vector<MethodData> stack;
         Methods() = default;
     };
     void newMethodSet() {
