@@ -64,6 +64,8 @@ module T::Props::TypeValidation
         type.types.map {|subtype| find_invalid_subtype(subtype)}.compact.first
       when T::Types::Enum, T::Types::ClassOf
         nil
+      when T::Private::Types::TypeAlias
+        find_invalid_subtype(type.aliased_type)
       when T::Types::Simple
         # TODO Could we manage to define a whitelist, consisting of something
         # like primitives, subdocs, DataInterfaces, and collections/enums/unions

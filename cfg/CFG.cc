@@ -136,7 +136,7 @@ void CFG::sanityCheck(core::Context ctx) {
     }
 }
 
-string CFG::toString(core::Context ctx) {
+string CFG::toString(core::Context ctx) const {
     fmt::memory_buffer buf;
     string symbolName = this->symbol.data(ctx)->showFullName(ctx);
     fmt::format_to(buf,
@@ -169,7 +169,7 @@ string CFG::toString(core::Context ctx) {
     return to_string(buf);
 }
 
-string CFG::showRaw(core::Context ctx) {
+string CFG::showRaw(core::Context ctx) const {
     fmt::memory_buffer buf;
     string symbolName = this->symbol.data(ctx)->showFullName(ctx);
     fmt::format_to(buf,
@@ -202,7 +202,7 @@ string CFG::showRaw(core::Context ctx) {
     return to_string(buf);
 }
 
-string BasicBlock::toString(core::Context ctx) {
+string BasicBlock::toString(core::Context ctx) const {
     fmt::memory_buffer buf;
     fmt::format_to(
         buf, "block[id={}]({})\n", this->id,
@@ -212,7 +212,7 @@ string BasicBlock::toString(core::Context ctx) {
     if (this->outerLoops > 0) {
         fmt::format_to(buf, "outerLoops: {}\n", this->outerLoops);
     }
-    for (Binding &exp : this->exprs) {
+    for (const Binding &exp : this->exprs) {
         fmt::format_to(buf, "{} = {}\n", exp.bind.toString(ctx), exp.value->toString(ctx));
     }
     if (this->bexit.cond.variable.exists()) {
@@ -223,7 +223,7 @@ string BasicBlock::toString(core::Context ctx) {
     return to_string(buf);
 }
 
-string BasicBlock::showRaw(core::Context ctx) {
+string BasicBlock::showRaw(core::Context ctx) const {
     fmt::memory_buffer buf;
     fmt::format_to(
         buf, "block[id={}]({})\n", this->id,
@@ -233,7 +233,7 @@ string BasicBlock::showRaw(core::Context ctx) {
     if (this->outerLoops > 0) {
         fmt::format_to(buf, "outerLoops: {}\n", this->outerLoops);
     }
-    for (Binding &exp : this->exprs) {
+    for (const Binding &exp : this->exprs) {
         fmt::format_to(buf, "Binding {{\n&nbsp;bind = {},\n&nbsp;value = {},\n}}\n", exp.bind.showRaw(ctx, 1),
                        exp.value->showRaw(ctx, 1));
     }

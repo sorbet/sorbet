@@ -1,5 +1,6 @@
 # typed: true
 # disable-fast-path: true
+# disable-stress-incremental: true
 extend T::Sig
 
 sig {params(s: Integer).void}

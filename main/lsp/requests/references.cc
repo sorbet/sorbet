@@ -1,31 +1,30 @@
 #include "absl/strings/match.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/ShowOperation.h"
 #include "main/lsp/lsp.h"
 
 using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-pair<unique_ptr<core::GlobalState>, vector<unique_ptr<Location>>>
-LSPLoop::getReferencesToSymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef symbol,
-                               vector<unique_ptr<Location>> locations) const {
+vector<unique_ptr<Location>> LSPLoop::getReferencesToSymbol(LSPTypechecker &typechecker, core::SymbolRef symbol,
+                                                            vector<unique_ptr<Location>> locations) const {
     if (symbol.exists()) {
-        auto run2 = setupLSPQueryBySymbol(move(gs), symbol);
-        gs = move(run2.gs);
-        locations = extractLocations(*gs, run2.responses, move(locations));
+        auto run2 = queryBySymbol(typechecker, symbol);
+        locations = extractLocations(typechecker.state(), run2.responses, move(locations));
     }
-    return make_pair(move(gs), move(locations));
+    return locations;
 }
 
-LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                const ReferenceParams &params) const {
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentReferences(LSPTypechecker &typechecker, const MessageId &id,
+                                                                  const ReferenceParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
-    ShowOperation op(*this, "References", "Finding all references...");
+    ShowOperation op(*config, "References", "Finding all references...");
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.references");
 
-    auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
-                                     LSPMethod::TextDocumentCompletion, false);
-    gs = move(result.gs);
+    const core::GlobalState &gs = typechecker.state();
+    auto result =
+        queryByLoc(typechecker, params.textDocument->uri, *params.position, LSPMethod::TextDocumentCompletion, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -36,25 +35,23 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
         auto &queryResponses = result.responses;
         if (!queryResponses.empty()) {
             const bool fileIsTyped =
-                config.uri2FileRef(*gs, params.textDocument->uri).data(*gs).strictLevel >= core::StrictLevel::True;
+                config->uri2FileRef(gs, params.textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
             // N.B.: Ignores literals.
             // If file is untyped, only supports find reference requests from constants and class definitions.
             if (auto constResp = resp->isConstant()) {
-                tie(gs, response->result) = getReferencesToSymbol(move(gs), constResp->symbol);
+                response->result = getReferencesToSymbol(typechecker, constResp->symbol);
             } else if (auto defResp = resp->isDefinition()) {
-                if (fileIsTyped || defResp->symbol.data(*gs)->isClassOrModule()) {
-                    tie(gs, response->result) = getReferencesToSymbol(move(gs), defResp->symbol);
+                if (fileIsTyped || defResp->symbol.data(gs)->isClassOrModule()) {
+                    response->result = getReferencesToSymbol(typechecker, defResp->symbol);
                 }
             } else if (fileIsTyped && resp->isIdent()) {
                 auto identResp = resp->isIdent();
-                auto loc = identResp->owner.data(*gs)->loc();
+                auto loc = identResp->owner.data(gs)->loc();
                 if (loc.exists()) {
-                    auto run2 =
-                        runQuery(move(gs), core::lsp::Query::createVarQuery(identResp->owner, identResp->variable),
-                                 {loc.file()});
-                    gs = move(run2.gs);
-                    response->result = extractLocations(*gs, run2.responses);
+                    auto run2 = typechecker.query(
+                        core::lsp::Query::createVarQuery(identResp->owner, identResp->variable), {loc.file()});
+                    response->result = extractLocations(gs, run2.responses);
                 }
             } else if (fileIsTyped && resp->isSend()) {
                 auto sendResp = resp->isSend();
@@ -62,7 +59,7 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
                 vector<unique_ptr<Location>> locations;
                 while (start != nullptr) {
                     if (start->main.method.exists() && !start->main.receiver->isUntyped()) {
-                        tie(gs, locations) = getReferencesToSymbol(move(gs), start->main.method, move(locations));
+                        locations = getReferencesToSymbol(typechecker, start->main.method, move(locations));
                     }
                     start = start->secondary.get();
                 }
@@ -70,7 +67,7 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
             }
         }
     }
-    return LSPResult::make(move(gs), move(response));
+    return response;
 }
 
 } // namespace sorbet::realmain::lsp

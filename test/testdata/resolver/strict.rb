@@ -5,4 +5,4 @@ B = T.let(T.unsafe(nil), T.untyped)
 
 C = T.let(1, Integer)
 
-D = T.type_alias(Integer)
+D = T.type_alias {Integer}

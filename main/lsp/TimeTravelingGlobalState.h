@@ -20,10 +20,12 @@ namespace sorbet::realmain::lsp {
  */
 class TimeTravelingGlobalState final {
 private:
-    // Contains file updates and their respective hash updates.
+    // Contains file updates and their respective hash+index updates.
     struct GlobalStateUpdate {
         std::vector<std::shared_ptr<core::File>> fileUpdates;
         std::vector<core::FileHash> hashUpdates;
+        // Note: Undo updates do not contain indexes.
+        std::vector<ast::ParsedFile> updatedFileIndexes;
     };
 
     /**
@@ -33,12 +35,11 @@ private:
      */
     struct TimeTravelUpdate {
         u4 version = 0;
+        bool hasNewFiles;
         GlobalStateUpdate update;
         GlobalStateUpdate undoUpdate;
     };
-    const LSPConfiguration config;
-    std::shared_ptr<spdlog::logger> logger;
-    WorkerPool &workers;
+    std::shared_ptr<const LSPConfiguration> config;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     std::unique_ptr<core::GlobalState> gs;
 
@@ -64,8 +65,8 @@ private:
     std::vector<core::FileHash> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
 
 public:
-    TimeTravelingGlobalState(const LSPConfiguration &config, const std::shared_ptr<spdlog::logger> &logger,
-                             WorkerPool &workers, std::unique_ptr<core::GlobalState> gs, u4 initialVersion);
+    TimeTravelingGlobalState(const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<core::GlobalState> gs,
+                             u4 initialVersion);
 
     /**
      * Travels GlobalState forwards and backwards in time. No-op if version == current version.
@@ -99,15 +100,27 @@ public:
     std::vector<ast::ParsedFile> indexFromFileSystem();
 
     /**
-     * Returns `true` if the given changes can run on the fast path relative to the current version of global state.
+     * Returns `true` if the given changes can run on the fast path relative to the provided version of global state.
+     * Only requires `updatedFileHashes` and `updatedFiles`.
+     *
      * TODO(jvilk): Return reason and track slow path stats.
      */
-    bool canTakeFastPath(const LSPFileUpdates &updates) const;
+    bool canTakeFastPath(u4 fromVersion, const LSPFileUpdates &updates);
+
+    /**
+     * Get a combined LSPFileUpdates containing edits from [fromId, toId] (inclusive).
+     */
+    LSPFileUpdates getCombinedUpdates(u4 fromId, u4 toId);
 
     /**
      * Returns true if `a` comes before `b`.
      */
     bool comesBefore(u4 a, u4 b) const;
+
+    /**
+     * If version `a` comes before `b`, returns `a` else `b`.
+     */
+    u4 minVersion(u4 a, u4 b) const;
 };
 
 } // namespace sorbet::realmain::lsp

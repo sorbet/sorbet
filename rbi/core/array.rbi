@@ -636,7 +636,7 @@ class Array < Object
     params(
         arg0: Elem,
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(T::Array[Elem]))
   end
   def assoc(arg0); end
 

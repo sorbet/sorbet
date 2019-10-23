@@ -1651,7 +1651,7 @@ class IO < Object
   # ```
   sig do
     params(
-        name: String,
+        name: T.any(String, Tempfile, File, Pathname),
         length: Integer,
         offset: Integer,
         external_encoding: String,
@@ -1693,7 +1693,7 @@ class IO < Object
   # details about open\_args.
   sig do
     params(
-        name: String,
+        name: T.any(String, Tempfile, File, Pathname),
         sep: String,
         limit: Integer,
         external_encoding: String,
@@ -1870,7 +1870,7 @@ class IO < Object
   # ```
   sig do
     params(
-        path: String,
+        path: T.any(String, Tempfile, File, Pathname),
         mode: String,
         perm: String,
     )
@@ -1944,8 +1944,8 @@ class IO < Object
   #     combination with other keys.
   sig do
     params(
-        name: String,
-        arg0: String,
+        name: T.any(String, Tempfile, File, Pathname),
+        string: String,
         offset: Integer,
         external_encoding: String,
         internal_encoding: String,
@@ -1954,10 +1954,11 @@ class IO < Object
         binmode: BasicObject,
         autoclose: BasicObject,
         mode: String,
+        perm: Integer
     )
     .returns(Integer)
   end
-  def self.write(name, arg0, offset=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil)); end
+  def self.write(name, string, offset=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil), perm: T.unsafe(nil)); end
 
   # Synonym for `IO.new`.
   sig do

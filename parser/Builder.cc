@@ -901,8 +901,26 @@ public:
     }
 
     unique_ptr<Node> string_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
-        core::Loc loc = collectionLoc(begin, parts, end);
-        return make_unique<DString>(loc, std::move(parts));
+        if (collapseStringParts(parts)) {
+            // only 1 child, either String or DString
+            auto firstPart = parts.front().get();
+
+            if (begin == nullptr || end == nullptr) {
+                if (auto *s = parser::cast_node<String>(firstPart)) {
+                    return make_unique<String>(s->loc, s->val);
+                } else if (auto *d = parser::cast_node<DString>(firstPart)) {
+                    return make_unique<DString>(d->loc, std::move(d->nodes));
+                } else {
+                    return nullptr;
+                }
+            } else {
+                auto *s = parser::cast_node<String>(firstPart);
+                return make_unique<String>(s->loc, s->val);
+            }
+        } else {
+            core::Loc loc = collectionLoc(begin, parts, end);
+            return make_unique<DString>(loc, std::move(parts));
+        }
     }
 
     unique_ptr<Node> string_internal(const token *string_) {
@@ -914,7 +932,17 @@ public:
     }
 
     unique_ptr<Node> symbol_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
-        return make_unique<DSymbol>(collectionLoc(begin, parts, end), std::move(parts));
+        if (collapseStringParts(parts)) {
+            // only 1 child: String
+            auto firstPart = parts.front().get();
+            if (auto *s = parser::cast_node<String>(firstPart)) {
+                return make_unique<Symbol>(s->loc, s->val);
+            } else {
+                return nullptr;
+            }
+        } else {
+            return make_unique<DSymbol>(collectionLoc(begin, parts, end), std::move(parts));
+        }
     }
 
     unique_ptr<Node> symbol_internal(const token *symbol) {
@@ -998,7 +1026,18 @@ public:
 
     unique_ptr<Node> word(sorbet::parser::NodeVec parts) {
         core::Loc loc = collectionLoc(parts);
-        return make_unique<DString>(loc, std::move(parts));
+        if (collapseStringParts(parts)) {
+            // a single String child
+            auto firstPart = parts.front().get();
+
+            if (auto *s = parser::cast_node<String>(firstPart)) {
+                return make_unique<String>(s->loc, s->val);
+            } else {
+                return nullptr;
+            }
+        } else {
+            return make_unique<DString>(loc, std::move(parts));
+        }
     }
 
     unique_ptr<Node> words_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
@@ -1043,6 +1082,16 @@ public:
             out.emplace_back(cast_node(args->at(i)));
         }
         return out;
+    }
+
+    bool collapseStringParts(sorbet::parser::NodeVec &parts) {
+        if (parts.size() != 1) {
+            return false;
+        }
+
+        auto firstPart = parts.front().get();
+
+        return parser::isa_node<String>(firstPart) || parser::isa_node<DString>(firstPart);
     }
 };
 

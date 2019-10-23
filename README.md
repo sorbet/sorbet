@@ -521,6 +521,50 @@ Add the `, ...` suffix to the end of a partial list of completion results, and
 the test harness will ensure that the listed identifiers match a prefix of the
 completion items. This prefix must still be listed in order.
 
+If a location should report zero completion items, use the special message
+`(nothing)`:
+
+```ruby
+class A
+  def self.foo_1; end
+  def self.foo_2; end
+
+  zzz
+#    ^ completion: (nothing)
+end
+```
+
+To write a test for the snippet that would be inserted into the document if a
+particular completion item was selected, you can make two files:
+
+```
+# -- test/testdata/lsp/completion/mytest.rb --
+class A
+  def self.foo_1; end
+end
+
+A.foo_
+#     ^ apply-completion: [A] item: 0
+```
+
+The `apply-completion` assertion says "make sure the file `mytest.A.rbedited`
+contains the result of inserting the completion snippet for the 0th completion
+item into the file."
+
+```
+# -- test/testdata/lsp/completion/mytest.A.rbedited --
+class A
+  def self.foo_1; end
+end
+
+A.foo_1${0}
+#     ^ apply-completion: [A] item: 0
+```
+
+As you can see, the fancy `${...}` (tabstop placeholders) show up verbatim in
+the output if they were sent in the completion response.
+
+
 #### Testing incremental typechecking
 
 In LSP mode, Sorbet runs file updates on a *fast path* or a *slow path*. It checks the structure of the

@@ -70,7 +70,7 @@ public:
     bool root() const;
     core::NameRef name() const;
     std::string path(core::Context ctx) const;
-    std::string show(core::Context ctx, int level = 0); // Render the entire tree
+    std::string show(core::Context ctx, int level = 0) const; // Render the entire tree
     std::string fullName(core::Context) const;
 
     std::string renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &) const;

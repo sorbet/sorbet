@@ -59,7 +59,8 @@ core::TypePtr QueryResponse::getRetType() const {
     } else if (auto def = isDefinition()) {
         return def->retType.type;
     } else {
-        return core::TypePtr();
+        // Should never happen, as the above checks should be exhaustive.
+        Exception::raise("Invalid QueryResponse object.");
     }
 }
 

@@ -1,0 +1,5 @@
+s(:kwbegin,
+  s(:rescue, nil,
+    s(:resbody,
+      s(:array,
+        s(:const, nil, :LoadError)), nil, nil), nil))

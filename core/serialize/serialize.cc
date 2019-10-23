@@ -244,7 +244,7 @@ void SerializerImpl::pickle(Pickler &p, const Name &what) {
             p.putStr(what.raw.utf8);
             break;
         case NameKind::UNIQUE:
-            p.putU1(what.unique.uniqueNameKind);
+            p.putU1(static_cast<u1>(what.unique.uniqueNameKind));
             p.putU4(what.unique.original._id);
             p.putU4(what.unique.num);
             break;
@@ -1143,7 +1143,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             auto tmp = unpickleExpr(p, gs, file);
             unique_ptr<ast::Reference> ref(static_cast<ast::Reference *>(tmp.release()));
             auto default_ = unpickleExpr(p, gs, file);
-            return make_unique<ast::OptionalArg>(loc, std::move(ref), std::move(default_));
+            return ast::MK::OptionalArg(loc, std::move(ref), std::move(default_));
         }
         case 30: {
             return make_unique<ast::ZSuperArgs>(loc);

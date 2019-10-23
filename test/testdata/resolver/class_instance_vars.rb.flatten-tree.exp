@@ -1,0 +1,109 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Mixin)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Child)
+          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <emptyTree>
+        end
+        ::Alias = ::Parent
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Child1)
+          ::Sorbet::Private::Static.keep_for_ide(::Alias)
+          <emptyTree>
+        end
+        <emptyTree>
+      end
+    end
+  end
+  class ::Parent<<C Parent>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def initialize<initialize>(<blk>)
+      begin
+        @ivar = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+          T.let(1, Integer)
+        end
+        @ivar2 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+          T.let(2, Integer)
+        end
+      end
+    end
+
+    def hi<hi>(<blk>)
+      begin
+        @ivar = 1
+        @ivar2
+      end
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      @@class_var = begin
+        ::Sorbet::Private::Static.keep_for_typechecking(::String)
+        T.let("hi", String)
+      end
+    end
+  end
+  module ::Mixin<<C Mixin>> < ()
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        @@mixin_cvar = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+          T.let(3, Integer)
+        end
+        @@mixin_cvar
+        <emptyTree>
+      end
+    end
+  end
+  class ::Child<<C Child>> < (::Parent, ::Mixin)
+    <emptyTree>
+
+    <emptyTree>
+
+    def child_method<child_method>(<blk>)
+      begin
+        @@class_var
+        @@mixin_cvar
+        @ivar2
+        @undefinedivar
+      end
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        @@class_var
+        @@mixin_cvar
+        @@undefined_cvar
+        ::Sorbet::Private::Static.keep_for_ide(::Mixin)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Child1<<C Child1>> < (::Alias)
+    def self.<static-init><<static-init>>(<blk>)
+      @@class_var
+    end
+  end
+  <emptyTree>
+end

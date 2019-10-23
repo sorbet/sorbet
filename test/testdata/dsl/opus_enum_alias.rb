@@ -4,14 +4,17 @@ extend T::Sig
 
 module Opus
   class Enum
-    extend T::Generic
     def initialize(x = nil)
+    end
+    def self.enums(&blk)
     end
   end
 end
 
 class MyEnum < Opus::Enum
+  enums do
   X = new
+  end
 end
 
 # We probably never want to allow this
@@ -23,7 +26,7 @@ AliasX = MyEnum::X
 # Type alias parsing happens in ResolveConstantsWalk, which is before
 # ResolveSignaturesWalk populates the resultType of static fields declared with
 # T.let.
-TypeAliasX = T.type_alias(MyEnum::X) # error: Constant `MyEnum::X` is not a class or type alias
+TypeAliasX = T.type_alias {MyEnum::X} # error: Constant `MyEnum::X` is not a class or type alias
 
 sig {params(x: AliasX).void} # error: Constant `AliasX` is not a class or type alias
 def with_class_alias(x); end

@@ -1,0 +1,8 @@
+s(:begin,
+  s(:send, nil, :td,
+    s(:send,
+      s(:begin,
+        s(:int, "1_500")), :toString)),
+  s(:block,
+    s(:send,
+      s(:send, nil, :td), :num), nil, nil))

@@ -39,7 +39,7 @@ struct RawName final {
 };
 CheckSize(RawName, 16, 8);
 
-enum UniqueNameKind : u2 {
+enum class UniqueNameKind : u1 {
     Parser,
     Desugar,
     Namer,

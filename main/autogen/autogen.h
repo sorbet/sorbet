@@ -22,15 +22,15 @@ struct DefinitionRef {
     DefinitionRef() : _id(NONE_ID){};
     DefinitionRef(u4 id) : _id(id) {}
 
-    u4 id() {
+    u4 id() const {
         return _id;
     }
 
-    bool exists() {
+    bool exists() const {
         return _id != NONE_ID;
     }
 
-    Definition &data(ParsedFile &pf);
+    const Definition &data(const ParsedFile &pf) const;
 };
 
 struct ReferenceRef {
@@ -38,15 +38,15 @@ struct ReferenceRef {
     ReferenceRef() : _id(NONE_ID){};
     ReferenceRef(u4 id) : _id(id) {}
 
-    u4 id() {
+    u4 id() const {
         return _id;
     }
 
-    bool exists() {
+    bool exists() const {
         return _id != NONE_ID;
     }
 
-    Reference &data(ParsedFile &pf);
+    const Reference &data(const ParsedFile &pf) const;
 };
 
 struct Definition {
@@ -89,9 +89,9 @@ struct ParsedFile {
     std::vector<Reference> refs;
     std::vector<core::NameRef> requires;
 
-    std::string toString(core::Context ctx);
+    std::string toString(core::Context ctx) const;
     std::string toMsgpack(core::Context ctx, int version);
-    std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id);
+    std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id) const;
     std::vector<std::string> listAllClasses(core::Context ctx);
 };
 

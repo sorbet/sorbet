@@ -1,0 +1,7 @@
+s(:if,
+  s(:lvar, :foo),
+  s(:lvar, :bar),
+  s(:if,
+    s(:lvar, :baz),
+    s(:int, "1"),
+    s(:int, "2")))

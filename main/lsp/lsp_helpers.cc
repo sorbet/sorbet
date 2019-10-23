@@ -45,7 +45,7 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
     // static-init for a class
-    if (data->name == core::Names::staticInit()) {
+    if (data->name == core::Names::staticInit() || data->name == core::Names::Constants::AttachedClass()) {
         return true;
     }
     // static-init for a file
@@ -70,7 +70,7 @@ bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view
 constexpr int NUM_ARGS_CUTOFF_FOR_MULTILINE_SIG = 4;
 
 string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
-                    const unique_ptr<core::TypeConstraint> &constraint) {
+                    const core::TypeConstraint *constraint) {
     ENFORCE(method.exists());
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
@@ -197,20 +197,20 @@ string methodDefinition(const core::GlobalState &gs, core::SymbolRef method) {
         argListSuffix = ")";
     }
 
-    auto result = fmt::format("def {}{}{}{}{}", methodNamePrefix, methodName, argListPrefix,
+    auto result = fmt::format("def {}{}{}{}{}; end", methodNamePrefix, methodName, argListPrefix,
                               fmt::join(arguments, argListSeparator), argListSuffix);
     if (arguments.size() > 0 && result.length() >= WIDTH_CUTOFF_FOR_MULTILINE_DEF) {
         argListPrefix = "(\n  ";
         argListSeparator = ",\n  ";
         argListSuffix = "\n)";
-        result = fmt::format("def {}{}{}{}{}", methodNamePrefix, methodName, argListPrefix,
+        result = fmt::format("def {}{}{}{}{}\nend", methodNamePrefix, methodName, argListPrefix,
                              fmt::join(arguments, argListSeparator), argListSuffix);
     }
     return result;
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
-                            core::TypePtr receiver, const unique_ptr<core::TypeConstraint> &constr) {
+                            core::TypePtr receiver, const core::TypeConstraint *constr) {
     core::Context ctx(gs, inWhat);
     auto resultType = type;
     if (auto *proxy = core::cast_type<core::ProxyType>(receiver.get())) {

@@ -445,7 +445,12 @@ class SyncRDoc
 
   private def store
     return @store if defined?(@store)
-    @store = driver.stores.find {|s| s.source == 'ruby'}
+
+    @store = if defined?(@store_path)
+      RDoc::Store.new(@store_path)
+    else
+      driver.stores.find {|s| s.source == 'ruby'}
+    end
     rdoc.store = @store
     @store
   end
@@ -567,6 +572,10 @@ class SyncRDoc
       opts.on("--[no-]diff", "Print changes for changed docs") do |d|
         @diff = d
       end
+
+      opts.on("--rdoc-store=PATH", "Path to the RDoc store to get the documentation from") do |p|
+        @store_path = p
+      end
     end
     parser.parse!
     if argv.empty?
@@ -578,6 +587,11 @@ class SyncRDoc
     store.complete(:private)
 
     argv.each do |dir|
+      if File.exist?(dir) && File.extname(dir) == '.rbi'
+        process_file!(RBIFile.new(dir))
+        next
+      end
+
       Dir.glob(File.join('**', '*.rbi'), base: dir) do |path|
         process_file!(RBIFile.new(File.join(dir, path)))
       end

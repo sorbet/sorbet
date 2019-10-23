@@ -30,36 +30,38 @@ const vector<PrintOptions> print_options({
     {"parse-tree", &Printers::ParseTree},
     {"parse-tree-json", &Printers::ParseTreeJson},
     {"parse-tree-whitequark", &Printers::ParseTreeWhitequark},
-    {"ast", &Printers::Desugared},
-    {"ast-raw", &Printers::DesugaredRaw},
+    {"desugar-tree", &Printers::DesugarTree},
+    {"desugar-tree-raw", &Printers::DesugarTreeRaw},
     {"dsl-tree", &Printers::DSLTree},
     {"dsl-tree-raw", &Printers::DSLTreeRaw},
     {"index-tree", &Printers::IndexTree, true},
     {"index-tree-raw", &Printers::IndexTreeRaw, true},
+    {"name-tree", &Printers::NameTree, true},
+    {"name-tree-raw", &Printers::NameTreeRaw, true},
+    {"resolve-tree", &Printers::ResolveTree, true},
+    {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
+    {"flatten-tree", &Printers::FlattenTree, true},
+    {"flatten-tree-raw", &Printers::FlattenTreeRaw, true},
+    {"ast", &Printers::AST, true},
+    {"ast-raw", &Printers::ASTRaw, true},
+    {"cfg", &Printers::CFG, true},
+    {"cfg-raw", &Printers::CFGRaw, true},
+    {"cfg-json", &Printers::CFGJson, true},
+    {"cfg-proto", &Printers::CFGProto, true},
     {"symbol-table", &Printers::SymbolTable, true},
     {"symbol-table-raw", &Printers::SymbolTableRaw, true},
     {"symbol-table-json", &Printers::SymbolTableJson, true},
     {"symbol-table-full", &Printers::SymbolTableFull, true},
     {"symbol-table-full-raw", &Printers::SymbolTableFullRaw, true},
     {"symbol-table-full-json", &Printers::SymbolTableFullJson, true},
-    {"name-tree", &Printers::NameTree, true},
-    {"name-tree-raw", &Printers::NameTreeRaw, true},
     {"file-table-json", &Printers::FileTableJson, true},
-    {"resolve-tree", &Printers::ResolveTree, true},
-    {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
     {"missing-constants", &Printers::MissingConstants, true},
-    {"flattened-tree", &Printers::FlattenedTree, true},
-    {"flattened-tree-raw", &Printers::FlattenedTreeRaw, true},
-    {"cfg", &Printers::CFG, true},
-    {"cfg-raw", &Printers::CFGRaw, true},
-    {"cfg-json", &Printers::CFGJson, true},
-    {"cfg-proto", &Printers::CFGProto, true},
+    {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
     {"autogen-classlist", &Printers::AutogenClasslist, true},
     {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
     {"autogen-subclasses", &Printers::AutogenSubclasses, true},
-    {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -87,35 +89,37 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         ParseTree,
         ParseTreeJson,
         ParseTreeWhitequark,
-        Desugared,
-        DesugaredRaw,
+        DesugarTree,
+        DesugarTreeRaw,
         DSLTree,
         DSLTreeRaw,
         IndexTree,
         IndexTreeRaw,
+        NameTree,
+        NameTreeRaw,
+        ResolveTree,
+        ResolveTreeRaw,
+        FlattenTree,
+        FlattenTreeRaw,
+        AST,
+        ASTRaw,
+        CFG,
+        CFGRaw,
+        CFGJson,
+        CFGProto,
         SymbolTable,
         SymbolTableRaw,
         SymbolTableJson,
         SymbolTableFull,
         SymbolTableFullRaw,
-        NameTree,
-        NameTreeRaw,
         FileTableJson,
-        ResolveTree,
-        ResolveTreeRaw,
         MissingConstants,
-        FlattenedTree,
-        FlattenedTreeRaw,
-        CFG,
-        CFGRaw,
-        CFGJson,
-        CFGProto,
+        PluginGeneratedCode,
         Autogen,
         AutogenMsgPack,
         AutogenClasslist,
         AutogenAutoloader,
         AutogenSubclasses,
-        PluginGeneratedCode,
     });
 }
 
@@ -343,6 +347,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
     options.add_options("advanced")("enable-experimental-lsp-quick-fix", "Enable experimental LSP feature: Quick Fix");
+    options.add_options("advanced")("enable-experimental-lsp-parse-errors-take-fast-path",
+                                    "Enable experimental LSP feature: Parse errors take the fast path");
     options.add_options("advanced")("enable-all-experimental-lsp-features", "Enable every experimental LSP feature.");
     options.add_options("advanced")(
         "ignore",
@@ -402,6 +408,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("stress-incremental-resolver",
                                "Force incremental updates to discover resolver & namer bugs");
+    options.add_options("dev")("sleep-in-slow-path", "Add some sleeps to slow path to artificially slow it down");
     options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
     options.add_options("dev")("censor-for-snapshot-tests",
@@ -666,6 +673,8 @@ void readOptions(Options &opts,
         opts.lspDocumentSymbolEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+        opts.lspParseErrorsTakeFastPath =
+            enableAllLSPFeatures || raw["enable-experimental-lsp-parse-errors-take-fast-path"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
@@ -777,6 +786,7 @@ void readOptions(Options &opts,
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
+        opts.sleepInSlowPath = raw["sleep-in-slow-path"].as<bool>();
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();

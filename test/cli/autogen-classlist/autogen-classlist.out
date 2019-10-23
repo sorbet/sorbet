@@ -6,8 +6,8 @@ A::Parent
 C::D
 Z
 --- invalid: class in method ---
-test/cli/autogen-classlist/b.rb:5: Parse Error: class definition in method body https://srb.help/2001
+test/cli/autogen-classlist/b.rb:5: class definition in method body https://srb.help/2001
      5 |    class InMethod; end # Not allowed
             ^^^^^
 Errors: 1
-
+Foo

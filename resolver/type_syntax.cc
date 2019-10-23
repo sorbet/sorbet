@@ -179,14 +179,26 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                         break;
                     }
 
+                    bool validBind = false;
                     auto bind = getResultType(ctx, *(send->args.front()), *parent, args);
-                    auto classType = core::cast_type<core::ClassType>(bind.get());
-                    if (!classType) {
+                    if (auto classType = core::cast_type<core::ClassType>(bind.get())) {
+                        sig.bind = classType->symbol;
+                        validBind = true;
+                    } else if (auto appType = core::cast_type<core::AppliedType>(bind.get())) {
+                        // When `T.proc.bind` is used with `T.class_of`, pass it
+                        // through as long as it only has the AttachedClass type
+                        // member.
+                        if (appType->klass.data(ctx)->isSingletonClass(ctx) &&
+                            appType->klass.data(ctx)->typeMembers().size() == 1) {
+                            sig.bind = appType->klass;
+                            validBind = true;
+                        }
+                    }
+
+                    if (!validBind) {
                         if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed `{}`: Can only bind to simple class names", send->fun.show(ctx));
                         }
-                    } else {
-                        sig.bind = classType->symbol;
                     }
 
                     break;
@@ -494,7 +506,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 }
                 return core::Types::untypedUntracked();
             }
-            return core::make_type<core::ClassType>(singleton);
+            return singleton.data(ctx)->externalType(ctx);
         }
         case core::Names::untyped()._id:
             return core::Types::untyped(ctx, args.untypedBlame);
@@ -506,6 +518,19 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 e.setHeader("Only top-level T.self_type is supported");
             }
             return core::Types::untypedUntracked();
+        case core::Names::attachedClass()._id:
+            if (!ctx.owner.data(ctx)->isSingletonClass(ctx)) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("`T.{}` may only be used in a singleton class method context",
+                                core::Names::attachedClass().show(ctx));
+                }
+                return core::Types::untypedUntracked();
+            } else {
+                // All singletons have an AttachedClass type member, created by
+                // `singletonClass`
+                auto attachedClass = ctx.owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+                return attachedClass.data(ctx)->resultType;
+            }
         case core::Names::noreturn()._id:
             return core::Types::bottom();
 
@@ -577,7 +602,8 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
             // want there to be one name for every type; making an alias for a type should always be
             // syntactically declared with T.type_alias.
             if (auto resultType = core::cast_type<core::ClassType>(maybeAliased.data(ctx)->resultType.get())) {
-                if (resultType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum())) {
+                if (resultType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum()) ||
+                    resultType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
                     result.type = maybeAliased.data(ctx)->resultType;
                     return;
                 }
@@ -585,7 +611,13 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
 
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
             if (sym.data(ctx)->isClassOrModule()) {
-                if (sym.data(ctx)->typeArity(ctx) > 0) {
+                // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
+                // same way that we check against types like `Array`
+                bool isBuiltinGeneric = sym == core::Symbols::T_Hash() || sym == core::Symbols::T_Array() ||
+                                        sym == core::Symbols::T_Set() || sym == core::Symbols::T_Range() ||
+                                        sym == core::Symbols::T_Enumerable() || sym == core::Symbols::T_Enumerator();
+
+                if (isBuiltinGeneric || sym.data(ctx)->typeArity(ctx) > 0) {
                     // This set **should not** grow over time.
                     bool isStdlibWhitelisted = sym == core::Symbols::Hash() || sym == core::Symbols::Array() ||
                                                sym == core::Symbols::Set() || sym == core::Symbols::Range() ||
@@ -595,16 +627,22 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                     if (auto e = ctx.state.beginError(i->loc, level)) {
                         e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
                                     sym.show(ctx));
-                        if (sym == core::Symbols::Hash()) {
+                        // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
+                        // if we're already looking at `T::Array` instead.
+                        auto typePrefix = isBuiltinGeneric ? "" : "T::";
+                        if (sym == core::Symbols::Hash() || sym == core::Symbols::T_Hash()) {
                             // Hash is special because it has arity 3 but you're only supposed to write the first 2
-                            e.replaceWith("Add type arguments", i->loc, "T::{}[T.untyped, T.untyped]",
+                            e.replaceWith("Add type arguments", i->loc, "{}{}[T.untyped, T.untyped]", typePrefix,
                                           i->loc.source(ctx));
-                        } else if (isStdlibWhitelisted) {
+                        } else if (isStdlibWhitelisted || isBuiltinGeneric) {
+                            // the default provided here for builtin generic types is 1, and that might need to change
+                            // if we add other builtin generics (but ideally we should never need to do so!)
+                            auto numTypeArgs = isBuiltinGeneric ? 1 : sym.data(ctx)->typeArity(ctx);
                             vector<string> untypeds;
-                            for (int i = 0; i < sym.data(ctx)->typeArity(ctx); i++) {
+                            for (int i = 0; i < numTypeArgs; i++) {
                                 untypeds.emplace_back("T.untyped");
                             }
-                            e.replaceWith("Add type arguments", i->loc, "T::{}[{}]", i->loc.source(ctx),
+                            e.replaceWith("Add type arguments", i->loc, "{}{}[{}]", typePrefix, i->loc.source(ctx),
                                           absl::StrJoin(untypeds, ", "));
                         }
                     }
@@ -825,7 +863,8 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 return;
             }
 
-            auto ctype = core::make_type<core::ClassType>(corrected.data(ctx)->singletonClass(ctx));
+            auto correctedSingleton = corrected.data(ctx)->singletonClass(ctx);
+            auto ctype = core::make_type<core::ClassType>(correctedSingleton);
             core::CallLocs locs{
                 s->loc,
                 recvi->loc,
@@ -835,7 +874,16 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
             auto out = core::Types::dispatchCallWithoutBlock(ctx, ctype, dispatchArgs);
 
             if (out->isUntyped()) {
-                result.type = out;
+                // Using a generic untyped type here will lead to incorrect handling of global state hashing,
+                // where we won't see difference between types with generic arguments.
+                // Thus, while normally we would treat these as untyped, in `sig`s we treat them as proper types, so
+                // that we can correctly hash them.
+                vector<core::TypePtr> targPtrs;
+                targPtrs.reserve(targs.size());
+                for (auto &targ : targs) {
+                    targPtrs.push_back(targ->type);
+                }
+                result.type = core::make_type<core::UnresolvedAppliedType>(correctedSingleton, move(targPtrs));
                 return;
             }
             if (auto *mt = core::cast_type<core::MetaType>(out.get())) {

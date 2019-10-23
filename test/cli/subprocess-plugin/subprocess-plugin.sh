@@ -14,4 +14,4 @@ echo ------ Bad plugin output on single file
 main/sorbet --silence-dev-message --dsl-plugins test/cli/subprocess-plugin/bad_plugin.yaml test/cli/subprocess-plugin/trigger_bad_plugin.rb 2>&1
 echo ------ Bad plugin output on many files
 main/sorbet --silence-dev-message --dsl-plugins test/cli/subprocess-plugin/bad_plugin.yaml test/cli/subprocess-plugin/trigger_bad_plugin.rb a b c d e f 2>&1 \
-  | grep 'Parse Error: unexpected token: syntax error'
+  | grep 'unexpected token kEND'

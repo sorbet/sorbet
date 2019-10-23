@@ -1,0 +1,3 @@
+s(:while,
+  s(:lvar, :foo),
+  s(:send, nil, :meth))

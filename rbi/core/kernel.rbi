@@ -636,13 +636,13 @@ module Kernel
   # Array(nil)         #=> []
   # Array(1)           #=> [1]
   # ```
-  sig {params(x: NilClass).returns([])}
   sig do
     params(
         x: BasicObject,
     )
     .returns(T::Array[T.untyped])
   end
+  sig {params(x: NilClass).returns([])}
   def Array(x); end
 
   # Create a new
@@ -1777,6 +1777,14 @@ module Kernel
     .returns(NilClass)
   end
   def p(*arg0); end
+
+  # Outputs `obj` to `out` in pretty printed format of `width` columns in width.
+  #
+  # If `out` is omitted, `$>` is assumed. If `width` is omitted, 79 is assumed.
+  #
+  # [`PP.pp`](https://docs.ruby-lang.org/en/2.6.0/PP.html#method-c-pp) returns
+  # `out`.
+  def pp(obj, out = nil, width = nil); end
 
   # If called without an argument, or if `max.to_i.abs == 0`, rand returns a
   # pseudo-random floating point number between 0.0 and 1.0, including 0.0 and

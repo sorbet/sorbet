@@ -1,2 +1,2 @@
 # typed: false
-def BEGIN # error: Parse Error: unexpected token: syntax error
+def BEGIN # error: unexpected token $end

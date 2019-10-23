@@ -1,4 +1,22 @@
 digraph "array.rb" {
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
+    color = blue;
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(TestArray) = alias <C TestArray>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(TestArray))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::TestArray#an_int" {
     label = "::TestArray#an_int";
     color = blue;
@@ -60,7 +78,7 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
     "bb::<Class:TestArray>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:TestArray>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(TestArray) = cast(<self>: NilClass, T.class_of(TestArray));\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(TestArray).sig()\l<selfRestore>$6: T.class_of(TestArray) = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(TestArray) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U TestArray>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestArray>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(TestArray).sig()\l<selfRestore>$6: T.class_of(TestArray) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_0" -> "bb::<Class:TestArray>#<static-init>_2" [style="bold"];
@@ -94,7 +112,7 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
     "bb::<Class:TestArray>#<static-init>_6" -> "bb::<Class:TestArray>#<static-init>_7" [style="tapered"];
 
     "bb::<Class:TestArray>#<static-init>_7" [
-        label = "block[id=7](<selfRestore>$16: T.class_of(TestArray))\l<statTemp>$13: Sorbet::Private::Static::Void = Solve<sig>\l<statTemp>$24: T.class_of(Sorbet::Private::Static) = alias <C Static>\lkeep_for_ide$26: T.class_of(T) = alias <C T>\l<statTemp>$25: T.class_of(T::Sig) = alias <C Sig>\l<statTemp>$23: Sorbet::Private::Static::Void = <statTemp>$24: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$25: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=7](<selfRestore>$16: T.class_of(TestArray))\l<statTemp>$13: Sorbet::Private::Static::Void = Solve<sig>\l<statTemp>$24: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$25: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$26: T.class_of(T) = alias <C T>\l<statTemp>$23: Sorbet::Private::Static::Void = <statTemp>$24: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$25: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_7" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];

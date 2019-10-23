@@ -1,0 +1,6 @@
+s(:def, :f,
+  s(:args,
+    s(:optarg, :var,
+      s(:defined?,
+        s(:lvar, :var)))),
+  s(:lvar, :var))

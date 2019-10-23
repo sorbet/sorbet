@@ -11,9 +11,9 @@
 
 //
 // This file defines the IR that most of the middle phases of Sorbet operate on
-// and manipulate It aims to be a middle ground between the parser output (very
-// verbose and fine grained) and the CFG data structure (very easy to typecheck
-// but very hard to do ad-hoc transformations on).
+// and manipulate. It aims to be a middle ground between the parser output
+// (very verbose and fine grained) and the CFG data structure (very easy to
+// typecheck but very hard to do ad-hoc transformations on).
 //
 // This IR is best learned by example. Try using the `--print` option to sorbet
 // on a handful of test/testdata files. Since there are multiple phases that
@@ -54,6 +54,23 @@ public:
 struct ParsedFile {
     std::unique_ptr<ast::Expression> tree;
     core::FileRef file;
+};
+
+/**
+ * Stores a vector of `ParsedFile`s. May be empty if pass was canceled or encountered an error.
+ * TODO: Modify to store reason if we ever have multiple reasons for a pass to stop. Currently, it's only empty if the
+ * pass is canceled in LSP mode.
+ */
+class ParsedFilesOrCancelled final {
+private:
+    std::optional<std::vector<ParsedFile>> trees;
+
+public:
+    ParsedFilesOrCancelled();
+    ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees);
+
+    bool hasResult() const;
+    std::vector<ParsedFile> &result();
 };
 
 template <class To> To *cast_tree(Expression *what) {
@@ -463,6 +480,10 @@ public:
 
     bool isDSLSynthesized() const {
         return (flags & DSL_SYNTHESIZED) != 0;
+    }
+
+    bool isPrivateOk() const {
+        return (flags & PRIVATE_OK) != 0;
     }
 
 private:

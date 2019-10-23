@@ -1002,7 +1002,12 @@ string KeywordArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const
 }
 
 string OptionalArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return this->expr->toStringWithTabs(gs, tabs) + " = " + this->default_->toStringWithTabs(gs, tabs);
+    stringstream buf;
+    buf << this->expr->toStringWithTabs(gs, tabs);
+    if (this->default_) {
+        buf << " = " << this->default_->toStringWithTabs(gs, tabs);
+    }
+    return buf.str();
 }
 
 string ShadowArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
@@ -1160,8 +1165,10 @@ string OptionalArg::showRaw(const core::GlobalState &gs, int tabs) {
     buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "expr = " + expr->showRaw(gs, tabs + 1) << '\n';
-    printTabs(buf, tabs + 1);
-    buf << "default_ = " + default_->showRaw(gs, tabs + 1) << '\n';
+    if (default_) {
+        printTabs(buf, tabs + 1);
+        buf << "default_ = " + default_->showRaw(gs, tabs + 1) << '\n';
+    }
     printTabs(buf, tabs);
     buf << "}";
 
@@ -1186,6 +1193,20 @@ string ShadowArg::nodeName() {
 
 string BlockArg::nodeName() {
     return "BlockArg";
+}
+
+ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
+ParsedFilesOrCancelled::ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees) : trees(move(trees)) {}
+
+bool ParsedFilesOrCancelled::hasResult() const {
+    return trees.has_value();
+}
+
+vector<ParsedFile> &ParsedFilesOrCancelled::result() {
+    if (trees.has_value()) {
+        return trees.value();
+    }
+    Exception::raise("Attempted to retrieve result of an AST pass that did not complete.");
 }
 
 } // namespace sorbet::ast

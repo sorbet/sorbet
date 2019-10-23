@@ -12,6 +12,7 @@
 #include "ProgressIndicator.h"
 #include "absl/strings/escaping.h" // BytesToHexString
 #include "absl/strings/match.h"
+#include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
@@ -154,11 +155,11 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
         ast = ast::desugar::node2Tree(ctx, move(parseTree));
     }
-    if (print.Desugared.enabled) {
-        print.Desugared.fmt("{}\n", ast->toStringWithTabs(gs, 0));
+    if (print.DesugarTree.enabled) {
+        print.DesugarTree.fmt("{}\n", ast->toStringWithTabs(gs, 0));
     }
-    if (print.DesugaredRaw.enabled) {
-        print.DesugaredRaw.fmt("{}\n", ast->showRaw(gs));
+    if (print.DesugarTreeRaw.enabled) {
+        print.DesugarTreeRaw.fmt("{}\n", ast->showRaw(gs));
     }
     return ast;
 }
@@ -178,7 +179,7 @@ ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
 }
 
 ast::ParsedFile emptyParsedFile(core::FileRef file) {
-    return {make_unique<ast::EmptyTree>(), file};
+    return {ast::MK::EmptyTree(), file};
 }
 
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
@@ -676,18 +677,18 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
 }
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts) {
-    ast::ParsedFile result{make_unique<ast::EmptyTree>(), resolved.file};
+    ast::ParsedFile result{ast::MK::EmptyTree(), resolved.file};
     core::FileRef f = resolved.file;
 
     resolved = definition_validator::runOne(ctx, std::move(resolved));
 
     resolved = flatten::runOne(ctx, move(resolved));
 
-    if (opts.print.FlattenedTree.enabled) {
-        opts.print.FlattenedTree.fmt("{}\n", resolved.tree->toString(ctx));
+    if (opts.print.FlattenTree.enabled || opts.print.AST.enabled) {
+        opts.print.FlattenTree.fmt("{}\n", resolved.tree->toString(ctx));
     }
-    if (opts.print.FlattenedTreeRaw.enabled) {
-        opts.print.FlattenedTreeRaw.fmt("{}\n", resolved.tree->showRaw(ctx));
+    if (opts.print.FlattenTreeRaw.enabled || opts.print.ASTRaw.enabled) {
+        opts.print.FlattenTreeRaw.fmt("{}\n", resolved.tree->showRaw(ctx));
     }
 
     if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::RESOLVER) {
@@ -712,6 +713,9 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         {
             core::ErrorRegion errs(ctx, f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->finishTypecheckFile(ctx.state, f);
+            }
         }
         if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("}}\n\n");
@@ -832,10 +836,13 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return what;
 }
 
-vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
+ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                    const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
     try {
         what = name(*gs, move(what), opts, skipConfigatron);
+        if (gs->wasTypecheckingCanceled()) {
+            return ast::ParsedFilesOrCancelled();
+        }
 
         for (auto &named : what) {
             if (opts.print.NameTree.enabled) {
@@ -847,7 +854,7 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         }
 
         if (opts.stopAfterPhase == options::Phase::NAMER) {
-            return what;
+            return ast::ParsedFilesOrCancelled(move(what));
         }
 
         core::MutableContext ctx(*gs, core::Symbols::root());
@@ -861,7 +868,11 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
             }
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
-            what = resolver::Resolver::run(ctx, move(what), workers);
+            auto maybeResult = resolver::Resolver::run(ctx, move(what), workers);
+            if (!maybeResult.hasResult()) {
+                return maybeResult;
+            }
+            what = move(maybeResult.result());
         }
         if (opts.stressIncrementalResolver) {
             auto symbolsBefore = gs->symbolsUsed();
@@ -907,11 +918,11 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         what = printMissingConstants(*gs, opts, move(what));
     }
 
-    return what;
+    return ast::ParsedFilesOrCancelled(move(what));
 }
 
-vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                  const options::Options &opts, WorkerPool &workers) {
+ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                      const options::Options &opts, WorkerPool &workers) {
     vector<ast::ParsedFile> typecheck_result;
 
     {
@@ -943,7 +954,8 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                 int processedByThread = 0;
 
                 {
-                    for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                    for (auto result = fileq->try_pop(job); !result.done() && !ctx.state.wasTypecheckingCanceled();
+                         result = fileq->try_pop(job)) {
                         if (result.gotItem()) {
                             processedByThread++;
                             core::FileRef file = job.file;
@@ -975,6 +987,9 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
                     gs->errorQueue->flushErrors();
+                    if (ctx.state.wasTypecheckingCanceled()) {
+                        return ast::ParsedFilesOrCancelled();
+                    }
                 }
             }
         }
@@ -1030,7 +1045,7 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
             plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
         }
 #endif
-        return typecheck_result;
+        return ast::ParsedFilesOrCancelled(move(typecheck_result));
     }
 }
 
@@ -1092,7 +1107,8 @@ core::UsageHash getAllNames(const core::GlobalState &gs, unique_ptr<ast::Express
     return move(collector.acc);
 };
 
-core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
+core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger,
+                               bool lspParseErrorsTakeFastPath) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
     unique_ptr<core::GlobalState> lgs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
@@ -1110,11 +1126,13 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
 
     single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore));
     auto errs = lgs->errorQueue->drainAllErrors();
-    for (auto &e : errs) {
-        if (e->what == core::errors::Parser::ParserError) {
-            core::GlobalStateHash invalid;
-            invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
-            return {move(invalid), {}};
+    if (!lspParseErrorsTakeFastPath) {
+        for (auto &e : errs) {
+            if (e->what == core::errors::Parser::ParserError) {
+                core::GlobalStateHash invalid;
+                invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
+                return {move(invalid), {}};
+            }
         }
     }
     auto allNames = getAllNames(*lgs, single[0].tree);

@@ -27,12 +27,8 @@ Begin {
             args = [
             ]
           }
-          then_ = DString {
-            nodes = [
-              String {
-                val = <U a>
-              }
-            ]
+          then_ = String {
+            val = <U a>
           }
           else_ = Integer {
             val = "1"

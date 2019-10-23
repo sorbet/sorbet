@@ -1,0 +1,3 @@
+s(:until,
+  s(:lvar, :foo),
+  s(:send, nil, :meth))

@@ -20,7 +20,6 @@ s(:begin,
     s(:int, "1")),
   s(:send, nil, :puts,
     s(:int, "1"),
-    s(:dstr,
-      s(:str, :a string)),
+    s(:str, :a string),
     s(:gvar, :$global),
     s(:nth_ref, 1)))

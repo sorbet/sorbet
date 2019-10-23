@@ -1,4 +1,7 @@
-class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4})
+class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=test/testdata/dsl/attr_multi.rb start=3:1 end=23:4})
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:1 end=23:4}
+      argument <blk><block> @ Loc {file=test/testdata/dsl/attr_multi.rb start=??? end=???}
   class <C <U Test>> < <C <U Object>> () @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:1 end=3:11}
     field <C <U Test>><U @a> -> String | NilClass @ Loc {file=test/testdata/dsl/attr_multi.rb start=7:18 end=7:19}
     field <C <U Test>><U @b> -> Integer | NilClass @ Loc {file=test/testdata/dsl/attr_multi.rb start=10:18 end=10:19}
@@ -33,7 +36,8 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <C <U Test>><U i=> (i, <blk>) -> String @ Loc {file=test/testdata/dsl/attr_multi.rb start=22:3 end=22:21}
       argument i<> -> String @ Loc {file=test/testdata/dsl/attr_multi.rb start=22:20 end=22:21}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/dsl/attr_multi.rb start=??? end=???}
-  class <S <C <U Test>> $1> < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:7 end=3:11}
+  class <S <C <U Test>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:7 end=3:11}
+    type-member(+) <S <C <U Test>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U Test>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=Test) @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:7 end=3:11}
     method <S <C <U Test>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/dsl/attr_multi.rb start=3:1 end=23:4}
       argument <blk><block> @ Loc {file=test/testdata/dsl/attr_multi.rb start=??? end=???}
 

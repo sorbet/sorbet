@@ -1,0 +1,29 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::C)
+        <emptyTree>
+      end
+    end
+  end
+  class ::C<<C C>> < (::<todo sym>)
+    def self.<static-init><<static-init>>(<blk>)
+      ::C::L = begin
+        ::Sorbet::Private::Static.keep_for_typechecking(::T.proc().params({:"x" => ::Integer}).returns(::Integer))
+        T.let(<self>.lambda() do |x$1|
+          x$1.*(x$1)
+        end, AppliedType {
+          klass = <C <U Proc1>>
+          targs = [
+            <C <U Return>> = Integer
+            <C <U Arg0>> = Integer
+          ]
+        })
+      end
+    end
+  end
+  <emptyTree>
+end

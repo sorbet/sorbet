@@ -623,7 +623,14 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                 }
 
                 bool first = true;
+                vector<Loc> sortedLocs;
+                sortedLocs.reserve(locs_.size());
                 for (const auto loc : locs_) {
+                    sortedLocs.emplace_back(loc);
+                }
+                fast_sort(sortedLocs,
+                          [&](const Loc &lhs, const Loc &rhs) { return lhs.showRaw(gs) < rhs.showRaw(gs); });
+                for (const auto loc : sortedLocs) {
                     if (absl::StartsWith(loc.file().data(gs).path(), payloadPathPrefix)) {
                         continue;
                     }
@@ -803,6 +810,9 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     }
     SymbolRef selfRef = this->ref(gs);
 
+    // avoid using `this` after the call to gs.enterTypeMember
+    auto selfLoc = this->loc();
+
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
     singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
     SymbolData singletonInfo = singleton.data(gs);
@@ -811,6 +821,14 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singletonInfo->members()[Names::attached()] = selfRef;
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
+
+    auto tp = gs.enterTypeMember(selfLoc, singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+
+    // Initialize the bounds of AttachedClass as todo, as they will be updated
+    // to the externalType of the attached class for the upper bound, and bottom
+    // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
+    auto todo = make_type<ClassType>(Symbols::todo());
+    tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
 
     selfRef.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;
@@ -871,8 +889,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
     ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedSubclasses should always be Array");
     auto currentClasses = appliedType->targs[0];
-    // Abusing T.any to be list cons, with T.noreturn as the empty list.
-    // (Except it's not, because Types::lub is too smart, and drops the T.noreturn to prevent allocating a T.any)
+
     auto iter = currentClasses.get();
     OrType *orT = nullptr;
     while ((orT = cast_type<OrType>(iter))) {
@@ -1103,7 +1120,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
         if (!type) {
             type = Types::untypedUntracked();
         }
-        result = mix(result, type);
+        result = mix(result, type->hash(gs));
         result = mix(result, _hash(arg.name.data(gs)->shortName(gs)));
     }
     for (const auto &e : typeParams) {
@@ -1195,8 +1212,24 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
     fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
         auto lhsShort = lhs.first.data(gs)->shortName(gs);
         auto rhsShort = rhs.first.data(gs)->shortName(gs);
-        return lhsShort < rhsShort ||
-               (lhsShort == rhsShort && lhs.first.data(gs)->showRaw(gs) < rhs.first.data(gs)->showRaw(gs));
+        auto compareShort = lhsShort.compare(rhsShort);
+        if (compareShort != 0) {
+            return compareShort < 0;
+        }
+        auto lhsRaw = lhs.first.data(gs)->showRaw(gs);
+        auto rhsRaw = rhs.first.data(gs)->showRaw(gs);
+        auto compareRaw = lhsRaw.compare(rhsRaw);
+        if (compareRaw != 0) {
+            return compareRaw < 0;
+        }
+        auto lhsSym = lhs.second.data(gs)->showRaw(gs);
+        auto rhsSym = rhs.second.data(gs)->showRaw(gs);
+        auto compareSym = lhsSym.compare(rhsSym);
+        if (compareSym != 0) {
+            return compareSym < 0;
+        }
+        ENFORCE(false, "no stable sort");
+        return 0;
     });
     return result;
 }

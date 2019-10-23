@@ -1,0 +1,2 @@
+s(:defs,
+  s(:lvar, :foo), :foo, nil, nil)

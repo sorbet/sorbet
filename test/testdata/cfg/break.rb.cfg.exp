@@ -64,7 +64,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<statTemp>$5: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$3: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$5: T.untyped)\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).sig()\l<selfRestore>$10: T.class_of(<root>) = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$3: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$5: T.untyped)\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).sig()\l<selfRestore>$10: T.class_of(<root>) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
@@ -171,7 +171,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_19" -> "bb::<Class:<root>>#<static-init>_20" [style="bold"];
     "bb::<Class:<root>>#<static-init>_20" [
-        label = "block[id=20](c: T.nilable(Symbol))\l<statTemp>$77: T.class_of(T) = alias <C T>\l<statTemp>$76: T.nilable(Symbol) = <statTemp>$77: T.class_of(T).reveal_type(c: T.nilable(Symbol))\l<statTemp>$80: T.class_of(Sorbet::Private::Static) = alias <C Static>\lkeep_for_ide$82: T.class_of(T) = alias <C T>\l<statTemp>$81: T.class_of(T::Sig) = alias <C Sig>\l<statTemp>$79: Sorbet::Private::Static::Void = <statTemp>$80: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$81: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=20](c: T.nilable(Symbol))\l<statTemp>$77: T.class_of(T) = alias <C T>\l<statTemp>$76: T.nilable(Symbol) = <statTemp>$77: T.class_of(T).reveal_type(c: T.nilable(Symbol))\l<statTemp>$80: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$81: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$82: T.class_of(T) = alias <C T>\l<statTemp>$79: Sorbet::Private::Static::Void = <statTemp>$80: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$81: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_20" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];

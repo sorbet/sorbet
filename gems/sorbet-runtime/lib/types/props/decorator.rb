@@ -10,11 +10,11 @@
 class T::Props::Decorator
   extend T::Sig
 
-  Rules = T.type_alias(T::Hash[Symbol, T.untyped])
-  DecoratedClass = T.type_alias(T.untyped) # T.class_of(T::Props), but that produces circular reference errors in some circumstances
-  DecoratedInstance = T.type_alias(T.untyped) # Would be T::Props, but that produces circular reference errors in some circumstances
-  PropType = T.type_alias(T.any(T::Types::Base, T::Props::CustomType))
-  PropTypeOrClass = T.type_alias(T.any(PropType, Module))
+  Rules = T.type_alias {T::Hash[Symbol, T.untyped]}
+  DecoratedClass = T.type_alias {T.untyped} # T.class_of(T::Props), but that produces circular reference errors in some circumstances
+  DecoratedInstance = T.type_alias {T.untyped} # Would be T::Props, but that produces circular reference errors in some circumstances
+  PropType = T.type_alias {T.any(T::Types::Base, T::Props::CustomType)}
+  PropTypeOrClass = T.type_alias {T.any(PropType, Module)}
 
   class NoRulesError < StandardError; end
 
@@ -156,10 +156,27 @@ class T::Props::Decorator
       else
         type_object.valid?(val)
       end
+
     if !valid
       raise T::Props::InvalidValueError.new("Can't set #{@class.name}.#{prop} to #{val.inspect} " \
         "(instance of #{val.class}) - need a #{type_object}")
     end
+  rescue T::Props::InvalidValueError => err
+    caller_loc = T.must(caller_locations(8, 1))[0]
+
+    pretty_message = "Parameter '#{prop}': #{err.message}\n" \
+      "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n"
+
+    T::Configuration.call_validation_error_handler(
+      nil,
+      message: err.message,
+      pretty_message: pretty_message,
+      kind: 'Parameter',
+      name: prop,
+      type: type,
+      value: val,
+      location: caller_loc,
+    )
   end
 
   # For performance, don't use named params here.
@@ -330,6 +347,7 @@ class T::Props::Decorator
     .void
   end
   def prop_defined(name, cls, rules={})
+    cls = T::Utils.resolve_alias(cls)
     if rules[:optional] == true
       T::Configuration.hard_assert_handler(
         'Use of `optional: true` is deprecated, please use `T.nilable(...)` instead.',
@@ -486,11 +504,7 @@ class T::Props::Decorator
   sig {params(name: Symbol, rules: Rules).void}
   private def define_getter_and_setter(name, rules)
     T::Configuration.without_ruby_warnings do
-      if rules[:immutable]
-        @class.send(:define_method, "#{name}=") do |_x|
-          raise T::Props::ImmutableProp.new("#{self.class}##{name} cannot be modified after creation.")
-        end
-      else
+      if !rules[:immutable]
         @class.send(:define_method, "#{name}=") do |x|
           self.class.decorator.prop_set(self, name, x, rules)
         end
@@ -559,6 +573,9 @@ class T::Props::Decorator
   TYPES_NOT_NEEDING_CLONE = [TrueClass, FalseClass, NilClass, Symbol, String, Numeric]
   if defined?(Opus) && defined?(Opus::Enum)
     TYPES_NOT_NEEDING_CLONE << Opus::Enum
+  end
+  if defined?(T::Enum)
+    TYPES_NOT_NEEDING_CLONE << T::Enum
   end
 
   sig {params(type: PropType).returns(T::Boolean)}

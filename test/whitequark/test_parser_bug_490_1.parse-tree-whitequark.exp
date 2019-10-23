@@ -1,0 +1,5 @@
+s(:def, :m, nil,
+  s(:sclass,
+    s(:self),
+    s(:module,
+      s(:const, nil, :M), nil)))

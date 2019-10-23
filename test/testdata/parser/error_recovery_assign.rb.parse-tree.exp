@@ -1,0 +1,11 @@
+DefMethod {
+  name = <U test_bad_assign>
+  args = Args {
+    args = [
+      Arg {
+        name = <U x>
+      }
+    ]
+  }
+  body = NULL
+}

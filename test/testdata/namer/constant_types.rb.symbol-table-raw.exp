@@ -1,4 +1,7 @@
-class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4})
+class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=test/testdata/namer/constant_types.rb start=3:1 end=10:4})
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/constant_types.rb start=3:1 end=10:4}
+      argument <blk><block> @ Loc {file=test/testdata/namer/constant_types.rb start=??? end=???}
   module <C <U Constants>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/constant_types.rb start=3:1 end=3:17}
     static-field <C <U Constants>><C <U A>> -> Integer(1) @ Loc {file=test/testdata/namer/constant_types.rb start=4:3 end=4:4}
     static-field <C <U Constants>><C <U B>> -> String("hi") @ Loc {file=test/testdata/namer/constant_types.rb start=5:3 end=5:4}
@@ -16,7 +19,8 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
         <C <U Elem>> = String
       ]
     } @ Loc {file=test/testdata/namer/constant_types.rb start=9:3 end=9:4}
-  class <S <C <U Constants>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/constant_types.rb start=3:8 end=3:17}
+  class <S <C <U Constants>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/constant_types.rb start=3:8 end=3:17}
+    type-member(+) <S <C <U Constants>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U Constants>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=Constants) @ Loc {file=test/testdata/namer/constant_types.rb start=3:8 end=3:17}
     method <S <C <U Constants>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/constant_types.rb start=3:1 end=10:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/constant_types.rb start=??? end=???}
 

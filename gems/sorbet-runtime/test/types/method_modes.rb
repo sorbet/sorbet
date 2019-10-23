@@ -95,7 +95,7 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
       klass.new.foo
     end
 
-    it "raises when overriding a standard method with .override" do
+    it "succeeds when overriding a standard method with .override" do
       parent = Class.new do
         extend T::Sig
         extend T::Helpers
@@ -109,16 +109,6 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         sig {override.returns(Object)}
         def foo; end
       end
-
-      err = assert_raises(RuntimeError) do
-        klass.new.foo
-      end
-
-      assert_includes(
-        err.message,
-        "You declared `foo` as .override, but the method it overrides is not declared as `overridable` or `abstract`.\n" \
-        "  Parent definition: #{parent} at #{__FILE__}"
-      )
     end
 
     it "succeeds when overriding an unannotated method with bare sig" do

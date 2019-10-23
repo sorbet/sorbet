@@ -76,7 +76,11 @@ class NameInserter {
     unique_ptr<ast::Expression> arg2Symbol(core::MutableContext ctx, int pos, ast::ParsedArg parsedArg) {
         if (pos < ctx.owner.data(ctx)->arguments().size()) {
             // TODO: check that flags match;
-            auto localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
+            unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
+            if (parsedArg.default_) {
+                localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr), move(parsedArg.default_));
+            }
+
             ctx.owner.data(ctx)->arguments()[pos].loc = parsedArg.loc;
             return move(localExpr);
         }
@@ -110,7 +114,7 @@ class NameInserter {
 
         if (parsedArg.default_) {
             argInfo.flags.isDefault = true;
-            localExpr = make_unique<ast::OptionalArg>(parsedArg.loc, move(localExpr), move(parsedArg.default_));
+            localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr), move(parsedArg.default_));
         }
 
         if (parsedArg.keyword) {
@@ -254,6 +258,13 @@ public:
                 }
             } else {
                 klass->symbol.data(ctx)->setIsModule(isModule);
+                auto renamed = ctx.state.findRenamedSymbol(klass->symbol.data(ctx)->owner, klass->symbol);
+                if (renamed.exists()) {
+                    if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                        e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx)->show(ctx));
+                        e.addErrorLine(renamed.data(ctx)->loc(), "Previous definition");
+                    }
+                }
             }
         }
         return klass;
@@ -387,7 +398,14 @@ public:
                 }
             }
         }
-        return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
+
+        ast::InsSeq::STATS_store retSeqs;
+        auto loc = klass->declLoc;
+        retSeqs.emplace_back(std::move(klass));
+        for (auto &stat : ideSeqs) {
+            retSeqs.emplace_back(std::move(stat));
+        }
+        return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
     ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ast::ParsedArg> parsedArgs) {
@@ -486,7 +504,7 @@ public:
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                 if (sym != ctx.owner) {
-                    // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
+                    // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader(
                         "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
@@ -494,7 +512,7 @@ public:
                     e.addErrorLine(ctx.owner.data(ctx)->loc(), "Previous alias definition");
                     e.addErrorLine(sym.data(ctx)->loc(), "Dealiased definition");
                 } else {
-                    // TODO(jez) Subtracting 1 because of the block arg we added everywhere.
+                    // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
                                 sym.show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
@@ -724,14 +742,15 @@ public:
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Types must be defined in class or module scopes");
             }
-            return make_unique<ast::EmptyTree>();
+            return ast::MK::EmptyTree();
         }
         if (ctx.owner == core::Symbols::root()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
                 e.setHeader("`{}` cannot be used at the top-level", "type_member");
             }
-            auto send =
-                ast::MK::Send1(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(), ast::MK::Untyped(asgn->loc));
+            auto send = ast::MK::Send0Block(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(),
+                                            ast::MK::Block0(asgn->loc, ast::MK::Untyped(asgn->loc)));
+
             return handleAssignment(ctx, make_unique<ast::Assign>(asgn->loc, std::move(asgn->lhs), std::move(send)));
         }
 
@@ -816,13 +835,9 @@ public:
             }
             sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
 
-            // Ensure that every type member has a LambdaParam with bounds, but give
-            // both bounds as T.untyped. The reason for this is that the bounds will
-            // be fixed up in the resolver, but if the type is used out of order (as
-            // in test/testdata/todo/fixed_ordering.rb) `T.untyped` will be used for
-            // the value of the type, instead of `<any>`
-            auto untyped = core::Types::untyped(ctx, sym);
-            sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, untyped, untyped);
+            // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
+            auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
+            sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, todo, todo);
 
             if (isTypeTemplate) {
                 auto context = ctx.owner.data(ctx)->enclosingClass(ctx);

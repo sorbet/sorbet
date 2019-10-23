@@ -1,0 +1,3 @@
+s(:send,
+  s(:lvar, :foo), :fun,
+  s(:lvar, :bar))

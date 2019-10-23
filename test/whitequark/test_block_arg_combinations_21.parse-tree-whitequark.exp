@@ -1,0 +1,8 @@
+s(:block,
+  s(:send, nil, :f),
+  s(:args,
+    s(:arg, :a),
+    s(:optarg, :o,
+      s(:int, "1")),
+    s(:arg, :p),
+    s(:blockarg, :b)), nil)

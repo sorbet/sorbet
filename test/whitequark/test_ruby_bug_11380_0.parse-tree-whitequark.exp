@@ -1,0 +1,9 @@
+s(:block,
+  s(:send, nil, :p,
+    s(:block,
+      s(:send, nil, :lambda), nil,
+      s(:sym, :hello)),
+    s(:hash,
+      s(:pair,
+        s(:sym, :a),
+        s(:int, "1")))), nil, nil)

@@ -744,5 +744,16 @@ public:
     virtual std::string typeName() const final;
 };
 
+class UnresolvedAppliedType final : public ClassType {
+public:
+    const core::SymbolRef klass;
+    const std::vector<TypePtr> targs;
+    UnresolvedAppliedType(SymbolRef klass, std::vector<TypePtr> targs)
+        : ClassType(core::Symbols::untyped()), klass(klass), targs(std::move(targs)){};
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string typeName() const final;
+};
+
 } // namespace sorbet::core
 #endif // SORBET_TYPES_H

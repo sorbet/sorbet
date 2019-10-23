@@ -22,7 +22,6 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
     vector<unique_ptr<ast::Expression>> empty;
 
     if (ctx.state.runningUnderAutogen) {
-        // TODO(jez) Verify whether this DSL pass is safe to run in for autogen
         return empty;
     }
 
@@ -87,7 +86,7 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
         unique_ptr<ast::Reference> arg = ast::MK::Local(nameLoc, name);
         if (implied) {
             auto default_ = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
-            arg = make_unique<ast::OptionalArg>(loc, move(arg), move(default_));
+            arg = ast::MK::OptionalArg(loc, move(arg), move(default_));
         }
         stats.emplace_back(ast::MK::Method1(loc, loc, name, move(arg), ast::MK::EmptyTree(),
                                             ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));

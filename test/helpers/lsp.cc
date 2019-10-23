@@ -8,6 +8,19 @@
 namespace sorbet::test {
 using namespace std;
 
+string filePathToUri(string_view prefixUrl, string_view filePath) {
+    return fmt::format("{}/{}", prefixUrl, filePath);
+}
+
+string uriToFilePath(string_view prefixUrl, string_view uri) {
+    if (uri.substr(0, prefixUrl.length()) != prefixUrl) {
+        ADD_FAILURE() << fmt::format(
+            "Unrecognized URI: `{}` is not contained in root URI `{}`, and thus does not correspond to a test file.",
+            uri, prefixUrl);
+        return "";
+    }
+    return string(uri.substr(prefixUrl.length() + 1));
+}
 template <typename T = DynamicRegistrationOption>
 std::unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
     auto option = std::make_unique<T>();
@@ -230,6 +243,38 @@ optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMess
         return nullopt;
     }
     return (*publishDiagnosticParams).get();
+}
+
+unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, const Range &range, int &nextId,
+                                                    string_view filename, string_view uriPrefix) {
+    auto uri = filePathToUri(uriPrefix, filename);
+    auto pos = make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(uri), range.start->copy());
+    auto id = nextId++;
+    auto msg =
+        make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion, move(pos)));
+    auto responses = lspWrapper.getLSPResponsesFor(move(msg));
+    if (responses.size() != 1) {
+        ADD_FAILURE() << "Expected to get 1 response";
+        return nullptr;
+    }
+    auto &responseMsg = responses.at(0);
+    if (!responseMsg->isResponse()) {
+        ADD_FAILURE() << "Expected response to actually be a response.";
+    }
+    auto &response = responseMsg->asResponse();
+    if (!response.result.has_value()) {
+        ADD_FAILURE() << "Expected result to have a value.";
+    }
+
+    auto completionList = move(get<unique_ptr<CompletionList>>(*response.result));
+    fast_sort(completionList->items, [&](const auto &left, const auto &right) -> bool {
+        string leftText = left->sortText.has_value() ? left->sortText.value() : left->label;
+        string rightText = right->sortText.has_value() ? right->sortText.value() : right->label;
+
+        return leftText < rightText;
+    });
+
+    return completionList;
 }
 
 vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view rootUri, LSPWrapper &lspWrapper,

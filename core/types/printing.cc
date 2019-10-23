@@ -38,6 +38,15 @@ string UnresolvedClassType::show(const GlobalState &gs) const {
         fmt::map_join(this->names, "::", [&](const auto &el) -> string { return el.data(gs)->show(gs); }));
 }
 
+string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    return this->show(gs);
+}
+
+string UnresolvedAppliedType::show(const GlobalState &gs) const {
+    return fmt::format("{}[{}] (unresolved)", this->klass.data(gs)->show(gs),
+                       fmt::map_join(targs, ", ", [&](auto targ) { return targ->show(gs); }));
+}
+
 string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("{}({})", this->underlying()->toStringWithTabs(gs, tabs), showValue(gs));
 }
@@ -370,6 +379,8 @@ string AppliedType::show(const GlobalState &gs) const {
     for (auto typeMember : typeMembers) {
         if (typeMember.data(gs)->isFixed()) {
             it = targs.erase(it);
+        } else if (typeMember.data(gs)->name == core::Names::Constants::AttachedClass()) {
+            it = targs.erase(it);
         } else if (this->klass == Symbols::Hash() && typeMember == typeMembers.back()) {
             it = targs.erase(it);
         } else {
@@ -424,6 +435,10 @@ string TypeVar::typeName() const {
 
 string UnresolvedClassType::typeName() const {
     return "UnresolvedClassType";
+}
+
+string UnresolvedAppliedType::typeName() const {
+    return "UnresolvedAppliedType";
 }
 
 string ClassType::typeName() const {

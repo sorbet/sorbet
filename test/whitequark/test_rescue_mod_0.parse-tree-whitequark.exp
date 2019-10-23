@@ -1,0 +1,4 @@
+s(:rescue,
+  s(:send, nil, :meth),
+  s(:resbody, nil, nil,
+    s(:lvar, :bar)), nil)

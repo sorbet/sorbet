@@ -1,0 +1,7 @@
+s(:undef,
+  s(:sym, :foo),
+  s(:sym, :bar),
+  s(:dsym,
+    s(:str, "foo"),
+    s(:begin,
+      s(:int, "1"))))

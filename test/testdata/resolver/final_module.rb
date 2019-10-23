@@ -1,6 +1,5 @@
 # typed: false
 # The fast path causes duplicate errors.
-# disable-fast-path: true
 
 class FinalClass
   extend T::Helpers

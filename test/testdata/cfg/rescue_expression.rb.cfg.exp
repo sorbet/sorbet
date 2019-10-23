@@ -66,7 +66,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(MyException) = alias <C MyException>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(MyException))\l<statTemp>$8: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$9: T.class_of(Exception) = alias <C Exception>\l<statTemp>$7: Sorbet::Private::Static::Void = <statTemp>$8: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$9: T.class_of(Exception))\l<statTemp>$12: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$10: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$12: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: T.class_of(MyException) = alias <C MyException>\l<statTemp>$5: Sorbet::Private::Static::Void = <statTemp>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$7: T.class_of(MyException))\l<statTemp>$9: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$10: T.class_of(Exception) = alias <C Exception>\l<statTemp>$8: Sorbet::Private::Static::Void = <statTemp>$9: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$10: T.class_of(Exception))\l<statTemp>$13: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$11: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$13: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -75,6 +75,24 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     ];
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:MyException>#<static-init>" {
+    label = "::<Class:MyException>#<static-init>";
+    color = blue;
+    "bb::<Class:MyException>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:MyException>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:MyException>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(MyException) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U MyException>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U MyException>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:MyException>#<static-init>_0" -> "bb::<Class:MyException>#<static-init>_1" [style="bold"];
+    "bb::<Class:MyException>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:MyException>#<static-init>_1" -> "bb::<Class:MyException>#<static-init>_1" [style="bold"];
 }
 
 }

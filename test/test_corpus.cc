@@ -75,6 +75,13 @@ public:
     void TearDown() override {}
 };
 
+class WhitequarkParserTest : public testing::TestWithParam<Expectations> {
+public:
+    ~WhitequarkParserTest() override = default;
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
 #define PRINTF(...)                                                                        \
     do {                                                                                   \
         testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); \
@@ -106,10 +113,10 @@ public:
 };
 
 UnorderedSet<string> knownExpectations = {
-    "parse-tree",      "parse-tree-json",    "ast",       "ast-raw",       "dsl-tree",     "dsl-tree-raw",
-    "symbol-table",    "symbol-table-raw",   "name-tree", "name-tree-raw", "resolve-tree", "resolve-tree-raw",
-    "flattened-tree",  "flattened-tree-raw", "cfg",       "cfg-raw",       "cfg-json",     "autogen",
-    "document-symbols"};
+    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "dsl-tree",
+    "dsl-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
+    "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",          "cfg-raw",          "cfg-json",
+    "autogen",          "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -125,7 +132,395 @@ unique_ptr<Diagnostic> errorToDiagnostic(const core::GlobalState &gs, const core
     return make_unique<Diagnostic>(Range::fromLoc(gs, error.loc), error.header);
 }
 
+class ExpectationHandler {
+    Expectations &test;
+    shared_ptr<core::ErrorQueue> &errorQueue;
+
+public:
+    vector<unique_ptr<core::Error>> errors;
+    UnorderedMap<string_view, string> got;
+
+    ExpectationHandler(Expectations &test, shared_ptr<core::ErrorQueue> &errorQueue)
+        : test(test), errorQueue(errorQueue){};
+
+    void addObserved(string_view expectationType, std::function<string()> mkExp, bool addNewline = true) {
+        if (test.expectations.contains(expectationType)) {
+            got[expectationType].append(mkExp());
+            if (addNewline) {
+                got[expectationType].append("\n");
+            }
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+    }
+
+    void checkExpectations(string prefix = "") {
+        for (auto &gotPhase : got) {
+            auto expectation = test.expectations.find(gotPhase.first);
+            ASSERT_TRUE(expectation != test.expectations.end())
+                << prefix << "missing expectation for " << gotPhase.first;
+            ASSERT_TRUE(expectation->second.size() == 1)
+                << prefix << "found unexpected multiple expectations of type " << gotPhase.first;
+
+            auto checker = test.folder + expectation->second.begin()->second;
+            auto expect = FileOps::read(checker);
+            EXPECT_EQ(expect, gotPhase.second) << prefix << "Mismatch on: " << checker;
+            if (expect == gotPhase.second) {
+                TEST_COUT << gotPhase.first << " OK" << '\n';
+            }
+        }
+    }
+
+    void drainErrors() {
+        auto newErrors = errorQueue->drainAllErrors();
+        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+    }
+
+    void clear() {
+        got.clear();
+        errorQueue->drainAllErrors();
+    }
+};
+
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
+    Expectations test = GetParam();
+    auto inputPath = test.folder + test.basename;
+    auto rbName = test.basename + ".rb";
+    SCOPED_TRACE(inputPath);
+
+    for (auto &exp : test.expectations) {
+        if (!knownExpectations.contains(exp.first)) {
+            ADD_FAILURE() << "Unknown pass: " << exp.first;
+        }
+    }
+
+    auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
+    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
+    auto gs = make_unique<core::GlobalState>(errorQueue);
+    gs->censorForSnapshotTests = true;
+    auto workers = WorkerPool::create(0, gs->tracer());
+
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+        gs->initEmpty();
+    } else {
+        core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
+    }
+    core::MutableContext ctx(*gs, core::Symbols::root());
+    // Parser
+    vector<core::FileRef> files;
+    constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+
+        for (auto &sourceFile : test.sourceFiles) {
+            auto fref = gs->enterFile(test.sourceFileContents[test.folder + sourceFile]);
+            if (FileOps::getFileName(sourceFile) == whitelistedTypedNoneTest) {
+                fref.data(*gs).strictLevel = core::StrictLevel::False;
+            }
+            files.emplace_back(fref);
+        }
+    }
+    vector<ast::ParsedFile> trees;
+    ExpectationHandler handler(test, errorQueue);
+
+    vector<core::ErrorRegion> errs;
+    for (auto file : files) {
+        errs.emplace_back(*gs, file);
+
+        if (FileOps::getFileName(file.data(ctx).path()) != whitelistedTypedNoneTest &&
+            file.data(ctx).source().find("# typed:") == string::npos) {
+            ADD_FAILURE_AT(file.data(*gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
+        }
+        unique_ptr<parser::Node> nodes;
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+
+            nodes = parser::Parser::run(*gs, file);
+        }
+
+        handler.drainErrors();
+        handler.addObserved("parse-tree", [&]() { return nodes->toString(*gs); });
+        handler.addObserved("parse-tree-whitequark", [&]() { return nodes->toWhitequark(*gs); });
+        handler.addObserved("parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+
+        // Desugarer
+        ast::ParsedFile desugared;
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+            auto file = nodes->loc.file();
+            desugared = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
+        }
+
+        handler.addObserved("desugar-tree", [&]() { return desugared.tree->toString(*gs); });
+        handler.addObserved("desugar-tree-raw", [&]() { return desugared.tree->showRaw(*gs); });
+
+        ast::ParsedFile dslUnwound;
+        ast::ParsedFile localNamed;
+
+        if (!test.expectations.contains("autogen")) {
+            // DSL
+            {
+                core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+
+                dslUnwound =
+                    testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree)), desugared.file});
+            }
+
+            handler.addObserved("dsl-tree", [&]() { return dslUnwound.tree->toString(*gs); });
+            handler.addObserved("dsl-tree-raw", [&]() { return dslUnwound.tree->showRaw(*gs); });
+
+            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
+        } else {
+            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
+            if (test.expectations.contains("dsl-tree-raw") || test.expectations.contains("dsl-tree")) {
+                ADD_FAILURE() << "Running DSL passes with autogen isn't supported";
+            }
+        }
+
+        // Namer
+        ast::ParsedFile namedTree;
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
+            core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
+            vector<ast::ParsedFile> vTmp;
+            vTmp.emplace_back(move(localNamed));
+            vTmp = namer::Namer::run(ctx, move(vTmp));
+            namedTree = testSerialize(*gs, move(vTmp[0]));
+        }
+
+        handler.addObserved("name-tree", [&]() { return namedTree.tree->toString(*gs); });
+        handler.addObserved("name-tree-raw", [&]() { return namedTree.tree->showRaw(*gs); });
+
+        trees.emplace_back(move(namedTree));
+    }
+
+    if (test.expectations.contains("autogen")) {
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs);
+            core::UnfreezeSymbolTable symbolAccess(*gs);
+
+            trees = resolver::Resolver::runConstantResolution(ctx, move(trees), *workers);
+        }
+        handler.addObserved(
+            "autogen",
+            [&]() {
+                stringstream payload;
+                for (auto &tree : trees) {
+                    auto pf = autogen::Autogen::generate(ctx, move(tree));
+                    tree = move(pf.tree);
+                    payload << pf.toString(ctx);
+                }
+                return payload.str();
+            },
+            false);
+    } else {
+        core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
+        core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
+        trees = move(resolver::Resolver::run(ctx, move(trees), *workers).result());
+        handler.drainErrors();
+    }
+
+    handler.addObserved("symbol-table", [&]() { return gs->toString(); });
+    handler.addObserved("symbol-table-raw", [&]() { return gs->showRaw(); });
+
+    for (auto &resolvedTree : trees) {
+        handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+    }
+
+    // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work
+    // distribution
+    fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
+        return lhs.file.data(ctx).source().size() > rhs.file.data(ctx).source().size();
+    });
+
+    for (auto &resolvedTree : trees) {
+        auto file = resolvedTree.file;
+
+        resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
+        handler.drainErrors();
+
+        resolvedTree = flatten::runOne(ctx, move(resolvedTree));
+
+        handler.addObserved("flatten-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("flatten-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+
+        auto checkTree = [&]() {
+            if (resolvedTree.tree == nullptr) {
+                auto path = file.data(ctx).path();
+                ADD_FAILURE_AT(path.begin(), 1) << "Already used tree. You can only have 1 CFG-ish .exp file";
+            }
+        };
+        auto checkPragma = [&](string ext) {
+            if (file.data(ctx).strictLevel < core::StrictLevel::True) {
+                auto path = file.data(ctx).path();
+                ADD_FAILURE_AT(path.begin(), 1)
+                    << "Missing `# typed:` pragma. Sources with ." << ext << ".exp files must specify # typed:";
+            }
+        };
+
+        // CFG
+        if (test.expectations.contains("cfg") || test.expectations.contains("cfg-raw") ||
+            test.expectations.contains("cfg-json")) {
+            checkTree();
+            checkPragma("cfg");
+            CFGCollectorAndTyper collector;
+            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            resolvedTree.tree.reset();
+
+            handler.addObserved("cfg", [&]() {
+                stringstream dot;
+                dot << "digraph \"" << rbName << "\" {" << '\n';
+                for (auto &cfg : collector.cfgs) {
+                    dot << cfg->toString(ctx) << '\n' << '\n';
+                }
+                dot << "}" << '\n';
+                return dot.str();
+            });
+
+            handler.addObserved("cfg-raw", [&]() {
+                stringstream dot;
+                dot << "digraph \"" << rbName << "\" {" << '\n';
+                dot << "  graph [fontname = \"Courier\"];\n";
+                dot << "  node [fontname = \"Courier\"];\n";
+                dot << "  edge [fontname = \"Courier\"];\n";
+                for (auto &cfg : collector.cfgs) {
+                    dot << cfg->showRaw(ctx) << '\n' << '\n';
+                }
+                dot << "}" << '\n';
+                return dot.str();
+            });
+
+            handler.addObserved(
+                "cfg-json",
+                [&]() {
+                    stringstream payload;
+                    for (auto &cfg : collector.cfgs) {
+                        if (cfg->shouldExport(ctx)) {
+                            auto proto = cfg::Proto::toProto(ctx.state, *cfg);
+                            payload << core::Proto::toJSON(proto);
+                        }
+                    }
+                    return payload.str();
+                },
+                false);
+        }
+
+        // If there is a tree left with a typed: pragma, run the inferencer
+        if (resolvedTree.tree != nullptr && file.data(ctx).originalSigil >= core::StrictLevel::True) {
+            checkTree();
+            CFGCollectorAndTyper collector;
+            ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            resolvedTree.tree.reset();
+            handler.drainErrors();
+        }
+    }
+
+    handler.checkExpectations();
+
+    if (test.expectations.contains("symbol-table")) {
+        string table = gs->toString() + '\n';
+        EXPECT_EQ(handler.got["symbol-table"], table) << " symbol-table should not be mutated by CFG+inference";
+    }
+
+    if (test.expectations.contains("symbol-table-raw")) {
+        string table = gs->showRaw() + '\n';
+        EXPECT_EQ(handler.got["symbol-table-raw"], table) << " symbol-table-raw should not be mutated by CFG+inference";
+    }
+
+    // Check warnings and errors
+    {
+        map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
+        for (auto &error : handler.errors) {
+            if (error->isSilenced) {
+                continue;
+            }
+            auto diag = errorToDiagnostic(*gs, *error);
+            if (diag == nullptr) {
+                continue;
+            }
+            auto path = error->loc.file().data(*gs).path();
+            diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
+        }
+        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
+    }
+
+    // Allow later phases to have errors that we didn't test for
+    errorQueue->drainAllErrors();
+
+    // now we test the incremental resolver
+
+    auto disableStressIncremental =
+        BooleanPropertyAssertion::getValue("disable-stress-incremental", assertions).value_or(false);
+    auto isAutogenTest = test.expectations.contains("autogen");
+    if (disableStressIncremental || isAutogenTest) {
+        TEST_COUT << "errors OK" << '\n';
+        return;
+    }
+
+    handler.clear();
+    auto symbolsBefore = gs->symbolsUsed();
+
+    vector<ast::ParsedFile> newTrees;
+    for (auto &f : trees) {
+        const int prohibitedLines = f.file.data(*gs).source().size();
+        auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.file.data(*gs).source());
+        auto newFile =
+            make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource), f.file.data(*gs).sourceType);
+        gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
+
+        // this replicates the logic of pipeline::indexOne
+        auto nodes = parser::Parser::run(*gs, f.file);
+        handler.addObserved("parse-tree", [&]() { return nodes->toString(*gs); });
+        handler.addObserved("parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+
+        core::MutableContext ctx(*gs, core::Symbols::root());
+        ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
+        handler.addObserved("desguar-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+
+        // DSL pass
+        file = testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(file.tree)), file.file});
+        handler.addObserved("dsl-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("dsl-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+
+        // local vars
+        file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
+
+        // namer
+        {
+            core::UnfreezeSymbolTable symbolTableAccess(*gs);
+            vector<ast::ParsedFile> vTmp;
+            vTmp.emplace_back(move(file));
+            vTmp = namer::Namer::run(ctx, move(vTmp));
+            file = testSerialize(*gs, move(vTmp[0]));
+        }
+
+        handler.addObserved("name-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("name-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        newTrees.emplace_back(move(file));
+    }
+
+    // resolver
+    trees = resolver::Resolver::runTreePasses(ctx, move(newTrees));
+
+    for (auto &resolvedTree : newTrees) {
+        handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+    }
+
+    handler.checkExpectations("[stress-incremental] ");
+
+    // and drain all the remaining errors
+    errorQueue->drainAllErrors();
+
+    EXPECT_EQ(symbolsBefore, gs->symbolsUsed()) << "the incremental resolver should not add new symbols";
+
+    TEST_COUT << "errors OK" << '\n';
+} // namespace sorbet::test
+
+TEST_P(WhitequarkParserTest, PerPhaseTest) { // NOLINT
     vector<unique_ptr<core::Error>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.basename;
@@ -181,269 +576,19 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         {
             core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            nodes = parser::Parser::run(gs, file);
+            // whitequark/parser declares these 3 meta variables to
+            // simplify testing cases around local variables
+            vector<string> initialLocals = {"foo", "bar", "baz"};
+            nodes = parser::Parser::run(gs, file, initialLocals);
         }
         {
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
-        auto expectation = test.expectations.find("parse-tree");
+        auto expectation = test.expectations.find("parse-tree-whitequark");
         if (expectation != test.expectations.end()) {
-            got["parse-tree"].append(nodes->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("parse-tree-json");
-        if (expectation != test.expectations.end()) {
-            got["parse-tree-json"].append(nodes->toJSON(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        // Desugarer
-        ast::ParsedFile desugared;
-        {
-            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
-            auto file = nodes->loc.file();
-            desugared = testSerialize(gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
-        }
-
-        expectation = test.expectations.find("ast");
-        if (expectation != test.expectations.end()) {
-            got["ast"].append(desugared.tree->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("ast-raw");
-        if (expectation != test.expectations.end()) {
-            got["ast-raw"].append(desugared.tree->showRaw(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-        ast::ParsedFile dslUnwound;
-        ast::ParsedFile localNamed;
-
-        if (test.expectations.find("autogen") == test.expectations.end()) {
-            // DSL
-            {
-                core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
-
-                dslUnwound =
-                    testSerialize(gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree)), desugared.file});
-            }
-
-            expectation = test.expectations.find("dsl-tree");
-            if (expectation != test.expectations.end()) {
-                got["dsl-tree"].append(dslUnwound.tree->toString(gs)).append("\n");
-                auto newErrors = errorQueue->drainAllErrors();
-                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-            }
-
-            expectation = test.expectations.find("dsl-tree-raw");
-            if (expectation != test.expectations.end()) {
-                got["dsl-tree-raw"].append(dslUnwound.tree->showRaw(gs)).append("\n");
-                auto newErrors = errorQueue->drainAllErrors();
-                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-            }
-
-            localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
-        } else {
-            localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(desugared)));
-            if (test.expectations.find("dsl-tree-raw") != test.expectations.end() ||
-
-                test.expectations.find("dsl-tree") != test.expectations.end()) {
-                ADD_FAILURE() << "Running DSL passes with autogen isn't supported";
-            }
-        }
-
-        // Namer
-        ast::ParsedFile namedTree;
-        {
-            core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-            core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-            vector<ast::ParsedFile> vTmp;
-            vTmp.emplace_back(move(localNamed));
-            vTmp = namer::Namer::run(ctx, move(vTmp));
-            namedTree = testSerialize(gs, move(vTmp[0]));
-        }
-
-        expectation = test.expectations.find("name-tree");
-        if (expectation != test.expectations.end()) {
-            got["name-tree"].append(namedTree.tree->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("name-tree-raw");
-        if (expectation != test.expectations.end()) {
-            got["name-tree-raw"].append(namedTree.tree->showRaw(gs));
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        trees.emplace_back(move(namedTree));
-    }
-
-    auto expectation = test.expectations.find("autogen");
-    if (expectation != test.expectations.end()) {
-        {
-            core::UnfreezeNameTable nameTableAccess(gs);
-            core::UnfreezeSymbolTable symbolAccess(gs);
-
-            trees = resolver::Resolver::runConstantResolution(ctx, move(trees), *workers);
-        }
-
-        for (auto &tree : trees) {
-            auto pf = autogen::Autogen::generate(ctx, move(tree));
-            tree = move(pf.tree);
-            got["autogen"].append(pf.toString(ctx));
-        }
-
-        auto newErrors = errorQueue->drainAllErrors();
-        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-    } else {
-        core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
-        core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-        trees = resolver::Resolver::run(ctx, move(trees), *workers);
-        auto newErrors = errorQueue->drainAllErrors();
-        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-    }
-
-    expectation = test.expectations.find("symbol-table");
-    if (expectation != test.expectations.end()) {
-        got["symbol-table"] = gs.toString() + '\n';
-        auto newErrors = errorQueue->drainAllErrors();
-        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-    }
-
-    expectation = test.expectations.find("symbol-table-raw");
-    if (expectation != test.expectations.end()) {
-        got["symbol-table-raw"] = gs.showRaw() + '\n';
-        auto newErrors = errorQueue->drainAllErrors();
-        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-    }
-
-    for (auto &resolvedTree : trees) {
-        expectation = test.expectations.find("resolve-tree");
-        if (expectation != test.expectations.end()) {
-            got["resolve-tree"].append(resolvedTree.tree->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("resolve-tree-raw");
-        if (expectation != test.expectations.end()) {
-            got["resolve-tree-raw"].append(resolvedTree.tree->showRaw(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-    }
-
-    // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work
-    // distribution
-    fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
-        return lhs.file.data(ctx).source().size() > rhs.file.data(ctx).source().size();
-    });
-
-    for (auto &resolvedTree : trees) {
-        auto file = resolvedTree.file;
-
-        {
-            resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        resolvedTree = flatten::runOne(ctx, move(resolvedTree));
-
-        expectation = test.expectations.find("flattened-tree");
-        if (expectation != test.expectations.end()) {
-            got["flattened-tree"].append(resolvedTree.tree->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("flattened-tree-raw");
-        if (expectation != test.expectations.end()) {
-            got["flattened-tree-raw"].append(resolvedTree.tree->showRaw(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        auto checkTree = [&]() {
-            if (resolvedTree.tree == nullptr) {
-                auto path = file.data(ctx).path();
-                ADD_FAILURE_AT(path.begin(), 1) << "Already used tree. You can only have 1 CFG-ish .exp file";
-            }
-        };
-        auto checkPragma = [&](string ext) {
-            if (file.data(ctx).strictLevel < core::StrictLevel::True) {
-                auto path = file.data(ctx).path();
-                ADD_FAILURE_AT(path.begin(), 1)
-                    << "Missing `# typed:` pragma. Sources with ." << ext << ".exp files must specify # typed:";
-            }
-        };
-
-        // CFG
-        auto expCfg = test.expectations.find("cfg");
-        auto expCfgRaw = test.expectations.find("cfg-raw");
-        auto expCfgJson = test.expectations.find("cfg-json");
-        if (expCfg != test.expectations.end() || expCfgRaw != test.expectations.end() ||
-            expCfgJson != test.expectations.end()) {
-            checkTree();
-            checkPragma("cfg");
-            CFGCollectorAndTyper collector;
-            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
-            resolvedTree.tree.reset();
-
-            if (expCfg != test.expectations.end()) {
-                stringstream dot;
-                dot << "digraph \"" << rbName << "\" {" << '\n';
-                for (auto &cfg : collector.cfgs) {
-                    dot << cfg->toString(ctx) << '\n' << '\n';
-                }
-                dot << "}" << '\n' << '\n';
-                got["cfg"].append(dot.str());
-                auto newErrors = errorQueue->drainAllErrors();
-                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-            }
-
-            if (expCfgRaw != test.expectations.end()) {
-                stringstream dot;
-                dot << "digraph \"" << rbName << "\" {" << '\n';
-                dot << "  graph [fontname = \"Courier\"];\n";
-                dot << "  node [fontname = \"Courier\"];\n";
-                dot << "  edge [fontname = \"Courier\"];\n";
-                for (auto &cfg : collector.cfgs) {
-                    dot << cfg->showRaw(ctx) << '\n' << '\n';
-                }
-                dot << "}" << '\n' << '\n';
-                got["cfg-raw"].append(dot.str());
-                auto newErrors = errorQueue->drainAllErrors();
-                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-            }
-
-            if (expCfgJson != test.expectations.end()) {
-                for (auto &cfg : collector.cfgs) {
-                    if (cfg->shouldExport(ctx)) {
-                        auto proto = cfg::Proto::toProto(ctx.state, *cfg);
-                        got["cfg-json"].append(core::Proto::toJSON(proto));
-                    }
-                }
-                auto newErrors = errorQueue->drainAllErrors();
-                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-            }
-        }
-
-        // If there is a tree left with a typed: pragma, run the inferencer
-        if (resolvedTree.tree != nullptr && file.data(ctx).originalSigil >= core::StrictLevel::True) {
-            checkTree();
-            CFGCollectorAndTyper collector;
-            ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
-            resolvedTree.tree.reset();
+            got["parse-tree-whitequark"].append(nodes->toWhitequark(gs)).append("\n");
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
@@ -461,18 +606,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         if (expect == gotPhase.second) {
             TEST_COUT << gotPhase.first << " OK" << '\n';
         }
-    }
-
-    expectation = test.expectations.find("symbol-table");
-    if (expectation != test.expectations.end()) {
-        string table = gs.toString() + '\n';
-        EXPECT_EQ(got["symbol-table"], table) << " symbol-table should not be mutated by CFG+inference";
-    }
-
-    expectation = test.expectations.find("symbol-table-raw");
-    if (expectation != test.expectations.end()) {
-        string table = gs.showRaw() + '\n';
-        EXPECT_EQ(got["symbol-table-raw"], table) << " symbol-table-raw should not be mutated by CFG+inference";
     }
 
     // Check warnings and errors
@@ -696,7 +829,7 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
         get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
 
     // Simple string comparison, just like other *.exp files.
-    EXPECT_EQ(documentSymbolsToString(receivedSymbolResponse), documentSymbolsToString(expectedSymbolResponse))
+    EXPECT_EQ(documentSymbolsToString(expectedSymbolResponse), documentSymbolsToString(receivedSymbolResponse))
         << "Mismatch on: " << expectedSymbolsPath;
 }
 
@@ -860,6 +993,7 @@ TEST_P(LSPTest, All) {
 
     // Completion assertions
     CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+    ApplyCompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
 
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
@@ -944,6 +1078,8 @@ TEST_P(LSPTest, All) {
 
 INSTANTIATE_TEST_SUITE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 INSTANTIATE_TEST_SUITE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_SUITE_P(WhitequarkParserTests, WhitequarkParserTest, ::testing::ValuesIn(getInputs(singleTest)),
+                         prettyPrintTest);
 
 bool compareNames(string_view left, string_view right) {
     auto lsplit = left.find("__");

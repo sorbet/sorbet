@@ -1,0 +1,5 @@
+DefMethod {
+  name = <U test_constant_only_scope>
+  args = NULL
+  body = NULL
+}

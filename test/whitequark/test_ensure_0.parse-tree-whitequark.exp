@@ -1,0 +1,4 @@
+s(:kwbegin,
+  s(:ensure,
+    s(:send, nil, :meth),
+    s(:lvar, :bar)))

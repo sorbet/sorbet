@@ -1271,25 +1271,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                             },
                                             classTypes);
 
-    auto SorbetWorkspaceEditCounts = makeObject("SorbetWorkspaceEditCounts",
-                                                {
-                                                    makeField("textDocumentDidOpen", JSONInt),
-                                                    makeField("textDocumentDidChange", JSONInt),
-                                                    makeField("textDocumentDidClose", JSONInt),
-                                                    makeField("sorbetWatchmanFileChange", JSONInt),
-                                                },
-                                                classTypes,
-                                                {
-                                                    "// Merges the given counter into this one",
-                                                    "void merge(const SorbetWorkspaceEditCounts &other);",
-                                                });
-
     auto SorbetWorkspaceEditParams =
-        makeObject("SorbetWorkspaceEditParams",
-                   {
-                       makeField("counts", SorbetWorkspaceEditCounts),
-                   },
-                   classTypes,
+        makeObject("SorbetWorkspaceEditParams", {}, classTypes,
                    {
                        "// Contains distilled file updates combined from one or more file update notifications.",
                        "LSPFileUpdates updates;",

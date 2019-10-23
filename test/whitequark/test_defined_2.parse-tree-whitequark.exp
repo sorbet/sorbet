@@ -1,0 +1,2 @@
+s(:defined?,
+  s(:ivar, :@foo))

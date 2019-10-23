@@ -1,13 +1,9 @@
 DString {
   nodes = [
-    DString {
-      nodes = [
-        Begin {
-          stmts = [
-            Integer {
-              val = "1"
-            }
-          ]
+    Begin {
+      stmts = [
+        Integer {
+          val = "1"
         }
       ]
     }

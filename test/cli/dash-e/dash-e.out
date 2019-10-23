@@ -1,7 +1,11 @@
 No errors! Great job.
-class ::<root> < ::Object () @ (... removed core rbi locs ..., https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1)
+class ::<root> < ::Object () @ (... removed core rbi locs ..., -e:1, https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1)
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ -e:1
+      argument <blk><block> @ Loc {file=-e start=??? end=???}
   class ::Foo < ::Object () @ -e:1
-  class ::<Class:Foo> < ::<Class:Object> () @ -e:1
+  class ::<Class:Foo>[<AttachedClass>] < ::<Class:Object> () @ -e:1
+    type-member(+) ::<Class:Foo>::<AttachedClass> -> T.class_of(Foo)::<AttachedClass> @ -e:1
     method ::<Class:Foo>#<static-init> (<blk>) @ -e:1
       argument <blk><block> @ Loc {file=-e start=??? end=???}
 

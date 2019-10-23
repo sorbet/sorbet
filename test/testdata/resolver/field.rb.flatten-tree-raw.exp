@@ -1,0 +1,44 @@
+InsSeq{
+  stats = [
+    EmptyTree
+    ClassDef{
+      kind = class
+      name = EmptyTree<<C <U <root>>>>
+      ancestors = []
+      rhs = [
+        EmptyTree
+
+        EmptyTree
+
+        MethodDef{
+          flags = 0
+          name = <U foo><<U foo>>
+          args = [Local{
+              localVariable = <U a>
+            }, Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = Assign{
+            lhs = UnresolvedIdent{
+              kind = Instance
+              name = <U @a>
+            }
+            rhs = Local{
+              localVariable = <U a>
+            }
+          }
+        }
+
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = EmptyTree
+        }
+      ]
+    }
+  ],
+  expr = EmptyTree
+}

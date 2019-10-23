@@ -1,7 +1,3 @@
-DSymbol {
-  nodes = [
-    String {
-      val = <U foo>
-    }
-  ]
+Symbol {
+  val = <U foo>
 }

@@ -1,0 +1,4 @@
+s(:and_asgn,
+  s(:send,
+    s(:lvar, :foo), :a),
+  s(:int, "1"))

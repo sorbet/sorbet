@@ -58,11 +58,7 @@ module T::Private::Methods::SignatureValidation
   def self.validate_override_mode(signature, super_signature)
     case signature.mode
     when *Modes::OVERRIDE_MODES
-      if !Modes::OVERRIDABLE_MODES.include?(super_signature.mode)
-        raise "You declared `#{signature.method_name}` as #{pretty_mode(signature)}, but the method it overrides is not declared as `overridable` or `abstract`.\n" \
-              "  Parent definition: #{method_loc_str(super_signature.method)}\n" \
-              "  Child definition:  #{method_loc_str(signature.method)}\n"
-      end
+      # Peaceful
     when *Modes::NON_OVERRIDE_MODES
       if super_signature.mode == Modes.standard
         # Peaceful

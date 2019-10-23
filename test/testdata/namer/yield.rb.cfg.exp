@@ -6,7 +6,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Main) = alias <C Main>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(Main))\l<statTemp>$9: T.class_of(Main) = alias <C Main>\l<statTemp>$8: Main = <statTemp>$9: T.class_of(Main).new()\l<statTemp>$7: T.untyped = <statTemp>$8: Main.main()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: T.class_of(Main) = alias <C Main>\l<statTemp>$5: Sorbet::Private::Static::Void = <statTemp>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$7: T.class_of(Main))\l<statTemp>$10: T.class_of(Main) = alias <C Main>\l<statTemp>$9: Main = <statTemp>$10: T.class_of(Main).new()\l<statTemp>$8: T.untyped = <statTemp>$9: Main.main()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -139,6 +139,24 @@ subgraph "cluster_::Main#main" {
     ];
 
     "bb::Main#main_5" -> "bb::Main#main_2" [style="bold"];
+}
+
+subgraph "cluster_::<Class:Main>#<static-init>" {
+    label = "::<Class:Main>#<static-init>";
+    color = blue;
+    "bb::<Class:Main>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Main>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:Main>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(Main) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Main>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Main>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Main>#<static-init>_0" -> "bb::<Class:Main>#<static-init>_1" [style="bold"];
+    "bb::<Class:Main>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Main>#<static-init>_1" -> "bb::<Class:Main>#<static-init>_1" [style="bold"];
 }
 
 }

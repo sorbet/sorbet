@@ -1,0 +1,5 @@
+s(:send, nil, :bar,
+  s(:def, :foo, nil,
+    s(:block,
+      s(:send,
+        s(:self), :each), nil, nil)))

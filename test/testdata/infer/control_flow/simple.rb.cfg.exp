@@ -1,4 +1,22 @@
 digraph "simple.rb" {
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
+    color = blue;
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(ControlFlow) = alias <C ControlFlow>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(ControlFlow))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::ControlFlow#orZero0" {
     label = "::ControlFlow#orZero0";
     color = blue;
@@ -335,7 +353,7 @@ subgraph "cluster_::<Class:ControlFlow>#<static-init>" {
     "bb::<Class:ControlFlow>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:ControlFlow>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(ControlFlow) = cast(<self>: NilClass, T.class_of(ControlFlow));\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$6: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
+        label = "block[id=0]()\l<self>: T.class_of(ControlFlow) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U ControlFlow>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U ControlFlow>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$6: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:ControlFlow>#<static-init>_0" -> "bb::<Class:ControlFlow>#<static-init>_2" [style="bold"];
@@ -488,7 +506,7 @@ subgraph "cluster_::<Class:ControlFlow>#<static-init>" {
     "bb::<Class:ControlFlow>#<static-init>_34" -> "bb::<Class:ControlFlow>#<static-init>_35" [style="tapered"];
 
     "bb::<Class:ControlFlow>#<static-init>_35" [
-        label = "block[id=35](<selfRestore>$147: T.class_of(ControlFlow))\l<statTemp>$144: Sorbet::Private::Static::Void = Solve<sig>\l<statTemp>$163: T.class_of(Sorbet::Private::Static) = alias <C Static>\lkeep_for_ide$165: T.class_of(T) = alias <C T>\l<statTemp>$164: T.class_of(T::Sig) = alias <C Sig>\l<statTemp>$162: Sorbet::Private::Static::Void = <statTemp>$163: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$164: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=35](<selfRestore>$147: T.class_of(ControlFlow))\l<statTemp>$144: Sorbet::Private::Static::Void = Solve<sig>\l<statTemp>$163: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$164: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$165: T.class_of(T) = alias <C T>\l<statTemp>$162: Sorbet::Private::Static::Void = <statTemp>$163: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$164: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:ControlFlow>#<static-init>_35" -> "bb::<Class:ControlFlow>#<static-init>_1" [style="bold"];

@@ -1,0 +1,10 @@
+s(:block,
+  s(:send, nil, :p,
+    s(:block,
+      s(:send, nil, :p), nil,
+      s(:begin,
+        s(:send, nil, :p,
+          s(:send, nil, :p)),
+        s(:send, nil, :p,
+          s(:send, nil, :p)))),
+    s(:send, nil, :tap)), nil, nil)

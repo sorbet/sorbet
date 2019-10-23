@@ -9,6 +9,9 @@ Gem::Specification.new do |s|
   s.executables = Dir.glob('bin/**/*').map {|path| path.gsub('bin/', '')}
   s.homepage    = 'https://sorbet.run'
   s.license     = 'Apache-2.0'
+  s.metadata = {
+    "source_code_uri" => "https://github.com/sorbet/sorbet"
+  }
 
   s.add_dependency 'sorbet-static', '0.0.0'
 

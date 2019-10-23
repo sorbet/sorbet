@@ -4,7 +4,7 @@
 
 class HugeEnum < Opus::Enum
   include T::Props::Serializable
-  Elem = type_template(fixed: self)
+  enums do
   Val000 = new()
   Val001 = new()
   Val002 = new()
@@ -1005,4 +1005,5 @@ class HugeEnum < Opus::Enum
   Val997 = new()
   Val998 = new()
   Val999 = new()
+  end
 end

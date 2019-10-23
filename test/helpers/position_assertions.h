@@ -260,6 +260,32 @@ public:
     std::string toString() const override;
 };
 
+// ^ apply-completion: [version] index
+class ApplyCompletionAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<ApplyCompletionAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                          int assertionLine, std::string_view assertionContents,
+                                                          std::string_view assertionType);
+
+    /** Checks all ApplyCompletionAssertions within the assertion vector. Skips over non-ApplyCompletionAssertions. */
+    static void checkAll(const std::vector<std::shared_ptr<RangeAssertion>> &assertions,
+                         const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                         LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+
+    ApplyCompletionAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                             std::string_view version, int index);
+
+    // The part between [..] in the assertion which specifies which `.[..].rbedited` file to compare against
+    const std::string version;
+    // Index into CompletionItem list of which item to apply (zero-indexed)
+    const int index;
+
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+               int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+
+    std::string toString() const override;
+};
+
 // # ^^^ apply-code-action: [version] title
 class ApplyCodeActionAssertion final : public RangeAssertion {
 public:

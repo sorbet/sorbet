@@ -22,8 +22,8 @@ std::vector<ast::ParsedFile> index(std::unique_ptr<core::GlobalState> &gs, std::
                                    const options::Options &opts, WorkerPool &workers,
                                    std::unique_ptr<KeyValueStore> &kvstore);
 
-std::vector<ast::ParsedFile> resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-                                     const options::Options &opts, WorkerPool &workers, bool skipConfigatron = false);
+ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
+                                    const options::Options &opts, WorkerPool &workers, bool skipConfigatron = false);
 
 std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                                 const options::Options &opts);
@@ -31,12 +31,13 @@ std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vect
 std::vector<ast::ParsedFile> name(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                   const options::Options &opts, bool skipConfigatron = false);
 
-std::vector<ast::ParsedFile> typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-                                       const options::Options &opts, WorkerPool &workers);
+ast::ParsedFilesOrCancelled typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
+                                      const options::Options &opts, WorkerPool &workers);
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts);
 
-core::FileHash computeFileHash(std::shared_ptr<core::File> forWhat, spdlog::logger &logger);
+core::FileHash computeFileHash(std::shared_ptr<core::File> forWhat, spdlog::logger &logger,
+                               bool lspParseErrorsTakeFastPath);
 
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts);

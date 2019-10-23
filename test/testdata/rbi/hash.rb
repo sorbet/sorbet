@@ -8,6 +8,9 @@ h[:foo] = :bar
 # Bad practise but not a type error
 Hash.new([])
 
+# Hash.[] with hash not a type error
+Hash[test: 'test']
+
 # to_a and Hash[] play nice together
 T.assert_type!(
   Hash[T::Hash[String, String].new.to_a],

@@ -3,13 +3,17 @@ extend T::Sig
 
 module Opus
   class Enum
-    extend T::Generic
+    extend T::Sig
+    sig {params(blk: T.proc.void).void}
+    def self.enums(&blk); end
   end
 end
 
 class MyEnum < Opus::Enum
+  enums do
   A = new
   B = new
+  end
 end
 
 # It used to be the case that this caused "unsupported usage of bare type",

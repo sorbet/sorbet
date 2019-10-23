@@ -8,6 +8,10 @@
 namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
+std::string filePathToUri(std::string_view prefixUrl, std::string_view filePath);
+
+std::string uriToFilePath(std::string_view prefixUrl, std::string_view uri);
+
 /** Creates the parameters to the `initialize` message, which advertises the client's capabilities. */
 std::unique_ptr<InitializeParams>
 makeInitializeParams(std::variant<std::string, JSONNullObject> rootPath,
@@ -36,6 +40,11 @@ void assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage 
 /** Retrieves the PublishDiagnosticsParam from a publishDiagnostics message, if applicable. Non-fatal fails and returns
  * an empty optional if it cannot be found. */
 std::optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMessage &notifMsg);
+
+/** Use the LSPWrapper to make a textDocument/completion request.
+ */
+std::unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, const Range &range, int &nextId,
+                                                         std::string_view filename, std::string_view uriPrefix);
 
 /** Sends boilerplate initialization / initialized messages to start a new LSP session. */
 std::vector<std::unique_ptr<LSPMessage>>

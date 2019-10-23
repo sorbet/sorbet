@@ -1,0 +1,7 @@
+s(:op_asgn,
+  s(:send,
+    s(:lvar, :foo), :[],
+    s(:int, "0"),
+    s(:int, "1")), :+,
+  s(:send, nil, :m,
+    s(:lvar, :foo)))

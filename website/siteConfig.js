@@ -27,7 +27,7 @@ const users = [
   },
   {
     caption: 'Gusto',
-    image: 'img/gusto-logo.png',
+    image: 'img/gusto-logo.jpg',
     infoLink: 'https://gusto.com/',
   },
   {

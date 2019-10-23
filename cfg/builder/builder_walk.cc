@@ -216,6 +216,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = current;
             },
             [&](ast::ConstantLit *a) {
+                if (a->symbol == core::Symbols::StubModule()) {
+                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(core::Symbols::untyped()));
+                } else {
+                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(a->symbol));
+                }
+
                 if (a->original) {
                     if (auto nested = ast::cast_tree<ast::ConstantLit>(a->original->scope.get())) {
                         core::LocalVariable deadSym = cctx.newTemporary(core::Names::keepForIde());
@@ -223,11 +229,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
                 }
 
-                if (a->symbol == core::Symbols::StubModule()) {
-                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(core::Symbols::untyped()));
-                } else {
-                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(a->symbol));
-                }
                 ret = current;
             },
             [&](ast::Local *a) {
@@ -319,7 +320,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         target.isShadow = e.shadow;
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s->fun, move(argFlags));
-                    auto send = make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, link);
+                    auto send = make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, s->isPrivateOk(), link);
                     auto solveConstraint = make_unique<SolveConstraint>(link);
                     core::LocalVariable sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
                     current->exprs.emplace_back(sendTemp, s->loc, move(send));
@@ -364,9 +365,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                             make_unique<Literal>(core::make_type<core::LiteralType>(int64_t(i))));
                         InlinedVector<core::LocalVariable, 2> idxVec{idxTmp};
                         InlinedVector<core::Loc, 2> locs{zeroLengthLoc};
-                        bodyBlock->exprs.emplace_back(
-                            argLoc, arg.loc,
-                            make_unique<Send>(argTemp, core::Names::squareBrackets(), s->block->loc, idxVec, locs));
+                        auto isPrivateOk = false;
+                        bodyBlock->exprs.emplace_back(argLoc, arg.loc,
+                                                      make_unique<Send>(argTemp, core::Names::squareBrackets(),
+                                                                        s->block->loc, idxVec, locs, isPrivateOk));
                     }
 
                     conditionalJump(headerBlock, core::LocalVariable::blockCall(), bodyBlock, solveConstraintBlock,
@@ -413,8 +415,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                      *
                      */
                 } else {
-                    current->exprs.emplace_back(cctx.target, s->loc,
-                                                make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs));
+                    current->exprs.emplace_back(
+                        cctx.target, s->loc,
+                        make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, s->isPrivateOk()));
                 }
 
                 ret = current;
@@ -547,9 +550,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         InlinedVector<core::Loc, 2> argLocs = {loc};
                         args.emplace_back(exceptionClass);
 
-                        rescueHandlersBlock->exprs.emplace_back(
-                            isaCheck, loc,
-                            make_unique<Send>(local->localVariable, core::Names::is_a_p(), loc, args, argLocs));
+                        auto isPrivateOk = false;
+                        rescueHandlersBlock->exprs.emplace_back(isaCheck, loc,
+                                                                make_unique<Send>(local->localVariable,
+                                                                                  core::Names::is_a_p(), loc, args,
+                                                                                  argLocs, isPrivateOk));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
@@ -593,8 +598,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 core::LocalVariable magic = cctx.newTemporary(core::Names::magic());
                 synthesizeExpr(current, magic, core::Loc::none(), make_unique<Alias>(core::Symbols::Magic()));
 
-                current->exprs.emplace_back(cctx.target, h->loc,
-                                            make_unique<Send>(magic, core::Names::buildHash(), h->loc, vars, locs));
+                auto isPrivateOk = false;
+                current->exprs.emplace_back(
+                    cctx.target, h->loc,
+                    make_unique<Send>(magic, core::Names::buildHash(), h->loc, vars, locs, isPrivateOk));
                 ret = current;
             },
 
@@ -609,8 +616,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 }
                 core::LocalVariable magic = cctx.newTemporary(core::Names::magic());
                 synthesizeExpr(current, magic, core::Loc::none(), make_unique<Alias>(core::Symbols::Magic()));
-                current->exprs.emplace_back(cctx.target, a->loc,
-                                            make_unique<Send>(magic, core::Names::buildArray(), a->loc, vars, locs));
+                auto isPrivateOk = false;
+                current->exprs.emplace_back(
+                    cctx.target, a->loc,
+                    make_unique<Send>(magic, core::Names::buildArray(), a->loc, vars, locs, isPrivateOk));
                 ret = current;
             },
 

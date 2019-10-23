@@ -1,0 +1,71 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::Test)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Test<<C Test>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def foo<foo>(x, <blk>)
+      begin
+        T.let(nil, String)
+        x
+      end
+    end
+
+    def bar<bar>(y, <blk>)
+      begin
+        T.let(nil, String)
+        y
+      end
+    end
+
+    def qux<qux>(z, <blk>)
+      begin
+        T.let("", String)
+        z
+      end
+    end
+
+    def baz<baz>(w, <blk>)
+      begin
+        T.let("", String)
+        w
+      end
+    end
+
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        <self>.sig() do ||
+          <self>.params({:"x" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"y" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"z" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"w" => ::String}).returns(::String)
+        end
+        ::Sorbet::Private::Static.keep_for_ide(::T::Sig)
+        <emptyTree>
+      end
+    end
+  end
+  <emptyTree>
+end

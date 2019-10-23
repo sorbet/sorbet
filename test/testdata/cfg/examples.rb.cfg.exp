@@ -1,4 +1,22 @@
 digraph "examples.rb" {
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
+    color = blue;
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Examples) = alias <C Examples>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(Examples))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::Examples#i_like_ifs" {
     label = "::Examples#i_like_ifs";
     color = blue;
@@ -315,6 +333,24 @@ subgraph "cluster_::Examples#take_arguments" {
     ];
 
     "bb::Examples#take_arguments_4" -> "bb::Examples#take_arguments_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:Examples>#<static-init>" {
+    label = "::<Class:Examples>#<static-init>";
+    color = blue;
+    "bb::<Class:Examples>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Examples>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:Examples>#<static-init>_0" [
+        label = "block[id=0]()\l<self>: T.class_of(Examples) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Examples>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Examples>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Examples>#<static-init>_0" -> "bb::<Class:Examples>#<static-init>_1" [style="bold"];
+    "bb::<Class:Examples>#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Examples>#<static-init>_1" -> "bb::<Class:Examples>#<static-init>_1" [style="bold"];
 }
 
 }

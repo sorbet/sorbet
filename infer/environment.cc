@@ -476,11 +476,21 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
     } else if (send->fun == core::Names::lessThan()) {
         const auto &recvKlass = send->recv.type;
         const auto &argType = send->args[0].type;
-        auto *argClass = core::cast_type<core::ClassType>(argType.get());
-        if (!argClass || !recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
-            !argClass->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
+
+        if (auto *argClass = core::cast_type<core::ClassType>(argType.get())) {
+            if (!recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
+                !argClass->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
+                return;
+            }
+        } else if (auto *argClass = core::cast_type<core::AppliedType>(argType.get())) {
+            if (!recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
+                !argClass->klass.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
+                return;
+            }
+        } else {
             return;
         }
+
         auto &whoKnows = getKnowledge(local);
         whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, argType);
         whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv.variable, argType);
@@ -790,10 +800,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 if (send->link || lspQueryMatch) {
                     retainedResult = make_shared<core::DispatchResult>(std::move(dispatched));
                 }
-                if (lspQueryMatch &&
-                    !(retainedResult->main.method.exists() && retainedResult->main.method.isSynthetic())) {
+                if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(bind.loc, retainedResult, send->fun));
+                        ctx, core::lsp::SendResponse(bind.loc, retainedResult, send->fun, send->isPrivateOk));
                 }
                 if (send->link) {
                     // This should eventually become ENFORCEs but currently they are wrong
@@ -1052,13 +1061,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                                                                  ty.origins2Explanations(ctx)));
                         }
                     }
-                } else {
+                } else if (!c->isSynthetic) {
                     if (castType->isUntyped()) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Please use `T.unsafe(...)` to cast to T.untyped");
                         }
-                    } else if (!c->isSynthetic && !ty.type->isUntyped() &&
-                               core::Types::isSubType(ctx, ty.type, castType)) {
+                    } else if (!ty.type->isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Useless cast: inferred type `{}` is already a subtype of `{}`",
                                         ty.type->show(ctx), castType->show(ctx));

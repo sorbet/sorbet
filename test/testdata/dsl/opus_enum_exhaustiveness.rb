@@ -5,18 +5,23 @@ extend T::Sig
 module Opus
   class Enum
     extend T::Sig
-    extend T::Generic
 
     sig {params(x: T.nilable(String)).void}
     def initialize(x = nil)
+    end
+
+    sig {params(blk: T.proc.void).void}
+    def self.enums(&blk)
     end
   end
 end
 
 class MyEnum < Opus::Enum
+  enums do
   A = new
   B = new
   C = new
+  end
 end
 
 sig {params(x: MyEnum).void}

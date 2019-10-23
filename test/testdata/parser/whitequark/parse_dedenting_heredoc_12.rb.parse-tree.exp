@@ -22,30 +22,26 @@ Begin {
       args = [
         DString {
           nodes = [
-            DString {
-              nodes = [
-                String {
-                  val = <U   x
+            String {
+              val = <U   x
 >
-                }
-                String {
-                  val = <U >
-                }
-                Begin {
-                  stmts = [
-                    Send {
-                      receiver = NULL
-                      method = <U foo>
-                      args = [
-                      ]
-                    }
+            }
+            String {
+              val = <U >
+            }
+            Begin {
+              stmts = [
+                Send {
+                  receiver = NULL
+                  method = <U foo>
+                  args = [
                   ]
                 }
-                String {
-                  val = <U 
->
-                }
               ]
+            }
+            String {
+              val = <U 
+>
             }
           ]
         }
