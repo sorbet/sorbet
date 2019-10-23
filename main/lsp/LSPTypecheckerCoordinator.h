@@ -12,13 +12,13 @@ namespace sorbet::realmain::lsp {
 class LSPTypecheckerCoordinator final {
     /** Contains a queue of functions to run on the typechecking thread. */
     BlockingUnBoundedQueue<std::function<void()>> lambdas;
-    /** Contains the ID of the thread responsible for typechecking. */
-    std::thread::id typecheckerThreadId;
     /** If 'true', the coordinator should terminate immediately. */
     bool shouldTerminate;
     /** LSPTypecheckerCoordinator delegates typechecking operations to LSPTypechecker. */
     LSPTypechecker typechecker;
     std::shared_ptr<const LSPConfiguration> config;
+    /** If 'true', then the typechecker is running on a dedicated thread. */
+    bool hasDedicatedThread;
 
     /**
      * Runs the provided function on the typechecker thread.
