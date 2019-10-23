@@ -2,7 +2,6 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
-#include "common/concurrency/WorkerPool.h"
 #include "core/core.h"
 
 #include <utility>
@@ -19,13 +18,10 @@ public:
     }
     ~FlattenWalk() {
         ENFORCE(methodScopes.empty());
-        ENFORCE(classStack.empty());
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         newMethodSet();
-        int size = classStack.size();
-        classStack.emplace_back(ClassScope{size, classDef->name.get()});
         return classDef;
     }
 
@@ -83,9 +79,7 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        ENFORCE(!classStack.empty());
         classDef->rhs = addMethods(ctx, std::move(classDef->rhs));
-        classStack.pop_back();
         return classDef;
     };
 
@@ -182,23 +176,16 @@ private:
 
     struct ClassScope {
         int index;
-        ast::Expression *name;
-        ClassScope(int index, ast::Expression *name) : index(index), name(name){};
+        ClassScope(int index) : index(index) {};
     };
 
-    // We flatten nested classes and methods into a flat list. We want to sort
-    // them by their starts, so that `class A; class B; end; end` --> `class A;
-    // end; class B; end`.
-    //
-    // In order to make TreeMap work out, we can't remove them from the AST
-    // until the `postTransform*` hook. Appending them to a list at that point
-    // would result in an "bottom-up" ordering, so instead we store a stack of
-    // "where does the next definition belong" into `classStack` and
-    // `methodScopes.stack`, which we push onto in the `preTransform* hook, and
-    // pop from in the `postTransform` hook.
-
+    // We flatten methods so that we have an arbitrary hierarchy of classes each of which has a flat list of
+    // methods. This prevents methods from existing deeper inside the hierarchy, enabling later traversals to stop
+    // recursing over the AST once they've reached a method def.
     vector<Methods> methodScopes;
-    vector<ClassScope> classStack;
+    // this allows us to skip adding methods to the method stack if we are going to add them as part of a larger
+    // expression: for example, if we have already seen the send `private(def foo...)` then we'll add the entire send,
+    // and not just the method.
     UnorderedSet<ast::Expression *> skipMethods;
 };
 
