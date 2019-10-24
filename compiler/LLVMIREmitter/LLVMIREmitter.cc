@@ -461,8 +461,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     const vector<llvm::BasicBlock *> llvmBlocks = getSorbetBlocks2LLVMBlockMapping(cs, cfg, func, userBodyEntry);
 
     int maxSendArgCount = 0;
-    for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
-        cfg::BasicBlock *bb = *it;
+    for (auto &bb : cfg.basicBlocks) {
         for (cfg::Binding &bind : bb->exprs) {
             if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
                 if (maxSendArgCount < snd->args.size()) {
