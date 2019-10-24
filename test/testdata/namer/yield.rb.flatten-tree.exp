@@ -26,34 +26,34 @@ begin
 
     <emptyTree>
 
-    def yielder<yielder>(<blk>)
+    def yielder(<blk>)
       begin
         a = <blk>.call(1)
         <blk>.call(a)
       end
     end
 
-    def blockpass<blockpass>(blk)
+    def blockpass(blk)
       begin
         a = blk.call(1)
         blk.call(a)
       end
     end
 
-    def mixed<mixed>(blk)
+    def mixed(blk)
       begin
         a = blk.call(1)
         blk.call(a)
       end
     end
 
-    def blockyield<blockyield>(<blk>)
+    def blockyield(<blk>)
       <self>.yielder() do |i$1|
         <blk>.call(i$1)
       end
     end
 
-    def main<main>(<blk>)
+    def main(<blk>)
       begin
         l = <self>.lambda() do |x$1|
           begin
@@ -68,7 +68,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

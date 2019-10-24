@@ -14,7 +14,7 @@ begin
 
     <emptyTree>
 
-    def method<method>(<blk>)
+    def method(<blk>)
       begin
         a = 1
         c = 4
@@ -34,7 +34,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

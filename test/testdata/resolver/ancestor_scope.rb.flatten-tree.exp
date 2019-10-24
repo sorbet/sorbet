@@ -31,12 +31,12 @@ begin
     end
   end
   class ::Other<<C Other>> < (::<todo sym>)
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::Test<<C Test>> < (::Other, ::Test::Mixin, ::Test::Other)
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       begin
         begin
           <emptyTree>
@@ -55,12 +55,12 @@ begin
     end
   end
   module ::Test::Mixin<<C Mixin>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::Test::Other<<C Other>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

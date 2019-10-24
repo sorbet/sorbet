@@ -18,11 +18,11 @@ begin
 
     <emptyTree>
 
-    def meth<meth>(<blk>)
+    def meth(<blk>)
       [#$a, #$b, #$c]
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       begin
         #$b = 2
         #$a

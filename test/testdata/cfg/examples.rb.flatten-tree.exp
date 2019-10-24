@@ -28,7 +28,7 @@ begin
 
     <emptyTree>
 
-    def i_like_ifs<i_like_ifs>(<blk>)
+    def i_like_ifs(<blk>)
       if true
         return 1
       else
@@ -36,7 +36,7 @@ begin
       end
     end
 
-    def i_like_exps<i_like_exps>(<blk>)
+    def i_like_exps(<blk>)
       if true
         1
       else
@@ -44,7 +44,7 @@ begin
       end
     end
 
-    def return_in_one_branch1<return_in_one_branch1>(<blk>)
+    def return_in_one_branch1(<blk>)
       if true
         return 1
       else
@@ -52,7 +52,7 @@ begin
       end
     end
 
-    def return_in_one_branch2<return_in_one_branch2>(<blk>)
+    def return_in_one_branch2(<blk>)
       if true
         1
       else
@@ -60,7 +60,7 @@ begin
       end
     end
 
-    def variables<variables>(<blk>)
+    def variables(<blk>)
       begin
         if true
           a = 1
@@ -76,7 +76,7 @@ begin
       end
     end
 
-    def variables_and_loop<variables_and_loop>(cond, <blk>)
+    def variables_and_loop(cond, <blk>)
       begin
         if true
           a = 1
@@ -94,7 +94,7 @@ begin
       end
     end
 
-    def variables_loop_if<variables_loop_if>(cond, <blk>)
+    def variables_loop_if(cond, <blk>)
       begin
         while true
           if cond
@@ -107,7 +107,7 @@ begin
       end
     end
 
-    def take_arguments<take_arguments>(i, <blk>)
+    def take_arguments(i, <blk>)
       if false
         2
       else
@@ -115,7 +115,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

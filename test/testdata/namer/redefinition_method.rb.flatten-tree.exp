@@ -26,11 +26,11 @@ begin
       <emptyTree>
     end
 
-    def foo<foo>(a, b, c, <blk>)
+    def foo(a, b, c, <blk>)
       <emptyTree>
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       begin
         <self>.sig() do ||
           <self>.params({:"a" => ::Integer}).returns(::Integer)

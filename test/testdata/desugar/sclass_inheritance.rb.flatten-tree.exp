@@ -5,7 +5,7 @@ begin
 
     <emptyTree>
 
-    def main<main>(<blk>)
+    def main(<blk>)
       begin
         <self>.puts(::A.newer())
         <self>.puts(::B.newer())
@@ -42,12 +42,12 @@ begin
     end
   end
   module ::MM<<C MM>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::MM)
@@ -60,11 +60,11 @@ begin
 
     <emptyTree>
 
-    def newer<newer>(<blk>)
+    def newer(<blk>)
       <self>.new()
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
@@ -73,16 +73,16 @@ begin
 
     <emptyTree>
 
-    def self.newer<newer>(<blk>)
+    def self.newer(<blk>)
       <self>.new()
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       ::Sorbet::Private::Static.keep_for_ide(::MM)
     end
   end
   class ::C<<C C>> < (::A)
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       begin
         <emptyTree>
         <emptyTree>
@@ -94,11 +94,11 @@ begin
 
     <emptyTree>
 
-    def newerer<newerer>(<blk>)
+    def newerer(<blk>)
       <self>.newer()
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

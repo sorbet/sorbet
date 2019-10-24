@@ -10,7 +10,7 @@ begin
     end
   end
   class ::C<<C C>> < (::<todo sym>)
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       ::C::L = begin
         ::Sorbet::Private::Static.keep_for_typechecking(::T.proc().params({:"x" => ::Integer}).returns(::Integer))
         T.let(<self>.lambda() do |x$1|

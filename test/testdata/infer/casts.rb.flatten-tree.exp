@@ -16,11 +16,11 @@ begin
 
     <emptyTree>
 
-    def untyped<untyped>(<blk>)
+    def untyped(<blk>)
       <emptyTree>
     end
 
-    def test_casts<test_casts>(<blk>)
+    def test_casts(<blk>)
       begin
         t = begin
           ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
@@ -60,7 +60,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

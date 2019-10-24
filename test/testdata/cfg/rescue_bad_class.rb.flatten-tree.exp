@@ -5,7 +5,7 @@ begin
 
     <emptyTree>
 
-    def foo<foo>(<blk>)
+    def foo(<blk>)
       <emptyTree>
     rescue Unresolved: <emptyTree>::<C NotAClass> => e
       <emptyTree>
