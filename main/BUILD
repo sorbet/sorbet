@@ -1,5 +1,5 @@
 cc_binary(
-    name = "sorbet_llvm",
+    name = "sorbet",
     srcs = [
         "main.cc",
     ],
