@@ -7,13 +7,13 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
     method <C <U A>><U food> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=4:5 end=4:13}
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
+    method <C <U A>><U foos> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=6:5 end=6:18}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
     method <C <U A>><U sfood> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=10:5 end=10:14}
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
   class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/flatten.rb start=2:7 end=2:8}
     type-member(+) <S <C <U A>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/resolver/flatten.rb start=2:7 end=2:8}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=15:4}
-      argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
-    method <S <C <U A>> $1><U foos> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=6:5 end=6:18}
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
     method <S <C <U A>> $1><U sfoo> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=9:3 end=9:16}
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}

@@ -34,7 +34,7 @@ begin
       <emptyTree>
     end
 
-    def self.foos<foos>(<blk>)
+    def foos<foos>(<blk>)
       <emptyTree>
     end
 
