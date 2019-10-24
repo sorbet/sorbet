@@ -667,7 +667,8 @@ void readOptions(Options &opts,
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
-        opts.lspAutocompleteMethodsEnabled = enableAllLSPFeatures || opts.lspAutocompleteEnabled || raw["enable-experimental-lsp-autocomplete-methods"].as<bool>();
+        opts.lspAutocompleteMethodsEnabled = enableAllLSPFeatures || opts.lspAutocompleteEnabled ||
+                                             raw["enable-experimental-lsp-autocomplete-methods"].as<bool>();
         opts.lspQuickFixEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-quick-fix"].as<bool>();
         opts.lspWorkspaceSymbolsEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-workspace-symbols"].as<bool>();
