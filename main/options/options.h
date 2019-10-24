@@ -197,6 +197,7 @@ struct Options {
     std::vector<std::string> lspDirsMissingFromClient;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspAutocompleteEnabled = false;
+    bool lspAutocompleteMethodsEnabled = false;
     bool lspQuickFixEnabled = false;
     bool lspWorkspaceSymbolsEnabled = false;
     bool lspDocumentSymbolEnabled = false;

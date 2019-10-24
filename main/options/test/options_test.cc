@@ -69,6 +69,7 @@ TEST(OptionsTest, DefaultConstructorMatchesReadOptions) {
     EXPECT_EQ(empty.relativeIgnorePatterns.size(), opts.relativeIgnorePatterns.size());
     EXPECT_EQ(empty.inputFileNames.size(), opts.inputFileNames.size());
     EXPECT_EQ(empty.lspAutocompleteEnabled, opts.lspAutocompleteEnabled);
+    EXPECT_EQ(empty.lspAutocompleteMethodsEnabled, opts.lspAutocompleteMethodsEnabled);
     EXPECT_EQ(empty.lspQuickFixEnabled, opts.lspQuickFixEnabled);
     EXPECT_EQ(empty.lspWorkspaceSymbolsEnabled, opts.lspWorkspaceSymbolsEnabled);
     EXPECT_EQ(empty.lspDocumentSymbolEnabled, opts.lspDocumentSymbolEnabled);

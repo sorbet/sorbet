@@ -340,6 +340,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.watchmanPath));
     options.add_options("advanced")("enable-experimental-lsp-autocomplete",
                                     "Enable experimental LSP feature: Autocomplete");
+    options.add_options("advanced")("enable-experimental-lsp-autocomplete-methods",
+                                    "Enable experimental LSP feature: Autocomplete, but only for methods");
     options.add_options("advanced")("enable-experimental-lsp-workspace-symbols",
                                     "Enable experimental LSP feature: Workspace Symbols");
     options.add_options("advanced")("enable-experimental-lsp-document-symbol",
@@ -665,6 +667,8 @@ void readOptions(Options &opts,
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
+        opts.lspAutocompleteMethodsEnabled = enableAllLSPFeatures || opts.lspAutocompleteEnabled ||
+                                             raw["enable-experimental-lsp-autocomplete-methods"].as<bool>();
         opts.lspQuickFixEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-quick-fix"].as<bool>();
         opts.lspWorkspaceSymbolsEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-workspace-symbols"].as<bool>();
