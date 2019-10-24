@@ -16,12 +16,12 @@ begin
 
     def take_arguments<take_arguments>(a, b, c, d, e, f, g)
       begin
-        if ::T.untyped()
+        if ::T.unsafe(false)
           ::Sorbet::Private::Static.keep_for_ide(1)
         else
           <emptyTree>
         end
-        if ::T.untyped()
+        if ::T.unsafe(false)
           ::Sorbet::Private::Static.keep_for_ide(2)
         else
           <emptyTree>

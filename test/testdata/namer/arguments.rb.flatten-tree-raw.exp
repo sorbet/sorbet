@@ -86,9 +86,10 @@ InsSeq{
                     orig = nullptr
                     symbol = ::T
                   }
-                  fun = <U untyped>
+                  fun = <U unsafe>
                   block = nullptr
                   args = [
+                    Literal{ value = false }
                   ]
                 }
                 thenp = Send{
@@ -110,9 +111,10 @@ InsSeq{
                     orig = nullptr
                     symbol = ::T
                   }
-                  fun = <U untyped>
+                  fun = <U unsafe>
                   block = nullptr
                   args = [
+                    Literal{ value = false }
                   ]
                 }
                 thenp = Send{

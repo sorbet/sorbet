@@ -22,7 +22,7 @@ begin
 
     def foo<foo>(x, <blk>)
       begin
-        if ::T.untyped()
+        if ::T.unsafe(false)
           T.let(nil, String)
         else
           <emptyTree>
@@ -33,7 +33,7 @@ begin
 
     def bar<bar>(y, <blk>)
       begin
-        if ::T.untyped()
+        if ::T.unsafe(false)
           T.let(nil, String)
         else
           <emptyTree>
@@ -44,7 +44,7 @@ begin
 
     def qux<qux>(z, <blk>)
       begin
-        if ::T.untyped()
+        if ::T.unsafe(false)
           T.let("", String)
         else
           <emptyTree>
@@ -55,7 +55,7 @@ begin
 
     def baz<baz>(w, <blk>)
       begin
-        if ::T.untyped()
+        if ::T.unsafe(false)
           T.let("", String)
         else
           <emptyTree>
