@@ -6,7 +6,7 @@ begin
           <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 
-        def foo<foo>(x, <blk>)
+        def foo(x, <blk>)
           x
         end
 
@@ -14,7 +14,7 @@ begin
           <self>.params({:"y" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 
-        def bar<bar>(y, <blk>)
+        def bar(y, <blk>)
           y
         end
 
@@ -22,7 +22,7 @@ begin
           <self>.params({:"z" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 
-        def qux<qux>(z, <blk>)
+        def qux(z, <blk>)
           z
         end
 
@@ -30,7 +30,7 @@ begin
           <self>.params({:"w" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 
-        def baz<baz>(w, <blk>)
+        def baz(w, <blk>)
           w
         end
 

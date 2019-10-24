@@ -14,7 +14,7 @@ begin
 
     <emptyTree>
 
-    def f<f>((x,y), z, <blk>)
+    def f((x,y), z, <blk>)
       begin
         begin
           <assignTemp>$3 = <destructure>$2
@@ -41,7 +41,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

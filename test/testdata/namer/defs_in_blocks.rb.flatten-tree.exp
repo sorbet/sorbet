@@ -9,7 +9,7 @@ begin
       end
     end
 
-    def a_method<a_method>(<blk>)
+    def a_method(<blk>)
       <emptyTree>
     end
   end

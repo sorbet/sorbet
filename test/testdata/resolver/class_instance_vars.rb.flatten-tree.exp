@@ -37,7 +37,7 @@ begin
 
     <emptyTree>
 
-    def initialize<initialize>(<blk>)
+    def initialize(<blk>)
       begin
         @ivar = begin
           ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
@@ -50,14 +50,14 @@ begin
       end
     end
 
-    def hi<hi>(<blk>)
+    def hi(<blk>)
       begin
         @ivar = 1
         @ivar2
       end
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       @@class_var = begin
         ::Sorbet::Private::Static.keep_for_typechecking(::String)
         T.let("hi", String)
@@ -65,7 +65,7 @@ begin
     end
   end
   module ::Mixin<<C Mixin>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       begin
         @@mixin_cvar = begin
           ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
@@ -81,7 +81,7 @@ begin
 
     <emptyTree>
 
-    def child_method<child_method>(<blk>)
+    def child_method(<blk>)
       begin
         @@class_var
         @@mixin_cvar
@@ -90,7 +90,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       begin
         @@class_var
         @@mixin_cvar
@@ -101,7 +101,7 @@ begin
     end
   end
   class ::Child1<<C Child1>> < (::Alias)
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       @@class_var
     end
   end

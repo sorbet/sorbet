@@ -14,7 +14,7 @@ begin
 
     <emptyTree>
 
-    def test_next_break<test_next_break>(<blk>)
+    def test_next_break(<blk>)
       <self>.each() do ||
         begin
           if <self>.rand()
@@ -31,7 +31,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

@@ -16,37 +16,37 @@ begin
 
     <emptyTree>
 
-    def foo<foo>(<blk>)
+    def foo(<blk>)
       begin
         <emptyTree>
         <emptyTree>
       end
     end
 
-    def food<food>(<blk>)
+    def food(<blk>)
       <emptyTree>
     end
 
-    def self.foos<foos>(<blk>)
+    def self.foos(<blk>)
       <emptyTree>
     end
 
-    def self.sfoo<sfoo>(<blk>)
+    def self.sfoo(<blk>)
       begin
         <emptyTree>
         <emptyTree>
       end
     end
 
-    def sfood<sfood>(<blk>)
+    def sfood(<blk>)
       <emptyTree>
     end
 
-    def self.sfoos<sfoos>(<blk>)
+    def self.sfoos(<blk>)
       <emptyTree>
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

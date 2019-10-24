@@ -14,7 +14,7 @@ begin
 
     <emptyTree>
 
-    def take_arguments<take_arguments>(a, b, c, d, e, f, g)
+    def take_arguments(a, b, c, d, e, f, g)
       begin
         if ::T.unsafe(false)
           ::Sorbet::Private::Static.keep_for_ide(1)
@@ -36,7 +36,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

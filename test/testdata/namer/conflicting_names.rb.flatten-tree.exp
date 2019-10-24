@@ -14,11 +14,11 @@ begin
 
     <emptyTree>
 
-    def Foo<Foo>(<blk>)
+    def Foo(<blk>)
       <emptyTree>
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::A::Foo)
@@ -27,7 +27,7 @@ begin
     end
   end
   class ::A::Foo<<C Foo>> < (::<todo sym>)
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

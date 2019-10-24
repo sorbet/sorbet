@@ -18,12 +18,12 @@ begin
     end
   end
   module ::B<<C B>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::A<<C A>> < ()
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::A::B::C)
@@ -32,7 +32,7 @@ begin
     end
   end
   class ::A::B::C<<C C>> < (::<todo sym>)
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end

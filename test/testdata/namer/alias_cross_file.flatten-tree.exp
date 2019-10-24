@@ -14,11 +14,11 @@ begin
 
     <emptyTree>
 
-    def test_resolve<test_resolve>(<blk>)
+    def test_resolve(<blk>)
       <emptyTree>
     end
 
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <self>.sig() do ||
         <self>.returns(::T2)
       end
@@ -42,7 +42,7 @@ begin
     end
   end
   class ::T1<<C T1>> < (::<todo sym>)
-    def self.<static-init><<static-init>>(<blk>)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
