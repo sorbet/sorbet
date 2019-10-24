@@ -349,12 +349,14 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
 unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker &typechecker, const MessageId &id,
                                                                   const CompletionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
-    if (!config->opts.lspAutocompleteEnabled) {
+    if (!config->opts.lspAutocompleteEnabled && !config->opts.lspAutocompleteMethodsEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Autocomplete` LSP feature is experimental and disabled by default.");
         return response;
     }
+
+    auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
 
@@ -362,13 +364,13 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
     auto uri = params.textDocument->uri;
     auto fref = config->uri2FileRef(gs, uri);
     if (!fref.exists()) {
-        response->result = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
+        response->result = std::move(emptyResult);
         return response;
     }
     auto pos = *params.position;
     auto queryLoc = config->lspPos2Loc(fref, pos, gs);
     if (!queryLoc.exists()) {
-        response->result = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
+        response->result = std::move(emptyResult);
         return response;
     }
     auto result = queryByLoc(typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
@@ -451,9 +453,11 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
                 items.push_back(getCompletionItemForSymbol(gs, similarMethod.method, similarMethod.receiverType,
                                                            similarMethod.constr.get(), queryLoc, prefix, items.size()));
             }
-        } else if (auto identResp = resp->isIdent()) {
-            findSimilarConstantOrIdent(gs, identResp->retType.type, queryLoc, items);
         } else if (auto constantResp = resp->isConstant()) {
+            if (!config->opts.lspAutocompleteEnabled) {
+                response->result = std::move(emptyResult);
+                return response;
+            }
             findSimilarConstantOrIdent(gs, constantResp->retType.type, queryLoc, items);
         }
     }

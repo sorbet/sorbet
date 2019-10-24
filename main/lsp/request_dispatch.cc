@@ -120,7 +120,7 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
                 serverCap->signatureHelpProvider = move(sigHelpProvider);
             }
 
-            if (opts.lspAutocompleteEnabled) {
+            if (opts.lspAutocompleteEnabled || opts.lspAutocompleteMethodsEnabled) {
                 auto completionProvider = make_unique<CompletionOptions>();
                 completionProvider->triggerCharacters = {"."};
                 serverCap->completionProvider = move(completionProvider);
