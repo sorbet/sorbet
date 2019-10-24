@@ -1,8 +1,0 @@
-Assign {
-  lhs = IVarLhs {
-    name = <U @var>
-  }
-  rhs = Integer {
-    val = "10"
-  }
-}

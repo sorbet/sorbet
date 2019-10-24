@@ -1,8 +1,0 @@
-Assign {
-  lhs = GVarLhs {
-    name = <U $var>
-  }
-  rhs = Integer {
-    val = "10"
-  }
-}
