@@ -259,7 +259,7 @@ private:
     UnorderedSet<ast::Expression *> skipMethods;
 };
 
-unique_ptr<ast::Expression> Flatten::patchFile(core::Context ctx, unique_ptr<ast::Expression> tree) {
+unique_ptr<ast::Expression> Flatten::run(core::Context ctx, unique_ptr<ast::Expression> tree) {
     FlattenWalk flatten;
     tree = ast::TreeMap::apply(ctx, flatten, std::move(tree));
     tree = flatten.addMethods(ctx, std::move(tree));

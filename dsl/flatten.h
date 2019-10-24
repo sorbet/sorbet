@@ -6,7 +6,7 @@ namespace sorbet::dsl {
 
 class Flatten final {
 public:
-    static std::unique_ptr<ast::Expression> patchFile(core::Context ctx, std::unique_ptr<ast::Expression> tree);
+    static std::unique_ptr<ast::Expression> run(core::Context ctx, std::unique_ptr<ast::Expression> tree);
 
     Flatten() = delete;
 };

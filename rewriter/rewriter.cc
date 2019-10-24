@@ -165,8 +165,8 @@ unique_ptr<ast::Expression> Rewriter::run(core::MutableContext ctx, unique_ptr<a
 
     Rewriterer rewriter;
     ast = ast::TreeMap::apply(ctx, rewriter, std::move(ast));
-    auto verifiedResult = ast::Verifier::run(ctx, std::move(ast));
-    verifiedResult = Flatten::patchFile(ctx, std::move(verifiedResult));
+    auto flattened = Flatten::run(ctx, std::move(ast));
+    auto verifiedResult = ast::Verifier::run(ctx, std::move(flattened));
     return verifiedResult;
 }
 
