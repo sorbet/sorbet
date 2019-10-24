@@ -64,7 +64,6 @@ public:
 
             methods.stack.emplace_back(methods.methods.size(), isStatic);
             methods.methods.emplace_back();
-
         }
         return send;
     }
