@@ -1461,8 +1461,7 @@ private:
                 } else {
                     // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the
                     // body.
-                    default_ =
-                        make_unique<ast::Cast>(loc, argType, move(optArgExp->default_), core::Names::let());
+                    default_ = make_unique<ast::Cast>(loc, argType, move(optArgExp->default_), core::Names::let());
                 }
                 auto maybe = ast::MK::If(loc, ast::MK::Untyped(loc), move(default_), ast::MK::EmptyTree());
                 lets.emplace_back(std::move(maybe));
