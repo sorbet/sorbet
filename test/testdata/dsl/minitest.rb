@@ -28,9 +28,9 @@ class MyTest
         instance_helper
     end
 
-    after do # error: Method `after` does not exist
-        @foo = nil
-        instance_helper # error: Method `instance_helper` does not exist
+    after do
+        @foo = nil # error: Reassigning field
+        instance_helper
     end
 
     it 'can read foo' do

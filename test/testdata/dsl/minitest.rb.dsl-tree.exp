@@ -57,10 +57,15 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
-    <self>.after() do ||
-      begin
-        @foo = nil
-        <self>.instance_helper()
+    begin
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+      def <after><<C <todo sym>>>(&<blk>)
+        begin
+          @foo = nil
+          <self>.instance_helper()
+        end
       end
     end
 
