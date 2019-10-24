@@ -23,8 +23,8 @@ def sorbet_llvm_externals():
 
     http_archive(
         name = "org_llvm_darwin",
-        url = "https://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-apple-darwin.tar.xz",
+        url = "https://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-darwin-apple.tar.xz",
         build_file = "//third_party:llvm.BUILD",
-        sha256 = "94ebeb70f17b6384e052c47fef24a6d70d3d949ab27b6c83d4ab7b298278ad6f",
-        strip_prefix = "clang+llvm-8.0.0-x86_64-apple-darwin",
+        sha256 = "b46e3fe3829d4eb30ad72993bf28c76b1e1f7e38509fbd44192a2ef7c0126fc7",
+        strip_prefix = "clang+llvm-9.0.0-x86_64-darwin-apple",
     )
