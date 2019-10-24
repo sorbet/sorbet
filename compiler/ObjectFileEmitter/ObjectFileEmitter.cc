@@ -103,7 +103,6 @@ void ObjectFileEmitter::run(llvm::LLVMContext &lctx, unique_ptr<llvm::Module> mo
     pmbuilder.OptLevel = optLevel;
     pmbuilder.SizeLevel = sizeLevel;
     pmbuilder.Inliner = llvm::createFunctionInliningPass(optLevel, sizeLevel, false);
-    pmbuilder.DisableUnitAtATime = false;
     pmbuilder.DisableUnrollLoops = false;
     pmbuilder.LoopVectorize = true;
     pmbuilder.SLPVectorize = true;
