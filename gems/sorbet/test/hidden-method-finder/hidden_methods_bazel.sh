@@ -82,7 +82,7 @@ info "├─ sorbet --version: $("$SRB_SORBET_EXE" --version)"
 # then uses that as a workspace.
 actual="${test_dir}/actual"
 cp -r "${test_dir}/src" "$actual"
-cp "${test_dir}/../shims.rb" "${actual}/shims.rb"
+cp "${test_dir}/../shims.rb.source" "${actual}/shims.rb"
 
 cleanup() {
   rm -rf "$actual"
