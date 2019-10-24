@@ -21,11 +21,21 @@ class MyTest
         end
     end
 
+    def instance_helper; end
+
     before do
         @foo = T.let(3, Integer)
+        instance_helper
     end
+
+    after do
+        @foo = nil # error: Reassigning field
+        instance_helper
+    end
+
     it 'can read foo' do
         T.assert_type!(@foo, Integer)
+        instance_helper
     end
 
     def self.random_method

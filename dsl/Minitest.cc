@@ -59,9 +59,9 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
         return nullptr;
     }
 
-    if (send->args.empty() && send->fun == core::Names::before()) {
-        return addSigVoid(ast::MK::Method0(send->loc, send->loc, core::Names::initialize(),
-                                           prepareBody(ctx, std::move(send->block->body)),
+    if (send->args.empty() && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
+        auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
+        return addSigVoid(ast::MK::Method0(send->loc, send->loc, name, prepareBody(ctx, std::move(send->block->body)),
                                            ast::MethodDef::DSLSynthesized));
     }
 
