@@ -1,6 +1,7 @@
 #include "common/Counters.h"
 #include "absl/strings/str_cat.h"
 #include "common/Counters_impl.h"
+#include "common/formatting.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
