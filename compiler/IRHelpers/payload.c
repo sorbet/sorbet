@@ -478,12 +478,12 @@ const rb_data_type_t closureInfo = {
     /* flags = */ RUBY_TYPED_FREE_IMMEDIATELY /* deferred free */,
 };
 
-VALUE allocClosureAsValue(int elemCount) {
+VALUE sorbet_allocClosureAsValue(int elemCount) {
     struct sorbet_Closure *ptr = sorbet_Closure_alloc(elemCount);
     return TypedData_Wrap_Struct(rb_cData, &closureInfo, ptr);
 }
 
-VALUE *getClosureElem(VALUE closure, int elemId) {
+VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
   return &(((struct sorbet_Closure *)RTYPEDDATA_DATA(closure))->closureData[elemId]);
 }
 
