@@ -1107,8 +1107,7 @@ core::UsageHash getAllNames(const core::GlobalState &gs, unique_ptr<ast::Express
     return move(collector.acc);
 };
 
-core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger,
-                               bool lspParseErrorsTakeFastPath) {
+core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
     unique_ptr<core::GlobalState> lgs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
@@ -1126,15 +1125,6 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
 
     single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore));
     auto errs = lgs->errorQueue->drainAllErrors();
-    if (!lspParseErrorsTakeFastPath) {
-        for (auto &e : errs) {
-            if (e->what == core::errors::Parser::ParserError) {
-                core::GlobalStateHash invalid;
-                invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
-                return {move(invalid), {}};
-            }
-        }
-    }
     auto allNames = getAllNames(*lgs, single[0].tree);
     auto workers = WorkerPool::create(0, lgs->tracer());
     pipeline::resolve(lgs, move(single), emptyOpts, *workers, true);
