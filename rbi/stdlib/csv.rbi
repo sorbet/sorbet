@@ -363,12 +363,12 @@ class CSV < Object
     .returns(T::Array[T::Array[T.nilable(String)]])
   end
   def self.read(path, options=T.unsafe(nil)); end
-  
+
   sig { params(row: T.any(Array, CSV::Row)).void }
   def <<(row); end
 
-  sig { params(str: String, blk: T.proc.params(csv: CSV).void).returns(String) }
-  def self.generate(str = "", &blk); end
+  sig { params(str: String, options: T.untyped, blk: T.proc.params(csv: CSV).void).returns(String) }
+  def self.generate(str = "", **options, &blk); end
 end
 
 # A [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) is part
