@@ -12,8 +12,7 @@ target triple = "x86_64-apple-darwin18.2.0"
 @rb_cObject = external local_unnamed_addr constant i64, align 8
 @.str.4 = private unnamed_addr constant [5 x i8] c"func\00", align 1
 @.str.8 = private unnamed_addr constant [16 x i8] c"CompiledClosure\00", align 1
-@closureInfo = constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.8, i32 0, i32 0), %struct.anon.1 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
-@rb_cData = external local_unnamed_addr constant i64, align 8
+@closureInfo = local_unnamed_addr constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.8, i32 0, i32 0), %struct.anon.1 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
 @rubyIdPrecomputed_a = internal unnamed_addr global i64 0, align 8
 @str_a = private unnamed_addr constant [2 x i8] c"a\00", align 1
 @rubyIdPrecomputed_b = internal unnamed_addr global i64 0, align 8
@@ -87,25 +86,12 @@ define internal i64 @sorbet_Closure_size(i8* nocapture readonly) #4 {
   ret i64 %6
 }
 
-; Function Attrs: nounwind ssp uwtable
-define i64 @allocClosureAsValue(i32) local_unnamed_addr #0 {
-  %2 = sext i32 %0 to i64
-  %3 = shl nsw i64 %2, 3
-  %4 = add nsw i64 %3, 8
-  %5 = tail call i8* @ruby_xmalloc(i64 %4) #1
-  %6 = load i64, i64* @rb_cData, align 8, !tbaa !5
-  %7 = tail call i64 @rb_data_typed_object_wrap(i64 %6, i8* %5, %struct.rb_data_type_struct* nonnull @closureInfo) #1
-  ret i64 %7
-}
-
-declare i64 @rb_data_typed_object_wrap(i64, i8*, %struct.rb_data_type_struct*) local_unnamed_addr #3
-
 ; Function Attrs: norecurse nounwind readonly ssp uwtable
-define nonnull i64* @getClosureElem(i64, i32) local_unnamed_addr #4 {
+define nonnull i64* @sorbet_getClosureElem(i64, i32) local_unnamed_addr #4 {
   %3 = inttoptr i64 %0 to %struct.RTypedData*
   %4 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %3, i64 0, i32 3
   %5 = bitcast i8** %4 to %struct.sorbet_Closure**
-  %6 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %5, align 8, !tbaa !7
+  %6 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %5, align 8, !tbaa !5
   %7 = sext i32 %1 to i64
   %8 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %6, i64 0, i32 1, i64 %7
   ret i64* %8
@@ -139,7 +125,7 @@ constr:
 define void @Init_hashes() local_unnamed_addr #6 {
 entry:
   %callArgs.i = alloca [4 x i64], align 8
-  %0 = load i64, i64* @rb_cObject, align 8, !tbaa !5
+  %0 = load i64, i64* @rb_cObject, align 8, !tbaa !10
   %1 = bitcast [4 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 32, i8* nonnull %1)
   %rubyId_a.i = load i64, i64* @rubyIdPrecomputed_a, align 8
@@ -179,12 +165,12 @@ attributes #8 = { cold noreturn nounwind }
 !2 = !{!"int", !3, i64 0}
 !3 = !{!"omnipotent char", !4, i64 0}
 !4 = !{!"Simple C/C++ TBAA"}
-!5 = !{!6, !6, i64 0}
-!6 = !{!"long", !3, i64 0}
-!7 = !{!8, !10, i64 32}
-!8 = !{!"RTypedData", !9, i64 0, !10, i64 16, !6, i64 24, !10, i64 32}
-!9 = !{!"RBasic", !6, i64 0, !6, i64 8}
-!10 = !{!"any pointer", !3, i64 0}
+!5 = !{!6, !9, i64 32}
+!6 = !{!"RTypedData", !7, i64 0, !9, i64 16, !8, i64 24, !9, i64 32}
+!7 = !{!"RBasic", !8, i64 0, !8, i64 8}
+!8 = !{!"long", !3, i64 0}
+!9 = !{!"any pointer", !3, i64 0}
+!10 = !{!8, !8, i64 0}
 !11 = !{!12}
 !12 = distinct !{!12, !13, !"sorbet_callFunc: argument 0"}
 !13 = distinct !{!13, !"sorbet_callFunc"}
