@@ -1458,15 +1458,18 @@ private:
             auto argType = argSym.type;
 
             if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(argExp.get())) {
+                unique_ptr<ast::Expression> default_;
+                auto loc = optArgExp->expr->loc;
                 if (!argType) {
-                    optArgExp->default_ = nullptr;
+                    default_ = ast::MK::KeepForIDE(move(optArgExp->default_));
                 } else {
                     // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the
                     // body.
-                    auto let =
-                        make_unique<ast::Cast>(optArgExp->loc, argType, move(optArgExp->default_), core::Names::let());
-                    lets.emplace_back(std::move(let));
+                    default_ = make_unique<ast::Cast>(loc, argType, move(optArgExp->default_), core::Names::let());
                 }
+                auto maybe =
+                    ast::MK::If(loc, ast::MK::Unsafe(loc, ast::MK::False(loc)), move(default_), ast::MK::EmptyTree());
+                lets.emplace_back(std::move(maybe));
             }
         }
 

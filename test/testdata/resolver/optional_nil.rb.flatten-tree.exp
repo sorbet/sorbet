@@ -22,28 +22,44 @@ begin
 
     def foo<foo>(x, <blk>)
       begin
-        T.let(nil, String)
+        if ::T.unsafe(false)
+          T.let(nil, String)
+        else
+          <emptyTree>
+        end
         x
       end
     end
 
     def bar<bar>(y, <blk>)
       begin
-        T.let(nil, String)
+        if ::T.unsafe(false)
+          T.let(nil, String)
+        else
+          <emptyTree>
+        end
         y
       end
     end
 
     def qux<qux>(z, <blk>)
       begin
-        T.let("", String)
+        if ::T.unsafe(false)
+          T.let("", String)
+        else
+          <emptyTree>
+        end
         z
       end
     end
 
     def baz<baz>(w, <blk>)
       begin
-        T.let("", String)
+        if ::T.unsafe(false)
+          T.let("", String)
+        else
+          <emptyTree>
+        end
         w
       end
     end
