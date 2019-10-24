@@ -21,11 +21,21 @@ class MyTest
         end
     end
 
+    def instance_helper; end
+
     before do
         @foo = T.let(3, Integer)
+        instance_helper
     end
+
+    after do # error: Method `after` does not exist
+        @foo = nil
+        instance_helper # error: Method `instance_helper` does not exist
+    end
+
     it 'can read foo' do
         T.assert_type!(@foo, Integer)
+        instance_helper
     end
 
     def self.random_method
