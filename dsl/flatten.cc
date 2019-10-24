@@ -72,8 +72,16 @@ public:
             return methodDef;
         }
         int staticLevel = computeStaticLevel(methodDef.get());
-        methods.stack.emplace_back(methods.methods.size(), staticLevel);
-        methods.methods.emplace_back();
+
+        // we should only move methods that /are/ nested, so if the method stack is empty, then don't bother adding
+        // space in the move queue and record the index as -1
+        if (methods.stack.size() == 0) {
+            methods.stack.emplace_back(-1, staticLevel);
+        } else {
+            methods.stack.emplace_back(methods.methods.size(), staticLevel);
+            methods.methods.emplace_back();
+        }
+
         return methodDef;
     }
 
@@ -102,8 +110,14 @@ public:
                 staticLevel = computeStaticLevel(methodDef);
             }
 
-            methods.stack.emplace_back(methods.methods.size(), staticLevel);
-            methods.methods.emplace_back();
+            // we should only move methods that are nested, so if the method stack is empty, then don't bother adding
+            // space in the move queue and record the index as -1
+            if (methods.stack.size() == 0) {
+                methods.stack.emplace_back(-1, staticLevel);
+            } else {
+                methods.stack.emplace_back(methods.methods.size(), staticLevel);
+                methods.methods.emplace_back();
+            }
         }
         return send;
     }
@@ -112,6 +126,14 @@ public:
         if (send->fun == core::Names::sig() || isMethodModifier(*send)) {
             auto &methods = curMethodSet();
             ENFORCE(!methods.stack.empty());
+
+            // we may not need to move this method at all: check first
+            if (methods.stack.back().idx == -1) {
+                methods.stack.pop_back();
+                return send;
+            }
+
+            // otherwise, we have a spot in the queue for it that has not yet been filled in
             ENFORCE(methods.methods.size() > methods.stack.back().idx);
             ENFORCE(methods.methods[methods.stack.back().idx] == nullptr);
 
@@ -157,6 +179,13 @@ public:
         }
         auto &methods = curMethodSet();
         ENFORCE(!methods.stack.empty());
+
+        // we may not need to move this method at all: check first
+        if (methods.stack.back().idx == -1) {
+            methods.stack.pop_back();
+            return methodDef;
+        }
+
         ENFORCE(methods.methods.size() > methods.stack.back().idx);
         ENFORCE(methods.methods[methods.stack.back().idx] == nullptr);
 
