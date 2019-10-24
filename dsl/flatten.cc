@@ -171,12 +171,11 @@ public:
         while (level > 1) {
             ast::ClassDef::RHS_store rhs;
             rhs.emplace_back(move(expr));
-            expr =
-                ast::MK::Class(loc, declLoc,
-                               make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
-                                                                 core::Names::singleton()),
-                               {}, std::move(rhs), ast::ClassDefKind::Class);
-            level --;
+            expr = ast::MK::Class(loc, declLoc,
+                                  make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
+                                                                    core::Names::singleton()),
+                                  {}, std::move(rhs), ast::ClassDefKind::Class);
+            level--;
         }
 
         methods.methods[methods.stack.back().idx] = std::move(expr);
