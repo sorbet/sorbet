@@ -28,7 +28,6 @@ echo "Bundle: $bundle"
 
 for i in "$llvmir"/*.llo; do
     echo "LLVM IR: $i"
-    external/llvm_toolchain/bin/opt -analyze "$i"
 done
 
 if [[ $rb != *"no-run"* ]]; then
