@@ -14,7 +14,7 @@ fi
 COMMAND_FILE="$(mktemp)"
 trap 'rm -f "$COMMAND_FILE"' EXIT
 
-bazel build //main:sorbet_llvm
+bazel build //main:sorbet
 
 if [ $# -eq 0 ]; then
   paths=(test/testdata)

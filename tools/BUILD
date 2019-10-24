@@ -11,7 +11,7 @@ compilation_database(
     targets = [
         # BEGIN compile_commands targets
         "//test/llvm:kaleidoscope",
-        "//main:sorbet_llvm",
+        "//main:sorbet",
         "//plugin_injector:plugin_injector",
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",
         "//compiler/LLVMIREmitter:LLVMIREmitter",
