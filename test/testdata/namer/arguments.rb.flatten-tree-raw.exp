@@ -91,11 +91,16 @@ InsSeq{
                   args = [
                   ]
                 }
-                thenp = Assign{
-                  lhs = Local{
-                    localVariable = <U b>
+                thenp = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::Sorbet::Private::Static
                   }
-                  rhs = Literal{ value = 1 }
+                  fun = <U keep_for_ide>
+                  block = nullptr
+                  args = [
+                    Literal{ value = 1 }
+                  ]
                 }
                 elsep = EmptyTree
               }
@@ -110,11 +115,16 @@ InsSeq{
                   args = [
                   ]
                 }
-                thenp = Assign{
-                  lhs = Local{
-                    localVariable = <U e>
+                thenp = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::Sorbet::Private::Static
                   }
-                  rhs = Literal{ value = 2 }
+                  fun = <U keep_for_ide>
+                  block = nullptr
+                  args = [
+                    Literal{ value = 2 }
+                  ]
                 }
                 elsep = EmptyTree
               }
