@@ -413,8 +413,13 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
     } else {
         buf << "def ";
     }
+    auto funcName = name.data(gs)->toString(gs);
+    buf << funcName;
     auto &data = this->symbol.dataAllowingNone(gs);
-    buf << name.data(gs)->toString(gs) << "<" << data->name.data(gs)->toString(gs) << ">";
+    auto symName = data->name.data(gs)->toString(gs);
+    if (funcName != symName) {
+        buf << "<" << data->name.data(gs)->toString(gs) << ">";
+    }
     buf << "(";
     bool first = true;
     if (this->symbol == core::Symbols::todo()) {
