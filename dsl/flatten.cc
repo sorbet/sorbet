@@ -71,8 +71,8 @@ public:
             ENFORCE(!methods.stack.empty());
             return methodDef;
         }
-        bool isStatic = computeIsStatic(methodDef.get());
-        methods.stack.emplace_back(methods.methods.size(), isStatic);
+        int staticLevel = computeStaticLevel(methodDef.get());
+        methods.stack.emplace_back(methods.methods.size(), staticLevel);
         methods.methods.emplace_back();
         return methodDef;
     }
@@ -92,17 +92,17 @@ public:
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
         if (send->fun == core::Names::sig() || isMethodModifier(*send)) {
             auto &methods = curMethodSet();
-            bool isStatic = false;
+            int staticLevel = 0;
             if (isMethodModifier(*send) && send->args.size() >= 1) {
                 // if this is a method modifier like `private` or `protected`, then we don't need to add a new scope
                 // when we traverse the method itself, so add it to the ignore set...
                 skipMethods.insert(send->args[0].get());
                 auto methodDef = ast::cast_tree<ast::MethodDef>(send->args.front().get());
                 ENFORCE(methodDef != nullptr);
-                isStatic = computeIsStatic(methodDef);
+                staticLevel = computeStaticLevel(methodDef);
             }
 
-            methods.stack.emplace_back(methods.methods.size(), isStatic);
+            methods.stack.emplace_back(methods.methods.size(), staticLevel);
             methods.methods.emplace_back();
         }
         return send;
@@ -118,7 +118,21 @@ public:
             if (isMethodModifier(*send) && send->args.size() >= 1) {
                 auto methodDef = ast::cast_tree<ast::MethodDef>(send->args.front().get());
                 ENFORCE(methodDef);
-                methodDef->setIsSelf(methods.stack.back().isStatic);
+                int level = methods.stack.back().staticLevel;
+                methodDef->setIsSelf(level > 0);
+                auto loc = methodDef->loc;
+                auto declLoc = methodDef->declLoc;
+                while (level > 1) {
+                    ast::ClassDef::RHS_store rhs;
+                    rhs.emplace_back(move(send->args.front()));
+                    auto nestedClass =
+                        ast::MK::Class(loc, declLoc,
+                                       make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
+                                                                         core::Names::singleton()),
+                                       {}, std::move(rhs), ast::ClassDefKind::Class);
+                    send->args.front() = move(nestedClass);
+                    level--;
+                }
             }
 
             methods.methods[methods.stack.back().idx] = std::move(send);
@@ -147,9 +161,25 @@ public:
         ENFORCE(methods.methods[methods.stack.back().idx] == nullptr);
 
         // we might need to modify the static-ness of the methods
-        methodDef->setIsSelf(methods.stack.back().isStatic);
+        // methodDef->setIsSelf(methods.stack.back().isStatic);
 
-        methods.methods[methods.stack.back().idx] = std::move(methodDef);
+        int level = methods.stack.back().staticLevel;
+        methodDef->setIsSelf(level == 1);
+        auto loc = methodDef->loc;
+        auto declLoc = methodDef->declLoc;
+        unique_ptr<ast::Expression> expr = move(methodDef);
+        while (level > 1) {
+            ast::ClassDef::RHS_store rhs;
+            rhs.emplace_back(move(expr));
+            expr =
+                ast::MK::Class(loc, declLoc,
+                               make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
+                                                                 core::Names::singleton()),
+                               {}, std::move(rhs), ast::ClassDefKind::Class);
+            level --;
+        }
+
+        methods.methods[methods.stack.back().idx] = std::move(expr);
         methods.stack.pop_back();
         return make_unique<ast::EmptyTree>();
     };
@@ -203,9 +233,10 @@ private:
         return ret;
     };
 
-    bool computeIsStatic(ast::MethodDef *methodDef) {
+    int computeStaticLevel(ast::MethodDef *methodDef) {
         auto &methods = curMethodSet();
-        return methodDef->isSelf() || (methods.stack.size() > 0 && methods.stack.back().isStatic);
+        int prevLevel = methods.stack.size() > 0 ? methods.stack.back().staticLevel : 0;
+        return prevLevel + (methodDef->isSelf() ? 1 : 0);
     }
 
     struct MethodData {
@@ -222,8 +253,8 @@ private:
         //
         // which means when we get to `bar` we need to know that the outer context `foo` is static. We pass that down
         // the current stack by means of this `isStatic` variable.
-        bool isStatic;
-        MethodData(int idx, bool isStatic) : idx(idx), isStatic(isStatic){};
+        int staticLevel;
+        MethodData(int idx, int staticLevel) : idx(idx), staticLevel(staticLevel){};
     };
     struct Methods {
         vector<unique_ptr<ast::Expression>> methods;

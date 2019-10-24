@@ -22,8 +22,6 @@ begin
 
     <emptyTree>
 
-    <emptyTree>
-
     def foo<foo>(<blk>)
       begin
         <emptyTree>
@@ -48,7 +46,19 @@ begin
       <emptyTree>
     end
 
-    def self.sfoos<sfoos>(<blk>)
+    def self.<static-init><<static-init>>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+      end
+    end
+  end
+  class <singleton class><<Class:A>> < ()
+    <emptyTree>
+
+    <emptyTree>
+
+    def sfoos<sfoos>(<blk>)
       <emptyTree>
     end
 
