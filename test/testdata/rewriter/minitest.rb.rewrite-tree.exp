@@ -37,6 +37,13 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
+    <emptyTree>
+
+    begin
+      <emptyTree>
+      <emptyTree>
+    end
+
     begin
       <emptyTree>
       <emptyTree>
@@ -110,12 +117,30 @@ class <emptyTree><<C <root>>> < ()
       <emptyTree>::<C CONST> = 10
     end
 
+    def instance_helper<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).void()
     end
 
     def initialize<<C <todo sym>>>(&<blk>)
-      @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
+      begin
+        @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
+        <self>.instance_helper()
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <after><<C <todo sym>>>(&<blk>)
+      begin
+        @foo = nil
+        <self>.instance_helper()
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -123,7 +148,10 @@ class <emptyTree><<C <root>>> < ()
     end
 
     def <test_can read foo><<C <todo sym>>>(&<blk>)
-      <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
+      begin
+        <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
+        <self>.instance_helper()
+      end
     end
 
     def self.random_method<<C <todo sym>>>(&<blk>)
