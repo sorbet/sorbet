@@ -1,8 +1,0 @@
-Kwbegin {
-  stmts = [
-    Ensure {
-      body = NULL
-      ensure = NULL
-    }
-  ]
-}

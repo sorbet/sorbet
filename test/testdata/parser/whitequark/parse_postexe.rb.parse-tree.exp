@@ -1,5 +1,0 @@
-Postexe {
-  body = Integer {
-    val = "1"
-  }
-}

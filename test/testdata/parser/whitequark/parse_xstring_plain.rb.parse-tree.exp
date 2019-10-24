@@ -1,7 +1,0 @@
-XString {
-  nodes = [
-    String {
-      val = <U foobar>
-    }
-  ]
-}
