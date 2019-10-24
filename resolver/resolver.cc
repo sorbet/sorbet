@@ -1463,7 +1463,7 @@ private:
                     // body.
                     default_ = make_unique<ast::Cast>(loc, argType, move(optArgExp->default_), core::Names::let());
                 }
-                auto maybe = ast::MK::If(loc, ast::MK::Untyped(loc), move(default_), ast::MK::EmptyTree());
+                auto maybe = ast::MK::If(loc, ast::MK::Unsafe(loc, ast::MK::False(loc)), move(default_), ast::MK::EmptyTree());
                 lets.emplace_back(std::move(maybe));
             }
         }
