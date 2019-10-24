@@ -86,8 +86,8 @@ steps:
   - label: "All tests and builds succeeded"
     command: .buildkite/all-succeeded.sh
 
-  - label: ":linux: publish_ruby_gems.sh (non-blocking)"
-    command: .buildkite/publish_ruby_gems.sh
+  - label: ":linux: publish-ruby-gems.sh (non-blocking)"
+    command: .buildkite/publish-ruby-gems.sh
     <<: *elastic
 
   - wait: ~
