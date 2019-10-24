@@ -86,6 +86,12 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     return sym;
 }
 
+vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Function *func) {
+    vector<llvm::Function *> res;
+    res.emplace_back(func);
+    return res;
+}
+
 llvm::Value *varGet(CompilerState &cs, core::LocalVariable var, llvm::IRBuilder<> &builder,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
                     const UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
@@ -132,7 +138,8 @@ llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
 // load self
 UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
 setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, cfg::CFG &cfg,
-                                unique_ptr<ast::MethodDef> &md, llvm::Function *func) {
+                                unique_ptr<ast::MethodDef> &md, llvm::Function *func,
+                                vector<llvm::Function *> rubyBlocks2Functions) {
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
     {
         // nill out variables.
@@ -210,7 +217,8 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
 }
 
 vector<llvm::BasicBlock *> getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Function *func,
-                                                            llvm::BasicBlock *llvmFuncEntry) {
+                                                            llvm::BasicBlock *llvmFuncEntry,
+                                                            vector<llvm::Function *> rubyBlocks2Functions) {
     vector<llvm::BasicBlock *> llvmBlocks(cfg.maxBasicBlockId);
     for (auto &b : cfg.basicBlocks) {
         if (b.get() == cfg.entry()) {
@@ -475,6 +483,8 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
     llvm::IRBuilder<> builder(cs);
 
+    vector<llvm::Function *> rubyBlocks2Functions = getRubyBlocks2FunctionsMapping(cs, cfg, func);
+
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
     cs.functionEntryInitializers = llvm::BasicBlock::Create(
@@ -483,13 +493,17 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
 
     auto rawEntryBlock = llvm::BasicBlock::Create(cs, "setupLocalsAndArguments", func);
     builder.SetInsertPoint(rawEntryBlock);
-    const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
-        setupArgumentsAndLocalVariables(cs, builder, cfg, md, func);
+
+    UnorderedMap<core::LocalVariable, int> variablesCapturedAtLeastOnce = findCaptures(cs, cfg);
 
     auto userBodyEntry = llvm::BasicBlock::Create(cs, "userBody", func);
     builder.CreateBr(userBodyEntry);
 
-    const vector<llvm::BasicBlock *> llvmBlocks = getSorbetBlocks2LLVMBlockMapping(cs, cfg, func, userBodyEntry);
+    const vector<llvm::BasicBlock *> llvmBlocks =
+        getSorbetBlocks2LLVMBlockMapping(cs, cfg, func, userBodyEntry, rubyBlocks2Functions);
+
+    const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
+        setupArgumentsAndLocalVariables(cs, builder, cfg, md, func, rubyBlocks2Functions);
 
     int maxSendArgCount = 0;
     for (auto &bb : cfg.basicBlocks) {
@@ -501,8 +515,6 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
             }
         }
     }
-
-    UnorderedMap<core::LocalVariable, int> variablesCapturedAtLeastOnce = findCaptures(cs, cfg);
 
     builder.SetInsertPoint(cs.functionEntryInitializers);
     auto sendArgArray =
