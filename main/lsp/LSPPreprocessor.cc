@@ -365,8 +365,9 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentPa
                 end.line = range->end->line + 1;
                 end.column = range->end->character + 1;
                 core::File old(string(localPath), string(fileContents), core::File::Type::Normal);
-                auto startOffset = core::Loc::pos2Offset(old, start);
-                auto endOffset = core::Loc::pos2Offset(old, end);
+                // These offsets are non-nullopt assuming the input range is a valid range.
+                auto startOffset = core::Loc::pos2Offset(old, start).value();
+                auto endOffset = core::Loc::pos2Offset(old, end).value();
                 fileContents = fileContents.replace(startOffset, endOffset - startOffset, change->text);
             } else {
                 // replace

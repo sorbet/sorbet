@@ -437,19 +437,22 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context c
     auto [classStart, classEnd] = classLoc->position(ctx);
 
     core::Loc::Detail thisLineStart = {classStart.line, 1};
-    core::Loc thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
-    auto [_, thisLinePadding] = thisLineLoc.findStartOfLine(ctx);
+    auto thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
+    ENFORCE(thisLineLoc.has_value());
+    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(ctx);
 
-    ENFORCE(classStart.line + 1 <= classLoc->file().data(ctx).lineBreaks().size());
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
-    core::Loc nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
-    auto [replacementLoc, nextLinePadding] = nextLineLoc.findStartOfLine(ctx);
+    auto nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
+    if (!nextLineLoc.has_value()) {
+        return nullopt;
+    }
+    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(ctx);
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
     return core::AutocorrectSuggestion{
         "Add `extend T::Helpers`",
-        {core::AutocorrectSuggestion::Edit{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)}}};
+        {core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Helpers\n", prefix)}}};
 }
 
 // This implements Ruby's argument matching logic (assigning values passed to a

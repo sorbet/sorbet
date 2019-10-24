@@ -361,8 +361,16 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
     const core::GlobalState &gs = typechecker.state();
     auto uri = params.textDocument->uri;
     auto fref = config->uri2FileRef(gs, uri);
+    if (!fref.exists()) {
+        response->result = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
+        return response;
+    }
     auto pos = *params.position;
     auto queryLoc = config->lspPos2Loc(fref, pos, gs);
+    if (!queryLoc.exists()) {
+        response->result = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
+        return response;
+    }
     auto result = queryByLoc(typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
 
     if (result.error) {

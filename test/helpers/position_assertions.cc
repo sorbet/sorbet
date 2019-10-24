@@ -1033,11 +1033,11 @@ void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared
     // TODO(jez) Share this code with CodeAction (String -> TextEdit -> ())
     auto beginLine = static_cast<u4>(textEdit->range->start->line + 1);
     auto beginCol = static_cast<u4>(textEdit->range->start->character + 1);
-    auto beginOffset = core::Loc::pos2Offset(*file, {beginLine, beginCol});
+    auto beginOffset = core::Loc::pos2Offset(*file, {beginLine, beginCol}).value();
 
     auto endLine = static_cast<u4>(textEdit->range->end->line + 1);
     auto endCol = static_cast<u4>(textEdit->range->end->character + 1);
-    auto endOffset = core::Loc::pos2Offset(*file, {endLine, endCol});
+    auto endOffset = core::Loc::pos2Offset(*file, {endLine, endCol}).value();
 
     string actualEditedFileContents = string(file->source());
     actualEditedFileContents.replace(beginOffset, endOffset - beginOffset, textEdit->newText);
@@ -1113,11 +1113,11 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
             core::Loc::Detail reqPos;
             reqPos.line = e->range->start->line + 1;
             reqPos.column = e->range->start->character + 1;
-            auto startOffset = core::Loc::pos2Offset(*file, reqPos);
+            auto startOffset = core::Loc::pos2Offset(*file, reqPos).value();
 
             reqPos.line = e->range->end->line + 1;
             reqPos.column = e->range->end->character + 1;
-            auto endOffset = core::Loc::pos2Offset(*file, reqPos);
+            auto endOffset = core::Loc::pos2Offset(*file, reqPos).value();
 
             actualEditedFileContents.replace(startOffset, endOffset - startOffset, e->newText);
         }

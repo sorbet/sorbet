@@ -99,8 +99,12 @@ core::Loc LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position 
     core::Loc::Detail reqPos;
     reqPos.line = pos.line + 1;
     reqPos.column = pos.character + 1;
-    auto offset = core::Loc::pos2Offset(fref.data(gs), reqPos);
-    return core::Loc{fref, offset, offset};
+    if (auto maybeOffset = core::Loc::pos2Offset(fref.data(gs), reqPos)) {
+        auto offset = maybeOffset.value();
+        return core::Loc{fref, offset, offset};
+    } else {
+        return core::Loc::none(fref);
+    }
 }
 
 string LSPConfiguration::localName2Remote(string_view filePath) const {
