@@ -283,6 +283,37 @@ void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
     builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
 }
 
+void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, cfg::BasicBlock *bb) {
+    // TODO
+}
+
+UnorderedMap<core::LocalVariable, int> findCaptures(CompilerState &cs, cfg::CFG &cfg) {
+    UnorderedMap<core::LocalVariable, int> ret;
+
+    for (auto &bb : cfg.basicBlocks) {
+        for (cfg::Binding &bind : bb->exprs) {
+            trackBlockUsage(cs, cfg, bind.bind.variable, bb.get());
+            typecase(
+                bind.value.get(), [&](cfg::Ident *i) { trackBlockUsage(cs, cfg, i->what, bb.get()); },
+                [&](cfg::Alias *i) { /* nothing */ }, [&](cfg::SolveConstraint *i) { /* nothing*/ },
+                [&](cfg::Send *i) {
+                    for (auto &arg : i->args) {
+                        trackBlockUsage(cs, cfg, arg.variable, bb.get());
+                    }
+                    trackBlockUsage(cs, cfg, i->recv.variable, bb.get());
+                },
+                [&](cfg::Return *i) { trackBlockUsage(cs, cfg, i->what.variable, bb.get()); },
+                [&](cfg::BlockReturn *i) { trackBlockUsage(cs, cfg, i->what.variable, bb.get()); },
+                [&](cfg::LoadSelf *i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
+                [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::Unanalyzable *i) { cs.trace("Unanalyzable\n"); },
+                [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { cs.trace("LoadYieldParams\n"); },
+                [&](cfg::Cast *i) { trackBlockUsage(cs, cfg, i->value.variable, bb.get()); },
+                [&](cfg::TAbsurd *i) { /*nothing*/ });
+        }
+    }
+    return ret;
+}
+
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBlock *> llvmBlocks,
                   const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables,
                   llvm::AllocaInst *sendArgArray) {
@@ -470,6 +501,9 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
             }
         }
     }
+
+    UnorderedMap<core::LocalVariable, int> variablesCapturedAtLeastOnce = findCaptures(cs, cfg);
+
     builder.SetInsertPoint(cs.functionEntryInitializers);
     auto sendArgArray =
         builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(cs), maxSendArgCount), nullptr, "callArgs");
