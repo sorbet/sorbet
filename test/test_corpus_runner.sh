@@ -19,7 +19,7 @@ echo "Ruby: $rb"
 echo "require './test/preamble.rb'; require './$rb';" > "$rbrunfile"
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
-main/sorbet_llvm --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$rb"
+main/sorbet --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$rb"
 
 base=$(basename "$rb")
 bundle="$llvmir/${base%.rb}.bundle"
