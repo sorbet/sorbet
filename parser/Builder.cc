@@ -1,4 +1,5 @@
 #include "parser/Builder.h"
+#include "common/common.h"
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "parser/Dedenter.h"
@@ -127,8 +128,8 @@ public:
         return cond;
     }
 
-    void error(ruby_parser::dclass err, core::Loc loc) {
-        driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos(), loc.endPos(), "");
+    void error(ruby_parser::dclass err, core::Loc loc, std::string data = "") {
+        driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos(), loc.endPos(), data);
     }
 
     /* Begin callback methods */
@@ -155,6 +156,11 @@ public:
     }
 
     unique_ptr<Node> args(const token *begin, sorbet::parser::NodeVec args, const token *end, bool check_args) {
+        if (check_args) {
+            UnorderedMap<std::string, core::Loc> map;
+            checkDuplicateArgs(args, map);
+        }
+
         if (begin == nullptr && args.empty() && end == nullptr) {
             return nullptr;
         }
@@ -187,6 +193,9 @@ public:
         } else if (auto *iv = parser::cast_node<IVar>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);
         } else if (auto *c = parser::cast_node<Const>(node.get())) {
+            if (!driver_->lex.context.dynamicConstDefintinionAllowed()) {
+                error(ruby_parser::dclass::DynamicConst, node->loc);
+            }
             return make_unique<ConstLhs>(c->loc, std::move(c->scope), c->name);
         } else if (auto *cv = parser::cast_node<CVar>(node.get())) {
             return make_unique<CVarLhs>(cv->loc, cv->name);
@@ -230,7 +239,11 @@ public:
             return make_unique<Begin>(loc, sorbet::parser::NodeVec());
         }
         if (auto *b = parser::cast_node<Begin>(body.get())) {
-            return body;
+            if (begin == nullptr && end == nullptr) {
+                // Synthesized (begin) from compstmt "a; b" or (mlhs)
+                // from multi_lhs "(a, b) = *foo".
+                return body;
+            }
         }
         if (auto *m = parser::cast_node<Mlhs>(body.get())) {
             return body;
@@ -250,14 +263,20 @@ public:
                 body = make_unique<Rescue>(maybe_loc(body).join(else_->loc), std::move(body), std::move(rescueBodies),
                                            std::move(else_));
             }
-        } else if (else_ != nullptr) {
-            // TODO: We're losing the source-level information that there was an
-            // `else` here.
+        } else if (elseTok != nullptr) {
             sorbet::parser::NodeVec stmts;
             if (body != nullptr) {
-                stmts.emplace_back(std::move(body));
+                if (auto *b = parser::cast_node<Begin>(body.get())) {
+                    stmts = std::move(b->stmts);
+                } else {
+                    stmts.emplace_back(std::move(body));
+                }
             }
-            stmts.emplace_back(std::move(else_));
+            sorbet::parser::NodeVec else_stmts;
+            auto elseLoc = tokLoc(elseTok).join(maybe_loc(else_));
+            else_stmts.emplace_back(std::move(else_));
+            stmts.emplace_back(make_unique<Begin>(elseLoc, std::move(else_stmts)));
+
             body = make_unique<Begin>(collectionLoc(stmts), std::move(stmts));
         }
 
@@ -476,6 +495,10 @@ public:
     }
 
     unique_ptr<Node> constOpAssignable(unique_ptr<Node> node) {
+        if (auto *c = parser::cast_node<Const>(node.get())) {
+            return make_unique<ConstLhs>(c->loc, std::move(c->scope), c->name);
+        }
+
         return node;
     }
 
@@ -550,8 +573,10 @@ public:
         core::Loc declLoc = tokLoc(def, name).join(maybe_loc(args));
         core::Loc loc = tokLoc(def, end);
 
-        // TODO: Ruby interprets (e.g.) def 1.method as a parser error; Do we
-        // need to reject it here, or can we defer that until later analysis?
+        if (isLiteralNode(*(definee.get()))) {
+            error(ruby_parser::dclass::SingletonLiteral, definee->loc);
+        }
+
         return make_unique<DefS>(loc, declLoc, std::move(definee), gs_.enterNameUTF8(name->string()), std::move(args),
                                  std::move(body));
     }
@@ -706,7 +731,11 @@ public:
     }
 
     unique_ptr<Node> loopUntil_mod(unique_ptr<Node> body, unique_ptr<Node> cond) {
-        return make_unique<UntilPost>(body->loc.join(cond->loc), std::move(cond), std::move(body));
+        if (parser::isa_node<Kwbegin>(body.get())) {
+            return make_unique<UntilPost>(body->loc.join(cond->loc), std::move(cond), std::move(body));
+        }
+
+        return make_unique<Until>(body->loc.join(cond->loc), std::move(cond), std::move(body));
     }
 
     unique_ptr<Node> loop_while(const token *keyword, unique_ptr<Node> cond, const token *do_, unique_ptr<Node> body,
@@ -715,7 +744,11 @@ public:
     }
 
     unique_ptr<Node> loop_while_mod(unique_ptr<Node> body, unique_ptr<Node> cond) {
-        return make_unique<WhilePost>(body->loc.join(cond->loc), std::move(cond), std::move(body));
+        if (parser::isa_node<Kwbegin>(body.get())) {
+            return make_unique<WhilePost>(body->loc.join(cond->loc), std::move(cond), std::move(body));
+        }
+
+        return make_unique<While>(body->loc.join(cond->loc), std::move(cond), std::move(body));
     }
 
     unique_ptr<Node> match_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
@@ -758,7 +791,8 @@ public:
             } else {
                 loc = tokLoc(not_).join(receiver->loc);
             }
-            return make_unique<Send>(loc, std::move(receiver), core::Names::bang(), sorbet::parser::NodeVec());
+            return make_unique<Send>(loc, transformCondition(std::move(receiver)), core::Names::bang(),
+                                     sorbet::parser::NodeVec());
         }
 
         ENFORCE(begin != nullptr && end != nullptr);
@@ -804,8 +838,8 @@ public:
 
     unique_ptr<Node> pair_quoted(const token *begin, sorbet::parser::NodeVec parts, const token *end,
                                  unique_ptr<Node> value) {
-        auto sym = make_unique<DSymbol>(tokLoc(begin).join(tokLoc(end)), std::move(parts));
-        return make_unique<Pair>(tokLoc(begin).join(value->loc), std::move(sym), std::move(value));
+        auto key = symbol_compose(begin, std::move(parts), end);
+        return make_unique<Pair>(tokLoc(begin).join(value->loc), std::move(key), std::move(value));
     }
 
     unique_ptr<Node> postexe(const token *begin, unique_ptr<Node> node, const token *rbrace) {
@@ -873,7 +907,7 @@ public:
             loc = loc.join(nameLoc);
             nm = gs_.enterNameUTF8(name->string());
         } else {
-            // TODO: give example when this happens
+            // case like 'def m(*); end'
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star(), ++uniqueCounter_);
         }
         return make_unique<Restarg>(loc, nm, nameLoc);
@@ -1092,6 +1126,52 @@ public:
         auto firstPart = parts.front().get();
 
         return parser::isa_node<String>(firstPart) || parser::isa_node<DString>(firstPart);
+    }
+
+    void checkDuplicateArgs(sorbet::parser::NodeVec &args, UnorderedMap<std::string, core::Loc> &map) {
+        for (auto &this_arg : args) {
+            if (auto *arg = parser::cast_node<Arg>(this_arg.get())) {
+                checkDuplicateArg(arg->name.toString(gs_), arg->loc, map);
+            } else if (auto *optarg = parser::cast_node<Optarg>(this_arg.get())) {
+                checkDuplicateArg(optarg->name.toString(gs_), optarg->loc, map);
+            } else if (auto *restarg = parser::cast_node<Restarg>(this_arg.get())) {
+                checkDuplicateArg(restarg->name.toString(gs_), restarg->loc, map);
+            } else if (auto *blockarg = parser::cast_node<Blockarg>(this_arg.get())) {
+                checkDuplicateArg(blockarg->name.toString(gs_), blockarg->loc, map);
+            } else if (auto *kwarg = parser::cast_node<Kwarg>(this_arg.get())) {
+                checkDuplicateArg(kwarg->name.toString(gs_), kwarg->loc, map);
+            } else if (auto *kwoptarg = parser::cast_node<Kwoptarg>(this_arg.get())) {
+                checkDuplicateArg(kwoptarg->name.toString(gs_), kwoptarg->loc, map);
+            } else if (auto *kwrestarg = parser::cast_node<Kwrestarg>(this_arg.get())) {
+                checkDuplicateArg(kwrestarg->name.toString(gs_), kwrestarg->loc, map);
+            } else if (auto *shadowarg = parser::cast_node<Shadowarg>(this_arg.get())) {
+                checkDuplicateArg(shadowarg->name.toString(gs_), shadowarg->loc, map);
+            } else if (auto *mlhs = parser::cast_node<Mlhs>(this_arg.get())) {
+                checkDuplicateArgs(mlhs->exprs, map);
+            }
+        }
+    }
+
+    void checkDuplicateArg(std::string this_name, core::Loc this_loc, UnorderedMap<std::string, core::Loc> &map) {
+        auto that_arg_loc_it = map.find(this_name);
+
+        if (that_arg_loc_it == map.end()) {
+            map[this_name] = this_loc;
+        } else if (argNameCollides(this_name)) {
+            error(ruby_parser::dclass::DuplicateArgument, this_loc, this_name);
+        }
+    }
+
+    bool argNameCollides(std::string name) {
+        // Ignore everything beginning with underscore.
+        return (name[0] != '_');
+    }
+
+    bool isLiteralNode(parser::Node &node) {
+        return parser::isa_node<Integer>(&node) || parser::isa_node<String>(&node) ||
+               parser::isa_node<DString>(&node) || parser::isa_node<Symbol>(&node) ||
+               parser::isa_node<DSymbol>(&node) || parser::isa_node<Regexp>(&node) || parser::isa_node<Array>(&node) ||
+               parser::isa_node<Hash>(&node);
     }
 };
 

@@ -97,7 +97,15 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Begin {
+            stmts = [
+              NULL
+            ]
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_elsif>

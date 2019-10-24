@@ -42,7 +42,7 @@ tuple<string, string> MESSAGES[] = {
     {"ArgumentIvar", "formal argument cannot be an instance variable"},
     {"ArgumentGvar", "formal argument cannot be a global variable"},
     {"ArgumentCvar", "formal argument cannot be a class variable"},
-    {"DuplicateArgument", "duplicate argument name"},
+    {"DuplicateArgument", "duplicate argument name {}"},
     {"EmptySymbol", "empty symbol literal"},
     {"OddHash", "odd number of entries for a hash"},
     {"SingletonLiteral", "cannot define a singleton method for a literal"},
@@ -55,6 +55,7 @@ tuple<string, string> MESSAGES[] = {
     {"MasgnAsCondition", "multiple assignment in conditional context"},
     {"BlockGivenToYield", "block given to yield"},
     {"InvalidRegexp", "{}"},
+    {"InvalidReturn", "Invalid return in class/module body"},
 
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},

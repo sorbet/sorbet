@@ -2,14 +2,13 @@ DefMethod {
   name = <U a>
   args = Args {
     args = [
-      Kwoptarg {
+      Kwarg {
         name = <U b>
-        default_ = Return {
-          exprs = [
-          ]
-        }
       }
     ]
   }
-  body = NULL
+  body = Return {
+    exprs = [
+    ]
+  }
 }

@@ -74,19 +74,6 @@ class LocalNameInserter {
             unique_ptr<ast::Reference> refExpImpl(refExp);
             arg.release();
             auto named = nameArg(move(refExpImpl));
-            if (nameSet.contains(named.name) && !absl::StartsWith(named.name.data(ctx)->shortName(ctx), "_")) {
-                if (auto e = ctx.state.beginError(named.loc, core::errors::Namer::RepeatedArgument)) {
-                    ENFORCE(!scopeStack.empty());
-                    auto frame = scopeStack.back();
-                    e.setHeader("Duplicated argument name `{}`", named.name.show(ctx));
-                    if (frame.insideMethod) {
-                        e.addErrorLine(frame.loc, "In argument list of method");
-                    } else if (frame.insideBlock) {
-                        e.addErrorLine(frame.loc, "In argument list of block");
-                    }
-                    ENFORCE(frame.insideMethod || frame.insideBlock);
-                }
-            }
             nameSet.insert(named.name);
             namedArgs.emplace_back(move(named));
         }

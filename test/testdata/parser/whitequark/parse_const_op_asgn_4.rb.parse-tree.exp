@@ -2,7 +2,7 @@ DefMethod {
   name = <U x>
   args = NULL
   body = OrAsgn {
-    left = Const {
+    left = ConstLhs {
       scope = Cbase {
       }
       name = <C <U A>>

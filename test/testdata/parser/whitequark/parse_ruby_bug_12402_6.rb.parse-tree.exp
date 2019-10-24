@@ -11,7 +11,7 @@ Begin {
       body = NULL
     }
     OrAsgn {
-      left = Const {
+      left = ConstLhs {
         scope = Send {
           receiver = NULL
           method = <U foo>

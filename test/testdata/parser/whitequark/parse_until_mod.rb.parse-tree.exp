@@ -10,7 +10,7 @@ Begin {
       args = NULL
       body = NULL
     }
-    UntilPost {
+    Until {
       cond = Send {
         receiver = NULL
         method = <U foo>
