@@ -76,6 +76,9 @@ Usage:
                                 using `watchman` on your PATH. (default: watchman)
       --enable-experimental-lsp-autocomplete
                                 Enable experimental LSP feature: Autocomplete
+      --enable-experimental-lsp-autocomplete-methods
+                                Enable experimental LSP feature:
+                                Autocomplete, but only for methods
       --enable-experimental-lsp-workspace-symbols
                                 Enable experimental LSP feature: Workspace
                                 Symbols
