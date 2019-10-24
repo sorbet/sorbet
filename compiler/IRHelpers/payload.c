@@ -448,10 +448,10 @@ void sorbet_rb_error_arity(int argc, int min, int max) {
 struct sorbet_Closure {
   const int size;
   VALUE closureData[]; // this is a rarely known feature of C99 https://en.wikipedia.org/wiki/Flexible_array_member
-}
+};
 
 struct sorbet_Closure *sorbet_Closure_alloc(int elemCount) {
-    return (struct sorbet_Closure *)xmalloc(sizeof(sorbet_Closure) + sizeof(VALUE) * elemCount);
+    return (struct sorbet_Closure *)xmalloc(sizeof(struct sorbet_Closure) + sizeof(VALUE) * elemCount);
 }
 
 void sorbet_Closure_mark(void *closurePtr) {
@@ -460,10 +460,10 @@ void sorbet_Closure_mark(void *closurePtr) {
     rb_gc_mark_values(ptr->size, &ptr->closureData[0]);
 }
 
-size_t sorbet_Closure_size(void *closurePtr) {
+size_t sorbet_Closure_size(const void *closurePtr) {
     // this might be possible to make more efficient using rb_mark_tbl
     struct sorbet_Closure *ptr = (struct sorbet_Closure *) closurePtr;
-    return sizeof(sorbet_Closure) + ptr->size * sizeof(VALUE);
+    return sizeof(struct sorbet_Closure) + ptr->size * sizeof(VALUE);
 }
 
 const rb_data_type_t closureInfo = {
@@ -471,7 +471,7 @@ const rb_data_type_t closureInfo = {
     {
         /* mark = */ sorbet_Closure_mark,
         /* free = */ RUBY_DEFAULT_FREE, // this uses xfree and optimzies it
-        /* size = */ sorbet_closure_size /*, compact */
+        /* size = */ sorbet_Closure_size /*, compact */
     },
     /* parent = */ NULL,
     /* arbitrary data = */ NULL,
@@ -480,11 +480,11 @@ const rb_data_type_t closureInfo = {
 
 VALUE allocClosureAsValue(int elemCount) {
     struct sorbet_Closure *ptr = sorbet_Closure_alloc(elemCount);
-    return TypedData_Wrap_Struct(rb_cData, data_type, sval);
+    return TypedData_Wrap_Struct(rb_cData, &closureInfo, ptr);
 }
 
 VALUE *getClosureElem(VALUE closure, int elemId) {
-  return &(((struct sorbet_Closure *)RTYPEDDATA_DATA(closure))->closureData[elemId])
+  return &(((struct sorbet_Closure *)RTYPEDDATA_DATA(closure))->closureData[elemId]);
 }
 
 #endif
