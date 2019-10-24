@@ -29,10 +29,9 @@ public:
         auto &methods = curMethodSet();
         if (skipMethods.contains(methodDef.get())) {
             ENFORCE(!methods.stack.empty());
-            methods.stack.back().isStatic = methodDef->isSelf();
             return methodDef;
         }
-        bool isStatic = methodDef->isSelf() || (methods.stack.size() > 0 && methods.stack.back().isStatic);
+        bool isStatic = computeIsStatic(methodDef.get());
         methods.stack.emplace_back(methods.methods.size(), isStatic);
         methods.methods.emplace_back();
         return methodDef;
@@ -53,20 +52,19 @@ public:
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
         if (send->fun == core::Names::sig() || isMethodModifier(*send)) {
             auto &methods = curMethodSet();
-            bool isStatic = methods.stack.size() > 0 && methods.stack.back().isStatic;
-            methods.stack.emplace_back(methods.methods.size(), isStatic);
-            methods.methods.emplace_back();
-
+            bool isStatic = false;
             if (isMethodModifier(*send) && send->args.size() >= 1) {
                 // if this is a method modifier like `private` or `protected`, then we don't need to add a new scope
                 // when we traverse the method itself, so add it to the ignore set...
                 skipMethods.insert(send->args[0].get());
-                // but we want /this/ stack frame to be a static frame if the method def it wraps is, so we should
-                // update our stack frame metadata accordingly
-                if (auto methodDef = ast::cast_tree<ast::MethodDef>(send->args[0].get())) {
-                    methods.stack.back().isStatic |= methodDef->isSelf();
-                }
+                auto methodDef = ast::cast_tree<ast::MethodDef>(send->args.front().get());
+                ENFORCE(methodDef);
+                isStatic = computeIsStatic(methodDef);
             }
+
+            methods.stack.emplace_back(methods.methods.size(), isStatic);
+            methods.methods.emplace_back();
+
         }
         return send;
     }
@@ -77,6 +75,12 @@ public:
             ENFORCE(!methods.stack.empty());
             ENFORCE(methods.methods.size() > methods.stack.back().idx);
             ENFORCE(methods.methods[methods.stack.back().idx] == nullptr);
+
+            if (isMethodModifier(*send) && send->args.size() >= 1) {
+                auto methodDef = ast::cast_tree<ast::MethodDef>(send->args.front().get());
+                ENFORCE(methodDef);
+                methodDef->setIsSelf(methods.stack.back().isStatic);
+            }
 
             methods.methods[methods.stack.back().idx] = std::move(send);
             methods.stack.pop_back();
@@ -103,9 +107,8 @@ public:
         ENFORCE(methods.methods.size() > methods.stack.back().idx);
         ENFORCE(methods.methods[methods.stack.back().idx] == nullptr);
 
-        if (methods.stack.back().isStatic) {
-            methodDef->flags |= ast::MethodDef::SelfMethod;
-        }
+        // we might need to modify the static-ness of the methods
+        methodDef->setIsSelf(methods.stack.back().isStatic);
 
         methods.methods[methods.stack.back().idx] = std::move(methodDef);
         methods.stack.pop_back();
@@ -160,6 +163,18 @@ private:
         popCurMethodSet();
         return ret;
     };
+
+    bool computeIsStatic(ast::MethodDef *methodDef) {
+        auto &methods = curMethodSet();
+        if (methods.stack.size() > 0 && !methods.stack.back().isStatic) {
+            // if we're already in a method, and that method is not static, then a `def self.foo` is not actually a
+            // static method but rather an instance method only available on that instance, which we currently will
+            // treat as just an instance method
+            return false;
+        } else {
+            return methodDef->isSelf();
+        }
+    }
 
     struct MethodData {
         // This is an index into the methods stack

@@ -44,7 +44,7 @@ begin
       end
     end
 
-    def self.sfood<sfood>(<blk>)
+    def sfood<sfood>(<blk>)
       <emptyTree>
     end
 

@@ -167,6 +167,14 @@ public:
         return (flags & RewriterSynthesized) != 0;
     }
 
+    void setIsSelf(bool isSelf) {
+        if (isSelf) {
+            flags |= SelfMethod;
+        } else {
+            flags &= ~SelfMethod;
+        }
+    }
+
 private:
     virtual void _sanityCheck();
 };
