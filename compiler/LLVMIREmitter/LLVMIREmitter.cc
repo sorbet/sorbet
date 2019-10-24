@@ -21,6 +21,20 @@ namespace sorbet::compiler {
 // and https://silverhammermba.github.io/emberb/c/ are your friends
 // use the `demo` module for experiments
 namespace {
+bool isStaticInit(CompilerState &cs, core::SymbolRef sym) {
+    auto name = sym.data(cs)->name;
+    return (name.data(cs)->kind == core::NameKind::UTF8 ? name : name.data(cs)->unique.original) ==
+           core::Names::staticInit();
+}
+
+llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::SymbolRef sym) {
+    if (isStaticInit(cs, sym)) {
+        // this is top level code that shoudln't be callable externally.
+        // Even more, sorbet reuses symbols used for these and thus if we mark them non-private we'll get link errors
+        return llvm::Function::InternalLinkage;
+    }
+    return llvm::Function::ExternalLinkage;
+}
 
 core::SymbolRef removeRoot(core::SymbolRef sym) {
     if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
@@ -227,7 +241,11 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
     ENFORCE(funcSym.data(cs)->isMethod());
 
     auto llvmFuncName = funcSym.data(cs)->toStringFullName(cs);
-    auto funcHandle = cs.module->getOrInsertFunction(llvmFuncName, cs.getRubyFFIType());
+    auto funcHandle = cs.module->getFunction(llvmFuncName);
+    if (funcHandle == nullptr) {
+        funcHandle =
+            llvm::Function::Create(cs.getRubyFFIType(), getFunctionLinkageType(cs, funcSym), llvmFuncName, *cs.module);
+    }
     auto universalSignature = llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
     auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
@@ -416,20 +434,6 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
     }
 }
 
-bool isStaticInit(CompilerState &cs, core::SymbolRef sym) {
-    auto name = sym.data(cs)->name;
-    return (name.data(cs)->kind == core::NameKind::UTF8 ? name : name.data(cs)->unique.original) ==
-           core::Names::staticInit();
-}
-
-llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::SymbolRef sym) {
-    if (isStaticInit(cs, sym)) {
-        // this is top level code that shoudln't be callable externally.
-        // Even more, sorbet reuses symbols used for these and thus if we mark them non-private we'll get link errors
-        return llvm::Function::InternalLinkage;
-    }
-    return llvm::Function::ExternalLinkage;
-}
 } // namespace
 
 void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
