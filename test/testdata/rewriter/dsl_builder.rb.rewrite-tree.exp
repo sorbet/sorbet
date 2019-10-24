@@ -1,91 +1,5 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C TestDSLBuilder><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <self>.dsl_optional(:"no_getter_or_setter", <emptyTree>::<C String>, {:"skip_getter" => true, :"skip_setter" => true})
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"opt_string" => <emptyTree>::<C String>}).returns(::NilClass)
     end
@@ -206,6 +120,8 @@ class <emptyTree><<C <root>>> < ()
       ::T.unsafe(nil)
     end
 
+    <self>.dsl_optional(:"no_getter_or_setter", <emptyTree>::<C String>, {:"skip_getter" => true, :"skip_setter" => true})
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"class_of" => <emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)}).returns(::NilClass)
     end
@@ -283,8 +199,6 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>::<C T>.assert_type!(<self>.get_opt_int_defaulted(), <emptyTree>::<C Integer>)
 
     <emptyTree>::<C T>.assert_type!(<self>.get_req_string(), <emptyTree>::<C String>)
-
-    <emptyTree>
 
     def test_instance_methods<<C <todo sym>>>(&<blk>)
       begin

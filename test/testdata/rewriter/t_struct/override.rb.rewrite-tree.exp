@@ -1,23 +1,5 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C Override><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"foo" => <emptyTree>::<C String>}).void()
     end
@@ -25,6 +7,8 @@ class <emptyTree><<C <root>>> < ()
     def initialize<<C <todo sym>>>(foo:, &<blk>)
       <emptyTree>
     end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C String>)

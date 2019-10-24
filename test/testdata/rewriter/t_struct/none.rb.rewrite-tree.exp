@@ -1,11 +1,5 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C None><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).void()
     end
@@ -13,6 +7,8 @@ class <emptyTree><<C <root>>> < ()
     def initialize<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
+
+    <emptyTree>
   end
 
   <emptyTree>::<C None>.new()

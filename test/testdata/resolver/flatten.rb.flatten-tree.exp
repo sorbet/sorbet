@@ -28,18 +28,18 @@ begin
       end
     end
 
+    def self.sfoo<sfoo>(<blk>)
+      begin
+        <emptyTree>
+      end
+    end
+
     def food<food>(<blk>)
       <emptyTree>
     end
 
     def self.foos<foos>(<blk>)
       <emptyTree>
-    end
-
-    def self.sfoo<sfoo>(<blk>)
-      begin
-        <emptyTree>
-      end
     end
 
     def self.sfood<sfood>(<blk>)

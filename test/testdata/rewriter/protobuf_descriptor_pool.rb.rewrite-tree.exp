@@ -2,8 +2,6 @@ class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C ProtocMsgClass><<C <todo sym>>> < ()
     <emptyTree>::<C Google>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").msgclass()
 
-    <emptyTree>
-
     def initialize<<C <todo sym>>>(arg0 = {}, &<blk>)
       <emptyTree>
     end
@@ -15,8 +13,6 @@ class <emptyTree><<C <root>>> < ()
 
   class <emptyTree>::<C StripeMsgClass><<C <todo sym>>> < ()
     ::<root>::<C Google>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").msgclass()
-
-    <emptyTree>
 
     def initialize<<C <todo sym>>>(arg0 = {}, &<blk>)
       <emptyTree>

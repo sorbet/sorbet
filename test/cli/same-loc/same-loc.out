@@ -47,15 +47,6 @@ test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Arra
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
 
-test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(Sorbet::Private::Static::StubModule)` https://srb.help/7003
-     4 |  const :foo, T::Array[Foo::Baz]
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://srb.help/7004
-     4 |  const :foo, T::Array[Foo::Baz]
-                      ^^^^^^^^^^^^^^^^^^
-    ???: `[]` defined here
-
 test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://srb.help/7004
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
@@ -69,6 +60,15 @@ test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Arra
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
+
+test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://srb.help/7004
+     4 |  const :foo, T::Array[Foo::Baz]
+                      ^^^^^^^^^^^^^^^^^^
+    ???: `[]` defined here
+
+test/cli/same-loc/same-loc.rb:4: Method `[]` does not exist on `T.class_of(Sorbet::Private::Static::StubModule)` https://srb.help/7003
+     4 |  const :foo, T::Array[Foo::Baz]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://srb.help/7004
      4 |  const :foo, T::Array[Foo::Baz]
@@ -90,8 +90,6 @@ test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)` https://srb.help/7003
-
 test/cli/same-loc/same-loc.rb:4: Method `sig` does not exist on `T.class_of(T::Sig::WithoutRuntime)` https://srb.help/7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -104,6 +102,8 @@ test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Arra
      4 |  const :foo, T::Array[Foo::Baz]
                       ^^^^^^^^^^^^^^^^^^
     ???: `[]` defined here
+
+test/cli/same-loc/same-loc.rb: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)` https://srb.help/7003
 
 test/cli/same-loc/same-loc.rb:4: Too many arguments provided for method `T::Array.[]`. Expected: `0`, got: `1` https://srb.help/7004
      4 |  const :foo, T::Array[Foo::Baz]

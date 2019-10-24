@@ -6,9 +6,9 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <C <U A>><U f1> (x, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=29:3 end=29:12}
       argument x<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=29:10 end=29:11}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-    method <C <U A>><U f2> (x, <blk>) -> T2 @ Loc {file=test/testdata/resolver/sig_misc.rb start=34:3 end=34:12}
-      argument x<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=33:17 end=33:18}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
+    method <C <U A>><U f2> (x, <blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=34:3 end=34:12}
+      argument x<> @ Loc {file=test/testdata/resolver/sig_misc.rb start=34:10 end=34:11}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
     method <C <U A>><U f3> (<blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=39:3 end=39:9}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
     method <C <U A>><U f4> (y, <blk>) -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=65:3 end=65:12}
