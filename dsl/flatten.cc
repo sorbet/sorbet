@@ -98,7 +98,7 @@ public:
                 // when we traverse the method itself, so add it to the ignore set...
                 skipMethods.insert(send->args[0].get());
                 auto methodDef = ast::cast_tree<ast::MethodDef>(send->args.front().get());
-                ENFORCE(methodDef);
+                ENFORCE(methodDef != nullptr);
                 isStatic = computeIsStatic(methodDef);
             }
 
@@ -174,7 +174,7 @@ public:
         }
 
         for (auto &method : popCurMethodDefs()) {
-            ENFORCE(!!method);
+            ENFORCE(method != nullptr);
             insSeq->stats.emplace_back(std::move(method));
         }
         return tree;
