@@ -8,6 +8,46 @@
 
 using namespace std;
 
+// This DSL pass flattens nested methods, so that once we've reached a non-definition AST node (i.e. not a ClassDef or a
+// MethodDef) then we know that there are no MethodDefs lurking deeper in the tree. In order to work correctly, this
+// also needs to move some non-method-def things as well, specifically `sig`s and sends for method visibility
+// (e.g. `private` and the like), and it also updates the static-ness of some MethodDefs based on where they have
+// appeared in a nested context.
+//
+// So, a file like the following
+//
+// class A
+//   sig{void}
+//   private def foo
+//     sig{void}
+//     def self.bar; end
+//   end
+// end
+//
+// will morally be transformed into the following
+//
+// class A
+//   sig{void}
+//   private def foo; end
+//   sig{void}
+//   def bar; end   # notice the lack of `self.` here
+// end
+//
+// So no nested methods exist any longer, and additionally, the nested method `bar` has had the `self.` qualifier
+// removed: if you run the above code in Ruby, you'll find that `bar` is not defined as a class method on `A`, but
+// rather as a not-always-available instance method on `A`, so introducing it as a static method is not at all
+// correct.
+//
+// It does this by maintaining a stack of indices and state and a queue of expressions during a tree traversal. Every
+// time something which might concievably need to be moved is found (i.e. a method definition or a send) we reserve
+// space for it in a queue and then add metadata about it---the intended queue slot as well as whether it is a class
+// method---to the stack. We can use the stack to disambiguate nested methods and also determine method context. Once
+// our tree traversal has left that subtree, we can safely move that subtree into the queue and replace it with an
+// EmptyTree. Once we leave a class scope, we empty that entire queue into the class scope, as well.
+//
+// The logic used to determine what sends need to be moved is purely syntactic, which suggests that if someone were to
+// redefine the method `private` and apply it to a `MethodDef`, then it will get caught by this and moved. This seems
+// vanishingly unlikely and would probably break a lot of other things, as well.
 namespace sorbet::dsl {
 
 class FlattenWalk {
