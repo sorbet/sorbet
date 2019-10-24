@@ -8,7 +8,7 @@ end
 class B
   def foo
     def self.bar
-      @x = T.let(0, Integer) # error: The instance variable `@x` must be declared inside `initialize` or declared nilable
+      @x = T.let(0, Integer) # error: The singleton instance variable `@x` must be declared inside the class body or declared nilable
     end
   end
 end

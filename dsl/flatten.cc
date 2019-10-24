@@ -205,14 +205,7 @@ private:
 
     bool computeIsStatic(ast::MethodDef *methodDef) {
         auto &methods = curMethodSet();
-        if (methods.stack.size() > 0 && !methods.stack.back().isStatic) {
-            // if we're already in a method, and that method is not static, then a `def self.foo` is not actually a
-            // static method but rather an instance method only available on that instance, which we currently will
-            // treat as just an instance method
-            return false;
-        } else {
-            return methodDef->isSelf();
-        }
+        return methodDef->isSelf() || (methods.stack.size() > 0 && methods.stack.back().isStatic);
     }
 
     struct MethodData {

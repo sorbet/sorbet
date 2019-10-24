@@ -34,7 +34,7 @@ begin
       <emptyTree>
     end
 
-    def foos<foos>(<blk>)
+    def self.foos<foos>(<blk>)
       <emptyTree>
     end
 
@@ -44,7 +44,7 @@ begin
       end
     end
 
-    def sfood<sfood>(<blk>)
+    def self.sfood<sfood>(<blk>)
       <emptyTree>
     end
 
