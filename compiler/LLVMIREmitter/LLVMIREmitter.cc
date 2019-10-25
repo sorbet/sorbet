@@ -149,9 +149,9 @@ llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
 // load arguments, check their count
 // load self
 UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
-setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, cfg::CFG &cfg,
-                                unique_ptr<ast::MethodDef> &md, llvm::Function *func,
-                                vector<llvm::Function *> rubyBlocks2Functions) {
+setupLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, cfg::CFG &cfg,
+                    vector<llvm::Function *> &rubyBlocks2Functions,
+                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesCapturedAtLeastOnce) {
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
     {
         // nill out variables.
@@ -165,6 +165,13 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
             cs.boxRawValue(builder, alloca, nilValueRaw);
         }
     }
+    return llvmVariables;
+}
+
+void setupArguments(CompilerState &cs, llvm::IRBuilder<> &builder, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
+                    llvm::Function *func, vector<llvm::Function *> &rubyBlocks2Functions,
+                    const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
+                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesCapturedAtLeastOnce) {
     auto maxArgCount = 0;
     auto minArgCount = 0;
     {
@@ -216,16 +223,14 @@ setupArgumentsAndLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, c
             llvm::StringRef nameRef(name.data(), name.length());
             auto argArrayRaw = func->arg_begin() + 1;
             auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
-            cs.boxRawValue(builder, llvmVariables[a->localVariable], rawValue);
+            cs.boxRawValue(builder, llvmVariables.at(a->localVariable), rawValue);
         }
     }
     {
         // box `self`
         auto selfArgRaw = (func->arg_begin() + 2);
-        cs.boxRawValue(builder, llvmVariables[core::LocalVariable::selfVariable()], selfArgRaw);
+        cs.boxRawValue(builder, llvmVariables.at(core::LocalVariable::selfVariable()), selfArgRaw);
     }
-
-    return llvmVariables;
 }
 
 vector<llvm::BasicBlock *> getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Function *func,
@@ -514,7 +519,9 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
         getSorbetBlocks2LLVMBlockMapping(cs, cfg, func, userBodyEntry, rubyBlocks2Functions);
 
     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
-        setupArgumentsAndLocalVariables(cs, builder, cfg, md, func, rubyBlocks2Functions);
+        setupLocalVariables(cs, builder, cfg, rubyBlocks2Functions, variablesCapturedAtLeastOnce);
+    setupArguments(cs, builder, cfg, md, func, rubyBlocks2Functions, llvmVariables, variablesCapturedAtLeastOnce);
+
     builder.CreateBr(userBodyEntry);
 
     int maxSendArgCount = 0;
