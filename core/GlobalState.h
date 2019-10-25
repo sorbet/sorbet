@@ -3,7 +3,6 @@
 #include "absl/synchronization/mutex.h"
 
 #include "core/Error.h"
-#include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Loc.h"
 #include "core/Names.h"
