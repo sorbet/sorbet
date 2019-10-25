@@ -193,7 +193,7 @@ class Enumerator < Object
 
   sig do
     params(
-        arg0: Integer,
+        arg0: T.any(Integer, T.proc.returns(Integer)),
         blk: T.proc.params(arg0: Enumerator::Yielder).void,
     )
     .void
