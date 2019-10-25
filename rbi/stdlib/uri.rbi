@@ -780,7 +780,7 @@ class URI::Generic < Object
   # uri.host = "foo.com"
   # uri.to_s  #=> "http://foo.com"
   # ```
-  sig {params(v: String).returns(T.untyped)}
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def host=(v); end
 
   # Extract the host part of the
@@ -796,7 +796,7 @@ class URI::Generic < Object
   # uri.hostname      #=> "::1"
   # uri.host          #=> "[::1]"
   # ```
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   def hostname; end
 
   # Sets the host part of the
@@ -814,7 +814,7 @@ class URI::Generic < Object
   # ```
   #
   # If the argument seems to be an IPv6 address, it is wrapped with brackets.
-  sig {params(v: String).returns(T.untyped)}
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def hostname=(v); end
 
   # == Args
