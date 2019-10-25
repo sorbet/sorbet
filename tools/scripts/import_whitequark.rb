@@ -227,9 +227,6 @@ class Minitest::Test
     # whitequark/parser returns nil, sorbet returns s(:begin)
     'test_empty_stmt',
 
-    # sorbet emits a simple s(:send) instead of s(:match_current_line)
-    'test_cond_match_current_line',
-
     # This one is tricky:
     # whitequark/parser relies on source maps in the AST builder,
     # and Sorbet simply doesn't enough information to mirror this behavior.
@@ -243,11 +240,8 @@ class Minitest::Test
     'test_bug_ascii_8bit_in_literal',
     'test_regex_error',
 
-    # error message is correct, but it has a 'Parse error:' prefix
-    'test_numbered_args_before_27',
-
     # Sorbet emits multiple errors, but whitequark/parser stops on the first one
-    'test_meth_ref_before_27'
+    'test_meth_ref__before_27'
   ]
 
   def after_teardown
