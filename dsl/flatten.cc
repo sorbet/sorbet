@@ -229,39 +229,37 @@ private:
             }
         }
 
-        // first add all the instance and static methods
-        for (int level = 0; level < 2; level++) {
-            for (auto &expr : exprs) {
-                if (expr.expr == nullptr || expr.staticLevel != level) {
-                    continue;
-                }
-
-                if (auto methodDef = ast::cast_tree<ast::MethodDef>(expr.expr.get())) {
-                    methodDef->setIsSelf(level > 0);
-                }
-                rhs.emplace_back(std::move(expr.expr));
-            }
+        // these will store the bodies of the `class << self` blocks we create at the end
+        vector<ast::ClassDef::RHS_store> nestedBlocks;
+        for (int level = 2; level <= highestLevel; level++) {
+            nestedBlocks.emplace_back();
         }
 
-        // then create `class << self` blocks of the appropriate nesting for the rest
-        for (int level = 2; level <= highestLevel; level++) {
-            ast::ClassDef::RHS_store nested_rhs;
-            for (auto &expr : exprs) {
-                if (expr.expr == nullptr || expr.staticLevel != level) {
-                    continue;
-                }
+        // this vector contains all the possible RHS target locations that we might move to
+        vector<ast::ClassDef::RHS_store*> targets;
+        // 0 and 1 both go into the class itself
+        targets.emplace_back(&rhs);
+        targets.emplace_back(&rhs);
+        // 2 and up go into the to-be-created `class << self` blocks
+        for (auto &tgt : nestedBlocks) {
+            targets.emplace_back(&tgt);
+        }
 
-                if (auto methodDef = ast::cast_tree<ast::MethodDef>(expr.expr.get())) {
-                    methodDef->setIsSelf(level == 1);
-                }
-                nested_rhs.emplace_back(std::move(expr.expr));
+        // move everything to its appropriate target
+        for (auto &expr : exprs) {
+            if (auto methodDef = ast::cast_tree<ast::MethodDef>(expr.expr.get())) {
+                methodDef->setIsSelf(expr.staticLevel > 0);
             }
+            targets[expr.staticLevel]->emplace_back(std::move(expr.expr));
+        }
 
+        // generate the nested `class << self` blocks as needed and add them to the class
+        for (auto &body : nestedBlocks) {
             auto classDef =
                 ast::MK::Class(loc, loc,
                                make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
                                                                  core::Names::singleton()),
-                               {}, std::move(nested_rhs), ast::ClassDefKind::Class);
+                               {}, std::move(body), ast::ClassDefKind::Class);
             rhs.emplace_back(std::move(classDef));
         }
 

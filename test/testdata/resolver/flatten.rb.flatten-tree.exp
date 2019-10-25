@@ -58,7 +58,7 @@ begin
 
     <emptyTree>
 
-    def sfoos<sfoos>(<blk>)
+    def self.sfoos<sfoos>(<blk>)
       <emptyTree>
     end
 
