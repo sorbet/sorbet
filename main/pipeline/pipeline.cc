@@ -24,6 +24,7 @@
 #include "common/crypto_hashing/crypto_hashing.h"
 #include "common/formatting.h"
 #include "common/sort.h"
+#include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
