@@ -69,7 +69,7 @@ int printDocumentSymbols(string_view filePath) {
         vector<unique_ptr<TextDocumentContentChangeEvent>> edits;
         edits.push_back(make_unique<TextDocumentContentChangeEvent>(fileEdit));
         auto params = make_unique<DidChangeTextDocumentParams>(
-            make_unique<VersionedTextDocumentIdentifier>(fileUri, fileId++), move(edits));
+            make_unique<VersionedTextDocumentIdentifier>(fileUri, static_cast<double>(fileId++)), move(edits));
         auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(params));
         lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
     }

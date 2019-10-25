@@ -35,7 +35,7 @@ passes=(
   cfg-raw
   cfg-json
   autogen
-  # document-symbols
+  document-symbols
 )
 
 bazel build //main:sorbet //test:print_document_symbols -c opt
