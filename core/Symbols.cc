@@ -1061,8 +1061,8 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
             const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
         ENFORCE(current == current2);
         for (auto &e : members()) {
-            ENFORCE(e.first.exists(), "symbol without a name in scope");
-            ENFORCE(e.second.exists(), "name corresponding to a <none> in scope");
+            ENFORCE(e.first.exists(), name.toString(gs) + " has a member symbol without a name");
+            ENFORCE(e.second.exists(), name.toString(gs) + "." + e.first.toString(gs) + " corresponds to a <none>");
         }
     }
     if (this->isMethod()) {
