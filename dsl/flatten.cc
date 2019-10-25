@@ -135,29 +135,9 @@ public:
 
             // otherwise, we have a spot in the queue for it that has not yet been filled in
             ENFORCE(methods.methods.size() > methods.stack.back().idx);
-            ENFORCE(methods.methods[methods.stack.back().idx] == nullptr);
+            ENFORCE(methods.methods[methods.stack.back().idx].expr == nullptr);
 
-            if (isMethodModifier(*send) && send->args.size() >= 1) {
-                auto methodDef = ast::cast_tree<ast::MethodDef>(send->args.front().get());
-                ENFORCE(methodDef);
-                int level = methods.stack.back().staticLevel;
-                methodDef->setIsSelf(level > 0);
-                auto loc = methodDef->loc;
-                auto declLoc = methodDef->declLoc;
-                while (level > 1) {
-                    ast::ClassDef::RHS_store rhs;
-                    rhs.emplace_back(move(send->args.front()));
-                    auto nestedClass =
-                        ast::MK::Class(loc, declLoc,
-                                       make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
-                                                                         core::Names::singleton()),
-                                       {}, std::move(rhs), ast::ClassDefKind::Class);
-                    send->args.front() = move(nestedClass);
-                    level--;
-                }
-            }
-
-            methods.methods[methods.stack.back().idx] = std::move(send);
+            methods.methods[methods.stack.back().idx] = {move(send), methods.stack.back().staticLevel};
             methods.stack.pop_back();
 
             return make_unique<ast::EmptyTree>();
@@ -167,7 +147,7 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        classDef->rhs = addMethods(ctx, std::move(classDef->rhs));
+        classDef->rhs = addMethods(ctx, std::move(classDef->rhs), classDef->loc);
         return classDef;
     };
 
@@ -187,27 +167,9 @@ public:
         }
 
         ENFORCE(methods.methods.size() > methods.stack.back().idx);
-        ENFORCE(methods.methods[methods.stack.back().idx] == nullptr);
+        ENFORCE(methods.methods[methods.stack.back().idx].expr == nullptr);
 
-        // we might need to modify the static-ness of the methods
-        // methodDef->setIsSelf(methods.stack.back().isStatic);
-
-        int level = methods.stack.back().staticLevel;
-        methodDef->setIsSelf(level == 1);
-        auto loc = methodDef->loc;
-        auto declLoc = methodDef->declLoc;
-        unique_ptr<ast::Expression> expr = move(methodDef);
-        while (level > 1) {
-            ast::ClassDef::RHS_store rhs;
-            rhs.emplace_back(move(expr));
-            expr = ast::MK::Class(loc, declLoc,
-                                  make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
-                                                                    core::Names::singleton()),
-                                  {}, std::move(rhs), ast::ClassDefKind::Class);
-            level--;
-        }
-
-        methods.methods[methods.stack.back().idx] = std::move(expr);
+        methods.methods[methods.stack.back().idx] = {std::move(methodDef), methods.stack.back().staticLevel};
         methods.stack.pop_back();
         return make_unique<ast::EmptyTree>();
     };
@@ -218,9 +180,9 @@ public:
             ENFORCE(popCurMethodDefs().empty());
             return tree;
         }
-        if (methods.size() == 1 && (ast::cast_tree<ast::EmptyTree>(tree.get()) != nullptr)) {
+        if (methods.size() == 1 && ast::isa_tree<ast::EmptyTree>(tree.get())) {
             // It was only 1 method to begin with, put it back
-            unique_ptr<ast::Expression> methodDef = std::move(popCurMethodDefs()[0]);
+            unique_ptr<ast::Expression> methodDef = std::move(popCurMethodDefs()[0].expr);
             return methodDef;
         }
 
@@ -232,34 +194,79 @@ public:
         }
 
         for (auto &method : popCurMethodDefs()) {
-            ENFORCE(method != nullptr);
-            insSeq->stats.emplace_back(std::move(method));
+            ENFORCE(method.expr != nullptr);
+            insSeq->stats.emplace_back(std::move(method.expr));
         }
         return tree;
     }
 
 private:
-    ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs) {
-        if (curMethodSet().methods.size() == 1 && rhs.size() == 1 &&
-            (ast::cast_tree<ast::EmptyTree>(rhs[0].get()) != nullptr)) {
+    ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs, core::Loc loc) {
+        if (curMethodSet().methods.size() == 1 && rhs.size() == 1 && ast::isa_tree<ast::EmptyTree>(rhs[0].get())) {
             // It was only 1 method to begin with, put it back
             rhs.pop_back();
-            rhs.emplace_back(std::move(popCurMethodDefs()[0]));
+            rhs.emplace_back(std::move(popCurMethodDefs()[0].expr));
             return rhs;
         }
-        for (auto &method : popCurMethodDefs()) {
-            ENFORCE(method.get() != nullptr);
-            rhs.emplace_back(std::move(method));
+
+        auto exprs = popCurMethodDefs();
+        // TODO: remove all this
+        //
+        // this add the nested methods at the appropriate 'staticness level'
+
+        int highestLevel = 0;
+        for (int i = 0; i < exprs.size(); i++) {
+            auto &expr = exprs[i];
+            if (highestLevel < expr.staticLevel) {
+                highestLevel = expr.staticLevel;
+            }
+            // we need to make sure that we keep sends with their attached methods, so fix that up here
+            if (i > 0) {
+                auto send = ast::cast_tree<ast::Send>(exprs[i - 1].expr.get());
+                if (send != nullptr && send->fun == core::Names::sig()) {
+                    exprs[i - 1].staticLevel = expr.staticLevel;
+                }
+            }
         }
+
+        // first add all the instance and static methods
+        for (int level = 0; level < 2; level++) {
+            for (auto &expr : exprs) {
+                if (expr.expr == nullptr || expr.staticLevel != level) {
+                    continue;
+                }
+
+                if (auto methodDef = ast::cast_tree<ast::MethodDef>(expr.expr.get())) {
+                    methodDef->setIsSelf(level > 0);
+                }
+                rhs.emplace_back(std::move(expr.expr));
+            }
+        }
+
+        // then create `class << self` blocks of the appropriate nesting for the rest
+        for (int level = 2; level <= highestLevel; level++) {
+            ast::ClassDef::RHS_store nested_rhs;
+            for (auto &expr : exprs) {
+                if (expr.expr == nullptr || expr.staticLevel != level) {
+                    continue;
+                }
+
+                if (auto methodDef = ast::cast_tree<ast::MethodDef>(expr.expr.get())) {
+                    methodDef->setIsSelf(level == 1);
+                }
+                nested_rhs.emplace_back(std::move(expr.expr));
+            }
+
+            auto classDef =
+                ast::MK::Class(loc, loc,
+                               make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
+                                                                 core::Names::singleton()),
+                               {}, std::move(nested_rhs), ast::ClassDefKind::Class);
+            rhs.emplace_back(std::move(classDef));
+        }
+
         return rhs;
     }
-
-    vector<unique_ptr<ast::Expression>> popCurMethodDefs() {
-        auto ret = std::move(curMethodSet().methods);
-        ENFORCE(curMethodSet().stack.empty());
-        popCurMethodSet();
-        return ret;
-    };
 
     int computeStaticLevel(ast::MethodDef *methodDef) {
         auto &methods = curMethodSet();
@@ -284,8 +291,14 @@ private:
         int staticLevel;
         MethodData(int idx, int staticLevel) : idx(idx), staticLevel(staticLevel){};
     };
+    struct MovedItem {
+        unique_ptr<ast::Expression> expr;
+        int staticLevel;
+        MovedItem(unique_ptr<ast::Expression> expr, int staticLevel) : expr(move(expr)), staticLevel(staticLevel){};
+        MovedItem() = default;
+    };
     struct Methods {
-        vector<unique_ptr<ast::Expression>> methods;
+        vector<MovedItem> methods;
         vector<MethodData> stack;
         Methods() = default;
     };
@@ -300,6 +313,13 @@ private:
         ENFORCE(!methodScopes.empty());
         methodScopes.pop_back();
     }
+
+    vector<MovedItem> popCurMethodDefs() {
+        auto ret = std::move(curMethodSet().methods);
+        ENFORCE(curMethodSet().stack.empty());
+        popCurMethodSet();
+        return ret;
+    };
 
     // We flatten methods so that we have an arbitrary hierarchy of classes each of which has a flat list of
     // methods. This prevents methods from existing deeper inside the hierarchy, enabling later traversals to stop

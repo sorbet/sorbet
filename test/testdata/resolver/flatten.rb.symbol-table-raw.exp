@@ -7,7 +7,7 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
     method <C <U A>><U food> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=4:5 end=4:13}
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/flatten.rb start=12:5 end=12:19}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=15:4}
     type-member(+) <S <C <U A>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/resolver/flatten.rb start=2:7 end=2:8}
     method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=15:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
@@ -19,13 +19,13 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
     method <S <C <U A>> $1><U sfoos> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=12:5 end=12:19}
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
-  class <S <S <C <U A>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/resolver/flatten.rb start=12:5 end=12:19}
+  class <S <S <C <U A>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=15:4}
     type-member(+) <S <S <C <U A>> $1> $1><C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U A>> $1> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {
   klass = <S <C <U A>> $1>
   targs = [
     <C <U <AttachedClass>>> = A
   ]
-}) @ Loc {file=test/testdata/resolver/flatten.rb start=12:5 end=12:19}
-    method <S <S <C <U A>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=12:5 end=13:8}
+}) @ Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=15:4}
+    method <S <S <C <U A>> $1> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=15:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
 
