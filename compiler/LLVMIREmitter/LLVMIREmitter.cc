@@ -497,13 +497,13 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     UnorderedMap<core::LocalVariable, int> variablesCapturedAtLeastOnce = findCaptures(cs, cfg);
 
     auto userBodyEntry = llvm::BasicBlock::Create(cs, "userBody", func);
-    builder.CreateBr(userBodyEntry);
 
     const vector<llvm::BasicBlock *> llvmBlocks =
         getSorbetBlocks2LLVMBlockMapping(cs, cfg, func, userBodyEntry, rubyBlocks2Functions);
 
     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
         setupArgumentsAndLocalVariables(cs, builder, cfg, md, func, rubyBlocks2Functions);
+    builder.CreateBr(userBodyEntry);
 
     int maxSendArgCount = 0;
     for (auto &bb : cfg.basicBlocks) {
