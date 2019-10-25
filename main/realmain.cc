@@ -18,6 +18,7 @@
 #include "common/Timer.h"
 #include "common/sort.h"
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"

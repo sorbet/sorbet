@@ -13,6 +13,7 @@
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
+#include "core/ErrorQueue.h"
 #include "core/errors/infer.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 

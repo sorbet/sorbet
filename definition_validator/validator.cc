@@ -1,5 +1,6 @@
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/Timer.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 
