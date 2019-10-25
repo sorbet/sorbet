@@ -244,7 +244,10 @@ class Minitest::Test
     'test_regex_error',
 
     # error message is correct, but it has a 'Parse error:' prefix
-    'test_numbered_args_before_27'
+    'test_numbered_args_before_27',
+
+    # Sorbet emits multiple errors, but whitequark/parser stops on the first one
+    'test_meth_ref_before_27'
   ]
 
   def after_teardown

@@ -14,7 +14,7 @@
 set -euo pipefail
 set -x
 
-REF=c1295b054cea829282bc1f8b3c0a7581c85c6e70
+REF=2a705681cfe339261b69b03593d008cb2c4eff35
 TARGET_RUBY_VERSION="2.6"
 
 SCRIPT=$(realpath "$0")

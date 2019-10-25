@@ -1,3 +1,3 @@
 # typed: true
 
-def f(var = defined?(var)) var end
+lambda{|;a|a}
