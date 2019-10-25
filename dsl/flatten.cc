@@ -236,7 +236,7 @@ private:
         }
 
         // this vector contains all the possible RHS target locations that we might move to
-        vector<ast::ClassDef::RHS_store*> targets;
+        vector<ast::ClassDef::RHS_store *> targets;
         // 0 and 1 both go into the class itself
         targets.emplace_back(&rhs);
         targets.emplace_back(&rhs);
