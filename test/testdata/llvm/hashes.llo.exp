@@ -132,10 +132,10 @@ entry:
   %rubyId_b.i = load i64, i64* @rubyIdPrecomputed_b, align 8
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_a.i) #9
-  %rawSym5.i = tail call i64 @rb_id2sym(i64 %rubyId_b.i) #9
+  %rawSym13.i = tail call i64 @rb_id2sym(i64 %rubyId_b.i) #9
   %rawHashLiteral.i = tail call i64 @rb_hash_new() #9
   %2 = tail call i64 @rb_hash_aset(i64 %rawHashLiteral.i, i64 %rawSym.i, i64 3) #9
-  %3 = tail call i64 @rb_hash_aset(i64 %rawHashLiteral.i, i64 %rawSym5.i, i64 5) #9
+  %3 = tail call i64 @rb_hash_aset(i64 %rawHashLiteral.i, i64 %rawSym13.i, i64 5) #9
   %callArgsAddr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %rawHashLiteral.i, i64* %callArgsAddr.i, align 8
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #9, !noalias !11

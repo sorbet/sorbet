@@ -359,7 +359,7 @@ BB3:                                              ; preds = %BB5, %argCountSucce
   ret i64 8
 
 BB5:                                              ; preds = %argCountSuccess, %BB5
-  %i.sroa.0.033 = phi i64 [ %7, %BB5 ], [ 1, %argCountSuccess ]
+  %i.sroa.0.040 = phi i64 [ %7, %BB5 ], [ 1, %argCountSuccess ]
   %4 = call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"userStr_hello ", i64 0, i64 0), i64 6) #14
   store i64 %rawArg_name, i64* %callArgsAddr, align 8
   call void @dbg_sorbet_validate_id(i64 %"rubyId_+", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #14, !noalias !14
@@ -369,7 +369,7 @@ BB5:                                              ; preds = %argCountSuccess, %B
   %6 = call i64 @rb_funcallv(i64 %2, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #14
   store i64 3, i64* %callArgsAddr, align 8
   call void @dbg_sorbet_validate_id(i64 %"rubyId_+", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #14, !noalias !20
-  %7 = call i64 @rb_funcallv(i64 %i.sroa.0.033, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr) #14
+  %7 = call i64 @rb_funcallv(i64 %i.sroa.0.040, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr) #14
   store i64 21, i64* %callArgsAddr, align 8
   call void @dbg_sorbet_validate_id(i64 %"rubyId_<", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #14, !noalias !23
   %8 = call i64 @rb_funcallv(i64 %7, i64 %"rubyId_<", i32 1, i64* nonnull %callArgsAddr) #14
