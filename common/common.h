@@ -8,11 +8,9 @@
 static_assert(false, "Need c++14 to compile this codebase");
 #endif
 
-#include "absl/algorithm/container.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/container/inlined_vector.h"
-#include "pdqsort.h"
 #include "spdlog/spdlog.h"
 #include <stdint.h>
 #include <string>
@@ -134,14 +132,6 @@ template <class From, class To> To *fast_cast(From *what) {
 } // namespace sorbet
 
 std::string demangle(const char *mangled);
-
-template <class Container, class Compare> inline void fast_sort(Container &container, Compare &&comp) {
-    pdqsort(container.begin(), container.end(), std::forward<Compare>(comp));
-};
-
-template <class Container> inline void fast_sort(Container &container) {
-    pdqsort(container.begin(), container.end());
-};
 
 /* use fast_sort */
 #pragma GCC poison sort c_sort

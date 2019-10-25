@@ -7,6 +7,7 @@
 #include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/formatting.h"
+#include "common/sort.h"
 #include "core/Error.h"
 #include "core/errors/infer.h"
 #include "main/options/ConfigParser.h"

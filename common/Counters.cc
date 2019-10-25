@@ -2,6 +2,7 @@
 #include "absl/strings/str_cat.h"
 #include "common/Counters_impl.h"
 #include "common/formatting.h"
+#include "common/sort.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>

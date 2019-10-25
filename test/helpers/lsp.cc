@@ -3,6 +3,7 @@
 // has to go first as it violates requirements
 
 #include "common/common.h"
+#include "common/sort.h"
 #include "test/helpers/lsp.h"
 
 namespace sorbet::test {

@@ -1,4 +1,5 @@
 #include "cfg/builder/builder.h"
+#include "common/sort.h"
 #include "core/Names.h"
 
 #include <algorithm> // sort, remove, unique

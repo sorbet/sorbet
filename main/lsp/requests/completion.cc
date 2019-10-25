@@ -1,6 +1,7 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "common/sort.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
