@@ -8,19 +8,69 @@
 
 namespace sorbet::realmain::lsp {
 using namespace std;
+
+namespace {
+constexpr string_view uriPrefix = "file:///"sv;
+
+// Given a path to a *.rb or *.rbupdate file, returns the set of edits to apply to Sorbet before requesting document
+// symbols along with the URI of the document.
+pair<string, vector<string>> findEditsToApply(string_view filePath) {
+    const auto idx = filePath.rfind('.');
+    if (idx == string_view::npos) {
+        Exception::raise("Invalid file path: {}", filePath);
+    }
+    string_view extension = filePath.substr(idx);
+    OSFileSystem fs;
+    vector<string> fileContents;
+    string uri;
+    fileContents.push_back(fs.readFile(filePath));
+    if (extension == ".rbupdate") {
+        // Find basename[.]version.rbupdate
+        const auto versionIdx = filePath.rfind('.', idx - 1);
+        if (versionIdx == string_view::npos) {
+            Exception::raise("rbupdate file is missing version number: {}", filePath);
+        }
+        string_view baseName = filePath.substr(0, versionIdx);
+        uri = absl::StrCat(uriPrefix, baseName, ".rb");
+        string_view versionString = filePath.substr(versionIdx + 1, idx - versionIdx);
+        int version = stoi(string(versionString));
+        for (version = version - 1; version >= 0; version--) {
+            try {
+                fileContents.push_back(fs.readFile(fmt::format("{}.{}.rbupdate", baseName, version)));
+            } catch (FileNotFoundException e) {
+                // Ignore.
+            }
+        }
+        fileContents.push_back(fs.readFile(fmt::format("{}.rb", baseName)));
+        reverse(fileContents.begin(), fileContents.end());
+    } else {
+        uri = absl::StrCat(uriPrefix, filePath);
+    }
+    return make_pair(uri, move(fileContents));
+}
+
 int printDocumentSymbols(string_view filePath) {
     LSPWrapper lspWrapper("", false);
     lspWrapper.enableAllExperimentalFeatures();
     int nextId = 1;
-    string uriPrefix = "file:///";
+    int fileId = 1;
+    auto [fileUri, fileEdits] = findEditsToApply(filePath);
     test::initializeLSP("", uriPrefix, lspWrapper, nextId);
-    string fileUri = uriPrefix + string(filePath);
     {
-        OSFileSystem fs;
-        auto params = make_unique<DidOpenTextDocumentParams>(
-            make_unique<TextDocumentItem>(fileUri, "ruby", 1, fs.readFile(filePath)));
+        // Initialize empty file.
+        auto params =
+            make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(fileUri, "ruby", fileId++, ""));
         auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params));
-        // Discard responses; it's OK if the file has errors.
+        // Discard responses.
+        lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+    }
+
+    for (auto &fileEdit : fileEdits) {
+        vector<unique_ptr<TextDocumentContentChangeEvent>> edits;
+        edits.push_back(make_unique<TextDocumentContentChangeEvent>(fileEdit));
+        auto params = make_unique<DidChangeTextDocumentParams>(
+            make_unique<VersionedTextDocumentIdentifier>(fileUri, fileId++), move(edits));
+        auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(params));
         lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
     }
 
@@ -45,6 +95,7 @@ int printDocumentSymbols(string_view filePath) {
         return 1;
     }
 }
+} // namespace
 } // namespace sorbet::realmain::lsp
 
 int main(int argc, char *argv[]) {
@@ -53,5 +104,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    return sorbet::realmain::lsp::printDocumentSymbols(argv[1]);
+    return sorbet::test::printDocumentSymbols(argv[1]);
 }
