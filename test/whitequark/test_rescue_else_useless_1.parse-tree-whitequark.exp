@@ -1,4 +1,0 @@
-s(:kwbegin,
-  s(:int, "1"),
-  s(:begin,
-    s(:int, "2")))

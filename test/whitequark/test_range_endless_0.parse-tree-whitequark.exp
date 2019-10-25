@@ -1,0 +1,2 @@
+s(:irange,
+  s(:int, "1"), nil)

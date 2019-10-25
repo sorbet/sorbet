@@ -476,7 +476,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
 
                       if (rescueBodies->size() == 0 && else_ != nullptr) {
                         driver.diagnostics.emplace_back(
-			                    dlevel::WARNING,
+			                    dlevel::ERROR,
                           dclass::UselessElse,
                           else_->tok
                         );
@@ -1067,6 +1067,14 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                 | arg tDOT3 arg
                     {
                       $$ = driver.build.range_exclusive(self, $1, $2, $3);
+                    }
+                | arg tDOT2
+                    {
+                      $$ = driver.build.range_inclusive(self, $1, $2, nullptr);
+                    }
+                | arg tDOT3
+                    {
+                      $$ = driver.build.range_exclusive(self, $1, $2, nullptr);
                     }
                 | arg tPLUS arg
                     {
@@ -1992,7 +2000,7 @@ opt_block_args_tail:
                     {
                       driver.lex.context.push(Context::State::LAMBDA);
                     }
-                  compstmt kEND
+                  bodystmt kEND
                     {
                       $$ = driver.alloc.delimited_block($1, nullptr, $3, $4);
                       driver.lex.context.pop();

@@ -1,3 +1,0 @@
-s(:def, :foo, nil,
-  s(:begin,
-    s(:begin, nil)))
