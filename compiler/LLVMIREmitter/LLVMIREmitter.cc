@@ -89,6 +89,18 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
 vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Function *func) {
     vector<llvm::Function *> res;
     res.emplace_back(func);
+    llvm::Type *args[] = {
+        llvm::Type::getInt64Ty(cs),    // block argument(first argument is both here and in argArray
+        llvm::Type::getInt64Ty(cs),    // data
+        llvm::Type::getInt32Ty(cs),    // arg count
+        llvm::Type::getInt64PtrTy(cs), // argArray
+    };
+    auto ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), args, false /*not varargs*/);
+
+    for (int i = 1; i < cfg.maxRubyBlockId; i++) {
+        auto fp = llvm::Function::Create(ft, llvm::Function::InternalLinkage, "", *cs.module);
+        res.emplace_back(fp);
+    }
     return res;
 }
 
