@@ -2,6 +2,7 @@
 #include "absl/strings/match.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
+#include "common/formatting.h"
 #include "common/sort.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
