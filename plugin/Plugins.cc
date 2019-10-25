@@ -1,5 +1,6 @@
 #include "plugin/Plugins.h"
 
+#include "common/sort.h"
 using namespace std;
 
 namespace sorbet::plugin {

@@ -1,7 +1,9 @@
 #include "core/NameHash.h"
+#include "common/sort.h"
 #include "core/GlobalState.h"
 #include "core/Hashing.h"
 #include "core/Names.h"
+
 using namespace std;
 namespace sorbet::core {
 u4 incZero(u4 a) {

@@ -16,6 +16,7 @@
 #include "absl/strings/str_cat.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
+#include "common/sort.h"
 #include "core/Error.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"

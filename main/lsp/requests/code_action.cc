@@ -1,3 +1,4 @@
+#include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
 

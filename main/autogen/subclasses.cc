@@ -1,5 +1,6 @@
 #include "main/autogen/subclasses.h"
 #include "common/FileOps.h"
+#include "common/sort.h"
 
 using namespace std;
 namespace sorbet::autogen {

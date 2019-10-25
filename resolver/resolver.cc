@@ -3,6 +3,7 @@
 #include "ast/Trees.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/sort.h"
 #include "core/Error.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"

@@ -3,6 +3,7 @@
 #include "common/JSON.h"
 #include "common/Levenstein.h"
 #include "common/formatting.h"
+#include "common/sort.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
 #include "core/Hashing.h"
