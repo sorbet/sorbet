@@ -1230,8 +1230,7 @@ module Enumerable
     .returns(T.untyped)
   end
   sig do
-    type_parameters(:U)
-    params(
+    type_parameters(:U).params(
         initial: T.type_parameter(:U),
         blk: T.proc.params(arg0: T.type_parameter(:U), arg1: Elem).returns(T.type_parameter(:U)),
     )
