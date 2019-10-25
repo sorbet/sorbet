@@ -1062,7 +1062,7 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         ENFORCE(current == current2);
         for (auto &e : members()) {
             ENFORCE(e.first.exists(), name.toString(gs) + " has a member symbol without a name");
-            ENFORCE(e.second.exists(), name.toString(gs) + "." + e.first.toString(gs) + " corresponds to a <none>");
+            ENFORCE(e.second.exists(), name.toString(gs) + "." + e.first.toString(gs) + " corresponds to a core::Symbols::noSymbol()");
         }
     }
     if (this->isMethod()) {
