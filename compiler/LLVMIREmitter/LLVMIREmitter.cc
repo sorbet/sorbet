@@ -16,6 +16,13 @@
 
 using namespace std;
 namespace sorbet::compiler {
+struct BasicBlockMap {
+    vector<llvm::BasicBlock *> functionInitializersByFunction;
+    vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
+    vector<llvm::BasicBlock *> userEntryBlockByFunction;
+    vector<llvm::BasicBlock *> llvmBlocksBySorbetBlocks;
+    vector<llvm::AllocaInst *> sendArgArrayByBlock;
+};
 
 // https://docs.ruby-lang.org/en/2.6.0/extension_rdoc.html
 // and https://silverhammermba.github.io/emberb/c/ are your friends
@@ -149,29 +156,35 @@ llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
 // load arguments, check their count
 // load self
 UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
-setupLocalVariables(CompilerState &cs, llvm::IRBuilder<> &builder, cfg::CFG &cfg,
-                    vector<llvm::Function *> &rubyBlocks2Functions,
-                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesCapturedAtLeastOnce) {
+setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, vector<llvm::Function *> &rubyBlocks2Functions,
+                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesCapturedAtLeastOnce,
+                    const BasicBlockMap &blockMap) {
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
+    llvm::IRBuilder<> builder(cs);
     {
         // nill out variables.
         auto valueType = cs.getValueType();
-        auto nilValueRaw = cs.getRubyNilRaw(builder);
-        for (const auto &entry : cfg.minLoops) {
+        for (const auto &entry : variablesCapturedAtLeastOnce) {
             auto var = entry.first;
             auto svName = var._name.data(cs)->shortName(cs);
+            builder.SetInsertPoint(blockMap.functionInitializersByFunction[entry.second.value()]);
             auto alloca = llvmVariables[var] =
                 builder.CreateAlloca(valueType, nullptr, llvm::StringRef(svName.data(), svName.length()));
+            auto nilValueRaw = cs.getRubyNilRaw(builder);
             cs.boxRawValue(builder, alloca, nilValueRaw);
         }
     }
     return llvmVariables;
 }
 
-void setupArguments(CompilerState &cs, llvm::IRBuilder<> &builder, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
-                    llvm::Function *func, vector<llvm::Function *> &rubyBlocks2Functions,
+void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
+                    vector<llvm::Function *> &rubyBlocks2Functions,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesCapturedAtLeastOnce) {
+                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesCapturedAtLeastOnce,
+                    const BasicBlockMap &blockMap) {
+    llvm::IRBuilder<> builder(cs);
+    auto func = rubyBlocks2Functions[0];
+    builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[0]);
     auto maxArgCount = 0;
     auto minArgCount = 0;
     {
@@ -231,21 +244,43 @@ void setupArguments(CompilerState &cs, llvm::IRBuilder<> &builder, cfg::CFG &cfg
         auto selfArgRaw = (func->arg_begin() + 2);
         cs.boxRawValue(builder, llvmVariables.at(core::LocalVariable::selfVariable()), selfArgRaw);
     }
+
+    // jump to user body
+    builder.CreateBr(blockMap.userEntryBlockByFunction[0]);
 }
 
-vector<llvm::BasicBlock *> getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Function *func,
-                                                            llvm::BasicBlock *llvmFuncEntry,
-                                                            vector<llvm::Function *> rubyBlocks2Functions) {
+BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
+                                               vector<llvm::Function *> rubyBlocks2Functions, int maxSendArgCount) {
+    vector<llvm::BasicBlock *> functionInitializersByFunction;
+    vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
+    vector<llvm::BasicBlock *> userEntryBlockByFunction;
+    vector<llvm::AllocaInst *> sendArgArrays;
+    llvm::IRBuilder<> builder(cs);
+    for (auto &fun : rubyBlocks2Functions) {
+        auto inits = functionInitializersByFunction.emplace_back(llvm::BasicBlock::Create(
+            cs, "functionEntryInitializers",
+            fun)); // we will build a link for this block later, after we finish building expressions into it
+        builder.SetInsertPoint(inits);
+        auto sendArgArray = builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(cs), maxSendArgCount),
+                                                 nullptr, "callArgs");
+        sendArgArrays.emplace_back(sendArgArray);
+        argumentSetupBlocksByFunction.emplace_back(llvm::BasicBlock::Create(cs, "argumentSetup", fun));
+        userEntryBlockByFunction.emplace_back(llvm::BasicBlock::Create(cs, "userEntry", fun));
+    }
+
     vector<llvm::BasicBlock *> llvmBlocks(cfg.maxBasicBlockId);
     for (auto &b : cfg.basicBlocks) {
         if (b.get() == cfg.entry()) {
-            llvmBlocks[b->id] = llvmFuncEntry;
+            llvmBlocks[b->id] = userEntryBlockByFunction[0]; // todo: we need something similar for block entries
         } else {
-            llvmBlocks[b->id] = llvm::BasicBlock::Create(cs, {"BB", to_string(b->id)},
-                                                         func); // to_s is slow. We should only use it in debug builds
+            llvmBlocks[b->id] = llvm::BasicBlock::Create(
+                cs, {"BB", to_string(b->id)},
+                rubyBlocks2Functions[b->rubyBlockId]); // to_s is slow. We should only use it in debug builds
         }
     }
-    return llvmBlocks;
+
+    return BasicBlockMap{functionInitializersByFunction, argumentSetupBlocksByFunction, userEntryBlockByFunction,
+                         llvmBlocks, sendArgArrays};
 }
 
 void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<> builder) {
@@ -323,8 +358,18 @@ void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, c
 
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
-UnorderedMap<core::LocalVariable, optional<int>> findCaptures(CompilerState &cs, cfg::CFG &cfg) {
+UnorderedMap<core::LocalVariable, optional<int>> findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef,
+                                                              cfg::CFG &cfg) {
     UnorderedMap<core::LocalVariable, optional<int>> ret;
+    for (auto &arg : mdef->args) {
+        ast::Expression *maybeLocal = arg.get();
+        if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg.get())) {
+            maybeLocal = opt->expr.get();
+        }
+        auto local = ast::cast_tree<ast::Local>(maybeLocal);
+        ENFORCE(local);
+        trackBlockUsage(cs, cfg, local->localVariable, cfg.entry(), ret);
+    }
 
     for (auto &bb : cfg.basicBlocks) {
         for (cfg::Binding &bind : bb->exprs) {
@@ -352,14 +397,14 @@ UnorderedMap<core::LocalVariable, optional<int>> findCaptures(CompilerState &cs,
     return ret;
 }
 
-void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBlock *> llvmBlocks,
-                  const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables,
-                  llvm::AllocaInst *sendArgArray) {
+void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
+                  const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables) {
     UnorderedMap<llvm::AllocaInst *, core::SymbolRef> aliases;
     llvm::IRBuilder<> builder(cs);
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
-        auto block = llvmBlocks[bb->id];
+        auto block = blockMap.llvmBlocksBySorbetBlocks[bb->id];
+        cs.functionEntryInitializers = blockMap.functionInitializersByFunction[bb->rubyBlockId];
         bool isTerminated = false;
         builder.SetInsertPoint(block);
         if (bb != cfg.deadBlock()) {
@@ -412,7 +457,9 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                                           llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
                                 auto var = varGet(cs, arg.variable, builder, llvmVariables, aliases);
-                                builder.CreateStore(var, builder.CreateGEP(sendArgArray, indices, "callArgsAddr"));
+                                builder.CreateStore(var,
+                                                    builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId],
+                                                                      indices, "callArgsAddr"));
                             }
                         }
                         llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
@@ -426,7 +473,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                         auto rawCall = builder.CreateCall(
                             cs.module->getFunction("sorbet_callFunc"),
                             {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                             builder.CreateGEP(sendArgArray, indices)},
+                             builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId], indices)},
                             "rawSendResult");
                         varSet(cs, targetAlloca, rawCall, builder, llvmVariables, aliases);
                     },
@@ -491,9 +538,10 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
                     auto var = varGet(cs, bb->bexit.cond.variable, builder, llvmVariables, aliases);
                     auto condValue = cs.getIsTruthyU1(builder, var);
 
-                    builder.CreateCondBr(condValue, llvmBlocks[bb->bexit.thenb->id], llvmBlocks[bb->bexit.elseb->id]);
+                    builder.CreateCondBr(condValue, blockMap.llvmBlocksBySorbetBlocks[bb->bexit.thenb->id],
+                                         blockMap.llvmBlocksBySorbetBlocks[bb->bexit.elseb->id]);
                 } else {
-                    builder.CreateBr(llvmBlocks[bb->bexit.thenb->id]);
+                    builder.CreateBr(blockMap.llvmBlocksBySorbetBlocks[bb->bexit.thenb->id]);
                 }
             }
         } else {
@@ -503,40 +551,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const vector<llvm::BasicBloc
     }
 }
 
-} // namespace
-
-void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
-    auto functionType = cs.getRubyFFIType();
-    auto func = llvm::Function::Create(functionType, getFunctionLinkageType(cs, md->symbol), functionName, cs.module);
-    func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
-    func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
-    func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
-    llvm::IRBuilder<> builder(cs);
-
-    vector<llvm::Function *> rubyBlocks2Functions = getRubyBlocks2FunctionsMapping(cs, cfg, func);
-
-    ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
-
-    cs.functionEntryInitializers = llvm::BasicBlock::Create(
-        cs, "functionEntryInitializers",
-        func); // we will build a link for this block later, after we finish building expressions into it
-
-    auto rawEntryBlock = llvm::BasicBlock::Create(cs, "setupLocalsAndArguments", func);
-    builder.SetInsertPoint(rawEntryBlock);
-
-    const UnorderedMap<core::LocalVariable, optional<int>> variablesCapturedAtLeastOnce = findCaptures(cs, cfg);
-
-    auto userBodyEntry = llvm::BasicBlock::Create(cs, "userBody", func);
-
-    const vector<llvm::BasicBlock *> llvmBlocks =
-        getSorbetBlocks2LLVMBlockMapping(cs, cfg, func, userBodyEntry, rubyBlocks2Functions);
-
-    const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
-        setupLocalVariables(cs, builder, cfg, rubyBlocks2Functions, variablesCapturedAtLeastOnce);
-    setupArguments(cs, builder, cfg, md, func, rubyBlocks2Functions, llvmVariables, variablesCapturedAtLeastOnce);
-
-    builder.CreateBr(userBodyEntry);
-
+int getMaxSendArgCount(cfg::CFG &cfg) {
     int maxSendArgCount = 0;
     for (auto &bb : cfg.basicBlocks) {
         for (cfg::Binding &bind : bb->exprs) {
@@ -547,13 +562,38 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
             }
         }
     }
+    return maxSendArgCount;
+}
 
-    builder.SetInsertPoint(cs.functionEntryInitializers);
-    auto sendArgArray =
-        builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(cs), maxSendArgCount), nullptr, "callArgs");
-    emitUserBody(cs, cfg, llvmBlocks, llvmVariables, sendArgArray);
-    builder.SetInsertPoint(cs.functionEntryInitializers);
-    builder.CreateBr(rawEntryBlock);
+} // namespace
+
+void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
+    const int maxSendArgCount = getMaxSendArgCount(cfg);
+    auto functionType = cs.getRubyFFIType();
+    auto func = llvm::Function::Create(functionType, getFunctionLinkageType(cs, md->symbol), functionName, cs.module);
+    func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
+    func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
+    func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
+    llvm::IRBuilder<> builder(cs);
+
+    vector<llvm::Function *> rubyBlocks2Functions = getRubyBlocks2FunctionsMapping(cs, cfg, func);
+
+    const BasicBlockMap blockMap = getSorbetBlocks2LLVMBlockMapping(cs, cfg, rubyBlocks2Functions, maxSendArgCount);
+
+    ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
+
+    const UnorderedMap<core::LocalVariable, optional<int>> variablesCapturedAtLeastOnce = findCaptures(cs, md, cfg);
+
+    const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
+        setupLocalVariables(cs, cfg, rubyBlocks2Functions, variablesCapturedAtLeastOnce, blockMap);
+
+    setupArguments(cs, cfg, md, rubyBlocks2Functions, llvmVariables, variablesCapturedAtLeastOnce, blockMap);
+
+    emitUserBody(cs, cfg, blockMap, llvmVariables);
+    for (int funId = 0; funId < blockMap.functionInitializersByFunction.size(); funId++) {
+        builder.SetInsertPoint(blockMap.functionInitializersByFunction[funId]);
+        builder.CreateBr(blockMap.argumentSetupBlocksByFunction[funId]);
+    }
     /* run verifier */
     ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
     cs.runCheapOptimizations(func);
