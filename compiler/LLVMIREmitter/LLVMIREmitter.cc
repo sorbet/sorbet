@@ -170,18 +170,25 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
     cs.boxRawValue(builder, llvmVariables.at(local), var);
 }
 
-llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
-                                llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage) {
-    auto name = "Init_" + baseName;
-
+llvm::Function *getOrCreateFunction(CompilerState &cs, std::string name, llvm::FunctionType *ft,
+                                    llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage) {
     auto func = cs.module->getFunction(name);
     if (func) {
         return func;
     }
+    return llvm::Function::Create(ft, linkageType, name, *cs.module);
+}
 
+llvm::Function *getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
+    return getOrCreateFunction(cs, sym.data(cs)->toStringFullName(cs), cs.getRubyFFIType(),
+                               getFunctionLinkageType(cs, sym));
+}
+
+llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
+                                llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage) {
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
-    return llvm::Function::Create(ft, linkageType, name, *cs.module);
+    return getOrCreateFunction(cs, "Init_" + baseName, ft, linkageType);
 }
 
 // Create local allocas for local variables, initialize them all to `nil`.
@@ -258,6 +265,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             minArgCount += 1;
         }
     }
+    auto numOptionalArgs = maxArgCount - minArgCount;
     {
         // validate arg count
         auto argCountRaw = func->arg_begin();
@@ -281,25 +289,98 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
         builder.SetInsertPoint(argCountSuccessBlock);
     }
+
+    vector<llvm::BasicBlock *> checkBlocks;
+    vector<llvm::BasicBlock *> fillFromArgBlocks;
+    vector<llvm::BasicBlock *> fillFromDefaultBlocks;
     {
-        // box required args
-        int argId = -1;
-        for (const auto &arg : md->args) {
-            argId += 1;
+        // create blocks for arg filling
+        for (auto i = 0; i < numOptionalArgs + 1; i++) {
+            auto suffix = i == numOptionalArgs ? "Done" : to_string(i);
+            checkBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"checkBlock", suffix}, func));
+            fillFromDefaultBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"fillFromDefaultBlock", suffix}, func));
+            // Don't bother making the "Done" block for fillFromArgBlocks
+            if (i < numOptionalArgs) {
+                fillFromArgBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"fillFromArgBlock", suffix}, func));
+            }
+        }
+    }
+    {
+        // fill local variables from args
+        auto fillRequiredArgs = llvm::BasicBlock::Create(cs, "fillRequiredArgs", func);
+        builder.CreateBr(fillRequiredArgs);
+        builder.SetInsertPoint(fillRequiredArgs);
+
+        // box `self`
+        auto selfArgRaw = func->arg_begin() + 2;
+        varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, llvmVariables, aliases, blockMap, funcId);
+
+        for (auto i = 0; i < maxArgCount; i++) {
+            if (i >= minArgCount) {
+                // if these are optional, put them in their own BasicBlock
+                // because we might not run it
+                auto &block = fillFromArgBlocks[i - minArgCount];
+                builder.SetInsertPoint(block);
+            }
+            const auto &arg = md->args[i];
             auto *a = ast::MK::arg2Local(arg.get());
-            llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, argId, true))};
+            llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
             auto name = a->localVariable._name.data(cs)->shortName(cs);
             llvm::StringRef nameRef(name.data(), name.length());
             auto argArrayRaw = func->arg_begin() + 1;
             auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
             varSet(cs, a->localVariable, rawValue, builder, llvmVariables, aliases, blockMap, funcId);
+            if (i >= minArgCount) {
+                // check if we need to fill in the next variable from the arg
+                builder.CreateBr(checkBlocks[i - minArgCount + 1]);
+            }
+        }
+
+        // make the last instruction in all the required args point at the first check block
+        builder.SetInsertPoint(fillRequiredArgs);
+        builder.CreateBr(checkBlocks[0]);
+    }
+    {
+        // build check blocks
+        for (auto i = 0; i < numOptionalArgs; i++) {
+            auto &block = checkBlocks[i];
+            builder.SetInsertPoint(block);
+            auto argCount = builder.CreateICmpEQ(func->arg_begin(), llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
+                                                 {"default", to_string(i)});
+            cs.setExpectedBool(builder, argCount, false);
+            builder.CreateCondBr(argCount, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
         }
     }
     {
-        // box `self`
-        auto selfArgRaw = (func->arg_begin() + 2);
-
-        varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, llvmVariables, aliases, blockMap, funcId);
+        // build fillFromDefaultBlocks
+        for (auto i = 0; i < numOptionalArgs; i++) {
+            auto &block = fillFromDefaultBlocks[i];
+            builder.SetInsertPoint(block);
+            if (md->name.data(cs)->kind == core::NameKind::UNIQUE &&
+                md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) {
+                // This method is already a default method so don't fill in
+                // another other defaults for it or else it is turtles all the
+                // way down
+            } else {
+                auto argIndex = i + minArgCount;
+                auto argMethodName =
+                    cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, argIndex + 1);
+                ENFORCE(argMethodName.exists());
+                auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
+                ENFORCE(argMethod.exists());
+                auto fillDefaultFunc = getOrCreateFunction(cs, argMethod);
+                auto rawValue = builder.CreateCall(fillDefaultFunc, {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2});
+                auto *a = ast::MK::arg2Local(md->args[argIndex].get());
+                cs.boxRawValue(builder, llvmVariables.at(a->localVariable), rawValue);
+            }
+            builder.CreateBr(fillFromDefaultBlocks[i + 1]);
+        }
+    }
+    {
+        // Tie up all the "Done" blocks at the end
+        builder.SetInsertPoint(checkBlocks[numOptionalArgs]);
+        builder.CreateBr(fillFromDefaultBlocks[numOptionalArgs]);
+        builder.SetInsertPoint(fillFromDefaultBlocks[numOptionalArgs]);
     }
 
     // jump to user body
@@ -401,11 +482,7 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
     ENFORCE(funcSym.data(cs)->isMethod());
 
     auto llvmFuncName = funcSym.data(cs)->toStringFullName(cs);
-    auto funcHandle = cs.module->getFunction(llvmFuncName);
-    if (funcHandle == nullptr) {
-        funcHandle =
-            llvm::Function::Create(cs.getRubyFFIType(), getFunctionLinkageType(cs, funcSym), llvmFuncName, *cs.module);
-    }
+    auto funcHandle = getOrCreateFunction(cs, funcSym);
     auto universalSignature = llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
     auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
@@ -720,8 +797,7 @@ int getMaxSendArgCount(cfg::CFG &cfg) {
 void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
     UnorderedMap<core::LocalVariable, core::SymbolRef> aliases;
     const int maxSendArgCount = getMaxSendArgCount(cfg);
-    auto functionType = cs.getRubyFFIType();
-    auto func = llvm::Function::Create(functionType, getFunctionLinkageType(cs, md->symbol), functionName, cs.module);
+    auto func = getOrCreateFunction(cs, md->symbol);
     {
         // setup function argument names
         func->arg_begin()->setName("argc");
@@ -754,7 +830,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     }
     /* run verifier */
     ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
-    cs.runCheapOptimizations(func);
+    // cs.runCheapOptimizations(func);
 }
 
 void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym) {
