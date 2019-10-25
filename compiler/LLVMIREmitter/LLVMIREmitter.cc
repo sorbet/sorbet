@@ -308,31 +308,44 @@ void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
     builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
 }
 
-void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, cfg::BasicBlock *bb) {
-    // TODO
+void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, cfg::BasicBlock *bb,
+                     UnorderedMap<core::LocalVariable, optional<int>> &usages) {
+    auto fnd = usages.find(lv);
+    if (fnd != usages.end()) {
+        auto &store = fnd->second;
+        if (!store || store.value() != bb->rubyBlockId) {
+            store = nullopt;
+        }
+    } else {
+        usages[lv] = bb->rubyBlockId;
+    }
 }
 
-UnorderedMap<core::LocalVariable, int> findCaptures(CompilerState &cs, cfg::CFG &cfg) {
-    UnorderedMap<core::LocalVariable, int> ret;
+/* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
+ * negative number */
+UnorderedMap<core::LocalVariable, optional<int>> findCaptures(CompilerState &cs, cfg::CFG &cfg) {
+    UnorderedMap<core::LocalVariable, optional<int>> ret;
 
     for (auto &bb : cfg.basicBlocks) {
         for (cfg::Binding &bind : bb->exprs) {
-            trackBlockUsage(cs, cfg, bind.bind.variable, bb.get());
+            trackBlockUsage(cs, cfg, bind.bind.variable, bb.get(), ret);
             typecase(
-                bind.value.get(), [&](cfg::Ident *i) { trackBlockUsage(cs, cfg, i->what, bb.get()); },
-                [&](cfg::Alias *i) { /* nothing */ }, [&](cfg::SolveConstraint *i) { /* nothing*/ },
+                bind.value.get(), [&](cfg::Ident *i) { trackBlockUsage(cs, cfg, i->what, bb.get(), ret); },
+                [&](cfg::Alias *i) { /* nothing */ // namespace
+                },
+                [&](cfg::SolveConstraint *i) { /* nothing*/ },
                 [&](cfg::Send *i) {
                     for (auto &arg : i->args) {
-                        trackBlockUsage(cs, cfg, arg.variable, bb.get());
+                        trackBlockUsage(cs, cfg, arg.variable, bb.get(), ret);
                     }
-                    trackBlockUsage(cs, cfg, i->recv.variable, bb.get());
+                    trackBlockUsage(cs, cfg, i->recv.variable, bb.get(), ret);
                 },
-                [&](cfg::Return *i) { trackBlockUsage(cs, cfg, i->what.variable, bb.get()); },
-                [&](cfg::BlockReturn *i) { trackBlockUsage(cs, cfg, i->what.variable, bb.get()); },
+                [&](cfg::Return *i) { trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret); },
+                [&](cfg::BlockReturn *i) { trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret); },
                 [&](cfg::LoadSelf *i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
                 [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::Unanalyzable *i) { cs.trace("Unanalyzable\n"); },
                 [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { cs.trace("LoadYieldParams\n"); },
-                [&](cfg::Cast *i) { trackBlockUsage(cs, cfg, i->value.variable, bb.get()); },
+                [&](cfg::Cast *i) { trackBlockUsage(cs, cfg, i->value.variable, bb.get(), ret); },
                 [&](cfg::TAbsurd *i) { /*nothing*/ });
         }
     }
@@ -511,7 +524,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     auto rawEntryBlock = llvm::BasicBlock::Create(cs, "setupLocalsAndArguments", func);
     builder.SetInsertPoint(rawEntryBlock);
 
-    UnorderedMap<core::LocalVariable, int> variablesCapturedAtLeastOnce = findCaptures(cs, cfg);
+    const UnorderedMap<core::LocalVariable, optional<int>> variablesCapturedAtLeastOnce = findCaptures(cs, cfg);
 
     auto userBodyEntry = llvm::BasicBlock::Create(cs, "userBody", func);
 
