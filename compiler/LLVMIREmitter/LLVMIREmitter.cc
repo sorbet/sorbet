@@ -157,14 +157,14 @@ llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
 // load self
 UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
 setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, vector<llvm::Function *> &rubyBlocks2Functions,
-                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesCapturedAtLeastOnce,
+                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
                     const BasicBlockMap &blockMap) {
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
     llvm::IRBuilder<> builder(cs);
     {
         // nill out variables.
         auto valueType = cs.getValueType();
-        for (const auto &entry : variablesCapturedAtLeastOnce) {
+        for (const auto &entry : variablesPrivateToBlocks) {
             auto var = entry.first;
             auto svName = var._name.data(cs)->shortName(cs);
             builder.SetInsertPoint(blockMap.functionInitializersByFunction[entry.second.value()]);
@@ -180,7 +180,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, vector<llvm::Function *> &
 void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
                     vector<llvm::Function *> &rubyBlocks2Functions,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesCapturedAtLeastOnce,
+                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
                     const BasicBlockMap &blockMap) {
     llvm::IRBuilder<> builder(cs);
     auto func = rubyBlocks2Functions[0];
@@ -344,15 +344,17 @@ void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
 }
 
 void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, cfg::BasicBlock *bb,
-                     UnorderedMap<core::LocalVariable, optional<int>> &usages) {
-    auto fnd = usages.find(lv);
-    if (fnd != usages.end()) {
+                     UnorderedMap<core::LocalVariable, optional<int>> &privateUsages,
+
+) {
+    auto fnd = privateUsages.find(lv);
+    if (fnd != privateUsages.end()) {
         auto &store = fnd->second;
-        if (!store || store.value() != bb->rubyBlockId) {
+        if (store && store.value() != bb->rubyBlockId) {
             store = nullopt;
         }
     } else {
-        usages[lv] = bb->rubyBlockId;
+        privateUsages[lv] = bb->rubyBlockId;
     }
 }
 
@@ -585,9 +587,9 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     const UnorderedMap<core::LocalVariable, optional<int>> variablesCapturedAtLeastOnce = findCaptures(cs, md, cfg);
 
     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
-        setupLocalVariables(cs, cfg, rubyBlocks2Functions, variablesCapturedAtLeastOnce, blockMap);
+        setupLocalVariables(cs, cfg, rubyBlocks2Functions, variablesPrivateToBlocks, blockMap);
 
-    setupArguments(cs, cfg, md, rubyBlocks2Functions, llvmVariables, variablesCapturedAtLeastOnce, blockMap);
+    setupArguments(cs, cfg, md, rubyBlocks2Functions, llvmVariables, variablesPrivateToBlocks, blockMap);
 
     emitUserBody(cs, cfg, blockMap, llvmVariables);
     for (int funId = 0; funId < blockMap.functionInitializersByFunction.size(); funId++) {
