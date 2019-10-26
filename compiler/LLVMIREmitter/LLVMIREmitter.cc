@@ -113,17 +113,24 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
     return res;
 }
 
-llvm::Value *varGet(CompilerState &cs, core::LocalVariable var, llvm::IRBuilder<> &builder,
+llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilder<> &builder,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
                     const UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases, const BasicBlockMap &blockMap,
                     int rubyBlockId) {
-    if (aliases.contains(var)) {
+    if (aliases.contains(local)) {
         // alias to a field or constant
-        return resolveSymbol(cs, aliases.at(var), builder);
+        return resolveSymbol(cs, aliases.at(local), builder);
+    }
+    if (blockMap.escapedVariableIndeces.contains(local)) {
+        auto id = blockMap.escapedVariableIndeces.at(local);
+        auto store =
+            builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
+                               {blockMap.escapedClosure[rubyBlockId], llvm::ConstantInt::get(cs, llvm::APInt(32, id))});
+        return builder.CreateLoad(store);
     }
 
     // normal local variable
-    return cs.unboxRawValue(builder, llvmVariables.at(var));
+    return cs.unboxRawValue(builder, llvmVariables.at(local));
 }
 
 void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilder<> &builder,
@@ -138,7 +145,17 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
         builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
                            {resolveSymbol(cs, owner, builder), toCString(name, builder),
                             llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
+        return;
     }
+    if (blockMap.escapedVariableIndeces.contains(local)) {
+        auto id = blockMap.escapedVariableIndeces.at(local);
+        auto store =
+            builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
+                               {blockMap.escapedClosure[rubyBlockId], llvm::ConstantInt::get(cs, llvm::APInt(32, id))});
+        builder.CreateStore(var, store);
+        return;
+    }
+
     // normal local variable
     cs.boxRawValue(builder, llvmVariables.at(local), var);
 }
