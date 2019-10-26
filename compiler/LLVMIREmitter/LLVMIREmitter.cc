@@ -22,6 +22,8 @@ struct BasicBlockMap {
     vector<llvm::BasicBlock *> userEntryBlockByFunction;
     vector<llvm::BasicBlock *> llvmBlocksBySorbetBlocks;
     vector<llvm::AllocaInst *> sendArgArrayByBlock;
+    vector<llvm::Value *> escapedClosure;
+    UnorderedMap<core::LocalVariable, int> escapedVariableIndeces;
 };
 
 // https://docs.ruby-lang.org/en/2.6.0/extension_rdoc.html
@@ -165,6 +167,9 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, vector<llvm::Function *> &
         auto valueType = cs.getValueType();
         for (const auto &entry : variablesPrivateToBlocks) {
             auto var = entry.first;
+            if (entry.second == std::nullopt) {
+                continue;
+            }
             auto svName = var._name.data(cs)->shortName(cs);
             builder.SetInsertPoint(blockMap.functionInitializersByFunction[entry.second.value()]);
             auto alloca = llvmVariables[var] =
@@ -249,12 +254,16 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 }
 
 BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
-                                               vector<llvm::Function *> rubyBlocks2Functions, int maxSendArgCount) {
+                                               vector<llvm::Function *> rubyBlocks2Functions,
+                                               UnorderedMap<core::LocalVariable, int> &&escapedVariableIndices,
+                                               int maxSendArgCount) {
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction;
     vector<llvm::AllocaInst *> sendArgArrays;
+    vector<llvm::Value *> escapedClosure;
     llvm::IRBuilder<> builder(cs);
+    int i = 0;
     for (auto &fun : rubyBlocks2Functions) {
         auto inits = functionInitializersByFunction.emplace_back(llvm::BasicBlock::Create(
             cs, "functionEntryInitializers",
@@ -262,9 +271,23 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
         builder.SetInsertPoint(inits);
         auto sendArgArray = builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(cs), maxSendArgCount),
                                                  nullptr, "callArgs");
+        llvm::Value *localClosure = nullptr;
+        if (i == 0) {
+            if (!escapedVariableIndices.empty())
+                localClosure =
+                    builder.CreateCall(cs.module->getFunction("sorbet_allocClosureAsValue"),
+                                       {llvm::ConstantInt::get(cs, llvm::APInt(32, escapedVariableIndices.size()))});
+            else {
+                localClosure = cs.getRubyNilRaw(builder);
+            }
+        } else {
+            localClosure = fun->arg_begin() + 1;
+        }
+        escapedClosure.emplace_back(localClosure);
         sendArgArrays.emplace_back(sendArgArray);
         argumentSetupBlocksByFunction.emplace_back(llvm::BasicBlock::Create(cs, "argumentSetup", fun));
         userEntryBlockByFunction.emplace_back(llvm::BasicBlock::Create(cs, "userEntry", fun));
+        i++;
     }
 
     vector<llvm::BasicBlock *> llvmBlocks(cfg.maxBasicBlockId);
@@ -278,8 +301,15 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
         }
     }
 
-    return BasicBlockMap{functionInitializersByFunction, argumentSetupBlocksByFunction, userEntryBlockByFunction,
-                         llvmBlocks, sendArgArrays};
+    return BasicBlockMap{functionInitializersByFunction,
+                         argumentSetupBlocksByFunction,
+                         userEntryBlockByFunction,
+                         llvmBlocks,
+                         sendArgArrays,
+                         escapedClosure,
+                         std::move(escapedVariableIndices)
+
+    };
 }
 
 void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<> builder) {
@@ -344,7 +374,7 @@ void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
 
 void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, cfg::BasicBlock *bb,
                      UnorderedMap<core::LocalVariable, optional<int>> &privateUsages,
-                     UnorderedMap<core::LocalVariable, optional<int>> &escapedIndexes, int &escapedIndexCounter
+                     UnorderedMap<core::LocalVariable, int> &escapedIndexes, int &escapedIndexCounter
 
 ) {
     auto fnd = privateUsages.find(lv);
@@ -362,10 +392,10 @@ void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, c
 
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
-pair<UnorderedMap<core::LocalVariable, optional<int>>, UnorderedMap<core::LocalVariable, optional<int>>>
+pair<UnorderedMap<core::LocalVariable, optional<int>>, UnorderedMap<core::LocalVariable, int>>
 findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg) {
     UnorderedMap<core::LocalVariable, optional<int>> ret;
-    UnorderedMap<core::LocalVariable, optional<int>> escapedVariableIndexes;
+    UnorderedMap<core::LocalVariable, int> escapedVariableIndexes;
     int idx = 0;
     for (auto &arg : mdef->args) {
         ast::Expression *maybeLocal = arg.get();
@@ -412,7 +442,7 @@ findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg)
 
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
                   const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables) {
-    UnorderedMap<llvm::AllocaInst *, core::SymbolRef> aliases;
+    UnorderedMap<core::LocalVariable, core::SymbolRef> aliases;
     llvm::IRBuilder<> builder(cs);
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
@@ -591,11 +621,12 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
 
     vector<llvm::Function *> rubyBlocks2Functions = getRubyBlocks2FunctionsMapping(cs, cfg, func);
 
-    const BasicBlockMap blockMap = getSorbetBlocks2LLVMBlockMapping(cs, cfg, rubyBlocks2Functions, maxSendArgCount);
+    auto [variablesPrivateToBlocks, escapedVariableIndexes] = findCaptures(cs, md, cfg);
+
+    const BasicBlockMap blockMap = getSorbetBlocks2LLVMBlockMapping(cs, cfg, rubyBlocks2Functions,
+                                                                    std::move(escapedVariableIndexes), maxSendArgCount);
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
-
-    const auto &[variablesPrivateToBlocks, escapedVariableIndexes] = findCaptures(cs, md, cfg);
 
     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
         setupLocalVariables(cs, cfg, rubyBlocks2Functions, variablesPrivateToBlocks, blockMap);
