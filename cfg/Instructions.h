@@ -74,11 +74,13 @@ CheckSize(Alias, 16, 8);
 class SolveConstraint final : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
-    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link){};
+    core::LocalVariable send;
+    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable send)
+        : link(link), send(send){};
     virtual std::string toString(core::Context ctx) const;
     virtual std::string showRaw(core::Context ctx, int tabs = 0) const;
 };
-CheckSize(SolveConstraint, 32, 8);
+CheckSize(SolveConstraint, 40, 8);
 
 class Send final : public Instruction {
 public:
