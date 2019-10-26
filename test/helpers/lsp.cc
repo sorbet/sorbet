@@ -321,7 +321,7 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
 }
 
 unique_ptr<LSPMessage> makeDidChange(std::string_view uri, std::string_view contents, int version) {
-    auto textDoc = make_unique<VersionedTextDocumentIdentifier>(string(uri), version);
+    auto textDoc = make_unique<VersionedTextDocumentIdentifier>(string(uri), static_cast<double>(version));
     auto textDocChange = make_unique<TextDocumentContentChangeEvent>(string(contents));
     vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;
     textChanges.push_back(move(textDocChange));
