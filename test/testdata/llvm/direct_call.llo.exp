@@ -429,7 +429,7 @@ entry:
   %7 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.4, i64 0, i64 0), i64 1) #14
   call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #14, !noalias !20
   %8 = call i64 @rb_funcallv(i64 %7, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #14
-  %rawSym30.i = call i64 @rb_id2sym(i64 %rubyId_bar.i) #14
+  %rawSym31.i = call i64 @rb_id2sym(i64 %rubyId_bar.i) #14
   %9 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.5, i64 0, i64 0), i64 6) #14
   call void @rb_define_method(i64 %9, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.6, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U bar>" to i64 (...)*), i32 -1) #14
   call void @dbg_sorbet_validate_id(i64 %rubyId_bar.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #14, !noalias !23
