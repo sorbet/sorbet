@@ -113,24 +113,23 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
 
 llvm::Value *varGet(CompilerState &cs, core::LocalVariable var, llvm::IRBuilder<> &builder,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-                    const UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
-    auto ret = llvmVariables.at(var);
-    if (!aliases.contains(ret)) {
-        return cs.unboxRawValue(builder, ret);
+                    const UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases) {
+    if (!aliases.contains(var)) {
+        return cs.unboxRawValue(builder, llvmVariables.at(var));
     }
 
-    return resolveSymbol(cs, aliases.at(ret), builder);
+    return resolveSymbol(cs, aliases.at(var), builder);
 }
 
-void varSet(CompilerState &cs, llvm::AllocaInst *alloca, llvm::Value *var, llvm::IRBuilder<> &builder,
+void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilder<> &builder,
             const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-            UnorderedMap<llvm::AllocaInst *, core::SymbolRef> &aliases) {
-    cs.boxRawValue(builder, alloca, var);
-    if (!aliases.contains(alloca)) {
+            UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases) {
+    if (!aliases.contains(local)) {
+        cs.boxRawValue(builder, llvmVariables.at(local), var);
         return;
     }
 
-    auto sym = aliases.at(alloca);
+    auto sym = aliases.at(local);
     auto name = sym.data(cs.gs)->name.show(cs.gs);
     auto owner = sym.data(cs.gs)->owner;
     builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
@@ -423,14 +422,13 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
         builder.SetInsertPoint(block);
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
-                auto targetAlloca = llvmVariables.at(bind.bind.variable);
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
                         auto var = varGet(cs, i->what, builder, llvmVariables, aliases);
-                        varSet(cs, targetAlloca, var, builder, llvmVariables, aliases);
+                        varSet(cs, bind.bind.variable, var, builder, llvmVariables, aliases);
                     },
-                    [&](cfg::Alias *i) { aliases[targetAlloca] = i->what; },
+                    [&](cfg::Alias *i) { aliases[bind.bind.variable] = i->what; },
                     [&](cfg::SolveConstraint *i) { cs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(cs)->shortName(cs);
@@ -446,7 +444,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                                                     varGet(cs, value, builder, llvmVariables, aliases)});
                                 argc += 2;
                             }
-                            varSet(cs, targetAlloca, ret, builder, llvmVariables, aliases);
+                            varSet(cs, bind.bind.variable, ret, builder, llvmVariables, aliases);
                             return;
                         }
                         if (i->fun == Names::sorbet_defineTopClassOrModule) {
@@ -489,7 +487,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
                              builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId], indices)},
                             "rawSendResult");
-                        varSet(cs, targetAlloca, rawCall, builder, llvmVariables, aliases);
+                        varSet(cs, bind.bind.variable, rawCall, builder, llvmVariables, aliases);
                     },
                     [&](cfg::Return *i) {
                         isTerminated = true;
@@ -501,15 +499,16 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     [&](cfg::Literal *i) {
                         cs.trace("Literal\n");
                         if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {
-                            varSet(cs, targetAlloca, cs.getRubyFalseRaw(builder), builder, llvmVariables, aliases);
+                            varSet(cs, bind.bind.variable, cs.getRubyFalseRaw(builder), builder, llvmVariables,
+                                   aliases);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::TrueClass())) {
-                            varSet(cs, targetAlloca, cs.getRubyTrueRaw(builder), builder, llvmVariables, aliases);
+                            varSet(cs, bind.bind.variable, cs.getRubyTrueRaw(builder), builder, llvmVariables, aliases);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::NilClass())) {
-                            varSet(cs, targetAlloca, cs.getRubyNilRaw(builder), builder, llvmVariables, aliases);
+                            varSet(cs, bind.bind.variable, cs.getRubyNilRaw(builder), builder, llvmVariables, aliases);
                             return;
                         }
 
@@ -518,7 +517,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
                                 auto rawInt = cs.getRubyIntRaw(builder, litType->value);
-                                varSet(cs, targetAlloca, rawInt, builder, llvmVariables, aliases);
+                                varSet(cs, bind.bind.variable, rawInt, builder, llvmVariables, aliases);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::Symbol: {
@@ -526,13 +525,13 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                                 auto rawId = cs.getRubyIdFor(builder, str);
                                 auto rawRubySym =
                                     builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
-                                varSet(cs, targetAlloca, rawRubySym, builder, llvmVariables, aliases);
+                                varSet(cs, bind.bind.variable, rawRubySym, builder, llvmVariables, aliases);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
                                 auto rawRubyString = cs.getRubyStringRaw(builder, str);
-                                varSet(cs, targetAlloca, rawRubyString, builder, llvmVariables, aliases);
+                                varSet(cs, bind.bind.variable, rawRubyString, builder, llvmVariables, aliases);
                                 break;
                             }
                             default:
