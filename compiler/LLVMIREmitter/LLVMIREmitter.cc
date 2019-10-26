@@ -345,6 +345,7 @@ void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
 
 void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, cfg::BasicBlock *bb,
                      UnorderedMap<core::LocalVariable, optional<int>> &privateUsages,
+                     UnorderedMap<core::LocalVariable, optional<int>> &escapedIndexes, int &escapedIndexCounter
 
 ) {
     auto fnd = privateUsages.find(lv);
@@ -352,6 +353,8 @@ void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, c
         auto &store = fnd->second;
         if (store && store.value() != bb->rubyBlockId) {
             store = nullopt;
+            escapedIndexes[lv] = escapedIndexCounter;
+            escapedIndexCounter += 1;
         }
     } else {
         privateUsages[lv] = bb->rubyBlockId;
@@ -360,9 +363,11 @@ void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, c
 
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
-UnorderedMap<core::LocalVariable, optional<int>> findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef,
-                                                              cfg::CFG &cfg) {
+pair<UnorderedMap<core::LocalVariable, optional<int>>, UnorderedMap<core::LocalVariable, optional<int>>>
+findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg) {
     UnorderedMap<core::LocalVariable, optional<int>> ret;
+    UnorderedMap<core::LocalVariable, optional<int>> escapedVariableIndexes;
+    int idx = 0;
     for (auto &arg : mdef->args) {
         ast::Expression *maybeLocal = arg.get();
         if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg.get())) {
@@ -370,33 +375,40 @@ UnorderedMap<core::LocalVariable, optional<int>> findCaptures(CompilerState &cs,
         }
         auto local = ast::cast_tree<ast::Local>(maybeLocal);
         ENFORCE(local);
-        trackBlockUsage(cs, cfg, local->localVariable, cfg.entry(), ret);
+        trackBlockUsage(cs, cfg, local->localVariable, cfg.entry(), ret, escapedVariableIndexes, idx);
     }
 
     for (auto &bb : cfg.basicBlocks) {
         for (cfg::Binding &bind : bb->exprs) {
-            trackBlockUsage(cs, cfg, bind.bind.variable, bb.get(), ret);
+            trackBlockUsage(cs, cfg, bind.bind.variable, bb.get(), ret, escapedVariableIndexes, idx);
             typecase(
-                bind.value.get(), [&](cfg::Ident *i) { trackBlockUsage(cs, cfg, i->what, bb.get(), ret); },
+                bind.value.get(),
+                [&](cfg::Ident *i) { trackBlockUsage(cs, cfg, i->what, bb.get(), ret, escapedVariableIndexes, idx); },
                 [&](cfg::Alias *i) { /* nothing */ // namespace
                 },
                 [&](cfg::SolveConstraint *i) { /* nothing*/ },
                 [&](cfg::Send *i) {
                     for (auto &arg : i->args) {
-                        trackBlockUsage(cs, cfg, arg.variable, bb.get(), ret);
+                        trackBlockUsage(cs, cfg, arg.variable, bb.get(), ret, escapedVariableIndexes, idx);
                     }
-                    trackBlockUsage(cs, cfg, i->recv.variable, bb.get(), ret);
+                    trackBlockUsage(cs, cfg, i->recv.variable, bb.get(), ret, escapedVariableIndexes, idx);
                 },
-                [&](cfg::Return *i) { trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret); },
-                [&](cfg::BlockReturn *i) { trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret); },
+                [&](cfg::Return *i) {
+                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret, escapedVariableIndexes, idx);
+                },
+                [&](cfg::BlockReturn *i) {
+                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret, escapedVariableIndexes, idx);
+                },
                 [&](cfg::LoadSelf *i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
                 [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::Unanalyzable *i) { cs.trace("Unanalyzable\n"); },
                 [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { cs.trace("LoadYieldParams\n"); },
-                [&](cfg::Cast *i) { trackBlockUsage(cs, cfg, i->value.variable, bb.get(), ret); },
+                [&](cfg::Cast *i) {
+                    trackBlockUsage(cs, cfg, i->value.variable, bb.get(), ret, escapedVariableIndexes, idx);
+                },
                 [&](cfg::TAbsurd *i) { /*nothing*/ });
         }
     }
-    return ret;
+    return {std::move(ret), std::move(escapedVariableIndexes)};
 }
 
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
@@ -584,7 +596,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
-    const UnorderedMap<core::LocalVariable, optional<int>> variablesCapturedAtLeastOnce = findCaptures(cs, md, cfg);
+    const auto &[variablesPrivateToBlocks, escapedVariableIndexes] = findCaptures(cs, md, cfg);
 
     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
         setupLocalVariables(cs, cfg, rubyBlocks2Functions, variablesPrivateToBlocks, blockMap);
