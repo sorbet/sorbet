@@ -116,27 +116,30 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
 llvm::Value *varGet(CompilerState &cs, core::LocalVariable var, llvm::IRBuilder<> &builder,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
                     const UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases, const BasicBlockMap &blockMap) {
-    if (!aliases.contains(var)) {
-        return cs.unboxRawValue(builder, llvmVariables.at(var));
+    if (aliases.contains(var)) {
+        // alias to a field or constant
+        return resolveSymbol(cs, aliases.at(var), builder);
     }
 
-    return resolveSymbol(cs, aliases.at(var), builder);
+    // normal local variable
+    return cs.unboxRawValue(builder, llvmVariables.at(var));
 }
 
 void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilder<> &builder,
             const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
             UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases, const BasicBlockMap &blockMap) {
-    if (!aliases.contains(local)) {
-        cs.boxRawValue(builder, llvmVariables.at(local), var);
-        return;
+    if (aliases.contains(local)) {
+        // alias to a field or constant
+        auto sym = aliases.at(local);
+        auto name = sym.data(cs.gs)->name.show(cs.gs);
+        auto owner = sym.data(cs.gs)->owner;
+        builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
+                           {resolveSymbol(cs, owner, builder), toCString(name, builder),
+                            llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
     }
 
-    auto sym = aliases.at(local);
-    auto name = sym.data(cs.gs)->name.show(cs.gs);
-    auto owner = sym.data(cs.gs)->owner;
-    builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
-                       {resolveSymbol(cs, owner, builder), toCString(name, builder),
-                        llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
+    // normal local variable
+    cs.boxRawValue(builder, llvmVariables.at(local), var);
 }
 
 llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
