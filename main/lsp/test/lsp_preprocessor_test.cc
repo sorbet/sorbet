@@ -66,7 +66,7 @@ bool comesBeforeSymmetric(const TimeTravelingGlobalState &ttgs, u4 a, u4 b) {
 
 unique_ptr<LSPMessage> makeOpen(string_view path, u4 version, string_view source) {
     auto params = make_unique<DidOpenTextDocumentParams>(
-        make_unique<TextDocumentItem>(string(path), "ruby", version, string(source)));
+        make_unique<TextDocumentItem>(string(path), "ruby", static_cast<double>(version), string(source)));
     return make_unique<LSPMessage>(
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params)));
 }
@@ -76,7 +76,7 @@ unique_ptr<LSPMessage> makeChange(string_view path, u4 version, string_view sour
     vector<unique_ptr<TextDocumentContentChangeEvent>> changes;
     changes.push_back(move(contentChange));
     auto params = make_unique<DidChangeTextDocumentParams>(
-        make_unique<VersionedTextDocumentIdentifier>(string(path), version), move(changes));
+        make_unique<VersionedTextDocumentIdentifier>(string(path), static_cast<double>(version)), move(changes));
     return make_unique<LSPMessage>(
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(params)));
 }

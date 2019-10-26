@@ -60,7 +60,7 @@ unique_ptr<LSPMessage> ProtocolTest::changeFile(string_view path, string_view ne
     sourceFileContents[string(path)] =
         make_shared<core::File>(string(path), string(newContents), core::File::Type::Normal);
     auto uri = getUri(path);
-    auto textDocIdent = make_unique<VersionedTextDocumentIdentifier>(uri, version);
+    auto textDocIdent = make_unique<VersionedTextDocumentIdentifier>(uri, static_cast<double>(version));
     vector<unique_ptr<TextDocumentContentChangeEvent>> changeEvents;
     changeEvents.push_back(make_unique<TextDocumentContentChangeEvent>(string(newContents)));
     auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDocIdent), move(changeEvents));
