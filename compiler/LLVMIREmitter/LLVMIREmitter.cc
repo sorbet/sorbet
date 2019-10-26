@@ -115,7 +115,8 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
 
 llvm::Value *varGet(CompilerState &cs, core::LocalVariable var, llvm::IRBuilder<> &builder,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-                    const UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases, const BasicBlockMap &blockMap) {
+                    const UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases, const BasicBlockMap &blockMap,
+                    int rubyBlockId) {
     if (aliases.contains(var)) {
         // alias to a field or constant
         return resolveSymbol(cs, aliases.at(var), builder);
@@ -127,7 +128,8 @@ llvm::Value *varGet(CompilerState &cs, core::LocalVariable var, llvm::IRBuilder<
 
 void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilder<> &builder,
             const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-            UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases, const BasicBlockMap &blockMap) {
+            UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases, const BasicBlockMap &blockMap,
+            int rubyBlockId) {
     if (aliases.contains(local)) {
         // alias to a field or constant
         auto sym = aliases.at(local);
@@ -137,7 +139,6 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
                            {resolveSymbol(cs, owner, builder), toCString(name, builder),
                             llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
     }
-
     // normal local variable
     cs.boxRawValue(builder, llvmVariables.at(local), var);
 }
@@ -162,11 +163,11 @@ llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
 UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
 setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, vector<llvm::Function *> &rubyBlocks2Functions,
                     const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
-                    const BasicBlockMap &blockMap) {
+                    const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases) {
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
     llvm::IRBuilder<> builder(cs);
     {
-        // nill out variables.
+        // nill out block local variables.
         auto valueType = cs.getValueType();
         for (const auto &entry : variablesPrivateToBlocks) {
             auto var = entry.first;
@@ -181,6 +182,15 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, vector<llvm::Function *> &
             cs.boxRawValue(builder, alloca, nilValueRaw);
         }
     }
+
+    {
+        // nill out closure variables
+
+        builder.SetInsertPoint(blockMap.functionInitializersByFunction[0]);
+        for (const auto &entry : blockMap.escapedVariableIndeces) {
+            varSet(cs, entry.first, cs.getRubyNilRaw(builder), builder, llvmVariables, aliases, blockMap, 0);
+        }
+    }
     return llvmVariables;
 }
 
@@ -190,8 +200,9 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                     const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
                     const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases) {
     llvm::IRBuilder<> builder(cs);
-    auto func = rubyBlocks2Functions[0];
-    builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[0]);
+    auto funcId = 0;
+    auto func = rubyBlocks2Functions[funcId];
+    builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[funcId]);
     auto maxArgCount = 0;
     auto minArgCount = 0;
     {
@@ -243,14 +254,14 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             llvm::StringRef nameRef(name.data(), name.length());
             auto argArrayRaw = func->arg_begin() + 1;
             auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
-            varSet(cs, a->localVariable, rawValue, builder, llvmVariables, aliases, blockMap);
+            varSet(cs, a->localVariable, rawValue, builder, llvmVariables, aliases, blockMap, funcId);
         }
     }
     {
         // box `self`
         auto selfArgRaw = (func->arg_begin() + 2);
 
-        varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, llvmVariables, aliases, blockMap);
+        varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, llvmVariables, aliases, blockMap, funcId);
     }
 
     // jump to user body
@@ -459,8 +470,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
-                        auto var = varGet(cs, i->what, builder, llvmVariables, aliases, blockMap);
-                        varSet(cs, bind.bind.variable, var, builder, llvmVariables, aliases, blockMap);
+                        auto var = varGet(cs, i->what, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
+                        varSet(cs, bind.bind.variable, var, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
                     },
                     [&](cfg::Alias *i) { aliases[bind.bind.variable] = i->what; },
                     [&](cfg::SolveConstraint *i) { cs.trace("SolveConstraint\n"); },
@@ -473,12 +484,14 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             while (argc < i->args.size()) {
                                 auto key = i->args[argc].variable;
                                 auto value = i->args[argc + 1].variable;
-                                builder.CreateCall(cs.module->getFunction("rb_hash_aset"),
-                                                   {ret, varGet(cs, key, builder, llvmVariables, aliases, blockMap),
-                                                    varGet(cs, value, builder, llvmVariables, aliases, blockMap)});
+                                builder.CreateCall(
+                                    cs.module->getFunction("rb_hash_aset"),
+                                    {ret, varGet(cs, key, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId),
+                                     varGet(cs, value, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId)});
                                 argc += 2;
                             }
-                            varSet(cs, bind.bind.variable, ret, builder, llvmVariables, aliases, blockMap);
+                            varSet(cs, bind.bind.variable, ret, builder, llvmVariables, aliases, blockMap,
+                                   bb->rubyBlockId);
                             return;
                         }
                         if (i->fun == Names::sorbet_defineTopClassOrModule) {
@@ -502,7 +515,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                                 argId += 1;
                                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                                           llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
-                                auto var = varGet(cs, arg.variable, builder, llvmVariables, aliases, blockMap);
+                                auto var = varGet(cs, arg.variable, builder, llvmVariables, aliases, blockMap,
+                                                  bb->rubyBlockId);
                                 builder.CreateStore(var,
                                                     builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId],
                                                                       indices, "callArgsAddr"));
@@ -515,17 +529,20 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
                         // to get inline caching.
                         // before this, perf will not be good
-                        auto var = varGet(cs, i->recv.variable, builder, llvmVariables, aliases, blockMap);
+                        auto var =
+                            varGet(cs, i->recv.variable, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
                         auto rawCall = builder.CreateCall(
                             cs.module->getFunction("sorbet_callFunc"),
                             {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
                              builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId], indices)},
                             "rawSendResult");
-                        varSet(cs, bind.bind.variable, rawCall, builder, llvmVariables, aliases, blockMap);
+                        varSet(cs, bind.bind.variable, rawCall, builder, llvmVariables, aliases, blockMap,
+                               bb->rubyBlockId);
                     },
                     [&](cfg::Return *i) {
                         isTerminated = true;
-                        auto var = varGet(cs, i->what.variable, builder, llvmVariables, aliases, blockMap);
+                        auto var =
+                            varGet(cs, i->what.variable, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
                         builder.CreateRet(var);
                     },
                     [&](cfg::BlockReturn *i) { cs.trace("BlockReturn\n"); },
@@ -534,17 +551,17 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         cs.trace("Literal\n");
                         if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {
                             varSet(cs, bind.bind.variable, cs.getRubyFalseRaw(builder), builder, llvmVariables, aliases,
-                                   blockMap);
+                                   blockMap, bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::TrueClass())) {
                             varSet(cs, bind.bind.variable, cs.getRubyTrueRaw(builder), builder, llvmVariables, aliases,
-                                   blockMap);
+                                   blockMap, bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::NilClass())) {
                             varSet(cs, bind.bind.variable, cs.getRubyNilRaw(builder), builder, llvmVariables, aliases,
-                                   blockMap);
+                                   blockMap, bb->rubyBlockId);
                             return;
                         }
 
@@ -553,7 +570,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
                                 auto rawInt = cs.getRubyIntRaw(builder, litType->value);
-                                varSet(cs, bind.bind.variable, rawInt, builder, llvmVariables, aliases, blockMap);
+                                varSet(cs, bind.bind.variable, rawInt, builder, llvmVariables, aliases, blockMap,
+                                       bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::Symbol: {
@@ -561,14 +579,15 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                                 auto rawId = cs.getRubyIdFor(builder, str);
                                 auto rawRubySym =
                                     builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
-                                varSet(cs, bind.bind.variable, rawRubySym, builder, llvmVariables, aliases, blockMap);
+                                varSet(cs, bind.bind.variable, rawRubySym, builder, llvmVariables, aliases, blockMap,
+                                       bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
                                 auto rawRubyString = cs.getRubyStringRaw(builder, str);
-                                varSet(cs, bind.bind.variable, rawRubyString, builder, llvmVariables, aliases,
-                                       blockMap);
+                                varSet(cs, bind.bind.variable, rawRubyString, builder, llvmVariables, aliases, blockMap,
+                                       bb->rubyBlockId);
                                 break;
                             }
                             default:
@@ -585,7 +604,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
             }
             if (!isTerminated) {
                 if (bb->bexit.thenb != bb->bexit.elseb) {
-                    auto var = varGet(cs, bb->bexit.cond.variable, builder, llvmVariables, aliases, blockMap);
+                    auto var =
+                        varGet(cs, bb->bexit.cond.variable, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
                     auto condValue = cs.getIsTruthyU1(builder, var);
 
                     builder.CreateCondBr(condValue, blockMap.llvmBlocksBySorbetBlocks[bb->bexit.thenb->id],
@@ -637,7 +657,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables =
-        setupLocalVariables(cs, cfg, rubyBlocks2Functions, variablesPrivateToBlocks, blockMap);
+        setupLocalVariables(cs, cfg, rubyBlocks2Functions, variablesPrivateToBlocks, blockMap, aliases);
 
     setupArguments(cs, cfg, md, rubyBlocks2Functions, llvmVariables, variablesPrivateToBlocks, blockMap, aliases);
 
