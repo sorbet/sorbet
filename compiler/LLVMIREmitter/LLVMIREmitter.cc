@@ -104,7 +104,7 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
     };
     auto ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), args, false /*not varargs*/);
 
-    for (int i = 1; i < cfg.maxRubyBlockId; i++) {
+    for (int i = 0; i < cfg.maxRubyBlockId; i++) {
         auto fp = llvm::Function::Create(ft, llvm::Function::InternalLinkage, "", *cs.module);
         res.emplace_back(fp);
     }
