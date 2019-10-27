@@ -140,6 +140,10 @@ int Location::cmp(const Location &b) const {
     return range->cmp(*b.range);
 }
 
+unique_ptr<Location> Location::copy() const {
+    return make_unique<Location>(uri, range->copy());
+}
+
 int Position::cmp(const Position &b) const {
     const int lineCmp = line - b.line;
     if (lineCmp != 0) {

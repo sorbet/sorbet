@@ -120,6 +120,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                classTypes,
                                {
                                    "int cmp(const Location &b) const;",
+                                   "std::unique_ptr<Location> copy() const;",
                                });
 
     auto DiagnosticRelatedInformation = makeObject("DiagnosticRelatedInformation",
