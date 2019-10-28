@@ -21,6 +21,7 @@ struct BasicBlockMap {
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction;
     vector<llvm::BasicBlock *> llvmBlocksBySorbetBlocks;
+    vector<int> basicBlockJumpOverrides;
     vector<llvm::AllocaInst *> sendArgArrayByBlock;
     vector<llvm::Value *> escapedClosure;
     UnorderedMap<core::LocalVariable, int> escapedVariableIndeces;
@@ -106,7 +107,7 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
     };
     auto ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), args, false /*not varargs*/);
 
-    for (int i = 0; i < cfg.maxRubyBlockId; i++) {
+    for (int i = 1; i <= cfg.maxRubyBlockId; i++) {
         auto fp = llvm::Function::Create(ft, llvm::Function::InternalLinkage, "", *cs.module);
         res.emplace_back(fp);
     }
@@ -283,6 +284,12 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
     // jump to user body
     builder.CreateBr(blockMap.userEntryBlockByFunction[0]);
+
+    for (int funcId = 1; funcId <= cfg.maxRubyBlockId; funcId++) {
+        // todo: this should be replaced with argument computation for blocks
+        builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[funcId]);
+        builder.CreateBr(blockMap.userEntryBlockByFunction[funcId]);
+    }
 }
 
 BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
@@ -291,10 +298,16 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                int maxSendArgCount) {
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
-    vector<llvm::BasicBlock *> userEntryBlockByFunction;
+    vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlocks2Functions.size());
     vector<llvm::AllocaInst *> sendArgArrays;
     vector<llvm::Value *> escapedClosure;
+    vector<int> basicBlockJumpOverrides(cfg.maxBasicBlockId);
     llvm::IRBuilder<> builder(cs);
+    {
+        for (int i = 0; i < cfg.maxBasicBlockId; i++) {
+            basicBlockJumpOverrides[i] = i;
+        }
+    }
     int i = 0;
     for (auto &fun : rubyBlocks2Functions) {
         auto inits = functionInitializersByFunction.emplace_back(llvm::BasicBlock::Create(
@@ -318,18 +331,24 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
         escapedClosure.emplace_back(localClosure);
         sendArgArrays.emplace_back(sendArgArray);
         argumentSetupBlocksByFunction.emplace_back(llvm::BasicBlock::Create(cs, "argumentSetup", fun));
-        userEntryBlockByFunction.emplace_back(llvm::BasicBlock::Create(cs, "userEntry", fun));
         i++;
     }
 
     vector<llvm::BasicBlock *> llvmBlocks(cfg.maxBasicBlockId);
     for (auto &b : cfg.basicBlocks) {
         if (b.get() == cfg.entry()) {
-            llvmBlocks[b->id] = userEntryBlockByFunction[0]; // todo: we need something similar for block entries
+            llvmBlocks[b->id] = userEntryBlockByFunction[0] =
+                llvm::BasicBlock::Create(cs, "userEntry", rubyBlocks2Functions[0]);
         } else {
             llvmBlocks[b->id] = llvm::BasicBlock::Create(
                 cs, {"BB", to_string(b->id)},
                 rubyBlocks2Functions[b->rubyBlockId]); // to_s is slow. We should only use it in debug builds
+        }
+    }
+    for (auto &b : cfg.basicBlocks) {
+        if (b->bexit.cond.variable == core::LocalVariable::blockCall()) {
+            userEntryBlockByFunction[b->rubyBlockId] = llvmBlocks[b->bexit.thenb->id];
+            basicBlockJumpOverrides[b->id] = b->bexit.elseb->id;
         }
     }
 
@@ -337,6 +356,7 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                          argumentSetupBlocksByFunction,
                          userEntryBlockByFunction,
                          llvmBlocks,
+                         basicBlockJumpOverrides,
                          sendArgArrays,
                          escapedClosure,
                          std::move(escapedVariableIndices)
@@ -558,11 +578,19 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     },
                     [&](cfg::Return *i) {
                         isTerminated = true;
+                        ENFORCE(bb->rubyBlockId == 0, "returns through multiple stacks not implemented");
                         auto var =
                             varGet(cs, i->what.variable, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
                         builder.CreateRet(var);
                     },
-                    [&](cfg::BlockReturn *i) { cs.trace("BlockReturn\n"); },
+                    [&](cfg::BlockReturn *i) {
+                        ENFORCE(bb->rubyBlockId != 0, "should never happen");
+
+                        isTerminated = true;
+                        auto var =
+                            varGet(cs, i->what.variable, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
+                        builder.CreateRet(var);
+                    },
                     [&](cfg::LoadSelf *i) { cs.trace("LoadSelf\n"); },
                     [&](cfg::Literal *i) {
                         cs.trace("Literal\n");
@@ -620,15 +648,18 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                 }
             }
             if (!isTerminated) {
-                if (bb->bexit.thenb != bb->bexit.elseb) {
+                if (bb->bexit.thenb != bb->bexit.elseb && bb->bexit.cond.variable != core::LocalVariable::blockCall()) {
                     auto var =
                         varGet(cs, bb->bexit.cond.variable, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
                     auto condValue = cs.getIsTruthyU1(builder, var);
 
-                    builder.CreateCondBr(condValue, blockMap.llvmBlocksBySorbetBlocks[bb->bexit.thenb->id],
-                                         blockMap.llvmBlocksBySorbetBlocks[bb->bexit.elseb->id]);
+                    builder.CreateCondBr(
+                        condValue,
+                        blockMap.llvmBlocksBySorbetBlocks[blockMap.basicBlockJumpOverrides[bb->bexit.thenb->id]],
+                        blockMap.llvmBlocksBySorbetBlocks[blockMap.basicBlockJumpOverrides[bb->bexit.elseb->id]]);
                 } else {
-                    builder.CreateBr(blockMap.llvmBlocksBySorbetBlocks[bb->bexit.thenb->id]);
+                    builder.CreateBr(
+                        blockMap.llvmBlocksBySorbetBlocks[blockMap.basicBlockJumpOverrides[bb->bexit.thenb->id]]);
                 }
             }
         } else {
