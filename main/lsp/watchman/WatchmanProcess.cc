@@ -1,5 +1,6 @@
 #include "WatchmanProcess.h"
 #include "common/FileOps.h"
+#include "common/formatting.h"
 #include "rapidjson/document.h"
 #include "subprocess.hpp"
 
