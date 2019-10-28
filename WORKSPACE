@@ -13,7 +13,7 @@ load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
 llvm_toolchain(
     name = "llvm_toolchain",
     absolute_paths = True,
-    llvm_version = "8.0.0",
+    llvm_version = "9.0.0",
 )
 
 load("@io_bazel_rules_go//go:def.bzl", "go_register_toolchains", "go_rules_dependencies")
