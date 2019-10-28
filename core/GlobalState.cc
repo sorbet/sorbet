@@ -658,7 +658,12 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
             ENFORCE(nameData->unique.num > 1);
             auto nm =
                 lookupNameUnique(UniqueNameKind::MangleRename, nameData->unique.original, nameData->unique.num - 1);
-            return nm.exists() ? ownerScope->members()[nm] : Symbols::noSymbol();
+            if (!nm.exists()) {
+                return Symbols::noSymbol();
+            }
+            auto res = ownerScope->members()[nm];
+            ENFORCE(res.exists());
+            return res;
         }
     } else {
         u2 unique = 1;
