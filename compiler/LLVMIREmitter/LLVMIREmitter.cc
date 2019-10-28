@@ -187,7 +187,14 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, vector<llvm::Function *> &
     {
         // nill out block local variables.
         auto valueType = cs.getValueType();
+        vector<pair<core::LocalVariable, optional<int>>> variablesPrivateToBlocksSorted;
+
         for (const auto &entry : variablesPrivateToBlocks) {
+            variablesPrivateToBlocksSorted.emplace_back(entry);
+        }
+        fast_sort(variablesPrivateToBlocksSorted,
+                  [](const auto &left, const auto &right) -> bool { return left.first < right.first; });
+        for (const auto &entry : variablesPrivateToBlocksSorted) {
             auto var = entry.first;
             if (entry.second == std::nullopt) {
                 continue;
@@ -205,8 +212,12 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, vector<llvm::Function *> &
         // nill out closure variables
 
         builder.SetInsertPoint(blockMap.functionInitializersByFunction[0]);
-        for (const auto &entry : blockMap.escapedVariableIndeces) {
-            varSet(cs, entry.first, cs.getRubyNilRaw(builder), builder, llvmVariables, aliases, blockMap, 0);
+        auto escapedVariablesCount = blockMap.escapedVariableIndeces.size();
+        for (auto i = 0; i < escapedVariablesCount; i++) {
+            auto store =
+                builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
+                                   {blockMap.escapedClosure[0], llvm::ConstantInt::get(cs, llvm::APInt(32, i))});
+            builder.CreateStore(cs.getRubyNilRaw(builder), store);
         }
     }
     return llvmVariables;
