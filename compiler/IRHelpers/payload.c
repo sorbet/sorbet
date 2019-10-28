@@ -406,8 +406,12 @@ VALUE sorbet_callBlock(VALUE array) __attribute__((always_inline)) {
 
 VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv) __attribute__((always_inline)) {
     dbg_sorbet_validate_id(func, "func");
-    // TODO: use LLVM magic to make argv stack allocated
     return rb_funcallv(recv, func, argc, argv);
+}
+
+VALUE sorbet_callFuncBlock(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv, VALUE(*blockImpl)(VALUE, VALUE, int, VALUE*), VALUE closure) __attribute__((always_inline)) {
+    dbg_sorbet_validate_id(func, "func");
+    return rb_block_call(recv, func, argc, argv, blockImpl, closure);
 }
 
 // defining a way to allocate storage for custom class:

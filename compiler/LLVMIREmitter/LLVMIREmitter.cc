@@ -494,7 +494,8 @@ findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg)
 
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
                   const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-                  UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases) {
+                  UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases,
+                  const vector<llvm::Function *> &rubyBlocks2Functions) {
     llvm::IRBuilder<> builder(cs);
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
@@ -568,11 +569,23 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         // before this, perf will not be good
                         auto var =
                             varGet(cs, i->recv.variable, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
-                        auto rawCall = builder.CreateCall(
-                            cs.module->getFunction("sorbet_callFunc"),
-                            {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                             builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId], indices)},
-                            "rawSendResult");
+                        llvm::Value *rawCall;
+                        if (i->link != nullptr) {
+                            // this send has a block!
+                            rawCall = builder.CreateCall(
+                                cs.module->getFunction("sorbet_callFuncBlock"),
+                                {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                                 builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId], indices),
+                                 rubyBlocks2Functions[i->link->rubyBlockId], blockMap.escapedClosure[bb->rubyBlockId]},
+                                "rawSendResult");
+
+                        } else {
+                            rawCall = builder.CreateCall(
+                                cs.module->getFunction("sorbet_callFunc"),
+                                {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                                 builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId], indices)},
+                                "rawSendResult");
+                        }
                         varSet(cs, bind.bind.variable, rawCall, builder, llvmVariables, aliases, blockMap,
                                bb->rubyBlockId);
                     },
@@ -709,7 +722,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
 
     setupArguments(cs, cfg, md, rubyBlocks2Functions, llvmVariables, variablesPrivateToBlocks, blockMap, aliases);
 
-    emitUserBody(cs, cfg, blockMap, llvmVariables, aliases);
+    emitUserBody(cs, cfg, blockMap, llvmVariables, aliases, rubyBlocks2Functions);
     for (int funId = 0; funId < blockMap.functionInitializersByFunction.size(); funId++) {
         builder.SetInsertPoint(blockMap.functionInitializersByFunction[funId]);
         builder.CreateBr(blockMap.argumentSetupBlocksByFunction[funId]);
