@@ -90,7 +90,7 @@ public:
     SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
     }
-    SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name);
+    SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;
 
     SymbolRef staticInitForFile(Loc loc);
     SymbolRef staticInitForClass(SymbolRef klass, Loc loc);
