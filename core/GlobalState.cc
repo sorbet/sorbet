@@ -652,6 +652,9 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     SymbolData ownerScope = owner.dataAllowingNone(*this);
 
     if (nameData->kind == NameKind::UNIQUE) {
+        if (nameData->unique.uniqueNameKind != UniqueNameKind::MangleRename) {
+            return Symbols::noSymbol();
+        }
         if (nameData->unique.num == 1) {
             return Symbols::noSymbol();
         } else {
