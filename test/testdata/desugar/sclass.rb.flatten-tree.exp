@@ -136,7 +136,7 @@ begin
     <emptyTree>
 
     def wrapper(<blk>)
-      <emptyTree>
+      :"e"
     end
 
     def e(<blk>)

@@ -28,7 +28,7 @@ using namespace std;
 //
 // class A
 //   sig{void}
-//   private def foo; end
+//   private def foo; :bar; end
 //   sig{void}
 //   def bar; end   # notice the lack of `self.` here
 // end
@@ -36,18 +36,14 @@ using namespace std;
 // So no nested methods exist any longer, and additionally, the nested method `bar` has had the `self.` qualifier
 // removed: if you run the above code in Ruby, you'll find that `bar` is not defined as a class method on `A`, but
 // rather as a not-always-available instance method on `A`, so introducing it as a static method is not at all
-// correct.
+// correct. Finally, because methods evaluate to their corresponding symbols, the former location of `bar`'s definition
+// has been replaced with the verbatim symbol `:bar`.
 //
-// It does this by maintaining a stack of indices and state and a queue of expressions during a tree traversal. Every
-// time something which might concievably need to be moved is found (i.e. a method definition or a send) we reserve
-// space for it in a queue and then add metadata about it---the intended queue slot as well as whether it is a class
-// method---to the stack. We can use the stack to disambiguate nested methods and also determine method context. Once
-// our tree traversal has left that subtree, we can safely move that subtree into the queue and replace it with an
-// EmptyTree. Once we leave a class scope, we empty that entire queue into the class scope, as well.
-//
-// The logic used to determine what sends need to be moved is purely syntactic, which suggests that if someone were to
-// redefine the method `private` and apply it to a `MethodDef`, then it will get caught by this and moved. This seems
-// vanishingly unlikely and would probably break a lot of other things, as well.
+// It does this by maintaining both a stack and a queue: elements on the stack include indices into the queue as well as
+// scoping information, while the queue consists of pointers to expressions; additionally, some stack elements do not
+// correspond to expressions that need to be moved, in which case their indices will be -1: for example, all methods at
+// the root of a class definition will have stack entries (so we can properly track nested methods) but none of them
+// will need to be moved, so they will have -1 indices.
 namespace sorbet::dsl {
 
 class FlattenWalk {
@@ -67,83 +63,55 @@ public:
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
         auto &methods = curMethodSet();
-        if (skipMethods.contains(methodDef.get())) {
-            ENFORCE(!methods.stack.empty());
-            return methodDef;
-        }
         int staticLevel = computeStaticLevel(methodDef.get());
-
-        // we should only move methods that /are/ nested, so if the method stack is empty, then don't bother adding
-        // space in the move queue and record the index as -1
         if (methods.stack.size() == 0) {
-            methods.stack.emplace_back(-1, staticLevel);
+            methods.stack.emplace_back(-1, staticLevel, methodDef.get());
         } else {
-            methods.stack.emplace_back(methods.methods.size(), staticLevel);
+            methods.stack.emplace_back(methods.methods.size(), staticLevel, methodDef.get());
             methods.methods.emplace_back();
         }
 
         return methodDef;
     }
 
-    // Returns `true` if the method is one of the modifier names in Ruby (e.g. 'private' or 'protected' or
-    // similar). This does not need to know about `module_function` because we have already re-written it in a previous
-    // DSL pass.
-    bool isMethodModifier(ast::Send &send) {
-        auto fun = send.fun;
-        return (fun == core::Names::private_() || fun == core::Names::protected_() || fun == core::Names::public_() ||
-                fun == core::Names::privateClassMethod()) &&
-               send.args.size() == 1 && ast::isa_tree<ast::MethodDef>(send.args[0].get());
-    }
-
     // We might want to move sends as well: either if they're method modifiers like `private` or `protected` or if
     // they're `sig`s. If so, then we'll treat them like we treat methods on our method stack
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
-        if (send->fun == core::Names::sig() || isMethodModifier(*send)) {
-            auto &methods = curMethodSet();
-            int staticLevel = 0;
-            if (isMethodModifier(*send) && send->args.size() >= 1) {
-                // if this is a method modifier like `private` or `protected`, then we don't need to add a new scope
-                // when we traverse the method itself, so add it to the ignore set...
-                skipMethods.insert(send->args[0].get());
-                auto methodDef = ast::cast_tree<ast::MethodDef>(send->args.front().get());
-                ENFORCE(methodDef != nullptr);
-                staticLevel = computeStaticLevel(methodDef);
-            }
-
-            // we should only move methods that are nested, so if the method stack is empty, then don't bother adding
-            // space in the move queue and record the index as -1
-            if (methods.stack.size() == 0) {
-                methods.stack.emplace_back(-1, staticLevel);
-            } else {
-                methods.stack.emplace_back(methods.methods.size(), staticLevel);
-                methods.methods.emplace_back();
-            }
+        auto &methods = curMethodSet();
+        if (methods.stack.size() == 0) {
+            return send;
         }
+
+        if (send->fun == core::Names::sig()) {
+            methods.stack.emplace_back(methods.methods.size(), 0, send.get());
+            methods.methods.emplace_back();
+        }
+
         return send;
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
-        if (send->fun == core::Names::sig() || isMethodModifier(*send)) {
-            auto &methods = curMethodSet();
-            ENFORCE(!methods.stack.empty());
+        auto &methods = curMethodSet();
 
-            // we may not need to move this method at all: check first
-            if (methods.stack.back().idx == -1) {
-                methods.stack.pop_back();
-                return send;
-            }
-
-            // otherwise, we have a spot in the queue for it that has not yet been filled in
-            ENFORCE(methods.methods.size() > methods.stack.back().idx);
-            ENFORCE(methods.methods[methods.stack.back().idx].expr == nullptr);
-
-            methods.methods[methods.stack.back().idx] = {move(send), methods.stack.back().staticLevel};
-            methods.stack.pop_back();
-
-            return make_unique<ast::EmptyTree>();
-        } else {
+        // if this isn't the thing on the stack, then we can ignore it
+        if (methods.stack.size() == 0 || methods.stack.back().target != send.get()) {
             return send;
         }
+
+        // we may not need to move this expression at all: check first
+        if (methods.stack.back().idx == -1) {
+            methods.stack.pop_back();
+            return send;
+        }
+
+        // otherwise, we have a spot in the queue for it that has not yet been filled in
+        ENFORCE(methods.methods.size() > methods.stack.back().idx);
+        ENFORCE(methods.methods[methods.stack.back().idx].expr == nullptr);
+
+        methods.methods[methods.stack.back().idx] = {move(send), methods.stack.back().staticLevel};
+        methods.stack.pop_back();
+
+        return ast::MK::EmptyTree();
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
@@ -152,13 +120,13 @@ public:
     };
 
     unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
-        // if this method is contained in a send like `private` or `protected`, then we should not move it, because
-        // moving the send will do that for us
-        if (skipMethods.contains(methodDef.get())) {
-            return methodDef;
-        }
         auto &methods = curMethodSet();
         ENFORCE(!methods.stack.empty());
+
+        // if this isn't the thing on the stack, then we can ignore it
+        if (methods.stack.back().target != methodDef.get()) {
+            return methodDef;
+        }
 
         // we may not need to move this method at all: check first
         if (methods.stack.back().idx == -1) {
@@ -166,12 +134,13 @@ public:
             return methodDef;
         }
 
+        auto replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
         ENFORCE(methods.methods.size() > methods.stack.back().idx);
         ENFORCE(methods.methods[methods.stack.back().idx].expr == nullptr);
 
         methods.methods[methods.stack.back().idx] = {std::move(methodDef), methods.stack.back().staticLevel};
         methods.stack.pop_back();
-        return make_unique<ast::EmptyTree>();
+        return replacement;
     };
 
     unique_ptr<ast::Expression> addMethods(core::Context ctx, unique_ptr<ast::Expression> tree) {
@@ -287,7 +256,9 @@ private:
         // which means when we get to `bar` we need to know that the outer context `foo` is static. We pass that down
         // the current stack by means of this `isStatic` variable.
         int staticLevel;
-        MethodData(int idx, int staticLevel) : idx(idx), staticLevel(staticLevel){};
+        ast::Expression *target;
+        MethodData(int idx, int staticLevel, ast::Expression *target)
+            : idx(idx), staticLevel(staticLevel), target(target){};
     };
     struct MovedItem {
         unique_ptr<ast::Expression> expr;
@@ -323,10 +294,6 @@ private:
     // methods. This prevents methods from existing deeper inside the hierarchy, enabling later traversals to stop
     // recursing over the AST once they've reached a method def.
     vector<Methods> methodScopes;
-    // this allows us to skip adding methods to the method stack if we are going to add them as part of a larger
-    // expression: for example, if we have already seen the send `private(def foo...)` then we'll add the entire send,
-    // and not just the method.
-    UnorderedSet<ast::Expression *> skipMethods;
 };
 
 unique_ptr<ast::Expression> Flatten::run(core::Context ctx, unique_ptr<ast::Expression> tree) {

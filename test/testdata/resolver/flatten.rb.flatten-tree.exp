@@ -24,13 +24,15 @@ begin
 
     def foo(<blk>)
       begin
-        <emptyTree>
+        :"food"
+        :"foos"
       end
     end
 
     def self.sfoo(<blk>)
       begin
-        <emptyTree>
+        :"sfood"
+        :"sfoos"
       end
     end
 
