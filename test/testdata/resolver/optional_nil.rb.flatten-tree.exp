@@ -20,48 +20,44 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     def foo(x, <blk>)
-      begin
-        if ::T.unsafe(false)
-          T.let(nil, String)
-        else
-          <emptyTree>
-        end
-        x
-      end
+      x
     end
 
     def bar(y, <blk>)
-      begin
-        if ::T.unsafe(false)
-          T.let(nil, String)
-        else
-          <emptyTree>
-        end
-        y
-      end
+      y
     end
 
     def qux(z, <blk>)
-      begin
-        if ::T.unsafe(false)
-          T.let("", String)
-        else
-          <emptyTree>
-        end
-        z
-      end
+      z
     end
 
     def baz(w, <blk>)
-      begin
-        if ::T.unsafe(false)
-          T.let("", String)
-        else
-          <emptyTree>
-        end
-        w
-      end
+      w
+    end
+
+    def foo<defaultAarg>1(x, <blk>)
+      nil
+    end
+
+    def bar<defaultAarg>1(y, <blk>)
+      nil
+    end
+
+    def qux<defaultAarg>1(z, <blk>)
+      ""
+    end
+
+    def baz<defaultAarg>1(w, <blk>)
+      ""
     end
 
     def self.<static-init>(<blk>)

@@ -56,6 +56,10 @@ InsSeq{
 
         EmptyTree
 
+        EmptyTree
+
+        EmptyTree
+
         MethodDef{
           flags = 0
           name = <U take_arguments><<U take_arguments>>
@@ -80,163 +84,159 @@ InsSeq{
             }]
           rhs = InsSeq{
             stats = [
-              If{
-                cond = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
+              Array{
+                elems = [
+                  Local{
+                    localVariable = <U a>
                   }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Literal{ value = false }
-                  ]
-                }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::Sorbet::Private::Static
+                  Local{
+                    localVariable = <U b>
                   }
-                  fun = <U keep_for_ide>
-                  block = nullptr
-                  args = [
-                    Literal{ value = 1 }
-                  ]
-                }
-                elsep = EmptyTree
+                  Local{
+                    localVariable = <U c>
+                  }
+                  Local{
+                    localVariable = <U d>
+                  }
+                  Local{
+                    localVariable = <U e>
+                  }
+                  Local{
+                    localVariable = <U f>
+                  }
+                  Local{
+                    localVariable = <U g>
+                  }
+                ]
               }
-              If{
-                cond = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Literal{ value = false }
-                  ]
+              Assign{
+                lhs = Local{
+                  localVariable = <U h>
                 }
-                thenp = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::Sorbet::Private::Static
-                  }
-                  fun = <U keep_for_ide>
-                  block = nullptr
-                  args = [
-                    Literal{ value = 2 }
-                  ]
-                }
-                elsep = EmptyTree
+                rhs = Literal{ value = 1 }
               }
             ],
-            expr = InsSeq{
-              stats = [
-                Array{
-                  elems = [
-                    Local{
-                      localVariable = <U a>
-                    }
-                    Local{
-                      localVariable = <U b>
-                    }
-                    Local{
-                      localVariable = <U c>
-                    }
-                    Local{
-                      localVariable = <U d>
-                    }
-                    Local{
-                      localVariable = <U e>
-                    }
-                    Local{
-                      localVariable = <U f>
-                    }
-                    Local{
-                      localVariable = <U g>
-                    }
-                  ]
-                }
-                Assign{
-                  lhs = Local{
-                    localVariable = <U h>
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U proc>
+              block = Block {
+                args = [
+                  Local{
+                    localVariable = <U a>$1
                   }
-                  rhs = Literal{ value = 1 }
-                }
-              ],
-              expr = Send{
-                recv = Local{
-                  localVariable = <U <self>>
-                }
-                fun = <U proc>
-                block = Block {
-                  args = [
+                  OptionalArg{
+                    expr = Local{
+                      localVariable = <U b>$1
+                    }
+                    default_ = Literal{ value = 1 }
+                  }
+                  RestArg{ expr = Local{
+                    localVariable = <U c>$1
+                  } }
+                  KeywordArg{ expr = Local{
+                    localVariable = <U d>$1
+                  } }
+                  OptionalArg{
+                    expr = KeywordArg{ expr = Local{
+                      localVariable = <U e>$1
+                    } }
+                    default_ = Literal{ value = 2 }
+                  }
+                  RestArg{ expr = KeywordArg{ expr = Local{
+                    localVariable = <U f>$1
+                  } } }
+                  BlockArg{ expr = Local{
+                    localVariable = <U g>$1
+                  } }
+                  ShadowArg{ expr = Local{
+                    localVariable = <U h>$1
+                  } }
+                ]
+                body = Array{
+                  elems = [
                     Local{
                       localVariable = <U a>$1
                     }
-                    OptionalArg{
-                      expr = Local{
-                        localVariable = <U b>$1
-                      }
-                      default_ = Literal{ value = 1 }
+                    Local{
+                      localVariable = <U b>$1
                     }
-                    RestArg{ expr = Local{
+                    Local{
                       localVariable = <U c>$1
-                    } }
-                    KeywordArg{ expr = Local{
-                      localVariable = <U d>$1
-                    } }
-                    OptionalArg{
-                      expr = KeywordArg{ expr = Local{
-                        localVariable = <U e>$1
-                      } }
-                      default_ = Literal{ value = 2 }
                     }
-                    RestArg{ expr = KeywordArg{ expr = Local{
+                    Local{
+                      localVariable = <U d>$1
+                    }
+                    Local{
+                      localVariable = <U e>$1
+                    }
+                    Local{
                       localVariable = <U f>$1
-                    } } }
-                    BlockArg{ expr = Local{
+                    }
+                    Local{
                       localVariable = <U g>$1
-                    } }
-                    ShadowArg{ expr = Local{
+                    }
+                    Local{
                       localVariable = <U h>$1
-                    } }
+                    }
                   ]
-                  body = Array{
-                    elems = [
-                      Local{
-                        localVariable = <U a>$1
-                      }
-                      Local{
-                        localVariable = <U b>$1
-                      }
-                      Local{
-                        localVariable = <U c>$1
-                      }
-                      Local{
-                        localVariable = <U d>$1
-                      }
-                      Local{
-                        localVariable = <U e>$1
-                      }
-                      Local{
-                        localVariable = <U f>$1
-                      }
-                      Local{
-                        localVariable = <U g>$1
-                      }
-                      Local{
-                        localVariable = <U h>$1
-                      }
-                    ]
-                  }
                 }
-                args = [
-                ]
               }
+              args = [
+              ]
             }
           }
+        }
+
+        MethodDef{
+          flags = 0
+          name = <DA <U take_arguments> $2><<DA <U take_arguments> $2>>
+          args = [Local{
+              localVariable = <U a>
+            }, OptionalArg{
+              expr = Local{
+                localVariable = <U b>
+              }
+            }, Local{
+              localVariable = <U c>
+            }, Local{
+              localVariable = <U d>
+            }, OptionalArg{
+              expr = Local{
+                localVariable = <U e>
+              }
+            }, Local{
+              localVariable = <U f>
+            }, Local{
+              localVariable = <U g>
+            }]
+          rhs = Literal{ value = 1 }
+        }
+
+        MethodDef{
+          flags = 0
+          name = <DA <U take_arguments> $5><<DA <U take_arguments> $5>>
+          args = [Local{
+              localVariable = <U a>
+            }, OptionalArg{
+              expr = Local{
+                localVariable = <U b>
+              }
+            }, Local{
+              localVariable = <U c>
+            }, Local{
+              localVariable = <U d>
+            }, OptionalArg{
+              expr = Local{
+                localVariable = <U e>
+              }
+            }, Local{
+              localVariable = <U f>
+            }, Local{
+              localVariable = <U g>
+            }]
+          rhs = Literal{ value = 2 }
         }
 
         MethodDef{

@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < ()
       <self>.params({:"bar" => <emptyTree>::<C Integer>, :"foo" => <emptyTree>::<C Integer>}).void()
     end
 
-    def initialize<<C <todo sym>>>(bar:, foo: = 3, &<blk>)
+    def initialize<<C <todo sym>>>(bar:, foo: = <emptyTree>, &<blk>)
       <emptyTree>
     end
 
@@ -38,6 +38,10 @@ class <emptyTree><<C <root>>> < ()
 
     def bar=<<C <todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C Integer>)
+    end
+
+    def initialize<defaultAarg>2<<C <todo sym>>>(bar:, foo: = <emptyTree>, &<blk>)
+      3
     end
   end
 end
