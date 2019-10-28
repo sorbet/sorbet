@@ -145,7 +145,7 @@ package(default_visibility = ["//visibility:public"])
         name = "com_grail_bazel_toolchain",
         remote = "https://github.com/DarkDimius/bazel-toolchain.git",
         commit = "4db2af1249fa1c20f5f12830e4ad209e56c870a4",
-        shallow_since = "1561409079 -0700",
+        shallow_since = "1571938947 -0700",
     )
 
     git_repository(
