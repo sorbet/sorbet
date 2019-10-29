@@ -246,7 +246,8 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
                     const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
                     const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases) {
-    // this function effectively generate an optimized build of https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
+    // this function effectively generate an optimized build of
+    // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(cs);
     auto funcId = 0;
     auto func = rubyBlocks2Functions[funcId];
