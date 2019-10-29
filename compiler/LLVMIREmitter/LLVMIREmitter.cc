@@ -31,6 +31,26 @@ struct BasicBlockMap {
 // and https://silverhammermba.github.io/emberb/c/ are your friends
 // use the `demo` module for experiments
 namespace {
+
+struct Alias {
+    enum class AliasKind { Constant, InstanceField };
+    AliasKind kind;
+    core::SymbolRef constantSym;
+    core::NameRef instanceField;
+    static Alias forConstant(core::SymbolRef sym) {
+        Alias ret;
+        ret.kind = AliasKind::Constant;
+        ret.constantSym = sym;
+        return ret;
+    }
+    static Alias forInstanceField(core::NameRef name) {
+        Alias ret;
+        ret.kind = AliasKind::InstanceField;
+        ret.instanceField = name;
+        return ret;
+    }
+};
+
 bool isStaticInit(CompilerState &cs, core::SymbolRef sym) {
     auto name = sym.data(cs)->name;
     return (name.data(cs)->kind == core::NameKind::UTF8 ? name : name.data(cs)->unique.original) ==
@@ -127,11 +147,11 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
 
 llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilder<> &builder,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-                    const UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases, const BasicBlockMap &blockMap,
+                    const UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap,
                     int rubyBlockId) {
     if (aliases.contains(local)) {
         // alias to a field or constant
-        return resolveSymbol(cs, aliases.at(local), builder);
+        return resolveSymbol(cs, aliases.at(local).constantSym, builder);
     }
     if (blockMap.escapedVariableIndeces.contains(local)) {
         auto id = blockMap.escapedVariableIndeces.at(local);
@@ -147,11 +167,10 @@ llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilde
 
 void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilder<> &builder,
             const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-            UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases, const BasicBlockMap &blockMap,
-            int rubyBlockId) {
+            UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap, int rubyBlockId) {
     if (aliases.contains(local)) {
         // alias to a field or constant
-        auto sym = aliases.at(local);
+        auto sym = aliases.at(local).constantSym;
         auto name = sym.data(cs.gs)->name.show(cs.gs);
         auto owner = sym.data(cs.gs)->owner;
         builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
@@ -199,7 +218,7 @@ llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
 UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
 setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, vector<llvm::Function *> &rubyBlocks2Functions,
                     const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
-                    const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases) {
+                    const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases) {
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
     llvm::IRBuilder<> builder(cs);
     {
@@ -245,7 +264,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                     vector<llvm::Function *> &rubyBlocks2Functions,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
                     const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
-                    const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases) {
+                    const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases) {
     // this function effectively generate an optimized build of
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(cs);
@@ -595,7 +614,7 @@ findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg)
 
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
                   const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
-                  UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases,
+                  UnorderedMap<core::LocalVariable, Alias> &aliases,
                   const vector<llvm::Function *> &rubyBlocks2Functions) {
     llvm::IRBuilder<> builder(cs);
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
@@ -612,7 +631,13 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         auto var = varGet(cs, i->what, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
                         varSet(cs, bind.bind.variable, var, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
                     },
-                    [&](cfg::Alias *i) { aliases[bind.bind.variable] = i->what; },
+                    [&](cfg::Alias *i) {
+                        if (i->what == core::Symbols::Magic_undeclaredFieldStub()) {
+                            aliases[bind.bind.variable] = Alias::forInstanceField(bind.bind.variable._name);
+                        } else {
+                            aliases[bind.bind.variable] = Alias::forConstant(i->what);
+                        }
+                    },
                     [&](cfg::SolveConstraint *i) { cs.trace("SolveConstraint\n"); },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(cs)->shortName(cs);
@@ -800,7 +825,7 @@ int getMaxSendArgCount(cfg::CFG &cfg) {
 } // namespace
 
 void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
-    UnorderedMap<core::LocalVariable, core::SymbolRef> aliases;
+    UnorderedMap<core::LocalVariable, Alias> aliases;
     const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto func = getOrCreateFunction(cs, md->symbol);
     {
