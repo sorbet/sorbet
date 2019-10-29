@@ -24,7 +24,7 @@ class Test
   end
 
   sig {params(x: Integer, y: String).returns(NilClass)}
-  def qux(x, y: M::C.id(x)) # not-error Expected `String` but found `Integer`
+  def qux(x, y: M::C.id(x)) # error: Expected `String` but found `Integer`
     puts 'hello, ' + y
   end
 end

@@ -653,21 +653,13 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     SymbolData ownerScope = owner.dataAllowingNone(*this);
 
     if (nameData->kind == NameKind::UNIQUE) {
-        if (nameData->unique.uniqueNameKind != UniqueNameKind::MangleRename) {
-            return Symbols::noSymbol();
-        }
         if (nameData->unique.num == 1) {
             return Symbols::noSymbol();
         } else {
             ENFORCE(nameData->unique.num > 1);
             auto nm =
                 lookupNameUnique(UniqueNameKind::MangleRename, nameData->unique.original, nameData->unique.num - 1);
-            if (!nm.exists()) {
-                return Symbols::noSymbol();
-            }
-            auto res = ownerScope->members()[nm];
-            ENFORCE(res.exists());
-            return res;
+            return nm.exists() ? ownerScope->members()[nm] : Symbols::noSymbol();
         }
     } else {
         u2 unique = 1;

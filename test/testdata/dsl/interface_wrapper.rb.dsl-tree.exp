@@ -14,12 +14,8 @@ class <emptyTree><<C <root>>> < ()
   end
 
   class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)
-    def self.wrap_instance<<C <todo sym>>>(x, y = <emptyTree>, &<blk>)
+    def self.wrap_instance<<C <todo sym>>>(x, y = nil, &<blk>)
       <emptyTree>
-    end
-
-    def self.wrap_instance<defaultAarg>2<<C <todo sym>>>(x, y = <emptyTree>, &<blk>)
-      nil
     end
   end
 
