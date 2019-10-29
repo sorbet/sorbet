@@ -9,3 +9,9 @@ module Foo
   def foo(a=1)
   end
 end
+
+module Bar
+  include Kernel
+  def bar(a=proc {{}})
+  end
+end

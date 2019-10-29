@@ -1,4 +1,10 @@
 class <emptyTree><<C <root>>> < ()
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  <self>.sig() do ||
+    <self>.params({:"a" => <emptyTree>::<C String>, :"b" => <emptyTree>::<C Integer>, :"c" => <emptyTree>::<C Integer>}).void()
+  end
+
   def foo<<C <todo sym>>>(a, b = <emptyTree>, c = <emptyTree>, &<blk>)
     <emptyTree>
   end
