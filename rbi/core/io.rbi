@@ -752,6 +752,64 @@ class IO < Object
   sig {returns(Integer)}
   def pid(); end
 
+  # Creates a pair of pipe endpoints (connected to each other) and returns them
+  # as a two-element array of `IO` objects: `[` *read_io*, *write_io* `]`.
+  #
+  # If a block is given, the block is called and returns the value of the block.
+  # *read_io* and *write_io* are sent to the block as arguments. If *read_io* and
+  # *write_io* are not closed when the block exits, they are closed. i.e. closing
+  # *read_io* and/or *write_io* doesn't cause an error.
+  #
+  # Not available on all platforms.
+  #
+  # If an encoding (encoding name or encoding object) is specified as an optional
+  # argument, read string from pipe is tagged with the encoding specified. If the
+  # argument is a colon separated two encoding names “A:B”, the read string is
+  # converted from encoding A (external encoding) to encoding B (internal encoding),
+  # then tagged with B. If two optional arguments are specified, those must be
+  # encoding objects or encoding names, and the first one is the external
+  # encoding, and the second one is the internal encoding. If the external
+  # encoding and the internal encoding is specified, optional hash argument
+  # specify the conversion option.
+  #
+  # In the example below, the two processes close the ends of the pipe that they
+  # are not using. This is not just a cosmetic nicety. The read end of a pipe will
+  # not generate an end of file condition if there are any writers with the pipe
+  # still open. In the case of the parent process, the `rd.read` will never return
+  # if it does not first issue a `wr.close`.
+  #
+  # ~~~ruby
+  # rd, wr = IO.pipe
+  #
+  # if fork
+  #   wr.close
+  #   puts "Parent got: <#{rd.read}>"
+  #   rd.close
+  #   Process.wait
+  # else
+  #   rd.close
+  #   puts "Sending message to parent"
+  #   wr.write "Hi Dad"
+  #   wr.close
+  # end
+  # ```
+  #
+  # produces:
+  #
+  # ```
+  # Sending message to parent
+  # Parent got: <Hi Dad>
+  # ```
+  sig do
+    params(
+      ext_enc: T.nilable(T.any(String, Encoding)),
+      int_enc: T.nilable(T.any(String, Encoding)),
+      opt: T.nilable(T::Hash[Symbol, String]),
+      blk: T.nilable(T.proc.params(read_io: IO, write_io: IO).void)
+    ).returns([IO, IO])
+  end
+  def self.pipe(ext_enc = nil, int_enc = nil, opt = nil, &blk); end
+
   # Returns the current offset (in bytes) of *ios*.
   #
   # ```ruby
