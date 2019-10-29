@@ -180,7 +180,7 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
     if (aliases.contains(local)) {
         // alias to a field or constant
         auto alias = aliases.at(local);
-        if (alias.kind == Alias::AliasKind::InstanceField) {
+        if (alias.kind == Alias::AliasKind::Constant) {
             auto sym = aliases.at(local).constantSym;
             auto name = sym.data(cs.gs)->name.show(cs.gs);
             auto owner = sym.data(cs.gs)->owner;
