@@ -461,7 +461,7 @@ class Module < Object
   # ```ruby
   # Float.const_defined?(:EPSILON)      #=> true, found in Float itself
   # Float.const_defined?("String")      #=> true, found in Object (ancestor)
-  # BasicObject.const_defined?(:Hash)   #=> false
+  # BasicObject.const_defined?(:T::Hash[T.untyped, T.untyped])   #=> false
   # ```
   #
   # If *mod* is a `Module`, additionally `Object` and its ancestors are checked:

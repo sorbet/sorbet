@@ -8,7 +8,7 @@
 # built.
 module RbConfig
   # The hash configurations stored.
-  CONFIG = T.let(T.unsafe(nil), Hash)
+  CONFIG = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   # [`DESTDIR`](https://docs.ruby-lang.org/en/2.6.0/RbConfig.html#DESTDIR) on
   # make install.
   DESTDIR = T.let(T.unsafe(nil), String)
@@ -45,7 +45,7 @@ module RbConfig
   # p Config.expand(Config::MAKEFILE_CONFIG["bindir"])
   # # => "/usr/local/bin"
   # ```
-  MAKEFILE_CONFIG = T.let(T.unsafe(nil), Hash)
+  MAKEFILE_CONFIG = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   # Ruby installed directory.
   TOPDIR = T.let(T.unsafe(nil), String)
 end

@@ -610,7 +610,7 @@ class DateTime < Date
       arg0: String,
       format: String
     )
-    .returns(Hash)
+    .returns(T::Hash[T.untyped, T.untyped])
   end
   def self._strptime(arg0, format="%F"); end
 

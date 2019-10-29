@@ -357,7 +357,7 @@
 #
 #     def specify_encoding_option(parser)
 #       # Keyword completion.  We are specifying a specific set of arguments (CODES
-#       # and CODE_ALIASES - notice the latter is a Hash), and the user may provide
+#       # and CODE_ALIASES - notice the latter is a T::Hash[T.untyped, T.untyped]), and the user may provide
 #       # the shortest unambiguous text.
 #       code_list = (CODE_ALIASES.keys + CODES).join(', ')
 #       parser.on("--code CODE", CODES, CODE_ALIASES, "Select encoding",

@@ -94,9 +94,9 @@
 # `:verbose` flags to methods in
 # [`FileUtils`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html).
 module FileUtils
-  LOW_METHODS = T.let(T.unsafe(nil), Array)
-  METHODS = T.let(T.unsafe(nil), Array)
-  OPT_TABLE = T.let(T.unsafe(nil), Hash)
+  LOW_METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
+  METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
+  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   VERSION = T.let(T.unsafe(nil), String)
 
   # Copies `src` to `dest`. If `src` is a directory, this method copies all its
@@ -962,9 +962,9 @@ end
 # equates to passing the `:noop` and `:verbose` flag to methods in
 # [`FileUtils`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html).
 module FileUtils::DryRun
-  LOW_METHODS = T.let(T.unsafe(nil), Array)
-  METHODS = T.let(T.unsafe(nil), Array)
-  OPT_TABLE = T.let(T.unsafe(nil), Hash)
+  LOW_METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
+  METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
+  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 end
 
 class FileUtils::Entry_ < Object
@@ -1082,9 +1082,9 @@ end
 # never changes files/directories.  This equates to passing the `:noop` flag to
 # methods in [`FileUtils`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html).
 module FileUtils::NoWrite
-  LOW_METHODS = T.let(T.unsafe(nil), Array)
-  METHODS = T.let(T.unsafe(nil), Array)
-  OPT_TABLE = T.let(T.unsafe(nil), Hash)
+  LOW_METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
+  METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
+  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 end
 
 module FileUtils::StreamUtils_
@@ -1096,7 +1096,7 @@ end
 # to methods in
 # [`FileUtils`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html).
 module FileUtils::Verbose
-  LOW_METHODS = T.let(T.unsafe(nil), Array)
-  METHODS = T.let(T.unsafe(nil), Array)
-  OPT_TABLE = T.let(T.unsafe(nil), Hash)
+  LOW_METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
+  METHODS = T.let(T.unsafe(nil), T::Array[T.untyped])
+  OPT_TABLE = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 end

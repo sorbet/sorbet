@@ -289,7 +289,7 @@ class String < Object
   #
   # If a block is given, which is a deprecated form, works the same as
   # `each_byte`.
-  sig {returns(Array)}
+  sig {returns(T::Array[T.untyped])}
   def bytes(); end
 
   # Returns the length of `str` in bytes.
@@ -418,7 +418,7 @@ class String < Object
   #
   # If a block is given, which is a deprecated form, works the same as
   # `each_char`.
-  sig {returns(Array)}
+  sig {returns(T::Array[T.untyped])}
   def chars(); end
 
   # Returns a new `String` with the given record separator removed from the end
@@ -982,7 +982,7 @@ class String < Object
   sig do
     params(
         arg0: T.any(Regexp, String),
-        arg1: Hash,
+        arg1: T::Hash[T.untyped, T.untyped],
     )
     .returns(String)
   end
@@ -1829,7 +1829,7 @@ class String < Object
   sig do
     params(
         arg0: T.any(Regexp, String),
-        arg1: T.any(String, Hash),
+        arg1: T.any(String, T::Hash[T.untyped, T.untyped]),
     )
     .returns(String)
   end
