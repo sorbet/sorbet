@@ -13,8 +13,7 @@ namespace sorbet::dsl {
  *
  * into
  *
- *   # TODO to insert the sig here
- *   # sig {params(arg0: String, arg1: Integer).returns(Integer)}
+ *   sig {params(arg0: String, arg1: Integer).returns(Integer)}
  *   def foo<defaultArg>1(arg0, arg1)
  *       my_expr
  *   end
