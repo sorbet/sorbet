@@ -80,7 +80,7 @@ class FlattenWalk {
 
     vector<Methods> methodScopes;
 
-    int computeStaticLevel(ast::MethodDef &methodDef) {
+    int computeStaticLevel(const ast::MethodDef &methodDef) {
         auto &methods = curMethodSet();
         int prevLevel = methods.stack.empty() ? 0 : methods.stack.back().staticLevel;
         return prevLevel + (methodDef.isSelf() ? 1 : 0);
