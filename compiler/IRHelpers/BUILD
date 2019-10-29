@@ -35,10 +35,10 @@ cc_binary(
 cc_library(
     name = "pseudo_lib",
     srcs = ["payload.c"],
+    nocopts ="-f.*-sections",
     copts = [
         "-Wno-gcc-compat",
-        "-flto=thin",
-        "-emit-llvm",
+        "-fembed-bitcode",
         "-std=c99",
         "-O1",
         "-g",
@@ -62,7 +62,7 @@ genrule(
     outs = [
         "payload.bc.orig",
     ],
-    cmd = "$(location :llvm-ar) -x $(locations :pseudo_lib) payload.o && mv payload.o $(location payload.bc.orig)",
+    cmd = "$(location :llvm-ar) -x $(locations :pseudo_lib) payload.o && otool  -s __LLVM __bitcode payload.o | tail -n +3 > bitcode.dump && xxd -r -seek -$$((16#$$(head -n 1 bitcode.dump| cut -f 1))) bitcode.dump $(location payload.bc.orig)",
     tools = [
         ":llvm-ar",
         ":pseudo_lib",
