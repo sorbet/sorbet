@@ -1592,7 +1592,8 @@ private:
                         !lastSigs.front()->isDSLSynthesized()) {
                         if (auto e = ctx.state.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
                             e.setHeader("To use `{}`, this file must declare an explicit `{}` sigil (found: "
-                                        "none). If you're not sure which one to use, start with `{}`", "sig", "# typed:", "# typed: false");
+                                        "none). If you're not sure which one to use, start with `{}`",
+                                        "sig", "# typed:", "# typed: false");
                         }
                     }
 
