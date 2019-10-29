@@ -53,6 +53,12 @@ unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Express
                 }
                 break;
             }
+
+            case core::Names::override_()._id: {
+                // A totoal hack but we allow .void.void or .void.returns and
+                // the one with content wins
+                send->fun = core::Names::void_();
+            }
         }
         auto recv = ast::cast_tree<ast::Send>(send->recv.get());
         send = recv;
