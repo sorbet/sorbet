@@ -1,3 +1,4 @@
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"

@@ -5,6 +5,7 @@
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "parser/parser.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
