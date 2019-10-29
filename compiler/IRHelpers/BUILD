@@ -35,7 +35,6 @@ cc_binary(
 cc_library(
     name = "pseudo_lib",
     srcs = ["payload.c"],
-    nocopts ="-f.*-sections",
     copts = [
         "-Wno-gcc-compat",
         "-fembed-bitcode",
@@ -45,6 +44,7 @@ cc_library(
         "-march=x86-64",
     ],
     linkstatic = 1,  # we are doing this only for llvm ir
+    nocopts = "-f.*-sections",
     visibility = ["//visibility:public"],
     deps = [
         "@ruby_2_4_3//:ruby_headers",
