@@ -13,7 +13,7 @@ class Test
   end
 
   sig {params(x: String, y: Integer).returns(String)}
-  def qux(x: '', y: x) # error: Returning value that does not conform to method result type
+  def qux(x: '', y: x) # error: Argument does not have asserted type `Integer`
     x + y.to_s
   end
 end

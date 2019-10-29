@@ -3,12 +3,12 @@ class Test
   extend T::Sig
 
   sig {params(x: String).returns(String)}
-  def foo(x = nil) # error: Returning value that does not conform to method result type
+  def foo(x = nil) # error: Argument does not have asserted type `String`
     x
   end
 
   sig {params(y: String).returns(String)}
-  def bar(y: nil) # error: Returning value that does not conform to method result type
+  def bar(y: nil) # error: Argument does not have asserted type `String`
     y
   end
 
