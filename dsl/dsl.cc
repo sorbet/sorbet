@@ -5,7 +5,6 @@
 #include "dsl/ClassNew.h"
 #include "dsl/Command.h"
 #include "dsl/DSLBuilder.h"
-#include "dsl/DefaultArgs.h"
 #include "dsl/Delegate.h"
 #include "dsl/InterfaceWrapper.h"
 #include "dsl/Mattr.h"
@@ -37,7 +36,6 @@ public:
         OpusEnum::patchDSL(ctx, classDef.get());
         Prop::patchDSL(ctx, classDef.get());
         TypeMembers::patchDSL(ctx, classDef.get());
-        DefaultArgs::patchDSL(ctx, classDef.get());
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->patchDSL(ctx, classDef.get());
@@ -49,9 +47,7 @@ public:
             typecase(
                 stat.get(),
                 [&](ast::Assign *assign) {
-                    vector<unique_ptr<ast::Expression>> nodes;
-
-                    nodes = Struct::replaceDSL(ctx, assign);
+                    auto nodes = Struct::replaceDSL(ctx, assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;

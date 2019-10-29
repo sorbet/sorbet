@@ -23,7 +23,6 @@ message Name {
          MANGLED_KEYWORD_ARG = 9;
          RESOLVER_MISSING_CLASS = 10;
          OPUS_ENUM = 11;
-         DEFAULT_ARG = 12;
     };
 
     Kind kind = 1;
