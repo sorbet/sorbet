@@ -6,9 +6,11 @@ rb=${1/--single_test=/}
 rbout=$(mktemp)
 llvmir=$(mktemp -d)
 rbrunfile=$(mktemp)
+runfile=$(mktemp)
+srbout=$(mktemp)
 
 cleanup() {
-    rm -r "$llvmir" "$rbout" "$rbrunfile"
+    rm -r "$llvmir" "$rbout" "$rbrunfile" "$runfile" "$srbout"
 }
 
 # trap cleanup EXIT
@@ -31,8 +33,6 @@ for i in "$llvmir"/*.llo; do
 done
 
 if [[ $rb != *"no-run"* ]]; then
-    runfile=$(mktemp)
-    srbout=$(mktemp)
     echo "require './test/preamble.rb'; require '$bundle';" > "$runfile"
     echo "Run Code: $ruby $runfile"
     echo "Run LLDB: lldb ./bazel-out/darwin-dbg/bin/external/ruby_2_4_3/bin/ruby -- $runfile"
