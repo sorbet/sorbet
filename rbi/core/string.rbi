@@ -1752,7 +1752,7 @@ class String < Object
   # ```
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Regexp),
     )
     .returns(T::Boolean)
   end
