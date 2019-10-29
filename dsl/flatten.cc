@@ -47,129 +47,65 @@ using namespace std;
 namespace sorbet::dsl {
 
 class FlattenWalk {
-private:
-public:
-    FlattenWalk() {
-        newMethodSet();
-    }
-    ~FlattenWalk() {
-        ENFORCE(methodScopes.empty());
-    }
-
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        newMethodSet();
-        return classDef;
-    }
-
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
-        auto &methods = curMethodSet();
-        int staticLevel = computeStaticLevel(methodDef.get());
-        if (methods.stack.size() == 0) {
-            methods.stack.emplace_back(-1, staticLevel, methodDef.get());
-        } else {
-            methods.stack.emplace_back(methods.methods.size(), staticLevel, methodDef.get());
-            methods.methods.emplace_back();
-        }
-
-        return methodDef;
-    }
-
-    // We might want to move sends as well: either if they're method modifiers like `private` or `protected` or if
-    // they're `sig`s. If so, then we'll treat them like we treat methods on our method stack
-    unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
-        auto &methods = curMethodSet();
-        if (methods.stack.size() == 0) {
-            return send;
-        }
-
-        if (send->fun == core::Names::sig()) {
-            methods.stack.emplace_back(methods.methods.size(), 0, send.get());
-            methods.methods.emplace_back();
-        }
-
-        return send;
-    }
-
-    unique_ptr<ast::Expression> postTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
-        auto &methods = curMethodSet();
-
-        // if this isn't the thing on the stack, then we can ignore it
-        if (methods.stack.size() == 0 || methods.stack.back().target != send.get()) {
-            return send;
-        }
-
-        // we may not need to move this expression at all: check first
-        if (methods.stack.back().idx == -1) {
-            methods.stack.pop_back();
-            return send;
-        }
-
-        // otherwise, we have a spot in the queue for it that has not yet been filled in
-        ENFORCE(methods.methods.size() > methods.stack.back().idx);
-        ENFORCE(methods.methods[methods.stack.back().idx].expr == nullptr);
-
-        methods.methods[methods.stack.back().idx] = {move(send), methods.stack.back().staticLevel};
-        methods.stack.pop_back();
-
-        return ast::MK::EmptyTree();
-    }
-
-    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        classDef->rhs = addMethods(ctx, std::move(classDef->rhs), classDef->loc);
-        return classDef;
+    struct MethodData {
+        // This is an index into the methods stack
+        int idx;
+        // we need to keep information around about whether we're in a static outer context: for example, if we have
+        //
+        //   def self.foo; def bar; end; end
+        //
+        // then we should flatten it to
+        //
+        //  def self.foo; end
+        //  def self.bar; end
+        //
+        // which means when we get to `bar` we need to know that the outer context `foo` is static. We pass that down
+        // the current stack by means of this `isStatic` variable.
+        int staticLevel;
+        ast::Expression *target;
+        MethodData(int idx, int staticLevel, ast::Expression *target)
+            : idx(idx), staticLevel(staticLevel), target(target){};
+    };
+    struct MovedItem {
+        unique_ptr<ast::Expression> expr;
+        int staticLevel;
+        MovedItem(unique_ptr<ast::Expression> expr, int staticLevel) : expr(move(expr)), staticLevel(staticLevel){};
+        MovedItem() = default;
+    };
+    struct Methods {
+        vector<MovedItem> methods;
+        vector<MethodData> stack;
+        Methods() = default;
     };
 
-    unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
+    vector<Methods> methodScopes;
+
+    int computeStaticLevel(ast::MethodDef &methodDef) {
         auto &methods = curMethodSet();
-        ENFORCE(!methods.stack.empty());
-
-        // if this isn't the thing on the stack, then we can ignore it
-        if (methods.stack.back().target != methodDef.get()) {
-            return methodDef;
-        }
-
-        // we may not need to move this method at all: check first
-        if (methods.stack.back().idx == -1) {
-            methods.stack.pop_back();
-            return methodDef;
-        }
-
-        auto replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
-        ENFORCE(methods.methods.size() > methods.stack.back().idx);
-        ENFORCE(methods.methods[methods.stack.back().idx].expr == nullptr);
-
-        methods.methods[methods.stack.back().idx] = {std::move(methodDef), methods.stack.back().staticLevel};
-        methods.stack.pop_back();
-        return replacement;
-    };
-
-    unique_ptr<ast::Expression> addMethods(core::Context ctx, unique_ptr<ast::Expression> tree) {
-        auto &methods = curMethodSet().methods;
-        if (methods.empty()) {
-            ENFORCE(popCurMethodDefs().empty());
-            return tree;
-        }
-        if (methods.size() == 1 && ast::isa_tree<ast::EmptyTree>(tree.get())) {
-            // It was only 1 method to begin with, put it back
-            unique_ptr<ast::Expression> methodDef = std::move(popCurMethodDefs()[0].expr);
-            return methodDef;
-        }
-
-        auto insSeq = ast::cast_tree<ast::InsSeq>(tree.get());
-        if (insSeq == nullptr) {
-            ast::InsSeq::STATS_store stats;
-            tree = make_unique<ast::InsSeq>(tree->loc, std::move(stats), std::move(tree));
-            return addMethods(ctx, std::move(tree));
-        }
-
-        for (auto &method : popCurMethodDefs()) {
-            ENFORCE(method.expr != nullptr);
-            insSeq->stats.emplace_back(std::move(method.expr));
-        }
-        return tree;
+        int prevLevel = methods.stack.empty() ? 0 : methods.stack.back().staticLevel;
+        return prevLevel + (methodDef.isSelf() ? 1 : 0);
     }
 
-private:
+    void newMethodSet() {
+        methodScopes.emplace_back();
+    }
+    Methods &curMethodSet() {
+        ENFORCE(!methodScopes.empty());
+        return methodScopes.back();
+    }
+    void popCurMethodSet() {
+        ENFORCE(!methodScopes.empty());
+        methodScopes.pop_back();
+    }
+
+    vector<MovedItem> popCurMethodDefs() {
+        auto ret = std::move(curMethodSet().methods);
+        ENFORCE(curMethodSet().stack.empty());
+        popCurMethodSet();
+        return ret;
+    };
+
+    // extract all the methods from the current queue and put them at the end of the class's current body
     ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs, core::Loc loc) {
         if (curMethodSet().methods.size() == 1 && rhs.size() == 1 && ast::isa_tree<ast::EmptyTree>(rhs[0].get())) {
             // It was only 1 method to begin with, put it back
@@ -235,65 +171,126 @@ private:
         return rhs;
     }
 
-    int computeStaticLevel(ast::MethodDef *methodDef) {
+public:
+    FlattenWalk() {
+        newMethodSet();
+    }
+    ~FlattenWalk() {
+        ENFORCE(methodScopes.empty());
+    }
+
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+        newMethodSet();
+        return classDef;
+    }
+
+    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+        classDef->rhs = addMethods(ctx, std::move(classDef->rhs), classDef->loc);
+        return classDef;
+    };
+
+    // We might want to move sends as well: either if they're method modifiers like `private` or `protected` or if
+    // they're `sig`s. If so, then we'll treat them like we treat methods on our method stack
+    unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
         auto &methods = curMethodSet();
-        int prevLevel = methods.stack.size() > 0 ? methods.stack.back().staticLevel : 0;
-        return prevLevel + (methodDef->isSelf() ? 1 : 0);
+        if (methods.stack.size() == 0) {
+            return send;
+        }
+
+        if (send->fun == core::Names::sig()) {
+            methods.stack.emplace_back(methods.methods.size(), 0, send.get());
+            methods.methods.emplace_back();
+        }
+
+        return send;
     }
 
-    struct MethodData {
-        // This is an index into the methods stack
-        int idx;
-        // we need to keep information around about whether we're in a static outer context: for example, if we have
-        //
-        //   def self.foo; def bar; end; end
-        //
-        // then we should flatten it to
-        //
-        //  def self.foo; end
-        //  def self.bar; end
-        //
-        // which means when we get to `bar` we need to know that the outer context `foo` is static. We pass that down
-        // the current stack by means of this `isStatic` variable.
-        int staticLevel;
-        ast::Expression *target;
-        MethodData(int idx, int staticLevel, ast::Expression *target)
-            : idx(idx), staticLevel(staticLevel), target(target){};
-    };
-    struct MovedItem {
-        unique_ptr<ast::Expression> expr;
-        int staticLevel;
-        MovedItem(unique_ptr<ast::Expression> expr, int staticLevel) : expr(move(expr)), staticLevel(staticLevel){};
-        MovedItem() = default;
-    };
-    struct Methods {
-        vector<MovedItem> methods;
-        vector<MethodData> stack;
-        Methods() = default;
-    };
-    void newMethodSet() {
-        methodScopes.emplace_back();
-    }
-    Methods &curMethodSet() {
-        ENFORCE(!methodScopes.empty());
-        return methodScopes.back();
-    }
-    void popCurMethodSet() {
-        ENFORCE(!methodScopes.empty());
-        methodScopes.pop_back();
+    unique_ptr<ast::Expression> postTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
+        auto &methods = curMethodSet();
+
+        // if this isn't the thing on the stack, then we can ignore it
+        if (methods.stack.size() == 0 || methods.stack.back().target != send.get()) {
+            return send;
+        }
+
+        // we may not need to move this expression at all: check first
+        if (methods.stack.back().idx == -1) {
+            methods.stack.pop_back();
+            return send;
+        }
+
+        // otherwise, we have a spot in the queue for it that has not yet been filled in
+        ENFORCE(methods.methods.size() > methods.stack.back().idx);
+        ENFORCE(methods.methods[methods.stack.back().idx].expr == nullptr);
+
+        methods.methods[methods.stack.back().idx] = {move(send), methods.stack.back().staticLevel};
+        methods.stack.pop_back();
+
+        return ast::MK::EmptyTree();
     }
 
-    vector<MovedItem> popCurMethodDefs() {
-        auto ret = std::move(curMethodSet().methods);
-        ENFORCE(curMethodSet().stack.empty());
-        popCurMethodSet();
-        return ret;
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
+        auto &methods = curMethodSet();
+        int staticLevel = computeStaticLevel(*methodDef);
+        if (methods.stack.size() == 0) {
+            methods.stack.emplace_back(-1, staticLevel, methodDef.get());
+        } else {
+            methods.stack.emplace_back(methods.methods.size(), staticLevel, methodDef.get());
+            methods.methods.emplace_back();
+        }
+
+        return methodDef;
+    }
+
+    unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
+        auto &methods = curMethodSet();
+        ENFORCE(!methods.stack.empty());
+
+        // if this isn't the thing on the stack, then we can ignore it
+        if (methods.stack.back().target != methodDef.get()) {
+            return methodDef;
+        }
+
+        // we may not need to move this method at all: check first
+        if (methods.stack.back().idx == -1) {
+            methods.stack.pop_back();
+            return methodDef;
+        }
+
+        auto replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
+        ENFORCE(methods.methods.size() > methods.stack.back().idx);
+        ENFORCE(methods.methods[methods.stack.back().idx].expr == nullptr);
+
+        methods.methods[methods.stack.back().idx] = {std::move(methodDef), methods.stack.back().staticLevel};
+        methods.stack.pop_back();
+        return replacement;
     };
 
-    // We flatten methods so that we have an arbitrary hierarchy of classes each of which has a flat list of
-    // methods. This prevents methods from existing deeper inside the hierarchy, enabling later traversals to stop
-    // recursing over the AST once they've reached a method def.
-    vector<Methods> methodScopes;
+    unique_ptr<ast::Expression> addMethods(core::Context ctx, unique_ptr<ast::Expression> tree) {
+        auto &methods = curMethodSet().methods;
+        if (methods.empty()) {
+            ENFORCE(popCurMethodDefs().empty());
+            return tree;
+        }
+        if (methods.size() == 1 && ast::isa_tree<ast::EmptyTree>(tree.get())) {
+            // It was only 1 method to begin with, put it back
+            unique_ptr<ast::Expression> methodDef = std::move(popCurMethodDefs()[0].expr);
+            return methodDef;
+        }
+
+        auto insSeq = ast::cast_tree<ast::InsSeq>(tree.get());
+        if (insSeq == nullptr) {
+            ast::InsSeq::STATS_store stats;
+            tree = make_unique<ast::InsSeq>(tree->loc, std::move(stats), std::move(tree));
+            return addMethods(ctx, std::move(tree));
+        }
+
+        for (auto &method : popCurMethodDefs()) {
+            ENFORCE(method.expr != nullptr);
+            insSeq->stats.emplace_back(std::move(method.expr));
+        }
+        return tree;
+    }
 };
 
 unique_ptr<ast::Expression> Flatten::run(core::Context ctx, unique_ptr<ast::Expression> tree) {
