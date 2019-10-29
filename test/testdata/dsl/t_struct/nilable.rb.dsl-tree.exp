@@ -24,6 +24,10 @@ class <emptyTree><<C <root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"foo" => <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
     def initialize<defaultArg>1<<C <todo sym>>>(foo: = <emptyTree>, &<blk>)
       nil
     end

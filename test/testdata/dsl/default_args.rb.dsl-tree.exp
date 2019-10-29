@@ -9,6 +9,10 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>
   end
 
+  <self>.sig() do ||
+    <self>.params({:"a" => <emptyTree>::<C String>, :"b" => <emptyTree>::<C Integer>, :"c" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
+  end
+
   def foo<defaultArg>1<<C <todo sym>>>(a, b = <emptyTree>, c = <emptyTree>, &<blk>)
     1
   end

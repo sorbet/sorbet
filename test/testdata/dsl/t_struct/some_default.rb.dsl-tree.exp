@@ -40,6 +40,10 @@ class <emptyTree><<C <root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Boolean>)
     end
 
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"foo" => <emptyTree>::<C Integer>, :"bar" => <emptyTree>::<C T>::<C Boolean>}).returns(<emptyTree>::<C T>::<C Boolean>)
+    end
+
     def initialize<defaultArg>1<<C <todo sym>>>(foo:, bar: = <emptyTree>, &<blk>)
       false
     end
