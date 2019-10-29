@@ -1127,9 +1127,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                     case cfg::CFG::MIN_LOOP_LET:
                         if (!asGoodAs) {
                             if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
-                                e.setHeader("Incompatible assignment to variable declared via `let`: `{}` is not a "
+                                e.setHeader("Incompatible assignment to variable declared via `{}`: `{}` is not a "
                                             "subtype of `{}`",
-                                            tp.type->show(ctx), cur.type->show(ctx));
+                                            "let", tp.type->show(ctx), cur.type->show(ctx));
                             }
                             tp = cur;
                         }

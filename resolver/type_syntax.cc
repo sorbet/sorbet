@@ -740,7 +740,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 if (sig.bind.exists()) {
                     if (!args.allowRebind) {
                         if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                            e.setHeader("Using `bind` is not permitted here");
+                            e.setHeader("Using `{}` is not permitted here", "bind");
                         }
                     } else {
                         result.rebind = sig.bind;

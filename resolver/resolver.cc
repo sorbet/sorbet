@@ -1591,8 +1591,9 @@ private:
                     if (loc.file().data(ctx).originalSigil == core::StrictLevel::None &&
                         !lastSigs.front()->isDSLSynthesized()) {
                         if (auto e = ctx.state.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
-                            e.setHeader("To use `sig`, this file must declare an explicit `# typed:` sigil (found: "
-                                        "none). If you're not sure which one to use, start with `# typed: false`");
+                            e.setHeader("To use `{}`, this file must declare an explicit `{}` sigil (found: "
+                                        "none). If you're not sure which one to use, start with `{}`",
+                                        "sig", "# typed:", "# typed: false");
                         }
                     }
 
