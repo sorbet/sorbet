@@ -59,7 +59,7 @@ void DefaultArgs::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
                         lastSig = nullptr;
                     }
                     newMethods.emplace_back(
-                        ast::MK::Method(loc, loc, name, std::move(args), std::move(rhs), mdef->flags));
+                        ast::MK::Method(loc, loc, name, std::move(args), std::move(rhs), mdef->flags | ast::MethodDef::DSLSynthesized));
                 }
             },
 
