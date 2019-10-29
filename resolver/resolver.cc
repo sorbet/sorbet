@@ -1133,7 +1133,7 @@ public:
 
     unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ast::ConstantLit> lit) {
         if (trackDependencies_) {
-            core::SymbolRef symbol = lit->symbol;
+            core::SymbolRef symbol = lit->symbol.data(ctx)->dealias(ctx);
             if (symbol == core::Symbols::T()) {
                 return lit;
             }
