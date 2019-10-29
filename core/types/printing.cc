@@ -1,6 +1,7 @@
 #include "absl/base/casts.h"
 #include "absl/strings/escaping.h"
 #include "common/common.h"
+#include "common/formatting.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/Symbols.h"

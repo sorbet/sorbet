@@ -1,6 +1,8 @@
 #include "cfg/CFG.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
+#include "common/Timer.h"
+#include "common/formatting.h"
 
 // helps debugging
 template class std::unique_ptr<sorbet::cfg::CFG>;

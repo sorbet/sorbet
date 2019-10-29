@@ -1,5 +1,6 @@
 #include "core/AutocorrectSuggestion.h"
 #include "absl/strings/str_cat.h"
+#include "common/sort.h"
 
 using namespace std;
 

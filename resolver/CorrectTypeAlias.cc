@@ -1,6 +1,7 @@
 #include <string_view>
 
 #include "absl/strings/str_split.h"
+#include "common/formatting.h"
 #include "resolver/CorrectTypeAlias.h"
 
 using namespace std;

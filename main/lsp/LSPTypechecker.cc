@@ -2,6 +2,7 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/synchronization/notification.h"
 #include "ast/treemap/treemap.h"
+#include "common/sort.h"
 #include "common/typecase.h"
 #include "core/Unfreeze.h"
 #include "main/lsp/DefLocSaver.h"

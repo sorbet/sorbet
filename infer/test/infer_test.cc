@@ -4,6 +4,7 @@
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/Names.h"
 #include "core/Unfreeze.h"
 #include "dsl/dsl.h"

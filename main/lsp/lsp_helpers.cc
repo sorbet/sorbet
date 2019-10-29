@@ -3,6 +3,7 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
+#include "common/sort.h"
 #include "lsp.h"
 
 using namespace std;

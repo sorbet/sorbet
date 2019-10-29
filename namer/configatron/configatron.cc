@@ -3,6 +3,7 @@
 
 #include "absl/strings/match.h"
 #include "common/FileOps.h"
+#include "common/formatting.h"
 #include "configatron.h"
 #include "core/errors/namer.h"
 #include <cctype>

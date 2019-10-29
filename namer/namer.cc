@@ -4,6 +4,7 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
+#include "common/Timer.h"
 #include "common/typecase.h"
 #include "core/Context.h"
 #include "core/Names.h"

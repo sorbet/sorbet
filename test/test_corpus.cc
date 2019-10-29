@@ -15,6 +15,8 @@
 #include "cfg/proto/proto.h"
 #include "common/FileOps.h"
 #include "common/common.h"
+#include "common/formatting.h"
+#include "common/sort.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"

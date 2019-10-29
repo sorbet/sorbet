@@ -6,6 +6,7 @@
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
+#include "common/formatting.h"
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "main/autogen/autogen.h"

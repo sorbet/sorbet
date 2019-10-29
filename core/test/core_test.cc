@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 // has to go first as it violates are requirements
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"

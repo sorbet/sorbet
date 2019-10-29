@@ -5,6 +5,7 @@
 #include "absl/strings/str_replace.h"
 #include "common/Counters_impl.h"
 #include "common/JSON.h"
+#include "common/formatting.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "version/version.h"
 #include <chrono>
