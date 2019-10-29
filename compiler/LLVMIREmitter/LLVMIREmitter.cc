@@ -151,7 +151,16 @@ llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilde
                     int rubyBlockId) {
     if (aliases.contains(local)) {
         // alias to a field or constant
-        return resolveSymbol(cs, aliases.at(local).constantSym, builder);
+        auto alias = aliases.at(local);
+
+        if (alias.kind == Alias::AliasKind::Constant) {
+            return resolveSymbol(cs, alias.constantSym, builder);
+        } else if (alias.kind == Alias::AliasKind::InstanceField) {
+            return builder.CreateCall(cs.module->getFunction("sorbet_instanceVariableGet"),
+                                      {varGet(cs, core::LocalVariable::selfVariable(), builder, llvmVariables, aliases,
+                                              blockMap, rubyBlockId),
+                                       cs.getRubyIdFor(builder, alias.instanceField.data(cs)->shortName(cs))});
+        }
     }
     if (blockMap.escapedVariableIndeces.contains(local)) {
         auto id = blockMap.escapedVariableIndeces.at(local);
@@ -170,12 +179,20 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
             UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap, int rubyBlockId) {
     if (aliases.contains(local)) {
         // alias to a field or constant
-        auto sym = aliases.at(local).constantSym;
-        auto name = sym.data(cs.gs)->name.show(cs.gs);
-        auto owner = sym.data(cs.gs)->owner;
-        builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
-                           {resolveSymbol(cs, owner, builder), toCString(name, builder),
-                            llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
+        auto alias = aliases.at(local);
+        if (alias.kind == Alias::AliasKind::InstanceField) {
+            auto sym = aliases.at(local).constantSym;
+            auto name = sym.data(cs.gs)->name.show(cs.gs);
+            auto owner = sym.data(cs.gs)->owner;
+            builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
+                               {resolveSymbol(cs, owner, builder), toCString(name, builder),
+                                llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
+        } else if (alias.kind == Alias::AliasKind::InstanceField) {
+            builder.CreateCall(cs.module->getFunction("sorbet_instanceVariableSet"),
+                               {varGet(cs, core::LocalVariable::selfVariable(), builder, llvmVariables, aliases,
+                                       blockMap, rubyBlockId),
+                                cs.getRubyIdFor(builder, alias.instanceField.data(cs)->shortName(cs)), var});
+        }
         return;
     }
     if (blockMap.escapedVariableIndeces.contains(local)) {
@@ -189,7 +206,7 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
 
     // normal local variable
     cs.boxRawValue(builder, llvmVariables.at(local), var);
-}
+} // namespace
 
 llvm::Function *getOrCreateFunction(CompilerState &cs, std::string name, llvm::FunctionType *ft,
                                     llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage) {
