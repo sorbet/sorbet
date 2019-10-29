@@ -9,7 +9,7 @@ class <emptyTree><<C <root>>> < ()
         <emptyTree>
       end
 
-      def initialize<defaultAarg>1<<C <todo sym>>>(x = <emptyTree>, &<blk>)
+      def initialize<defaultArg>1<<C <todo sym>>>(x = <emptyTree>, &<blk>)
         nil
       end
     end

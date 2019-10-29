@@ -99,7 +99,7 @@ string Name::toString(const GlobalState &gs) const {
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
                 return absl::StrCat(this->unique.original.data(gs)->show(gs), " (overload.", this->unique.num, ")");
             } else if (this->unique.uniqueNameKind == UniqueNameKind::DefaultArg) {
-                return fmt::format("{}<defaultAarg>{}", this->unique.original.data(gs)->show(gs), this->unique.num);
+                return fmt::format("{}<defaultArg>{}", this->unique.original.data(gs)->show(gs), this->unique.num);
             }
             if (gs.censorForSnapshotTests && this->unique.uniqueNameKind == UniqueNameKind::Namer &&
                 this->unique.original == core::Names::staticInit()) {
@@ -128,7 +128,7 @@ string Name::show(const GlobalState &gs) const {
                 // original name, so that our OpusEnum DSL-synthesized class names are kept as an implementation detail.
                 // Thus, we fall through.
             } else if (this->unique.uniqueNameKind == UniqueNameKind::DefaultArg) {
-                return fmt::format("{}<defaultAarg>{}", this->unique.original.data(gs)->show(gs), this->unique.num);
+                return fmt::format("{}<defaultArg>{}", this->unique.original.data(gs)->show(gs), this->unique.num);
             }
             return this->unique.original.data(gs)->show(gs);
         case NameKind::CONSTANT:
