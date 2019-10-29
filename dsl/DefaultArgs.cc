@@ -61,7 +61,7 @@ unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Express
             }
 
             case core::Names::override_()._id: {
-                // A totoal hack but we allow .void.void or .void.returns and
+                // A total hack but we allow .void.void or .void.returns and
                 // the one with content wins
                 send->fun = core::Names::void_();
             }
