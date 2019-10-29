@@ -1,0 +1,13 @@
+class <emptyTree><<C <root>>> < ()
+  def foo<<C <todo sym>>>(a, b = <emptyTree>, c = <emptyTree>, &<blk>)
+    <emptyTree>
+  end
+
+  def foo<defaultAarg>2<<C <todo sym>>>(a, b = <emptyTree>, c = <emptyTree>, &<blk>)
+    1
+  end
+
+  def foo<defaultAarg>3<<C <todo sym>>>(a, b = <emptyTree>, c = <emptyTree>, &<blk>)
+    2
+  end
+end

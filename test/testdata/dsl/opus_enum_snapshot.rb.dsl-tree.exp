@@ -1,12 +1,16 @@
 class <emptyTree><<C <root>>> < ()
   module <emptyTree>::<C Opus><<C <todo sym>>> < ()
     class <emptyTree>::<C Enum><<C <todo sym>>> < (::<todo sym>)
-      def initialize<<C <todo sym>>>(x = nil, &<blk>)
+      def initialize<<C <todo sym>>>(x = <emptyTree>, &<blk>)
         <emptyTree>
       end
 
       def self.enums<<C <todo sym>>>(&blk)
         <emptyTree>
+      end
+
+      def initialize<defaultAarg>1<<C <todo sym>>>(x = <emptyTree>, &<blk>)
+        nil
       end
     end
   end
