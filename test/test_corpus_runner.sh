@@ -5,16 +5,16 @@ rb=${1/--single_test=/}
 
 rbout=$(mktemp)
 llvmir=$(mktemp -d)
+rbrunfile=$(mktemp)
 
 cleanup() {
-    rm -r "$llvmir" "$rbout"
+    rm -r "$llvmir" "$rbout" "$rbrunfile"
 }
 
 # trap cleanup EXIT
 
 ruby="/Users/$(whoami)/.rbenv/shims/ruby"
 
-rbrunfile=$(mktemp)
 echo "Ruby: $rb"
 echo "require './test/preamble.rb'; require './$rb';" > "$rbrunfile"
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
