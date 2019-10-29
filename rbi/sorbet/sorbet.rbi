@@ -178,7 +178,7 @@ class Sorbet::Private::Static::ENVClass
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T::Array[Elem])
+    .returns(T::Hash[String, String])
   end
   sig {returns(T::Enumerator[Elem])}
   def reject(&blk); end
