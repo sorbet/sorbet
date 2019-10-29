@@ -54,6 +54,12 @@ unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Express
                 break;
             }
 
+            case core::Names::abstract()._id: {
+                // Don't make this method at all since abstract methods can't
+                // have bodies
+                return nullptr;
+            }
+
             case core::Names::override_()._id: {
                 // A totoal hack but we allow .void.void or .void.returns and
                 // the one with content wins
