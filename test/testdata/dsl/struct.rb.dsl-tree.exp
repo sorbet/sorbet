@@ -107,6 +107,10 @@ class <emptyTree><<C <root>>> < ()
         nil
       end
 
+      <self>.sig() do ||
+        <self>.params({:"foo" => <emptyTree>::<C BasicObject>, :"bar" => <emptyTree>::<C BasicObject>}).returns(<emptyTree>::<C BasicObject>)
+      end
+
       def self.new<defaultArg>2<<C <todo sym>>>(foo = <emptyTree>, bar = <emptyTree>, &<blk>)
         nil
       end
