@@ -351,7 +351,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             builder.SetInsertPoint(block);
             auto argCount =
                 builder.CreateICmpEQ(func->arg_begin(), llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
-                                     {"default", to_string(i)});
+                                     llvm::Twine("default") + llvm::Twine(i));
             cs.setExpectedBool(builder, argCount, false);
             builder.CreateCondBr(argCount, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
         }
