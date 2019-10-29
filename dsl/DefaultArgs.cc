@@ -29,6 +29,7 @@ void DefaultArgs::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
             },
             [&](ast::MethodDef *mdef) {
                 auto i = -1;
+                auto uniqueNum = 1;
                 for (auto &methodArg : mdef->args) {
                     ++i;
                     auto arg = ast::cast_tree<ast::OptionalArg>(methodArg.get());
@@ -38,7 +39,7 @@ void DefaultArgs::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
 
                     ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(arg->expr.get()) ||
                             ast::isa_tree<ast::KeywordArg>(arg->expr.get()));
-                    auto name = ctx.state.freshNameUnique(core::UniqueNameKind::DefaultArg, mdef->name, i + 1);
+                    auto name = ctx.state.freshNameUnique(core::UniqueNameKind::DefaultArg, mdef->name, uniqueNum++);
                     ast::MethodDef::ARGS_store args;
                     for (auto &marg : mdef->args) {
                         auto newArg = marg->deepCopy();
