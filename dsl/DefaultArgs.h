@@ -19,7 +19,7 @@ namespace sorbet::dsl {
  *       my_expr
  *   end
  *   sig {params(arg0: String, arg1: Integer).void}
- *   def foo(arg0, arg1 = foo<defaultArg>2(arg0, arg1))
+ *   def foo(arg0, arg1 = foo<defaultArg>1(arg0, arg1))
  *   end
  */
 class DefaultArgs final {
