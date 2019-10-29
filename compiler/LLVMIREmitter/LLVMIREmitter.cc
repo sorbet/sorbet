@@ -345,8 +345,9 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         for (auto i = 0; i < numOptionalArgs; i++) {
             auto &block = checkBlocks[i];
             builder.SetInsertPoint(block);
-            auto argCount = builder.CreateICmpEQ(func->arg_begin(), llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
-                                                 {"default", to_string(i)});
+            auto argCount =
+                builder.CreateICmpEQ(func->arg_begin(), llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
+                                     {"default", to_string(i)});
             cs.setExpectedBool(builder, argCount, false);
             builder.CreateCondBr(argCount, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
         }
@@ -363,13 +364,13 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 // way down
             } else {
                 auto argIndex = i + minArgCount;
-                auto argMethodName =
-                    cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, argIndex + 1);
+                auto argMethodName = cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, argIndex + 1);
                 ENFORCE(argMethodName.exists());
                 auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
                 ENFORCE(argMethod.exists());
                 auto fillDefaultFunc = getOrCreateFunction(cs, argMethod);
-                auto rawValue = builder.CreateCall(fillDefaultFunc, {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2});
+                auto rawValue = builder.CreateCall(fillDefaultFunc,
+                                                   {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2});
                 auto *a = ast::MK::arg2Local(md->args[argIndex].get());
                 cs.boxRawValue(builder, llvmVariables.at(a->localVariable), rawValue);
             }
