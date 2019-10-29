@@ -108,7 +108,8 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
     auto ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), args, false /*not varargs*/);
 
     for (int i = 1; i <= cfg.maxRubyBlockId; i++) {
-        auto fp = llvm::Function::Create(ft, llvm::Function::InternalLinkage, "", *cs.module);
+        auto fp = llvm::Function::Create(ft, llvm::Function::InternalLinkage,
+                                         llvm::Twine{func->getName()} + "$block_" + llvm::Twine(i), *cs.module);
         res.emplace_back(fp);
     }
     return res;
@@ -351,9 +352,8 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
             llvmBlocks[b->id] = userEntryBlockByFunction[0] =
                 llvm::BasicBlock::Create(cs, "userEntry", rubyBlocks2Functions[0]);
         } else {
-            llvmBlocks[b->id] = llvm::BasicBlock::Create(
-                cs, {"BB", to_string(b->id)},
-                rubyBlocks2Functions[b->rubyBlockId]); // to_s is slow. We should only use it in debug builds
+            llvmBlocks[b->id] = llvm::BasicBlock::Create(cs, llvm::Twine("BB") + llvm::Twine(b->id),
+                                                         rubyBlocks2Functions[b->rubyBlockId]);
         }
     }
     for (auto &b : cfg.basicBlocks) {
