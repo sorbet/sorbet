@@ -747,7 +747,7 @@ class Array < Object
   # [ "a", nil, "b", nil, "c" ].compact! #=> [ "a", "b", "c" ]
   # [ "a", "b", "c" ].compact!           #=> nil
   # ```
-  sig {returns(T::Array[Elem])}
+  sig {returns(T.nilable(T::Array[Elem]))}
   def compact!(); end
 
   # Appends the elements of `other_ary`s to `self`.
@@ -2204,7 +2204,7 @@ class Array < Object
   # c = [["student","sam"], ["student","george"], ["teacher","matz"]]
   # c.uniq! {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
   # ```
-  sig {returns(T::Array[Elem])}
+  sig {returns(T.nilable(T::Array[Elem]))}
   def uniq!(); end
 
   # Prepends objects to the front of `self`, moving other elements upwards. See
