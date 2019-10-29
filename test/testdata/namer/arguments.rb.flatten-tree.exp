@@ -28,11 +28,11 @@ begin
       end
     end
 
-    def take_arguments<defaultAarg>2(a, b, c, d, e, f, g)
+    def take_arguments<defaultAarg>1(a, b, c, d, e, f, g)
       1
     end
 
-    def take_arguments<defaultAarg>5(a, b, c, d, e, f, g)
+    def take_arguments<defaultAarg>2(a, b, c, d, e, f, g)
       2
     end
 

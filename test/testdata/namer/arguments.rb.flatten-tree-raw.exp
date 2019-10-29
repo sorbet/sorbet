@@ -191,7 +191,7 @@ InsSeq{
 
         MethodDef{
           flags = 0
-          name = <DA <U take_arguments> $2><<DA <U take_arguments> $2>>
+          name = <DA <U take_arguments> $1><<DA <U take_arguments> $1>>
           args = [Local{
               localVariable = <U a>
             }, OptionalArg{
@@ -216,7 +216,7 @@ InsSeq{
 
         MethodDef{
           flags = 0
-          name = <DA <U take_arguments> $5><<DA <U take_arguments> $5>>
+          name = <DA <U take_arguments> $2><<DA <U take_arguments> $2>>
           args = [Local{
               localVariable = <U a>
             }, OptionalArg{

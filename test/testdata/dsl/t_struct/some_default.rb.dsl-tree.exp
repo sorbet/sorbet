@@ -40,7 +40,7 @@ class <emptyTree><<C <root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Boolean>)
     end
 
-    def initialize<defaultAarg>2<<C <todo sym>>>(foo:, bar: = <emptyTree>, &<blk>)
+    def initialize<defaultAarg>1<<C <todo sym>>>(foo:, bar: = <emptyTree>, &<blk>)
       false
     end
   end
