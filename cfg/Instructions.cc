@@ -27,11 +27,11 @@ Return::Return(core::LocalVariable what) : what(what) {
 }
 
 string SolveConstraint::toString(core::Context ctx) const {
-    return fmt::format("Solve<{}>", this->link->fun.toString(ctx));
+    return fmt::format("Solve<{}, {}>", this->send.toString(ctx), this->link->fun.toString(ctx));
 }
 
 string SolveConstraint::showRaw(core::Context ctx, int tabs) const {
-    return fmt::format("Solve {{ link = {} }}", this->link->fun.showRaw(ctx));
+    return fmt::format("Solve {{ send = {}, link = {} }}", this->send.toString(ctx), this->link->fun.showRaw(ctx));
 }
 
 string Return::toString(core::Context ctx) const {

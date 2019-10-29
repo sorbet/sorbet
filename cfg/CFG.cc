@@ -80,6 +80,9 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {
                 blockReads.insert(v->fallback);
                 blockReadsAndWrites.insert(v->fallback);
+            } else if (auto *v = cast_instruction<SolveConstraint>(bind.value.get())) {
+                blockReads.insert(v->send);
+                blockReadsAndWrites.insert(v->send);
             }
 
             auto fnd = blockReads.find(bind.bind.variable);

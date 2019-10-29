@@ -322,8 +322,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s->fun, move(argFlags), newRubyBlockId);
                     auto send = make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, s->isPrivateOk(), link);
-                    auto solveConstraint = make_unique<SolveConstraint>(link);
                     core::LocalVariable sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
+                    auto solveConstraint = make_unique<SolveConstraint>(link, sendTemp);
                     current->exprs.emplace_back(sendTemp, s->loc, move(send));
                     core::LocalVariable restoreSelf = cctx.newTemporary(core::Names::selfRestore());
                     synthesizeExpr(current, restoreSelf, core::Loc::none(),

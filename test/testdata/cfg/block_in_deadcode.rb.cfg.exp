@@ -16,14 +16,14 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2, rubyBlockId=1](<self>: Object, <selfRestore>$5: Object)\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2, rubyBlockId=1](<self>: Object, <selfRestore>$5: Object, <block-pre-call-temp>$4: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_5" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
     "bb::Object#foo_3" [
-        label = "block[id=3, rubyBlockId=0](<selfRestore>$5: Object)\l<returnMethodTemp>$2: T.untyped = Solve<outer>\l<self>: Object = <selfRestore>$5\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<selfRestore>$5: Object, <block-pre-call-temp>$4: Sorbet::Private::Static::Void)\l<returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$4, outer>\l<self>: Object = <selfRestore>$5\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
