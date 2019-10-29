@@ -1335,6 +1335,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
+  sig {returns(T::Enumerator[Elem])}
   def keep_if(&blk); end
 
   # Returns the last element(s) of `self`. If the array is empty, the first form
@@ -1607,7 +1608,7 @@ class Array < Object
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(T::Array[Elem]))
   end
   sig {returns(T::Enumerator[Elem])}
   def reject!(&blk); end

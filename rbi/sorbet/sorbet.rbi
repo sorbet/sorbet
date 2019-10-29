@@ -109,7 +109,7 @@ class Sorbet::Private::Static::ENVClass
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T::Array[Elem])
+    .returns(Sorbet::Private::Static::ENVClass)
   end
   sig {returns(T::Enumerator[Elem])}
   def delete_if(&blk); end
@@ -145,17 +145,18 @@ class Sorbet::Private::Static::ENVClass
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T::Enumerator[Elem])
+    .returns(Sorbet::Private::Static::ENVClass)
   end
+  sig {returns(T::Enumerator[Elem])}
   def keep_if(&blk); end
 
   sig do
     params(
         name: String,
     )
-    .returns(T.nilable(K))
+    .returns(T.nilable(Elem))
   end
-  def key(arg0); end
+  def key(name); end
 
   sig do
     params(
@@ -186,7 +187,7 @@ class Sorbet::Private::Static::ENVClass
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(Sorbet::Private::Static::ENVClass))
   end
   sig {returns(T::Enumerator[Elem])}
   def reject!(&blk); end
