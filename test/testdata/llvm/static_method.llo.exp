@@ -439,13 +439,13 @@ entry:
 define i64 @"<S <C <U Foo>> $1><U bar>"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #11 {
 functionEntryInitializers:
   %tooManyArgs = icmp eq i32 %argc, 0
-  br i1 %tooManyArgs, label %argCountSuccess, label %argCountFailBlock
+  br i1 %tooManyArgs, label %fillRequiredArgs, label %argCountFailBlock
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call fastcc void @sorbet_rb_error_arity(i32 %argc)
   unreachable
 
-argCountSuccess:                                  ; preds = %functionEntryInitializers
+fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %0 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.6, i64 0, i64 0), i64 3) #14
   ret i64 %0
 }

@@ -363,13 +363,13 @@ functionEntryInitializers:
   %"rubyId_+" = load i64, i64* @"rubyIdPrecomputed_+", align 8
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %0 = icmp eq i32 %argc, 1
-  br i1 %0, label %argCountSuccess, label %argCountFailBlock
+  br i1 %0, label %fillRequiredArgs, label %argCountFailBlock
 
-BB3:                                              ; preds = %BB5, %argCountSuccess
+BB3:                                              ; preds = %BB5, %fillRequiredArgs
   ret i64 8
 
-BB5:                                              ; preds = %argCountSuccess, %BB5
-  %i.sroa.0.041 = phi i64 [ %4, %BB5 ], [ 1, %argCountSuccess ]
+BB5:                                              ; preds = %fillRequiredArgs, %BB5
+  %i.sroa.0.041 = phi i64 [ %4, %BB5 ], [ 1, %fillRequiredArgs ]
   %1 = call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"userStr_hello ", i64 0, i64 0), i64 6) #14
   store i64 %rawArg_name, i64* %callArgsAddr, align 8
   call void @dbg_sorbet_validate_id(i64 %"rubyId_+", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #14, !noalias !14
@@ -391,7 +391,7 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   tail call fastcc void @sorbet_rb_error_arity(i32 %argc)
   unreachable
 
-argCountSuccess:                                  ; preds = %functionEntryInitializers
+fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %rawArg_name = load i64, i64* %argArray, align 8
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
   store i64 21, i64* %callArgsAddr, align 8

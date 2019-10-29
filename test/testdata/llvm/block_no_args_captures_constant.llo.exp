@@ -384,13 +384,13 @@ functionEntryInitializers:
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %rubyId_times = load i64, i64* @rubyIdPrecomputed_times, align 8
   %tooManyArgs = icmp eq i32 %argc, 0
-  br i1 %tooManyArgs, label %argCountSuccess, label %argCountFailBlock
+  br i1 %tooManyArgs, label %fillRequiredArgs, label %argCountFailBlock
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call fastcc void @sorbet_rb_error_arity(i32 %argc)
   unreachable
 
-argCountSuccess:                                  ; preds = %functionEntryInitializers
+fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %8 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %5, align 8, !tbaa !11
   %9 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %8, i64 0, i32 1, i64 0
   store i64 %selfRaw, i64* %9, align 8
