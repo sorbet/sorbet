@@ -100,10 +100,11 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
     vector<llvm::Function *> res;
     res.emplace_back(func);
     llvm::Type *args[] = {
-        llvm::Type::getInt64Ty(cs),    // block argument(first argument is both here and in argArray
+        llvm::Type::getInt64Ty(cs),    // first yielded argument(first argument is both here and in argArray
         llvm::Type::getInt64Ty(cs),    // data
         llvm::Type::getInt32Ty(cs),    // arg count
         llvm::Type::getInt64PtrTy(cs), // argArray
+        llvm::Type::getInt64Ty(cs),    // blockArg
     };
     auto ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), args, false /*not varargs*/);
 
@@ -117,6 +118,7 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
             (fp->arg_begin() + 1)->setName("captures");
             (fp->arg_begin() + 2)->setName("argc");
             (fp->arg_begin() + 3)->setName("argArray");
+            (fp->arg_begin() + 4)->setName("blockArg");
         }
         res.emplace_back(fp);
     }
@@ -244,6 +246,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
                     const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
                     const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, core::SymbolRef> &aliases) {
+    // this function effectively generate an optimized build of https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(cs);
     auto funcId = 0;
     auto func = rubyBlocks2Functions[funcId];
@@ -345,8 +348,9 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         for (auto i = 0; i < numOptionalArgs; i++) {
             auto &block = checkBlocks[i];
             builder.SetInsertPoint(block);
-            auto argCount = builder.CreateICmpEQ(func->arg_begin(), llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
-                                                 {"default", to_string(i)});
+            auto argCount =
+                builder.CreateICmpEQ(func->arg_begin(), llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
+                                     {"default", to_string(i)});
             cs.setExpectedBool(builder, argCount, false);
             builder.CreateCondBr(argCount, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
         }
@@ -363,13 +367,13 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 // way down
             } else {
                 auto argIndex = i + minArgCount;
-                auto argMethodName =
-                    cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, argIndex + 1);
+                auto argMethodName = cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, argIndex + 1);
                 ENFORCE(argMethodName.exists());
                 auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
                 ENFORCE(argMethod.exists());
                 auto fillDefaultFunc = getOrCreateFunction(cs, argMethod);
-                auto rawValue = builder.CreateCall(fillDefaultFunc, {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2});
+                auto rawValue = builder.CreateCall(fillDefaultFunc,
+                                                   {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2});
                 auto *a = ast::MK::arg2Local(md->args[argIndex].get());
                 cs.boxRawValue(builder, llvmVariables.at(a->localVariable), rawValue);
             }
