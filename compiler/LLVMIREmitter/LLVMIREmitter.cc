@@ -110,6 +110,14 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
     for (int i = 1; i <= cfg.maxRubyBlockId; i++) {
         auto fp = llvm::Function::Create(ft, llvm::Function::InternalLinkage,
                                          llvm::Twine{func->getName()} + "$block_" + llvm::Twine(i), *cs.module);
+        {
+            // setup argument names
+            // setup function argument names
+            fp->arg_begin()->setName("firstYieldArgRaw");
+            (fp->arg_begin() + 1)->setName("captures");
+            (fp->arg_begin() + 2)->setName("argc");
+            (fp->arg_begin() + 3)->setName("argArray");
+        }
         res.emplace_back(fp);
     }
     return res;
@@ -714,6 +722,12 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto functionType = cs.getRubyFFIType();
     auto func = llvm::Function::Create(functionType, getFunctionLinkageType(cs, md->symbol), functionName, cs.module);
+    {
+        // setup function argument names
+        func->arg_begin()->setName("argc");
+        (func->arg_begin() + 1)->setName("argArray");
+        (func->arg_begin() + 2)->setName("selfRaw");
+    }
     func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
     func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
