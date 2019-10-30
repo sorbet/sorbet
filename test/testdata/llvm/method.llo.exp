@@ -36,8 +36,7 @@ target triple = "x86_64-apple-darwin18.2.0"
 @str_T = private unnamed_addr constant [2 x i8] c"T\00", align 1
 @rubyIdPrecomputed_hello = internal unnamed_addr global i64 0, align 8
 @llvm.global_ctors = appending global [5 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_<", i8* bitcast (i64* @"rubyIdPrecomputed_<" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_+", i8* bitcast (i64* @"rubyIdPrecomputed_+" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_unsafe, i8* bitcast (i64* @rubyIdPrecomputed_unsafe to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_hello, i8* bitcast (i64* @rubyIdPrecomputed_hello to i8*) }]
-@str_Object.1 = private unnamed_addr constant [7 x i8] c"Object\00", align 1
-@str_hello.2 = private unnamed_addr constant [6 x i8] c"hello\00", align 1
+@str_hello.1 = private unnamed_addr constant [6 x i8] c"hello\00", align 1
 @userStr_sorbet = private unnamed_addr constant [7 x i8] c"sorbet\00", align 1
 
 ; Function Attrs: nounwind ssp uwtable
@@ -104,187 +103,111 @@ declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #3
 declare i64 @rb_id2sym(i64) local_unnamed_addr #3
 
 ; Function Attrs: noinline nounwind ssp uwtable
-define internal fastcc i64 @sorbet_getConstant(i8*, i64) unnamed_addr #4 {
-  %3 = tail call i64 @rb_intern2(i8* %0, i64 %1) #14
-  %4 = tail call i64 @rb_id2sym(i64 %3) #14
-  %5 = load i64, i64* @rb_cObject, align 8, !tbaa !7
-  %6 = tail call %struct.OnigEncodingTypeST* @rb_enc_get(i64 %4) #14
-  %7 = getelementptr inbounds i8, i8* %0, i64 %1
-  %8 = ptrtoint i8* %0 to i64
-  br label %11
+define internal fastcc i64 @sorbet_getConstant() unnamed_addr #4 {
+  %1 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1) #14
+  %2 = tail call i64 @rb_id2sym(i64 %1) #14
+  %3 = load i64, i64* @rb_cObject, align 8, !tbaa !7
+  %4 = tail call %struct.OnigEncodingTypeST* @rb_enc_get(i64 %2) #14
+  %5 = tail call i64 @rb_check_id_cstr(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1, %struct.OnigEncodingTypeST* %4) #14
+  %6 = and i64 %3, 7
+  %7 = icmp ne i64 %6, 0
+  %8 = and i64 %3, -9
+  %9 = icmp eq i64 %8, 0
+  %10 = or i1 %7, %9
+  br i1 %10, label %19, label %14
 
-.loopexit9:                                       ; preds = %rb_obj_freeze_inline.exit, %42, %39, %26, %99
-  %9 = phi i64 [ %100, %99 ], [ %4, %26 ], [ %4, %42 ], [ %4, %39 ], [ %64, %rb_obj_freeze_inline.exit ]
-  %10 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !7
-  tail call void (i64, i8*, ...) @rb_raise(i64 %10, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @.str.4, i64 0, i64 0), i64 %12, i64 %9) #15
+11:                                               ; preds = %59, %rb_obj_freeze_inline.exit
+  %12 = phi i64 [ %60, %59 ], [ %24, %rb_obj_freeze_inline.exit ]
+  %13 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !7
+  tail call void (i64, i8*, ...) @rb_raise(i64 %13, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @.str.4, i64 0, i64 0), i64 %3, i64 %12) #15
   unreachable
 
-11:                                               ; preds = %107, %2
-  %12 = phi i64 [ %5, %2 ], [ %108, %107 ]
-  %13 = phi i8* [ %0, %2 ], [ %48, %107 ]
-  %14 = phi i8* [ %0, %2 ], [ %47, %107 ]
-  %15 = icmp ult i8* %14, %7
-  br i1 %15, label %16, label %26
+14:                                               ; preds = %0
+  %15 = inttoptr i64 %3 to %struct.RBasic*
+  %16 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %15, i64 0, i32 0
+  %17 = load i64, i64* %16, align 8, !tbaa !1
+  %18 = and i64 %17, 30
+  %switch = icmp eq i64 %18, 2
+  br i1 %switch, label %21, label %19
 
-16:                                               ; preds = %11
-  %17 = load i8, i8* %14, align 1, !tbaa !6
-  %18 = icmp eq i8 %17, 58
-  br i1 %18, label %26, label %.preheader
+19:                                               ; preds = %14, %0
+  %20 = load i64, i64* @rb_eTypeError, align 8, !tbaa !7
+  tail call void (i64, i8*, ...) @rb_raise(i64 %20, i8* getelementptr inbounds ([36 x i8], [36 x i8]* @.str.5, i64 0, i64 0), i64 %2) #15
+  unreachable
 
-19:                                               ; preds = %.preheader
-  %20 = load i8, i8* %23, align 1, !tbaa !6
-  %21 = icmp eq i8 %20, 58
-  br i1 %21, label %.loopexit, label %.preheader
+21:                                               ; preds = %14
+  %22 = icmp eq i64 %5, 0
+  br i1 %22, label %23, label %56
 
-.preheader:                                       ; preds = %16, %19
-  %22 = phi i8* [ %23, %19 ], [ %14, %16 ]
-  %23 = getelementptr inbounds i8, i8* %22, i64 1
-  %24 = icmp eq i8* %23, %7
-  br i1 %24, label %.loopexit, label %19
+23:                                               ; preds = %21
+  %24 = tail call i64 @rb_str_subseq(i64 %2, i64 0, i64 1) #14
+  %25 = and i64 %24, 7
+  %26 = icmp ne i64 %25, 0
+  %27 = and i64 %24, -9
+  %28 = icmp eq i64 %27, 0
+  %29 = or i1 %26, %28
+  br i1 %29, label %rb_obj_freeze_inline.exit, label %30
 
-.loopexit:                                        ; preds = %19, %.preheader
-  %.lcssa = phi i8* [ %23, %19 ], [ %7, %.preheader ]
-  %25 = icmp ult i8* %.lcssa, %7
-  br label %26
-
-26:                                               ; preds = %.loopexit, %16, %11
-  %27 = phi i8* [ %14, %11 ], [ %14, %16 ], [ %.lcssa, %.loopexit ]
-  %28 = phi i1 [ false, %11 ], [ true, %16 ], [ %25, %.loopexit ]
-  %29 = icmp eq i8* %13, %27
-  br i1 %29, label %.loopexit9, label %30
-
-30:                                               ; preds = %26
-  %31 = ptrtoint i8* %27 to i64
-  %32 = ptrtoint i8* %13 to i64
-  %33 = sub i64 %31, %32
-  %34 = tail call i64 @rb_check_id_cstr(i8* %13, i64 %33, %struct.OnigEncodingTypeST* %6) #14
-  %35 = sub i64 %32, %8
-  br i1 %28, label %36, label %46
+30:                                               ; preds = %23
+  %31 = inttoptr i64 %24 to %struct.RBasic*
+  %32 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %31, i64 0, i32 0
+  %33 = load i64, i64* %32, align 8, !tbaa !1
+  %34 = and i64 %33, 31
+  %35 = icmp eq i64 %34, 27
+  br i1 %35, label %rb_obj_freeze_inline.exit, label %36
 
 36:                                               ; preds = %30
-  %37 = load i8, i8* %27, align 1, !tbaa !6
-  %38 = icmp eq i8 %37, 58
-  br i1 %38, label %39, label %46
+  %37 = or i64 %33, 2048
+  store i64 %37, i64* %32, align 8, !tbaa !1
+  %38 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %31, i64 0, i32 1
+  %39 = load i64, i64* %38, align 8, !tbaa !8
+  %40 = icmp ne i64 %39, 0
+  %41 = and i64 %33, 4096
+  %42 = icmp eq i64 %41, 0
+  %43 = and i1 %42, %40
+  br i1 %43, label %44, label %rb_obj_freeze_inline.exit
 
-39:                                               ; preds = %36
-  %40 = getelementptr inbounds i8, i8* %27, i64 2
-  %41 = icmp ult i8* %40, %7
-  br i1 %41, label %42, label %.loopexit9
-
-42:                                               ; preds = %39
-  %43 = getelementptr inbounds i8, i8* %27, i64 1
-  %44 = load i8, i8* %43, align 1, !tbaa !6
-  %45 = icmp eq i8 %44, 58
-  br i1 %45, label %46, label %.loopexit9
-
-46:                                               ; preds = %42, %36, %30
-  %47 = phi i8* [ %27, %36 ], [ %27, %30 ], [ %40, %42 ]
-  %48 = phi i8* [ %13, %36 ], [ %13, %30 ], [ %40, %42 ]
-  %49 = and i64 %12, 7
-  %50 = icmp ne i64 %49, 0
-  %51 = and i64 %12, -9
-  %52 = icmp eq i64 %51, 0
-  %53 = or i1 %50, %52
-  br i1 %53, label %59, label %54
-
-54:                                               ; preds = %46
-  %55 = inttoptr i64 %12 to %struct.RBasic*
-  %56 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %55, i64 0, i32 0
-  %57 = load i64, i64* %56, align 8, !tbaa !1
-  %58 = and i64 %57, 30
-  %switch = icmp eq i64 %58, 2
-  br i1 %switch, label %61, label %59
-
-59:                                               ; preds = %54, %46
-  %60 = load i64, i64* @rb_eTypeError, align 8, !tbaa !7
-  tail call void (i64, i8*, ...) @rb_raise(i64 %60, i8* getelementptr inbounds ([36 x i8], [36 x i8]* @.str.5, i64 0, i64 0), i64 %4) #15
-  unreachable
-
-61:                                               ; preds = %54
-  %62 = icmp eq i64 %34, 0
-  br i1 %62, label %63, label %96
-
-63:                                               ; preds = %61
-  %64 = tail call i64 @rb_str_subseq(i64 %4, i64 %35, i64 %33) #14
-  %65 = and i64 %64, 7
-  %66 = icmp ne i64 %65, 0
-  %67 = and i64 %64, -9
-  %68 = icmp eq i64 %67, 0
-  %69 = or i1 %66, %68
-  br i1 %69, label %rb_obj_freeze_inline.exit, label %70
-
-70:                                               ; preds = %63
-  %71 = inttoptr i64 %64 to %struct.RBasic*
-  %72 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %71, i64 0, i32 0
-  %73 = load i64, i64* %72, align 8, !tbaa !1
-  %74 = and i64 %73, 31
-  %75 = icmp eq i64 %74, 27
-  br i1 %75, label %rb_obj_freeze_inline.exit, label %76
-
-76:                                               ; preds = %70
-  %77 = or i64 %73, 2048
-  store i64 %77, i64* %72, align 8, !tbaa !1
-  %78 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %71, i64 0, i32 1
-  %79 = load i64, i64* %78, align 8, !tbaa !8
-  %80 = icmp ne i64 %79, 0
-  %81 = and i64 %73, 4096
-  %82 = icmp eq i64 %81, 0
-  %83 = and i1 %82, %80
-  br i1 %83, label %84, label %rb_obj_freeze_inline.exit
-
-84:                                               ; preds = %76
-  tail call void @rb_freeze_singleton_class(i64 %64) #14
+44:                                               ; preds = %36
+  tail call void @rb_freeze_singleton_class(i64 %24) #14
   br label %rb_obj_freeze_inline.exit
 
-rb_obj_freeze_inline.exit:                        ; preds = %63, %70, %76, %84
-  %85 = tail call i32 @rb_is_const_name(i64 %64) #14
-  %86 = icmp eq i32 %85, 0
-  br i1 %86, label %.loopexit9, label %rb_class_of.exit
+rb_obj_freeze_inline.exit:                        ; preds = %23, %30, %36, %44
+  %45 = tail call i32 @rb_is_const_name(i64 %24) #14
+  %46 = icmp eq i32 %45, 0
+  br i1 %46, label %11, label %rb_class_of.exit
 
 rb_class_of.exit:                                 ; preds = %rb_obj_freeze_inline.exit
-  %87 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %55, i64 0, i32 1
-  %88 = load i64, i64* %87, align 8, !tbaa !7
-  %89 = tail call i32 @rb_method_basic_definition_p(i64 %88, i64 2817) #14
-  %90 = icmp eq i32 %89, 0
-  br i1 %90, label %91, label %94
+  %47 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %15, i64 0, i32 1
+  %48 = load i64, i64* %47, align 8, !tbaa !7
+  %49 = tail call i32 @rb_method_basic_definition_p(i64 %48, i64 2817) #14
+  %50 = icmp eq i32 %49, 0
+  br i1 %50, label %51, label %54
 
-91:                                               ; preds = %rb_class_of.exit
-  %92 = tail call i64 @rb_str_intern(i64 %64) #14
-  %93 = tail call i64 @rb_const_missing(i64 %12, i64 %92) #14
-  br label %107
+51:                                               ; preds = %rb_class_of.exit
+  %52 = tail call i64 @rb_str_intern(i64 %24) #14
+  %53 = tail call i64 @rb_const_missing(i64 %3, i64 %52) #14
+  br label %63
 
-94:                                               ; preds = %rb_class_of.exit
-  %95 = tail call i64 @rb_mod_const_missing(i64 %12, i64 %64) #15
+54:                                               ; preds = %rb_class_of.exit
+  %55 = tail call i64 @rb_mod_const_missing(i64 %3, i64 %24) #15
   unreachable
 
-96:                                               ; preds = %61
-  %97 = tail call i32 @rb_is_const_id(i64 %34) #6
-  %98 = icmp eq i32 %97, 0
-  br i1 %98, label %99, label %101
+56:                                               ; preds = %21
+  %57 = tail call i32 @rb_is_const_id(i64 %5) #6
+  %58 = icmp eq i32 %57, 0
+  br i1 %58, label %59, label %61
 
-99:                                               ; preds = %96
-  %100 = tail call i64 @rb_id2sym(i64 %34) #14
-  br label %.loopexit9
+59:                                               ; preds = %56
+  %60 = tail call i64 @rb_id2sym(i64 %5) #14
+  br label %11
 
-101:                                              ; preds = %96
-  %102 = icmp eq i64 %35, 0
-  br i1 %102, label %103, label %105
+61:                                               ; preds = %56
+  %62 = tail call i64 @rb_const_get(i64 %3, i64 %5) #14
+  br label %63
 
-103:                                              ; preds = %101
-  %104 = tail call i64 @rb_const_get(i64 %12, i64 %34) #14
-  br label %107
-
-105:                                              ; preds = %101
-  %106 = tail call i64 @rb_const_get_from(i64 %12, i64 %34) #14
-  br label %107
-
-107:                                              ; preds = %105, %103, %91
-  %108 = phi i64 [ %93, %91 ], [ %104, %103 ], [ %106, %105 ]
-  %109 = icmp ult i8* %47, %7
-  br i1 %109, label %11, label %110
-
-110:                                              ; preds = %107
-  ret i64 %108
+63:                                               ; preds = %51, %61
+  %64 = phi i64 [ %53, %51 ], [ %62, %61 ]
+  ret i64 %64
 }
 
 declare %struct.OnigEncodingTypeST* @rb_enc_get(i64) local_unnamed_addr #3
@@ -311,8 +234,6 @@ declare i64 @rb_mod_const_missing(i64, i64) local_unnamed_addr #5
 declare i32 @rb_is_const_id(i64) local_unnamed_addr #6
 
 declare i64 @rb_const_get(i64, i64) local_unnamed_addr #3
-
-declare i64 @rb_const_get_from(i64, i64) local_unnamed_addr #3
 
 declare void @rb_define_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr #3
 
@@ -445,7 +366,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal void @Constr_rubyIdPrecomputed_hello() #10 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.2, i64 0, i64 0), i64 5) #14
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.1, i64 0, i64 0), i64 5) #14
   store i64 %0, i64* @rubyIdPrecomputed_hello, align 8
   ret void
 }
@@ -459,19 +380,17 @@ entry:
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %1)
   %rubyId_unsafe.i = load i64, i64* @rubyIdPrecomputed_unsafe, align 8
   %rubyId_hello.i = load i64, i64* @rubyIdPrecomputed_hello, align 8
-  %2 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.1, i64 0, i64 0), i64 6) #14
   %callArgsAddr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 %2, i64* %callArgsAddr.i, align 8
-  %3 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1) #14
+  store i64 %0, i64* %callArgsAddr.i, align 8
+  %2 = tail call fastcc i64 @sorbet_getConstant() #14
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #14, !noalias !23
-  %4 = call i64 @rb_funcallv(i64 %3, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #14
+  %3 = call i64 @rb_funcallv(i64 %2, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #14
   %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_hello.i) #14
-  %5 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.1, i64 0, i64 0), i64 6) #14
-  call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.2, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U hello>" to i64 (...)*), i32 -1) #14
-  %6 = call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @userStr_sorbet, i64 0, i64 0), i64 6) #14
-  store i64 %6, i64* %callArgsAddr.i, align 8
+  call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.1, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U hello>" to i64 (...)*), i32 -1) #14
+  %4 = call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @userStr_sorbet, i64 0, i64 0), i64 6) #14
+  store i64 %4, i64* %callArgsAddr.i, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_hello.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #14, !noalias !26
-  %7 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_hello.i, i32 1, i64* nonnull %callArgsAddr.i) #14
+  %5 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_hello.i, i32 1, i64* nonnull %callArgsAddr.i) #14
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %1)
   ret void
 }
