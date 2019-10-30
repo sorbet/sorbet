@@ -20,6 +20,13 @@ void dbg_sorbet_validate_id(ID value, char * name) __attribute__((weak)) {
     }
 }
 
+const char* dbg_pi(ID id) __attribute__((weak)){
+  return rb_id2name(id);
+}
+const char* dbg_p(VALUE obj) __attribute__((weak)) {
+  return RSTRING_PTR(rb_sprintf("%"PRIsVALUE, obj);
+}
+
 // ****
 // ****                       Singletons
 // ****
