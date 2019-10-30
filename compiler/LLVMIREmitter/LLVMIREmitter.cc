@@ -154,8 +154,58 @@ llvm::Value *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuild
     }
     auto str = showClassName(cs, sym);
     ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
-    return builder.CreateCall(cs.module->getFunction("sorbet_getConstant"),
-                              {toCString(str, builder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
+    auto loaderName = "const_load" + str;
+    auto func = cs.module->getFunction(loaderName);
+    if (!func) {
+        auto ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), {}, false /*not varargs*/);
+        func = llvm::Function::Create(ft, llvm::Function::InternalLinkage, loaderName, *cs.module);
+        auto recomputeFunT = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), {}, false /*not varargs*/);
+        auto recomputeFun = llvm::Function::Create(recomputeFunT, llvm::Function::LinkOnceAnyLinkage,
+                                                   llvm::Twine("const_recompute_") + str, *cs.module);
+        recomputeFun->addFnAttr(llvm::Attribute::Cold);
+        llvm::IRBuilder<> functionBuilder(cs);
+        functionBuilder.SetInsertPoint(llvm::BasicBlock::Create(cs, "const_guard", func));
+        auto fastPath = llvm::BasicBlock::Create(cs, "cost_fastPath", func);
+        auto slowPath = llvm::BasicBlock::Create(cs, "cost_slowPath", func);
+        auto guardEpochName = "guard_epoch_" + str;
+        auto guardedConstName = "guarded_const_" + str;
+
+        auto tp = llvm::Type::getInt64Ty(cs);
+        auto guardEpochDeclaration = cs.module->getOrInsertGlobal(guardEpochName, tp, [&] {
+            auto ret = new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::LinkOnceAnyLinkage,
+                                                llvm::ConstantInt::get(tp, 0), guardEpochName);
+            return ret;
+        });
+
+        auto guardedConstDeclaration = cs.module->getOrInsertGlobal(guardedConstName, tp, [&] {
+            auto ret = new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::LinkOnceAnyLinkage,
+                                                llvm::ConstantInt::get(tp, 0), guardedConstName);
+            return ret;
+        });
+
+        auto canTakeFastPath = functionBuilder.CreateICmpEQ(
+            functionBuilder.CreateLoad(guardEpochDeclaration),
+            functionBuilder.CreateCall(cs.module->getFunction("sorbet_getConstantEpoch")), "canTakeFastPath");
+        cs.setExpectedBool(functionBuilder, canTakeFastPath, true);
+        functionBuilder.CreateCondBr(canTakeFastPath, fastPath, slowPath);
+        functionBuilder.SetInsertPoint(fastPath);
+        functionBuilder.CreateRet(functionBuilder.CreateLoad(guardedConstDeclaration));
+        functionBuilder.SetInsertPoint(slowPath);
+        functionBuilder.CreateCall(recomputeFun);
+        // call update func
+        functionBuilder.CreateBr(fastPath);
+        functionBuilder.SetInsertPoint(llvm::BasicBlock::Create(cs, "", recomputeFun));
+
+        functionBuilder.CreateStore(
+            functionBuilder.CreateCall(
+                cs.module->getFunction("sorbet_getConstant"),
+                {toCString(str, functionBuilder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))}),
+            guardedConstDeclaration);
+        functionBuilder.CreateStore(functionBuilder.CreateCall(cs.module->getFunction("sorbet_getConstantEpoch")),
+                                    guardEpochDeclaration);
+        functionBuilder.CreateRetVoid();
+    }
+    return builder.CreateCall(func, {});
 }
 
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {

@@ -290,6 +290,12 @@ void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) __a
     rb_define_const(owner, name, value);
 }
 
+RUBY_EXTERN rb_serial_t ruby_vm_global_constant_state;
+
+long sorbet_getConstantEpoch() {
+    return ruby_vm_global_constant_state;
+}
+
 // Trying to be a copy of rb_mod_const_get
 VALUE sorbet_getConstant(const char *path, long pathLen) __attribute__((noinline)) {
     VALUE name, mod;
