@@ -129,15 +129,16 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     for (auto &edit : autocorrect.edits) {
         u4 n = edit.loc.endPos() - edit.loc.beginPos();
         if (gs.autocorrect) {
-            auto line = edit.replacement == ""
-                ? ErrorLine::from(edit.loc, "Deleted")
-                : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Inserted" : "Replaced with", edit.replacement);
+            auto line =
+                edit.replacement == ""
+                    ? ErrorLine::from(edit.loc, "Deleted")
+                    : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Inserted" : "Replaced with", edit.replacement);
 
             addErrorSection(ErrorSection("Autocorrect: Done", {line}));
         } else {
-            auto line = edit.replacement == ""
-                ? ErrorLine::from(edit.loc, "Delete")
-                : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Insert" : "Replace with", edit.replacement);
+            auto line = edit.replacement == "" ? ErrorLine::from(edit.loc, "Delete")
+                                               : ErrorLine::from(edit.loc, "{} `{}`",
+                                                                 n == 0 ? "Insert" : "Replace with", edit.replacement);
 
             addErrorSection(ErrorSection("Autocorrect: Use `-a` to autocorrect", {line}));
         }
