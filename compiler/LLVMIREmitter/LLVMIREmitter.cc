@@ -429,7 +429,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             } else {
                 auto argIndex = i + minArgCount;
                 auto argMethodName = cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, argIndex + 1);
-                ENFORCE(argMethodName.exists());
+                ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(gs) + argIndex + " does not exist");
                 auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
                 ENFORCE(argMethod.exists());
                 auto fillDefaultFunc = getOrCreateFunction(cs, argMethod);
