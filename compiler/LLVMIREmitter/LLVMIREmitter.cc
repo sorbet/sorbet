@@ -674,7 +674,13 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     },
                     [&](cfg::Alias *i) {
                         if (i->what == core::Symbols::Magic_undeclaredFieldStub()) {
-                            aliases[bind.bind.variable] = Alias::forInstanceField(bind.bind.variable._name);
+                            auto name = bind.bind.variable._name.data(cs)->shortName(cs);
+                            if (name.size() > 2 && name[0] == '@' && name[1] == '@') {
+                                aliases[bind.bind.variable] = Alias::forClassField(bind.bind.variable._name);
+                            } else {
+                                ENFORCE(name.size() > 1 && name[0] == '@');
+                                aliases[bind.bind.variable] = Alias::forInstanceField(bind.bind.variable._name);
+                            }
                         } else {
                             aliases[bind.bind.variable] = Alias::forConstant(i->what);
                         }
