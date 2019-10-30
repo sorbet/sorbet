@@ -547,7 +547,7 @@ _Bool sorbet_isa_String(VALUE obj) {
     return RB_TYPE_P(obj, T_STRING);
 }
 
-_Bool sorbet_isa_method(VALUE obj) {
+_Bool sorbet_isa_Method(VALUE obj) {
     return rb_obj_is_method(obj) == Qtrue;
 }
 
