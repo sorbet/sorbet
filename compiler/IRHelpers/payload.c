@@ -21,11 +21,11 @@ void dbg_sorbet_validate_id(ID value, char * name) __attribute__((weak)) {
 }
 
 const char* dbg_pi(ID id) __attribute__((weak)){
-  return rb_id2name(id);
+    return rb_id2name(id);
 }
 const char* dbg_p(VALUE obj) __attribute__((weak)) {
-  char* ret= RSTRING_PTR(rb_sprintf("%"PRIsVALUE, obj));
-  return ret;
+    char* ret= RSTRING_PTR(rb_sprintf("%"PRIsVALUE, obj));
+    return ret;
 }
 
 // ****
@@ -278,7 +278,7 @@ void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) __attribute_
 // ****
 
 VALUE sorbet_rb_cObject() {
-  return rb_cObject;
+    return rb_cObject;
 }
 
 void sorbet_defineTopLevelConstant(const char *name, VALUE value) __attribute__((always_inline)) {
@@ -465,8 +465,8 @@ void sorbet_rb_error_arity(int argc, int min, int max) {
 // xmalloc
 
 struct sorbet_Closure {
-  const int size;
-  VALUE closureData[]; // this is a rarely known feature of C99 https://en.wikipedia.org/wiki/Flexible_array_member
+    const int size;
+    VALUE closureData[]; // this is a rarely known feature of C99 https://en.wikipedia.org/wiki/Flexible_array_member
 };
 
 struct sorbet_Closure *sorbet_Closure_alloc(int elemCount) {
@@ -503,8 +503,8 @@ VALUE sorbet_allocClosureAsValue(int elemCount) {
 }
 
 VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
-  struct sorbet_Closure *ptr = (struct sorbet_Closure *) RTYPEDDATA_DATA(closure);
-  return &(ptr->closureData[elemId]);
+    struct sorbet_Closure *ptr = (struct sorbet_Closure *) RTYPEDDATA_DATA(closure);
+    return &(ptr->closureData[elemId]);
 }
 
 #endif
