@@ -173,7 +173,7 @@ llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilde
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
                                       {getClassVariableStoreClass(cs, builder, blockMap),
-                                       cs.getRubyIdFor(builder, alias.instanceField.data(cs)->shortName(cs))});
+                                       cs.getRubyIdFor(builder, alias.classField.data(cs)->shortName(cs))});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_instanceVariableGet"),
                                       {varGet(cs, core::LocalVariable::selfVariable(), builder, llvmVariables, aliases,
@@ -209,7 +209,7 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             builder.CreateCall(cs.module->getFunction("sorbet_classVariableSet"),
                                {getClassVariableStoreClass(cs, builder, blockMap),
-                                cs.getRubyIdFor(builder, alias.instanceField.data(cs)->shortName(cs)), var});
+                                cs.getRubyIdFor(builder, alias.classField.data(cs)->shortName(cs)), var});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             builder.CreateCall(cs.module->getFunction("sorbet_instanceVariableSet"),
                                {varGet(cs, core::LocalVariable::selfVariable(), builder, llvmVariables, aliases,
