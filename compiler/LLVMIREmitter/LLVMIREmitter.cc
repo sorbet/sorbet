@@ -27,6 +27,7 @@ struct BasicBlockMap {
     vector<llvm::AllocaInst *> sendArgArrayByBlock;
     vector<llvm::Value *> escapedClosure;
     UnorderedMap<core::LocalVariable, int> escapedVariableIndeces;
+    llvm::BasicBlock *sigVerificationBlock;
 };
 
 // https://docs.ruby-lang.org/en/2.6.0/extension_rdoc.html
@@ -468,7 +469,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     }
 
     // jump to user body
-    builder.CreateBr(blockMap.userEntryBlockByFunction[0]);
+    builder.CreateBr(blockMap.sigVerificationBlock);
 
     for (int funcId = 1; funcId <= cfg.maxRubyBlockId; funcId++) {
         // todo: this should be replaced with argument computation for blocks
@@ -519,6 +520,8 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
         i++;
     }
 
+    llvm::BasicBlock *sigVerificationBlock = llvm::BasicBlock::Create(cs, "checkSig", rubyBlocks2Functions[0]);
+
     vector<llvm::BasicBlock *> llvmBlocks(cfg.maxBasicBlockId);
     for (auto &b : cfg.basicBlocks) {
         if (b.get() == cfg.entry()) {
@@ -544,7 +547,8 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                          basicBlockJumpOverrides,
                          sendArgArrays,
                          escapedClosure,
-                         std::move(escapedVariableIndices)
+                         std::move(escapedVariableIndices),
+                         sigVerificationBlock
 
     };
 }
@@ -908,6 +912,14 @@ int getMaxSendArgCount(cfg::CFG &cfg) {
     return maxSendArgCount;
 }
 
+void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
+                         const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
+                         const UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap) {
+    llvm::IRBuilder<> builder(cs);
+    builder.SetInsertPoint(blockMap.sigVerificationBlock);
+    builder.CreateBr(blockMap.userEntryBlockByFunction[0]);
+}
+
 } // namespace
 
 void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
@@ -938,6 +950,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
         setupLocalVariables(cs, cfg, rubyBlocks2Functions, variablesPrivateToBlocks, blockMap, aliases);
 
     setupArguments(cs, cfg, md, rubyBlocks2Functions, llvmVariables, variablesPrivateToBlocks, blockMap, aliases);
+    emitSigVerification(cs, cfg, md, llvmVariables, aliases, blockMap);
 
     emitUserBody(cs, cfg, blockMap, llvmVariables, aliases, rubyBlocks2Functions);
     for (int funId = 0; funId < blockMap.functionInitializersByFunction.size(); funId++) {
