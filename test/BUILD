@@ -20,8 +20,8 @@ sh_binary(
     data = [
         "preamble.rb",
         "//main:sorbet",
-        "@ruby_2_6_3//:ruby",
         "@llvm_toolchain//:bin/ld",
         "@llvm_toolchain//:bin/opt",
+        "@ruby_2_6_3//:ruby",
     ],
 )
