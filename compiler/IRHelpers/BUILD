@@ -47,8 +47,8 @@ cc_library(
     nocopts = "-f.*-sections",
     visibility = ["//visibility:public"],
     deps = [
-        "@ruby_2_4_3//:ruby_headers",
-        "@ruby_2_4_3//:ruby_private_headers",
+        "@ruby_2_6_3//:ruby_headers",
+        "@ruby_2_6_3//:ruby_private_headers",
     ],
 )
 
