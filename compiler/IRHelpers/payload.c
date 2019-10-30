@@ -274,7 +274,6 @@ void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) __a
 }
 
 // Trying to be a copy of rb_mod_const_get
-static const char wrong_constant_name[] = "wrong constant name %1$s";
 VALUE sorbet_getConstant(const char* path, long pathLen) __attribute__((noinline)) {
     VALUE name, mod;
     rb_encoding *enc;
@@ -293,7 +292,7 @@ VALUE sorbet_getConstant(const char* path, long pathLen) __attribute__((noinline
 
     if (DISABLED_CODE && (p >= pend || !*p)) {
 wrong_name:
-        rb_name_err_raise(wrong_constant_name, mod, name);
+        rb_raise(rb_eRuntimeError, "wrong constant name %"PRIsVALUE"%"PRIsVALUE, mod, name);
     }
 
     if (DISABLED_CODE && (p + 2 < pend && p[0] == ':' && p[1] == ':')) {
@@ -321,7 +320,7 @@ wrong_name:
 
         if (!RB_TYPE_P(mod, T_MODULE) && !RB_TYPE_P(mod, T_CLASS)) {
             rb_raise(rb_eTypeError, "%"PRIsVALUE" does not refer to class/module",
-                    QUOTE(name));
+                    name);
         }
 
         if (!id) {
