@@ -15,7 +15,7 @@ cleanup() {
 
 # trap cleanup EXIT
 
-ruby="/Users/$(whoami)/.rbenv/shims/ruby"
+ruby="./external/ruby_2_6_3/ruby"
 
 echo "Ruby: $rb"
 echo "require './test/preamble.rb'; require './$rb';" > "$rbrunfile"
@@ -38,7 +38,7 @@ done
 
 if [[ $rb != *"no-run"* ]]; then
     echo "Run Code: $ruby $runfile"
-    echo "Run LLDB: lldb ./bazel-out/darwin-dbg/bin/external/ruby_2_4_3/bin/ruby -- $runfile"
+    echo "Run LLDB: lldb $ruby -- $runfile"
     $ruby "$runfile" | tee "$srbout"
 
     diff -a "$rbout" "$srbout"
