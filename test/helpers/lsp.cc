@@ -157,6 +157,11 @@ unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int l
                                                 make_unique<Position>(line, character))));
 }
 
+unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query) {
+    return make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::WorkspaceSymbol,
+                                                               make_unique<WorkspaceSymbolParams>(string(query))));
+}
+
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities) {
     // Properties checked in the same order they are described in the LSP spec.
