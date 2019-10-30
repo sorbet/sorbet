@@ -248,6 +248,10 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
     cs.boxRawValue(builder, llvmVariables.at(local), var);
 } // namespace
 
+string getFunctionName(CompilerState &cs, core::SymbolRef sym) {
+    return "func_" + sym.data(cs)->toStringFullName(cs);
+}
+
 llvm::Function *getOrCreateFunction(CompilerState &cs, std::string name, llvm::FunctionType *ft,
                                     llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage) {
     auto func = cs.module->getFunction(name);
@@ -258,8 +262,7 @@ llvm::Function *getOrCreateFunction(CompilerState &cs, std::string name, llvm::F
 }
 
 llvm::Function *getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
-    return getOrCreateFunction(cs, sym.data(cs)->toStringFullName(cs), cs.getRubyFFIType(),
-                               getFunctionLinkageType(cs, sym));
+    return getOrCreateFunction(cs, getFunctionName(cs, sym), cs.getRubyFFIType(), getFunctionLinkageType(cs, sym));
 }
 
 llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
@@ -569,8 +572,7 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
     auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
     ENFORCE(funcSym.exists());
     ENFORCE(funcSym.data(cs)->isMethod());
-
-    auto llvmFuncName = funcSym.data(cs)->toStringFullName(cs);
+    auto llvmFuncName = getFunctionName(cs, funcSym);
     auto funcHandle = getOrCreateFunction(cs, funcSym);
     auto universalSignature = llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
     auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
@@ -605,7 +607,7 @@ void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
     }
 
     auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
-    auto llvmFuncName = funcSym.data(cs)->toStringFullName(cs);
+    auto llvmFuncName = getFunctionName(cs, funcSym);
     builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
 }
 
@@ -965,7 +967,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
 void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym) {
     llvm::IRBuilder<> builder(cs);
 
-    auto baseName = sym.data(cs)->toStringFullName(cs);
+    auto baseName = getFunctionName(cs, sym);
     auto linkageType = llvm::Function::InternalLinkage;
     auto owner = sym.data(cs)->owner;
     auto isRoot = owner == core::Symbols::rootSingleton();
@@ -990,7 +992,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym) 
         }
 
         // Call the LLVM method that was made by run() from this Init_ method
-        auto staticInitName = staticInit.data(cs)->toStringFullName(cs);
+        auto staticInitName = getFunctionName(cs, staticInit);
         auto staticInitFunc = cs.module->getFunction(staticInitName);
         ENFORCE(staticInitFunc);
         builder.CreateCall(staticInitFunc,
