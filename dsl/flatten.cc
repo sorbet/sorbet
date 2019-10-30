@@ -104,7 +104,7 @@ class FlattenWalk {
     };
 
     // extract all the methods from the current queue and put them at the end of the class's current body
-    ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs, core::Loc loc) {
+    ast::ClassDef::RHS_store addClassDefMethods(core::Context ctx, ast::ClassDef::RHS_store rhs, core::Loc loc) {
         if (curMethodSet().methods.size() == 1 && rhs.size() == 1 && ast::isa_tree<ast::EmptyTree>(rhs[0].get())) {
             // It was only 1 method to begin with, put it back
             rhs.pop_back();
@@ -183,7 +183,7 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        classDef->rhs = addMethods(ctx, std::move(classDef->rhs), classDef->loc);
+        classDef->rhs = addClassDefMethods(ctx, std::move(classDef->rhs), classDef->loc);
         return classDef;
     };
 
@@ -251,7 +251,7 @@ public:
         return replacement;
     };
 
-    unique_ptr<ast::Expression> addMethods(core::Context ctx, unique_ptr<ast::Expression> tree) {
+    unique_ptr<ast::Expression> addTopLevelMethods(core::Context ctx, unique_ptr<ast::Expression> tree) {
         auto &methods = curMethodSet().methods;
         if (methods.empty()) {
             ENFORCE(popCurMethodDefs().empty());
@@ -267,7 +267,7 @@ public:
         if (insSeq == nullptr) {
             ast::InsSeq::STATS_store stats;
             tree = make_unique<ast::InsSeq>(tree->loc, std::move(stats), std::move(tree));
-            return addMethods(ctx, std::move(tree));
+            return addTopLevelMethods(ctx, std::move(tree));
         }
 
         for (auto &method : popCurMethodDefs()) {
@@ -281,7 +281,7 @@ public:
 unique_ptr<ast::Expression> Flatten::run(core::Context ctx, unique_ptr<ast::Expression> tree) {
     FlattenWalk flatten;
     tree = ast::TreeMap::apply(ctx, flatten, std::move(tree));
-    tree = flatten.addMethods(ctx, std::move(tree));
+    tree = flatten.addTopLevelMethods(ctx, std::move(tree));
 
     return tree;
 }
