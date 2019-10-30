@@ -6,6 +6,8 @@ payload="$1"
 # mark all our unternal functions as, well, internal :-)
 sed -i '.bak' 's/define double @sorbet_/define internal double @sorbet_/g' "$payload"
 sed -i '.bak' 's/define i64 @sorbet_/define internal i64 @sorbet_/g' "$payload"
+sed -i '.bak' 's/define nonnull i64\* @sorbet_/define internal nonnull i64\* @sorbet_/g' "$payload"
+sed -i '.bak' 's/define %struct\.sorbet_Closure\* @sorbet_/define internal %struct\.sorbet_Closure\* @sorbet_/g' "$payload"
 sed -i '.bak' 's/define i8\* @sorbet_/define internal i8\* @sorbet_/g' "$payload"
 sed -i '.bak' 's/define zeroext i1 @sorbet_/define internal zeroext i1 @sorbet_/g' "$payload"
 sed -i '.bak' 's/define void @sorbet_/define internal void @sorbet_/g' "$payload"
