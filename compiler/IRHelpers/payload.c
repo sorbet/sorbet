@@ -255,6 +255,14 @@ VALUE sorbet_instanceVariableSet(VALUE receiver, ID name, VALUE newValue) __attr
     return rb_ivar_set(receiver, name, newValue);
 }
 
+VALUE sorbet_globalVariableGet(const char *name) __attribute__((always_inline)) {
+    return rb_gv_get(name);
+}
+
+void sorbet_globalVariableSet(const char *name, VALUE newValue) __attribute__((always_inline)) {
+    rb_gv_set(name, newValue);
+}
+
 VALUE sorbet_classVariableGet(VALUE _class, ID name) __attribute__((always_inline)) {
     dbg_sorbet_validate_id(name, "name");
     return rb_cvar_get(_class, name);
