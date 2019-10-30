@@ -810,7 +810,10 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             varGet(cs, i->what.variable, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
                         builder.CreateRet(var);
                     },
-                    [&](cfg::LoadSelf *i) { cs.trace("LoadSelf\n"); },
+                    [&](cfg::LoadSelf *i) {
+                        auto var = varGet(cs, i->fallback, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
+                        varSet(cs, bind.bind.variable, var, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
+                    },
                     [&](cfg::Literal *i) {
                         if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {
                             varSet(cs, bind.bind.variable, cs.getRubyFalseRaw(builder), builder, llvmVariables, aliases,
