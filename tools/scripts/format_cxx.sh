@@ -14,7 +14,7 @@ bazel build @com_stripe_ruby_typer//tools:clang-format &> /dev/null
 
 # shellcheck disable=SC2207
 cxx_src=(
-    $(git ls-files -c -m -o --exclude-standard -- '*.cxx' '*.cc' '*.h' | \
+    $(git ls-files -c -m -o --exclude-standard -- '*.cxx' '*.cc' '*.h' '*.c' | \
           grep -v ^third_party/
     )
 )
