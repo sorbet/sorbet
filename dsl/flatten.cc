@@ -61,8 +61,7 @@ class FlattenWalk {
         // which means when we get to `bar` we need to know that the outer context `foo` is static. We pass that down
         // the current stack by means of this `isStatic` variable.
         int staticLevel;
-        MethodData(bool needsMoved, int staticLevel)
-            : needsMoved(needsMoved), staticLevel(staticLevel){};
+        MethodData(bool needsMoved, int staticLevel) : needsMoved(needsMoved), staticLevel(staticLevel){};
     };
     struct MovedItem {
         unique_ptr<ast::Expression> expr;
