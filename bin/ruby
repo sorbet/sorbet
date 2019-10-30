@@ -8,7 +8,7 @@ cleanup() {
     rm -r "$llvmir" "$runfile"
 }
 
-# trap cleanup EXIT
+trap cleanup EXIT
 
 bazel build @llvm_toolchain//:bin/ld main:sorbet 2> /dev/null
 
@@ -25,5 +25,3 @@ done
 
 ruby="/Users/$(whoami)/.rbenv/shims/ruby"
 $ruby "$runfile"
-
-cleanup
