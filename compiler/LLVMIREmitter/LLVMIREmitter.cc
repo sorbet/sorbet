@@ -646,7 +646,7 @@ findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg)
             typecase(
                 bind.value.get(),
                 [&](cfg::Ident *i) { trackBlockUsage(cs, cfg, i->what, bb.get(), ret, escapedVariableIndexes, idx); },
-                [&](cfg::Alias *i) { /* nothing */ // namespace
+                [&](cfg::Alias *i) { /* nothing */
                 },
                 [&](cfg::SolveConstraint *i) { /* nothing*/ },
                 [&](cfg::Send *i) {
@@ -812,7 +812,6 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     },
                     [&](cfg::LoadSelf *i) { cs.trace("LoadSelf\n"); },
                     [&](cfg::Literal *i) {
-                        cs.trace("Literal\n");
                         if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {
                             varSet(cs, bind.bind.variable, cs.getRubyFalseRaw(builder), builder, llvmVariables, aliases,
                                    blockMap, bb->rubyBlockId);
@@ -858,9 +857,13 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                                 cs.trace("UnsupportedLiteral");
                         }
                     },
-                    [&](cfg::Unanalyzable *i) { cs.trace("Unanalyzable\n"); },
-                    [&](cfg::LoadArg *i) { cs.trace("LoadArg\n"); },
-                    [&](cfg::LoadYieldParams *i) { cs.trace("LoadYieldParams\n"); },
+                    [&](cfg::Unanalyzable *i) { Exception::raise("unsupported"); },
+                    [&](cfg::LoadArg *i) {
+                        /* intentionally omitted, it's part of method preambula */
+                    },
+                    [&](cfg::LoadYieldParams *i) {
+                        /* intentionally omitted, it's part of method preambula */
+                    },
                     [&](cfg::Cast *i) { cs.trace("Cast\n"); }, [&](cfg::TAbsurd *i) { cs.trace("TAbsurd\n"); });
                 if (isTerminated) {
                     break;
