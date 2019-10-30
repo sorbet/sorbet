@@ -947,16 +947,25 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
                                                            core::UntypedMode::AlwaysCompatible)) {
                     if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
-                        e.setHeader("Returning value that does not conform to method result type");
-                        e.addErrorSection(core::ErrorSection(
-                            "Expected " + methodReturnType->show(ctx),
-                            {
-                                core::ErrorLine::from(ctx.owner.data(ctx)->loc(), "Method `{}` has return type `{}`",
-                                                      ctx.owner.data(ctx)->name.show(ctx), methodReturnType->show(ctx)),
-                            }));
-                        e.addErrorSection(
-                            core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
-                                               typeAndOrigin.origins2Explanations(ctx)));
+                        auto ownerData = ctx.owner.data(ctx);
+                        if (ownerData->name.data(ctx)->kind == core::NameKind::UNIQUE &&
+                            ownerData->name.data(ctx)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) {
+                            e.setHeader("Argument does not have asserted type `{}`", methodReturnType->show(ctx));
+                            e.addErrorSection(
+                                core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
+                                                   typeAndOrigin.origins2Explanations(ctx)));
+                        } else {
+                            e.setHeader("Returning value that does not conform to method result type");
+                            e.addErrorSection(core::ErrorSection(
+                                "Expected " + methodReturnType->show(ctx),
+                                {
+                                    core::ErrorLine::from(ownerData->loc(), "Method `{}` has return type `{}`",
+                                                          ownerData->name.show(ctx), methodReturnType->show(ctx)),
+                                }));
+                            e.addErrorSection(
+                                core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
+                                                   typeAndOrigin.origins2Explanations(ctx)));
+                        }
                     }
                 }
             },

@@ -14,26 +14,26 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
+    <emptyTree>
+
     def take_arguments(a, b, c, d, e, f, g)
       begin
-        if ::T.unsafe(false)
-          ::Sorbet::Private::Static.keep_for_ide(1)
-        else
-          <emptyTree>
-        end
-        if ::T.unsafe(false)
-          ::Sorbet::Private::Static.keep_for_ide(2)
-        else
-          <emptyTree>
-        end
-        begin
-          [a, b, c, d, e, f, g]
-          h = 1
-          <self>.proc() do |a$1, b$1 = 1, *c$1, d$1:, e$1: = 2, *f$1:, &g$1; h$1|
-            [a$1, b$1, c$1, d$1, e$1, f$1, g$1, h$1]
-          end
+        [a, b, c, d, e, f, g]
+        h = 1
+        <self>.proc() do |a$1, b$1 = 1, *c$1, d$1:, e$1: = 2, *f$1:, &g$1; h$1|
+          [a$1, b$1, c$1, d$1, e$1, f$1, g$1, h$1]
         end
       end
+    end
+
+    def take_arguments<defaultArg>1(a, b, c, d, e, f, g)
+      1
+    end
+
+    def take_arguments<defaultArg>2(a, b, c, d, e, f, g)
+      2
     end
 
     def self.<static-init>(<blk>)
