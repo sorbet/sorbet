@@ -2,8 +2,8 @@
 #define GRANITA_H
 // Paul's and Dmitry's laptops have different attributes for this function in system libraries.
 void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
-#include "ruby.h"
 #include "internal.h"
+#include "ruby.h"
 #include "vm_core.h"
 // for explanation of WTF is happening here, see ruby.h and
 // https://silverhammermba.github.io/emberb/c/ and
@@ -13,26 +13,26 @@ void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 // ****                       Internal Helper Functions
 // ****
 
-void dbg_sorbet_validate_id(ID value, char * name) __attribute__((weak)) {
+void dbg_sorbet_validate_id(ID value, char *name) __attribute__((weak)) {
     if (UNLIKELY(value == 0)) {
         printf("ERROR: %s is 0\n", name);
         abort();
     }
 }
 
-const char* dbg_pi(ID id) __attribute__((weak)){
-  return rb_id2name(id);
+const char *dbg_pi(ID id) __attribute__((weak)) {
+    return rb_id2name(id);
 }
-const char* dbg_p(VALUE obj) __attribute__((weak)) {
-  char* ret= RSTRING_PTR(rb_sprintf("%"PRIsVALUE, obj));
-  return ret;
+const char *dbg_p(VALUE obj) __attribute__((weak)) {
+    char *ret = RSTRING_PTR(rb_sprintf("%" PRIsVALUE, obj));
+    return ret;
 }
 
 // ****
 // ****                       Singletons
 // ****
 
-VALUE sorbet_rubyTrue() __attribute__((always_inline))  {
+VALUE sorbet_rubyTrue() __attribute__((always_inline)) {
     return RUBY_Qtrue;
 }
 
@@ -278,7 +278,7 @@ void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) __attribute_
 // ****
 
 VALUE sorbet_rb_cObject() {
-  return rb_cObject;
+    return rb_cObject;
 }
 
 void sorbet_defineTopLevelConstant(const char *name, VALUE value) __attribute__((always_inline)) {
@@ -290,7 +290,7 @@ void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) __a
 }
 
 // Trying to be a copy of rb_mod_const_get
-VALUE sorbet_getConstant(const char* path, long pathLen) __attribute__((noinline)) {
+VALUE sorbet_getConstant(const char *path, long pathLen) __attribute__((noinline)) {
     VALUE name, mod;
     rb_encoding *enc;
     const char *pbeg, *p, *pend;
@@ -307,8 +307,8 @@ VALUE sorbet_getConstant(const char* path, long pathLen) __attribute__((noinline
     pend = path + pathLen;
 
     if (DISABLED_CODE && (p >= pend || !*p)) {
-wrong_name:
-        rb_raise(rb_eRuntimeError, "wrong constant name %"PRIsVALUE"%"PRIsVALUE, mod, name);
+    wrong_name:
+        rb_raise(rb_eRuntimeError, "wrong constant name %" PRIsVALUE "%" PRIsVALUE, mod, name);
     }
 
     if (DISABLED_CODE && (p + 2 < pend && p[0] == ':' && p[1] == ':')) {
@@ -321,22 +321,24 @@ wrong_name:
         VALUE part;
         long len, beglen;
 
-        while (p < pend && *p != ':') p++;
+        while (p < pend && *p != ':')
+            p++;
 
-        if (pbeg == p) goto wrong_name;
+        if (pbeg == p)
+            goto wrong_name;
 
-        id = rb_check_id_cstr(pbeg, len = p-pbeg, enc);
-        beglen = pbeg-path;
+        id = rb_check_id_cstr(pbeg, len = p - pbeg, enc);
+        beglen = pbeg - path;
 
         if (p < pend && p[0] == ':') {
-            if (p + 2 >= pend || p[1] != ':') goto wrong_name;
+            if (p + 2 >= pend || p[1] != ':')
+                goto wrong_name;
             p += 2;
             pbeg = p;
         }
 
         if (!RB_TYPE_P(mod, T_MODULE) && !RB_TYPE_P(mod, T_CLASS)) {
-            rb_raise(rb_eTypeError, "%"PRIsVALUE" does not refer to class/module",
-                    name);
+            rb_raise(rb_eTypeError, "%" PRIsVALUE " does not refer to class/module", name);
         }
 
         if (!id) {
@@ -345,13 +347,11 @@ wrong_name:
             if (!rb_is_const_name(part)) {
                 name = part;
                 goto wrong_name;
-            }
-            else if (!rb_method_basic_definition_p(CLASS_OF(mod), idConst_missing)) {
+            } else if (!rb_method_basic_definition_p(CLASS_OF(mod), idConst_missing)) {
                 part = rb_str_intern(part);
                 mod = rb_const_missing(mod, part);
                 continue;
-            }
-            else {
+            } else {
                 rb_mod_const_missing(mod, part);
             }
         }
@@ -361,11 +361,9 @@ wrong_name:
         }
         if (!recur) {
             mod = rb_const_get_at(mod, id);
-        }
-        else if (beglen == 0) {
+        } else if (beglen == 0) {
             mod = rb_const_get(mod, id);
-        }
-        else {
+        } else {
             mod = rb_const_get_from(mod, id);
         }
     }
@@ -374,7 +372,7 @@ wrong_name:
 }
 // End copy of rb_mod_const_get
 
-void sorbet_setConstant(VALUE mod, const char* name, long nameLen, VALUE value) __attribute__((noinline)) {
+void sorbet_setConstant(VALUE mod, const char *name, long nameLen, VALUE value) __attribute__((noinline)) {
     ID id = rb_intern2(name, nameLen);
     return rb_const_set(mod, id, value);
 }
@@ -396,12 +394,14 @@ VALUE sorbet_defineNestedClass(VALUE owner, const char *name, VALUE super) __att
 }
 
 // this DOES override existing methods
-void sorbet_defineMethod(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc) __attribute__((always_inline)) {
+void sorbet_defineMethod(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc)
+    __attribute__((always_inline)) {
     rb_define_method(klass, name, methodPtr, argc);
 }
 
 // this DOES override existing methods
-void sorbet_defineMethodSingleton(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc) __attribute__((always_inline)) {
+void sorbet_defineMethodSingleton(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc)
+    __attribute__((always_inline)) {
     rb_define_singleton_method(klass, name, methodPtr, argc);
 }
 
@@ -419,12 +419,15 @@ VALUE sorbet_callBlock(VALUE array) __attribute__((always_inline)) {
     return rb_yield_splat(array);
 }
 
-VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv) __attribute__((always_inline)) {
+VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv)
+    __attribute__((always_inline)) {
     dbg_sorbet_validate_id(func, "func");
     return rb_funcallv(recv, func, argc, argv);
 }
 
-VALUE sorbet_callFuncBlock(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv, VALUE(*blockImpl)(VALUE, VALUE, int, VALUE*, VALUE), VALUE closure) __attribute__((always_inline)) {
+VALUE sorbet_callFuncBlock(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv,
+                           VALUE (*blockImpl)(VALUE, VALUE, int, VALUE *, VALUE), VALUE closure)
+    __attribute__((always_inline)) {
     dbg_sorbet_validate_id(func, "func");
     return rb_block_call(recv, func, argc, argv, blockImpl, closure);
 }
@@ -465,8 +468,8 @@ void sorbet_rb_error_arity(int argc, int min, int max) {
 // xmalloc
 
 struct sorbet_Closure {
-  const int size;
-  VALUE closureData[]; // this is a rarely known feature of C99 https://en.wikipedia.org/wiki/Flexible_array_member
+    const int size;
+    VALUE closureData[]; // this is a rarely known feature of C99 https://en.wikipedia.org/wiki/Flexible_array_member
 };
 
 struct sorbet_Closure *sorbet_Closure_alloc(int elemCount) {
@@ -475,13 +478,13 @@ struct sorbet_Closure *sorbet_Closure_alloc(int elemCount) {
 
 void sorbet_Closure_mark(void *closurePtr) {
     // this might be possible to make more efficient using rb_mark_tbl
-    struct sorbet_Closure *ptr = (struct sorbet_Closure *) closurePtr;
+    struct sorbet_Closure *ptr = (struct sorbet_Closure *)closurePtr;
     rb_gc_mark_values(ptr->size, &ptr->closureData[0]);
 }
 
 size_t sorbet_Closure_size(const void *closurePtr) {
     // this might be possible to make more efficient using rb_mark_tbl
-    struct sorbet_Closure *ptr = (struct sorbet_Closure *) closurePtr;
+    struct sorbet_Closure *ptr = (struct sorbet_Closure *)closurePtr;
     return sizeof(struct sorbet_Closure) + ptr->size * sizeof(VALUE);
 }
 
@@ -489,7 +492,7 @@ const rb_data_type_t closureInfo = {
     "CompiledClosure", // this shouldn't ever be visible to users
     {
         /* mark = */ sorbet_Closure_mark,
-        /* free = */ RUBY_DEFAULT_FREE, // this uses xfree and optimzies it
+        /* free = */ RUBY_DEFAULT_FREE,  // this uses xfree and optimzies it
         /* size = */ sorbet_Closure_size /*, compact */
     },
     /* parent = */ NULL,
@@ -503,7 +506,7 @@ VALUE sorbet_allocClosureAsValue(int elemCount) {
 }
 
 VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
-  return &(((struct sorbet_Closure *)RTYPEDDATA_DATA(closure))->closureData[elemId]);
+    return &(((struct sorbet_Closure *)RTYPEDDATA_DATA(closure))->closureData[elemId]);
 }
 
 // ****
@@ -511,47 +514,47 @@ VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
 // ****
 
 _Bool sorbet_isa_Integer(VALUE obj) {
-  return RB_FIXNUM_P(obj);
+    return RB_FIXNUM_P(obj);
 }
 
 _Bool sorbet_isa_TrueClass(VALUE obj) {
-  return obj == RUBY_Qtrue;
+    return obj == RUBY_Qtrue;
 }
 
 _Bool sorbet_isa_FalseClass(VALUE obj) {
-  return obj == RUBY_Qfalse;
+    return obj == RUBY_Qfalse;
 }
 
 _Bool sorbet_isa_NilClass(VALUE obj) {
-  return obj == RUBY_Qnil;
+    return obj == RUBY_Qnil;
 }
 
 _Bool sorbet_isa_Symbol(VALUE obj) {
-  return RB_SYMBOL_P(obj);
+    return RB_SYMBOL_P(obj);
 }
 
 _Bool sorbet_isa_Float(VALUE obj) {
-  return RB_FLOAT_TYPE_P(obj);
+    return RB_FLOAT_TYPE_P(obj);
 }
 
 _Bool sorbet_isa_Untyped(VALUE obj) {
-  return 1;
+    return 1;
 }
 
 _Bool sorbet_isa_String(VALUE obj) {
-  return RB_TYPE_P(obj, T_STRING);
+    return RB_TYPE_P(obj, T_STRING);
 }
 
 _Bool sorbet_isa_method(VALUE obj) {
-  return rb_obj_is_method(obj) == Qtrue;
+    return rb_obj_is_method(obj) == Qtrue;
 }
 
 _Bool sorbet_isa_Proc(VALUE obj) {
-  return rb_obj_is_proc(obj) == Qtrue;
+    return rb_obj_is_proc(obj) == Qtrue;
 }
 
 _Bool sorbet_isa(VALUE obj, VALUE class) {
-  return rb_obj_is_kind_of(obj, class) == Qtrue;
+    return rb_obj_is_kind_of(obj, class) == Qtrue;
 }
 
 #endif
