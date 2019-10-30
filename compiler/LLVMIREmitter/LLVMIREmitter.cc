@@ -40,7 +40,7 @@ struct Alias {
     core::SymbolRef constantSym;
     core::NameRef instanceField;
     core::NameRef classField;
-    core::NameRef globalField;
+    core::SymbolRef globalField;
     static Alias forConstant(core::SymbolRef sym) {
         Alias ret;
         ret.kind = AliasKind::Constant;
@@ -59,10 +59,10 @@ struct Alias {
         ret.instanceField = name;
         return ret;
     }
-    static Alias forGlobalField(core::NameRef name) {
+    static Alias forGlobalField(core::SymbolRef sym) {
         Alias ret;
         ret.kind = AliasKind::GlobalField;
-        ret.globalField = name;
+        ret.globalField = sym;
         return ret;
     }
 };
@@ -181,7 +181,7 @@ llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilde
             return resolveSymbol(cs, alias.constantSym, builder);
         } else if (alias.kind == Alias::AliasKind::GlobalField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_globalVariableGet"),
-                                      {toCString(alias.globalField.data(cs)->shortName(cs), builder)});
+                                      {toCString(alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder)});
 
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
@@ -221,7 +221,7 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
                                 llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
         } else if (alias.kind == Alias::AliasKind::GlobalField) {
             builder.CreateCall(cs.module->getFunction("sorbet_globalVariableSet"),
-                               {toCString(alias.globalField.data(cs)->shortName(cs), builder), var});
+                               {toCString(alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder), var});
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             builder.CreateCall(cs.module->getFunction("sorbet_classVariableSet"),
                                {getClassVariableStoreClass(cs, builder, blockMap),
@@ -697,17 +697,26 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             auto name = bind.bind.variable._name.data(cs)->shortName(cs);
                             if (name.size() > 2 && name[0] == '@' && name[1] == '@') {
                                 aliases[bind.bind.variable] = Alias::forClassField(bind.bind.variable._name);
-                            } else if (name.size() > 1 && name[0] == '$') {
-                                aliases[bind.bind.variable] = Alias::forGlobalField(bind.bind.variable._name);
                             } else {
                                 ENFORCE(name.size() > 1 && name[0] == '@');
                                 aliases[bind.bind.variable] = Alias::forInstanceField(bind.bind.variable._name);
                             }
                         } else {
-                            aliases[bind.bind.variable] = Alias::forConstant(i->what);
+                            if (i->what.data(cs)->isField()) {
+                                auto name = bind.bind.variable._name.data(cs)->shortName(cs);
+                                ENFORCE(name.size() > 1 && name[0] == '$');
+                                aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
+                            } else {
+                                aliases[bind.bind.variable] = Alias::forConstant(i->what);
+                            }
                         }
                     },
-                    [&](cfg::SolveConstraint *i) { cs.trace("SolveConstraint\n"); },
+                    [&](cfg::SolveConstraint *i) {
+                        /*uncomment this when we rebase over sorbet master again*/
+                        // auto var = varGet(cs, i->send, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
+                        // varSet(cs, bind.bind.variable, var, builder, llvmVariables, aliases, blockMap,
+                        // bb->rubyBlockId);
+                    },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(cs)->shortName(cs);
                         if (i->fun == core::Names::buildHash()) {
