@@ -24,7 +24,8 @@ const char* dbg_pi(ID id) __attribute__((weak)){
   return rb_id2name(id);
 }
 const char* dbg_p(VALUE obj) __attribute__((weak)) {
-  return RSTRING_PTR(rb_sprintf("%"PRIsVALUE, obj);
+  char* ret= RSTRING_PTR(rb_sprintf("%"PRIsVALUE, obj));
+  return ret;
 }
 
 // ****
