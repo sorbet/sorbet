@@ -1088,7 +1088,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, 
         core::SymbolRef staticInit;
         auto attachedClass = owner.data(cs)->attachedClass(cs);
         if (isRoot) {
-            staticInit = cs.gs.lookupStaticInitForFile(attachedClass.data(cs)->loc());
+            staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());
         } else {
             staticInit = cs.gs.lookupStaticInitForClass(attachedClass);
         }
@@ -1096,7 +1096,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, 
         // Call the LLVM method that was made by run() from this Init_ method
         auto staticInitName = getFunctionName(cs, staticInit);
         auto staticInitFunc = cs.module->getFunction(staticInitName);
-        ENFORCE(staticInitFunc);
+        ENFORCE(staticInitFunc, staticInitName + " does not exist");
         builder.CreateCall(staticInitFunc,
                            {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                             llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
