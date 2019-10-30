@@ -181,8 +181,8 @@
 class Time < Object
   include Comparable
 
-  RFC2822_DAY_NAME = T.let(T.unsafe(nil), Array)
-  RFC2822_MONTH_NAME = T.let(T.unsafe(nil), Array)
+  RFC2822_DAY_NAME = T.let(T.unsafe(nil), T::Array[T.untyped])
+  RFC2822_MONTH_NAME = T.let(T.unsafe(nil), T::Array[T.untyped])
 
   # Creates a new [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object
   # with the value given by `time`, the given number of `seconds_with_frac`, or

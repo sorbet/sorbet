@@ -240,7 +240,7 @@ class Set < Object
 
   # Returns a new set that is a copy of the set, flattening each containing set
   # recursively.
-  sig {returns(Set)}
+  sig {returns(T::Set[T.untyped])}
   def flatten(); end
 
   # Equivalent to
@@ -975,6 +975,6 @@ end
 # arr                       #=> [1, 2, 3]
 # ```
 class Array
-  sig {returns(Set)}
+  sig {returns(T::Set[T.untyped])}
   def to_set; end
 end

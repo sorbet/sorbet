@@ -10,12 +10,12 @@ class RubyVM < Object
   # these values does not affect VM execution. Specification is not stable and
   # you should not depend on this value. Of course, this constant is MRI
   # specific.
-  DEFAULT_PARAMS = T.let(T.unsafe(nil), Hash)
+  DEFAULT_PARAMS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   # [`INSTRUCTION_NAMES`](https://docs.ruby-lang.org/en/2.6.0/RubyVM.html#INSTRUCTION_NAMES)
-  INSTRUCTION_NAMES = T.let(T.unsafe(nil), Array)
+  INSTRUCTION_NAMES = T.let(T.unsafe(nil), T::Array[T.untyped])
   # [`OPTS`](https://docs.ruby-lang.org/en/2.6.0/RubyVM.html#OPTS), which shows
   # vm build options
-  OPTS = T.let(T.unsafe(nil), Array)
+  OPTS = T.let(T.unsafe(nil), T::Array[T.untyped])
 end
 
 # The
