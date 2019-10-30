@@ -626,17 +626,18 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
 void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
     auto sym = typeToSym(cs, i->args[0].type);
     auto classNameCStr = toCString(showClassNameWithoutOwner(cs, sym), builder);
+    auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
 
     if (sym.data(cs)->owner != core::Symbols::root()) {
         auto getOwner = resolveSymbol(cs, sym.data(cs)->owner, builder);
-        if (sym.data(cs)->superClass() == core::Symbols::Module()) {
+        if (isModule) {
             builder.CreateCall(cs.module->getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
         } else {
             auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
             builder.CreateCall(cs.module->getFunction("sorbet_defineNestedClass"), {getOwner, classNameCStr, rawCall});
         }
     } else {
-        if (sym.data(cs)->superClass() == core::Symbols::Module()) {
+        if (isModule) {
             builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
         } else {
             auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
