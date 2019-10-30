@@ -48,8 +48,7 @@ namespace sorbet::dsl {
 
 class FlattenWalk {
     struct MethodData {
-        // This is an index into the methods stack
-        int idx;
+        bool needsMoved;
         // we need to keep information around about whether we're in a static outer context: for example, if we have
         //
         //   def self.foo; def bar; end; end
@@ -62,9 +61,8 @@ class FlattenWalk {
         // which means when we get to `bar` we need to know that the outer context `foo` is static. We pass that down
         // the current stack by means of this `isStatic` variable.
         int staticLevel;
-        ast::Expression *target;
-        MethodData(int idx, int staticLevel, ast::Expression *target)
-            : idx(idx), staticLevel(staticLevel), target(target){};
+        MethodData(bool needsMoved, int staticLevel)
+            : needsMoved(needsMoved), staticLevel(staticLevel){};
     };
     struct MovedItem {
         unique_ptr<ast::Expression> expr;
@@ -198,8 +196,7 @@ public:
         }
 
         if (send->fun == core::Names::sig()) {
-            methods.stack.emplace_back(methods.methods.size(), 0, send.get());
-            methods.methods.emplace_back();
+            methods.stack.emplace_back(true, 0);
         }
 
         return send;
@@ -209,21 +206,18 @@ public:
         auto &methods = curMethodSet();
 
         // if this isn't the thing on the stack, then we can ignore it
-        if (methods.stack.size() == 0 || methods.stack.back().target != send.get()) {
+        if (methods.stack.size() == 0 || send->fun != core::Names::sig()) {
             return send;
         }
 
         // we may not need to move this expression at all: check first
-        if (methods.stack.back().idx == -1) {
+        if (!methods.stack.back().needsMoved) {
             methods.stack.pop_back();
             return send;
         }
 
         // otherwise, we have a spot in the queue for it that has not yet been filled in
-        ENFORCE(methods.methods.size() > methods.stack.back().idx);
-        ENFORCE(methods.methods[methods.stack.back().idx].expr == nullptr);
-
-        methods.methods[methods.stack.back().idx] = {move(send), methods.stack.back().staticLevel};
+        methods.methods.emplace_back(move(send), methods.stack.back().staticLevel);
         methods.stack.pop_back();
 
         return ast::MK::EmptyTree();
@@ -233,10 +227,9 @@ public:
         auto &methods = curMethodSet();
         int staticLevel = computeStaticLevel(*methodDef);
         if (methods.stack.size() == 0) {
-            methods.stack.emplace_back(-1, staticLevel, methodDef.get());
+            methods.stack.emplace_back(false, staticLevel);
         } else {
-            methods.stack.emplace_back(methods.methods.size(), staticLevel, methodDef.get());
-            methods.methods.emplace_back();
+            methods.stack.emplace_back(true, staticLevel);
         }
 
         return methodDef;
@@ -246,22 +239,14 @@ public:
         auto &methods = curMethodSet();
         ENFORCE(!methods.stack.empty());
 
-        // if this isn't the thing on the stack, then we can ignore it
-        if (methods.stack.back().target != methodDef.get()) {
-            return methodDef;
-        }
-
         // we may not need to move this method at all: check first
-        if (methods.stack.back().idx == -1) {
+        if (!methods.stack.back().needsMoved) {
             methods.stack.pop_back();
             return methodDef;
         }
 
         auto replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
-        ENFORCE(methods.methods.size() > methods.stack.back().idx);
-        ENFORCE(methods.methods[methods.stack.back().idx].expr == nullptr);
-
-        methods.methods[methods.stack.back().idx] = {std::move(methodDef), methods.stack.back().staticLevel};
+        methods.methods.emplace_back(std::move(methodDef), methods.stack.back().staticLevel);
         methods.stack.pop_back();
         return replacement;
     };
