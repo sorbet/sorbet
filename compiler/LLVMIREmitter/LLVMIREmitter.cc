@@ -429,8 +429,10 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 // way down
             } else {
                 optionalMethodIndex++;
-                auto argMethodName = cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, optionalMethodIndex);
-                ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(cs) + to_string(optionalMethodIndex) + " does not exist");
+                auto argMethodName =
+                    cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, optionalMethodIndex);
+                ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(cs) +
+                                                    to_string(optionalMethodIndex) + " does not exist");
                 auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
                 ENFORCE(argMethod.exists());
                 auto fillDefaultFunc = getOrCreateFunction(cs, argMethod);
