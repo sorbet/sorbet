@@ -506,4 +506,52 @@ VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
   return &(((struct sorbet_Closure *)RTYPEDDATA_DATA(closure))->closureData[elemId]);
 }
 
+// ****
+// **** Implementation helpers for type tests
+// ****
+
+_Bool sorbet_isa_Integer(VALUE obj) {
+  return RB_FIXNUM_P(obj);
+}
+
+_Bool sorbet_isa_TrueClass(VALUE obj) {
+  return obj == RUBY_Qtrue;
+}
+
+_Bool sorbet_isa_FalseClass(VALUE obj) {
+  return obj == RUBY_Qfalse;
+}
+
+_Bool sorbet_isa_NilClass(VALUE obj) {
+  return obj == RUBY_Qnil;
+}
+
+_Bool sorbet_isa_Symbol(VALUE obj) {
+  return RB_SYMBOL_P(obj);
+}
+
+_Bool sorbet_isa_Float(VALUE obj) {
+  return RB_FLOAT_TYPE_P(obj);
+}
+
+_Bool sorbet_isa_Untyped(VALUE obj) {
+  return 1;
+}
+
+_Bool sorbet_isa_String(VALUE obj) {
+  return RB_TYPE_P(obj, T_STRING);
+}
+
+_Bool sorbet_isa_method(VALUE obj) {
+  return rb_obj_is_method(obj) == Qtrue;
+}
+
+_Bool sorbet_isa_Proc(VALUE obj) {
+  return rb_obj_is_proc(obj) == Qtrue;
+}
+
+_Bool sorbet_isa(VALUE obj, VALUE class) {
+  return rb_obj_is_kind_of(obj, class) == Qtrue;
+}
+
 #endif
