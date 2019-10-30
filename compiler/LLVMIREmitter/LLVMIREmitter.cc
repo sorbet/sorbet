@@ -662,12 +662,14 @@ findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg)
                     trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret, escapedVariableIndexes, idx);
                 },
                 [&](cfg::LoadSelf *i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
-                [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::Unanalyzable *i) { cs.trace("Unanalyzable\n"); },
-                [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { cs.trace("LoadYieldParams\n"); },
+                [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::Unanalyzable *i) { /*nothing*/ },
+                [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { /*nothing*/ },
                 [&](cfg::Cast *i) {
                     trackBlockUsage(cs, cfg, i->value.variable, bb.get(), ret, escapedVariableIndexes, idx);
                 },
-                [&](cfg::TAbsurd *i) { /*nothing*/ });
+                [&](cfg::TAbsurd *i) {
+                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret, escapedVariableIndexes, idx);
+                });
         }
     }
     return {std::move(ret), std::move(escapedVariableIndexes)};
