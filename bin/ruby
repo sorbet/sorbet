@@ -1,6 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 
+root="$( dirname "${BASH_SOURCE[0]}" )"/..
 llvmir=$(mktemp -d)
 runfile=$(mktemp)
 
@@ -10,15 +11,17 @@ cleanup() {
 
 trap cleanup EXIT
 
+cd "$root"
 bazel build @llvm_toolchain//:bin/ld main:sorbet 2> /dev/null
+cd - > /dev/null
 
-bazel-bin/main/sorbet --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$@"
+"$root/bazel-bin/main/sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$@"
 
-echo "require './test/preamble.rb';" > "$runfile"
+echo "require '$root/test/preamble.rb';" > "$runfile"
 
 for o in "$llvmir"/*.o; do
     bundle="${o%.rb}.bundle"
-    bazel-sorbet_llvm/external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
+    "$root/bazel-sorbet_llvm/external/llvm_toolchain/bin/ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
     echo "require '$bundle';" >> "$runfile"
 done
 
