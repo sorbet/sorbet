@@ -117,6 +117,12 @@ void DefaultArgs::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
             },
             [&](ast::MethodDef *mdef) {
                 if (isOverload) {
+                    // Overloaded methods have multiple signatures, not all of
+                    // which include all the arguments. Programatically copying
+                    // them over and figuring out which ones apply to which
+                    // defaults and how is super hard. This is one of the
+                    // reasons we don't let users write them, and only have them
+                    // in the stdlib.
                     return;
                 }
                 auto i = -1;
