@@ -836,7 +836,7 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
 }
 
 TEST_P(LSPTest, All) {
-    string rootPath = fmt::format("/Users/{}/stripe/pay-server", std::getenv("USER"));
+    string rootPath = fmt::format("/Users/{}/stripe/sorbet", std::getenv("USER"));
     string rootUri = fmt::format("file://{}", rootPath);
 
     // filename => URI
