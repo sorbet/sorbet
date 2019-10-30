@@ -5812,6 +5812,8 @@ end
 # :   nil indicates [RFC-822] group syntax. Otherwise, returns [RFC-822] domain
 #     name.
 class Net::IMAP::Address < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def host(); end
 
@@ -6683,6 +6685,8 @@ end
 # :   Returns a hash that represents parameters of the Content-Disposition
 #     field.
 class Net::IMAP::ContentDisposition < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def dsp_type(); end
 
@@ -6745,6 +6749,8 @@ end
 # raw\_data
 # :   Returns the raw data string.
 class Net::IMAP::ContinuationRequest < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def data(); end
 
@@ -6882,6 +6888,8 @@ end
 # message\_id
 # :   Returns a string that represents the message-id.
 class Net::IMAP::Envelope < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def bcc(); end
 
@@ -7063,6 +7071,8 @@ end
 #     UID
 # :       A number expressing the unique identifier of the message.
 class Net::IMAP::FetchData < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def attr(); end
 
@@ -7173,6 +7183,8 @@ end
 # rights
 # :   The access rights the indicated user has to the mailbox.
 class Net::IMAP::MailboxACLItem < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def mailbox(); end
 
@@ -7249,6 +7261,8 @@ end
 # name
 # :   Returns the mailbox name.
 class Net::IMAP::MailboxList < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def attr(); end
 
@@ -7326,6 +7340,8 @@ end
 # quota
 # :   Quota limit imposed on the mailbox.
 class Net::IMAP::MailboxQuota < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def mailbox(); end
 
@@ -7395,6 +7411,8 @@ end
 # quotaroots
 # :   Zero or more quotaroots that affect the quota on the specified mailbox.
 class Net::IMAP::MailboxQuotaRoot < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def mailbox(); end
 
@@ -7584,6 +7602,8 @@ end
 # data
 # :   Returns the data, if it exists.
 class Net::IMAP::ResponseCode < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def data(); end
 
@@ -7700,6 +7720,8 @@ class Net::IMAP::ResponseParser
 end
 
 class Net::IMAP::ResponseParser::Token < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def symbol(); end
 
@@ -7758,6 +7780,8 @@ end
 # text
 # :   Returns the text.
 class Net::IMAP::ResponseText < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def code(); end
 
@@ -7812,6 +7836,8 @@ end
 # :   Returns a hash. Each key is one of "MESSAGES", "RECENT", "UIDNEXT",
 #     "UIDVALIDITY", "UNSEEN". Each value is a number.
 class Net::IMAP::StatusData < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def attr(); end
 
@@ -7883,6 +7909,8 @@ end
 # raw\_data
 # :   Returns the raw data string.
 class Net::IMAP::TaggedResponse < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def data(); end
 
@@ -7961,6 +7989,8 @@ end
 #     [`Net::IMAP::ThreadMember`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#ThreadMember)
 #     objects for mail items that are children of this in the thread.
 class Net::IMAP::ThreadMember < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def children(); end
 
@@ -8028,6 +8058,8 @@ end
 # raw\_data
 # :   Returns the raw data string.
 class Net::IMAP::UntaggedResponse < Struct
+  Elem = type_member(fixed: T.untyped)
+
   sig {returns(::T.untyped)}
   def data(); end
 
