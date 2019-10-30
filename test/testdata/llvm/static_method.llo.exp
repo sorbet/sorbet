@@ -429,7 +429,7 @@ constr:
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_static_method() local_unnamed_addr #11 {
+define void @Init_test_testdata_llvm_static_method() local_unnamed_addr #11 {
 entry:
   %callArgs.i.i.i = alloca [2 x i64], align 8
   %callArgs.i = alloca [1 x i64], align 8
