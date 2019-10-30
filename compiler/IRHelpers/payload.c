@@ -559,4 +559,8 @@ _Bool sorbet_isa(VALUE obj, VALUE class) {
     return rb_obj_is_kind_of(obj, class) == Qtrue;
 }
 
+_Bool sorbet_isa_class_of(VALUE obj, VALUE class) {
+    return (obj == class) || (rb_obj_is_kind_of(obj, rb_cModule) && rb_class_inherited_p(obj, class));
+}
+
 #endif
