@@ -35,11 +35,12 @@ struct BasicBlockMap {
 namespace {
 
 struct Alias {
-    enum class AliasKind { Constant, InstanceField, ClassField };
+    enum class AliasKind { Constant, InstanceField, ClassField, GlobalField };
     AliasKind kind;
     core::SymbolRef constantSym;
     core::NameRef instanceField;
     core::NameRef classField;
+    core::NameRef globalField;
     static Alias forConstant(core::SymbolRef sym) {
         Alias ret;
         ret.kind = AliasKind::Constant;
@@ -56,6 +57,12 @@ struct Alias {
         Alias ret;
         ret.kind = AliasKind::InstanceField;
         ret.instanceField = name;
+        return ret;
+    }
+    static Alias forGlobalField(core::NameRef name) {
+        Alias ret;
+        ret.kind = AliasKind::GlobalField;
+        ret.globalField = name;
         return ret;
     }
 };
@@ -97,8 +104,9 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
     return owner + showClassNameWithoutOwner(gs, sym);
 }
 
-llvm::Constant *toCString(std::string str, llvm::IRBuilder<> &builder) {
-    return builder.CreateGlobalStringPtr(str, "str_" + str);
+llvm::Constant *toCString(string_view str, llvm::IRBuilder<> &builder) {
+    llvm::StringRef nameRef(str.data(), str.length());
+    return builder.CreateGlobalStringPtr(nameRef, llvm::Twine("str_") + nameRef);
 }
 
 llvm::CallInst *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
@@ -171,6 +179,10 @@ llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilde
 
         if (alias.kind == Alias::AliasKind::Constant) {
             return resolveSymbol(cs, alias.constantSym, builder);
+        } else if (alias.kind == Alias::AliasKind::GlobalField) {
+            return builder.CreateCall(cs.module->getFunction("sorbet_globalVariableGet"),
+                                      {toCString(alias.globalField.data(cs)->shortName(cs), builder)});
+
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
                                       {getClassVariableStoreClass(cs, builder, blockMap),
@@ -207,6 +219,9 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
             builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
                                {resolveSymbol(cs, owner, builder), toCString(name, builder),
                                 llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
+        } else if (alias.kind == Alias::AliasKind::GlobalField) {
+            builder.CreateCall(cs.module->getFunction("sorbet_globalVariableSet"),
+                               {toCString(alias.globalField.data(cs)->shortName(cs), builder), var});
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             builder.CreateCall(cs.module->getFunction("sorbet_classVariableSet"),
                                {getClassVariableStoreClass(cs, builder, blockMap),
@@ -682,6 +697,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             auto name = bind.bind.variable._name.data(cs)->shortName(cs);
                             if (name.size() > 2 && name[0] == '@' && name[1] == '@') {
                                 aliases[bind.bind.variable] = Alias::forClassField(bind.bind.variable._name);
+                            } else if (name.size() > 1 && name[0] == '$') {
+                                aliases[bind.bind.variable] = Alias::forGlobalField(bind.bind.variable._name);
                             } else {
                                 ENFORCE(name.size() > 1 && name[0] == '@');
                                 aliases[bind.bind.variable] = Alias::forInstanceField(bind.bind.variable._name);
