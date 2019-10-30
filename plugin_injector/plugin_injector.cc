@@ -11,8 +11,8 @@
 #include "core/errors/errors.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
-#include <optional>
 #include <filesystem>
+#include <optional>
 
 using namespace std;
 namespace sorbet::pipeline::semantic_extension {
