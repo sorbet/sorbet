@@ -1088,7 +1088,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, 
         core::SymbolRef staticInit;
         auto attachedClass = owner.data(cs)->attachedClass(cs);
         if (isRoot) {
-            staticInit = cs.gs.lookupStaticInitForFile(attachedClass.data(cs)->loc());
+            staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());
         } else {
             staticInit = cs.gs.lookupStaticInitForClass(attachedClass);
         }
