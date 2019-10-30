@@ -7,8 +7,6 @@ target triple = "x86_64-apple-darwin18.2.0"
 %struct.OnigEncodingTypeST = type { i32 (i8*, i8*, %struct.OnigEncodingTypeST*)*, i8*, i32, i32, i32 (i8*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i8*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i32, %struct.OnigEncodingTypeST*)*, i32 (i32, i8*, %struct.OnigEncodingTypeST*)*, i32 (i32, i8**, i8*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i32, i32 (i32, i32*, i32, i8*)*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i32, i8*, i8*, %struct.OnigCaseFoldCodeItem*, %struct.OnigEncodingTypeST*)*, i32 (%struct.OnigEncodingTypeST*, i8*, i8*)*, i32 (i32, i32, %struct.OnigEncodingTypeST*)*, i32 (i32, i32*, i32**, %struct.OnigEncodingTypeST*)*, i8* (i8*, i8*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i8*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i32*, i8**, i8*, i8*, i8*, %struct.OnigEncodingTypeST*)*, i32, i32 }
 %struct.OnigCaseFoldCodeItem = type { i32, i32, [3 x i32] }
 %struct.RBasic = type { i64, i64 }
-%struct.sorbet_Closure = type { i32, [0 x i64] }
-%struct.RTypedData = type { %struct.RBasic, %struct.rb_data_type_struct*, i64, i8* }
 
 @.str = private unnamed_addr constant [16 x i8] c"ERROR: %s is 0\0A\00", align 1
 @rb_cObject = external local_unnamed_addr constant i64, align 8
@@ -286,18 +284,6 @@ declare i64 @rb_define_class_under(i64, i8*, i64) local_unnamed_addr #3
 declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #3
 
 ; Function Attrs: nounwind ssp uwtable
-define %struct.sorbet_Closure* @sorbet_Closure_alloc(i32) local_unnamed_addr #0 {
-  %2 = sext i32 %0 to i64
-  %3 = shl nsw i64 %2, 3
-  %4 = add nsw i64 %3, 8
-  %5 = tail call i8* @ruby_xmalloc(i64 %4) #12
-  %6 = bitcast i8* %5 to %struct.sorbet_Closure*
-  ret %struct.sorbet_Closure* %6
-}
-
-declare i8* @ruby_xmalloc(i64) local_unnamed_addr #3
-
-; Function Attrs: nounwind ssp uwtable
 define internal void @sorbet_Closure_mark(i8*) #0 {
   %2 = bitcast i8* %0 to i32*
   %3 = load i32, i32* %2, align 8, !tbaa !9
@@ -318,17 +304,6 @@ define internal i64 @sorbet_Closure_size(i8* nocapture readonly) #7 {
   %5 = shl nsw i64 %4, 3
   %6 = add nsw i64 %5, 8
   ret i64 %6
-}
-
-; Function Attrs: norecurse nounwind readonly ssp uwtable
-define nonnull i64* @sorbet_getClosureElem(i64, i32) local_unnamed_addr #7 {
-  %3 = inttoptr i64 %0 to %struct.RTypedData*
-  %4 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %3, i64 0, i32 3
-  %5 = bitcast i8** %4 to %struct.sorbet_Closure**
-  %6 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %5, align 8, !tbaa !11
-  %7 = sext i32 %1 to i64
-  %8 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %6, i64 0, i32 1, i64 %7
-  ret i64* %8
 }
 
 declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
@@ -362,7 +337,7 @@ entry:
   %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %1, i64* %callArgsAddr.i, align 8
   %2 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.8, i64 0, i64 0), i64 1) #12
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !14
+  tail call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !11
   %3 = call i64 @rb_funcallv(i64 %2, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #12
   %4 = call i64 @rb_define_module(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.9, i64 0, i64 0)) #12
   %5 = bitcast [1 x i64]* %callArgs.i.i.i to i8*
@@ -373,7 +348,7 @@ entry:
   %callArgsAddr.i.i.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i.i.i, i64 0, i64 0
   store i64 %6, i64* %callArgsAddr.i.i.i, align 8
   %7 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.8, i64 0, i64 0), i64 1) #12
-  call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i.i.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !17
+  call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i.i.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !14
   %8 = call i64 @rb_funcallv(i64 %7, i64 %rubyId_unsafe.i.i.i, i32 1, i64* nonnull %callArgsAddr.i.i.i) #12
   %9 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.9, i64 0, i64 0), i64 3) #12
   %10 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.10, i64 0, i64 0), i64 6) #12
@@ -381,25 +356,25 @@ entry:
   %12 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([9 x i8], [9 x i8]* @"str_Foo::Bar", i64 0, i64 0), i64 8) #12
   store i64 %12, i64* %callArgsAddr.i.i.i, align 8
   %13 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_Sorbet::Private::Static.11", i64 0, i64 0), i64 23) #12
-  call void @dbg_sorbet_validate_id(i64 %rubyId_keep_for_ide.i.i.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !20
+  call void @dbg_sorbet_validate_id(i64 %rubyId_keep_for_ide.i.i.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !17
   %14 = call i64 @rb_funcallv(i64 %13, i64 %rubyId_keep_for_ide.i.i.i, i32 1, i64* nonnull %callArgsAddr.i.i.i) #12
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %5) #12
   %15 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.9, i64 0, i64 0), i64 3) #12
   store i64 %15, i64* %callArgsAddr.i, align 8
   %16 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_Sorbet::Private::Static.11", i64 0, i64 0), i64 23) #12
-  call void @dbg_sorbet_validate_id(i64 %rubyId_keep_for_ide.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !23
+  call void @dbg_sorbet_validate_id(i64 %rubyId_keep_for_ide.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !20
   %17 = call i64 @rb_funcallv(i64 %16, i64 %rubyId_keep_for_ide.i, i32 1, i64* nonnull %callArgsAddr.i) #12
   %18 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.10, i64 0, i64 0), i64 6) #12
   store i64 %18, i64* %callArgsAddr.i, align 8
   %19 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.8, i64 0, i64 0), i64 1) #12
-  call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !26
+  call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !23
   %20 = call i64 @rb_funcallv(i64 %19, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #12
   %21 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.10, i64 0, i64 0), i64 6) #12
   %22 = call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Baz.5, i64 0, i64 0), i64 %21) #12
   %23 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Baz.5, i64 0, i64 0), i64 3) #12
   store i64 %23, i64* %callArgsAddr.i, align 8
   %24 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_Sorbet::Private::Static.11", i64 0, i64 0), i64 23) #12
-  call void @dbg_sorbet_validate_id(i64 %rubyId_keep_for_ide.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !29
+  call void @dbg_sorbet_validate_id(i64 %rubyId_keep_for_ide.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !26
   %25 = call i64 @rb_funcallv(i64 %24, i64 %rubyId_keep_for_ide.i, i32 1, i64* nonnull %callArgsAddr.i) #12
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %0)
   ret void
@@ -437,9 +412,9 @@ attributes #13 = { noreturn nounwind }
 !8 = !{!7, !2, i64 8}
 !9 = !{!10, !10, i64 0}
 !10 = !{!"int", !3, i64 0}
-!11 = !{!12, !13, i64 32}
-!12 = !{!"RTypedData", !7, i64 0, !13, i64 16, !2, i64 24, !13, i64 32}
-!13 = !{!"any pointer", !3, i64 0}
+!11 = !{!12}
+!12 = distinct !{!12, !13, !"sorbet_callFunc: argument 0"}
+!13 = distinct !{!13, !"sorbet_callFunc"}
 !14 = !{!15}
 !15 = distinct !{!15, !16, !"sorbet_callFunc: argument 0"}
 !16 = distinct !{!16, !"sorbet_callFunc"}
@@ -455,6 +430,3 @@ attributes #13 = { noreturn nounwind }
 !26 = !{!27}
 !27 = distinct !{!27, !28, !"sorbet_callFunc: argument 0"}
 !28 = distinct !{!28, !"sorbet_callFunc"}
-!29 = !{!30}
-!30 = distinct !{!30, !31, !"sorbet_callFunc: argument 0"}
-!31 = distinct !{!31, !"sorbet_callFunc"}

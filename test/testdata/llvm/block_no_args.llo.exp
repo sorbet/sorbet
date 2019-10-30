@@ -7,8 +7,8 @@ target triple = "x86_64-apple-darwin18.2.0"
 %struct.OnigEncodingTypeST = type { i32 (i8*, i8*, %struct.OnigEncodingTypeST*)*, i8*, i32, i32, i32 (i8*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i8*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i32, %struct.OnigEncodingTypeST*)*, i32 (i32, i8*, %struct.OnigEncodingTypeST*)*, i32 (i32, i8**, i8*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i32, i32 (i32, i32*, i32, i8*)*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i32, i8*, i8*, %struct.OnigCaseFoldCodeItem*, %struct.OnigEncodingTypeST*)*, i32 (%struct.OnigEncodingTypeST*, i8*, i8*)*, i32 (i32, i32, %struct.OnigEncodingTypeST*)*, i32 (i32, i32*, i32**, %struct.OnigEncodingTypeST*)*, i8* (i8*, i8*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i8*, i8*, %struct.OnigEncodingTypeST*)*, i32 (i32*, i8**, i8*, i8*, i8*, %struct.OnigEncodingTypeST*)*, i32, i32 }
 %struct.OnigCaseFoldCodeItem = type { i32, i32, [3 x i32] }
 %struct.RBasic = type { i64, i64 }
-%struct.sorbet_Closure = type { i32, [0 x i64] }
 %struct.RTypedData = type { %struct.RBasic, %struct.rb_data_type_struct*, i64, i8* }
+%struct.sorbet_Closure = type { i32, [0 x i64] }
 
 @.str = private unnamed_addr constant [16 x i8] c"ERROR: %s is 0\0A\00", align 1
 @rb_cObject = external local_unnamed_addr constant i64, align 8
@@ -277,16 +277,6 @@ declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #3
 
 declare i64 @rb_block_call(i64, i64, i32, i64*, i64 (...)*, i64) local_unnamed_addr #3
 
-; Function Attrs: nounwind ssp uwtable
-define %struct.sorbet_Closure* @sorbet_Closure_alloc(i32) local_unnamed_addr #0 {
-  %2 = sext i32 %0 to i64
-  %3 = shl nsw i64 %2, 3
-  %4 = add nsw i64 %3, 8
-  %5 = tail call i8* @ruby_xmalloc(i64 %4) #12
-  %6 = bitcast i8* %5 to %struct.sorbet_Closure*
-  ret %struct.sorbet_Closure* %6
-}
-
 declare i8* @ruby_xmalloc(i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind ssp uwtable
@@ -314,17 +304,6 @@ define internal i64 @sorbet_Closure_size(i8* nocapture readonly) #7 {
 
 declare i64 @rb_data_typed_object_wrap(i64, i8*, %struct.rb_data_type_struct*) local_unnamed_addr #3
 
-; Function Attrs: norecurse nounwind readonly ssp uwtable
-define nonnull i64* @sorbet_getClosureElem(i64, i32) local_unnamed_addr #7 {
-  %3 = inttoptr i64 %0 to %struct.RTypedData*
-  %4 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %3, i64 0, i32 3
-  %5 = bitcast i8** %4 to %struct.sorbet_Closure**
-  %6 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %5, align 8, !tbaa !11
-  %7 = sext i32 %1 to i64
-  %8 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %6, i64 0, i32 1, i64 %7
-  ret i64* %8
-}
-
 declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind ssp
@@ -336,7 +315,7 @@ functionEntryInitializers:
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
   store i64 %0, i64* %callArgsAddr, align 8
   %1 = tail call fastcc i64 @sorbet_getConstant()
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !14
+  tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.4, i64 0, i64 0)) #12, !noalias !11
   %2 = call i64 @rb_funcallv(i64 %1, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #12
   ret i64 %2
 }
@@ -370,11 +349,11 @@ entry:
   %5 = inttoptr i64 %4 to %struct.RTypedData*
   %6 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %5, i64 0, i32 3
   %7 = bitcast i8** %6 to %struct.sorbet_Closure**
-  %8 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !11
+  %8 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !14
   %9 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %8, i64 0, i32 1, i64 0
   store i64 8, i64* %9, align 8
   %rubyId_times.i = load i64, i64* @rubyIdPrecomputed_times, align 8
-  %10 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !11
+  %10 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !14
   %11 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %10, i64 0, i32 1, i64 0
   store i64 %0, i64* %11, align 8
   %12 = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
@@ -416,12 +395,12 @@ attributes #13 = { noreturn nounwind }
 !8 = !{!7, !2, i64 8}
 !9 = !{!10, !10, i64 0}
 !10 = !{!"int", !3, i64 0}
-!11 = !{!12, !13, i64 32}
-!12 = !{!"RTypedData", !7, i64 0, !13, i64 16, !2, i64 24, !13, i64 32}
-!13 = !{!"any pointer", !3, i64 0}
-!14 = !{!15}
-!15 = distinct !{!15, !16, !"sorbet_callFunc: argument 0"}
-!16 = distinct !{!16, !"sorbet_callFunc"}
+!11 = !{!12}
+!12 = distinct !{!12, !13, !"sorbet_callFunc: argument 0"}
+!13 = distinct !{!13, !"sorbet_callFunc"}
+!14 = !{!15, !16, i64 32}
+!15 = !{!"RTypedData", !7, i64 0, !16, i64 16, !2, i64 24, !16, i64 32}
+!16 = !{!"any pointer", !3, i64 0}
 !17 = !{!18}
 !18 = distinct !{!18, !19, !"sorbet_callFuncBlock: argument 0"}
 !19 = distinct !{!19, !"sorbet_callFuncBlock"}
