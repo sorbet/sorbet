@@ -418,6 +418,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     }
     {
         // build fillFromDefaultBlocks
+        auto optionalMethodIndex = 0;
         for (auto i = 0; i < numOptionalArgs; i++) {
             auto &block = fillFromDefaultBlocks[i];
             builder.SetInsertPoint(block);
@@ -427,14 +428,15 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 // another other defaults for it or else it is turtles all the
                 // way down
             } else {
-                auto argIndex = i + minArgCount;
-                auto argMethodName = cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, argIndex + 1);
-                ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(gs) + argIndex + " does not exist");
+                optionalMethodIndex++;
+                auto argMethodName = cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, optionalMethodIndex);
+                ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(cs) + to_string(optionalMethodIndex) + " does not exist");
                 auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
                 ENFORCE(argMethod.exists());
                 auto fillDefaultFunc = getOrCreateFunction(cs, argMethod);
                 auto rawValue = builder.CreateCall(fillDefaultFunc,
                                                    {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2});
+                auto argIndex = i + minArgCount;
                 auto *a = ast::MK::arg2Local(md->args[argIndex].get());
                 cs.boxRawValue(builder, llvmVariables.at(a->localVariable), rawValue);
             }
