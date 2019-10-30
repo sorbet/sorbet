@@ -23,6 +23,7 @@ void dbg_sorbet_validate_id(ID value, char *name) __attribute__((weak)) {
 const char *dbg_pi(ID id) __attribute__((weak)) {
     return rb_id2name(id);
 }
+
 const char *dbg_p(VALUE obj) __attribute__((weak)) {
     char *ret = RSTRING_PTR(rb_sprintf("%" PRIsVALUE, obj));
     return ret;
@@ -506,7 +507,8 @@ VALUE sorbet_allocClosureAsValue(int elemCount) {
 }
 
 VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
-    return &(((struct sorbet_Closure *)RTYPEDDATA_DATA(closure))->closureData[elemId]);
+    struct sorbet_Closure *ptr = (struct sorbet_Closure *)RTYPEDDATA_DATA(closure);
+    return &(ptr->closureData[elemId]);
 }
 
 // ****
