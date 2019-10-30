@@ -17,6 +17,7 @@
 using namespace std;
 namespace sorbet::compiler {
 struct BasicBlockMap {
+    core::SymbolRef forMethod;
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction;
@@ -33,14 +34,21 @@ struct BasicBlockMap {
 namespace {
 
 struct Alias {
-    enum class AliasKind { Constant, InstanceField };
+    enum class AliasKind { Constant, InstanceField, ClassField };
     AliasKind kind;
     core::SymbolRef constantSym;
     core::NameRef instanceField;
+    core::NameRef classField;
     static Alias forConstant(core::SymbolRef sym) {
         Alias ret;
         ret.kind = AliasKind::Constant;
         ret.constantSym = sym;
+        return ret;
+    }
+    static Alias forClassField(core::NameRef name) {
+        Alias ret;
+        ret.kind = AliasKind::ClassField;
+        ret.classField = name;
         return ret;
     }
     static Alias forInstanceField(core::NameRef name) {
@@ -143,7 +151,14 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
         res.emplace_back(fp);
     }
     return res;
-}
+};
+
+llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &builder, const BasicBlockMap &blockMap) {
+    auto sym = blockMap.forMethod.data(cs)->owner;
+    ENFORCE(sym.data(cs)->isClassOrModule());
+
+    return resolveSymbol(cs, sym.data(cs)->topAttachedClass(cs), builder);
+};
 
 llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilder<> &builder,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
@@ -155,6 +170,10 @@ llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilde
 
         if (alias.kind == Alias::AliasKind::Constant) {
             return resolveSymbol(cs, alias.constantSym, builder);
+        } else if (alias.kind == Alias::AliasKind::ClassField) {
+            return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
+                                      {getClassVariableStoreClass(cs, builder, blockMap),
+                                       cs.getRubyIdFor(builder, alias.instanceField.data(cs)->shortName(cs))});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_instanceVariableGet"),
                                       {varGet(cs, core::LocalVariable::selfVariable(), builder, llvmVariables, aliases,
@@ -172,7 +191,7 @@ llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilde
 
     // normal local variable
     return cs.unboxRawValue(builder, llvmVariables.at(local));
-}
+} // namespace
 
 void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilder<> &builder,
             const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
@@ -187,6 +206,10 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
             builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
                                {resolveSymbol(cs, owner, builder), toCString(name, builder),
                                 llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
+        } else if (alias.kind == Alias::AliasKind::ClassField) {
+            builder.CreateCall(cs.module->getFunction("sorbet_classVariableSet"),
+                               {getClassVariableStoreClass(cs, builder, blockMap),
+                                cs.getRubyIdFor(builder, alias.instanceField.data(cs)->shortName(cs)), var});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             builder.CreateCall(cs.module->getFunction("sorbet_instanceVariableSet"),
                                {varGet(cs, core::LocalVariable::selfVariable(), builder, llvmVariables, aliases,
@@ -493,7 +516,8 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
         }
     }
 
-    return BasicBlockMap{functionInitializersByFunction,
+    return BasicBlockMap{cfg.symbol,
+                         functionInitializersByFunction,
                          argumentSetupBlocksByFunction,
                          userEntryBlockByFunction,
                          llvmBlocks,
