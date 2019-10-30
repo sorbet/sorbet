@@ -264,7 +264,7 @@ rb_obj_freeze_inline.exit:                        ; preds = %63, %70, %76, %84
 rb_class_of.exit:                                 ; preds = %rb_obj_freeze_inline.exit
   %87 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %55, i64 0, i32 1
   %88 = load i64, i64* %87, align 8, !tbaa !7
-  %89 = tail call i32 @rb_method_basic_definition_p(i64 %88, i64 2817) #15
+  %89 = tail call i32 @rb_method_basic_definition_p(i64 %88, i64 2737) #15
   %90 = icmp eq i32 %89, 0
   br i1 %90, label %91, label %94
 
