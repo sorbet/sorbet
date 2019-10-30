@@ -503,7 +503,8 @@ VALUE sorbet_allocClosureAsValue(int elemCount) {
 }
 
 VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
-  return &(((struct sorbet_Closure *)RTYPEDDATA_DATA(closure))->closureData[elemId]);
+  struct sorbet_Closure *ptr = (struct sorbet_Closure *) RTYPEDDATA_DATA(closure);
+  return &(ptr->closureData[elemId]);
 }
 
 #endif
