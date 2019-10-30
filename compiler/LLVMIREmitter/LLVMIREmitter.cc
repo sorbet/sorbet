@@ -110,10 +110,48 @@ llvm::Constant *toCString(string_view str, llvm::IRBuilder<> &builder) {
     return builder.CreateGlobalStringPtr(nameRef, llvm::Twine("str_") + nameRef);
 }
 
-llvm::CallInst *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
+// TODO: add more from https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/include/ruby/ruby.h#L1962. Will
+// need to modify core sorbet for it.
+const vector<pair<core::SymbolRef, string>> knownSymbolMapping = {
+    {core::Symbols::Kernel(), "rb_mKernel"},
+    {core::Symbols::Enumerable(), "rb_mEnumerable"},
+    {core::Symbols::BasicObject(), "rb_cBasicObject"},
+    {core::Symbols::Object(), "rb_cObject"},
+    {core::Symbols::Array(), "rb_cArray"},
+    {core::Symbols::Class(), "rb_cClass"},
+    {core::Symbols::FalseClass(), "rb_cFalseClass"},
+    {core::Symbols::TrueClass(), "rb_cTrueClass"},
+    {core::Symbols::Float(), "rb_cFloat"},
+    {core::Symbols::Hash(), "rb_cHash"},
+    {core::Symbols::Integer(), "rb_cInteger"},
+    {core::Symbols::Module(), "rb_cModule"},
+    {core::Symbols::NilClass(), "rb_cNilClass"},
+    {core::Symbols::Proc(), "rb_cProc"},
+    {core::Symbols::Range(), "rb_cRange"},
+    {core::Symbols::Rational(), "rb_cRational"},
+    {core::Symbols::Regexp(), "rb_cRegexp"},
+    {core::Symbols::String(), "rb_cString"},
+    {core::Symbols::Struct(), "rb_cStruct"},
+    {core::Symbols::Symbol(), "rb_cSymbol"},
+    {core::Symbols::StandardError(), "rb_eStandardError"},
+};
+
+llvm::Value *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
     // TODO(perf): use something similar to
     // https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_insnhelper.c#L3258-L3275
     sym = removeRoot(sym);
+    for (const auto &[knownSym, name] : knownSymbolMapping) {
+        if (sym == knownSym) {
+            auto tp = llvm::Type::getInt64Ty(cs);
+            auto &nm = name; // C++ bindings don't play well with captures
+            auto globalDeclaration = cs.module->getOrInsertGlobal(name, tp, [&] {
+                auto ret =
+                    new llvm::GlobalVariable(*cs.module, tp, true, llvm::GlobalVariable::ExternalLinkage, nullptr, nm);
+                return ret;
+            });
+            return builder.CreateLoad(globalDeclaration);
+        }
+    }
     auto str = showClassName(cs, sym);
     ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
     return builder.CreateCall(cs.module->getFunction("sorbet_getConstant"),
