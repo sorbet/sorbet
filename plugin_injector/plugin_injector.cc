@@ -12,6 +12,8 @@
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
 #include <optional>
+#include <filesystem>
+
 using namespace std;
 namespace sorbet::pipeline::semantic_extension {
 namespace {
@@ -76,7 +78,8 @@ public:
         }
         compiler::CompilerState state(gs, lctx, module.get());
         sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
-        sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol);
+        string fileName = fileName2ObjectName((string)cfg.symbol.data(gs)->loc().file().data(state).path());
+        sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol, fileName);
     };
     virtual void patchDSL(core::MutableContext &ctx, ast::ClassDef *klass) const override {
         if (!irOutputDir.has_value()) {

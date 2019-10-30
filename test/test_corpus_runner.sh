@@ -30,7 +30,7 @@ done
 echo "require './test/preamble.rb';" > "$runfile"
 
 for o in "$llvmir"/*.o; do
-    base=$(basename "$rb")
+    base=$(basename "$o")
     bundle="$llvmir/${base%.rb}.bundle"
     external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
     echo "Bundle: $bundle"

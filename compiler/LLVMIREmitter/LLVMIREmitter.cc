@@ -1003,7 +1003,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     // cs.runCheapOptimizations(func);
 }
 
-void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym) {
+void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, string_view objectName) {
     llvm::IRBuilder<> builder(cs);
 
     auto baseName = getFunctionName(cs, sym);
@@ -1012,7 +1012,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym) 
     auto isRoot = owner == core::Symbols::rootSingleton();
 
     if (isStaticInit(cs, sym) && isRoot) {
-        baseName = FileOps::getFileName(sym.data(cs)->loc().file().data(cs).path());
+        baseName = objectName;
         baseName = baseName.substr(0, baseName.rfind(".rb"));
         linkageType = llvm::Function::ExternalLinkage;
     }
