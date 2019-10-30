@@ -17,8 +17,7 @@ bazel-bin/main/sorbet --silence-dev-message --no-error-count --typed=true --llvm
 echo "require './test/preamble.rb';" > "$runfile"
 
 for o in "$llvmir"/*.o; do
-    base=$(basename "$o")
-    bundle="$llvmir/${base%.rb}.bundle"
+    bundle="${o%.rb}.bundle"
     bazel-sorbet_llvm/external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
     echo "require '$bundle';" >> "$runfile"
 done
