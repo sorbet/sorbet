@@ -1442,7 +1442,7 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
                 return false;
             }
         } else if (level == StrictLevel::Stdlib) {
-            level = StrictLevel::True;
+            level = StrictLevel::Strict;
             if (what == errors::Resolver::OverloadNotAllowed || what == errors::Resolver::VariantTypeMemberInClass) {
                 return false;
             }
