@@ -23,17 +23,21 @@ $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
 main/sorbet --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$rb"
 
-base=$(basename "$rb")
-bundle="$llvmir/${base%.rb}.bundle"
-external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$llvmir"/*.o -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
-echo "Bundle: $bundle"
-
 for i in "$llvmir"/*.llo; do
     echo "LLVM IR: $i"
 done
 
+echo "require './test/preamble.rb';" > "$runfile"
+
+for o in "$llvmir"/*.o; do
+    base=$(basename "$rb")
+    bundle="$llvmir/${base%.rb}.bundle"
+    external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
+    echo "Bundle: $bundle"
+    echo "require '$bundle';" >> "$runfile"
+done
+
 if [[ $rb != *"no-run"* ]]; then
-    echo "require './test/preamble.rb'; require '$bundle';" > "$runfile"
     echo "Run Code: $ruby $runfile"
     echo "Run LLDB: lldb ./bazel-out/darwin-dbg/bin/external/ruby_2_4_3/bin/ruby -- $runfile"
     $ruby "$runfile" | tee "$srbout"
