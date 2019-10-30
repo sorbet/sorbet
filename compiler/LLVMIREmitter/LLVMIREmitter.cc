@@ -8,6 +8,7 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/FileOps.h"
+#include "common/sort.h"
 #include "common/typecase.h"
 #include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
