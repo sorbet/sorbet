@@ -480,7 +480,7 @@ entry:
   %10 = call i64 @rb_funcallv(i64 %9, i64 %rubyId_unsafe.i.i.i, i32 1, i64* nonnull %callArgsAddr.i.i.i) #14
   %rawSym.i.i.i = call i64 @rb_id2sym(i64 %rubyId_write.i.i.i) #14
   %11 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.11, i64 0, i64 0), i64 1) #14
-  call void @rb_define_method(i64 %11, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_write.8, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U A>><U write>" to i64 (...)*), i32 -1) #14
+  call void @rb_define_method(i64 %11, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_write.8, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U A>><U write>" to i64 (...)*), i32 -1) #14
   %12 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.9, i64 0, i64 0), i64 6) #14
   store i64 %12, i64* %callArgsAddr.i.i.i, align 8
   %13 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.10, i64 0, i64 0), i64 1) #14
@@ -488,7 +488,7 @@ entry:
   %14 = call i64 @rb_funcallv(i64 %13, i64 %rubyId_unsafe.i.i.i, i32 1, i64* nonnull %callArgsAddr.i.i.i) #14
   %rawSym27.i.i.i = call i64 @rb_id2sym(i64 %rubyId_read.i.i.i) #14
   %15 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.11, i64 0, i64 0), i64 1) #14
-  call void @rb_define_method(i64 %15, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read.12, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U A>><U read>" to i64 (...)*), i32 -1) #14
+  call void @rb_define_method(i64 %15, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read.12, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U A>><U read>" to i64 (...)*), i32 -1) #14
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %7) #14
   %16 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.11, i64 0, i64 0), i64 1) #14
   store i64 %16, i64* %callArgsAddr.i, align 8
@@ -525,7 +525,7 @@ entry:
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"<C <U A>><U write>"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
+define i64 @"func_<C <U A>><U write>"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
 functionEntryInitializers:
   %"rubyId_@f" = load i64, i64* @"rubyIdPrecomputed_@f", align 8
   %0 = icmp eq i32 %argc, 1
@@ -553,7 +553,7 @@ constr:
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"<C <U A>><U read>"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #11 {
+define i64 @"func_<C <U A>><U read>"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #11 {
 functionEntryInitializers:
   %"rubyId_@f" = load i64, i64* @"rubyIdPrecomputed_@f", align 8
   %tooManyArgs = icmp eq i32 %argc, 0

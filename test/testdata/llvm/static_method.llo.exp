@@ -426,7 +426,7 @@ entry:
   %9 = call i64 @rb_funcallv(i64 %8, i64 %rubyId_unsafe.i.i.i, i32 1, i64* nonnull %callArgsAddr.i.i.i) #14
   %rawSym.i.i.i = call i64 @rb_id2sym(i64 %rubyId_bar.i.i.i) #14
   %10 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.5, i64 0, i64 0), i64 3) #14
-  call void @rb_define_singleton_method(i64 %10, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.6, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<S <C <U Foo>> $1><U bar>" to i64 (...)*), i32 -1) #14
+  call void @rb_define_singleton_method(i64 %10, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.6, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<S <C <U Foo>> $1><U bar>" to i64 (...)*), i32 -1) #14
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %6) #14
   %11 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.5, i64 0, i64 0), i64 3) #14
   store i64 %11, i64* %callArgsAddr.i, align 8
@@ -444,7 +444,7 @@ entry:
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"<S <C <U Foo>> $1><U bar>"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #11 {
+define i64 @"func_<S <C <U Foo>> $1><U bar>"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #11 {
 functionEntryInitializers:
   %tooManyArgs = icmp eq i32 %argc, 0
   br i1 %tooManyArgs, label %fillRequiredArgs, label %argCountFailBlock

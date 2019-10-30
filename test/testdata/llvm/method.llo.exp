@@ -364,7 +364,7 @@ define internal i64 @sorbet_Closure_size(i8* nocapture readonly) #8 {
 declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"<C <U Object>><U hello>"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #9 {
+define i64 @"func_<C <U Object>><U hello>"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #9 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
   %"rubyId_<" = load i64, i64* @"rubyIdPrecomputed_<", align 8
@@ -467,7 +467,7 @@ entry:
   %4 = call i64 @rb_funcallv(i64 %3, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #14
   %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_hello.i) #14
   %5 = call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.1, i64 0, i64 0), i64 6) #14
-  call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.2, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"<C <U Object>><U hello>" to i64 (...)*), i32 -1) #14
+  call void @rb_define_method(i64 %5, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.2, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U hello>" to i64 (...)*), i32 -1) #14
   %6 = call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @userStr_sorbet, i64 0, i64 0), i64 6) #14
   store i64 %6, i64* %callArgsAddr.i, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_hello.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #14, !noalias !26
