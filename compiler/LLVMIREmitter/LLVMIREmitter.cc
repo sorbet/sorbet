@@ -157,6 +157,19 @@ llvm::Value *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuild
     auto loaderName = "const_load" + str;
     auto func = cs.module->getFunction(loaderName);
     if (!func) {
+        // generate something logically similar to
+        // VALUE const_load_FOO() {
+        //    if (const_guard == constant_epoch()) {
+        //      return guarded_const;
+        //    } else {
+        //      guardedConst = sorbet_getConstant("FOO");
+        //      const_guard = constant_epoch();
+        //      return guarded_const;
+        //    }
+        //
+        //    It's not exactly this as I'm doing some tunnings, more specifically, the "else" branch will be marked cold
+        //    and shared across all modules
+
         auto ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), {}, false /*not varargs*/);
         func = llvm::Function::Create(ft, llvm::Function::InternalLinkage, loaderName, *cs.module);
         auto recomputeFunT = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), {}, false /*not varargs*/);
