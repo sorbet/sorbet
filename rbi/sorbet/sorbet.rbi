@@ -107,7 +107,7 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
     )
     .returns(Sorbet::Private::Static::ENVClass)
   end
@@ -143,7 +143,7 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
     )
     .returns(Sorbet::Private::Static::ENVClass)
   end
@@ -154,7 +154,7 @@ class Sorbet::Private::Static::ENVClass
     params(
         name: String,
     )
-    .returns(T.nilable(Elem))
+    .returns(T.nilable(String))
   end
   def key(name); end
 
@@ -174,9 +174,12 @@ class Sorbet::Private::Static::ENVClass
   sig {returns(Integer)}
   def length(); end
 
+  sig {void}
+  def rehash(); end
+
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
     )
     .returns(T::Hash[String, String])
   end
@@ -185,7 +188,7 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
     )
     .returns(T.nilable(Sorbet::Private::Static::ENVClass))
   end
