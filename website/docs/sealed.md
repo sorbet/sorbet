@@ -21,7 +21,7 @@ end
 class Child1; include Parent; end
 class Child2; include Parent; end
 
-sig {params(x: Parent).void
+sig {params(x: Parent).void}
 def foo(x)
   case x
   when Child1 then # ...
