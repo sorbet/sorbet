@@ -4,7 +4,7 @@ set -eo pipefail
 root="$( dirname "${BASH_SOURCE[0]}" )"/..
 
 if [ -z "$runfile" ]; then
-    runfile=$(mktemp -d)
+    runfile=$(mktemp)
     rmtmp=1
 fi
 
@@ -17,9 +17,10 @@ cleanup() {
 trap cleanup EXIT
 
 echo "require './$root/bin/preamble.rb';" > "$runfile"
+echo "require './$root/bin/patch_require.rb';" >> "$runfile"
 
-for bundle in $("$root/bin/compile" "$@"); do
-    echo "require '$bundle';" >> "$runfile"
+for rb in "$@"; do
+    echo "require '$rb';" >> "$runfile"
 done
 
 ruby="/Users/$(whoami)/.rbenv/shims/ruby"

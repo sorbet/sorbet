@@ -10,10 +10,10 @@ module Kernel
     if File.exists?(name)
       Dir.mktmpdir do |tmpdir|
         cmd = [__dir__ + '/compile', name]
-        env = {"llvmir" => tmpdir}
-        stdout, stderr, status = Open3.capture3(env, *cmd)
+        stdout, stderr, status = Open3.capture3(ENV, *cmd)
         raise stderr if !status.success?
         name = stdout.strip
+        raise "compiled failed" unless name.end_with?('.bundle')
         return sorbet_old_require(name)
       end
     end
