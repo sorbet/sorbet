@@ -1,10 +1,37 @@
+require 'open3'
+require 'tmpdir'
+
 module Kernel
   alias sorbet_old_require require
   def require(name)
-    if File.exists?(name)
-      puts name
-      IO.popen([__dir__ + '/compile', name])
+    if File.exists?(name + ".rb")
+      name = name + ".rb"
     end
+    if File.exists?(name)
+      Dir.mktmpdir do |tmpdir|
+        cmd = [__dir__ + '/compile', name]
+        env = {"llvmir" => tmpdir}
+        stdout, stderr, status = Open3.capture3(env, *cmd)
+        raise stderr if !status.success?
+        name = stdout.strip
+        return sorbet_old_require(name)
+      end
+    end
+
     sorbet_old_require(name)
+  end
+
+  def require_relative(feature)
+    locations = Kernel.caller_locations(1, 2)
+    file = case locations[0]
+           when Thread::Backtrace::Location
+             locations[0].absolute_path
+           when Array
+             # For runtime require_relatives
+             locations[1][0]
+           end
+
+    absolute = File.expand_path(feature, File.dirname(file))
+    require(absolute)
   end
 end

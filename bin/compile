@@ -30,7 +30,7 @@ fi
 "$sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$@"
 
 for o in "$llvmir"/*.o; do
-    bundle="${o%.rb}.bundle"
+    bundle="${o%.o}.bundle"
     "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
     echo "$bundle"
 done
