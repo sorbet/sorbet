@@ -1,8 +1,5 @@
 require 'tempfile'
-args = T.unsafe(Array.new)
-args << 'foo'
-args << '.rb'
-file = Tempfile.new(args)
+file = Tempfile.new(['foo', '.rb'])
 file.write("puts 'hello world'")
 file.close
 path = T.unsafe(file.path)
