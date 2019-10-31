@@ -1,5 +1,5 @@
-#ifndef SRUBY_DSL_COMMAND_H
-#define SRUBY_DSL_COMMAND_H
+#ifndef SORBET_REWRITER_COMMAND_H
+#define SORBET_REWRITER_COMMAND_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

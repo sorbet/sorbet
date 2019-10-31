@@ -1,5 +1,5 @@
-#ifndef SRUBY_DSL_OPUSENUM_H
-#define SRUBY_DSL_OPUSENUM_H
+#ifndef SORBET_REWRITER_OPUSENUM_H
+#define SORBET_REWRITER_OPUSENUM_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {
