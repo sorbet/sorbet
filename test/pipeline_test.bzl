@@ -25,8 +25,9 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
             if None == current:
                 data = {
                     "path": dirname(path),
-                    "prefix": prefix,
+                    "prefix": "{}/{}".format(dirname(path), prefix),
                     "sentinel": path,
+                    "isMultiFile": "__" in path,
                     "disabled": "disabled" in path,
                 }
                 tests[test_name] = data
@@ -47,13 +48,20 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
         else:
             enabled_tests.append(test_name)
 
+        data = ["test_corpus_runner"]
+        if tests[name]["isMultiFile"]:
+            data += native.glob(["{}*".format(prefix)])
+        else:
+            data += [sentinel]
+            data += native.glob(["{}.*.exp".format(prefix)])
+            data += native.glob(["{}.*.rbupdated".format(prefix)])
+            data += native.glob(["{}.*.rbedited".format(prefix)])
+
         native.sh_test(
             name = "test_{}/{}".format(test_name_prefix, name),
             srcs = ["test_corpus_forwarder.sh"],
             args = ["--single_test=$(location {})".format(sentinel), "--gtest_filter={}/*".format(filter)] + extra_args,
-            data = native.glob([
-                "{}/{}*".format(path, prefix),
-            ]) + ["test_corpus_runner"],
+            data = data,
             size = "small",
             tags = tags + extra_tags,
         )
