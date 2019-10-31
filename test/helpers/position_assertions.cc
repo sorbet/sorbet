@@ -1193,34 +1193,36 @@ void SymbolSearchAssertion::checkAllForQuery(std::string query,
     // Show any expected symbols that weren't returned by LSP
     for (auto entry : assertionsByLine) {
         auto lineInfo = entry.first;
-        auto expected = entry.second;
-        auto &actual = symbolsByLine[lineInfo];
-        if (expected.size() == actual.size()) {
+        auto expectedResults = entry.second;
+        auto &actualResults = symbolsByLine[lineInfo];
+        if (expectedResults.size() <= actualResults.size()) {
             continue;
         }
         success = false;
-        auto assertion = expected[0];
+        auto assertion = expectedResults[0];
         auto location = assertion->getLocation(uriPrefix);
+        auto sourceLineNumber = location->range->start->line + 1;
         auto sourceLine = getLine(sourceFileContents, uriPrefix, *location.get());
-        ADD_FAILURE_AT(location->uri.c_str(), assertion->range->start->line + 1)
-            << fmt::format("WorkspaceSymbol query `{}` did not return a reference to:\n{}\n", query,
+        ASSERT_EQ(expectedResults.size(), actualResults.size())
+            << fmt::format("For WorkspaceSymbol query `{}` on [{}:{}]:\n{}\n", query, location->uri, sourceLineNumber,
                            prettyPrintRangeComment(sourceLine, *assertion->range, ""));
     }
 
     // Show any symbols returned by LSP that weren't asserted
     for (auto entry : symbolsByLine) {
         auto lineInfo = entry.first;
-        auto actual = entry.second;
-        auto &expected = assertionsByLine[lineInfo];
-        if (expected.size() == actual.size()) {
+        auto actualResults = entry.second;
+        auto &expectedResults = assertionsByLine[lineInfo];
+        if (expectedResults.size() >= actualResults.size()) {
             continue;
         }
         success = false;
-        auto symbolInfo = actual[0];
+        auto symbolInfo = actualResults[0];
         auto &location = symbolInfo->location;
+        auto sourceLineNumber = location->range->start->line + 1;
         auto sourceLine = getLine(sourceFileContents, uriPrefix, *location.get());
-        ADD_FAILURE_AT(location->uri.c_str(), location->range->start->line + 1)
-            << fmt::format("WorkspaceSymbol query `{}` returned an unexpected reference to:\n{}\n", query,
+        ASSERT_EQ(expectedResults.size(), actualResults.size())
+            << fmt::format("For WorkspaceSymbol query `{}` on [{}:{}]:\n{}\n", query, location->uri, sourceLineNumber,
                            prettyPrintRangeComment(sourceLine, *location->range, ""));
     }
 
