@@ -461,7 +461,7 @@ public:
     core::NameRef fun;
 
     static const int PRIVATE_OK = 1 << 0;
-    static const int DSL_SYNTHESIZED = 1 << 1;
+    static const int REWRITER_SYNTHESIZED = 1 << 1;
     u4 flags;
 
     std::unique_ptr<Expression> recv;
@@ -479,7 +479,7 @@ public:
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
     bool isRewriterSynthesized() const {
-        return (flags & DSL_SYNTHESIZED) != 0;
+        return (flags & REWRITER_SYNTHESIZED) != 0;
     }
 
     bool isPrivateOk() const {

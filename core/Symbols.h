@@ -65,7 +65,7 @@ public:
         // --- Applies to all types of Symbols ---
 
         // Synthesized by C++ code in a DSL pass
-        static constexpr u4 DSL_SYNTHESIZED = 0x0000'0001;
+        static constexpr u4 REWRITER_SYNTHESIZED = 0x0000'0001;
 
         // --- For our current symbol type, what flags does it have?
 
@@ -480,10 +480,10 @@ public:
     }
 
     inline void setRewriterSynthesized() {
-        flags |= Symbol::Flags::DSL_SYNTHESIZED;
+        flags |= Symbol::Flags::REWRITER_SYNTHESIZED;
     }
     inline bool isRewriterSynthesized() const {
-        return (flags & Symbol::Flags::DSL_SYNTHESIZED) != 0;
+        return (flags & Symbol::Flags::REWRITER_SYNTHESIZED) != 0;
     }
 
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
