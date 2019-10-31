@@ -172,7 +172,7 @@ unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, un
     Timer timeit(gs.tracer(), "runDSL", {{"file", (string)file.data(gs).path()}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
     core::ErrorRegion errs(gs, file);
-    return dsl::DSL::run(ctx, move(ast));
+    return rewriter::DSL::run(ctx, move(ast));
 }
 
 ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
