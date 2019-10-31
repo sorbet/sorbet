@@ -10,16 +10,6 @@ module T::Sig::WithoutRuntime
   def self.sig(arg=nil, &blk); end
 end
 
-module Sorbet; end
-module Sorbet::Private; end
-module Sorbet::Private::Static
-  def self.keep_for_ide(expr)
-  end
-
-  def self.keep_for_typechecking(expr)
-  end
-end
-
 module Sorbet::Private::Static::StubModule
 end
 

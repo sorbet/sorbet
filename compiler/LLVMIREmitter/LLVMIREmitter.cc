@@ -872,6 +872,9 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     },
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(cs)->shortName(cs);
+                        if (i->fun == core::Names::keepForIde() || i->fun == core::Names::keepForTypechecking()) {
+                            return;
+                        }
                         if (i->fun == core::Names::buildHash()) {
                             auto ret =
                                 builder.CreateCall(cs.module->getFunction("sorbet_newRubyHash"), {}, "rawHashLiteral");
