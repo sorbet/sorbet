@@ -239,7 +239,7 @@ const vector<pair<core::SymbolRef, string>> optimizedTypeTests = {
 
 llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilder<> &builder, llvm::Value *val,
                               const core::TypePtr &type) {
-    llvm::Value *ret;
+    llvm::Value *ret = nullptr;
     typecase(
         type.get(),
         [&](core::ClassType *ct) {
@@ -259,8 +259,42 @@ llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilder<> &builder, llv
             ret =
                 builder.CreateCall(cs.module->getFunction("sorbet_isa"), {val, resolveSymbol(cs, ct->symbol, builder)});
         },
-
+        [&](core::OrType *ct) {
+            // TODO: reoder types so that cheap test is done first
+            auto left = createTypeTestU1(cs, builder, val, ct->left);
+            auto rightBlockStart = llvm::BasicBlock::Create(cs, "orRight", builder.GetInsertBlock()->getParent());
+            auto contBlock = llvm::BasicBlock::Create(cs, "orContinue", builder.GetInsertBlock()->getParent());
+            auto leftEnd = builder.GetInsertBlock();
+            builder.CreateCondBr(left, contBlock, rightBlockStart);
+            builder.SetInsertPoint(rightBlockStart);
+            auto right = createTypeTestU1(cs, builder, val, ct->right);
+            auto rightEnd = builder.GetInsertBlock();
+            builder.CreateBr(contBlock);
+            builder.SetInsertPoint(contBlock);
+            auto phi = builder.CreatePHI(builder.getInt1Ty(), 2, "orTypeTest");
+            phi->addIncoming(left, leftEnd);
+            phi->addIncoming(right, rightEnd);
+            ret = phi;
+        },
+        [&](core::AndType *ct) {
+            // TODO: reoder types so that cheap test is done first
+            auto left = createTypeTestU1(cs, builder, val, ct->left);
+            auto rightBlockStart = llvm::BasicBlock::Create(cs, "andRight", builder.GetInsertBlock()->getParent());
+            auto contBlock = llvm::BasicBlock::Create(cs, "andContinue", builder.GetInsertBlock()->getParent());
+            auto leftEnd = builder.GetInsertBlock();
+            builder.CreateCondBr(left, rightBlockStart, contBlock);
+            builder.SetInsertPoint(rightBlockStart);
+            auto right = createTypeTestU1(cs, builder, val, ct->right);
+            auto rightEnd = builder.GetInsertBlock();
+            builder.CreateBr(contBlock);
+            builder.SetInsertPoint(contBlock);
+            auto phi = builder.CreatePHI(builder.getInt1Ty(), 2, "andTypeTest");
+            phi->addIncoming(left, leftEnd);
+            phi->addIncoming(right, rightEnd);
+            ret = phi;
+        },
         [&](core::Type *_default) { ret = builder.getInt1(true); });
+    ENFORCE(ret != nullptr);
     return ret;
 }
 
