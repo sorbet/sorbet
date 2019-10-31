@@ -1,0 +1,667 @@
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C NotAODM><<C <todo sym>>> < (::<todo sym>)
+    def self.prop<<C <todo sym>>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    <self>.prop()
+
+    <self>.prop(:"foo", :"not_a_string")
+
+    <self>.prop("not_a_symbol", <emptyTree>::<C String>)
+
+    <self>.prop(:"foo", <emptyTree>::<C String>, "not_a_hash")
+
+    <self>.prop("too", <emptyTree>::<C String>, {}, "many")
+
+    <self>.optional(:"company_name", <emptyTree>::<C String>, :"nonempty_string")
+
+    <self>.optional(:"day", <emptyTree>::<C IntegerParam>.new({:"min" => 1, :"max" => 31}))
+
+    <self>.optional(:"name", <emptyTree>::<C StringParam>.alphanumeric())
+
+    <self>.optional(:"how_many", <emptyTree>::<C Opus>::<C Param>::<C CaseParam>.new(<self>.how_many_cases(), <emptyTree>::<C Opus>::<C Param>::<C ParamSpecsParam>.new(<emptyTree>::<C Default>)))
+
+    <self>.optional(:"optional_param", <emptyTree>::<C IntegerParam>.new())
+  end
+
+  class <emptyTree>::<C SomeODM><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def foo<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
+
+    def foo=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def foo2<<C <todo sym>>>(&<blk>)
+      <emptyTree>::<C T>.cast(<emptyTree>::<C T>.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    <self>.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
+
+    def foo2=<<C <todo sym>>>(arg0, &<blk>)
+      <emptyTree>::<C T>.cast(nil, <emptyTree>::<C String>)
+    end
+  end
+
+  class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>
+  end
+
+  class <emptyTree>::<C AdvancedODM><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def default<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
+
+    def default=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def t_nilable<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def t_nilable=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def type<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
+
+    def type=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::Object)
+    end
+
+    def object<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), ::Object)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::Object}).returns(::Object)
+    end
+
+    def object=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), ::Object)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C Array>)
+    end
+
+    def array<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+    end
+
+    def array=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
+    end
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+      end
+
+      def array=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      def array<<C <todo sym>>>(&<blk>)
+        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::T::Array.[](<emptyTree>::<C String>))
+    end
+
+    def array_of<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), ::T::Array.[](<emptyTree>::<C String>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T::Array.[](<emptyTree>::<C String>)}).returns(::T::Array.[](<emptyTree>::<C String>))
+    end
+
+    def array_of=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), ::T::Array.[](<emptyTree>::<C String>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C Array>)
+    end
+
+    def array_of_explicit<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+    end
+
+    def array_of_explicit=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
+    end
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+      end
+
+      def array_of_explicit=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      def array_of_explicit<<C <todo sym>>>(&<blk>)
+        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+    end
+
+    def t_array<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+    end
+
+    def t_array=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+    end
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({:"arg0" => <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+      end
+
+      def t_array=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](<emptyTree>::<C String>))
+      end
+
+      def t_array<<C <todo sym>>>(&<blk>)
+        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](<emptyTree>::<C String>))
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+    end
+
+    def hash_of<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+    end
+
+    def hash_of=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+    end
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({:"arg0" => <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+      end
+
+      def hash_of=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C HashMutator>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+      end
+
+      def hash_of<<C <todo sym>>>(&<blk>)
+        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C HashMutator>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def const_explicit<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def const<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C Array>)
+    end
+
+    def no_class_arg<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
+    end
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+      end
+
+      def no_class_arg=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      def no_class_arg<<C <todo sym>>>(&<blk>)
+        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::T.untyped())
+    end
+
+    def enum_prop<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
+    end
+
+    def foreign_<<C <todo sym>>>(*opts:, &<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"opts" => ::T.untyped()}).returns(<emptyTree>::<C ForeignClass>)
+    end
+
+    def foreign_!<<C <todo sym>>>(*opts:, &<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_lazy<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_lazy=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
+    end
+
+    def foreign_lazy_<<C <todo sym>>>(*opts:, &<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"opts" => ::T.untyped()}).returns(<emptyTree>::<C ForeignClass>)
+    end
+
+    def foreign_lazy_!<<C <todo sym>>>(*opts:, &<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_proc<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_proc=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
+    end
+
+    def foreign_proc_<<C <todo sym>>>(*opts:, &<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"opts" => ::T.untyped()}).returns(<emptyTree>::<C ForeignClass>)
+    end
+
+    def foreign_proc_!<<C <todo sym>>>(*opts:, &<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_invalid<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_invalid=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"opts" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def foreign_invalid_<<C <todo sym>>>(*opts:, &<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"opts" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def foreign_invalid_!<<C <todo sym>>>(*opts:, &<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def ifunset<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
+
+    def ifunset=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def ifunset_nilable<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def ifunset_nilable=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+  end
+
+  class <emptyTree>::<C PropHelpers><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::String)
+    end
+
+    def token<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), ::String)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::String}).returns(::String)
+    end
+
+    def token=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), ::String)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::Float)
+    end
+
+    def created<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), ::Float)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::Float}).returns(::Float)
+    end
+
+    def created=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), ::Float)
+    end
+  end
+
+  class <emptyTree>::<C PropHelpers2><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::String)
+    end
+
+    def token<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), ::String)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::String}).returns(::String)
+    end
+
+    def token=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), ::String)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::Float)
+    end
+
+    def created<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), ::Float)
+    end
+  end
+
+  class <emptyTree>::<C ShardingProp><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::String)
+    end
+
+    def merchant<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), ::String)
+    end
+  end
+
+  class <emptyTree>::<C EncryptedProp><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::T.nilable(::String))
+    end
+
+    def foo<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), ::T.nilable(::String))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+    end
+
+    def encrypted_foo<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.nilable(::String)}).returns(::T.nilable(::String))
+    end
+
+    def foo=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), ::T.nilable(::String))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>)}).returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+    end
+
+    def encrypted_foo=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::T.nilable(::String))
+    end
+
+    def bar<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), ::T.nilable(::String))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+    end
+
+    def encrypted_bar<<C <todo sym>>>(&<blk>)
+      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+    end
+  end
+
+  def main<<C <todo sym>>>(&<blk>)
+    begin
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo=("b"))
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo2())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo2=("b"))
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().default())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().t_nilable())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().type())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().object())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().array())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().array_of())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().array_of_explicit())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().t_array())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().hash_of())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().const_explicit())
+      <emptyTree>::<C AdvancedODM>.new().const_explicit=("b")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().const())
+      <emptyTree>::<C AdvancedODM>.new().const=("b")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().no_class_arg())
+      <emptyTree>::<C AdvancedODM>.new().no_class_arg=(["b"])
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().enum_prop())
+      <emptyTree>::<C AdvancedODM>.new().enum_prop=("hello")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_!())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_lazy_())
+      <emptyTree>::<C AdvancedODM>.new().foreign_invalid_()
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers>.new().token())
+      <emptyTree>::<C PropHelpers>.new().token=("tok_token")
+      <emptyTree>::<C PropHelpers>.new().token=(nil)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers>.new().created())
+      <emptyTree>::<C PropHelpers>.new().created=(0.000000)
+      <emptyTree>::<C PropHelpers>.new().created=(nil)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers2>.new().token())
+      <emptyTree>::<C PropHelpers2>.new().token=("tok_token")
+      <emptyTree>::<C PropHelpers2>.new().token=(nil)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers2>.new().created())
+      <emptyTree>::<C PropHelpers2>.new().created=(0.000000)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C ShardingProp>.new().merchant())
+      <emptyTree>::<C ShardingProp>.new().merchant=("hi")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().foo())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().encrypted_foo())
+      <emptyTree>::<C EncryptedProp>.new().foo=("hello")
+      <emptyTree>::<C EncryptedProp>.new().foo=(nil)
+      <emptyTree>::<C EncryptedProp>.new().bar=("hello")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().ifunset())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().ifunset_nilable())
+      <emptyTree>::<C AdvancedODM>.new().ifunset=(nil)
+      <emptyTree>::<C AdvancedODM>.new().ifunset_nilable=(nil)
+    end
+  end
+end
