@@ -216,11 +216,11 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 return emptyParsedFile(file);
             }
         }
-        if (print.DSLTree.enabled) {
-            print.DSLTree.fmt("{}\n", tree->toStringWithTabs(lgs, 0));
+        if (print.RewriterTree.enabled) {
+            print.RewriterTree.fmt("{}\n", tree->toStringWithTabs(lgs, 0));
         }
-        if (print.DSLTreeRaw.enabled) {
-            print.DSLTreeRaw.fmt("{}\n", tree->showRaw(lgs));
+        if (print.RewriterTreeRaw.enabled) {
+            print.RewriterTreeRaw.fmt("{}\n", tree->showRaw(lgs));
         }
         if (opts.stopAfterPhase == options::Phase::REWRITER) {
             return emptyParsedFile(file);
@@ -280,11 +280,11 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
             if (!opts.skipDSLPasses) {
                 tree = runDSL(gs, file, move(tree));
             }
-            if (print.DSLTree.enabled) {
-                print.DSLTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
+            if (print.RewriterTree.enabled) {
+                print.RewriterTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
             }
-            if (print.DSLTreeRaw.enabled) {
-                print.DSLTreeRaw.fmt("{}\n", tree->showRaw(gs));
+            if (print.RewriterTreeRaw.enabled) {
+                print.RewriterTreeRaw.fmt("{}\n", tree->showRaw(gs));
             }
 
             tree = runLocalVars(gs, ast::ParsedFile{move(tree), file}).tree;
