@@ -119,14 +119,14 @@ constr:
 define void @Init_test_testdata_llvm_hello() local_unnamed_addr #6 {
 "func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit":
   %callArgs.i = alloca [1 x i64], align 8
-  %0 = load i64, i64* @rb_cObject, align 8, !tbaa !9
+  %0 = load i64, i64* @rb_cObject, align 8
   %1 = bitcast [1 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %1)
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %2 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"userStr_hello world", i64 0, i64 0), i64 11) #9
   %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %2, i64* %callArgsAddr.i, align 8
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #9, !noalias !10
+  tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #9, !noalias !9
   %3 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #9
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %1)
   ret void
@@ -158,7 +158,6 @@ attributes #9 = { nounwind }
 !6 = !{!4, !4, i64 0}
 !7 = !{!8, !8, i64 0}
 !8 = !{!"int", !4, i64 0}
-!9 = !{!3, !3, i64 0}
-!10 = !{!11}
-!11 = distinct !{!11, !12, !"sorbet_callFunc: argument 0"}
-!12 = distinct !{!12, !"sorbet_callFunc"}
+!9 = !{!10}
+!10 = distinct !{!10, !11, !"sorbet_callFunc: argument 0"}
+!11 = distinct !{!11, !"sorbet_callFunc"}

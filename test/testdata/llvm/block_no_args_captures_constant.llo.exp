@@ -536,7 +536,7 @@ constr:
 define void @Init_test_testdata_llvm_block_no_args_captures_constant() local_unnamed_addr #14 {
 typeTestSuccess.i:
   %callArgs.i = alloca [2 x i64], align 8
-  %0 = load i64, i64* @rb_cObject, align 8, !tbaa !7
+  %0 = load i64, i64* @rb_cObject, align 8
   %1 = bitcast [2 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %1)
   %rubyId_unsafe.i = load i64, i64* @rubyIdPrecomputed_unsafe, align 8
