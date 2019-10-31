@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_CHALK_ODM_PROP_H
-#define SORBET_DSL_CHALK_ODM_PROP_H
+#ifndef SORBET_REWRITER_CHALK_ODM_PROP_H
+#define SORBET_REWRITER_CHALK_ODM_PROP_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

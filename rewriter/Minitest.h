@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_MINITEST_H
-#define SORBET_DSL_MINITEST_H
+#ifndef SORBET_REWRITER_MINITEST_H
+#define SORBET_REWRITER_MINITEST_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

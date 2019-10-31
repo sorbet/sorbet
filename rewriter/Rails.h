@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_RAILS_H
-#define SORBET_DSL_RAILS_H
+#ifndef SORBET_REWRITER_RAILS_H
+#define SORBET_REWRITER_RAILS_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

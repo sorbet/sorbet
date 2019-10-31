@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_DELEGATE_H
-#define SORBET_DSL_DELEGATE_H
+#ifndef SORBET_REWRITER_DELEGATE_H
+#define SORBET_REWRITER_DELEGATE_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

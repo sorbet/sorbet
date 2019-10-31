@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_REGEXP_H
-#define SORBET_DSL_REGEXP_H
+#ifndef SORBET_REWRITER_REGEXP_H
+#define SORBET_REWRITER_REGEXP_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

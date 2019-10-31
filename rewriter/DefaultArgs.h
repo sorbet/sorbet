@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_DEFAULT_ARGS_H
-#define SORBET_DSL_DEFAULT_ARGS_H
+#ifndef SORBET_REWRITER_DEFAULT_ARGS_H
+#define SORBET_REWRITER_DEFAULT_ARGS_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

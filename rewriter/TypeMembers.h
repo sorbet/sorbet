@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_TYPEMEMBERS_H
-#define SORBET_DSL_TYPEMEMBERS_H
+#ifndef SORBET_REWRITER_TYPEMEMBERS_H
+#define SORBET_REWRITER_TYPEMEMBERS_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

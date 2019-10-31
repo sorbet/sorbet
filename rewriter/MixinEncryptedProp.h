@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_MIXIN_ENCRYPTED_PROP_H
-#define SORBET_DSL_MIXIN_ENCRYPTED_PROP_H
+#ifndef SORBET_REWRITER_MIXIN_ENCRYPTED_PROP_H
+#define SORBET_REWRITER_MIXIN_ENCRYPTED_PROP_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

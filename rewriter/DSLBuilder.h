@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_DSLBUILDER_H
-#define SORBET_DSL_DSLBUILDER_H
+#ifndef SORBET_REWRITER_DSLBUILDER_H
+#define SORBET_REWRITER_DSLBUILDER_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

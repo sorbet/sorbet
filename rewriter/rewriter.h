@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_DSL_H
-#define SORBET_DSL_DSL_H
+#ifndef SORBET_REWRITER_DSL_H
+#define SORBET_REWRITER_DSL_H
 #include "ast/ast.h"
 #include <memory>
 

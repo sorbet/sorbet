@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_PRIVATE_H
-#define SORBET_DSL_PRIVATE_H
+#ifndef SORBET_REWRITER_PRIVATE_H
+#define SORBET_REWRITER_PRIVATE_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

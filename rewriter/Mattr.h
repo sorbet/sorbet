@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_MATTR_H
-#define SORBET_DSL_MATTR_H
+#ifndef SORBET_REWRITER_MATTR_H
+#define SORBET_REWRITER_MATTR_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

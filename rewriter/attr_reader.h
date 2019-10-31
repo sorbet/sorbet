@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_ATTR_READER_H
-#define SORBET_DSL_ATTR_READER_H
+#ifndef SORBET_REWRITER_ATTR_READER_H
+#define SORBET_REWRITER_ATTR_READER_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {

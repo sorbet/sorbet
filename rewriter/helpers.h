@@ -1,5 +1,5 @@
-#ifndef SORBET_DSL_HELPERS
-#define SORBET_DSL_HELPERS
+#ifndef SORBET_REWRITER_HELPERS
+#define SORBET_REWRITER_HELPERS
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
