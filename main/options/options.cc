@@ -34,7 +34,7 @@ const vector<PrintOptions> print_options({
     {"parse-tree-whitequark", &Printers::ParseTreeWhitequark},
     {"desugar-tree", &Printers::DesugarTree},
     {"desugar-tree-raw", &Printers::DesugarTreeRaw},
-    {"dsl-tree", &Printers::DSLTree},
+    {"rewrite-tree", &Printers::DSLTree},
     {"dsl-tree-raw", &Printers::DSLTreeRaw},
     {"index-tree", &Printers::IndexTree, true},
     {"index-tree-raw", &Printers::IndexTreeRaw, true},
