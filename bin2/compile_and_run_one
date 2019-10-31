@@ -29,7 +29,7 @@ fi
 
 "$sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$@"
 
-echo "require './$root/bin2/preamble.rb';" > "$runfile"
+echo "require './$root/bin/preamble.rb';" > "$runfile"
 
 for o in "$llvmir"/*.o; do
     bundle="${o%.rb}.bundle"
