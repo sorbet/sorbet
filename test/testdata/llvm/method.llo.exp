@@ -410,7 +410,7 @@ constr:
 
 ; Function Attrs: nounwind sspreq
 define void @Init_test_testdata_llvm_method() local_unnamed_addr #13 {
-entry:
+typeTestSuccess.i:
   %callArgs.i = alloca [2 x i64], align 8
   %0 = load i64, i64* @rb_cObject, align 8, !tbaa !7
   %1 = bitcast [2 x i64]* %callArgs.i to i8*
@@ -424,11 +424,11 @@ entry:
   %canTakeFastPath.i = icmp eq i64 %2, %3
   br i1 %canTakeFastPath.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit", label %const_slowPath.i, !prof !24
 
-const_slowPath.i:                                 ; preds = %entry
+const_slowPath.i:                                 ; preds = %typeTestSuccess.i
   tail call void @const_recompute_T() #16
   br label %"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit"
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit": ; preds = %entry, %const_slowPath.i
+"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit": ; preds = %typeTestSuccess.i, %const_slowPath.i
   %4 = load i64, i64* @guarded_const_T, align 8
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !27
   %5 = call i64 @rb_funcallv(i64 %4, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #16
