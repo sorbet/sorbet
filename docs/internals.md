@@ -121,7 +121,7 @@ another or make modifications within the IR they were given.
 |     |                                  | [`parser::Node`]    |                                   |
 | 2   | [Desugar], `-p desugar-tree`     |                     |                                   |
 | 3   |                                  | [`ast::Expression`] | [DSL]                             |
-| 4   |                                  | [`ast::Expression`] | [LocalVars], `-p dsl-tree`        |
+| 4   |                                  | [`ast::Expression`] | [LocalVars], `-p rewrite-tree`        |
 | 5   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
 | 6   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
 | 6   |                                  | [`ast::Expression`] | [Flattener], `-p flatten-tree`    |

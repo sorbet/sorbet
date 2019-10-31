@@ -19,8 +19,8 @@ passes=(
   parse-tree-json
   desugar-tree
   desugar-tree-raw
-  dsl-tree
-  dsl-tree-raw
+  rewrite-tree
+  rewrite-tree-raw
   symbol-table
   symbol-table-raw
   name-tree

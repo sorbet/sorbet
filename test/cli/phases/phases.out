@@ -24,12 +24,12 @@ ClassDef{
   ]
 }
 --- desugar-tree-raw end ---
---- dsl-tree start ---
+--- rewrite-tree start ---
 class <emptyTree><<C <root>>> < ()
   1
 end
---- dsl-tree end ---
---- dsl-tree-raw start ---
+--- rewrite-tree end ---
+--- rewrite-tree-raw start ---
 ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
@@ -38,7 +38,7 @@ ClassDef{
     Literal{ value = 1 }
   ]
 }
---- dsl-tree-raw end ---
+--- rewrite-tree-raw end ---
 --- index-tree start ---
 class <emptyTree><<C <root>>> < ()
   1

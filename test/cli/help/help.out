@@ -140,7 +140,7 @@ Usage:
  dev options:
   -p, --print type              Print: [parse-tree, parse-tree-json,
                                 parse-tree-whitequark, desugar-tree, desugar-tree-raw,
-                                dsl-tree, dsl-tree-raw, index-tree,
+                                rewrite-tree, rewrite-tree-raw, index-tree,
                                 index-tree-raw, name-tree, name-tree-raw, resolve-tree,
                                 resolve-tree-raw, flatten-tree,
                                 flatten-tree-raw, ast, ast-raw, cfg, cfg-raw, cfg-json,
