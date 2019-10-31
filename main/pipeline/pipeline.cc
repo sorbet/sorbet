@@ -188,7 +188,7 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
-    ast::ParsedFile dslsInlined{nullptr, file};
+    ast::ParsedFile rewriten{nullptr, file};
     ENFORCE(file.data(lgs).strictLevel == decideStrictLevel(lgs, file, opts));
 
     Timer timeit(lgs.tracer(), "indexOne");
@@ -226,8 +226,8 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             return emptyParsedFile(file);
         }
 
-        dslsInlined.tree = move(tree);
-        return dslsInlined;
+        rewriten.tree = move(tree);
+        return rewriten;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = lgs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
@@ -245,7 +245,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                                                                           core::GlobalState &gs, core::FileRef file,
                                                                           unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
-    ast::ParsedFile dslsInlined{nullptr, file};
+    ast::ParsedFile rewriten{nullptr, file};
     vector<shared_ptr<core::File>> resultPluginFiles;
 
     Timer timeit(gs.tracer(), "indexOneWithPlugins", {{"file", (string)file.data(gs).path()}});
@@ -302,8 +302,8 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
             return emptyPluginFile(file);
         }
 
-        dslsInlined.tree = move(tree);
-        return {move(dslsInlined), resultPluginFiles};
+        rewriten.tree = move(tree);
+        return {move(rewriten), resultPluginFiles};
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
