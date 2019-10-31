@@ -188,7 +188,7 @@ If you pass the `-p desugar-tree` or `-p desugar-tree-raw` option to `sorbet`,
 you can see what a Ruby program looks like after being desugared.
 
 
-### DSL
+### Rewriter
 
 The Rewriter pass is sort of like a domain-specific desugar pass. It takes
 [`ast::Expression`]s and rewrites specific Ruby DSLs and metaprogramming into
