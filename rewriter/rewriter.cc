@@ -1,4 +1,4 @@
-#include "rewriter/dsl.h"
+#include "rewriter/rewriter.h"
 #include "ast/treemap/treemap.h"
 #include "ast/verifier/verifier.h"
 #include "common/typecase.h"

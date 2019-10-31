@@ -2,7 +2,7 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
-#include "rewriter/dsl.h"
+#include "rewriter/rewriter.h"
 
 using namespace std;
 

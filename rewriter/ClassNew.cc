@@ -4,7 +4,7 @@
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
-#include "rewriter/dsl.h"
+#include "rewriter/rewriter.h"
 
 using namespace std;
 

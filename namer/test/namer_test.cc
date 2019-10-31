@@ -7,7 +7,7 @@
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
-#include "rewriter/dsl.h"
+#include "rewriter/rewriter.h"
 #include "local_vars/local_vars.h"
 #include "namer/namer.h"
 #include "spdlog/sinks/stdout_color_sinks.h"

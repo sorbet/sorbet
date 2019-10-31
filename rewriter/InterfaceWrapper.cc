@@ -4,8 +4,8 @@
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
-#include "core/errors/dsl.h"
-#include "rewriter/dsl.h"
+#include "core/errors/rewriter.h"
+#include "rewriter/rewriter.h"
 #include "rewriter/util.h"
 
 using namespace std;
