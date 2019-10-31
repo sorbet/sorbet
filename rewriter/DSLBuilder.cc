@@ -89,7 +89,7 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
             arg = ast::MK::OptionalArg(loc, move(arg), move(default_));
         }
         stats.emplace_back(ast::MK::Method1(loc, loc, name, move(arg), ast::MK::EmptyTree(),
-                                            ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
+                                            ast::MethodDef::SelfMethod | ast::MethodDef::RewriterSynthesized));
     }
 
     if (!skipGetter) {
@@ -102,12 +102,12 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
         stats.emplace_back(ast::MK::Method(loc, loc, getName, ast::MethodDef::ARGS_store(),
                                            ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
-                                           ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
+                                           ast::MethodDef::SelfMethod | ast::MethodDef::RewriterSynthesized));
 
         // def <prop>()
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
         stats.emplace_back(ast::MK::Method(loc, loc, name, ast::MethodDef::ARGS_store(),
-                                           ast::MK::Unsafe(loc, ast::MK::Nil(loc)), ast::MethodDef::DSLSynthesized));
+                                           ast::MK::Unsafe(loc, ast::MK::Nil(loc)), ast::MethodDef::RewriterSynthesized));
     }
 
     return stats;

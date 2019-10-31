@@ -41,8 +41,8 @@ bool definesBehavior(const unique_ptr<ast::Expression> &expr) {
         },
 
         // Ignore code synthesized by DSL pass.
-        [&](ast::Send *send) { result = !send->isDSLSynthesized(); },
-        [&](ast::MethodDef *methodDef) { result = !methodDef->isDSLSynthesized(); },
+        [&](ast::Send *send) { result = !send->isRewriterSynthesized(); },
+        [&](ast::MethodDef *methodDef) { result = !methodDef->isRewriterSynthesized(); },
 
         [&](ast::Expression *klass) { result = true; });
     return result;

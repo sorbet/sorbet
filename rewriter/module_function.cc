@@ -92,7 +92,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::rewriteDefn(core::MutableCon
     unique_ptr<ast::Expression> moduleCopy = expr->deepCopy();
     ENFORCE(moduleCopy, "Should be non-nil.");
     auto newDefn = ast::cast_tree<ast::MethodDef>(moduleCopy.get());
-    newDefn->flags |= ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized;
+    newDefn->flags |= ast::MethodDef::SelfMethod | ast::MethodDef::RewriterSynthesized;
     stats.emplace_back(move(moduleCopy));
 
     return stats;
@@ -133,7 +133,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableCont
             args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
             args.emplace_back(std::make_unique<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
             stats.emplace_back(ast::MK::Method(loc, loc, methodName, std::move(args), ast::MK::EmptyTree(),
-                                               ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
+                                               ast::MethodDef::SelfMethod | ast::MethodDef::RewriterSynthesized));
         } else {
             if (auto e = ctx.state.beginError(arg->loc, core::errors::DSL::BadModuleFunction)) {
                 e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",

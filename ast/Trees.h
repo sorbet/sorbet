@@ -149,7 +149,7 @@ public:
 
     enum Flags {
         SelfMethod = 1,
-        DSLSynthesized = 2,
+        RewriterSynthesized = 2,
     };
 
     MethodDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
@@ -163,8 +163,8 @@ public:
         return (flags & SelfMethod) != 0;
     }
 
-    bool isDSLSynthesized() const {
-        return (flags & DSLSynthesized) != 0;
+    bool isRewriterSynthesized() const {
+        return (flags & RewriterSynthesized) != 0;
     }
 
 private:
@@ -478,7 +478,7 @@ public:
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
-    bool isDSLSynthesized() const {
+    bool isRewriterSynthesized() const {
         return (flags & DSL_SYNTHESIZED) != 0;
     }
 

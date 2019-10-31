@@ -125,7 +125,7 @@ vector<unique_ptr<ast::Expression>> Delegate::replaceDSL(core::MutableContext ct
         args.emplace_back(std::make_unique<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
 
         methodStubs.push_back(ast::MK::Method(loc, loc, methodName, std::move(args), ast::MK::EmptyTree(),
-                                              ast::MethodDef::DSLSynthesized));
+                                              ast::MethodDef::RewriterSynthesized));
     }
 
     return methodStubs;

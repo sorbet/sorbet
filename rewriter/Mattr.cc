@@ -25,7 +25,7 @@ static void addInstanceCounterPart(vector<unique_ptr<ast::Expression>> &sink, co
     sink.emplace_back(sig->deepCopy());
     auto instanceDef = def->deepCopy();
     ENFORCE(ast::isa_tree<ast::MethodDef>(def.get()));
-    ast::cast_tree<ast::MethodDef>(instanceDef.get())->flags = ast::MethodDef::Flags::DSLSynthesized;
+    ast::cast_tree<ast::MethodDef>(instanceDef.get())->flags = ast::MethodDef::Flags::RewriterSynthesized;
     sink.emplace_back(move(instanceDef));
 }
 
@@ -93,7 +93,7 @@ vector<unique_ptr<ast::Expression>> Mattr::replaceDSL(core::MutableContext ctx, 
         if (doReaders) {
             auto sig = ast::MK::Sig0(loc, ast::MK::Untyped(loc));
             auto def = ast::MK::Method0(loc, loc, lit->asSymbol(ctx), ast::MK::EmptyTree(),
-                                        ast::MethodDef::Flags::SelfMethod | ast::MethodDef::Flags::DSLSynthesized);
+                                        ast::MethodDef::Flags::SelfMethod | ast::MethodDef::Flags::RewriterSynthesized);
             if (instanceReader) {
                 addInstanceCounterPart(result, sig, def);
             }
@@ -105,7 +105,7 @@ vector<unique_ptr<ast::Expression>> Mattr::replaceDSL(core::MutableContext ctx, 
                                      ast::MK::Untyped(loc));
             auto def = ast::MK::Method1(loc, loc, lit->asSymbol(ctx).addEq(ctx),
                                         ast::MK::Local(loc, core::Names::arg0()), ast::MK::EmptyTree(),
-                                        ast::MethodDef::Flags::SelfMethod | ast::MethodDef::Flags::DSLSynthesized);
+                                        ast::MethodDef::Flags::SelfMethod | ast::MethodDef::Flags::RewriterSynthesized);
             if (instanceWriter) {
                 addInstanceCounterPart(result, sig, def);
             }
@@ -118,7 +118,7 @@ vector<unique_ptr<ast::Expression>> Mattr::replaceDSL(core::MutableContext ctx, 
             auto sig = ast::MK::Sig0(
                 loc, ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean()));
             auto def = ast::MK::Method0(loc, loc, lit->asSymbol(ctx).addQuestion(ctx), ast::MK::False(loc),
-                                        ast::MethodDef::Flags::SelfMethod | ast::MethodDef::Flags::DSLSynthesized);
+                                        ast::MethodDef::Flags::SelfMethod | ast::MethodDef::Flags::RewriterSynthesized);
             if (instanceReader && instancePredicate) {
                 addInstanceCounterPart(result, sig, def);
             }

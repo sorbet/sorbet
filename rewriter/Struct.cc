@@ -111,9 +111,9 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
         }
         newArgs.emplace_back(ast::MK::OptionalArg(loc, move(argName), ast::MK::Nil(loc)));
 
-        body.emplace_back(ast::MK::Method0(loc, loc, name, ast::MK::EmptyTree(), ast::MethodDef::DSLSynthesized));
+        body.emplace_back(ast::MK::Method0(loc, loc, name, ast::MK::EmptyTree(), ast::MethodDef::RewriterSynthesized));
         body.emplace_back(ast::MK::Method1(loc, loc, name.addEq(ctx), ast::MK::Local(loc, core::Names::arg0()),
-                                           ast::MK::Local(loc, core::Names::arg0()), ast::MethodDef::DSLSynthesized));
+                                           ast::MK::Local(loc, core::Names::arg0()), ast::MethodDef::RewriterSynthesized));
     }
 
     // Elem = type_member(fixed: T.untyped)
@@ -138,7 +138,7 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
 
     body.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigValues))));
     body.emplace_back(ast::MK::Method(loc, loc, core::Names::initialize(), std::move(newArgs),
-                                      ast::MK::Cast(loc, dupName(asgn->lhs.get())), ast::MethodDef::DSLSynthesized));
+                                      ast::MK::Cast(loc, dupName(asgn->lhs.get())), ast::MethodDef::RewriterSynthesized));
 
     ast::ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),

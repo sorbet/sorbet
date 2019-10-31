@@ -479,10 +479,10 @@ public:
         return isStaticField() && (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
     }
 
-    inline void setDSLSynthesized() {
+    inline void setRewriterSynthesized() {
         flags |= Symbol::Flags::DSL_SYNTHESIZED;
     }
-    inline bool isDSLSynthesized() const {
+    inline bool isRewriterSynthesized() const {
         return (flags & Symbol::Flags::DSL_SYNTHESIZED) != 0;
     }
 

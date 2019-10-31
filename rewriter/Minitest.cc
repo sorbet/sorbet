@@ -62,7 +62,7 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
     if (send->args.empty() && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
         return addSigVoid(ast::MK::Method0(send->loc, send->loc, name, prepareBody(ctx, std::move(send->block->body)),
-                                           ast::MethodDef::DSLSynthesized));
+                                           ast::MethodDef::RewriterSynthesized));
     }
 
     if (send->args.size() != 1) {
@@ -84,7 +84,7 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
         auto name = ctx.state.enterNameUTF8("<test_" + argString + ">");
         return addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
                                            prepareBody(ctx, std::move(send->block->body)),
-                                           ast::MethodDef::DSLSynthesized));
+                                           ast::MethodDef::RewriterSynthesized));
     }
 
     return nullptr;

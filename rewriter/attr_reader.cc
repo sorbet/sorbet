@@ -261,7 +261,7 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
             }
 
             stats.emplace_back(
-                ast::MK::Method0(loc, loc, name, ast::MK::Instance(argLoc, varName), ast::MethodDef::DSLSynthesized));
+                ast::MK::Method0(loc, loc, name, ast::MK::Instance(argLoc, varName), ast::MethodDef::RewriterSynthesized));
         }
     }
 
@@ -297,7 +297,7 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
                 body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(loc, name));
             }
             stats.emplace_back(ast::MK::Method1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body),
-                                                ast::MethodDef::DSLSynthesized));
+                                                ast::MethodDef::RewriterSynthesized));
         }
     }
 

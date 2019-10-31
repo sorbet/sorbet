@@ -626,8 +626,8 @@ public:
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
         method->symbol.data(ctx)->addLoc(ctx, method->declLoc);
-        if (method->isDSLSynthesized()) {
-            method->symbol.data(ctx)->setDSLSynthesized();
+        if (method->isRewriterSynthesized()) {
+            method->symbol.data(ctx)->setRewriterSynthesized();
         }
         return method;
     }
@@ -679,7 +679,7 @@ public:
     unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         // forbid dynamic constant definition
         auto ownerData = ctx.owner.data(ctx);
-        if (!ownerData->isClassOrModule() && !ownerData->isDSLSynthesized()) {
+        if (!ownerData->isClassOrModule() && !ownerData->isRewriterSynthesized()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::DynamicConstantAssignment)) {
                 e.setHeader("Dynamic constant assignment");
             }
