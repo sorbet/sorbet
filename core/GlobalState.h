@@ -98,6 +98,7 @@ public:
     SymbolRef lookupStaticInitForClass(SymbolRef klass) const;
 
     NameRef enterNameUTF8(std::string_view nm);
+    NameRef lookupNameUTF8(std::string_view nm) const;
 
     NameRef lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const;
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num);

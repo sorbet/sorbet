@@ -873,6 +873,32 @@ string_view GlobalState::enterString(string_view nm) {
     return string_view(from, nm.size());
 }
 
+NameRef GlobalState::lookupNameUTF8(string_view nm) const {
+    const auto hs = _hash(nm);
+    unsigned int hashTableSize = namesByHash.size();
+    unsigned int mask = hashTableSize - 1;
+    auto bucketId = hs & mask;
+    unsigned int probeCount = 1;
+
+    while (namesByHash[bucketId].second != 0u) {
+        auto &bucket = namesByHash[bucketId];
+        if (bucket.first == hs) {
+            auto nameId = bucket.second;
+            auto &nm2 = names[nameId];
+            if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
+                counterInc("names.utf8.hit");
+                return nm2.ref(*this);
+            } else {
+                counterInc("names.hash_collision.utf8");
+            }
+        }
+        bucketId = (bucketId + probeCount) & mask;
+        probeCount++;
+    }
+
+    return core::NameRef::noName();
+}
+
 NameRef GlobalState::enterNameUTF8(string_view nm) {
     const auto hs = _hash(nm);
     unsigned int hashTableSize = namesByHash.size();
