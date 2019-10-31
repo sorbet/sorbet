@@ -18,9 +18,9 @@ cleanup() {
 ruby="./external/ruby_2_6_3/ruby"
 
 echo "Source: $rb"
-echo "Run Ruby: bazel-bin/$ruby $rb"
-echo "Run Sorbet: run/ruby $rb"
 echo "require './run/preamble.rb'; require './$rb';" > "$rbrunfile"
+echo "Run Ruby: bazel-bin/$ruby $rbrunfile"
+echo "Run Sorbet: run/ruby $rb"
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
 llvmir=$llvmir runfile=$runfile run/ruby "$rb" | tee "$srbout"
