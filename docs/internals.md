@@ -201,7 +201,7 @@ examples of DSLs that are rewritten by this pass:
 
 - `Chalk::ODM`'s `prop` definitions are written similarly to `attr_reader`
 
-The core dsl pass lives in [rewriter/rewriter.cc].
+The core Rewriter pass lives in [rewriter/rewriter.cc].
 Each Rewriter pass lives in its own file in the [rewriter/] folder.
 
 In the future, we anticipate rewriting the DSL phase with a plugin architecture.
