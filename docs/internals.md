@@ -20,7 +20,7 @@ unfinished or confusing section!
 - [Phases](#phases)
   - [Parser](#parser)
   - [Desugar](#desugar)
-  - [DSL](#rewriter)
+  - [Rewriter](#rewriter)
   - [LocalVars](#localvars)
   - [Namer](#namer)
   - [Resolver](#resolver)
@@ -120,7 +120,7 @@ another or make modifications within the IR they were given.
 | 1   | [Parser], `-p parse-tree`        |                     |                                   |
 |     |                                  | [`parser::Node`]    |                                   |
 | 2   | [Desugar], `-p desugar-tree`     |                     |                                   |
-| 3   |                                  | [`ast::Expression`] | [DSL]                             |
+| 3   |                                  | [`ast::Expression`] | [Rewriter]                             |
 | 4   |                                  | [`ast::Expression`] | [LocalVars], `-p rewrite-tree`        |
 | 5   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
 | 6   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
