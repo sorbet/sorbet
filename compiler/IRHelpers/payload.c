@@ -558,13 +558,31 @@ _Bool sorbet_isa_Untyped(VALUE obj) {
     return 1;
 }
 
+_Bool sorbet_isa_Hash(VALUE obj) {
+    return RB_TYPE_P(obj, T_HASH);
+}
+
+_Bool sorbet_isa_Array(VALUE obj) {
+    return RB_TYPE_P(obj, T_ARRAY);
+}
+
+_Bool sorbet_isa_Regexp(VALUE obj) {
+    return RB_TYPE_P(obj, T_REGEXP);
+}
+
+_Bool sorbet_isa_Rational(VALUE obj) {
+    return RB_TYPE_P(obj, T_RATIONAL);
+}
+
 _Bool sorbet_isa_String(VALUE obj) {
     return RB_TYPE_P(obj, T_STRING);
 }
 
+/*
 _Bool sorbet_isa_Method(VALUE obj) {
     return rb_obj_is_method(obj) == Qtrue;
 }
+*/
 
 _Bool sorbet_isa_Proc(VALUE obj) {
     return rb_obj_is_proc(obj) == Qtrue;

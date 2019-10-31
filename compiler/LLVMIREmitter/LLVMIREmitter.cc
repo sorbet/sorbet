@@ -219,9 +219,49 @@ llvm::Value *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuild
     return builder.CreateLoad(guardedConstDeclaration);
 }
 
+const vector<pair<core::SymbolRef, string>> optimizedTypeTests = {
+    {core::Symbols::untyped(), "sorbet_isa_Untyped"},
+    {core::Symbols::Array(), "sorbet_isa_Array"},
+    {core::Symbols::FalseClass(), "sorbet_isa_FalseClass"},
+    {core::Symbols::TrueClass(), "sorbet_isa_TrueClass"},
+    {core::Symbols::Float(), "sorbet_isa_Float"},
+    {core::Symbols::Hash(), "sorbet_isa_Hash"},
+    {core::Symbols::Integer(), "sorbet_isa_Integer"},
+    {core::Symbols::NilClass(), "sorbet_isa_NilClass"},
+    {core::Symbols::Proc(), "sorbet_isa_Proc"},
+    {core::Symbols::Rational(), "sorbet_isa_Rational"},
+    {core::Symbols::Regexp(), "sorbet_isa_Regexp"},
+    {core::Symbols::String(), "sorbet_isa_String"},
+    {core::Symbols::Symbol(), "sorbet_isa_Symbol"},
+    {core::Symbols::Proc(), "sorbet_isa_Proc"},
+
+};
+
 llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilder<> &builder, llvm::Value *val,
                               const core::TypePtr &type) {
-    return builder.getInt1(true);
+    llvm::Value *ret;
+    typecase(
+        type.get(),
+        [&](core::ClassType *ct) {
+            for (const auto &[candidate, specializedCall] : optimizedTypeTests) {
+                if (ct->symbol == candidate) {
+                    ret = builder.CreateCall(cs.module->getFunction(specializedCall), {val});
+                    return;
+                }
+            }
+            auto attachedClass = ct->symbol.data(cs)->attachedClass(cs);
+            // todo: handle attached of attached class
+            if (attachedClass.exists()) {
+                ret = builder.CreateCall(cs.module->getFunction("sorbet_isa_class_of"),
+                                         {val, resolveSymbol(cs, attachedClass, builder)});
+                return;
+            }
+            ret =
+                builder.CreateCall(cs.module->getFunction("sorbet_isa"), {val, resolveSymbol(cs, ct->symbol, builder)});
+        },
+
+        [&](core::Type *_default) { ret = builder.getInt1(true); });
+    return ret;
 }
 
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
