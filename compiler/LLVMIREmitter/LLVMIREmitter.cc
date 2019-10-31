@@ -983,7 +983,20 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     [&](cfg::Cast *i) {
                         auto val =
                             varGet(cs, i->value.variable, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
-                        auto UNUSED(passedTypeTest) = createTypeTestU1(cs, builder, val, bind.bind.type);
+                        auto passedTypeTest = createTypeTestU1(cs, builder, val, bind.bind.type);
+                        auto successBlock =
+                            llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
+
+                        auto failBlock =
+                            llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
+
+                        cs.setExpectedBool(builder, passedTypeTest, true);
+                        builder.CreateCondBr(passedTypeTest, successBlock, failBlock);
+                        builder.SetInsertPoint(failBlock);
+                        // throw exception here
+                        builder.CreateBr(successBlock);
+                        builder.SetInsertPoint(successBlock);
+
                         if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {
                             varSet(cs, bind.bind.variable, val, builder, llvmVariables, aliases, blockMap,
                                    bb->rubyBlockId);
