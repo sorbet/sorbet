@@ -221,6 +221,11 @@ llvm::Value *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuild
     return builder.CreateCall(func, {});
 }
 
+llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilder<> &builder, llvm::Value *val,
+                              const core::TypePtr &type) {
+    return builder.getInt1(true);
+}
+
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     core::SymbolRef sym;
     if (auto classType = core::cast_type<core::ClassType>(typ.get())) {
@@ -975,7 +980,19 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     [&](cfg::LoadYieldParams *i) {
                         /* intentionally omitted, it's part of method preambula */
                     },
-                    [&](cfg::Cast *i) { cs.trace("Cast\n"); }, [&](cfg::TAbsurd *i) { cs.trace("TAbsurd\n"); });
+                    [&](cfg::Cast *i) {
+                        auto val =
+                            varGet(cs, i->value.variable, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
+                        auto UNUSED(passedTypeTest) = createTypeTestU1(cs, builder, val, bind.bind.type);
+                        if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {
+                            varSet(cs, bind.bind.variable, val, builder, llvmVariables, aliases, blockMap,
+                                   bb->rubyBlockId);
+                        } else if (i->cast == core::Names::assertType()) {
+                            varSet(cs, bind.bind.variable, cs.getRubyFalseRaw(builder), builder, llvmVariables, aliases,
+                                   blockMap, bb->rubyBlockId);
+                        }
+                    },
+                    [&](cfg::TAbsurd *i) { cs.trace("TAbsurd\n"); });
                 if (isTerminated) {
                     break;
                 }
