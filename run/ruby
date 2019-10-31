@@ -23,5 +23,10 @@ for rb in "$@"; do
     echo "require '$rb';" >> "$runfile"
 done
 
-ruby="./external/ruby_2_6_3/ruby"
+if [ -f external/ruby_2_6_3/ruby ]; then
+    ruby=external/ruby_2_6_3/ruby
+else
+    bazel build @ruby_2_6_3//:ruby --config=dbg 2> /dev/null
+    ruby="$root/bazel-bin/external/ruby_2_6_3/ruby"
+fi
 $ruby "$runfile"
