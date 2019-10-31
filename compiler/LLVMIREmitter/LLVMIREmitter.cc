@@ -175,9 +175,9 @@ llvm::Value *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuild
     auto canTakeFastPath =
         builder.CreateICmpEQ(builder.CreateLoad(guardEpochDeclaration),
                              builder.CreateCall(cs.module->getFunction("sorbet_getConstantEpoch")), "canTakeFastPath");
-    cs.setExpectedBool(builder, canTakeFastPath, true);
+    auto expected = cs.setExpectedBool(builder, canTakeFastPath, true);
 
-    builder.CreateCondBr(canTakeFastPath, continuePath, slowPath);
+    builder.CreateCondBr(expected, continuePath, slowPath);
     builder.SetInsertPoint(slowPath);
     auto recomputeFunName = "const_recompute_" + str;
     auto recomputeFun = cs.module->getFunction(recomputeFunName);
@@ -462,14 +462,14 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
         auto tooManyArgs =
             builder.CreateICmpUGT(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgCount)), "tooManyArgs");
-        cs.setExpectedBool(builder, tooManyArgs, false);
-        builder.CreateCondBr(tooManyArgs, argCountFailBlock, argCountSecondCheckBlock);
+        auto expected1 = cs.setExpectedBool(builder, tooManyArgs, false);
+        builder.CreateCondBr(expected1, argCountFailBlock, argCountSecondCheckBlock);
 
         builder.SetInsertPoint(argCountSecondCheckBlock);
         auto tooFewArgs =
             builder.CreateICmpULT(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgCount)), "tooFewArgs");
-        cs.setExpectedBool(builder, tooFewArgs, false);
-        builder.CreateCondBr(tooFewArgs, argCountFailBlock, argCountSuccessBlock);
+        auto expected2 = cs.setExpectedBool(builder, tooFewArgs, false);
+        builder.CreateCondBr(expected2, argCountFailBlock, argCountSuccessBlock);
 
         builder.SetInsertPoint(argCountFailBlock);
         cs.emitArgumentMismatch(builder, argCountRaw, minArgCount, maxArgCount);
@@ -535,8 +535,8 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             auto argCount =
                 builder.CreateICmpEQ(func->arg_begin(), llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
                                      llvm::Twine("default") + llvm::Twine(i));
-            cs.setExpectedBool(builder, argCount, false);
-            builder.CreateCondBr(argCount, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
+            auto expected = cs.setExpectedBool(builder, argCount, false);
+            builder.CreateCondBr(expected, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
         }
     }
     {
@@ -988,8 +988,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         auto failBlock =
                             llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
 
-                        cs.setExpectedBool(builder, passedTypeTest, true);
-                        builder.CreateCondBr(passedTypeTest, successBlock, failBlock);
+                        auto expected = cs.setExpectedBool(builder, passedTypeTest, true);
+                        builder.CreateCondBr(expected, successBlock, failBlock);
                         builder.SetInsertPoint(failBlock);
                         // throw exception here
                         builder.CreateBr(successBlock);

@@ -34,7 +34,7 @@ public:
 
     // api for actual code emission
     llvm::Value *getRubyIdFor(llvm::IRBuilderBase &builder, std::string_view idName);
-    void setExpectedBool(llvm::IRBuilderBase &builder, llvm::Value *boolean, bool expected);
+    llvm::Value *setExpectedBool(llvm::IRBuilderBase &builder, llvm::Value *boolean, bool expected);
     // boxed raw value from rawData into target. Assumes that types are compatible.
     void boxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *storeTarget, llvm::Value *rawData);
     llvm::Value *unboxRawValue(llvm::IRBuilderBase &builder, llvm::AllocaInst *storeTarget);
