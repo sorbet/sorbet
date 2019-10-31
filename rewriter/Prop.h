@@ -26,7 +26,7 @@ namespace sorbet::rewriter {
  * from the expected shape stops the desugaring.
  *
  * Most other `replaceDSL`s return just nodes, but we also want to keep track of the prop information so that at the end
- * of the DSL pass on the classDef, we can construct an `initialize` method with good static types.
+ * of the Rewriter pass on the classDef, we can construct an `initialize` method with good static types.
  *
  */
 class Prop final {

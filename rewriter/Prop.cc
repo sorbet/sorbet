@@ -14,7 +14,7 @@ namespace {
 
 // these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
-// users, but we don't know that information in the DSL passes.
+// users, but we don't know that information in the Rewriter passes.
 bool isT(ast::Expression *expr) {
     auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (t == nullptr || t->cnst != core::Names::Constants::T()) {

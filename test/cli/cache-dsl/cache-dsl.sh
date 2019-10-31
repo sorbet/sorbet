@@ -8,8 +8,8 @@ trap cleanup EXIT
 set -e
 metrics="$dir/metrics.json"
 
-# attr_accessor.rb relies on the DSL pass to typecheck properly. We
-# cache it using a normal run, and then re-run without DSL passes and
+# attr_accessor.rb relies on the Rewriter pass to typecheck properly. We
+# cache it using a normal run, and then re-run without Rewriter passes and
 # verify that it fails (i.e. that it isn't re-using cached DSL-passed
 # source). We re-run twice to exercise both cached and uncached paths.
 main/sorbet \

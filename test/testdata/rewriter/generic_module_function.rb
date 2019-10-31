@@ -1,6 +1,6 @@
 # typed: true
 
-# We currently desugar module_function in a DSL pass, but we
+# We currently desugar module_function in a Rewriter pass, but we
 # previously treated it specially in the namer, and there were
 # edge-cases with generics where we'd treat the static and instance
 # method as being basically "the same", but this would cause errors

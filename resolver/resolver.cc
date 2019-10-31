@@ -1435,7 +1435,7 @@ private:
         }
     }
 
-    // These will already be handled by DefaultArgs DSL pass
+    // These will already be handled by DefaultArgs Rewriter pass
     void deleteOptionlArg(core::MutableContext ctx, ast::MethodDef *mdef) {
         for (auto &arg : mdef->args) {
             if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(arg.get())) {

@@ -276,7 +276,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         } else {
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
             if (test.expectations.contains("rewrite-tree-raw") || test.expectations.contains("rewrite-tree")) {
-                ADD_FAILURE() << "Running DSL passes with autogen isn't supported";
+                ADD_FAILURE() << "Running Rewriter passes with autogen isn't supported";
             }
         }
 
@@ -482,7 +482,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         handler.addObserved("desguar-tree", [&]() { return file.tree->toString(*gs); });
         handler.addObserved("desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
-        // DSL pass
+        // Rewriter pass
         file = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(file.tree)), file.file});
         handler.addObserved("rewrite-tree", [&]() { return file.tree->toString(*gs); });
         handler.addObserved("rewrite-tree-raw", [&]() { return file.tree->showRaw(*gs); });

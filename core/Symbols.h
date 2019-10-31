@@ -64,7 +64,7 @@ public:
 
         // --- Applies to all types of Symbols ---
 
-        // Synthesized by C++ code in a DSL pass
+        // Synthesized by C++ code in a Rewriter pass
         static constexpr u4 REWRITER_SYNTHESIZED = 0x0000'0001;
 
         // --- For our current symbol type, what flags does it have?

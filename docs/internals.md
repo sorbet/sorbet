@@ -161,7 +161,7 @@ The header itself is generated using [parser/tools/generate_ast.cc].
 
 In general, the IR the parser generates is intended to model Ruby very
 granularly, but is frequently redundant for the purpose of typechecking. We use
-the Desugar and DSL passes to simplify the IR before typechecking.
+the Desugar and Rewriter passes to simplify the IR before typechecking.
 
 
 ### Desugar
@@ -190,7 +190,7 @@ you can see what a Ruby program looks like after being desugared.
 
 ### DSL
 
-The DSL pass is sort of like a domain-specific desugar pass. It takes
+The Rewriter pass is sort of like a domain-specific desugar pass. It takes
 [`ast::Expression`]s and rewrites specific Ruby DSLs and metaprogramming into
 code that Sorbet can analyze. DSL in this context can have a broad meaning. Some
 examples of DSLs that are rewritten by this pass:
@@ -202,15 +202,15 @@ examples of DSLs that are rewritten by this pass:
 - `Chalk::ODM`'s `prop` definitions are written similarly to `attr_reader`
 
 The core dsl pass lives in [rewriter/dsl.cc].
-Each DSL pass lives in its own file in the [rewriter/] folder.
+Each Rewriter pass lives in its own file in the [rewriter/] folder.
 
 In the future, we anticipate rewriting the DSL phase with a plugin architecture.
 This will allow for a wider audience of Rubyists to teach Sorbet about DSLs
 they've written.
 
-We artificially limit what code we call from DSL passes. Sometimes it would be
+We artificially limit what code we call from Rewriter passes. Sometimes it would be
 convenient to call into other phases of Sorbet, but instead we've reimplemented
-functionality in the DSL pass. This keeps the surface area of the API we'll have
+functionality in the Rewriter pass. This keeps the surface area of the API we'll have
 to present to plugins in the future small.
 
 

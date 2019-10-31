@@ -1,6 +1,6 @@
 # typed: true
 
-# This is only an error because autogen does **not** run the ClassNew DSL pass.
+# This is only an error because autogen does **not** run the ClassNew Rewriter pass.
 
 A = Class.new
 

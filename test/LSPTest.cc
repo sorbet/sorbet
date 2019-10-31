@@ -18,7 +18,7 @@ void LSPTest::SetUp() {
     lspWrapper->enableAllExperimentalFeatures();
 
     if (test.expectations.find("autogen") != test.expectations.end()) {
-        // When autogen is enabled, skip DSL passes...
+        // When autogen is enabled, skip Rewriter passes...
         lspWrapper->opts.skipRewriterPasses = true;
         // Some autogen tests assume that some errors will occur from the resolver step, others assume the resolver
         // won't run.

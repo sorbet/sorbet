@@ -49,7 +49,7 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
 
 // these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
-// users, but we don't know that information in the DSL passes.
+// users, but we don't know that information in the Rewriter passes.
 bool isT(const unique_ptr<ast::Expression> &expr) {
     auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr.get());
     if (t == nullptr || t->cnst != core::Names::Constants::T()) {
@@ -69,7 +69,7 @@ bool isTNilable(const unique_ptr<ast::Expression> &expr) {
 }
 
 // Slightly modified from TypeSyntax::isSig.
-// We don't want to depend on resolver so that one day everything in the DSL pass can be standalone.
+// We don't want to depend on resolver so that one day everything in the Rewriter pass can be standalone.
 //
 // There must be both a `sig` and a `returns` in order for isSig to be true.
 bool isSig(const ast::Send *send) {
@@ -199,7 +199,7 @@ unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const a
 // duplicated onto all but the first synthesized method. For example, sig (1)
 // above will actually be untouched in the syntax tree, but (2), (3), and (4)
 // will have to be synthesized. Handling this case gets a little tricky
-// considering that this DSL pass handles all three of attr_reader,
+// considering that this Rewriter pass handles all three of attr_reader,
 // attr_writer, and attr_accessor.
 //
 // Also note that the burden is on the user to provide an accurate type signature.
