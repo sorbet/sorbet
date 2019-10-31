@@ -206,7 +206,7 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "emscripten_clang_linux",
-        url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/linux_64bit/emscripten-llvm-e1.38.25.tar.gz",
+        url = "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/linux/emscripten-llvm-e1.38.25.tar.gz",
         build_file = "@com_stripe_ruby_typer//third_party:emscripten-clang.BUILD",
         sha256 = "0e9a5a114a60c21604f4038b573109bd31424aeba275b4173480485ca0a56ba4",
         strip_prefix = "emscripten-llvm-e1.38.25",
@@ -214,7 +214,7 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "emscripten_clang_darwin",
-        url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/osx_64bit/emscripten-llvm-e1.38.25.tar.gz",
+        url = "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/mac/emscripten-llvm-e1.38.25.tar.gz",
         build_file = "@com_stripe_ruby_typer//third_party:emscripten-clang.BUILD",
         sha256 = "01519125c613d0b013193eaf5ac5031e6ec34aac2451c357fd4097874ceee38c",
         strip_prefix = "emscripten-llvm-e1.38.25",
