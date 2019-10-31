@@ -453,7 +453,7 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "flags =";
     const pair<int, string_view> flags[] = {
         {SelfMethod, "self"sv},
-        {RewriterSynthesized, "dsl"sv},
+        {RewriterSynthesized, "rewriter"sv},
     };
     for (auto &ent : flags) {
         if ((this->flags & ent.first) != 0) {
