@@ -23,5 +23,5 @@ for rb in "$@"; do
     echo "require '$rb';" >> "$runfile"
 done
 
-ruby="/Users/$(whoami)/.rbenv/shims/ruby"
+ruby="./external/ruby_2_6_3/ruby"
 $ruby "$runfile"
