@@ -1152,6 +1152,29 @@ shared_ptr<SymbolSearchAssertion> SymbolSearchAssertion::make(string_view filena
     return nullptr;
 }
 
+bool SymbolSearchAssertion::matches(std::string_view uriPrefix, std::shared_ptr<SymbolInformation> symbol) {
+    auto assertionLocation = getLocation(uriPrefix);
+    auto &symbolLocation = symbol->location;
+    if (assertionLocation->uri != symbolLocation->uri ||
+        assertionLocation->range->start->line != symbolLocation->range->start->line) {
+        return false;
+    }
+    return true;
+}
+namespace {
+string pluralized_count(string_view word, int count) {
+    return fmt::format("{} {}{}", count, word, (count == 1) ? "" : "s");
+}
+
+void addFailureAtLocationWithSource(unique_ptr<Location> location,
+                                    const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                    string_view uriPrefix, std::string_view message) {
+    auto sourceLine = getLine(sourceFileContents, uriPrefix, *location);
+    ADD_FAILURE_AT(location->uri.c_str(), location->range->start->line + 1)
+        << fmt::format("{}\n{}\n", message, prettyPrintRangeComment(sourceLine, *location->range, ""));
+}
+} // namespace
+
 void SymbolSearchAssertion::checkAllForQuery(std::string query,
                                              const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
                                              const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
@@ -1169,7 +1192,7 @@ void SymbolSearchAssertion::checkAllForQuery(std::string query,
 
     // Request results from LSP
     auto responses = lspWrapper.getLSPResponsesFor(makeWorkspaceSymbolRequest(id, query));
-    ASSERT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/definition` request.";
+    ASSERT_EQ(1, responses.size()) << "Unexpected number of responses to a `workspace/symbol` request.";
     ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
     auto &respMsg = responses.at(0)->asResponse();
     ASSERT_TRUE(respMsg.result.has_value());
@@ -1187,46 +1210,59 @@ void SymbolSearchAssertion::checkAllForQuery(std::string query,
         auto &location = symbol->location;
         auto line = fmt::format("{}:{:{}}", location->uri, location->range->start->line, lineWidth);
         symbolsByLine[line].push_back(symbol);
+        assertionsByLine[line]; // create entry in assertionsByLine, if none exists yet.
     }
 
-    bool success = true;
-    // Show any expected symbols that weren't returned by LSP
+    int numUnsatisfiedExpectations = 0;
+    int numUnexpectedSymbols = 0;
+    // Look line-by-line for unmatched symbols and assertions
     for (auto entry : assertionsByLine) {
         auto lineInfo = entry.first;
-        auto expectedResults = entry.second;
-        auto &actualResults = symbolsByLine[lineInfo];
-        if (expectedResults.size() <= actualResults.size()) {
-            continue;
+        auto assertionsOnLine = entry.second;
+        auto &symbolsOnLine = symbolsByLine[lineInfo];
+
+        // Report assertions with no matching symbol
+        for (auto &assertion : assertionsOnLine) {
+            bool foundMatchingSymbol = false;
+            for (auto &symbol : symbolsOnLine) {
+                if (assertion->matches(uriPrefix, symbol)) {
+                    foundMatchingSymbol = true;
+                    break;
+                }
+            }
+            if (foundMatchingSymbol) {
+                continue;
+            }
+            numUnsatisfiedExpectations++;
+            addFailureAtLocationWithSource(
+                assertion->getLocation(uriPrefix), sourceFileContents, uriPrefix,
+                fmt::format("No results matched `workspace/symbol` expectation: {}", assertion->toString()));
         }
-        success = false;
-        auto assertion = expectedResults[0];
-        auto location = assertion->getLocation(uriPrefix);
-        auto sourceLineNumber = location->range->start->line + 1;
-        auto sourceLine = getLine(sourceFileContents, uriPrefix, *location.get());
-        ASSERT_EQ(expectedResults.size(), actualResults.size())
-            << fmt::format("For WorkspaceSymbol query `{}` on [{}:{}]:\n{}\n", query, location->uri, sourceLineNumber,
-                           prettyPrintRangeComment(sourceLine, *assertion->range, ""));
+        // Report symbols with no matching assertion
+        for (auto &symbol : symbolsOnLine) {
+            bool foundMatchingAssertion = false;
+            for (auto &assertion : assertionsOnLine) {
+                if (assertion->matches(uriPrefix, symbol)) {
+                    foundMatchingAssertion = true;
+                    break;
+                }
+            }
+            if (foundMatchingAssertion) {
+                continue;
+            }
+            numUnexpectedSymbols++;
+            addFailureAtLocationWithSource(
+                symbol->location->copy(), sourceFileContents, uriPrefix,
+                fmt::format("Unexpected result from `workspace/symbol` query \"{}\": {}\n", query, symbol->toJSON()));
+        }
     }
 
-    // Show any symbols returned by LSP that weren't asserted
-    for (auto entry : symbolsByLine) {
-        auto lineInfo = entry.first;
-        auto actualResults = entry.second;
-        auto &expectedResults = assertionsByLine[lineInfo];
-        if (expectedResults.size() >= actualResults.size()) {
-            continue;
-        }
-        success = false;
-        auto symbolInfo = actualResults[0];
-        auto &location = symbolInfo->location;
-        auto sourceLineNumber = location->range->start->line + 1;
-        auto sourceLine = getLine(sourceFileContents, uriPrefix, *location.get());
-        ASSERT_EQ(expectedResults.size(), actualResults.size())
-            << fmt::format("For WorkspaceSymbol query `{}` on [{}:{}]:\n{}\n", query, location->uri, sourceLineNumber,
-                           prettyPrintRangeComment(sourceLine, *location->range, ""));
+    if (numUnsatisfiedExpectations + numUnexpectedSymbols > 0) {
+        ADD_FAILURE() << fmt::format("`workspace/symbol` query \"{}\" {}: {}, {}\n", query,
+                                     pluralized_count("failure", numUnsatisfiedExpectations + numUnexpectedSymbols),
+                                     pluralized_count("unsatisfied expectation", numUnsatisfiedExpectations),
+                                     pluralized_count("unexpected result", numUnexpectedSymbols));
     }
-
-    ASSERT_TRUE(success) << fmt::format("For query \"{}\"", query);
 }
 
 void SymbolSearchAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
