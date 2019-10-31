@@ -311,7 +311,7 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
-    // Synthesize <Magic>#build_array(*vs : T.untyped) => Array
+    // Synthesize <Magic>#<build-array>(*vs : T.untyped) => Array
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildArray());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
