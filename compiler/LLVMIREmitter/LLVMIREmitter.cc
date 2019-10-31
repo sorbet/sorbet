@@ -1092,9 +1092,6 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     /* run verifier */
     ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
     // cs.runCheapOptimizations(func);
-    // TODO(perf): Don't run any benchmarks with this commented out!
-    // this disables important optimizations(such as lowering of `expect` intrinsic, thus removing the information it
-    // provides and makit it a black box that stops other optimizations)
 }
 
 void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, string_view objectName) {
