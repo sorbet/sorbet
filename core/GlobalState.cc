@@ -1443,7 +1443,8 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
             }
         } else if (level == StrictLevel::Stdlib) {
             level = StrictLevel::Strict;
-            if (what == errors::Resolver::OverloadNotAllowed || what == errors::Resolver::VariantTypeMemberInClass || what == errors::Infer::UntypedMethod) {
+            if (what == errors::Resolver::OverloadNotAllowed || what == errors::Resolver::VariantTypeMemberInClass ||
+                what == errors::Infer::UntypedMethod) {
                 return false;
             }
         }
