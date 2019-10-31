@@ -19,11 +19,11 @@ ruby="./external/ruby_2_6_3/ruby"
 
 echo "Source: $rb"
 echo "Run Ruby: bazel-bin/$ruby $rb"
-echo "Run Sorbet: bin/ruby $rb"
-echo "require './bin/preamble.rb'; require './$rb';" > "$rbrunfile"
+echo "Run Sorbet: run/ruby $rb"
+echo "require './run/preamble.rb'; require './$rb';" > "$rbrunfile"
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
-llvmir=$llvmir runfile=$runfile bin/ruby "$rb" | tee "$srbout"
+llvmir=$llvmir runfile=$runfile run/ruby "$rb" | tee "$srbout"
 
 echo "Run LLDB: lldb bazel-bin/$ruby -- $runfile"
 for i in "$llvmir"/*.llo; do

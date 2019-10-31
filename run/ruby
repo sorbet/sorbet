@@ -16,8 +16,8 @@ cleanup() {
 
 trap cleanup EXIT
 
-echo "require './$root/bin/preamble.rb';" > "$runfile"
-echo "require './$root/bin/patch_require.rb';" >> "$runfile"
+echo "require './$root/run/preamble.rb';" > "$runfile"
+echo "require './$root/run/patch_require.rb';" >> "$runfile"
 
 for rb in "$@"; do
     echo "require '$rb';" >> "$runfile"
