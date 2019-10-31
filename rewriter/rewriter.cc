@@ -27,7 +27,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-class DSLReplacer {
+class Rewriterer {
     friend class Rewriter;
 
 public:
@@ -156,13 +156,13 @@ public:
     }
 
 private:
-    DSLReplacer() = default;
+    Rewriterer() = default;
 };
 
 unique_ptr<ast::Expression> Rewriter::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
     auto ast = std::move(tree);
 
-    DSLReplacer dslReplacer;
+    Rewriterer dslReplacer;
     ast = ast::TreeMap::apply(ctx, dslReplacer, std::move(ast));
     auto verifiedResult = ast::Verifier::run(ctx, std::move(ast));
     return verifiedResult;
