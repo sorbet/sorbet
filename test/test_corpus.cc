@@ -261,7 +261,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         ast::ParsedFile localNamed;
 
         if (!test.expectations.contains("autogen")) {
-            // DSL
+            // Rewriter
             {
                 core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
