@@ -31,7 +31,7 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
             if (validAttr) {
                 res = nameRef;
             } else {
-                if (auto e = ctx.state.beginError(name->loc, core::errors::DSL::BadAttrArg)) {
+                if (auto e = ctx.state.beginError(name->loc, core::errors::rewriter::BadAttrArg)) {
                     e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
                 }
                 res = core::Names::empty();
@@ -40,7 +40,7 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
         }
     }
     if (!res.exists()) {
-        if (auto e = ctx.state.beginError(name->loc, core::errors::DSL::BadAttrArg)) {
+        if (auto e = ctx.state.beginError(name->loc, core::errors::rewriter::BadAttrArg)) {
             e.setHeader("arg must be a Symbol or String");
         }
     }
@@ -130,7 +130,7 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, const 
     ast::Send *cur = body;
     while (cur != nullptr) {
         if (cur->fun == core::Names::typeParameters()) {
-            if (auto e = ctx.state.beginError(sig->loc, core::errors::DSL::BadAttrType)) {
+            if (auto e = ctx.state.beginError(sig->loc, core::errors::rewriter::BadAttrType)) {
                 e.setHeader("The type for an `{}` cannot contain `{}`", attrFun.show(ctx), "type_parameters");
             }
             body->args[0] = ast::MK::Untyped(body->args[0]->loc);

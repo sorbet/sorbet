@@ -122,7 +122,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableCont
                 if (validAttr) {
                     methodName = nameRef;
                 } else {
-                    if (auto e = ctx.state.beginError(lit->loc, core::errors::DSL::BadModuleFunction)) {
+                    if (auto e = ctx.state.beginError(lit->loc, core::errors::rewriter::BadModuleFunction)) {
                         e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
                     }
                 }
@@ -135,7 +135,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableCont
             stats.emplace_back(ast::MK::Method(loc, loc, methodName, std::move(args), ast::MK::EmptyTree(),
                                                ast::MethodDef::SelfMethod | ast::MethodDef::RewriterSynthesized));
         } else {
-            if (auto e = ctx.state.beginError(arg->loc, core::errors::DSL::BadModuleFunction)) {
+            if (auto e = ctx.state.beginError(arg->loc, core::errors::rewriter::BadModuleFunction)) {
                 e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
                             "module_function");
             }

@@ -21,14 +21,14 @@ unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableContext ct
     }
 
     if (!ast::isa_tree<ast::UnresolvedConstantLit>(send->recv.get())) {
-        if (auto e = ctx.state.beginError(send->recv->loc, core::errors::DSL::BadWrapInstance)) {
+        if (auto e = ctx.state.beginError(send->recv->loc, core::errors::rewriter::BadWrapInstance)) {
             e.setHeader("Unsupported wrap_instance() on a non-constant-literal");
         }
         return send;
     }
 
     if (send->args.size() != 1) {
-        if (auto e = ctx.state.beginError(send->loc, core::errors::DSL::BadWrapInstance)) {
+        if (auto e = ctx.state.beginError(send->loc, core::errors::rewriter::BadWrapInstance)) {
             e.setHeader("Wrong number of arguments to `{}`. Expected: `{}`, got: `{}`", "wrap_instance", 0,
                         send->args.size());
         }
