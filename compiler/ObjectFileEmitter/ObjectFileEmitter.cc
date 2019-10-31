@@ -1,3 +1,5 @@
+#include "llvm/Analysis/TargetLibraryInfo.h"
+#include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/IRPrintingPasses.h"
@@ -35,35 +37,7 @@ void outputLLVM(llvm::legacy::PassManager &pm, string_view dir, string_view file
                 const unique_ptr<llvm::Module> &module) {}
 
 void outputObjectFile(llvm::legacy::PassManager &pm, string_view dir, string_view fileNameWithoutExtension,
-                      unique_ptr<llvm::Module> module) {
-    // We encode this value in our `.exp` files right now so we have to hard
-    // code it to something that doesn't chance accross sytems.
-    // TODO stop putting it in our .exp files and then unhardcode this
-    auto targetTriple = "x86_64-apple-darwin18.2.0";
-    // auto targetTriple = llvm::sys::getDefaultTargetTriple();
-    module->setTargetTriple(targetTriple);
-
-    std::string error;
-    auto target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
-
-    // Print an error and exit if we couldn't find the requested target.
-    // This generally occurs if we've forgotten to initialise the
-    // TargetRegistry or we have a bogus target triple.
-    if (!target) {
-        llvm::errs() << error;
-        return;
-    }
-
-    auto cpu = "skylake"; // this should probably not be hardcoded in future, but for now, this is what llc uses on
-                          // mac and thus brings us closer to their assembly
-    auto features = "";
-
-    llvm::TargetOptions opt;
-    auto relocationModel = llvm::Optional<llvm::Reloc::Model>(llvm::Reloc::PIC_);
-    auto targetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, relocationModel);
-
-    module->setDataLayout(targetMachine->createDataLayout());
-
+                      unique_ptr<llvm::Module> module, llvm::TargetMachine *targetMachine) {
     std::error_code ec;
     auto fileName = ((string)dir) + "/" + (string)fileNameWithoutExtension + ".o";
     llvm::raw_fd_ostream dest(fileName, ec, llvm::sys::fs::OF_None);
@@ -86,15 +60,54 @@ void outputObjectFile(llvm::legacy::PassManager &pm, string_view dir, string_vie
 
 void ObjectFileEmitter::run(llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module, string_view dir,
                             string_view objectName) {
+    /* setup target */
+    std::string error;
+    auto targetTriple = "x86_64-apple-darwin18.2.0";
+    auto target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
+
+    // Print an error and exit if we couldn't find the requested target.
+    // This generally occurs if we've forgotten to initialise the
+    // TargetRegistry or we have a bogus target triple.
+    if (!target) {
+        llvm::errs() << error;
+        return;
+    }
+
+    auto cpu = "skylake"; // this should probably not be hardcoded in future, but for now, this is what llc uses on
+                          // mac and thus brings us closer to their assembly
+    auto features = "";
+
+    llvm::TargetOptions opt;
+    auto relocationModel = llvm::Optional<llvm::Reloc::Model>(llvm::Reloc::PIC_);
+    auto targetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, relocationModel);
+
+    // We encode this value in our `.exp` files right now so we have to hard
+    // code it to something that doesn't chance accross sytems.
+    // TODO stop putting it in our .exp files and then unhardcode this
+    // auto targetTriple = llvm::sys::getDefaultTargetTriple();
+
+    module->setTargetTriple(targetMachine->getTargetTriple().str());
+    module->setDataLayout(targetMachine->createDataLayout());
+
     /* run optimizations */
 
-    unique_ptr<llvm::legacy::PassManager> pm = make_unique<llvm::legacy::PassManager>();
-
+    llvm::legacy::PassManager pm;
     // print unoptimized IR
-    std::error_code ec;
-    auto name = ((string)dir) + "/" + (string)objectName + ".ll";
-    llvm::raw_fd_ostream llFile(name, ec, llvm::sys::fs::F_Text);
-    pm->add(llvm::createPrintModulePass(llFile, ""));
+    {
+        llvm::legacy::PassManager ppm;
+        std::error_code ec;
+        auto name = ((string)dir) + "/" + (string)objectName + ".ll";
+        llvm::raw_fd_ostream llFile(name, ec, llvm::sys::fs::F_Text);
+        ppm.add(llvm::createPrintModulePass(llFile, ""));
+        ppm.run(*module);
+    }
+
+    // add platform specific information
+    pm.add(new llvm::TargetLibraryInfoWrapperPass(targetMachine->getTargetTriple()));
+    pm.add(llvm::createTargetTransformInfoWrapperPass(targetMachine->getTargetIRAnalysis()));
+
+    llvm::legacy::FunctionPassManager fnPasses(module.get());
+    fnPasses.add(llvm::createTargetTransformInfoWrapperPass(targetMachine->getTargetIRAnalysis()));
 
     // enable optimizations
     llvm::PassManagerBuilder pmbuilder;
@@ -107,15 +120,25 @@ void ObjectFileEmitter::run(llvm::LLVMContext &lctx, unique_ptr<llvm::Module> mo
     pmbuilder.LoopVectorize = true;
     pmbuilder.SLPVectorize = true;
     pmbuilder.VerifyInput = debug_mode;
-    pmbuilder.populateModulePassManager(*pm);
-    pmbuilder.populateLTOPassManager(*pm);
+    targetMachine->adjustPassManager(pmbuilder);
+    pmbuilder.populateFunctionPassManager(fnPasses);
+    pmbuilder.populateModulePassManager(pm);
+    pmbuilder.populateLTOPassManager(pm);
     // print optimized IR
     std::error_code ec1;
     auto nameOpt = ((string)dir) + "/" + (string)objectName + ".llo";
     llvm::raw_fd_ostream lloFile(nameOpt, ec1, llvm::sys::fs::F_Text);
-    pm->add(llvm::createPrintModulePass(lloFile, ""));
+    pm.add(llvm::createPrintModulePass(lloFile, ""));
 
-    outputObjectFile(*pm, dir, string(objectName), move(module));
+    fnPasses.doInitialization();
+    for (llvm::Function &func : *module) {
+        fnPasses.run(func);
+    }
+    fnPasses.doFinalization();
+    if (debug_mode) {
+        pm.add(llvm::createVerifierPass());
+    }
+    outputObjectFile(pm, dir, string(objectName), move(module), targetMachine);
 }
 
 } // namespace sorbet::compiler
