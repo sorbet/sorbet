@@ -162,8 +162,8 @@ private:
 unique_ptr<ast::Expression> Rewriter::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
     auto ast = std::move(tree);
 
-    Rewriterer dslReplacer;
-    ast = ast::TreeMap::apply(ctx, dslReplacer, std::move(ast));
+    Rewriterer rewriter;
+    ast = ast::TreeMap::apply(ctx, rewriter, std::move(ast));
     auto verifiedResult = ast::Verifier::run(ctx, std::move(ast));
     return verifiedResult;
 }
