@@ -4,13 +4,14 @@ set -eo pipefail
 root="$( dirname "${BASH_SOURCE[0]}" )"/..
 
 if [ -z "$runfile" ]; then
+    llvmir=$(mktemp -d)
     runfile=$(mktemp)
     rmtmp=1
 fi
 
 cleanup() {
     if [ -n "$rmtmp" ]; then
-        rm -r "$runfile"
+        rm -r "$llvmir" "$runfile"
     fi
 }
 
@@ -19,9 +20,10 @@ trap cleanup EXIT
 echo "require './$root/run/preamble.rb';" > "$runfile"
 echo "require './$root/run/patch_require.rb';" >> "$runfile"
 
-for rb in "$@"; do
-    echo "require '$rb';" >> "$runfile"
-done
+rb=$1
+shift
+echo "require '$rb';" >> "$runfile"
+"$root/run/compile" "$llvmir" "$(dirname "$rb")"
 
 if [ -f "$root/external/ruby_2_6_3/ruby" ]; then
     ruby="$root/external/ruby_2_6_3/ruby"
@@ -31,4 +33,4 @@ else
     cd - > /dev/null
     ruby="$root/bazel-bin/external/ruby_2_6_3/ruby"
 fi
-$ruby "$runfile"
+$ruby "$runfile" "$@"

@@ -19,8 +19,7 @@ rb=$2
 
 "$sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$rb"
 
-underscores=${rb//\//_}
-o="$llvmir/$underscores.o"
-bundle="$llvmir/$underscores.bundle"
-"$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
-echo "$bundle"
+for o in "$llvmir"/*.o; do
+    bundle="${o%.o}.bundle"
+    "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
+done
