@@ -1006,8 +1006,11 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         auto expected = cs.setExpectedBool(builder, passedTypeTest, true);
                         builder.CreateCondBr(expected, successBlock, failBlock);
                         builder.SetInsertPoint(failBlock);
-                        // throw exception here
-                        builder.CreateBr(successBlock);
+                        // this will throw exception
+                        builder.CreateCall(cs.module->getFunction("sorbet_cast_failure"),
+                                           {val, toCString(i->cast.data(cs)->shortName(cs), builder),
+                                            toCString(bind.bind.type->show(cs), builder)});
+                        builder.CreateUnreachable();
                         builder.SetInsertPoint(successBlock);
 
                         if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {

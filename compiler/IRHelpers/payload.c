@@ -457,6 +457,13 @@ VALUE sorbet_rb_arity_error_new(int argc, int min, int max) {
     return rb_exc_new3(rb_eArgError, err_mess);
 }
 
+void sorbet_cast_failure(VALUE value, char *castMethod, char *type) __attribute__((cold)) __attribute__((__noreturn__)) {
+    // TODO: cargo cult more of
+    // https://github.com/sorbet/sorbet/blob/b045fb1ba12756c3760fe516dc315580d93f3621/gems/sorbet-runtime/lib/types/types/base.rb#L105
+    rb_raise(rb_eTypeError, "%s: Expected type %s, got %s with value %" PRIsVALUE, castMethod, type,
+             rb_obj_classname(value), value);
+}
+
 void sorbet_rb_error_arity(int argc, int min, int max) {
     rb_exc_raise(sorbet_rb_arity_error_new(argc, min, max));
 }
