@@ -1,4 +1,4 @@
-#include "dsl/flatten.h"
+#include "rewriter/flatten.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
@@ -38,7 +38,7 @@ using namespace std;
 // rather as a not-always-available instance method on `A`, so introducing it as a static method is not at all
 // correct. Finally, because methods evaluate to their corresponding symbols, the former location of `bar`'s definition
 // has been replaced with the verbatim symbol `:bar`.
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 class FlattenWalk {
     // This is what we keep on the stack: we need to know whether an item should be moved or not (i.e. whether it's
@@ -349,4 +349,4 @@ unique_ptr<ast::Expression> Flatten::run(core::Context ctx, unique_ptr<ast::Expr
     return tree;
 }
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter

@@ -1,8 +1,8 @@
-#ifndef SORBET_DSL_FLATTEN_H
-#define SORBET_DSL_FLATTEN_H
+#ifndef SORBET_REWRITER_FLATTEN_H
+#define SORBET_REWRITER_FLATTEN_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 class Flatten final {
 public:
@@ -11,6 +11,6 @@ public:
     Flatten() = delete;
 };
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter
 
 #endif
