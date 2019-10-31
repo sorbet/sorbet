@@ -285,13 +285,13 @@ declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
 define i64 @"func_<C <U Object>><U foo>"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #9 {
 functionEntryInitializers:
   %tooManyArgs = icmp eq i32 %argc, 0
-  br i1 %tooManyArgs, label %fillRequiredArgs, label %argCountFailBlock
+  br i1 %tooManyArgs, label %typeTestSuccess, label %argCountFailBlock
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call fastcc void @sorbet_rb_error_arity(i32 %argc)
   unreachable
 
-fillRequiredArgs:                                 ; preds = %functionEntryInitializers
+typeTestSuccess:                                  ; preds = %functionEntryInitializers
   ret i64 3
 }
 

@@ -753,23 +753,23 @@ define i64 @"func_<C <U B>><U read>"(i32 %argc, i64* nocapture readnone %argArra
 functionEntryInitializers:
   %"rubyId_@@f" = load i64, i64* @"rubyIdPrecomputed_@@f", align 8
   %tooManyArgs = icmp eq i32 %argc, 0
-  br i1 %tooManyArgs, label %fillRequiredArgs, label %argCountFailBlock
+  br i1 %tooManyArgs, label %typeTestSuccess, label %argCountFailBlock
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call fastcc void @sorbet_rb_error_arity(i32 %argc, i32 0, i32 0)
   unreachable
 
-fillRequiredArgs:                                 ; preds = %functionEntryInitializers
+typeTestSuccess:                                  ; preds = %functionEntryInitializers
   %0 = load i64, i64* @guard_epoch_B, align 8
   %1 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
   %canTakeFastPath.i = icmp eq i64 %0, %1
   br i1 %canTakeFastPath.i, label %const_loadB.exit, label %cost_slowPath.i
 
-cost_slowPath.i:                                  ; preds = %fillRequiredArgs
+cost_slowPath.i:                                  ; preds = %typeTestSuccess
   tail call void @const_recompute_B() #15
   br label %const_loadB.exit
 
-const_loadB.exit:                                 ; preds = %fillRequiredArgs, %cost_slowPath.i
+const_loadB.exit:                                 ; preds = %typeTestSuccess, %cost_slowPath.i
   %2 = load i64, i64* @guarded_const_B, align 8
   tail call void @dbg_sorbet_validate_id(i64 %"rubyId_@@f", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.3, i64 0, i64 0)) #15
   %3 = tail call i64 @rb_cvar_get(i64 %2, i64 %"rubyId_@@f") #15
@@ -781,23 +781,23 @@ define i64 @"func_<S <C <U B>> $1><U read>"(i32 %argc, i64* nocapture readnone %
 functionEntryInitializers:
   %"rubyId_@@f" = load i64, i64* @"rubyIdPrecomputed_@@f", align 8
   %tooManyArgs = icmp eq i32 %argc, 0
-  br i1 %tooManyArgs, label %fillRequiredArgs, label %argCountFailBlock
+  br i1 %tooManyArgs, label %typeTestSuccess, label %argCountFailBlock
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call fastcc void @sorbet_rb_error_arity(i32 %argc, i32 0, i32 0)
   unreachable
 
-fillRequiredArgs:                                 ; preds = %functionEntryInitializers
+typeTestSuccess:                                  ; preds = %functionEntryInitializers
   %0 = load i64, i64* @guard_epoch_B, align 8
   %1 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
   %canTakeFastPath.i = icmp eq i64 %0, %1
   br i1 %canTakeFastPath.i, label %const_loadB.exit, label %cost_slowPath.i
 
-cost_slowPath.i:                                  ; preds = %fillRequiredArgs
+cost_slowPath.i:                                  ; preds = %typeTestSuccess
   tail call void @const_recompute_B() #15
   br label %const_loadB.exit
 
-const_loadB.exit:                                 ; preds = %fillRequiredArgs, %cost_slowPath.i
+const_loadB.exit:                                 ; preds = %typeTestSuccess, %cost_slowPath.i
   %2 = load i64, i64* @guarded_const_B, align 8
   tail call void @dbg_sorbet_validate_id(i64 %"rubyId_@@f", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.3, i64 0, i64 0)) #15
   %3 = tail call i64 @rb_cvar_get(i64 %2, i64 %"rubyId_@@f") #15

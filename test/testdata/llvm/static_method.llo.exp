@@ -539,13 +539,13 @@ cost_slowPath.i6.i:                               ; preds = %"const_loadSorbet::
 define i64 @"func_<S <C <U Foo>> $1><U bar>"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #12 {
 functionEntryInitializers:
   %tooManyArgs = icmp eq i32 %argc, 0
-  br i1 %tooManyArgs, label %fillRequiredArgs, label %argCountFailBlock
+  br i1 %tooManyArgs, label %typeTestSuccess, label %argCountFailBlock
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call fastcc void @sorbet_rb_error_arity(i32 %argc)
   unreachable
 
-fillRequiredArgs:                                 ; preds = %functionEntryInitializers
+typeTestSuccess:                                  ; preds = %functionEntryInitializers
   %0 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.2, i64 0, i64 0), i64 3) #15
   ret i64 %0
 }
