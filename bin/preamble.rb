@@ -10,6 +10,11 @@ module T::Sig::WithoutRuntime
   def self.sig(arg=nil, &blk); end
 end
 
+module Sorbet; end
+module Sorbet::Private; end
+module Sorbet::Private::Static
+end
+
 module Sorbet::Private::Static::StubModule
 end
 
