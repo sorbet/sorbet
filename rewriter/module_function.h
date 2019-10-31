@@ -35,7 +35,7 @@ public:
 
 private:
     static std::vector<std::unique_ptr<ast::Expression>> run(core::MutableContext ctx, ast::Send *send,
-                                                                    const ast::Expression *prevStat);
+                                                             const ast::Expression *prevStat);
 
     static std::vector<std::unique_ptr<ast::Expression>>
     rewriteDefn(core::MutableContext ctx, const ast::Expression *expr, const ast::Expression *prevStat);

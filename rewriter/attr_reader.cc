@@ -206,7 +206,7 @@ unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const a
 // All attr_accessor's should probably have `T.nilable(...)` to account for a
 // read-before-write.
 vector<unique_ptr<ast::Expression>> AttrReader::run(core::MutableContext ctx, ast::Send *send,
-                                                           const ast::Expression *prevStat) {
+                                                    const ast::Expression *prevStat) {
     vector<unique_ptr<ast::Expression>> empty;
 
     if (ctx.state.runningUnderAutogen) {
@@ -260,8 +260,8 @@ vector<unique_ptr<ast::Expression>> AttrReader::run(core::MutableContext ctx, as
                 }
             }
 
-            stats.emplace_back(
-                ast::MK::Method0(loc, loc, name, ast::MK::Instance(argLoc, varName), ast::MethodDef::RewriterSynthesized));
+            stats.emplace_back(ast::MK::Method0(loc, loc, name, ast::MK::Instance(argLoc, varName),
+                                                ast::MethodDef::RewriterSynthesized));
         }
     }
 

@@ -2,6 +2,7 @@
 #include "ast/treemap/treemap.h"
 #include "ast/verifier/verifier.h"
 #include "common/typecase.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "rewriter/ClassNew.h"
 #include "rewriter/Command.h"
 #include "rewriter/DSLBuilder.h"
@@ -21,7 +22,6 @@
 #include "rewriter/TypeMembers.h"
 #include "rewriter/attr_reader.h"
 #include "rewriter/module_function.h"
-#include "main/pipeline/semantic_extension/SemanticExtension.h"
 
 using namespace std;
 

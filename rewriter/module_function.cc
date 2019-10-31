@@ -99,7 +99,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::rewriteDefn(core::MutableCon
 }
 
 vector<unique_ptr<ast::Expression>> ModuleFunction::run(core::MutableContext ctx, ast::Send *send,
-                                                               const ast::Expression *prevStat) {
+                                                        const ast::Expression *prevStat) {
     vector<unique_ptr<ast::Expression>> stats;
 
     if (send->fun != core::Names::moduleFunction()) {

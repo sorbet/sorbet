@@ -370,7 +370,8 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     }
 
     auto loc = methodSymbol.data(ctx)->loc();
-    // Sometimes the methodSymbol we're looking at has been synthesized by a Rewriter pass, so no 'def' exists in the source
+    // Sometimes the methodSymbol we're looking at has been synthesized by a Rewriter pass, so no 'def' exists in the
+    // source
     if (loc.file().data(ctx).source().substr(loc.beginPos(), 3) != "def") {
         return false;
     }

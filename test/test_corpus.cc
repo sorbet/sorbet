@@ -21,7 +21,6 @@
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
-#include "rewriter/rewriter.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
@@ -30,6 +29,7 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "resolver/resolver.h"
+#include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "test/LSPTest.h"
@@ -116,7 +116,7 @@ public:
 
 UnorderedSet<string> knownExpectations = {
     "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
-    "rewrite-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
+    "rewrite-tree-raw", "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
     "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",          "cfg-raw",          "cfg-json",
     "autogen",          "document-symbols"};
 
@@ -265,8 +265,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             {
                 core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
-                rewriten =
-                    testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
+                rewriten = testSerialize(
+                    *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
             }
 
             handler.addObserved("rewrite-tree", [&]() { return rewriten.tree->toString(*gs); });

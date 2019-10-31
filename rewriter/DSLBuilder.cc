@@ -107,7 +107,8 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::run(core::MutableContext ctx, as
         // def <prop>()
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
         stats.emplace_back(ast::MK::Method(loc, loc, name, ast::MethodDef::ARGS_store(),
-                                           ast::MK::Unsafe(loc, ast::MK::Nil(loc)), ast::MethodDef::RewriterSynthesized));
+                                           ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
+                                           ast::MethodDef::RewriterSynthesized));
     }
 
     return stats;
