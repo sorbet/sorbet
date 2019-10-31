@@ -4,7 +4,7 @@
 #include "ast/ast.h"
 #include "core/Context.h"
 #include "core/core.h"
-#include "dsl/util.h"
+#include "rewriter/util.h"
 
 namespace sorbet::rewriter {
 

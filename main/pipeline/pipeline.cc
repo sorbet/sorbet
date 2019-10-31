@@ -30,7 +30,7 @@
 #include "core/errors/parser.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
-#include "dsl/dsl.h"
+#include "rewriter/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"

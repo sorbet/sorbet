@@ -1,4 +1,4 @@
-#include "dsl/ProtobufDescriptorPool.h"
+#include "rewriter/ProtobufDescriptorPool.h"
 #include "ast/Helpers.h"
 #include "core/Names.h"
 

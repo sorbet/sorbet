@@ -1,11 +1,11 @@
-#include "dsl/Minitest.h"
+#include "rewriter/Minitest.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/dsl.h"
-#include "dsl/dsl.h"
+#include "rewriter/dsl.h"
 
 using namespace std;
 

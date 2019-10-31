@@ -1,10 +1,10 @@
-#include "dsl/MixinEncryptedProp.h"
+#include "rewriter/MixinEncryptedProp.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
 #include "core/core.h"
-#include "dsl/helpers.h"
-#include "dsl/util.h"
+#include "rewriter/helpers.h"
+#include "rewriter/util.h"
 
 using namespace std;
 

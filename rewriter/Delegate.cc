@@ -1,4 +1,4 @@
-#include "dsl/Delegate.h"
+#include "rewriter/Delegate.h"
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
 #include <optional>

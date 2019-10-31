@@ -1,10 +1,10 @@
-#include "dsl/Struct.h"
+#include "rewriter/Struct.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
-#include "dsl/dsl.h"
+#include "rewriter/dsl.h"
 
 using namespace std;
 

@@ -1,12 +1,12 @@
-#include "dsl/InterfaceWrapper.h"
+#include "rewriter/InterfaceWrapper.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/dsl.h"
-#include "dsl/dsl.h"
-#include "dsl/util.h"
+#include "rewriter/dsl.h"
+#include "rewriter/util.h"
 
 using namespace std;
 

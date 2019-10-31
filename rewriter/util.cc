@@ -1,8 +1,8 @@
-#include "dsl/util.h"
+#include "rewriter/util.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
-#include "dsl/dsl.h"
+#include "rewriter/dsl.h"
 
 using namespace std;
 

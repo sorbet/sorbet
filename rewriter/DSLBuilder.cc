@@ -1,11 +1,11 @@
-#include "dsl/DSLBuilder.h"
+#include "rewriter/DSLBuilder.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
-#include "dsl/dsl.h"
-#include "dsl/util.h"
+#include "rewriter/dsl.h"
+#include "rewriter/util.h"
 
 using namespace std;
 
