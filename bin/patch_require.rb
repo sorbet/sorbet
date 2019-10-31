@@ -8,14 +8,13 @@ module Kernel
       name = name + ".rb"
     end
     if File.exists?(name)
-      Dir.mktmpdir do |tmpdir|
-        cmd = [__dir__ + '/compile', name]
-        stdout, stderr, status = Open3.capture3(ENV, *cmd)
-        raise stderr if !status.success?
-        name = stdout.strip
-        raise "compiled failed" unless name.end_with?('.bundle')
-        return sorbet_old_require(name)
-      end
+      tmpdir = ENV['llvmir'] || Dir.mktmpdir
+      cmd = [__dir__ + '/compile', tmpdir, name]
+      stdout, stderr, status = Open3.capture3(ENV, *cmd)
+      raise stderr if !status.success?
+      name = stdout.strip
+      raise "compiled failed" unless name.end_with?('.bundle')
+      return sorbet_old_require(name)
     end
 
     sorbet_old_require(name)

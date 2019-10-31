@@ -3,19 +3,6 @@ set -eox pipefail
 
 root="$( dirname "${BASH_SOURCE[0]}" )"/..
 
-if [ -z "$llvmir" ]; then
-    llvmir=$(mktemp -d)
-    rmtmp=1
-fi
-
-cleanup() {
-    if [ -n "$rmtmp" ]; then
-        rm -r "$llvmir"
-    fi
-}
-
-trap cleanup EXIT
-
 if [ -f main/sorbet ]; then
     sorbet=main/sorbet
     ld=external/llvm_toolchain/bin/ld
@@ -27,9 +14,9 @@ else
     ld="$root/bazel-sorbet_llvm/external/llvm_toolchain/bin/ld"
 fi
 
-"$sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$@"
+"$sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$1" "$2"
 
-for o in "$llvmir"/*.o; do
+for o in "$1"/*.o; do
     bundle="${o%.o}.bundle"
     "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
     echo "$bundle"
