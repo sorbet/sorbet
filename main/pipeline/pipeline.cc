@@ -222,7 +222,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
         if (print.DSLTreeRaw.enabled) {
             print.DSLTreeRaw.fmt("{}\n", tree->showRaw(lgs));
         }
-        if (opts.stopAfterPhase == options::Phase::DSL) {
+        if (opts.stopAfterPhase == options::Phase::REWRITER) {
             return emptyParsedFile(file);
         }
 
@@ -298,7 +298,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
         if (print.IndexTreeRaw.enabled) {
             print.IndexTreeRaw.fmt("{}\n", tree->showRaw(gs));
         }
-        if (opts.stopAfterPhase == options::Phase::DSL) {
+        if (opts.stopAfterPhase == options::Phase::REWRITER) {
             return emptyPluginFile(file);
         }
 
