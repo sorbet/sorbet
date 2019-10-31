@@ -1,5 +1,5 @@
 sh_binary(
-    name = "bin",
+    name = "rb",
     srcs = ["ruby"],
     data = [
         "compile_and_run_one",
