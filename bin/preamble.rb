@@ -1,6 +1,7 @@
 # typed: __STDLIB_INTERNAL
 
 module T
+  def self.cast(value, *opts, **kwopts); value; end;
   def self.unsafe(value); value; end
 end
 module T::Sig
