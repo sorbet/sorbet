@@ -463,6 +463,8 @@ end
 # for restrictions on the format and size of metadata items you may add to a
 # specification.
 class Gem::Specification < Gem::BasicSpecification
+  Elem = type_template(fixed: T.untyped)
+
   CURRENT_SPECIFICATION_VERSION = T.let(T.unsafe(nil), Integer)
   EMPTY = T.let(T.unsafe(nil), T::Array[T.untyped])
   MARSHAL_FIELDS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
