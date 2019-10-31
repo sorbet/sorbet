@@ -461,6 +461,8 @@ void sorbet_cast_failure(VALUE value, char *castMethod, char *type) __attribute_
 __attribute__((__noreturn__)) {
     // TODO: cargo cult more of
     // https://github.com/sorbet/sorbet/blob/b045fb1ba12756c3760fe516dc315580d93f3621/gems/sorbet-runtime/lib/types/types/base.rb#L105
+    //
+    // e.g. we need to teach the `got` part to do `T.class_of`
     rb_raise(rb_eTypeError, "%s: Expected type %s, got %s with value %" PRIsVALUE, castMethod, type,
              rb_obj_classname(value), value);
 }
