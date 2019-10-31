@@ -1532,7 +1532,7 @@ private:
                     } else {
                         categoryCounterInc("method.sig", "false");
                     }
-                    if (DSL) {
+                    if (rewriten) {
                         categoryCounterInc("method.dsl", "true");
                     } else {
                         categoryCounterInc("method.dsl", "false");
