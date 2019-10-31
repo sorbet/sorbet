@@ -1,3 +1,3 @@
 # typed: true
 
-lambda{|;a|a}
+1..

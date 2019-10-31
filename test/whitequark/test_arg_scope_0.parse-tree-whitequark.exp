@@ -1,6 +1,5 @@
-s(:def, :f,
+s(:block,
+  s(:send, nil, :lambda),
   s(:args,
-    s(:optarg, :var,
-      s(:defined?,
-        s(:lvar, :var)))),
-  s(:lvar, :var))
+    s(:shadowarg, :a)),
+  s(:lvar, :a))

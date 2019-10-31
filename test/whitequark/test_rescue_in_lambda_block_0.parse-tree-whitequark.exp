@@ -1,0 +1,4 @@
+s(:block,
+  s(:send, nil, :lambda), nil,
+  s(:rescue, nil,
+    s(:resbody, nil, nil, nil), nil))

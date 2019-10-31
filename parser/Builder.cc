@@ -855,11 +855,13 @@ public:
     }
 
     unique_ptr<Node> range_exclusive(unique_ptr<Node> lhs, const token *oper, unique_ptr<Node> rhs) {
-        return make_unique<ERange>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
+        core::Loc loc = lhs->loc.join(tokLoc(oper)).join(maybe_loc(rhs));
+        return make_unique<ERange>(loc, std::move(lhs), std::move(rhs));
     }
 
     unique_ptr<Node> range_inclusive(unique_ptr<Node> lhs, const token *oper, unique_ptr<Node> rhs) {
-        return make_unique<IRange>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
+        core::Loc loc = lhs->loc.join(tokLoc(oper)).join(maybe_loc(rhs));
+        return make_unique<IRange>(loc, std::move(lhs), std::move(rhs));
     }
 
     unique_ptr<Node> rational(const token *tok) {
