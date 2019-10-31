@@ -7,5 +7,5 @@ sh_binary(
         "//main:sorbet",
         "@llvm_toolchain//:bin/ld",
     ],
-    visibility = ["//visibility:public"],
+    visibility = ["//test:__pkg__"],
 )
