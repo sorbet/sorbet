@@ -11,6 +11,10 @@ module Kernel
       tmpdir = ENV['llvmir'] || Dir.mktmpdir
       cmd = [__dir__ + '/compile', tmpdir, name]
       stdout, stderr, status = Open3.capture3(ENV, *cmd)
+      if !status.success?
+        $stderr.puts stderr
+        exit status.exitstatus
+      end
       raise stderr if !status.success?
       name = stdout.strip
       raise "compiled failed" unless name.end_with?('.bundle')

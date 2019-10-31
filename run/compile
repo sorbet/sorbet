@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eox pipefail
+set -eo pipefail
 
 root="$( dirname "${BASH_SOURCE[0]}" )"/..
 
