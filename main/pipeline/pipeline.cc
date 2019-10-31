@@ -167,9 +167,9 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
     return ast;
 }
 
-unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
+unique_ptr<ast::Expression> runRewriter(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
     core::MutableContext ctx(gs, core::Symbols::root());
-    Timer timeit(gs.tracer(), "runDSL", {{"file", (string)file.data(gs).path()}});
+    Timer timeit(gs.tracer(), "runRewriter", {{"file", (string)file.data(gs).path()}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
     core::ErrorRegion errs(gs, file);
     return rewriter::Rewriter::run(ctx, move(ast));
@@ -209,7 +209,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 return emptyParsedFile(file);
             }
             if (!opts.skipRewriterPasses) {
-                tree = runDSL(lgs, file, move(tree));
+                tree = runRewriter(lgs, file, move(tree));
             }
             tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
             if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
@@ -278,7 +278,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
             }
 #endif
             if (!opts.skipRewriterPasses) {
-                tree = runDSL(gs, file, move(tree));
+                tree = runRewriter(gs, file, move(tree));
             }
             if (print.RewriterTree.enabled) {
                 print.RewriterTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
