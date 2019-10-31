@@ -1,5 +1,5 @@
 cc_library(
-    name = "dsl",
+    name = "rewriter",
     srcs = glob(
         [
             "*.cc",
