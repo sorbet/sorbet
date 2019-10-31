@@ -14,6 +14,7 @@ source .buildkite/tools/setup-bazel.sh
 
 err=0
 
+./bazel clean
 ./bazel test //... --test_summary=terse --test_output=errors || err=$?
 
 echo "--- uploading test results"
