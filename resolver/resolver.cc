@@ -1525,7 +1525,7 @@ private:
             [&](ast::MethodDef *mdef) {
                 if (debug_mode) {
                     bool hasSig = !lastSigs.empty();
-                    bool DSL = mdef->isRewriterSynthesized();
+                    bool rewriten = mdef->isRewriterSynthesized();
                     bool isRBI = mdef->loc.file().data(ctx).isRBI();
                     if (hasSig) {
                         categoryCounterInc("method.sig", "true");
