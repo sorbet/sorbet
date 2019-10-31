@@ -138,7 +138,7 @@ class FlattenWalk {
 
                 auto back = stack.back();
                 stack.pop_back();
-                return std::optional<MethodData>(back);
+                return MethodData(back);
             } else {
                 stack.pop_back();
                 return std::nullopt;
