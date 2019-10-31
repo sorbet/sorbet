@@ -20,7 +20,7 @@ unfinished or confusing section!
 - [Phases](#phases)
   - [Parser](#parser)
   - [Desugar](#desugar)
-  - [DSL](#dsl)
+  - [DSL](#rewriter)
   - [LocalVars](#localvars)
   - [Namer](#namer)
   - [Resolver](#resolver)
@@ -627,7 +627,7 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 <!-- Phase descriptions -->
 [parser]: #parser
 [desugar]: #desugar
-[dsl]: #dsl
+[dsl]: #rewriter
 [localvars]: #localvars
 [namer]: #namer
 [resolver]: #resolver
