@@ -80,7 +80,7 @@ public:
         string fileName = fileName2ObjectName((string)cfg.symbol.data(gs)->loc().file().data(state).path());
         sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol, fileName);
     };
-    virtual void patchDSL(core::MutableContext &ctx, ast::ClassDef *klass) const override {
+    virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override {
         if (!irOutputDir.has_value()) {
             return;
         }
