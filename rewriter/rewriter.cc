@@ -28,7 +28,7 @@ using namespace std;
 namespace sorbet::rewriter {
 
 class DSLReplacer {
-    friend class DSL;
+    friend class Rewriter;
 
 public:
     unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
