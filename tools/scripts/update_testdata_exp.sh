@@ -66,7 +66,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
       candidate="$basename.$pass.exp"
       args=()
       if [ "$pass" = "autogen" ]; then
-        args=("--stop-after=namer --skip-dsl-passes")
+        args=("--stop-after=namer --skip-rewriter-passes")
       fi
       if ! [ -e "$candidate" ]; then
         continue

@@ -406,7 +406,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options("dev")("skip-dsl-passes", "Do not run DSL passess");
+    options.add_options("dev")("skip-rewriter-passes", "Do not run DSL passess");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("stress-incremental-resolver",
                                "Force incremental updates to discover resolver & namer bugs");
@@ -783,7 +783,7 @@ void readOptions(Options &opts,
         if (raw.count("configatron-file")) {
             opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
         }
-        opts.skipDSLPasses = raw["skip-dsl-passes"].as<bool>();
+        opts.skipDSLPasses = raw["skip-rewriter-passes"].as<bool>();
         opts.storeState = raw["store-state"].as<string>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();

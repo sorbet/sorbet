@@ -21,11 +21,11 @@ for pass in uncached cached; do
     if main/sorbet \
            --silence-dev-message \
            --cache-dir "$dir/" \
-           --skip-dsl-passes \
+           --skip-rewriter-passes \
            --metrics-prefix=cache-dsl \
            --metrics-file="$metrics" \
            test/cli/cache-rewriter/attr_accessor.rb 2>&1; then
-        echo "FAILED: skip-dsl-passes should generate an error"
+        echo "FAILED: skip-rewriter-passes should generate an error"
     fi
     uncached=
     if grep -q "types.input.files.kvstore.miss" "$metrics"; then
