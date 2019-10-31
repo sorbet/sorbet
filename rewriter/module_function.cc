@@ -12,7 +12,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-void ModuleFunction::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
+void ModuleFunction::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     // once we see a bare `module_function`, we should replace every subsequent definition
     bool moduleFunctionActive = false;
     ast::Expression *prevStat = nullptr;

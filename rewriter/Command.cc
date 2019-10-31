@@ -38,7 +38,7 @@ bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
     return id->symbol == core::Symbols::root();
 }
 
-void Command::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
+void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     if (ctx.state.runningUnderAutogen) {
         return;
     }

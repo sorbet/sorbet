@@ -19,7 +19,7 @@ namespace sorbet::rewriter {
  */
 class Rails final {
 public:
-    static void patchDSL(core::MutableContext ctx, ast::ClassDef *cdef);
+    static void run(core::MutableContext ctx, ast::ClassDef *cdef);
 
     Rails() = delete;
 };

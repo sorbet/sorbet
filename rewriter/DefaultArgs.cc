@@ -97,7 +97,7 @@ unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Express
     return expr;
 }
 
-void DefaultArgs::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
+void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
     vector<unique_ptr<ast::Expression>> newMethods;
     ast::Send *lastSig = nullptr;
     bool isOverload = false;

@@ -353,7 +353,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 }
 } // namespace
 
-void Prop::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
+void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     if (ctx.state.runningUnderAutogen) {
         return;
     }

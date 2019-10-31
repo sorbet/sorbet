@@ -32,15 +32,15 @@ class DSLReplacer {
 
 public:
     unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
-        Command::patchDSL(ctx, classDef.get());
-        Rails::patchDSL(ctx, classDef.get());
-        OpusEnum::patchDSL(ctx, classDef.get());
-        Prop::patchDSL(ctx, classDef.get());
-        TypeMembers::patchDSL(ctx, classDef.get());
-        DefaultArgs::patchDSL(ctx, classDef.get());
+        Command::run(ctx, classDef.get());
+        Rails::run(ctx, classDef.get());
+        OpusEnum::run(ctx, classDef.get());
+        Prop::run(ctx, classDef.get());
+        TypeMembers::run(ctx, classDef.get());
+        DefaultArgs::run(ctx, classDef.get());
 
         for (auto &extension : ctx.state.semanticExtensions) {
-            extension->patchDSL(ctx, classDef.get());
+            extension->run(ctx, classDef.get());
         }
 
         ast::Expression *prevStat = nullptr;
@@ -129,7 +129,7 @@ public:
             prevStat = stat.get();
         }
         if (replaceNodes.empty()) {
-            ModuleFunction::patchDSL(ctx, classDef.get());
+            ModuleFunction::run(ctx, classDef.get());
             return classDef;
         }
 
@@ -146,7 +146,7 @@ public:
                 }
             }
         }
-        ModuleFunction::patchDSL(ctx, classDef.get());
+        ModuleFunction::run(ctx, classDef.get());
 
         return classDef;
     }

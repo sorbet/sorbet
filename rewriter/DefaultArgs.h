@@ -23,7 +23,7 @@ namespace sorbet::rewriter {
  */
 class DefaultArgs final {
 public:
-    static void patchDSL(core::MutableContext ctx, ast::ClassDef *klass);
+    static void run(core::MutableContext ctx, ast::ClassDef *klass);
 
     DefaultArgs() = delete;
 };

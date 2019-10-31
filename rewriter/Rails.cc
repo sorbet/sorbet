@@ -11,7 +11,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-void Rails::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
+void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     if (cdef->ancestors.size() != 1) {
         return;
     }

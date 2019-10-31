@@ -9,7 +9,7 @@ namespace sorbet::rewriter {
  */
 class TypeMembers final {
 public:
-    static void patchDSL(core::MutableContext ctx, ast::ClassDef *cdef);
+    static void run(core::MutableContext ctx, ast::ClassDef *cdef);
 
     TypeMembers() = delete;
 };

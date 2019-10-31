@@ -161,7 +161,7 @@ void collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, unique_ptr<
 
 } // namespace
 
-void OpusEnum::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
+void OpusEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     if (ctx.state.runningUnderAutogen) {
         return;
     }

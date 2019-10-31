@@ -31,7 +31,7 @@ namespace sorbet::rewriter {
  */
 class Prop final {
 public:
-    static void patchDSL(core::MutableContext ctx, ast::ClassDef *klass);
+    static void run(core::MutableContext ctx, ast::ClassDef *klass);
 
     Prop() = delete;
 };

@@ -50,7 +50,7 @@ namespace sorbet::rewriter {
  */
 class OpusEnum final {
 public:
-    static void patchDSL(core::MutableContext ctx, ast::ClassDef *klass);
+    static void run(core::MutableContext ctx, ast::ClassDef *klass);
 
     OpusEnum() = delete;
 };

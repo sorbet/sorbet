@@ -20,7 +20,7 @@ namespace sorbet::rewriter {
  */
 class Command final {
 public:
-    static void patchDSL(core::MutableContext ctx, ast::ClassDef *klass);
+    static void run(core::MutableContext ctx, ast::ClassDef *klass);
 
     Command() = delete;
 };

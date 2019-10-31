@@ -10,7 +10,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-void TypeMembers::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
+void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     UnorderedSet<core::NameRef> typeMembers;
 
     for (auto &expr : cdef->rhs) {

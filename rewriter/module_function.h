@@ -30,7 +30,7 @@ namespace sorbet::rewriter {
  */
 class ModuleFunction final {
 public:
-    static void patchDSL(core::MutableContext ctx, ast::ClassDef *cdef);
+    static void run(core::MutableContext ctx, ast::ClassDef *cdef);
     ModuleFunction() = delete;
 
 private:
