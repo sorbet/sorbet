@@ -1,16 +1,16 @@
 #!/bin/bash
-set -eo pipefail
+set -eox pipefail
 
 root="$( dirname "${BASH_SOURCE[0]}" )"/..
+
 if [ -z "$llvmir" ]; then
     llvmir=$(mktemp -d)
-    runfile=$(mktemp)
     rmtmp=1
 fi
 
 cleanup() {
     if [ -n "$rmtmp" ]; then
-        rm -r "$llvmir" "$runfile"
+        rm -r "$llvmir"
     fi
 }
 
@@ -29,13 +29,8 @@ fi
 
 "$sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$@"
 
-echo "require './$root/bin/preamble.rb';" > "$runfile"
-
 for o in "$llvmir"/*.o; do
     bundle="${o%.rb}.bundle"
     "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
-    echo "require '$bundle';" >> "$runfile"
+    echo "$bundle"
 done
-
-ruby="/Users/$(whoami)/.rbenv/shims/ruby"
-$ruby "$runfile"

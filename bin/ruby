@@ -2,4 +2,25 @@
 set -eo pipefail
 
 root="$( dirname "${BASH_SOURCE[0]}" )"/..
-"$root/bin/compile_and_run_one" "$@"
+
+if [ -z "$runfile" ]; then
+    runfile=$(mktemp -d)
+    rmtmp=1
+fi
+
+cleanup() {
+    if [ -n "$rmtmp" ]; then
+        rm -r "$runfile"
+    fi
+}
+
+trap cleanup EXIT
+
+echo "require './$root/bin/preamble.rb';" > "$runfile"
+
+for bundle in $("$root/bin/compile" "$@"); do
+    echo "require '$bundle';" >> "$runfile"
+done
+
+ruby="/Users/$(whoami)/.rbenv/shims/ruby"
+$ruby "$runfile"
