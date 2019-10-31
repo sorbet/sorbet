@@ -15,7 +15,7 @@ metrics="$dir/metrics.json"
 main/sorbet \
     --silence-dev-message \
     --cache-dir "$dir/" \
-    test/cli/cache-rewriter/attr_accessor.rb 2>&1
+    test/cli/cache-dsl/attr_accessor.rb 2>&1
 
 for pass in uncached cached; do
     if main/sorbet \
@@ -24,7 +24,7 @@ for pass in uncached cached; do
            --skip-rewriter-passes \
            --metrics-prefix=cache-dsl \
            --metrics-file="$metrics" \
-           test/cli/cache-rewriter/attr_accessor.rb 2>&1; then
+           test/cli/cache-dsl/attr_accessor.rb 2>&1; then
         echo "FAILED: skip-rewriter-passes should generate an error"
     fi
     uncached=
