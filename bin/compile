@@ -14,10 +14,13 @@ else
     ld="$root/bazel-sorbet_llvm/external/llvm_toolchain/bin/ld"
 fi
 
-"$sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$1" "$2"
+llvmir=$1
+rb=$2
 
-for o in "$1"/*.o; do
-    bundle="${o%.o}.bundle"
-    "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
-    echo "$bundle"
-done
+"$sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$rb"
+
+underscores=${rb//\//_}
+o="$llvmir/$underscores.o"
+bundle=${o/.o/.bundle}
+"$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
+echo "$bundle"
