@@ -416,7 +416,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         klass->rhs.emplace_back(ast::MK::Method(loc, loc, core::Names::initialize(), std::move(args),
                                                 ast::MK::EmptyTree(), ast::MethodDef::RewriterSynthesized));
     }
-    // this is cargo-culted from dsl.cc.
+    // this is cargo-culted from rewriter.cc.
     for (auto &stat : oldRHS) {
         if (replaceNodes.find(stat.get()) == replaceNodes.end()) {
             klass->rhs.emplace_back(std::move(stat));
