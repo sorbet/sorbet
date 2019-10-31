@@ -457,7 +457,7 @@ VALUE sorbet_rb_arity_error_new(int argc, int min, int max) {
     return rb_exc_new3(rb_eArgError, err_mess);
 }
 
-void sorbet_cast_failure(VALUE value, char *castMethod, char *type) __attribute__((cold))
+void sorbet_cast_failure(VALUE value, char *castMethod, char *type) __attribute__((__cold__))
 __attribute__((__noreturn__)) {
     // TODO: cargo cult more of
     // https://github.com/sorbet/sorbet/blob/b045fb1ba12756c3760fe516dc315580d93f3621/gems/sorbet-runtime/lib/types/types/base.rb#L105
@@ -465,7 +465,7 @@ __attribute__((__noreturn__)) {
              rb_obj_classname(value), value);
 }
 
-void sorbet_rb_error_arity(int argc, int min, int max) {
+void sorbet_rb_error_arity(int argc, int min, int max) __attribute__((__noreturn__)) {
     rb_exc_raise(sorbet_rb_arity_error_new(argc, min, max));
 }
 
@@ -498,7 +498,7 @@ void sorbet_Closure_mark(void *closurePtr) {
     rb_gc_mark_values(ptr->size, &ptr->closureData[0]);
 }
 
-size_t sorbet_Closure_size(const void *closurePtr) {
+size_t sorbet_Closure_size(const void *closurePtr) __attribute__((const)) {
     // this might be possible to make more efficient using rb_mark_tbl
     struct sorbet_Closure *ptr = (struct sorbet_Closure *)closurePtr;
     return sizeof(struct sorbet_Closure) + ptr->size * sizeof(VALUE);
@@ -530,69 +530,69 @@ VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
 // **** Implementation helpers for type tests
 // ****
 
-_Bool sorbet_isa_Integer(VALUE obj) {
+_Bool sorbet_isa_Integer(VALUE obj) __attribute__((const)) {
     return RB_FIXNUM_P(obj);
 }
 
-_Bool sorbet_isa_TrueClass(VALUE obj) {
+_Bool sorbet_isa_TrueClass(VALUE obj) __attribute__((const)) {
     return obj == RUBY_Qtrue;
 }
 
-_Bool sorbet_isa_FalseClass(VALUE obj) {
+_Bool sorbet_isa_FalseClass(VALUE obj) __attribute__((const)) {
     return obj == RUBY_Qfalse;
 }
 
-_Bool sorbet_isa_NilClass(VALUE obj) {
+_Bool sorbet_isa_NilClass(VALUE obj) __attribute__((const)) {
     return obj == RUBY_Qnil;
 }
 
-_Bool sorbet_isa_Symbol(VALUE obj) {
+_Bool sorbet_isa_Symbol(VALUE obj) __attribute__((const)) {
     return RB_SYMBOL_P(obj);
 }
 
-_Bool sorbet_isa_Float(VALUE obj) {
+_Bool sorbet_isa_Float(VALUE obj) __attribute__((const)) {
     return RB_FLOAT_TYPE_P(obj);
 }
 
-_Bool sorbet_isa_Untyped(VALUE obj) {
+_Bool sorbet_isa_Untyped(VALUE obj) __attribute__((const)) {
     return 1;
 }
 
-_Bool sorbet_isa_Hash(VALUE obj) {
+_Bool sorbet_isa_Hash(VALUE obj) __attribute__((const)) {
     return RB_TYPE_P(obj, T_HASH);
 }
 
-_Bool sorbet_isa_Array(VALUE obj) {
+_Bool sorbet_isa_Array(VALUE obj) __attribute__((const)) {
     return RB_TYPE_P(obj, T_ARRAY);
 }
 
-_Bool sorbet_isa_Regexp(VALUE obj) {
+_Bool sorbet_isa_Regexp(VALUE obj) __attribute__((const)) {
     return RB_TYPE_P(obj, T_REGEXP);
 }
 
-_Bool sorbet_isa_Rational(VALUE obj) {
+_Bool sorbet_isa_Rational(VALUE obj) __attribute__((const)) {
     return RB_TYPE_P(obj, T_RATIONAL);
 }
 
-_Bool sorbet_isa_String(VALUE obj) {
+_Bool sorbet_isa_String(VALUE obj) __attribute__((const)) {
     return RB_TYPE_P(obj, T_STRING);
 }
 
 /*
-_Bool sorbet_isa_Method(VALUE obj) {
+_Bool sorbet_isa_Method(VALUE obj) __attribute__((const))  {
     return rb_obj_is_method(obj) == Qtrue;
 }
 */
 
-_Bool sorbet_isa_Proc(VALUE obj) {
+_Bool sorbet_isa_Proc(VALUE obj) __attribute__((const)) {
     return rb_obj_is_proc(obj) == Qtrue;
 }
 
-_Bool sorbet_isa(VALUE obj, VALUE class) {
+_Bool sorbet_isa(VALUE obj, VALUE class) __attribute__((const)) {
     return rb_obj_is_kind_of(obj, class) == Qtrue;
 }
 
-_Bool sorbet_isa_class_of(VALUE obj, VALUE class) {
+_Bool sorbet_isa_class_of(VALUE obj, VALUE class) __attribute__((const)) {
     return (obj == class) || (rb_obj_is_kind_of(obj, rb_cModule) && rb_class_inherited_p(obj, class));
 }
 
