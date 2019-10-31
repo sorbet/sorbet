@@ -141,7 +141,7 @@ struct Options {
     bool noErrorCount = false;
     bool autocorrect = false;
     bool waitForDebugger = false;
-    bool skipDSLPasses = false;
+    bool skipRewriterPasses = false;
     bool suggestRuntimeProfiledType = false;
     bool censorForSnapshotTests = false;
     int threads = 0;

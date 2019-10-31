@@ -783,7 +783,7 @@ void readOptions(Options &opts,
         if (raw.count("configatron-file")) {
             opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
         }
-        opts.skipDSLPasses = raw["skip-rewriter-passes"].as<bool>();
+        opts.skipRewriterPasses = raw["skip-rewriter-passes"].as<bool>();
         opts.storeState = raw["store-state"].as<string>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();

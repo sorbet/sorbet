@@ -35,7 +35,7 @@ TEST(OptionsTest, DefaultConstructorMatchesReadOptions) {
     EXPECT_EQ(empty.noErrorCount, opts.noErrorCount);
     EXPECT_EQ(empty.autocorrect, opts.autocorrect);
     EXPECT_EQ(empty.waitForDebugger, opts.waitForDebugger);
-    EXPECT_EQ(empty.skipDSLPasses, opts.skipDSLPasses);
+    EXPECT_EQ(empty.skipRewriterPasses, opts.skipRewriterPasses);
     EXPECT_EQ(empty.suggestRuntimeProfiledType, opts.suggestRuntimeProfiledType);
     EXPECT_EQ(empty.threads, opts.threads);
     EXPECT_EQ(empty.logLevel, opts.logLevel);

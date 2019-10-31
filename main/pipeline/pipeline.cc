@@ -208,7 +208,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
             }
-            if (!opts.skipDSLPasses) {
+            if (!opts.skipRewriterPasses) {
                 tree = runDSL(lgs, file, move(tree));
             }
             tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
@@ -277,7 +277,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                 resultPluginFiles = move(pluginFiles);
             }
 #endif
-            if (!opts.skipDSLPasses) {
+            if (!opts.skipRewriterPasses) {
                 tree = runDSL(gs, file, move(tree));
             }
             if (print.RewriterTree.enabled) {
