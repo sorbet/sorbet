@@ -259,6 +259,11 @@ llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilder<> &builder, llv
             ret =
                 builder.CreateCall(cs.module->getFunction("sorbet_isa"), {val, resolveSymbol(cs, ct->symbol, builder)});
         },
+        [&](core::AppliedType *at) {
+            auto base = createTypeTestU1(cs, builder, val, core::make_type<ClassType>(at->klass));
+            ret = base;
+            // todo: ranges, hashes, sets, enumerator, and, overall, enumerables
+        },
         [&](core::OrType *ct) {
             // TODO: reoder types so that cheap test is done first
             auto left = createTypeTestU1(cs, builder, val, ct->left);
