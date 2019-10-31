@@ -662,7 +662,7 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
     };
 }
 
-void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<> builder) {
+void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<> &builder) {
     ENFORCE(i->args.size() == 2);
     auto ownerSym = typeToSym(cs, i->args[0].type);
 
@@ -691,7 +691,7 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
     builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
 }
 
-void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> builder) {
+void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> &builder) {
     auto sym = typeToSym(cs, i->args[0].type);
     auto classNameCStr = toCString(showClassNameWithoutOwner(cs, sym), builder);
     auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
