@@ -126,8 +126,8 @@ long sorbet_rubyArrayLen(VALUE array) __attribute__((always_inline)) {
     return RARRAY_LEN(array);
 }
 
-VALUE sorbet_newRubyArray() __attribute__((always_inline)) {
-    return rb_ary_new();
+VALUE sorbet_newRubyArray(long size) __attribute__((always_inline)) {
+    return rb_ary_new2(size);
 }
 
 VALUE sorbet_newRubyArrayWithElems(long size, const VALUE *elems) __attribute__((always_inline)) {

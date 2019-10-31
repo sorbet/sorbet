@@ -833,17 +833,29 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     [&](cfg::Send *i) {
                         auto str = i->fun.data(cs)->shortName(cs);
                         if (i->fun == core::Names::buildHash()) {
-                            auto ret = builder.CreateCall(cs.module->getFunction("rb_hash_new"), {}, "rawHashLiteral");
+                            auto ret = builder.CreateCall(cs.module->getFunction("sorbet_newRubyHash"), {}, "rawHashLiteral");
                             // TODO(perf): in 2.7 use rb_hash_bulk_insert will give 2x speedup
                             int argc = 0;
                             while (argc < i->args.size()) {
                                 auto key = i->args[argc].variable;
                                 auto value = i->args[argc + 1].variable;
                                 builder.CreateCall(
-                                    cs.module->getFunction("rb_hash_aset"),
+                                    cs.module->getFunction("sorbet_hashStore"),
                                     {ret, varGet(cs, key, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId),
                                      varGet(cs, value, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId)});
                                 argc += 2;
+                            }
+                            varSet(cs, bind.bind.variable, ret, builder, llvmVariables, aliases, blockMap,
+                                   bb->rubyBlockId);
+                            return;
+                        }
+                        if (i->fun == core::Names::buildArray()) {
+                            auto ret = builder.CreateCall(cs.module->getFunction("sorbet_newRubyArray"), {llvm::ConstantInt::get(cs, llvm::APInt(64, i->args.size(), true))}, "rawArrayLiteral");
+                            for (int argc = 0; argc < i->args.size(); argc++) {
+                                auto value = i->args[argc].variable;
+                                builder.CreateCall(
+                                    cs.module->getFunction("sorbet_arrayPush"),
+                                    {ret, varGet(cs, value, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId)});
                             }
                             varSet(cs, bind.bind.variable, ret, builder, llvmVariables, aliases, blockMap,
                                    bb->rubyBlockId);
