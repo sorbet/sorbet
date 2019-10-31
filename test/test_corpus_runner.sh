@@ -17,32 +17,26 @@ cleanup() {
 
 ruby="./external/ruby_2_6_3/ruby"
 
-echo "Ruby: $rb"
-echo "require './test/preamble.rb'; require './$rb';" > "$rbrunfile"
+echo "Source: $rb"
+echo "Run Ruby: bazel-bin/$ruby $rb"
+echo "Run Sorbet: bin/ruby $rb"
+echo "require './bin/preamble.rb'; require './$rb';" > "$rbrunfile"
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
-main/sorbet --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$rb"
+llvmir=$llvmir runfile=$runfile bin/ruby "$rb" | tee "$srbout"
 
+echo "Run LLDB: lldb bazel-bin/$ruby -- $runfile"
 for i in "$llvmir"/*.llo; do
     echo "LLVM IR: $i"
 done
-
-echo "require './test/preamble.rb';" > "$runfile"
-
-for o in "$llvmir"/*.o; do
-    bundle="${o%.rb}.bundle"
-    external/llvm_toolchain/bin/ld -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
-    echo "Bundle: $bundle"
-    echo "require '$bundle';" >> "$runfile"
+for i in "$llvmir"/*.ll; do
+    echo "LLVM IR (unoptimized): $i"
+done
+for i in "$llvmir"/*.bundle; do
+    echo "Bundle : $i"
 done
 
-if [[ $rb != *"no-run"* ]]; then
-    echo "Run Code: $ruby $runfile"
-    echo "Run LLDB: lldb $ruby -- $runfile"
-    $ruby "$runfile" | tee "$srbout"
-
-    diff -a "$rbout" "$srbout"
-fi
+diff -a "$rbout" "$srbout"
 
 for ext in "llo"; do
     exp=${rb%.rb}.$ext.exp

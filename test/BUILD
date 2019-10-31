@@ -18,10 +18,7 @@ sh_binary(
     name = "test_corpus_runner",
     srcs = ["test_corpus_runner.sh"],
     data = [
-        "preamble.rb",
-        "//main:sorbet",
-        "@llvm_toolchain//:bin/ld",
-        "@llvm_toolchain//:bin/opt",
+        "//bin",
         "@ruby_2_6_3//:ruby",
     ],
 )

@@ -2,26 +2,38 @@
 set -eo pipefail
 
 root="$( dirname "${BASH_SOURCE[0]}" )"/..
-llvmir=$(mktemp -d)
-runfile=$(mktemp)
+if [ -z "$llvmir" ]; then
+    llvmir=$(mktemp -d)
+    runfile=$(mktemp)
+    rmtmp=1
+fi
 
 cleanup() {
-    rm -r "$llvmir" "$runfile"
+    if [ -n "$rmtmp" ]; then
+        rm -r "$llvmir" "$runfile"
+    fi
 }
 
 trap cleanup EXIT
 
-cd "$root"
-bazel build @llvm_toolchain//:bin/ld main:sorbet 2> /dev/null
-cd - > /dev/null
+if [ -f main/sorbet ]; then
+    sorbet=main/sorbet
+    ld=external/llvm_toolchain/bin/ld
+else
+    cd "$root"
+    bazel build @llvm_toolchain//:bin/ld main:sorbet 2> /dev/null
+    cd - > /dev/null
+    sorbet="$root/bazel-bin/main/sorbet"
+    ld="$root/bazel-sorbet_llvm/external/llvm_toolchain/bin/ld"
+fi
 
-"$root/bazel-bin/main/sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$@"
+"$sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$@"
 
-echo "require './$root/test/preamble.rb';" > "$runfile"
+echo "require './$root/bin/preamble.rb';" > "$runfile"
 
 for o in "$llvmir"/*.o; do
     bundle="${o%.rb}.bundle"
-    "$root/bazel-sorbet_llvm/external/llvm_toolchain/bin/ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
+    "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
     echo "require '$bundle';" >> "$runfile"
 done
 
