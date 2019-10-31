@@ -18,7 +18,7 @@ sh_binary(
     name = "test_corpus_runner",
     srcs = ["test_corpus_runner.sh"],
     data = [
-        "//bin:rb",
+        "//bin2:rb",
         "@ruby_2_6_3//:ruby",
     ],
 )

@@ -2,4 +2,4 @@
 set -eo pipefail
 
 root="$( dirname "${BASH_SOURCE[0]}" )"/..
-"$root/bin/compile_and_run_one" "$@"
+"$root/bin2/compile_and_run_one" "$@"
