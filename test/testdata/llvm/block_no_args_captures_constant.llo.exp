@@ -382,7 +382,7 @@ define internal void @sorbet_Closure_mark(i8*) #0 {
 
 declare void @rb_gc_mark_values(i64, i64*) local_unnamed_addr #3
 
-; Function Attrs: norecurse nounwind readonly ssp uwtable
+; Function Attrs: norecurse nounwind readnone ssp uwtable
 define internal i64 @sorbet_Closure_size(i8* nocapture readonly) #9 {
   %2 = bitcast i8* %0 to i32*
   %3 = load i32, i32* %2, align 8, !tbaa !9
@@ -433,12 +433,9 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   br i1 %15, label %typeTestSuccess, label %typeTestFail, !prof !14
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
-  %16 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %5, align 8, !tbaa !11
-  %17 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %16, i64 0, i32 1, i64 0
-  store i64 %12, i64* %17, align 8
-  %18 = load i64, i64* @guard_epoch_A, align 8
-  %19 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
-  %canTakeFastPath = icmp eq i64 %18, %19
+  %16 = load i64, i64* @guard_epoch_A, align 8
+  %17 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
+  %canTakeFastPath = icmp eq i64 %16, %17
   br i1 %canTakeFastPath, label %const_continue, label %const_slowPath, !prof !14
 
 typeTestFail:                                     ; preds = %fillRequiredArgs
@@ -446,14 +443,14 @@ typeTestFail:                                     ; preds = %fillRequiredArgs
   unreachable
 
 const_continue:                                   ; preds = %const_slowPath, %typeTestSuccess
-  %20 = load i64, i64* @guarded_const_A, align 8
+  %18 = load i64, i64* @guarded_const_A, align 8
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
-  store i64 %20, i64* %callArgsAddr, align 8
-  %21 = load i64, i64* @rb_mKernel, align 8
+  store i64 %18, i64* %callArgsAddr, align 8
+  %19 = load i64, i64* @rb_mKernel, align 8
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !17
-  %22 = call i64 @rb_funcallv(i64 %21, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #17
+  %20 = call i64 @rb_funcallv(i64 %19, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #17
   call void @dbg_sorbet_validate_id(i64 %rubyId_times, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !20
-  %23 = call i64 @rb_block_call(i64 21, i64 %rubyId_times, i32 0, i64* nonnull %callArgsAddr, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<C <U Object>><U foo>$block_1" to i64 (...)*), i64 %2) #17
+  %21 = call i64 @rb_block_call(i64 21, i64 %rubyId_times, i32 0, i64* nonnull %callArgsAddr, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<C <U Object>><U foo>$block_1" to i64 (...)*), i64 %2) #17
   ret i64 8
 
 const_slowPath:                                   ; preds = %typeTestSuccess
@@ -584,7 +581,7 @@ attributes #5 = { noreturn }
 attributes #6 = { nounwind readnone }
 attributes #7 = { cold noreturn nounwind optsize ssp uwtable }
 attributes #8 = { noreturn nounwind ssp uwtable }
-attributes #9 = { norecurse nounwind readonly ssp uwtable }
+attributes #9 = { norecurse nounwind readnone ssp uwtable }
 attributes #10 = { nounwind sspreq uwtable }
 attributes #11 = { ssp }
 attributes #12 = { nounwind ssp }

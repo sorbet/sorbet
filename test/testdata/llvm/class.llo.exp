@@ -341,7 +341,7 @@ define internal void @sorbet_Closure_mark(i8*) #0 {
 
 declare void @rb_gc_mark_values(i64, i64*) local_unnamed_addr #3
 
-; Function Attrs: norecurse nounwind readonly ssp uwtable
+; Function Attrs: norecurse nounwind readnone ssp uwtable
 define internal i64 @sorbet_Closure_size(i8* nocapture readonly) #7 {
   %2 = bitcast i8* %0 to i32*
   %3 = load i32, i32* %2, align 8, !tbaa !9
@@ -614,7 +614,7 @@ attributes #3 = { "addedToSilenceEmptyAttrsError" }
 attributes #4 = { noinline nounwind ssp uwtable }
 attributes #5 = { noreturn }
 attributes #6 = { nounwind readnone }
-attributes #7 = { norecurse nounwind readonly ssp uwtable }
+attributes #7 = { norecurse nounwind readnone ssp uwtable }
 attributes #8 = { nounwind ssp }
 attributes #9 = { cold ssp }
 attributes #10 = { nounwind sspreq }
