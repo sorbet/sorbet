@@ -305,5 +305,35 @@ public:
     std::string toString() const override;
 };
 
+// # symbol-search: "query"
+class SymbolSearchAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<SymbolSearchAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                       int assertionLine, std::string_view assertionContents,
+                                                       std::string_view assertionType);
+
+    const std::string query;
+    const int rank = 0;
+
+    /** Checks all SymbolSearchAssertions within the assertion vector. Skips over non-CompletionAssertions. */
+    static void checkAll(const std::vector<std::shared_ptr<RangeAssertion>> &assertions,
+                         const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                         LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+
+    /** Checks all SymbolSearchAssertions for the given symbol query. */
+    static void checkAllForQuery(const std::string query,
+                                 const std::vector<std::shared_ptr<SymbolSearchAssertion>> &assertions,
+                                 const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                                 LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string errorPrefix);
+
+    SymbolSearchAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                          std::string_view query);
+
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+               int &nextId, std::string_view uriPrefix, const Location &queryLoc);
+
+    std::string toString() const override;
+};
+
 } // namespace sorbet::test
 #endif // TEST_HELPERS_POSITION_ASSERTIONS_H

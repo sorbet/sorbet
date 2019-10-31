@@ -39,6 +39,7 @@ const UnorderedMap<
         {"apply-completion", ApplyCompletionAssertion::make},
         {"apply-code-action", ApplyCodeActionAssertion::make},
         {"no-stdlib", BooleanPropertyAssertion::make},
+        {"symbol-search", SymbolSearchAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -1127,6 +1128,121 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
             "Invalid quick fix result. Expected edited result ({}) to be:\n{}\n...but actually resulted in:\n{}",
             expectedUpdatedFilePath, expectedEditedFileContents, actualEditedFileContents);
     }
+}
+
+SymbolSearchAssertion::SymbolSearchAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                             string_view query)
+    : RangeAssertion(filename, range, assertionLine), query(query) {}
+
+shared_ptr<SymbolSearchAssertion> SymbolSearchAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                              int assertionLine, string_view assertionContents,
+                                                              string_view assertionType) {
+    static const regex contentsRegex(R"(^\s*\"([^\"]+)\"\s*$)");
+
+    smatch matches;
+    string assertionContentsString = string(assertionContents);
+    if (regex_search(assertionContentsString, matches, contentsRegex)) {
+        auto query = matches[1].str();
+        return make_shared<SymbolSearchAssertion>(filename, range, assertionLine, query);
+    }
+
+    ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1) << fmt::format(
+        "Improperly formatted assertion. Expected 'symbol-search: \"<query>\"'. Found '{}'", assertionContents);
+
+    return nullptr;
+}
+
+void SymbolSearchAssertion::checkAllForQuery(std::string query,
+                                             const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
+                                             const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                             LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix,
+                                             string errorPrefix) {
+    const int id = nextId++;
+    const int lineWidth = 6; // ensure sort order == numerical order (if file is less than a million lines)
+
+    std::map<std::string, vector<shared_ptr<SymbolSearchAssertion>>> assertionsByLine;
+    for (auto assertion : assertions) {
+        auto location = assertion->getLocation(uriPrefix);
+        auto line = fmt::format("{}:{:{}}", location->uri, location->range->start->line, lineWidth);
+        assertionsByLine[line].push_back(assertion);
+    }
+
+    // Request results from LSP
+    auto responses = lspWrapper.getLSPResponsesFor(makeWorkspaceSymbolRequest(id, query));
+    ASSERT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/definition` request.";
+    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    auto &respMsg = responses.at(0)->asResponse();
+    ASSERT_TRUE(respMsg.result.has_value());
+    ASSERT_FALSE(respMsg.error.has_value());
+    auto &result = *(respMsg.result);
+    vector<shared_ptr<SymbolInformation>> symbols;
+    if (auto symbolInfos = get_if<vector<unique_ptr<SymbolInformation>>>(
+            &get<variant<JSONNullObject, vector<unique_ptr<SymbolInformation>>>>(result))) {
+        for (auto &symbolInfo : *symbolInfos) {
+            symbols.push_back(shared_ptr<SymbolInformation>(std::move(symbolInfo)));
+        }
+    }
+    std::map<std::string, vector<shared_ptr<SymbolInformation>>> symbolsByLine;
+    for (auto &symbol : symbols) {
+        auto &location = symbol->location;
+        auto line = fmt::format("{}:{:{}}", location->uri, location->range->start->line, lineWidth);
+        symbolsByLine[line].push_back(symbol);
+    }
+
+    bool success = true;
+    // Show any expected symbols that weren't returned by LSP
+    for (auto entry : assertionsByLine) {
+        auto lineInfo = entry.first;
+        auto expected = entry.second;
+        auto &actual = symbolsByLine[lineInfo];
+        if (expected.size() == actual.size()) {
+            continue;
+        }
+        success = false;
+        auto assertion = expected[0];
+        auto location = assertion->getLocation(uriPrefix);
+        auto sourceLine = getLine(sourceFileContents, uriPrefix, *location.get());
+        ADD_FAILURE_AT(location->uri.c_str(), assertion->range->start->line + 1)
+            << fmt::format("WorkspaceSymbol query `{}` did not return a reference to:\n{}\n", query,
+                           prettyPrintRangeComment(sourceLine, *assertion->range, ""));
+    }
+
+    // Show any symbols returned by LSP that weren't asserted
+    for (auto entry : symbolsByLine) {
+        auto lineInfo = entry.first;
+        auto actual = entry.second;
+        auto &expected = assertionsByLine[lineInfo];
+        if (expected.size() == actual.size()) {
+            continue;
+        }
+        success = false;
+        auto symbolInfo = actual[0];
+        auto &location = symbolInfo->location;
+        auto sourceLine = getLine(sourceFileContents, uriPrefix, *location.get());
+        ADD_FAILURE_AT(location->uri.c_str(), location->range->start->line + 1)
+            << fmt::format("WorkspaceSymbol query `{}` returned an unexpected reference to:\n{}\n", query,
+                           prettyPrintRangeComment(sourceLine, *location->range, ""));
+    }
+
+    ASSERT_TRUE(success) << fmt::format("For query \"{}\"", query);
+}
+
+void SymbolSearchAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
+                                     const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                     LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+    UnorderedMap<std::string, vector<shared_ptr<SymbolSearchAssertion>>> queryToAssertionsMap;
+    for (auto &assertion : assertions) {
+        if (auto searchAssertion = dynamic_pointer_cast<SymbolSearchAssertion>(assertion)) {
+            queryToAssertionsMap[searchAssertion->query].push_back(searchAssertion);
+        }
+    }
+    for (auto entry : queryToAssertionsMap) {
+        checkAllForQuery(entry.first, entry.second, sourceFileContents, lspWrapper, nextId, uriPrefix, errorPrefix);
+    }
+}
+
+string SymbolSearchAssertion::toString() const {
+    return fmt::format("symbol-search: \"{}\"", query);
 }
 
 } // namespace sorbet::test

@@ -836,7 +836,7 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
 }
 
 TEST_P(LSPTest, All) {
-    string rootPath = "/Users/jvilk/stripe/pay-server";
+    string rootPath = fmt::format("/Users/{}/stripe/sorbet", std::getenv("USER"));
     string rootUri = fmt::format("file://{}", rootPath);
 
     // filename => URI
@@ -997,6 +997,9 @@ TEST_P(LSPTest, All) {
     CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
     ApplyCompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
 
+    // Workspace Symbol assertions
+    SymbolSearchAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
         // sourceLSPFileUpdates is unordered (and we can't use an ordered map unless we make its contents `const`)
@@ -1076,7 +1079,8 @@ TEST_P(LSPTest, All) {
             HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId, rootUri);
         }
     }
-} // namespace sorbet::test
+}
+// namespace sorbet::test
 
 INSTANTIATE_TEST_SUITE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 INSTANTIATE_TEST_SUITE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
