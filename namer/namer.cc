@@ -271,7 +271,7 @@ public:
         return klass;
     }
 
-    bool handleNamerDSL(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &line) {
+    bool handleNamerRewriter(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &line) {
         if (addAncestor(ctx, klass, line)) {
             return true;
         }
@@ -346,7 +346,7 @@ public:
         klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
-                                  [&](unique_ptr<ast::Expression> &line) { return handleNamerDSL(ctx, klass, line); });
+                                  [&](unique_ptr<ast::Expression> &line) { return handleNamerRewriter(ctx, klass, line); });
         klass->rhs.erase(toRemove, klass->rhs.end());
 
         if (!klass->ancestors.empty()) {
