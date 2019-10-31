@@ -51,25 +51,25 @@ public:
                 [&](ast::Assign *assign) {
                     vector<unique_ptr<ast::Expression>> nodes;
 
-                    nodes = Struct::replaceDSL(ctx, assign);
+                    nodes = Struct::run(ctx, assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
-                    nodes = ClassNew::replaceDSL(ctx, assign);
+                    nodes = ClassNew::run(ctx, assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
-                    nodes = ProtobufDescriptorPool::replaceDSL(ctx, assign);
+                    nodes = ProtobufDescriptorPool::run(ctx, assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
-                    nodes = Regexp::replaceDSL(ctx, assign);
+                    nodes = Regexp::run(ctx, assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
@@ -79,45 +79,45 @@ public:
                 [&](ast::Send *send) {
                     vector<unique_ptr<ast::Expression>> nodes;
 
-                    nodes = MixinEncryptedProp::replaceDSL(ctx, send);
+                    nodes = MixinEncryptedProp::run(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
-                    nodes = Minitest::replaceDSL(ctx, send);
+                    nodes = Minitest::run(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = move(nodes);
                         return;
                     }
 
-                    nodes = DSLBuilder::replaceDSL(ctx, send);
+                    nodes = DSLBuilder::run(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
-                    nodes = Private::replaceDSL(ctx, send);
+                    nodes = Private::run(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
-                    nodes = Delegate::replaceDSL(ctx, send);
+                    nodes = Delegate::run(ctx, send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
                     // This one is different: it gets an extra prevStat argument.
-                    nodes = AttrReader::replaceDSL(ctx, send, prevStat);
+                    nodes = AttrReader::run(ctx, send, prevStat);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
                     // This one is also a little different: it gets the ClassDef kind
-                    nodes = Mattr::replaceDSL(ctx, send, classDef->kind);
+                    nodes = Mattr::run(ctx, send, classDef->kind);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
@@ -152,7 +152,7 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
-        return InterfaceWrapper::replaceDSL(ctx, std::move(send));
+        return InterfaceWrapper::run(ctx, std::move(send));
     }
 
 private:

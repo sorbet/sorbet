@@ -26,7 +26,7 @@ namespace sorbet::rewriter {
  */
 class AttrReader final {
 public:
-    static std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::MutableContext ctx, ast::Send *send,
+    static std::vector<std::unique_ptr<ast::Expression>> run(core::MutableContext ctx, ast::Send *send,
                                                                     const ast::Expression *prevStat);
 
     AttrReader() = delete;

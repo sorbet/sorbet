@@ -10,7 +10,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-vector<unique_ptr<ast::Expression>> ClassNew::replaceDSL(core::MutableContext ctx, ast::Assign *asgn) {
+vector<unique_ptr<ast::Expression>> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<unique_ptr<ast::Expression>> empty;
     core::Loc loc = asgn->loc;
 
@@ -58,7 +58,7 @@ vector<unique_ptr<ast::Expression>> ClassNew::replaceDSL(core::MutableContext ct
     }
 
     if (send->block != nullptr) {
-        // Steal the trees, because the replaceDSL is going to remove the original send node from the tree anyway.
+        // Steal the trees, because the run is going to remove the original send node from the tree anyway.
         if (auto insSeq = ast::cast_tree<ast::InsSeq>(send->block->body.get())) {
             for (auto &&stat : insSeq->stats) {
                 body.emplace_back(move(stat));

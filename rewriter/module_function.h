@@ -34,7 +34,7 @@ public:
     ModuleFunction() = delete;
 
 private:
-    static std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::MutableContext ctx, ast::Send *send,
+    static std::vector<std::unique_ptr<ast::Expression>> run(core::MutableContext ctx, ast::Send *send,
                                                                     const ast::Expression *prevStat);
 
     static std::vector<std::unique_ptr<ast::Expression>>

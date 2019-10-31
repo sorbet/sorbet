@@ -10,7 +10,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-vector<unique_ptr<ast::Expression>> Regexp::replaceDSL(core::MutableContext ctx, ast::Assign *asgn) {
+vector<unique_ptr<ast::Expression>> Regexp::run(core::MutableContext ctx, ast::Assign *asgn) {
     auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
     if (lhs == nullptr) {
         return {};

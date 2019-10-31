@@ -35,7 +35,7 @@ static optional<core::NameRef> stringOrSymbolNameRef(const core::GlobalState &gs
     }
 }
 
-vector<unique_ptr<ast::Expression>> Delegate::replaceDSL(core::MutableContext ctx, const ast::Send *send) {
+vector<unique_ptr<ast::Expression>> Delegate::run(core::MutableContext ctx, const ast::Send *send) {
     vector<unique_ptr<ast::Expression>> empty;
     auto loc = send->loc;
 

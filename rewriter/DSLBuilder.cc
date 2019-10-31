@@ -18,7 +18,7 @@ using namespace std;
 //
 
 namespace sorbet::rewriter {
-vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext ctx, ast::Send *send) {
+vector<unique_ptr<ast::Expression>> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> empty;
 
     if (ctx.state.runningUnderAutogen) {

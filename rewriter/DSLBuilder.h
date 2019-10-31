@@ -22,7 +22,7 @@ namespace sorbet::rewriter {
  */
 class DSLBuilder final {
 public:
-    static std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::MutableContext ctx, ast::Send *send);
+    static std::vector<std::unique_ptr<ast::Expression>> run(core::MutableContext ctx, ast::Send *send);
 
     DSLBuilder() = delete;
 };

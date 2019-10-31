@@ -205,7 +205,7 @@ unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const a
 // Also note that the burden is on the user to provide an accurate type signature.
 // All attr_accessor's should probably have `T.nilable(...)` to account for a
 // read-before-write.
-vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext ctx, ast::Send *send,
+vector<unique_ptr<ast::Expression>> AttrReader::run(core::MutableContext ctx, ast::Send *send,
                                                            const ast::Expression *prevStat) {
     vector<unique_ptr<ast::Expression>> empty;
 

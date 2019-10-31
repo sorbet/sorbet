@@ -6,7 +6,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-vector<unique_ptr<ast::Expression>> ProtobufDescriptorPool::replaceDSL(core::MutableContext ctx, ast::Assign *asgn) {
+vector<unique_ptr<ast::Expression>> ProtobufDescriptorPool::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<unique_ptr<ast::Expression>> empty;
 
     auto sendMsgclass = ast::cast_tree<ast::Send>(asgn->rhs.get());

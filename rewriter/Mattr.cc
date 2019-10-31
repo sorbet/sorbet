@@ -29,7 +29,7 @@ static void addInstanceCounterPart(vector<unique_ptr<ast::Expression>> &sink, co
     sink.emplace_back(move(instanceDef));
 }
 
-vector<unique_ptr<ast::Expression>> Mattr::replaceDSL(core::MutableContext ctx, const ast::Send *send,
+vector<unique_ptr<ast::Expression>> Mattr::run(core::MutableContext ctx, const ast::Send *send,
                                                       ast::ClassDefKind classDefKind) {
     vector<unique_ptr<ast::Expression>> empty;
     bool doReaders = false;

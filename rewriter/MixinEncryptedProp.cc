@@ -24,7 +24,7 @@ unique_ptr<ast::Expression> mkNilableString(core::Loc loc) {
     return mkNilable(loc, ast::MK::Constant(loc, core::Symbols::String()));
 }
 
-vector<unique_ptr<ast::Expression>> MixinEncryptedProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
+vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> empty;
 
     if (ctx.state.runningUnderAutogen) {

@@ -11,7 +11,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-vector<unique_ptr<ast::Expression>> Private::replaceDSL(core::MutableContext ctx, ast::Send *send) {
+vector<unique_ptr<ast::Expression>> Private::run(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> empty;
 
     if (send->args.size() != 1) {

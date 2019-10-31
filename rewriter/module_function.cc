@@ -31,7 +31,7 @@ void ModuleFunction::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
                     replaceNodes[stat.get()] = move(empty);
                 } else {
                     // if we do have arguments, then we can rewrite them appropriately
-                    replaceNodes[stat.get()] = replaceDSL(ctx, send, prevStat);
+                    replaceNodes[stat.get()] = run(ctx, send, prevStat);
                 }
             }
         } else if (auto defn = ast::cast_tree<ast::MethodDef>(stat.get())) {
@@ -98,7 +98,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::rewriteDefn(core::MutableCon
     return stats;
 }
 
-vector<unique_ptr<ast::Expression>> ModuleFunction::replaceDSL(core::MutableContext ctx, ast::Send *send,
+vector<unique_ptr<ast::Expression>> ModuleFunction::run(core::MutableContext ctx, ast::Send *send,
                                                                const ast::Expression *prevStat) {
     vector<unique_ptr<ast::Expression>> stats;
 

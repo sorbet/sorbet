@@ -50,7 +50,7 @@ string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
     return arg->toString(ctx);
 }
 
-unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send *send) {
+unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send) {
     if (send->block == nullptr) {
         return nullptr;
     }
@@ -93,7 +93,7 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
 unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
     auto bodySend = ast::cast_tree<ast::Send>(body.get());
     if (bodySend) {
-        auto change = replaceDSLSingle(ctx, bodySend);
+        auto change = runSingle(ctx, bodySend);
         if (change) {
             return change;
         }
@@ -101,13 +101,13 @@ unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Ex
     return body;
 }
 
-vector<unique_ptr<ast::Expression>> Minitest::replaceDSL(core::MutableContext ctx, ast::Send *send) {
+vector<unique_ptr<ast::Expression>> Minitest::run(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> stats;
     if (ctx.state.runningUnderAutogen) {
         return stats;
     }
 
-    auto exp = replaceDSLSingle(ctx, send);
+    auto exp = runSingle(ctx, send);
     if (exp != nullptr) {
         stats.emplace_back(std::move(exp));
     }

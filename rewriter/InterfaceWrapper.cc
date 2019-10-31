@@ -11,7 +11,7 @@
 using namespace std;
 
 namespace sorbet::rewriter {
-unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableContext ctx, unique_ptr<ast::Send> send) {
+unique_ptr<ast::Expression> InterfaceWrapper::run(core::MutableContext ctx, unique_ptr<ast::Send> send) {
     if (ctx.state.runningUnderAutogen) {
         return send;
     }

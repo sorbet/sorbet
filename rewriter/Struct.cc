@@ -45,7 +45,7 @@ static bool isLiteralTrue(const core::GlobalState &gs, ast::Expression *node) {
     return false;
 }
 
-vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx, ast::Assign *asgn) {
+vector<unique_ptr<ast::Expression>> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<unique_ptr<ast::Expression>> empty;
 
     if (ctx.state.runningUnderAutogen) {
@@ -123,7 +123,7 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
                        ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)))));
 
     if (send->block != nullptr) {
-        // Steal the trees, because the replaceDSL is going to remove the original send node from the tree anyway.
+        // Steal the trees, because the run is going to remove the original send node from the tree anyway.
         if (auto insSeq = ast::cast_tree<ast::InsSeq>(send->block->body.get())) {
             for (auto &&stat : insSeq->stats) {
                 body.emplace_back(move(stat));
