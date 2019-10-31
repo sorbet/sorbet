@@ -181,6 +181,22 @@ class String < Object
   end
   def =~(arg0); end
 
+  # If the string is frozen, then return duplicated mutable string.
+  #
+  # If the string is not frozen, then return the string itself.
+  sig do
+    returns(String)
+  end
+  def +@; end
+
+  # Returns a frozen, possibly pre-existing copy of the string.
+  #
+  # The string will be deduplicated as long as it is not tainted, or has any instance variables set on it.
+  sig do
+    returns(String)
+  end
+  def -@; end
+
   # Element Reference --- If passed a single `index`, returns a substring of one
   # character at that index. If passed a `start` index and a `length`, returns a
   # substring containing `length` characters starting at the `start` index. If
