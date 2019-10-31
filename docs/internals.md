@@ -627,7 +627,7 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 <!-- Phase descriptions -->
 [parser]: #parser
 [desugar]: #desugar
-[dsl]: #rewriter
+[rewriter]: #rewriter
 [localvars]: #localvars
 [namer]: #namer
 [resolver]: #resolver
