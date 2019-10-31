@@ -21,7 +21,6 @@
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
-#include "dsl/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
@@ -30,6 +29,7 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "resolver/resolver.h"
+#include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "test/LSPTest.h"
@@ -115,8 +115,8 @@ public:
 };
 
 UnorderedSet<string> knownExpectations = {
-    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "dsl-tree",
-    "dsl-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
+    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
+    "rewrite-tree-raw", "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
     "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",          "cfg-raw",          "cfg-json",
     "autogen",          "document-symbols"};
 
@@ -257,26 +257,26 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         handler.addObserved("desugar-tree", [&]() { return desugared.tree->toString(*gs); });
         handler.addObserved("desugar-tree-raw", [&]() { return desugared.tree->showRaw(*gs); });
 
-        ast::ParsedFile dslUnwound;
+        ast::ParsedFile rewriten;
         ast::ParsedFile localNamed;
 
         if (!test.expectations.contains("autogen")) {
-            // DSL
+            // Rewriter
             {
                 core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
-                dslUnwound =
-                    testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree)), desugared.file});
+                rewriten = testSerialize(
+                    *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
             }
 
-            handler.addObserved("dsl-tree", [&]() { return dslUnwound.tree->toString(*gs); });
-            handler.addObserved("dsl-tree-raw", [&]() { return dslUnwound.tree->showRaw(*gs); });
+            handler.addObserved("rewrite-tree", [&]() { return rewriten.tree->toString(*gs); });
+            handler.addObserved("rewrite-tree-raw", [&]() { return rewriten.tree->showRaw(*gs); });
 
-            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
+            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
         } else {
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
-            if (test.expectations.contains("dsl-tree-raw") || test.expectations.contains("dsl-tree")) {
-                ADD_FAILURE() << "Running DSL passes with autogen isn't supported";
+            if (test.expectations.contains("rewrite-tree-raw") || test.expectations.contains("rewrite-tree")) {
+                ADD_FAILURE() << "Running Rewriter passes with autogen isn't supported";
             }
         }
 
@@ -482,10 +482,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         handler.addObserved("desguar-tree", [&]() { return file.tree->toString(*gs); });
         handler.addObserved("desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
-        // DSL pass
-        file = testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(file.tree)), file.file});
-        handler.addObserved("dsl-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved("dsl-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        // Rewriter pass
+        file = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(file.tree)), file.file});
+        handler.addObserved("rewrite-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("rewrite-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
         // local vars
         file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));

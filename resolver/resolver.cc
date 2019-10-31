@@ -1435,7 +1435,7 @@ private:
         }
     }
 
-    // These will already be handled by DefaultArgs DSL pass
+    // These will already be handled by DefaultArgs Rewriter pass
     void deleteOptionlArg(core::MutableContext ctx, ast::MethodDef *mdef) {
         for (auto &arg : mdef->args) {
             if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(arg.get())) {
@@ -1525,14 +1525,14 @@ private:
             [&](ast::MethodDef *mdef) {
                 if (debug_mode) {
                     bool hasSig = !lastSigs.empty();
-                    bool DSL = mdef->isDSLSynthesized();
+                    bool rewriten = mdef->isRewriterSynthesized();
                     bool isRBI = mdef->loc.file().data(ctx).isRBI();
                     if (hasSig) {
                         categoryCounterInc("method.sig", "true");
                     } else {
                         categoryCounterInc("method.sig", "false");
                     }
-                    if (DSL) {
+                    if (rewriten) {
                         categoryCounterInc("method.dsl", "true");
                     } else {
                         categoryCounterInc("method.dsl", "false");
@@ -1542,7 +1542,7 @@ private:
                     } else {
                         categoryCounterInc("method.rbi", "false");
                     }
-                    if (hasSig && !isRBI && !DSL) {
+                    if (hasSig && !isRBI && !rewriten) {
                         counterInc("types.sig.human");
                     }
                 }
@@ -1552,7 +1552,7 @@ private:
 
                     auto loc = lastSigs[0]->loc;
                     if (loc.file().data(ctx).originalSigil == core::StrictLevel::None &&
-                        !lastSigs.front()->isDSLSynthesized()) {
+                        !lastSigs.front()->isRewriterSynthesized()) {
                         if (auto e = ctx.state.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
                             e.setHeader("To use `{}`, this file must declare an explicit `{}` sigil (found: "
                                         "none). If you're not sure which one to use, start with `{}`",

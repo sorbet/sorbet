@@ -34,8 +34,8 @@ const vector<PrintOptions> print_options({
     {"parse-tree-whitequark", &Printers::ParseTreeWhitequark},
     {"desugar-tree", &Printers::DesugarTree},
     {"desugar-tree-raw", &Printers::DesugarTreeRaw},
-    {"dsl-tree", &Printers::DSLTree},
-    {"dsl-tree-raw", &Printers::DSLTreeRaw},
+    {"rewrite-tree", &Printers::RewriterTree},
+    {"rewrite-tree-raw", &Printers::RewriterTreeRaw},
     {"index-tree", &Printers::IndexTree, true},
     {"index-tree-raw", &Printers::IndexTreeRaw, true},
     {"name-tree", &Printers::NameTree, true},
@@ -93,8 +93,8 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         ParseTreeWhitequark,
         DesugarTree,
         DesugarTreeRaw,
-        DSLTree,
-        DSLTreeRaw,
+        RewriterTree,
+        RewriterTreeRaw,
         IndexTree,
         IndexTreeRaw,
         NameTree,
@@ -139,7 +139,7 @@ const vector<StopAfterOptions> stop_after_options({
     {"init", Phase::INIT},
     {"parser", Phase::PARSER},
     {"desugarer", Phase::DESUGARER},
-    {"dsl", Phase::DSL},
+    {"rewriter", Phase::REWRITER},
     {"local-vars", Phase::LOCAL_VARS},
     {"namer", Phase::NAMER},
     {"resolver", Phase::RESOLVER},
@@ -406,7 +406,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options("dev")("skip-dsl-passes", "Do not run DSL passess");
+    options.add_options("dev")("skip-rewriter-passes", "Do not run Rewriter passess");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("stress-incremental-resolver",
                                "Force incremental updates to discover resolver & namer bugs");
@@ -783,7 +783,7 @@ void readOptions(Options &opts,
         if (raw.count("configatron-file")) {
             opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
         }
-        opts.skipDSLPasses = raw["skip-dsl-passes"].as<bool>();
+        opts.skipRewriterPasses = raw["skip-rewriter-passes"].as<bool>();
         opts.storeState = raw["store-state"].as<string>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();

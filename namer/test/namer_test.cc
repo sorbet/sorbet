@@ -7,9 +7,9 @@
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
-#include "dsl/dsl.h"
 #include "local_vars/local_vars.h"
 #include "namer/namer.h"
+#include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 
@@ -46,7 +46,7 @@ ast::ParsedFile getTree(core::GlobalState &gs, string str) {
     file.data(gs).strictLevel = core::StrictLevel::Strict;
     sorbet::core::MutableContext ctx(gs, core::Symbols::root());
     auto ast = ast::desugar::node2Tree(ctx, move(tree));
-    ast = dsl::DSL::run(ctx, move(ast));
+    ast = rewriter::Rewriter::run(ctx, move(ast));
     return ast::ParsedFile{move(ast), file};
 }
 

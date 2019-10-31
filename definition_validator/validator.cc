@@ -314,7 +314,7 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
         auto isRBI = absl::c_any_of(method.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isRBI(); });
         if (!method.data(ctx)->isOverride() && method.data(ctx)->hasSig() &&
             overridenMethod.data(ctx)->isOverridable() && !anyIsInterface && overridenMethod.data(ctx)->hasSig() &&
-            !method.data(ctx)->isDSLSynthesized() && !isRBI) {
+            !method.data(ctx)->isRewriterSynthesized() && !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
                             method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), "override.");
@@ -322,7 +322,7 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
             }
         }
         if (!method.data(ctx)->isOverride() && method.data(ctx)->hasSig() && overridenMethod.data(ctx)->isAbstract() &&
-            overridenMethod.data(ctx)->hasSig() && !method.data(ctx)->isDSLSynthesized() && !isRBI) {
+            overridenMethod.data(ctx)->hasSig() && !method.data(ctx)->isRewriterSynthesized() && !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
                             method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), "override.");
@@ -330,7 +330,7 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
             }
         }
         if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable()) &&
-            !method.data(ctx)->isIncompatibleOverride() && !isRBI && !method.data(ctx)->isDSLSynthesized()) {
+            !method.data(ctx)->isIncompatibleOverride() && !isRBI && !method.data(ctx)->isRewriterSynthesized()) {
             if (overridenMethod.data(ctx)->isFinalMethod()) {
                 if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
                     e.setHeader("Method overrides a final method `{}`", overridenMethod.data(ctx)->show(ctx));

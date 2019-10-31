@@ -271,7 +271,8 @@ public:
         return klass;
     }
 
-    bool handleNamerDSL(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &line) {
+    bool handleNamerRewriter(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass,
+                             unique_ptr<ast::Expression> &line) {
         if (addAncestor(ctx, klass, line)) {
             return true;
         }
@@ -345,8 +346,9 @@ public:
         klass->symbol.data(ctx)->addLoc(ctx, klass->declLoc);
         klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
-        auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
-                                  [&](unique_ptr<ast::Expression> &line) { return handleNamerDSL(ctx, klass, line); });
+        auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(), [&](unique_ptr<ast::Expression> &line) {
+            return handleNamerRewriter(ctx, klass, line);
+        });
         klass->rhs.erase(toRemove, klass->rhs.end());
 
         if (!klass->ancestors.empty()) {
@@ -626,8 +628,8 @@ public:
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
         method->symbol.data(ctx)->addLoc(ctx, method->declLoc);
-        if (method->isDSLSynthesized()) {
-            method->symbol.data(ctx)->setDSLSynthesized();
+        if (method->isRewriterSynthesized()) {
+            method->symbol.data(ctx)->setRewriterSynthesized();
         }
         return method;
     }
@@ -679,7 +681,7 @@ public:
     unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         // forbid dynamic constant definition
         auto ownerData = ctx.owner.data(ctx);
-        if (!ownerData->isClassOrModule() && !ownerData->isDSLSynthesized()) {
+        if (!ownerData->isClassOrModule() && !ownerData->isRewriterSynthesized()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::DynamicConstantAssignment)) {
                 e.setHeader("Dynamic constant assignment");
             }

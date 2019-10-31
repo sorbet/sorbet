@@ -1,0 +1,212 @@
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C TestDSLBuilder><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"opt_string" => <emptyTree>::<C String>}).returns(::NilClass)
+    end
+
+    def self.opt_string<<C <todo sym>>>(opt_string, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C String>))
+    end
+
+    def self.get_opt_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C String>))
+    end
+
+    def opt_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"opt_int_defaulted" => <emptyTree>::<C Integer>}).returns(::NilClass)
+    end
+
+    def self.opt_int_defaulted<<C <todo sym>>>(opt_int_defaulted, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def self.get_opt_int_defaulted<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def opt_int_defaulted<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"req_string" => <emptyTree>::<C String>}).returns(::NilClass)
+    end
+
+    def self.req_string<<C <todo sym>>>(req_string, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def self.get_req_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def req_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"implied_string" => <emptyTree>::<C String>}).returns(::NilClass)
+    end
+
+    def self.implied_string<<C <todo sym>>>(implied_string = ::T.untyped(), &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def self.get_implied_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def implied_string<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"no_getter" => <emptyTree>::<C String>}).returns(::NilClass)
+    end
+
+    def self.no_getter<<C <todo sym>>>(no_getter, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C String>))
+    end
+
+    def self.get_no_setter<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C String>))
+    end
+
+    def no_setter<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    <self>.dsl_optional(:"no_getter_or_setter", <emptyTree>::<C String>, {:"skip_getter" => true, :"skip_setter" => true})
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"class_of" => <emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)}).returns(::NilClass)
+    end
+
+    def self.class_of<<C <todo sym>>>(class_of, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)))
+    end
+
+    def self.get_class_of<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)))
+    end
+
+    def class_of<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"root_const" => ::<root>::<C Integer>}).returns(::NilClass)
+    end
+
+    def self.root_const<<C <todo sym>>>(root_const, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.nilable(::<root>::<C Integer>))
+    end
+
+    def self.get_root_const<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.nilable(::<root>::<C Integer>))
+    end
+
+    def root_const<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(nil)
+    end
+  end
+
+  class <emptyTree>::<C TestChild><<C <todo sym>>> < (<emptyTree>::<C TestDSLBuilder>)
+    <self>.opt_string("hi")
+
+    <self>.get_opt_string()
+
+    <self>.opt_string()
+
+    <self>.opt_string(:"nope")
+
+    <self>.opt_string(nil)
+
+    <self>.opt_int_defaulted(17)
+
+    <self>.implied_string()
+
+    <self>.no_getter("I\'m setting the value")
+
+    <self>.get_no_getter()
+
+    <self>.class_of(<emptyTree>::<C Integer>)
+
+    <emptyTree>::<C T>.assert_type!(<self>.get_opt_string(), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+
+    <emptyTree>::<C T>.assert_type!(<self>.get_opt_string(), <emptyTree>::<C String>)
+
+    <emptyTree>::<C T>.assert_type!(<self>.get_opt_int_defaulted(), <emptyTree>::<C Integer>)
+
+    <emptyTree>::<C T>.assert_type!(<self>.get_req_string(), <emptyTree>::<C String>)
+
+    def test_instance_methods<<C <todo sym>>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.assert_type!(<self>.opt_string(), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+        <emptyTree>::<C T>.assert_type!(<self>.opt_int_defaulted(), <emptyTree>::<C Integer>)
+        <emptyTree>::<C T>.assert_type!(<self>.req_string(), <emptyTree>::<C String>)
+        <self>.no_getter()
+      end
+    end
+  end
+end

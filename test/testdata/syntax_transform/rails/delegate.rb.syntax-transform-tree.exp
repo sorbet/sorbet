@@ -1,0 +1,172 @@
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C GoodUsages><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def foo<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def bar<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def baz<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def ball<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def string_foo<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def string_bar<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def symbol_foo<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def symbol_bar<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def true_foo<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def true_bar<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig() do ||
+      <self>.void()
+    end
+
+    def usages<<C <todo sym>>>(&<blk>)
+      begin
+        <self>.foo() do ||
+          <emptyTree>
+        end
+        <self>.bar(1, 3, 4, 5)
+        <self>.baz()
+        <self>.ball({:"thing" => 0}) do ||
+          <emptyTree>
+        end
+        <self>.string_foo()
+        <self>.string_bar()
+        <self>.symbol_foo() do ||
+          <emptyTree>
+        end
+        <self>.symbol_bar(1, 2) do ||
+          <emptyTree>
+        end
+        <self>.true_foo()
+        <self>.true_bar()
+      end
+    end
+  end
+
+  class <emptyTree>::<C WorksWithoutExtendingTSig><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def foo<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def bar<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+  end
+
+  class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)
+    local = 0
+
+    <self>.not_delegate(:"thing", {:"to" => :"nop"})
+
+    <self>.delegate()
+
+    <self>.delegate(:"thing")
+
+    <self>.delegate({:"to" => :"thing"})
+
+    <self>.delegate(:"thing", {:"prefix" => :"thing"})
+
+    <self>.delegate(:"foo", {:"to" => :"thing", :"prefix" => local})
+
+    <self>.delegate(:"foo", {local => :"thing"})
+
+    <self>.delegate(234, {:"to" => :"good"})
+
+    <self>.delegate({:"thing" => :"thing"})
+
+    <self>.delegate(:"foo", :"bar", {:"to" => :"@hi", :"prefix" => true})
+
+    <self>.delegate(:"foo", :"bar", {:"to" => "", :"prefix" => true})
+  end
+
+  class <emptyTree>::<C EnumerableUsage><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <self>.include(<emptyTree>::<C Enumerable>)
+
+    <emptyTree>::<C Elem> = <self>.type_member()
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
+    end
+
+    def each<<C <todo sym>>>(*arg0, &<blk>)
+      <emptyTree>
+    end
+  end
+end

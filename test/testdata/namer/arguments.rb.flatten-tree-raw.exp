@@ -190,7 +190,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = dsl
+          flags = rewriter
           name = <DA <U take_arguments> $1><<DA <U take_arguments> $1>>
           args = [Local{
               localVariable = <U a>
@@ -215,7 +215,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = dsl
+          flags = rewriter
           name = <DA <U take_arguments> $2><<DA <U take_arguments> $2>>
           args = [Local{
               localVariable = <U a>

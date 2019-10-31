@@ -30,7 +30,6 @@
 #include "core/errors/parser.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
-#include "dsl/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
@@ -39,6 +38,7 @@
 #include "parser/parser.h"
 #include "pipeline.h"
 #include "resolver/resolver.h"
+#include "rewriter/rewriter.h"
 
 using namespace std;
 
@@ -167,12 +167,12 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
     return ast;
 }
 
-unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
+unique_ptr<ast::Expression> runRewriter(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
     core::MutableContext ctx(gs, core::Symbols::root());
-    Timer timeit(gs.tracer(), "runDSL", {{"file", (string)file.data(gs).path()}});
+    Timer timeit(gs.tracer(), "runRewriter", {{"file", (string)file.data(gs).path()}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
     core::ErrorRegion errs(gs, file);
-    return dsl::DSL::run(ctx, move(ast));
+    return rewriter::Rewriter::run(ctx, move(ast));
 }
 
 ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
@@ -188,7 +188,7 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
-    ast::ParsedFile dslsInlined{nullptr, file};
+    ast::ParsedFile rewriten{nullptr, file};
     ENFORCE(file.data(lgs).strictLevel == decideStrictLevel(lgs, file, opts));
 
     Timer timeit(lgs.tracer(), "indexOne");
@@ -208,26 +208,26 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
             }
-            if (!opts.skipDSLPasses) {
-                tree = runDSL(lgs, file, move(tree));
+            if (!opts.skipRewriterPasses) {
+                tree = runRewriter(lgs, file, move(tree));
             }
             tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
             if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
                 return emptyParsedFile(file);
             }
         }
-        if (print.DSLTree.enabled) {
-            print.DSLTree.fmt("{}\n", tree->toStringWithTabs(lgs, 0));
+        if (print.RewriterTree.enabled) {
+            print.RewriterTree.fmt("{}\n", tree->toStringWithTabs(lgs, 0));
         }
-        if (print.DSLTreeRaw.enabled) {
-            print.DSLTreeRaw.fmt("{}\n", tree->showRaw(lgs));
+        if (print.RewriterTreeRaw.enabled) {
+            print.RewriterTreeRaw.fmt("{}\n", tree->showRaw(lgs));
         }
-        if (opts.stopAfterPhase == options::Phase::DSL) {
+        if (opts.stopAfterPhase == options::Phase::REWRITER) {
             return emptyParsedFile(file);
         }
 
-        dslsInlined.tree = move(tree);
-        return dslsInlined;
+        rewriten.tree = move(tree);
+        return rewriten;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = lgs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
@@ -245,7 +245,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                                                                           core::GlobalState &gs, core::FileRef file,
                                                                           unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
-    ast::ParsedFile dslsInlined{nullptr, file};
+    ast::ParsedFile rewriten{nullptr, file};
     vector<shared_ptr<core::File>> resultPluginFiles;
 
     Timer timeit(gs.tracer(), "indexOneWithPlugins", {{"file", (string)file.data(gs).path()}});
@@ -277,14 +277,14 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                 resultPluginFiles = move(pluginFiles);
             }
 #endif
-            if (!opts.skipDSLPasses) {
-                tree = runDSL(gs, file, move(tree));
+            if (!opts.skipRewriterPasses) {
+                tree = runRewriter(gs, file, move(tree));
             }
-            if (print.DSLTree.enabled) {
-                print.DSLTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
+            if (print.RewriterTree.enabled) {
+                print.RewriterTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
             }
-            if (print.DSLTreeRaw.enabled) {
-                print.DSLTreeRaw.fmt("{}\n", tree->showRaw(gs));
+            if (print.RewriterTreeRaw.enabled) {
+                print.RewriterTreeRaw.fmt("{}\n", tree->showRaw(gs));
             }
 
             tree = runLocalVars(gs, ast::ParsedFile{move(tree), file}).tree;
@@ -298,12 +298,12 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
         if (print.IndexTreeRaw.enabled) {
             print.IndexTreeRaw.fmt("{}\n", tree->showRaw(gs));
         }
-        if (opts.stopAfterPhase == options::Phase::DSL) {
+        if (opts.stopAfterPhase == options::Phase::REWRITER) {
             return emptyPluginFile(file);
         }
 
-        dslsInlined.tree = move(tree);
-        return {move(dslsInlined), resultPluginFiles};
+        rewriten.tree = move(tree);
+        return {move(rewriten), resultPluginFiles};
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {

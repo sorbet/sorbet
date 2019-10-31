@@ -48,8 +48,8 @@ struct Printers {
     PrinterConfig ParseTreeWhitequark;
     PrinterConfig DesugarTree;
     PrinterConfig DesugarTreeRaw;
-    PrinterConfig DSLTree;
-    PrinterConfig DSLTreeRaw;
+    PrinterConfig RewriterTree;
+    PrinterConfig RewriterTreeRaw;
     PrinterConfig IndexTree;
     PrinterConfig IndexTreeRaw;
     PrinterConfig NameTree;
@@ -93,7 +93,7 @@ enum Phase {
     INIT,
     PARSER,
     DESUGARER,
-    DSL,
+    REWRITER,
     LOCAL_VARS,
     NAMER,
     RESOLVER,
@@ -141,7 +141,7 @@ struct Options {
     bool noErrorCount = false;
     bool autocorrect = false;
     bool waitForDebugger = false;
-    bool skipDSLPasses = false;
+    bool skipRewriterPasses = false;
     bool suggestRuntimeProfiledType = false;
     bool censorForSnapshotTests = false;
     int threads = 0;
