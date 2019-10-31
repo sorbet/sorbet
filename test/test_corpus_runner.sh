@@ -23,6 +23,7 @@ echo "Run Ruby: bazel-bin/$ruby $rbrunfile"
 echo "Run Sorbet: run/ruby $rb"
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
+echo "Temp Dir: $llvmir"
 llvmir=$llvmir runfile=$runfile run/ruby "$rb" | tee "$srbout"
 
 echo "Run LLDB: lldb bazel-bin/$ruby -- $runfile"

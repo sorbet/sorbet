@@ -21,6 +21,6 @@ rb=$2
 
 underscores=${rb//\//_}
 o="$llvmir/$underscores.o"
-bundle=${o/.o/.bundle}
+bundle="$llvmir/$underscores.bundle"
 "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
 echo "$bundle"
