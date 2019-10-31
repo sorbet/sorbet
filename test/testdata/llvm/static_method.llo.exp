@@ -30,18 +30,13 @@ target triple = "x86_64-apple-darwin18.2.0"
 @guard_epoch_T = linkonce local_unnamed_addr global i64 0
 @guarded_const_T = linkonce local_unnamed_addr global i64 0
 @str_T = private unnamed_addr constant [2 x i8] c"T\00", align 1
-@rubyIdPrecomputed_keep_for_ide = internal unnamed_addr global i64 0, align 8
-@str_keep_for_ide = private unnamed_addr constant [13 x i8] c"keep_for_ide\00", align 1
+@rubyIdPrecomputed_bar = internal unnamed_addr global i64 0, align 8
 @guard_epoch_Foo = linkonce local_unnamed_addr global i64 0
 @guarded_const_Foo = linkonce local_unnamed_addr global i64 0
 @str_Foo.1 = private unnamed_addr constant [4 x i8] c"Foo\00", align 1
-@"guard_epoch_Sorbet::Private::Static" = linkonce local_unnamed_addr global i64 0
-@"guarded_const_Sorbet::Private::Static" = linkonce local_unnamed_addr global i64 0
-@"str_Sorbet::Private::Static" = private unnamed_addr constant [24 x i8] c"Sorbet::Private::Static\00", align 1
-@rubyIdPrecomputed_bar = internal unnamed_addr global i64 0, align 8
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
-@llvm.global_ctors = appending global [4 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_unsafe, i8* bitcast (i64* @rubyIdPrecomputed_unsafe to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_keep_for_ide, i8* bitcast (i64* @rubyIdPrecomputed_keep_for_ide to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_bar, i8* bitcast (i64* @rubyIdPrecomputed_bar to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }]
+@llvm.global_ctors = appending global [3 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_unsafe, i8* bitcast (i64* @rubyIdPrecomputed_unsafe to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_bar, i8* bitcast (i64* @rubyIdPrecomputed_bar to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }]
 @str_bar.5 = private unnamed_addr constant [4 x i8] c"bar\00", align 1
 
 ; Function Attrs: nounwind ssp uwtable
@@ -387,10 +382,10 @@ define linkonce void @const_recompute_T() local_unnamed_addr #10 {
 }
 
 ; Function Attrs: nounwind ssp
-define internal void @Constr_rubyIdPrecomputed_keep_for_ide() #9 {
+define internal void @Constr_rubyIdPrecomputed_bar() #9 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @str_keep_for_ide, i64 0, i64 0), i64 12) #15
-  store i64 %0, i64* @rubyIdPrecomputed_keep_for_ide, align 8
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.5, i64 0, i64 0), i64 3) #15
+  store i64 %0, i64* @rubyIdPrecomputed_bar, align 8
   ret void
 }
 
@@ -400,23 +395,6 @@ define linkonce void @const_recompute_Foo() local_unnamed_addr #10 {
   store i64 %1, i64* @guarded_const_Foo, align 8
   %2 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
   store i64 %2, i64* @guard_epoch_Foo, align 8
-  ret void
-}
-
-; Function Attrs: cold ssp
-define linkonce void @"const_recompute_Sorbet::Private::Static"() local_unnamed_addr #10 {
-  %1 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_Sorbet::Private::Static", i64 0, i64 0), i64 23)
-  store i64 %1, i64* @"guarded_const_Sorbet::Private::Static", align 8
-  %2 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  store i64 %2, i64* @"guard_epoch_Sorbet::Private::Static", align 8
-  ret void
-}
-
-; Function Attrs: nounwind ssp
-define internal void @Constr_rubyIdPrecomputed_bar() #9 {
-constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.5, i64 0, i64 0), i64 3) #15
-  store i64 %0, i64* @rubyIdPrecomputed_bar, align 8
   ret void
 }
 
@@ -437,7 +415,6 @@ entry:
   %1 = bitcast [1 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %1)
   %rubyId_unsafe.i = load i64, i64* @rubyIdPrecomputed_unsafe, align 8
-  %rubyId_keep_for_ide.i = load i64, i64* @rubyIdPrecomputed_keep_for_ide, align 8
   %rubyId_bar.i = load i64, i64* @rubyIdPrecomputed_bar, align 8
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
@@ -488,49 +465,23 @@ const_slowPath13.i.i.i:                           ; preds = %const_continue.i.i.
   %15 = load i64, i64* @guard_epoch_Foo, align 8
   %16 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
   %canTakeFastPath28.i = icmp eq i64 %15, %16
-  br i1 %canTakeFastPath28.i, label %const_continue26.i, label %const_slowPath27.i, !prof !13
+  br i1 %canTakeFastPath28.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit", label %const_slowPath27.i, !prof !13
 
 const_slowPath.i:                                 ; preds = %entry
   tail call void @const_recompute_T() #15
   br label %const_continue.i
 
-const_continue26.i:                               ; preds = %const_slowPath27.i, %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i"
-  %17 = phi i64 [ %.pre.i, %const_slowPath27.i ], [ %15, %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i" ]
-  %18 = load i64, i64* @guarded_const_Foo, align 8
-  store i64 %18, i64* %callArgsAddr.i, align 8
-  %19 = load i64, i64* @"guard_epoch_Sorbet::Private::Static", align 8
-  %canTakeFastPath32.i = icmp eq i64 %19, %17
-  br i1 %canTakeFastPath32.i, label %const_continue30.i, label %const_slowPath31.i, !prof !13
-
 const_slowPath27.i:                               ; preds = %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i"
-  call void @const_recompute_Foo() #15
-  %.pre.i = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  br label %const_continue26.i
-
-const_continue30.i:                               ; preds = %const_slowPath31.i, %const_continue26.i
-  %20 = load i64, i64* @"guarded_const_Sorbet::Private::Static", align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_keep_for_ide.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !20
-  %21 = call i64 @rb_funcallv(i64 %20, i64 %rubyId_keep_for_ide.i, i32 1, i64* nonnull %callArgsAddr.i) #15
-  %22 = load i64, i64* @guard_epoch_Foo, align 8
-  %23 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath36.i = icmp eq i64 %22, %23
-  br i1 %canTakeFastPath36.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit", label %const_slowPath35.i, !prof !13
-
-const_slowPath31.i:                               ; preds = %const_continue26.i
-  call void @"const_recompute_Sorbet::Private::Static"() #15
-  br label %const_continue30.i
-
-const_slowPath35.i:                               ; preds = %const_continue30.i
   call void @const_recompute_Foo() #15
   br label %"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit"
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit": ; preds = %const_continue30.i, %const_slowPath35.i
-  %24 = load i64, i64* @guarded_const_Foo, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_bar.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !23
-  %25 = call i64 @rb_funcallv(i64 %24, i64 %rubyId_bar.i, i32 0, i64* nonnull %callArgsAddr.i) #15
-  store i64 %25, i64* %callArgsAddr.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !26
-  %26 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #15
+"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit": ; preds = %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i", %const_slowPath27.i
+  %17 = load i64, i64* @guarded_const_Foo, align 8
+  call void @dbg_sorbet_validate_id(i64 %rubyId_bar.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !20
+  %18 = call i64 @rb_funcallv(i64 %17, i64 %rubyId_bar.i, i32 0, i64* nonnull %callArgsAddr.i) #15
+  store i64 %18, i64* %callArgsAddr.i, align 8
+  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !23
+  %19 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #15
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %1)
   ret void
 }
@@ -600,6 +551,3 @@ attributes #16 = { noreturn nounwind }
 !23 = !{!24}
 !24 = distinct !{!24, !25, !"sorbet_callFunc: argument 0"}
 !25 = distinct !{!25, !"sorbet_callFunc"}
-!26 = !{!27}
-!27 = distinct !{!27, !28, !"sorbet_callFunc: argument 0"}
-!28 = distinct !{!28, !"sorbet_callFunc"}
