@@ -39,7 +39,7 @@ cc_test(
     deps = [
         "namer",
         "//ast/desugar",
-        "//dsl",
+        "//rewriter",
         "//local_vars",
         "//parser",
         "@com_google_googletest//:gtest",

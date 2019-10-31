@@ -64,7 +64,7 @@ compilation_database(
         "//main/autogen:autogen",
         "//main/options:options",
         "//third_party/licenses:licenses",
-        "//dsl:dsl",
+        "//rewriter:dsl",
         "//definition_validator:definition_validator",
         "//core/serialize:serialize_test",
         "//core/serialize:serialize",

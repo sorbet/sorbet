@@ -41,7 +41,7 @@ cc_test(
         "infer",
         "//ast/desugar",
         "//cfg",
-        "//dsl",
+        "//rewriter",
         "//flattener",
         "//local_vars",
         "//namer",

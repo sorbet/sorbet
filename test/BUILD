@@ -20,7 +20,7 @@ cc_binary(
         "//cfg/proto",
         "//core",
         "//definition_validator",
-        "//dsl",
+        "//rewriter",
         "//flattener",
         "//infer",
         "//local_vars",
