@@ -3,14 +3,14 @@ set -eo pipefail
 
 rb=${1/--single_test=/}
 
-rbout=$(mktemp)
 llvmir=$(mktemp -d)
 rbrunfile=$(mktemp)
-runfile=$(mktemp)
+srbrunfile=$(mktemp)
+rbout=$(mktemp)
 srbout=$(mktemp)
 
 cleanup() {
-    rm -r "$llvmir" "$rbout" "$rbrunfile" "$runfile" "$srbout"
+    rm -r "$llvmir" "$rbrunfile" "$srbrunfile" "$rbout" "$srbout"
 }
 
 # trap cleanup EXIT
@@ -24,9 +24,9 @@ echo "Run Sorbet: run/ruby $rb"
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
 echo "Temp Dir: $llvmir"
-llvmir=$llvmir runfile=$runfile run/ruby "$rb" | tee "$srbout"
+llvmir=$llvmir runfile=$srbrunfile run/ruby "$rb" | tee "$srbout"
 
-echo "Run LLDB: lldb bazel-bin/$ruby -- $runfile"
+echo "Run LLDB: lldb bazel-bin/$ruby -- $srbrunfile"
 for i in "$llvmir"/*.llo; do
     echo "LLVM IR: $i"
 done
