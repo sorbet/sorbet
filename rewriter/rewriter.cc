@@ -159,7 +159,7 @@ private:
     DSLReplacer() = default;
 };
 
-unique_ptr<ast::Expression> DSL::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
+unique_ptr<ast::Expression> Rewriter::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
     auto ast = std::move(tree);
 
     DSLReplacer dslReplacer;

@@ -266,7 +266,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                 core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
                 dslUnwound =
-                    testSerialize(*gs, ast::ParsedFile{rewriter::DSL::run(ctx, move(desugared.tree)), desugared.file});
+                    testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
             }
 
             handler.addObserved("rewrite-tree", [&]() { return dslUnwound.tree->toString(*gs); });
@@ -483,7 +483,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         handler.addObserved("desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
         // DSL pass
-        file = testSerialize(*gs, ast::ParsedFile{rewriter::DSL::run(ctx, move(file.tree)), file.file});
+        file = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(file.tree)), file.file});
         handler.addObserved("rewrite-tree", [&]() { return file.tree->toString(*gs); });
         handler.addObserved("rewrite-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 

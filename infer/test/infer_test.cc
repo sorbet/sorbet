@@ -49,7 +49,7 @@ void processSource(core::GlobalState &cb, string str) {
     sorbet::core::MutableContext ctx(cb, core::Symbols::root());
     auto fileId = ast->loc.file();
     auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(ast)), fileId};
-    tree.tree = rewriter::DSL::run(ctx, move(tree.tree));
+    tree.tree = rewriter::Rewriter::run(ctx, move(tree.tree));
     tree = local_vars::LocalVars::run(ctx, move(tree));
     vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));
