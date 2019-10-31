@@ -1226,9 +1226,11 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, 
         auto staticInitFunc = cs.module->getFunction(staticInitName);
         ENFORCE(staticInitFunc, staticInitName + " does not exist");
         builder.CreateCall(staticInitFunc,
-                           {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-                            llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
-                            builder.CreateCall(cs.module->getFunction("sorbet_rb_cObject"))},
+                           {
+                               llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+                               llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
+                               resolveSymbol(cs, owner, builder),
+                           },
                            staticInitName);
     }
 
