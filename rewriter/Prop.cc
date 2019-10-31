@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 namespace {
 
 // these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,

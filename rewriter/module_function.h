@@ -2,7 +2,7 @@
 #define SORBET_DSL_MODULE_FUNCTION_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 /**
  * This class desugars `module_function`, which has several ways it can be used. If it is used with a method definition

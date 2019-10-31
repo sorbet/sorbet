@@ -2,7 +2,7 @@
 #define SRUBY_DSL_COMMAND_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 /**
  * This class implements Opus::Command by taking

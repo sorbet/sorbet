@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 // TODO this isn't quite right since the scoping will change. This would
 // really all be easier if we could run after class naming :/

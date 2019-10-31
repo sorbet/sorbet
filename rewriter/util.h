@@ -5,7 +5,7 @@
 #include "core/Names.h"
 #include <memory>
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 class ASTUtil {
 public:
     static std::unique_ptr<ast::Expression> dupType(const ast::Expression *orig);

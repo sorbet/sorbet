@@ -2,7 +2,7 @@
 #define SORBET_DSL_INTERFACE_WRAPPER_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 /**
  * This class desugars `wrap_interface` into a simple cast:

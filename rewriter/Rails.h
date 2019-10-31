@@ -2,7 +2,7 @@
 #define SORBET_DSL_RAILS_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 /**
  * This class is meant to support some of the missing methods for rails. It is

@@ -25,7 +25,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 class DSLReplacer {
     friend class DSL;

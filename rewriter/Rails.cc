@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 void Rails::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
     if (cdef->ancestors.size() != 1) {

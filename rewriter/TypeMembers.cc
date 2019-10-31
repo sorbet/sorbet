@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 void TypeMembers::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
     UnorderedSet<core::NameRef> typeMembers;

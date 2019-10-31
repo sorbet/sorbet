@@ -6,7 +6,7 @@
 #include "core/core.h"
 #include "dsl/util.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 std::unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name, std::unique_ptr<ast::Expression> rhs);
 

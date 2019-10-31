@@ -5,7 +5,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Expression> expr, ast::Expression *param) {
     auto sig = ast::cast_tree<ast::Send>(expr.get());

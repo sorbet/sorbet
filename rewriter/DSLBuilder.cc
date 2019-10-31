@@ -17,7 +17,7 @@ using namespace std;
 // You might want to cross-reference that file when trying to understand or update this code.
 //
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> empty;
 

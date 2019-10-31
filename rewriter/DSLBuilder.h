@@ -2,7 +2,7 @@
 #define SORBET_DSL_DSLBUILDER_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 /**
  * This class desugars DSLs created by DSLBuilder. Specifically it desugars

@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
     if (klass->kind != ast::Class || klass->ancestors.empty()) {

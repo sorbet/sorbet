@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 vector<unique_ptr<ast::Expression>> Regexp::replaceDSL(core::MutableContext ctx, ast::Assign *asgn) {
     auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());

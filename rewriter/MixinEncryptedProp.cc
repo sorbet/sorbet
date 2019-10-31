@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 unique_ptr<ast::Expression> mkNilableEncryptedValue(core::MutableContext ctx, core::Loc loc) {
     auto opus = ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Opus());

@@ -2,7 +2,7 @@
 #define SORBET_DSL_DELEGATE_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 /**
  * This class implements Module#delegate from ActiveSupport

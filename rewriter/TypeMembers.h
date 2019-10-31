@@ -2,7 +2,7 @@
 #define SORBET_DSL_TYPEMEMBERS_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 /**
  * This class does nothing but raise errors for and then delete duplicate type members

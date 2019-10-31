@@ -2,7 +2,7 @@
 #define SRUBY_DSL_OPUSENUM_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 /**
  * This class provides the following features for Opus::Enum:

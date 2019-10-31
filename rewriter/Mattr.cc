@@ -4,7 +4,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 static bool literalSymbolEqual(const core::GlobalState &gs, ast::Expression *node, core::NameRef name) {
     if (auto lit = ast::cast_tree<ast::Literal>(node)) {

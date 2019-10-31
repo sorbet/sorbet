@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 unique_ptr<ast::Expression> ASTUtil::dupType(const ast::Expression *orig) {
     auto send = ast::cast_tree_const<ast::Send>(orig);

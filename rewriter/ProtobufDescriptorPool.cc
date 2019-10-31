@@ -4,7 +4,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 vector<unique_ptr<ast::Expression>> ProtobufDescriptorPool::replaceDSL(core::MutableContext ctx, ast::Assign *asgn) {
     vector<unique_ptr<ast::Expression>> empty;

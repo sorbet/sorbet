@@ -7,7 +7,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs) {
     return ast::MK::Method0(loc, loc, name, move(rhs), ast::MethodDef::DSLSynthesized);

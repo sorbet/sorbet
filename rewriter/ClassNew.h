@@ -2,7 +2,7 @@
 #define SORBET_DSL_CLASS_NEW_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 /**
  * This class desugars things of the form

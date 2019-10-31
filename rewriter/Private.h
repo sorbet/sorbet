@@ -2,7 +2,7 @@
 #define SORBET_DSL_PRIVATE_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 /**
  * This class processes nodes like

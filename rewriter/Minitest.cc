@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 namespace {
 unique_ptr<ast::Expression> addSigVoid(unique_ptr<ast::Expression> expr) {

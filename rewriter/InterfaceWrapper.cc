@@ -10,7 +10,7 @@
 
 using namespace std;
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableContext ctx, unique_ptr<ast::Send> send) {
     if (ctx.state.runningUnderAutogen) {
         return send;

@@ -2,7 +2,7 @@
 #define SORBET_DSL_MATTR_H
 #include "ast/ast.h"
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 /**
  * This class implements Module#mattr_accessor and similar APIs from ActiveSupport.

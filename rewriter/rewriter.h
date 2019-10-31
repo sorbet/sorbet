@@ -3,7 +3,7 @@
 #include "ast/ast.h"
 #include <memory>
 
-namespace sorbet::dsl {
+namespace sorbet::rewriter {
 
 class DSL final {
 public:
