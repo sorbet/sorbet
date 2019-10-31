@@ -35,7 +35,7 @@ const vector<PrintOptions> print_options({
     {"desugar-tree", &Printers::DesugarTree},
     {"desugar-tree-raw", &Printers::DesugarTreeRaw},
     {"rewrite-tree", &Printers::DSLTree},
-    {"dsl-tree-raw", &Printers::DSLTreeRaw},
+    {"rewrite-tree-raw", &Printers::DSLTreeRaw},
     {"index-tree", &Printers::IndexTree, true},
     {"index-tree-raw", &Printers::IndexTreeRaw, true},
     {"name-tree", &Printers::NameTree, true},

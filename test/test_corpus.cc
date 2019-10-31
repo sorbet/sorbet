@@ -116,7 +116,7 @@ public:
 
 UnorderedSet<string> knownExpectations = {
     "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
-    "dsl-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
+    "rewrite-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
     "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",          "cfg-raw",          "cfg-json",
     "autogen",          "document-symbols"};
 
@@ -270,12 +270,12 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             }
 
             handler.addObserved("rewrite-tree", [&]() { return dslUnwound.tree->toString(*gs); });
-            handler.addObserved("dsl-tree-raw", [&]() { return dslUnwound.tree->showRaw(*gs); });
+            handler.addObserved("rewrite-tree-raw", [&]() { return dslUnwound.tree->showRaw(*gs); });
 
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
         } else {
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
-            if (test.expectations.contains("dsl-tree-raw") || test.expectations.contains("rewrite-tree")) {
+            if (test.expectations.contains("rewrite-tree-raw") || test.expectations.contains("rewrite-tree")) {
                 ADD_FAILURE() << "Running DSL passes with autogen isn't supported";
             }
         }
@@ -485,7 +485,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         // DSL pass
         file = testSerialize(*gs, ast::ParsedFile{rewriter::DSL::run(ctx, move(file.tree)), file.file});
         handler.addObserved("rewrite-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved("dsl-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved("rewrite-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
         // local vars
         file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
