@@ -93,7 +93,7 @@ enum Phase {
     INIT,
     PARSER,
     DESUGARER,
-    DSL,
+    REWRITER,
     LOCAL_VARS,
     NAMER,
     RESOLVER,
