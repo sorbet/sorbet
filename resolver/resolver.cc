@@ -1542,7 +1542,7 @@ private:
                     } else {
                         categoryCounterInc("method.rbi", "false");
                     }
-                    if (hasSig && !isRBI && !DSL) {
+                    if (hasSig && !isRBI && !rewriten) {
                         counterInc("types.sig.human");
                     }
                 }
