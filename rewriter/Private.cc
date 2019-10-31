@@ -42,4 +42,4 @@ vector<unique_ptr<ast::Expression>> Private::replaceDSL(core::MutableContext ctx
     return empty;
 }
 
-}; // namespace sorbet::dsl
+}; // namespace sorbet::rewriter

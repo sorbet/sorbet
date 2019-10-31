@@ -32,6 +32,6 @@ public:
     ProtobufDescriptorPool() = delete;
 };
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter
 
 #endif

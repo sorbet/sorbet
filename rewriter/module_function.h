@@ -41,6 +41,6 @@ private:
     rewriteDefn(core::MutableContext ctx, const ast::Expression *expr, const ast::Expression *prevStat);
 };
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter
 
 #endif

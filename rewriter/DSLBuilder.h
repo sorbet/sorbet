@@ -27,6 +27,6 @@ public:
     DSLBuilder() = delete;
 };
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter
 
 #endif

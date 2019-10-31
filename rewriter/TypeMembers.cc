@@ -42,4 +42,4 @@ void TypeMembers::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
     }
 }
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter

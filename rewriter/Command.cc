@@ -93,4 +93,4 @@ void Command::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.insert(klass->rhs.begin() + i + 2, std::move(selfCall));
 }
 
-}; // namespace sorbet::dsl
+}; // namespace sorbet::rewriter

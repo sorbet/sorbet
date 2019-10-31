@@ -57,4 +57,4 @@ void Rails::patchDSL(core::MutableContext ctx, ast::ClassDef *cdef) {
     cdef->ancestors.erase(cdef->ancestors.begin(), cdef->ancestors.begin() + 1);
 }
 
-}; // namespace sorbet::dsl
+}; // namespace sorbet::rewriter

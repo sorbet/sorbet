@@ -55,6 +55,6 @@ public:
     OpusEnum() = delete;
 };
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter
 
 #endif

@@ -194,4 +194,4 @@ void OpusEnum::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
         }
     }
 }
-}; // namespace sorbet::dsl
+}; // namespace sorbet::rewriter

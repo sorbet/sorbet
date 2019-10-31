@@ -150,4 +150,4 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
     return stats;
 }
 
-}; // namespace sorbet::dsl
+}; // namespace sorbet::rewriter

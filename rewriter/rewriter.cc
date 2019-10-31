@@ -168,4 +168,4 @@ unique_ptr<ast::Expression> DSL::run(core::MutableContext ctx, unique_ptr<ast::E
     return verifiedResult;
 }
 
-}; // namespace sorbet::dsl
+}; // namespace sorbet::rewriter

@@ -21,6 +21,6 @@ std::unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expres
 
 bool isProbablySymbol(core::MutableContext ctx, ast::Expression *type, core::SymbolRef sym);
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter
 
 #endif

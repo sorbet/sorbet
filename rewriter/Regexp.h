@@ -21,6 +21,6 @@ public:
     Regexp() = delete;
 };
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter
 
 #endif

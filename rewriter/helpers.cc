@@ -83,4 +83,4 @@ bool isProbablySymbol(core::MutableContext ctx, ast::Expression *type, core::Sym
     return false;
 }
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter

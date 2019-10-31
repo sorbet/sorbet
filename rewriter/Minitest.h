@@ -37,6 +37,6 @@ public:
     Minitest() = delete;
 };
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter
 
 #endif

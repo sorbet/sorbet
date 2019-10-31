@@ -37,4 +37,4 @@ unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableContext ct
 
     return ast::MK::Let(send->loc, move(send->args.front()), move(send->recv));
 }
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter

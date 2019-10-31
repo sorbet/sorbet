@@ -36,6 +36,6 @@ public:
     Prop() = delete;
 };
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter
 
 #endif

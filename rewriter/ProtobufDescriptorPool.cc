@@ -64,4 +64,4 @@ vector<unique_ptr<ast::Expression>> ProtobufDescriptorPool::replaceDSL(core::Mut
     return res;
 }
 
-}; // namespace sorbet::dsl
+}; // namespace sorbet::rewriter

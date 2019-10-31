@@ -120,4 +120,4 @@ void ASTUtil::putBackHashValue(core::MutableContext ctx, ast::Hash &hash, unique
     hash.values.emplace_back(move(value));
 }
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter

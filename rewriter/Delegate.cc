@@ -131,4 +131,4 @@ vector<unique_ptr<ast::Expression>> Delegate::replaceDSL(core::MutableContext ct
     return methodStubs;
 }
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter

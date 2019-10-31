@@ -171,4 +171,4 @@ void DefaultArgs::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
     }
 }
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter

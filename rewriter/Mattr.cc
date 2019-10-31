@@ -129,4 +129,4 @@ vector<unique_ptr<ast::Expression>> Mattr::replaceDSL(core::MutableContext ctx, 
     return result;
 }
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter

@@ -114,4 +114,4 @@ vector<unique_ptr<ast::Expression>> Minitest::replaceDSL(core::MutableContext ct
     return stats;
 }
 
-}; // namespace sorbet::dsl
+}; // namespace sorbet::rewriter

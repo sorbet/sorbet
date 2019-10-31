@@ -25,6 +25,6 @@ public:
     Command() = delete;
 };
 
-} // namespace sorbet::dsl
+} // namespace sorbet::rewriter
 
 #endif

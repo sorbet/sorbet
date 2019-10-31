@@ -106,4 +106,4 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::replaceDSL(core::Mutable
     return stats;
 }
 
-}; // namespace sorbet::dsl
+}; // namespace sorbet::rewriter
