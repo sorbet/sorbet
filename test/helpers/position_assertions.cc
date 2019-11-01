@@ -1131,19 +1131,21 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
 }
 
 SymbolSearchAssertion::SymbolSearchAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                             string_view query)
-    : RangeAssertion(filename, range, assertionLine), query(query) {}
+                                             string_view query, optional<string> name)
+    : RangeAssertion(filename, range, assertionLine), query(query), name(name) {}
 
 shared_ptr<SymbolSearchAssertion> SymbolSearchAssertion::make(string_view filename, unique_ptr<Range> &range,
                                                               int assertionLine, string_view assertionContents,
                                                               string_view assertionType) {
-    static const regex contentsRegex(R"(^\s*\"([^\"]+)\"\s*$)");
+    static const regex contentsRegex(R"(^\s*\"([^\"]+)\"\s*(?:,\s*name\s*=\s*\"([^\"]+)\")?\s*$)");
 
     smatch matches;
     string assertionContentsString = string(assertionContents);
     if (regex_search(assertionContentsString, matches, contentsRegex)) {
         auto query = matches[1].str();
-        return make_shared<SymbolSearchAssertion>(filename, range, assertionLine, query);
+        auto nameGroup = matches[2].str();
+        optional<string> name = nameGroup.empty() ? nullopt : make_optional(nameGroup);
+        return make_shared<SymbolSearchAssertion>(filename, range, assertionLine, query, name);
     }
 
     ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1) << fmt::format(
@@ -1155,8 +1157,13 @@ shared_ptr<SymbolSearchAssertion> SymbolSearchAssertion::make(string_view filena
 bool SymbolSearchAssertion::matches(std::string_view uriPrefix, std::shared_ptr<SymbolInformation> symbol) {
     auto assertionLocation = getLocation(uriPrefix);
     auto &symbolLocation = symbol->location;
-    if (assertionLocation->uri != symbolLocation->uri ||
-        assertionLocation->range->start->line != symbolLocation->range->start->line) {
+    if (assertionLocation->uri != symbolLocation->uri) {
+        return false;
+    }
+    if (assertionLocation->range->start->line != symbolLocation->range->start->line) {
+        return false;
+    }
+    if (name.has_value() && name.value() != symbol->name) {
         return false;
     }
     return true;
@@ -1250,7 +1257,7 @@ void matchAssertionsToSymbols(
     for (auto &symbol : unmatchedSymbols) {
         addFailureAtLocationWithSource(symbol->location->copy(), sourceFileContents, uriPrefix,
                                        fmt::format("{}Unexpected result from `workspace/symbol` query \"{}\": {}\n",
-                                                   errorPrefix, query, symbol->toJSON()));
+                                                   errorPrefix, query, symbol->toJSON(true)));
     }
 
     if (!unmatchedAssertions.empty() || !unmatchedSymbols.empty()) {
@@ -1306,7 +1313,8 @@ void SymbolSearchAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &a
 }
 
 string SymbolSearchAssertion::toString() const {
-    return fmt::format("symbol-search: \"{}\"", query);
+    auto namePart = name.has_value() ? fmt::format(", name=\"{}\"", name.value()) : "";
+    return fmt::format("symbol-search: \"{}\"{}", query, namePart);
 }
 
 } // namespace sorbet::test

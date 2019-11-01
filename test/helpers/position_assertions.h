@@ -305,7 +305,7 @@ public:
     std::string toString() const override;
 };
 
-// # symbol-search: "query"
+// # symbol-search: "query" [, name="expected-name"]
 class SymbolSearchAssertion final : public RangeAssertion {
 public:
     static std::shared_ptr<SymbolSearchAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
@@ -313,6 +313,7 @@ public:
                                                        std::string_view assertionType);
 
     const std::string query;
+    const std::optional<std::string> name;
     const int rank = 0;
 
     /** Checks all SymbolSearchAssertions within the assertion vector. Skips over non-CompletionAssertions. */
@@ -321,7 +322,7 @@ public:
                          LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
 
     SymbolSearchAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                          std::string_view query);
+                          std::string_view query, std::optional<std::string> name);
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
                int &nextId, std::string_view uriPrefix, const Location &queryLoc);
