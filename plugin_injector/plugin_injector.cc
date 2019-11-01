@@ -8,8 +8,8 @@
 #include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
-#include "core/errors/errors.h"
 #include "core/ErrorQueue.h"
+#include "core/errors/errors.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
 #include <optional>
