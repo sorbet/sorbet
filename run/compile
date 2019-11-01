@@ -7,11 +7,13 @@ if [ -f main/sorbet ]; then
     sorbet=main/sorbet
     ld=external/llvm_toolchain/bin/ld
 else
-    cd "$base"
-    bazel build @llvm_toolchain//:bin/ld main:sorbet 2> /dev/null
-    cd - > /dev/null
     sorbet="$base/bazel-bin/main/sorbet"
     ld="$base/bazel-sorbet_llvm/external/llvm_toolchain/bin/ld"
+    if [ ! -f "$sorbet" ]; then
+        cd "$base"
+        bazel build @llvm_toolchain//:bin/ld main:sorbet 2> /dev/null
+        cd - > /dev/null
+    fi
 fi
 
 llvmir=$1
