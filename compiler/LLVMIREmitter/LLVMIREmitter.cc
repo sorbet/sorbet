@@ -516,6 +516,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[funcId]);
     auto maxArgCount = 0;
     auto minArgCount = 0;
+    core::LocalVariable blkArgName;
     {
         for (auto &arg : md->args) {
             if (ast::isa_tree<ast::OptionalArg>(arg.get())) {
@@ -525,12 +526,14 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             auto local = ast::cast_tree<ast::Local>(arg.get());
             ENFORCE(local);
             if (local->localVariable._name == core::Names::blkArg()) {
+                blkArgName = local->localVariable;
                 continue;
             }
             maxArgCount += 1;
             minArgCount += 1;
         }
     }
+    ENFORCE(blkArgName._name.exists());
     auto numOptionalArgs = maxArgCount - minArgCount;
     {
         // validate arg count
@@ -604,6 +607,10 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
         // make the last instruction in all the required args point at the first check block
         builder.SetInsertPoint(fillRequiredArgs);
+        // TODO(perf): if block isn't captured, we can optimize this to skip proc conversion
+        // TODO(perf): if block isn't used, don't load it at all
+        varSet(cs, blkArgName, builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")), builder,
+               llvmVariables, aliases, blockMap, 0);
         builder.CreateBr(checkBlocks[0]);
     }
     {
@@ -642,7 +649,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                                                    {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2});
                 auto argIndex = i + minArgCount;
                 auto *a = ast::MK::arg2Local(md->args[argIndex].get());
-                cs.boxRawValue(builder, llvmVariables.at(a->localVariable), rawValue);
+                varSet(cs, a->localVariable, rawValue, builder, llvmVariables, aliases, blockMap, 0);
             }
             builder.CreateBr(fillFromDefaultBlocks[i + 1]);
         }

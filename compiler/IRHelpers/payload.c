@@ -297,6 +297,13 @@ long sorbet_getConstantEpoch() {
     return ruby_vm_global_constant_state;
 }
 
+VALUE  sorbet_getMethodBlockAsProc() {
+    if (rb_block_given_p()) {
+        return rb_block_proc();
+    } 
+    return Qnil;
+}
+
 // Trying to be a copy of rb_mod_const_get
 VALUE sorbet_getConstant(const char *path, long pathLen) __attribute__((noinline)) {
     VALUE name, mod;
