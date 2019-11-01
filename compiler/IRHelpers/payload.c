@@ -297,10 +297,10 @@ long sorbet_getConstantEpoch() {
     return ruby_vm_global_constant_state;
 }
 
-VALUE  sorbet_getMethodBlockAsProc() {
+VALUE sorbet_getMethodBlockAsProc() {
     if (rb_block_given_p()) {
         return rb_block_proc();
-    } 
+    }
     return Qnil;
 }
 
