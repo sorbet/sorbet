@@ -250,8 +250,11 @@ void appendFilesInDir(string_view basePath, string_view path, const sorbet::Unor
             if (!recursive || strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
                 continue;
             }
-            appendFilesInDir(basePath, fullPath, extensions, recursive, result, absoluteIgnorePatterns,
-                             relativeIgnorePatterns);
+            try {
+                appendFilesInDir(basePath, fullPath, extensions, recursive, result, absoluteIgnorePatterns,
+                                 relativeIgnorePatterns);
+            } catch (sorbet::FileNotFoundException) {
+            }
         } else {
             auto dotLocation = fullPath.rfind('.');
             // Note: Can't call substr with an index > string length, so explicitly check if a dot isn't found.
