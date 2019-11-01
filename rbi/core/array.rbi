@@ -1885,7 +1885,7 @@ class Array < Object
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(T::Array[Elem]))
   end
   sig {returns(T::Enumerator[Elem])}
   def select!(&blk); end
