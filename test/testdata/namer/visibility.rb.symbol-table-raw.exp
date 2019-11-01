@@ -1,0 +1,35 @@
+class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=test/testdata/namer/visibility.rb start=3:1 end=21:4})
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=3:1 end=21:4}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+  class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/namer/visibility.rb start=3:1 end=3:8}
+    method <C <U A>><U f1> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=4:3 end=4:9}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+    method <C <U A>><U f2> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=5:10 end=5:16}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+    method <C <U A>><U f3> : private (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=6:11 end=6:17}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+    method <C <U A>><U f4> : protected (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=7:13 end=7:19}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/visibility.rb start=3:7 end=3:8}
+    type-member(+) <S <C <U A>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/namer/visibility.rb start=3:7 end=3:8}
+    method <S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=3:1 end=9:4}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+    method <S <C <U A>> $1><U f5> : private (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=8:24 end=8:35}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+  class <C <U B>> < <C <U Object>> () @ Loc {file=test/testdata/namer/visibility.rb start=11:1 end=11:8}
+    method <C <U B>><U f1> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=12:3 end=12:9}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+    method <C <U B>><U f2> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=13:3 end=13:9}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+    method <C <U B>><U f3> : private (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=14:3 end=14:9}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+    method <C <U B>><U f4> : protected (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=15:3 end=15:9}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/visibility.rb start=11:7 end=11:8}
+    type-member(+) <S <C <U B>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U B>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/namer/visibility.rb start=11:7 end=11:8}
+    method <S <C <U B>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=11:1 end=21:4}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+    method <S <C <U B>> $1><U f5> : private (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=16:3 end=16:14}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+
