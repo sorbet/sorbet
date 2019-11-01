@@ -1173,22 +1173,99 @@ void addFailureAtLocationWithSource(unique_ptr<Location> location,
     ADD_FAILURE_AT(location->uri.c_str(), location->range->start->line + 1)
         << fmt::format("{}\n{}\n", message, prettyPrintRangeComment(sourceLine, *location->range, ""));
 }
-} // namespace
 
-void SymbolSearchAssertion::checkAllForQuery(std::string query,
-                                             const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
-                                             const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                             LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix,
-                                             string errorPrefix) {
-    const int id = nextId++;
-    const int lineWidth = 6; // ensure sort order == numerical order (if file is less than a million lines)
-
-    std::map<std::string, vector<shared_ptr<SymbolSearchAssertion>>> assertionsByLine;
+/*
+ * Splits assertions/symbols for a query into three categories:
+ *    assertionSymbolPairs => matching pairs of assertions/symbols
+ *    unmatchedAssertions => assertions with no matching symbol
+ *    unmatchedSymbols => symbols with no matching assertion
+ */
+void matchAssertionsToSymbols(
+    string_view query, const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
+    vector<shared_ptr<SymbolInformation>> &symbols,
+    const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, string_view uriPrefix,
+    string_view errorPrefix,
+    vector<pair<shared_ptr<SymbolSearchAssertion>, shared_ptr<SymbolInformation>>> &assertionSymbolPairs,
+    vector<shared_ptr<SymbolSearchAssertion>> &unmatchedAssertions,
+    vector<shared_ptr<SymbolInformation>> &unmatchedSymbols) {
+    std::map<std::pair<std::string, int>, vector<shared_ptr<SymbolSearchAssertion>>> assertionsByLine;
     for (auto assertion : assertions) {
         auto location = assertion->getLocation(uriPrefix);
-        auto line = fmt::format("{}:{:{}}", location->uri, location->range->start->line, lineWidth);
-        assertionsByLine[line].push_back(assertion);
+        assertionsByLine[make_pair(location->uri, location->range->start->line)].push_back(assertion);
     }
+    std::map<std::pair<std::string, int>, vector<shared_ptr<SymbolInformation>>> symbolsByLine;
+    for (auto &symbol : symbols) {
+        auto key = make_pair(symbol->location->uri, symbol->location->range->start->line);
+        symbolsByLine[key].push_back(symbol);
+        assertionsByLine[key]; // create entry in assertionsByLine, if none exists yet.
+    }
+    // Look line-by-line for unmatched symbols and assertions
+    for (auto entry : assertionsByLine) {
+        auto assertionsOnLine = entry.second;
+        auto &symbolsOnLine = symbolsByLine[entry.first];
+        auto [uri, line] = entry;
+        // Find assertions with no matching symbol
+        for (auto &assertion : assertionsOnLine) {
+            optional<shared_ptr<SymbolInformation>> matchingSymbol;
+            for (auto &symbol : symbols) {
+                if (!assertion->matches(uriPrefix, symbol)) {
+                    continue;
+                }
+                if (matchingSymbol.has_value()) {
+                    addFailureAtLocationWithSource(
+                        assertion->getLocation(uriPrefix), sourceFileContents, uriPrefix,
+                        fmt::format("More than one symbol matches assertion:\n {}\n"
+                                    "Found matching symbols:\n  {}\n  {}\n"
+                                    "Please refine your test to avoid ambiguity.",
+                                    assertion->toString(), matchingSymbol.value()->toJSON(true), symbol->toJSON(true)));
+                } else {
+                    matchingSymbol = symbol;
+                    assertionSymbolPairs.emplace_back(assertion, symbol);
+                }
+            }
+            if (!matchingSymbol.has_value()) {
+                unmatchedAssertions.push_back(assertion);
+            }
+        }
+        // Find symbols with no matching assertion
+        for (auto &symbol : symbolsOnLine) {
+            bool foundMatchingAssertion = false;
+            for (auto &assertion : assertions) {
+                if (assertion->matches(uriPrefix, symbol)) {
+                    foundMatchingAssertion = true;
+                    break;
+                }
+            }
+            if (!foundMatchingAssertion) {
+                unmatchedSymbols.push_back(symbol);
+            }
+        }
+    }
+
+    for (auto &assertion : unmatchedAssertions) {
+        addFailureAtLocationWithSource(
+            assertion->getLocation(uriPrefix), sourceFileContents, uriPrefix,
+            fmt::format("{}No results matched `workspace/symbol` expectation: {}", errorPrefix, assertion->toString()));
+    }
+    for (auto &symbol : unmatchedSymbols) {
+        addFailureAtLocationWithSource(symbol->location->copy(), sourceFileContents, uriPrefix,
+                                       fmt::format("{}Unexpected result from `workspace/symbol` query \"{}\": {}\n",
+                                                   errorPrefix, query, symbol->toJSON()));
+    }
+
+    if (!unmatchedAssertions.empty() || !unmatchedSymbols.empty()) {
+        auto numFailures = unmatchedAssertions.size() + unmatchedSymbols.size();
+        ADD_FAILURE() << fmt::format("{}`workspace/symbol` query \"{}\" {}: {}, {}\n", errorPrefix, query,
+                                     pluralized_count("failure", numFailures),
+                                     pluralized_count("unsatisfied expectation", unmatchedAssertions.size()),
+                                     pluralized_count("unexpected result", unmatchedSymbols.size()));
+    }
+}
+
+void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
+                      const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
+                      int &nextId, string_view uriPrefix, string_view errorPrefix) {
+    const int id = nextId++;
 
     // Request results from LSP
     auto responses = lspWrapper.getLSPResponsesFor(makeWorkspaceSymbolRequest(id, query));
@@ -1205,65 +1282,14 @@ void SymbolSearchAssertion::checkAllForQuery(std::string query,
             symbols.push_back(shared_ptr<SymbolInformation>(std::move(symbolInfo)));
         }
     }
-    std::map<std::string, vector<shared_ptr<SymbolInformation>>> symbolsByLine;
-    for (auto &symbol : symbols) {
-        auto &location = symbol->location;
-        auto line = fmt::format("{}:{:{}}", location->uri, location->range->start->line, lineWidth);
-        symbolsByLine[line].push_back(symbol);
-        assertionsByLine[line]; // create entry in assertionsByLine, if none exists yet.
-    }
 
-    int numUnsatisfiedExpectations = 0;
-    int numUnexpectedSymbols = 0;
-    // Look line-by-line for unmatched symbols and assertions
-    for (auto entry : assertionsByLine) {
-        auto lineInfo = entry.first;
-        auto assertionsOnLine = entry.second;
-        auto &symbolsOnLine = symbolsByLine[lineInfo];
-
-        // Report assertions with no matching symbol
-        for (auto &assertion : assertionsOnLine) {
-            bool foundMatchingSymbol = false;
-            for (auto &symbol : symbolsOnLine) {
-                if (assertion->matches(uriPrefix, symbol)) {
-                    foundMatchingSymbol = true;
-                    break;
-                }
-            }
-            if (foundMatchingSymbol) {
-                continue;
-            }
-            numUnsatisfiedExpectations++;
-            addFailureAtLocationWithSource(
-                assertion->getLocation(uriPrefix), sourceFileContents, uriPrefix,
-                fmt::format("No results matched `workspace/symbol` expectation: {}", assertion->toString()));
-        }
-        // Report symbols with no matching assertion
-        for (auto &symbol : symbolsOnLine) {
-            bool foundMatchingAssertion = false;
-            for (auto &assertion : assertionsOnLine) {
-                if (assertion->matches(uriPrefix, symbol)) {
-                    foundMatchingAssertion = true;
-                    break;
-                }
-            }
-            if (foundMatchingAssertion) {
-                continue;
-            }
-            numUnexpectedSymbols++;
-            addFailureAtLocationWithSource(
-                symbol->location->copy(), sourceFileContents, uriPrefix,
-                fmt::format("Unexpected result from `workspace/symbol` query \"{}\": {}\n", query, symbol->toJSON()));
-        }
-    }
-
-    if (numUnsatisfiedExpectations + numUnexpectedSymbols > 0) {
-        ADD_FAILURE() << fmt::format("`workspace/symbol` query \"{}\" {}: {}, {}\n", query,
-                                     pluralized_count("failure", numUnsatisfiedExpectations + numUnexpectedSymbols),
-                                     pluralized_count("unsatisfied expectation", numUnsatisfiedExpectations),
-                                     pluralized_count("unexpected result", numUnexpectedSymbols));
-    }
+    vector<pair<shared_ptr<SymbolSearchAssertion>, shared_ptr<SymbolInformation>>> assertionSymbolPairs;
+    vector<shared_ptr<SymbolSearchAssertion>> unmatchedAssertions;
+    vector<shared_ptr<SymbolInformation>> unmatchedSymbols;
+    matchAssertionsToSymbols(query, assertions, symbols, sourceFileContents, uriPrefix, errorPrefix,
+                             assertionSymbolPairs, unmatchedAssertions, unmatchedSymbols);
 }
+} // namespace
 
 void SymbolSearchAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
                                      const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,

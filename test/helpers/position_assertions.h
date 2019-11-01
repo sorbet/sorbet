@@ -326,17 +326,10 @@ public:
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
                int &nextId, std::string_view uriPrefix, const Location &queryLoc);
 
-    std::string toString() const override;
-
-private:
-    /** Checks all SymbolSearchAssertions for the given symbol query. */
-    static void checkAllForQuery(const std::string query,
-                                 const std::vector<std::shared_ptr<SymbolSearchAssertion>> &assertions,
-                                 const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                                 LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string errorPrefix);
-
     /** Returns true if the given symbol matches this assertion. */
     bool matches(std::string_view uriPrefix, std::shared_ptr<SymbolInformation> symbol);
+
+    std::string toString() const override;
 };
 
 } // namespace sorbet::test
