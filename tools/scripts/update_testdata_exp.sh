@@ -47,13 +47,14 @@ for this_src in "${rb_src[@]}" DUMMY; do
         "$llvmir" \
         "${srcs[@]}" \
         2\>/dev/null\; \
-        for ext in "llo ll"\; do \
-          exp=${basename%.rb}.\$ext.exp\; \
-          if [ -f \$exp ]\; then \
-            cat "$llvmir/*.\$ext" \> \$exp\; \
-          fi\; \
-        done >> "$COMMAND_FILE" \
-        \}\; f >> "$COMMAND_FILE"
+      for ext in "llo ll"\; do \
+        exp=${basename%.rb}.\$ext.exp\; \
+        if [ -f \$exp ]\; then \
+          cat "$llvmir/*.\$ext" \> \$exp\; \
+        fi\; \
+      done\; \
+      >> "$COMMAND_FILE" \
+    \}\; f >> "$COMMAND_FILE"
   fi
 
   basename="$this_base"
