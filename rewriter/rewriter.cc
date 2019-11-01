@@ -21,6 +21,7 @@
 #include "rewriter/Struct.h"
 #include "rewriter/TypeMembers.h"
 #include "rewriter/attr_reader.h"
+#include "rewriter/flatten.h"
 #include "rewriter/module_function.h"
 
 using namespace std;
@@ -164,7 +165,11 @@ unique_ptr<ast::Expression> Rewriter::run(core::MutableContext ctx, unique_ptr<a
 
     Rewriterer rewriter;
     ast = ast::TreeMap::apply(ctx, rewriter, std::move(ast));
-    auto verifiedResult = ast::Verifier::run(ctx, std::move(ast));
+    // This AST flattening pass requires that we mutate the AST in a way that our previous DSL passes were not designed
+    // around, which is why it runs all at once and is not expressed as a `patch` method like the other DSL passes. This
+    // is a rare case: in general, we should *not* add new DSL passes here.
+    auto flattened = Flatten::run(ctx, std::move(ast));
+    auto verifiedResult = ast::Verifier::run(ctx, std::move(flattened));
     return verifiedResult;
 }
 

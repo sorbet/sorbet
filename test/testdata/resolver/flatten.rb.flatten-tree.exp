@@ -16,10 +16,23 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     def foo(<blk>)
       begin
-        <emptyTree>
-        <emptyTree>
+        :"food"
+        :"foos"
+      end
+    end
+
+    def self.sfoo(<blk>)
+      begin
+        :"sfood"
+        :"sfoos"
       end
     end
 
@@ -31,16 +44,21 @@ begin
       <emptyTree>
     end
 
-    def self.sfoo(<blk>)
+    def self.sfood(<blk>)
+      <emptyTree>
+    end
+
+    def self.<static-init>(<blk>)
       begin
         <emptyTree>
         <emptyTree>
       end
     end
+  end
+  class <singleton class><<Class:A>> < ()
+    <emptyTree>
 
-    def sfood(<blk>)
-      <emptyTree>
-    end
+    <emptyTree>
 
     def self.sfoos(<blk>)
       <emptyTree>
