@@ -1,3 +1,4 @@
+# typed: true
 def my_name(name:, prefix: "Mr")
   prefix + " " + name
 end

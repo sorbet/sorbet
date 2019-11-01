@@ -1,4 +1,5 @@
 # typed: true
+# typed: true
 class A; end;
 def foo
   puts A

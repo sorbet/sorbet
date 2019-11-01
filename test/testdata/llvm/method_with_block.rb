@@ -1,4 +1,5 @@
 # typed: true
+# typed: true
 
 def foo
   yield

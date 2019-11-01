@@ -1,3 +1,4 @@
+# typed: true
 def wrong_order(first="1", second)
   first + " " + second
 end

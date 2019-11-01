@@ -1,3 +1,4 @@
+# typed: true
 module Foo
   class Bar
   end

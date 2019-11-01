@@ -1,3 +1,4 @@
+# typed: true
 class Foo
   def bar
     "bar"

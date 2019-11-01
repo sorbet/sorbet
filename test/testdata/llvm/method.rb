@@ -1,3 +1,4 @@
+# typed: true
 def hello(name)
    i = 0
    while (i < 10)

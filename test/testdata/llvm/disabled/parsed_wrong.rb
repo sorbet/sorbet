@@ -1,3 +1,4 @@
+# typed: true
 a = <<EOD
 part 1 of heredoc #{ "not a heredoc" + <<EOM }
 eom part

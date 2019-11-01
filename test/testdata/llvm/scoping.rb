@@ -1,3 +1,4 @@
+# typed: true
 module A
 end
 puts A

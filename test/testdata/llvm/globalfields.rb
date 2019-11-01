@@ -1,4 +1,5 @@
 # typed: true
+# typed: true
 
 class A
   def write(v)

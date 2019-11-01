@@ -1,3 +1,4 @@
+# typed: true
 p self
 
 def on_object

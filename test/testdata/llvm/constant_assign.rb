@@ -1,3 +1,4 @@
+# typed: true
 A = 1
 puts A
 
