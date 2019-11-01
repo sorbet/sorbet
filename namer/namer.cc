@@ -452,23 +452,45 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
-        ast::MethodDef *mdef;
-        if (original->args.size() == 1 && (mdef = ast::cast_tree<ast::MethodDef>(original->args[0].get())) != nullptr) {
+        core::SymbolRef method;
+        if (original->args.size() == 1) {
+            if (auto mdef = ast::cast_tree<ast::MethodDef>(original->args[0].get())) {
+                // this handles the `private def foo` case
+                method = mdef->symbol;
+            } else if (auto sym = ast::cast_tree<ast::Literal>(original->args[0].get())) {
+                // this handles the `private :foo` case
+                if (!sym->isSymbol(ctx)) {
+                    return original;
+                }
+                auto name = sym->asSymbol(ctx);
+                auto owner = ctx.owner;
+                if (original->fun._id == core::Names::privateClassMethod()._id) {
+                    owner = owner.data(ctx)->singletonClass(ctx);
+                }
+                method = ctx.state.lookupMethodSymbol(owner, name);
+                if (method == core::Symbols::noSymbol()) {
+                    return original;
+                }
+            } else {
+                return original;
+            }
             switch (original->fun._id) {
                 case core::Names::private_()._id:
                 case core::Names::privateClassMethod()._id:
-                    mdef->symbol.data(ctx)->setPrivate();
+                    method.data(ctx)->setPrivate();
                     break;
                 case core::Names::protected_()._id:
-                    mdef->symbol.data(ctx)->setProtected();
+                    method.data(ctx)->setProtected();
                     break;
                 case core::Names::public_()._id:
-                    mdef->symbol.data(ctx)->setPublic();
+                    method.data(ctx)->setPublic();
                     break;
                 default:
                     return original;
             }
-            return std::move(original->args[0]);
+            if (ast::isa_tree<ast::MethodDef>(original->args[0].get())) {
+                return std::move(original->args[0]);
+            }
         }
         return original;
     }
