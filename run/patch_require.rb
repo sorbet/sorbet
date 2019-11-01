@@ -1,14 +1,17 @@
+# typed: true
 require 'open3'
 require 'tmpdir'
 
 module Kernel
   alias sorbet_old_require require
   def require(name)
-    if File.exists?(name + ".rb")
+    if File.exist?(name + ".rb")
       name = name + ".rb"
     end
-    if File.exists?(name)
-      name = ENV['llvmir'] + '/' + name.gsub('/', '_') + '.bundle'
+    if File.exist?(name)
+      tmpdir = ENV['llvmir']
+      raise "no 'llvmir' in ENV" unless tmpdir
+      name = tmpdir + '/' + name.gsub('/', '_') + '.bundle'
       return sorbet_old_require(name)
     end
 
@@ -17,15 +20,8 @@ module Kernel
 
   def require_relative(feature)
     locations = Kernel.caller_locations(1, 2)
-    file = case locations[0]
-           when Thread::Backtrace::Location
-             locations[0].absolute_path
-           when Array
-             # For runtime require_relatives
-             locations[1][0]
-           end
-
-    absolute = File.expand_path(feature, File.dirname(file))
+    file = T.must(T.must(locations)[0]).absolute_path
+    absolute = File.expand_path(feature, File.dirname(T.must(file)))
     require(absolute)
   end
 end
