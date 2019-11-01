@@ -46,8 +46,8 @@ for this_src in "${rb_src[@]}" DUMMY; do
         --llvm-ir-folder \
         "$llvmir" \
         "${srcs[@]}" \
-        2\>/dev/null\; \
-      for ext in "llo ll"\; do \
+        2\> "$llvmir/update_testdata_exp.stderr"\; \
+      for ext in "llo ll stderr"\; do \
         exp=${basename%.rb}.\$ext.exp\; \
         if [ -f \$exp ]\; then \
           cat "$llvmir/*.\$ext" \> \$exp\; \
