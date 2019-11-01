@@ -40,4 +40,4 @@ else
         cd - > /dev/null
     fi
 fi
-$ruby "$runfile" "$@"
+llvmir=$llvmir $ruby "$runfile" "$@"
