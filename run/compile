@@ -1,17 +1,17 @@
 #!/bin/bash
 set -eo pipefail
 
-root="$( dirname "${BASH_SOURCE[0]}" )"/..
+base="$( dirname "${BASH_SOURCE[0]}" )"/..
 
 if [ -f main/sorbet ]; then
     sorbet=main/sorbet
     ld=external/llvm_toolchain/bin/ld
 else
-    cd "$root"
+    cd "$base"
     bazel build @llvm_toolchain//:bin/ld main:sorbet 2> /dev/null
     cd - > /dev/null
-    sorbet="$root/bazel-bin/main/sorbet"
-    ld="$root/bazel-sorbet_llvm/external/llvm_toolchain/bin/ld"
+    sorbet="$base/bazel-bin/main/sorbet"
+    ld="$base/bazel-sorbet_llvm/external/llvm_toolchain/bin/ld"
 fi
 
 llvmir=$1

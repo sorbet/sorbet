@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 
-root="$( dirname "${BASH_SOURCE[0]}" )"/..
+base="$( dirname "${BASH_SOURCE[0]}" )"/..
 
 if [ -z "$runfile" ]; then
     llvmir=$(mktemp -d)
@@ -17,20 +17,21 @@ cleanup() {
 
 trap cleanup EXIT
 
-echo "require './$root/run/preamble.rb';" > "$runfile"
-echo "require './$root/run/patch_require.rb';" >> "$runfile"
+echo "require './$base/run/preamble.rb';" > "$runfile"
+echo "require './$base/run/patch_require.rb';" >> "$runfile"
 
 rb=$1
 shift
 echo "require '$rb';" >> "$runfile"
-"$root/run/compile" "$llvmir" "$(dirname "$rb")"
+: "${root:=$(dirname "$rb")}"
+"$base/run/compile" "$llvmir" "$root"
 
-if [ -f "$root/external/ruby_2_6_3/ruby" ]; then
-    ruby="$root/external/ruby_2_6_3/ruby"
+if [ -f "$base/external/ruby_2_6_3/ruby" ]; then
+    ruby="$base/external/ruby_2_6_3/ruby"
 else
-    cd "$root"
+    cd "$base"
     bazel build @ruby_2_6_3//:ruby --config=dbg 2> /dev/null
     cd - > /dev/null
-    ruby="$root/bazel-bin/external/ruby_2_6_3/ruby"
+    ruby="$base/bazel-bin/external/ruby_2_6_3/ruby"
 fi
 $ruby "$runfile" "$@"
