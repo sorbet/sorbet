@@ -8,14 +8,14 @@
 # generic classes. This shouldn't be a problem with the DSL-ified
 # version.
 
-module M
+class M
   extend T::Sig
   extend T::Helpers
   extend T::Generic
 
-  A = type_member(:in)
+  A = type_member
 
-  interface!
+  abstract!
 
   sig {abstract.params(x: A).void}
   def foo(x); end
