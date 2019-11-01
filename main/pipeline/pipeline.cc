@@ -51,16 +51,14 @@ public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->loc.file().data(ctx).strictLevel < core::StrictLevel::True || m->symbol.data(ctx)->isOverloaded()) {
-            return m;
-        }
+        auto willTypecheck = m->loc.file().data(ctx).strictLevel >= core::StrictLevel::True &&
+                             !m->symbol.data(ctx)->isOverloaded() && opts.stopAfterPhase != options::Phase::CFG;
         auto &print = opts.print;
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
 
-        if (opts.stopAfterPhase == options::Phase::CFG) {
-            return m;
+        if (willTypecheck) {
+            cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
         }
-        cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
         if (cfg) {
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->typecheck(ctx.state, *cfg, m);
