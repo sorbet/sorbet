@@ -19,7 +19,7 @@ fi
 llvmir=$1
 rb=$2
 
-"$sorbet" --silence-dev-message --no-error-count --typed=true --llvm-ir-folder "$llvmir" "$rb"
+"$sorbet" --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$rb"
 
 for o in "$llvmir"/*.o; do
     bundle="${o%.o}.bundle"

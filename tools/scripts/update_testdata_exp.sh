@@ -43,7 +43,6 @@ for this_src in "${rb_src[@]}" DUMMY; do
     echo f\(\) \{ \
       bazel-bin/main/sorbet --silence-dev-message \
         --no-error-count \
-        --typed=true \
         --llvm-ir-folder \
         "$llvmir" \
         "${srcs[@]}" \
