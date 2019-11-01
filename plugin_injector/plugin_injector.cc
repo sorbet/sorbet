@@ -9,6 +9,7 @@
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "core/errors/errors.h"
+#include "core/ErrorQueue.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
 #include <optional>
@@ -64,7 +65,7 @@ public:
     };
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
                            std::unique_ptr<ast::MethodDef> &md) const override {
-        if (!irOutputDir.has_value()) {
+        if (gs.errorQueue->nonSilencedErrorCount > 0) {
             return;
         }
 
