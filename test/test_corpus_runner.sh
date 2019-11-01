@@ -31,7 +31,13 @@ code=$?
 set -e
 
 if [ $code -ne 0 ]; then
-    diff "${rb%.rb}.stderr.exp" "$srberr"
+    stderr="${rb%.rb}.stderr.exp"
+    if [ -f "$stderr" ]; then
+        diff "${rb%.rb}.stderr.exp" "$srberr"
+    else
+        cat "$srberr"
+        exit $code
+    fi
 fi
 
 echo "Run LLDB: lldb bazel-bin/$ruby -- $srbrunfile"
