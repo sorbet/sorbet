@@ -23,8 +23,12 @@ echo "require './$base/run/patch_require.rb';" >> "$runfile"
 rb=$1
 shift
 echo "require '$rb';" >> "$runfile"
-: "${root:=$(dirname "$rb")}"
-"$base/run/compile" "$llvmir" "$root"
+
+args=("$rb")
+if [ -n "${root:-''}" ]; then
+    args+=("$root")
+fi
+"$base/run/compile" "$llvmir" "${args[@]}"
 
 if [ -f "$base/external/ruby_2_6_3/ruby" ]; then
     ruby="$base/external/ruby_2_6_3/ruby"
