@@ -8,7 +8,6 @@ module Kernel
       name = name + ".rb"
     end
     if File.exists?(name)
-      tmpdir = ENV['llvmir']
       name = ENV['llvmir'] + '/' + name.gsub('/', '_') + '.bundle'
       return sorbet_old_require(name)
     end
