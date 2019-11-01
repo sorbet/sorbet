@@ -3,14 +3,26 @@
 
 namespace sorbet::compiler {
 
-void Names::init(core::GlobalState &gs) {
-    Names::sorbet_defineTopClassOrModule = gs.enterNameUTF8("<sorbet_defineTopClassOrModule>");
-    Names::sorbet_defineMethod = gs.enterNameUTF8("<sorbet_defineMethod>");
-    Names::sorbet_defineMethodSingleton = gs.enterNameUTF8("<sorbet_defineMethodSingleton>");
+core::NameRef Names::sorbet_defineTopClassOrModule(const core::GlobalState &gs) {
+    auto ret = gs.lookupNameUTF8("<sorbet_defineTopClassOrModule>");
+    ENFORCE(ret.exists(), "Did you forget to call Names::init");
+    return ret;
+}
+core::NameRef Names::sorbet_defineMethod(const core::GlobalState &gs) {
+    auto ret = gs.lookupNameUTF8("<sorbet_defineMethod>");
+    ENFORCE(ret.exists(), "Did you forget to call Names::init");
+    return ret;
+}
+core::NameRef Names::sorbet_defineMethodSingleton(const core::GlobalState &gs) {
+    auto ret = gs.lookupNameUTF8("<sorbet_defineMethodSingleton>");
+    ENFORCE(ret.exists(), "Did you forget to call Names::init");
+    return ret;
 }
 
-core::NameRef Names::sorbet_defineTopClassOrModule;
-core::NameRef Names::sorbet_defineMethod;
-core::NameRef Names::sorbet_defineMethodSingleton;
+void Names::init(core::GlobalState &gs) {
+    gs.enterNameUTF8("<sorbet_defineTopClassOrModule>");
+    gs.enterNameUTF8("<sorbet_defineMethod>");
+    gs.enterNameUTF8("<sorbet_defineMethodSingleton>");
+}
 
 } // namespace sorbet::compiler

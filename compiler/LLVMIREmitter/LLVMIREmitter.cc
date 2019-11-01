@@ -953,15 +953,15 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                                    bb->rubyBlockId);
                             return;
                         }
-                        if (i->fun == Names::sorbet_defineTopClassOrModule) {
+                        if (i->fun == Names::sorbet_defineTopClassOrModule(cs)) {
                             defineClass(cs, i, builder);
                             return;
                         }
-                        if (i->fun == Names::sorbet_defineMethod) {
+                        if (i->fun == Names::sorbet_defineMethod(cs)) {
                             defineMethod(cs, i, false, builder);
                             return;
                         }
-                        if (i->fun == Names::sorbet_defineMethodSingleton) {
+                        if (i->fun == Names::sorbet_defineMethodSingleton(cs)) {
                             defineMethod(cs, i, true, builder);
                             return;
                         }
