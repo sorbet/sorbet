@@ -31,15 +31,16 @@ module T::Private::Abstract::Declare
         raise "You must call `abstract!` *before* defining an initialize method"
       end
 
-      # Don't need to silence warnings via without_ruby_warnings when calling
-      # define_method because of the guard above
-
-      mod.send(:define_method, :initialize) do |*args, &blk|
-        if self.class == mod
-          raise "#{mod} is declared as abstract; it cannot be instantiated"
+      initialize_check_module = Module.new do
+        define_method(:initialize) do |*args, &blk|
+          if mod.equal?(self.class)
+            raise "#{mod} is declared as abstract; it cannot be instantiated"
+          end
+          super(*args, &blk)
         end
-        super(*args, &blk)
       end
+
+      mod.prepend(initialize_check_module)
     end
   end
 end

@@ -366,6 +366,42 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       )
     end
 
+    it "fails when instantiating the class when the class defines initialize" do
+      klass = Class.new do
+        extend T::Helpers
+        abstract!
+        def initialize; end
+      end
+
+      err = assert_raises(RuntimeError) do
+        klass.new
+      end
+
+      assert_equal(
+        "#{klass} is declared as abstract; it cannot be instantiated",
+        err.message
+      )
+    end
+
+    it "fails when the the class respond to == with a lie" do
+      klass = Class.new do
+        extend T::Helpers
+        abstract!
+        def self.==(*)
+          false
+        end
+      end
+
+      err = assert_raises(RuntimeError) do
+        klass.new
+      end
+
+      assert_equal(
+        "#{klass} is declared as abstract; it cannot be instantiated",
+        err.message
+      )
+    end
+
     it "succeeds when instantiating a concrete subclass" do
       klass = Class.new(AbstractClass) do
         extend T::Sig
