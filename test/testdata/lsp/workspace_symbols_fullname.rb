@@ -25,9 +25,3 @@ module Bar
     end
   end
 end
-
-class Baz
-  attr_accessor :foo
-  #              ^^^ symbol-search: "foo", name="foo"
-  #              ^^^ symbol-search: "foo", name="foo="
-end
