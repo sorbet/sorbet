@@ -479,7 +479,7 @@ class Enumerator::Lazy < Enumerator
     )
     .returns(Enumerator::Lazy[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator::Lazy[Elem])}
   def drop_while(&blk); end
 
   # Returns an array containing all elements of `enum` for which the given
@@ -523,9 +523,9 @@ class Enumerator::Lazy < Enumerator
     type_parameters(:U).params(
         blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
     )
-    .returns(T.type_parameter(:U))
+    .returns(Enumerator::Lazy[T.type_parameter(:U)])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(Enumerator::Lazy[Elem])}
   def flat_map(&blk); end
 
   # Returns an array of every element in *enum* for which `Pattern === element`.
@@ -633,7 +633,7 @@ class Enumerator::Lazy < Enumerator
     params(
         n: Integer,
     )
-    .returns(T.nilable(T::Array[Elem]))
+    .returns(Enumerator::Lazy[Elem])
   end
   def take(n); end
 
