@@ -413,6 +413,75 @@ end
 class Enumerator::Lazy < Enumerator
   extend T::Generic
   Elem = type_member(:out)
+
+  # Returns a new array with the results of running *block* once for every
+  # element in *enum*.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # (1..4).map { |i| i*i }      #=> [1, 4, 9, 16]
+  # (1..4).collect { "cat"  }   #=> ["cat", "cat", "cat", "cat"]
+  # ```
+  sig do
+    type_parameters(:U).params(
+        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+    )
+    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+  end
+  sig {returns(Enumerator::Lazy[Elem])}
+  def collect(&blk); end
+
+  # Returns a new array with the concatenated results of running *block* once
+  # for every element in *enum*.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # [1, 2, 3, 4].flat_map { |e| [e, -e] } #=> [1, -1, 2, -2, 3, -3, 4, -4]
+  # [[1, 2], [3, 4]].flat_map { |e| e + [100] } #=> [1, 2, 100, 3, 4, 100]
+  # ```
+  sig do
+    type_parameters(:U).params(
+        blk: T.proc.params(arg0: Elem).returns(Enumerator::Lazy[T.type_parameter(:U)]),
+    )
+    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+  end
+  def collect_concat(&blk); end
+
+  # Drops first n elements from *enum*, and returns rest elements in an array.
+  #
+  # ```ruby
+  # a = [1, 2, 3, 4, 5, 0]
+  # a.drop(3)             #=> [4, 5, 0]
+  # ```
+  sig do
+    params(
+        n: Integer,
+    )
+    .returns(Enumerable::Lazy[Elem])
+  end
+  def drop(n); end
+
+  # Drops elements up to, but not including, the first element for which the
+  # block returns `nil` or `false` and returns an array containing the remaining
+  # elements.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # a = [1, 2, 3, 4, 5, 0]
+  # a.drop_while { |i| i < 3 }   #=> [3, 4, 5, 0]
+  # ```
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(Enumerator::Lazy[Elem])
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def drop_while(&blk); end
+
 end
 
 # [`Yielder`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/Yielder.html)
