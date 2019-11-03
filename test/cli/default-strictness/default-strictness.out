@@ -1,0 +1,11 @@
+test/cli/default-strictness/default-strictness.rb:1: Expected `String` but found `Symbol(:"error")` for argument `arg0` https://srb.help/7002
+     1 |"x" + :error
+        ^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L58: Method `String#+` has specified `arg0` as `String`
+    58 |        arg0: String,
+                ^^^^
+  Got Symbol(:"error") originating from:
+    test/cli/default-strictness/default-strictness.rb:1:
+     1 |"x" + :error
+              ^^^^^^
+Errors: 1
