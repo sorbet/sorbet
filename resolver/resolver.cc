@@ -1552,7 +1552,7 @@ private:
 
                     auto loc = lastSigs[0]->loc;
                     if (loc.file().data(ctx).originalSigil == core::StrictLevel::None &&
-                        !lastSigs.front()->isRewriterSynthesized()) {
+                        !ctx.state.defaultStrictness.has_value() && !lastSigs.front()->isRewriterSynthesized()) {
                         if (auto e = ctx.state.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
                             e.setHeader("To use `{}`, this file must declare an explicit `{}` sigil (found: "
                                         "none). If you're not sure which one to use, start with `{}`",
@@ -1656,18 +1656,17 @@ private:
     // type (once we have generics) will be nontrivial.
     core::TypePtr resolveConstantType(core::Context ctx, unique_ptr<ast::Expression> &expr, core::SymbolRef ofSym) {
         core::TypePtr result;
-        typecase(
-            expr.get(), [&](ast::Literal *a) { result = a->value; },
-            [&](ast::Cast *cast) {
-                if (cast->cast != core::Names::let()) {
-                    if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
-                        e.setHeader("Use `{}` to specify the type of constants", "T.let");
-                    }
-                }
-                result = cast->type;
-            },
-            [&](ast::InsSeq *outer) { result = resolveConstantType(ctx, outer->expr, ofSym); },
-            [&](ast::Expression *expr) {});
+        typecase(expr.get(), [&](ast::Literal *a) { result = a->value; },
+                 [&](ast::Cast *cast) {
+                     if (cast->cast != core::Names::let()) {
+                         if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
+                             e.setHeader("Use `{}` to specify the type of constants", "T.let");
+                         }
+                     }
+                     result = cast->type;
+                 },
+                 [&](ast::InsSeq *outer) { result = resolveConstantType(ctx, outer->expr, ofSym); },
+                 [&](ast::Expression *expr) {});
         return result;
     }
 

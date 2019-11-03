@@ -421,6 +421,7 @@ int realmain(int argc, char *argv[]) {
     if (opts.autocorrect) {
         gs->autocorrect = true;
     }
+    gs->defaultStrictness = opts.defaultStrictness;
     if (opts.suggestRuntimeProfiledType) {
         gs->suggestRuntimeProfiledType = true;
     }

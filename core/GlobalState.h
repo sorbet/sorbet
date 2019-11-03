@@ -159,6 +159,7 @@ public:
     int globalStateId;
     bool silenceErrors = false;
     bool autocorrect = false;
+    std::optional<StrictLevel> defaultStrictness = std::nullopt;
     bool suggestRuntimeProfiledType = false;
 
     // We have a lot of internal names of form `<something>` that's chosen with `<` and `>` as you can't make
