@@ -378,7 +378,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         level = fnd->second;
     } else {
         if (fileData.originalSigil == core::StrictLevel::None) {
-            level = core::StrictLevel::False;
+            level = opts.defaultStrictness;
         } else {
             level = fileData.originalSigil;
         }

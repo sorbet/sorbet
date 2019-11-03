@@ -367,6 +367,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
     options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
+    options.add_options("advanced")(
+        "default-strictness", "Specifies a default strictness level to use for files without a '#typed: ' comment.",
+        cxxopts::value<string>()->default_value("false"));
 
     options.add_options("advanced")(
         "autogen-autoloader-exclude-require",
@@ -804,6 +807,7 @@ void readOptions(Options &opts,
         opts.debugLogFile = raw["debug-log-file"].as<string>();
         opts.webTraceFile = raw["web-trace-file"].as<string>();
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
+        opts.defaultStrictness = text2StrictLevel(raw["default-strictness"].as<string>(), logger);
         if (raw.count("autogen-version") > 0) {
             if (!opts.print.AutogenMsgPack.enabled) {
                 logger->error("`{}` must also include `{}`", "--autogen-version", "-p autogen-msgpack");
