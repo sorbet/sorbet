@@ -482,6 +482,178 @@ class Enumerator::Lazy < Enumerator
   sig {returns(T::Enumerator[Elem])}
   def drop_while(&blk); end
 
+  # Returns an array containing all elements of `enum` for which the given
+  # `block` returns a true value.
+  #
+  # If no block is given, an
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # returned instead.
+  #
+  # ```ruby
+  # (1..10).find_all { |i|  i % 3 == 0 }   #=> [3, 6, 9]
+  #
+  # [1,2,3,4,5].select { |num|  num.even?  }   #=> [2, 4]
+  #
+  # [:foo, :bar].filter { |x| x == :foo }   #=> [:foo]
+  # ```
+  #
+  # See also
+  # [`Enumerable#reject`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-reject).
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(Enumerator::Lazy[Elem])
+  end
+  sig {returns(Enumerator::Lazy[Elem])}
+  def find_all(&blk); end
+
+  ### This signature is wrong; See entire note on Enumerator#flat_map
+
+  # Returns a new array with the concatenated results of running *block* once
+  # for every element in *enum*.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # [1, 2, 3, 4].flat_map { |e| [e, -e] } #=> [1, -1, 2, -2, 3, -3, 4, -4]
+  # [[1, 2], [3, 4]].flat_map { |e| e + [100] } #=> [1, 2, 100, 3, 4, 100]
+  # ```
+  sig do
+    type_parameters(:U).params(
+        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+    )
+    .returns(T.type_parameter(:U))
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def flat_map(&blk); end
+
+  # Returns an array of every element in *enum* for which `Pattern === element`.
+  # If the optional *block* is supplied, each matching element is passed to it,
+  # and the block's result is stored in the output array.
+  #
+  # ```ruby
+  # (1..100).grep 38..44   #=> [38, 39, 40, 41, 42, 43, 44]
+  # c = IO.constants
+  # c.grep(/SEEK/)         #=> [:SEEK_SET, :SEEK_CUR, :SEEK_END]
+  # res = c.grep(/SEEK/) { |v| IO.const_get(v) }
+  # res                    #=> [0, 1, 2]
+  # ```
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .returns(Enumerator::Lazy[Elem])
+  end
+  sig do
+    type_parameters(:U).params(
+        arg0: BasicObject,
+        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+    )
+    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+  end
+  def grep(arg0, &blk); end
+
+  # Returns a new array with the results of running *block* once for every
+  # element in *enum*.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # (1..4).map { |i| i*i }      #=> [1, 4, 9, 16]
+  # (1..4).collect { "cat"  }   #=> ["cat", "cat", "cat", "cat"]
+  # ```
+  sig do
+    type_parameters(:U).params(
+        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+    )
+    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+  end
+  sig {returns(Enumerator::Lazy[Elem])}
+  def map(&blk); end
+
+  # Returns an array for all elements of `enum` for which the given `block`
+  # returns `false`.
+  #
+  # If no block is given, an
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # returned instead.
+  #
+  # ```ruby
+  # (1..10).reject { |i|  i % 3 == 0 }   #=> [1, 2, 4, 5, 7, 8, 10]
+  #
+  # [1, 2, 3, 4, 5].reject { |num| num.even? } #=> [1, 3, 5]
+  # ```
+  #
+  # See also
+  # [`Enumerable#find_all`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-find_all).
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(Enumerator::Lazy[Elem])
+  end
+  sig {returns(Enumerator::Lazy[Elem])}
+  def reject(&blk); end
+
+  # Returns an array containing all elements of `enum` for which the given
+  # `block` returns a true value.
+  #
+  # If no block is given, an
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # returned instead.
+  #
+  # ```ruby
+  # (1..10).find_all { |i|  i % 3 == 0 }   #=> [3, 6, 9]
+  #
+  # [1,2,3,4,5].select { |num|  num.even?  }   #=> [2, 4]
+  #
+  # [:foo, :bar].filter { |x| x == :foo }   #=> [:foo]
+  # ```
+  #
+  # See also
+  # [`Enumerable#reject`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-reject).
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(Enumerator::Lazy[Elem])
+  end
+  sig {returns(Enumerator::Lazy[Elem])}
+  def select(&blk); end
+
+  # Returns first n elements from *enum*.
+  #
+  # ```ruby
+  # a = [1, 2, 3, 4, 5, 0]
+  # a.take(3)             #=> [1, 2, 3]
+  # a.take(30)            #=> [1, 2, 3, 4, 5, 0]
+  # ```
+  sig do
+    params(
+        n: Integer,
+    )
+    .returns(T.nilable(T::Array[Elem]))
+  end
+  def take(n); end
+
+  # Passes elements to the block until the block returns `nil` or `false`, then
+  # stops iterating and returns an array of all prior elements.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # a = [1, 2, 3, 4, 5, 0]
+  # a.take_while { |i| i < 3 }   #=> [1, 2]
+  # ```
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(Enumerator::Lazy[Elem])
+  end
+  sig {returns(Enumerator::Lazy[Elem])}
+  def take_while(&blk); end
 end
 
 # [`Yielder`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/Yielder.html)

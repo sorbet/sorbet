@@ -1316,5 +1316,4 @@ module Enumerable
   # ```
   sig { returns(Enumerator::Lazy[Elem])}
   def lazy(); end
-
 end
