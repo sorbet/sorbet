@@ -21,9 +21,9 @@ shift
 
 if [ "$#" -eq 0 ]; then
     # No args passed. Run `srb` to find the right place
-    SRB_SORBET_EXE=$sorbet srb tc --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir"
+    SRB_SORBET_EXE=$sorbet srb tc --silence-dev-message --no-error-count --suppress-non-critical --llvm-ir-folder "$llvmir"
 else
-    $sorbet --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$@"
+    $sorbet --silence-dev-message --no-error-count --suppress-non-critical --llvm-ir-folder "$llvmir" "$@"
 fi
 
 for o in "$llvmir"/*.o; do
