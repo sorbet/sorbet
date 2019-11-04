@@ -28,6 +28,7 @@ struct BasicBlockMap {
     vector<llvm::Value *> escapedClosure;
     UnorderedMap<core::LocalVariable, int> escapedVariableIndeces;
     llvm::BasicBlock *sigVerificationBlock;
+    vector<shared_ptr<core::SendAndBlockLink>> blockLinks;
 };
 
 // https://docs.ruby-lang.org/en/2.6.0/extension_rdoc.html
@@ -728,10 +729,18 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                          rubyBlocks2Functions[b->rubyBlockId]);
         }
     }
+    vector<shared_ptr<core::SendAndBlockLink>> blockLinks(rubyBlocks2Functions.size());
     for (auto &b : cfg.basicBlocks) {
         if (b->bexit.cond.variable == core::LocalVariable::blockCall()) {
             userEntryBlockByFunction[b->rubyBlockId] = llvmBlocks[b->bexit.thenb->id];
             basicBlockJumpOverrides[b->id] = b->bexit.elseb->id;
+            ENFORCE(b->backEdges.size() == 2, "not expected structure of calls involving blocks");
+            auto backId = b->backEdges[0] == b->bexit.thenb ? 1 : 0;
+            auto &expectedSendBind = b->backEdges[backId]->exprs[b->backEdges[backId]->exprs.size() - 2];
+            auto expectedSend = cfg::cast_instruction<cfg::Send>(expectedSendBind.value.get());
+            ENFORCE(expectedSend);
+            ENFORCE(expectedSend->link);
+            blockLinks[b->rubyBlockId] = expectedSend->link;
         }
     }
 
@@ -744,7 +753,8 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                          sendArgArrays,
                          escapedClosure,
                          std::move(escapedVariableIndices),
-                         sigVerificationBlock
+                         sigVerificationBlock,
+                         blockLinks
 
     };
 }
@@ -880,6 +890,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                   UnorderedMap<core::LocalVariable, Alias> &aliases,
                   const vector<llvm::Function *> &rubyBlocks2Functions) {
     llvm::IRBuilder<> builder(cs);
+    UnorderedSet<core::LocalVariable> loadYieldParamsResults; // methods calls on these are ignored
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         auto block = blockMap.llvmBlocksBySorbetBlocks[bb->id];
@@ -921,6 +932,12 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         // bb->rubyBlockId);
                     },
                     [&](cfg::Send *i) {
+                        if (i->recv.variable._name == core::Names::blkArg() &&
+                            loadYieldParamsResults.contains(i->recv.variable)) {
+                            // this loads an argument of a block.
+                            // They are already loaded in preambula of the method
+                            return;
+                        }
                         auto str = i->fun.data(cs)->shortName(cs);
                         if (i->fun == core::Names::keepForIde() || i->fun == core::Names::keepForTypechecking()) {
                             return;
@@ -1084,6 +1101,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         /* intentionally omitted, it's part of method preambula */
                     },
                     [&](cfg::LoadYieldParams *i) {
+                        loadYieldParamsResults.insert(bind.bind.variable);
                         /* intentionally omitted, it's part of method preambula */
                     },
                     [&](cfg::Cast *i) {
