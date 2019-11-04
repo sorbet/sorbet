@@ -26,7 +26,7 @@ echo "require '$rb';" >> "$runfile"
 
 setRoot() {
     root=$( cd "$(dirname "$rb")"; pwd -P)
-    while [ ! -d "$root/sorbet/config" ]; do
+    while [ ! -f "$root/sorbet/config" ]; do
         root=$(dirname "$root")
         if [ "$root" == "/" ]; then
             root=""
