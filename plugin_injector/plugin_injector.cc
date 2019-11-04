@@ -65,10 +65,6 @@ public:
     };
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
                            std::unique_ptr<ast::MethodDef> &md) const override {
-        if (gs.errorQueue->nonSilencedErrorCount > 0) {
-            return;
-        }
-
         auto threadState = getThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
