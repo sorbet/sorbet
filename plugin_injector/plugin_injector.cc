@@ -17,7 +17,8 @@
 using namespace std;
 namespace sorbet::pipeline::semantic_extension {
 namespace {
-string fileName2ObjectName(string sourceFile) {
+string objectFileName(const core::GlobalState &gs, const core::FileRef &f) {
+    string sourceFile(f.data(gs).path());
     absl::c_replace(sourceFile, '/', '_');
     return sourceFile;
 }
@@ -62,7 +63,7 @@ public:
         llvm::LLVMContext &lctx = threadState->lctx;
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
         if (module) {
-            string fileName = fileName2ObjectName((string)f.data(gs).path());
+            string fileName = objectFileName(gs, f);
             sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
         }
     };
@@ -77,7 +78,7 @@ public:
         }
         compiler::CompilerState state(gs, lctx, module.get());
         sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
-        string fileName = fileName2ObjectName((string)cfg.symbol.data(gs)->loc().file().data(state).path());
+        string fileName = objectFileName(gs, cfg.symbol.data(gs)->loc().file());
         sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol, fileName);
     };
     virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override {
