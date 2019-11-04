@@ -518,14 +518,17 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     auto minArgCount = 0;
     core::LocalVariable blkArgName;
     {
+        auto argId = -1;
         for (auto &arg : md->args) {
+            argId += 1;
+            cs.trace(arg->showRaw(cs));
             if (ast::isa_tree<ast::OptionalArg>(arg.get())) {
                 maxArgCount += 1;
                 continue;
             }
             auto local = ast::cast_tree<ast::Local>(arg.get());
             ENFORCE(local);
-            if (local->localVariable._name == core::Names::blkArg()) {
+            if (cfg.symbol.data(cs)->arguments()[argId].flags.isBlock) {
                 blkArgName = local->localVariable;
                 continue;
             }
@@ -533,7 +536,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             minArgCount += 1;
         }
     }
-    ENFORCE(blkArgName._name.exists());
+    ENFORCE(blkArgName.exists());
     auto numOptionalArgs = maxArgCount - minArgCount;
     {
         // validate arg count
