@@ -107,10 +107,10 @@ class T::Enum
     return nil if instance.nil?
 
     if self == T::Enum
-      Opus::Error.hard("Cannot call T::Enum.serialize directly. You must call on a specific child class.")
+      raise "Cannot call T::Enum.serialize directly. You must call on a specific child class."
     end
     if instance.class != self
-      Opus::Error.hard("Cannot call #serialize on a value that is not an instance of #{self}.")
+      raise "Cannot call #serialize on a value that is not an instance of #{self}."
     end
     instance.serialize
   end
@@ -119,7 +119,7 @@ class T::Enum
   sig {params(mongo_value: SerializedVal).returns(T.experimental_attached_class).checked(:never)}
   def self.deserialize(mongo_value)
     if self == T::Enum
-      Opus::Error.hard("Cannot call T::Enum.deserialize directly. You must call on a specific child class.")
+      raise "Cannot call T::Enum.deserialize directly. You must call on a specific child class."
     end
     self.from_serialized(mongo_value)
   end
@@ -184,10 +184,9 @@ class T::Enum
   # See https://ruby-doc.org/core-2.4.0/String.html#method-i-3D-3D
   sig {returns(String)}
   def to_str
-    Opus::Error.soft(
+    T::Configuration.soft_assert_handler(
       'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.',
       storytime: {class: self.class.name},
-      notify: 'nroman',
     )
     serialize.to_s
   end
@@ -216,7 +215,7 @@ class T::Enum
 
   sig {params(method: Symbol, other: T.untyped).void}
   private def comparison_assertion_failed(method, other)
-    Opus::Error.soft(
+    T::Configuration.soft_assert_handler(
       'Enum to string comparison not allowed. Compare to the Enum instance directly instead. See go/enum-migration',
       storytime: {
         class: self.class.name,
@@ -224,8 +223,7 @@ class T::Enum
         other: other,
         other_class: other.class.name,
         method: method,
-      },
-      notify: 'nroman',
+      }
     )
   end
 

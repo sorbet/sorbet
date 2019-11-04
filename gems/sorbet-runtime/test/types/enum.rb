@@ -173,21 +173,24 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
 
     it 'does not allow serialization of strings' do
-      assert_raises_hard_error(/Cannot call #serialize on a value that is not an instance of .*CardSuit/) do
+      ex = assert_raises(RuntimeError) do
         CardSuit.serialize("heart")
       end
+      assert_match(/Cannot call #serialize on a value that is not an instance of .*CardSuit/, ex.message)
     end
 
     it 'does not allow a different instance type to be serialized' do
-      assert_raises_hard_error(/Cannot call #serialize on a value that is not an instance of .*CardSuitCustom/) do
+      ex = assert_raises(RuntimeError) do
         CardSuitCustom.serialize(CardSuit::HEART) # mixed Custom and non-Custom
       end
+      assert_match(/Cannot call #serialize on a value that is not an instance of .*CardSuitCustom/, ex.message)
     end
 
     it 'does not allow T::Enum.serialize to be called directly' do
-      assert_raises_hard_error(/Cannot call T::Enum.serialize directly/) do
+      ex = assert_raises(RuntimeError) do
         T::Enum.serialize(CardSuit::HEART)
       end
+      assert_match(/Cannot call T::Enum.serialize directly/, ex.message)
     end
 
     it 'supports class-level deserialize' do
@@ -195,9 +198,10 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
 
     it 'does not allow calling T::Enum.deserialize directly' do
-      assert_raises_hard_error(/Cannot call T::Enum.deserialize directly/) do
+      ex = assert_raises(RuntimeError) do
         T::Enum.deserialize('abcdef')
       end
+      assert_match(/Cannot call T::Enum.deserialize directly/, ex.message)
     end
   end
 
@@ -293,55 +297,58 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
   end
 
-  describe 'string value comparison assertions' do
-    ENUM_COMPARE_MSG = 'Enum to string comparison not allowed. Compare to the Enum instance directly instead. See go/enum-migration'
+  describe 'string value conversion assertions' do
+    ENUM_CONVERSION_MSG = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
+    before do
+      T::Configuration.expects(:soft_assert_handler).at_least_once.with do |message|
+        assert_equal(ENUM_CONVERSION_MSG, message)
+      end
+    end
 
     it 'raises an assertion if to_str is called and also returns the serialized value' do
-      expect_soft_error('Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.')
       assert_equal('heart', CardSuit::HEART.to_str)
     end
 
     it 'raises an assertion if to_str is called (implicitly) and also returns the serialized value' do
-      expect_soft_error('Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.')
       assert_equal('foo heart', 'foo ' + CardSuit::HEART)
+    end
+  end
+
+  describe 'string value comparison assertions' do
+    ENUM_COMPARE_MSG = 'Enum to string comparison not allowed. Compare to the Enum instance directly instead. See go/enum-migration'
+    before do
+      T::Configuration.expects(:soft_assert_handler).at_least_once.with do |message|
+        assert_equal(ENUM_COMPARE_MSG, message)
+      end
     end
 
     it 'raises an assertion if string is lhs of comparison' do
-      expect_soft_error(ENUM_COMPARE_MSG)
       assert_equal(true, 'spade' == CardSuit::SPADE)
 
-      expect_soft_error(ENUM_COMPARE_MSG)
       assert_equal(false, 'diamond' == CardSuit::SPADE)
     end
 
     it 'raises an assertion if string is rhs of comparison' do
-      expect_soft_error(ENUM_COMPARE_MSG)
       assert_equal(true, CardSuit::SPADE == 'spade')
 
-      expect_soft_error(ENUM_COMPARE_MSG)
       assert_equal(false, CardSuit::SPADE == 'diamond')
     end
 
     it 'raises an assertion if string is lhs of === comparison' do
-      expect_soft_error(ENUM_COMPARE_MSG)
       assert_equal(true, 'spade' === CardSuit::SPADE)
 
-      expect_soft_error(ENUM_COMPARE_MSG)
       assert_equal(false, 'club' === CardSuit::SPADE)
     end
 
     it 'raises an assertion if string is rhs of === comparison' do
-      expect_soft_error(ENUM_COMPARE_MSG)
       assert_equal(true, CardSuit::SPADE === 'spade')
 
-      expect_soft_error(ENUM_COMPARE_MSG)
       assert_equal(false, CardSuit::CLUB === 'spade')
     end
 
     it 'raises an assertion for a string in a `when` compared to an enum value' do
       val = CardSuit::SPADE
 
-      2.times {expect_soft_error(ENUM_COMPARE_MSG)}
       matched = case val
       when 'club' then false
       when 'spade' then true
@@ -353,16 +360,15 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     it 'raises an assertion for a enum in a `when` compared to an string value' do
       val = 'spade'
 
-      2.times {expect_soft_error(ENUM_COMPARE_MSG)}
       matched = case val
       when CardSuit::CLUB then false
       when CardSuit::SPADE then true
       end
       assert_equal(true, matched)
     end
+  end
 
-    it 'can be used with an assert' do
-      assert(CardSuit::SPADE, 'some message')
-    end
+  it 'can be used with an assert' do
+    assert(CardSuit::SPADE, 'some message')
   end
 end
