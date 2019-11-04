@@ -27,6 +27,11 @@ else
 fi
 
 for o in "$llvmir"/*.o; do
+    if [ ! -f "$o" ]; then
+        echo "No .o files output from Sorbet"
+        exit 1;
+    fi
+
     bundle="${o%.o}.bundle"
     "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
 done
