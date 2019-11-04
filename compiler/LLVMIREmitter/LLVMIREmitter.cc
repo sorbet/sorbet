@@ -735,8 +735,14 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
         if (b->bexit.cond.variable == core::LocalVariable::blockCall()) {
             userEntryBlockByFunction[b->rubyBlockId] = llvmBlocks[b->bexit.thenb->id];
             basicBlockJumpOverrides[b->id] = b->bexit.elseb->id;
-            ENFORCE(b->backEdges.size() == 2, "not expected structure of calls involving blocks");
-            auto backId = b->backEdges[0] == b->bexit.thenb ? 1 : 0;
+            auto backId = -1;
+            for (auto bid = 0; bid < b->backEdges.size(); bid++) {
+                if (b->backEdges[bid]->rubyBlockId < b->rubyBlockId) {
+                    backId = bid;
+                    break;
+                };
+            }
+            ENFORCE(backId >= 0);
             auto &expectedSendBind = b->backEdges[backId]->exprs[b->backEdges[backId]->exprs.size() - 2];
             auto expectedSend = cfg::cast_instruction<cfg::Send>(expectedSendBind.value.get());
             ENFORCE(expectedSend);
