@@ -1,21 +1,20 @@
 # typed: true
-# typed: true
 
 def foo
   yield
 end
 
-#def boo(&blk)
-#  yield "boo"
+def boo(&blk)
+  yield
 #  blk.call("boo1")
-#end
+end
 
 
 foo do
   puts "heey"
 end
 
-#boo do |arg|
-#  puts "boohey"
-#end
+boo do
+  puts "boohey"
+end
 
