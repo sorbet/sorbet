@@ -129,12 +129,12 @@ class T::Enum
 
 
   sig {returns(T.self_type)}
-  def dup # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
+  def dup
     self
   end
 
   sig {returns(T.self_type).checked(:tests)}
-  def clone # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
+  def clone
     self
   end
 
@@ -193,7 +193,7 @@ class T::Enum
   end
 
   sig {params(other: BasicObject).returns(T::Boolean).checked(:never)}
-  def ==(other) # rubocop:disable PrisonGuard/NoIncompleteEquality
+  def ==(other)
     case other
     when String
       comparison_assertion_failed(:==, other)
@@ -301,7 +301,7 @@ class T::Enum
     # Freeze the Enum class and bind the constant names into each of the instances.
     @mapping = {}
     self.constants(false).each do |const_name|
-      instance = self.const_get(const_name, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
+      instance = self.const_get(const_name, false)
       if !instance.is_a?(self)
         raise "Invalid constant #{self}::#{const_name} on enum. " \
           "All constants defined for an enum must be instances itself (e.g. `Foo = new`)."

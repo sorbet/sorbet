@@ -216,8 +216,6 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     #   MyEnum < T::Enum
     #     Foo = new
     #   end
-    #
-    # rubocop:disable PrisonGuard/NoDynamicConstAccess
 
     it 'does not allow duplicated serialized_vals' do
       ex = assert_raises(RuntimeError) do
@@ -293,7 +291,6 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
         ex.message
       )
     end
-    # rubocop:enable PrisonGuard/NoDynamicConstAccess
   end
 
   describe 'string value comparison assertions' do
@@ -311,10 +308,10 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
 
     it 'raises an assertion if string is lhs of comparison' do
       expect_soft_error(ENUM_COMPARE_MSG)
-      assert_equal(true, 'spade' == CardSuit::SPADE) # rubocop:disable Style/YodaCondition (that's the point of this test)
+      assert_equal(true, 'spade' == CardSuit::SPADE)
 
       expect_soft_error(ENUM_COMPARE_MSG)
-      assert_equal(false, 'diamond' == CardSuit::SPADE) # rubocop:disable Style/YodaCondition (that's the point of this test)
+      assert_equal(false, 'diamond' == CardSuit::SPADE)
     end
 
     it 'raises an assertion if string is rhs of comparison' do
@@ -327,18 +324,18 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
 
     it 'raises an assertion if string is lhs of === comparison' do
       expect_soft_error(ENUM_COMPARE_MSG)
-      assert_equal(true, 'spade' === CardSuit::SPADE) # rubocop:disable Style/CaseEquality
+      assert_equal(true, 'spade' === CardSuit::SPADE)
 
       expect_soft_error(ENUM_COMPARE_MSG)
-      assert_equal(false, 'club' === CardSuit::SPADE) # rubocop:disable Style/CaseEquality
+      assert_equal(false, 'club' === CardSuit::SPADE)
     end
 
     it 'raises an assertion if string is rhs of === comparison' do
       expect_soft_error(ENUM_COMPARE_MSG)
-      assert_equal(true, CardSuit::SPADE === 'spade') # rubocop:disable Style/CaseEquality
+      assert_equal(true, CardSuit::SPADE === 'spade')
 
       expect_soft_error(ENUM_COMPARE_MSG)
-      assert_equal(false, CardSuit::CLUB === 'spade') # rubocop:disable Style/CaseEquality
+      assert_equal(false, CardSuit::CLUB === 'spade')
     end
 
     it 'raises an assertion for a string in a `when` compared to an enum value' do
