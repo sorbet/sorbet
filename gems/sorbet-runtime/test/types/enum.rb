@@ -297,9 +297,35 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
   describe 'string value conversion assertions' do
     ENUM_CONVERSION_MSG = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
     before do
+      T::Configuration.expects(:soft_assert_handler).never
+    end
+
+    it 'raises an assertion if to_str is called and also returns the serialized value' do
+      ex = assert_raises(NoMethodError) do
+        CardSuit::HEART.to_str
+      end
+      assert_equal(ENUM_CONVERSION_MSG, ex.message)
+    end
+
+    it 'raises an assertion if to_str is called (implicitly) and also returns the serialized value' do
+      ex = assert_raises(NoMethodError) do
+        'foo ' + CardSuit::HEART
+      end
+      assert_equal(ENUM_CONVERSION_MSG, ex.message)
+    end
+  end
+
+  describe 'string value conversion assertions in legacy migration mode' do
+    ENUM_CONVERSION_MSG = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
+    before do
+      T::Configuration.enable_legacy_t_enum_migration_mode
       T::Configuration.expects(:soft_assert_handler).at_least_once.with do |message|
         assert_equal(ENUM_CONVERSION_MSG, message)
       end
+    end
+
+    after do
+      T::Configuration.disable_legacy_t_enum_migration_mode
     end
 
     it 'raises an assertion if to_str is called and also returns the serialized value' do
@@ -312,11 +338,53 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
   end
 
   describe 'string value comparison assertions' do
+    it 'returns false if the types mismatch for ==' do
+      assert_equal(false, 'spade' == CardSuit::SPADE)
+      assert_equal(false, 'diamond' == CardSuit::SPADE)
+      assert_equal(false, CardSuit::SPADE == 'spade')
+      assert_equal(false, CardSuit::SPADE == 'diamond')
+    end
+
+    it 'returns false if the types mismatch for ===' do
+      assert_equal(false, 'spade' === CardSuit::SPADE)
+      assert_equal(false, 'club' === CardSuit::SPADE)
+      assert_equal(false, CardSuit::SPADE === 'spade')
+      assert_equal(false, CardSuit::CLUB === 'spade')
+    end
+
+    it 'returns false for a string in a `when` compared to an enum value' do
+      val = CardSuit::SPADE
+
+      matched = case val
+      when 'club' then false
+      when 'spade' then true
+      else false
+      end
+      assert_equal(false, matched)
+    end
+
+    it 'returns false for a enum in a `when` compared to an string value' do
+      val = 'spade'
+
+      matched = case val
+      when CardSuit::CLUB then false
+      when CardSuit::SPADE then true
+      end
+      assert_nil(matched)
+    end
+  end
+
+  describe 'string value comparison assertions in legacy migration mode' do
     ENUM_COMPARE_MSG = 'Enum to string comparison not allowed. Compare to the Enum instance directly instead. See go/enum-migration'
     before do
+      T::Configuration.enable_legacy_t_enum_migration_mode
       T::Configuration.expects(:soft_assert_handler).at_least_once.with do |message|
         assert_equal(ENUM_COMPARE_MSG, message)
       end
+    end
+
+    after do
+      T::Configuration.disable_legacy_t_enum_migration_mode
     end
 
     it 'raises an assertion if string is lhs of comparison' do
