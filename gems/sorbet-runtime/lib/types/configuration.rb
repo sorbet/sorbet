@@ -356,6 +356,7 @@ module T::Configuration
     String
     Symbol
     Time
+    T::Enum
   }).freeze
 
   def self.scalar_types
