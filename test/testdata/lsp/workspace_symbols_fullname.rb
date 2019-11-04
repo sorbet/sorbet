@@ -1,27 +1,39 @@
 # typed: true
 
-def foo
-  # ^^^ symbol-search: "foo"
+def bar
+  # ^^^ symbol-search: "bar"
 end
 
 class Foo
   #   ^^^ symbol-search: "Foo"
-  #   TODO: support case-insensitive matches ^^^ symbol-search: "foo"
-  def foo
-    # ^^^ symbol-search: "foo"
+  #   ^^^ symbol-search: "foo"
+  def bar
+    # ^^^ symbol-search: "bar"
   end
 end
 
-module Bar
-  def foo
-    # ^^^ symbol-search: "foo"
+module Attrs
+  class Reader
+    attr_reader :bar
+    #            ^^^ symbol-search: "bar", name="bar"
+  end
+
+  class Writer
+    attr_writer :bar
+    #            ^^^ symbol-search: "bar", name="bar="
+  end
+end
+
+module Inner
+  def bar
+    # ^^^ symbol-search: "bar"
   end
 
   module Foo
     #    ^^^ symbol-search: "Foo"
-    #    TODO: support case-insensitive matches ^^^ symbol-search: "foo"
-    def foo
-      # ^^^ symbol-search: "foo"
+    #    ^^^ symbol-search: "foo"
+    def bar
+      # ^^^ symbol-search: "bar"
     end
   end
 end
