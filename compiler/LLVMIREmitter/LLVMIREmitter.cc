@@ -906,7 +906,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         } else {
                             if (i->what.data(cs)->isField()) {
                                 auto name = bind.bind.variable._name.data(cs)->shortName(cs);
-                                ENFORCE(name.size() > 1 && name[0] == '$');
+                                ENFORCE((name.size() > 1 && name[0] == '$') || stoi((string)name) > 0), "'" + ((string)name) + "' is not a valid global name");
                                 aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
                             } else {
                                 aliases[bind.bind.variable] = Alias::forConstant(i->what);
