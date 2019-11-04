@@ -20,6 +20,8 @@ namespace {
 string objectFileName(const core::GlobalState &gs, const core::FileRef &f) {
     string sourceFile(f.data(gs).path());
     absl::c_replace(sourceFile, '/', '_');
+    absl::c_replace(sourceFile, '.', '_');
+    sourceFile.replace(sourceFile.find("_rb"), 3, ".rb");
     return sourceFile;
 }
 } // namespace
