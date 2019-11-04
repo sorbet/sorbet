@@ -55,6 +55,9 @@ public:
     }
 
     virtual void finishTypecheckFile(const core::GlobalState &gs, const core::FileRef &f) const override {
+        if (f.data(gs).minErrorLevel() < core::StrictLevel::True) {
+            return;
+        }
         auto threadState = getThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
