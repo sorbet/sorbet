@@ -19,7 +19,12 @@ fi
 llvmir=$1
 shift
 
-"$sorbet" --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$@"
+if [ "$#" -eq 0 ]; then
+    # No args passed. Run `srb` to find the right place
+    SRB_SORBET_EXE=$sorbet srb tc --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir"
+else
+    $sorbet --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$@"
+fi
 
 for o in "$llvmir"/*.o; do
     bundle="${o%.o}.bundle"

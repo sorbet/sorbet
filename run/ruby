@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 
-base="$( dirname "${BASH_SOURCE[0]}" )"/..
+base="$( cd "$(dirname "$0")" ; pwd -P )"/..
 
 if [ -z "$runfile" ]; then
     llvmir=$(mktemp -d)
@@ -17,18 +17,35 @@ cleanup() {
 
 trap cleanup EXIT
 
-echo "require './$base/run/preamble.rb';" > "$runfile"
-echo "require './$base/run/patch_require.rb';" >> "$runfile"
+echo "require '$base/run/preamble.rb';" > "$runfile"
+echo "require '$base/run/patch_require.rb';" >> "$runfile"
 
 rb=$1
 shift
 echo "require '$rb';" >> "$runfile"
 
-args=("$rb")
-if [ -n "${root:-''}" ]; then
-    args+=("$root")
+setRoot() {
+    root=$( cd "$(dirname "$rb")"; pwd -P)
+    while [ ! -d "$root/sorbet/config" ]; do
+        root=$(dirname "$root")
+        if [ "$root" == "/" ]; then
+            root=""
+            return
+        fi
+    done
+}
+
+if [ -z "$root" ]; then
+    setRoot
 fi
-"$base/run/compile" "$llvmir" "${args[@]}"
+if [ -z "$root" ]; then
+    # Still no root? I guess we're just compiling this one file
+    "$base/run/compile" "$llvmir" "$rb"
+else
+    cd "$root"
+    "$base/run/compile" "$llvmir"
+    cd - > /dev/null
+fi
 
 if [ -f "$base/external/ruby_2_6_3/ruby" ]; then
     ruby="$base/external/ruby_2_6_3/ruby"
