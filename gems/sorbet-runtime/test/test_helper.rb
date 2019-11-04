@@ -10,6 +10,7 @@ require 'mocha/minitest'
 
 require 'pathname'
 require 'tempfile'
+require 'json'
 
 require_relative '../lib/sorbet-runtime'
 
