@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 # typed: strict
-require_relative '../../extn'
-Opus::AutogenLoader.init(__FILE__)
 
 # Enumerations allow for type-safe declarations of a fixed set of values.
 #
@@ -42,6 +40,7 @@ Opus::AutogenLoader.init(__FILE__)
 # WARNING: Enum instances are singletons that are shared among all their users. Their internals
 # should be kept immutable to avoid unpredictable action at a distance.
 class T::Enum
+  extend T::Sig
   extend T::Props::CustomType
 
   # TODO(jez) Might want to restrict this, or make subclasses provide this type

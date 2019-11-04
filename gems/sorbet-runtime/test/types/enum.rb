@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 # typed: false
-require_relative '../../../extn'
-Opus::AutogenLoader.init(__FILE__)
+require_relative '../test_helper'
 
+module T::Enum::Test; end
 class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
-  include Critic::Helpers::Errors
-  include Critic::Helpers::Constants
-
   class CardSuit < T::Enum
     enums do
       CLUB = new
