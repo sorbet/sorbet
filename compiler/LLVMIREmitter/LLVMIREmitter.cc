@@ -1096,7 +1096,10 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                                 cs.trace("UnsupportedLiteral");
                         }
                     },
-                    [&](cfg::Unanalyzable *i) { Exception::raise("unsupported node: " + i->toString(cs)); },
+                    [&](cfg::Unanalyzable *i) {
+                        Exception::raise("unsupported node: " + i->toString(core::Context(cs.gs, cfg.symbol)) +
+                                         " in file: " + (string)cfg.symbol.data(cs)->loc().file().data(cs).path());
+                    },
                     [&](cfg::LoadArg *i) {
                         /* intentionally omitted, it's part of method preambula */
                     },
