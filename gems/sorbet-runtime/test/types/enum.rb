@@ -208,7 +208,7 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     #
     # For purposes of these tests, the  declaration of the following form
     #
-    #   Opus::LoadHooks.class_with_load_hooks(T::Enum) do
+    #   Class.new(T::Enum) do
     #     const_set(:FOO, new)
     #   end
     #

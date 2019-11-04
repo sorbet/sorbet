@@ -170,10 +170,6 @@ class T::Enum
   end
 
 
-  ## Migrating from `make_accessible` / `make_accessible_DEPRECATED` ##
-  #
-  # TODO [nroman] Remove these once the migration is complete
-
   # NB: Do not call this method. This exists to allow for a safe migration path in places where enum
   # values are compared directly against string values.
   #
