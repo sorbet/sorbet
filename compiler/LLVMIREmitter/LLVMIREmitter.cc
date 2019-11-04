@@ -13,6 +13,7 @@
 #include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/Names/Names.h"
+#include "core/errors/errors.h"
 #include <string_view>
 
 using namespace std;
@@ -1097,8 +1098,9 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         }
                     },
                     [&](cfg::Unanalyzable *i) {
-                        Exception::raise("unsupported node: " + i->toString(core::Context(cs.gs, cfg.symbol)) +
-                                         " in file: " + (string)cfg.symbol.data(cs)->loc().file().data(cs).path());
+                        if (auto e = cs.gs.beginError(bind.loc, core::errors::Internal::InternalError)) {
+                            e.setHeader("Unsupported node: `{}`", i->toString(core::Context(cs.gs, cfg.symbol)));
+                        }
                     },
                     [&](cfg::LoadArg *i) {
                         /* intentionally omitted, it's part of method preambula */
