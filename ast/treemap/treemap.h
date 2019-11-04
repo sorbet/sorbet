@@ -719,6 +719,480 @@ public:
         }
     }
 };
-} // namespace sorbet::ast
 
+
+
+/**
+ * Given a tree transformer FUNC transform a tree.
+ * Tree is guaranteed to be visited in the definition order.
+ * FUNC may maintain internal state.
+ * @tparam tree transformer, see FUNC_EXAMPLE
+ */
+template <class FUNC, class CTX> class ShallowMapper {
+private:
+    friend class ShallowMap;
+
+    FUNC &func;
+
+    static_assert(!HAS_MEMBER_preTransformField<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformLiteral<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformUnresolvedConstantLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformLocal<FUNC>::value, "use post*Transform instead");
+
+    ShallowMapper(FUNC &func) : func(func) {}
+
+    unique_ptr<Expression> mapClassDef(unique_ptr<ClassDef> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformClassDef<FUNC>::value) {
+            v = PostPonePreTransform_ClassDef<FUNC, CTX, HAS_MEMBER_preTransformClassDef<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+
+        // We intentionally do not walk v->ancestors nor v->singletonAncestors.
+        // They are guaranteed to be simple trees in the desugarer.
+        for (auto &def : v->rhs) {
+            def = mapIt(move(def), ctx.withOwner(v->symbol));
+        }
+
+        if constexpr (HAS_MEMBER_postTransformClassDef<FUNC>::value) {
+            return PostPonePostTransform_ClassDef<FUNC, CTX, HAS_MEMBER_postTransformClassDef<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapMethodDef(unique_ptr<MethodDef> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformMethodDef<FUNC>::value) {
+            v = PostPonePreTransform_MethodDef<FUNC, CTX, HAS_MEMBER_preTransformMethodDef<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+
+        for (auto &arg : v->args) {
+            // Only OptionalArgs have subexpressions within them.
+            if (auto *optArg = cast_tree<OptionalArg>(arg.get())) {
+                optArg->default_ = mapIt(move(optArg->default_), ctx.withOwner(v->symbol));
+            }
+        }
+        // because this is a DefinitionMapper, we do not map over the body of the class
+
+        if constexpr (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
+            return PostPonePostTransform_MethodDef<FUNC, CTX, HAS_MEMBER_postTransformMethodDef<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+
+        return v;
+    }
+
+    unique_ptr<Expression> mapIf(unique_ptr<If> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformIf<FUNC>::value) {
+            v = PostPonePreTransform_If<FUNC, CTX, HAS_MEMBER_preTransformIf<FUNC>::value>::call(ctx, move(v), func);
+        }
+        v->cond = mapIt(move(v->cond), ctx);
+        v->thenp = mapIt(move(v->thenp), ctx);
+        v->elsep = mapIt(move(v->elsep), ctx);
+
+        if constexpr (HAS_MEMBER_postTransformIf<FUNC>::value) {
+            return PostPonePostTransform_If<FUNC, CTX, HAS_MEMBER_postTransformIf<FUNC>::value>::call(ctx, move(v),
+                                                                                                      func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapWhile(unique_ptr<While> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformWhile<FUNC>::value) {
+            v = PostPonePreTransform_While<FUNC, CTX, HAS_MEMBER_preTransformWhile<FUNC>::value>::call(ctx, move(v),
+                                                                                                       func);
+        }
+        v->cond = mapIt(move(v->cond), ctx);
+        v->body = mapIt(move(v->body), ctx);
+
+        if constexpr (HAS_MEMBER_postTransformWhile<FUNC>::value) {
+            return PostPonePostTransform_While<FUNC, CTX, HAS_MEMBER_postTransformWhile<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapBreak(unique_ptr<Break> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformBreak<FUNC>::value) {
+            return PostPonePreTransform_Break<FUNC, CTX, HAS_MEMBER_preTransformBreak<FUNC>::value>::call(ctx, move(v),
+                                                                                                          func);
+        }
+
+        v->expr = mapIt(move(v->expr), ctx);
+
+        if constexpr (HAS_MEMBER_postTransformBreak<FUNC>::value) {
+            return PostPonePostTransform_Break<FUNC, CTX, HAS_MEMBER_postTransformBreak<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+        return v;
+    }
+    unique_ptr<Expression> mapRetry(unique_ptr<Retry> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_postTransformRetry<FUNC>::value) {
+            return PostPonePostTransform_Retry<FUNC, CTX, HAS_MEMBER_postTransformRetry<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapNext(unique_ptr<Next> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformNext<FUNC>::value) {
+            return PostPonePreTransform_Next<FUNC, CTX, HAS_MEMBER_preTransformNext<FUNC>::value>::call(ctx, move(v),
+                                                                                                        func);
+        }
+
+        v->expr = mapIt(move(v->expr), ctx);
+
+        if constexpr (HAS_MEMBER_postTransformNext<FUNC>::value) {
+            return PostPonePostTransform_Next<FUNC, CTX, HAS_MEMBER_postTransformNext<FUNC>::value>::call(ctx, move(v),
+                                                                                                          func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapReturn(unique_ptr<Return> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformReturn<FUNC>::value) {
+            v = PostPonePreTransform_Return<FUNC, CTX, HAS_MEMBER_preTransformReturn<FUNC>::value>::call(ctx, move(v),
+                                                                                                         func);
+        }
+        v->expr = mapIt(move(v->expr), ctx);
+
+        if constexpr (HAS_MEMBER_postTransformReturn<FUNC>::value) {
+            return PostPonePostTransform_Return<FUNC, CTX, HAS_MEMBER_postTransformReturn<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+
+        return v;
+    }
+
+    unique_ptr<Expression> mapRescueCase(unique_ptr<RescueCase> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformRescueCase<FUNC>::value) {
+            v = PostPonePreTransform_RescueCase<FUNC, CTX, HAS_MEMBER_preTransformRescueCase<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+
+        for (auto &el : v->exceptions) {
+            el = mapIt(move(el), ctx);
+        }
+
+        v->var = mapIt(move(v->var), ctx);
+
+        v->body = mapIt(move(v->body), ctx);
+
+        if constexpr (HAS_MEMBER_postTransformRescueCase<FUNC>::value) {
+            return PostPonePostTransform_RescueCase<FUNC, CTX, HAS_MEMBER_postTransformRescueCase<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+
+        return v;
+    }
+    unique_ptr<Expression> mapRescue(unique_ptr<Rescue> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformRescue<FUNC>::value) {
+            v = PostPonePreTransform_Rescue<FUNC, CTX, HAS_MEMBER_preTransformRescue<FUNC>::value>::call(ctx, move(v),
+                                                                                                         func);
+        }
+
+        v->body = mapIt(move(v->body), ctx);
+
+        int i = 0;
+        while (i < v->rescueCases.size()) {
+            auto &el = v->rescueCases[i];
+            auto oldRef = el.get();
+            auto narg = mapRescueCase(move(el), ctx);
+            if (el.get() != narg.get()) {
+                auto nargCase = cast_tree<RescueCase>(narg.get());
+                ENFORCE(nargCase != nullptr, "rescue case was mapped into non-a rescue case");
+                el.reset(nargCase);
+                narg.release();
+            } else {
+                narg.release();
+                el.reset(oldRef);
+            }
+            i++;
+        }
+
+        v->else_ = mapIt(move(v->else_), ctx);
+        v->ensure = mapIt(move(v->ensure), ctx);
+
+        if constexpr (HAS_MEMBER_postTransformRescue<FUNC>::value) {
+            return PostPonePostTransform_Rescue<FUNC, CTX, HAS_MEMBER_postTransformRescue<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+
+        return v;
+    }
+
+    unique_ptr<Expression> mapField(unique_ptr<Field> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_postTransformField<FUNC>::value) {
+            return PostPonePostTransform_Field<FUNC, CTX, HAS_MEMBER_postTransformField<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapUnresolvedIdent(unique_ptr<UnresolvedIdent> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value) {
+            return PostPonePostTransform_UnresolvedIdent<
+                FUNC, CTX, HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value>::call(ctx, move(v), func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapAssign(unique_ptr<Assign> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformAssign<FUNC>::value) {
+            v = PostPonePreTransform_Assign<FUNC, CTX, HAS_MEMBER_preTransformAssign<FUNC>::value>::call(ctx, move(v),
+                                                                                                         func);
+        }
+
+        v->lhs = mapIt(move(v->lhs), ctx);
+        v->rhs = mapIt(move(v->rhs), ctx);
+
+        if constexpr (HAS_MEMBER_postTransformAssign<FUNC>::value) {
+            return PostPonePostTransform_Assign<FUNC, CTX, HAS_MEMBER_postTransformAssign<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+
+        return v;
+    }
+
+    unique_ptr<Expression> mapSend(unique_ptr<Send> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformSend<FUNC>::value) {
+            v = PostPonePreTransform_Send<FUNC, CTX, HAS_MEMBER_preTransformSend<FUNC>::value>::call(ctx, move(v),
+                                                                                                     func);
+        }
+        v->recv = mapIt(move(v->recv), ctx);
+        for (auto &arg : v->args) {
+            arg = mapIt(move(arg), ctx);
+            ENFORCE(arg.get() != nullptr);
+        }
+
+        if (v->block) {
+            auto nblock = mapBlock(move(v->block), ctx);
+            ENFORCE(isa_tree<Block>(nblock.get()), "block was mapped into not-a block");
+            v->block.reset(cast_tree<Block>(nblock.release()));
+        }
+
+        if constexpr (HAS_MEMBER_postTransformSend<FUNC>::value) {
+            return PostPonePostTransform_Send<FUNC, CTX, HAS_MEMBER_postTransformSend<FUNC>::value>::call(ctx, move(v),
+                                                                                                          func);
+        }
+
+        return v;
+    }
+
+    unique_ptr<Expression> mapHash(unique_ptr<Hash> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformHash<FUNC>::value) {
+            v = PostPonePreTransform_Hash<FUNC, CTX, HAS_MEMBER_preTransformHash<FUNC>::value>::call(ctx, move(v),
+                                                                                                     func);
+        }
+        for (auto &key : v->keys) {
+            key = mapIt(move(key), ctx);
+        }
+
+        for (auto &value : v->values) {
+            value = mapIt(move(value), ctx);
+        }
+
+        if constexpr (HAS_MEMBER_postTransformArray<FUNC>::value) {
+            return PostPonePostTransform_Hash<FUNC, CTX, HAS_MEMBER_postTransformHash<FUNC>::value>::call(ctx, move(v),
+                                                                                                          func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapArray(unique_ptr<Array> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformArray<FUNC>::value) {
+            v = PostPonePreTransform_Array<FUNC, CTX, HAS_MEMBER_preTransformArray<FUNC>::value>::call(ctx, move(v),
+                                                                                                       func);
+        }
+        for (auto &elem : v->elems) {
+            elem = mapIt(move(elem), ctx);
+        }
+
+        if constexpr (HAS_MEMBER_postTransformArray<FUNC>::value) {
+            return PostPonePostTransform_Array<FUNC, CTX, HAS_MEMBER_postTransformArray<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapLiteral(unique_ptr<Literal> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_postTransformLiteral<FUNC>::value) {
+            return PostPonePostTransform_Literal<FUNC, CTX, HAS_MEMBER_postTransformLiteral<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapUnresolvedConstantLit(unique_ptr<UnresolvedConstantLit> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>::value) {
+            return PostPonePostTransform_UnresolvedConstantLit<
+                FUNC, CTX, HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>::value>::call(ctx, move(v), func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapConstantLit(unique_ptr<ConstantLit> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_postTransformConstantLit<FUNC>::value) {
+            return PostPonePostTransform_ConstantLit<FUNC, CTX, HAS_MEMBER_postTransformConstantLit<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapBlock(unique_ptr<Block> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformBlock<FUNC>::value) {
+            v = PostPonePreTransform_Block<FUNC, CTX, HAS_MEMBER_preTransformBlock<FUNC>::value>::call(ctx, move(v),
+                                                                                                       func);
+        }
+
+        for (auto &arg : v->args) {
+            // Only OptionalArgs have subexpressions within them.
+            if (auto *optArg = cast_tree<OptionalArg>(arg.get())) {
+                optArg->default_ = mapIt(move(optArg->default_), ctx);
+            }
+        }
+        v->body = mapIt(move(v->body), ctx);
+
+        if constexpr (HAS_MEMBER_postTransformBlock<FUNC>::value) {
+            return PostPonePostTransform_Block<FUNC, CTX, HAS_MEMBER_postTransformBlock<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapInsSeq(unique_ptr<InsSeq> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformInsSeq<FUNC>::value) {
+            v = PostPonePreTransform_InsSeq<FUNC, CTX, HAS_MEMBER_preTransformInsSeq<FUNC>::value>::call(ctx, move(v),
+                                                                                                         func);
+        }
+
+        for (auto &stat : v->stats) {
+            stat = mapIt(move(stat), ctx);
+        }
+
+        v->expr = mapIt(move(v->expr), ctx);
+
+        if constexpr (HAS_MEMBER_postTransformInsSeq<FUNC>::value) {
+            return PostPonePostTransform_InsSeq<FUNC, CTX, HAS_MEMBER_postTransformInsSeq<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+
+        return v;
+    }
+
+    unique_ptr<Expression> mapLocal(unique_ptr<Local> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_postTransformLocal<FUNC>::value) {
+            return PostPonePostTransform_Local<FUNC, CTX, HAS_MEMBER_postTransformLocal<FUNC>::value>::call(
+                ctx, move(v), func);
+        }
+        return v;
+    }
+
+    unique_ptr<Expression> mapCast(unique_ptr<Cast> v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformCast<FUNC>::value) {
+            v = PostPonePreTransform_Cast<FUNC, CTX, HAS_MEMBER_preTransformCast<FUNC>::value>::call(ctx, move(v),
+                                                                                                     func);
+        }
+        v->arg = mapIt(move(v->arg), ctx);
+
+        if constexpr (HAS_MEMBER_postTransformCast<FUNC>::value) {
+            return PostPonePostTransform_Cast<FUNC, CTX, HAS_MEMBER_postTransformCast<FUNC>::value>::call(ctx, move(v),
+                                                                                                          func);
+        }
+
+        return v;
+    }
+
+    unique_ptr<Expression> mapIt(unique_ptr<Expression> what, CTX ctx) {
+        if (what == nullptr) {
+            return what;
+        }
+        auto loc = what->loc;
+
+        try {
+            // TODO: reorder by frequency
+            if constexpr (HAS_MEMBER_preTransformExpression<FUNC>::value) {
+                what = PostPonePreTransform_Expression<FUNC, CTX, HAS_MEMBER_preTransformExpression<FUNC>::value>::call(
+                    ctx, move(what), func);
+            }
+
+            if (isa_tree<EmptyTree>(what.get()) || isa_tree<ZSuperArgs>(what.get())) {
+                return what;
+            }
+
+            if (isa_tree<UnresolvedConstantLit>(what.get())) {
+                return mapUnresolvedConstantLit(
+                    std::unique_ptr<UnresolvedConstantLit>(static_cast<UnresolvedConstantLit *>(what.release())), ctx);
+            } else if (isa_tree<ConstantLit>(what.get())) {
+                return mapConstantLit(std::unique_ptr<ConstantLit>(static_cast<ConstantLit *>(what.release())), ctx);
+            } else if (isa_tree<Send>(what.get())) {
+                return mapSend(std::unique_ptr<Send>(static_cast<Send *>(what.release())), ctx);
+            } else if (isa_tree<Literal>(what.get())) {
+                return mapLiteral(std::unique_ptr<Literal>(static_cast<Literal *>(what.release())), ctx);
+            } else if (UnresolvedIdent *u = cast_tree<UnresolvedIdent>(what.get())) {
+                return mapUnresolvedIdent(
+                    std::unique_ptr<UnresolvedIdent>(static_cast<UnresolvedIdent *>(what.release())), ctx);
+            } else if (isa_tree<Local>(what.get())) {
+                return mapLocal(std::unique_ptr<Local>(static_cast<Local *>(what.release())), ctx);
+            } else if (isa_tree<MethodDef>(what.get())) {
+                return mapMethodDef(std::unique_ptr<MethodDef>(static_cast<MethodDef *>(what.release())), ctx);
+            } else if (isa_tree<InsSeq>(what.get())) {
+                return mapInsSeq(std::unique_ptr<InsSeq>(static_cast<InsSeq *>(what.release())), ctx);
+            } else if (isa_tree<Hash>(what.get())) {
+                return mapHash(std::unique_ptr<Hash>(static_cast<Hash *>(what.release())), ctx);
+            } else if (isa_tree<ClassDef>(what.get())) {
+                return mapClassDef(std::unique_ptr<ClassDef>(static_cast<ClassDef *>(what.release())), ctx);
+            } else if (isa_tree<If>(what.get())) {
+                return mapIf(std::unique_ptr<If>(static_cast<If *>(what.release())), ctx);
+            } else if (isa_tree<While>(what.get())) {
+                return mapWhile(std::unique_ptr<While>(static_cast<While *>(what.release())), ctx);
+            } else if (isa_tree<Break>(what.get())) {
+                return mapBreak(std::unique_ptr<Break>(static_cast<Break *>(what.release())), ctx);
+            } else if (isa_tree<Retry>(what.get())) {
+                return mapRetry(std::unique_ptr<Retry>(static_cast<Retry *>(what.release())), ctx);
+            } else if (isa_tree<Next>(what.get())) {
+                return mapNext(std::unique_ptr<Next>(static_cast<Next *>(what.release())), ctx);
+            } else if (isa_tree<Return>(what.get())) {
+                return mapReturn(std::unique_ptr<Return>(static_cast<Return *>(what.release())), ctx);
+            } else if (isa_tree<Rescue>(what.get())) {
+                return mapRescue(std::unique_ptr<Rescue>(static_cast<Rescue *>(what.release())), ctx);
+            } else if (isa_tree<Field>(what.get())) {
+                return mapField(std::unique_ptr<Field>(static_cast<Field *>(what.release())), ctx);
+            } else if (isa_tree<Assign>(what.get())) {
+                return mapAssign(std::unique_ptr<Assign>(static_cast<Assign *>(what.release())), ctx);
+            } else if (isa_tree<Array>(what.get())) {
+                return mapArray(std::unique_ptr<Array>(static_cast<Array *>(what.release())), ctx);
+            } else if (isa_tree<Cast>(what.get())) {
+                return mapCast(std::unique_ptr<Cast>(static_cast<Cast *>(what.release())), ctx);
+            } else {
+                Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+            }
+        } catch (SorbetException &e) {
+            Exception::failInFuzzer();
+
+            throw ReportedRubyException{e, loc};
+        }
+    }
+};
+
+class ShallowMap {
+public:
+    template <typename CTX, typename FUNC>
+    static unique_ptr<Expression> apply(CTX ctx, FUNC &func, unique_ptr<Expression> to) {
+        ShallowMapper<FUNC, CTX> walker(func);
+        try {
+            return walker.mapIt(move(to), ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.state.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
+    }
+};
+
+} // namespace sorbet::ast
 #endif // SORBET_TREEMAP_H
