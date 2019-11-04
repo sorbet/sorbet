@@ -521,16 +521,18 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     core::LocalVariable blkArgName;
     {
         auto argId = -1;
-        for (auto &arg : md->args) {
+        auto &args = cfg.symbol.data(cs)->arguments();
+        ENFORCE(args.size() == md->args.size());
+        for (auto &treeArg : md->args) {
             argId += 1;
-            cs.trace(arg->showRaw(cs));
-            if (ast::isa_tree<ast::OptionalArg>(arg.get())) {
+            auto &symArg = args[argId];
+            if (symArg.flags.isDefault) {
                 maxArgCount += 1;
                 continue;
             }
-            auto local = ast::cast_tree<ast::Local>(arg.get());
+            auto local = ast::cast_tree<ast::Local>(treeArg.get());
             ENFORCE(local);
-            if (cfg.symbol.data(cs)->arguments()[argId].flags.isBlock) {
+            if (symArg.flags.isBlock) {
                 blkArgName = local->localVariable;
                 continue;
             }
