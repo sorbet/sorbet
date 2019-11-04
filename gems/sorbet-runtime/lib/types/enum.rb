@@ -179,19 +179,28 @@ class T::Enum
   # See https://ruby-doc.org/core-2.4.0/String.html#method-i-3D-3D
   sig {returns(String)}
   def to_str
-    T::Configuration.soft_assert_handler(
-      'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.',
-      storytime: {class: self.class.name},
-    )
-    serialize.to_s
+    msg = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
+    if T::Configuration.legacy_t_enum_migration_mode?
+      T::Configuration.soft_assert_handler(
+        msg,
+        storytime: {class: self.class.name},
+      )
+      serialize.to_s
+    else
+      raise NoMethodError.new(msg)
+    end
   end
 
   sig {params(other: BasicObject).returns(T::Boolean).checked(:never)}
   def ==(other)
     case other
     when String
-      comparison_assertion_failed(:==, other)
-      self.serialize == other
+      if T::Configuration.legacy_t_enum_migration_mode?
+        comparison_assertion_failed(:==, other)
+        self.serialize == other
+      else
+        false
+      end
     else
       super(other)
     end
@@ -201,8 +210,12 @@ class T::Enum
   def ===(other)
     case other
     when String
-      comparison_assertion_failed(:===, other)
-      self.serialize == other
+      if T::Configuration.legacy_t_enum_migration_mode?
+        comparison_assertion_failed(:===, other)
+        self.serialize == other
+      else
+        false
+      end
     else
       super(other)
     end
