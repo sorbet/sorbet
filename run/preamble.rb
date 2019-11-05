@@ -5,6 +5,7 @@ module T
   def self.unsafe(value); value; end
   def self.any(left, right); end
   def self.all(left, right); end
+  def self.must(arg, msg=nil); arg; end
 end
 module T::Sig
   def sig(arg=nil, &blk); end
