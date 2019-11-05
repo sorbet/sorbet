@@ -120,6 +120,7 @@ module T::Configuration
   def self.default_checked_level=(default_checked_level); end
   def self.enable_checking_for_sigs_marked_checked_tests; end
   def self.enable_final_checks_on_hooks; end
+  def self.enable_legacy_t_enum_migration_mode; end
   def self.reset_final_checks_on_hooks; end
   def self.hard_assert_handler(str, extra); end
   def self.hard_assert_handler=(value); end
