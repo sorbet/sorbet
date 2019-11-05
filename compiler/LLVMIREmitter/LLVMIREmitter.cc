@@ -636,7 +636,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         for (auto i = 0; i < numOptionalArgs; i++) {
             auto &block = fillFromDefaultBlocks[i];
             builder.SetInsertPoint(block);
-            if (md->name.data(cs)->kind == core::NameKind::UNIQUE &&
+            if (funId == 0 && md->name.data(cs)->kind == core::NameKind::UNIQUE &&
                 md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) {
                 // This method is already a default method so don't fill in
                 // another other defaults for it or else it is turtles all the
