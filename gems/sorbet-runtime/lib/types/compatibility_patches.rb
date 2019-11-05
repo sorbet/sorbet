@@ -31,8 +31,26 @@ if defined? ::RSpec::Mocks::AnyInstance
           T::Private::Methods.maybe_run_sig_block_for_method(method)
           super(method_name)
         end
+
+        def stash
+          T::Private::Methods.maybe_run_sig_block_for_method(@object.method(@method))
+          super
+        end
       end
       ::RSpec::Mocks::AnyInstance::Recorder.prepend(RecorderExtensions)
     end
   end
 end
+
+module T
+  module CompatibilityPatches
+    module StasherExtensions
+      def stash
+        T::Private::Methods.maybe_run_sig_block_for_method(@object.method(@method))
+        super
+      end
+    end
+    ::RSpec::Mocks::InstanceMethodStasher.prepend(StasherExtensions)
+  end
+end
+
