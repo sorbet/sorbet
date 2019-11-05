@@ -643,21 +643,6 @@ public:
         return method;
     }
 
-    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
-                                                             unique_ptr<ast::UnresolvedIdent> nm) {
-        ENFORCE(nm->kind != ast::UnresolvedIdent::Local, "Unresolved local left after `name_locals`");
-
-        if (nm->kind == ast::UnresolvedIdent::Global) {
-            auto sym = ctx.state.lookupSymbol(core::Symbols::root(), nm->name);
-            if (!sym.exists()) {
-                sym = ctx.state.enterFieldSymbol(nm->loc, core::Symbols::root(), nm->name);
-            }
-            return make_unique<ast::Field>(nm->loc, sym);
-        } else {
-            return nm;
-        }
-    }
-
     // Returns the SymbolRef corresponding to the class `self.class`, unless the
     // context is a class, in which case return it.
     core::SymbolRef contextClass(core::GlobalState &gs, core::SymbolRef ofWhat) const {

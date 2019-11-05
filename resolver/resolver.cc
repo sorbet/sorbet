@@ -2062,6 +2062,12 @@ public:
         ENFORCE(false, "These should have all been removed: {}", original->toString(ctx));
         return original;
     }
+    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
+                                                             unique_ptr<ast::UnresolvedIdent> original) {
+        ENFORCE(original->kind != ast::UnresolvedIdent::Local, "{} should have been removed by local_vars",
+                original->toString(ctx));
+        return original;
+    }
     unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
                                                           unique_ptr<ast::ConstantLit> original) {
         ENFORCE(ResolveConstantsWalk::isAlreadyResolved(ctx, *original));
