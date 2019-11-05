@@ -22,7 +22,7 @@ echo "require '$base/run/patch_require.rb';" >> "$runfile"
 
 rb=$1
 shift
-echo "require '$base/$rb';" >> "$runfile"
+echo "load '$base/$rb';" >> "$runfile"
 
 setRoot() {
     root=$( cd "$(dirname "$rb")"; pwd -P)
