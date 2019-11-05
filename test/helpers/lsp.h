@@ -10,6 +10,8 @@ using namespace sorbet::realmain::lsp;
 
 std::string filePathToUri(std::string_view prefixUrl, std::string_view filePath);
 
+bool isUriATestFile(std::string_view prefixUrl, std::string_view uri);
+
 std::string uriToFilePath(std::string_view prefixUrl, std::string_view uri);
 
 /** Creates the parameters to the `initialize` message, which advertises the client's capabilities. */

@@ -1,6 +1,5 @@
 # typed: true
 
-
 def foo
   # ^^^ symbol-search: "foo"
 end

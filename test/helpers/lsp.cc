@@ -2,6 +2,7 @@
 #include <cxxopts.hpp>
 // has to go first as it violates requirements
 
+#include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/sort.h"
 #include "test/helpers/lsp.h"
@@ -13,8 +14,12 @@ string filePathToUri(string_view prefixUrl, string_view filePath) {
     return fmt::format("{}/{}", prefixUrl, filePath);
 }
 
+bool isUriATestFile(string_view prefixUrl, string_view uri) {
+    return absl::StartsWith(uri, prefixUrl);
+}
+
 string uriToFilePath(string_view prefixUrl, string_view uri) {
-    if (uri.substr(0, prefixUrl.length()) != prefixUrl) {
+    if (!isUriATestFile(prefixUrl, uri)) {
         ADD_FAILURE() << fmt::format(
             "Unrecognized URI: `{}` is not contained in root URI `{}`, and thus does not correspond to a test file.",
             uri, prefixUrl);
