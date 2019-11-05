@@ -22,8 +22,8 @@ struct BasicBlockMap {
     llvm::BasicBlock *sigVerificationBlock;
     std::vector<std::shared_ptr<core::SendAndBlockLink>> blockLinks;
     std::vector<std::vector<core::LocalVariable>> rubyBlockArgs;
+    std::vector<llvm::Function *> rubyBlocks2Functions;
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
-    std::vector<llvm::Function *> &rubyBlocks2Functions;
 };
 
 struct Alias {

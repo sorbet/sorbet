@@ -15,7 +15,7 @@ using namespace std;
 namespace sorbet::compiler {
 
 UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
-setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, vector<llvm::Function *> &rubyBlocks2Functions,
+setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
                     const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
                     const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases) {
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
@@ -176,12 +176,12 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
                                                                      unique_ptr<ast::MethodDef> &md,
                                                                      UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                                      llvm::Function *mainFunc) {
-    vector<llvm::Function *> rubyBlocks2Functions = getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc);
+    vector<llvm::Function *> rubyBlock2Function = getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto [variablesPrivateToBlocks, escapedVariableIndices] = findCaptures(cs, md, cfg);
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
-    vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlocks2Functions.size());
+    vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
     vector<llvm::AllocaInst *> sendArgArrays;
     vector<llvm::Value *> escapedClosure;
     vector<int> basicBlockJumpOverrides(cfg.maxBasicBlockId);
@@ -192,7 +192,7 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
         }
     }
     int i = 0;
-    for (auto &fun : rubyBlocks2Functions) {
+    for (auto &fun : rubyBlock2Function) {
         auto inits = functionInitializersByFunction.emplace_back(llvm::BasicBlock::Create(
             cs, "functionEntryInitializers",
             fun)); // we will build a link for this block later, after we finish building expressions into it
@@ -217,20 +217,20 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
         i++;
     }
 
-    llvm::BasicBlock *sigVerificationBlock = llvm::BasicBlock::Create(cs, "checkSig", rubyBlocks2Functions[0]);
+    llvm::BasicBlock *sigVerificationBlock = llvm::BasicBlock::Create(cs, "checkSig", rubyBlock2Function[0]);
 
     vector<llvm::BasicBlock *> llvmBlocks(cfg.maxBasicBlockId);
     for (auto &b : cfg.basicBlocks) {
         if (b.get() == cfg.entry()) {
             llvmBlocks[b->id] = userEntryBlockByFunction[0] =
-                llvm::BasicBlock::Create(cs, "userEntry", rubyBlocks2Functions[0]);
+                llvm::BasicBlock::Create(cs, "userEntry", rubyBlock2Function[0]);
         } else {
             llvmBlocks[b->id] = llvm::BasicBlock::Create(cs, llvm::Twine("BB") + llvm::Twine(b->id),
-                                                         rubyBlocks2Functions[b->rubyBlockId]);
+                                                         rubyBlock2Function[b->rubyBlockId]);
         }
     }
-    vector<shared_ptr<core::SendAndBlockLink>> blockLinks(rubyBlocks2Functions.size());
-    vector<vector<core::LocalVariable>> rubyBlockArgs(rubyBlocks2Functions.size());
+    vector<shared_ptr<core::SendAndBlockLink>> blockLinks(rubyBlock2Function.size());
+    vector<vector<core::LocalVariable>> rubyBlockArgs(rubyBlock2Function.size());
 
     {
         // fill in data about args for main function
@@ -275,22 +275,21 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
         }
     }
 
-    auto approximation = BasicBlockMap{cfg.symbol,
-                                       functionInitializersByFunction,
-                                       argumentSetupBlocksByFunction,
-                                       userEntryBlockByFunction,
-                                       llvmBlocks,
-                                       move(basicBlockJumpOverrides),
-                                       move(sendArgArrays),
-                                       escapedClosure,
-                                       std::move(escapedVariableIndices),
-                                       sigVerificationBlock,
-                                       move(blockLinks),
-                                       move(rubyBlockArgs),
-                                       {},
-                                       rubyBlocks2Functions};
-    approximation.llvmVariables =
-        setupLocalVariables(cs, cfg, rubyBlocks2Functions, variablesPrivateToBlocks, approximation, aliases);
+    BasicBlockMap approximation{cfg.symbol,
+                                functionInitializersByFunction,
+                                argumentSetupBlocksByFunction,
+                                userEntryBlockByFunction,
+                                llvmBlocks,
+                                move(basicBlockJumpOverrides),
+                                move(sendArgArrays),
+                                escapedClosure,
+                                std::move(escapedVariableIndices),
+                                sigVerificationBlock,
+                                move(blockLinks),
+                                move(rubyBlockArgs),
+                                move(rubyBlock2Function),
+                                {}};
+    approximation.llvmVariables = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation, aliases);
 
     return approximation;
 }
