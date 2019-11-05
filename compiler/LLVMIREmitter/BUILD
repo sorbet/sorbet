@@ -1,9 +1,10 @@
 cc_library(
     name = "LLVMIREmitter",
-    srcs = [
-        "LLVMIREmitter.cc",
-        "LLVMIREmitter.h",
-    ],
+    srcs = glob([
+        "*.cc",
+        "*.h",
+    ]),
+    hdrs = ["LLVMIREmitter.h"],
     linkstatic = 1,
     visibility = ["//visibility:public"],
     deps = [
