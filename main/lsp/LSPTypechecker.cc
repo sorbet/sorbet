@@ -29,9 +29,8 @@ void LSPTypechecker::initialize(LSPFileUpdates updates) {
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates) {
-    bool committed = true;
     auto run = runTypechecking(move(updates));
-    committed = !run.canceled;
+    auto committed = !run.canceled;
     commitTypecheckRun(move(run));
     return committed;
 }
