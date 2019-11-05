@@ -1436,7 +1436,7 @@ private:
     }
 
     // These will already be handled by DefaultArgs Rewriter pass
-    void deleteOptionlArg(core::MutableContext ctx, ast::MethodDef *mdef) {
+    void deleteOptionlArg(core::Context ctx, ast::MethodDef *mdef) {
         for (auto &arg : mdef->args) {
             if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(arg.get())) {
                 optArgExp->default_ = nullptr;
@@ -1614,8 +1614,6 @@ private:
                     // OVERLOAD
                     lastSigs.clear();
                 }
-
-                deleteOptionlArg(ctx, mdef);
 
                 if (mdef->symbol.data(ctx)->isAbstract()) {
                     if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
@@ -1842,6 +1840,7 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
+        deleteOptionlArg(ctx, original.get());
         nestedBlockCounts.pop_back();
         return original;
     }
