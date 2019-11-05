@@ -436,6 +436,18 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             return fnd.type;
         }
         case core::Names::enum_()._id: {
+            auto beginPos = send->loc.beginPos();
+            constexpr u4 offset = char_traits<char>::length("T.enum");
+            auto endPos = beginPos + offset;
+            auto replacementLoc = core::Loc{send->loc.file(), beginPos, endPos};
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::DeprecatedEnum)) {
+                e.setHeader("`{}` is deprecated in favor of `{}`", "T.enum", "T::Enum");
+                e.replaceWith("Replace with `T.deprecated_enum`", replacementLoc, "T.deprecated_enum");
+            }
+
+            return core::Types::untypedUntracked();
+        }
+        case core::Names::deprecatedEnum()._id: {
             if (send->args.size() != 1) {
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();

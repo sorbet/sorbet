@@ -110,6 +110,7 @@ NameDef names[] = {
     {"all"},
     {"any"},
     {"enum_", "enum"},
+    {"deprecatedEnum", "deprecated_enum"},
     {"enums"},
     {"nilable"},
     {"proc"},
