@@ -212,6 +212,9 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
             if (argSym.flags.isBlock) {
                 continue;
             }
+            if (argSym.flags.isDefault) {
+                continue;
+            }
             if (argSym.flags.isKeyword) {
                 absl::StrAppend(&s, argSym.name.data(gs)->shortName(gs), ": ");
             }
