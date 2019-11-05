@@ -387,83 +387,85 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
 
     auto &queryResponses = result.responses;
     vector<unique_ptr<CompletionItem>> items;
-    if (!queryResponses.empty()) {
-        auto resp = move(queryResponses[0]);
+    if (queryResponses.empty()) {
+        response->result = std::move(emptyResult);
+        return response;
+    }
 
-        if (auto sendResp = resp->isSend()) {
-            auto prefix = sendResp->callerSideName.data(gs)->shortName(gs);
-            config->logger->debug("Looking for method similar to {}", prefix);
+    auto resp = move(queryResponses[0]);
 
-            // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
-            auto similarKeywords = sendResp->isPrivateOk ? allSimilarKeywords(prefix) : vector<RubyKeyword>{};
+    if (auto sendResp = resp->isSend()) {
+        auto prefix = sendResp->callerSideName.data(gs)->shortName(gs);
+        config->logger->debug("Looking for method similar to {}", prefix);
 
-            auto similarMethodsByName = allSimilarMethods(gs, *sendResp->dispatchResult, prefix);
-            for (auto &[methodName, similarMethods] : similarMethodsByName) {
-                fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
-                    if (left.depth != right.depth) {
-                        return left.depth < right.depth;
-                    }
+        // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
+        auto similarKeywords = sendResp->isPrivateOk ? allSimilarKeywords(prefix) : vector<RubyKeyword>{};
 
-                    return left.method._id < right.method._id;
-                });
-            }
-
-            auto deduped = vector<SimilarMethod>{};
-            for (auto &[methodName, similarMethods] : similarMethodsByName) {
-                if (methodName.data(gs)->kind == core::NameKind::UNIQUE &&
-                    methodName.data(gs)->unique.uniqueNameKind == core::UniqueNameKind::MangleRename) {
-                    // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
-                    // unique names, because we want each overload to show up but those use unique names.
-                    continue;
-                }
-
-                // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
-                auto similarMethod = similarMethods[0];
-
-                if (similarMethod.method.data(gs)->isPrivate() && !sendResp->isPrivateOk) {
-                    continue;
-                }
-
-                deduped.emplace_back(similarMethod);
-            }
-
-            fast_sort(deduped, [&](const auto &left, const auto &right) -> bool {
+        auto similarMethodsByName = allSimilarMethods(gs, *sendResp->dispatchResult, prefix);
+        for (auto &[methodName, similarMethods] : similarMethodsByName) {
+            fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
                 if (left.depth != right.depth) {
                     return left.depth < right.depth;
                 }
 
-                auto leftShortName = left.method.data(gs)->name.data(gs)->shortName(gs);
-                auto rightShortName = right.method.data(gs)->name.data(gs)->shortName(gs);
-                if (leftShortName != rightShortName) {
-                    if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
-                        return true;
-                    }
-                    if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
-                        return false;
-                    }
-
-                    return leftShortName < rightShortName;
-                }
-
                 return left.method._id < right.method._id;
             });
-
-            // TODO(jez) Do something smarter here than "all matching keywords always come first"
-            for (auto &similarKeyword : similarKeywords) {
-                items.push_back(
-                    getCompletionItemForKeyword(gs, *config, similarKeyword, queryLoc, prefix, items.size()));
-            }
-            for (auto &similarMethod : deduped) {
-                items.push_back(getCompletionItemForSymbol(gs, similarMethod.method, similarMethod.receiverType,
-                                                           similarMethod.constr.get(), queryLoc, prefix, items.size()));
-            }
-        } else if (auto constantResp = resp->isConstant()) {
-            if (!config->opts.lspAutocompleteEnabled) {
-                response->result = std::move(emptyResult);
-                return response;
-            }
-            findSimilarConstantOrIdent(gs, constantResp->retType.type, queryLoc, items);
         }
+
+        auto deduped = vector<SimilarMethod>{};
+        for (auto &[methodName, similarMethods] : similarMethodsByName) {
+            if (methodName.data(gs)->kind == core::NameKind::UNIQUE &&
+                methodName.data(gs)->unique.uniqueNameKind == core::UniqueNameKind::MangleRename) {
+                // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
+                // unique names, because we want each overload to show up but those use unique names.
+                continue;
+            }
+
+            // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
+            auto similarMethod = similarMethods[0];
+
+            if (similarMethod.method.data(gs)->isPrivate() && !sendResp->isPrivateOk) {
+                continue;
+            }
+
+            deduped.emplace_back(similarMethod);
+        }
+
+        fast_sort(deduped, [&](const auto &left, const auto &right) -> bool {
+            if (left.depth != right.depth) {
+                return left.depth < right.depth;
+            }
+
+            auto leftShortName = left.method.data(gs)->name.data(gs)->shortName(gs);
+            auto rightShortName = right.method.data(gs)->name.data(gs)->shortName(gs);
+            if (leftShortName != rightShortName) {
+                if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
+                    return true;
+                }
+                if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
+                    return false;
+                }
+
+                return leftShortName < rightShortName;
+            }
+
+            return left.method._id < right.method._id;
+        });
+
+        // TODO(jez) Do something smarter here than "all matching keywords always come first"
+        for (auto &similarKeyword : similarKeywords) {
+            items.push_back(getCompletionItemForKeyword(gs, *config, similarKeyword, queryLoc, prefix, items.size()));
+        }
+        for (auto &similarMethod : deduped) {
+            items.push_back(getCompletionItemForSymbol(gs, similarMethod.method, similarMethod.receiverType,
+                                                       similarMethod.constr.get(), queryLoc, prefix, items.size()));
+        }
+    } else if (auto constantResp = resp->isConstant()) {
+        if (!config->opts.lspAutocompleteEnabled) {
+            response->result = std::move(emptyResult);
+            return response;
+        }
+        findSimilarConstantOrIdent(gs, constantResp->retType.type, queryLoc, items);
     }
 
     response->result = make_unique<CompletionList>(false, move(items));
