@@ -19,3 +19,37 @@ class B
   protected :f4
   private_class_method :f5
 end
+
+
+class C
+  private :foo
+  def foo; end  # this does not end up being private
+end
+
+class Foo1
+  def foo;  # this does not end up being private
+  end
+  private_class_method :foo
+end
+
+class Foo2
+  def self.foo;  # this does not end up being private
+  end
+  private :foo
+end
+
+class Foo3
+  def self.foo;
+  end
+  class <<self
+    private :foo
+  end
+end
+
+class Foo4
+  class <<self
+    def foo;
+    end
+    private :foo
+  end
+end
