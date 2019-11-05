@@ -12,17 +12,17 @@
 # @example Declaring an Enum:
 #   class Suit < T::Enum
 #     enums do
-#       CLUB = T.let(new, Suit)
-#       SPADE = T.let(new, Suit)
-#       DIAMOND = T.let(new, Suit)
-#       HEART = T.let(new, Suit)
+#       CLUB = new
+#       SPADE = new
+#       DIAMOND = new
+#       HEART = new
 #     end
 #   end
 #
 # @example Custom serialization value:
 #   class Status < T::Enum
 #     enums do
-#       READY = T.let(new('rdy'), Status)
+#       READY = new('rdy')
 #       ...
 #     end
 #   end
@@ -31,7 +31,7 @@
 #   Suit::SPADE
 #
 # @example Converting from serialized value to enum instance:
-#   Suit.from_serialized('club') == Suit::CLUB
+#   Suit.deserialize('club') == Suit::CLUB
 #
 # @example Using enums in type signatures:
 #   sig {params(suit: Suit).returns(Boolean)}
