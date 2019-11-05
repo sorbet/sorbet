@@ -58,7 +58,7 @@ ast::Send *asEnumsDo(ast::Expression *stat) {
 
 // TODO(jez) Change this error message after making everything T::Enum
 vector<unique_ptr<ast::Expression>> badConst(core::MutableContext ctx, core::Loc headerLoc, core::Loc line1Loc) {
-    if (auto e = ctx.state.beginError(headerLoc, core::errors::rewriter::OpusEnumConstNotEnumValue)) {
+    if (auto e = ctx.state.beginError(headerLoc, core::errors::Rewriter::OpusEnumConstNotEnumValue)) {
         e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "Opus::Enum");
         e.addErrorLine(line1Loc, "Enclosing definition here");
     }
@@ -117,7 +117,7 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
     // So we're good to process this thing as a new Opus::Enum value.
 
     if (fromWhere != FromWhere::Inside) {
-        if (auto e = ctx.state.beginError(stat->loc, core::errors::rewriter::OpusEnumOutsideEnumsDo)) {
+        if (auto e = ctx.state.beginError(stat->loc, core::errors::Rewriter::OpusEnumOutsideEnumsDo)) {
             e.setHeader("Definition of enum value `{}` must be within the `{}` block for this `{}`",
                         lhs->cnst.show(ctx), "enums do", "Opus::Enum");
             e.addErrorLine(klass->declLoc, "Enclosing definition here");
