@@ -24,11 +24,13 @@ target triple = "x86_64-apple-darwin18.2.0"
 @rb_cModule = external local_unnamed_addr constant i64, align 8
 @str_cast = private unnamed_addr constant [5 x i8] c"cast\00", align 1
 @"str_T.class_of(<root>)" = private unnamed_addr constant [19 x i8] c"T.class_of(<root>)\00", align 1
-@rubyIdPrecomputed_each = internal unnamed_addr global i64 0, align 8
-@str_each = private unnamed_addr constant [5 x i8] c"each\00", align 1
+@rubyIdPrecomputed_map = internal unnamed_addr global i64 0, align 8
+@str_map = private unnamed_addr constant [4 x i8] c"map\00", align 1
+@"rubyIdPrecomputed_+" = internal unnamed_addr global i64 0, align 8
+@"str_+" = private unnamed_addr constant [2 x i8] c"+\00", align 1
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
-@llvm.global_ctors = appending global [2 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_each, i8* bitcast (i64* @rubyIdPrecomputed_each to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }]
+@llvm.global_ctors = appending global [3 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_map, i8* bitcast (i64* @rubyIdPrecomputed_map to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_+", i8* bitcast (i64* @"rubyIdPrecomputed_+" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }]
 
 ; Function Attrs: nounwind ssp uwtable
 define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
@@ -150,7 +152,7 @@ declare i64 @rb_class_inherited_p(i64, i64) local_unnamed_addr #7
 define internal i64 @"func_<S <C <U <root>>> $1><N <U <static-init>> $110>$block_1"(i64 %firstYieldArgRaw, i64 %captures, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #8 {
 functionEntryInitializers:
   %callArgs = alloca [2 x i64], align 8
-  %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
+  %"rubyId_+" = load i64, i64* @"rubyIdPrecomputed_+", align 8
   %default0 = icmp eq i32 %argc, 0
   br i1 %default0, label %fillFromDefaultBlockDone, label %fillFromArgBlock0, !prof !0
 
@@ -161,23 +163,25 @@ fillFromArgBlock0:                                ; preds = %functionEntryInitia
 fillFromDefaultBlockDone:                         ; preds = %functionEntryInitializers, %fillFromArgBlock0
   %x.sroa.0.0 = phi i64 [ %rawArg_x, %fillFromArgBlock0 ], [ 8, %functionEntryInitializers ]
   %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
-  store i64 %x.sroa.0.0, i64* %callArgsAddr, align 8
-  %0 = inttoptr i64 %captures to %struct.RTypedData*
-  %1 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %0, i64 0, i32 3
-  %2 = bitcast i8** %1 to %struct.sorbet_Closure**
-  %3 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %2, align 8, !tbaa !10
-  %4 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %3, i64 0, i32 1, i64 0
-  %5 = load i64, i64* %4, align 8
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #12, !noalias !13
-  %6 = call i64 @rb_funcallv(i64 %5, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #12
-  ret i64 %6
+  store i64 3, i64* %callArgsAddr, align 8
+  tail call void @dbg_sorbet_validate_id(i64 %"rubyId_+", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #12, !noalias !10
+  %0 = call i64 @rb_funcallv(i64 %x.sroa.0.0, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr) #12
+  ret i64 %0
 }
 
 ; Function Attrs: nounwind ssp
-define internal void @Constr_rubyIdPrecomputed_each() #8 {
+define internal void @Constr_rubyIdPrecomputed_map() #8 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_each, i64 0, i64 0), i64 4) #12
-  store i64 %0, i64* @rubyIdPrecomputed_each, align 8
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_map, i64 0, i64 0), i64 3) #12
+  store i64 %0, i64* @rubyIdPrecomputed_map, align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal void @"Constr_rubyIdPrecomputed_+"() #8 {
+constr:
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+", i64 0, i64 0), i64 1) #12
+  store i64 %0, i64* @"rubyIdPrecomputed_+", align 8
   ret void
 }
 
@@ -202,11 +206,12 @@ entry:
   %5 = inttoptr i64 %4 to %struct.RTypedData*
   %6 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %5, i64 0, i32 3
   %7 = bitcast i8** %6 to %struct.sorbet_Closure**
-  %8 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !10
+  %8 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !13
   %9 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %8, i64 0, i32 1, i64 0
   store i64 8, i64* %9, align 8
-  %rubyId_each.i = load i64, i64* @rubyIdPrecomputed_each, align 8
-  %10 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !10
+  %rubyId_map.i = load i64, i64* @rubyIdPrecomputed_map, align 8
+  %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
+  %10 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !13
   %11 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %10, i64 0, i32 1, i64 0
   store i64 %0, i64* %11, align 8
   %12 = tail call i32 @rb_block_given_p() #12
@@ -218,7 +223,7 @@ entry:
   br label %sorbet_getMethodBlockAsProc.exit.i
 
 sorbet_getMethodBlockAsProc.exit.i:               ; preds = %14, %entry
-  %16 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !10
+  %16 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !13
   %17 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %16, i64 0, i32 1, i64 0
   %18 = load i64, i64* %17, align 8
   %19 = icmp eq i64 %18, %0
@@ -244,8 +249,11 @@ typeTestFail.i:                                   ; preds = %sorbet_isa_class_of
   %27 = tail call i64 @rb_ary_push(i64 %26, i64 3) #12
   %28 = tail call i64 @rb_ary_push(i64 %26, i64 5) #12
   %29 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_each.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #12, !noalias !17
-  %30 = call i64 @rb_block_call(i64 %26, i64 %rubyId_each.i, i32 0, i64* nonnull %29, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<S <C <U <root>>> $1><N <U <static-init>> $110>$block_1" to i64 (...)*), i64 %4) #12
+  tail call void @dbg_sorbet_validate_id(i64 %rubyId_map.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #12, !noalias !17
+  %30 = call i64 @rb_block_call(i64 %26, i64 %rubyId_map.i, i32 0, i64* nonnull %29, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<S <C <U <root>>> $1><N <U <static-init>> $110>$block_1" to i64 (...)*), i64 %4) #12
+  store i64 %30, i64* %29, align 8
+  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #12, !noalias !20
+  %31 = call i64 @rb_funcallv(i64 %18, i64 %rubyId_puts.i, i32 1, i64* nonnull %29) #12
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %1)
   ret void
 }
@@ -281,13 +289,16 @@ attributes #13 = { noreturn nounwind }
 !7 = !{!3, !3, i64 0}
 !8 = !{!9, !9, i64 0}
 !9 = !{!"int", !4, i64 0}
-!10 = !{!11, !12, i64 32}
-!11 = !{!"RTypedData", !2, i64 0, !12, i64 16, !3, i64 24, !12, i64 32}
-!12 = !{!"any pointer", !4, i64 0}
-!13 = !{!14}
-!14 = distinct !{!14, !15, !"sorbet_callFunc: argument 0"}
-!15 = distinct !{!15, !"sorbet_callFunc"}
+!10 = !{!11}
+!11 = distinct !{!11, !12, !"sorbet_callFunc: argument 0"}
+!12 = distinct !{!12, !"sorbet_callFunc"}
+!13 = !{!14, !15, i64 32}
+!14 = !{!"RTypedData", !2, i64 0, !15, i64 16, !3, i64 24, !15, i64 32}
+!15 = !{!"any pointer", !4, i64 0}
 !16 = !{!"branch_weights", i32 1073205, i32 2146410443}
 !17 = !{!18}
 !18 = distinct !{!18, !19, !"sorbet_callFuncBlock: argument 0"}
 !19 = distinct !{!19, !"sorbet_callFuncBlock"}
+!20 = !{!21}
+!21 = distinct !{!21, !22, !"sorbet_callFunc: argument 0"}
+!22 = distinct !{!22, !"sorbet_callFunc"}

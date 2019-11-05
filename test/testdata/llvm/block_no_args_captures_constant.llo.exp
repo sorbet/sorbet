@@ -464,7 +464,7 @@ const_continue:                                   ; preds = %const_slowPath, %ty
   %24 = call i64 @rb_funcallv(i64 %23, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #17
   call void @dbg_sorbet_validate_id(i64 %rubyId_times, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !20
   %25 = call i64 @rb_block_call(i64 21, i64 %rubyId_times, i32 0, i64* nonnull %callArgsAddr, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<C <U Object>><U foo>$block_1" to i64 (...)*), i64 %2) #17
-  ret i64 8
+  ret i64 %25
 
 const_slowPath:                                   ; preds = %typeTestSuccess
   tail call void @const_recompute_A() #17
