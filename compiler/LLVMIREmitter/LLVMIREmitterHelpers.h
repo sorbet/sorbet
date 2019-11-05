@@ -66,7 +66,6 @@ public:
     static BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                           std::unique_ptr<ast::MethodDef> &md,
                                                           std::vector<llvm::Function *> rubyBlocks2Functions,
-                                                          int maxSendArgCount,
                                                           UnorderedMap<core::LocalVariable, Alias> &aliases);
 };
 } // namespace sorbet::compiler

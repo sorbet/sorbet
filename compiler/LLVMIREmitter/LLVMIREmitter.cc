@@ -898,20 +898,6 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
     }
 }
 
-int getMaxSendArgCount(cfg::CFG &cfg) {
-    int maxSendArgCount = 0;
-    for (auto &bb : cfg.basicBlocks) {
-        for (cfg::Binding &bind : bb->exprs) {
-            if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
-                if (maxSendArgCount < snd->args.size()) {
-                    maxSendArgCount = snd->args.size();
-                }
-            }
-        }
-    }
-    return maxSendArgCount;
-}
-
 void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
                          const UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap) {
     llvm::IRBuilder<> builder(cs);
@@ -923,7 +909,6 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
 
 void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
     UnorderedMap<core::LocalVariable, Alias> aliases;
-    const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto func = getOrCreateFunction(cs, md->symbol);
     {
         // setup function argument names
@@ -938,8 +923,8 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
 
     vector<llvm::Function *> rubyBlocks2Functions = LLVMIREmitterHelpers::getRubyBlocks2FunctionsMapping(cs, cfg, func);
 
-    const BasicBlockMap blockMap = LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(
-        cs, cfg, md, rubyBlocks2Functions, maxSendArgCount, aliases);
+    const BasicBlockMap blockMap =
+        LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, rubyBlocks2Functions, aliases);
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 

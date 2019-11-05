@@ -129,9 +129,25 @@ findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg)
     return {std::move(ret), std::move(escapedVariableIndexes)};
 }
 
-BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(
-    CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, vector<llvm::Function *> rubyBlocks2Functions,
-    int maxSendArgCount, UnorderedMap<core::LocalVariable, Alias> &aliases) {
+int getMaxSendArgCount(cfg::CFG &cfg) {
+    int maxSendArgCount = 0;
+    for (auto &bb : cfg.basicBlocks) {
+        for (cfg::Binding &bind : bb->exprs) {
+            if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
+                if (maxSendArgCount < snd->args.size()) {
+                    maxSendArgCount = snd->args.size();
+                }
+            }
+        }
+    }
+    return maxSendArgCount;
+}
+
+BasicBlockMap
+LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
+                                                       vector<llvm::Function *> rubyBlocks2Functions,
+                                                       UnorderedMap<core::LocalVariable, Alias> &aliases) {
+    const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto [variablesPrivateToBlocks, escapedVariableIndices] = findCaptures(cs, md, cfg);
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
