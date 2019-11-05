@@ -395,9 +395,8 @@ vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blo
 }
 
 void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
-                    vector<llvm::Function *> &rubyBlocks2Functions,
-                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
-                    const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases) {
+                    vector<llvm::Function *> &rubyBlocks2Functions, const BasicBlockMap &blockMap,
+                    UnorderedMap<core::LocalVariable, Alias> &aliases) {
     // this function effectively generate an optimized build of
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(cs);
@@ -1017,7 +1016,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
-    setupArguments(cs, cfg, md, rubyBlocks2Functions, variablesPrivateToBlocks, blockMap, aliases);
+    setupArguments(cs, cfg, md, rubyBlocks2Functions, blockMap, aliases);
     emitSigVerification(cs, cfg, md, aliases, blockMap);
 
     emitUserBody(cs, cfg, blockMap, aliases, rubyBlocks2Functions);
