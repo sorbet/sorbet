@@ -23,6 +23,7 @@ struct BasicBlockMap {
     std::vector<std::shared_ptr<core::SendAndBlockLink>> blockLinks;
     std::vector<std::vector<core::LocalVariable>> rubyBlockArgs;
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
+    std::vector<llvm::Function *> &rubyBlocks2Functions;
 };
 
 struct Alias {
@@ -60,13 +61,10 @@ struct Alias {
 
 class LLVMIREmitterHelpers {
 public:
-    static std::vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg,
-                                                                        llvm::Function *func);
-
     static BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                           std::unique_ptr<ast::MethodDef> &md,
-                                                          std::vector<llvm::Function *> rubyBlocks2Functions,
-                                                          UnorderedMap<core::LocalVariable, Alias> &aliases);
+                                                          UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                                          llvm::Function *mainFunc);
 };
 } // namespace sorbet::compiler
 #endif

@@ -394,14 +394,13 @@ vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blo
     return res;
 }
 
-void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
-                    vector<llvm::Function *> &rubyBlocks2Functions, const BasicBlockMap &blockMap,
+void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const BasicBlockMap &blockMap,
                     UnorderedMap<core::LocalVariable, Alias> &aliases) {
     // this function effectively generate an optimized build of
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(cs);
-    for (auto funcId = 0; funcId < rubyBlocks2Functions.size(); funcId++) {
-        auto func = rubyBlocks2Functions[funcId];
+    for (auto funcId = 0; funcId < blockMap.rubyBlocks2Functions.size(); funcId++) {
+        auto func = blockMap.rubyBlocks2Functions[funcId];
         builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[funcId]);
         auto maxArgCount = 0;
         auto minArgCount = 0;
@@ -637,8 +636,7 @@ void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> &builder) {
 }
 
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
-                  UnorderedMap<core::LocalVariable, Alias> &aliases,
-                  const vector<llvm::Function *> &rubyBlocks2Functions) {
+                  UnorderedMap<core::LocalVariable, Alias> &aliases) {
     llvm::IRBuilder<> builder(cs);
     UnorderedSet<core::LocalVariable> loadYieldParamsResults; // methods calls on these are ignored
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
@@ -761,7 +759,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                                 cs.module->getFunction("sorbet_callFuncBlock"),
                                 {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
                                  builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId], indices),
-                                 rubyBlocks2Functions[i->link->rubyBlockId], blockMap.escapedClosure[bb->rubyBlockId]},
+                                 blockMap.rubyBlocks2Functions[i->link->rubyBlockId],
+                                 blockMap.escapedClosure[bb->rubyBlockId]},
                                 "rawSendResult");
 
                         } else {
@@ -921,17 +920,14 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
     llvm::IRBuilder<> builder(cs);
 
-    vector<llvm::Function *> rubyBlocks2Functions = LLVMIREmitterHelpers::getRubyBlocks2FunctionsMapping(cs, cfg, func);
-
-    const BasicBlockMap blockMap =
-        LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, rubyBlocks2Functions, aliases);
+    const BasicBlockMap blockMap = LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, aliases, func);
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
-    setupArguments(cs, cfg, md, rubyBlocks2Functions, blockMap, aliases);
+    setupArguments(cs, cfg, md, blockMap, aliases);
     emitSigVerification(cs, cfg, md, aliases, blockMap);
 
-    emitUserBody(cs, cfg, blockMap, aliases, rubyBlocks2Functions);
+    emitUserBody(cs, cfg, blockMap, aliases);
     for (int funId = 0; funId < blockMap.functionInitializersByFunction.size(); funId++) {
         builder.SetInsertPoint(blockMap.functionInitializersByFunction[funId]);
         builder.CreateBr(blockMap.argumentSetupBlocksByFunction[funId]);
