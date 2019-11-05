@@ -131,7 +131,7 @@ string LSPConfiguration::localName2Remote(string_view filePath) const {
 string LSPConfiguration::remoteName2Local(string_view uri) const {
     assertHasClientConfig();
     const bool isSorbetURI = absl::StartsWith(uri, sorbetScheme);
-    if (!absl::StartsWith(uri, clientConfig->rootUri) && !clientConfig->enableSorbetURIs && !isSorbetURI) {
+    if (!absl::StartsWith(uri, clientConfig->rootUri) && (!clientConfig->enableSorbetURIs || !isSorbetURI)) {
         logger->error("Unrecognized URI received from client: {}", uri);
         return string(uri);
     }
