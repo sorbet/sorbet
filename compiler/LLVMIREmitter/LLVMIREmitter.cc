@@ -30,6 +30,7 @@ struct BasicBlockMap {
     UnorderedMap<core::LocalVariable, int> escapedVariableIndeces;
     llvm::BasicBlock *sigVerificationBlock;
     vector<shared_ptr<core::SendAndBlockLink>> blockLinks;
+    vector<vector<core::LocalVariable>> rubyBlockArgs;
 };
 
 // https://docs.ruby-lang.org/en/2.6.0/extension_rdoc.html
@@ -522,18 +523,15 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     {
         auto argId = -1;
         auto &args = cfg.symbol.data(cs)->arguments();
-        ENFORCE(args.size() == md->args.size());
-        for (auto &treeArg : md->args) {
+        ENFORCE(args.size() == blockMap.rubyBlockArgs[funcId].size());
+        for (auto &symArg : args) {
             argId += 1;
-            auto &symArg = args[argId];
             if (symArg.flags.isDefault) {
                 maxArgCount += 1;
                 continue;
             }
-            auto local = ast::cast_tree<ast::Local>(treeArg.get());
-            ENFORCE(local);
             if (symArg.flags.isBlock) {
-                blkArgName = local->localVariable;
+                blkArgName = blockMap.rubyBlockArgs[funcId][argId];
                 continue;
             }
             maxArgCount += 1;
@@ -598,14 +596,14 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 auto &block = fillFromArgBlocks[i - minArgCount];
                 builder.SetInsertPoint(block);
             }
-            const auto &arg = md->args[i];
-            auto *a = ast::MK::arg2Local(arg.get());
+            const auto a = blockMap.rubyBlockArgs[funcId][i];
+
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
-            auto name = a->localVariable._name.data(cs)->shortName(cs);
+            auto name = a._name.data(cs)->shortName(cs);
             llvm::StringRef nameRef(name.data(), name.length());
             auto argArrayRaw = func->arg_begin() + 1;
             auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
-            varSet(cs, a->localVariable, rawValue, builder, llvmVariables, aliases, blockMap, funcId);
+            varSet(cs, a, rawValue, builder, llvmVariables, aliases, blockMap, funcId);
             if (i >= minArgCount) {
                 // check if we need to fill in the next variable from the arg
                 builder.CreateBr(checkBlocks[i - minArgCount + 1]);
@@ -655,8 +653,9 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 auto rawValue = builder.CreateCall(fillDefaultFunc,
                                                    {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2});
                 auto argIndex = i + minArgCount;
-                auto *a = ast::MK::arg2Local(md->args[argIndex].get());
-                varSet(cs, a->localVariable, rawValue, builder, llvmVariables, aliases, blockMap, 0);
+                auto a = blockMap.rubyBlockArgs[funcId][argIndex];
+
+                varSet(cs, a, rawValue, builder, llvmVariables, aliases, blockMap, 0);
             }
             builder.CreateBr(fillFromDefaultBlocks[i + 1]);
         }
@@ -678,7 +677,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     }
 }
 
-BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
+BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
                                                vector<llvm::Function *> rubyBlocks2Functions,
                                                UnorderedMap<core::LocalVariable, int> &&escapedVariableIndices,
                                                int maxSendArgCount) {
@@ -733,6 +732,16 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
         }
     }
     vector<shared_ptr<core::SendAndBlockLink>> blockLinks(rubyBlocks2Functions.size());
+    vector<vector<core::LocalVariable>> rubyBlockArgs(rubyBlocks2Functions.size());
+
+    {
+        // fill in data about args for main function
+        for (auto &treeArg : md->args) {
+            auto *a = ast::MK::arg2Local(treeArg.get());
+            rubyBlockArgs[0].emplace_back(a->localVariable);
+        }
+    }
+
     for (auto &b : cfg.basicBlocks) {
         if (b->bexit.cond.variable == core::LocalVariable::blockCall()) {
             userEntryBlockByFunction[b->rubyBlockId] = llvmBlocks[b->bexit.thenb->id];
@@ -750,6 +759,21 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
             ENFORCE(expectedSend);
             ENFORCE(expectedSend->link);
             blockLinks[b->rubyBlockId] = expectedSend->link;
+
+            rubyBlockArgs[b->rubyBlockId].resize(expectedSend->link->argFlags.size(),
+                                                 core::LocalVariable::noVariable());
+            for (auto &maybeCallOnLoadYieldArg : b->bexit.thenb->exprs) {
+                auto maybeCast = cfg::cast_instruction<cfg::Send>(maybeCallOnLoadYieldArg.value.get());
+                if (maybeCast == nullptr || maybeCast->recv.variable._name != core::Names::blkArg() ||
+                    maybeCast->fun != core::Names::squareBrackets() || maybeCast->args.size() != 1) {
+                    continue;
+                }
+                auto litType = core::cast_type<core::LiteralType>(maybeCast->args[0].type.get());
+                if (litType == nullptr) {
+                    continue;
+                }
+                rubyBlockArgs[b->rubyBlockId][litType->value] = maybeCallOnLoadYieldArg.bind.variable;
+            }
         }
     }
 
@@ -758,12 +782,13 @@ BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                          argumentSetupBlocksByFunction,
                          userEntryBlockByFunction,
                          llvmBlocks,
-                         basicBlockJumpOverrides,
-                         sendArgArrays,
+                         move(basicBlockJumpOverrides),
+                         move(sendArgArrays),
                          escapedClosure,
                          std::move(escapedVariableIndices),
                          sigVerificationBlock,
-                         blockLinks
+                         move(blockLinks),
+                         move(rubyBlockArgs)
 
     };
 }
@@ -1215,7 +1240,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
 
     auto [variablesPrivateToBlocks, escapedVariableIndexes] = findCaptures(cs, md, cfg);
 
-    const BasicBlockMap blockMap = getSorbetBlocks2LLVMBlockMapping(cs, cfg, rubyBlocks2Functions,
+    const BasicBlockMap blockMap = getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, rubyBlocks2Functions,
                                                                     std::move(escapedVariableIndexes), maxSendArgCount);
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
