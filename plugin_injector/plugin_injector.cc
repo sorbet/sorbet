@@ -5,11 +5,11 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "compiler/DefinitionRewriter/DefinitionRewriter.h"
+#include "compiler/Errors/Errors.h"
 #include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "core/ErrorQueue.h"
-#include "core/errors/errors.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
 #include <optional>
@@ -88,7 +88,7 @@ public:
             return;
         }
         if (klass->loc.file().data(ctx).strictLevel < core::StrictLevel::True) {
-            if (auto e = ctx.state.beginError(klass->loc, core::errors::Internal::InternalError)) {
+            if (auto e = ctx.state.beginError(klass->loc, core::errors::Compiler::Untyped)) {
                 e.setHeader("File must be `typed: true` or higher to be compiled");
             }
         }

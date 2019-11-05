@@ -10,10 +10,10 @@
 #include "common/FileOps.h"
 #include "common/sort.h"
 #include "common/typecase.h"
+#include "compiler/Errors/Errors.h"
 #include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/Names/Names.h"
-#include "core/errors/errors.h"
 #include <string_view>
 
 using namespace std;
@@ -1106,7 +1106,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         }
                     },
                     [&](cfg::Unanalyzable *i) {
-                        if (auto e = cs.gs.beginError(bind.loc, core::errors::Internal::InternalError)) {
+                        if (auto e = cs.gs.beginError(bind.loc, core::errors::Compiler::Unanalyzable)) {
                             e.setHeader("Unsupported node: `{}`", i->toString(core::Context(cs.gs, cfg.symbol)));
                         }
                     },

@@ -6,6 +6,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//compiler/DefinitionRewriter",
+        "//compiler/Errors",
         "//compiler/LLVMIREmitter",
         "//compiler/ObjectFileEmitter",
         "@com_stripe_ruby_typer//ast",

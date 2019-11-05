@@ -7,6 +7,7 @@ cc_library(
     linkstatic = 1,
     visibility = ["//visibility:public"],
     deps = [
+        "//compiler/Errors",
         "//compiler/IRHelpers",
         "//compiler/Names",
         "@com_stripe_ruby_typer//ast",
