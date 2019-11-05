@@ -1,0 +1,229 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Typed Enums via T::Enum · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Enumerations allow for type-safe declarations of a fixed set of values. &amp;quot;Type&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Typed Enums via T::Enum · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;Enumerations allow for type-safe declarations of a fixed set of values. &amp;quot;Type&lt;/p&gt;
+"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Type System</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/tenum">T::Enum</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/metaprogramming-plugins">Metaprogramming plugins</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/tenum.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Typed Enums via T::Enum</h1></header><article><div><span><p>Enumerations allow for type-safe declarations of a fixed set of values. “Type
+safe” means that the values in this set are the only values that belong to this
+type. Here’s an example of how to define a typed enum with Sorbet:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) New enumerations are defined by creating a subclass of T::Enum</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suit</span> &lt; T::Enum</span>
+  <span class="hljs-comment"># (2) Enum values are declared within an `enums do` block</span>
+  enums <span class="hljs-keyword">do</span>
+    Spades = new
+    Hearts = new
+    Clubs = new
+    Diamonds = new
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Note how each enum value is created by calling <code>new</code>: each enum value is an
+instance of the enumeration class itself. This means that
+<code>Suit::Spades.is_a?(Suit)</code>, and the same for all the other enum values. This
+guarantees that one enum value cannot be used where some other type is expected,
+and vice versa.</p>
+<p>This also means that once an enum has been defined as a subclass of <code>T::Enum</code>,
+it behaves like any other <a href="/docs/class-types">Class Type</a> and can be used in method
+signatures, type aliases, <code>T.let</code> annotations, and any other place a class type
+can be used:</p>
+<pre><code class="hljs css language-ruby">sig {returns(Suit)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">random_suit</span></span>
+  Suit.values.sample
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="exhaustiveness"></a><a href="#exhaustiveness" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Exhaustiveness</h2>
+<p>Sorbet knows about the values in an enumeration statically, and so it can use
+<a href="/docs/exhaustiveness">exhaustiveness checking</a> to check whether all enum values
+have been considered. The easiest way is to use a <code>case</code> statement:</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">suit:</span> Suit).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">describe_suit_color</span><span class="hljs-params">(suit)</span></span>
+  <span class="hljs-keyword">case</span> suit
+  <span class="hljs-keyword">when</span> Suit::Spades   <span class="hljs-keyword">then</span> puts <span class="hljs-string">"Spades are black!"</span>
+  <span class="hljs-keyword">when</span> Suit::Hearts   <span class="hljs-keyword">then</span> puts <span class="hljs-string">"Hearts are red!"</span>
+  <span class="hljs-keyword">when</span> Suit::Clubs    <span class="hljs-keyword">then</span> puts <span class="hljs-string">"Clubs are black!"</span>
+  <span class="hljs-keyword">when</span> Suit::Diamonds <span class="hljs-keyword">then</span> puts <span class="hljs-string">"Diamonds are red!"</span>
+  <span class="hljs-keyword">else</span> T.absurd(suit)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Because of the call to <code>T.absurd</code>, if any of the individual suits had not been
+handled, Sorbet would report an error statically that one of the cases was
+missing. For more information on how exhaustiveness checking works, see
+<a href="/docs/exhaustiveness">Exhaustiveness Checking</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="converting-enums-to-other-types"></a><a href="#converting-enums-to-other-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Converting enums to other types</h2>
+<p>Enumerations do not implicitly convert to any other type. Instead, all
+conversion must be done explicitly. One particularly convenient way to implement
+these conversion functions is to define instance methods on the enum class
+itself:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suit</span> &lt; T::Enum</span>
+  enums <span class="hljs-keyword">do</span>
+    <span class="hljs-comment"># ...</span>
+  <span class="hljs-keyword">end</span>
+
+  sig {returns(Integer)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">rank</span></span>
+    <span class="hljs-comment"># (1) Case on self (because this is an instance method)</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-keyword">self</span>
+    <span class="hljs-keyword">when</span> Spades <span class="hljs-keyword">then</span> <span class="hljs-number">1</span>
+    <span class="hljs-keyword">when</span> Hearts <span class="hljs-keyword">then</span> <span class="hljs-number">2</span>
+    <span class="hljs-keyword">when</span> Clubs <span class="hljs-keyword">then</span> <span class="hljs-number">3</span>
+    <span class="hljs-keyword">when</span> Diamonds <span class="hljs-keyword">then</span> <span class="hljs-number">4</span>
+    <span class="hljs-keyword">else</span>
+      <span class="hljs-comment"># (2) Exhaustiveness still works when casing on `self`</span>
+      T.absurd(<span class="hljs-keyword">self</span>)
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>A particularly common case to convert an enum to a String. Because this is so
+common, this conversion has been built in (it still must be explicitly called):</p>
+<pre><code class="hljs css language-ruby">Suit::Spades.serialize <span class="hljs-comment"># =&gt; 'spades'</span>
+Suit::Hearts.serialize <span class="hljs-comment"># =&gt; 'hearts'</span>
+<span class="hljs-comment"># ...</span>
+</code></pre>
+<p>Again: this conversion must be done explicitly. When attempting to implicitly
+convert an enum value to a string, you’ll get a non-human-friendly
+representation of the enum:</p>
+<pre><code class="hljs css language-ruby">suit = Suit::Spades
+puts <span class="hljs-string">"Got suit: <span class="hljs-subst">#{suit}</span>"</span>
+<span class="hljs-comment"># =&gt;  Got suit: #&lt;Suit::Spades&gt;</span>
+</code></pre>
+<p>The default value used for serializing an enum is the name of the enum, all
+lowercase. To specify an alternative serialized value, pass an argument to
+<code>new</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suit</span> &lt; T::Enum</span>
+  enums <span class="hljs-keyword">do</span>
+    Spades = new(<span class="hljs-string">'SPADES'</span>)
+    Hearts = new(<span class="hljs-string">'HEARTS'</span>)
+    Clubs = new(<span class="hljs-string">'CLUBS'</span>)
+    Diamonds = new(<span class="hljs-string">'DIAMONDS'</span>)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+Suit::Diamonds.serialize <span class="hljs-comment"># =&gt; 'DIAMONDS'</span>
+</code></pre>
+<p>Each serialized value must be unique compared to all other serialized values for
+this enum.</p>
+<p>Another common conversion is to take the serialized value and deserialize it
+back to the original enum value. This is also built into <code>T::Enum</code>:</p>
+<pre><code class="hljs css language-ruby">serialized = Suit::Spades.serialize
+suit = Suit.deserialize(serialized)
+
+puts suit
+<span class="hljs-comment"># =&gt; #&lt;Suit::Spades&gt;</span>
+</code></pre>
+<p>When the value being deserialized doesn’t exist, a <code>KeyError</code> exception is
+raised:</p>
+<pre><code class="hljs css language-ruby">Suit.deserialize(<span class="hljs-string">'bad value'</span>)
+<span class="hljs-comment"># =&gt; KeyError: Enum Suit key not found: "bad value"</span>
+</code></pre>
+<p>You can also ask whether a specific serialized value exists for an enum:</p>
+<pre><code class="hljs css language-ruby">Suit.has_serialized?(Suit::Spades.serialize)
+<span class="hljs-comment"># =&gt; true</span>
+
+Suit.has_serialized?(<span class="hljs-string">'bad value'</span>)
+<span class="hljs-comment"># =&gt; false</span>
+</code></pre>
+<!-- TODO(jez) Add a version of deserialize that returns T.nilable? -->
+<!-- TODO(jez) Using enum *values* as type annotations / in unions -->
+<!-- TODO(jez) ^ Limitation: can't be used in type aliases... -->
+<h2><a class="anchor" aria-hidden="true" id="listing-the-values-of-an-enum"></a><a href="#listing-the-values-of-an-enum" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Listing the values of an enum</h2>
+<p>Sometimes it is useful to enumerate all the values of an enum:</p>
+<pre><code class="hljs css language-ruby">Suit.values
+<span class="hljs-comment"># =&gt; [#&lt;Suit::Spades&gt;, #&lt;Suit::Heart&gt;, #&lt;Suit::Clubs&gt;, #&lt;Suit::Diamonds&gt;]</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="what-s-next"></a><a href="#what-s-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
+<ul>
+<li><p><a href="/docs/union-types">Union types</a></p>
+<p>Enums are great for defining simple sets of related constants. When the values
+are not simple constants (for example, “any instance of these two classes”),
+union types provide a more powerful mechanism for organizing code.</p></li>
+<li><p><a href="/docs/sealed">Sealed Classes and Modules</a></p>
+<p>While union types provide an ad hoc mechanism to group related types, sealed
+classes and modules provide a way to establish this grouping at these types’
+definitions.</p></li>
+<li><p><a href="/docs/exhaustiveness">Exhaustiveness Checking</a></p>
+<p>For union types, sealed classes, and enums, Sorbet has powerful exhaustiveness
+checking that can statically catch when certain cases have not been handled.</p></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/tstruct"><span class="arrow-prev">← </span><span>T::Struct</span></a><a class="docs-next button" href="/docs/untyped"><span>T.untyped</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#exhaustiveness">Exhaustiveness</a></li><li><a href="#converting-enums-to-other-types">Converting enums to other types</a></li><li><a href="#listing-the-values-of-an-enum">Listing the values of an enum</a></li><li><a href="#what-s-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'fa1ec885ab70787d636759b88e509b92',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
