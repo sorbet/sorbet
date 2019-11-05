@@ -21,6 +21,14 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCodeAction(LSPTypechecker
 
     const core::GlobalState &gs = typechecker.state();
     core::FileRef file = config->uri2FileRef(gs, params.textDocument->uri);
+    if (!file.exists()) {
+        // File is an invalid URI. Perhaps the user opened a file that is not within the VS Code workspace?
+        // Don't send an error, as it's not the user's fault and isn't actionable. Instead, send an empty list of code
+        // actions.
+        response->result = move(result);
+        return response;
+    }
+
     LSPFileUpdates updates;
     updates.canTakeFastPath = true;
     const auto &globalStateHashes = typechecker.getFileHashes();
