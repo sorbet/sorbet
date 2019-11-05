@@ -506,6 +506,19 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, vector<llvm::Function *> &
     return llvmVariables;
 }
 
+vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::SymbolRef method,
+                                                      const BasicBlockMap &blockMap) {
+    if (blockId != 0) {
+        return blockMap.blockLinks[blockId]->argFlags;
+    }
+    vector<core::ArgInfo::ArgFlags> res;
+    for (auto &argInfo : method.data(cs)->arguments()) {
+        res.emplace_back(argInfo.flags);
+    }
+
+    return res;
+}
+
 void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
                     vector<llvm::Function *> &rubyBlocks2Functions,
                     const UnorderedMap<core::LocalVariable, llvm::AllocaInst *> &llvmVariables,
@@ -514,166 +527,184 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     // this function effectively generate an optimized build of
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(cs);
-    auto funcId = 0;
-    auto func = rubyBlocks2Functions[funcId];
-    builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[funcId]);
-    auto maxArgCount = 0;
-    auto minArgCount = 0;
-    core::LocalVariable blkArgName;
-    {
-        auto argId = -1;
-        auto &args = cfg.symbol.data(cs)->arguments();
-        ENFORCE(args.size() == blockMap.rubyBlockArgs[funcId].size());
-        for (auto &symArg : args) {
-            argId += 1;
-            if (symArg.flags.isDefault) {
-                maxArgCount += 1;
-                continue;
-            }
-            if (symArg.flags.isBlock) {
-                blkArgName = blockMap.rubyBlockArgs[funcId][argId];
-                continue;
-            }
-            maxArgCount += 1;
-            minArgCount += 1;
-        }
-    }
-    ENFORCE(blkArgName.exists());
-    auto numOptionalArgs = maxArgCount - minArgCount;
-    {
-        // validate arg count
-        auto argCountRaw = func->arg_begin();
-        auto argCountFailBlock = llvm::BasicBlock::Create(cs, "argCountFailBlock", func);
-        auto argCountSecondCheckBlock = llvm::BasicBlock::Create(cs, "argCountSecondCheckBlock", func);
-        auto argCountSuccessBlock = llvm::BasicBlock::Create(cs, "argCountSuccess", func);
-
-        auto tooManyArgs =
-            builder.CreateICmpUGT(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgCount)), "tooManyArgs");
-        auto expected1 = cs.setExpectedBool(builder, tooManyArgs, false);
-        builder.CreateCondBr(expected1, argCountFailBlock, argCountSecondCheckBlock);
-
-        builder.SetInsertPoint(argCountSecondCheckBlock);
-        auto tooFewArgs =
-            builder.CreateICmpULT(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgCount)), "tooFewArgs");
-        auto expected2 = cs.setExpectedBool(builder, tooFewArgs, false);
-        builder.CreateCondBr(expected2, argCountFailBlock, argCountSuccessBlock);
-
-        builder.SetInsertPoint(argCountFailBlock);
-        cs.emitArgumentMismatch(builder, argCountRaw, minArgCount, maxArgCount);
-
-        builder.SetInsertPoint(argCountSuccessBlock);
-    }
-
-    vector<llvm::BasicBlock *> checkBlocks;
-    vector<llvm::BasicBlock *> fillFromArgBlocks;
-    vector<llvm::BasicBlock *> fillFromDefaultBlocks;
-    {
-        // create blocks for arg filling
-        for (auto i = 0; i < numOptionalArgs + 1; i++) {
-            auto suffix = i == numOptionalArgs ? "Done" : to_string(i);
-            checkBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"checkBlock", suffix}, func));
-            fillFromDefaultBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"fillFromDefaultBlock", suffix}, func));
-            // Don't bother making the "Done" block for fillFromArgBlocks
-            if (i < numOptionalArgs) {
-                fillFromArgBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"fillFromArgBlock", suffix}, func));
-            }
-        }
-    }
-    {
-        // fill local variables from args
-        auto fillRequiredArgs = llvm::BasicBlock::Create(cs, "fillRequiredArgs", func);
-        builder.CreateBr(fillRequiredArgs);
-        builder.SetInsertPoint(fillRequiredArgs);
-
-        // box `self`
-        auto selfArgRaw = func->arg_begin() + 2;
-        varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, llvmVariables, aliases, blockMap, funcId);
-
-        for (auto i = 0; i < maxArgCount; i++) {
-            if (i >= minArgCount) {
-                // if these are optional, put them in their own BasicBlock
-                // because we might not run it
-                auto &block = fillFromArgBlocks[i - minArgCount];
-                builder.SetInsertPoint(block);
-            }
-            const auto a = blockMap.rubyBlockArgs[funcId][i];
-
-            llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
-            auto name = a._name.data(cs)->shortName(cs);
-            llvm::StringRef nameRef(name.data(), name.length());
-            auto argArrayRaw = func->arg_begin() + 1;
-            auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
-            varSet(cs, a, rawValue, builder, llvmVariables, aliases, blockMap, funcId);
-            if (i >= minArgCount) {
-                // check if we need to fill in the next variable from the arg
-                builder.CreateBr(checkBlocks[i - minArgCount + 1]);
-            }
-        }
-
-        // make the last instruction in all the required args point at the first check block
-        builder.SetInsertPoint(fillRequiredArgs);
-        // TODO(perf): if block isn't captured, we can optimize this to skip proc conversion
-        // TODO(perf): if block isn't used, don't load it at all
-        varSet(cs, blkArgName, builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")), builder,
-               llvmVariables, aliases, blockMap, 0);
-        builder.CreateBr(checkBlocks[0]);
-    }
-    {
-        // build check blocks
-        for (auto i = 0; i < numOptionalArgs; i++) {
-            auto &block = checkBlocks[i];
-            builder.SetInsertPoint(block);
-            auto argCount =
-                builder.CreateICmpEQ(func->arg_begin(), llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
-                                     llvm::Twine("default") + llvm::Twine(i));
-            auto expected = cs.setExpectedBool(builder, argCount, false);
-            builder.CreateCondBr(expected, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
-        }
-    }
-    {
-        // build fillFromDefaultBlocks
-        auto optionalMethodIndex = 0;
-        for (auto i = 0; i < numOptionalArgs; i++) {
-            auto &block = fillFromDefaultBlocks[i];
-            builder.SetInsertPoint(block);
-            if (funId == 0 && md->name.data(cs)->kind == core::NameKind::UNIQUE &&
-                md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) {
-                // This method is already a default method so don't fill in
-                // another other defaults for it or else it is turtles all the
-                // way down
-            } else {
-                optionalMethodIndex++;
-                auto argMethodName =
-                    cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, optionalMethodIndex);
-                ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(cs) +
-                                                    to_string(optionalMethodIndex) + " does not exist");
-                auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
-                ENFORCE(argMethod.exists());
-                auto fillDefaultFunc = getOrCreateFunction(cs, argMethod);
-                auto rawValue = builder.CreateCall(fillDefaultFunc,
-                                                   {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2});
-                auto argIndex = i + minArgCount;
-                auto a = blockMap.rubyBlockArgs[funcId][argIndex];
-
-                varSet(cs, a, rawValue, builder, llvmVariables, aliases, blockMap, 0);
-            }
-            builder.CreateBr(fillFromDefaultBlocks[i + 1]);
-        }
-    }
-    {
-        // Tie up all the "Done" blocks at the end
-        builder.SetInsertPoint(checkBlocks[numOptionalArgs]);
-        builder.CreateBr(fillFromDefaultBlocks[numOptionalArgs]);
-        builder.SetInsertPoint(fillFromDefaultBlocks[numOptionalArgs]);
-    }
-
-    // jump to user body
-    builder.CreateBr(blockMap.sigVerificationBlock);
-
-    for (int funcId = 1; funcId <= cfg.maxRubyBlockId; funcId++) {
-        // todo: this should be replaced with argument computation for blocks
+    for (auto funcId = 0; funcId < rubyBlocks2Functions.size(); funcId++) {
+        auto func = rubyBlocks2Functions[funcId];
         builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[funcId]);
-        builder.CreateBr(blockMap.userEntryBlockByFunction[funcId]);
+        auto maxArgCount = 0;
+        auto minArgCount = 0;
+        auto argCountRaw = funcId == 0 ? func->arg_begin() : func->arg_begin() + 2;
+        auto argArrayRaw = funcId == 0 ? func->arg_begin() + 1 : func->arg_begin() + 3;
+
+        core::LocalVariable blkArgName;
+        {
+            auto argId = -1;
+            auto args = getArgFlagsForBlockId(cs, funcId, cfg.symbol, blockMap);
+            ENFORCE(args.size() == blockMap.rubyBlockArgs[funcId].size());
+            for (auto &argFlags : args) {
+                argId += 1;
+                if (argFlags.isDefault) {
+                    maxArgCount += 1;
+                    continue;
+                }
+                if (argFlags.isBlock) {
+                    blkArgName = blockMap.rubyBlockArgs[funcId][argId];
+                    continue;
+                }
+                maxArgCount += 1;
+                minArgCount += 1;
+            }
+        }
+        if (funcId != 0) {
+            minArgCount = 0;
+            // blocks Can have 0 args always
+        }
+
+        auto numOptionalArgs = maxArgCount - minArgCount;
+        if (funcId == 0) {
+            // validate arg count
+            auto argCountFailBlock = llvm::BasicBlock::Create(cs, "argCountFailBlock", func);
+            auto argCountSecondCheckBlock = llvm::BasicBlock::Create(cs, "argCountSecondCheckBlock", func);
+            auto argCountSuccessBlock = llvm::BasicBlock::Create(cs, "argCountSuccess", func);
+
+            auto tooManyArgs = builder.CreateICmpUGT(
+                argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgCount)), "tooManyArgs");
+            auto expected1 = cs.setExpectedBool(builder, tooManyArgs, false);
+            builder.CreateCondBr(expected1, argCountFailBlock, argCountSecondCheckBlock);
+
+            builder.SetInsertPoint(argCountSecondCheckBlock);
+            auto tooFewArgs = builder.CreateICmpULT(
+                argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgCount)), "tooFewArgs");
+            auto expected2 = cs.setExpectedBool(builder, tooFewArgs, false);
+            builder.CreateCondBr(expected2, argCountFailBlock, argCountSuccessBlock);
+
+            builder.SetInsertPoint(argCountFailBlock);
+            cs.emitArgumentMismatch(builder, argCountRaw, minArgCount, maxArgCount);
+
+            builder.SetInsertPoint(argCountSuccessBlock);
+        }
+
+        vector<llvm::BasicBlock *> checkBlocks;
+        vector<llvm::BasicBlock *> fillFromArgBlocks;
+        vector<llvm::BasicBlock *> fillFromDefaultBlocks;
+        {
+            // create blocks for arg filling
+            for (auto i = 0; i < numOptionalArgs + 1; i++) {
+                auto suffix = i == numOptionalArgs ? "Done" : to_string(i);
+                checkBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"checkBlock", suffix}, func));
+                fillFromDefaultBlocks.emplace_back(
+                    llvm::BasicBlock::Create(cs, {"fillFromDefaultBlock", suffix}, func));
+                // Don't bother making the "Done" block for fillFromArgBlocks
+                if (i < numOptionalArgs) {
+                    fillFromArgBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"fillFromArgBlock", suffix}, func));
+                }
+            }
+        }
+        {
+            // fill local variables from args
+            auto fillRequiredArgs = llvm::BasicBlock::Create(cs, "fillRequiredArgs", func);
+            builder.CreateBr(fillRequiredArgs);
+            builder.SetInsertPoint(fillRequiredArgs);
+
+            // box `self`
+            if (funcId == 0) {
+                auto selfArgRaw = func->arg_begin() + 2;
+                varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, llvmVariables, aliases, blockMap,
+                       funcId);
+            }
+
+            for (auto i = 0; i < maxArgCount; i++) {
+                if (i >= minArgCount) {
+                    // if these are optional, put them in their own BasicBlock
+                    // because we might not run it
+                    auto &block = fillFromArgBlocks[i - minArgCount];
+                    builder.SetInsertPoint(block);
+                }
+                const auto a = blockMap.rubyBlockArgs[funcId][i];
+
+                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
+                auto name = a._name.data(cs)->shortName(cs);
+                llvm::StringRef nameRef(name.data(), name.length());
+                auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
+                varSet(cs, a, rawValue, builder, llvmVariables, aliases, blockMap, funcId);
+                if (i >= minArgCount) {
+                    // check if we need to fill in the next variable from the arg
+                    builder.CreateBr(checkBlocks[i - minArgCount + 1]);
+                }
+            }
+
+            // make the last instruction in all the required args point at the first check block
+            builder.SetInsertPoint(fillRequiredArgs);
+            // TODO(perf): if block isn't captured, we can optimize this to skip proc conversion
+            // TODO(perf): if block isn't used, don't load it at all
+            //
+            if (blkArgName.exists()) {
+                // TODO: I don't think this correctly handles blocks with block args
+                varSet(cs, blkArgName, builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")),
+                       builder, llvmVariables, aliases, blockMap, 0);
+            }
+            builder.CreateBr(checkBlocks[0]);
+        }
+        {
+            // build check blocks
+            for (auto i = 0; i < numOptionalArgs; i++) {
+                auto &block = checkBlocks[i];
+                builder.SetInsertPoint(block);
+                auto argCount =
+                    builder.CreateICmpEQ(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
+                                         llvm::Twine("default") + llvm::Twine(i));
+                auto expected = cs.setExpectedBool(builder, argCount, false);
+                builder.CreateCondBr(expected, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
+            }
+        }
+        {
+            // build fillFromDefaultBlocks
+            auto optionalMethodIndex = 0;
+            for (auto i = 0; i < numOptionalArgs; i++) {
+                auto &block = fillFromDefaultBlocks[i];
+                builder.SetInsertPoint(block);
+                if (funcId == 0 && md->name.data(cs)->kind == core::NameKind::UNIQUE &&
+                    md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) {
+                    // This method is already a default method so don't fill in
+                    // another other defaults for it or else it is turtles all the
+                    // way down
+                } else {
+                    llvm::Value *rawValue;
+                    if (funcId == 0) {
+                        optionalMethodIndex++;
+                        auto argMethodName =
+                            cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, optionalMethodIndex);
+                        ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(cs) +
+                                                            to_string(optionalMethodIndex) + " does not exist");
+                        auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
+                        ENFORCE(argMethod.exists());
+                        auto fillDefaultFunc = getOrCreateFunction(cs, argMethod);
+                        rawValue =
+                            builder.CreateCall(fillDefaultFunc, {argCountRaw, argArrayRaw,
+                                                                 func->arg_begin() + 2 /* this is wrong for block*/});
+                    } else {
+                        rawValue = cs.getRubyNilRaw(builder);
+                    }
+                    auto argIndex = i + minArgCount;
+                    auto a = blockMap.rubyBlockArgs[funcId][argIndex];
+
+                    varSet(cs, a, rawValue, builder, llvmVariables, aliases, blockMap, 0);
+                }
+                builder.CreateBr(fillFromDefaultBlocks[i + 1]);
+            }
+        }
+        {
+            // Tie up all the "Done" blocks at the end
+            builder.SetInsertPoint(checkBlocks[numOptionalArgs]);
+            builder.CreateBr(fillFromDefaultBlocks[numOptionalArgs]);
+            builder.SetInsertPoint(fillFromDefaultBlocks[numOptionalArgs]);
+        }
+
+        if (funcId == 0) {
+            // jump to user body
+            builder.CreateBr(blockMap.sigVerificationBlock);
+        } else {
+            builder.CreateBr(blockMap.userEntryBlockByFunction[funcId]);
+        }
     }
 }
 
