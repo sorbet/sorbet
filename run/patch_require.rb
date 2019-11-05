@@ -11,10 +11,10 @@ module Kernel
     if File.exist?(name)
       tmpdir = ENV['llvmir']
       raise "no 'llvmir' in ENV" unless tmpdir
-      name = tmpdir + '/' + name.gsub('/', '_').gsub('.', '_') + '.bundle'
-      if File.exist?(name)
-        $stderr.puts "SorbetLLVM using compiled: #{name}"
-        return sorbet_old_require(name)
+      bundle = tmpdir + '/' + name.gsub('/', '_').gsub('.', '_') + '.bundle'
+      if File.exist?(bundle)
+        $stderr.puts "SorbetLLVM using compiled: #{bundle}"
+        return sorbet_old_require(bundle)
       end
       $stderr.puts "SorbetLLVM interpretting: #{name}"
     end

@@ -33,5 +33,6 @@ for o in "$llvmir"/*.o; do
     fi
 
     bundle="${o%.o}.bundle"
+    # echo "Linking: $bundle"
     "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
 done
