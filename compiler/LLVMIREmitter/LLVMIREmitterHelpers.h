@@ -63,12 +63,11 @@ public:
     static std::vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg,
                                                                         llvm::Function *func);
 
-    static BasicBlockMap getSorbetBlocks2LLVMBlockMapping(
-        CompilerState &cs, cfg::CFG &cfg, std::unique_ptr<ast::MethodDef> &md,
-        std::vector<llvm::Function *> rubyBlocks2Functions,
-        UnorderedMap<core::LocalVariable, int> &&escapedVariableIndices, int maxSendArgCount,
-        const UnorderedMap<core::LocalVariable, std::optional<int>> &variablesPrivateToBlocks,
-        UnorderedMap<core::LocalVariable, Alias> &aliases);
+    static BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
+                                                          std::unique_ptr<ast::MethodDef> &md,
+                                                          std::vector<llvm::Function *> rubyBlocks2Functions,
+                                                          int maxSendArgCount,
+                                                          UnorderedMap<core::LocalVariable, Alias> &aliases);
 };
 } // namespace sorbet::compiler
 #endif
