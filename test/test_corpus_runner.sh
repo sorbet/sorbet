@@ -25,6 +25,7 @@ echo "Run Sorbet: run/ruby $rb"
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
 echo "Temp Dir: $llvmir"
+run/compile "$llvmir" "$rb"
 set +e
 llvmir=$llvmir runfile=$srbrunfile run/ruby "$rb" 2> "$srberr" | tee "$srbout"
 code=$?
