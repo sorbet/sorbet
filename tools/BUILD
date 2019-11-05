@@ -18,6 +18,7 @@ compilation_database(
         "//compiler/IRHelpers:pseudo_lib",
         "//compiler/IRHelpers:generate_load_payload",
         "//compiler/IRHelpers:IRHelpers",
+        "//compiler/Errors:Errors",
         "//compiler/DefinitionRewriter:DefinitionRewriter",
         "//compiler/Names:Names",
         # END compile_commands targets
