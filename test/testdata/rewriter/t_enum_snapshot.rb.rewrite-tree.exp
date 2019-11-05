@@ -1,21 +1,5 @@
 class <emptyTree><<C <root>>> < ()
-  module <emptyTree>::<C Opus><<C <todo sym>>> < ()
-    class <emptyTree>::<C Enum><<C <todo sym>>> < (::<todo sym>)
-      def initialize<<C <todo sym>>>(x = <emptyTree>, &<blk>)
-        <emptyTree>
-      end
-
-      def self.enums<<C <todo sym>>>(&blk)
-        <emptyTree>
-      end
-
-      def initialize<defaultArg>1<<C <todo sym>>>(x = <emptyTree>, &<blk>)
-        nil
-      end
-    end
-  end
-
-  class <emptyTree>::<C MyEnum><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Enum>)
+  class <emptyTree>::<C MyEnum><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
     <self>.extend(::T::Helpers)
 
     <self>.abstract!()
@@ -56,7 +40,7 @@ class <emptyTree><<C <root>>> < ()
     end
   end
 
-  class <emptyTree>::<C EnumsDoEnum><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Enum>)
+  class <emptyTree>::<C EnumsDoEnum><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
     <self>.extend(::T::Helpers)
 
     <self>.abstract!()
@@ -92,7 +76,7 @@ class <emptyTree><<C <root>>> < ()
     end
   end
 
-  class <emptyTree>::<C BadConsts><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Enum>)
+  class <emptyTree>::<C BadConsts><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
     <self>.extend(::T::Helpers)
 
     <self>.abstract!()

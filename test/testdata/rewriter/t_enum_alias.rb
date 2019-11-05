@@ -2,16 +2,7 @@
 # disable-fast-path: true
 extend T::Sig
 
-module Opus
-  class Enum
-    def initialize(x = nil)
-    end
-    def self.enums(&blk)
-    end
-  end
-end
-
-class MyEnum < Opus::Enum
+class MyEnum < T::Enum
   enums do
   X = new
   end

@@ -1,14 +1,5 @@
 # typed: true
-module Opus
-  class Enum
-    def initialize(x = nil)
-    end
-    def self.enums(&blk)
-    end
-  end
-end
-
-class MyEnum < Opus::Enum
+class MyEnum < T::Enum
   enums do
   X = new
   Y = new('y')
@@ -23,7 +14,7 @@ class NotAnEnum
   end
 end
 
-class EnumsDoEnum < Opus::Enum
+class EnumsDoEnum < T::Enum
   enums do
     X = new
     Y = new('y')
@@ -33,7 +24,7 @@ class EnumsDoEnum < Opus::Enum
   def something_outside; end
 end
 
-class BadConsts < Opus::Enum
+class BadConsts < T::Enum
   Before = new # error: must be within the `enums do` block
   StaticField1 = 1 # error: must be unique instances of the enum
   enums do
