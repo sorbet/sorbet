@@ -991,10 +991,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         }
                     },
                     [&](cfg::SolveConstraint *i) {
-                        /*uncomment this when we rebase over sorbet master again*/
-                        // auto var = varGet(cs, i->send, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
-                        // varSet(cs, bind.bind.variable, var, builder, llvmVariables, aliases, blockMap,
-                        // bb->rubyBlockId);
+                        auto var = varGet(cs, i->send, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
+                        varSet(cs, bind.bind.variable, var, builder, llvmVariables, aliases, blockMap, bb->rubyBlockId);
                     },
                     [&](cfg::Send *i) {
                         if (i->recv.variable._name == core::Names::blkArg() &&
