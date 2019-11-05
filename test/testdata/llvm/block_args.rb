@@ -1,2 +1,2 @@
 # typed: true
-[1,2].each {|x| puts x}
+puts [1,2].map {|x| x + 1}
