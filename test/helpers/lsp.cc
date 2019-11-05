@@ -2,6 +2,7 @@
 #include <cxxopts.hpp>
 // has to go first as it violates requirements
 
+#include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/sort.h"
 #include "test/helpers/lsp.h"
@@ -14,7 +15,7 @@ string filePathToUri(string_view prefixUrl, string_view filePath) {
 }
 
 bool isUriATestFile(string_view prefixUrl, string_view uri) {
-    return uri.substr(0, prefixUrl.length()) == prefixUrl;
+    return absl::StartsWith(uri, prefixUrl);
 }
 
 string uriToFilePath(string_view prefixUrl, string_view uri) {

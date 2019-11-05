@@ -43,7 +43,7 @@ const UnorderedMap<
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
-const UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "linearization", "commented-out-error", ""};
+const UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "linearization", "commented-out-error"};
 
 constexpr string_view NOTHING_LABEL = "(nothing)"sv;
 constexpr string_view NULL_LABEL = "null"sv;
@@ -1158,7 +1158,10 @@ shared_ptr<SymbolSearchAssertion> SymbolSearchAssertion::make(string_view filena
         return nullptr;
     }
     auto query = topMatches[1].str();
-    auto remainingOptions = topMatches[2].str();
+    optional<string> remainingOptions = nullopt;
+    if (topMatches[2].matched) {
+        remainingOptions = topMatches[2].str();
+    }
 
     // Parse options
     optional<string> name = nullopt;
@@ -1166,61 +1169,72 @@ shared_ptr<SymbolSearchAssertion> SymbolSearchAssertion::make(string_view filena
     optional<int> rank = nullopt;
     optional<string> uri = nullopt;
     // regex groups:
-    //   1 => "name = value"
-    //   2 => name
-    //   3 => value
-    //   4 => string contents of value
-    //   5 => digits value
-    //   6 =>  remaining options
-    static const regex optionsRegex(R"(^,\s*(([a-z]+)\s*=\s*(\"([^\"]*)\"|(\d+)))\s*(,.*)?\s*$)");
-    while (!remainingOptions.empty()) {
+    //   1 => name
+    //   2 => value
+    //   3 => string contents of value
+    //   4 => digits value
+    //   5 =>  remaining options
+    static const regex optionsRegex(R"(^,\s*([a-z]+)\s*=\s*(\"([^\"]*)\"|(\d+))\s*(,.*)?\s*$)");
+    while (remainingOptions.has_value()) {
         smatch matches;
-        if (!regex_match(remainingOptions, matches, optionsRegex)) {
+        if (!regex_match(*remainingOptions, matches, optionsRegex)) {
             ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1) << fmt::format(
-                "Improperly formatted assertion. Could not parse '{}' for symbol-search.", remainingOptions);
+                "Improperly formatted assertion. Could not parse '{}' for symbol-search.", *remainingOptions);
             return nullptr;
         }
-        auto optionPair = matches[1].str();
-        auto optionName = matches[2].str();
+        auto optionName = matches[1].str();
+        auto optionValue = matches[2].str();
+        optional<string> valueStringContents = nullopt;
+        optional<int> valueAsInt = nullopt;
+        if (matches[3].matched) {
+            valueStringContents = matches[3].str();
+        } else if (matches[4].matched) {
+            valueAsInt = atoi(matches[4].str().c_str());
+        }
+        if (matches[5].matched) {
+            remainingOptions = matches[5].str();
+        } else {
+            remainingOptions = nullopt;
+        }
+
         if (optionName == "name") {
-            if (!matches[4].matched) {
+            if (!valueStringContents.has_value()) {
                 ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
                     << fmt::format("Improperly formatted `symbol-search` assertion.\n"
-                                   "Expected `name = \"str\"`, got `{}` in:\n{}\n.",
-                                   optionPair, assertionContents);
+                                   "Expected `name = \"str\"`, got `{} = {}` in:\n{}\n",
+                                   optionName, optionValue, assertionContents);
             }
-            name = matches[4].str();
+            name = valueStringContents;
         } else if (optionName == "container") {
-            if (!matches[4].matched) {
+            if (!valueStringContents.has_value()) {
                 ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
                     << fmt::format("Improperly formatted `symbol-search` assertion.\n"
-                                   "Expected `container = \"str\"`, got `{}` in:\n{}\n.",
-                                   optionPair, assertionContents);
+                                   "Expected `container = \"str\"`, got `{} = {}` in:\n{}\n",
+                                   optionName, optionValue, assertionContents);
             }
-            container = matches[4].str();
+            container = valueStringContents;
         } else if (optionName == "rank") {
-            if (!matches[5].matched) {
+            if (!valueAsInt.has_value()) {
                 ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
                     << fmt::format("Improperly formatted `symbol-search` assertion.\n"
-                                   "Expected `rank = integer`, got `{}` in:\n{}\n.",
-                                   optionPair, assertionContents);
+                                   "Expected `rank = integer`, got `{} = {}` in:\n{}\n",
+                                   optionName, optionValue, assertionContents);
             }
-            rank = atoi(matches[5].str().c_str());
+            rank = valueAsInt;
         } else if (optionName == "uri") {
-            if (!matches[4].matched) {
+            if (!valueStringContents.has_value()) {
                 ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
                     << fmt::format("Improperly formatted `symbol-search` assertion.\n"
-                                   "Expected `uri = \"substr\"`, got `{}` in:\n{}\n.",
-                                   optionPair, assertionContents);
+                                   "Expected `uri = \"substr\"`, got `{} = {}` in:\n{}\n",
+                                   optionName, optionValue, assertionContents);
             }
-            uri = matches[4].str();
+            uri = valueStringContents;
         } else {
             ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
                 << fmt::format("Improperly formatted `symbol-search` assertion for query {}.\n"
-                               "Valid args are name, container, rank, and uri, could not parse `{}` in:\n{}\n",
-                               query, optionPair, assertionContents);
+                               "Valid args are name, container, rank, and uri, could not parse `{} = {}` in:\n{}\n",
+                               query, optionName, optionValue, assertionContents);
         }
-        remainingOptions = matches[6].str();
     }
     return make_shared<SymbolSearchAssertion>(filename, range, assertionLine, query, name, container, rank, uri);
 }
