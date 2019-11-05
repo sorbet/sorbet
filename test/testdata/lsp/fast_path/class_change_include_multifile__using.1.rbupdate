@@ -1,0 +1,6 @@
+# typed: true
+# assert-slow-path: true
+
+module A
+  include B
+end
