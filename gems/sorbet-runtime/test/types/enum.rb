@@ -129,6 +129,18 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
   end
 
+  describe 'try_deserialize' do
+    it 'returns the value for a valid serialization' do
+      suit = CardSuit.try_deserialize('club')
+      assert_equal(CardSuit::CLUB, suit)
+    end
+
+    it 'returns nil for an invalid serialization' do
+      suit = CardSuit.try_deserialize('blerg')
+      assert_nil(suit)
+    end
+  end
+
   describe 'to_json' do
     it 'serializes to a JSON string' do
       assert_equal('"club"', CardSuit::CLUB.to_json)
