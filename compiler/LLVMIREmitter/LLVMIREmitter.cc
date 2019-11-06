@@ -378,8 +378,10 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             } else if (name.size() > 1 && name[0] == '$') {
                                 aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
                             } else {
-                                aliases[bind.bind.variable] = Alias::forConstant(i->what);
+                                ENFORCE(false, "Unknown field");
                             }
+                        } else {
+                            aliases[bind.bind.variable] = Alias::forConstant(i->what);
                         }
                     },
                     [&](cfg::SolveConstraint *i) {
