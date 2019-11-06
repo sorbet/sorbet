@@ -385,6 +385,30 @@ private:
         }
     }
 
+    static void saveAncestorTypeForHashing(core::MutableContext ctx, const AncestorResolutionItem &item) {
+        // For LSP, create a synthetic method <unresolved-ancestors> that has a return type containing a type
+        // for every ancestor. When this return type changes, LSP takes the slow path (see
+        // Symbol::methodShapeHash()).
+        auto unresolvedPath = item.ancestor->fullUnresolvedPath(ctx);
+        if (!unresolvedPath.has_value()) {
+            return;
+        }
+
+        auto ancestorType =
+            core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
+
+        core::SymbolRef uaSym =
+            ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
+        core::TypePtr resultType = uaSym.data(ctx)->resultType;
+        if (!resultType) {
+            uaSym.data(ctx)->resultType = core::TupleType::build(ctx, {ancestorType});
+        } else if (auto tt = core::cast_type<core::TupleType>(resultType.get())) {
+            tt->elems.push_back(ancestorType);
+        } else {
+            ENFORCE(false);
+        }
+    }
+
     static core::SymbolRef stubSymbolForAncestor(const AncestorResolutionItem &item) {
         if (item.isSuperclass) {
             return core::Symbols::StubSuperClass();
@@ -438,9 +462,11 @@ private:
             resolved = stubSymbolForAncestor(job);
         }
 
+        bool ancestorPresent = true;
         if (job.isSuperclass) {
             if (resolved == core::Symbols::todo()) {
                 // No superclass specified
+                ancestorPresent = false;
             } else if (!job.klass.data(ctx)->superClass().exists() ||
                        job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
                        job.klass.data(ctx)->superClass() == resolved) {
@@ -456,6 +482,9 @@ private:
             job.klass.data(ctx)->addMixin(resolved);
         }
 
+        if (ancestorPresent) {
+            saveAncestorTypeForHashing(ctx, job);
+        }
         return true;
     }
 
