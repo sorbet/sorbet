@@ -112,22 +112,6 @@ static std::unique_ptr<ast::Reference> dupRef(ast::Reference *arg) {
     return newArg;
 }
 
-class DefaultArgsSanityCheckWalk {
-public:
-    unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
-        if (original->loc.file().data(ctx).isStdlib()) {
-            // These might have overloads in them so might not get erased
-            return original;
-        }
-        for (auto &arg : original->args) {
-            if (auto optionalArg = ast::cast_tree<ast::OptionalArg>(arg.get())) {
-                ENFORCE(ast::isa_tree<ast::EmptyTree>(optionalArg->default_.get()), original->toString(ctx));
-            }
-        }
-        return original;
-    }
-};
-
 void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
     vector<unique_ptr<ast::Expression>> newMethods;
     ast::Send *lastSig = nullptr;
@@ -195,11 +179,6 @@ void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
     for (auto &stat : newMethods) {
         klass->rhs.emplace_back(move(stat));
-    }
-
-    DefaultArgsSanityCheckWalk sanity;
-    for (auto &stat : klass->rhs) {
-        stat = ast::TreeMap::apply(ctx, sanity, std::move(stat));
     }
 }
 
