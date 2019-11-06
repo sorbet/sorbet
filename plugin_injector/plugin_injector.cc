@@ -64,18 +64,15 @@ public:
         }
         auto threadState = getThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
-        unique_ptr<llvm::Module> &module = threadState->combinedModule;
+        unique_ptr<llvm::Module> module = move(threadState->combinedModule);
         if (module) {
             ENFORCE(threadState->file.exists());
             ENFORCE(f == threadState->file);
-            if (f.data(gs).minErrorLevel() < core::StrictLevel::True) {
-                module = nullptr;
-                threadState->file = core::FileRef();
-                return;
+            if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
+                string fileName = objectFileName(gs, f);
+                sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
             }
-            string fileName = objectFileName(gs, f);
-            sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
-            ENFORCE(module == nullptr);
+            ENFORCE(threadState->combinedModule == nullptr);
             threadState->file = core::FileRef();
         }
     };
