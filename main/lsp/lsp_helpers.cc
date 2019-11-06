@@ -46,8 +46,9 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
     // static-init for a class
-    if (data->name == core::Names::staticInit() || data->name == core::Names::unresolvedAncestors() ||
-        data->name == core::Names::Constants::AttachedClass()) {
+    if (data->name == core::Names::staticInit() ||
+        // <unresolved-ancestors> is a fake method created to ensure IDE takes slow path for class hierarchy changes
+        data->name == core::Names::unresolvedAncestors() || data->name == core::Names::Constants::AttachedClass()) {
         return true;
     }
     // static-init for a file
@@ -55,6 +56,7 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         data->name.data(gs)->unique.original == core::Names::staticInit()) {
         return true;
     }
+    // <block>
     if (data->name.data(gs)->kind == core::NameKind::UNIQUE &&
         data->name.data(gs)->unique.original == core::Names::blockTemp()) {
         return true;
