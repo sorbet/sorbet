@@ -633,42 +633,28 @@ module Opus::Types::Test
       end
     end
 
-    describe "OpusEnum" do
+    describe "TEnum" do
       before do
-        class ::Opus::Enum
-          extend T::Sig
-          extend T::Generic
-          extend Enumerable
-
-          Elem = type_template
-
-          def initialize(serialized_val = nil); end
-          def inspect; @const_name || '__UNINITIALIZED'; end
-          def self.each(&blk); end
-
-          # This doesn't exist in Opus::Enum--it's here to be able to implement #inspect
-          def const_name=(const_name); @const_name = const_name; end
-        end
-
-        class ::MyEnum < ::Opus::Enum
-          A = new; A.const_name = 'A'
-          B = new; B.const_name = 'B'
-          C = new; C.const_name = 'C'
+        class ::MyEnum < ::T::Enum
+          enums do
+            A = new
+            B = new
+            C = new
+          end
         end
       end
 
       after do
-        ::Opus.send(:remove_const, :Enum)
         ::Object.send(:remove_const, :MyEnum)
       end
 
-      it 'allows Opus::Enum values when coercing' do
+      it 'allows T::Enum values when coercing' do
         a = T::Utils.coerce(::MyEnum::A)
-        assert_instance_of(T::Types::OpusEnum, a)
+        assert_instance_of(T::Types::TEnum, a)
         assert_equal(a.val, ::MyEnum::A)
       end
 
-      it 'allows Opus::Enum values in a sig params' do
+      it 'allows T::Enum values in a sig params' do
         c = Class.new do
           extend T::Sig
           sig {params(x: MyEnum::A).void}
@@ -685,7 +671,7 @@ module Opus::Types::Test
         end
       end
 
-      it 'allows Opus::Enum values in a sig returns' do
+      it 'allows T::Enum values in a sig returns' do
         c = Class.new do
           extend T::Sig
           sig {returns(MyEnum::A)}
@@ -702,7 +688,7 @@ module Opus::Types::Test
         end
       end
 
-      it 'allows Opus::Enum values in a union' do
+      it 'allows T::Enum values in a union' do
         c = Class.new do
           extend T::Sig
           sig {params(x: T.any(MyEnum::A, MyEnum::B)).void}
