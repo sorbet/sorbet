@@ -1,6 +1,4 @@
 # typed: true
-require 'open3'
-require 'tmpdir'
 
 module Kernel
   alias sorbet_old_require require
@@ -11,7 +9,11 @@ module Kernel
     if File.exist?(name)
       tmpdir = ENV['llvmir']
       raise "no 'llvmir' in ENV" unless tmpdir
-      bundle = tmpdir + '/' + name.gsub('/', '_').gsub('.', '_') + '.bundle'
+      bundle_name = name.gsub('/', '_').gsub('.', '_').gsub('_rb', '.rb')
+      if name.start_with?('./')
+        bundle_name = bundle_name[2..-1]
+      end
+      bundle = tmpdir + '/' + bundle_name + '.bundle'
       if File.exist?(bundle)
         $stderr.puts "SorbetLLVM using compiled: #{bundle}"
         return sorbet_old_require(bundle)
