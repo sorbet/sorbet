@@ -65,6 +65,7 @@ public:
         auto threadState = getThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
+        ENFORCE(threadState->file.exists());
         ENFORCE(f == threadState->file);
         if (module) {
             string fileName = objectFileName(gs, f);
