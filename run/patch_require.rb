@@ -16,6 +16,9 @@ module Kernel
         $stderr.puts "SorbetLLVM using compiled: #{bundle}"
         return sorbet_old_require(bundle)
       end
+      if ENV['force_compile']
+        raise "No compiled bundle: #{bundle}"
+      end
       $stderr.puts "SorbetLLVM interpretting: #{name}"
     end
 

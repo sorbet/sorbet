@@ -27,7 +27,7 @@ $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 echo "Temp Dir: $llvmir"
 run/compile "$llvmir" "$rb"
 set +e
-llvmir=$llvmir run/ruby "$rbrunfile" 2> "$srberr" | tee "$srbout"
+force_compile=1 llvmir=$llvmir run/ruby "$rbrunfile" 2> "$srberr" | tee "$srbout"
 code=$?
 set -e
 
