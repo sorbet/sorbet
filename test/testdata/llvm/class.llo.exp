@@ -622,7 +622,7 @@ sorbet_getMethodBlockAsProc.exit.i.i4.i:          ; preds = %70, %const_continue
 const_continue.i.i5.i:                            ; preds = %const_slowPath.i.i7.i, %sorbet_getMethodBlockAsProc.exit.i.i4.i
   %74 = load i64, i64* @guarded_const_Baz, align 8
   %75 = icmp eq i64 %74, %67
-  br i1 %75, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit", label %76
+  br i1 %75, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %76
 
 76:                                               ; preds = %const_continue.i.i5.i
   %77 = load i64, i64* @rb_cModule, align 8, !tbaa !7
@@ -633,7 +633,7 @@ const_continue.i.i5.i:                            ; preds = %const_slowPath.i.i7
 sorbet_isa_class_of.exit.i.i6.i:                  ; preds = %76
   %80 = call i64 @rb_class_inherited_p(i64 %67, i64 %74) #9
   %81 = icmp eq i64 %80, 0
-  br i1 %81, label %typeTestFail.i.i8.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit", !prof !0
+  br i1 %81, label %typeTestFail.i.i8.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", !prof !0
 
 const_slowPath.i.i7.i:                            ; preds = %sorbet_getMethodBlockAsProc.exit.i.i4.i
   call void @const_recompute_Baz() #15
@@ -651,7 +651,7 @@ const_slowPath43.i:                               ; preds = %const_continue38.i
   call void @const_recompute_Object() #15
   br label %const_continue42.i
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit": ; preds = %const_continue.i.i5.i, %sorbet_isa_class_of.exit.i.i6.i
+"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %const_continue.i.i5.i, %sorbet_isa_class_of.exit.i.i6.i
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %1)
   ret void
 }

@@ -147,7 +147,7 @@ declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #3
 declare i64 @rb_class_inherited_p(i64, i64) local_unnamed_addr #7
 
 ; Function Attrs: nounwind ssp
-define internal i64 @"func_<S <C <U <root>>> $1><N <U <static-init>> $110>$block_1"(i64 %firstYieldArgRaw, i64 %captures, i32 %argc, i64* nocapture readnone %argArray, i64 %blockArg) #8 {
+define internal i64 @"func_<S <C <U <root>>> $1><N <U <static-init>> $111>$block_1"(i64 %firstYieldArgRaw, i64 %captures, i32 %argc, i64* nocapture readnone %argArray, i64 %blockArg) #8 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
@@ -217,7 +217,7 @@ sorbet_getMethodBlockAsProc.exit.i:               ; preds = %16, %entry
   %19 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %18, i64 0, i32 1, i64 0
   %20 = load i64, i64* %19, align 8
   %21 = icmp eq i64 %20, %0
-  br i1 %21, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit", label %22
+  br i1 %21, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %22
 
 22:                                               ; preds = %sorbet_getMethodBlockAsProc.exit.i
   %23 = load i64, i64* @rb_cModule, align 8, !tbaa !7
@@ -228,20 +228,20 @@ sorbet_getMethodBlockAsProc.exit.i:               ; preds = %16, %entry
 sorbet_isa_class_of.exit.i:                       ; preds = %22
   %26 = tail call i64 @rb_class_inherited_p(i64 %20, i64 %0) #7
   %27 = icmp eq i64 %26, 0
-  br i1 %27, label %typeTestFail.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit", !prof !0
+  br i1 %27, label %typeTestFail.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", !prof !0
 
 typeTestFail.i:                                   ; preds = %sorbet_isa_class_of.exit.i, %22
   tail call fastcc void @sorbet_cast_failure(i64 %20) #12
   unreachable
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $110>.exit": ; preds = %sorbet_getMethodBlockAsProc.exit.i, %sorbet_isa_class_of.exit.i
+"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %sorbet_getMethodBlockAsProc.exit.i, %sorbet_isa_class_of.exit.i
   %28 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @userStr_hi, i64 0, i64 0), i64 2) #12
   %29 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !10
   %30 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %29, i64 0, i32 1, i64 1
   store i64 %28, i64* %30, align 8
   %31 = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_times.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #12, !noalias !17
-  %32 = call i64 @rb_block_call(i64 21, i64 %rubyId_times.i, i32 0, i64* nonnull %31, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<S <C <U <root>>> $1><N <U <static-init>> $110>$block_1" to i64 (...)*), i64 %4) #12
+  %32 = call i64 @rb_block_call(i64 21, i64 %rubyId_times.i, i32 0, i64* nonnull %31, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<S <C <U <root>>> $1><N <U <static-init>> $111>$block_1" to i64 (...)*), i64 %4) #12
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %1)
   ret void
 }
