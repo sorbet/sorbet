@@ -378,7 +378,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             } else if (name.size() > 1 && name[0] == '$') {
                                 aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
                             } else {
-                                ENFORCE(false, "Unknown field");
+                                ENFORCE(stoi((string)name) > 0, "'" + ((string)name) + "' is not a valid global name");
+                                aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
                             }
                         } else {
                             aliases[bind.bind.variable] = Alias::forConstant(i->what);
