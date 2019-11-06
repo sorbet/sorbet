@@ -65,16 +65,19 @@ public:
         auto threadState = getThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
         unique_ptr<llvm::Module> module = move(threadState->combinedModule);
-        if (module) {
-            ENFORCE(threadState->file.exists());
-            ENFORCE(f == threadState->file);
-            if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
-                string fileName = objectFileName(gs, f);
-                sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
-            }
-            ENFORCE(threadState->combinedModule == nullptr);
-            threadState->file = core::FileRef();
+        if (!module) {
+            ENFORCE(!threadState->file.exists());
+            return;
         }
+
+        ENFORCE(threadState->file.exists());
+        ENFORCE(f == threadState->file);
+        if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
+            string fileName = objectFileName(gs, f);
+            sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
+        }
+        ENFORCE(threadState->combinedModule == nullptr);
+        threadState->file = core::FileRef();
     };
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
                            std::unique_ptr<ast::MethodDef> &md) const override {
