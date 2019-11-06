@@ -70,6 +70,8 @@ public:
             ENFORCE(f == threadState->file);
             string fileName = objectFileName(gs, f);
             sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
+            ENFORCE(module == nullptr);
+            threadState->file = core::FileRef();
         }
     };
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
