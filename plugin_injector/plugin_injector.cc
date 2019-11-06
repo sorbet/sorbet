@@ -65,9 +65,9 @@ public:
         auto threadState = getThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
-        ENFORCE(threadState->file.exists());
-        ENFORCE(f == threadState->file);
         if (module) {
+            ENFORCE(threadState->file.exists());
+            ENFORCE(f == threadState->file);
             string fileName = objectFileName(gs, f);
             sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
         }
