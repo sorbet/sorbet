@@ -13,6 +13,7 @@ cc_library(
         "LSPPreprocessor.h",
         "LSPTypechecker.h",
         "LSPTypecheckerCoordinator.h",
+        "LocalVarFinder.h",
         "LocalVarSaver.h",
         "ShowOperation.h",
         "TimeTravelingGlobalState.h",

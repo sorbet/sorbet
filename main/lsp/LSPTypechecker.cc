@@ -7,6 +7,7 @@
 #include "core/Unfreeze.h"
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/LSPMessage.h"
+#include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/LocalVarSaver.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/pipeline/pipeline.h"
@@ -436,6 +437,33 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{move(out.second)};
+}
+
+vector<core::LocalVariable> LSPTypechecker::localsForMethod(const core::SymbolRef method) const {
+    auto filesForQuery = vector<core::FileRef>{};
+    for (auto loc : method.data(*gs)->locs()) {
+        filesForQuery.emplace_back(loc.file());
+    }
+
+    auto updatedIndexed = vector<ast::ParsedFile>{};
+    for (auto &f : filesForQuery) {
+        const int id = f.id();
+        const auto it = indexedFinalGS.find(id);
+        const auto &parsedFile = it == indexedFinalGS.end() ? indexed[id] : it->second;
+        if (parsedFile.tree) {
+            updatedIndexed.emplace_back(ast::ParsedFile{parsedFile.tree->deepCopy(), parsedFile.file});
+        }
+    }
+    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
+
+    // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeMap::apply
+    LocalVarFinder localVarFinder(method);
+    auto ctx = core::Context{*gs, core::Symbols::root()};
+    for (auto &t : resolved) {
+        t.tree = ast::TreeMap::apply(ctx, localVarFinder, move(t.tree));
+    }
+
+    return localVarFinder.result();
 }
 
 TypecheckRun LSPTypechecker::retypecheck(LSPFileUpdates updates) const {
