@@ -39,8 +39,8 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
             builder.SetInsertPoint(blockMap.functionInitializersByFunction[entry.second.value()]);
             auto alloca = llvmVariables[var] =
                 builder.CreateAlloca(valueType, nullptr, llvm::StringRef(svName.data(), svName.length()));
-            auto nilValueRaw = cs.getRubyNilRaw(builder);
-            cs.boxRawValue(builder, alloca, nilValueRaw);
+            auto nilValueRaw = MK::getRubyNilRaw(cs, builder);
+            MK::boxRawValue(cs, builder, alloca, nilValueRaw);
         }
     }
 
@@ -53,7 +53,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
             auto store =
                 builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
                                    {blockMap.escapedClosure[0], llvm::ConstantInt::get(cs, llvm::APInt(32, i))});
-            builder.CreateStore(cs.getRubyNilRaw(builder), store);
+            builder.CreateStore(MK::getRubyNilRaw(cs, builder), store);
         }
     }
     return llvmVariables;
@@ -206,7 +206,7 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
                     builder.CreateCall(cs.module->getFunction("sorbet_allocClosureAsValue"),
                                        {llvm::ConstantInt::get(cs, llvm::APInt(32, escapedVariableIndices.size()))});
             else {
-                localClosure = cs.getRubyNilRaw(builder);
+                localClosure = MK::getRubyNilRaw(cs, builder);
             }
         } else {
             localClosure = fun->arg_begin() + 1;

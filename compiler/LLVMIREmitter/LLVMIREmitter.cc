@@ -132,7 +132,7 @@ llvm::Value *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuild
     auto canTakeFastPath =
         builder.CreateICmpEQ(builder.CreateLoad(guardEpochDeclaration),
                              builder.CreateCall(cs.module->getFunction("sorbet_getConstantEpoch")), "canTakeFastPath");
-    auto expected = cs.setExpectedBool(builder, canTakeFastPath, true);
+    auto expected = MK::setExpectedBool(cs, builder, canTakeFastPath, true);
 
     builder.CreateCondBr(expected, continuePath, slowPath);
     builder.SetInsertPoint(slowPath);
@@ -297,12 +297,12 @@ llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilde
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
                                       {getClassVariableStoreClass(cs, builder, blockMap),
-                                       cs.getRubyIdFor(builder, alias.classField.data(cs)->shortName(cs))});
+                                       MK::getRubyIdFor(cs, builder, alias.classField.data(cs)->shortName(cs))});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             return builder.CreateCall(
                 cs.module->getFunction("sorbet_instanceVariableGet"),
                 {varGet(cs, core::LocalVariable::selfVariable(), builder, aliases, blockMap, rubyBlockId),
-                 cs.getRubyIdFor(builder, alias.instanceField.data(cs)->shortName(cs))});
+                 MK::getRubyIdFor(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
         }
     }
     if (blockMap.escapedVariableIndeces.contains(local)) {
@@ -314,7 +314,7 @@ llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilde
     }
 
     // normal local variable
-    return cs.unboxRawValue(builder, blockMap.llvmVariables.at(local));
+    return MK::unboxRawValue(cs, builder, blockMap.llvmVariables.at(local));
 } // namespace
 
 void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilder<> &builder,
@@ -335,12 +335,12 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             builder.CreateCall(cs.module->getFunction("sorbet_classVariableSet"),
                                {getClassVariableStoreClass(cs, builder, blockMap),
-                                cs.getRubyIdFor(builder, alias.classField.data(cs)->shortName(cs)), var});
+                                MK::getRubyIdFor(cs, builder, alias.classField.data(cs)->shortName(cs)), var});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             builder.CreateCall(
                 cs.module->getFunction("sorbet_instanceVariableSet"),
                 {varGet(cs, core::LocalVariable::selfVariable(), builder, aliases, blockMap, rubyBlockId),
-                 cs.getRubyIdFor(builder, alias.instanceField.data(cs)->shortName(cs)), var});
+                 MK::getRubyIdFor(cs, builder, alias.instanceField.data(cs)->shortName(cs)), var});
         }
         return;
     }
@@ -354,7 +354,7 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
     }
 
     // normal local variable
-    cs.boxRawValue(builder, blockMap.llvmVariables.at(local), var);
+    MK::boxRawValue(cs, builder, blockMap.llvmVariables.at(local), var);
 } // namespace
 
 string getFunctionName(CompilerState &cs, core::SymbolRef sym) {
@@ -440,17 +440,17 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
             auto tooManyArgs = builder.CreateICmpUGT(
                 argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgCount)), "tooManyArgs");
-            auto expected1 = cs.setExpectedBool(builder, tooManyArgs, false);
+            auto expected1 = MK::setExpectedBool(cs, builder, tooManyArgs, false);
             builder.CreateCondBr(expected1, argCountFailBlock, argCountSecondCheckBlock);
 
             builder.SetInsertPoint(argCountSecondCheckBlock);
             auto tooFewArgs = builder.CreateICmpULT(
                 argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgCount)), "tooFewArgs");
-            auto expected2 = cs.setExpectedBool(builder, tooFewArgs, false);
+            auto expected2 = MK::setExpectedBool(cs, builder, tooFewArgs, false);
             builder.CreateCondBr(expected2, argCountFailBlock, argCountSuccessBlock);
 
             builder.SetInsertPoint(argCountFailBlock);
-            cs.emitArgumentMismatch(builder, argCountRaw, minArgCount, maxArgCount);
+            MK::emitArgumentMismatch(cs, builder, argCountRaw, minArgCount, maxArgCount);
 
             builder.SetInsertPoint(argCountSuccessBlock);
         }
@@ -523,7 +523,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 auto argCount =
                     builder.CreateICmpEQ(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
                                          llvm::Twine("default") + llvm::Twine(i));
-                auto expected = cs.setExpectedBool(builder, argCount, false);
+                auto expected = MK::setExpectedBool(cs, builder, argCount, false);
                 builder.CreateCondBr(expected, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
             }
         }
@@ -553,7 +553,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                             builder.CreateCall(fillDefaultFunc, {argCountRaw, argArrayRaw,
                                                                  func->arg_begin() + 2 /* this is wrong for block*/});
                     } else {
-                        rawValue = cs.getRubyNilRaw(builder);
+                        rawValue = MK::getRubyNilRaw(cs, builder);
                     }
                     auto argIndex = i + minArgCount;
                     auto a = blockMap.rubyBlockArgs[funcId][argIndex];
@@ -729,7 +729,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             defineMethod(cs, i, true, builder);
                             return;
                         }
-                        auto rawId = cs.getRubyIdFor(builder, str);
+                        auto rawId = MK::getRubyIdFor(cs, builder, str);
 
                         // fill in args
                         {
@@ -791,17 +791,17 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     },
                     [&](cfg::Literal *i) {
                         if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {
-                            varSet(cs, bind.bind.variable, cs.getRubyFalseRaw(builder), builder, aliases, blockMap,
+                            varSet(cs, bind.bind.variable, MK::getRubyFalseRaw(cs, builder), builder, aliases, blockMap,
                                    bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::TrueClass())) {
-                            varSet(cs, bind.bind.variable, cs.getRubyTrueRaw(builder), builder, aliases, blockMap,
+                            varSet(cs, bind.bind.variable, MK::getRubyTrueRaw(cs, builder), builder, aliases, blockMap,
                                    bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::NilClass())) {
-                            varSet(cs, bind.bind.variable, cs.getRubyNilRaw(builder), builder, aliases, blockMap,
+                            varSet(cs, bind.bind.variable, MK::getRubyNilRaw(cs, builder), builder, aliases, blockMap,
                                    bb->rubyBlockId);
                             return;
                         }
@@ -810,13 +810,13 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         ENFORCE(litType);
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
-                                auto rawInt = cs.getRubyIntRaw(builder, litType->value);
+                                auto rawInt = MK::getRubyIntRaw(cs, builder, litType->value);
                                 varSet(cs, bind.bind.variable, rawInt, builder, aliases, blockMap, bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::Symbol: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
-                                auto rawId = cs.getRubyIdFor(builder, str);
+                                auto rawId = MK::getRubyIdFor(cs, builder, str);
                                 auto rawRubySym =
                                     builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
                                 varSet(cs, bind.bind.variable, rawRubySym, builder, aliases, blockMap, bb->rubyBlockId);
@@ -824,7 +824,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             }
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
-                                auto rawRubyString = cs.getRubyStringRaw(builder, str);
+                                auto rawRubyString = MK::getRubyStringRaw(cs, builder, str);
                                 varSet(cs, bind.bind.variable, rawRubyString, builder, aliases, blockMap,
                                        bb->rubyBlockId);
                                 break;
@@ -854,7 +854,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         auto failBlock =
                             llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
 
-                        auto expected = cs.setExpectedBool(builder, passedTypeTest, true);
+                        auto expected = MK::setExpectedBool(cs, builder, passedTypeTest, true);
                         builder.CreateCondBr(expected, successBlock, failBlock);
                         builder.SetInsertPoint(failBlock);
                         // this will throw exception
@@ -867,7 +867,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {
                             varSet(cs, bind.bind.variable, val, builder, aliases, blockMap, bb->rubyBlockId);
                         } else if (i->cast == core::Names::assertType()) {
-                            varSet(cs, bind.bind.variable, cs.getRubyFalseRaw(builder), builder, aliases, blockMap,
+                            varSet(cs, bind.bind.variable, MK::getRubyFalseRaw(cs, builder), builder, aliases, blockMap,
                                    bb->rubyBlockId);
                         }
                     },
@@ -879,7 +879,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
             if (!isTerminated) {
                 if (bb->bexit.thenb != bb->bexit.elseb && bb->bexit.cond.variable != core::LocalVariable::blockCall()) {
                     auto var = varGet(cs, bb->bexit.cond.variable, builder, aliases, blockMap, bb->rubyBlockId);
-                    auto condValue = cs.getIsTruthyU1(builder, var);
+                    auto condValue = MK::getIsTruthyU1(cs, builder, var);
 
                     builder.CreateCondBr(
                         condValue,
@@ -892,7 +892,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
             }
         } else {
             // handle dead block. TODO: this should throw
-            builder.CreateRet(cs.getRubyNilRaw(builder));
+            builder.CreateRet(MK::getRubyNilRaw(cs, builder));
         }
     }
 }

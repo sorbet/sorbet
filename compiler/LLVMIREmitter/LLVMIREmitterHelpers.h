@@ -3,10 +3,15 @@
 #include "LLVMIREmitter.h"
 #include <vector>
 
+namespace sorbet::cfg {
+class Send;
+};
+
 namespace llvm {
 class Function;
 class BasicBlock;
 class AllocaInst;
+class IRBuilderBase;
 }; // namespace llvm
 namespace sorbet::compiler {
 struct BasicBlockMap {
@@ -65,6 +70,27 @@ public:
                                                           std::unique_ptr<ast::MethodDef> &md,
                                                           UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                           llvm::Function *mainFunc);
+};
+
+class MK {
+public:
+    // api for actual code emission
+    static llvm::Value *getRubyIdFor(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName);
+    static llvm::Value *setExpectedBool(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *boolean,
+                                        bool expected);
+    // boxed raw value from rawData into target. Assumes that types are compatible.
+    static void boxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *storeTarget,
+                            llvm::Value *rawData);
+    static llvm::Value *unboxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *storeTarget);
+
+    static llvm::Value *getRubyNilRaw(CompilerState &cs, llvm::IRBuilderBase &builder);
+    static llvm::Value *getRubyFalseRaw(CompilerState &cs, llvm::IRBuilderBase &builder);
+    static llvm::Value *getRubyTrueRaw(CompilerState &cs, llvm::IRBuilderBase &builder);
+    static void emitArgumentMismatch(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *currentArgCount,
+                                     int minArgs, int maxArgs);
+    static llvm::Value *getRubyIntRaw(CompilerState &cs, llvm::IRBuilderBase &builder, long num);
+    static llvm::Value *getRubyStringRaw(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str);
+    static llvm::Value *getIsTruthyU1(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
 };
 } // namespace sorbet::compiler
 #endif
