@@ -19,7 +19,7 @@ cleanup() {
 ruby="./external/ruby_2_6_3/ruby"
 
 echo "Source: $rb"
-echo "require './run/preamble.rb'; require './$rb';" > "$rbrunfile"
+echo "require './$rb';" > "$rbrunfile"
 echo "Run Ruby: bazel-bin/$ruby $rbrunfile"
 echo "Run Sorbet: run/ruby $rb"
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
@@ -27,7 +27,7 @@ $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 echo "Temp Dir: $llvmir"
 run/compile "$llvmir" "$rb"
 set +e
-llvmir=$llvmir runfile=$srbrunfile run/ruby "$rb" 2> "$srberr" | tee "$srbout"
+llvmir=$llvmir run/ruby "$rbrunfile" 2> "$srberr" | tee "$srbout"
 code=$?
 set -e
 
@@ -49,7 +49,7 @@ for i in "$llvmir"/*.ll; do
     echo "LLVM IR (unoptimized): $i"
 done
 for i in "$llvmir"/*.bundle; do
-    echo "Bundle : $i"
+    echo "Bundle: $i"
 done
 
 diff -a "$rbout" "$srbout"
