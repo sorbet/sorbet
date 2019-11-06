@@ -1,6 +1,7 @@
 #ifndef SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
 #define SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
 #include "LLVMIREmitter.h"
+#include <string_view>
 #include <vector>
 
 namespace sorbet::cfg {
@@ -91,6 +92,10 @@ public:
     static llvm::Value *getRubyIntRaw(CompilerState &cs, llvm::IRBuilderBase &builder, long num);
     static llvm::Value *getRubyStringRaw(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str);
     static llvm::Value *getIsTruthyU1(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
+
+    static llvm::Value *getRubyConstantValueRaw(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder);
+
+    static llvm::Constant *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
 };
 } // namespace sorbet::compiler
 #endif

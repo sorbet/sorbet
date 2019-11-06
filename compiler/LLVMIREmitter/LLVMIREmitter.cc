@@ -40,142 +40,6 @@ llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::
     return llvm::Function::ExternalLinkage;
 }
 
-core::SymbolRef removeRoot(core::SymbolRef sym) {
-    if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
-        // Root methods end up going on object
-        sym = core::Symbols::Object();
-    }
-    return sym;
-}
-
-std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
-    auto name = sym.data(gs)->name;
-    if (name.data(gs)->kind == core::NameKind::UNIQUE) {
-        return name.data(gs)->unique.original.data(gs)->show(gs);
-    }
-    return name.data(gs)->show(gs);
-}
-
-std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
-    bool includeOwner = sym.data(gs)->owner.exists() && sym.data(gs)->owner != core::Symbols::root();
-    string owner = includeOwner ? showClassName(gs, sym.data(gs)->owner) + "::" : "";
-    return owner + showClassNameWithoutOwner(gs, sym);
-}
-
-llvm::Constant *toCString(string_view str, llvm::IRBuilder<> &builder) {
-    llvm::StringRef nameRef(str.data(), str.length());
-    return builder.CreateGlobalStringPtr(nameRef, llvm::Twine("str_") + nameRef);
-}
-
-// TODO: add more from https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/include/ruby/ruby.h#L1962. Will
-// need to modify core sorbet for it.
-const vector<pair<core::SymbolRef, string>> knownSymbolMapping = {
-    {core::Symbols::Kernel(), "rb_mKernel"},
-    {core::Symbols::Enumerable(), "rb_mEnumerable"},
-    {core::Symbols::BasicObject(), "rb_cBasicObject"},
-    {core::Symbols::Object(), "rb_cObject"},
-    {core::Symbols::Array(), "rb_cArray"},
-    {core::Symbols::Class(), "rb_cClass"},
-    {core::Symbols::FalseClass(), "rb_cFalseClass"},
-    {core::Symbols::TrueClass(), "rb_cTrueClass"},
-    {core::Symbols::Float(), "rb_cFloat"},
-    {core::Symbols::Hash(), "rb_cHash"},
-    {core::Symbols::Integer(), "rb_cInteger"},
-    {core::Symbols::Module(), "rb_cModule"},
-    {core::Symbols::NilClass(), "rb_cNilClass"},
-    {core::Symbols::Proc(), "rb_cProc"},
-    {core::Symbols::Range(), "rb_cRange"},
-    {core::Symbols::Rational(), "rb_cRational"},
-    {core::Symbols::Regexp(), "rb_cRegexp"},
-    {core::Symbols::String(), "rb_cString"},
-    {core::Symbols::Struct(), "rb_cStruct"},
-    {core::Symbols::Symbol(), "rb_cSymbol"},
-    {core::Symbols::StandardError(), "rb_eStandardError"},
-};
-
-llvm::Value *resolveSymbol(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder) {
-    sym = removeRoot(sym);
-    for (const auto &[knownSym, name] : knownSymbolMapping) {
-        if (sym == knownSym) {
-            auto tp = llvm::Type::getInt64Ty(cs);
-            auto &nm = name; // C++ bindings don't play well with captures
-            auto globalDeclaration = cs.module->getOrInsertGlobal(name, tp, [&] {
-                auto ret =
-                    new llvm::GlobalVariable(*cs.module, tp, true, llvm::GlobalVariable::ExternalLinkage, nullptr, nm);
-                return ret;
-            });
-            return builder.CreateLoad(globalDeclaration);
-        }
-    }
-    auto str = showClassName(cs, sym);
-    ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
-    auto loaderName = "const_load" + str;
-    auto continuePath = llvm::BasicBlock::Create(cs, "const_continue", builder.GetInsertBlock()->getParent());
-    auto slowPath = llvm::BasicBlock::Create(cs, "const_slowPath", builder.GetInsertBlock()->getParent());
-    auto guardEpochName = "guard_epoch_" + str;
-    auto guardedConstName = "guarded_const_" + str;
-
-    auto tp = llvm::Type::getInt64Ty(cs);
-
-    auto guardEpochDeclaration = cs.module->getOrInsertGlobal(guardEpochName, tp, [&] {
-        auto ret = new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::LinkOnceAnyLinkage,
-                                            llvm::ConstantInt::get(tp, 0), guardEpochName);
-        return ret;
-    });
-
-    auto guardedConstDeclaration = cs.module->getOrInsertGlobal(guardedConstName, tp, [&] {
-        auto ret = new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::LinkOnceAnyLinkage,
-                                            llvm::ConstantInt::get(tp, 0), guardedConstName);
-        return ret;
-    });
-
-    auto canTakeFastPath =
-        builder.CreateICmpEQ(builder.CreateLoad(guardEpochDeclaration),
-                             builder.CreateCall(cs.module->getFunction("sorbet_getConstantEpoch")), "canTakeFastPath");
-    auto expected = MK::setExpectedBool(cs, builder, canTakeFastPath, true);
-
-    builder.CreateCondBr(expected, continuePath, slowPath);
-    builder.SetInsertPoint(slowPath);
-    auto recomputeFunName = "const_recompute_" + str;
-    auto recomputeFun = cs.module->getFunction(recomputeFunName);
-    if (!recomputeFun) {
-        // generate something logically similar to
-        // VALUE const_load_FOO() {
-        //    if (const_guard == constant_epoch()) {
-        //      return guarded_const;
-        //    } else {
-        //      guardedConst = sorbet_getConstant("FOO");
-        //      const_guard = constant_epoch();
-        //      return guarded_const;
-        //    }
-        //
-        //    It's not exactly this as I'm doing some tunnings, more specifically, the "else" branch will be marked cold
-        //    and shared across all modules
-
-        auto recomputeFunT = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), {}, false /*not varargs*/);
-        recomputeFun = llvm::Function::Create(recomputeFunT, llvm::Function::LinkOnceAnyLinkage,
-                                              llvm::Twine("const_recompute_") + str, *cs.module);
-        recomputeFun->addFnAttr(llvm::Attribute::Cold);
-        llvm::IRBuilder<> functionBuilder(cs);
-
-        functionBuilder.SetInsertPoint(llvm::BasicBlock::Create(cs, "", recomputeFun));
-
-        functionBuilder.CreateStore(
-            functionBuilder.CreateCall(
-                cs.module->getFunction("sorbet_getConstant"),
-                {toCString(str, functionBuilder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))}),
-            guardedConstDeclaration);
-        functionBuilder.CreateStore(functionBuilder.CreateCall(cs.module->getFunction("sorbet_getConstantEpoch")),
-                                    guardEpochDeclaration);
-        functionBuilder.CreateRetVoid();
-    }
-    builder.CreateCall(recomputeFun);
-    builder.CreateBr(continuePath);
-    builder.SetInsertPoint(continuePath);
-
-    return builder.CreateLoad(guardedConstDeclaration);
-}
-
 const vector<pair<core::SymbolRef, string>> optimizedTypeTests = {
     {core::Symbols::untyped(), "sorbet_isa_Untyped"},
     {core::Symbols::Array(), "sorbet_isa_Array"},
@@ -210,11 +74,11 @@ llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilder<> &builder, llv
             // todo: handle attached of attached class
             if (attachedClass.exists()) {
                 ret = builder.CreateCall(cs.module->getFunction("sorbet_isa_class_of"),
-                                         {val, resolveSymbol(cs, attachedClass, builder)});
+                                         {val, MK::getRubyConstantValueRaw(cs, attachedClass, builder)});
                 return;
             }
-            ret =
-                builder.CreateCall(cs.module->getFunction("sorbet_isa"), {val, resolveSymbol(cs, ct->symbol, builder)});
+            ret = builder.CreateCall(cs.module->getFunction("sorbet_isa"),
+                                     {val, MK::getRubyConstantValueRaw(cs, ct->symbol, builder)});
         },
         [&](core::AppliedType *at) {
             auto base = createTypeTestU1(cs, builder, val, core::make_type<core::ClassType>(at->klass));
@@ -260,6 +124,14 @@ llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilder<> &builder, llv
     return ret;
 }
 
+core::SymbolRef removeRoot(core::SymbolRef sym) {
+    if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
+        // Root methods end up going on object
+        sym = core::Symbols::Object();
+    }
+    return sym;
+}
+
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     core::SymbolRef sym;
     if (auto classType = core::cast_type<core::ClassType>(typ.get())) {
@@ -278,7 +150,7 @@ llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &bu
     auto sym = blockMap.forMethod.data(cs)->owner;
     ENFORCE(sym.data(cs)->isClassOrModule());
 
-    return resolveSymbol(cs, sym.data(cs)->topAttachedClass(cs), builder);
+    return MK::getRubyConstantValueRaw(cs, sym.data(cs)->topAttachedClass(cs), builder);
 };
 
 llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilder<> &builder,
@@ -289,10 +161,11 @@ llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilde
         auto alias = aliases.at(local);
 
         if (alias.kind == Alias::AliasKind::Constant) {
-            return resolveSymbol(cs, alias.constantSym, builder);
+            return MK::getRubyConstantValueRaw(cs, alias.constantSym, builder);
         } else if (alias.kind == Alias::AliasKind::GlobalField) {
-            return builder.CreateCall(cs.module->getFunction("sorbet_globalVariableGet"),
-                                      {toCString(alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder)});
+            return builder.CreateCall(
+                cs.module->getFunction("sorbet_globalVariableGet"),
+                {MK::toCString(cs, alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder)});
 
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
@@ -327,11 +200,12 @@ void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm
             auto name = sym.data(cs.gs)->name.show(cs.gs);
             auto owner = sym.data(cs.gs)->owner;
             builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
-                               {resolveSymbol(cs, owner, builder), toCString(name, builder),
+                               {MK::getRubyConstantValueRaw(cs, owner, builder), MK::toCString(cs, name, builder),
                                 llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
         } else if (alias.kind == Alias::AliasKind::GlobalField) {
-            builder.CreateCall(cs.module->getFunction("sorbet_globalVariableSet"),
-                               {toCString(alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder), var});
+            builder.CreateCall(
+                cs.module->getFunction("sorbet_globalVariableSet"),
+                {MK::toCString(cs, alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder), var});
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             builder.CreateCall(cs.module->getFunction("sorbet_classVariableSet"),
                                {getClassVariableStoreClass(cs, builder, blockMap),
@@ -602,30 +476,40 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
 
     auto rubyFunc = cs.module->getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
     ENFORCE(rubyFunc);
-    builder.CreateCall(rubyFunc, {resolveSymbol(cs, ownerSym, builder), toCString(funcNameRef.show(cs), builder), ptr,
+    builder.CreateCall(rubyFunc, {MK::getRubyConstantValueRaw(cs, ownerSym, builder),
+                                  MK::toCString(cs, funcNameRef.show(cs), builder), ptr,
                                   llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
     builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
 }
 
+std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
+    auto name = sym.data(gs)->name;
+    if (name.data(gs)->kind == core::NameKind::UNIQUE) {
+        return name.data(gs)->unique.original.data(gs)->show(gs);
+    }
+    return name.data(gs)->show(gs);
+}
+
 void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> &builder) {
     auto sym = typeToSym(cs, i->args[0].type);
-    auto classNameCStr = toCString(showClassNameWithoutOwner(cs, sym), builder);
+    // this is wrong and will not work for `class <<self`
+    auto classNameCStr = MK::toCString(cs, showClassNameWithoutOwner(cs, sym), builder);
     auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
 
     if (sym.data(cs)->owner != core::Symbols::root()) {
-        auto getOwner = resolveSymbol(cs, sym.data(cs)->owner, builder);
+        auto getOwner = MK::getRubyConstantValueRaw(cs, sym.data(cs)->owner, builder);
         if (isModule) {
             builder.CreateCall(cs.module->getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
         } else {
-            auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
+            auto rawCall = MK::getRubyConstantValueRaw(cs, sym.data(cs)->superClass(), builder);
             builder.CreateCall(cs.module->getFunction("sorbet_defineNestedClass"), {getOwner, classNameCStr, rawCall});
         }
     } else {
         if (isModule) {
             builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
         } else {
-            auto rawCall = resolveSymbol(cs, sym.data(cs)->superClass(), builder);
+            auto rawCall = MK::getRubyConstantValueRaw(cs, sym.data(cs)->superClass(), builder);
             builder.CreateCall(cs.module->getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
         }
     }
@@ -859,8 +743,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         builder.SetInsertPoint(failBlock);
                         // this will throw exception
                         builder.CreateCall(cs.module->getFunction("sorbet_cast_failure"),
-                                           {val, toCString(i->cast.data(cs)->shortName(cs), builder),
-                                            toCString(bind.bind.type->show(cs), builder)});
+                                           {val, MK::toCString(cs, i->cast.data(cs)->shortName(cs), builder),
+                                            MK::toCString(cs, bind.bind.type->show(cs), builder)});
                         builder.CreateUnreachable();
                         builder.SetInsertPoint(successBlock);
 
@@ -972,7 +856,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, 
                            {
                                llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
-                               resolveSymbol(cs, owner, builder),
+                               MK::getRubyConstantValueRaw(cs, owner, builder),
                            },
                            staticInitName);
     }
