@@ -37,15 +37,20 @@ if defined? ::RSpec::Mocks::AnyInstance
   end
 end
 
-module T
-  module CompatibilityPatches
-    module StasherExtensions
-      def stash
-        T::Private::Methods.maybe_run_sig_block_for_method(@object.method(@method))
-        super
+if defined? ::RSpec::Mocks::InstanceMethodStasher
+  module T
+    module CompatibilityPatches
+      module StasherExtensions
+        def stash
+          if @klass.respond_to?(@method)
+            T::Private::Methods.maybe_run_sig_block_for_method(@klass.method(@method))
+          elsif @klass.method_defined?(@method, false)
+            T::Private::Methods.maybe_run_sig_block_for_method(@klass.instance_method(@method))
+          end
+          super
+        end
+        ::RSpec::Mocks::InstanceMethodStasher.prepend(StasherExtensions)
       end
     end
-    ::RSpec::Mocks::InstanceMethodStasher.prepend(StasherExtensions)
   end
 end
-
