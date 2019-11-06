@@ -30,6 +30,7 @@ target triple = "x86_64-apple-darwin18.2.0"
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
 @llvm.global_ctors = appending global [2 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_times, i8* bitcast (i64* @rubyIdPrecomputed_times to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }]
+@rb_mKernel = external local_unnamed_addr constant i64
 
 ; Function Attrs: nounwind ssp uwtable
 define weak void @dbg_sorbet_validate_id(i64, i8*) local_unnamed_addr #0 {
@@ -153,9 +154,10 @@ functionEntryInitializers:
   %0 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @userStr_hi, i64 0, i64 0), i64 2) #12
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
   store i64 %0, i64* %callArgsAddr, align 8
+  %1 = load i64, i64* @rb_mKernel, align 8
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #12, !noalias !10
-  %1 = call i64 @rb_funcallv(i64 8, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #12
-  ret i64 %1
+  %2 = call i64 @rb_funcallv(i64 %1, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #12
+  ret i64 %2
 }
 
 ; Function Attrs: nounwind ssp

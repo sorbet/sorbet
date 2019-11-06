@@ -28,6 +28,9 @@ target triple = "x86_64-apple-darwin18.2.0"
 @rubyIdPrecomputed_unsafe = internal unnamed_addr global i64 0, align 8
 @str_unsafe = private unnamed_addr constant [7 x i8] c"unsafe\00", align 1
 @llvm.global_ctors = appending global [1 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_unsafe, i8* bitcast (i64* @rubyIdPrecomputed_unsafe to i8*) }]
+@guard_epoch_T = linkonce local_unnamed_addr global i64 0
+@guarded_const_T = linkonce local_unnamed_addr global i64 0
+@str_T = private unnamed_addr constant [2 x i8] c"T\00", align 1
 @guard_epoch_Object = linkonce local_unnamed_addr global i64 0
 @guarded_const_Object = linkonce local_unnamed_addr global i64 0
 @str_Object = private unnamed_addr constant [7 x i8] c"Object\00", align 1
@@ -379,6 +382,15 @@ constr:
 }
 
 ; Function Attrs: cold ssp
+define linkonce void @const_recompute_T() local_unnamed_addr #11 {
+  %1 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1)
+  store i64 %1, i64* @guarded_const_T, align 8
+  %2 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  store i64 %2, i64* @guard_epoch_T, align 8
+  ret void
+}
+
+; Function Attrs: cold ssp
 define linkonce void @const_recompute_Object() local_unnamed_addr #11 {
   %1 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0), i64 6)
   store i64 %1, i64* @guarded_const_Object, align 8
@@ -392,62 +404,70 @@ define void @Init_test_testdata_llvm_class() local_unnamed_addr #12 {
 entry:
   %callArgs.i.i.i = alloca [1 x i64], align 8
   %callArgs.i = alloca [1 x i64], align 8
-  %0 = bitcast [1 x i64]* %callArgs.i to i8*
-  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %0)
+  %0 = load i64, i64* @rb_cObject, align 8
+  %1 = bitcast [1 x i64]* %callArgs.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %1)
   %rubyId_unsafe.i = load i64, i64* @rubyIdPrecomputed_unsafe, align 8
-  %1 = tail call i32 @rb_block_given_p() #15
-  %2 = icmp eq i32 %1, 0
-  br i1 %2, label %typeTestSuccess.i, label %3
+  %2 = tail call i32 @rb_block_given_p() #15
+  %3 = icmp eq i32 %2, 0
+  br i1 %3, label %typeTestSuccess.i, label %4
 
-3:                                                ; preds = %entry
-  %4 = tail call i64 @rb_block_proc() #15
+4:                                                ; preds = %entry
+  %5 = tail call i64 @rb_block_proc() #15
   br label %typeTestSuccess.i
 
-typeTestSuccess.i:                                ; preds = %entry, %3
+typeTestSuccess.i:                                ; preds = %entry, %4
   %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 8, i64* %callArgsAddr.i, align 8
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !13
-  %5 = call i64 @rb_funcallv(i64 8, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #15
-  %6 = call i64 @rb_define_module(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.1, i64 0, i64 0)) #15
-  %7 = load i64, i64* @guard_epoch_Foo, align 8
-  %8 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath.i.i = icmp eq i64 %7, %8
-  br i1 %canTakeFastPath.i.i, label %const_continue.i.i, label %const_slowPath.i.i, !prof !16
+  store i64 %0, i64* %callArgsAddr.i, align 8
+  %6 = load i64, i64* @guard_epoch_T, align 8
+  %7 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %canTakeFastPath.i = icmp eq i64 %6, %7
+  br i1 %canTakeFastPath.i, label %const_continue.i, label %const_slowPath.i, !prof !13
 
-const_continue.i.i:                               ; preds = %const_slowPath.i.i, %typeTestSuccess.i
-  %9 = load i64, i64* @guarded_const_Foo, align 8
-  %10 = bitcast [1 x i64]* %callArgs.i.i.i to i8*
-  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %10) #15
+const_continue.i:                                 ; preds = %const_slowPath.i, %typeTestSuccess.i
+  %8 = load i64, i64* @guarded_const_T, align 8
+  tail call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !14
+  %9 = call i64 @rb_funcallv(i64 %8, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #15
+  %10 = call i64 @rb_define_module(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.1, i64 0, i64 0)) #15
+  %11 = load i64, i64* @guard_epoch_Foo, align 8
+  %12 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %canTakeFastPath.i.i = icmp eq i64 %11, %12
+  br i1 %canTakeFastPath.i.i, label %const_continue.i.i, label %const_slowPath.i.i, !prof !13
+
+const_continue.i.i:                               ; preds = %const_slowPath.i.i, %const_continue.i
+  %13 = load i64, i64* @guarded_const_Foo, align 8
+  %14 = bitcast [1 x i64]* %callArgs.i.i.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %14) #15
   %rubyId_unsafe.i.i.i = load i64, i64* @rubyIdPrecomputed_unsafe, align 8
-  %11 = call i32 @rb_block_given_p() #15
-  %12 = icmp eq i32 %11, 0
-  br i1 %12, label %sorbet_getMethodBlockAsProc.exit.i.i.i, label %13
+  %15 = call i32 @rb_block_given_p() #15
+  %16 = icmp eq i32 %15, 0
+  br i1 %16, label %sorbet_getMethodBlockAsProc.exit.i.i.i, label %17
 
-13:                                               ; preds = %const_continue.i.i
-  %14 = call i64 @rb_block_proc() #15
+17:                                               ; preds = %const_continue.i.i
+  %18 = call i64 @rb_block_proc() #15
   br label %sorbet_getMethodBlockAsProc.exit.i.i.i
 
-sorbet_getMethodBlockAsProc.exit.i.i.i:           ; preds = %13, %const_continue.i.i
-  %15 = load i64, i64* @guard_epoch_Foo, align 8
-  %16 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath.i.i.i = icmp eq i64 %15, %16
-  br i1 %canTakeFastPath.i.i.i, label %const_continue.i.i.i, label %const_slowPath.i.i.i, !prof !16
+sorbet_getMethodBlockAsProc.exit.i.i.i:           ; preds = %17, %const_continue.i.i
+  %19 = load i64, i64* @guard_epoch_Foo, align 8
+  %20 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %canTakeFastPath.i.i.i = icmp eq i64 %19, %20
+  br i1 %canTakeFastPath.i.i.i, label %const_continue.i.i.i, label %const_slowPath.i.i.i, !prof !13
 
 const_continue.i.i.i:                             ; preds = %const_slowPath.i.i.i, %sorbet_getMethodBlockAsProc.exit.i.i.i
-  %17 = load i64, i64* @guarded_const_Foo, align 8
-  %18 = icmp eq i64 %17, %9
-  br i1 %18, label %typeTestSuccess.i.i.i, label %19
+  %21 = load i64, i64* @guarded_const_Foo, align 8
+  %22 = icmp eq i64 %21, %13
+  br i1 %22, label %typeTestSuccess.i.i.i, label %23
 
-19:                                               ; preds = %const_continue.i.i.i
-  %20 = load i64, i64* @rb_cModule, align 8, !tbaa !7
-  %21 = call i64 @rb_obj_is_kind_of(i64 %9, i64 %20) #15
-  %22 = icmp eq i64 %21, 0
-  br i1 %22, label %typeTestFail.i.i.i, label %sorbet_isa_class_of.exit.i.i.i, !prof !17
+23:                                               ; preds = %const_continue.i.i.i
+  %24 = load i64, i64* @rb_cModule, align 8, !tbaa !7
+  %25 = call i64 @rb_obj_is_kind_of(i64 %13, i64 %24) #15
+  %26 = icmp eq i64 %25, 0
+  br i1 %26, label %typeTestFail.i.i.i, label %sorbet_isa_class_of.exit.i.i.i, !prof !17
 
-sorbet_isa_class_of.exit.i.i.i:                   ; preds = %19
-  %23 = call i64 @rb_class_inherited_p(i64 %9, i64 %17) #9
-  %24 = icmp eq i64 %23, 0
-  br i1 %24, label %typeTestFail.i.i.i, label %typeTestSuccess.i.i.i, !prof !0
+sorbet_isa_class_of.exit.i.i.i:                   ; preds = %23
+  %27 = call i64 @rb_class_inherited_p(i64 %13, i64 %21) #9
+  %28 = icmp eq i64 %27, 0
+  br i1 %28, label %typeTestFail.i.i.i, label %typeTestSuccess.i.i.i, !prof !0
 
 const_slowPath.i.i.i:                             ; preds = %sorbet_getMethodBlockAsProc.exit.i.i.i
   call void @const_recompute_Foo() #15
@@ -455,158 +475,184 @@ const_slowPath.i.i.i:                             ; preds = %sorbet_getMethodBlo
 
 typeTestSuccess.i.i.i:                            ; preds = %sorbet_isa_class_of.exit.i.i.i, %const_continue.i.i.i
   %callArgsAddr.i.i.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i.i.i, i64 0, i64 0
-  store i64 8, i64* %callArgsAddr.i.i.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i.i.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !18
-  %25 = call i64 @rb_funcallv(i64 8, i64 %rubyId_unsafe.i.i.i, i32 1, i64* nonnull %callArgsAddr.i.i.i) #15
-  %26 = load i64, i64* @guard_epoch_Foo, align 8
-  %27 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath24.i.i.i = icmp eq i64 %26, %27
-  br i1 %canTakeFastPath24.i.i.i, label %const_continue22.i.i.i, label %const_slowPath23.i.i.i, !prof !16
+  store i64 %0, i64* %callArgsAddr.i.i.i, align 8
+  %29 = load i64, i64* @guard_epoch_T, align 8
+  %30 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %canTakeFastPath22.i.i.i = icmp eq i64 %29, %30
+  br i1 %canTakeFastPath22.i.i.i, label %const_continue20.i.i.i, label %const_slowPath21.i.i.i, !prof !13
 
-typeTestFail.i.i.i:                               ; preds = %sorbet_isa_class_of.exit.i.i.i, %19
-  call fastcc void @sorbet_cast_failure(i64 %9, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"str_T.class_of(Foo)", i64 0, i64 0)) #15
+typeTestFail.i.i.i:                               ; preds = %sorbet_isa_class_of.exit.i.i.i, %23
+  call fastcc void @sorbet_cast_failure(i64 %13, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"str_T.class_of(Foo)", i64 0, i64 0)) #15
   unreachable
 
-const_continue22.i.i.i:                           ; preds = %const_slowPath23.i.i.i, %typeTestSuccess.i.i.i
-  %28 = phi i64 [ %.pre.i.i.i, %const_slowPath23.i.i.i ], [ %26, %typeTestSuccess.i.i.i ]
-  %29 = load i64, i64* @guarded_const_Foo, align 8
-  %30 = load i64, i64* @guard_epoch_Object, align 8
-  %canTakeFastPath27.i.i.i = icmp eq i64 %30, %28
-  br i1 %canTakeFastPath27.i.i.i, label %const_continue25.i.i.i, label %const_slowPath26.i.i.i, !prof !16
+const_continue20.i.i.i:                           ; preds = %const_slowPath21.i.i.i, %typeTestSuccess.i.i.i
+  %31 = load i64, i64* @guarded_const_T, align 8
+  call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i.i.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !18
+  %32 = call i64 @rb_funcallv(i64 %31, i64 %rubyId_unsafe.i.i.i, i32 1, i64* nonnull %callArgsAddr.i.i.i) #15
+  %33 = load i64, i64* @guard_epoch_Foo, align 8
+  %34 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %canTakeFastPath25.i.i.i = icmp eq i64 %33, %34
+  br i1 %canTakeFastPath25.i.i.i, label %const_continue23.i.i.i, label %const_slowPath24.i.i.i, !prof !13
 
-const_slowPath23.i.i.i:                           ; preds = %typeTestSuccess.i.i.i
+const_slowPath21.i.i.i:                           ; preds = %typeTestSuccess.i.i.i
+  call void @const_recompute_T() #15
+  br label %const_continue20.i.i.i
+
+const_continue23.i.i.i:                           ; preds = %const_slowPath24.i.i.i, %const_continue20.i.i.i
+  %35 = phi i64 [ %.pre.i.i.i, %const_slowPath24.i.i.i ], [ %33, %const_continue20.i.i.i ]
+  %36 = load i64, i64* @guarded_const_Foo, align 8
+  %37 = load i64, i64* @guard_epoch_Object, align 8
+  %canTakeFastPath28.i.i.i = icmp eq i64 %37, %35
+  br i1 %canTakeFastPath28.i.i.i, label %const_continue26.i.i.i, label %const_slowPath27.i.i.i, !prof !13
+
+const_slowPath24.i.i.i:                           ; preds = %const_continue20.i.i.i
   call void @const_recompute_Foo() #15
   %.pre.i.i.i = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  br label %const_continue22.i.i.i
+  br label %const_continue23.i.i.i
 
-const_continue25.i.i.i:                           ; preds = %const_slowPath26.i.i.i, %const_continue22.i.i.i
-  %31 = load i64, i64* @guarded_const_Object, align 8
-  %32 = call i64 @rb_define_class_under(i64 %29, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Bar, i64 0, i64 0), i64 %31) #15
-  %33 = load i64, i64* @"guard_epoch_Foo::Bar", align 8
-  %34 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath.i.i.i.i = icmp eq i64 %33, %34
-  br i1 %canTakeFastPath.i.i.i.i, label %const_continue.i.i.i.i, label %const_slowPath.i.i.i.i, !prof !16
-
-const_continue.i.i.i.i:                           ; preds = %const_slowPath.i.i.i.i, %const_continue25.i.i.i
-  %35 = load i64, i64* @"guarded_const_Foo::Bar", align 8
-  %36 = call i32 @rb_block_given_p() #15
-  %37 = icmp eq i32 %36, 0
-  br i1 %37, label %sorbet_getMethodBlockAsProc.exit.i.i.i.i.i, label %38
-
-38:                                               ; preds = %const_continue.i.i.i.i
-  %39 = call i64 @rb_block_proc() #15
-  br label %sorbet_getMethodBlockAsProc.exit.i.i.i.i.i
-
-sorbet_getMethodBlockAsProc.exit.i.i.i.i.i:       ; preds = %38, %const_continue.i.i.i.i
+const_continue26.i.i.i:                           ; preds = %const_slowPath27.i.i.i, %const_continue23.i.i.i
+  %38 = load i64, i64* @guarded_const_Object, align 8
+  %39 = call i64 @rb_define_class_under(i64 %36, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Bar, i64 0, i64 0), i64 %38) #15
   %40 = load i64, i64* @"guard_epoch_Foo::Bar", align 8
   %41 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath.i.i.i.i.i = icmp eq i64 %40, %41
-  br i1 %canTakeFastPath.i.i.i.i.i, label %const_continue.i.i.i.i.i, label %const_slowPath.i.i.i.i.i, !prof !16
+  %canTakeFastPath.i.i.i.i = icmp eq i64 %40, %41
+  br i1 %canTakeFastPath.i.i.i.i, label %const_continue.i.i.i.i, label %const_slowPath.i.i.i.i, !prof !13
+
+const_continue.i.i.i.i:                           ; preds = %const_slowPath.i.i.i.i, %const_continue26.i.i.i
+  %42 = load i64, i64* @"guarded_const_Foo::Bar", align 8
+  %43 = call i32 @rb_block_given_p() #15
+  %44 = icmp eq i32 %43, 0
+  br i1 %44, label %sorbet_getMethodBlockAsProc.exit.i.i.i.i.i, label %45
+
+45:                                               ; preds = %const_continue.i.i.i.i
+  %46 = call i64 @rb_block_proc() #15
+  br label %sorbet_getMethodBlockAsProc.exit.i.i.i.i.i
+
+sorbet_getMethodBlockAsProc.exit.i.i.i.i.i:       ; preds = %45, %const_continue.i.i.i.i
+  %47 = load i64, i64* @"guard_epoch_Foo::Bar", align 8
+  %48 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %canTakeFastPath.i.i.i.i.i = icmp eq i64 %47, %48
+  br i1 %canTakeFastPath.i.i.i.i.i, label %const_continue.i.i.i.i.i, label %const_slowPath.i.i.i.i.i, !prof !13
 
 const_continue.i.i.i.i.i:                         ; preds = %const_slowPath.i.i.i.i.i, %sorbet_getMethodBlockAsProc.exit.i.i.i.i.i
-  %42 = load i64, i64* @"guarded_const_Foo::Bar", align 8
-  %43 = icmp eq i64 %42, %35
-  br i1 %43, label %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i", label %44
+  %49 = load i64, i64* @"guarded_const_Foo::Bar", align 8
+  %50 = icmp eq i64 %49, %42
+  br i1 %50, label %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i", label %51
 
-44:                                               ; preds = %const_continue.i.i.i.i.i
-  %45 = load i64, i64* @rb_cModule, align 8, !tbaa !7
-  %46 = call i64 @rb_obj_is_kind_of(i64 %35, i64 %45) #15
-  %47 = icmp eq i64 %46, 0
-  br i1 %47, label %typeTestFail.i.i.i.i.i, label %sorbet_isa_class_of.exit.i.i.i.i.i, !prof !17
+51:                                               ; preds = %const_continue.i.i.i.i.i
+  %52 = load i64, i64* @rb_cModule, align 8, !tbaa !7
+  %53 = call i64 @rb_obj_is_kind_of(i64 %42, i64 %52) #15
+  %54 = icmp eq i64 %53, 0
+  br i1 %54, label %typeTestFail.i.i.i.i.i, label %sorbet_isa_class_of.exit.i.i.i.i.i, !prof !17
 
-sorbet_isa_class_of.exit.i.i.i.i.i:               ; preds = %44
-  %48 = call i64 @rb_class_inherited_p(i64 %35, i64 %42) #9
-  %49 = icmp eq i64 %48, 0
-  br i1 %49, label %typeTestFail.i.i.i.i.i, label %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i", !prof !0
+sorbet_isa_class_of.exit.i.i.i.i.i:               ; preds = %51
+  %55 = call i64 @rb_class_inherited_p(i64 %42, i64 %49) #9
+  %56 = icmp eq i64 %55, 0
+  br i1 %56, label %typeTestFail.i.i.i.i.i, label %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i", !prof !0
 
 const_slowPath.i.i.i.i.i:                         ; preds = %sorbet_getMethodBlockAsProc.exit.i.i.i.i.i
   call void @"const_recompute_Foo::Bar"() #15
   br label %const_continue.i.i.i.i.i
 
-typeTestFail.i.i.i.i.i:                           ; preds = %sorbet_isa_class_of.exit.i.i.i.i.i, %44
-  call fastcc void @sorbet_cast_failure(i64 %35, i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"str_T.class_of(Foo::Bar)", i64 0, i64 0)) #15
+typeTestFail.i.i.i.i.i:                           ; preds = %sorbet_isa_class_of.exit.i.i.i.i.i, %51
+  call fastcc void @sorbet_cast_failure(i64 %42, i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"str_T.class_of(Foo::Bar)", i64 0, i64 0)) #15
   unreachable
 
-const_slowPath.i.i.i.i:                           ; preds = %const_continue25.i.i.i
+const_slowPath.i.i.i.i:                           ; preds = %const_continue26.i.i.i
   call void @"const_recompute_Foo::Bar"() #15
   br label %const_continue.i.i.i.i
 
-const_slowPath26.i.i.i:                           ; preds = %const_continue22.i.i.i
+const_slowPath27.i.i.i:                           ; preds = %const_continue23.i.i.i
   call void @const_recompute_Object() #15
-  br label %const_continue25.i.i.i
+  br label %const_continue26.i.i.i
 
-const_slowPath.i.i:                               ; preds = %typeTestSuccess.i
+const_slowPath.i.i:                               ; preds = %const_continue.i
   call void @const_recompute_Foo() #15
   br label %const_continue.i.i
 
 "Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i": ; preds = %sorbet_isa_class_of.exit.i.i.i.i.i, %const_continue.i.i.i.i.i
-  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %10) #15
-  store i64 8, i64* %callArgsAddr.i, align 8
+  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %14) #15
+  store i64 %0, i64* %callArgsAddr.i, align 8
+  %57 = load i64, i64* @guard_epoch_T, align 8
+  %58 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %canTakeFastPath40.i = icmp eq i64 %57, %58
+  br i1 %canTakeFastPath40.i, label %const_continue38.i, label %const_slowPath39.i, !prof !13
+
+const_slowPath.i:                                 ; preds = %typeTestSuccess.i
+  tail call void @const_recompute_T() #15
+  br label %const_continue.i
+
+const_continue38.i:                               ; preds = %const_slowPath39.i, %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i"
+  %59 = load i64, i64* @guarded_const_T, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !21
-  %50 = call i64 @rb_funcallv(i64 8, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #15
-  %51 = load i64, i64* @guard_epoch_Object, align 8
-  %52 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath.i = icmp eq i64 %51, %52
-  br i1 %canTakeFastPath.i, label %const_continue.i, label %const_slowPath.i, !prof !16
+  %60 = call i64 @rb_funcallv(i64 %59, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #15
+  %61 = load i64, i64* @guard_epoch_Object, align 8
+  %62 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %canTakeFastPath44.i = icmp eq i64 %61, %62
+  br i1 %canTakeFastPath44.i, label %const_continue42.i, label %const_slowPath43.i, !prof !13
 
-const_continue.i:                                 ; preds = %const_slowPath.i, %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i"
-  %53 = load i64, i64* @guarded_const_Object, align 8
-  %54 = call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Baz.4, i64 0, i64 0), i64 %53) #15
-  %55 = load i64, i64* @guard_epoch_Baz, align 8
-  %56 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath.i1.i = icmp eq i64 %55, %56
-  br i1 %canTakeFastPath.i1.i, label %const_continue.i2.i, label %const_slowPath.i9.i, !prof !16
+const_slowPath39.i:                               ; preds = %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i"
+  call void @const_recompute_T() #15
+  br label %const_continue38.i
 
-const_continue.i2.i:                              ; preds = %const_slowPath.i9.i, %const_continue.i
-  %57 = load i64, i64* @guarded_const_Baz, align 8
-  %58 = call i32 @rb_block_given_p() #15
-  %59 = icmp eq i32 %58, 0
-  br i1 %59, label %sorbet_getMethodBlockAsProc.exit.i.i4.i, label %60
+const_continue42.i:                               ; preds = %const_slowPath43.i, %const_continue38.i
+  %63 = load i64, i64* @guarded_const_Object, align 8
+  %64 = call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Baz.4, i64 0, i64 0), i64 %63) #15
+  %65 = load i64, i64* @guard_epoch_Baz, align 8
+  %66 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %canTakeFastPath.i1.i = icmp eq i64 %65, %66
+  br i1 %canTakeFastPath.i1.i, label %const_continue.i2.i, label %const_slowPath.i9.i, !prof !13
 
-60:                                               ; preds = %const_continue.i2.i
-  %61 = call i64 @rb_block_proc() #15
+const_continue.i2.i:                              ; preds = %const_slowPath.i9.i, %const_continue42.i
+  %67 = load i64, i64* @guarded_const_Baz, align 8
+  %68 = call i32 @rb_block_given_p() #15
+  %69 = icmp eq i32 %68, 0
+  br i1 %69, label %sorbet_getMethodBlockAsProc.exit.i.i4.i, label %70
+
+70:                                               ; preds = %const_continue.i2.i
+  %71 = call i64 @rb_block_proc() #15
   br label %sorbet_getMethodBlockAsProc.exit.i.i4.i
 
-sorbet_getMethodBlockAsProc.exit.i.i4.i:          ; preds = %60, %const_continue.i2.i
-  %62 = load i64, i64* @guard_epoch_Baz, align 8
-  %63 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath.i.i3.i = icmp eq i64 %62, %63
-  br i1 %canTakeFastPath.i.i3.i, label %const_continue.i.i5.i, label %const_slowPath.i.i7.i, !prof !16
+sorbet_getMethodBlockAsProc.exit.i.i4.i:          ; preds = %70, %const_continue.i2.i
+  %72 = load i64, i64* @guard_epoch_Baz, align 8
+  %73 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %canTakeFastPath.i.i3.i = icmp eq i64 %72, %73
+  br i1 %canTakeFastPath.i.i3.i, label %const_continue.i.i5.i, label %const_slowPath.i.i7.i, !prof !13
 
 const_continue.i.i5.i:                            ; preds = %const_slowPath.i.i7.i, %sorbet_getMethodBlockAsProc.exit.i.i4.i
-  %64 = load i64, i64* @guarded_const_Baz, align 8
-  %65 = icmp eq i64 %64, %57
-  br i1 %65, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %66
+  %74 = load i64, i64* @guarded_const_Baz, align 8
+  %75 = icmp eq i64 %74, %67
+  br i1 %75, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %76
 
-66:                                               ; preds = %const_continue.i.i5.i
-  %67 = load i64, i64* @rb_cModule, align 8, !tbaa !7
-  %68 = call i64 @rb_obj_is_kind_of(i64 %57, i64 %67) #15
-  %69 = icmp eq i64 %68, 0
-  br i1 %69, label %typeTestFail.i.i8.i, label %sorbet_isa_class_of.exit.i.i6.i, !prof !17
+76:                                               ; preds = %const_continue.i.i5.i
+  %77 = load i64, i64* @rb_cModule, align 8, !tbaa !7
+  %78 = call i64 @rb_obj_is_kind_of(i64 %67, i64 %77) #15
+  %79 = icmp eq i64 %78, 0
+  br i1 %79, label %typeTestFail.i.i8.i, label %sorbet_isa_class_of.exit.i.i6.i, !prof !17
 
-sorbet_isa_class_of.exit.i.i6.i:                  ; preds = %66
-  %70 = call i64 @rb_class_inherited_p(i64 %57, i64 %64) #9
-  %71 = icmp eq i64 %70, 0
-  br i1 %71, label %typeTestFail.i.i8.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", !prof !0
+sorbet_isa_class_of.exit.i.i6.i:                  ; preds = %76
+  %80 = call i64 @rb_class_inherited_p(i64 %67, i64 %74) #9
+  %81 = icmp eq i64 %80, 0
+  br i1 %81, label %typeTestFail.i.i8.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", !prof !0
 
 const_slowPath.i.i7.i:                            ; preds = %sorbet_getMethodBlockAsProc.exit.i.i4.i
   call void @const_recompute_Baz() #15
   br label %const_continue.i.i5.i
 
-typeTestFail.i.i8.i:                              ; preds = %sorbet_isa_class_of.exit.i.i6.i, %66
-  call fastcc void @sorbet_cast_failure(i64 %57, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"str_T.class_of(Baz)", i64 0, i64 0)) #15
+typeTestFail.i.i8.i:                              ; preds = %sorbet_isa_class_of.exit.i.i6.i, %76
+  call fastcc void @sorbet_cast_failure(i64 %67, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"str_T.class_of(Baz)", i64 0, i64 0)) #15
   unreachable
 
-const_slowPath.i9.i:                              ; preds = %const_continue.i
+const_slowPath.i9.i:                              ; preds = %const_continue42.i
   call void @const_recompute_Baz() #15
   br label %const_continue.i2.i
 
-const_slowPath.i:                                 ; preds = %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i"
+const_slowPath43.i:                               ; preds = %const_continue38.i
   call void @const_recompute_Object() #15
-  br label %const_continue.i
+  br label %const_continue42.i
 
 "func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %const_continue.i.i5.i, %sorbet_isa_class_of.exit.i.i6.i
-  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %0)
+  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %1)
   ret void
 }
 
@@ -674,10 +720,10 @@ attributes #16 = { noreturn nounwind }
 !10 = !{!"int", !4, i64 0}
 !11 = !{!12, !12, i64 0}
 !12 = !{!"long long", !4, i64 0}
-!13 = !{!14}
-!14 = distinct !{!14, !15, !"sorbet_callFunc: argument 0"}
-!15 = distinct !{!15, !"sorbet_callFunc"}
-!16 = !{!"branch_weights", i32 2000, i32 1}
+!13 = !{!"branch_weights", i32 2000, i32 1}
+!14 = !{!15}
+!15 = distinct !{!15, !16, !"sorbet_callFunc: argument 0"}
+!16 = distinct !{!16, !"sorbet_callFunc"}
 !17 = !{!"branch_weights", i32 1073205, i32 2146410443}
 !18 = !{!19}
 !19 = distinct !{!19, !20, !"sorbet_callFunc: argument 0"}
