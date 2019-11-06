@@ -385,7 +385,7 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
     }
     for (const auto [name, sym] : klass.data(gs)->members()) {
         if (!sym.exists() || !sym.data(gs)->isMethod() || sym.data(gs)->name == core::Names::staticInit() ||
-            sym.data(gs)->isFinalMethod()) {
+            sym.data(gs)->name == core::Names::unresolvedAncestors() || sym.data(gs)->isFinalMethod()) {
             continue;
         }
         if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {

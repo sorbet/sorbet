@@ -46,7 +46,8 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
     // static-init for a class
-    if (data->name == core::Names::staticInit() || data->name == core::Names::Constants::AttachedClass()) {
+    if (data->name == core::Names::staticInit() || data->name == core::Names::unresolvedAncestors() ||
+        data->name == core::Names::Constants::AttachedClass()) {
         return true;
     }
     // static-init for a file
