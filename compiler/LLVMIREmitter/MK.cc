@@ -3,6 +3,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/Transforms/Utils/ModuleUtils.h" // appendToGlobalCtors
 // needef for LLVMIREmitterHelpers
+#include "common/typecase.h"
 #include "core/core.h"
 // ^^^ violate our poisons
 #include "LLVMIREmitterHelpers.h"
@@ -248,4 +249,91 @@ llvm::Constant *MK::toCString(CompilerState &cs, string_view str, llvm::IRBuilde
     llvm::StringRef nameRef(str.data(), str.length());
     return builderCast(builder).CreateGlobalStringPtr(nameRef, llvm::Twine("str_") + nameRef);
 }
+
+namespace {
+const vector<pair<core::SymbolRef, string>> optimizedTypeTests = {
+    {core::Symbols::untyped(), "sorbet_isa_Untyped"},
+    {core::Symbols::Array(), "sorbet_isa_Array"},
+    {core::Symbols::FalseClass(), "sorbet_isa_FalseClass"},
+    {core::Symbols::TrueClass(), "sorbet_isa_TrueClass"},
+    {core::Symbols::Float(), "sorbet_isa_Float"},
+    {core::Symbols::Hash(), "sorbet_isa_Hash"},
+    {core::Symbols::Integer(), "sorbet_isa_Integer"},
+    {core::Symbols::NilClass(), "sorbet_isa_NilClass"},
+    {core::Symbols::Proc(), "sorbet_isa_Proc"},
+    {core::Symbols::Rational(), "sorbet_isa_Rational"},
+    {core::Symbols::Regexp(), "sorbet_isa_Regexp"},
+    {core::Symbols::String(), "sorbet_isa_String"},
+    {core::Symbols::Symbol(), "sorbet_isa_Symbol"},
+    {core::Symbols::Proc(), "sorbet_isa_Proc"},
+};
+}
+
+llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val,
+                                  const core::TypePtr &type) {
+    auto &builder = builderCast(b);
+    llvm::Value *ret = nullptr;
+    typecase(
+        type.get(),
+        [&](core::ClassType *ct) {
+            for (const auto &[candidate, specializedCall] : optimizedTypeTests) {
+                if (ct->symbol == candidate) {
+                    ret = builder.CreateCall(cs.module->getFunction(specializedCall), {val});
+                    return;
+                }
+            }
+            auto attachedClass = ct->symbol.data(cs)->attachedClass(cs);
+            // todo: handle attached of attached class
+            if (attachedClass.exists()) {
+                ret = builder.CreateCall(cs.module->getFunction("sorbet_isa_class_of"),
+                                         {val, MK::getRubyConstantValueRaw(cs, attachedClass, builder)});
+                return;
+            }
+            ret = builder.CreateCall(cs.module->getFunction("sorbet_isa"),
+                                     {val, MK::getRubyConstantValueRaw(cs, ct->symbol, builder)});
+        },
+        [&](core::AppliedType *at) {
+            auto base = createTypeTestU1(cs, builder, val, core::make_type<core::ClassType>(at->klass));
+            ret = base;
+            // todo: ranges, hashes, sets, enumerator, and, overall, enumerables
+        },
+        [&](core::OrType *ct) {
+            // TODO: reoder types so that cheap test is done first
+            auto left = createTypeTestU1(cs, builder, val, ct->left);
+            auto rightBlockStart = llvm::BasicBlock::Create(cs, "orRight", builder.GetInsertBlock()->getParent());
+            auto contBlock = llvm::BasicBlock::Create(cs, "orContinue", builder.GetInsertBlock()->getParent());
+            auto leftEnd = builder.GetInsertBlock();
+            builder.CreateCondBr(left, contBlock, rightBlockStart);
+            builder.SetInsertPoint(rightBlockStart);
+            auto right = createTypeTestU1(cs, builder, val, ct->right);
+            auto rightEnd = builder.GetInsertBlock();
+            builder.CreateBr(contBlock);
+            builder.SetInsertPoint(contBlock);
+            auto phi = builder.CreatePHI(builder.getInt1Ty(), 2, "orTypeTest");
+            phi->addIncoming(left, leftEnd);
+            phi->addIncoming(right, rightEnd);
+            ret = phi;
+        },
+        [&](core::AndType *ct) {
+            // TODO: reoder types so that cheap test is done first
+            auto left = createTypeTestU1(cs, builder, val, ct->left);
+            auto rightBlockStart = llvm::BasicBlock::Create(cs, "andRight", builder.GetInsertBlock()->getParent());
+            auto contBlock = llvm::BasicBlock::Create(cs, "andContinue", builder.GetInsertBlock()->getParent());
+            auto leftEnd = builder.GetInsertBlock();
+            builder.CreateCondBr(left, rightBlockStart, contBlock);
+            builder.SetInsertPoint(rightBlockStart);
+            auto right = createTypeTestU1(cs, builder, val, ct->right);
+            auto rightEnd = builder.GetInsertBlock();
+            builder.CreateBr(contBlock);
+            builder.SetInsertPoint(contBlock);
+            auto phi = builder.CreatePHI(builder.getInt1Ty(), 2, "andTypeTest");
+            phi->addIncoming(left, leftEnd);
+            phi->addIncoming(right, rightEnd);
+            ret = phi;
+        },
+        [&](core::Type *_default) { ret = builder.getInt1(true); });
+    ENFORCE(ret != nullptr);
+    return ret;
+}
+
 }; // namespace sorbet::compiler
