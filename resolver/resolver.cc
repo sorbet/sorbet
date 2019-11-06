@@ -1435,15 +1435,6 @@ private:
         }
     }
 
-    // These will already be handled by DefaultArgs Rewriter pass
-    void deleteOptionlArg(core::MutableContext ctx, ast::MethodDef *mdef) {
-        for (auto &arg : mdef->args) {
-            if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(arg.get())) {
-                optArgExp->default_ = nullptr;
-            }
-        }
-    }
-
     // Force errors from any signatures that didn't attach to methods.
     // `lastSigs` will always be empty after this function is called.
     void processLeftoverSigs(core::MutableContext ctx, InlinedVector<ast::Send *, 1> &lastSigs) {
@@ -1614,8 +1605,6 @@ private:
                     // OVERLOAD
                     lastSigs.clear();
                 }
-
-                deleteOptionlArg(ctx, mdef);
 
                 if (mdef->symbol.data(ctx)->isAbstract()) {
                     if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
@@ -2050,11 +2039,6 @@ public:
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
         ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 original->toString(ctx));
-        for (auto &arg : original->args) {
-            if (auto optionalArg = ast::cast_tree<ast::OptionalArg>(arg.get())) {
-                ENFORCE(!optionalArg->default_);
-            }
-        }
         return original;
     }
     unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
