@@ -164,10 +164,10 @@ class FlattenWalk {
     // need to move to the end, so we keep that below on the stack.
     vector<ClassScope> classScopes;
 
-    int computeStaticLevel(const ast::MethodDef &methodDef) {
+    int computeStaticLevel(bool isSelf) {
         auto &methods = curMethodSet();
         int prevLevel = methods.stack.empty() ? 0 : methods.stack.back().staticLevel;
-        return prevLevel + (methodDef.isSelf() ? 1 : 0);
+        return prevLevel + (isSelf ? 1 : 0);
     }
 
     void newMethodSet() {
@@ -268,7 +268,7 @@ public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(classDef->name.get())) {
             ENFORCE(ident->name == core::Names::singleton());
-            curMethodSet().pushScope(0, true);
+            curMethodSet().pushScope(computeStaticLevel(true), true);
             return classDef;
         }
         newMethodSet();
@@ -316,7 +316,7 @@ public:
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
         // add a new scope for this method def
-        curMethodSet().pushScope(computeStaticLevel(*methodDef), false);
+        curMethodSet().pushScope(computeStaticLevel(methodDef->isSelf()), false);
         return methodDef;
     }
 
