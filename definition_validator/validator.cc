@@ -384,8 +384,15 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
         return;
     }
     for (const auto [name, sym] : klass.data(gs)->members()) {
-        if (!sym.exists() || !sym.data(gs)->isMethod() || sym.data(gs)->name == core::Names::staticInit() ||
-            sym.data(gs)->name == core::Names::unresolvedAncestors() || sym.data(gs)->isFinalMethod()) {
+        // We only care about method symbols that exist.
+        if (!sym.exists() || !sym.data(gs)->isMethod() ||
+            // Method is 'final', and passes the check.
+            sym.data(gs)->isFinalMethod() ||
+            // <static-init> is a fake method Sorbet synthesizes for typechecking.
+            sym.data(gs)->name == core::Names::staticInit() ||
+            // <unresolved-ancestors> is a fake method Sorbet synthesizes to ensure class hierarchy changes in IDE take
+            // slow path.
+            sym.data(gs)->name == core::Names::unresolvedAncestors()) {
             continue;
         }
         if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
