@@ -89,7 +89,7 @@ class FlattenWalk {
         // and false otherwise
         bool isClassScope;
         MethodData(optional<int> targetLocation, int staticLevel, bool isClassScope)
-            : targetLocation(targetLocation), staticLevel(staticLevel), isClassScope(isClassScope) {};
+            : targetLocation(targetLocation), staticLevel(staticLevel), isClassScope(isClassScope){};
     };
 
     // This represents something that needs to be moved to the end of the class scope as well as information about how
