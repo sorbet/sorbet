@@ -5,7 +5,7 @@ def foo
 end
 foo
 
-def foo
+def foo(a)
   puts "foo2"
 end
-foo
+foo(2)
