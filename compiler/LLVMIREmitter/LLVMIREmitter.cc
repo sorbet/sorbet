@@ -373,15 +373,9 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             auto name = bind.bind.variable._name.data(cs)->shortName(cs);
                             if (name.size() > 2 && name[0] == '@' && name[1] == '@') {
                                 aliases[bind.bind.variable] = Alias::forClassField(bind.bind.variable._name);
-                            } else {
-                                ENFORCE(name.size() > 1 && name[0] == '@');
+                            } else if (name.size() > 1 && name[0] == '@') {
                                 aliases[bind.bind.variable] = Alias::forInstanceField(bind.bind.variable._name);
-                            }
-                        } else {
-                            if (i->what.data(cs)->isField()) {
-                                auto name = bind.bind.variable._name.data(cs)->shortName(cs);
-                                ENFORCE((name.size() > 1 && name[0] == '$') || stoi((string)name) > 0,
-                                        "'" + ((string)name) + "' is not a valid global name");
+                            } else if (name.size() > 1 && name[0] == '$') {
                                 aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
                             } else {
                                 aliases[bind.bind.variable] = Alias::forConstant(i->what);
