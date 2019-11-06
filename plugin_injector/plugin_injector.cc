@@ -79,6 +79,7 @@ public:
         ENFORCE(threadState->combinedModule == nullptr);
         threadState->file = core::FileRef();
     };
+
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
                            std::unique_ptr<ast::MethodDef> &md) const override {
         if (!irOutputDir.has_value()) {
@@ -100,10 +101,18 @@ public:
         }
         ENFORCE(threadState->file.exists());
         compiler::CompilerState state(gs, lctx, module.get());
-        sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
-        string fileName = objectFileName(gs, cfg.symbol.data(gs)->loc().file());
-        sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol, fileName);
+        try {
+            sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
+            string fileName = objectFileName(gs, cfg.symbol.data(gs)->loc().file());
+            sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol, fileName);
+        } catch (...) {
+            // cleanup
+            module = nullptr;
+            threadState->file = core::FileRef();
+            throw;
+        }
     };
+
     virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override {
         if (!irOutputDir.has_value()) {
             return;
@@ -119,6 +128,7 @@ public:
 
         sorbet::compiler::DefinitionRewriter::run(ctx, klass);
     };
+
     virtual ~LLVMSemanticExtension(){};
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) override {
         return make_unique<LLVMSemanticExtension>(this->irOutputDir);
