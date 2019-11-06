@@ -109,8 +109,9 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[funcId]);
         auto maxArgCount = 0;
         auto minArgCount = 0;
-        auto argCountRaw = funcId == 0 ? func->arg_begin() : func->arg_begin() + 2;
-        auto argArrayRaw = funcId == 0 ? func->arg_begin() + 1 : func->arg_begin() + 3;
+        auto isBlock = funcId != 0;
+        auto argCountRaw = !isBlock ? func->arg_begin() : func->arg_begin() + 2;
+        auto argArrayRaw = !isBlock ? func->arg_begin() + 1 : func->arg_begin() + 3;
 
         core::LocalVariable blkArgName;
         {
@@ -131,13 +132,13 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 minArgCount += 1;
             }
         }
-        if (funcId != 0) {
+        if (isBlock) {
             minArgCount = 0;
             // blocks Can have 0 args always
         }
 
         auto numOptionalArgs = maxArgCount - minArgCount;
-        if (funcId == 0) {
+        if (!isBlock) {
             // validate arg count
             auto argCountFailBlock = llvm::BasicBlock::Create(cs, "argCountFailBlock", func);
             auto argCountSecondCheckBlock = llvm::BasicBlock::Create(cs, "argCountSecondCheckBlock", func);
@@ -183,7 +184,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             builder.SetInsertPoint(fillRequiredArgs);
 
             // box `self`
-            if (funcId == 0) {
+            if (!isBlock) {
                 auto selfArgRaw = func->arg_begin() + 2;
                 MK::varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, aliases, blockMap, funcId);
             }
@@ -239,14 +240,14 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             for (auto i = 0; i < numOptionalArgs; i++) {
                 auto &block = fillFromDefaultBlocks[i];
                 builder.SetInsertPoint(block);
-                if (funcId == 0 && md->name.data(cs)->kind == core::NameKind::UNIQUE &&
+                if (!isBlock && md->name.data(cs)->kind == core::NameKind::UNIQUE &&
                     md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) {
                     // This method is already a default method so don't fill in
                     // another other defaults for it or else it is turtles all the
                     // way down
                 } else {
                     llvm::Value *rawValue;
-                    if (funcId == 0) {
+                    if (!isBlock) {
                         optionalMethodIndex++;
                         auto argMethodName =
                             cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, optionalMethodIndex);
@@ -276,7 +277,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             builder.SetInsertPoint(fillFromDefaultBlocks[numOptionalArgs]);
         }
 
-        if (funcId == 0) {
+        if (!isBlock) {
             // jump to user body
             builder.CreateBr(blockMap.sigVerificationBlock);
         } else {
