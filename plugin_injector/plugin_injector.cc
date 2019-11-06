@@ -59,6 +59,9 @@ public:
     }
 
     virtual void finishTypecheckFile(const core::GlobalState &gs, const core::FileRef &f) const override {
+        if (!irOutputDir.has_value()) {
+            return;
+        }
         if (f.data(gs).minErrorLevel() < core::StrictLevel::True) {
             return;
         }
@@ -76,6 +79,9 @@ public:
     };
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
                            std::unique_ptr<ast::MethodDef> &md) const override {
+        if (!irOutputDir.has_value()) {
+            return;
+        }
         auto threadState = getThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
