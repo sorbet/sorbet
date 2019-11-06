@@ -92,10 +92,18 @@ public:
     static llvm::Value *getRubyIntRaw(CompilerState &cs, llvm::IRBuilderBase &builder, long num);
     static llvm::Value *getRubyStringRaw(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str);
     static llvm::Value *getIsTruthyU1(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
-    static llvm::Value *getRubyConstantValueRaw(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilder<> &builder);
+    static llvm::Value *getRubyConstantValueRaw(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &builder);
     static llvm::Constant *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
     static llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                          const core::TypePtr &type);
+
+    static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
+                               const UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap,
+                               int rubyBlockId);
+
+    static void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &builder,
+                       UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap,
+                       int rubyBlockId);
 };
 } // namespace sorbet::compiler
 #endif
