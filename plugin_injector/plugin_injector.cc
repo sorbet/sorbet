@@ -88,6 +88,7 @@ public:
         } else {
             ENFORCE(threadState->file == md->loc.file());
         }
+        ENFORCE(threadState->file.exists());
         compiler::CompilerState state(gs, lctx, module.get());
         sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
         string fileName = objectFileName(gs, cfg.symbol.data(gs)->loc().file());
