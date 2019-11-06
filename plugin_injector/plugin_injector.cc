@@ -30,6 +30,7 @@ class ThreadState {
 public:
     llvm::LLVMContext lctx;
     unique_ptr<llvm::Module> combinedModule;
+    core::FileRef file;
 };
 
 class LLVMSemanticExtension : public SemanticExtension {
@@ -64,6 +65,7 @@ public:
         auto threadState = getThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
+        ENFORCE(f == threadState->file);
         if (module) {
             string fileName = objectFileName(gs, f);
             sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
@@ -75,8 +77,14 @@ public:
         llvm::LLVMContext &lctx = threadState->lctx;
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
+        // TODO: Figure out why this isn't true
+        // ENFORCE(absl::c_find(cfg.symbol.data(gs)->locs(), md->loc) != cfg.symbol.data(gs)->locs().end(), md->loc.toString(gs));
+        ENFORCE(md->loc.file().exists());
         if (!module) {
             module = sorbet::compiler::IRHelpers::readDefaultModule(functionName.data(), lctx);
+            threadState->file = md->loc.file();
+        } else {
+            ENFORCE(threadState->file == md->loc.file());
         }
         compiler::CompilerState state(gs, lctx, module.get());
         sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
