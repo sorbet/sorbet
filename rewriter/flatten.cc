@@ -84,8 +84,12 @@ class FlattenWalk {
         // which means when we get to `bar` we need to know that the outer context `foo` is static. We pass that down
         // the current stack by means of this `staticLevel` variable.
         int staticLevel;
-        MethodData(optional<int> targetLocation, int staticLevel)
-            : targetLocation(targetLocation), staticLevel(staticLevel){};
+        // this will be true if the thing we're moving here is
+        //   class << self
+        // and false otherwise
+        bool isClassScope;
+        MethodData(optional<int> targetLocation, int staticLevel, bool isClassScope)
+            : targetLocation(targetLocation), staticLevel(staticLevel), isClassScope(isClassScope) {};
     };
 
     // This represents something that needs to be moved to the end of the class scope as well as information about how
@@ -109,16 +113,16 @@ class FlattenWalk {
         ClassScope() = default;
 
         // push a method scope, possibly noting whether
-        void pushScope(int staticLevel) {
-            if (stack.size() == 0) {
+        void pushScope(int staticLevel, bool isClassScope) {
+            if (stack.size() == 0 || stack.back().isClassScope) {
                 // we're at the top level of a class, not nested inside a method, which means we don't need to move
                 // anything: we'll add to the stack but don't need to allocate space on the move queue
-                stack.emplace_back(std::nullopt, staticLevel);
+                stack.emplace_back(std::nullopt, staticLevel, isClassScope);
             } else {
                 // we're nested inside another method: that means that whatever scope we're recording is going to need
                 // to be moved out, so we'll allocate space in the move queue and note the index of the allocated space
                 // (so that we can reconstruct the original traversal order)
-                stack.emplace_back(moveQueue.size(), staticLevel);
+                stack.emplace_back(moveQueue.size(), staticLevel, isClassScope);
                 moveQueue.emplace_back();
             }
         }
@@ -262,11 +266,25 @@ public:
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+        if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(classDef->name.get())) {
+            ENFORCE(ident->name == core::Names::singleton());
+            curMethodSet().pushScope(0, true);
+            return classDef;
+        }
         newMethodSet();
         return classDef;
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+        auto &methods = curMethodSet();
+        if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(classDef->name.get())) {
+            // if we get a MethodData back, then we need to move this and replace it with an EmptyTree
+            if (auto md = methods.popScope()) {
+                methods.addExpr(*md, move(classDef));
+                return ast::MK::EmptyTree();
+            }
+            return classDef;
+        }
         classDef->rhs = addClassDefMethods(ctx, std::move(classDef->rhs), classDef->loc);
         return classDef;
     };
@@ -276,7 +294,7 @@ public:
         // that we don't know the 'staticness level' of a sig, as it depends on the method that follows it (whether that
         // method has a `self.` or not), so we'll fill that information in later
         if (send->fun == core::Names::sig()) {
-            curMethodSet().pushScope(0);
+            curMethodSet().pushScope(0, false);
         }
 
         return send;
@@ -298,7 +316,7 @@ public:
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
         // add a new scope for this method def
-        curMethodSet().pushScope(computeStaticLevel(*methodDef));
+        curMethodSet().pushScope(computeStaticLevel(*methodDef), false);
         return methodDef;
     }
 
