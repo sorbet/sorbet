@@ -19,15 +19,18 @@ cleanup() {
 ruby="./external/ruby_2_6_3/ruby"
 
 echo "Source: $rb"
-echo "require './$rb';" > "$rbrunfile"
+echo "require './run/preamble.rb'; require './$rb';" > "$rbrunfile"
 echo "Run Ruby: bazel-bin/$ruby $rbrunfile"
-echo "Run Sorbet: run/ruby $rb"
+echo "Running Ruby..."
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
+echo "require './$rb';" > "$srbrunfile"
+echo "Run Sorbet: force_compile=1 llvmir=$llvmir run/ruby $srbrunfile"
 echo "Temp Dir: $llvmir"
+echo "Running Sorbet Compiler..."
 run/compile "$llvmir" "$rb"
 set +e
-force_compile=1 llvmir=$llvmir run/ruby "$rbrunfile" 2> "$srberr" | tee "$srbout"
+force_compile=1 llvmir=$llvmir run/ruby "$srbrunfile" 2> "$srberr" | tee "$srbout"
 code=$?
 set -e
 
