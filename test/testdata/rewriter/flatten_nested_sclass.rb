@@ -9,7 +9,6 @@ class A
 end
 
 A.foo
-A.bar
 
 class B
   def foo;

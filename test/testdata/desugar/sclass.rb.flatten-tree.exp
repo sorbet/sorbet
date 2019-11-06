@@ -121,7 +121,7 @@ begin
 
     <emptyTree>
 
-    def e(<blk>)
+    def self.e(<blk>)
       "e"
     end
 
