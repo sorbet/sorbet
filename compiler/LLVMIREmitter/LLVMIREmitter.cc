@@ -196,6 +196,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                     builder.SetInsertPoint(block);
                 }
                 const auto a = blockMap.rubyBlockArgs[funcId][i];
+                ENFORCE(a._name.exists());
 
                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
                 auto name = a._name.data(cs)->shortName(cs);
