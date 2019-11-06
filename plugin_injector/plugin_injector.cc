@@ -62,15 +62,17 @@ public:
         if (!irOutputDir.has_value()) {
             return;
         }
-        if (f.data(gs).minErrorLevel() < core::StrictLevel::True) {
-            return;
-        }
         auto threadState = getThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
         if (module) {
             ENFORCE(threadState->file.exists());
             ENFORCE(f == threadState->file);
+            if (f.data(gs).minErrorLevel() < core::StrictLevel::True) {
+                module = nullptr;
+                threadState->file = core::FileRef();
+                return;
+            }
             string fileName = objectFileName(gs, f);
             sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
             ENFORCE(module == nullptr);
