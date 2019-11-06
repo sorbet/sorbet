@@ -459,7 +459,7 @@ class Enumerator::Lazy < Enumerator
     params(
         n: Integer,
     )
-    .returns(Enumerable::Lazy[Elem])
+    .returns(Enumerator::Lazy[Elem])
   end
   def drop(n); end
 
