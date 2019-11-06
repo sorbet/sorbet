@@ -78,7 +78,8 @@ public:
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
         // TODO: Figure out why this isn't true
-        // ENFORCE(absl::c_find(cfg.symbol.data(gs)->locs(), md->loc) != cfg.symbol.data(gs)->locs().end(), md->loc.toString(gs));
+        // ENFORCE(absl::c_find(cfg.symbol.data(gs)->locs(), md->loc) != cfg.symbol.data(gs)->locs().end(),
+        // md->loc.toString(gs));
         ENFORCE(md->loc.file().exists());
         if (!module) {
             module = sorbet::compiler::IRHelpers::readDefaultModule(functionName.data(), lctx);
