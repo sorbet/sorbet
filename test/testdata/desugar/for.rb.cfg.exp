@@ -114,7 +114,7 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_1" [shape = parallelogram];
 
     "bb::<Class:Main>#main_0" [
-        label = "block[id=0, rubyBlockId=0]()\l@a$121: T.untyped = alias <C <undeclared-field-stub>>\l@@b$125: T.untyped = alias <C <undeclared-field-stub>>\l$c$129: T.untyped = alias $c\l<self>: T.class_of(Main) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Main>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Main>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$4: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <statTemp>$4: T.class_of(A).each()\l<selfRestore>$6: T.class_of(Main) = <self>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l@a$121: T.untyped = alias <C <undeclared-field-stub>>\l@@b$125: T.untyped = alias <C <undeclared-field-stub>>\l$c$129: T.untyped = alias <C <undeclared-field-stub>>\l<self>: T.class_of(Main) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Main>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Main>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$4: T.class_of(A) = alias <C A>\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <statTemp>$4: T.class_of(A).each()\l<selfRestore>$6: T.class_of(Main) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_0" -> "bb::<Class:Main>#main_2" [style="bold"];
