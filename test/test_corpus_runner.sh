@@ -57,7 +57,12 @@ diff -a "$rbout" "$srbout"
 for ext in "llo"; do
     exp=${rb%.rb}.$ext.exp
     if [ -f "$exp" ]; then
-        diff <(cat "$llvmir/"*".$ext") "$exp";
+        actual=("$llvmir/"*".$ext")
+        if [ ! -f "${actual[0]}" ]; then
+            echo "No LLVMIR found at" "${actual[@]}"
+            exit 1
+        fi
+        diff <(cat "${actual[@]}") "$exp";
     fi
 done
 
