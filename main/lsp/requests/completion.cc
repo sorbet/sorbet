@@ -1,6 +1,7 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "common/formatting.h"
 #include "common/sort.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
@@ -201,6 +202,18 @@ vector<RubyKeyword> allSimilarKeywords(string_view prefix) {
     return result;
 }
 
+vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const vector<core::LocalVariable> &locals,
+                                             string_view prefix) {
+    auto result = vector<core::LocalVariable>{};
+    for (const auto &local : locals) {
+        if (hasSimilarName(gs, local._name, prefix)) {
+            result.emplace_back(local);
+        }
+    }
+
+    return result;
+}
+
 string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
     vector<string> typeAndArgNames;
@@ -258,6 +271,32 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
 
     item->documentation =
         make_unique<MarkupContent>(config.getClientConfig().clientCompletionItemMarkupKind, rubyKeyword.documentation);
+
+    return item;
+}
+
+unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs, const LSPConfiguration &config,
+                                                     const core::LocalVariable &local, const core::Loc queryLoc,
+                                                     string_view prefix, size_t sortIdx) {
+    auto label = string(local._name.data(gs)->shortName(gs));
+    auto item = make_unique<CompletionItem>(label);
+    item->sortText = fmt::format("{:06d}", sortIdx);
+    item->kind = CompletionItemKind::Variable;
+
+    // TODO(jez) This should probably be a helper function (see getCompletionItemForSymbol)
+    u4 queryStart = queryLoc.beginPos();
+    u4 prefixSize = prefix.size();
+    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
+    auto replacementRange = Range::fromLoc(gs, replacementLoc);
+    auto replacementText = label;
+    if (replacementRange != nullptr) {
+        item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
+    } else {
+        // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
+        item->insertText = replacementText;
+    }
+    item->insertTextFormat = InsertTextFormat::PlainText;
+    // TODO(jez) Show the type of the local under the documentation field?
 
     return item;
 }
@@ -412,6 +451,18 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
             });
         }
 
+        auto locals = typechecker.localsForMethod(sendResp->enclosingMethod);
+        fast_sort(locals, [&gs](const auto &left, const auto &right) {
+            // Sort by actual name, not by NameRef id
+            if (left._name != right._name) {
+                return left._name.data(gs)->shortName(gs) < right._name.data(gs)->shortName(gs);
+            } else {
+                return left < right;
+            }
+        });
+        auto similarLocals =
+            sendResp->isPrivateOk ? allSimilarLocals(gs, locals, prefix) : vector<core::LocalVariable>{};
+
         auto deduped = vector<SimilarMethod>{};
         for (auto &[methodName, similarMethods] : similarMethodsByName) {
             if (methodName.data(gs)->kind == core::NameKind::UNIQUE &&
@@ -452,9 +503,12 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
             return left.method._id < right.method._id;
         });
 
-        // TODO(jez) Do something smarter here than "all matching keywords always come first"
+        // TODO(jez) Do something smarter here than "all keywords then all locals then all methods"
         for (auto &similarKeyword : similarKeywords) {
             items.push_back(getCompletionItemForKeyword(gs, *config, similarKeyword, queryLoc, prefix, items.size()));
+        }
+        for (auto &similarLocal : similarLocals) {
+            items.push_back(getCompletionItemForLocal(gs, *config, similarLocal, queryLoc, prefix, items.size()));
         }
         for (auto &similarMethod : deduped) {
             items.push_back(getCompletionItemForSymbol(gs, similarMethod.method, similarMethod.receiverType,
