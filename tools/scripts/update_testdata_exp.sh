@@ -29,6 +29,7 @@ done < <(find "${paths[@]}" -name '*.rb*' | sort)
 
 basename=
 srcs=()
+exp_extensions="llo ll stderr"
 
 for this_src in "${rb_src[@]}" DUMMY; do
   this_base="${this_src%__*}"
@@ -48,7 +49,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
         "$llvmir" \
         "${srcs[@]}" \
         2\> "$llvmir/update_testdata_exp.stderr"\; \
-      for ext in "llo ll stderr"\; do \
+      for ext in "$exp_extensions"\; do \
         exp=${basename%.rb}.\$ext.exp\; \
         if [ -f \$exp ]\; then \
           cat "$llvmir/*.\$ext" \> \$exp\; \
