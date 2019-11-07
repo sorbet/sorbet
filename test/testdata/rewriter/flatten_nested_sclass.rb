@@ -9,6 +9,7 @@ class A
 end
 
 A.foo
+A.singleton_class.bar
 
 class B
   def foo;
