@@ -38,6 +38,17 @@ for this_src in "${rb_src[@]}" DUMMY; do
         continue
     fi
 
+    has_exp=
+    for ext in $exp_extensions; do
+        if [ -f "${this_base%.rb}.$ext.exp" ]; then
+            has_exp=1
+        fi
+    done
+
+    if [ -z $has_exp ]; then
+        continue
+    fi
+
     if [ -n "$basename" ]; then
         llvmir=$(mktemp -d)
         # shellcheck disable=SC1010
