@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-# typed: false
+# typed: true
 # -*- Ruby -*-
 # $Id: matrix-ruby.code,v 1.4 2004/11/13 07:42:14 bfulgham Exp $
 # http://www.bagley.org/~doug/shootout/

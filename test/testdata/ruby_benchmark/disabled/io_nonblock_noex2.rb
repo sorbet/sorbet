@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 nr = 1_000_000
 i = 0
 msg = '.'

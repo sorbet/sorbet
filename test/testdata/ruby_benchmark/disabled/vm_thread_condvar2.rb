@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # many threads, one mutex, many condvars
 require 'thread'
 m = Mutex.new

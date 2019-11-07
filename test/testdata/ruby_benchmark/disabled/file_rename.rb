@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # rename file
 require 'tempfile'
 

@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 require 'benchmark'
 
 Benchmark.bm do |x|

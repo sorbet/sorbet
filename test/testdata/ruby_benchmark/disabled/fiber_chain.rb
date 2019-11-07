@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # Check performance of fiber creation and transfer.
 
 def make_link(previous)

@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 h = {}
 
 10000.times do |i|

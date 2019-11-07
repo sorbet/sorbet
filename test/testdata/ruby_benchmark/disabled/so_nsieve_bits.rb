@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-# typed: false
+# typed: true
 #coding: us-ascii
 #
 # The Great Computer Language Shootout

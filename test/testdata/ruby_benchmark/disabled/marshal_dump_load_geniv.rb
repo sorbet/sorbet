@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 a = ''
 a.instance_eval do
   @a = :a

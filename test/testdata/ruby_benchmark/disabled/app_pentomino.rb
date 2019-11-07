@@ -1,5 +1,5 @@
 #!/usr/local/bin/ruby
-# typed: false
+# typed: true
 # This program is contributed by Shin Nishiyama
 
 

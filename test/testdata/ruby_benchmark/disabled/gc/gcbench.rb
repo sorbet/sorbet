@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 require 'benchmark'
 require 'pp'
 require 'optparse'

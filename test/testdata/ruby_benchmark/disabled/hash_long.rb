@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 k1 = "Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong";
 k2 = "Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping";
 h = {k1 => 0, k2 => 0};
