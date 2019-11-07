@@ -554,22 +554,22 @@ const_continue.i:                                 ; preds = %const_slowPath.i, %
   store i64 %0, i64* %callArgsAddr.i, align 8
   %30 = load i64, i64* @guard_epoch_T, align 8
   %31 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !27
-  %canTakeFastPath37.i = icmp eq i64 %30, %31
-  br i1 %canTakeFastPath37.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath36.i, !prof !11
+  %canTakeFastPath38.i = icmp eq i64 %30, %31
+  br i1 %canTakeFastPath38.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath37.i, !prof !11
 
 const_slowPath.i:                                 ; preds = %typeTestSuccess.i
   tail call void @const_recompute_T() #17
   br label %const_continue.i
 
-const_slowPath36.i:                               ; preds = %const_continue.i
+const_slowPath37.i:                               ; preds = %const_continue.i
   call void @const_recompute_T() #17
   br label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit"
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %const_continue.i, %const_slowPath36.i
+"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %const_continue.i, %const_slowPath37.i
   %32 = load i64, i64* @guarded_const_T, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !33
   %33 = call i64 @rb_funcallv(i64 %32, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #17
-  %rawSym39.i = call i64 @rb_id2sym(i64 %rubyId_boo.i) #17
+  %rawSym40.i = call i64 @rb_id2sym(i64 %rubyId_boo.i) #17
   call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_boo.5, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U boo>" to i64 (...)*), i32 -1) #17
   %34 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !18
   %35 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %34, i64 0, i32 1, i64 0

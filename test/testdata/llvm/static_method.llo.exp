@@ -546,18 +546,18 @@ const_slowPath.i.i:                               ; preds = %const_continue.i
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %14) #17
   %36 = load i64, i64* @guard_epoch_Foo, align 8
   %37 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath28.i = icmp eq i64 %36, %37
-  br i1 %canTakeFastPath28.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath27.i, !prof !13
+  %canTakeFastPath30.i = icmp eq i64 %36, %37
+  br i1 %canTakeFastPath30.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath29.i, !prof !13
 
 const_slowPath.i:                                 ; preds = %typeTestSuccess.i
   tail call void @const_recompute_T() #17
   br label %const_continue.i
 
-const_slowPath27.i:                               ; preds = %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i"
+const_slowPath29.i:                               ; preds = %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i"
   call void @const_recompute_Foo() #17
   br label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit"
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i", %const_slowPath27.i
+"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %"Init_func_<S <C <U Foo>> $1><U <static-init>>.exit.i", %const_slowPath29.i
   %38 = load i64, i64* @guarded_const_Foo, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_bar.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !21
   %39 = call i64 @rb_funcallv(i64 %38, i64 %rubyId_bar.i, i32 0, i64* nonnull %callArgsAddr.i) #17
