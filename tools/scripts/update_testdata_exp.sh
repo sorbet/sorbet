@@ -38,9 +38,12 @@ for this_src in "${rb_src[@]}" DUMMY; do
         continue
     fi
 
+    basename="$this_base"
+    srcs=("$this_src")
+
     for ext in $exp_extensions; do
-        exp=${this_base%.rb}.$ext.exp
-        if [ -f "${this_base%.rb}.$ext.exp" ]; then
+        exp=${basename%.rb}.$ext.exp
+        if [ -f "${basename%.rb}.$ext.exp" ]; then
             llvmir=$(mktemp -d)
             echo \
                 bazel-bin/main/sorbet \
@@ -55,9 +58,6 @@ for this_src in "${rb_src[@]}" DUMMY; do
             >> "$COMMAND_FILE"
         fi
     done
-
-    basename="$this_base"
-    srcs=("$this_src")
 done
 
 parallel --joblog - < "$COMMAND_FILE"
