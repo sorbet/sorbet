@@ -200,9 +200,9 @@ struct Options {
     bool lspAutocompleteMethodsEnabled = false;
     bool lspQuickFixEnabled = false;
     bool lspWorkspaceSymbolsEnabled = false;
+    bool lspDocumentHighlightEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;
-    bool lspHoverEnabled = false;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;

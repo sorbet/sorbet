@@ -37,25 +37,33 @@ LSPQueryResult LSPLoop::queryByLoc(LSPTypechecker &typechecker, string_view uri,
     return typechecker.query(core::lsp::Query::createLocQuery(loc), {fref});
 }
 
-LSPQueryResult LSPLoop::queryBySymbol(LSPTypechecker &typechecker, core::SymbolRef sym) const {
+LSPQueryResult LSPLoop::queryBySymbol(LSPTypechecker &typechecker, core::SymbolRef sym,
+                                      optional<string_view> overSingleFile) const {
     Timer timeit(config->logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<core::FileRef> frefs;
-    const core::GlobalState &gs = typechecker.state();
-    const core::NameHash symNameHash(gs, sym.data(gs)->name.data(gs));
-    // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
-    int i = -1;
-    for (auto &hash : typechecker.getFileHashes()) {
-        i++;
-        const auto &usedSends = hash.usages.sends;
-        const auto &usedConstants = hash.usages.constants;
-        auto ref = core::FileRef(i);
+    if (overSingleFile.has_value()) {
+        auto fref = config->uri2FileRef(typechecker.state(), overSingleFile.value());
+        if (fref.exists()) {
+            frefs.emplace_back(fref);
+        }
+    } else {
+        const core::GlobalState &gs = typechecker.state();
+        const core::NameHash symNameHash(gs, sym.data(gs)->name.data(gs));
+        // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
+        int i = -1;
+        for (auto &hash : typechecker.getFileHashes()) {
+            i++;
+            const auto &usedSends = hash.usages.sends;
+            const auto &usedConstants = hash.usages.constants;
+            auto ref = core::FileRef(i);
 
-        const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
-        if (fileIsValid &&
-            (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
-             std::find(usedConstants.begin(), usedConstants.end(), symNameHash) != usedConstants.end())) {
-            frefs.emplace_back(ref);
+            const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
+            if (fileIsValid &&
+                (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
+                 std::find(usedConstants.begin(), usedConstants.end(), symNameHash) != usedConstants.end())) {
+                frefs.emplace_back(ref);
+            }
         }
     }
 
