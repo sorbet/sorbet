@@ -32,7 +32,6 @@ force_compile=1 llvmir=$llvmir run/ruby "$rb" 2> "$srberr" | tee "$srbout"
 code=$?
 set -e
 
-grep "SorbetLLVM using compiled" "$srberr"
 if [ $code -ne 0 ]; then
     stderr="${rb%.rb}.stderr.exp"
     if [ -f "$stderr" ]; then
@@ -67,5 +66,8 @@ for ext in "llo"; do
         diff <(cat "${actual[@]}") "$exp";
     fi
 done
+
+grep "SorbetLLVM using compiled" "$srberr"
+grep -v "SorbetLLVM interpreting" "$srberr"
 
 cleanup

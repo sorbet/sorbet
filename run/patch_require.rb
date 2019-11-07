@@ -21,7 +21,7 @@ module Kernel
       if ENV['force_compile']
         raise "No compiled bundle: #{bundle}"
       end
-      $stderr.puts "SorbetLLVM interpretting: #{name}"
+      $stderr.puts "SorbetLLVM interpreting: #{name}"
     end
 
     sorbet_old_require(name)
