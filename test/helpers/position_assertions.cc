@@ -359,9 +359,7 @@ unique_ptr<Location> RangeAssertion::getLocation(string_view uriPrefix) const {
 }
 
 unique_ptr<DocumentHighlight> RangeAssertion::getDocumentHighlight() {
-    auto newRange = make_unique<Range>(make_unique<Position>(range->start->line, range->start->character),
-                                       make_unique<Position>(range->end->line, range->end->character));
-    return make_unique<DocumentHighlight>(move(newRange));
+    return make_unique<DocumentHighlight>(range->copy());
 }
 
 pair<string_view, int> getSymbolAndVersion(string_view assertionContents) {
@@ -522,9 +520,9 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
                          locations);
 }
 
-void HighlightAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                               LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string_view symbol,
-                               const Location &queryLoc, const vector<shared_ptr<RangeAssertion>> &allLocs) {
+void UsageAssertion::checkHighlights(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                     LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string_view symbol,
+                                     const Location &queryLoc, const vector<shared_ptr<RangeAssertion>> &allLocs) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;

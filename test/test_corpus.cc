@@ -977,8 +977,8 @@ TEST_P(LSPTest, All) {
                             filteredEntryAssertions.push_back(e);
                         }
                     }
-                    HighlightAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
-                                              filteredEntryAssertions);
+                    UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol,
+                                                    *queryLoc, filteredEntryAssertions);
                 } else {
                     ADD_FAILURE() << fmt::format(
                         "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "
