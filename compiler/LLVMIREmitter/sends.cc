@@ -16,6 +16,7 @@
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitterHelpers.h"
 #include "compiler/LLVMIREmitter/NameBasedIntrinsics.h"
+#include "compiler/LLVMIREmitter/SymbolBasedIntrinsicMethod.h"
 #include "compiler/Names/Names.h"
 #include <string_view>
 
@@ -37,6 +38,16 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
             return nameBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, currentRubyBlockId);
         }
     }
+    for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics()) {
+        if (absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), i->fun)) {
+            auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
+            for (auto &c : potentialClasses) {
+                if (i->recv.type->derivesFrom(cs, c)) {
+                    return symbolBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, currentRubyBlockId);
+                }
+            }
+        };
+    };
     auto &builder = builderCast(build);
     auto str = i->fun.data(cs)->shortName(cs);
     auto rawId = MK::getRubyIdFor(cs, builder, str);
