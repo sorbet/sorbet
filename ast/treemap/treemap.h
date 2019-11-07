@@ -772,7 +772,7 @@ private:
                 optArg->default_ = mapIt(move(optArg->default_), ctx.withOwner(v->symbol));
             }
         }
-        // because this is a ShallowMap, we do not map over the body of the class unless it is synthesized by the
+        // because this is a ShallowMap, we do not map over the body of the method unless it is synthesized by the
         // rewriter pass, because we can be sure that typical Ruby code does not e.g. include constant definitions in
         // the body of a method
         if (v->isRewriterSynthesized()) {
