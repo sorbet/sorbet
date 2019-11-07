@@ -43,7 +43,8 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     return sym;
 }
 
-void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<> &builder) {
+llvm::Value *defineMethod(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> &builder) {
+    bool isSelf = i->fun == Names::sorbet_defineMethodSingleton(cs);
     ENFORCE(i->args.size() == 2);
     auto ownerSym = typeToSym(cs, i->args[0].type);
 
@@ -71,6 +72,7 @@ void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<
                                   llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
     builder.CreateCall(LLVMIREmitterHelpers::getInitFunction(cs, funcSym), {});
+    return MK::getRubyNilRaw(cs, builder);
 }
 
 std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
@@ -81,7 +83,7 @@ std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolR
     return name.data(gs)->show(gs);
 }
 
-void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> &builder) {
+llvm::Value *defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> &builder) {
     auto sym = typeToSym(cs, i->args[0].type);
     // this is wrong and will not work for `class <<self`
     auto classNameCStr = MK::toCString(cs, showClassNameWithoutOwner(cs, sym), builder);
@@ -107,6 +109,7 @@ void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> &builder) {
     auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
     auto llvmFuncName = LLVMIREmitterHelpers::getFunctionName(cs, funcSym);
     builder.CreateCall(LLVMIREmitterHelpers::getInitFunction(cs, funcSym), {});
+    return MK::getRubyNilRaw(cs, builder);
 }
 
 }; // namespace
@@ -146,16 +149,10 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
         return ret;
     }
     if (i->fun == Names::sorbet_defineTopClassOrModule(cs)) {
-        defineClass(cs, i, builder);
-        return MK::getRubyNilRaw(cs, builder);
+        return defineClass(cs, i, builder);
     }
-    if (i->fun == Names::sorbet_defineMethod(cs)) {
-        defineMethod(cs, i, false, builder);
-        return MK::getRubyNilRaw(cs, builder);
-    }
-    if (i->fun == Names::sorbet_defineMethodSingleton(cs)) {
-        defineMethod(cs, i, true, builder);
-        return MK::getRubyNilRaw(cs, builder);
+    if (i->fun == Names::sorbet_defineMethod(cs) || i->fun == Names::sorbet_defineMethodSingleton(cs)) {
+        return defineMethod(cs, i, builder);
     }
     auto rawId = MK::getRubyIdFor(cs, builder, str);
 
