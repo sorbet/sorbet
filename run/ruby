@@ -23,5 +23,9 @@ fi
 rb=$1
 shift
 
-echo "require './$rb';" > "$srbrunfile"
+if [ "${rb:0:1}" != "/" ]; then
+    rb="./$rb"
+fi
+
+echo "require '$rb';" > "$srbrunfile"
 $ruby -r "$base/run/preamble.rb" -r "$base/run/patch_require.rb" "$srbrunfile" "$@"
