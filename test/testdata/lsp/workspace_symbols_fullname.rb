@@ -1,39 +1,36 @@
 # typed: true
 
-def bar
-  # ^^^ symbol-search: "bar"
-end
+module A; module B; module C; end; end; end  
 
-class Foo
-  #   ^^^ symbol-search: "Foo"
-  #   ^^^ symbol-search: "foo"
-  def bar
-    # ^^^ symbol-search: "bar"
-  end
-end
-
-module Attrs
-  class Reader
-    attr_reader :bar
-    #            ^^^ symbol-search: "bar", name="bar"
+module A::B::C
+  module FooBarBaz1
+    #    ^^^^^^^^^^ symbol-search: "fbb"
+    def self.d; end
+    class FooBarBaz2
+      #   ^^^^^^^^^^ symbol-search: "fbb"
+      def self.d; end
+      def e; end
+    end
   end
 
-  class Writer
-    attr_writer :bar
-    #            ^^^ symbol-search: "bar", name="bar="
-  end
-end
-
-module Inner
-  def bar
-    # ^^^ symbol-search: "bar"
+  class FooBarBaz3
+    #   ^^^^^^^^^^ symbol-search: "fbb"
+    def self.d; end
+    def e; end
   end
 
   module Foo
-    #    ^^^ symbol-search: "Foo"
-    #    ^^^ symbol-search: "foo"
-    def bar
-      # ^^^ symbol-search: "bar"
+    module Bar
+      class Baz
+        #   ^^^ symbol-search: "fbb"
+        def self.d; end
+        def e; end
+      end
+    end
+    class BarBaz
+      #   ^^^^^^ symbol-search: "fbb"
+      def self.d; end
+      def e; end
     end
   end
 end

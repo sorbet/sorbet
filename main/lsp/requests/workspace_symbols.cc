@@ -50,47 +50,45 @@ SymbolInformation *SymbolMatcher::symbolRef2SymbolInformation(core::SymbolRef sy
 }
 
 namespace {
-optional<int> scoreSymbolAgainstQuery(const string_view symbol, const string query) {
-    int score = 0;
+
+/** Returns a pair of {score, query_length_matched} for the given symbol/query. */
+pair<int, int> scoreSymbol(const string_view symbol, const string_view query) {
     auto symbolIter = symbol.begin();
     auto symbolEnd = symbol.end();
-    bool previousSymbolCharWasBoundary = true;
-    int matchSize = -query.length(); // When we find the first matching char, we'll set this to 0
+    bool atBoundary = true;
+    int score = symbol.length();
+    int queryMatchLength = 0;
     for (auto queryCh : query) {
-        bool found = false;
-        bool queryIsLower = islower(queryCh);
         int gap = 0;
+        int symbolCharsConsumed = 0;
+        bool queryCharIsLower = islower(queryCh);
         while (symbolIter != symbolEnd) {
             char symbolCh = *symbolIter++;
-            matchSize++;
-            char symbolCharIsUpper = std::isupper(symbolCh);
-            if (queryCh == symbolCh || (queryIsLower && symbolCharIsUpper && queryCh == std::tolower(symbolCh))) {
-                found = true;
-                if (matchSize < 0) {
-                    matchSize = 0; // found a matching char, start here...
-                }
+            symbolCharsConsumed++;
+            // Check if the current character is boundary-starting
+            atBoundary = atBoundary || isupper(symbolCh);
+            if (queryCh == symbolCh || (queryCharIsLower && tolower(queryCh) == tolower(symbolCh))) {
+                queryMatchLength++;
                 if (gap == 0) {
                     // no penalty for adjacent matching characters
-                } else if (previousSymbolCharWasBoundary || symbolCharIsUpper) {
+                } else if (atBoundary) {
                     score += 100 + gap; // being *on* a boundary is good
                 } else {
-                    score += 200 + gap; // being *off* a boundary is bad
+                    score += 200 + 5 * gap; // being *off* a boundary is bad
                 }
                 break;
-            } else {
-                if (previousSymbolCharWasBoundary || symbolCharIsUpper) {
-                    gap += 50; // small penalty for skipping a boundary
-                }
-                previousSymbolCharWasBoundary = !isalpha(symbolCh);
-                gap++;
             }
+            atBoundary = !isalnum(symbolCh);
+            gap++;
         }
-        if (!found && symbolIter == symbolEnd) {
-            return nullopt;
+        if (queryMatchLength > 1) {
+            score += symbolCharsConsumed;
+        }
+        if (symbolIter == symbolEnd) {
+            break;
         }
     }
-    score += matchSize;
-    return score;
+    return make_pair(score, queryMatchLength);
 }
 } // namespace
 
@@ -100,23 +98,68 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     if (query.empty()) {
         return results;
     }
-    vector<pair<u4, int>> symbolScores;
+    const int queryLength = query.length();
+
+    struct ScoreInfo {
+        u4 symbolIndex = 0;
+        int lengthMatched = 0;
+        int score = 0;
+    };
+    vector<ScoreInfo> scoreInfos(gs.symbolsUsed());
+    // First pass: match short names
     for (u4 symbolIndex = 1; symbolIndex < gs.symbolsUsed(); symbolIndex++) {
-        auto symbolRef = core::SymbolRef(gs, symbolIndex);
-        auto nameData = symbolRef.data(gs)->name.data(gs);
+        auto symbolData = core::SymbolRef(gs, symbolIndex).data(gs);
+        auto nameData = symbolData->name.data(gs);
         if (nameData->kind == core::NameKind::UNIQUE) {
             continue;
         }
         auto shortName = nameData->shortName(gs);
-        auto score = scoreSymbolAgainstQuery(shortName, query);
-        if (score.has_value()) {
-            symbolScores.emplace_back(symbolIndex, *score);
+        auto [score, lengthMatched] = scoreSymbol(shortName, query);
+        scoreInfos[symbolIndex].symbolIndex = symbolIndex;
+        scoreInfos[symbolIndex].score = score;
+        scoreInfos[symbolIndex].lengthMatched = lengthMatched;
+    }
+
+    // Second pass: in some cases, try again if matching long name might improve the result
+    for (u4 symbolIndex = 1; symbolIndex < gs.symbolsUsed(); symbolIndex++) {
+        ScoreInfo &scoreInfo = scoreInfos[symbolIndex];
+        if (scoreInfo.symbolIndex == 0) {
+            continue; // symbol ineligible
+        }
+        auto symbolData = core::SymbolRef(gs, symbolIndex).data(gs);
+        auto ownerRef = symbolData->owner;
+        if (!ownerRef.exists()) {
+            continue; // no owner
+        }
+        ScoreInfo &ownerScoreInfo = scoreInfos[ownerRef._id];
+        if (ownerScoreInfo.lengthMatched == 0) {
+            continue; // owner can't improve search result
+        }
+        if (ownerScoreInfo.lengthMatched == queryLength) {
+            continue; // don't bother retrying: it fully matches the container
+        }
+        if (ownerScoreInfo.lengthMatched <= scoreInfo.lengthMatched && ownerScoreInfo.score >= scoreInfo.score) {
+            continue; // owner's score was same-or-worse on equal-or-shorter match, don't bother
+        }
+        auto fullName = symbolData->showFullName(gs);
+        auto [score, lengthMatched] = scoreSymbol(fullName, query);
+        if (lengthMatched > scoreInfo.lengthMatched ||
+            (lengthMatched == scoreInfo.lengthMatched && score <= scoreInfo.score)) {
+            // Found a better match (longer or better score)
+            scoreInfo.score = score;
+            scoreInfo.lengthMatched = lengthMatched;
         }
     }
-    fast_sort(symbolScores,
-              [](pair<u4, int> &left, pair<u4, int> &right) -> bool { return left.second < right.second; });
-    for (auto symbolScore : symbolScores) {
-        core::SymbolRef ref(gs, symbolScore.first);
+    fast_sort(scoreInfos, [queryLength](ScoreInfo &left, ScoreInfo &right) -> bool {
+        int leftScore = (left.lengthMatched != queryLength) ? INT_MAX : left.score;
+        int rightScore = (right.lengthMatched != queryLength) ? INT_MAX : right.score;
+        return leftScore < rightScore;
+    });
+    for (ScoreInfo &scoreInfo : scoreInfos) {
+        core::SymbolRef ref(gs, scoreInfo.symbolIndex);
+        if (scoreInfo.lengthMatched != queryLength) {
+            break; // end of legit matches
+        }
         auto data = symbolRef2SymbolInformation(ref);
         if (data != nullptr) {
             results.emplace_back(data);
@@ -126,6 +169,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
         }
     }
     return results;
+
 } // namespace sorbet::realmain::lsp
 
 unique_ptr<ResponseMessage> LSPLoop::handleWorkspaceSymbols(LSPTypechecker &typechecker, const MessageId &id,
