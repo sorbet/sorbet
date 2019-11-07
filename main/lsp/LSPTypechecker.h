@@ -104,8 +104,10 @@ public:
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
 
-    /** Gets the local variables for a method by walking the ast::Expression source of the method. */
-    std::vector<core::LocalVariable> localsForMethod(const core::SymbolRef method) const;
+    /**
+     * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
+     */
+    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
 
     /**
      * Returns the parsed file for the given file.

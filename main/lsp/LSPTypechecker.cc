@@ -484,7 +484,7 @@ TypecheckRun LSPTypechecker::retypecheck(LSPFileUpdates updates) const {
     return runTypechecking(move(updates));
 }
 
-const ast::ParsedFile &LSPTypechecker::getIndex(core::FileRef fref) const {
+const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
     const auto id = fref.id();
     auto treeFinalGS = indexedFinalGS.find(id);
     if (treeFinalGS != indexedFinalGS.end()) {
