@@ -200,11 +200,24 @@ public:
     }
 } BuildHashIntrinsic;
 
+class IdentityIntrinsic : public NameBasedIntrinsicMethod {
+public:
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &builder,
+                                  const BasicBlockMap &blockMap,
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                  int currentRubyBlockId) const override {
+        return MK::varGet(cs, i->args[0].variable, builder, aliases, blockMap, currentRubyBlockId);
+    }
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::suggestType()};
+    }
+} IdentityIntrinsic;
+
 }; // namespace
+
 vector<NameBasedIntrinsicMethod *> &NameBasedIntrinsicMethod::definedIntrinsics() {
     static vector<NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineMethodIntrinsic, &DefineClassIntrinsic,
-                                                  &BuildArrayIntrinsic, &BuildHashIntrinsic};
-
+                                                  &BuildArrayIntrinsic, &BuildHashIntrinsic, &IdentityIntrinsic};
     return ret;
 }
 }; // namespace sorbet::compiler
