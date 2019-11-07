@@ -1134,7 +1134,8 @@ public:
         return klass;
     }
 
-    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx, unique_ptr<ast::UnresolvedIdent> nm) {
+    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
+                                                             unique_ptr<ast::UnresolvedIdent> nm) {
         ENFORCE(nm->kind != ast::UnresolvedIdent::Local, "Unresolved local left after `name_locals`");
 
         if (nm->kind == ast::UnresolvedIdent::Global) {
@@ -1147,7 +1148,6 @@ public:
             return nm;
         }
     }
-
 
     unique_ptr<ast::Send> preTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
         switch (send->fun._id) {

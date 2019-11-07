@@ -720,8 +720,6 @@ public:
     }
 };
 
-
-
 /**
  * Given a tree transformer FUNC transform a tree.
  * Tree is guaranteed to be visited in the definition order.
