@@ -775,6 +775,9 @@ private:
             }
         }
         // because this is a DefinitionMapper, we do not map over the body of the class
+        if (v->isRewriterSynthesized()) {
+            v->rhs = mapIt(move(v->rhs), ctx.withOwner(v->symbol));
+        }
 
         if constexpr (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
             return PostPonePostTransform_MethodDef<FUNC, CTX, HAS_MEMBER_postTransformMethodDef<FUNC>::value>::call(
