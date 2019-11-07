@@ -216,8 +216,8 @@ public:
 }; // namespace
 
 vector<NameBasedIntrinsicMethod *> &NameBasedIntrinsicMethod::definedIntrinsics() {
-    static vector<NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineMethodIntrinsic, &DefineClassIntrinsic,
-                                                  &BuildArrayIntrinsic, &BuildHashIntrinsic, &IdentityIntrinsic};
+    static vector<NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic,  &DefineMethodIntrinsic, &DefineClassIntrinsic,
+                                                  &BuildArrayIntrinsic, &BuildHashIntrinsic,    &IdentityIntrinsic};
     return ret;
 }
 }; // namespace sorbet::compiler
