@@ -586,7 +586,7 @@ ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     Timer timeit(ctx.state.tracer(), "validateSymbols");
 
     ValidateWalk validate;
-    tree.tree = ast::TreeMap::apply(ctx, validate, std::move(tree.tree));
+    tree.tree = ast::ShallowMap::apply(ctx, validate, std::move(tree.tree));
     return tree;
 }
 
