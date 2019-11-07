@@ -38,37 +38,23 @@ for this_src in "${rb_src[@]}" DUMMY; do
         continue
     fi
 
-    has_exp=
     for ext in $exp_extensions; do
+        exp=${this_base%.rb}.$ext.exp
         if [ -f "${this_base%.rb}.$ext.exp" ]; then
-            has_exp=1
+            llvmir=$(mktemp -d)
+            echo \
+                bazel-bin/main/sorbet \
+                --silence-dev-message \
+                --no-error-count \
+                --suppress-non-critical \
+                --llvm-ir-folder \
+                "$llvmir" \
+                "${srcs[@]}" \
+                2\> "$llvmir/update_testdata_exp.stderr"\; \
+                cp "$llvmir/*.$ext" "$exp" \
+            >> "$COMMAND_FILE"
         fi
     done
-
-    if [ -z $has_exp ]; then
-        continue
-    fi
-
-    if [ -n "$basename" ]; then
-        llvmir=$(mktemp -d)
-        # shellcheck disable=SC1010
-        echo f\(\) \{ \
-            bazel-bin/main/sorbet \
-            --silence-dev-message \
-            --no-error-count \
-            --llvm-ir-folder \
-            "$llvmir" \
-            "${srcs[@]}" \
-            2\> "$llvmir/update_testdata_exp.stderr"\; \
-            for ext in "$exp_extensions"\; do \
-                exp=${basename%.rb}.\$ext.exp\; \
-                if [ -f \$exp ]\; then \
-                    cat "$llvmir/*.\$ext" \> \$exp\; \
-                    fi\; \
-                done\; \
-                >> "$COMMAND_FILE" \
-                \}\; f >> "$COMMAND_FILE"
-    fi
 
     basename="$this_base"
     srcs=("$this_src")
