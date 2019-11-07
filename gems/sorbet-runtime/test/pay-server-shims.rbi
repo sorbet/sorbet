@@ -11,7 +11,3 @@ module Opus::Sensitivity::Utils
 end
 
 class Opus::Ownership; end
-
-# TODO(jez) Shouldn't need either of these after T::Enum is in sorbet-runtime
-class Opus::Enum; end
-class T::Enum; end

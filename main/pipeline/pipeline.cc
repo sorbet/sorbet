@@ -798,7 +798,8 @@ private:
 
     bool isWhiteListed(core::Context ctx, core::SymbolRef sym) {
         return sym.data(ctx)->name == core::Names::staticInit() ||
-               sym.data(ctx)->name == core::Names::Constants::Root();
+               sym.data(ctx)->name == core::Names::Constants::Root() ||
+               sym.data(ctx)->name == core::Names::unresolvedAncestors();
     }
 
     void checkLoc(core::Context ctx, core::Loc loc) {

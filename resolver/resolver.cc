@@ -385,6 +385,30 @@ private:
         }
     }
 
+    static void saveAncestorTypeForHashing(core::MutableContext ctx, const AncestorResolutionItem &item) {
+        // For LSP, create a synthetic method <unresolved-ancestors> that has a return type containing a type
+        // for every ancestor. When this return type changes, LSP takes the slow path (see
+        // Symbol::methodShapeHash()).
+        auto unresolvedPath = item.ancestor->fullUnresolvedPath(ctx);
+        if (!unresolvedPath.has_value()) {
+            return;
+        }
+
+        auto ancestorType =
+            core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
+
+        core::SymbolRef uaSym =
+            ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
+        core::TypePtr resultType = uaSym.data(ctx)->resultType;
+        if (!resultType) {
+            uaSym.data(ctx)->resultType = core::TupleType::build(ctx, {ancestorType});
+        } else if (auto tt = core::cast_type<core::TupleType>(resultType.get())) {
+            tt->elems.push_back(ancestorType);
+        } else {
+            ENFORCE(false);
+        }
+    }
+
     static core::SymbolRef stubSymbolForAncestor(const AncestorResolutionItem &item) {
         if (item.isSuperclass) {
             return core::Symbols::StubSuperClass();
@@ -438,9 +462,11 @@ private:
             resolved = stubSymbolForAncestor(job);
         }
 
+        bool ancestorPresent = true;
         if (job.isSuperclass) {
             if (resolved == core::Symbols::todo()) {
                 // No superclass specified
+                ancestorPresent = false;
             } else if (!job.klass.data(ctx)->superClass().exists() ||
                        job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
                        job.klass.data(ctx)->superClass() == resolved) {
@@ -456,6 +482,9 @@ private:
             job.klass.data(ctx)->addMixin(resolved);
         }
 
+        if (ancestorPresent) {
+            saveAncestorTypeForHashing(ctx, job);
+        }
         return true;
     }
 
@@ -1435,15 +1464,6 @@ private:
         }
     }
 
-    // These will already be handled by DefaultArgs Rewriter pass
-    void deleteOptionlArg(core::MutableContext ctx, ast::MethodDef *mdef) {
-        for (auto &arg : mdef->args) {
-            if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(arg.get())) {
-                optArgExp->default_ = nullptr;
-            }
-        }
-    }
-
     // Force errors from any signatures that didn't attach to methods.
     // `lastSigs` will always be empty after this function is called.
     void processLeftoverSigs(core::MutableContext ctx, InlinedVector<ast::Send *, 1> &lastSigs) {
@@ -1614,8 +1634,6 @@ private:
                     // OVERLOAD
                     lastSigs.clear();
                 }
-
-                deleteOptionlArg(ctx, mdef);
 
                 if (mdef->symbol.data(ctx)->isAbstract()) {
                     if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
@@ -2050,16 +2068,17 @@ public:
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
         ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 original->toString(ctx));
-        for (auto &arg : original->args) {
-            if (auto optionalArg = ast::cast_tree<ast::OptionalArg>(arg.get())) {
-                ENFORCE(!optionalArg->default_);
-            }
-        }
         return original;
     }
     unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
                                                                    unique_ptr<ast::UnresolvedConstantLit> original) {
         ENFORCE(false, "These should have all been removed: {}", original->toString(ctx));
+        return original;
+    }
+    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
+                                                             unique_ptr<ast::UnresolvedIdent> original) {
+        ENFORCE(original->kind != ast::UnresolvedIdent::Local, "{} should have been removed by local_vars",
+                original->toString(ctx));
         return original;
     }
     unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,

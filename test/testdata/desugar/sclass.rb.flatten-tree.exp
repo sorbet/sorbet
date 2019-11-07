@@ -9,7 +9,7 @@ begin
       begin
         <self>.puts(::A.a())
         <self>.puts(::B.b())
-        <self>.puts(#$c.c())
+        <self>.puts($c.c())
         <self>.puts(::D.singleton_class().d())
         <self>.puts(::E.e())
         <self>.puts(::F.f=(91))
@@ -30,7 +30,7 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::B)
           <emptyTree>
         end
-        #$c = ::Object.new()
+        $c = ::Object.new()
         begin
           <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::D)

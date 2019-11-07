@@ -105,6 +105,7 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
             serverCap->typeDefinitionProvider = true;
             serverCap->documentSymbolProvider = opts.lspDocumentSymbolEnabled;
             serverCap->workspaceSymbolProvider = opts.lspWorkspaceSymbolsEnabled;
+            serverCap->documentHighlightProvider = opts.lspDocumentHighlightEnabled;
             serverCap->hoverProvider = true;
             serverCap->referencesProvider = true;
 
@@ -128,6 +129,11 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
 
             response->result = make_unique<InitializeResult>(move(serverCap));
             config->output->write(move(response));
+        } else if (method == LSPMethod::TextDocumentDocumentHighlight) {
+            auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
+            typecheckerCoord.syncRun([&](auto &typechecker) -> void {
+                config->output->write(handleTextDocumentDocumentHighlight(typechecker, id, *params));
+            });
         } else if (method == LSPMethod::TextDocumentDocumentSymbol) {
             auto &params = get<unique_ptr<DocumentSymbolParams>>(rawParams);
             typecheckerCoord.syncRun([&](auto &typechecker) -> void {

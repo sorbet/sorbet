@@ -57,6 +57,19 @@ class T::Enum
     @values
   end
 
+  # Convert from serialized value to enum instance
+  #
+  # Note: It would have been nice to make this method final before people started overriding it.
+  # Note: Failed CriticalMethodsNoRuntimeTypingTest
+  sig {params(serialized_val: SerializedVal).returns(T.nilable(T.experimental_attached_class)).checked(:never)}
+  def self.try_deserialize(serialized_val)
+    if @mapping.nil?
+      raise "Attempting to access serialization map of #{self.class} before it has been initialized." \
+        " Enums are not initialized until the 'enums do' block they are defined in has finished running."
+    end
+    @mapping[serialized_val]
+  end
+
   # Convert from serialized value to enum instance.
   #
   # Note: It would have been nice to make this method final before people started overriding it.
@@ -66,11 +79,7 @@ class T::Enum
   # @raise [KeyError] if serialized value does not match any instance.
   sig {overridable.params(serialized_val: SerializedVal).returns(T.experimental_attached_class).checked(:never)}
   def self.from_serialized(serialized_val)
-    if @mapping.nil?
-      raise "Attempting to access serialization map of #{self.class} before it has been initialized." \
-        " Enums are not initialized until the 'enums do' block they are defined in has finished running."
-    end
-    res = @mapping[serialized_val]
+    res = try_deserialize(serialized_val)
     if res.nil?
       raise KeyError.new("Enum #{self} key not found: #{serialized_val.inspect}")
     end

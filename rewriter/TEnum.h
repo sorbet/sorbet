@@ -5,22 +5,22 @@
 namespace sorbet::rewriter {
 
 /**
- * This class provides the following features for Opus::Enum:
+ * This class provides the following features for T::Enum:
  *
  * - no need to manually annotate constants in `T.let` for use in strict mode
  * - support for exhaustiveness checks over enum values (by pretending that
- *   Opus::Enum values are actually singleton instances of synthetic classes)
- * - allows using Opus::Enum values in type signatures directly.
+ *   T::Enum values are actually singleton instances of synthetic classes)
+ * - allows using T::Enum values in type signatures directly.
  *
  * Given either:
  *
- *   class MyEnum < Opus::Enum
+ *   class MyEnum < T::Enum
  *     X = new
  *     Y = new('y')
  *     Z = T.let(new, Z)
  *   end
  *
- *   class MyEnum < Opus::Enum
+ *   class MyEnum < T::Enum
  *     enums do
  *       X = new
  *       Y = new('y')
@@ -30,7 +30,7 @@ namespace sorbet::rewriter {
  *
  * Outputs:
  *
- *   class MyEnum < Opus::Enum
+ *   class MyEnum < T::Enum
  *     extend T::Helpers
  *     sealed!
  *     abstract!
@@ -48,11 +48,11 @@ namespace sorbet::rewriter {
  *     T.let(new, Z)
  *   end
  */
-class OpusEnum final {
+class TEnum final {
 public:
     static void run(core::MutableContext ctx, ast::ClassDef *klass);
 
-    OpusEnum() = delete;
+    TEnum() = delete;
 };
 
 } // namespace sorbet::rewriter

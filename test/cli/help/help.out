@@ -85,6 +85,9 @@ Usage:
       --enable-experimental-lsp-document-symbol
                                 Enable experimental LSP feature: Document
                                 Symbol
+      --enable-experimental-lsp-document-highlight
+                                Enable experimental LSP feature: Document
+                                Highlight
       --enable-experimental-lsp-signature-help
                                 Enable experimental LSP feature: Signature
                                 Help

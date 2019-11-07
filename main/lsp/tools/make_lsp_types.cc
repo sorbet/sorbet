@@ -1311,6 +1311,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "textDocument/didChange",
                                      "textDocument/didClose",
                                      "textDocument/didOpen",
+                                     "textDocument/documentHighlight",
                                      "textDocument/documentSymbol",
                                      "textDocument/hover",
                                      "textDocument/publishDiagnostics",
@@ -1326,6 +1327,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
         makeDiscriminatedUnion(methodField, {
                                                 {"initialize", InitializeParams},
                                                 {"shutdown", makeOptional(JSONNull)},
+                                                {"textDocument/documentHighlight", TextDocumentPositionParams},
                                                 {"textDocument/documentSymbol", DocumentSymbolParams},
                                                 {"textDocument/definition", TextDocumentPositionParams},
                                                 {"textDocument/typeDefinition", TextDocumentPositionParams},
@@ -1350,6 +1352,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
         {
             {"initialize", InitializeResult},
             {"shutdown", JSONNull},
+            // DocumentHighlight[] | null
+            {"textDocument/documentHighlight", makeVariant({JSONNull, makeArray(DocumentHighlight)})},
             // DocumentSymbol[] | SymbolInformation[] | null
             // Sorbet only uses DocumentSymbol[].
             {"textDocument/documentSymbol", makeVariant({JSONNull, makeArray(DocumentSymbol)})},

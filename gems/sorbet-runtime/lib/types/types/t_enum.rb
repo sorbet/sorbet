@@ -2,8 +2,8 @@
 # typed: true
 
 module T::Types
-  # Validates that an object is equal to another Opus::Enum singleton value.
-  class OpusEnum < Base
+  # Validates that an object is equal to another T::Enum singleton value.
+  class TEnum < Base
     attr_reader :val
 
     def initialize(val)
@@ -23,7 +23,7 @@ module T::Types
     # @override Base
     private def subtype_of_single?(other)
       case other
-      when OpusEnum
+      when TEnum
         @val == other.val
       else
         false
