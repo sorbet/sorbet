@@ -5,6 +5,7 @@
 #include "llvm/IR/Verifier.h"
 // ^^^ violate our poisons
 #include "ast/Helpers.h"
+#include "absl/base/casts.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/FileOps.h"
@@ -526,6 +527,11 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
                                 auto rawInt = MK::getRubyIntRaw(cs, builder, litType->value);
+                                MK::varSet(cs, bind.bind.variable, rawInt, builder, aliases, blockMap, bb->rubyBlockId);
+                                break;
+                            }
+                            case core::LiteralType::LiteralTypeKind::Float: {
+                                auto rawInt = MK::getRubyFloatRaw(cs, builder, absl::bit_cast<double>(litType->value));
                                 MK::varSet(cs, bind.bind.variable, rawInt, builder, aliases, blockMap, bb->rubyBlockId);
                                 break;
                             }
