@@ -41,7 +41,8 @@ for this_src in "${rb_src[@]}" DUMMY; do
     llvmir=$(mktemp -d)
     # shellcheck disable=SC1010
     echo f\(\) \{ \
-      bazel-bin/main/sorbet --silence-dev-message \
+      bazel-bin/main/sorbet \
+        --silence-dev-message \
         --no-error-count \
         --llvm-ir-folder \
         "$llvmir" \
