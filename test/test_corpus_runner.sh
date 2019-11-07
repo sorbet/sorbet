@@ -32,6 +32,7 @@ force_compile=1 llvmir=$llvmir run/ruby "$rb" 2> "$srberr" | tee "$srbout"
 code=$?
 set -e
 
+grep "SorbetLLVM using compiled" "$srberr"
 if [ $code -ne 0 ]; then
     stderr="${rb%.rb}.stderr.exp"
     if [ -f "$stderr" ]; then
