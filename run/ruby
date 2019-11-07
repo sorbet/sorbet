@@ -3,6 +3,12 @@ set -eo pipefail
 
 base="$( cd "$(dirname "$0")" ; pwd -P )"/..
 
+srbrunfile=$(mktemp)
+cleanup() {
+    rm -r "$srbrunfile"
+}
+trap cleanup EXIT
+
 if [ -f "$base/external/ruby_2_6_3/ruby" ]; then
     ruby="$base/external/ruby_2_6_3/ruby"
 else
@@ -13,4 +19,9 @@ else
         cd - > /dev/null
     fi
 fi
-$ruby -r "$base/run/preamble.rb" -r "$base/run/patch_require.rb" "$@"
+
+rb=$1
+shift
+
+echo "require './$rb';" > "$srbrunfile"
+$ruby -r "$base/run/preamble.rb" -r "$base/run/patch_require.rb" "$srbrunfile" "$@"

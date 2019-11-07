@@ -5,13 +5,12 @@ rb=${1/--single_test=/}
 
 llvmir=$(mktemp -d)
 rbrunfile=$(mktemp)
-srbrunfile=$(mktemp)
 rbout=$(mktemp)
 srbout=$(mktemp)
 srberr=$(mktemp)
 
 cleanup() {
-    rm -r "$llvmir" "$rbrunfile" "$srbrunfile" "$rbout" "$srbout" "$srberr"
+    rm -r "$llvmir" "$rbrunfile" "$rbout" "$srbout" "$srberr"
 }
 
 # trap cleanup EXIT
@@ -24,13 +23,12 @@ echo "Run Ruby: bazel-bin/$ruby $rbrunfile"
 echo "Running Ruby..."
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
 
-echo "require './$rb';" > "$srbrunfile"
-echo "Run Sorbet: force_compile=1 llvmir=$llvmir run/ruby $srbrunfile"
+echo "Run Sorbet: force_compile=1 llvmir=$llvmir run/ruby $rb"
 echo "Temp Dir: $llvmir"
 echo "Running Sorbet Compiler..."
 run/compile "$llvmir" "$rb"
 set +e
-force_compile=1 llvmir=$llvmir run/ruby "$srbrunfile" 2> "$srberr" | tee "$srbout"
+force_compile=1 llvmir=$llvmir run/ruby "$rb" 2> "$srberr" | tee "$srbout"
 code=$?
 set -e
 
@@ -44,7 +42,7 @@ if [ $code -ne 0 ]; then
     fi
 fi
 
-echo "Run LLDB: lldb bazel-bin/$ruby -- $srbrunfile"
+echo "Run LLDB: lldb bazel-bin/$ruby -- $rb"
 for i in "$llvmir"/*.llo; do
     echo "LLVM IR: $i"
 done
