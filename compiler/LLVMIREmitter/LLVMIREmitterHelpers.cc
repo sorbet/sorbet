@@ -294,4 +294,50 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
     return approximation;
 }
 
+string LLVMIREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym) {
+    return "func_" + sym.data(cs)->toStringFullName(cs);
+}
+
+bool LLVMIREmitterHelpers::isStaticInit(CompilerState &cs, core::SymbolRef sym) {
+    auto name = sym.data(cs)->name;
+    return (name.data(cs)->kind == core::NameKind::UTF8 ? name : name.data(cs)->unique.original) ==
+           core::Names::staticInit();
+}
+
+namespace {
+llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::SymbolRef sym) {
+    if (LLVMIREmitterHelpers::isStaticInit(cs, sym)) {
+        // this is top level code that shoudln't be callable externally.
+        // Even more, sorbet reuses symbols used for these and thus if we mark them non-private we'll get link errors
+        return llvm::Function::InternalLinkage;
+    }
+    return llvm::Function::ExternalLinkage;
+}
+
+llvm::Function *
+getOrCreateFunctionWithName(CompilerState &cs, std::string name, llvm::FunctionType *ft,
+                            llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage) {
+    auto func = cs.module->getFunction(name);
+    if (func) {
+        return func;
+    }
+    return llvm::Function::Create(ft, linkageType, name, *cs.module);
+}
+
+}; // namespace
+
+llvm::Function *LLVMIREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
+    return getOrCreateFunctionWithName(cs, LLVMIREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
+                                       getFunctionLinkageType(cs, sym));
+}
+
+llvm::Function *LLVMIREmitterHelpers::getInitFunction(CompilerState &cs, core::SymbolRef sym) {
+    std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
+    auto linkageType = llvm::Function::InternalLinkage;
+    auto baseName = LLVMIREmitterHelpers::getFunctionName(cs, sym);
+
+    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
+    return getOrCreateFunctionWithName(cs, "Init_" + baseName, ft, linkageType);
+}
+
 } // namespace sorbet::compiler

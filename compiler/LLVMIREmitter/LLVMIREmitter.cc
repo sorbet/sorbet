@@ -4,8 +4,8 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Verifier.h"
 // ^^^ violate our poisons
-#include "ast/Helpers.h"
 #include "absl/base/casts.h"
+#include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/FileOps.h"
@@ -25,67 +25,6 @@ namespace sorbet::compiler {
 // and https://silverhammermba.github.io/emberb/c/ are your friends
 // use the `demo` module for experiments
 namespace {
-
-bool isStaticInit(CompilerState &cs, core::SymbolRef sym) {
-    auto name = sym.data(cs)->name;
-    return (name.data(cs)->kind == core::NameKind::UTF8 ? name : name.data(cs)->unique.original) ==
-           core::Names::staticInit();
-}
-
-llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::SymbolRef sym) {
-    if (isStaticInit(cs, sym)) {
-        // this is top level code that shoudln't be callable externally.
-        // Even more, sorbet reuses symbols used for these and thus if we mark them non-private we'll get link errors
-        return llvm::Function::InternalLinkage;
-    }
-    return llvm::Function::ExternalLinkage;
-}
-
-core::SymbolRef removeRoot(core::SymbolRef sym) {
-    if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
-        // Root methods end up going on object
-        sym = core::Symbols::Object();
-    }
-    return sym;
-}
-
-core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
-    core::SymbolRef sym;
-    if (auto classType = core::cast_type<core::ClassType>(typ.get())) {
-        sym = classType->symbol;
-    } else if (auto appliedType = core::cast_type<core::AppliedType>(typ.get())) {
-        sym = appliedType->klass;
-    } else {
-        ENFORCE(false);
-    }
-    sym = removeRoot(sym);
-    ENFORCE(sym.data(gs)->isClassOrModule());
-    return sym;
-}
-
-string getFunctionName(CompilerState &cs, core::SymbolRef sym) {
-    return "func_" + sym.data(cs)->toStringFullName(cs);
-}
-
-llvm::Function *getOrCreateFunction(CompilerState &cs, std::string name, llvm::FunctionType *ft,
-                                    llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage) {
-    auto func = cs.module->getFunction(name);
-    if (func) {
-        return func;
-    }
-    return llvm::Function::Create(ft, linkageType, name, *cs.module);
-}
-
-llvm::Function *getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
-    return getOrCreateFunction(cs, getFunctionName(cs, sym), cs.getRubyFFIType(), getFunctionLinkageType(cs, sym));
-}
-
-llvm::Function *getInitFunction(CompilerState &cs, std::string baseName,
-                                llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage) {
-    std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
-    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
-    return getOrCreateFunction(cs, "Init_" + baseName, ft, linkageType);
-}
 
 vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::SymbolRef method,
                                                       const BasicBlockMap &blockMap) {
@@ -256,7 +195,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                                                             to_string(optionalMethodIndex) + " does not exist");
                         auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
                         ENFORCE(argMethod.exists());
-                        auto fillDefaultFunc = getOrCreateFunction(cs, argMethod);
+                        auto fillDefaultFunc = LLVMIREmitterHelpers::getOrCreateFunction(cs, argMethod);
                         rawValue =
                             builder.CreateCall(fillDefaultFunc, {argCountRaw, argArrayRaw,
                                                                  func->arg_begin() + 2 /* this is wrong for block*/});
@@ -285,72 +224,6 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             builder.CreateBr(blockMap.userEntryBlockByFunction[funcId]);
         }
     }
-}
-
-void defineMethod(CompilerState &cs, cfg::Send *i, bool isSelf, llvm::IRBuilder<> &builder) {
-    ENFORCE(i->args.size() == 2);
-    auto ownerSym = typeToSym(cs, i->args[0].type);
-
-    auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
-    ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-    core::NameRef funcNameRef(cs, lit->value);
-
-    auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
-    if (ownerSym == core::Symbols::Object() && !isSelf) {
-        // TODO Figure out if this speicial case is right
-        lookupSym = core::Symbols::Object();
-    }
-    auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
-    ENFORCE(funcSym.exists());
-    ENFORCE(funcSym.data(cs)->isMethod());
-    auto llvmFuncName = getFunctionName(cs, funcSym);
-    auto funcHandle = getOrCreateFunction(cs, funcSym);
-    auto universalSignature = llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
-    auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
-
-    auto rubyFunc = cs.module->getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
-    ENFORCE(rubyFunc);
-    builder.CreateCall(rubyFunc, {MK::getRubyConstantValueRaw(cs, ownerSym, builder),
-                                  MK::toCString(cs, funcNameRef.show(cs), builder), ptr,
-                                  llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
-
-    builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
-}
-
-std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
-    auto name = sym.data(gs)->name;
-    if (name.data(gs)->kind == core::NameKind::UNIQUE) {
-        return name.data(gs)->unique.original.data(gs)->show(gs);
-    }
-    return name.data(gs)->show(gs);
-}
-
-void defineClass(CompilerState &cs, cfg::Send *i, llvm::IRBuilder<> &builder) {
-    auto sym = typeToSym(cs, i->args[0].type);
-    // this is wrong and will not work for `class <<self`
-    auto classNameCStr = MK::toCString(cs, showClassNameWithoutOwner(cs, sym), builder);
-    auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
-
-    if (sym.data(cs)->owner != core::Symbols::root()) {
-        auto getOwner = MK::getRubyConstantValueRaw(cs, sym.data(cs)->owner, builder);
-        if (isModule) {
-            builder.CreateCall(cs.module->getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
-        } else {
-            auto rawCall = MK::getRubyConstantValueRaw(cs, sym.data(cs)->superClass(), builder);
-            builder.CreateCall(cs.module->getFunction("sorbet_defineNestedClass"), {getOwner, classNameCStr, rawCall});
-        }
-    } else {
-        if (isModule) {
-            builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
-        } else {
-            auto rawCall = MK::getRubyConstantValueRaw(cs, sym.data(cs)->superClass(), builder);
-            builder.CreateCall(cs.module->getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
-        }
-    }
-
-    auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
-    auto llvmFuncName = getFunctionName(cs, funcSym);
-    builder.CreateCall(getInitFunction(cs, llvmFuncName), {});
 }
 
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
@@ -399,93 +272,9 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             // They are already loaded in preambula of the method
                             return;
                         }
-                        auto str = i->fun.data(cs)->shortName(cs);
-                        if (i->fun == core::Names::keepForIde() || i->fun == core::Names::keepForTypechecking()) {
-                            return;
-                        }
-                        if (i->fun == core::Names::buildHash()) {
-                            auto ret =
-                                builder.CreateCall(cs.module->getFunction("sorbet_newRubyHash"), {}, "rawHashLiteral");
-                            // TODO(perf): in 2.7 use rb_hash_bulk_insert will give 2x speedup
-                            int argc = 0;
-                            while (argc < i->args.size()) {
-                                auto key = i->args[argc].variable;
-                                auto value = i->args[argc + 1].variable;
-                                builder.CreateCall(
-                                    cs.module->getFunction("sorbet_hashStore"),
-                                    {ret, MK::varGet(cs, key, builder, aliases, blockMap, bb->rubyBlockId),
-                                     MK::varGet(cs, value, builder, aliases, blockMap, bb->rubyBlockId)});
-                                argc += 2;
-                            }
-                            MK::varSet(cs, bind.bind.variable, ret, builder, aliases, blockMap, bb->rubyBlockId);
-                            return;
-                        }
-                        if (i->fun == core::Names::buildArray()) {
-                            auto ret = builder.CreateCall(
-                                cs.module->getFunction("sorbet_newRubyArray"),
-                                {llvm::ConstantInt::get(cs, llvm::APInt(64, i->args.size(), true))}, "rawArrayLiteral");
-                            for (int argc = 0; argc < i->args.size(); argc++) {
-                                auto value = i->args[argc].variable;
-                                builder.CreateCall(
-                                    cs.module->getFunction("sorbet_arrayPush"),
-                                    {ret, MK::varGet(cs, value, builder, aliases, blockMap, bb->rubyBlockId)});
-                            }
-                            MK::varSet(cs, bind.bind.variable, ret, builder, aliases, blockMap, bb->rubyBlockId);
-                            return;
-                        }
-                        if (i->fun == Names::sorbet_defineTopClassOrModule(cs)) {
-                            defineClass(cs, i, builder);
-                            return;
-                        }
-                        if (i->fun == Names::sorbet_defineMethod(cs)) {
-                            defineMethod(cs, i, false, builder);
-                            return;
-                        }
-                        if (i->fun == Names::sorbet_defineMethodSingleton(cs)) {
-                            defineMethod(cs, i, true, builder);
-                            return;
-                        }
-                        auto rawId = MK::getRubyIdFor(cs, builder, str);
 
-                        // fill in args
-                        {
-                            int argId = -1;
-                            for (auto &arg : i->args) {
-                                argId += 1;
-                                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-                                                          llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
-                                auto var = MK::varGet(cs, arg.variable, builder, aliases, blockMap, bb->rubyBlockId);
-                                builder.CreateStore(var,
-                                                    builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId],
-                                                                      indices, "callArgsAddr"));
-                            }
-                        }
-                        llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
-                                                  llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
-
-                        // TODO(perf): call
-                        // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
-                        // to get inline caching.
-                        // before this, perf will not be good
-                        auto var = MK::varGet(cs, i->recv.variable, builder, aliases, blockMap, bb->rubyBlockId);
-                        llvm::Value *rawCall;
-                        if (i->link != nullptr) {
-                            // this send has a block!
-                            rawCall = builder.CreateCall(
-                                cs.module->getFunction("sorbet_callFuncBlock"),
-                                {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                                 builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId], indices),
-                                 blockMap.rubyBlocks2Functions[i->link->rubyBlockId],
-                                 blockMap.escapedClosure[bb->rubyBlockId]},
-                                "rawSendResult");
-
-                        } else {
-                            rawCall = builder.CreateCall(
-                                cs.module->getFunction("sorbet_callFunc"),
-                                {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                                 builder.CreateGEP(blockMap.sendArgArrayByBlock[bb->rubyBlockId], indices)},
-                                "rawSendResult");
-                        }
+                        auto rawCall =
+                            LLVMIREmitterHelpers::emitMethodCall(cs, builder, i, blockMap, aliases, bb->rubyBlockId);
                         MK::varSet(cs, bind.bind.variable, rawCall, builder, aliases, blockMap, bb->rubyBlockId);
                     },
                     [&](cfg::Return *i) {
@@ -630,7 +419,7 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
 
 void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
     UnorderedMap<core::LocalVariable, Alias> aliases;
-    auto func = getOrCreateFunction(cs, md->symbol);
+    auto func = LLVMIREmitterHelpers::getOrCreateFunction(cs, md->symbol);
     {
         // setup function argument names
         func->arg_begin()->setName("argc");
@@ -662,22 +451,24 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
 void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, string_view objectName) {
     llvm::IRBuilder<> builder(cs);
 
-    auto baseName = getFunctionName(cs, sym);
-    auto linkageType = llvm::Function::InternalLinkage;
     auto owner = sym.data(cs)->owner;
     auto isRoot = owner == core::Symbols::rootSingleton();
+    llvm::Function *entryFunc;
 
-    if (isStaticInit(cs, sym) && isRoot) {
-        baseName = objectName;
-        baseName = baseName.substr(0, baseName.rfind(".rb"));
-        linkageType = llvm::Function::ExternalLinkage;
+    if (LLVMIREmitterHelpers::isStaticInit(cs, sym) && isRoot) {
+        auto baseName = objectName.substr(0, objectName.rfind(".rb"));
+        auto linkageType = llvm::Function::ExternalLinkage;
+        std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
+        auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
+        entryFunc = llvm::Function::Create(ft, linkageType, "Init_" + (string)baseName, *cs.module);
+    } else {
+        entryFunc = LLVMIREmitterHelpers::getInitFunction(cs, sym);
     }
-    auto entryFunc = getInitFunction(cs, baseName, linkageType);
 
     auto bb = llvm::BasicBlock::Create(cs, "entry", entryFunc);
     builder.SetInsertPoint(bb);
 
-    if (isStaticInit(cs, sym)) {
+    if (LLVMIREmitterHelpers::isStaticInit(cs, sym)) {
         core::SymbolRef staticInit;
         auto attachedClass = owner.data(cs)->attachedClass(cs);
         if (isRoot) {
@@ -687,7 +478,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, 
         }
 
         // Call the LLVM method that was made by run() from this Init_ method
-        auto staticInitName = getFunctionName(cs, staticInit);
+        auto staticInitName = LLVMIREmitterHelpers::getFunctionName(cs, staticInit);
         auto staticInitFunc = cs.module->getFunction(staticInitName);
         ENFORCE(staticInitFunc, staticInitName + " does not exist");
         builder.CreateCall(staticInitFunc,

@@ -67,6 +67,16 @@ struct Alias {
 
 class LLVMIREmitterHelpers {
 public:
+    static bool isStaticInit(CompilerState &cs, core::SymbolRef sym);
+    static std::string getFunctionName(CompilerState &cs, core::SymbolRef sym);
+    static llvm::Function *getOrCreateFunction(CompilerState &cs, core::SymbolRef sym);
+
+    static llvm::Function *getInitFunction(CompilerState &cs, core::SymbolRef sym);
+
+    static llvm::Value *emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::Send *send,
+                                       const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                       int currentRubyBlockId);
+
     static BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                           std::unique_ptr<ast::MethodDef> &md,
                                                           UnorderedMap<core::LocalVariable, Alias> &aliases,
