@@ -1,17 +1,13 @@
 #include "LocalVarFinder.h"
 #include "ast/ArgParsing.h"
+#include "core/GlobalState.h"
 
 using namespace std;
 
 namespace sorbet::realmain::lsp {
 
 unique_ptr<ast::Assign> LocalVarFinder::postTransformAssign(core::Context ctx, unique_ptr<ast::Assign> assign) {
-    // TODO(jez) We can't guarantee that methodStack is not empty, because we don't run on flattened trees
-    // This means that querys to find the local variables of <static-init> methods will return no results.
-
-    if (methodStack.empty()) {
-        return assign;
-    }
+    ENFORCE(!methodStack.empty());
 
     auto *local = ast::cast_tree<ast::Local>(assign->lhs.get());
     if (local == nullptr) {
@@ -48,6 +44,24 @@ unique_ptr<ast::MethodDef> LocalVarFinder::postTransformMethodDef(core::Context 
                                                                   unique_ptr<ast::MethodDef> methodDef) {
     this->methodStack.pop_back();
     return methodDef;
+}
+
+unique_ptr<ast::ClassDef> LocalVarFinder::preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+    ENFORCE(classDef->symbol.exists());
+    ENFORCE(classDef->symbol != core::Symbols::todo());
+
+    auto currentMethod = classDef->symbol == core::Symbols::root()
+                             ? ctx.state.lookupStaticInitForFile(classDef->loc)
+                             : ctx.state.lookupStaticInitForClass(classDef->symbol);
+
+    this->methodStack.emplace_back(currentMethod);
+
+    return classDef;
+}
+
+unique_ptr<ast::ClassDef> LocalVarFinder::postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+    this->methodStack.pop_back();
+    return classDef;
 }
 
 const vector<core::LocalVariable> &LocalVarFinder::result() const {

@@ -5,10 +5,8 @@ extend T::Sig
 # It should never show up in a completion result inside a method.
 x_outside = nil
 
-# We don't handle completing local variables in <static-init> methods yet.
-# Ideally, this should be `x_outside`
 x_ # error: does not exist
-# ^ completion: (nothing)
+# ^ completion: x_outside
 
 def without_args
   x_1 = nil
@@ -85,4 +83,10 @@ def non_rooted_match
   xxx_yyy_zzz = nil
   yyy # error: does not exist
   #  ^ completion: xxx_yyy_zzz
+end
+
+class Wrapper
+  x_inside_class = nil
+  x_ # error: does not exist
+  # ^ completion: x_inside_class
 end
