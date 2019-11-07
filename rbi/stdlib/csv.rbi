@@ -364,7 +364,7 @@ class CSV < Object
   end
   def self.read(path, options=T.unsafe(nil)); end
 
-  sig { params(row: T.any(T::Array[T.untyped], CSV::Row)).void }
+  sig { params(row: T.any(T::Array[T.untyped], CSV::Row)).returns(CSV)) }
   def <<(row); end
 
   sig { params(str: String, options: T.untyped, blk: T.proc.params(csv: CSV).void).returns(String) }
