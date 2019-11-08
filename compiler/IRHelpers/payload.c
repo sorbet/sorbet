@@ -479,6 +479,7 @@ void sorbet_rb_error_arity(int argc, int min, int max) __attribute__((__noreturn
 }
 
 void sorbet_checkStack() {
+    // This is actually pretty slow. We should probably use guard pages instead.
     ruby_stack_check();
 }
 

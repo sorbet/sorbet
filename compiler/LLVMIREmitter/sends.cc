@@ -71,6 +71,48 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
             }
         };
     };
+    auto &recvType = i->recv.type;
+    core::SymbolRef recvClass = core::Symbols::noSymbol();
+    if (auto ct = core::cast_type<core::ClassType>(recvType.get())) {
+        recvClass = ct->symbol;
+    } else if (auto at = core::cast_type<core::AppliedType>(recvType.get())) {
+        recvClass = at->klass;
+    }
+
+    if (recvClass.exists()) {
+        auto funSym = recvClass.data(cs)->findMember(cs, i->fun);
+        if (funSym.exists() && funSym.data(cs)->isFinalMethod()) {
+            auto llvmFunc = LLVMIREmitterHelpers::lookupFunction(cs, funSym);
+            if (llvmFunc != nullptr) {
+                auto &builder = builderCast(build);
+                // TODO: insert type guard
+                {
+                    // fill in args
+                    int argId = -1;
+                    for (auto &arg : i->args) {
+                        argId += 1;
+                        llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+                                                  llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
+                        auto var = MK::varGet(cs, arg.variable, builder, aliases, blockMap, currentRubyBlockId);
+                        builder.CreateStore(var, builder.CreateGEP(blockMap.sendArgArrayByBlock[currentRubyBlockId],
+                                                                   indices, "callArgsAddr"));
+                    }
+                }
+                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
+                                          llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
+
+                auto var = MK::varGet(cs, i->recv.variable, builder, aliases, blockMap, currentRubyBlockId);
+                builder.CreateCall(cs.module->getFunction("sorbet_checkStack"), {});
+                llvm::Value *rawCall = builder.CreateCall(
+                    llvmFunc,
+                    {llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                     builder.CreateGEP(blockMap.sendArgArrayByBlock[currentRubyBlockId], indices), var},
+                    "directSendResult");
+                return rawCall;
+            }
+        }
+    }
+
     return LLVMIREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, currentRubyBlockId);
 }
 
