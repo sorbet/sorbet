@@ -14,7 +14,7 @@ public:
                                   int currentRubyBlockId) const = 0;
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const = 0;
 
-    static std::vector<NameBasedIntrinsicMethod *> &definedIntrinsics();
+    static const std::vector<const NameBasedIntrinsicMethod *> &definedIntrinsics();
 };
 }; // namespace sorbet::compiler
 #endif

@@ -214,10 +214,10 @@ public:
 } IdentityIntrinsic;
 
 }; // namespace
-
-vector<NameBasedIntrinsicMethod *> &NameBasedIntrinsicMethod::definedIntrinsics() {
-    static vector<NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic,  &DefineMethodIntrinsic, &DefineClassIntrinsic,
-                                                  &BuildArrayIntrinsic, &BuildHashIntrinsic,    &IdentityIntrinsic};
+const vector<const NameBasedIntrinsicMethod *> &NameBasedIntrinsicMethod::definedIntrinsics() {
+    static vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic,   &DefineMethodIntrinsic,
+                                                        &DefineClassIntrinsic, &BuildArrayIntrinsic,
+                                                        &BuildHashIntrinsic,   &IdentityIntrinsic};
     return ret;
 }
 }; // namespace sorbet::compiler

@@ -15,7 +15,8 @@ public:
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const = 0;
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const = 0;
 
-    static std::vector<SymbolBasedIntrinsicMethod *> &definedIntrinsics();
+    virtual ~SymbolBasedIntrinsicMethod() = default;
+    static std::vector<const SymbolBasedIntrinsicMethod *> &definedIntrinsics();
 };
 }; // namespace sorbet::compiler
 #endif
