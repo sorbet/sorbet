@@ -1619,10 +1619,21 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(res);
             },
             [&](parser::Defined *defined) {
-                auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(),
-                                     // Intentionally drop the defined->value since we shouldn't typecheck if it exists
-                                     // or not node2TreeImpl(dctx, std::move(defined->value)));
-                                     MK::Nil(loc));
+                auto valuePtr = node2TreeImpl(dctx, std::move(defined->value));
+                auto loc = valuePtr->loc;
+                auto value = valuePtr.get();
+                Array::ENTRY_store args;
+                while (!isa_tree<EmptyTree>(value)) {
+                    auto lit = cast_tree<UnresolvedConstantLit>(value);
+                    if (!lit) {
+                        args.clear();
+                        break;
+                    }
+                    args.emplace_back(MK::String(lit->loc, lit->cnst));
+                    value = lit->scope.get();
+                }
+                absl::c_reverse(args);
+                auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(), MK::Array(loc, std::move(args)));
                 result.swap(res);
             },
             [&](parser::LineLiteral *line) {
