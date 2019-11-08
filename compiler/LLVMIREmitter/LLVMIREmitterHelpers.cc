@@ -313,8 +313,46 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
     return approximation;
 }
 
+namespace {
+
+string getFunctionNamePrefix(CompilerState &cs, core::SymbolRef sym) {
+    auto maybeAttached = sym.data(cs)->attachedClass(cs);
+    if (maybeAttached.exists()) {
+        return getFunctionNamePrefix(cs, maybeAttached) + ".singleton_class";
+    }
+    string suffix;
+    auto name = sym.data(cs)->name;
+    if (name.data(cs)->kind == core::NameKind::CONSTANT &&
+        name.data(cs)->cnst.original.data(cs)->kind == core::NameKind::UTF8) {
+        suffix = (string)name.data(cs)->shortName(cs);
+    } else {
+        suffix = name.toString(cs);
+    }
+    string prefix =
+        sym.data(cs)->owner == core::Symbols::root() ? "" : getFunctionNamePrefix(cs, sym.data(cs)->owner) + "::";
+
+    return prefix + suffix;
+}
+} // namespace
+
 string LLVMIREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym) {
-    return "func_" + sym.data(cs)->toStringFullName(cs);
+    auto maybeAttachedOwner = sym.data(cs)->owner.data(cs)->attachedClass(cs);
+    string prefix = "func_";
+    if (maybeAttachedOwner.exists()) {
+        prefix = prefix + getFunctionNamePrefix(cs, maybeAttachedOwner) + ".";
+    } else {
+        prefix = prefix + getFunctionNamePrefix(cs, sym.data(cs)->owner) + "#";
+    }
+
+    auto name = sym.data(cs)->name;
+    string suffix;
+    if (name.data(cs)->kind == core::NameKind::UTF8) {
+        suffix = (string)name.data(cs)->shortName(cs);
+    } else {
+        suffix = name.toString(cs);
+    }
+
+    return prefix + suffix;
 }
 
 bool LLVMIREmitterHelpers::isStaticInit(CompilerState &cs, core::SymbolRef sym) {
