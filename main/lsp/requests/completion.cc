@@ -216,7 +216,8 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
     return result;
 }
 
-string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
+string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiverType,
+                     const core::TypeConstraint *constraint) {
     auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
     vector<string> typeAndArgNames;
 
@@ -234,7 +235,8 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
                 absl::StrAppend(&s, argSym.name.data(gs)->shortName(gs), ": ");
             }
             if (argSym.type) {
-                absl::StrAppend(&s, "${", i++, ":", argSym.type->show(gs), "}");
+                absl::StrAppend(&s, "${", i++, ":",
+                                getResultType(gs, argSym.type, method, receiverType, constraint)->show(gs), "}");
             } else {
                 absl::StrAppend(&s, "${", i++, "}");
             }
@@ -353,7 +355,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
         string replacementText;
         if (config->getClientConfig().clientCompletionItemSnippetSupport) {
             item->insertTextFormat = InsertTextFormat::Snippet;
-            replacementText = methodSnippet(gs, what);
+            replacementText = methodSnippet(gs, what, receiverType, constraint);
         } else {
             item->insertTextFormat = InsertTextFormat::PlainText;
             replacementText = string(what.data(gs)->name.data(gs)->shortName(gs));
