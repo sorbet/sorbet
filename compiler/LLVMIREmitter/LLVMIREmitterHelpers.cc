@@ -61,9 +61,9 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
 
 void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, cfg::BasicBlock *bb,
                      UnorderedMap<core::LocalVariable, optional<int>> &privateUsages,
-                     UnorderedMap<core::LocalVariable, int> &escapedIndexes, int &escapedIndexCounter
-
-) {
+                     UnorderedMap<core::LocalVariable, int> &escapedIndexes, int &escapedIndexCounter,
+                     bool &usesBlockArg, core::LocalVariable blkArg) {
+    usesBlockArg = usesBlockArg || lv == blkArg;
     auto fnd = privateUsages.find(lv);
     if (fnd != privateUsages.end()) {
         auto &store = fnd->second;
@@ -79,54 +79,72 @@ void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, c
 
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
-pair<UnorderedMap<core::LocalVariable, optional<int>>, UnorderedMap<core::LocalVariable, int>>
+tuple<UnorderedMap<core::LocalVariable, optional<int>>, UnorderedMap<core::LocalVariable, int>, bool>
 findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg) {
     UnorderedMap<core::LocalVariable, optional<int>> ret;
     UnorderedMap<core::LocalVariable, int> escapedVariableIndexes;
+    bool usesBlockArg = false;
+    core::LocalVariable blkArg = core::LocalVariable::noVariable();
+
     int idx = 0;
+    int argId = -1;
     for (auto &arg : mdef->args) {
+        argId += 1;
         ast::Expression *maybeLocal = arg.get();
         if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg.get())) {
             maybeLocal = opt->expr.get();
         }
         auto local = ast::cast_tree<ast::Local>(maybeLocal);
         ENFORCE(local);
-        trackBlockUsage(cs, cfg, local->localVariable, cfg.entry(), ret, escapedVariableIndexes, idx);
+        trackBlockUsage(cs, cfg, local->localVariable, cfg.entry(), ret, escapedVariableIndexes, idx, usesBlockArg,
+                        blkArg);
+        if (cfg.symbol.data(cs)->arguments()[argId].flags.isBlock) {
+            blkArg = local->localVariable;
+        }
     }
 
     for (auto &bb : cfg.basicBlocks) {
         for (cfg::Binding &bind : bb->exprs) {
-            trackBlockUsage(cs, cfg, bind.bind.variable, bb.get(), ret, escapedVariableIndexes, idx);
+            trackBlockUsage(cs, cfg, bind.bind.variable, bb.get(), ret, escapedVariableIndexes, idx, usesBlockArg,
+                            blkArg);
             typecase(
                 bind.value.get(),
-                [&](cfg::Ident *i) { trackBlockUsage(cs, cfg, i->what, bb.get(), ret, escapedVariableIndexes, idx); },
+                [&](cfg::Ident *i) {
+                    trackBlockUsage(cs, cfg, i->what, bb.get(), ret, escapedVariableIndexes, idx, usesBlockArg, blkArg);
+                },
                 [&](cfg::Alias *i) { /* nothing */
                 },
                 [&](cfg::SolveConstraint *i) { /* nothing*/ },
                 [&](cfg::Send *i) {
                     for (auto &arg : i->args) {
-                        trackBlockUsage(cs, cfg, arg.variable, bb.get(), ret, escapedVariableIndexes, idx);
+                        trackBlockUsage(cs, cfg, arg.variable, bb.get(), ret, escapedVariableIndexes, idx, usesBlockArg,
+                                        blkArg);
                     }
-                    trackBlockUsage(cs, cfg, i->recv.variable, bb.get(), ret, escapedVariableIndexes, idx);
+                    trackBlockUsage(cs, cfg, i->recv.variable, bb.get(), ret, escapedVariableIndexes, idx, usesBlockArg,
+                                    blkArg);
                 },
                 [&](cfg::Return *i) {
-                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret, escapedVariableIndexes, idx);
+                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret, escapedVariableIndexes, idx, usesBlockArg,
+                                    blkArg);
                 },
                 [&](cfg::BlockReturn *i) {
-                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret, escapedVariableIndexes, idx);
+                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret, escapedVariableIndexes, idx, usesBlockArg,
+                                    blkArg);
                 },
                 [&](cfg::LoadSelf *i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
                 [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::Unanalyzable *i) { /*nothing*/ },
                 [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { /*nothing*/ },
                 [&](cfg::Cast *i) {
-                    trackBlockUsage(cs, cfg, i->value.variable, bb.get(), ret, escapedVariableIndexes, idx);
+                    trackBlockUsage(cs, cfg, i->value.variable, bb.get(), ret, escapedVariableIndexes, idx,
+                                    usesBlockArg, blkArg);
                 },
                 [&](cfg::TAbsurd *i) {
-                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret, escapedVariableIndexes, idx);
+                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), ret, escapedVariableIndexes, idx, usesBlockArg,
+                                    blkArg);
                 });
         }
     }
-    return {std::move(ret), std::move(escapedVariableIndexes)};
+    return {std::move(ret), std::move(escapedVariableIndexes), usesBlockArg};
 }
 
 int getMaxSendArgCount(cfg::CFG &cfg) {
@@ -178,7 +196,7 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
                                                                      llvm::Function *mainFunc) {
     vector<llvm::Function *> rubyBlock2Function = getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
-    auto [variablesPrivateToBlocks, escapedVariableIndices] = findCaptures(cs, md, cfg);
+    auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlock] = findCaptures(cs, md, cfg);
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
@@ -288,7 +306,8 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
                                 move(blockLinks),
                                 move(rubyBlockArgs),
                                 move(rubyBlock2Function),
-                                {}};
+                                {},
+                                usesBlock};
     approximation.llvmVariables = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation, aliases);
 
     return approximation;

@@ -152,10 +152,8 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
             // make the last instruction in all the required args point at the first check block
             builder.SetInsertPoint(fillRequiredArgs);
-            // TODO(perf): if block isn't captured, we can optimize this to skip proc conversion
-            // TODO(perf): if block isn't used, don't load it at all
             //
-            if (blkArgName.exists()) {
+            if (blkArgName.exists() && blockMap.usesBlockArgs) {
                 // TODO: I don't think this correctly handles blocks with block args
                 MK::varSet(cs, blkArgName, builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")),
                            builder, aliases, blockMap, 0);

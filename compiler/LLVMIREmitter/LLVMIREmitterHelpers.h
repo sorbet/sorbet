@@ -30,6 +30,7 @@ struct BasicBlockMap {
     std::vector<std::vector<core::LocalVariable>> rubyBlockArgs;
     std::vector<llvm::Function *> rubyBlocks2Functions;
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
+    bool usesBlockArgs;
 };
 
 struct Alias {
