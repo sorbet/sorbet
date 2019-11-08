@@ -507,54 +507,45 @@ entry:
   %10 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !18
   %11 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %10, i64 0, i32 1, i64 0
   store i64 %0, i64* %11, align 8
-  %12 = tail call i32 @rb_block_given_p() #17
-  %13 = icmp eq i32 %12, 0
-  br i1 %13, label %sorbet_getMethodBlockAsProc.exit.i, label %14
+  %12 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !18
+  %13 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %12, i64 0, i32 1, i64 0
+  %14 = load i64, i64* %13, align 8
+  %15 = icmp eq i64 %14, %0
+  br i1 %15, label %typeTestSuccess.i, label %16
 
-14:                                               ; preds = %entry
-  %15 = tail call i64 @rb_block_proc() #17
-  br label %sorbet_getMethodBlockAsProc.exit.i
+16:                                               ; preds = %entry
+  %17 = load i64, i64* @rb_cModule, align 8, !tbaa !7
+  %18 = tail call i64 @rb_obj_is_kind_of(i64 %14, i64 %17) #17
+  %19 = icmp eq i64 %18, 0
+  br i1 %19, label %typeTestFail.i, label %sorbet_isa_class_of.exit.i, !prof !29
 
-sorbet_getMethodBlockAsProc.exit.i:               ; preds = %14, %entry
-  %16 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !18
-  %17 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %16, i64 0, i32 1, i64 0
-  %18 = load i64, i64* %17, align 8
-  %19 = icmp eq i64 %18, %0
-  br i1 %19, label %typeTestSuccess.i, label %20
+sorbet_isa_class_of.exit.i:                       ; preds = %16
+  %20 = tail call i64 @rb_class_inherited_p(i64 %14, i64 %0) #10
+  %21 = icmp eq i64 %20, 0
+  br i1 %21, label %typeTestFail.i, label %typeTestSuccess.i, !prof !0
 
-20:                                               ; preds = %sorbet_getMethodBlockAsProc.exit.i
-  %21 = load i64, i64* @rb_cModule, align 8, !tbaa !7
-  %22 = tail call i64 @rb_obj_is_kind_of(i64 %18, i64 %21) #17
-  %23 = icmp eq i64 %22, 0
-  br i1 %23, label %typeTestFail.i, label %sorbet_isa_class_of.exit.i, !prof !29
-
-sorbet_isa_class_of.exit.i:                       ; preds = %20
-  %24 = tail call i64 @rb_class_inherited_p(i64 %18, i64 %0) #10
-  %25 = icmp eq i64 %24, 0
-  br i1 %25, label %typeTestFail.i, label %typeTestSuccess.i, !prof !0
-
-typeTestSuccess.i:                                ; preds = %sorbet_isa_class_of.exit.i, %sorbet_getMethodBlockAsProc.exit.i
+typeTestSuccess.i:                                ; preds = %sorbet_isa_class_of.exit.i, %entry
   %callArgsAddr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %0, i64* %callArgsAddr.i, align 8
-  %26 = load i64, i64* @guard_epoch_T, align 8
-  %27 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !27
-  %canTakeFastPath.i = icmp eq i64 %26, %27
+  %22 = load i64, i64* @guard_epoch_T, align 8
+  %23 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !27
+  %canTakeFastPath.i = icmp eq i64 %22, %23
   br i1 %canTakeFastPath.i, label %const_continue.i, label %const_slowPath.i, !prof !11
 
-typeTestFail.i:                                   ; preds = %sorbet_isa_class_of.exit.i, %20
-  tail call fastcc void @sorbet_cast_failure(i64 %18, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(<root>)", i64 0, i64 0)) #17
+typeTestFail.i:                                   ; preds = %sorbet_isa_class_of.exit.i, %16
+  tail call fastcc void @sorbet_cast_failure(i64 %14, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(<root>)", i64 0, i64 0)) #17
   unreachable
 
 const_continue.i:                                 ; preds = %const_slowPath.i, %typeTestSuccess.i
-  %28 = load i64, i64* @guarded_const_T, align 8
+  %24 = load i64, i64* @guarded_const_T, align 8
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !30
-  %29 = call i64 @rb_funcallv(i64 %28, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #17
+  %25 = call i64 @rb_funcallv(i64 %24, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #17
   %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_foo.i) #17
   call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo.4, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U foo>" to i64 (...)*), i32 -1) #17
   store i64 %0, i64* %callArgsAddr.i, align 8
-  %30 = load i64, i64* @guard_epoch_T, align 8
-  %31 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !27
-  %canTakeFastPath38.i = icmp eq i64 %30, %31
+  %26 = load i64, i64* @guard_epoch_T, align 8
+  %27 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !27
+  %canTakeFastPath38.i = icmp eq i64 %26, %27
   br i1 %canTakeFastPath38.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath37.i, !prof !11
 
 const_slowPath.i:                                 ; preds = %typeTestSuccess.i
@@ -566,21 +557,21 @@ const_slowPath37.i:                               ; preds = %const_continue.i
   br label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit"
 
 "func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %const_continue.i, %const_slowPath37.i
-  %32 = load i64, i64* @guarded_const_T, align 8
+  %28 = load i64, i64* @guarded_const_T, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !33
-  %33 = call i64 @rb_funcallv(i64 %32, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #17
+  %29 = call i64 @rb_funcallv(i64 %28, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #17
   %rawSym40.i = call i64 @rb_id2sym(i64 %rubyId_boo.i) #17
   call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_boo.5, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U boo>" to i64 (...)*), i32 -1) #17
+  %30 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !18
+  %31 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %30, i64 0, i32 1, i64 0
+  %32 = load i64, i64* %31, align 8
+  call void @dbg_sorbet_validate_id(i64 %rubyId_foo.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !36
+  %33 = call i64 @rb_block_call(i64 %32, i64 %rubyId_foo.i, i32 0, i64* nonnull %callArgsAddr.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<S <C <U <root>>> $1><N <U <static-init>> $111>$block_1" to i64 (...)*), i64 %4) #17
   %34 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !18
   %35 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %34, i64 0, i32 1, i64 0
   %36 = load i64, i64* %35, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_foo.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !36
-  %37 = call i64 @rb_block_call(i64 %36, i64 %rubyId_foo.i, i32 0, i64* nonnull %callArgsAddr.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<S <C <U <root>>> $1><N <U <static-init>> $111>$block_1" to i64 (...)*), i64 %4) #17
-  %38 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !18
-  %39 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %38, i64 0, i32 1, i64 0
-  %40 = load i64, i64* %39, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_boo.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !39
-  %41 = call i64 @rb_block_call(i64 %40, i64 %rubyId_boo.i, i32 0, i64* nonnull %callArgsAddr.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<S <C <U <root>>> $1><N <U <static-init>> $111>$block_2" to i64 (...)*), i64 %4) #17
+  %37 = call i64 @rb_block_call(i64 %36, i64 %rubyId_boo.i, i32 0, i64* nonnull %callArgsAddr.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<S <C <U <root>>> $1><N <U <static-init>> $111>$block_2" to i64 (...)*), i64 %4) #17
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %1)
   ret void
 }
