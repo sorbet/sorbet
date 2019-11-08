@@ -621,9 +621,10 @@ _Bool sorbet_isa_class_of(VALUE obj, VALUE class) __attribute__((const)) {
 VALUE sorbet_splatIntrinsic(VALUE arr, VALUE before, VALUE after) {
     long len = sorbet_rubyArrayLen(arr);
     int size = sorbet_rubyValueToLong(before) + sorbet_rubyValueToLong(after);
-    if (len < size) {
+    int missing = size - len;
+    if (missing > 0) {
         VALUE newArr = rb_ary_dup(arr);
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < missing; i++) {
             sorbet_arrayPush(newArr, sorbet_rubyNil());
         }
         return newArr;
