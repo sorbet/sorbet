@@ -106,7 +106,7 @@ class <emptyTree><<C <root>>> < ()
 
   next([1, 2])
 
-  ::<Magic>.defined?(["X"])
+  ::<Magic>.defined?("X")
 
   <self>.super(ZSuperArgs)
 
