@@ -70,6 +70,9 @@ class LLVMIREmitterHelpers {
 public:
     static bool isStaticInit(CompilerState &cs, core::SymbolRef sym);
     static std::string getFunctionName(CompilerState &cs, core::SymbolRef sym);
+    static llvm::Function *lookupFunction(CompilerState &cs, core::SymbolRef sym);
+    static llvm::Function *getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym);
+    static llvm::Function *cleanFunctionBody(CompilerState &cs, llvm::Function *func);
     static llvm::Function *getOrCreateFunction(CompilerState &cs, core::SymbolRef sym);
 
     static llvm::Function *getInitFunction(CompilerState &cs, core::SymbolRef sym);

@@ -417,7 +417,7 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
 
 void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
     UnorderedMap<core::LocalVariable, Alias> aliases;
-    auto func = LLVMIREmitterHelpers::getOrCreateFunction(cs, md->symbol);
+    auto func = LLVMIREmitterHelpers::cleanFunctionBody(cs, LLVMIREmitterHelpers::getOrCreateFunction(cs, md->symbol));
     {
         // setup function argument names
         func->arg_begin()->setName("argc");

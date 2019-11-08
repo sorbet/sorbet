@@ -335,9 +335,13 @@ llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::
 
 llvm::Function *
 getOrCreateFunctionWithName(CompilerState &cs, std::string name, llvm::FunctionType *ft,
-                            llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage) {
+                            llvm::GlobalValue::LinkageTypes linkageType = llvm::Function::InternalLinkage,
+                            bool overrideLinkage = false) {
     auto func = cs.module->getFunction(name);
     if (func) {
+        if (overrideLinkage) {
+            func->setLinkage(linkageType);
+        }
         return func;
     }
     return llvm::Function::Create(ft, linkageType, name, *cs.module);
@@ -345,9 +349,18 @@ getOrCreateFunctionWithName(CompilerState &cs, std::string name, llvm::FunctionT
 
 }; // namespace
 
+llvm::Function *LLVMIREmitterHelpers::lookupFunction(CompilerState &cs, core::SymbolRef sym) {
+    auto func = cs.module->getFunction(LLVMIREmitterHelpers::getFunctionName(cs, sym));
+    return func;
+}
+llvm::Function *LLVMIREmitterHelpers::getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym) {
+    return getOrCreateFunctionWithName(cs, LLVMIREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
+                                       llvm::Function::WeakAnyLinkage);
+}
+
 llvm::Function *LLVMIREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
     return getOrCreateFunctionWithName(cs, LLVMIREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
-                                       getFunctionLinkageType(cs, sym));
+                                       getFunctionLinkageType(cs, sym), true);
 }
 
 llvm::Function *LLVMIREmitterHelpers::getInitFunction(CompilerState &cs, core::SymbolRef sym) {
@@ -357,6 +370,11 @@ llvm::Function *LLVMIREmitterHelpers::getInitFunction(CompilerState &cs, core::S
 
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
     return getOrCreateFunctionWithName(cs, "Init_" + baseName, ft, linkageType);
+}
+
+llvm::Function *LLVMIREmitterHelpers::cleanFunctionBody(CompilerState &cs, llvm::Function *func) {
+    func->getBasicBlockList().clear();
+    return func;
 }
 
 } // namespace sorbet::compiler
