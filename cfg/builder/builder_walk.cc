@@ -216,10 +216,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = current;
             },
             [&](ast::UnresolvedConstantLit *a) { Exception::raise("Should have been eliminated by namer/resolver"); },
-            [&](ast::Field *a) {
-                current->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(global2Local(cctx, a->symbol)));
-                ret = current;
-            },
             [&](ast::ConstantLit *a) {
                 if (a->symbol == core::Symbols::StubModule()) {
                     current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(core::Symbols::untyped()));
@@ -244,8 +240,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 core::LocalVariable lhs;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a->lhs.get())) {
                     lhs = global2Local(cctx, lhsIdent->symbol);
-                } else if (auto field = ast::cast_tree<ast::Field>(a->lhs.get())) {
-                    lhs = global2Local(cctx, field->symbol);
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a->lhs.get())) {
                     lhs = lhsLocal->localVariable;
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a->lhs.get())) {
