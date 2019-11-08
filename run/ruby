@@ -28,4 +28,4 @@ if [ "${rb:0:1}" != "/" ]; then
 fi
 
 echo "require '$rb';" > "$srbrunfile"
-$ruby -r "$base/run/preamble.rb" -r "$base/run/patch_require.rb" "$srbrunfile" "$@"
+$ruby -r "$base/run/tools/preamble.rb" -r "$base/run/tools/patch_require.rb" "$srbrunfile" "$@"

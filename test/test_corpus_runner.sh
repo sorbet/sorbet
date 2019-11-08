@@ -18,7 +18,7 @@ cleanup() {
 ruby="./external/ruby_2_6_3/ruby"
 
 echo "Source: $rb"
-echo "require './run/preamble.rb'; require './$rb';" > "$rbrunfile"
+echo "require './run/tools/preamble.rb'; require './$rb';" > "$rbrunfile"
 echo "Run Ruby: bazel-bin/$ruby $rbrunfile"
 echo "Running Ruby..."
 $ruby "$rbrunfile" 2>&1 | tee "$rbout"
