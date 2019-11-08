@@ -1624,7 +1624,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 Send::ARGS_store args;
                 while (!isa_tree<EmptyTree>(value.get())) {
                     auto lit = cast_tree<UnresolvedConstantLit>(value.get());
-                    if (!lit) {
+                    if (lit == nullptr) {
                         args.clear();
                         break;
                     }
