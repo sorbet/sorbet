@@ -344,7 +344,7 @@ llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llv
     return ret;
 }
 
-llvm::Value *MK::payloadCall(CompilerState &cs, string func, vector<core::LocalVariable> args,
+llvm::Value *MK::payloadCall(CompilerState &cs, string_view func, const vector<core::LocalVariable> &args,
                              llvm::IRBuilderBase &build, const BasicBlockMap &blockMap,
                              const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId) {
     auto &builder = builderCast(build);
@@ -352,7 +352,8 @@ llvm::Value *MK::payloadCall(CompilerState &cs, string func, vector<core::LocalV
     for (auto i = 0; i < vars.size(); i++) {
         vars[i] = MK::varGet(cs, args[i], build, blockMap, aliases, rubyBlockId);
     }
-    return builder.CreateCall(cs.module->getFunction(func), vars, func);
+    auto name = llvm::StringRef(func.data(), func.length());
+    return builder.CreateCall(cs.module->getFunction(name), vars, name);
 }
 
 namespace {
