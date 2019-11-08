@@ -1621,7 +1621,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             [&](parser::Defined *defined) {
                 auto value = node2TreeImpl(dctx, std::move(defined->value));
                 auto loc = value->loc;
-                Array::ENTRY_store args;
+                Send::ARGS_store args;
                 while (!isa_tree<EmptyTree>(value.get())) {
                     auto lit = cast_tree<UnresolvedConstantLit>(value.get());
                     if (!lit) {
@@ -1632,8 +1632,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     value = std::move(lit->scope);
                 }
                 absl::c_reverse(args);
-                auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(),
-                                     MK::Array(loc, std::move(args)));
+                auto res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(), std::move(args));
                 result.swap(res);
             },
             [&](parser::LineLiteral *line) {

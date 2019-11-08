@@ -332,11 +332,12 @@ void GlobalState::initEmpty() {
         arg.flags.isBlock = true;
     }
 
-    // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
+    // Synthesize <Magic>#<defined>(*arg0: String) => Boolean
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::defined_p());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::Object();
+        arg.flags.isRepeated = true;
+        arg.type = Types::String();
     }
     method.data(*this)->resultType = Types::any(ctx, Types::nilClass(), Types::String());
     {
