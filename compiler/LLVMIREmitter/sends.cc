@@ -48,6 +48,13 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
             }
         };
     };
+    return LLVMIREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, currentRubyBlockId);
+}
+
+llvm::Value *LLVMIREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
+                                                           const BasicBlockMap &blockMap,
+                                                           UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                                           int currentRubyBlockId) {
     auto &builder = builderCast(build);
     auto str = i->fun.data(cs)->shortName(cs);
     auto rawId = MK::getRubyIdFor(cs, builder, str);
