@@ -269,6 +269,7 @@ public:
 
 static const vector<CallCMethod> knownCMethods{
     {"<expand-splat>", "sorbet_splatIntrinsic", NoReciever},
+    {"defined?", "sorbet_definedIntinsic", NoReciever},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {

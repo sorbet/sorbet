@@ -651,6 +651,20 @@ VALUE sorbet_splatIntrinsic(VALUE recv, int argc, const VALUE *const restrict ar
     return arr;
 }
 
+VALUE sorbet_definedIntinsic(VALUE recv, int argc, const VALUE *const restrict argv) {
+    VALUE klass = sorbet_rb_cObject();
+    for (int i = 0; i < argc; i++) {
+        ID id = argv[i];
+        VALUE newClass = rb_const_search(klass, id, 0, 0, 0);
+        if (newClass == Qundef) {
+            return sorbet_boolToRuby(false);
+        }
+        klass = newClass;
+    }
+    return sorbet_boolToRuby(true);
+}
+
+
 // ****
 // ****                       Symbol Intrinsics. See CallCMethod in SymbolIntrinsics.cc
 // ****
