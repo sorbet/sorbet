@@ -230,7 +230,7 @@ llvm::Value *MK::getRubyConstantValueRaw(CompilerState &cs, core::SymbolRef sym,
         auto recomputeFunT = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), {}, false /*not varargs*/);
         recomputeFun = llvm::Function::Create(recomputeFunT, llvm::Function::LinkOnceAnyLinkage,
                                               llvm::Twine("const_recompute_") + str, *cs.module);
-        recomputeFun->addFnAttr(llvm::Attribute::Cold);
+        recomputeFun->addFnAttr(llvm::Attribute::AlwaysInline);
         llvm::IRBuilder<> functionBuilder(cs);
 
         functionBuilder.SetInsertPoint(llvm::BasicBlock::Create(cs, "", recomputeFun));
