@@ -31,8 +31,7 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 
 llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
                                                   const BasicBlockMap &blockMap,
-                                                  UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                                  int rubyBlockId) {
+                                                  UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId) {
     for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics()) {
         if (absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), i->fun)) {
             auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
@@ -51,13 +50,12 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                         llvm::BasicBlock::Create(cs, "fastCallIntrinsic", builder.GetInsertBlock()->getParent());
                     builder.CreateCondBr(MK::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
                     builder.SetInsertPoint(fastPath);
-                    auto fastPathRes =
-                        symbolBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, rubyBlockId);
+                    auto fastPathRes = symbolBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, rubyBlockId);
                     auto fastPathEnd = builder.GetInsertBlock();
                     builder.CreateBr(afterSend);
                     builder.SetInsertPoint(slowPath);
-                    auto slowPathRes = LLVMIREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases,
-                                                                                     rubyBlockId);
+                    auto slowPathRes =
+                        LLVMIREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, rubyBlockId);
                     auto slowPathEnd = builder.GetInsertBlock();
                     builder.CreateBr(afterSend);
                     builder.SetInsertPoint(afterSend);
@@ -98,8 +96,8 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                 auto fastPath = llvm::BasicBlock::Create(cs, "fastCallFinal", builder.GetInsertBlock()->getParent());
                 builder.CreateCondBr(MK::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
                 builder.SetInsertPoint(fastPath);
-                auto fastPathRes = LLVMIREmitterHelpers::emitMethodCallDirrect(cs, build, funSym, i, blockMap, aliases,
-                                                                               rubyBlockId);
+                auto fastPathRes =
+                    LLVMIREmitterHelpers::emitMethodCallDirrect(cs, build, funSym, i, blockMap, aliases, rubyBlockId);
                 auto fastPathEnd = builder.GetInsertBlock();
                 builder.CreateBr(afterSend);
                 builder.SetInsertPoint(slowPath);
@@ -136,8 +134,8 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                       llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
             auto var = MK::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
-            builder.CreateStore(
-                var, builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
+            builder.CreateStore(var,
+                                builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
         }
     }
     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
@@ -169,8 +167,8 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, ll
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                       llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
             auto var = MK::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
-            builder.CreateStore(
-                var, builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
+            builder.CreateStore(var,
+                                builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
         }
     }
     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),

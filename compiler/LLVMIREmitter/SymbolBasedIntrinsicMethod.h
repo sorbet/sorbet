@@ -10,8 +10,7 @@ class SymbolBasedIntrinsicMethod {
 public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &builder,
                                   const BasicBlockMap &blockMap,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int rubyBlockId) const = 0;
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId) const = 0;
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const = 0;
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const = 0;
 
