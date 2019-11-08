@@ -165,7 +165,7 @@ public:
         for (int argc = 0; argc < i->args.size(); argc++) {
             auto value = i->args[argc].variable;
             builder.CreateCall(cs.module->getFunction("sorbet_arrayPush"),
-                               {ret, MK::varGet(cs, value, builder, aliases, blockMap, currentRubyBlockId)});
+                               {ret, MK::varGet(cs, value, builder, blockMap, aliases, currentRubyBlockId)});
         }
         return ret;
     }
@@ -188,8 +188,8 @@ public:
             auto key = i->args[argc].variable;
             auto value = i->args[argc + 1].variable;
             builder.CreateCall(cs.module->getFunction("sorbet_hashStore"),
-                               {ret, MK::varGet(cs, key, builder, aliases, blockMap, currentRubyBlockId),
-                                MK::varGet(cs, value, builder, aliases, blockMap, currentRubyBlockId)});
+                               {ret, MK::varGet(cs, key, builder, blockMap, aliases, currentRubyBlockId),
+                                MK::varGet(cs, value, builder, blockMap, aliases, currentRubyBlockId)});
             argc += 2;
         }
         return ret;
@@ -206,7 +206,7 @@ public:
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                   int currentRubyBlockId) const override {
-        return MK::varGet(cs, i->args[0].variable, build, aliases, blockMap, currentRubyBlockId);
+        return MK::varGet(cs, i->args[0].variable, build, blockMap, aliases, currentRubyBlockId);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::suggestType()};

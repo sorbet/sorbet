@@ -350,7 +350,7 @@ llvm::Value *MK::payloadCall(CompilerState &cs, string func, vector<core::LocalV
     auto &builder = builderCast(build);
     vector<llvm::Value *> vars(args.size());
     for (auto i = 0; i < vars.size(); i++) {
-        vars[i] = MK::varGet(cs, args[i], build, aliases, blockMap, currentRubyBlockId);
+        vars[i] = MK::varGet(cs, args[i], build, blockMap, aliases, currentRubyBlockId);
     }
     return builder.CreateCall(cs.module->getFunction(func), vars, func);
 }
@@ -387,7 +387,7 @@ llvm::Value *MK::varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBu
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             return builder.CreateCall(
                 cs.module->getFunction("sorbet_instanceVariableGet"),
-                {varGet(cs, core::LocalVariable::selfVariable(), builder, aliases, blockMap, rubyBlockId),
+                {varGet(cs, core::LocalVariable::selfVariable(), builder, blockMap, aliases, rubyBlockId),
                  MK::getRubyIdFor(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
         }
     }
@@ -427,7 +427,7 @@ void MK::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, 
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             builder.CreateCall(
                 cs.module->getFunction("sorbet_instanceVariableSet"),
-                {MK::varGet(cs, core::LocalVariable::selfVariable(), builder, aliases, blockMap, rubyBlockId),
+                {MK::varGet(cs, core::LocalVariable::selfVariable(), builder, blockMap, aliases, rubyBlockId),
                  MK::getRubyIdFor(cs, builder, alias.instanceField.data(cs)->shortName(cs)), var});
         }
         return;
