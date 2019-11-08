@@ -631,7 +631,6 @@ VALUE sorbet_boolToRuby(_Bool b) {
     return RUBY_Qfalse;
 }
 
-
 // ****
 // ****                       Name Based Intrinsics
 // ****
