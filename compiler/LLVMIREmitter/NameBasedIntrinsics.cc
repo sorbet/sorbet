@@ -213,11 +213,29 @@ public:
     }
 } IdentityIntrinsic;
 
+class SplatIntrinsic : public NameBasedIntrinsicMethod {
+public:
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
+                                  const BasicBlockMap &blockMap,
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                  int currentRubyBlockId) const override {
+        auto &builder = builderCast(build);
+        auto arr = MK::varGet(cs, i->args[0].variable, builder, aliases, blockMap, currentRubyBlockId);
+        auto before = MK::varGet(cs, i->args[1].variable, builder, aliases, blockMap, currentRubyBlockId);
+        auto after = MK::varGet(cs, i->args[2].variable, builder, aliases, blockMap, currentRubyBlockId);
+        return builder.CreateCall(cs.module->getFunction("sorbet_splatIntrinsic"), {arr, before, after},
+                                  "sorbet_splatIntrinsic");
+    }
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::expandSplat()};
+    }
+} SplatIntrinsic;
+
 }; // namespace
 const vector<const NameBasedIntrinsicMethod *> &NameBasedIntrinsicMethod::definedIntrinsics() {
-    static vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic,   &DefineMethodIntrinsic,
-                                                        &DefineClassIntrinsic, &BuildArrayIntrinsic,
-                                                        &BuildHashIntrinsic,   &IdentityIntrinsic};
+    static vector<const NameBasedIntrinsicMethod *> ret{
+        &DoNothingIntrinsic, &DefineMethodIntrinsic, &DefineClassIntrinsic, &BuildArrayIntrinsic,
+        &BuildHashIntrinsic, &IdentityIntrinsic,     &SplatIntrinsic};
     return ret;
 }
 }; // namespace sorbet::compiler

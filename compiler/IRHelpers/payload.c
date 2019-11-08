@@ -614,10 +614,10 @@ void sorbet_ensure_arity(int argc, int expected) {
 }
 
 VALUE sorbet_boolToRuby(_Bool b) {
-  if (b) {
-      return RUBY_Qtrue;
-  }
-  return RUBY_Qfalse;
+    if (b) {
+        return RUBY_Qtrue;
+    }
+    return RUBY_Qfalse;
 }
 
 VALUE sorbet_rb_array_len(VALUE recv, ID func, int argc, const VALUE *const restrict argv) {
@@ -650,4 +650,22 @@ VALUE sorbet_rb_int_neq(VALUE recv, int argc, const VALUE *const restrict argv) 
     sorbet_ensure_arity(argc, 1);
     return sorbet_boolToRuby(rb_int_equal(recv, argv[0]) == sorbet_rubyFalse());
 }
+
+// ****
+// ****                       Intrinsics
+// ****
+
+VALUE sorbet_splatIntrinsic(VALUE arr, VALUE before, VALUE after) {
+    long len = sorbet_rubyArrayLen(arr);
+    int size = sorbet_rubyValueToLong(before) + sorbet_rubyValueToLong(after);
+    if (len < size) {
+        VALUE newArr = rb_ary_dup(arr);
+        for (int i = 0; i < size; i++) {
+            sorbet_arrayPush(newArr, sorbet_rubyNil());
+        }
+        return newArr;
+    }
+    return arr;
+}
+
 #endif
