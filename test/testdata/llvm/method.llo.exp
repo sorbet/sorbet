@@ -336,7 +336,7 @@ BB5:                                              ; preds = %afterCall
   call void @dbg_sorbet_validate_id(i64 %rubyId_puts, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !16
   %5 = call i64 @rb_funcallv(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #17
   store i64 3, i64* %callArgsAddr, align 8
-  br i1 %2, label %slowCall42, label %slowCall41
+  br i1 %2, label %slowCall44, label %slowCall43
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call fastcc void @sorbet_rb_error_arity(i32 %argc)
@@ -373,25 +373,25 @@ sorbet_rb_int_lt.exit:                            ; preds = %BB2
   %13 = select i1 %12, i64 20, i64 0
   br label %afterCall
 
-slowCall41:                                       ; preds = %BB5
+slowCall43:                                       ; preds = %BB5
   call void @dbg_sorbet_validate_id(i64 %"rubyId_+", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !22
   %14 = call i64 @rb_funcallv(i64 %i.sroa.0.0, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr) #17
   br label %BB2.backedge
 
-slowCall42:                                       ; preds = %BB5
+slowCall44:                                       ; preds = %BB5
   %15 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0, i64 2) #17
   %16 = extractvalue { i64, i1 } %15, 1
   %17 = extractvalue { i64, i1 } %15, 0
   br i1 %16, label %18, label %BB2.backedge
 
-18:                                               ; preds = %slowCall42
+18:                                               ; preds = %slowCall44
   %19 = ashr i64 %17, 1
   %20 = xor i64 %19, -9223372036854775808
   %21 = call i64 @rb_int2big(i64 %20) #17, !noalias !25
   br label %BB2.backedge
 
-BB2.backedge:                                     ; preds = %18, %slowCall42, %slowCall41
-  %i.sroa.0.0.be = phi i64 [ %14, %slowCall41 ], [ %21, %18 ], [ %17, %slowCall42 ]
+BB2.backedge:                                     ; preds = %18, %slowCall44, %slowCall43
+  %i.sroa.0.0.be = phi i64 [ %14, %slowCall43 ], [ %21, %18 ], [ %17, %slowCall44 ]
   br label %BB2
 }
 

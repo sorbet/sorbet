@@ -417,22 +417,22 @@ const_continue.i:                                 ; preds = %const_slowPath.i, %
   store i64 %0, i64* %callArgsAddr.i, align 8
   %6 = load i64, i64* @guard_epoch_T, align 8
   %7 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
-  %canTakeFastPath33.i = icmp eq i64 %6, %7
-  br i1 %canTakeFastPath33.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath32.i, !prof !11
+  %canTakeFastPath34.i = icmp eq i64 %6, %7
+  br i1 %canTakeFastPath34.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath33.i, !prof !11
 
 const_slowPath.i:                                 ; preds = %typeTestSuccess.i
   tail call void @const_recompute_T() #16
   br label %const_continue.i
 
-const_slowPath32.i:                               ; preds = %const_continue.i
+const_slowPath33.i:                               ; preds = %const_continue.i
   call void @const_recompute_T() #16
   br label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit"
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %const_continue.i, %const_slowPath32.i
+"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %const_continue.i, %const_slowPath33.i
   %8 = load i64, i64* @guarded_const_T, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_unsafe.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !20
   %9 = call i64 @rb_funcallv(i64 %8, i64 %rubyId_unsafe.i, i32 1, i64* nonnull %callArgsAddr.i) #16
-  %rawSym35.i = call i64 @rb_id2sym(i64 %rubyId_bar.i) #16
+  %rawSym36.i = call i64 @rb_id2sym(i64 %rubyId_bar.i) #16
   call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.5, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U bar>" to i64 (...)*), i32 -1) #16
   call void @dbg_sorbet_validate_id(i64 %rubyId_bar.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !23
   %10 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_bar.i, i32 0, i64* nonnull %callArgsAddr.i) #16
