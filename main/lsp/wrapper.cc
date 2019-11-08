@@ -77,7 +77,6 @@ void LSPWrapper::enableAllExperimentalFeatures() {
     enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
     enableExperimentalFeature(LSPExperimentalFeature::SignatureHelp);
     enableExperimentalFeature(LSPExperimentalFeature::QuickFix);
-    enableExperimentalFeature(LSPExperimentalFeature::AutocompleteMethods);
 }
 
 void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
@@ -99,9 +98,6 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
             break;
         case LSPExperimentalFeature::SignatureHelp:
             opts.lspSignatureHelpEnabled = true;
-            break;
-        case LSPExperimentalFeature::AutocompleteMethods:
-            opts.lspAutocompleteEnabled = true;
             break;
     }
 }
