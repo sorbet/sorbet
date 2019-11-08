@@ -410,6 +410,30 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
                          const UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap) {
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(blockMap.sigVerificationBlock);
+    int argId = -1;
+    for (auto &argInfo : cfg.symbol.data(cs)->arguments()) {
+        argId += 1;
+        auto local = blockMap.rubyBlockArgs[0][argId];
+        auto var = MK::varGet(cs, local, builder, aliases, blockMap, 0);
+        auto &expectedType = argInfo.type;
+        if (!expectedType) {
+            continue;
+        }
+        auto passedTypeTest = MK::createTypeTestU1(cs, builder, var, expectedType);
+        auto successBlock = llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
+
+        auto failBlock = llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
+
+        auto expected = MK::setExpectedBool(cs, builder, passedTypeTest, true);
+        builder.CreateCondBr(expected, successBlock, failBlock);
+        builder.SetInsertPoint(failBlock);
+        // this will throw exception
+        builder.CreateCall(
+            cs.module->getFunction("sorbet_cast_failure"),
+            {var, MK::toCString(cs, "sig", builder), MK::toCString(cs, expectedType->show(cs), builder)});
+        builder.CreateUnreachable();
+        builder.SetInsertPoint(successBlock);
+    }
     builder.CreateBr(blockMap.userEntryBlockByFunction[0]);
 }
 
