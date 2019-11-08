@@ -439,33 +439,6 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     return LSPQueryResult{move(out.second)};
 }
 
-vector<core::LocalVariable> LSPTypechecker::localsForMethod(const core::SymbolRef method) const {
-    auto filesForQuery = vector<core::FileRef>{};
-    for (auto loc : method.data(*gs)->locs()) {
-        filesForQuery.emplace_back(loc.file());
-    }
-
-    auto updatedIndexed = vector<ast::ParsedFile>{};
-    for (auto &f : filesForQuery) {
-        const int id = f.id();
-        const auto it = indexedFinalGS.find(id);
-        const auto &parsedFile = it == indexedFinalGS.end() ? indexed[id] : it->second;
-        if (parsedFile.tree) {
-            updatedIndexed.emplace_back(ast::ParsedFile{parsedFile.tree->deepCopy(), parsedFile.file});
-        }
-    }
-    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
-
-    // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeMap::apply
-    LocalVarFinder localVarFinder(method);
-    auto ctx = core::Context{*gs, core::Symbols::root()};
-    for (auto &t : resolved) {
-        t.tree = ast::TreeMap::apply(ctx, localVarFinder, move(t.tree));
-    }
-
-    return localVarFinder.result();
-}
-
 TypecheckRun LSPTypechecker::retypecheck(LSPFileUpdates updates) const {
     if (!updates.canTakeFastPath) {
         Exception::raise("Tried to typecheck slow path updates with retypecheck. Retypecheck can only typecheck the "
@@ -492,6 +465,17 @@ const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
     }
     ENFORCE(id < indexed.size());
     return indexed[id];
+}
+
+vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs) const {
+    vector<ast::ParsedFile> updatedIndexed;
+    for (auto fref : frefs) {
+        auto &indexed = getIndexed(fref);
+        if (indexed.tree) {
+            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree->deepCopy(), indexed.file});
+        }
+    }
+    return pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
 }
 
 const std::vector<core::FileHash> &LSPTypechecker::getFileHashes() const {

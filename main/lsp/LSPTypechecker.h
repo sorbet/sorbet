@@ -110,9 +110,9 @@ public:
     const ast::ParsedFile &getIndexed(core::FileRef fref) const;
 
     /**
-     * Returns the parsed file for the given file.
+     * Returns the parsed files for the given files, including resolver.
      */
-    const ast::ParsedFile &getIndex(core::FileRef fref) const;
+    std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const;
 
     /**
      * Returns the hashes of all committed files.

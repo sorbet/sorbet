@@ -1,10 +1,12 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "ast/treemap/treemap.h"
 #include "common/formatting.h"
 #include "common/sort.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/lsp.h"
 
 using namespace std;
@@ -303,6 +305,24 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
 
 } // namespace
 
+vector<core::LocalVariable> LSPLoop::localsForMethod(const core::GlobalState &gs, LSPTypechecker &typechecker,
+                                                     const core::SymbolRef method) const {
+    auto files = vector<core::FileRef>{};
+    for (auto loc : method.data(gs)->locs()) {
+        files.emplace_back(loc.file());
+    }
+    auto resolved = typechecker.getResolved(files);
+
+    // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeMap::apply
+    LocalVarFinder localVarFinder(method);
+    auto ctx = core::Context{gs, core::Symbols::root()};
+    for (auto &t : resolved) {
+        t.tree = ast::TreeMap::apply(ctx, localVarFinder, move(t.tree));
+    }
+
+    return localVarFinder.result();
+}
+
 unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::GlobalState &gs, core::SymbolRef what,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
@@ -451,7 +471,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
             });
         }
 
-        auto locals = typechecker.localsForMethod(sendResp->enclosingMethod);
+        auto locals = localsForMethod(gs, typechecker, sendResp->enclosingMethod);
         fast_sort(locals, [&gs](const auto &left, const auto &right) {
             // Sort by actual name, not by NameRef id
             if (left._name != right._name) {

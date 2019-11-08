@@ -75,6 +75,9 @@ class LSPLoop {
     std::vector<std::unique_ptr<Location>>
     getReferencesToSymbol(LSPTypechecker &typechecker, core::SymbolRef symbol,
                           std::vector<std::unique_ptr<Location>> locations = {}) const;
+    std::vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPTypechecker &typechecker,
+                                                     const core::SymbolRef method) const;
+
     std::unique_ptr<ResponseMessage> handleTextDocumentReferences(LSPTypechecker &typechecker, const MessageId &id,
                                                                   const ReferenceParams &params) const;
     std::unique_ptr<ResponseMessage> handleTextDocumentDefinition(LSPTypechecker &typechecker, const MessageId &id,
