@@ -795,22 +795,22 @@ functionEntryInitializers:
   br i1 %0, label %fillRequiredArgs, label %argCountFailBlock, !prof !33
 
 BB3:                                              ; preds = %sorbet_rb_int_lt.exit
-  %rawSendResult43 = tail call fastcc i64 @sorbet_rb_int_minus(i64 %rawArg_n, i64 3)
-  store i64 %rawSendResult43, i64* %callArgsAddr, align 8
+  %rawSendResult42 = tail call fastcc i64 @sorbet_rb_int_minus(i64 %rawArg_n, i64 3)
+  store i64 %rawSendResult42, i64* %callArgsAddr, align 8
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_fib, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #19, !noalias !34
   %1 = call i64 @rb_funcallv(i64 %selfRaw, i64 %rubyId_fib, i32 1, i64* nonnull %callArgsAddr) #19
   store i64 5, i64* %callArgsAddr, align 8
-  %rawSendResult61 = call fastcc i64 @sorbet_rb_int_minus(i64 %rawArg_n, i64 5)
-  store i64 %rawSendResult61, i64* %callArgsAddr, align 8
+  %rawSendResult60 = call fastcc i64 @sorbet_rb_int_minus(i64 %rawArg_n, i64 5)
+  store i64 %rawSendResult60, i64* %callArgsAddr, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_fib, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #19, !noalias !37
   %2 = call i64 @rb_funcallv(i64 %selfRaw, i64 %rubyId_fib, i32 1, i64* nonnull %callArgsAddr) #19
   %3 = and i64 %1, 1
   %4 = icmp eq i64 %3, 0
   store i64 %2, i64* %callArgsAddr, align 8
-  br i1 %4, label %slowCall75, label %slowCall76, !prof !0
+  br i1 %4, label %slowCallIntrinsic74, label %fastCallIntrinsic75, !prof !0
 
-BB4:                                              ; preds = %108, %106, %97, %95, %89, %42, %26, %21, %slowCall75, %sorbet_rb_int_lt.exit
-  %"<returnMethodTemp>.sroa.0.0" = phi i64 [ 3, %sorbet_rb_int_lt.exit ], [ %18, %slowCall75 ], [ %109, %108 ], [ %107, %106 ], [ %43, %42 ], [ %29, %26 ], [ %25, %21 ], [ %98, %97 ], [ %94, %89 ], [ -9223372036854775806, %95 ]
+BB4:                                              ; preds = %108, %106, %97, %95, %89, %42, %26, %21, %slowCallIntrinsic74, %sorbet_rb_int_lt.exit
+  %"<returnMethodTemp>.sroa.0.0" = phi i64 [ 3, %sorbet_rb_int_lt.exit ], [ %18, %slowCallIntrinsic74 ], [ %109, %108 ], [ %107, %106 ], [ %43, %42 ], [ %29, %26 ], [ %25, %21 ], [ %98, %97 ], [ %94, %89 ], [ -9223372036854775806, %95 ]
   ret i64 %"<returnMethodTemp>.sroa.0.0"
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
@@ -863,17 +863,17 @@ typeTestFail25:                                   ; preds = %sorbet_isa_class_of
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast.4, i64 0, i64 0), i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(HasFib).5", i64 0, i64 0))
   unreachable
 
-slowCall75:                                       ; preds = %BB3
+slowCallIntrinsic74:                              ; preds = %BB3
   call void @dbg_sorbet_validate_id(i64 %"rubyId_+", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #19, !noalias !40
   %18 = call i64 @rb_funcallv(i64 %1, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr) #19
   br label %BB4
 
-slowCall76:                                       ; preds = %BB3
+fastCallIntrinsic75:                              ; preds = %BB3
   %19 = and i64 %2, 1
   %20 = icmp eq i64 %19, 0
   br i1 %20, label %30, label %21, !prof !0
 
-21:                                               ; preds = %slowCall76
+21:                                               ; preds = %fastCallIntrinsic75
   %22 = add nsw i64 %2, -1
   %23 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %1, i64 %22) #19
   %24 = extractvalue { i64, i1 } %23, 1
@@ -886,7 +886,7 @@ slowCall76:                                       ; preds = %BB3
   %29 = call i64 @rb_int2big(i64 %28) #19, !noalias !43
   br label %BB4
 
-30:                                               ; preds = %slowCall76
+30:                                               ; preds = %fastCallIntrinsic75
   %31 = and i64 %2, 7
   %32 = icmp ne i64 %31, 0
   %33 = and i64 %2, -9

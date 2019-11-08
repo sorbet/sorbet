@@ -158,9 +158,9 @@ functionEntryInitializers:
   br i1 %default0, label %fillFromDefaultBlockDone.thread, label %fillFromDefaultBlockDone, !prof !0
 
 fillFromDefaultBlockDone.thread:                  ; preds = %functionEntryInitializers
-  %callArgsAddr20 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
-  store i64 3, i64* %callArgsAddr20, align 8
-  br label %slowCall
+  %callArgsAddr19 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
+  store i64 3, i64* %callArgsAddr19, align 8
+  br label %slowCallIntrinsic
 
 fillFromDefaultBlockDone:                         ; preds = %functionEntryInitializers
   %rawArg_x = load i64, i64* %argArray, align 8
@@ -168,30 +168,30 @@ fillFromDefaultBlockDone:                         ; preds = %functionEntryInitia
   %1 = icmp eq i64 %0, 0
   %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
   store i64 3, i64* %callArgsAddr, align 8
-  br i1 %1, label %slowCall, label %slowCall10, !prof !0
+  br i1 %1, label %slowCallIntrinsic, label %fastCallIntrinsic, !prof !0
 
-afterCall:                                        ; preds = %6, %slowCall10, %slowCall
-  %sendResSlowFastRaw = phi i64 [ %2, %slowCall ], [ %9, %6 ], [ %5, %slowCall10 ]
-  ret i64 %sendResSlowFastRaw
+afterCallIntrinsic:                               ; preds = %6, %fastCallIntrinsic, %slowCallIntrinsic
+  %sendResSlowFastIntrinsicRaw = phi i64 [ %2, %slowCallIntrinsic ], [ %9, %6 ], [ %5, %fastCallIntrinsic ]
+  ret i64 %sendResSlowFastIntrinsicRaw
 
-slowCall:                                         ; preds = %fillFromDefaultBlockDone, %fillFromDefaultBlockDone.thread
-  %callArgsAddr25 = phi i64* [ %callArgsAddr20, %fillFromDefaultBlockDone.thread ], [ %callArgsAddr, %fillFromDefaultBlockDone ]
-  %x.sroa.0.024 = phi i64 [ 8, %fillFromDefaultBlockDone.thread ], [ %rawArg_x, %fillFromDefaultBlockDone ]
+slowCallIntrinsic:                                ; preds = %fillFromDefaultBlockDone, %fillFromDefaultBlockDone.thread
+  %callArgsAddr24 = phi i64* [ %callArgsAddr19, %fillFromDefaultBlockDone.thread ], [ %callArgsAddr, %fillFromDefaultBlockDone ]
+  %x.sroa.0.023 = phi i64 [ 8, %fillFromDefaultBlockDone.thread ], [ %rawArg_x, %fillFromDefaultBlockDone ]
   tail call void @dbg_sorbet_validate_id(i64 %"rubyId_+", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #13, !noalias !10
-  %2 = call i64 @rb_funcallv(i64 %x.sroa.0.024, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr25) #13
-  br label %afterCall
+  %2 = call i64 @rb_funcallv(i64 %x.sroa.0.023, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr24) #13
+  br label %afterCallIntrinsic
 
-slowCall10:                                       ; preds = %fillFromDefaultBlockDone
+fastCallIntrinsic:                                ; preds = %fillFromDefaultBlockDone
   %3 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %rawArg_x, i64 2) #13
   %4 = extractvalue { i64, i1 } %3, 1
   %5 = extractvalue { i64, i1 } %3, 0
-  br i1 %4, label %6, label %afterCall
+  br i1 %4, label %6, label %afterCallIntrinsic
 
-6:                                                ; preds = %slowCall10
+6:                                                ; preds = %fastCallIntrinsic
   %7 = ashr i64 %5, 1
   %8 = xor i64 %7, -9223372036854775808
   %9 = tail call i64 @rb_int2big(i64 %8) #13, !noalias !13
-  br label %afterCall
+  br label %afterCallIntrinsic
 }
 
 ; Function Attrs: nounwind ssp
