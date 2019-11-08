@@ -33,11 +33,6 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                                                   const BasicBlockMap &blockMap,
                                                   UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                   int currentRubyBlockId) {
-    for (auto nameBasedIntrinsic : NameBasedIntrinsicMethod::definedIntrinsics()) {
-        if (absl::c_linear_search(nameBasedIntrinsic->applicableMethods(cs), i->fun)) {
-            return nameBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, currentRubyBlockId);
-        }
-    }
     for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics()) {
         if (absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), i->fun)) {
             auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
@@ -74,6 +69,12 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
             }
         };
     };
+    for (auto nameBasedIntrinsic : NameBasedIntrinsicMethod::definedIntrinsics()) {
+        if (absl::c_linear_search(nameBasedIntrinsic->applicableMethods(cs), i->fun)) {
+            return nameBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, currentRubyBlockId);
+        }
+    }
+
     auto &recvType = i->recv.type;
     core::SymbolRef recvClass = core::Symbols::noSymbol();
     if (auto ct = core::cast_type<core::ClassType>(recvType.get())) {
