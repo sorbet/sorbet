@@ -17,13 +17,14 @@ namespace {
 class SymbolMatcher final {
 public:
     static constexpr int MAX_RESULTS = 50;
+    static constexpr int MAX_LOCATIONS_PER_SYMBOL = 10;
 
     SymbolMatcher(const LSPConfiguration &config, const core::GlobalState &gs);
 
     vector<unique_ptr<SymbolInformation>> doQuery(string_view query, int limit = MAX_RESULTS);
 
 private:
-    vector<unique_ptr<SymbolInformation>> symbolRef2SymbolInformations(core::SymbolRef symRef);
+    vector<unique_ptr<SymbolInformation>> symbolRef2SymbolInformations(core::SymbolRef symRef, int limit);
 
     const LSPConfiguration &config;
     const core::GlobalState &gs;
@@ -34,7 +35,7 @@ SymbolMatcher::SymbolMatcher(const LSPConfiguration &config, const core::GlobalS
 /**
  * Converts a symbol into any (supported) SymbolInformation objects.
  */
-vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformations(core::SymbolRef symRef) {
+vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformations(core::SymbolRef symRef, int limit) {
     vector<unique_ptr<SymbolInformation>> results;
     auto sym = symRef.data(gs);
     if (hideSymbol(gs, symRef)) {
@@ -52,6 +53,9 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
             make_unique<SymbolInformation>(sym->name.show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
         result->containerName = sym->owner.data(gs)->showFullName(gs);
         results.emplace_back(move(result));
+        if (results.size() >= limit) {
+            break;
+        }
     }
     return results;
 }
@@ -175,7 +179,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     fast_sort(candidates, [](pair<u4, int> &left, pair<u4, int> &right) -> bool { return left.second < right.second; });
     for (auto &candidate : candidates) {
         core::SymbolRef ref(gs, candidate.first);
-        for (auto &symbolInformation : symbolRef2SymbolInformations(ref)) {
+        for (auto &symbolInformation : symbolRef2SymbolInformations(ref, MAX_LOCATIONS_PER_SYMBOL)) {
             results.emplace_back(move(symbolInformation));
             if (results.size() >= limit) {
                 break;
