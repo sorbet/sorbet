@@ -7,8 +7,8 @@
 #include "common/typecase.h"
 #include "core/core.h"
 
-#include "compiler/IRHelpers/IRHelpers.h"
 #include "LLVMIREmitterHelpers.h"
+#include "compiler/IRHelpers/IRHelpers.h"
 #include <string>
 
 using namespace std;
