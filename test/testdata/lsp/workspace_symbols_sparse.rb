@@ -94,9 +94,9 @@ module B
   class D
     def initialize
       @fbb = T.let(0, Integer)
-      #^^^^^^^^^^^ symbol-search: "fbb", rank=0
+      #^^^ symbol-search: "fbb", rank=0
       @fb_baz = T.let(1, Integer)
-      #^^^^^^^^^^^ symbol-search: "fbb", rank=10
+      #^^^^^^ symbol-search: "fbb", rank=10
       @foo_bar_baz = T.let(2, Integer)
       #^^^^^^^^^^^ symbol-search: "fbb", rank=20
       @other_foo_bar_baz = T.let(3, Integer)
