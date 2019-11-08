@@ -346,11 +346,11 @@ llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llv
 
 llvm::Value *MK::payloadCall(CompilerState &cs, string func, vector<core::LocalVariable> args,
                              llvm::IRBuilderBase &build, const BasicBlockMap &blockMap,
-                             const UnorderedMap<core::LocalVariable, Alias> &aliases, int currentRubyBlockId) {
+                             const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId) {
     auto &builder = builderCast(build);
     vector<llvm::Value *> vars(args.size());
     for (auto i = 0; i < vars.size(); i++) {
-        vars[i] = MK::varGet(cs, args[i], build, blockMap, aliases, currentRubyBlockId);
+        vars[i] = MK::varGet(cs, args[i], build, blockMap, aliases, rubyBlockId);
     }
     return builder.CreateCall(cs.module->getFunction(func), vars, func);
 }

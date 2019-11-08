@@ -52,7 +52,7 @@ public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int currentRubyBlockId) const override {
+                                  int rubyBlockId) const override {
         return MK::getRubyNilRaw(cs, build);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -65,7 +65,7 @@ public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int currentRubyBlockId) const override {
+                                  int rubyBlockId) const override {
         auto &builder = builderCast(build);
         bool isSelf = i->fun == Names::sorbet_defineMethodSingleton(cs);
         ENFORCE(i->args.size() == 2);
@@ -117,7 +117,7 @@ public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int currentRubyBlockId) const override {
+                                  int rubyBlockId) const override {
         auto &builder = builderCast(build);
         auto sym = typeToSym(cs, i->args[0].type);
         // this is wrong and will not work for `class <<self`
@@ -157,7 +157,7 @@ public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int currentRubyBlockId) const override {
+                                  int rubyBlockId) const override {
         auto &builder = builderCast(build);
         auto ret =
             builder.CreateCall(cs.module->getFunction("sorbet_newRubyArray"),
@@ -165,7 +165,7 @@ public:
         for (int argc = 0; argc < i->args.size(); argc++) {
             auto value = i->args[argc].variable;
             builder.CreateCall(cs.module->getFunction("sorbet_arrayPush"),
-                               {ret, MK::varGet(cs, value, builder, blockMap, aliases, currentRubyBlockId)});
+                               {ret, MK::varGet(cs, value, builder, blockMap, aliases, rubyBlockId)});
         }
         return ret;
     }
@@ -179,7 +179,7 @@ public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int currentRubyBlockId) const override {
+                                  int rubyBlockId) const override {
         auto &builder = builderCast(build);
         auto ret = builder.CreateCall(cs.module->getFunction("sorbet_newRubyHash"), {}, "rawHashLiteral");
         // TODO(perf): in 2.7 use rb_hash_bulk_insert will give 2x speedup
@@ -188,8 +188,8 @@ public:
             auto key = i->args[argc].variable;
             auto value = i->args[argc + 1].variable;
             builder.CreateCall(cs.module->getFunction("sorbet_hashStore"),
-                               {ret, MK::varGet(cs, key, builder, blockMap, aliases, currentRubyBlockId),
-                                MK::varGet(cs, value, builder, blockMap, aliases, currentRubyBlockId)});
+                               {ret, MK::varGet(cs, key, builder, blockMap, aliases, rubyBlockId),
+                                MK::varGet(cs, value, builder, blockMap, aliases, rubyBlockId)});
             argc += 2;
         }
         return ret;
@@ -205,8 +205,8 @@ public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int currentRubyBlockId) const override {
-        return MK::varGet(cs, i->args[0].variable, build, blockMap, aliases, currentRubyBlockId);
+                                  int rubyBlockId) const override {
+        return MK::varGet(cs, i->args[0].variable, build, blockMap, aliases, rubyBlockId);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::suggestType()};
@@ -218,10 +218,10 @@ public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int currentRubyBlockId) const override {
+                                  int rubyBlockId) const override {
         return MK::payloadCall(cs, "sorbet_splatIntrinsic",
                                {i->args[0].variable, i->args[1].variable, i->args[2].variable}, build, blockMap,
-                               aliases, currentRubyBlockId);
+                               aliases, rubyBlockId);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::expandSplat()};

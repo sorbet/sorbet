@@ -79,17 +79,17 @@ public:
 
     static llvm::Value *emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::Send *send,
                                        const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                       int currentRubyBlockId);
+                                       int rubyBlockId);
 
     static llvm::Value *emitMethodCallDirrect(CompilerState &cs, llvm::IRBuilderBase &builder, core::SymbolRef funSym,
                                               cfg::Send *send, const BasicBlockMap &blockMap,
                                               UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                              int currentRubyBlockId);
+                                              int rubyBlockId);
 
     static llvm::Value *emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::Send *send,
                                                 const BasicBlockMap &blockMap,
                                                 UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                                int currentRubyBlockId);
+                                                int rubyBlockId);
 
     static BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                           std::unique_ptr<ast::MethodDef> &md,
@@ -123,7 +123,7 @@ public:
                                          const core::TypePtr &type);
     static llvm::Value *payloadCall(CompilerState &cs, std::string func, std::vector<core::LocalVariable> args,
                                     llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
-                                    const UnorderedMap<core::LocalVariable, Alias> &aliases, int currentRubyBlockId);
+                                    const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId);
 
     static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
                                const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases,

@@ -38,7 +38,7 @@ public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int currentRubyBlockId) const override {
+                                  int rubyBlockId) const override {
         auto &builder = builderCast(build);
 
         // fill in args
@@ -48,18 +48,18 @@ public:
                 argId += 1;
                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                           llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
-                auto var = MK::varGet(cs, arg.variable, builder, blockMap, aliases, currentRubyBlockId);
+                auto var = MK::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
                 builder.CreateStore(
-                    var, builder.CreateGEP(blockMap.sendArgArrayByBlock[currentRubyBlockId], indices, "callArgsAddr"));
+                    var, builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
             }
         }
         llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
                                   llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
 
-        auto var = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, currentRubyBlockId);
+        auto var = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
         return builder.CreateCall(cs.module->getFunction(cMethod),
                                   {var, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                                   builder.CreateGEP(blockMap.sendArgArrayByBlock[currentRubyBlockId], indices)},
+                                   builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices)},
                                   "rawSendResult");
     };
 
