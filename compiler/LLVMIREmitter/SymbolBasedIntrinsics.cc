@@ -26,6 +26,7 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 };
 
 class CallCMethod : public SymbolBasedIntrinsicMethod {
+protected:
     core::SymbolRef rubyClass;
     string_view rubyMethod;
     string cMethod;
@@ -70,16 +71,33 @@ public:
     };
 };
 
-static const vector<CallCMethod> knownCMethods{
+class CallCMethodSingleton : public CallCMethod {
+public:
+    CallCMethodSingleton(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod)
+        : CallCMethod(rubyClass, rubyMethod, cMethod){};
+
+    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+        return {rubyClass.data(cs)->lookupSingletonClass(cs)};
+    };
+};
+
+static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Array(), "size", "sorbet_rb_array_len"}, {core::Symbols::Integer(), "+", "sorbet_rb_int_plus"},
     {core::Symbols::Integer(), "-", "sorbet_rb_int_minus"},  {core::Symbols::Integer(), ">", "sorbet_rb_int_gt"},
     {core::Symbols::Integer(), "<", "sorbet_rb_int_lt"},     {core::Symbols::Integer(), "==", "sorbet_rb_int_equal"},
     {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq"},
 };
 
+static const vector<CallCMethodSingleton> knownCMethodsSingleton{
+    {core::Symbols::T(), "unsafe", "sorbet_T_unsafe"},
+};
+
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
     vector<const SymbolBasedIntrinsicMethod *> res;
-    for (auto &method : knownCMethods) {
+    for (auto &method : knownCMethodsInstance) {
+        res.emplace_back(&method);
+    }
+    for (auto &method : knownCMethodsSingleton) {
         res.emplace_back(&method);
     }
     return res;
