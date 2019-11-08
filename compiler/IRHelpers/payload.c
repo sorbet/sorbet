@@ -628,12 +628,42 @@ VALUE sorbet_rb_array_len(VALUE recv, ID func, int argc, const VALUE *const rest
 // TODO: add many from https://github.com/ruby/ruby/blob/ruby_2_6/include/ruby/intern.h#L55
 VALUE sorbet_rb_int_plus(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
-    return rb_int_plus(recv, argv[0]);
+    VALUE y = argv[0];
+    if (LIKELY(FIXNUM_P(recv))) {
+        if (LIKELY(FIXNUM_P(y))) {
+            return rb_fix_plus_fix(recv, y);
+        } else if (RB_TYPE_P(y, T_BIGNUM)) {
+            return rb_big_plus(y, recv);
+        } else if (RB_TYPE_P(recv, T_FLOAT)) {
+            return DBL2NUM((double)FIX2LONG(recv) + RFLOAT_VALUE(y));
+        } else if (RB_TYPE_P(y, T_COMPLEX)) {
+            return rb_complex_plus(y, recv);
+        }
+        // fall through to coerce
+    } else if (RB_TYPE_P(recv, T_BIGNUM)) {
+        return rb_big_plus(recv, y);
+    }
+    return rb_num_coerce_bin(recv, y, '+');
 }
 
 VALUE sorbet_rb_int_minus(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
-    return rb_int_minus(recv, argv[0]);
+    // optimized version from numeric.c
+    VALUE y = argv[0];
+    if (LIKELY(FIXNUM_P(recv))) {
+        if (LIKELY(FIXNUM_P(y))) {
+            return rb_fix_minus_fix(recv, y);
+        } else if (RB_TYPE_P(y, T_BIGNUM)) {
+            VALUE x = rb_int2big(FIX2LONG(recv));
+            return rb_big_minus(x, y);
+        } else if (RB_TYPE_P(y, T_FLOAT)) {
+            return DBL2NUM((double)FIX2LONG(recv) - RFLOAT_VALUE(y));
+        }
+        // fall throught to coerece
+    } else if (RB_TYPE_P(recv, T_BIGNUM)) {
+        return rb_big_minus(recv, y);
+    }
+    return rb_num_coerce_bin(recv, y, '-');
 }
 
 VALUE sorbet_rb_int_gt(VALUE recv, int argc, const VALUE *const restrict argv) {
@@ -643,11 +673,24 @@ VALUE sorbet_rb_int_gt(VALUE recv, int argc, const VALUE *const restrict argv) {
 
 VALUE sorbet_rb_int_lt(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
-    VALUE gte = rb_int_ge(recv, argv[0]);
-    if (gte == RUBY_Qfalse || gte == RUBY_Qnil) {
-        return RUBY_Qtrue;
+    VALUE y = argv[0];
+    if (LIKELY(FIXNUM_P(recv))) {
+        if (LIKELY(FIXNUM_P(y))) {
+            if (FIX2LONG(recv) < FIX2LONG(y)) {
+                return Qtrue;
+            }
+            return Qfalse;
+        } else if (RB_TYPE_P(y, T_BIGNUM)) {
+            return rb_big_cmp(y, recv) == INT2FIX(+1) ? Qtrue : Qfalse;
+        } else if (RB_TYPE_P(y, T_FLOAT)) {
+            return rb_integer_float_cmp(recv, y) == INT2FIX(-1) ? Qtrue : Qfalse;
+        } else {
+            return rb_num_coerce_relop(recv, y, '<');
+        }
+    } else if (RB_TYPE_P(recv, T_BIGNUM)) {
+        return rb_big_lt(recv, y);
     }
-    return RUBY_Qfalse;
+    return Qnil;
 }
 
 VALUE sorbet_rb_int_equal(VALUE recv, int argc, const VALUE *const restrict argv) {
