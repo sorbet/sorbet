@@ -47,7 +47,6 @@ public:
     unique_ptr<Rescue> preTransformRescue(core::MutableContext ctx, unique_ptr<Rescue> original);
     unique_ptr<Expression> postTransformRescue(core::MutableContext ctx, unique_ptr<Rescue> original);
 
-    unique_ptr<Expression> postTransformField(core::MutableContext ctx, unique_ptr<Field> original);
     unique_ptr<Expression> postTransformUnresolvedIdent(core::MutableContext ctx, unique_ptr<UnresolvedIdent> original);
 
     unique_ptr<Assign> preTransformAssign(core::MutableContext ctx, unique_ptr<Assign> original);
@@ -135,7 +134,6 @@ GENERATE_HAS_MEMBER(postTransformNext);
 GENERATE_HAS_MEMBER(postTransformReturn);
 GENERATE_HAS_MEMBER(postTransformRescueCase);
 GENERATE_HAS_MEMBER(postTransformRescue);
-GENERATE_HAS_MEMBER(postTransformField);
 GENERATE_HAS_MEMBER(postTransformUnresolvedIdent);
 GENERATE_HAS_MEMBER(postTransformAssign);
 GENERATE_HAS_MEMBER(postTransformSend);
@@ -228,7 +226,6 @@ GENERATE_POSTPONE_POSTCLASS(Next);
 GENERATE_POSTPONE_POSTCLASS(Return);
 GENERATE_POSTPONE_POSTCLASS(RescueCase);
 GENERATE_POSTPONE_POSTCLASS(Rescue);
-GENERATE_POSTPONE_POSTCLASS(Field);
 GENERATE_POSTPONE_POSTCLASS(UnresolvedIdent);
 GENERATE_POSTPONE_POSTCLASS(Assign);
 GENERATE_POSTPONE_POSTCLASS(Send);
@@ -446,14 +443,6 @@ private:
                 ctx, move(v), func);
         }
 
-        return v;
-    }
-
-    unique_ptr<Expression> mapField(unique_ptr<Field> v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformField<FUNC>::value) {
-            return PostPonePostTransform_Field<FUNC, CTX, HAS_MEMBER_postTransformField<FUNC>::value>::call(
-                ctx, move(v), func);
-        }
         return v;
     }
 
@@ -684,8 +673,6 @@ private:
                 return mapReturn(std::unique_ptr<Return>(static_cast<Return *>(what.release())), ctx);
             } else if (isa_tree<Rescue>(what.get())) {
                 return mapRescue(std::unique_ptr<Rescue>(static_cast<Rescue *>(what.release())), ctx);
-            } else if (isa_tree<Field>(what.get())) {
-                return mapField(std::unique_ptr<Field>(static_cast<Field *>(what.release())), ctx);
             } else if (isa_tree<Assign>(what.get())) {
                 return mapAssign(std::unique_ptr<Assign>(static_cast<Assign *>(what.release())), ctx);
             } else if (isa_tree<Array>(what.get())) {

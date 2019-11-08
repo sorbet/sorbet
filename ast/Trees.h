@@ -318,21 +318,6 @@ private:
 };
 // CheckSize(Rescue, 64, 8);
 
-class Field final : public Reference {
-public:
-    core::SymbolRef symbol;
-
-    Field(core::Loc loc, core::SymbolRef symbol);
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-private:
-    virtual void _sanityCheck();
-};
-// CheckSize(Field, 24, 8);
-
 class Local final : public Reference {
 public:
     core::LocalVariable localVariable;
