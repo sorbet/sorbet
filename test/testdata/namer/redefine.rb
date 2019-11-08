@@ -33,7 +33,7 @@ sig {params(a: Integer).returns(Integer)}
 def wrong_args(a)
   1
 end
-def wrong_args(a:) # error: redefined with mismatched argument attribute `isKeyword`. Expected: `false`, got: `true`
+def wrong_args(a:) # error: Method `Object#wrong_args` redefined with argument `a` as a keyword argument
   2
 end
 T.reveal_type(wrong_args(a: 2)) # error: Revealed type: `T.untyped`
@@ -51,7 +51,7 @@ sig {params(a: Integer).returns(Integer)}
 def wrong_repeatedness(a)
   1
 end
-def wrong_repeatedness(*a) # error: redefined with mismatched argument attribute `isRepeated`. Expected: `false`, got: `true`
+def wrong_repeatedness(*a) # error: Method `Object#wrong_repeatedness` redefined with argument `a` as a splat argument
   2
 end
 T.reveal_type(wrong_repeatedness(3)) # error: Revealed type: `T.untyped`
