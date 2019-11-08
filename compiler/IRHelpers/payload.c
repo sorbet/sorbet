@@ -676,6 +676,16 @@ VALUE sorbet_rb_int_minus(VALUE recv, int argc, const VALUE *const restrict argv
     return rb_num_coerce_bin(recv, y, '-');
 }
 
+VALUE sorbet_rb_int_mul(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    return rb_int_mul(recv, argv[0]);
+}
+
+VALUE sorbet_rb_int_div(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    return rb_int_div(recv, argv[0]);
+}
+
 VALUE sorbet_rb_int_gt(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
     return rb_int_gt(recv, argv[0]);
