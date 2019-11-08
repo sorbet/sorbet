@@ -43,7 +43,30 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
             auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
             for (auto &c : potentialClasses) {
                 if (i->recv.type->derivesFrom(cs, c)) {
-                    return symbolBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, currentRubyBlockId);
+                    auto &builder = builderCast(build);
+                    auto recv = MK::varGet(cs, i->recv.variable, builder, aliases, blockMap, currentRubyBlockId);
+
+                    auto typeTest = MK::createTypeTestU1(cs, builder, recv, core::make_type<core::ClassType>(c));
+
+                    auto afterSend = llvm::BasicBlock::Create(cs, "afterCall", builder.GetInsertBlock()->getParent());
+                    auto slowPath = llvm::BasicBlock::Create(cs, "slowCall", builder.GetInsertBlock()->getParent());
+                    auto fastPath = llvm::BasicBlock::Create(cs, "slowCall", builder.GetInsertBlock()->getParent());
+                    builder.CreateCondBr(MK::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
+                    builder.SetInsertPoint(fastPath);
+                    auto fastPathRes =
+                        symbolBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, currentRubyBlockId);
+                    auto fastPathEnd = builder.GetInsertBlock();
+                    builder.CreateBr(afterSend);
+                    builder.SetInsertPoint(slowPath);
+                    auto slowPathRes = LLVMIREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases,
+                                                                                     currentRubyBlockId);
+                    auto slowPathEnd = builder.GetInsertBlock();
+                    builder.CreateBr(afterSend);
+                    builder.SetInsertPoint(afterSend);
+                    auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, "sendResSlowFastRaw");
+                    phi->addIncoming(fastPathRes, fastPathEnd);
+                    phi->addIncoming(slowPathRes, slowPathEnd);
+                    return phi;
                 }
             }
         };

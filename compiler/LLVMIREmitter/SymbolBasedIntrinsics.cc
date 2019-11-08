@@ -87,8 +87,7 @@ vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
 // stuff
 }; // namespace
 vector<const SymbolBasedIntrinsicMethod *> &SymbolBasedIntrinsicMethod::definedIntrinsics() {
-    static vector<const SymbolBasedIntrinsicMethod *> ret{};
-    getKnownCMethodPtrs();
+    static vector<const SymbolBasedIntrinsicMethod *> ret = getKnownCMethodPtrs();
 
     return ret;
 }
