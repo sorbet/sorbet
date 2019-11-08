@@ -394,16 +394,16 @@ typeTestSuccess.i:
   %2 = load i64, i64* @guard_epoch_T, align 8
   %3 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
   %canTakeFastPath.i = icmp eq i64 %2, %3
-  br i1 %canTakeFastPath.i, label %afterCallIntrinsic.i, label %const_slowPath.i, !prof !11
+  br i1 %canTakeFastPath.i, label %afterSymCallIntrinsic_unsafe.i, label %const_slowPath.i, !prof !11
 
 const_slowPath.i:                                 ; preds = %typeTestSuccess.i
   %4 = tail call fastcc i64 @sorbet_getConstant() #15
   store i64 %4, i64* @guarded_const_T, align 8
   %5 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
   store i64 %5, i64* @guard_epoch_T, align 8
-  br label %afterCallIntrinsic.i
+  br label %afterSymCallIntrinsic_unsafe.i
 
-afterCallIntrinsic.i:                             ; preds = %const_slowPath.i, %typeTestSuccess.i
+afterSymCallIntrinsic_unsafe.i:                   ; preds = %const_slowPath.i, %typeTestSuccess.i
   %callArgsAddr4.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %0, i64* %callArgsAddr4.i, align 8
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_foo.i) #15
@@ -413,14 +413,14 @@ afterCallIntrinsic.i:                             ; preds = %const_slowPath.i, %
   %canTakeFastPath43.i = icmp eq i64 %6, %7
   br i1 %canTakeFastPath43.i, label %"func_<root>.<static-init>$111.exit", label %const_slowPath42.i, !prof !11
 
-const_slowPath42.i:                               ; preds = %afterCallIntrinsic.i
+const_slowPath42.i:                               ; preds = %afterSymCallIntrinsic_unsafe.i
   %8 = tail call fastcc i64 @sorbet_getConstant() #15
   store i64 %8, i64* @guarded_const_T, align 8
   %9 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
   store i64 %9, i64* @guard_epoch_T, align 8
   br label %"func_<root>.<static-init>$111.exit"
 
-"func_<root>.<static-init>$111.exit":             ; preds = %afterCallIntrinsic.i, %const_slowPath42.i
+"func_<root>.<static-init>$111.exit":             ; preds = %afterSymCallIntrinsic_unsafe.i, %const_slowPath42.i
   store i64 %0, i64* %callArgsAddr4.i, align 8
   %rawSym62.i = tail call i64 @rb_id2sym(i64 %rubyId_bar.i) #15
   tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar.5, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#bar" to i64 (...)*), i32 -1) #15

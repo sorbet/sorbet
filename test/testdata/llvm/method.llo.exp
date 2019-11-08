@@ -322,12 +322,12 @@ BB2:                                              ; preds = %BB2.backedge, %BB2.
   %1 = and i64 %i.sroa.0.0, 1
   %2 = icmp ne i64 %1, 0
   store i64 21, i64* %callArgsAddr, align 8
-  br i1 %2, label %sorbet_rb_int_lt.exit, label %slowCallIntrinsic, !prof !12
+  br i1 %2, label %sorbet_rb_int_lt.exit, label %"slowSymCallIntrinsic_<", !prof !12
 
-BB3:                                              ; preds = %afterCallIntrinsic
+BB3:                                              ; preds = %"afterSymCallIntrinsic_<"
   ret i64 8
 
-BB5:                                              ; preds = %afterCallIntrinsic
+BB5:                                              ; preds = %"afterSymCallIntrinsic_<"
   %3 = call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"userStr_hello ", i64 0, i64 0), i64 6) #16
   store i64 %rawArg_name, i64* %callArgsAddr, align 8
   call void @dbg_sorbet_validate_id(i64 %"rubyId_+", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !13
@@ -336,7 +336,7 @@ BB5:                                              ; preds = %afterCallIntrinsic
   call void @dbg_sorbet_validate_id(i64 %rubyId_puts, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !16
   %5 = call i64 @rb_funcallv(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #16
   store i64 3, i64* %callArgsAddr, align 8
-  br i1 %2, label %fastCallIntrinsic43, label %slowCallIntrinsic42
+  br i1 %2, label %"fastSymCallIntrinsic_+", label %"slowSymCallIntrinsic_+"
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call fastcc void @sorbet_rb_error_arity(i32 %argc)
@@ -357,41 +357,41 @@ typeTestFail:                                     ; preds = %fillRequiredArgs
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw)
   unreachable
 
-afterCallIntrinsic:                               ; preds = %slowCallIntrinsic, %sorbet_rb_int_lt.exit
-  %sendResSlowFastIntrinsicRaw = phi i64 [ %13, %sorbet_rb_int_lt.exit ], [ %11, %slowCallIntrinsic ]
-  %9 = and i64 %sendResSlowFastIntrinsicRaw, -9
+"afterSymCallIntrinsic_<":                        ; preds = %"slowSymCallIntrinsic_<", %sorbet_rb_int_lt.exit
+  %"symIntrinsicRawPhi_<" = phi i64 [ %13, %sorbet_rb_int_lt.exit ], [ %11, %"slowSymCallIntrinsic_<" ]
+  %9 = and i64 %"symIntrinsicRawPhi_<", -9
   %10 = icmp eq i64 %9, 0
   br i1 %10, label %BB3, label %BB5
 
-slowCallIntrinsic:                                ; preds = %BB2
+"slowSymCallIntrinsic_<":                         ; preds = %BB2
   call void @dbg_sorbet_validate_id(i64 %"rubyId_<", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !19
   %11 = call i64 @rb_funcallv(i64 %i.sroa.0.0, i64 %"rubyId_<", i32 1, i64* nonnull %callArgsAddr) #16
-  br label %afterCallIntrinsic
+  br label %"afterSymCallIntrinsic_<"
 
 sorbet_rb_int_lt.exit:                            ; preds = %BB2
   %12 = icmp slt i64 %i.sroa.0.0, 20
   %13 = select i1 %12, i64 20, i64 0
-  br label %afterCallIntrinsic
+  br label %"afterSymCallIntrinsic_<"
 
-slowCallIntrinsic42:                              ; preds = %BB5
+"slowSymCallIntrinsic_+":                         ; preds = %BB5
   call void @dbg_sorbet_validate_id(i64 %"rubyId_+", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !22
   %14 = call i64 @rb_funcallv(i64 %i.sroa.0.0, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr) #16
   br label %BB2.backedge
 
-fastCallIntrinsic43:                              ; preds = %BB5
+"fastSymCallIntrinsic_+":                         ; preds = %BB5
   %15 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0, i64 2) #16
   %16 = extractvalue { i64, i1 } %15, 1
   %17 = extractvalue { i64, i1 } %15, 0
   br i1 %16, label %18, label %BB2.backedge
 
-18:                                               ; preds = %fastCallIntrinsic43
+18:                                               ; preds = %"fastSymCallIntrinsic_+"
   %19 = ashr i64 %17, 1
   %20 = xor i64 %19, -9223372036854775808
   %21 = call i64 @rb_int2big(i64 %20) #16, !noalias !25
   br label %BB2.backedge
 
-BB2.backedge:                                     ; preds = %18, %fastCallIntrinsic43, %slowCallIntrinsic42
-  %i.sroa.0.0.be = phi i64 [ %14, %slowCallIntrinsic42 ], [ %21, %18 ], [ %17, %fastCallIntrinsic43 ]
+BB2.backedge:                                     ; preds = %18, %"fastSymCallIntrinsic_+", %"slowSymCallIntrinsic_+"
+  %i.sroa.0.0.be = phi i64 [ %14, %"slowSymCallIntrinsic_+" ], [ %21, %18 ], [ %17, %"fastSymCallIntrinsic_+" ]
   br label %BB2
 }
 
