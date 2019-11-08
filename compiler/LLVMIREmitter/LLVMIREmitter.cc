@@ -294,15 +294,18 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     },
                     [&](cfg::Literal *i) {
                         if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {
-                            MK::varSet(cs, bind.bind.variable, MK::getRubyFalseRaw(cs, builder), builder, blockMap, aliases, bb->rubyBlockId);
+                            MK::varSet(cs, bind.bind.variable, MK::getRubyFalseRaw(cs, builder), builder, blockMap,
+                                       aliases, bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::TrueClass())) {
-                            MK::varSet(cs, bind.bind.variable, MK::getRubyTrueRaw(cs, builder), builder, blockMap, aliases, bb->rubyBlockId);
+                            MK::varSet(cs, bind.bind.variable, MK::getRubyTrueRaw(cs, builder), builder, blockMap,
+                                       aliases, bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::NilClass())) {
-                            MK::varSet(cs, bind.bind.variable, MK::getRubyNilRaw(cs, builder), builder, blockMap, aliases, bb->rubyBlockId);
+                            MK::varSet(cs, bind.bind.variable, MK::getRubyNilRaw(cs, builder), builder, blockMap,
+                                       aliases, bb->rubyBlockId);
                             return;
                         }
 
@@ -373,7 +376,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {
                             MK::varSet(cs, bind.bind.variable, val, builder, blockMap, aliases, bb->rubyBlockId);
                         } else if (i->cast == core::Names::assertType()) {
-                            MK::varSet(cs, bind.bind.variable, MK::getRubyFalseRaw(cs, builder), builder, blockMap, aliases, bb->rubyBlockId);
+                            MK::varSet(cs, bind.bind.variable, MK::getRubyFalseRaw(cs, builder), builder, blockMap,
+                                       aliases, bb->rubyBlockId);
                         }
                     },
                     [&](cfg::TAbsurd *i) { cs.trace("TAbsurd\n"); });
