@@ -1,7 +1,7 @@
 # typed: strict
 
 class HasFib
-  T::Sig::WithoutRuntime.sig{params(n: Integer).returns(Integer)}
+  T::Sig::WithoutRuntime.sig(:final) {params(n: Integer).returns(Integer)}
   def self.fib(n)
     if n < 3
       1
