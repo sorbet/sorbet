@@ -12,13 +12,13 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-class SymbolMatcher {
+namespace {
+
+class SymbolMatcher final {
 public:
     static constexpr int MAX_RESULTS = 50;
 
     SymbolMatcher(const LSPConfiguration &config, const core::GlobalState &gs);
-
-    virtual ~SymbolMatcher() = default;
 
     vector<unique_ptr<SymbolInformation>> doQuery(string_view query, int limit = MAX_RESULTS);
 
@@ -55,8 +55,6 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
     }
     return results;
 }
-
-namespace {
 
 inline bool isNamespaceSeparator(char ch) {
     return ch == ':' || ch == '.';
