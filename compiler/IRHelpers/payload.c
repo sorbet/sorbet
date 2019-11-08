@@ -605,4 +605,49 @@ _Bool sorbet_isa_class_of(VALUE obj, VALUE class) __attribute__((const)) {
     return (obj == class) || (rb_obj_is_kind_of(obj, rb_cModule) && rb_class_inherited_p(obj, class));
 }
 
+// Intrinsics. See CallCMethod in SymbolIntrinsics.cc
+
+void sorbet_ensure_arity(int argc, int expected) {
+    if (argc != expected) {
+        sorbet_rb_error_arity(argc, expected, expected);
+    }
+}
+
+VALUE sorbet_boolToRuby(_Bool b) {
+  if (b) {
+      return RUBY_Qtrue;
+  }
+  return RUBY_Qfalse;
+}
+
+VALUE sorbet_rb_array_len(VALUE recv, ID func, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 0);
+    return sorbet_longToRubyValue(rb_array_len(recv));
+}
+
+// TODO: add many from https://github.com/ruby/ruby/blob/ruby_2_6/include/ruby/intern.h#L55
+VALUE sorbet_rb_int_plus(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    return rb_int_plus(recv, argv[0]);
+}
+
+VALUE sorbet_rb_int_minus(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    return rb_int_minus(recv, argv[0]);
+}
+
+VALUE sorbet_rb_int_gt(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    return rb_int_gt(recv, argv[0]);
+}
+
+VALUE sorbet_rb_int_equal(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    return rb_int_equal(recv, argv[0]);
+}
+
+VALUE sorbet_rb_int_neq(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    return sorbet_boolToRuby(rb_int_equal(recv, argv[0]) == sorbet_rubyFalse());
+}
 #endif
