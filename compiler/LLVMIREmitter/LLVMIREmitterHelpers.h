@@ -6,7 +6,7 @@
 
 namespace sorbet::cfg {
 class Send;
-};
+}; // namespace sorbet::cfg
 
 namespace llvm {
 class Function;
@@ -121,6 +121,9 @@ public:
     static llvm::Constant *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
     static llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                          const core::TypePtr &type);
+    static llvm::Value *payloadCall(CompilerState &cs, std::string func, std::vector<core::LocalVariable> args,
+                                    llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
+                                    const UnorderedMap<core::LocalVariable, Alias> &aliases, int currentRubyBlockId);
 
     static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
                                const UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap,

@@ -1,11 +1,13 @@
-#include "compiler/IRHelpers/IRHelpers.h"
 #include "llvm/IR/DerivedTypes.h" // FunctionType
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/Transforms/Utils/ModuleUtils.h" // appendToGlobalCtors
+// ^^^ violate our poisons
+
 // needef for LLVMIREmitterHelpers
 #include "common/typecase.h"
 #include "core/core.h"
-// ^^^ violate our poisons
+
+#include "compiler/IRHelpers/IRHelpers.h"
 #include "LLVMIREmitterHelpers.h"
 #include <string>
 
@@ -340,6 +342,17 @@ llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llv
         [&](core::Type *_default) { ret = builder.getInt1(true); });
     ENFORCE(ret != nullptr);
     return ret;
+}
+
+llvm::Value *MK::payloadCall(CompilerState &cs, string func, vector<core::LocalVariable> args,
+                             llvm::IRBuilderBase &build, const BasicBlockMap &blockMap,
+                             const UnorderedMap<core::LocalVariable, Alias> &aliases, int currentRubyBlockId) {
+    auto &builder = builderCast(build);
+    vector<llvm::Value *> vars(args.size());
+    for (auto i = 0; i < vars.size(); i++) {
+        vars[i] = MK::varGet(cs, args[i], build, aliases, blockMap, currentRubyBlockId);
+    }
+    return builder.CreateCall(cs.module->getFunction(func), vars, func);
 }
 
 namespace {

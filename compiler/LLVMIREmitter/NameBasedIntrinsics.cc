@@ -49,11 +49,11 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 
 class DoNothingIntrinsic : public NameBasedIntrinsicMethod {
 public:
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &builder,
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                   int currentRubyBlockId) const override {
-        return MK::getRubyNilRaw(cs, builder);
+        return MK::getRubyNilRaw(cs, build);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::keepForIde(), core::Names::keepForTypechecking()};
@@ -202,11 +202,11 @@ public:
 
 class IdentityIntrinsic : public NameBasedIntrinsicMethod {
 public:
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &builder,
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                   int currentRubyBlockId) const override {
-        return MK::varGet(cs, i->args[0].variable, builder, aliases, blockMap, currentRubyBlockId);
+        return MK::varGet(cs, i->args[0].variable, build, aliases, blockMap, currentRubyBlockId);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::suggestType()};
@@ -219,12 +219,9 @@ public:
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                   int currentRubyBlockId) const override {
-        auto &builder = builderCast(build);
-        auto arr = MK::varGet(cs, i->args[0].variable, builder, aliases, blockMap, currentRubyBlockId);
-        auto before = MK::varGet(cs, i->args[1].variable, builder, aliases, blockMap, currentRubyBlockId);
-        auto after = MK::varGet(cs, i->args[2].variable, builder, aliases, blockMap, currentRubyBlockId);
-        return builder.CreateCall(cs.module->getFunction("sorbet_splatIntrinsic"), {arr, before, after},
-                                  "sorbet_splatIntrinsic");
+        return MK::payloadCall(cs, "sorbet_splatIntrinsic",
+                               {i->args[0].variable, i->args[1].variable, i->args[2].variable}, build, blockMap,
+                               aliases, currentRubyBlockId);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::expandSplat()};
