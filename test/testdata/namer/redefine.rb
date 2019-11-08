@@ -39,6 +39,15 @@ end
 T.reveal_type(wrong_args(a: 2)) # error: Revealed type: `T.untyped`
 
 sig {params(a: Integer).returns(Integer)}
+def wrong_args2(a:)
+  1
+end
+def wrong_args2(a) # error: Method `Object#wrong_args2` redefined with argument `a` as a non-keyword argument
+  2
+end
+T.reveal_type(wrong_args2(a: 2)) # error: Revealed type: `T.untyped`
+
+sig {params(a: Integer).returns(Integer)}
 def wrong_name(a)
   1
 end
@@ -55,6 +64,15 @@ def wrong_repeatedness(*a) # error: Method `Object#wrong_repeatedness` redefined
   2
 end
 T.reveal_type(wrong_repeatedness(3)) # error: Revealed type: `T.untyped`
+
+sig {params(a: Integer).returns(Integer)}
+def wrong_repeatedness2(*a)
+  1
+end
+def wrong_repeatedness2(a) # error: Method `Object#wrong_repeatedness2` redefined with argument `a` as a non-splat argument
+  2
+end
+T.reveal_type(wrong_repeatedness2(3)) # error: Revealed type: `T.untyped`
 
 sig {params(a: Integer).returns(Integer)}
 def wrong_blockness(a)
