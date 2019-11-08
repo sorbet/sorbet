@@ -641,6 +641,15 @@ VALUE sorbet_rb_int_gt(VALUE recv, int argc, const VALUE *const restrict argv) {
     return rb_int_gt(recv, argv[0]);
 }
 
+VALUE sorbet_rb_int_lt(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    VALUE gte = rb_int_ge(recv, argv[0]);
+    if (gte == RUBY_Qfalse || gte == RUBY_Qnil) {
+        return RUBY_Qtrue;
+    }
+    return RUBY_Qfalse;
+}
+
 VALUE sorbet_rb_int_equal(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
     return rb_int_equal(recv, argv[0]);

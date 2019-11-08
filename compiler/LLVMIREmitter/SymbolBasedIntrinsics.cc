@@ -72,7 +72,9 @@ public:
 
 static const vector<CallCMethod> knownCMethods{
     {core::Symbols::Array(), "size", "sorbet_rb_array_len"}, {core::Symbols::Integer(), "+", "sorbet_rb_int_plus"},
-    {core::Symbols::Integer(), "-", "sorbet_rb_int_minus"},  {core::Symbols::Integer(), ">", "sorbet_rb_int_gt"},
+    {core::Symbols::Integer(), "-", "sorbet_rb_int_minus"},  
+    {core::Symbols::Integer(), ">", "sorbet_rb_int_gt"},
+    {core::Symbols::Integer(), "<", "sorbet_rb_int_lt"},
     {core::Symbols::Integer(), "==", "sorbet_rb_int_equal"}, {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq"},
 };
 
