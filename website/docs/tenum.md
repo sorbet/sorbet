@@ -150,6 +150,14 @@ Suit.deserialize('bad value')
 # => KeyError: Enum Suit key not found: "bad value"
 ```
 
+If this is not the behavior you want, you can use `try_deserialize` which
+returns `nil` when the value doesn't deserialize to anything:
+
+```ruby
+Suit.try_deserialize('bad value')
+# => nil
+```
+
 You can also ask whether a specific serialized value exists for an enum:
 
 ```ruby
@@ -160,7 +168,6 @@ Suit.has_serialized?('bad value')
 # => false
 ```
 
-<!-- TODO(jez) Add a version of deserialize that returns T.nilable? -->
 <!-- TODO(jez) Using enum *values* as type annotations / in unions -->
 <!-- TODO(jez) ^ Limitation: can't be used in type aliases... -->
 

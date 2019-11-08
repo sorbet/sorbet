@@ -1,4 +1,4 @@
-#include "rewriter/OpusEnum.h"
+#include "rewriter/TEnum.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
@@ -18,7 +18,7 @@ enum class FromWhere {
     Outside,
 };
 
-bool isOpusEnum(core::MutableContext ctx, ast::ClassDef *klass) {
+bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     if (klass->kind != ast::Class || klass->ancestors.empty()) {
         return false;
     }
@@ -33,7 +33,7 @@ bool isOpusEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     if (scope == nullptr) {
         return false;
     }
-    if (scope->cnst != core::Names::Constants::Opus() && scope->cnst != core::Names::Constants::T()) {
+    if (scope->cnst != core::Names::Constants::T()) {
         return false;
     }
     if (ast::isa_tree<ast::EmptyTree>(scope->scope.get())) {
@@ -58,8 +58,8 @@ ast::Send *asEnumsDo(ast::Expression *stat) {
 
 // TODO(jez) Change this error message after making everything T::Enum
 vector<unique_ptr<ast::Expression>> badConst(core::MutableContext ctx, core::Loc headerLoc, core::Loc line1Loc) {
-    if (auto e = ctx.state.beginError(headerLoc, core::errors::Rewriter::OpusEnumConstNotEnumValue)) {
-        e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "Opus::Enum");
+    if (auto e = ctx.state.beginError(headerLoc, core::errors::Rewriter::TEnumConstNotEnumValue)) {
+        e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "T::Enum");
         e.addErrorLine(line1Loc, "Enclosing definition here");
     }
     return {};
@@ -114,17 +114,17 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
     //
     //   A = new | T.let(new, ...)
     //
-    // So we're good to process this thing as a new Opus::Enum value.
+    // So we're good to process this thing as a new T::Enum value.
 
     if (fromWhere != FromWhere::Inside) {
-        if (auto e = ctx.state.beginError(stat->loc, core::errors::Rewriter::OpusEnumOutsideEnumsDo)) {
+        if (auto e = ctx.state.beginError(stat->loc, core::errors::Rewriter::TEnumOutsideEnumsDo)) {
             e.setHeader("Definition of enum value `{}` must be within the `{}` block for this `{}`",
-                        lhs->cnst.show(ctx), "enums do", "Opus::Enum");
+                        lhs->cnst.show(ctx), "enums do", "T::Enum");
             e.addErrorLine(klass->declLoc, "Enclosing definition here");
         }
     }
 
-    auto name = ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::OpusEnum, lhs->cnst, 1));
+    auto name = ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::TEnum, lhs->cnst, 1));
     auto classCnst = ast::MK::UnresolvedConstant(lhs->loc, ast::MK::EmptyTree(), name);
     ast::ClassDef::ANCESTORS_store parent;
     parent.emplace_back(klass->name->deepCopy());
@@ -161,12 +161,12 @@ void collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, unique_ptr<
 
 } // namespace
 
-void OpusEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
+void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     if (ctx.state.runningUnderAutogen) {
         return;
     }
 
-    if (!isOpusEnum(ctx, klass)) {
+    if (!isTEnum(ctx, klass)) {
         return;
     }
 

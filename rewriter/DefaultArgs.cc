@@ -1,5 +1,6 @@
 #include "rewriter/DefaultArgs.h"
 #include "ast/Helpers.h"
+#include "ast/treemap/treemap.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
 
@@ -97,6 +98,20 @@ unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Express
     return expr;
 }
 
+static std::unique_ptr<ast::Reference> dupRef(ast::Reference *arg) {
+    unique_ptr<ast::Reference> newArg;
+    typecase(
+        arg, [&](ast::UnresolvedIdent *nm) { newArg = ast::MK::Local(arg->loc, nm->name); },
+        [&](ast::RestArg *rest) { newArg = ast::MK::RestArg(arg->loc, dupRef(rest->expr.get())); },
+        [&](ast::KeywordArg *kw) { newArg = ast::MK::KeywordArg(arg->loc, dupRef(kw->expr.get())); },
+        [&](ast::OptionalArg *opt) {
+            newArg = ast::MK::OptionalArg(arg->loc, dupRef(opt->expr.get()), ast::MK::EmptyTree());
+        },
+        [&](ast::BlockArg *blk) { newArg = ast::MK::BlockArg(arg->loc, dupRef(blk->expr.get())); },
+        [&](ast::ShadowArg *shadow) { newArg = ast::MK::ShadowArg(arg->loc, dupRef(shadow->expr.get())); });
+    return newArg;
+}
+
 void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
     vector<unique_ptr<ast::Expression>> newMethods;
     ast::Send *lastSig = nullptr;
@@ -138,13 +153,9 @@ void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
                             ast::isa_tree<ast::KeywordArg>(arg->expr.get()));
                     auto name = ctx.state.freshNameUnique(core::UniqueNameKind::DefaultArg, mdef->name, uniqueNum++);
                     ast::MethodDef::ARGS_store args;
-                    for (auto &marg : mdef->args) {
-                        auto newArg = marg->deepCopy();
-                        auto optArg = ast::cast_tree<ast::OptionalArg>(newArg.get());
-                        if (optArg) {
-                            optArg->default_ = ast::MK::EmptyTree();
-                        }
-                        args.emplace_back(move(newArg));
+                    for (auto &arg : mdef->args) {
+                        auto ref = ast::cast_tree<ast::Reference>(arg.get());
+                        args.emplace_back(dupRef(ref));
                     }
                     auto loc = arg->default_->loc;
                     auto rhs = move(arg->default_);

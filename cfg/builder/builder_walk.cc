@@ -79,6 +79,9 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
             ENFORCE(cctx.ctx.owner.data(cctx.ctx)->isMethod());
             klass = cctx.ctx.owner.data(cctx.ctx)->owner;
             break;
+        case ast::UnresolvedIdent::Global:
+            klass = core::Symbols::root();
+            break;
         default:
             // These should have been removed in the namer
             Exception::notImplemented();
@@ -89,8 +92,10 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
     if (!sym.exists()) {
         auto fnd = cctx.discoveredUndeclaredFields.find(id->name);
         if (fnd == cctx.discoveredUndeclaredFields.end()) {
-            if (auto e = cctx.ctx.state.beginError(id->loc, core::errors::CFG::UndeclaredVariable)) {
-                e.setHeader("Use of undeclared variable `{}`", id->name.show(cctx.ctx));
+            if (id->kind != ast::UnresolvedIdent::Global) {
+                if (auto e = cctx.ctx.state.beginError(id->loc, core::errors::CFG::UndeclaredVariable)) {
+                    e.setHeader("Use of undeclared variable `{}`", id->name.show(cctx.ctx));
+                }
             }
             auto ret = cctx.newTemporary(id->name);
             cctx.discoveredUndeclaredFields[id->name] = ret;

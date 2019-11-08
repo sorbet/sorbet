@@ -69,6 +69,7 @@ InsSeq{
               expr = Local{
                 localVariable = <U b>
               }
+              default_ = EmptyTree
             }, Local{
               localVariable = <U c>
             }, Local{
@@ -77,6 +78,7 @@ InsSeq{
               expr = Local{
                 localVariable = <U e>
               }
+              default_ = EmptyTree
             }, Local{
               localVariable = <U f>
             }, Local{
@@ -198,6 +200,7 @@ InsSeq{
               expr = Local{
                 localVariable = <U b>
               }
+              default_ = EmptyTree
             }, Local{
               localVariable = <U c>
             }, Local{
@@ -206,6 +209,7 @@ InsSeq{
               expr = Local{
                 localVariable = <U e>
               }
+              default_ = EmptyTree
             }, Local{
               localVariable = <U f>
             }, Local{
@@ -223,6 +227,7 @@ InsSeq{
               expr = Local{
                 localVariable = <U b>
               }
+              default_ = EmptyTree
             }, Local{
               localVariable = <U c>
             }, Local{
@@ -231,6 +236,7 @@ InsSeq{
               expr = Local{
                 localVariable = <U e>
               }
+              default_ = EmptyTree
             }, Local{
               localVariable = <U f>
             }, Local{

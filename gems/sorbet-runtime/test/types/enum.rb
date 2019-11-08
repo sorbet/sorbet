@@ -129,6 +129,18 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
   end
 
+  describe 'try_deserialize' do
+    it 'returns the value for a valid serialization' do
+      suit = CardSuit.try_deserialize('club')
+      assert_equal(CardSuit::CLUB, suit)
+    end
+
+    it 'returns nil for an invalid serialization' do
+      suit = CardSuit.try_deserialize('blerg')
+      assert_nil(suit)
+    end
+  end
+
   describe 'to_json' do
     it 'serializes to a JSON string' do
       assert_equal('"club"', CardSuit::CLUB.to_json)
@@ -316,11 +328,11 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
   end
 
   describe 'string value conversion assertions in legacy migration mode' do
-    ENUM_CONVERSION_MSG = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
+    ENUM_CONVERSION_MSG_LEGACY = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
     before do
       T::Configuration.enable_legacy_t_enum_migration_mode
       T::Configuration.expects(:soft_assert_handler).at_least_once.with do |message|
-        assert_equal(ENUM_CONVERSION_MSG, message)
+        assert_equal(ENUM_CONVERSION_MSG_LEGACY, message)
       end
     end
 

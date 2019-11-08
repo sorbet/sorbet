@@ -12,13 +12,13 @@
 #include "rewriter/Mattr.h"
 #include "rewriter/Minitest.h"
 #include "rewriter/MixinEncryptedProp.h"
-#include "rewriter/OpusEnum.h"
 #include "rewriter/Private.h"
 #include "rewriter/Prop.h"
 #include "rewriter/ProtobufDescriptorPool.h"
 #include "rewriter/Rails.h"
 #include "rewriter/Regexp.h"
 #include "rewriter/Struct.h"
+#include "rewriter/TEnum.h"
 #include "rewriter/TypeMembers.h"
 #include "rewriter/attr_reader.h"
 #include "rewriter/flatten.h"
@@ -35,7 +35,7 @@ public:
     unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
         Command::run(ctx, classDef.get());
         Rails::run(ctx, classDef.get());
-        OpusEnum::run(ctx, classDef.get());
+        TEnum::run(ctx, classDef.get());
         Prop::run(ctx, classDef.get());
         TypeMembers::run(ctx, classDef.get());
         DefaultArgs::run(ctx, classDef.get());

@@ -202,7 +202,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     EXPECT_TRUE(capabilities.typeDefinitionProvider.value_or(false));
     EXPECT_FALSE(capabilities.implementationProvider.has_value());
     EXPECT_TRUE(capabilities.referencesProvider.value_or(false));
-    EXPECT_FALSE(capabilities.documentHighlightProvider.has_value());
+    EXPECT_TRUE(capabilities.documentHighlightProvider.has_value());
     EXPECT_TRUE(capabilities.documentSymbolProvider.value_or(false));
     EXPECT_TRUE(capabilities.workspaceSymbolProvider.value_or(false));
     EXPECT_TRUE(capabilities.codeActionProvider.has_value());

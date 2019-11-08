@@ -112,8 +112,9 @@ InsSeq{
           args = [Local{
               localVariable = <U <blk>>
             }]
-          rhs = Field{
-            symbol = <U $S>
+          rhs = UnresolvedIdent{
+            kind = Global
+            name = <U $S>
           }
         }
 

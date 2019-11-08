@@ -389,12 +389,8 @@ public:
         return SymbolRef(nullptr, 81);
     }
 
-    static SymbolRef OpusEnum() {
-        return SymbolRef(nullptr, 82);
-    }
-
     static SymbolRef T_Enum() {
-        return SymbolRef(nullptr, 83);
+        return SymbolRef(nullptr, 82);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

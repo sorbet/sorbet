@@ -54,7 +54,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
         else:
             data += [sentinel]
             data += native.glob(["{}.*.exp".format(prefix)])
-            data += native.glob(["{}.*.rbupdated".format(prefix)])
+            data += native.glob(["{}.*.rbupdate".format(prefix)])
             data += native.glob(["{}.*.rbedited".format(prefix)])
 
         native.sh_test(

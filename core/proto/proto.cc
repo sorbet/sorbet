@@ -54,7 +54,7 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
                 case UniqueNameKind::ResolverMissingClass:
                     protoName.set_unique(com::stripe::rubytyper::Name::RESOLVER_MISSING_CLASS);
                     break;
-                case UniqueNameKind::OpusEnum:
+                case UniqueNameKind::TEnum:
                     protoName.set_unique(com::stripe::rubytyper::Name::OPUS_ENUM);
                     break;
                 case UniqueNameKind::DefaultArg:

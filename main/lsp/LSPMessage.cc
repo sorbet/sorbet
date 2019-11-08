@@ -146,6 +146,7 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::TextDocumentHover:
         case LSPMethod::TextDocumentCompletion:
         case LSPMethod::TextDocumentSignatureHelp:
+        case LSPMethod::TextDocumentDocumentHighlight:
         // These are file updates. They shouldn't be delayed (but they can be combined/expedited).
         case LSPMethod::TextDocumentDidOpen:
         case LSPMethod::TextDocumentDidChange:

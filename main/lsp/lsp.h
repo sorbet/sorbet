@@ -65,7 +65,12 @@ class LSPLoop {
 
     LSPQueryResult queryByLoc(LSPTypechecker &typechecker, std::string_view uri, const Position &pos,
                               const LSPMethod forMethod, bool errorIfFileIsUntyped = true) const;
-    LSPQueryResult queryBySymbol(LSPTypechecker &typechecker, core::SymbolRef symbol) const;
+    LSPQueryResult queryBySymbol(LSPTypechecker &typechecker, core::SymbolRef symbol,
+                                 const std::optional<std::string_view> uri = std::nullopt) const;
+
+    std::unique_ptr<ResponseMessage>
+    handleTextDocumentDocumentHighlight(LSPTypechecker &typechecker, const MessageId &id,
+                                        const TextDocumentPositionParams &params) const;
     std::unique_ptr<ResponseMessage> handleTextDocumentHover(LSPTypechecker &typechecker, const MessageId &id,
                                                              const TextDocumentPositionParams &params) const;
     std::unique_ptr<ResponseMessage> handleTextDocumentDocumentSymbol(LSPTypechecker &typechecker, const MessageId &id,
@@ -75,9 +80,11 @@ class LSPLoop {
     std::vector<std::unique_ptr<Location>>
     getReferencesToSymbol(LSPTypechecker &typechecker, core::SymbolRef symbol,
                           std::vector<std::unique_ptr<Location>> locations = {}) const;
+    std::vector<std::unique_ptr<DocumentHighlight>>
+    getHighlightsToSymbolInFile(LSPTypechecker &typechecker, std::string_view uri, core::SymbolRef symbol,
+                                std::vector<std::unique_ptr<DocumentHighlight>> highlights = {}) const;
     std::vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPTypechecker &typechecker,
                                                      const core::SymbolRef method) const;
-
     std::unique_ptr<ResponseMessage> handleTextDocumentReferences(LSPTypechecker &typechecker, const MessageId &id,
                                                                   const ReferenceParams &params) const;
     std::unique_ptr<ResponseMessage> handleTextDocumentDefinition(LSPTypechecker &typechecker, const MessageId &id,
