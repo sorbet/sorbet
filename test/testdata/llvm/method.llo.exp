@@ -308,7 +308,7 @@ declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
 declare { i64, i1 } @llvm.sadd.with.overflow.i64(i64, i64) #10
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_<C <U Object>><U hello>"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
+define i64 @"func_Object#hello"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
   %"rubyId_<" = load i64, i64* @"rubyIdPrecomputed_<", align 8
@@ -446,19 +446,19 @@ typeTestSuccess.i:
   %2 = load i64, i64* @guard_epoch_T, align 8
   %3 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !28
   %canTakeFastPath.i = icmp eq i64 %2, %3
-  br i1 %canTakeFastPath.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath.i, !prof !12
+  br i1 %canTakeFastPath.i, label %"func_<root>.<static-init>$111.exit", label %const_slowPath.i, !prof !12
 
 const_slowPath.i:                                 ; preds = %typeTestSuccess.i
   %4 = tail call fastcc i64 @sorbet_getConstant() #16
   store i64 %4, i64* @guarded_const_T, align 8
   %5 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !28
   store i64 %5, i64* @guard_epoch_T, align 8
-  br label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit"
+  br label %"func_<root>.<static-init>$111.exit"
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %typeTestSuccess.i, %const_slowPath.i
+"func_<root>.<static-init>$111.exit":             ; preds = %typeTestSuccess.i, %const_slowPath.i
   %callArgsAddr3.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_hello.i) #16
-  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.2, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U hello>" to i64 (...)*), i32 -1) #16
+  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello.2, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#hello" to i64 (...)*), i32 -1) #16
   %6 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @userStr_sorbet, i64 0, i64 0), i64 6) #16
   store i64 %6, i64* %callArgsAddr3.i, align 8
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_hello.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !30

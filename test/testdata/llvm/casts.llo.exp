@@ -410,7 +410,7 @@ declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
 declare { i64, i1 } @llvm.sadd.with.overflow.i64(i64, i64) #10
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_<C <U Object>><U fooAll>"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
+define i64 @"func_Object#fooAll"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
 functionEntryInitializers:
   %callArgs = alloca [2 x i64], align 8
   %rubyId_all = load i64, i64* @rubyIdPrecomputed_all, align 8
@@ -480,7 +480,7 @@ constr:
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_<C <U Object>><U fooAny1>"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
+define i64 @"func_Object#fooAny1"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
 functionEntryInitializers:
   %callArgs = alloca [2 x i64], align 8
   %rubyId_any = load i64, i64* @rubyIdPrecomputed_any, align 8
@@ -569,7 +569,7 @@ constr:
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_<C <U Object>><U fooAny2>"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
+define i64 @"func_Object#fooAny2"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
 functionEntryInitializers:
   %callArgs = alloca [2 x i64], align 8
   %rubyId_any = load i64, i64* @rubyIdPrecomputed_any, align 8
@@ -652,7 +652,7 @@ typeTestFail25:                                   ; preds = %orContinue
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_<C <U Object>><U fooInt>"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
+define i64 @"func_Object#fooInt"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
 functionEntryInitializers:
   %0 = icmp eq i32 %argc, 1
   br i1 %0, label %fillRequiredArgs, label %argCountFailBlock, !prof !11
@@ -708,7 +708,7 @@ constr:
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_<C <U Object>><U fooArray>"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
+define i64 @"func_Object#fooArray"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
   %"rubyId_[]" = load i64, i64* @"rubyIdPrecomputed_[]", align 8
@@ -870,7 +870,7 @@ afterCallIntrinsic.i:                             ; preds = %const_slowPath.i, %
   %callArgsAddr7.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %0, i64* %callArgsAddr7.i, align 8
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_fooAll.i) #16
-  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_fooAll.17, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U fooAll>" to i64 (...)*), i32 -1) #16
+  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_fooAll.17, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#fooAll" to i64 (...)*), i32 -1) #16
   %6 = load i64, i64* @guard_epoch_T, align 8
   %7 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !13
   %canTakeFastPath101.i = icmp eq i64 %6, %7
@@ -886,7 +886,7 @@ const_slowPath100.i:                              ; preds = %afterCallIntrinsic.
 afterCallIntrinsic105.i:                          ; preds = %const_slowPath100.i, %afterCallIntrinsic.i
   store i64 %0, i64* %callArgsAddr7.i, align 8
   %rawSym120.i = tail call i64 @rb_id2sym(i64 %rubyId_fooAny1.i) #16
-  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_fooAny1.18, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U fooAny1>" to i64 (...)*), i32 -1) #16
+  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_fooAny1.18, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#fooAny1" to i64 (...)*), i32 -1) #16
   %10 = load i64, i64* @guard_epoch_T, align 8
   %11 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !13
   %canTakeFastPath124.i = icmp eq i64 %10, %11
@@ -902,7 +902,7 @@ const_slowPath123.i:                              ; preds = %afterCallIntrinsic1
 afterCallIntrinsic128.i:                          ; preds = %const_slowPath123.i, %afterCallIntrinsic105.i
   store i64 %0, i64* %callArgsAddr7.i, align 8
   %rawSym143.i = tail call i64 @rb_id2sym(i64 %rubyId_fooAny2.i) #16
-  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_fooAny2.19, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U fooAny2>" to i64 (...)*), i32 -1) #16
+  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_fooAny2.19, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#fooAny2" to i64 (...)*), i32 -1) #16
   %14 = load i64, i64* @guard_epoch_T, align 8
   %15 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !13
   %canTakeFastPath147.i = icmp eq i64 %14, %15
@@ -918,22 +918,22 @@ const_slowPath146.i:                              ; preds = %afterCallIntrinsic1
 afterCallIntrinsic151.i:                          ; preds = %const_slowPath146.i, %afterCallIntrinsic128.i
   store i64 %0, i64* %callArgsAddr7.i, align 8
   %rawSym166.i = tail call i64 @rb_id2sym(i64 %rubyId_fooInt.i) #16
-  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_fooInt.20, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U fooInt>" to i64 (...)*), i32 -1) #16
+  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_fooInt.20, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#fooInt" to i64 (...)*), i32 -1) #16
   %18 = load i64, i64* @guard_epoch_T, align 8
   %19 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !13
   %canTakeFastPath170.i = icmp eq i64 %18, %19
-  br i1 %canTakeFastPath170.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath169.i, !prof !12
+  br i1 %canTakeFastPath170.i, label %"func_<root>.<static-init>$111.exit", label %const_slowPath169.i, !prof !12
 
 const_slowPath169.i:                              ; preds = %afterCallIntrinsic151.i
   %20 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1) #16
   store i64 %20, i64* @guarded_const_T, align 8
   %21 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !13
   store i64 %21, i64* @guard_epoch_T, align 8
-  br label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit"
+  br label %"func_<root>.<static-init>$111.exit"
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %afterCallIntrinsic151.i, %const_slowPath169.i
+"func_<root>.<static-init>$111.exit":             ; preds = %afterCallIntrinsic151.i, %const_slowPath169.i
   %rawSym189.i = tail call i64 @rb_id2sym(i64 %rubyId_fooArray.i) #16
-  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @str_fooArray.21, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U fooArray>" to i64 (...)*), i32 -1) #16
+  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @str_fooArray.21, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#fooArray" to i64 (...)*), i32 -1) #16
   store i64 5, i64* %callArgsAddr7.i, align 8
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_fooInt.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !31
   %22 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_fooInt.i, i32 1, i64* nonnull %callArgsAddr7.i) #16

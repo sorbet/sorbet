@@ -380,7 +380,7 @@ declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #3
 declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_<C <U Object>><U foo>"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #10 {
+define i64 @"func_Object#foo"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #10 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
@@ -552,20 +552,20 @@ const_continue44.i:                               ; preds = %const_slowPath45.i,
   %10 = load i64, i64* @guard_epoch_A, align 8
   %11 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !12
   %canTakeFastPath.i.i = icmp eq i64 %10, %11
-  br i1 %canTakeFastPath.i.i, label %"Init_func_<S <C <U A>> $1><U <static-init>>.exit.i", label %const_slowPath.i.i, !prof !11
+  br i1 %canTakeFastPath.i.i, label %"Init_func_A.<static-init>.exit.i", label %const_slowPath.i.i, !prof !11
 
 const_slowPath.i.i:                               ; preds = %const_continue44.i
   %12 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.2, i64 0, i64 0), i64 1) #15
   store i64 %12, i64* @guarded_const_A, align 8
   %13 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !12
   store i64 %13, i64* @guard_epoch_A, align 8
-  br label %"Init_func_<S <C <U A>> $1><U <static-init>>.exit.i"
+  br label %"Init_func_A.<static-init>.exit.i"
 
-"Init_func_<S <C <U A>> $1><U <static-init>>.exit.i": ; preds = %const_slowPath.i.i, %const_continue44.i
+"Init_func_A.<static-init>.exit.i":               ; preds = %const_slowPath.i.i, %const_continue44.i
   %14 = phi i64 [ %10, %const_continue44.i ], [ %13, %const_slowPath.i.i ]
   %15 = load i64, i64* @guard_epoch_T, align 8
   %canTakeFastPath51.i = icmp eq i64 %15, %14
-  br i1 %canTakeFastPath51.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath50.i, !prof !11
+  br i1 %canTakeFastPath51.i, label %"func_<root>.<static-init>$111.exit", label %const_slowPath50.i, !prof !11
 
 const_slowPath45.i:                               ; preds = %afterCallIntrinsic.i
   %16 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object.3, i64 0, i64 0), i64 6) #15
@@ -574,17 +574,17 @@ const_slowPath45.i:                               ; preds = %afterCallIntrinsic.
   store i64 %17, i64* @guard_epoch_Object, align 8
   br label %const_continue44.i
 
-const_slowPath50.i:                               ; preds = %"Init_func_<S <C <U A>> $1><U <static-init>>.exit.i"
+const_slowPath50.i:                               ; preds = %"Init_func_A.<static-init>.exit.i"
   %18 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1) #15
   store i64 %18, i64* @guarded_const_T, align 8
   %19 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !12
   store i64 %19, i64* @guard_epoch_T, align 8
-  br label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit"
+  br label %"func_<root>.<static-init>$111.exit"
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %"Init_func_<S <C <U A>> $1><U <static-init>>.exit.i", %const_slowPath50.i
+"func_<root>.<static-init>$111.exit":             ; preds = %"Init_func_A.<static-init>.exit.i", %const_slowPath50.i
   store i64 %0, i64* %callArgsAddr4.i, align 8
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_foo.i) #15
-  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo.4, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U foo>" to i64 (...)*), i32 -1) #15
+  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo.4, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#foo" to i64 (...)*), i32 -1) #15
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_foo.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !26
   %20 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_foo.i, i32 0, i64* nonnull %callArgsAddr4.i) #15
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %1)

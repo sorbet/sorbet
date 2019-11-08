@@ -399,7 +399,7 @@ declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #3
 declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_<C <U Object>><U foo>"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #10 {
+define i64 @"func_Object#foo"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #10 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
   %0 = tail call i8* @ruby_xmalloc(i64 16) #15
@@ -454,7 +454,7 @@ const_continue:                                   ; preds = %typeTestSuccess.con
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !17
   %20 = call i64 @rb_funcallv(i64 %19, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #15
   call void @dbg_sorbet_validate_id(i64 %rubyId_times, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !20
-  %21 = call i64 @rb_block_call(i64 21, i64 %rubyId_times, i32 0, i64* nonnull %callArgsAddr, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<C <U Object>><U foo>$block_1" to i64 (...)*), i64 %2) #15
+  %21 = call i64 @rb_block_call(i64 21, i64 %rubyId_times, i32 0, i64* nonnull %callArgsAddr, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_Object#foo$block_1" to i64 (...)*), i64 %2) #15
   ret i64 %21
 
 const_slowPath:                                   ; preds = %typeTestSuccess
@@ -466,7 +466,7 @@ const_slowPath:                                   ; preds = %typeTestSuccess
 }
 
 ; Function Attrs: nounwind ssp
-define internal i64 @"func_<C <U Object>><U foo>$block_1"(i64 %firstYieldArgRaw, i64 %captures, i32 %argc, i64* nocapture readnone %argArray, i64 %blockArg) #11 {
+define internal i64 @"func_Object#foo$block_1"(i64 %firstYieldArgRaw, i64 %captures, i32 %argc, i64* nocapture readnone %argArray, i64 %blockArg) #11 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
@@ -541,20 +541,20 @@ typeTestSuccess.i:
   %3 = load i64, i64* @guard_epoch_T, align 8
   %4 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
   %canTakeFastPath.i = icmp eq i64 %3, %4
-  br i1 %canTakeFastPath.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath.i, !prof !14
+  br i1 %canTakeFastPath.i, label %"func_<root>.<static-init>$111.exit", label %const_slowPath.i, !prof !14
 
 const_slowPath.i:                                 ; preds = %typeTestSuccess.i
   %5 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0)) #15
   store i64 %5, i64* @guarded_const_T, align 8
   %6 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
   store i64 %6, i64* @guard_epoch_T, align 8
-  br label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit"
+  br label %"func_<root>.<static-init>$111.exit"
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %typeTestSuccess.i, %const_slowPath.i
+"func_<root>.<static-init>$111.exit":             ; preds = %typeTestSuccess.i, %const_slowPath.i
   %callArgsAddr3.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %0, i64* %callArgsAddr3.i, align 8
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_foo.i) #15
-  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo.3, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_<C <U Object>><U foo>" to i64 (...)*), i32 -1) #15
+  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo.3, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#foo" to i64 (...)*), i32 -1) #15
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_foo.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !26
   %7 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_foo.i, i32 0, i64* nonnull %callArgsAddr3.i) #15
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %1)

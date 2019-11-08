@@ -280,16 +280,16 @@ typeTestSuccess.i:
   %2 = load i64, i64* @guard_epoch_T, align 8
   %3 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
   %canTakeFastPath.i = icmp eq i64 %2, %3
-  br i1 %canTakeFastPath.i, label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit", label %const_slowPath.i, !prof !13
+  br i1 %canTakeFastPath.i, label %"func_<root>.<static-init>$111.exit", label %const_slowPath.i, !prof !13
 
 const_slowPath.i:                                 ; preds = %typeTestSuccess.i
   %4 = tail call fastcc i64 @sorbet_getConstant() #12
   store i64 %4, i64* @guarded_const_T, align 8
   %5 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
   store i64 %5, i64* @guard_epoch_T, align 8
-  br label %"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit"
+  br label %"func_<root>.<static-init>$111.exit"
 
-"func_<S <C <U <root>>> $1><N <U <static-init>> $111>.exit": ; preds = %typeTestSuccess.i, %const_slowPath.i
+"func_<root>.<static-init>$111.exit":             ; preds = %typeTestSuccess.i, %const_slowPath.i
   %callArgsAddr3.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
   store i64 3, i64* %callArgsAddr3.i, align 8
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #12, !noalias !14
