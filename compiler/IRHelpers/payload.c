@@ -478,6 +478,10 @@ void sorbet_rb_error_arity(int argc, int min, int max) __attribute__((__noreturn
     rb_exc_raise(sorbet_rb_arity_error_new(argc, min, max));
 }
 
+void sorbet_checkStack() {
+    ruby_stack_check();
+}
+
 // ****
 // **** Optimized versions of callFunc.
 // **** Should use the same calling concention.
