@@ -12,7 +12,7 @@ public:
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId) const = 0;
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const = 0;
-
+    virtual ~NameBasedIntrinsicMethod() = default;
     static const std::vector<const NameBasedIntrinsicMethod *> &definedIntrinsics();
 };
 }; // namespace sorbet::compiler

@@ -615,25 +615,7 @@ _Bool sorbet_isa_class_of(VALUE obj, VALUE class) __attribute__((const)) {
 }
 
 // ****
-// ****                       Name Based Intrinsics
-// ****
-
-VALUE sorbet_splatIntrinsic(VALUE arr, VALUE before, VALUE after) {
-    long len = sorbet_rubyArrayLen(arr);
-    int size = sorbet_rubyValueToLong(before) + sorbet_rubyValueToLong(after);
-    int missing = size - len;
-    if (missing > 0) {
-        VALUE newArr = rb_ary_dup(arr);
-        for (int i = 0; i < missing; i++) {
-            sorbet_arrayPush(newArr, sorbet_rubyNil());
-        }
-        return newArr;
-    }
-    return arr;
-}
-
-// ****
-// ****                       Symbol Intrinsics. See CallCMethod in SymbolIntrinsics.cc
+// ****                       Helpers for Intrinsics
 // ****
 
 void sorbet_ensure_arity(int argc, int expected) {
@@ -648,6 +630,31 @@ VALUE sorbet_boolToRuby(_Bool b) {
     }
     return RUBY_Qfalse;
 }
+
+
+// ****
+// ****                       Name Based Intrinsics
+// ****
+
+VALUE sorbet_splatIntrinsic(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 3);
+    VALUE arr = argv[0];
+    long len = sorbet_rubyArrayLen(arr);
+    int size = sorbet_rubyValueToLong(argv[1]) + sorbet_rubyValueToLong(argv[2]);
+    int missing = size - len;
+    if (missing > 0) {
+        VALUE newArr = rb_ary_dup(arr);
+        for (int i = 0; i < missing; i++) {
+            sorbet_arrayPush(newArr, sorbet_rubyNil());
+        }
+        return newArr;
+    }
+    return arr;
+}
+
+// ****
+// ****                       Symbol Intrinsics. See CallCMethod in SymbolIntrinsics.cc
+// ****
 
 VALUE sorbet_T_unsafe(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);

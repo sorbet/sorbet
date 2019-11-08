@@ -213,26 +213,78 @@ public:
     }
 } IdentityIntrinsic;
 
-class SplatIntrinsic : public NameBasedIntrinsicMethod {
+enum ShouldTakeReciever {
+    TakesReciever,
+    NoReciever,
+};
+
+class CallCMethod : public NameBasedIntrinsicMethod {
+protected:
+    string_view rubyMethod;
+    string cMethod;
+    ShouldTakeReciever takesReciever;
+
 public:
+    CallCMethod(string_view rubyMethod, string cMethod, ShouldTakeReciever takesReciever)
+        : rubyMethod(rubyMethod), cMethod(cMethod), takesReciever(takesReciever){};
+
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                   int rubyBlockId) const override {
-        return MK::payloadCall(cs, "sorbet_splatIntrinsic",
-                               {i->args[0].variable, i->args[1].variable, i->args[2].variable}, build, blockMap,
-                               aliases, rubyBlockId);
+        auto &builder = builderCast(build);
+
+        // fill in args
+        {
+            int argId = -1;
+            for (auto &arg : i->args) {
+                argId += 1;
+                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+                                          llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
+                auto var = MK::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
+                builder.CreateStore(
+                    var, builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
+            }
+        }
+
+        llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
+                                  llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
+
+        llvm::Value *var;
+        if (takesReciever == TakesReciever) {
+            var = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+        } else {
+            var = MK::getRubyNilRaw(cs, builder);
+        }
+
+        return builder.CreateCall(cs.module->getFunction(cMethod),
+                                  {var, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                                   builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices)},
+                                  "rawSendResult");
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::expandSplat()};
     }
-} SplatIntrinsic;
+};
+// sorbet_splatIntrinsic
+
+static const vector<CallCMethod> knownCMethods{
+    {"<expand-splat>", "sorbet_splatIntrinsic", NoReciever},
+};
+
+vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
+    vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic,  &DefineMethodIntrinsic, &DefineClassIntrinsic,
+                                                 &BuildArrayIntrinsic, &BuildHashIntrinsic,    &IdentityIntrinsic};
+
+    for (auto &method : knownCMethods) {
+        ret.emplace_back(&method);
+    }
+    return ret;
+}
 
 }; // namespace
 const vector<const NameBasedIntrinsicMethod *> &NameBasedIntrinsicMethod::definedIntrinsics() {
-    static vector<const NameBasedIntrinsicMethod *> ret{
-        &DoNothingIntrinsic, &DefineMethodIntrinsic, &DefineClassIntrinsic, &BuildArrayIntrinsic,
-        &BuildHashIntrinsic, &IdentityIntrinsic,     &SplatIntrinsic};
+    static vector<const NameBasedIntrinsicMethod *> ret = computeNameBasedIntrinsics();
     return ret;
 }
 }; // namespace sorbet::compiler
