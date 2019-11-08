@@ -625,7 +625,7 @@ VALUE sorbet_boolToRuby(_Bool b) {
     return RUBY_Qfalse;
 }
 
-VALUE sorbet_rb_array_len(VALUE recv, ID func, int argc, const VALUE *const restrict argv) {
+VALUE sorbet_rb_array_len(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 0);
     return sorbet_longToRubyValue(rb_array_len(recv));
 }
