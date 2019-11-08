@@ -81,6 +81,11 @@ public:
                                        const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
                                        int currentRubyBlockId);
 
+    static llvm::Value *emitMethodCallDirrect(CompilerState &cs, llvm::IRBuilderBase &builder, core::SymbolRef funSym,
+                                              cfg::Send *send, const BasicBlockMap &blockMap,
+                                              UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                              int currentRubyBlockId);
+
     static llvm::Value *emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::Send *send,
                                                 const BasicBlockMap &blockMap,
                                                 UnorderedMap<core::LocalVariable, Alias> &aliases,

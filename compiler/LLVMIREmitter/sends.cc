@@ -48,9 +48,12 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
 
                     auto typeTest = MK::createTypeTestU1(cs, builder, recv, core::make_type<core::ClassType>(c));
 
-                    auto afterSend = llvm::BasicBlock::Create(cs, "afterCall", builder.GetInsertBlock()->getParent());
-                    auto slowPath = llvm::BasicBlock::Create(cs, "slowCall", builder.GetInsertBlock()->getParent());
-                    auto fastPath = llvm::BasicBlock::Create(cs, "slowCall", builder.GetInsertBlock()->getParent());
+                    auto afterSend =
+                        llvm::BasicBlock::Create(cs, "afterCallIntrinsic", builder.GetInsertBlock()->getParent());
+                    auto slowPath =
+                        llvm::BasicBlock::Create(cs, "slowCallIntrinsic", builder.GetInsertBlock()->getParent());
+                    auto fastPath =
+                        llvm::BasicBlock::Create(cs, "fastCallIntrinsic", builder.GetInsertBlock()->getParent());
                     builder.CreateCondBr(MK::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
                     builder.SetInsertPoint(fastPath);
                     auto fastPathRes =
@@ -63,7 +66,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                     auto slowPathEnd = builder.GetInsertBlock();
                     builder.CreateBr(afterSend);
                     builder.SetInsertPoint(afterSend);
-                    auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, "sendResSlowFastRaw");
+                    auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, "sendResSlowFastIntrinsicRaw");
                     phi->addIncoming(fastPathRes, fastPathEnd);
                     phi->addIncoming(slowPathRes, slowPathEnd);
                     return phi;
@@ -85,35 +88,68 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
             auto llvmFunc = LLVMIREmitterHelpers::lookupFunction(cs, funSym);
             if (llvmFunc != nullptr) {
                 auto &builder = builderCast(build);
-                // TODO: insert type guard
-                {
-                    // fill in args
-                    int argId = -1;
-                    for (auto &arg : i->args) {
-                        argId += 1;
-                        llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-                                                  llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
-                        auto var = MK::varGet(cs, arg.variable, builder, aliases, blockMap, currentRubyBlockId);
-                        builder.CreateStore(var, builder.CreateGEP(blockMap.sendArgArrayByBlock[currentRubyBlockId],
-                                                                   indices, "callArgsAddr"));
-                    }
-                }
-                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
-                                          llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
+                auto recv = MK::varGet(cs, i->recv.variable, builder, aliases, blockMap, currentRubyBlockId);
 
-                auto var = MK::varGet(cs, i->recv.variable, builder, aliases, blockMap, currentRubyBlockId);
-                builder.CreateCall(cs.module->getFunction("sorbet_checkStack"), {});
-                llvm::Value *rawCall = builder.CreateCall(
-                    llvmFunc,
-                    {llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                     builder.CreateGEP(blockMap.sendArgArrayByBlock[currentRubyBlockId], indices), var},
-                    "directSendResult");
-                return rawCall;
+                auto typeTest = MK::createTypeTestU1(cs, builder, recv, core::make_type<core::ClassType>(recvClass));
+
+                auto afterSend = llvm::BasicBlock::Create(cs, "afterCallFinal", builder.GetInsertBlock()->getParent());
+                auto slowPath = llvm::BasicBlock::Create(cs, "slowCallFinal", builder.GetInsertBlock()->getParent());
+                auto fastPath = llvm::BasicBlock::Create(cs, "fastCallFinal", builder.GetInsertBlock()->getParent());
+                builder.CreateCondBr(MK::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
+                builder.SetInsertPoint(fastPath);
+                auto fastPathRes = LLVMIREmitterHelpers::emitMethodCallDirrect(cs, build, funSym, i, blockMap, aliases,
+                                                                               currentRubyBlockId);
+                auto fastPathEnd = builder.GetInsertBlock();
+                builder.CreateBr(afterSend);
+                builder.SetInsertPoint(slowPath);
+                auto slowPathRes =
+                    LLVMIREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, currentRubyBlockId);
+                auto slowPathEnd = builder.GetInsertBlock();
+                builder.CreateBr(afterSend);
+                builder.SetInsertPoint(afterSend);
+                auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, "sendResSlowFastFinalRaw");
+                phi->addIncoming(fastPathRes, fastPathEnd);
+                phi->addIncoming(slowPathRes, slowPathEnd);
+                return phi;
             }
         }
     }
 
     return LLVMIREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, currentRubyBlockId);
+}
+
+llvm::Value *LLVMIREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm::IRBuilderBase &build,
+                                                         core::SymbolRef funSym, cfg::Send *i,
+                                                         const BasicBlockMap &blockMap,
+                                                         UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                                         int currentRubyBlockId) {
+    auto &builder = builderCast(build);
+    auto llvmFunc = LLVMIREmitterHelpers::lookupFunction(cs, funSym);
+    ENFORCE(llvmFunc != nullptr);
+    // TODO: insert type guard
+    {
+        // fill in args
+        int argId = -1;
+        for (auto &arg : i->args) {
+            argId += 1;
+            llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+                                      llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
+            auto var = MK::varGet(cs, arg.variable, builder, aliases, blockMap, currentRubyBlockId);
+            builder.CreateStore(
+                var, builder.CreateGEP(blockMap.sendArgArrayByBlock[currentRubyBlockId], indices, "callArgsAddr"));
+        }
+    }
+    llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
+                              llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
+
+    auto var = MK::varGet(cs, i->recv.variable, builder, aliases, blockMap, currentRubyBlockId);
+    builder.CreateCall(cs.module->getFunction("sorbet_checkStack"), {});
+    llvm::Value *rawCall =
+        builder.CreateCall(llvmFunc,
+                           {llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                            builder.CreateGEP(blockMap.sendArgArrayByBlock[currentRubyBlockId], indices), var},
+                           "directSendResult");
+    return rawCall;
 }
 
 llvm::Value *LLVMIREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
