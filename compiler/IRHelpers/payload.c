@@ -49,6 +49,7 @@ VALUE sorbet_rubyNil() __attribute__((always_inline)) {
 // ****
 // ****                       Conversions between Ruby values and C values
 // ****
+
 long sorbet_rubyValueToLong(VALUE val) __attribute__((always_inline)) {
     return FIX2LONG(val);
 }
@@ -68,6 +69,7 @@ VALUE sorbet_doubleToRubyValue(double u) __attribute__((always_inline)) {
 // ****
 // ****                       Integer
 // ****
+
 VALUE sorbet_Integer_plus_Integer(VALUE a, VALUE b) __attribute__((always_inline)) {
     return sorbet_longToRubyValue(sorbet_rubyValueToLong(a) + sorbet_rubyValueToLong(b));
 }
@@ -103,6 +105,7 @@ VALUE sorbet_Integer_neq_Integer(VALUE a, VALUE b) __attribute__((always_inline)
 // ****
 // ****                       Operations on Strings
 // ****
+
 const char *sorbet_rubyStringToCPtr(VALUE value) __attribute__((always_inline)) {
     return RSTRING_PTR(value);
 }
@@ -122,6 +125,7 @@ VALUE sorbet_stringPlus(VALUE str1, VALUE str2) __attribute__((always_inline)) {
 // ****
 // ****                       Operations on Arrays
 // ****
+
 long sorbet_rubyArrayLen(VALUE array) __attribute__((always_inline)) {
     return RARRAY_LEN(array);
 }
@@ -149,7 +153,7 @@ VALUE sorbet_arrayGet(VALUE array, long idx) __attribute__((always_inline)) {
 // ****
 // ****                       Operations on Hashes
 // ****
-//
+
 VALUE sorbet_newRubyHash() __attribute__((always_inline)) {
     return rb_hash_new();
 }
@@ -491,7 +495,7 @@ void sorbet_checkStack() {
 // ****
 
 // ****
-// **** Closures
+// ****                       Closures
 // ****
 
 // this specifies to use ruby default free for freeing(which is just xfree). Thus objects should be allocated with
@@ -541,7 +545,7 @@ VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
 }
 
 // ****
-// **** Implementation helpers for type tests
+// ****                       Implementation helpers for type tests
 // ****
 
 _Bool sorbet_isa_Integer(VALUE obj) __attribute__((const)) {
@@ -610,7 +614,26 @@ _Bool sorbet_isa_class_of(VALUE obj, VALUE class) __attribute__((const)) {
     return (obj == class) || (rb_obj_is_kind_of(obj, rb_cModule) && rb_class_inherited_p(obj, class));
 }
 
-// Intrinsics. See CallCMethod in SymbolIntrinsics.cc
+// ****
+// ****                       Name Based Intrinsics
+// ****
+
+VALUE sorbet_splatIntrinsic(VALUE arr, VALUE before, VALUE after) {
+    long len = sorbet_rubyArrayLen(arr);
+    int size = sorbet_rubyValueToLong(before) + sorbet_rubyValueToLong(after);
+    if (len < size) {
+        VALUE newArr = rb_ary_dup(arr);
+        for (int i = 0; i < size; i++) {
+            sorbet_arrayPush(newArr, sorbet_rubyNil());
+        }
+        return newArr;
+    }
+    return arr;
+}
+
+// ****
+// ****                       Symbol Intrinsics. See CallCMethod in SymbolIntrinsics.cc
+// ****
 
 void sorbet_ensure_arity(int argc, int expected) {
     if (argc != expected) {
@@ -721,23 +744,6 @@ VALUE sorbet_rb_int_equal(VALUE recv, int argc, const VALUE *const restrict argv
 VALUE sorbet_rb_int_neq(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
     return sorbet_boolToRuby(rb_int_equal(recv, argv[0]) == sorbet_rubyFalse());
-}
-
-// ****
-// ****                       Intrinsics
-// ****
-
-VALUE sorbet_splatIntrinsic(VALUE arr, VALUE before, VALUE after) {
-    long len = sorbet_rubyArrayLen(arr);
-    int size = sorbet_rubyValueToLong(before) + sorbet_rubyValueToLong(after);
-    if (len < size) {
-        VALUE newArr = rb_ary_dup(arr);
-        for (int i = 0; i < size; i++) {
-            sorbet_arrayPush(newArr, sorbet_rubyNil());
-        }
-        return newArr;
-    }
-    return arr;
 }
 
 #endif
