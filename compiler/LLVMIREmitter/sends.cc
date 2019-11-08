@@ -37,17 +37,19 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
             auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
             for (auto &c : potentialClasses) {
                 if (i->recv.type->derivesFrom(cs, c)) {
+                    auto methodName = i->fun.data(cs)->shortName(cs);
+                    llvm::StringRef methodNameRef(methodName.data(), methodName.size());
                     auto &builder = builderCast(build);
                     auto recv = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
 
                     auto typeTest = MK::createTypeTestU1(cs, builder, recv, core::make_type<core::ClassType>(c));
 
-                    auto afterSend =
-                        llvm::BasicBlock::Create(cs, "afterCallIntrinsic", builder.GetInsertBlock()->getParent());
-                    auto slowPath =
-                        llvm::BasicBlock::Create(cs, "slowCallIntrinsic", builder.GetInsertBlock()->getParent());
-                    auto fastPath =
-                        llvm::BasicBlock::Create(cs, "fastCallIntrinsic", builder.GetInsertBlock()->getParent());
+                    auto afterSend = llvm::BasicBlock::Create(cs, llvm::Twine("afterSymCallIntrinsic_") + methodNameRef,
+                                                              builder.GetInsertBlock()->getParent());
+                    auto slowPath = llvm::BasicBlock::Create(cs, llvm::Twine("slowSymCallIntrinsic_") + methodNameRef,
+                                                             builder.GetInsertBlock()->getParent());
+                    auto fastPath = llvm::BasicBlock::Create(cs, llvm::Twine("fastSymCallIntrinsic_") + methodNameRef,
+                                                             builder.GetInsertBlock()->getParent());
                     builder.CreateCondBr(MK::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
                     builder.SetInsertPoint(fastPath);
                     auto fastPathRes = symbolBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, rubyBlockId);
@@ -59,7 +61,8 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                     auto slowPathEnd = builder.GetInsertBlock();
                     builder.CreateBr(afterSend);
                     builder.SetInsertPoint(afterSend);
-                    auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, "sendResSlowFastIntrinsicRaw");
+                    auto phi =
+                        builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("symIntrinsicRawPhi_") + methodNameRef);
                     phi->addIncoming(fastPathRes, fastPathEnd);
                     phi->addIncoming(slowPathRes, slowPathEnd);
                     return phi;
@@ -86,14 +89,19 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
         if (funSym.exists() && funSym.data(cs)->isFinalMethod()) {
             auto llvmFunc = LLVMIREmitterHelpers::lookupFunction(cs, funSym);
             if (llvmFunc != nullptr) {
+                auto methodName = i->fun.data(cs)->shortName(cs);
+                llvm::StringRef methodNameRef(methodName.data(), methodName.size());
                 auto &builder = builderCast(build);
                 auto recv = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
 
                 auto typeTest = MK::createTypeTestU1(cs, builder, recv, core::make_type<core::ClassType>(recvClass));
 
-                auto afterSend = llvm::BasicBlock::Create(cs, "afterCallFinal", builder.GetInsertBlock()->getParent());
-                auto slowPath = llvm::BasicBlock::Create(cs, "slowCallFinal", builder.GetInsertBlock()->getParent());
-                auto fastPath = llvm::BasicBlock::Create(cs, "fastCallFinal", builder.GetInsertBlock()->getParent());
+                auto afterSend = llvm::BasicBlock::Create(cs, llvm::Twine("afterCallFinal_") + methodNameRef,
+                                                          builder.GetInsertBlock()->getParent());
+                auto slowPath = llvm::BasicBlock::Create(cs, llvm::Twine("slowCallFinal_") + methodNameRef,
+                                                         builder.GetInsertBlock()->getParent());
+                auto fastPath = llvm::BasicBlock::Create(cs, llvm::Twine("fastCallFinal_") + methodNameRef,
+                                                         builder.GetInsertBlock()->getParent());
                 builder.CreateCondBr(MK::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
                 builder.SetInsertPoint(fastPath);
                 auto fastPathRes =
@@ -106,7 +114,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                 auto slowPathEnd = builder.GetInsertBlock();
                 builder.CreateBr(afterSend);
                 builder.SetInsertPoint(afterSend);
-                auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, "sendResSlowFastFinalRaw");
+                auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("finalCallPhi_") + methodNameRef);
                 phi->addIncoming(fastPathRes, fastPathEnd);
                 phi->addIncoming(slowPathRes, slowPathEnd);
                 return phi;
