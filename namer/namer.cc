@@ -561,16 +561,15 @@ public:
                 }
                 return;
             }
-            if (symArg.flags.isBlock != methodArg.block) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
-                                methodArg.local.toString(ctx), methodArg.block ? "block" : "non-block");
-                    e.addErrorLine(sym.data(ctx)->loc(),
-                                   "The corresponding argument `{}` in the previous definition was {}a block argument",
-                                   symArg.show(ctx), symArg.flags.isBlock ? "" : "not ");
-                }
-                return;
-            }
+            // because of how we synthesize block args, this condition should always be true. In particular: the last
+            // thing in our list of arguments will always be a block arg, either an explicit one or an implicit one, and
+            // the only situation in which a block arg will ever be seen is as the last argument in the
+            // list. Consequently, the only situation in which a block arg will be matched up with a non-block arg is
+            // when the lists are different lengths: but in that case, we'll have bailed out of this function already
+            // with the "without matching argument count" error above. So, as long as we have maintained the intended
+            // invariants around methods and arguments, we do not need to ever issue an error about non-matching
+            // isBlock-ness.
+            ENFORCE(symArg.flags.isBlock == methodArg.block);
             if (symArg.flags.isRepeated != methodArg.repeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
