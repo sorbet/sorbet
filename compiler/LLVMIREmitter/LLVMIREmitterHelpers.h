@@ -130,7 +130,7 @@ public:
                                int rubyBlockId);
 
     static void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &builder,
-                       UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap,
+                       const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
                        int rubyBlockId);
 };
 } // namespace sorbet::compiler

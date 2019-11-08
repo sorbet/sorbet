@@ -404,7 +404,7 @@ llvm::Value *MK::varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBu
 }
 
 void MK::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &build,
-                UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap, int rubyBlockId) {
+                const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId) {
     auto &builder = builderCast(build);
     if (aliases.contains(local)) {
         // alias to a field or constant
