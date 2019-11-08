@@ -73,24 +73,28 @@ module T::Private::ClassUtils
   # overriding it (if it is defined by one of mod's ancestors). Returns a ReplacedMethod instance
   # on which you can call `bind(...).call(...)` to call the original method, or `restore` to
   # restore the original method (by overwriting or removing the override).
-  def self.replace_method(mod, name, &blk)
+  def self.replace_method(mod, name, specific: false, &blk)
     original_method = mod.instance_method(name)
     original_visibility = visibility_method_name(mod, name)
     original_owner = original_method.owner
 
-    mod.ancestors.each do |ancestor|
-      break if ancestor == mod
-      if ancestor == original_owner
-        # If we get here, that means the method we're trying to replace exists on a *prepended*
-        # mixin, which means in order to supersede it, we'd need to create a method on a new
-        # module that we'd prepend before `ancestor`. The problem with that approach is there'd
-        # be no way to remove that new module after prepending it, so we'd be left with these
-        # empty anonymous modules in the ancestor chain after calling `restore`.
-        #
-        # That's not necessarily a deal breaker, but for now, we're keeping it as unsupported.
-        raise "You're trying to replace `#{name}` on `#{mod}`, but that method exists in a " \
-              "prepended module (#{ancestor}), which we don't currently support. Talk to " \
-              "#dev-productivity for help."
+    # The check below assumes that you want to replace the method that is first-in-line
+    # to be called, which is not always the case.
+    unless specific
+      mod.ancestors.each do |ancestor|
+        break if ancestor == mod
+        if ancestor == original_owner
+          # If we get here, that means the method we're trying to replace exists on a *prepended*
+          # mixin, which means in order to supersede it, we'd need to create a method on a new
+          # module that we'd prepend before `ancestor`. The problem with that approach is there'd
+          # be no way to remove that new module after prepending it, so we'd be left with these
+          # empty anonymous modules in the ancestor chain after calling `restore`.
+          #
+          # That's not necessarily a deal breaker, but for now, we're keeping it as unsupported.
+          raise "You're trying to replace `#{name}` on `#{mod}`, but that method exists in a " \
+                "prepended module (#{ancestor}), which we don't currently support. Talk to " \
+                "#dev-productivity for help."
+        end
       end
     end
 

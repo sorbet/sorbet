@@ -383,6 +383,28 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       )
     end
 
+    it "fails when instantiating the class when the class defines initialize with a sig" do
+      klass = Class.new do
+        extend T::Sig
+        extend T::Helpers
+        abstract!
+
+        sig {returns(Integer)}
+        def initialize
+          3
+        end
+      end
+
+      err = assert_raises(RuntimeError) do
+        klass.new
+      end
+
+      assert_equal(
+        "#{klass} is declared as abstract; it cannot be instantiated",
+        err.message
+      )
+    end
+
     it "fails when the the class respond to == with a lie" do
       klass = Class.new do
         extend T::Helpers
@@ -431,6 +453,26 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       end
       klass.new.foo
       T::Private::Abstract::Validate.validate_subclass(klass)
+    end
+
+    it 'succeeds with concrete initialize from parent' do
+      parent = Class.new do
+        extend T::Sig
+        extend T::Helpers
+        abstract!
+
+        sig {returns(Integer)}
+        def initialize
+          @foo = true
+          3
+        end
+      end
+
+      child = Class.new(parent) do
+        attr_reader :foo
+      end
+
+      assert(child.new.foo)
     end
 
     it 'can override methods using type members' do
