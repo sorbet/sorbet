@@ -1633,7 +1633,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     value = lit->scope.get();
                 }
                 absl::c_reverse(args);
-                auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(), MK::Array(loc, std::move(args)));
+                auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(),
+                                     MK::Array(loc, std::move(args)));
                 result.swap(res);
             },
             [&](parser::LineLiteral *line) {
