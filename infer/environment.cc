@@ -803,7 +803,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 }
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(bind.loc, retainedResult, send->fun, send->isPrivateOk));
+                        ctx,
+                        core::lsp::SendResponse(bind.loc, retainedResult, send->fun, send->isPrivateOk, ctx.owner));
                 }
                 if (send->link) {
                     // This should eventually become ENFORCEs but currently they are wrong

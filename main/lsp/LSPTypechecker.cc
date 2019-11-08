@@ -7,6 +7,7 @@
 #include "core/Unfreeze.h"
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/LSPMessage.h"
+#include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/LocalVarSaver.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/pipeline/pipeline.h"
@@ -455,7 +456,7 @@ TypecheckRun LSPTypechecker::retypecheck(LSPFileUpdates updates) const {
     return runTypechecking(move(updates));
 }
 
-const ast::ParsedFile &LSPTypechecker::getIndex(core::FileRef fref) const {
+const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
     const auto id = fref.id();
     auto treeFinalGS = indexedFinalGS.find(id);
     if (treeFinalGS != indexedFinalGS.end()) {
@@ -463,6 +464,17 @@ const ast::ParsedFile &LSPTypechecker::getIndex(core::FileRef fref) const {
     }
     ENFORCE(id < indexed.size());
     return indexed[id];
+}
+
+vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs) const {
+    vector<ast::ParsedFile> updatedIndexed;
+    for (auto fref : frefs) {
+        auto &indexed = getIndexed(fref);
+        if (indexed.tree) {
+            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree->deepCopy(), indexed.file});
+        }
+    }
+    return pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
 }
 
 const std::vector<core::FileHash> &LSPTypechecker::getFileHashes() const {
