@@ -552,35 +552,40 @@ public:
 
             if (symArg.flags.isKeyword != methodArg.keyword) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), "isKeyword", symArg.flags.isKeyword, methodArg.keyword);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                    e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
+                                methodArg.local.toString(ctx), methodArg.keyword ? "keyword" : "non-keyword");
+                    e.addErrorLine(
+                        sym.data(ctx)->loc(),
+                        "The corresponding argument `{}` in the previous definition was {}a keyword argument",
+                        symArg.show(ctx), symArg.flags.isKeyword ? "" : "not ");
                 }
                 return;
             }
             if (symArg.flags.isBlock != methodArg.block) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), "isBlock", symArg.flags.isBlock, methodArg.block);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                    e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
+                                methodArg.local.toString(ctx), methodArg.block ? "block" : "non-block");
+                    e.addErrorLine(sym.data(ctx)->loc(),
+                                   "The corresponding argument `{}` in the previous definition was {}a block argument",
+                                   symArg.show(ctx), symArg.flags.isBlock ? "" : "not ");
                 }
                 return;
             }
             if (symArg.flags.isRepeated != methodArg.repeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), "isRepeated", symArg.flags.isRepeated, methodArg.repeated);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                    e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
+                                methodArg.local.toString(ctx), methodArg.repeated ? "splat" : "non-splat");
+                    e.addErrorLine(sym.data(ctx)->loc(),
+                                   "The corresponding argument `{}` in the previous definition was {}a splat argument",
+                                   symArg.show(ctx), symArg.flags.isRepeated ? "" : "not ");
                 }
                 return;
             }
             if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader("Method `{}` redefined with mismatched argument name. Expected: `{}`, got: `{}`",
-                                sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
+                    e.setHeader(
+                        "Method `{}` redefined with mismatched keyword argument name. Expected: `{}`, got: `{}`",
+                        sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return;
