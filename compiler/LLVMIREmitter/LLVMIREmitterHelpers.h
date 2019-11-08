@@ -126,7 +126,7 @@ public:
                                     const UnorderedMap<core::LocalVariable, Alias> &aliases, int currentRubyBlockId);
 
     static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
-                               const UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap,
+                               const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                int rubyBlockId);
 
     static void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &builder,

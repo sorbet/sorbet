@@ -366,7 +366,7 @@ llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &bu
 } // namespace
 
 llvm::Value *MK::varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &build,
-                        const UnorderedMap<core::LocalVariable, Alias> &aliases, const BasicBlockMap &blockMap,
+                        const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases,
                         int rubyBlockId) {
     auto &builder = builderCast(build);
     if (aliases.contains(local)) {
