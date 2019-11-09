@@ -12,3 +12,8 @@ module A
   end
 end
 foo
+
+puts defined?(A)
+# puts defined?(1)
+puts defined?(A+1)
+puts defined?(B+1)

@@ -309,21 +309,19 @@ VALUE sorbet_getMethodBlockAsProc() {
 }
 
 // Trying to be a copy of rb_mod_const_get
-VALUE sorbet_getConstant(const char *path, long pathLen) __attribute__((noinline)) {
-    VALUE name, mod;
+VALUE sorbet_getConstantAt(VALUE mod, ID id) __attribute__((noinline)) {
+    VALUE name;
     rb_encoding *enc;
-    const char *pbeg, *p, *pend;
-    ID id;
+    const char *pbeg, *p, *path, *pend;
     int recur = 1;
     int DISABLED_CODE = 0;
 
-    id = rb_intern2(path, pathLen);
     name = ID2SYM(id);
-    mod = sorbet_rb_cObject();
     enc = rb_enc_get(name);
+    path = rb_id2name(id);
 
     pbeg = p = path;
-    pend = path + pathLen;
+    pend = path + strlen(path);
 
     if (DISABLED_CODE && (p >= pend || !*p)) {
     wrong_name:
@@ -390,6 +388,12 @@ VALUE sorbet_getConstant(const char *path, long pathLen) __attribute__((noinline
     return mod;
 }
 // End copy of rb_mod_const_get
+
+VALUE sorbet_getConstant(const char *path, long pathLen) __attribute__((noinline)) {
+    VALUE mod = sorbet_rb_cObject();
+    ID id = rb_intern2(path, pathLen);
+    return sorbet_getConstantAt(mod, id);
+}
 
 void sorbet_setConstant(VALUE mod, const char *name, long nameLen, VALUE value) __attribute__((noinline)) {
     ID id = rb_intern2(name, nameLen);
@@ -651,17 +655,21 @@ VALUE sorbet_splatIntrinsic(VALUE recv, int argc, const VALUE *const restrict ar
     return arr;
 }
 
+// This doesn't do exactly the right thing because that is done by the parser in Ruby. Ruby will return the String "expression" if the RHS is an expression.
 VALUE sorbet_definedIntinsic(VALUE recv, int argc, const VALUE *const restrict argv) {
+    if (argc == 0) {
+        return sorbet_rubyNil();
+    }
     VALUE klass = sorbet_rb_cObject();
     for (int i = 0; i < argc; i++) {
-        ID id = argv[i];
-        VALUE newClass = rb_const_search(klass, id, 0, 0, 0);
-        if (newClass == Qundef) {
-            return sorbet_boolToRuby(false);
+        VALUE str = argv[i];
+        ID id = rb_intern(sorbet_rubyStringToCPtr(str));
+        if (!rb_const_defined_at(klass, id)) {
+            return sorbet_rubyNil();
         }
-        klass = newClass;
+        klass = sorbet_getConstantAt(klass, id);
     }
-    return sorbet_boolToRuby(true);
+    return rb_str_new2("constant");
 }
 
 
