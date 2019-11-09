@@ -655,6 +655,7 @@ VALUE sorbet_splatIntrinsic(VALUE recv, int argc, const VALUE *const restrict ar
 // ****                       Symbol Intrinsics. See CallCMethod in SymbolIntrinsics.cc
 // ****
 
+// TODO: add many from https://github.com/ruby/ruby/blob/ruby_2_6/include/ruby/intern.h#L55
 VALUE sorbet_T_unsafe(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
     return argv[0];
@@ -665,7 +666,65 @@ VALUE sorbet_rb_array_len(VALUE recv, int argc, const VALUE *const restrict argv
     return sorbet_longToRubyValue(rb_array_len(recv));
 }
 
-// TODO: add many from https://github.com/ruby/ruby/blob/ruby_2_6/include/ruby/intern.h#L55
+VALUE sorbet_rb_array_square_br(VALUE recv, int argc, const VALUE *const restrict argv) {
+    VALUE ary = recv;
+    rb_check_arity(argc, 1, 2);
+    if (argc == 2) {
+        return rb_ary_aref2(ary, argv[0], argv[1]);
+    }
+    VALUE arg = argv[0];
+
+    long beg, len;
+
+    /* special case - speeding up */
+    if (FIXNUM_P(arg)) {
+        return rb_ary_entry(ary, FIX2LONG(arg));
+    }
+    /* check if idx is Range */
+    switch (rb_range_beg_len(arg, &beg, &len, RARRAY_LEN(ary), 0)) {
+        case Qfalse:
+            break;
+        case Qnil:
+            return Qnil;
+        default:
+            return rb_ary_subseq(ary, beg, len);
+    }
+    return rb_ary_entry(ary, NUM2LONG(arg));
+}
+
+void rb_ary_splice(VALUE ary, long beg, long len, const VALUE *rptr, long rlen);
+
+VALUE sorbet_rb_array_square_br_eq(VALUE ary, int argc, const VALUE *const restrict argv) {
+    long offset, beg, len;
+    VALUE rpl;
+
+    if (argc == 3) {
+        rb_check_frozen(ary);
+        beg = NUM2LONG(argv[0]);
+        len = NUM2LONG(argv[1]);
+        goto range;
+    }
+    rb_check_arity(argc, 2, 2);
+    rb_check_frozen(ary);
+    if (FIXNUM_P(argv[0])) {
+        offset = FIX2LONG(argv[0]);
+        goto fixnum;
+    }
+    if (rb_range_beg_len(argv[0], &beg, &len, RARRAY_LEN(ary), 1)) {
+        /* check if idx is Range */
+    range:
+        rpl = rb_ary_to_ary(argv[argc - 1]);
+        rb_ary_splice(ary, beg, len, RARRAY_CONST_PTR_TRANSIENT(rpl), RARRAY_LEN(rpl));
+        RB_GC_GUARD(rpl);
+        return argv[argc - 1];
+    }
+
+    offset = NUM2LONG(argv[0]);
+fixnum:
+    rb_ary_store(ary, offset, argv[1]);
+    return argv[1];
+}
+
 VALUE sorbet_rb_int_plus(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
     VALUE y = argv[0];
