@@ -191,7 +191,7 @@ ID sorbet_symToID(VALUE sym) __attribute__((always_inline)) {
     return SYM2ID(sym);
 }
 
-ID sorbet_IDToSym(ID id) __attribute__((always_inline)) {
+VALUE sorbet_IDToSym(ID id) __attribute__((always_inline)) {
     dbg_sorbet_validate_id(id, "id");
     return ID2SYM(id);
 }
