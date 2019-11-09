@@ -1,27 +1,36 @@
 # typed: true
 
-def foo
-  # ^^^ symbol-search: "foo"
-end
+module A; module B; module C; end; end; end  
 
-class Foo
-  #   ^^^ symbol-search: "Foo"
-  #   TODO: support case-insensitive matches ^^^ symbol-search: "foo"
-  def foo
-    # ^^^ symbol-search: "foo"
+module A::B::C
+  module FooBarBaz1
+    #    ^^^^^^^^^^ symbol-search: "fbb"
+    def self.d; end
+    class FooBarBaz2
+      #   ^^^^^^^^^^ symbol-search: "fbb"
+      def self.d; end
+      def e; end
+    end
   end
-end
 
-module Bar
-  def foo
-    # ^^^ symbol-search: "foo"
+  class FooBarBaz3
+    #   ^^^^^^^^^^ symbol-search: "fbb"
+    def self.d; end
+    def e; end
   end
 
   module Foo
-    #    ^^^ symbol-search: "Foo"
-    #    TODO: support case-insensitive matches ^^^ symbol-search: "foo"
-    def foo
-      # ^^^ symbol-search: "foo"
+    module Bar
+      class Baz
+        #   ^^^ symbol-search: "fbb"
+        def self.d; end
+        def e; end
+      end
+    end
+    class BarBaz
+      #   ^^^^^^ symbol-search: "fbb"
+      def self.d; end
+      def e; end
     end
   end
 end

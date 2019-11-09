@@ -1439,10 +1439,11 @@ void checkSymbolsReturnedInRankOrder(string_view query,
                 if (*leftAssertion->rank > *rightAssertion->rank) {
                     ADD_FAILURE() << fmt::format(
                         "Symbols not returned in ascending `rank` order for query `{}`:\n"
-                        "Symbol matching assertion #1 should appear *after* symbol matching assertion #2.\n"
+                        "Symbol for assertion #1 ({} {}) should appear *after* symbol for assertion #2 ({} {}).\n"
                         "Assertion #1: {}\nAssertion #2: {}\nSymbol #1:\n{}\nSymbol #2:\n{}\n",
-                        query, leftAssertion->toString(), rightAssertion->toString(), leftSymbol.toJSON(true),
-                        rightSymbol.toJSON(true));
+                        query, leftSymbol.containerName.value_or(""), leftSymbol.name,
+                        rightSymbol.containerName.value_or(""), rightSymbol.name, leftAssertion->toString(),
+                        rightAssertion->toString(), leftSymbol.toJSON(true), rightSymbol.toJSON(true));
                 }
             }
         }
