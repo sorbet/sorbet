@@ -652,19 +652,16 @@ VALUE sorbet_splatIntrinsic(VALUE recv, int argc, const VALUE *const restrict ar
 }
 
 VALUE sorbet_definedIntinsic(VALUE recv, int argc, const VALUE *const restrict argv) {
-    if (argc == 0) {
-        return rb_id2str(sorbet_IDIntern("", 0));
+    VALUE klass = sorbet_rb_cObject();
+    for (int i = 0; i < argc; i++) {
+        ID id = argv[i];
+        VALUE newClass = rb_const_search(klass, id, 0, 0, 0);
+        if (newClass == Qundef) {
+            return sorbet_boolToRuby(false);
+        }
+        klass = newClass;
     }
-    VALUE t_paamayim_nekudotayim = rb_id2str(sorbet_IDIntern("::", 2));
-    VALUE name = argv[0];
-    for (int i = 1; i < argc; i++) {
-        name = rb_str_plus(name, t_paamayim_nekudotayim);
-        name = rb_str_plus(name, argv[i]);
-    }
-    if (rb_const_defined_at(sorbet_rb_cObject(), name)) {
-        return sorbet_boolToRuby(true);
-    }
-    return sorbet_boolToRuby(false);
+    return sorbet_boolToRuby(true);
 }
 
 
