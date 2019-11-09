@@ -26,20 +26,22 @@ echo -e "source\tinterpreted\tcompiled"
 for this_src in "${rb_src[@]}" DUMMY; do
     cp "$this_src" tmp/bench/target.rb
     pushd tmp/bench &>/dev/null
+      echo -en "${this_src#test/testdata/ruby_benchmark/}\t"
       ../../run/compile . target.rb &>/dev/null
       ld -bundle -o target.bundle target.rb.o -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
       (time for i in {1..10}; do ../../bazel-bin/external/ruby_2_6_3/ruby -r ../../run/tools/preamble.rb ./target.rb; done) 2>&1|grep real | cut -d$'\t' -f 2 > ruby_runtime
-      (time for i in {1..10}; do ../../bazel-bin/external/ruby_2_6_3/ruby -r ../../run/tools/preamble.rb -e "require './target.so'" ; done) 2>&1|grep real | cut -d$'\t' -f 2 > compiled_runtime
 
       minutes_ruby=$(cat ruby_runtime|cut -d "m" -f1)
       seconds_ruby=$(cat ruby_runtime|cut -d "m" -f2 |cut -d "s" -f 1)
       ruby_time=$(echo "scale=3;(${minutes_ruby} * 60 + ${seconds_ruby})/10"| bc)
+      echo -en "$ruby_time\t"
 
+      (time for i in {1..10}; do ../../bazel-bin/external/ruby_2_6_3/ruby -r ../../run/tools/preamble.rb -e "require './target.so'" ; done) 2>&1|grep real | cut -d$'\t' -f 2 > compiled_runtime
       minutes_compiled=$(cat compiled_runtime|cut -d "m" -f1)
       seconds_compiled=$(cat compiled_runtime|cut -d "m" -f2 |cut -d "s" -f 1)
       compiled_time=$(echo "scale=3;(${minutes_compiled} * 60 + ${seconds_compiled})/10"| bc)
+      echo -e "$compiled_time"
 
-      echo -e "${this_src#test/testdata/ruby_benchmark/}\t$ruby_time\t$compiled_time"
       rm *
     popd &>/dev/null
 done
