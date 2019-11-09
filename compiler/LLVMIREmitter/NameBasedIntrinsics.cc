@@ -263,10 +263,9 @@ public:
                                   "rawSendResult");
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::expandSplat()};
+        return {cs.gs.lookupNameUTF8(rubyMethod)};
     }
 };
-// sorbet_splatIntrinsic
 
 static const vector<CallCMethod> knownCMethods{
     {"<expand-splat>", "sorbet_splatIntrinsic", NoReciever},
@@ -275,7 +274,6 @@ static const vector<CallCMethod> knownCMethods{
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic,  &DefineMethodIntrinsic, &DefineClassIntrinsic,
                                                  &BuildArrayIntrinsic, &BuildHashIntrinsic,    &IdentityIntrinsic};
-
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }
