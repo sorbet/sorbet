@@ -9,8 +9,16 @@ test_suite(
 load(":compiler_tests.bzl", "compiler_tests")
 
 compiler_tests(
+    "test_corpus",
     glob([
-        "testdata/**/*.rb",
+        "testdata/llvm/**/*.rb",
+    ]),
+)
+
+compiler_tests(
+    "ruby_benchmark",
+    glob([
+        "testdata/ruby_benchmark/**/*.rb",
     ]),
 )
 

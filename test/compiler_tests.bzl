@@ -1,8 +1,8 @@
 load("@com_stripe_ruby_typer//test:pipeline_test.bzl", "pipeline_tests")
 
-def compiler_tests(files):
+def compiler_tests(name, files):
     pipeline_tests(
-        "test_corpus",
+        name,
         files,
         "PosTests",
     )
