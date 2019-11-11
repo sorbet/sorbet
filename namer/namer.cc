@@ -552,35 +552,39 @@ public:
 
             if (symArg.flags.isKeyword != methodArg.keyword) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), "isKeyword", symArg.flags.isKeyword, methodArg.keyword);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                    e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
+                                methodArg.local.toString(ctx), methodArg.keyword ? "keyword" : "non-keyword");
+                    e.addErrorLine(
+                        sym.data(ctx)->loc(),
+                        "The corresponding argument `{}` in the previous definition was {}a keyword argument",
+                        symArg.show(ctx), symArg.flags.isKeyword ? "" : "not ");
                 }
                 return;
             }
-            if (symArg.flags.isBlock != methodArg.block) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), "isBlock", symArg.flags.isBlock, methodArg.block);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
-                }
-                return;
-            }
+            // because of how we synthesize block args, this condition should always be true. In particular: the last
+            // thing in our list of arguments will always be a block arg, either an explicit one or an implicit one, and
+            // the only situation in which a block arg will ever be seen is as the last argument in the
+            // list. Consequently, the only situation in which a block arg will be matched up with a non-block arg is
+            // when the lists are different lengths: but in that case, we'll have bailed out of this function already
+            // with the "without matching argument count" error above. So, as long as we have maintained the intended
+            // invariants around methods and arguments, we do not need to ever issue an error about non-matching
+            // isBlock-ness.
+            ENFORCE(symArg.flags.isBlock == methodArg.block);
             if (symArg.flags.isRepeated != methodArg.repeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), "isRepeated", symArg.flags.isRepeated, methodArg.repeated);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                    e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
+                                methodArg.local.toString(ctx), methodArg.repeated ? "splat" : "non-splat");
+                    e.addErrorLine(sym.data(ctx)->loc(),
+                                   "The corresponding argument `{}` in the previous definition was {}a splat argument",
+                                   symArg.show(ctx), symArg.flags.isRepeated ? "" : "not ");
                 }
                 return;
             }
             if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader("Method `{}` redefined with mismatched argument name. Expected: `{}`, got: `{}`",
-                                sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
+                    e.setHeader(
+                        "Method `{}` redefined with mismatched keyword argument name. Expected: `{}`, got: `{}`",
+                        sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return;
