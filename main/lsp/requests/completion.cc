@@ -18,43 +18,50 @@ namespace {
 struct RubyKeyword {
     const string keyword;
     const string documentation;
+    const optional<string> snippet;
 
-    RubyKeyword(string keyword, string documentation) : keyword(keyword), documentation(documentation){};
+    RubyKeyword(string keyword, string documentation, optional<string> snippet = nullopt)
+        : keyword(keyword), documentation(documentation), snippet(snippet){};
 };
 
 // Taken from https://docs.ruby-lang.org/en/2.6.0/keywords_rdoc.html
 // We might want to put this somewhere shareable if there are more places that want to use it.
+//
+// VS Code snippet syntax is in general smarter than LSP snippet syntax.
+// Specifically, VS Code will intelligently insert the correct indentation after newlines.
 const RubyKeyword rubyKeywords[] = {
     {"BEGIN", "Runs before any other code in the current file."},
     {"END", "Runs after any other code in the current file."},
     {"__ENCODING__", "The script encoding of the current file."},
     {"__FILE__", "The path to the current file."},
     {"__LINE__", "The line number of this keyword in the current file."},
-    {"alias", "Creates an alias between two methods (and other things)."},
+    {"alias", "Creates an alias between two methods (and other things).", "alias ${1:_new} ${2:_existing}$0"},
     {"and", "Short-circuit Boolean and with lower precedence than &&"},
-    {"begin", "Starts an exception handling block."},
+    {"begin", "Starts an exception handling block.", "begin\n  $0\nend"},
     {"break", "Leaves a block early."},
-    {"case", "Starts a case expression."},
-    {"class", "Creates or opens a class."},
-    {"def", "Defines a method."},
-    {"defined?", "Returns a string describing its argument."},
-    {"do", "Starts a block."},
+    {"case", "Starts a case expression.", "case ${1:expr}\nwhen ${2:expr}\n  $0\nelse\nend"},
+    {"class", "Creates or opens a class.", "class ${1:ClassName}\n  $0\nend"},
+    {"def", "Defines a method.", "def ${1:method_name}($2)\n  $0\nend"},
+    {"defined?", "Returns a string describing its argument.", "defined?(${1:Constant})$0"},
+    // TODO(jez) Even better would be to auto-insert a block for methods that we know must take a block
+    {"do", "Starts a block.", "do\n  $0\nend"},
     {"else", "The unhandled condition in case, if and unless expressions."},
-    {"elsif", "An alternate condition for an if expression."},
+    {"elsif", "An alternate condition for an if expression.", "elsif ${1:expr}$0"},
     {"end",
      "The end of a syntax block. Used by classes, modules, methods, exception handling and control expressions."},
     {"ensure", "Starts a section of code that is always run when an exception is raised."},
     {"false", "Boolean false."},
     {"for", "A loop that is similar to using the each method."},
-    {"if", "Used for if and modifier if expressions."},
+    {"if", "Used for if and modifier if expressions.", "if ${1:expr}\n  $0\nend"},
     {"in", "Used to separate the iterable object and iterator variable in a for loop."},
-    {"module", "Creates or opens a module."},
+    {"module", "Creates or opens a module.", "module ${1:ModuleName}\n  $0\nend"},
     {"next", "Skips the rest of the block."},
     {"nil", "A false value usually indicating “no value” or “unknown”."},
     {"not", "Inverts the following boolean expression. Has a lower precedence than !"},
     {"or", "Boolean or with lower precedence than ||"},
     {"redo", "Restarts execution in the current block."},
-    {"rescue", "Starts an exception section of code in a begin block."},
+    // Would really like to dedent the line too...
+    {"rescue", "Starts an exception section of code in a begin block.", "rescue ${1:MyException} => ${2:ex}\n$0"},
     {"retry", "Retries an exception block."},
     {"return", "Exits a method."},
     {"self", "The object the current method is attached to."},
@@ -63,10 +70,11 @@ const RubyKeyword rubyKeywords[] = {
     {"true", "Boolean true."},
     // This is also defined on Kernel
     // {"undef", "Prevents a class or module from responding to a method call."},
-    {"unless", "Used for unless and modifier unless expressions."},
-    {"until", "Creates a loop that executes until the condition is true."},
-    {"when", "A condition in a case expression."},
-    {"while", "Creates a loop that executes while the condition is true."},
+    {"unless", "Used for unless and modifier unless expressions.", "unless ${1:expr}\n  $0\nend"},
+    {"until", "Creates a loop that executes until the condition is true.", "until ${1:expr}\n  $0\nend"},
+    // Would really like to dedent the line too...
+    {"when", "A condition in a case expression.", "when ${1:expr}$0"},
+    {"while", "Creates a loop that executes while the condition is true.", "while ${1:expr}\n  $0\nend"},
     {"yield", "Starts execution of the block sent to the current method."},
 };
 
@@ -254,27 +262,42 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
 unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &gs, const LSPConfiguration &config,
                                                        const RubyKeyword &rubyKeyword, const core::Loc queryLoc,
                                                        string_view prefix, size_t sortIdx) {
-    auto label = rubyKeyword.keyword;
-    auto item = make_unique<CompletionItem>(label);
+    auto item = make_unique<CompletionItem>(rubyKeyword.keyword);
     item->sortText = fmt::format("{:06d}", sortIdx);
-    item->kind = CompletionItemKind::Keyword;
 
     // TODO(jez) This should probably be a helper function (see getCompletionItemForSymbol)
     u4 queryStart = queryLoc.beginPos();
     u4 prefixSize = prefix.size();
+
+    string replacementText;
+    if (rubyKeyword.snippet.has_value() && config.getClientConfig().clientCompletionItemSnippetSupport) {
+        item->insertTextFormat = InsertTextFormat::Snippet;
+        item->kind = CompletionItemKind::Snippet;
+        replacementText = rubyKeyword.snippet.value();
+    } else {
+        item->insertTextFormat = InsertTextFormat::PlainText;
+        item->kind = CompletionItemKind::Keyword;
+        replacementText = rubyKeyword.keyword;
+    }
+
     auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
     auto replacementRange = Range::fromLoc(gs, replacementLoc);
-    auto replacementText = label;
     if (replacementRange != nullptr) {
         item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
     } else {
-        // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
+        // Range::fromLoc failed... maybe the fuzzer is running?
         item->insertText = replacementText;
     }
-    item->insertTextFormat = InsertTextFormat::PlainText;
 
-    item->documentation =
-        make_unique<MarkupContent>(config.getClientConfig().clientCompletionItemMarkupKind, rubyKeyword.documentation);
+    item->detail = fmt::format("(sorbet) {}", rubyKeyword.documentation);
+    if (rubyKeyword.snippet.has_value()) {
+        auto documentation = rubyKeyword.snippet.value();
+        auto markupKind = config.getClientConfig().clientCompletionItemMarkupKind;
+        if (markupKind == MarkupKind::Markdown) {
+            documentation = absl::StrCat("\n\n```ruby\n", documentation, "\n```");
+        }
+        item->documentation = make_unique<MarkupContent>(markupKind, documentation);
+    }
 
     return item;
 }
