@@ -4,8 +4,6 @@
 #include "ast/treemap/treemap.h"
 #include "core/core.h"
 
-#include <iostream>
-
 #include <utility>
 
 using namespace std;
