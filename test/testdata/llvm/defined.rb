@@ -9,6 +9,7 @@ end
 foo
 module A
   class B
+    # puts defined?(B)
   end
 end
 foo
