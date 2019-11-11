@@ -8,6 +8,7 @@
 #include "common/sort.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
+#include <iterator>
 #include <regex>
 
 using namespace std;
@@ -1471,6 +1472,12 @@ void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAss
             &get<variant<JSONNullObject, vector<unique_ptr<SymbolInformation>>>>(result))) {
         for (auto &symbolInfo : *symbolInfos) {
             symbolAssertionMatches.emplace_back(*symbolInfo, nullptr);
+        }
+        constexpr int MAX_RESPONSES = 50;
+        if (symbolInfos->size() > MAX_RESPONSES) {
+            ADD_FAILURE() << fmt::format(
+                "Too many responses for a `workspace/symbol` request. [Expected no more than {}, got {}].",
+                MAX_RESPONSES, symbolInfos->size());
         }
     }
     matchSymbolsToAssertions(query, assertions, symbolAssertionMatches, sourceFileContents, uriPrefix, errorPrefix);

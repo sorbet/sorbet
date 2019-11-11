@@ -16,15 +16,15 @@ namespace {
 
 class SymbolMatcher final {
 public:
-    static constexpr int MAX_RESULTS = 50;
-    static constexpr int MAX_LOCATIONS_PER_SYMBOL = 10;
+    static constexpr size_t MAX_RESULTS = 50;
+    static constexpr size_t MAX_LOCATIONS_PER_SYMBOL = 10;
 
     SymbolMatcher(const LSPConfiguration &config, const core::GlobalState &gs);
 
-    vector<unique_ptr<SymbolInformation>> doQuery(string_view query, int limit = MAX_RESULTS);
+    vector<unique_ptr<SymbolInformation>> doQuery(string_view query, size_t maxResults = MAX_RESULTS);
 
 private:
-    vector<unique_ptr<SymbolInformation>> symbolRef2SymbolInformations(core::SymbolRef symRef, int limit);
+    vector<unique_ptr<SymbolInformation>> symbolRef2SymbolInformations(core::SymbolRef symRef, size_t maxLocations);
 
     const LSPConfiguration &config;
     const core::GlobalState &gs;
@@ -35,13 +35,14 @@ SymbolMatcher::SymbolMatcher(const LSPConfiguration &config, const core::GlobalS
 /**
  * Converts a symbol into any (supported) SymbolInformation objects.
  */
-vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformations(core::SymbolRef symRef, int limit) {
+vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformations(core::SymbolRef symRef,
+                                                                                  size_t maxLocations) {
     vector<unique_ptr<SymbolInformation>> results;
     auto sym = symRef.data(gs);
-    if (hideSymbol(gs, symRef)) {
-        return results;
-    }
     for (auto loc : sym->locs()) {
+        if (results.size() >= maxLocations) {
+            break;
+        }
         if (!loc.file().exists()) {
             continue;
         }
@@ -53,9 +54,6 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
             make_unique<SymbolInformation>(sym->name.show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
         result->containerName = sym->owner.data(gs)->showFullName(gs);
         results.emplace_back(move(result));
-        if (results.size() >= limit) {
-            break;
-        }
     }
     return results;
 }
@@ -113,7 +111,7 @@ pair<int, string_view::const_iterator> partialMatchSymbol(string_view symbol, st
 }
 } // namespace
 
-vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_view, int limit) {
+vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_view, size_t maxResults) {
     vector<unique_ptr<SymbolInformation>> results;
     string_view::const_iterator queryBegin = query_view.begin();
     string_view::const_iterator queryEnd = query_view.end();
@@ -151,8 +149,10 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     // Second pass: record matches and (try a little harder by relaxing the prefix-only requirement for non-matches)
     // Don't update partialScoreInfos, because we are using it to keep the prefix-only scores for owner-namespaces.
     vector<pair<u4, int>> candidates;
-    for (auto &scoreInfo : scoreInfos) {
-        if (scoreInfo.symbolIndex == 0) {
+    for (u4 symbolIndex = 1; symbolIndex < gs.symbolsUsed(); symbolIndex++) {
+        auto &scoreInfo = scoreInfos[symbolIndex];
+        auto symbolRef = core::SymbolRef(gs, scoreInfo.symbolIndex);
+        if (hideSymbol(gs, symbolRef)) {
             continue; // symbol ineligible
         }
         auto symbolData = core::SymbolRef(gs, scoreInfo.symbolIndex).data(gs);
@@ -179,13 +179,15 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     fast_sort(candidates, [](pair<u4, int> &left, pair<u4, int> &right) -> bool { return left.second < right.second; });
     for (auto &candidate : candidates) {
         core::SymbolRef ref(gs, candidate.first);
-        for (auto &symbolInformation : symbolRef2SymbolInformations(ref, MAX_LOCATIONS_PER_SYMBOL)) {
+        auto maxLocations = min(MAX_LOCATIONS_PER_SYMBOL, maxResults - results.size());
+        for (auto &symbolInformation : symbolRef2SymbolInformations(ref, maxLocations)) {
             results.emplace_back(move(symbolInformation));
-            if (results.size() >= limit) {
-                break;
-            }
+        }
+        if (results.size() >= maxResults) {
+            break;
         }
     }
+    ENFORCE(results.size() <= maxResults);
     return results;
 }
 
