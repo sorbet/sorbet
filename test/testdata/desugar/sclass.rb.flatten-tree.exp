@@ -192,6 +192,8 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
     def wrapper(<blk>)
       begin
         <self>.inner()
@@ -202,6 +204,10 @@ begin
       "g"
     end
 
+    def inner(<blk>)
+      ::T.reveal_type(<self>)
+    end
+
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
@@ -210,16 +216,8 @@ begin
     end
   end
   class <singleton class><<Class:G>> < ()
-    <emptyTree>
-
-    <emptyTree>
-
-    def inner(<blk>)
-      ::T.reveal_type(<self>)
-    end
-
     def self.<static-init>(<blk>)
-      <emptyTree>
+      :"inner"
     end
   end
   class ::H<<C H>> < (::<todo sym>)
