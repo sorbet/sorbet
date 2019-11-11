@@ -4,6 +4,8 @@
 #include "ast/treemap/treemap.h"
 #include "core/core.h"
 
+#include <iostream>
+
 #include <utility>
 
 using namespace std;
@@ -41,7 +43,18 @@ using namespace std;
 namespace sorbet::rewriter {
 
 class FlattenWalk {
-    enum class ScopeType { ClassScope, MethodScope };
+    enum class ScopeType { ClassScope, MethodScope, InstanceScope };
+
+    struct ScopeInfo {
+        // How many `class << self` levels are we inside?
+        u4 staticLevel;
+        // this will be true if the thing we're moving here is
+        //   class << self
+        // and false otherwise.
+        ScopeType scopeType;
+
+        ScopeInfo(u4 staticLevel, ScopeType scopeType) : staticLevel(staticLevel), scopeType(scopeType) {}
+    };
 
     // This is what we keep on the stack: we need to know whether an item should be moved or not (i.e. whether it's
     // nested or not) and keep a stack of the current 'staticness' level (i.e. how many levels of `def self.something`
@@ -74,24 +87,10 @@ class FlattenWalk {
         // we want, and the `ClassScope` class below uses ENFORCEs to make sure that we always use these indices
         // correctly.
         optional<int> targetLocation;
-        // we need to keep information around about whether we're in a static outer context: for example, if we have
-        //
-        //   def self.foo; def bar; end; end
-        //
-        // then we should flatten it to
-        //
-        //  def self.foo; end
-        //  def self.bar; end
-        //
-        // which means when we get to `bar` we need to know that the outer context `foo` is static. We pass that down
-        // the current stack by means of this `staticLevel` variable.
-        int staticLevel;
-        // this will be true if the thing we're moving here is
-        //   class << self
-        // and false otherwise
-        ScopeType scopeType;
-        MethodData(optional<int> targetLocation, int staticLevel, ScopeType scopeType)
-            : targetLocation(targetLocation), staticLevel(staticLevel), scopeType(scopeType){};
+        // this encompasses all of our scope information into a single value
+        ScopeInfo scopeInfo;
+        MethodData(optional<int> targetLocation, ScopeInfo scopeInfo)
+            : targetLocation(targetLocation), scopeInfo(scopeInfo){};
     };
 
     // This represents something that needs to be moved to the end of the class scope as well as information about how
@@ -99,8 +98,8 @@ class FlattenWalk {
     // whether it should be in a `class << self` block.
     struct MovedItem {
         unique_ptr<ast::Expression> expr;
-        int staticLevel;
-        MovedItem(unique_ptr<ast::Expression> expr, int staticLevel) : expr(move(expr)), staticLevel(staticLevel){};
+        u4 staticLevel;
+        MovedItem(unique_ptr<ast::Expression> expr, u4 staticLevel) : expr(move(expr)), staticLevel(staticLevel){};
         MovedItem() = default;
     };
 
@@ -115,16 +114,16 @@ class FlattenWalk {
         ClassScope() = default;
 
         // push a method scope, possibly noting whether
-        void pushScope(int staticLevel, ScopeType scopeType) {
-            if (stack.size() == 0 || stack.back().scopeType == ScopeType::ClassScope) {
+        void pushScope(ScopeInfo info) {
+            if (stack.size() == 0 || stack.back().scopeInfo.scopeType == ScopeType::ClassScope) {
                 // we're at the top level of a class, not nested inside a method, which means we don't need to move
                 // anything: we'll add to the stack but don't need to allocate space on the move queue
-                stack.emplace_back(std::nullopt, staticLevel, scopeType);
+                stack.emplace_back(std::nullopt, info);
             } else {
                 // we're nested inside another method: that means that whatever scope we're recording is going to need
                 // to be moved out, so we'll allocate space in the move queue and note the index of the allocated space
                 // (so that we can reconstruct the original traversal order)
-                stack.emplace_back(moveQueue.size(), staticLevel, scopeType);
+                stack.emplace_back(moveQueue.size(), info);
                 moveQueue.emplace_back();
             }
         }
@@ -157,7 +156,11 @@ class FlattenWalk {
             int idx = *md.targetLocation;
             ENFORCE(moveQueue.size() > idx);
             ENFORCE(moveQueue[idx].expr == nullptr);
-            moveQueue[idx] = {move(expr), md.staticLevel};
+            auto staticLevel = md.scopeInfo.staticLevel;
+            if (md.scopeInfo.scopeType == ScopeType::MethodScope) {
+                staticLevel += 1;
+            }
+            moveQueue[idx] = {move(expr), staticLevel};
         }
     };
 
@@ -166,10 +169,20 @@ class FlattenWalk {
     // need to move to the end, so we keep that below on the stack.
     vector<ClassScope> classScopes;
 
-    int computeStaticLevel(bool isSelf) {
+    ScopeInfo computeScopeInfo(ScopeType scopeType) {
         auto &methods = curMethodSet();
-        int prevLevel = methods.stack.empty() ? 0 : methods.stack.back().staticLevel;
-        return prevLevel + (isSelf ? 1 : 0);
+        // if we're in an instance, then we stay in an instance
+        if (!methods.stack.empty() && methods.stack.back().scopeInfo.scopeType == ScopeType::InstanceScope &&
+            methods.stack.back().scopeInfo.staticLevel == 0) {
+            return ScopeInfo(0, ScopeType::InstanceScope);
+        } else {
+            auto existingLevel = methods.stack.empty() ? 0 : methods.stack.back().scopeInfo.staticLevel;
+            if (scopeType == ScopeType::ClassScope) {
+                return ScopeInfo(existingLevel + 1, scopeType);
+            } else {
+                return ScopeInfo(existingLevel, scopeType);
+            }
+        }
     }
 
     void newMethodSet() {
@@ -270,7 +283,7 @@ public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(classDef->name.get())) {
             ENFORCE(ident->name == core::Names::singleton());
-            curMethodSet().pushScope(computeStaticLevel(true), ScopeType::ClassScope);
+            curMethodSet().pushScope(computeScopeInfo(ScopeType::ClassScope));
             return classDef;
         }
         newMethodSet();
@@ -296,7 +309,7 @@ public:
         // that we don't know the 'staticness level' of a sig, as it depends on the method that follows it (whether that
         // method has a `self.` or not), so we'll fill that information in later
         if (send->fun == core::Names::sig()) {
-            curMethodSet().pushScope(0, ScopeType::MethodScope);
+            curMethodSet().pushScope(computeScopeInfo(ScopeType::MethodScope));
         }
 
         return send;
@@ -318,7 +331,8 @@ public:
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
         // add a new scope for this method def
-        curMethodSet().pushScope(computeStaticLevel(methodDef->isSelf()), ScopeType::MethodScope);
+        curMethodSet().pushScope(
+            computeScopeInfo(methodDef->isSelf() ? ScopeType::MethodScope : ScopeType::InstanceScope));
         return methodDef;
     }
 
