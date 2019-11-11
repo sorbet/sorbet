@@ -1473,11 +1473,11 @@ void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAss
         for (auto &symbolInfo : *symbolInfos) {
             symbolAssertionMatches.emplace_back(*symbolInfo, nullptr);
         }
-        constexpr int MAX_RESPONSES = 50;
-        if (symbolInfos->size() > MAX_RESPONSES) {
+        constexpr int MAX_RESULTS = 50; // see MAX_RESULTS in workspace_symbols.cc
+        if (symbolInfos->size() > MAX_RESULTS) {
             ADD_FAILURE() << fmt::format(
-                "Too many responses for a `workspace/symbol` request. [Expected no more than {}, got {}].",
-                MAX_RESPONSES, symbolInfos->size());
+                "Too many results for `workspace/symbol` request for `{}`. [Expected no more than {}, got {}].", query,
+                MAX_RESULTS, symbolInfos->size());
         }
     }
     matchSymbolsToAssertions(query, assertions, symbolAssertionMatches, sourceFileContents, uriPrefix, errorPrefix);
