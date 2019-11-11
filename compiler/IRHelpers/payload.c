@@ -655,7 +655,8 @@ VALUE sorbet_splatIntrinsic(VALUE recv, int argc, const VALUE *const restrict ar
     return arr;
 }
 
-// This doesn't do exactly the right thing because that is done by the parser in Ruby. Ruby will return the String "expression" if the RHS is an expression.
+// This doesn't do exactly the right thing because that is done by the parser in Ruby. Ruby will return the String
+// "expression" if the RHS is an expression.
 VALUE sorbet_definedIntinsic(VALUE recv, int argc, const VALUE *const restrict argv) {
     if (argc == 0) {
         return sorbet_rubyNil();
@@ -671,7 +672,6 @@ VALUE sorbet_definedIntinsic(VALUE recv, int argc, const VALUE *const restrict a
     }
     return rb_str_new2("constant");
 }
-
 
 // ****
 // ****                       Symbol Intrinsics. See CallCMethod in SymbolIntrinsics.cc
