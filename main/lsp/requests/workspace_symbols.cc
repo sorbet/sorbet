@@ -46,7 +46,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
         if (!loc.file().exists()) {
             continue;
         }
-        auto location = config.loc2Location(gs, sym->loc());
+        auto location = config.loc2Location(gs, loc);
         if (location == nullptr) {
             continue;
         }
