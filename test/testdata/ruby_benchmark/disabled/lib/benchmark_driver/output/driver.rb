@@ -1,4 +1,4 @@
-# typed: ignore
+# typed: true
 require 'benchmark_driver/output/simple'
 
 # This replicates the legacy benchmark/driver.rb behavior.

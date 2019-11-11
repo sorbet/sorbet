@@ -1,4 +1,4 @@
-# typed: ignore
+# typed: true
 require 'rdoc/rdoc'
 require 'tmpdir'
 

@@ -1,4 +1,4 @@
-# typed: ignore
+# typed: true
 require "securerandom"
 
 20_0000.times do

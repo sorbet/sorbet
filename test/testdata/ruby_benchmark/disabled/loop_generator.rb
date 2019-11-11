@@ -1,4 +1,4 @@
-# typed: ignore
+# typed: true
 max = 600000
 
 if defined? Fiber

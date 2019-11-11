@@ -1,4 +1,4 @@
-# typed: ignore
+# typed: true
 require 'benchmark_driver/runner/total'
 
 class BenchmarkDriver::Runner::Stime < BenchmarkDriver::Runner::Total
