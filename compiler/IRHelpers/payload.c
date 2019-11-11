@@ -511,7 +511,8 @@ struct sorbet_Closure {
 };
 
 struct sorbet_Closure *sorbet_Closure_alloc(int elemCount) {
-    struct sorbet_Closure *ret = (struct sorbet_Closure *)xmalloc(sizeof(struct sorbet_Closure) + sizeof(VALUE) * elemCount);
+    struct sorbet_Closure *ret =
+        (struct sorbet_Closure *)xmalloc(sizeof(struct sorbet_Closure) + sizeof(VALUE) * elemCount);
     *(int *)&ret->size = elemCount; // this is how you assign a const field after malloc
     return ret;
 }
