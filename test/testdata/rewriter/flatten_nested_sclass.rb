@@ -9,7 +9,7 @@ class A
 end
 
 A.foo
-A.singleton_class.bar
+A.bar
 
 class B
   def foo;
@@ -20,7 +20,7 @@ class B
 end
 
 B.new.foo
-B.bar
+B.new.bar
 
 
 class C
