@@ -1,6 +1,9 @@
 # typed: true
 max = 600000
 
+class Fiber; end
+class Generator; end
+
 if defined? Fiber
   gen = (1..max).each
   loop do
