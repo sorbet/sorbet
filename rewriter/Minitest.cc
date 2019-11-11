@@ -1,6 +1,7 @@
 #include "rewriter/Minitest.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
+#include "ast/treemap/treemap.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
@@ -12,6 +13,24 @@ using namespace std;
 namespace sorbet::rewriter {
 
 namespace {
+class ConstantMover {
+    vector<unique_ptr<ast::Expression>> movedConstants;
+
+public:
+    unique_ptr<ast::Expression> postTransformAssign(core::Context ctx, unique_ptr<ast::Assign> asgn) {
+        if (ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs.get())) {
+            movedConstants.emplace_back(move(asgn));
+            return ast::MK::EmptyTree();
+        }
+
+        return asgn;
+    }
+
+    vector<unique_ptr<ast::Expression>> getMovedConstants() {
+        return move(movedConstants);
+    }
+};
+
 unique_ptr<ast::Expression> addSigVoid(unique_ptr<ast::Expression> expr) {
     return ast::MK::InsSeq1(expr->loc, ast::MK::SigVoid(expr->loc, ast::MK::Hash0(expr->loc)), std::move(expr));
 }
@@ -81,10 +100,22 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs),
                               ast::ClassDefKind::Class);
     } else if (send->fun == core::Names::it()) {
+        ConstantMover constantMover;
+        send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
         auto name = ctx.state.enterNameUTF8("<test_" + argString + ">");
-        return addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
-                                           prepareBody(ctx, std::move(send->block->body)),
-                                           ast::MethodDef::RewriterSynthesized));
+        auto method = addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
+                                                  prepareBody(ctx, std::move(send->block->body)),
+                                                  ast::MethodDef::RewriterSynthesized));
+        auto movedConstants = constantMover.getMovedConstants();
+        if (movedConstants.empty()) {
+            return method;
+        } else {
+            ast::InsSeq::STATS_store stats;
+            for (auto &m : movedConstants) {
+                stats.emplace_back(move(m));
+            }
+            return ast::MK::InsSeq(send->loc, std::move(stats), move(method));
+        }
     }
 
     return nullptr;
