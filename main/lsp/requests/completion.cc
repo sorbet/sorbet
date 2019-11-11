@@ -45,7 +45,7 @@ const RubyKeyword rubyKeywords[] = {
     {"defined?", "Returns a string describing its argument.", "defined?(${1:Constant})$0"},
     // TODO(jez) Even better would be to auto-insert a block for methods that we know must take a block
     {"do", "Starts a block.", "do\n  $0\nend"},
-    {"else", "The unhandled condition in case, if and unless expressions.", "else ${1:expr}$0"},
+    {"else", "The unhandled condition in case, if and unless expressions."},
     {"elsif", "An alternate condition for an if expression.", "elsif ${1:expr}$0"},
     {"end",
      "The end of a syntax block. Used by classes, modules, methods, exception handling and control expressions."},
@@ -291,8 +291,11 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
 
     item->detail = fmt::format("(sorbet) {}", rubyKeyword.documentation);
     if (rubyKeyword.snippet.has_value()) {
+        auto documentation = rubyKeyword.snippet.value();
         auto markupKind = config.getClientConfig().clientCompletionItemMarkupKind;
-        auto documentation = absl::StrCat("\n\n```ruby\n", rubyKeyword.snippet.value(), "\n```");
+        if (markupKind == MarkupKind::Markdown) {
+            documentation = absl::StrCat("\n\n```ruby\n", documentation, "\n```");
+        }
         item->documentation = make_unique<MarkupContent>(markupKind, documentation);
     }
 
