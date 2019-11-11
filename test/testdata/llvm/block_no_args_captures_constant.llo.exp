@@ -420,14 +420,16 @@ define i64 @"func_Object#foo"(i32 %argc, i64* nocapture readnone %argArray, i64 
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
   %0 = tail call i8* @ruby_xmalloc(i64 16) #16
-  %1 = load i64, i64* @rb_cData, align 8, !tbaa !7
-  %2 = tail call i64 @rb_data_typed_object_wrap(i64 %1, i8* %0, %struct.rb_data_type_struct* nonnull @closureInfo) #16
-  %3 = inttoptr i64 %2 to %struct.RTypedData*
-  %4 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %3, i64 0, i32 3
-  %5 = bitcast i8** %4 to %struct.sorbet_Closure**
-  %6 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %5, align 8, !tbaa !11
-  %7 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %6, i64 0, i32 1, i64 0
-  store i64 8, i64* %7, align 8
+  %1 = bitcast i8* %0 to i32*
+  store i32 1, i32* %1, align 8, !tbaa !9
+  %2 = load i64, i64* @rb_cData, align 8, !tbaa !7
+  %3 = tail call i64 @rb_data_typed_object_wrap(i64 %2, i8* %0, %struct.rb_data_type_struct* nonnull @closureInfo) #16
+  %4 = inttoptr i64 %3 to %struct.RTypedData*
+  %5 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %4, i64 0, i32 3
+  %6 = bitcast i8** %5 to %struct.sorbet_Closure**
+  %7 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %6, align 8, !tbaa !11
+  %8 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %7, i64 0, i32 1, i64 0
+  store i64 8, i64* %8, align 8
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %rubyId_times = load i64, i64* @rubyIdPrecomputed_times, align 8
   %tooManyArgs = icmp eq i32 %argc, 0
@@ -438,21 +440,21 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %8 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %5, align 8, !tbaa !11
-  %9 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %8, i64 0, i32 1, i64 0
-  store i64 %selfRaw, i64* %9, align 8
-  %10 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %5, align 8, !tbaa !11
-  %11 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %10, i64 0, i32 1, i64 0
-  %12 = load i64, i64* %11, align 8
-  %13 = load i64, i64* @rb_cObject, align 8
-  %14 = tail call i64 @rb_obj_is_kind_of(i64 %12, i64 %13) #16
-  %15 = icmp eq i64 %14, 20
-  br i1 %15, label %typeTestSuccess, label %typeTestFail, !prof !14
+  %9 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %6, align 8, !tbaa !11
+  %10 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %9, i64 0, i32 1, i64 0
+  store i64 %selfRaw, i64* %10, align 8
+  %11 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %6, align 8, !tbaa !11
+  %12 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %11, i64 0, i32 1, i64 0
+  %13 = load i64, i64* %12, align 8
+  %14 = load i64, i64* @rb_cObject, align 8
+  %15 = tail call i64 @rb_obj_is_kind_of(i64 %13, i64 %14) #16
+  %16 = icmp eq i64 %15, 20
+  br i1 %16, label %typeTestSuccess, label %typeTestFail, !prof !14
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
-  %16 = load i64, i64* @guard_epoch_A, align 8
-  %17 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
-  %canTakeFastPath = icmp eq i64 %16, %17
+  %17 = load i64, i64* @guard_epoch_A, align 8
+  %18 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
+  %canTakeFastPath = icmp eq i64 %17, %18
   br i1 %canTakeFastPath, label %typeTestSuccess.const_continue_crit_edge, label %const_slowPath, !prof !14
 
 typeTestSuccess.const_continue_crit_edge:         ; preds = %typeTestSuccess
@@ -460,25 +462,25 @@ typeTestSuccess.const_continue_crit_edge:         ; preds = %typeTestSuccess
   br label %const_continue
 
 typeTestFail:                                     ; preds = %fillRequiredArgs
-  tail call fastcc void @sorbet_cast_failure(i64 %12)
+  tail call fastcc void @sorbet_cast_failure(i64 %13)
   unreachable
 
 const_continue:                                   ; preds = %typeTestSuccess.const_continue_crit_edge, %const_slowPath
-  %18 = phi i64 [ %.pre, %typeTestSuccess.const_continue_crit_edge ], [ %22, %const_slowPath ]
+  %19 = phi i64 [ %.pre, %typeTestSuccess.const_continue_crit_edge ], [ %23, %const_slowPath ]
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
-  store i64 %18, i64* %callArgsAddr, align 8
-  %19 = load i64, i64* @rb_mKernel, align 8
+  store i64 %19, i64* %callArgsAddr, align 8
+  %20 = load i64, i64* @rb_mKernel, align 8
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !17
-  %20 = call i64 @rb_funcallv(i64 %19, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #16
+  %21 = call i64 @rb_funcallv(i64 %20, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #16
   call void @dbg_sorbet_validate_id(i64 %rubyId_times, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !20
-  %21 = call i64 @rb_block_call(i64 21, i64 %rubyId_times, i32 0, i64* nonnull %callArgsAddr, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_Object#foo$block_1" to i64 (...)*), i64 %2) #16
-  ret i64 %21
+  %22 = call i64 @rb_block_call(i64 21, i64 %rubyId_times, i32 0, i64* nonnull %callArgsAddr, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_Object#foo$block_1" to i64 (...)*), i64 %3) #16
+  ret i64 %22
 
 const_slowPath:                                   ; preds = %typeTestSuccess
-  %22 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.2, i64 0, i64 0)) #16
-  store i64 %22, i64* @guarded_const_A, align 8
-  %23 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
-  store i64 %23, i64* @guard_epoch_A, align 8
+  %23 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.2, i64 0, i64 0)) #16
+  store i64 %23, i64* @guarded_const_A, align 8
+  %24 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !15
+  store i64 %24, i64* @guard_epoch_A, align 8
   br label %const_continue
 }
 
