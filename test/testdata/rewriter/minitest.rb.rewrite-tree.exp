@@ -14,11 +14,14 @@ class <emptyTree><<C <root>>> < ()
     end
 
     begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def <test_allows constants inside of IT><<C <todo sym>>>(&<blk>)
-        <emptyTree>::<C CONST> = 10
+      <emptyTree>::<C CONST> = 10
+      begin
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
+        def <test_allows constants inside of IT><<C <todo sym>>>(&<blk>)
+          <emptyTree>
+        end
       end
     end
 
