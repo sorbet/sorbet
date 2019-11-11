@@ -416,19 +416,9 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     Timer timeit(config->logger, "query");
     prodCategoryCounterInc("lsp.updates", "query");
     ENFORCE(gs->errorQueue->isEmpty());
-    vector<ast::ParsedFile> updatedIndexed;
-    for (auto &f : filesForQuery) {
-        const int id = f.id();
-        const auto it = indexedFinalGS.find(id);
-        const auto &parsedFile = it == indexedFinalGS.end() ? indexed[id] : it->second;
-        if (parsedFile.tree) {
-            updatedIndexed.emplace_back(ast::ParsedFile{parsedFile.tree->deepCopy(), parsedFile.file});
-        }
-    }
-
     ENFORCE(gs->lspQuery.isEmpty());
     gs->lspQuery = q;
-    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
+    auto resolved = getResolved(filesForQuery);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
     pipeline::typecheck(gs, move(resolved), config->opts, config->workers);
