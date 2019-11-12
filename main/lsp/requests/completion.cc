@@ -362,6 +362,8 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
                                                                const core::Loc queryLoc, string_view prefix,
                                                                size_t sortIdx) const {
     ENFORCE(what.exists());
+    auto supportsSnippets = config->getClientConfig().clientCompletionItemSnippetSupport;
+    auto markupKind = config->getClientConfig().clientCompletionItemMarkupKind;
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
 
     // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
@@ -374,9 +376,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
     }
     if (what.data(gs)->isMethod()) {
         item->kind = CompletionItemKind::Method;
-        if (what.exists()) {
-            item->detail = prettyTypeForMethod(gs, what, receiverType, nullptr, constraint);
-        }
+        item->detail = what.data(gs)->show(gs);
 
         u4 queryStart = queryLoc.beginPos();
         u4 prefixSize = prefix.size();
@@ -384,7 +384,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
         auto replacementRange = Range::fromLoc(gs, replacementLoc);
 
         string replacementText;
-        if (config->getClientConfig().clientCompletionItemSnippetSupport) {
+        if (supportsSnippets) {
             item->insertTextFormat = InsertTextFormat::Snippet;
             replacementText = methodSnippet(gs, what, receiverType, constraint);
         } else {
@@ -404,12 +404,12 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
             documentation =
                 findDocumentation(what.data(gs)->loc().file().data(gs).source(), what.data(gs)->loc().beginPos());
         }
-        if (documentation != nullopt) {
-            if (documentation->find("@deprecated") != documentation->npos) {
-                item->deprecated = true;
-            }
-            item->documentation = make_unique<MarkupContent>(config->getClientConfig().clientCompletionItemMarkupKind,
-                                                             documentation.value());
+
+        auto prettyType = prettyTypeForMethod(gs, what, receiverType, nullptr, constraint);
+        item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
+
+        if (documentation != nullopt && documentation->find("@deprecated") != documentation->npos) {
+            item->deprecated = true;
         }
     } else if (what.data(gs)->isStaticField()) {
         item->kind = CompletionItemKind::Constant;
