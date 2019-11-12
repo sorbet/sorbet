@@ -89,8 +89,8 @@ unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, string_view ru
 // iff a sig has more than this many parameters, then print it as a multi-line sig.
 constexpr int NUM_ARGS_CUTOFF_FOR_MULTILINE_SIG = 4;
 
-string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
-                    const core::TypeConstraint *constraint) {
+string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
+                          core::TypePtr retType, const core::TypeConstraint *constraint) {
     ENFORCE(method.exists());
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
@@ -165,7 +165,7 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
 // iff a `def` would be this wide or wider, expand it to be a multi-line def.
 constexpr int WIDTH_CUTOFF_FOR_MULTILINE_DEF = 80;
 
-string methodDefinition(const core::GlobalState &gs, core::SymbolRef method) {
+string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
     ENFORCE(method.exists());
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
@@ -227,6 +227,12 @@ string methodDefinition(const core::GlobalState &gs, core::SymbolRef method) {
                              fmt::join(arguments, argListSeparator), argListSuffix);
     }
     return result;
+}
+
+string prettyTypeForMethod(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
+                           core::TypePtr retType, const core::TypeConstraint *constraint) {
+    return fmt::format("{}\n{}", prettySigForMethod(gs, method, receiver, retType, constraint),
+                       prettyDefForMethod(gs, method));
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
