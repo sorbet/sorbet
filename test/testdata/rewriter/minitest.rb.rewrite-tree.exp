@@ -14,13 +14,40 @@ class <emptyTree><<C <root>>> < ()
     end
 
     begin
-      <emptyTree>::<C CONST> = 10
+      <emptyTree>::<C CONST> = ::T.unsafe(nil)
       begin
         ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({}).void()
         end
         def <test_allows constants inside of IT><<C <todo sym>>>(&<blk>)
-          <emptyTree>
+          ::Module.const_set(:"CONST", 10)
+        end
+      end
+    end
+
+    begin
+      <emptyTree>::<C C2> = ::T.let(::T.unsafe(nil), <emptyTree>::<C Integer>)
+      begin
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
+        def <test_allows let-ed constants inside of IT><<C <todo sym>>>(&<blk>)
+          ::Module.const_set(:"C2", <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
+        end
+      end
+    end
+
+    begin
+      <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
+      begin
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
+        def <test_allows path constants inside of IT><<C <todo sym>>>(&<blk>)
+          begin
+            <emptyTree>
+            <emptyTree>::<C C3>.new()
+          end
         end
       end
     end
@@ -126,5 +153,11 @@ class <emptyTree><<C <root>>> < ()
 
   def junk<<C <todo sym>>>(&<blk>)
     <emptyTree>
+  end
+
+  module <emptyTree>::<C Mod><<C <todo sym>>> < ()
+    class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
+      <emptyTree>
+    end
   end
 end

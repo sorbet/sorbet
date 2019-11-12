@@ -11,6 +11,15 @@ class MyTest
       CONST = 10
     end
 
+    it "allows let-ed constants inside of IT" do
+      C2 = T.let(10, Integer)
+    end
+
+    it "allows path constants inside of IT" do
+      C3 = Mod::C
+      C3.new
+    end
+
     describe "some inner tests" do
         def inside_method
         end
@@ -62,4 +71,10 @@ class MyTest
 end
 
 def junk
+end
+
+
+module Mod
+  class C
+  end
 end
