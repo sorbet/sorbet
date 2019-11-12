@@ -57,15 +57,21 @@ sh_binary(
     srcs = ["tools/postprocess_payload.sh"],
 )
 
+sh_binary(
+    name = "generate_payload_bc_orig_generator",
+    srcs = ["tools/generate_payload_bc_orig_generator.sh"],
+)
+
 genrule(
     name = "generate_payload_bc_orig",
     outs = [
         "payload.bc.orig",
     ],
-    cmd = "find . && $(location :llvm-ar) -x $(locations :pseudo_lib) payload.o && otool  -s __LLVM __bitcode payload.o | tail -n +3 > bitcode.dump && xxd -r -seek -$$((16#$$(head -n 1 bitcode.dump| cut -f 1))) bitcode.dump $(location payload.bc.orig)",
+    cmd = "$(location :generate_payload_bc_orig_generator) $(location :llvm-ar) $(location payload.bc.orig) $(locations :pseudo_lib)",
     tools = [
         ":llvm-ar",
         ":pseudo_lib",
+        ":generate_payload_bc_orig_generator",
     ],
     visibility = ["//visibility:public"],
 )
