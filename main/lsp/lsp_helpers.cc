@@ -70,6 +70,22 @@ bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view
     return fnd != string_view::npos;
 }
 
+unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, string_view rubyMarkup,
+                                           optional<string_view> explanation) {
+    // format rubyMarkup
+    string formattedTypeString;
+    if (markupKind == MarkupKind::Markdown && rubyMarkup.length() > 0) {
+        formattedTypeString = fmt::format("```ruby\n{}\n```", rubyMarkup);
+    } else {
+        formattedTypeString = string(rubyMarkup);
+    }
+
+    string content =
+        absl::StrCat(formattedTypeString, explanation.has_value() ? "\n\n---\n\n" : "", explanation.value_or(""));
+
+    return make_unique<MarkupContent>(markupKind, move(content));
+}
+
 // iff a sig has more than this many parameters, then print it as a multi-line sig.
 constexpr int NUM_ARGS_CUTOFF_FOR_MULTILINE_SIG = 4;
 

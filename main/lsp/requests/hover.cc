@@ -29,22 +29,6 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
     return contents;
 }
 
-unique_ptr<MarkupContent> formatHoverText(MarkupKind markupKind, string_view typeString,
-                                          optional<string_view> docString) {
-    // format typeString
-    string formattedTypeString;
-    if (markupKind == MarkupKind::Markdown && typeString.length() > 0) {
-        formattedTypeString = fmt::format("```ruby\n{}\n```", typeString);
-    } else {
-        formattedTypeString = string(typeString);
-    }
-
-    string content =
-        absl::StrCat(formattedTypeString, docString.has_value() ? "\n\n---\n\n" : "", docString.value_or(""));
-
-    return make_unique<MarkupContent>(markupKind, move(content));
-}
-
 unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypechecker &typechecker, const MessageId &id,
                                                              const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
@@ -97,11 +81,11 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypechecker &typ
             } else {
                 typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint);
             }
-            response->result = make_unique<Hover>(formatHoverText(clientHoverMarkupKind, typeString, documentation));
+            response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, documentation));
         } else if (auto defResp = resp->isDefinition()) {
             string typeString = absl::StrCat(methodDetail(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr),
                                              "\n", methodDefinition(gs, defResp->symbol));
-            response->result = make_unique<Hover>(formatHoverText(clientHoverMarkupKind, typeString, documentation));
+            response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, documentation));
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(gs);
             auto type = constResp->retType.type;
@@ -115,7 +99,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypechecker &typ
                 type = core::make_type<core::MetaType>(type);
             }
             response->result =
-                make_unique<Hover>(formatHoverText(clientHoverMarkupKind, type->showWithMoreInfo(gs), documentation));
+                make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, type->showWithMoreInfo(gs), documentation));
         } else {
             core::TypePtr retType = resp->getRetType();
             // Some untyped arguments have null types.
@@ -123,7 +107,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypechecker &typ
                 retType = core::Types::untypedUntracked();
             }
             response->result = make_unique<Hover>(
-                formatHoverText(clientHoverMarkupKind, retType->showWithMoreInfo(gs), documentation));
+                formatRubyMarkup(clientHoverMarkupKind, retType->showWithMoreInfo(gs), documentation));
         }
     }
     return response;

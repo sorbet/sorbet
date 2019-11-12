@@ -140,6 +140,8 @@ public:
 std::optional<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);
 bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, std::string_view pattern);
 bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym);
+std::unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, std::string_view rubyMarkup,
+                                                std::optional<std::string_view> explanation);
 std::string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
                          core::TypePtr retType, const core::TypeConstraint *constraint);
 std::string methodDefinition(const core::GlobalState &gs, core::SymbolRef method);
