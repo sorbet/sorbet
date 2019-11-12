@@ -87,7 +87,9 @@ unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, string_view ru
 }
 
 // iff a sig has more than this many parameters, then print it as a multi-line sig.
-constexpr int NUM_ARGS_CUTOFF_FOR_MULTILINE_SIG = 4;
+constexpr int MAX_PRETTY_SIG_ARGS = 4;
+// iff a `def` would be this wide or wider, expand it to be a multi-line def.
+constexpr int MAX_PRETTY_WIDTH = 80;
 
 string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
                           core::TypePtr retType, const core::TypeConstraint *constraint) {
@@ -141,29 +143,28 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
     }
 
     string flagString = "";
-    string paramsString = "";
-    if (typeAndArgNames.size() > NUM_ARGS_CUTOFF_FOR_MULTILINE_SIG) {
-        if (!flags.empty()) {
-            flagString = fmt::format("{}\n  .", fmt::join(flags, "\n  ."));
-        }
-        if (!typeAndArgNames.empty()) {
-            paramsString = fmt::format("params(\n    {}\n  )\n  .", fmt::join(typeAndArgNames, ",\n    "));
-        }
-        return fmt::format("{}{} do\n  {}{}{}\nend", accessFlagString, sigCall, flagString, paramsString,
-                           methodReturnType);
-    } else {
-        if (!flags.empty()) {
-            flagString = fmt::format("{}.", fmt::join(flags, "."));
-        }
-        if (!typeAndArgNames.empty()) {
-            paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
-        }
-        return fmt::format("{}{} {{{}{}{}}}", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
+    if (!flags.empty()) {
+        flagString = fmt::format("{}.", fmt::join(flags, "."));
     }
-}
+    string paramsString = "";
+    if (!typeAndArgNames.empty()) {
+        paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
+    }
 
-// iff a `def` would be this wide or wider, expand it to be a multi-line def.
-constexpr int WIDTH_CUTOFF_FOR_MULTILINE_DEF = 80;
+    auto oneline =
+        fmt::format("{}{} {{{}{}{}}}", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
+    if (oneline.size() <= MAX_PRETTY_WIDTH && typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
+        return oneline;
+    }
+
+    if (!flags.empty()) {
+        flagString = fmt::format("{}\n  .", fmt::join(flags, "\n  ."));
+    }
+    if (!typeAndArgNames.empty()) {
+        paramsString = fmt::format("params(\n    {}\n  )\n  .", fmt::join(typeAndArgNames, ",\n    "));
+    }
+    return fmt::format("{}{} do\n  {}{}{}\nend", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
+}
 
 string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
     ENFORCE(method.exists());
@@ -219,7 +220,7 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
 
     auto result = fmt::format("def {}{}{}{}{}; end", methodNamePrefix, methodName, argListPrefix,
                               fmt::join(arguments, argListSeparator), argListSuffix);
-    if (arguments.size() > 0 && result.length() >= WIDTH_CUTOFF_FOR_MULTILINE_DEF) {
+    if (arguments.size() > 0 && result.length() >= MAX_PRETTY_WIDTH) {
         argListPrefix = "(\n  ";
         argListSeparator = ",\n  ";
         argListSuffix = "\n)";
