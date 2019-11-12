@@ -17,17 +17,61 @@ class ConstantMover {
     vector<unique_ptr<ast::Expression>> movedConstants;
 
 public:
-    unique_ptr<ast::Expression> postTransformAssign(core::Context ctx, unique_ptr<ast::Assign> asgn) {
-        if (ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs.get())) {
-            movedConstants.emplace_back(move(asgn));
-            return ast::MK::EmptyTree();
+    unique_ptr<ast::Expression> createConstAssign(ast::Assign& asgn) {
+        auto loc = asgn.loc;
+        auto unsafeNil = ast::MK::Unsafe(loc, ast::MK::Nil(loc));
+        if (auto send = ast::cast_tree<ast::Send>(asgn.rhs.get())) {
+            if (send->fun == core::Names::let() && send->args.size() == 2) {
+                auto rhs = ast::MK::Let(loc, move(unsafeNil), send->args[1]->deepCopy());
+                return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(rhs));
+            }
+        }
+
+        return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(unsafeNil));
+    }
+
+    unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
+        if (auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get())) {
+            if (ast::isa_tree<ast::UnresolvedConstantLit>(asgn->rhs.get())) {
+                movedConstants.emplace_back(move(asgn));
+                return ast::MK::EmptyTree();
+            }
+            auto name = ast::MK::Symbol(cnst->loc, cnst->cnst);
+
+            // if the constant is already in a T.let, preserve it, otherwise decay it to unsafe
+            movedConstants.emplace_back(createConstAssign(*asgn));
+
+            auto module = ast::MK::Constant(asgn->loc, core::Symbols::Module());
+            auto const_set = ctx.state.enterNameUTF8("const_set");
+            return ast::MK::Send2(asgn->loc, move(module), const_set, move(name), move(asgn->rhs));
         }
 
         return asgn;
     }
 
+    unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+        movedConstants.emplace_back(move(classDef));
+        return ast::MK::EmptyTree();
+    }
+
     vector<unique_ptr<ast::Expression>> getMovedConstants() {
         return move(movedConstants);
+    }
+
+    unique_ptr<ast::Expression> addConstantsToExpression(core::Loc loc, unique_ptr<ast::Expression> expr) {
+        auto consts = getMovedConstants();
+
+        if (consts.empty()) {
+            return expr;
+        } else {
+            ast::InsSeq::STATS_store stats;
+
+            for (auto &m : consts) {
+                stats.emplace_back(move(m));
+            }
+
+            return ast::MK::InsSeq(loc, std::move(stats), move(expr));
+        }
     }
 };
 
@@ -80,8 +124,11 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
 
     if (send->args.empty() && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
-        return addSigVoid(ast::MK::Method0(send->loc, send->loc, name, prepareBody(ctx, std::move(send->block->body)),
-                                           ast::MethodDef::RewriterSynthesized));
+        ConstantMover constantMover;
+        send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
+        auto method = addSigVoid(ast::MK::Method0(send->loc, send->loc, name, prepareBody(ctx, std::move(send->block->body)),
+                                                  ast::MethodDef::RewriterSynthesized));
+        return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
     if (send->args.size() != 1) {
@@ -106,16 +153,7 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         auto method = addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
                                                   prepareBody(ctx, std::move(send->block->body)),
                                                   ast::MethodDef::RewriterSynthesized));
-        auto movedConstants = constantMover.getMovedConstants();
-        if (movedConstants.empty()) {
-            return method;
-        } else {
-            ast::InsSeq::STATS_store stats;
-            for (auto &m : movedConstants) {
-                stats.emplace_back(move(m));
-            }
-            return ast::MK::InsSeq(send->loc, std::move(stats), move(method));
-        }
+        return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
     return nullptr;
