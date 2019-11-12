@@ -69,9 +69,9 @@ genrule(
     ],
     cmd = "$(location :generate_payload_bc_orig_generator) $(location :llvm-ar) $(location payload.bc.orig) $(locations :pseudo_lib)",
     tools = [
+        ":generate_payload_bc_orig_generator",
         ":llvm-ar",
         ":pseudo_lib",
-        ":generate_payload_bc_orig_generator",
     ],
     visibility = ["//visibility:public"],
 )
