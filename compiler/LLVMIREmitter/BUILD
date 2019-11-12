@@ -13,7 +13,7 @@ cc_library(
         "//compiler/Names",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",
-        "@org_llvm_darwin",
+        "@org_llvm",
         "@spdlog",
     ],
 )

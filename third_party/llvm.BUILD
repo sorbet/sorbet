@@ -1,5 +1,5 @@
 cc_library(
-    name = "org_llvm_darwin",
+    name = "org_llvm",
     # Don't include lib/ recursively, because we don't want all the clang code in there.
     srcs = glob([
         "lib/libLLVM*.a",

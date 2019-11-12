@@ -9,7 +9,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "@com_stripe_ruby_typer//core",
-        "@org_llvm_darwin",
+        "@org_llvm",
     ],
 )
 
