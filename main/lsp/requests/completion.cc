@@ -19,9 +19,11 @@ struct RubyKeyword {
     const string keyword;
     const string documentation;
     const optional<string> snippet;
+    const optional<string> detail;
 
-    RubyKeyword(string keyword, string documentation, optional<string> snippet = nullopt)
-        : keyword(keyword), documentation(documentation), snippet(snippet){};
+    RubyKeyword(string keyword, string documentation, optional<string> snippet = nullopt,
+                optional<string> detail = nullopt)
+        : keyword(keyword), documentation(documentation), snippet(snippet), detail(detail){};
 };
 
 // Taken from https://docs.ruby-lang.org/en/2.6.0/keywords_rdoc.html
@@ -39,9 +41,9 @@ const RubyKeyword rubyKeywords[] = {
     {"and", "Short-circuit Boolean and with lower precedence than &&"},
     {"begin", "Starts an exception handling block.", "begin\n  $0\nend"},
     {"break", "Leaves a block early."},
-    {"case", "Starts a case expression.", "case ${1:expr}\nwhen ${2:expr}\n  $0\nelse\nend"},
-    {"class", "Creates or opens a class.", "class ${1:ClassName}\n  $0\nend"},
-    {"def", "Defines a method.", "def ${1:method_name}($2)\n  $0\nend"},
+    {"case", "Starts a case expression.", "case ${1:expr}\nwhen ${2:expr}\n  $0\nelse\nend", "case/when/else/end"},
+    {"class", "Creates or opens a class.", "class ${1:ClassName}\n  $0\nend", "New class"},
+    {"def", "Defines a method.", "def ${1:method_name}($2)\n  $0\nend", "New method"},
     {"defined?", "Returns a string describing its argument.", "defined?(${1:Constant})$0"},
     // TODO(jez) Even better would be to auto-insert a block for methods that we know must take a block
     {"do", "Starts a block.", "do\n  $0\nend"},
@@ -52,9 +54,9 @@ const RubyKeyword rubyKeywords[] = {
     {"ensure", "Starts a section of code that is always run when an exception is raised."},
     {"false", "Boolean false."},
     {"for", "A loop that is similar to using the each method."},
-    {"if", "Used for if and modifier if expressions.", "if ${1:expr}\n  $0\nend"},
+    {"if", "Used for if and modifier if expressions.", "if ${1:expr}\n  $0\nend", "if/end"},
     {"in", "Used to separate the iterable object and iterator variable in a for loop."},
-    {"module", "Creates or opens a module.", "module ${1:ModuleName}\n  $0\nend"},
+    {"module", "Creates or opens a module.", "module ${1:ModuleName}\n  $0\nend", "New module"},
     {"next", "Skips the rest of the block."},
     {"nil", "A false value usually indicating “no value” or “unknown”."},
     {"not", "Inverts the following boolean expression. Has a lower precedence than !"},
@@ -70,11 +72,11 @@ const RubyKeyword rubyKeywords[] = {
     {"true", "Boolean true."},
     // This is also defined on Kernel
     // {"undef", "Prevents a class or module from responding to a method call."},
-    {"unless", "Used for unless and modifier unless expressions.", "unless ${1:expr}\n  $0\nend"},
-    {"until", "Creates a loop that executes until the condition is true.", "until ${1:expr}\n  $0\nend"},
+    {"unless", "Used for unless and modifier unless expressions.", "unless ${1:expr}\n  $0\nend", "unless/end"},
+    {"until", "Creates a loop that executes until the condition is true.", "until ${1:expr}\n  $0\nend", "until/end"},
     // Would really like to dedent the line too...
     {"when", "A condition in a case expression.", "when ${1:expr}$0"},
-    {"while", "Creates a loop that executes while the condition is true.", "while ${1:expr}\n  $0\nend"},
+    {"while", "Creates a loop that executes while the condition is true.", "while ${1:expr}\n  $0\nend", "while/end"},
     {"yield", "Starts execution of the block sent to the current method."},
 };
 
@@ -262,6 +264,8 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
 unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &gs, const LSPConfiguration &config,
                                                        const RubyKeyword &rubyKeyword, const core::Loc queryLoc,
                                                        string_view prefix, size_t sortIdx) {
+    auto supportSnippets = config.getClientConfig().clientCompletionItemSnippetSupport;
+    auto markupKind = config.getClientConfig().clientCompletionItemMarkupKind;
     auto item = make_unique<CompletionItem>(rubyKeyword.keyword);
     item->sortText = fmt::format("{:06d}", sortIdx);
 
@@ -270,7 +274,7 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
     u4 prefixSize = prefix.size();
 
     string replacementText;
-    if (rubyKeyword.snippet.has_value() && config.getClientConfig().clientCompletionItemSnippetSupport) {
+    if (rubyKeyword.snippet.has_value() && supportSnippets) {
         item->insertTextFormat = InsertTextFormat::Snippet;
         item->kind = CompletionItemKind::Snippet;
         replacementText = rubyKeyword.snippet.value();
@@ -289,11 +293,18 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
         item->insertText = replacementText;
     }
 
-    item->detail = fmt::format("(sorbet) {}", rubyKeyword.documentation);
+    if (rubyKeyword.detail.has_value()) {
+        item->detail = fmt::format("(sorbet) {}", rubyKeyword.detail.value());
+    } else if (item->kind == CompletionItemKind::Snippet) {
+        item->detail = fmt::format("(sorbet) Snippet: {}", rubyKeyword.keyword);
+    } else {
+        item->detail = fmt::format("(sorbet) Ruby keyword: {}", rubyKeyword.keyword);
+    }
+
     if (rubyKeyword.snippet.has_value()) {
-        auto rubyMarkup = rubyKeyword.snippet.value();
-        auto markupKind = config.getClientConfig().clientCompletionItemMarkupKind;
-        item->documentation = formatRubyMarkup(markupKind, rubyMarkup, rubyKeyword.documentation);
+        item->documentation = formatRubyMarkup(markupKind, rubyKeyword.snippet.value(), rubyKeyword.documentation);
+    } else {
+        item->documentation = rubyKeyword.documentation;
     }
 
     return item;
