@@ -37,8 +37,8 @@ def sorbet_llvm_externals():
     else:
         http_archive(
             name = "org_llvm",
-            url = "https://releases.llvm.org/9.0.0/clang%2bllvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz",
+            url = "https://releases.llvm.org/9.0.0/clang%2bllvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz",
             build_file = "//third_party:llvm.BUILD",
-            sha256 = "a23b082b30c128c9831dbdd96edad26b43f56624d0ad0ea9edec506f5385038d",
+            sha256 = "5c1473c2611e1eac4ed1aeea5544eac5e9d266f40c5623bbaeb1c6555815a27d",
             strip_prefix = "clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04",
         )
