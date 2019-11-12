@@ -50,6 +50,8 @@ public:
         return asgn;
     }
 
+    // classdefs define new constants, so we always move those if they're the "top-level" classdef (i.e. if we have
+    // nested classdefs, we should only move the outermost one)
     unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
         classDepth++;
         return classDef;
@@ -62,6 +64,26 @@ public:
             return ast::MK::EmptyTree();
         }
         return classDef;
+    }
+
+    // we move sends if they are other minitest `describe` blocks, as those end up being classes anyway: consequently,
+    // we treat those the same wa we treat classes
+    unique_ptr<ast::Send> preTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
+        if (!send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
+            classDepth++;
+        }
+        return send;
+    }
+
+    unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
+        if (!send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
+            classDepth--;
+            if (classDepth == 0) {
+                movedConstants.emplace_back(move(send));
+                return ast::MK::EmptyTree();
+            }
+        }
+        return send;
     }
 
     vector<unique_ptr<ast::Expression>> getMovedConstants() {
