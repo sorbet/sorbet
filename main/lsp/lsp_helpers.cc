@@ -80,8 +80,7 @@ unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, string_view ru
         formattedTypeString = string(rubyMarkup);
     }
 
-    string content =
-        absl::StrCat(formattedTypeString, explanation.has_value() ? "\n\n---\n\n" : "", explanation.value_or(""));
+    string content = absl::StrCat(formattedTypeString, explanation.has_value() ? "\n\n" : "", explanation.value_or(""));
 
     return make_unique<MarkupContent>(markupKind, move(content));
 }
