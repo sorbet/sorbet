@@ -51,12 +51,12 @@ public:
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
-        classDepth ++;
+        classDepth++;
         return classDef;
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
-        classDepth --;
+        classDepth--;
         if (classDepth == 0) {
             movedConstants.emplace_back(move(classDef));
             return ast::MK::EmptyTree();
