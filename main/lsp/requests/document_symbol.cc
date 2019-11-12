@@ -50,7 +50,7 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     }
     auto result = make_unique<DocumentSymbol>(prefix + sym->name.show(gs), kind, move(range), move(selectionRange));
     if (sym->isMethod()) {
-        result->detail = methodDetail(gs, symRef, nullptr, nullptr, nullptr);
+        result->detail = prettyTypeForMethod(gs, symRef, nullptr, nullptr, nullptr);
     } else {
         // Currently released version of VSCode has a bug that requires this non-optional field to be present
         result->detail = "";

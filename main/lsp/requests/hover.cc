@@ -13,15 +13,13 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
     auto start = &dispatchResult;
     ;
     while (start != nullptr) {
-        auto &dispatchComponent = start->main;
-        if (dispatchComponent.method.exists()) {
+        auto &component = start->main;
+        if (component.method.exists()) {
             if (!contents.empty()) {
                 contents += "\n";
             }
             contents = absl::StrCat(
-                contents,
-                methodDetail(gs, dispatchComponent.method, dispatchComponent.receiver, retType, constraint.get()), "\n",
-                methodDefinition(gs, dispatchComponent.method));
+                contents, prettyTypeForMethod(gs, component.method, component.receiver, retType, constraint.get()));
         }
         start = start->secondary.get();
     }
@@ -83,8 +81,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypechecker &typ
             }
             response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, documentation));
         } else if (auto defResp = resp->isDefinition()) {
-            string typeString = absl::StrCat(methodDetail(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr),
-                                             "\n", methodDefinition(gs, defResp->symbol));
+            string typeString = prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr);
             response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, documentation));
         } else if (auto constResp = resp->isConstant()) {
             const auto &data = constResp->symbol.data(gs);
