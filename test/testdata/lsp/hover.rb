@@ -82,7 +82,6 @@ class BigFoo; extend T::Sig
     # ^^^^^^^^^^^^^^^^^^^^^ hover: ```ruby
     # ^^^^^^^^^^^^^^^^^^^^^ hover: sig {void}
     # ^^^^^^^^^^^^^^^^^^^^^ hover: ```
-    # ^^^^^^^^^^^^^^^^^^^^^ hover: ---
     # ^^^^^^^^^^^^^^^^^^^^^ hover: Tests return markdown output
   end
 end
