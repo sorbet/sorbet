@@ -14,7 +14,6 @@ cc_library(
     includes = ["include/"],
     linkopts = [
         "-lpthread",
-        "-lcurses",
         "-ldl",
         "-lz",
     ],
