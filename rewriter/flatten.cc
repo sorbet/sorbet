@@ -41,14 +41,12 @@ using namespace std;
 namespace sorbet::rewriter {
 
 class FlattenWalk {
-    enum class ScopeType { ClassScope, MethodScope, InstanceScope };
+    enum class ScopeType { ClassScope, StaticMethodScope, InstanceMethodScope };
 
     struct ScopeInfo {
-        // How many `class << self` levels are we inside?
+        // This tells us how many `class << self` levels we're nested inside
         u4 staticLevel;
-        // this will be true if the thing we're moving here is
-        //   class << self
-        // and false otherwise.
+        // this corresponds to the thing we're moving
         ScopeType scopeType;
 
         ScopeInfo(u4 staticLevel, ScopeType scopeType) : staticLevel(staticLevel), scopeType(scopeType) {}
@@ -85,7 +83,7 @@ class FlattenWalk {
         // we want, and the `ClassScope` class below uses ENFORCEs to make sure that we always use these indices
         // correctly.
         optional<int> targetLocation;
-        // this encompasses all of our scope information into a single value
+        // this is all the metadata about this specific stack frame, and what scope it puts it into
         ScopeInfo scopeInfo;
         MethodData(optional<int> targetLocation, ScopeInfo scopeInfo)
             : targetLocation(targetLocation), scopeInfo(scopeInfo){};
@@ -155,7 +153,10 @@ class FlattenWalk {
             ENFORCE(moveQueue.size() > idx);
             ENFORCE(moveQueue[idx].expr == nullptr);
             auto staticLevel = md.scopeInfo.staticLevel;
-            if (md.scopeInfo.scopeType == ScopeType::MethodScope) {
+            // the staticLevel on the stack corresponded to how many `class << self` blocks we were inside of, which is
+            // why we don't count `self.foo` methods as increasing the number there. We do want to treat them as static
+            // once we replace them, so we add 1 to the computed staticLevel if we're moving a static method here.
+            if (md.scopeInfo.scopeType == ScopeType::StaticMethodScope) {
                 staticLevel += 1;
             }
             moveQueue[idx] = {move(expr), staticLevel};
@@ -167,13 +168,27 @@ class FlattenWalk {
     // need to move to the end, so we keep that below on the stack.
     vector<ClassScope> classScopes;
 
+    // compute the new scope information.
     ScopeInfo computeScopeInfo(ScopeType scopeType) {
         auto &methods = curMethodSet();
-        // if we're in an instance, then we stay in an instance
-        if (!methods.stack.empty() && methods.stack.back().scopeInfo.scopeType == ScopeType::InstanceScope &&
+        // if we're in instance scope, then we'll always stay in it. This is an incorrect approximation, but it's as
+        // close as we can get with our specific model: in particular, if we have something like
+        //
+        // def foo; def bar; end; end
+        //
+        // then both #foo and #bar will be instance methods, but if we have
+        //
+        // def foo; def self.bar; end; end
+        //
+        // then #foo will be an instance method while #bar will be an instance method stored on the singleton class for
+        // the instances on which #foo has been called: that is to say, it will act as an instance method, but it won't
+        // be an instance method available on every instance of the enclosing class. We desugar it as though it's an
+        // instance method.
+        if (!methods.stack.empty() && methods.stack.back().scopeInfo.scopeType == ScopeType::InstanceMethodScope &&
             methods.stack.back().scopeInfo.staticLevel == 0) {
-            return ScopeInfo(0, ScopeType::InstanceScope);
+            return ScopeInfo(0, ScopeType::InstanceMethodScope);
         } else {
+            // if we're not in an instance scope, then we carry on the staticLevel from the stack
             auto existingLevel = methods.stack.empty() ? 0 : methods.stack.back().scopeInfo.staticLevel;
             if (scopeType == ScopeType::ClassScope) {
                 return ScopeInfo(existingLevel + 1, scopeType);
@@ -214,9 +229,7 @@ class FlattenWalk {
         }
 
         auto exprs = popCurMethodDefs();
-        // TODO: remove all this
-        //
-        // this add the nested methods at the appropriate 'staticness level'
+        // this adds all the methods at the appropriate 'staticness' level
 
         int highestLevel = 0;
         for (int i = 0; i < exprs.size(); i++) {
@@ -307,7 +320,7 @@ public:
         // that we don't know the 'staticness level' of a sig, as it depends on the method that follows it (whether that
         // method has a `self.` or not), so we'll fill that information in later
         if (send->fun == core::Names::sig()) {
-            curMethodSet().pushScope(computeScopeInfo(ScopeType::MethodScope));
+            curMethodSet().pushScope(computeScopeInfo(ScopeType::StaticMethodScope));
         }
 
         return send;
@@ -330,7 +343,7 @@ public:
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
         // add a new scope for this method def
         curMethodSet().pushScope(
-            computeScopeInfo(methodDef->isSelf() ? ScopeType::MethodScope : ScopeType::InstanceScope));
+            computeScopeInfo(methodDef->isSelf() ? ScopeType::StaticMethodScope : ScopeType::InstanceMethodScope));
         return methodDef;
     }
 
