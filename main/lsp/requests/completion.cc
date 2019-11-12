@@ -364,7 +364,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
     if (what.data(gs)->isMethod()) {
         item->kind = CompletionItemKind::Method;
         if (what.exists()) {
-            item->detail = methodDetail(gs, what, receiverType, nullptr, constraint);
+            item->detail = prettyTypeForMethod(gs, what, receiverType, nullptr, constraint);
         }
 
         u4 queryStart = queryLoc.beginPos();
