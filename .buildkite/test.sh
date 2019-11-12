@@ -9,6 +9,11 @@ case "${unameOut}" in
     *)          exit 1
 esac
 
+if [[ "linux" == "$platform" ]]; then
+    apt-get update
+    apt-get install -yy libncurses5-dev libncursesw5-dev
+fi
+
 export JOB_NAME=test
 source .buildkite/tools/setup-bazel.sh
 
