@@ -20,3 +20,6 @@ steps:
     command: .buildkite/test.sh
     agents:
       os: mac
+  - label: ":linux: test"
+    command: .buildkite/test.sh
+    <<: *elastic
