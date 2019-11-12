@@ -14,6 +14,7 @@ namespace sorbet::rewriter {
 
 namespace {
 class ConstantMover {
+    u4 classDepth = 0;
     vector<unique_ptr<ast::Expression>> movedConstants;
 
 public:
@@ -49,9 +50,18 @@ public:
         return asgn;
     }
 
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+        classDepth ++;
+        return classDef;
+    }
+
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
-        movedConstants.emplace_back(move(classDef));
-        return ast::MK::EmptyTree();
+        classDepth --;
+        if (classDepth == 0) {
+            movedConstants.emplace_back(move(classDef));
+            return ast::MK::EmptyTree();
+        }
+        return classDef;
     }
 
     vector<unique_ptr<ast::Expression>> getMovedConstants() {
