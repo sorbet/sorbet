@@ -2,7 +2,6 @@ test_suite(
     name = "test",
     tests = [
         "test_corpus",
-        "//test/llvm:kaleidoscope_test",
     ],
 )
 
