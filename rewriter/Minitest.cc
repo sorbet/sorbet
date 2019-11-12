@@ -17,7 +17,7 @@ class ConstantMover {
     vector<unique_ptr<ast::Expression>> movedConstants;
 
 public:
-    unique_ptr<ast::Expression> createConstAssign(ast::Assign& asgn) {
+    unique_ptr<ast::Expression> createConstAssign(ast::Assign &asgn) {
         auto loc = asgn.loc;
         auto unsafeNil = ast::MK::Unsafe(loc, ast::MK::Nil(loc));
         if (auto send = ast::cast_tree<ast::Send>(asgn.rhs.get())) {
@@ -126,8 +126,9 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
         ConstantMover constantMover;
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
-        auto method = addSigVoid(ast::MK::Method0(send->loc, send->loc, name, prepareBody(ctx, std::move(send->block->body)),
-                                                  ast::MethodDef::RewriterSynthesized));
+        auto method =
+            addSigVoid(ast::MK::Method0(send->loc, send->loc, name, prepareBody(ctx, std::move(send->block->body)),
+                                        ast::MethodDef::RewriterSynthesized));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
