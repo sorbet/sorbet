@@ -9,7 +9,7 @@ class A
 end
 
 A.new.this_is_a # error: does not exist
-#              ^ completion: this_is_a_test, <test_this_is_a_test>
+#              ^ completion: this_is_a_test
 
 class B
   def default_arg(x: nil)
@@ -17,4 +17,4 @@ class B
 end
 
 B.new.default_ar # error: does not exist
-#               ^ completion: default_arg, default_arg
+#               ^ completion: default_arg
