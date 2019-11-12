@@ -8,6 +8,7 @@
 #include "rewriter/DSLBuilder.h"
 #include "rewriter/DefaultArgs.h"
 #include "rewriter/Delegate.h"
+#include "rewriter/Flatfiles.h"
 #include "rewriter/InterfaceWrapper.h"
 #include "rewriter/Mattr.h"
 #include "rewriter/Minitest.h"
@@ -36,6 +37,7 @@ public:
         Command::run(ctx, classDef.get());
         Rails::run(ctx, classDef.get());
         TEnum::run(ctx, classDef.get());
+        Flatfiles::run(ctx, classDef.get());
         Prop::run(ctx, classDef.get());
         TypeMembers::run(ctx, classDef.get());
         DefaultArgs::run(ctx, classDef.get());
