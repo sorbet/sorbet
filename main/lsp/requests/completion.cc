@@ -291,12 +291,9 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
 
     item->detail = fmt::format("(sorbet) {}", rubyKeyword.documentation);
     if (rubyKeyword.snippet.has_value()) {
-        auto documentation = rubyKeyword.snippet.value();
+        auto rubyMarkup = rubyKeyword.snippet.value();
         auto markupKind = config.getClientConfig().clientCompletionItemMarkupKind;
-        if (markupKind == MarkupKind::Markdown) {
-            documentation = absl::StrCat("\n\n```ruby\n", documentation, "\n```");
-        }
-        item->documentation = make_unique<MarkupContent>(markupKind, documentation);
+        item->documentation = formatRubyMarkup(markupKind, rubyMarkup, rubyKeyword.documentation);
     }
 
     return item;
