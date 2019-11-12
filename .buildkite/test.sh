@@ -11,7 +11,7 @@ esac
 
 if [[ "linux" == "$platform" ]]; then
     apt-get update
-    apt-get install -yy libncurses5-dev libncursesw5-dev
+    apt-get install -yy libncurses5-dev libncursesw5-dev xxd
 fi
 
 export JOB_NAME=test
