@@ -634,9 +634,9 @@ class Array < Object
   # ```
   sig do
     params(
-        arg0: Elem,
+      arg0: T.untyped,
     )
-    .returns(T.nilable(T::Array[Elem]))
+    .returns(T.nilable(Elem))
   end
   def assoc(arg0); end
 
