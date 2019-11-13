@@ -463,7 +463,7 @@ public:
                     return original;
                 }
                 auto name = sym->asSymbol(ctx);
-                auto owner = ctx.owner;
+                auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
                 if (original->fun._id == core::Names::privateClassMethod()._id) {
                     owner = owner.data(ctx)->singletonClass(ctx);
                 }
