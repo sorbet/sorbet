@@ -149,6 +149,22 @@ class <emptyTree><<C <root>>> < ()
     <self>.junk().it("ignores non-self calls") do ||
       <self>.junk()
     end
+
+    class <emptyTree>::<C <class_a non-ideal situation>><<C <todo sym>>> < (<self>)
+      begin
+        class <emptyTree>::<C <class_nobody should write this but we should still handle it>><<C <todo sym>>> < (<self>)
+          <emptyTree>
+        end
+        begin
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.params({}).void()
+          end
+          def <test_contains nested describes><<C <todo sym>>>(&<blk>)
+            <emptyTree>
+          end
+        end
+      end
+    end
   end
 
   def junk<<C <todo sym>>>(&<blk>)

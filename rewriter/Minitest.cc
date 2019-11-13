@@ -69,14 +69,14 @@ public:
     // we move sends if they are other minitest `describe` blocks, as those end up being classes anyway: consequently,
     // we treat those the same way we treat classes
     unique_ptr<ast::Send> preTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
-        if (!send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
+        if (send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
             classDepth++;
         }
         return send;
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
-        if (!send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
+        if (send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
             classDepth--;
             if (classDepth == 0) {
                 movedConstants.emplace_back(move(send));
