@@ -19,5 +19,6 @@ cc_library(
         "-lcurses",
         "-ldl",
         "-lz",
+        "-lstdc++",
     ],
 )
