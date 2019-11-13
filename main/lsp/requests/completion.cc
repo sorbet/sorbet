@@ -424,44 +424,43 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(const core::Globa
         resultType = core::Types::untypedUntracked();
     }
 
-    if (what.data(gs)->isMethod()) {
-        item->kind = CompletionItemKind::Method;
-        item->detail = what.data(gs)->show(gs);
+    item->kind = CompletionItemKind::Method;
+    item->detail = what.data(gs)->show(gs);
 
-        u4 queryStart = queryLoc.beginPos();
-        u4 prefixSize = prefix.size();
-        auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
-        auto replacementRange = Range::fromLoc(gs, replacementLoc);
+    u4 queryStart = queryLoc.beginPos();
+    u4 prefixSize = prefix.size();
+    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
+    auto replacementRange = Range::fromLoc(gs, replacementLoc);
 
-        string replacementText;
-        if (supportsSnippets) {
-            item->insertTextFormat = InsertTextFormat::Snippet;
-            replacementText = methodSnippet(gs, what, receiverType, constraint);
-        } else {
-            item->insertTextFormat = InsertTextFormat::PlainText;
-            replacementText = string(what.data(gs)->name.data(gs)->shortName(gs));
-        }
-
-        if (replacementRange != nullptr) {
-            item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
-        } else {
-            // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
-            item->insertText = replacementText;
-        }
-
-        optional<string> documentation = nullopt;
-        if (what.data(gs)->loc().file().exists()) {
-            documentation =
-                findDocumentation(what.data(gs)->loc().file().data(gs).source(), what.data(gs)->loc().beginPos());
-        }
-
-        auto prettyType = prettyTypeForMethod(gs, what, receiverType, nullptr, constraint);
-        item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
-
-        if (documentation != nullopt && documentation->find("@deprecated") != documentation->npos) {
-            item->deprecated = true;
-        }
+    string replacementText;
+    if (supportsSnippets) {
+        item->insertTextFormat = InsertTextFormat::Snippet;
+        replacementText = methodSnippet(gs, what, receiverType, constraint);
+    } else {
+        item->insertTextFormat = InsertTextFormat::PlainText;
+        replacementText = string(what.data(gs)->name.data(gs)->shortName(gs));
     }
+
+    if (replacementRange != nullptr) {
+        item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
+    } else {
+        // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
+        item->insertText = replacementText;
+    }
+
+    optional<string> documentation = nullopt;
+    if (what.data(gs)->loc().file().exists()) {
+        documentation =
+            findDocumentation(what.data(gs)->loc().file().data(gs).source(), what.data(gs)->loc().beginPos());
+    }
+
+    auto prettyType = prettyTypeForMethod(gs, what, receiverType, nullptr, constraint);
+    item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
+
+    if (documentation != nullopt && documentation->find("@deprecated") != documentation->npos) {
+        item->deprecated = true;
+    }
+
     return item;
 }
 
