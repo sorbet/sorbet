@@ -311,8 +311,9 @@ bool childNeedsOverride(core::Context ctx, core::SymbolRef childSymbol, core::Sy
 
 } // namespace
 
-bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, unique_ptr<cfg::CFG> &cfg,
-                                    const core::TypePtr &methodReturnType, core::TypeConstraint &constr) {
+optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Context ctx, unique_ptr<cfg::CFG> &cfg,
+                                                                     const core::TypePtr &methodReturnType,
+                                                                     core::TypeConstraint &constr) {
     core::SymbolRef methodSymbol = cfg->symbol;
 
     bool guessedSomethingUseful = false;
@@ -323,7 +324,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     core::TypePtr guessedReturnType;
     if (!constr.isEmpty()) {
         if (!constr.solve(ctx)) {
-            return false;
+            return nullopt;
         }
 
         guessedReturnType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
@@ -347,7 +348,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     };
     bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->arguments(), isBadArg);
     if (hasBadArg) {
-        return false;
+        return nullopt;
     }
 
     auto guessedArgumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
@@ -373,7 +374,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     // Sometimes the methodSymbol we're looking at has been synthesized by a Rewriter pass, so no 'def' exists in the
     // source
     if (loc.file().data(ctx).source().substr(loc.beginPos(), 3) != "def") {
-        return false;
+        return nullopt;
     }
 
     // Note: Before running any substantial codemod to add generated sigs at Stripe, be sure to insert `generated.`
@@ -426,7 +427,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         fmt::format_to(ss, ").");
     }
     if (!guessedSomethingUseful) {
-        return false;
+        return nullopt;
     }
 
     if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
@@ -455,11 +456,11 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     bool hasExistingSig = methodSymbol.data(ctx)->resultType != nullptr;
 
     if (!loc.file().exists()) {
-        return false;
+        return nullopt;
     }
 
     if (hasExistingSig && !methodSymbol.data(ctx)->hasGeneratedSig()) {
-        return false;
+        return nullopt;
     }
 
     if (hasExistingSig) {
@@ -467,7 +468,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
             replacementLoc = core::Loc(loc.file(), *existingStart, replacementLoc.endPos());
         } else {
             // Had existing sig, but couldn't find where it started, so give up suggesting a sig.
-            return false;
+            return nullopt;
         }
     }
 
@@ -480,9 +481,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         edits.emplace_back(edit.value());
     }
 
-    e.addAutocorrect(core::AutocorrectSuggestion{fmt::format("Add `{}`", sig), edits});
-
-    return true;
+    return core::AutocorrectSuggestion{fmt::format("Add `{}`", sig), edits};
 }
 
 } // namespace sorbet::infer
