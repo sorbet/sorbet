@@ -188,7 +188,7 @@ module URI
     )
     .returns(T::Array[[String, String]])
   end
-  def self.decode_www_form_component(str, enc=T.unsafe(nil)); end
+  def self.decode_www_form_component(str, enc=Encoding::UTF_8); end
 
   sig do
     params(
