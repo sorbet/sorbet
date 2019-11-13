@@ -1,7 +1,7 @@
 #ifndef GRANITA_H
 #define GRANITA_H
 // Paul's and Dmitry's laptops have different attributes for this function in system libraries.
-void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__)) __attribute__((__nounwind__));
+void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 #include "include/ruby/encoding.h" // for rb_encoding
 #include "internal.h"
 #include "ruby.h"
