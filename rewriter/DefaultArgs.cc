@@ -25,6 +25,10 @@ unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Express
 
     unique_ptr<ast::Expression> retType;
 
+    if (sig->block == nullptr) {
+        return ast::MK::EmptyTree();
+    }
+
     auto send = ast::cast_tree<ast::Send>(sig->block->body.get());
     if (!send) {
         return ast::MK::EmptyTree();
