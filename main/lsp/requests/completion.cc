@@ -290,7 +290,7 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
     auto item = make_unique<CompletionItem>(rubyKeyword.keyword);
     item->sortText = fmt::format("{:06d}", sortIdx);
 
-    // TODO(jez) This should probably be a helper function (see getCompletionItemForSymbol)
+    // TODO(jez) This should probably be a helper function (see getCompletionItemForMethod)
     u4 queryStart = queryLoc.beginPos();
     u4 prefixSize = prefix.size();
 
@@ -331,6 +331,33 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
     return item;
 }
 
+unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const core::SymbolRef what,
+                                                        size_t sortIdx) {
+    ENFORCE(what.exists());
+    auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
+
+    // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
+    // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
+    item->sortText = fmt::format("{:06d}", sortIdx);
+
+    auto resultType = what.data(gs)->resultType;
+    if (!resultType) {
+        resultType = core::Types::untypedUntracked();
+    }
+
+    if (what.data(gs)->isStaticField()) {
+        // TODO(jez) Handle isStaticFieldTypeAlias (hover has special handling to show the type for these)
+        item->kind = CompletionItemKind::Constant;
+        item->detail = resultType->show(gs);
+    } else if (what.data(gs)->isClassOrModule()) {
+        item->kind = CompletionItemKind::Class;
+    } else {
+        ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
+    }
+
+    return item;
+}
+
 unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs, const LSPConfiguration &config,
                                                      const core::LocalVariable &local, const core::Loc queryLoc,
                                                      string_view prefix, size_t sortIdx) {
@@ -339,7 +366,7 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
     item->sortText = fmt::format("{:06d}", sortIdx);
     item->kind = CompletionItemKind::Variable;
 
-    // TODO(jez) This should probably be a helper function (see getCompletionItemForSymbol)
+    // TODO(jez) This should probably be a helper function (see getCompletionItemForMethod)
     u4 queryStart = queryLoc.beginPos();
     u4 prefixSize = prefix.size();
     auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
@@ -377,12 +404,13 @@ vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPType
 
 } // namespace
 
-unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::GlobalState &gs, core::SymbolRef what,
+unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(const core::GlobalState &gs, core::SymbolRef what,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                const core::Loc queryLoc, string_view prefix,
                                                                size_t sortIdx) const {
     ENFORCE(what.exists());
+    ENFORCE(what.data(gs)->isMethod());
     auto supportsSnippets = config->getClientConfig().clientCompletionItemSnippetSupport;
     auto markupKind = config->getClientConfig().clientCompletionItemMarkupKind;
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
@@ -433,11 +461,6 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
         if (documentation != nullopt && documentation->find("@deprecated") != documentation->npos) {
             item->deprecated = true;
         }
-    } else if (what.data(gs)->isStaticField()) {
-        item->kind = CompletionItemKind::Constant;
-        item->detail = resultType->show(gs);
-    } else if (what.data(gs)->isClassOrModule()) {
-        item->kind = CompletionItemKind::Class;
     }
     return item;
 }
@@ -456,8 +479,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
                     sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                     // hide singletons
                     hasSimilarName(gs, sym.data(gs)->name, pattern)) {
-                    items.push_back(
-                        getCompletionItemForSymbol(gs, sym, receiverType, nullptr, queryLoc, pattern, items.size()));
+                    items.push_back(getCompletionItemForConstant(gs, sym, items.size()));
                 }
             }
         } while (owner != core::Symbols::root());
@@ -579,7 +601,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
             items.push_back(getCompletionItemForLocal(gs, *config, similarLocal, queryLoc, prefix, items.size()));
         }
         for (auto &similarMethod : deduped) {
-            items.push_back(getCompletionItemForSymbol(gs, similarMethod.method, similarMethod.receiverType,
+            items.push_back(getCompletionItemForMethod(gs, similarMethod.method, similarMethod.receiverType,
                                                        similarMethod.constr.get(), queryLoc, prefix, items.size()));
         }
     } else if (auto constantResp = resp->isConstant()) {
