@@ -3,13 +3,30 @@ begin
   class <emptyTree><<C <root>>> < ()
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::A)
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <emptyTree>
+        end
+        ::A.new().foo()
+        ::A.foo()
+        ::A.new().food()
+        ::A.food()
+        ::A.new().foos()
+        ::A.foos()
+        ::A.sfoo()
+        ::A.new().sfoo()
+        ::A.new().sfood()
+        ::A.sfood()
+        ::A.sfoos()
+        ::A.new().sfoos()
         <emptyTree>
       end
     end
   end
   class ::A<<C A>> < (::<todo sym>)
+    <emptyTree>
+
     <emptyTree>
 
     <emptyTree>
@@ -40,25 +57,13 @@ begin
       <emptyTree>
     end
 
-    def self.foos(<blk>)
+    def foos(<blk>)
       <emptyTree>
     end
 
-    def self.sfood(<blk>)
+    def sfood(<blk>)
       <emptyTree>
     end
-
-    def self.<static-init>(<blk>)
-      begin
-        <emptyTree>
-        <emptyTree>
-      end
-    end
-  end
-  class <singleton class><<Class:A>> < ()
-    <emptyTree>
-
-    <emptyTree>
 
     def self.sfoos(<blk>)
       <emptyTree>
