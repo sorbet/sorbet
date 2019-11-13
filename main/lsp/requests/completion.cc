@@ -7,6 +7,7 @@
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LocalVarFinder.h"
+#include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/lsp.h"
 
 using namespace std;
@@ -402,10 +403,24 @@ vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPType
     return localVarFinder.result();
 }
 
+core::SymbolRef firstMethodAfterQuery(LSPTypechecker &typechecker, const core::Loc queryLoc) {
+    const core::GlobalState &gs = typechecker.state();
+    auto files = vector<core::FileRef>{queryLoc.file()};
+    auto resolved = typechecker.getResolved(files);
+
+    NextMethodFinder nextMethodFinder(queryLoc);
+    auto ctx = core::Context{gs, core::Symbols::root()};
+    for (auto &t : resolved) {
+        t.tree = ast::TreeMap::apply(ctx, nextMethodFinder, move(t.tree));
+    }
+
+    return nextMethodFinder.result();
+}
+
 } // namespace
 
-unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(const core::GlobalState &gs, core::SymbolRef what,
-                                                               core::TypePtr receiverType,
+unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(const core::GlobalState &gs, LSPTypechecker &typechecker,
+                                                               core::SymbolRef what, core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                const core::Loc queryLoc, string_view prefix,
                                                                size_t sortIdx) const {
@@ -600,8 +615,9 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
             items.push_back(getCompletionItemForLocal(gs, *config, similarLocal, queryLoc, prefix, items.size()));
         }
         for (auto &similarMethod : deduped) {
-            items.push_back(getCompletionItemForMethod(gs, similarMethod.method, similarMethod.receiverType,
-                                                       similarMethod.constr.get(), queryLoc, prefix, items.size()));
+            items.push_back(getCompletionItemForMethod(gs, typechecker, similarMethod.method,
+                                                       similarMethod.receiverType, similarMethod.constr.get(), queryLoc,
+                                                       prefix, items.size()));
         }
     } else if (auto constantResp = resp->isConstant()) {
         if (!config->opts.lspAutocompleteEnabled) {
