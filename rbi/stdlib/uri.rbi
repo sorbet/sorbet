@@ -174,6 +174,35 @@ module URI
   VERSION_CODE = T.let(T.unsafe(nil), String)
   WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
+  # Decode URL-encoded form data from given `str`.
+  #
+  # This decodes application/x-www-form-urlencoded data and returns array of key-value array.
+  #
+  # This refers [url.spec.whatwg.org/#concept-urlencoded-parser](http://url.spec.whatwg.org/#concept-urlencoded-parser),
+  # so this supports only &-separator, don't support ;-separator.
+  #
+  # ~~~ruby
+  # ary = ::decode_www_form(“a=1&a=2&b=3”)
+  # p ary #=> [['a', '1'], ['a', '2'], ['b', '3']]
+  # p ary.assoc('a').last #=> '1'
+  # p ary.assoc('b').last #=> '3'
+  # p ary.rassoc('a').last #=> '2'
+  # p Hash # => {“a”=>“2”, “b”=>“3”}
+  # ~~~
+  #
+  # See [::decode_www_form_component](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-decode_www_form_component),
+  # [::encode_www_form](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-encode_www_form)
+  sig do
+    params(
+      str: String,
+      enc: Encoding,
+      separator: String,
+      use__charset_: T::Boolean,
+      isindex: T::Boolean
+    ).returns(T::Array[[String, String]])
+  end
+  def self.decode_www_form(str, enc = Encoding::UTF_8, separator: '&', use__charset_: false, isindex: false); end
+
   # Decodes given `str` of URL-encoded form data.
   #
   # This decodes + to SP.
