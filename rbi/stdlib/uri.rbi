@@ -259,6 +259,26 @@ module URI
   end
   def self.encode_www_form(enum, enc=nil); end
 
+  # Encode given `str` to URL-encoded form data.
+  #
+  # This method doesn't convert *, -, ., 0-9, A-Z, _, a-z, but does convert SP
+  # (ASCII space) to + and converts others to %XX.
+  #
+  # If `enc` is given, convert `str` to the encoding before percent encoding.
+  #
+  # This is an implementation of
+  # [www.w3.org/TR/html5/forms.html#url-encoded-form-data](http://www.w3.org/TR/html5/forms.html#url-encoded-form-data)
+  #
+  # See [::decode_www_form_component](https://docs.ruby-lang.org/en/2.1.0/URI.html#method-c-decode_www_form_component),
+  # [::encode_www_form](https://docs.ruby-lang.org/en/2.1.0/URI.html#method-c-encode_www_form)
+  sig do
+    params(
+      str: Object,
+      enc: T.nilable(Encoding)
+    ).returns(String)
+  end
+  def self.encode_www_form_component(str, enc=nil); end
+
   sig do
     params(
         arg: String,
