@@ -2,7 +2,20 @@ cc_library(
     name = "org_llvm_linux",
     # Don't include lib/ recursively, because we don't want all the clang code in there.
     srcs = glob([
+        "lib/libLLVM*.a",
+        "lib/libc++abi.so",
         "lib/libclang-cpp.so",
+        "lib/libclang.so",
+        "lib/libc++.so",
+        "lib/libgomp.so",
+        "lib/libiomp5.so",
+        "lib/liblldbIntelFeatures.so",
+        "lib/liblldb.so",
+        "lib/libLTO.so",
+        "lib/libomp.so",
+        "lib/libomptarget.so",
+        "lib/libRemarks.so",
+        "lib/libunwind.so",
     ]),
     visibility = ["//visibility:public"],
     hdrs = glob([
@@ -17,5 +30,6 @@ cc_library(
         "-lcurses",
         "-ldl",
         "-lz",
+        "-lstdc++",
     ],
 )
