@@ -13,7 +13,7 @@ module Kernel
       if name.start_with?('./')
         bundle_name = bundle_name[2..-1]
       end
-      if RUBY_PLATFORM == "x86_64-linux-gnu"
+      if RUBY_PLATFORM == "x86_64-linux"
         suffix = '.so'
       elsif RUBY_PLATFORM == "x86_64-darwin18"
         suffix = '.bundle'
