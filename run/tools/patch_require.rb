@@ -9,9 +9,9 @@ module Kernel
     if File.exist?(name)
       tmpdir = ENV['llvmir']
       raise "no 'llvmir' in ENV" unless tmpdir
-      bundle_name = name.gsub('/', '_').gsub('.', '_').gsub('_rb', '.rb')
+      root_name = name.gsub('/', '_').gsub('.', '_').gsub('_rb', '.rb')
       if name.start_with?('./')
-        bundle_name = bundle_name[2..-1]
+        root_name = root_name[2..-1]
       end
       if RUBY_PLATFORM == "x86_64-linux"
         suffix = '.so'
@@ -20,13 +20,13 @@ module Kernel
       else
         raise "unknown platform: #{RUBY_PLATFORM}"
       end
-      bundle = tmpdir + '/' + bundle_name + suffix
-      if File.exist?(bundle)
-        $stderr.puts "SorbetLLVM using compiled: #{bundle}"
-        return sorbet_old_require(bundle)
+      cext = tmpdir + '/' + root_name + suffix
+      if File.exist?(cext)
+        $stderr.puts "SorbetLLVM using compiled: #{cext}"
+        return sorbet_old_require(cext)
       end
       if ENV['force_compile']
-        raise "No compiled bundle: #{bundle}"
+        raise "No compiled extension: #{cext}"
       end
       $stderr.puts "SorbetLLVM interpreting: #{name}"
     end
