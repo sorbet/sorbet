@@ -3,9 +3,6 @@ cc_library(
     # Don't include lib/ recursively, because we don't want all the clang code in there.
     srcs = glob([
         "lib/libLLVM*.a",
-        "lib/libc++.a",
-        "lib/libc++abi.a",
-        "lib/libunwind.a",
     ]),
     visibility = ["//visibility:public"],
     hdrs = glob([
