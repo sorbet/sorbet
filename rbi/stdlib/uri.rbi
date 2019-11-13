@@ -219,6 +219,46 @@ module URI
   end
   def self.decode_www_form_component(str, enc=T.unsafe(nil)); end
 
+  # Generate URL-encoded form data from given enum.
+  #
+  # This generates application/x-www-form-urlencoded data defined in HTML5 from
+  # given an [Enumerable](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html)
+  # object.
+  #
+  # This internally uses
+  # [::encode_www_form_component](https://docs.ruby-lang.org/en/2.1.0/URI.html#method-c-encode_www_form_component).
+  #
+  # This method doesn't convert the encoding of given items, so convert them
+  # before call this method if you want to send data as other than original
+  # encoding or mixed encoding data. (Strings which are encoded in an HTML5
+  # ASCII incompatible encoding are converted to UTF-8.)
+  #
+  # This method doesn't handle files. When you send a file,
+  # use multipart/form-data.
+  #
+  # This refers [url.spec.whatwg.org/#concept-urlencoded-serializer](http://url.spec.whatwg.org/#concept-urlencoded-serializer)
+  #
+  # ~~~ruby
+  # URI.encode_www_form([["q", "ruby"], ["lang", "en"]])
+  # #=> "q=ruby&lang=en"
+  # URI.encode_www_form("q" => "ruby", "lang" => "en")
+  # #=> "q=ruby&lang=en"
+  # URI.encode_www_form("q" => ["ruby", "perl"], "lang" => "en")
+  # #=> "q=ruby&q=perl&lang=en"
+  # URI.encode_www_form([["q", "ruby"], ["q", "perl"], ["lang", "en"]])
+  # #=> "q=ruby&q=perl&lang=en"
+  # ~~~
+  #
+  # See [::encode_www_form_component](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-encode_www_form_component),
+  # [::decode_www_form](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-decode_www_form)
+  sig do
+    params(
+      enum: T::Enumerable[Object],
+      enc: T.nilable(Encoding)
+    ).returns(String)
+  end
+  def self.encode_www_form(enum, enc=nil); end
+
   sig do
     params(
         arg: String,
