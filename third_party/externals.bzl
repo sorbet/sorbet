@@ -14,7 +14,7 @@ def sorbet_llvm_externals():
             remote = "https://github.com/sorbet/sorbet.git",
             commit = SORBET_VERSION,
             # git log -n 1 --pretty=format:"%cd" --date=raw origin/master
-            shallow_since = "1573239421 -0800",
+            shallow_since = "1573682809 -0800",
         )
     else:
         native.local_repository(
