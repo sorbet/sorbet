@@ -9,11 +9,10 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "@com_stripe_ruby_typer//core",
-        select({
-            "@com_stripe_ruby_typer//tools/config:linux": "@org_llvm_linux",
-            "@com_stripe_ruby_typer//tools/config:darwin": "@org_llvm_darwin",
-        }),
-    ],
+    ] + select({
+        "@com_stripe_ruby_typer//tools/config:linux": ["@org_llvm_linux"],
+        "@com_stripe_ruby_typer//tools/config:darwin": ["@org_llvm_darwin"],
+    }),
 )
 
 load("@com_stripe_ruby_typer//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
