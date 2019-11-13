@@ -32,7 +32,13 @@ for o in "$llvmir"/*.o; do
         exit 1;
     fi
 
-    bundle="${o%.o}.bundle"
-    # echo "Linking: $bundle"
-    "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
+    if [[ "$OSTYPE" == "linux-gnu" ]]; then
+      so="${o%.o}.so"
+      # echo "Linking: $so"
+      "$ld" -o "$so" "$o"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+      bundle="${o%.o}.bundle"
+      # echo "Linking: $bundle"
+      "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
+    fi
 done
