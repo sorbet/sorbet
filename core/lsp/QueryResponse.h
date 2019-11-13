@@ -62,7 +62,14 @@ public:
     const core::TypeAndOrigins retType;
 };
 
-typedef std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, DefinitionResponse>
+class EditResponse final {
+public:
+    EditResponse(core::Loc loc, std::string replacement) : loc(loc), replacement(replacement){};
+    const core::Loc loc;
+    const std::string replacement;
+};
+
+typedef std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, DefinitionResponse, EditResponse>
     QueryResponseVariant;
 
 /**
@@ -104,6 +111,11 @@ public:
      * Returns nullptr unless this is a Definition.
      */
     const DefinitionResponse *isDefinition() const;
+
+    /**
+     * Returns nullptr unless this is an Edit.
+     */
+    const EditResponse *isEdit() const;
 
     /**
      * Returns the source code location for the specific expression that this

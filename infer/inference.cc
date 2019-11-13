@@ -3,6 +3,7 @@
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
 #include "core/errors/infer.h"
+#include "core/lsp/QueryResponse.h"
 #include "infer/SigSuggestion.h"
 #include "infer/environment.h"
 #include "infer/infer.h"
@@ -223,6 +224,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             if (maybeAutocorrect.has_value()) {
                 e.addAutocorrect(move(maybeAutocorrect.value()));
             }
+        } else if (ctx.state.lspQuery.matchesSuggestSig(cfg->symbol)) {
+            // Force maybeSuggestSig to run just to respond to the query (discard the result)
+            SigSuggestion::maybeSuggestSig(ctx, cfg, methodReturnType, *constr);
         }
     }
 
