@@ -840,7 +840,7 @@ class URI::Generic < Object
   #   Parser for internal use [URI::DEFAULT_PARSER by default].
   # `arg_check`::
   #   Check arguments [false by default].
-  # 
+  #
   # Creates a new URI::Generic instance from `generic` components without check.
   sig do
     params(
