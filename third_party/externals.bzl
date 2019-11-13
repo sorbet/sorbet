@@ -29,16 +29,16 @@ def sorbet_llvm_externals():
     if is_linux:
         http_archive(
             name = "org_llvm",
-            url = "https://releases.llvm.org/9.0.0/clang%2bllvm-9.0.0-x86_64-darwin-apple.tar.xz",
+            url = "https://releases.llvm.org/9.0.0/clang%2bllvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz",
             build_file = "//third_party:llvm-linux.BUILD",
-            sha256 = "b46e3fe3829d4eb30ad72993bf28c76b1e1f7e38509fbd44192a2ef7c0126fc7",
-            strip_prefix = "clang+llvm-9.0.0-x86_64-darwin-apple",
+            sha256 = "5c1473c2611e1eac4ed1aeea5544eac5e9d266f40c5623bbaeb1c6555815a27d",
+            strip_prefix = "clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04",
         )
     else:
         http_archive(
             name = "org_llvm",
-            url = "https://releases.llvm.org/9.0.0/clang%2bllvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz",
+            url = "https://releases.llvm.org/9.0.0/clang%2bllvm-9.0.0-x86_64-darwin-apple.tar.xz",
             build_file = "//third_party:llvm.BUILD",
-            sha256 = "5c1473c2611e1eac4ed1aeea5544eac5e9d266f40c5623bbaeb1c6555815a27d",
-            strip_prefix = "clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04",
+            sha256 = "b46e3fe3829d4eb30ad72993bf28c76b1e1f7e38509fbd44192a2ef7c0126fc7",
+            strip_prefix = "clang+llvm-9.0.0-x86_64-darwin-apple",
         )
