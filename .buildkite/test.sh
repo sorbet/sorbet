@@ -13,7 +13,9 @@ if [[ "linux" == "$platform" ]]; then
     apt-get update
     apt-get install -yy libncurses5-dev libncursesw5-dev xxd
 elif [[ "mac" == "$platform" ]]; then
-    brew install wget
+    if ! [ -x "$(command -v wget)" ]; then
+        brew install wget
+    fi
 fi
 
 export JOB_NAME=test
