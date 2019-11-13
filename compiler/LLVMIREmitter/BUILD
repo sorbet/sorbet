@@ -13,7 +13,10 @@ cc_library(
         "//compiler/Names",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",
-        "@org_llvm",
+        select({
+            "@com_stripe_ruby_typer//tools/config:linux": "@org_llvm_linux",
+            "@com_stripe_ruby_typer//tools/config:darwin": "@org_llvm_darwin",
+        }),
         "@spdlog",
     ],
 )

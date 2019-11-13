@@ -9,7 +9,10 @@ cc_library(
     deps = [
         "//compiler/IRHelpers",
         "@com_stripe_ruby_typer//core",
-        "@org_llvm",
+        select({
+            "@com_stripe_ruby_typer//tools/config:linux": "@org_llvm_linux",
+            "@com_stripe_ruby_typer//tools/config:darwin": "@org_llvm_darwin",
+        }),
         "@spdlog",
     ],
 )
