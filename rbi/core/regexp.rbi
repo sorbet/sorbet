@@ -1270,4 +1270,27 @@ class Regexp < Object
     .returns(T::Boolean)
   end
   def eql?(other); end
+
+  # Return a `Regexp` object that is the union of the given *patterns*, i.e.,
+  # will match any of its parts. The *patterns* can be
+  # [Regexp](https://ruby-doc.org/core-2.4.1/Regexp.html) objects, in which case
+  # their options will be preserved, or Strings. If no patterns are given,
+  # returns `/(?!)/`. The behavior is unspecified if any given *pattern*
+  # contains capture.
+  #
+  # ~~~ruby
+  # Regexp.union                         #=> /(?!)/
+  # Regexp.union("penzance")             #=> /penzance/
+  # Regexp.union("a+b*c")                #=> /a\+b\*c/
+  # Regexp.union("skiing", "sledding")   #=> /skiing|sledding/
+  # Regexp.union(["skiing", "sledding"]) #=> /skiing|sledding/
+  # Regexp.union(/dogs/, /cats/i)        #=> /(?-mix:dogs)|(?i-mx:cats)/
+  # ~~~
+  #
+  # Note: the arguments for `::union` will try to be converted into a regular
+  # expression literal via to_regexp.
+  sig do
+    params(pats: T.untyped).returns(Regexp)
+  end
+  def self.union(*pats); end
 end
