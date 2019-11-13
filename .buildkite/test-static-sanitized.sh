@@ -17,6 +17,7 @@ esac
 
 if [[ "linux" == "$platform" ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-linux"
+  apt-get install -yy libtinfo-dev
 elif [[ "mac" == "$platform" ]]; then
   CONFIG_OPTS="--config=buildfarm-sanitized-mac"
 fi
