@@ -12,6 +12,8 @@ esac
 if [[ "linux" == "$platform" ]]; then
     apt-get update
     apt-get install -yy libncurses5-dev libncursesw5-dev xxd
+elif [[ "mac" == "$platform" ]]; then
+    brew install wget
 fi
 
 export JOB_NAME=test
@@ -48,7 +50,6 @@ cat "$annotation_path"
 if grep -q "<details>" "$annotation_path"; then
   echo "--- :buildkite: Creating annotation"
 
-  brew install wget
   wget -O - https://github.com/buildkite/terminal-to-html/releases/download/v3.2.0/terminal-to-html-3.2.0-linux-amd64.gz | gunzip -c > ./terminal-to-html
   chmod u+x ./terminal-to-html
 
