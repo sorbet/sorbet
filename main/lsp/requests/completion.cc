@@ -357,10 +357,8 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
     return item;
 }
 
-} // namespace
-
-vector<core::LocalVariable> LSPLoop::localsForMethod(const core::GlobalState &gs, LSPTypechecker &typechecker,
-                                                     const core::SymbolRef method) const {
+vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPTypechecker &typechecker,
+                                            const core::SymbolRef method) {
     auto files = vector<core::FileRef>{};
     for (auto loc : method.data(gs)->locs()) {
         files.emplace_back(loc.file());
@@ -376,6 +374,8 @@ vector<core::LocalVariable> LSPLoop::localsForMethod(const core::GlobalState &gs
 
     return localVarFinder.result();
 }
+
+} // namespace
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::GlobalState &gs, core::SymbolRef what,
                                                                core::TypePtr receiverType,
@@ -395,6 +395,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
     if (!resultType) {
         resultType = core::Types::untypedUntracked();
     }
+
     if (what.data(gs)->isMethod()) {
         item->kind = CompletionItemKind::Method;
         item->detail = what.data(gs)->show(gs);
