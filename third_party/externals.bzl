@@ -24,10 +24,10 @@ def sorbet_llvm_externals():
 
     http_archive(
         name = "org_llvm_linux",
-        url = "https://releases.llvm.org/9.0.0/clang%2bllvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz",
+        url = "https://releases.llvm.org/9.0.0/clang%2bllvm-9.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz",
         build_file = "//third_party:llvm-linux.BUILD",
-        sha256 = "5c1473c2611e1eac4ed1aeea5544eac5e9d266f40c5623bbaeb1c6555815a27d",
-        strip_prefix = "clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04",
+        sha256 = "bea706c8f6992497d08488f44e77b8f0f87f5b275295b974aa8b194efba18cb8",
+        strip_prefix = "clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-14.04",
     )
 
     http_archive(
