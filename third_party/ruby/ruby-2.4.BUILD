@@ -397,6 +397,7 @@ EOF
 
 cc_binary(
     name = "bin/ruby",
+    linkstatic = False,
     srcs = [
         "main.c",
     ],
