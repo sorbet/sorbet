@@ -52,7 +52,11 @@ cat "$annotation_path"
 if grep -q "<details>" "$annotation_path"; then
   echo "--- :buildkite: Creating annotation"
 
-  wget -O - https://github.com/buildkite/terminal-to-html/releases/download/v3.2.0/terminal-to-html-3.2.0-linux-amd64.gz | gunzip -c > ./terminal-to-html
+  if [[ "linux" == "$platform" ]]; then
+      wget -O - https://github.com/buildkite/terminal-to-html/releases/download/v3.2.0/terminal-to-html-3.2.0-linux-amd64.gz | gunzip -c > ./terminal-to-html
+  elif [[ "mac" == "$platform" ]]; then
+      wget -O - https://github.com/buildkite/terminal-to-html/releases/download/v3.2.0/terminal-to-html-3.2.0-darwin-amd64.gz | gunzip -c > ./terminal-to-html
+  fi
   chmod u+x ./terminal-to-html
 
   # https://buildkite.com/docs/agent/v3/cli-annotate
