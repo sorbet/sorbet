@@ -394,8 +394,19 @@ EOF
 """
 )
 
+
 cc_binary(
     name = "bin/ruby",
+    srcs = [
+        "main.c",
+    ],
+    deps = [
+            ":libruby"
+    ]
+)
+
+cc_library(
+    name = "libruby",
 
     srcs = [
         "prelude.c",
@@ -409,7 +420,6 @@ cc_binary(
         "enc/unicode.c",
         "enc/utf_8.c",
 
-        "main.c",
         "dln.c",
         "localeinit.c",
         "loadpath.c",

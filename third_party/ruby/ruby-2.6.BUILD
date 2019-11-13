@@ -415,6 +415,16 @@ EOF
 
 cc_binary(
     name = "bin/ruby",
+    srcs = [
+        "main.c",
+    ],
+    deps = [
+            ":libruby"
+    ]
+)
+
+cc_library(
+    name = "libruby",
 
     srcs = [
         "prelude.c",
@@ -430,7 +440,6 @@ cc_binary(
 
         "addr2line.c",
         "ast.c",
-        "main.c",
         "dln.c",
         "localeinit.c",
         "loadpath.c",
