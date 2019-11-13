@@ -43,6 +43,7 @@ cc_library(
         "-std=c99",
         "-O1",
         "-g",
+        "-fPIC",
         "-march=x86-64",
     ],
     linkstatic = 1,  # we are doing this only for llvm ir
