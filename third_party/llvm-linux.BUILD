@@ -4,6 +4,8 @@ cc_library(
     srcs = glob([
         "lib/libLLVM*.a",
         "lib/libc++.a",
+        "lib/libc++abi.a",
+        "lib/libunwind.a",
     ]),
     visibility = ["//visibility:public"],
     hdrs = glob([
