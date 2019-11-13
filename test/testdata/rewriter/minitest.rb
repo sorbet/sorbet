@@ -68,6 +68,13 @@ class MyTest
     junk.it "ignores non-self calls" do
         junk
     end
+
+    describe "a non-ideal situation" do
+      it "contains nested describes" do
+        describe "nobody should write this but we should still handle it" do
+        end
+      end
+    end
 end
 
 def junk
