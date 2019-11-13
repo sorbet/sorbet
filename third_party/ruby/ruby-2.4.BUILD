@@ -397,7 +397,10 @@ EOF
 
 cc_binary(
     name = "bin/ruby",
-    linkstatic = False,
+    linkstatic = select({
+        ":linux": False,
+        ":darwin": True,
+    }),
     srcs = [
         "main.c",
     ],
