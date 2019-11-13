@@ -13,7 +13,14 @@ module Kernel
       if name.start_with?('./')
         bundle_name = bundle_name[2..-1]
       end
-      bundle = tmpdir + '/' + bundle_name + '.bundle'
+      if RUBY_PLATFORM == "x86_64-linux-gnu"
+        suffix = '.so'
+      elsif RUBY_PLATFORM == "x86_64-darwin18"
+        suffix = '.bundle'
+      else
+        raise "unknown platform: #{RUBY_PLATFORM}"
+      end
+      bundle = tmpdir + '/' + bundle_name + suffix
       if File.exist?(bundle)
         $stderr.puts "SorbetLLVM using compiled: #{bundle}"
         return sorbet_old_require(bundle)

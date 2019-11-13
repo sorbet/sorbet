@@ -35,7 +35,7 @@ for o in "$llvmir"/*.o; do
     if [[ "$OSTYPE" == "linux-gnu" ]]; then
       so="${o%.o}.so"
       # echo "Linking: $so"
-      "$ld" -o "$so" "$o"
+      "$ld" -o "$so" "$o" -shared --allow-shlib-undefined
     elif [[ "$OSTYPE" == "darwin"* ]]; then
       bundle="${o%.o}.bundle"
       # echo "Linking: $bundle"
