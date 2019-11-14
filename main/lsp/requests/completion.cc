@@ -1,4 +1,5 @@
 #include "absl/algorithm/container.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "ast/treemap/treemap.h"
@@ -417,6 +418,84 @@ core::SymbolRef firstMethodAfterQuery(LSPTypechecker &typechecker, const core::L
     return nextMethodFinder.result();
 }
 
+constexpr string_view suggestSigDocs =
+    "Sorbet suggests this signature given the method below. Sorbet's suggested sigs are imperfect. It doesn't always "
+    "guess the correct types (or any types at all), but they're usually a good starting point."sv;
+
+unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const MarkupKind markupKind, core::SymbolRef what,
+                                         core::TypePtr receiverType, const core::Loc queryLoc, string_view prefix,
+                                         size_t sortIdx) {
+    ENFORCE(receiverType != nullptr);
+
+    const core::GlobalState &gs = typechecker.state();
+
+    auto targetMethod = firstMethodAfterQuery(typechecker, queryLoc);
+    if (!targetMethod.exists()) {
+        return nullptr;
+    }
+
+    core::SymbolRef receiverSym;
+    if (auto classType = core::cast_type<core::ClassType>(receiverType.get())) {
+        receiverSym = classType->symbol;
+    } else if (auto appliedType = core::cast_type<core::AppliedType>(receiverType.get())) {
+        receiverSym = appliedType->klass;
+    } else {
+        // receiverType is not a simple type. This can happen for any number of strange and uncommon reasons, like:
+        // x = T.let(self, T.nilable(T::Sig));  x.sig {void}
+        return nullptr;
+    }
+
+    auto attachedClass = receiverSym.data(gs)->attachedClass(gs);
+    if (attachedClass == core::Symbols::root()) {
+        attachedClass = core::Symbols::Object();
+    }
+    if (!attachedClass.exists() || attachedClass != targetMethod.data(gs)->owner) {
+        // The targetMethodd we were going to suggest a sig for is not actually in the same scope as this sig.
+        return nullptr;
+    }
+
+    auto queryFiles = vector<core::FileRef>{queryLoc.file()};
+    auto queryResult = typechecker.query(core::lsp::Query::createSuggestSigQuery(targetMethod), queryFiles);
+    if (queryResult.error) {
+        return nullptr;
+    }
+
+    auto &queryResponses = queryResult.responses;
+    if (queryResponses.empty()) {
+        return nullptr;
+    }
+
+    auto editResponse = queryResponses[0]->isEdit();
+    if (editResponse == nullptr) {
+        return nullptr;
+    }
+
+    auto item = make_unique<CompletionItem>("sig");
+    item->kind = CompletionItemKind::Method;
+    item->sortText = fmt::format("{:06d}", sortIdx);
+    item->detail = fmt::format("Suggested sig for {}", targetMethod.data(gs)->name.data(gs)->shortName(gs));
+
+    u4 queryStart = queryLoc.beginPos();
+    u4 prefixSize = prefix.size();
+    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
+    auto replacementRange = Range::fromLoc(gs, replacementLoc);
+
+    // SigSuggestion.cc computes the replacement text assuming it will be inserted immediately in front of the def,
+    // which means it has a newline and indentation at the end of the replacement. We don't need that whitespace
+    // because we can just replace the prefix that the user has already started typing.
+    auto replacementText = absl::StripTrailingAsciiWhitespace(editResponse->replacement);
+
+    if (replacementRange != nullptr) {
+        item->textEdit = make_unique<TextEdit>(std::move(replacementRange), string(replacementText));
+    } else {
+        item->insertText = replacementText;
+    }
+
+    item->documentation = formatRubyMarkup(markupKind, replacementText, suggestSigDocs);
+
+    return item;
+}
+
 } // namespace
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(const core::GlobalState &gs, LSPTypechecker &typechecker,
@@ -428,6 +507,13 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(const core::Globa
     ENFORCE(what.data(gs)->isMethod());
     auto supportsSnippets = config->getClientConfig().clientCompletionItemSnippetSupport;
     auto markupKind = config->getClientConfig().clientCompletionItemMarkupKind;
+
+    if (what == core::Symbols::sig()) {
+        if (auto item = trySuggestSig(typechecker, markupKind, what, receiverType, queryLoc, prefix, sortIdx)) {
+            return item;
+        }
+    }
+
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
 
     // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
