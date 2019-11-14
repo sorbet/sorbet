@@ -54,7 +54,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
                 "$llvmir" \
                 "${srcs[@]}" \
                 2\> "$llvmir/update_testdata_exp.stderr"\; \
-                cp "$llvmir/*.$ext" "$exp" \
+                cat "$llvmir/*.$ext" \| grep -v \'^target triple =\' \> "$exp" \
             >> "$COMMAND_FILE"
         fi
     done

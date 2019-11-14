@@ -65,8 +65,8 @@ for ext in "llo"; do
         fi
         if [[ "$OSTYPE" == "darwin"* ]]; then
           diff \
-            <(grep -v 'target triple =' < "${actual[@]}") \
-            <(grep -v 'target triple =' < "$exp")
+            <(grep -v '^target triple =' < "${actual[@]}") \
+            "$exp"
         fi
     fi
 done
