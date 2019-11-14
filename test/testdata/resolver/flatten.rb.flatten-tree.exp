@@ -46,19 +46,19 @@ begin
       end
     end
 
-    def self.sfoo(<blk>)
-      begin
-        :"sfood"
-        :"sfoos"
-      end
-    end
-
     def food(<blk>)
       <emptyTree>
     end
 
     def foos(<blk>)
       <emptyTree>
+    end
+
+    def self.sfoo(<blk>)
+      begin
+        :"sfood"
+        :"sfoos"
+      end
     end
 
     def sfood(<blk>)

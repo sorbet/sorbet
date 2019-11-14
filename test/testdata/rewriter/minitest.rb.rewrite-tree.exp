@@ -1,114 +1,80 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
-    def outside_method<<C <todo sym>>>(&<blk>)
-      <emptyTree>
-    end
-
     begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def <it 'works outside'><<C <todo sym>>>(&<blk>)
-        <self>.outside_method()
-      end
+      <emptyTree>
+      <emptyTree>
     end
 
     begin
       <emptyTree>::<C CONST> = ::T.unsafe(nil)
       begin
-        ::T::Sig::WithoutRuntime.sig() do ||
-          <self>.params({}).void()
-        end
-        def <it 'allows constants inside of IT'><<C <todo sym>>>(&<blk>)
-          ::Module.const_set(:"CONST", 10)
-        end
+        <emptyTree>
+        <emptyTree>
       end
     end
 
     begin
       <emptyTree>::<C C2> = ::T.let(::T.unsafe(nil), <emptyTree>::<C Integer>)
       begin
-        ::T::Sig::WithoutRuntime.sig() do ||
-          <self>.params({}).void()
-        end
-        def <it 'allows let-ed constants inside of IT'><<C <todo sym>>>(&<blk>)
-          ::Module.const_set(:"C2", <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
-        end
+        <emptyTree>
+        <emptyTree>
       end
     end
 
     begin
       <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
       begin
+<<<<<<< HEAD
         ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({}).void()
         end
         def <it 'allows path constants inside of IT'><<C <todo sym>>>(&<blk>)
           <emptyTree>::<C C3>.new()
         end
+=======
+        <emptyTree>
+        <emptyTree>
+>>>>>>> Update exp files
       end
     end
 
     class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
       begin
-        def inside_method<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+        begin
+          <emptyTree>
           <emptyTree>
         end
+      end
+
+      def inside_method<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+
+      def <it 'works inside'><<C <todo sym>>>(&<blk>)
         begin
-          ::T::Sig::WithoutRuntime.sig() do ||
-            <self>.params({}).void()
-          end
-          def <it 'works inside'><<C <todo sym>>>(&<blk>)
-            begin
-              <self>.outside_method()
-              <self>.inside_method()
-            end
-          end
+          <self>.outside_method()
+          <self>.inside_method()
         end
       end
     end
 
-    def instance_helper<<C <todo sym>>>(&<blk>)
+    begin
+      <emptyTree>
       <emptyTree>
     end
 
     begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def initialize<<C <todo sym>>>(&<blk>)
-        begin
-          @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
-          <self>.instance_helper()
-        end
-      end
+      <emptyTree>
+      <emptyTree>
     end
 
     begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def <after><<C <todo sym>>>(&<blk>)
-        begin
-          @foo = nil
-          <self>.instance_helper()
-        end
-      end
-    end
-
-    begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def <it 'can read foo'><<C <todo sym>>>(&<blk>)
-        begin
-          <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
-          <self>.instance_helper()
-        end
-      end
-    end
-
-    def self.random_method<<C <todo sym>>>(&<blk>)
+      <emptyTree>
       <emptyTree>
     end
 
@@ -119,26 +85,30 @@ class <emptyTree><<C <root>>> < ()
     class <emptyTree>::<C <describe 'Object'>><<C <todo sym>>> < (<self>)
       begin
         begin
-          ::T::Sig::WithoutRuntime.sig() do ||
-            <self>.params({}).void()
-          end
-          def <it 'Object'><<C <todo sym>>>(&<blk>)
-            <emptyTree>
-          end
+          <emptyTree>
+          <emptyTree>
         end
         begin
-          ::T::Sig::WithoutRuntime.sig() do ||
-            <self>.params({}).void()
-          end
-          def <it 'Object'><<C <todo sym>>>(&<blk>)
-            <emptyTree>
-          end
+          <emptyTree>
+          <emptyTree>
         end
       end
-    end
 
-    def self.it<<C <todo sym>>>(*args, &<blk>)
-      <emptyTree>
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+
+      def <it 'Object'><<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+
+      def <it 'Object'><<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
     end
 
     <self>.it("ignores methods without a block")
@@ -151,22 +121,115 @@ class <emptyTree><<C <root>>> < ()
       begin
         class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)        end
         begin
-          ::T::Sig::WithoutRuntime.sig() do ||
-            <self>.params({}).void()
-          end
-          def <it 'contains nested describes'><<C <todo sym>>>(&<blk>)
-            <emptyTree>
-          end
+          <emptyTree>
+          <emptyTree>
         end
       end
-    end
-  end
 
-  def junk<<C <todo sym>>>(&<blk>)
-    <emptyTree>
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+
+      def <it 'contains nested describes'><<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+    end
+
+    def outside_method<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+<<<<<<< HEAD
+  module <emptyTree>::<C Mod><<C <todo sym>>> < ()
+    class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)    end
+=======
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <it 'works outside'><<C <todo sym>>>(&<blk>)
+      <self>.outside_method()
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <it 'allows constants inside of IT'><<C <todo sym>>>(&<blk>)
+      ::Module.const_set(:"CONST", 10)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <it 'allows let-ed constants inside of IT'><<C <todo sym>>>(&<blk>)
+      ::Module.const_set(:"C2", <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <it 'allows path constants inside of IT'><<C <todo sym>>>(&<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>::<C C3>.new()
+      end
+    end
+
+    def instance_helper<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def initialize<<C <todo sym>>>(&<blk>)
+      begin
+        @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
+        <self>.instance_helper()
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <after><<C <todo sym>>>(&<blk>)
+      begin
+        @foo = nil
+        <self>.instance_helper()
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <it 'can read foo'><<C <todo sym>>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
+        <self>.instance_helper()
+      end
+    end
+
+    def self.random_method<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    def self.it<<C <todo sym>>>(*args, &<blk>)
+      <emptyTree>
+    end
   end
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
     class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)    end
+  end
+
+  def junk<<C <todo sym>>>(&<blk>)
+    <emptyTree>
+>>>>>>> Update exp files
   end
 end

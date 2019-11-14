@@ -127,11 +127,11 @@ begin
 
     def self.<static-init>(<blk>)
       begin
+        <self>.wrapper()
         begin
           <emptyTree>
           <emptyTree>
         end
-        <self>.wrapper()
         <emptyTree>
       end
     end
@@ -198,12 +198,12 @@ begin
       <self>.inner()
     end
 
-    def self.g(<blk>)
-      "g"
-    end
-
     def inner(<blk>)
       ::T.reveal_type(<self>)
+    end
+
+    def self.g(<blk>)
+      "g"
     end
 
     def self.<static-init>(<blk>)
