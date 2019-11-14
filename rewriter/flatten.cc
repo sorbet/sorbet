@@ -111,7 +111,8 @@ class FlattenWalk {
 
         // push a method scope, possibly noting whether
         void pushScope(ScopeInfo info) {
-            if (!stack.empty() && (stack.back().scopeInfo.scopeType == ScopeType::ClassScope || stack.back().scopeInfo.scopeType == ScopeType::VisibilityModScope)) {
+            if (!stack.empty() && (stack.back().scopeInfo.scopeType == ScopeType::ClassScope ||
+                                   stack.back().scopeInfo.scopeType == ScopeType::VisibilityModScope)) {
                 // we're at the top level of a class, not nested inside a method, which means we don't need to move
                 // anything: we'll add to the stack but don't need to allocate space on the move queue
                 stack.emplace_back(std::nullopt, info);
@@ -327,16 +328,13 @@ public:
         return classDef;
     }
 
-    bool shouldMoveSend(ast::Send& send) {
+    bool shouldMoveSend(ast::Send &send) {
         if (send.fun == core::Names::sig()) {
             return true;
         }
-        if ((send.fun == core::Names::private_() ||
-             send.fun == core::Names::privateClassMethod() ||
-             send.fun == core::Names::protected_() ||
-             send.fun == core::Names::public_()) &&
-            send.args.size() == 1 &&
-            send.recv->isSelfReference()) {
+        if ((send.fun == core::Names::private_() || send.fun == core::Names::privateClassMethod() ||
+             send.fun == core::Names::protected_() || send.fun == core::Names::public_()) &&
+            send.args.size() == 1 && send.recv->isSelfReference()) {
             return true;
         }
         return false;
@@ -347,7 +345,8 @@ public:
         // that we don't know the 'staticness level' of a sig, as it depends on the method that follows it (whether that
         // method has a `self.` or not), so we'll fill that information in later
         if (shouldMoveSend(*send)) {
-            auto scopeType = send->fun == core::Names::sig() ? ScopeType::StaticMethodScope : ScopeType::VisibilityModScope;
+            auto scopeType =
+                send->fun == core::Names::sig() ? ScopeType::StaticMethodScope : ScopeType::VisibilityModScope;
             curMethodSet().pushScope(computeScopeInfo(scopeType));
         }
 
