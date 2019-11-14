@@ -405,7 +405,7 @@ vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPType
 }
 
 core::SymbolRef firstMethodAfterQuery(LSPTypechecker &typechecker, const core::Loc queryLoc) {
-    const core::GlobalState &gs = typechecker.state();
+    const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{queryLoc.file()};
     auto resolved = typechecker.getResolved(files);
 
@@ -427,7 +427,7 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const Mark
                                          size_t sortIdx) {
     ENFORCE(receiverType != nullptr);
 
-    const core::GlobalState &gs = typechecker.state();
+    const auto &gs = typechecker.state();
 
     auto targetMethod = firstMethodAfterQuery(typechecker, queryLoc);
     if (!targetMethod.exists()) {
@@ -498,11 +498,12 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const Mark
 
 } // namespace
 
-unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(const core::GlobalState &gs, LSPTypechecker &typechecker,
-                                                               core::SymbolRef what, core::TypePtr receiverType,
+unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &typechecker, core::SymbolRef what,
+                                                               core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                const core::Loc queryLoc, string_view prefix,
                                                                size_t sortIdx) const {
+    const auto &gs = typechecker.state();
     ENFORCE(what.exists());
     ENFORCE(what.data(gs)->isMethod());
     auto supportsSnippets = config->getClientConfig().clientCompletionItemSnippetSupport;
@@ -593,7 +594,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
 
-    const core::GlobalState &gs = typechecker.state();
+    const auto &gs = typechecker.state();
     auto uri = params.textDocument->uri;
     auto fref = config->uri2FileRef(gs, uri);
     if (!fref.exists()) {
@@ -701,9 +702,8 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
             items.push_back(getCompletionItemForLocal(gs, *config, similarLocal, queryLoc, prefix, items.size()));
         }
         for (auto &similarMethod : deduped) {
-            items.push_back(getCompletionItemForMethod(gs, typechecker, similarMethod.method,
-                                                       similarMethod.receiverType, similarMethod.constr.get(), queryLoc,
-                                                       prefix, items.size()));
+            items.push_back(getCompletionItemForMethod(typechecker, similarMethod.method, similarMethod.receiverType,
+                                                       similarMethod.constr.get(), queryLoc, prefix, items.size()));
         }
     } else if (auto constantResp = resp->isConstant()) {
         if (!config->opts.lspAutocompleteEnabled) {
