@@ -446,10 +446,8 @@ VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) c
     return rb_funcallv(recv, func, argc, argv);
 }
 
-VALUE sorbet_callFuncProc(VALUE recv, ID func, int argc,
-         __attribute__((noescape)) const VALUE *const restrict argv,
-        VALUE proc)
-    __attribute__((always_inline)) {
+VALUE sorbet_callFuncProc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv,
+                          VALUE proc) __attribute__((always_inline)) {
     dbg_sorbet_validate_id(func, "func");
     return rb_funcall_with_block(recv, func, argc, argv, proc);
 }
