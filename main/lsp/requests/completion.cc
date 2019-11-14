@@ -284,6 +284,19 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
     }
 }
 
+// This is an approximation. It takes advantage of the fact that nearly all of the time,
+// the prefix being used to suggest completion items actually accurred in the source text
+// of the file, immediately before the queryLoc.
+//
+// This is somewhat brittle, but has worked well so far.
+unique_ptr<Range> replacementRangeForQuery(const core::GlobalState &gs, core::Loc queryLoc, string_view prefix) {
+    auto queryStart = queryLoc.beginPos();
+    u4 prefixSize = prefix.size();
+    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
+    // Sometimes Range::fromLoc returns nullptr (commonly when running under a fuzzer which disables certain loc info).
+    return Range::fromLoc(gs, replacementLoc);
+}
+
 unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &gs, const LSPConfiguration &config,
                                                        const RubyKeyword &rubyKeyword, const core::Loc queryLoc,
                                                        string_view prefix, size_t sortIdx) {
@@ -291,10 +304,6 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
     auto markupKind = config.getClientConfig().clientCompletionItemMarkupKind;
     auto item = make_unique<CompletionItem>(rubyKeyword.keyword);
     item->sortText = fmt::format("{:06d}", sortIdx);
-
-    // TODO(jez) This should probably be a helper function (see getCompletionItemForMethod)
-    u4 queryStart = queryLoc.beginPos();
-    u4 prefixSize = prefix.size();
 
     string replacementText;
     if (rubyKeyword.snippet.has_value() && supportSnippets) {
@@ -307,12 +316,9 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
         replacementText = rubyKeyword.keyword;
     }
 
-    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
-    auto replacementRange = Range::fromLoc(gs, replacementLoc);
-    if (replacementRange != nullptr) {
+    if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
         item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
     } else {
-        // Range::fromLoc failed... maybe the fuzzer is running?
         item->insertText = replacementText;
     }
 
@@ -368,16 +374,10 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
     item->sortText = fmt::format("{:06d}", sortIdx);
     item->kind = CompletionItemKind::Variable;
 
-    // TODO(jez) This should probably be a helper function (see getCompletionItemForMethod)
-    u4 queryStart = queryLoc.beginPos();
-    u4 prefixSize = prefix.size();
-    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
-    auto replacementRange = Range::fromLoc(gs, replacementLoc);
     auto replacementText = label;
-    if (replacementRange != nullptr) {
+    if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
         item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
     } else {
-        // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
         item->insertText = replacementText;
     }
     item->insertTextFormat = InsertTextFormat::PlainText;
@@ -529,11 +529,6 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
     item->kind = CompletionItemKind::Method;
     item->detail = what.data(gs)->show(gs);
 
-    u4 queryStart = queryLoc.beginPos();
-    u4 prefixSize = prefix.size();
-    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
-    auto replacementRange = Range::fromLoc(gs, replacementLoc);
-
     string replacementText;
     if (supportsSnippets) {
         item->insertTextFormat = InsertTextFormat::Snippet;
@@ -543,10 +538,9 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
         replacementText = string(what.data(gs)->name.data(gs)->shortName(gs));
     }
 
-    if (replacementRange != nullptr) {
+    if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
         item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
     } else {
-        // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
         item->insertText = replacementText;
     }
 
