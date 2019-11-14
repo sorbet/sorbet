@@ -322,6 +322,12 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         guessedSomethingUseful = true;
     }
 
+    auto lspQueryMatches = ctx.state.lspQuery.matchesSuggestSig(methodSymbol);
+    if (lspQueryMatches) {
+        // Even a sig with no useful types is still useful interactively (saves on typing)
+        guessedSomethingUseful = true;
+    }
+
     core::TypePtr guessedReturnType;
     if (!constr.isEmpty()) {
         if (!constr.solve(ctx)) {
@@ -334,7 +340,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             guessedReturnType = core::Types::untypedUntracked();
         }
 
-        guessedSomethingUseful = guessedSomethingUseful || !guessedReturnType->isUntyped();
+        guessedSomethingUseful |= !guessedReturnType->isUntyped();
     } else {
         guessedReturnType = methodReturnType;
     }
@@ -479,7 +485,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     auto replacementContents = fmt::format("{}\n{}", sig, spaces);
     edits.emplace_back(core::AutocorrectSuggestion::Edit{replacementLoc, replacementContents});
 
-    if (ctx.state.lspQuery.matchesSuggestSig(methodSymbol)) {
+    if (lspQueryMatches) {
         core::lsp::QueryResponse::pushQueryResponse(
             ctx, core::lsp::EditResponse(replacementLoc, std::move(replacementContents)));
     }
