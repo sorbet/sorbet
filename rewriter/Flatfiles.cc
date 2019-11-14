@@ -31,24 +31,11 @@ void Flatfiles::run(core::MutableContext ctx, ast::ClassDef *klass) {
         return;
     }
 
-    // this will now only run if you have declared `flatfile!` in the body of the class
-    bool isFlatfile = false;
-    for (auto &stat : klass->rhs) {
-        if (auto send = ast::cast_tree<ast::Send>(stat.get())) {
-            if (send->fun == core::Names::declareFlatfile()) {
-                isFlatfile = true;
-            }
-        }
-    }
-    if (!isFlatfile) {
-        return;
-    }
-
     vector<unique_ptr<ast::Expression>> methods;
     for (auto &stat : klass->rhs) {
         if (auto send = ast::cast_tree<ast::Send>(stat.get())) {
-            if ((send->fun != core::Names::from() && send->fun != core::Names::field() &&
-                 send->fun != core::Names::pattern()) ||
+            if ((send->fun != core::Names::ff_from() && send->fun != core::Names::ff_field() &&
+                 send->fun != core::Names::ff_pattern()) ||
                 !send->recv->isSelfReference() || send->args.size() < 1) {
                 continue;
             }
