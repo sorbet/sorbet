@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e
+
+# This file was inspired by https://github.com/bazelbuild/bazel at d6fec93.
+
+# This script will be run bazel when building process starts to
+# generate key-value information that represents the status of the
+# workspace. The output should be like
+#
+# KEY1 VALUE1
+# KEY2 VALUE2
+#
+# If the script exits with non-zero code, it's considered as a failure
+# and the output will be discarded.
+
+if ! git rev-parse --git-dir >&/dev/null; then
+    echo "STABLE_BUILD_SCM_REVISION nongit"
+    echo "STABLE_BUILD_SCM_COMMIT_COUNT 0"
+    echo "STABLE_BUILD_SCM_CLEAN 0"
+    exit 0
+fi
+
+# The code below presents an implementation that works for git repository
+git_rev=$(git rev-parse HEAD)
+git_commit_count=$(git rev-list --count HEAD)
+echo "STABLE_BUILD_SCM_REVISION ${git_rev}"
+echo "STABLE_BUILD_SCM_COMMIT_COUNT ${git_commit_count}"
+
+# Check whether there are any uncommited changes
+if git diff-index --quiet HEAD --; then
+    clean="1"
+else
+    clean="0"
+fi
+echo "STABLE_BUILD_SCM_CLEAN ${clean}"
