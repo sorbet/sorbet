@@ -21,14 +21,14 @@ echo "Source: $rb"
 echo "require './run/tools/preamble.rb'; require './$rb';" > "$rbrunfile"
 echo "Run Ruby: bazel-bin/$ruby $rbrunfile"
 echo "Running Ruby..."
-$ruby "$rbrunfile" 2>&1 | tee "$rbout"
+$ruby --disable=gems --disable=did_you_mean "$rbrunfile" 2>&1 | tee "$rbout"
 
 echo "Run Sorbet: force_compile=1 llvmir=$llvmir run/ruby $rb"
 echo "Temp Dir: $llvmir"
 echo "Running Sorbet Compiler..."
 run/compile "$llvmir" "$rb"
 set +e
-force_compile=1 llvmir=$llvmir run/ruby "$rb" 2> "$srberr" | tee "$srbout"
+force_compile=1 llvmir=$llvmir run/ruby "$rb" --disable=gems --disable=did_you_mean 2> "$srberr" | tee "$srbout"
 code=$?
 set -e
 
