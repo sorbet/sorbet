@@ -131,7 +131,8 @@ int sorbet_rubyArrayLen(VALUE array) __attribute__((always_inline)) {
 }
 
 const VALUE *sorbet_rubyArrayInnerPtr(VALUE array) __attribute__((always_inline)) {
-    // there's also a transient version of this function if we ever decide to want more speed. transient stands for that we _should not_ allow to execute any code between getting these pointers and reading elements from
+    // there's also a transient version of this function if we ever decide to want more speed. transient stands for that
+    // we _should not_ allow to execute any code between getting these pointers and reading elements from
     return RARRAY_CONST_PTR(array);
 }
 
