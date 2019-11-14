@@ -26,14 +26,14 @@ for this_src in "${rb_src[@]}" DUMMY; do
       echo -en "${this_src#test/testdata/ruby_benchmark/}\t"
       ../../run/compile . target.rb &>/dev/null
       ld -bundle -o target.bundle target.rb.o -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
-      (time for _ in {1..10}; do ../../bazel-bin/external/ruby_2_6_3/ruby -r ../../run/tools/preamble.rb ./target.rb; done) 2>&1|grep real | cut -d$'\t' -f 2 > ruby_runtime
+      (time for _ in {1..10}; do ../../bazel-bin/external/ruby_2_6_3/ruby -r ../../run/tools/preamble.rb ./target.rb --disable=gems --disable=did_you_mean ; done) 2>&1|grep real | cut -d$'\t' -f 2 > ruby_runtime
 
       minutes_ruby=$(cut -d "m" -f1 < ruby_runtime)
       seconds_ruby=$(cut -d "m" -f2 < ruby_runtime | cut -d "s" -f 1)
       ruby_time=$(echo "scale=3;(${minutes_ruby} * 60 + ${seconds_ruby})/10"| bc)
       echo -en "$ruby_time\t"
 
-      (time for _ in {1..10}; do ../../bazel-bin/external/ruby_2_6_3/ruby -r ../../run/tools/preamble.rb -e "require './target.so'" ; done) 2>&1|grep real | cut -d$'\t' -f 2 > compiled_runtime
+      (time for _ in {1..10}; do ../../bazel-bin/external/ruby_2_6_3/ruby -r ../../run/tools/preamble.rb -e "require './target.so'" --disable=gems --disable=did_you_mean ; done) 2>&1|grep real | cut -d$'\t' -f 2 > compiled_runtime
       minutes_compiled=$(cut -d "m" -f1 < compiled_runtime)
       seconds_compiled=$(cut -d "m" -f2 < compiled_runtime | cut -d "s" -f 1)
       compiled_time=$(echo "scale=3;(${minutes_compiled} * 60 + ${seconds_compiled})/10"| bc)
