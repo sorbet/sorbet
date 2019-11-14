@@ -50,8 +50,8 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         auto maxArgCount = 0;
         auto minArgCount = 0;
         auto isBlock = funcId != 0;
-        auto argCountRaw = !isBlock ? func->arg_begin() : func->arg_begin() + 2;
-        auto argArrayRaw = !isBlock ? func->arg_begin() + 1 : func->arg_begin() + 3;
+        llvm::Value *argCountRaw = !isBlock ? func->arg_begin() : func->arg_begin() + 2;
+        llvm::Value *argArrayRaw = !isBlock ? func->arg_begin() + 1 : func->arg_begin() + 3;
 
         core::LocalVariable blkArgName;
         {
@@ -73,6 +73,44 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             }
         }
         if (isBlock) {
+            if (minArgCount != 1) {
+                // blocks can expand their first argument in arg array
+                auto arrayTestBlock = llvm::BasicBlock::Create(cs, "argArrayExpandArrayTest", func);
+                auto argExpandBlock = llvm::BasicBlock::Create(cs, "argArrayExpand", func);
+                auto afterArgArrayExpandBlock = llvm::BasicBlock::Create(cs, "afterArgArrayExpand", func);
+                auto argSizeForExpansionCheck = builder.CreateICmpEQ(
+                    argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "arrayExpansionSizeGuard");
+                builder.CreateCondBr(argSizeForExpansionCheck, arrayTestBlock, afterArgArrayExpandBlock);
+                auto sizeTestEnd = builder.GetInsertBlock();
+                builder.SetInsertPoint(arrayTestBlock);
+                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true))};
+                auto rawArg1Value =
+                    builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "arg1_maybeExpandToFullArgs");
+                auto isArray = MK::createTypeTestU1(cs, builder, rawArg1Value,
+                                                    core::make_type<core::ClassType>(core::Symbols::Array()));
+                auto typeTestEnd = builder.GetInsertBlock();
+
+                builder.CreateCondBr(isArray, argExpandBlock, afterArgArrayExpandBlock);
+                builder.SetInsertPoint(argExpandBlock);
+                auto newArgArray = builder.CreateCall(cs.module->getFunction("sorbet_rubyArrayInnerPtr"),
+                                                      {rawArg1Value}, "expandedArgArray");
+                auto newArgc =
+                    builder.CreateCall(cs.module->getFunction("sorbet_rubyArrayLen"), {rawArg1Value}, "expandedArgc");
+                auto expansionEnd = builder.GetInsertBlock();
+                builder.CreateBr(afterArgArrayExpandBlock);
+                builder.SetInsertPoint(afterArgArrayExpandBlock);
+                auto argcPhi = builder.CreatePHI(builder.getInt32Ty(), 3, "argcPhi");
+                argcPhi->addIncoming(argCountRaw, sizeTestEnd);
+                argcPhi->addIncoming(argCountRaw, typeTestEnd);
+                argcPhi->addIncoming(newArgc, expansionEnd);
+                argCountRaw = argcPhi;
+                auto argArrayPhi = builder.CreatePHI(llvm::Type::getInt64PtrTy(cs), 3, "argArrayPhi");
+                argArrayPhi->addIncoming(argArrayRaw, sizeTestEnd);
+                argArrayPhi->addIncoming(argArrayRaw, typeTestEnd);
+                argArrayPhi->addIncoming(newArgArray, expansionEnd);
+
+                argArrayRaw = argArrayPhi;
+            }
             minArgCount = 0;
             // blocks Can have 0 args always
         }

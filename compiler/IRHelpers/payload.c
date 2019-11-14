@@ -126,8 +126,13 @@ VALUE sorbet_stringPlus(VALUE str1, VALUE str2) __attribute__((always_inline)) {
 // ****                       Operations on Arrays
 // ****
 
-long sorbet_rubyArrayLen(VALUE array) __attribute__((always_inline)) {
+int sorbet_rubyArrayLen(VALUE array) __attribute__((always_inline)) {
     return RARRAY_LEN(array);
+}
+
+const VALUE *sorbet_rubyArrayInnerPtr(VALUE array) __attribute__((always_inline)) {
+    // there's also a transient version of this function if we ever decide to want more speed. transient stands for that we _should not_ allow to execute any code between getting these pointers and reading elements from
+    return RARRAY_CONST_PTR(array);
 }
 
 VALUE sorbet_newRubyArray(long size) __attribute__((always_inline)) {
