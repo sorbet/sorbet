@@ -41,7 +41,7 @@ using namespace std;
 namespace sorbet::rewriter {
 
 class FlattenWalk {
-    enum class ScopeType { ClassScope, StaticMethodScope, InstanceMethodScope };
+    enum class ScopeType { ClassScope, StaticMethodScope, InstanceMethodScope, VisibilityModScope };
 
     struct ScopeInfo {
         // This tells us how many `class << self` levels we're nested inside
@@ -111,7 +111,7 @@ class FlattenWalk {
 
         // push a method scope, possibly noting whether
         void pushScope(ScopeInfo info) {
-            if (stack.size() == 0 || stack.back().scopeInfo.scopeType == ScopeType::ClassScope) {
+            if (!stack.empty() && (stack.back().scopeInfo.scopeType == ScopeType::ClassScope || stack.back().scopeInfo.scopeType == ScopeType::VisibilityModScope)) {
                 // we're at the top level of a class, not nested inside a method, which means we don't need to move
                 // anything: we'll add to the stack but don't need to allocate space on the move queue
                 stack.emplace_back(std::nullopt, info);
@@ -313,14 +313,30 @@ public:
         }
         classDef->rhs = addClassDefMethods(ctx, std::move(classDef->rhs), classDef->loc);
         return classDef;
-    };
+    }
+
+    bool shouldMoveSend(ast::Send& send) {
+        if (send.fun == core::Names::sig()) {
+            return true;
+        }
+        if ((send.fun == core::Names::private_() ||
+             send.fun == core::Names::privateClassMethod() ||
+             send.fun == core::Names::protected_() ||
+             send.fun == core::Names::public_()) &&
+            send.args.size() == 1 &&
+            send.recv->isSelfReference()) {
+            return true;
+        }
+        return false;
+    }
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
         // we might want to move sigs, so we mostly use the same logic that we use for methods. The one exception is
         // that we don't know the 'staticness level' of a sig, as it depends on the method that follows it (whether that
         // method has a `self.` or not), so we'll fill that information in later
-        if (send->fun == core::Names::sig()) {
-            curMethodSet().pushScope(computeScopeInfo(ScopeType::StaticMethodScope));
+        if (shouldMoveSend(*send)) {
+            auto scopeType = send->fun == core::Names::sig() ? ScopeType::StaticMethodScope : ScopeType::VisibilityModScope;
+            curMethodSet().pushScope(computeScopeInfo(scopeType));
         }
 
         return send;
@@ -329,7 +345,7 @@ public:
     unique_ptr<ast::Expression> postTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
         auto &methods = curMethodSet();
         // if it's not a send, then we didn't make a stack frame for it
-        if (send->fun != core::Names::sig()) {
+        if (!shouldMoveSend(*send)) {
             return send;
         }
         // if we get a MethodData back, then we need to move this and replace it with an EmptyTree
