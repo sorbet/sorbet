@@ -65,7 +65,12 @@ class LSPLoop {
 
     LSPQueryResult queryByLoc(LSPTypechecker &typechecker, std::string_view uri, const Position &pos,
                               const LSPMethod forMethod, bool errorIfFileIsUntyped = true) const;
-    LSPQueryResult queryBySymbol(LSPTypechecker &typechecker, core::SymbolRef symbol) const;
+    LSPQueryResult queryBySymbol(LSPTypechecker &typechecker, core::SymbolRef symbol,
+                                 const std::optional<std::string_view> uri = std::nullopt) const;
+
+    std::unique_ptr<ResponseMessage>
+    handleTextDocumentDocumentHighlight(LSPTypechecker &typechecker, const MessageId &id,
+                                        const TextDocumentPositionParams &params) const;
     std::unique_ptr<ResponseMessage> handleTextDocumentHover(LSPTypechecker &typechecker, const MessageId &id,
                                                              const TextDocumentPositionParams &params) const;
     std::unique_ptr<ResponseMessage> handleTextDocumentDocumentSymbol(LSPTypechecker &typechecker, const MessageId &id,
@@ -75,6 +80,9 @@ class LSPLoop {
     std::vector<std::unique_ptr<Location>>
     getReferencesToSymbol(LSPTypechecker &typechecker, core::SymbolRef symbol,
                           std::vector<std::unique_ptr<Location>> locations = {}) const;
+    std::vector<std::unique_ptr<DocumentHighlight>>
+    getHighlightsToSymbolInFile(LSPTypechecker &typechecker, std::string_view uri, core::SymbolRef symbol,
+                                std::vector<std::unique_ptr<DocumentHighlight>> highlights = {}) const;
     std::unique_ptr<ResponseMessage> handleTextDocumentReferences(LSPTypechecker &typechecker, const MessageId &id,
                                                                   const ReferenceParams &params) const;
     std::unique_ptr<ResponseMessage> handleTextDocumentDefinition(LSPTypechecker &typechecker, const MessageId &id,
@@ -85,7 +93,7 @@ class LSPLoop {
                                                                   const CompletionParams &params) const;
     std::unique_ptr<ResponseMessage> handleTextDocumentCodeAction(LSPTypechecker &typechecker, const MessageId &id,
                                                                   const CodeActionParams &params) const;
-    std::unique_ptr<CompletionItem> getCompletionItemForSymbol(const core::GlobalState &gs, core::SymbolRef what,
+    std::unique_ptr<CompletionItem> getCompletionItemForMethod(const core::GlobalState &gs, core::SymbolRef what,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                const core::Loc queryLoc, std::string_view prefix,
@@ -130,9 +138,10 @@ public:
 std::optional<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);
 bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, std::string_view pattern);
 bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym);
-std::string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
-                         core::TypePtr retType, const core::TypeConstraint *constraint);
-std::string methodDefinition(const core::GlobalState &gs, core::SymbolRef method);
+std::unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, std::string_view rubyMarkup,
+                                                std::optional<std::string_view> explanation);
+std::string prettyTypeForMethod(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
+                                core::TypePtr retType, const core::TypeConstraint *constraint);
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const core::TypeConstraint *constr);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef);

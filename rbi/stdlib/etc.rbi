@@ -564,6 +564,10 @@ end
 class Etc::Group < Struct
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
+  class << self
+    extend T::Generic
+    Elem = type_member(fixed: T.untyped)
+  end
 end
 
 # [`Passwd`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Passwd)
@@ -618,4 +622,8 @@ end
 class Etc::Passwd < Struct
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
+  class << self
+    extend T::Generic
+    Elem = type_member(fixed: T.untyped)
+  end
 end

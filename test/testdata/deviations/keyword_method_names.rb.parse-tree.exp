@@ -99,9 +99,20 @@ Begin {
       }
       body = Begin {
         stmts = [
-          Begin {
-            stmts = [
-              NULL
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U else>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U else>
+            args = [
             ]
           }
         ]

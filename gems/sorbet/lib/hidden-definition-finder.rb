@@ -124,6 +124,10 @@ class Sorbet::Private::HiddenMethodFinder
         # Make sure we don't load a sorbet/config in your cwd
         '--no-config',
         '--print=symbol-table-full-json',
+        # The hidden-definition serializer is not smart enough to put T::Enum
+        # constants it discovers inside an `enums do` block. We probably want
+        # to come up with a better long term solution here.
+        '--error-black-list=3506',
         # Method redefined with mismatched argument is ok since sometime
         # people monkeypatch over method
         '--error-black-list=4010',

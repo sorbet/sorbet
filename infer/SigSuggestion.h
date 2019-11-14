@@ -6,8 +6,9 @@
 namespace sorbet::infer {
 class SigSuggestion final {
 public:
-    static bool maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, std::unique_ptr<cfg::CFG> &cfg,
-                                const core::TypePtr &methodReturnType, core::TypeConstraint &constr);
+    static std::optional<core::AutocorrectSuggestion> maybeSuggestSig(core::Context ctx, std::unique_ptr<cfg::CFG> &cfg,
+                                                                      const core::TypePtr &methodReturnType,
+                                                                      core::TypeConstraint &constr);
 };
 } // namespace sorbet::infer
 

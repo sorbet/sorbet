@@ -16,7 +16,9 @@
 #include "absl/strings/str_cat.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
+#include "common/sort.h"
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
@@ -410,7 +412,7 @@ int realmain(int argc, char *argv[]) {
     unique_ptr<KeyValueStore> kvstore;
     if (!opts.cacheDir.empty()) {
         kvstore = make_unique<KeyValueStore>(Version::full_version_string, opts.cacheDir,
-                                             opts.skipDSLPasses ? "nodsl" : "default");
+                                             opts.skipRewriterPasses ? "nodsl" : "default");
     }
     payload::createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {

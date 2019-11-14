@@ -2,7 +2,9 @@
 #include <cxxopts.hpp>
 // has to go first as it violates requirements
 
+#include "absl/strings/match.h"
 #include "common/common.h"
+#include "common/sort.h"
 #include "test/helpers/lsp.h"
 
 namespace sorbet::test {
@@ -12,8 +14,12 @@ string filePathToUri(string_view prefixUrl, string_view filePath) {
     return fmt::format("{}/{}", prefixUrl, filePath);
 }
 
+bool isUriATestFile(string_view prefixUrl, string_view uri) {
+    return absl::StartsWith(uri, prefixUrl);
+}
+
 string uriToFilePath(string_view prefixUrl, string_view uri) {
-    if (uri.substr(0, prefixUrl.length()) != prefixUrl) {
+    if (!isUriATestFile(prefixUrl, uri)) {
         ADD_FAILURE() << fmt::format(
             "Unrecognized URI: `{}` is not contained in root URI `{}`, and thus does not correspond to a test file.",
             uri, prefixUrl);
@@ -156,6 +162,11 @@ unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int l
                                                 make_unique<Position>(line, character))));
 }
 
+unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query) {
+    return make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::WorkspaceSymbol,
+                                                               make_unique<WorkspaceSymbolParams>(string(query))));
+}
+
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities) {
     // Properties checked in the same order they are described in the LSP spec.
@@ -191,7 +202,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     EXPECT_TRUE(capabilities.typeDefinitionProvider.value_or(false));
     EXPECT_FALSE(capabilities.implementationProvider.has_value());
     EXPECT_TRUE(capabilities.referencesProvider.value_or(false));
-    EXPECT_FALSE(capabilities.documentHighlightProvider.has_value());
+    EXPECT_TRUE(capabilities.documentHighlightProvider.has_value());
     EXPECT_TRUE(capabilities.documentSymbolProvider.value_or(false));
     EXPECT_TRUE(capabilities.workspaceSymbolProvider.value_or(false));
     EXPECT_TRUE(capabilities.codeActionProvider.has_value());

@@ -44,24 +44,36 @@ begin
       w
     end
 
-    def foo<defaultAarg>1(x, <blk>)
+    def foo<defaultArg>1(x, <blk>)
       nil
     end
 
-    def bar<defaultAarg>1(y, <blk>)
+    def bar<defaultArg>1(y, <blk>)
       nil
     end
 
-    def qux<defaultAarg>1(z, <blk>)
+    def qux<defaultArg>1(z, <blk>)
       ""
     end
 
-    def baz<defaultAarg>1(w, <blk>)
+    def baz<defaultArg>1(w, <blk>)
       ""
     end
 
     def self.<static-init>(<blk>)
       begin
+        <self>.sig() do ||
+          <self>.params({:"x" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"y" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"z" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"w" => ::String}).returns(::String)
+        end
         <self>.sig() do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end

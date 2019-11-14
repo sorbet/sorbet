@@ -73,10 +73,10 @@ LSPWrapper::~LSPWrapper() {}
 void LSPWrapper::enableAllExperimentalFeatures() {
     enableExperimentalFeature(LSPExperimentalFeature::Autocomplete);
     enableExperimentalFeature(LSPExperimentalFeature::WorkspaceSymbols);
+    enableExperimentalFeature(LSPExperimentalFeature::DocumentHighlight);
     enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
     enableExperimentalFeature(LSPExperimentalFeature::SignatureHelp);
     enableExperimentalFeature(LSPExperimentalFeature::QuickFix);
-    enableExperimentalFeature(LSPExperimentalFeature::AutocompleteMethods);
 }
 
 void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
@@ -90,14 +90,14 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
         case LSPExperimentalFeature::WorkspaceSymbols:
             opts.lspWorkspaceSymbolsEnabled = true;
             break;
+        case LSPExperimentalFeature::DocumentHighlight:
+            opts.lspDocumentHighlightEnabled = true;
+            break;
         case LSPExperimentalFeature::DocumentSymbol:
             opts.lspDocumentSymbolEnabled = true;
             break;
         case LSPExperimentalFeature::SignatureHelp:
             opts.lspSignatureHelpEnabled = true;
-            break;
-        case LSPExperimentalFeature::AutocompleteMethods:
-            opts.lspAutocompleteEnabled = true;
             break;
     }
 }

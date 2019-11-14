@@ -3,6 +3,7 @@
 #include "ast/Trees.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/sort.h"
 #include "core/Error.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
@@ -13,6 +14,7 @@
 
 #include "absl/strings/str_cat.h"
 #include "common/Timer.h"
+#include "common/concurrency/ConcurrentQueue.h"
 #include "core/Symbols.h"
 #include <utility>
 #include <vector>
@@ -383,6 +385,30 @@ private:
         }
     }
 
+    static void saveAncestorTypeForHashing(core::MutableContext ctx, const AncestorResolutionItem &item) {
+        // For LSP, create a synthetic method <unresolved-ancestors> that has a return type containing a type
+        // for every ancestor. When this return type changes, LSP takes the slow path (see
+        // Symbol::methodShapeHash()).
+        auto unresolvedPath = item.ancestor->fullUnresolvedPath(ctx);
+        if (!unresolvedPath.has_value()) {
+            return;
+        }
+
+        auto ancestorType =
+            core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
+
+        core::SymbolRef uaSym =
+            ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
+        core::TypePtr resultType = uaSym.data(ctx)->resultType;
+        if (!resultType) {
+            uaSym.data(ctx)->resultType = core::TupleType::build(ctx, {ancestorType});
+        } else if (auto tt = core::cast_type<core::TupleType>(resultType.get())) {
+            tt->elems.push_back(ancestorType);
+        } else {
+            ENFORCE(false);
+        }
+    }
+
     static core::SymbolRef stubSymbolForAncestor(const AncestorResolutionItem &item) {
         if (item.isSuperclass) {
             return core::Symbols::StubSuperClass();
@@ -436,9 +462,11 @@ private:
             resolved = stubSymbolForAncestor(job);
         }
 
+        bool ancestorPresent = true;
         if (job.isSuperclass) {
             if (resolved == core::Symbols::todo()) {
                 // No superclass specified
+                ancestorPresent = false;
             } else if (!job.klass.data(ctx)->superClass().exists() ||
                        job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
                        job.klass.data(ctx)->superClass() == resolved) {
@@ -454,6 +482,9 @@ private:
             job.klass.data(ctx)->addMixin(resolved);
         }
 
+        if (ancestorPresent) {
+            saveAncestorTypeForHashing(ctx, job);
+        }
         return true;
     }
 
@@ -464,7 +495,7 @@ private:
         if (!ancestorSym.data(ctx)->isClassOrModuleSealed()) {
             return;
         }
-        Timer timeit(ctx.state.errorQueue->logger, "resolver.registerSealedSubclass");
+        Timer timeit(ctx.state.tracer(), "resolver.registerSealedSubclass");
 
         ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
     }
@@ -664,7 +695,7 @@ public:
 
     static vector<ast::ParsedFile> resolveConstants(core::MutableContext ctx, vector<ast::ParsedFile> trees,
                                                     WorkerPool &workers) {
-        Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants");
+        Timer timeit(ctx.state.tracer(), "resolver.resolve_constants");
         core::Context ictx = ctx;
         auto resultq = make_shared<BlockingBoundedQueue<ResolveWalkResult>>(trees.size());
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -731,7 +762,7 @@ public:
         fast_sort(trees,
                   [](const auto &lhs, const auto &rhs) -> bool { return locCompare(lhs.tree->loc, rhs.tree->loc); });
 
-        Timer timeit1(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point");
+        Timer timeit1(ctx.state.tracer(), "resolver.resolve_constants.fixed_point");
 
         bool progress = true;
         bool first = true; // we need to run at least once to force class aliases and type aliases
@@ -740,7 +771,7 @@ public:
             first = false;
             counterInc("resolve.constants.retries");
             {
-                Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point.ancestors");
+                Timer timeit(ctx.state.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
                 // This is an optimization. The order should not matter semantically
                 // We try to resolve most ancestors second because this makes us much more likely to resolve everything
                 // else.
@@ -758,7 +789,7 @@ public:
                 categoryCounterAdd("resolve.constants.ancestor", "retry", origSize - todoAncestors.size());
             }
             {
-                Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point.constants");
+                Timer timeit(ctx.state.tracer(), "resolver.resolve_constants.fixed_point.constants");
                 int origSize = todo.size();
                 auto it = remove_if(todo.begin(), todo.end(),
                                     [ctx](ResolutionItem &job) -> bool { return resolveJob(ctx, job); });
@@ -767,7 +798,7 @@ public:
                 categoryCounterAdd("resolve.constants.nonancestor", "retry", origSize - todo.size());
             }
             {
-                Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point.class_aliases");
+                Timer timeit(ctx.state.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
                 // This is an optimization. The order should not matter semantically
                 // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
                 // every item in todoClassAliases implicitly depends on an item in item in todo
@@ -782,7 +813,7 @@ public:
                 categoryCounterAdd("resolve.constants.aliases", "retry", origSize - todoClassAliases.size());
             }
             {
-                Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.fixed_point.type_aliases");
+                Timer timeit(ctx.state.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
                 int origSize = todoTypeAliases.size();
                 auto it =
                     remove_if(todoTypeAliases.begin(), todoTypeAliases.end(),
@@ -828,7 +859,7 @@ public:
         // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
 
         {
-            Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants.errors");
+            Timer timeit(ctx.state.tracer(), "resolver.resolve_constants.errors");
             int i = -1;
             for (auto &job : todo) {
                 i++;
@@ -1131,7 +1162,7 @@ public:
 
     unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ast::ConstantLit> lit) {
         if (trackDependencies_) {
-            core::SymbolRef symbol = lit->symbol;
+            core::SymbolRef symbol = lit->symbol.data(ctx)->dealias(ctx);
             if (symbol == core::Symbols::T()) {
                 return lit;
             }
@@ -1225,7 +1256,7 @@ public:
 
     static vector<ast::ParsedFile> run(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
         ResolveTypeParamsWalk params;
-        Timer timeit(ctx.state.errorQueue->logger, "resolver.type_params");
+        Timer timeit(ctx.state.tracer(), "resolver.type_params");
 
         for (auto &tree : trees) {
             tree.tree = ast::TreeMap::apply(ctx, params, std::move(tree.tree));
@@ -1433,15 +1464,6 @@ private:
         }
     }
 
-    // These will already be haldned by DefaultArgs DSL pass
-    void deleteOptionlArg(core::MutableContext ctx, ast::MethodDef *mdef) {
-        for (auto &arg : mdef->args) {
-            if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(arg.get())) {
-                optArgExp->default_ = nullptr;
-            }
-        }
-    }
-
     // Force errors from any signatures that didn't attach to methods.
     // `lastSigs` will always be empty after this function is called.
     void processLeftoverSigs(core::MutableContext ctx, InlinedVector<ast::Send *, 1> &lastSigs) {
@@ -1523,14 +1545,14 @@ private:
             [&](ast::MethodDef *mdef) {
                 if (debug_mode) {
                     bool hasSig = !lastSigs.empty();
-                    bool DSL = mdef->isDSLSynthesized();
+                    bool rewriten = mdef->isRewriterSynthesized();
                     bool isRBI = mdef->loc.file().data(ctx).isRBI();
                     if (hasSig) {
                         categoryCounterInc("method.sig", "true");
                     } else {
                         categoryCounterInc("method.sig", "false");
                     }
-                    if (DSL) {
+                    if (rewriten) {
                         categoryCounterInc("method.dsl", "true");
                     } else {
                         categoryCounterInc("method.dsl", "false");
@@ -1540,7 +1562,7 @@ private:
                     } else {
                         categoryCounterInc("method.rbi", "false");
                     }
-                    if (hasSig && !isRBI && !DSL) {
+                    if (hasSig && !isRBI && !rewriten) {
                         counterInc("types.sig.human");
                     }
                 }
@@ -1550,10 +1572,11 @@ private:
 
                     auto loc = lastSigs[0]->loc;
                     if (loc.file().data(ctx).originalSigil == core::StrictLevel::None &&
-                        !lastSigs.front()->isDSLSynthesized()) {
+                        !lastSigs.front()->isRewriterSynthesized()) {
                         if (auto e = ctx.state.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
-                            e.setHeader("To use `sig`, this file must declare an explicit `# typed:` sigil (found: "
-                                        "none). If you're not sure which one to use, start with `# typed: false`");
+                            e.setHeader("To use `{}`, this file must declare an explicit `{}` sigil (found: "
+                                        "none). If you're not sure which one to use, start with `{}`",
+                                        "sig", "# typed:", "# typed: false");
                         }
                     }
 
@@ -1611,8 +1634,6 @@ private:
                     // OVERLOAD
                     lastSigs.clear();
                 }
-
-                deleteOptionlArg(ctx, mdef);
 
                 if (mdef->symbol.data(ctx)->isAbstract()) {
                     if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
@@ -2047,16 +2068,17 @@ public:
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
         ENFORCE(original->symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 original->toString(ctx));
-        for (auto &arg : original->args) {
-            if (auto optionalArg = ast::cast_tree<ast::OptionalArg>(arg.get())) {
-                ENFORCE(!optionalArg->default_);
-            }
-        }
         return original;
     }
     unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
                                                                    unique_ptr<ast::UnresolvedConstantLit> original) {
         ENFORCE(false, "These should have all been removed: {}", original->toString(ctx));
+        return original;
+    }
+    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
+                                                             unique_ptr<ast::UnresolvedIdent> original) {
+        ENFORCE(original->kind != ast::UnresolvedIdent::Local, "{} should have been removed by local_vars",
+                original->toString(ctx));
         return original;
     }
     unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
@@ -2100,7 +2122,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::MutableContext ctx, vector<ast::
 
 vector<ast::ParsedFile> Resolver::resolveSigs(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
     ResolveSignaturesWalk sigs;
-    Timer timeit(ctx.state.errorQueue->logger, "resolver.sigs_vars_and_flatten");
+    Timer timeit(ctx.state.tracer(), "resolver.sigs_vars_and_flatten");
     for (auto &tree : trees) {
         tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
     }
@@ -2110,7 +2132,7 @@ vector<ast::ParsedFile> Resolver::resolveSigs(core::MutableContext ctx, vector<a
 
 vector<ast::ParsedFile> Resolver::resolveMixesInClassMethods(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
     ResolveMixesInClassMethodsWalk mixesInClassMethods;
-    Timer timeit(ctx.state.errorQueue->logger, "resolver.mixes_in_class_methods");
+    Timer timeit(ctx.state.tracer(), "resolver.mixes_in_class_methods");
     for (auto &tree : trees) {
         tree.tree = ast::TreeMap::apply(ctx, mixesInClassMethods, std::move(tree.tree));
     }
@@ -2119,7 +2141,7 @@ vector<ast::ParsedFile> Resolver::resolveMixesInClassMethods(core::MutableContex
 
 void Resolver::sanityCheck(core::MutableContext ctx, vector<ast::ParsedFile> &trees) {
     if (debug_mode) {
-        Timer timeit(ctx.state.errorQueue->logger, "resolver.sanity_check");
+        Timer timeit(ctx.state.tracer(), "resolver.sanity_check");
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
             tree.tree = ast::TreeMap::apply(ctx, sanity, std::move(tree.tree));

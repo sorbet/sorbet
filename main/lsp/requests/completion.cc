@@ -1,8 +1,12 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "ast/treemap/treemap.h"
+#include "common/formatting.h"
+#include "common/sort.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/lsp.h"
 
 using namespace std;
@@ -14,43 +18,52 @@ namespace {
 struct RubyKeyword {
     const string keyword;
     const string documentation;
+    const optional<string> snippet;
+    const optional<string> detail;
 
-    RubyKeyword(string keyword, string documentation) : keyword(keyword), documentation(documentation){};
+    RubyKeyword(string keyword, string documentation, optional<string> snippet = nullopt,
+                optional<string> detail = nullopt)
+        : keyword(keyword), documentation(documentation), snippet(snippet), detail(detail){};
 };
 
 // Taken from https://docs.ruby-lang.org/en/2.6.0/keywords_rdoc.html
 // We might want to put this somewhere shareable if there are more places that want to use it.
+//
+// VS Code snippet syntax is in general smarter than LSP snippet syntax.
+// Specifically, VS Code will intelligently insert the correct indentation after newlines.
 const RubyKeyword rubyKeywords[] = {
     {"BEGIN", "Runs before any other code in the current file."},
     {"END", "Runs after any other code in the current file."},
     {"__ENCODING__", "The script encoding of the current file."},
     {"__FILE__", "The path to the current file."},
     {"__LINE__", "The line number of this keyword in the current file."},
-    {"alias", "Creates an alias between two methods (and other things)."},
+    {"alias", "Creates an alias between two methods (and other things).", "alias ${1:_new} ${2:_existing}$0"},
     {"and", "Short-circuit Boolean and with lower precedence than &&"},
-    {"begin", "Starts an exception handling block."},
+    {"begin", "Starts an exception handling block.", "begin\n  $0\nend"},
     {"break", "Leaves a block early."},
-    {"case", "Starts a case expression."},
-    {"class", "Creates or opens a class."},
-    {"def", "Defines a method."},
-    {"defined?", "Returns a string describing its argument."},
-    {"do", "Starts a block."},
+    {"case", "Starts a case expression.", "case ${1:expr}\nwhen ${2:expr}\n  $0\nelse\nend", "case/when/else/end"},
+    {"class", "Creates or opens a class.", "class ${1:ClassName}\n  $0\nend", "New class"},
+    {"def", "Defines a method.", "def ${1:method_name}($2)\n  $0\nend", "New method"},
+    {"defined?", "Returns a string describing its argument.", "defined?(${1:Constant})$0"},
+    // TODO(jez) Even better would be to auto-insert a block for methods that we know must take a block
+    {"do", "Starts a block.", "do\n  $0\nend"},
     {"else", "The unhandled condition in case, if and unless expressions."},
-    {"elsif", "An alternate condition for an if expression."},
+    {"elsif", "An alternate condition for an if expression.", "elsif ${1:expr}$0"},
     {"end",
      "The end of a syntax block. Used by classes, modules, methods, exception handling and control expressions."},
     {"ensure", "Starts a section of code that is always run when an exception is raised."},
     {"false", "Boolean false."},
     {"for", "A loop that is similar to using the each method."},
-    {"if", "Used for if and modifier if expressions."},
+    {"if", "Used for if and modifier if expressions.", "if ${1:expr}\n  $0\nend", "if/end"},
     {"in", "Used to separate the iterable object and iterator variable in a for loop."},
-    {"module", "Creates or opens a module."},
+    {"module", "Creates or opens a module.", "module ${1:ModuleName}\n  $0\nend", "New module"},
     {"next", "Skips the rest of the block."},
     {"nil", "A false value usually indicating “no value” or “unknown”."},
     {"not", "Inverts the following boolean expression. Has a lower precedence than !"},
     {"or", "Boolean or with lower precedence than ||"},
     {"redo", "Restarts execution in the current block."},
-    {"rescue", "Starts an exception section of code in a begin block."},
+    // Would really like to dedent the line too...
+    {"rescue", "Starts an exception section of code in a begin block.", "rescue ${1:MyException} => ${2:ex}\n$0"},
     {"retry", "Retries an exception block."},
     {"return", "Exits a method."},
     {"self", "The object the current method is attached to."},
@@ -59,10 +72,11 @@ const RubyKeyword rubyKeywords[] = {
     {"true", "Boolean true."},
     // This is also defined on Kernel
     // {"undef", "Prevents a class or module from responding to a method call."},
-    {"unless", "Used for unless and modifier unless expressions."},
-    {"until", "Creates a loop that executes until the condition is true."},
-    {"when", "A condition in a case expression."},
-    {"while", "Creates a loop that executes while the condition is true."},
+    {"unless", "Used for unless and modifier unless expressions.", "unless ${1:expr}\n  $0\nend", "unless/end"},
+    {"until", "Creates a loop that executes until the condition is true.", "until ${1:expr}\n  $0\nend", "until/end"},
+    // Would really like to dedent the line too...
+    {"when", "A condition in a case expression.", "when ${1:expr}$0"},
+    {"while", "Creates a loop that executes while the condition is true.", "while ${1:expr}\n  $0\nend", "while/end"},
     {"yield", "Starts execution of the block sent to the current method."},
 };
 
@@ -98,6 +112,19 @@ struct SimilarMethod final {
     shared_ptr<core::TypeConstraint> constr = nullptr;
 };
 
+bool hasAngleBrackets(string_view haystack) {
+    return absl::c_any_of(haystack, [](char c) { return c == '<' || c == '>'; });
+}
+
+bool isDefaultArgName(const core::GlobalState &gs, core::NameRef methodName) {
+    auto nameKind = methodName.data(gs)->kind;
+    if (nameKind != core::NameKind::UNIQUE) {
+        return false;
+    }
+
+    return methodName.data(gs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg;
+}
+
 using SimilarMethodsByName = UnorderedMap<core::NameRef, vector<SimilarMethod>>;
 
 // First of pair is "found at this depth in the ancestor hierarchy"
@@ -110,6 +137,14 @@ SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::S
         depth++;
         for (auto [memberName, memberSymbol] : ancestor.data(gs)->members()) {
             if (!memberSymbol.data(gs)->isMethod()) {
+                continue;
+            }
+            if (hasAngleBrackets(memberName.data(gs)->shortName(gs))) {
+                // Gets rid of methods like `<test_foo bar>` generated by our DSL passes
+                continue;
+            }
+            if (isDefaultArgName(gs, memberName)) {
+                // These don't actually have angle brackets in them--they're unique names internally
                 continue;
             }
 
@@ -200,7 +235,20 @@ vector<RubyKeyword> allSimilarKeywords(string_view prefix) {
     return result;
 }
 
-string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
+vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const vector<core::LocalVariable> &locals,
+                                             string_view prefix) {
+    auto result = vector<core::LocalVariable>{};
+    for (const auto &local : locals) {
+        if (hasSimilarName(gs, local._name, prefix)) {
+            result.emplace_back(local);
+        }
+    }
+
+    return result;
+}
+
+string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiverType,
+                     const core::TypeConstraint *constraint) {
     auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
     vector<string> typeAndArgNames;
 
@@ -211,11 +259,15 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
             if (argSym.flags.isBlock) {
                 continue;
             }
+            if (argSym.flags.isDefault) {
+                continue;
+            }
             if (argSym.flags.isKeyword) {
                 absl::StrAppend(&s, argSym.name.data(gs)->shortName(gs), ": ");
             }
             if (argSym.type) {
-                absl::StrAppend(&s, "${", i++, ":", argSym.type->show(gs), "}");
+                absl::StrAppend(&s, "${", i++, ":",
+                                getResultType(gs, argSym.type, method, receiverType, constraint)->show(gs), "}");
             } else {
                 absl::StrAppend(&s, "${", i++, "}");
             }
@@ -233,12 +285,88 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
 unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &gs, const LSPConfiguration &config,
                                                        const RubyKeyword &rubyKeyword, const core::Loc queryLoc,
                                                        string_view prefix, size_t sortIdx) {
-    auto label = rubyKeyword.keyword;
+    auto supportSnippets = config.getClientConfig().clientCompletionItemSnippetSupport;
+    auto markupKind = config.getClientConfig().clientCompletionItemMarkupKind;
+    auto item = make_unique<CompletionItem>(rubyKeyword.keyword);
+    item->sortText = fmt::format("{:06d}", sortIdx);
+
+    // TODO(jez) This should probably be a helper function (see getCompletionItemForMethod)
+    u4 queryStart = queryLoc.beginPos();
+    u4 prefixSize = prefix.size();
+
+    string replacementText;
+    if (rubyKeyword.snippet.has_value() && supportSnippets) {
+        item->insertTextFormat = InsertTextFormat::Snippet;
+        item->kind = CompletionItemKind::Snippet;
+        replacementText = rubyKeyword.snippet.value();
+    } else {
+        item->insertTextFormat = InsertTextFormat::PlainText;
+        item->kind = CompletionItemKind::Keyword;
+        replacementText = rubyKeyword.keyword;
+    }
+
+    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
+    auto replacementRange = Range::fromLoc(gs, replacementLoc);
+    if (replacementRange != nullptr) {
+        item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
+    } else {
+        // Range::fromLoc failed... maybe the fuzzer is running?
+        item->insertText = replacementText;
+    }
+
+    if (rubyKeyword.detail.has_value()) {
+        item->detail = fmt::format("(sorbet) {}", rubyKeyword.detail.value());
+    } else if (item->kind == CompletionItemKind::Snippet) {
+        item->detail = fmt::format("(sorbet) Snippet: {}", rubyKeyword.keyword);
+    } else {
+        item->detail = fmt::format("(sorbet) Ruby keyword: {}", rubyKeyword.keyword);
+    }
+
+    if (rubyKeyword.snippet.has_value()) {
+        item->documentation = formatRubyMarkup(markupKind, rubyKeyword.snippet.value(), rubyKeyword.documentation);
+    } else {
+        item->documentation = rubyKeyword.documentation;
+    }
+
+    return item;
+}
+
+unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const core::SymbolRef what,
+                                                        size_t sortIdx) {
+    ENFORCE(what.exists());
+    auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
+
+    // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
+    // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
+    item->sortText = fmt::format("{:06d}", sortIdx);
+
+    auto resultType = what.data(gs)->resultType;
+    if (!resultType) {
+        resultType = core::Types::untypedUntracked();
+    }
+
+    if (what.data(gs)->isStaticField()) {
+        // TODO(jez) Handle isStaticFieldTypeAlias (hover has special handling to show the type for these)
+        item->kind = CompletionItemKind::Constant;
+        item->detail = resultType->show(gs);
+    } else if (what.data(gs)->isClassOrModule()) {
+        item->kind = CompletionItemKind::Class;
+    } else {
+        ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
+    }
+
+    return item;
+}
+
+unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs, const LSPConfiguration &config,
+                                                     const core::LocalVariable &local, const core::Loc queryLoc,
+                                                     string_view prefix, size_t sortIdx) {
+    auto label = string(local._name.data(gs)->shortName(gs));
     auto item = make_unique<CompletionItem>(label);
     item->sortText = fmt::format("{:06d}", sortIdx);
-    item->kind = CompletionItemKind::Keyword;
+    item->kind = CompletionItemKind::Variable;
 
-    // TODO(jez) This should probably be a helper function (see getCompletionItemForSymbol)
+    // TODO(jez) This should probably be a helper function (see getCompletionItemForMethod)
     u4 queryStart = queryLoc.beginPos();
     u4 prefixSize = prefix.size();
     auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
@@ -251,21 +379,40 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
         item->insertText = replacementText;
     }
     item->insertTextFormat = InsertTextFormat::PlainText;
-
-    item->documentation =
-        make_unique<MarkupContent>(config.getClientConfig().clientCompletionItemMarkupKind, rubyKeyword.documentation);
+    // TODO(jez) Show the type of the local under the documentation field?
 
     return item;
 }
 
+vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPTypechecker &typechecker,
+                                            const core::SymbolRef method) {
+    auto files = vector<core::FileRef>{};
+    for (auto loc : method.data(gs)->locs()) {
+        files.emplace_back(loc.file());
+    }
+    auto resolved = typechecker.getResolved(files);
+
+    // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeMap::apply
+    LocalVarFinder localVarFinder(method);
+    auto ctx = core::Context{gs, core::Symbols::root()};
+    for (auto &t : resolved) {
+        t.tree = ast::TreeMap::apply(ctx, localVarFinder, move(t.tree));
+    }
+
+    return localVarFinder.result();
+}
+
 } // namespace
 
-unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::GlobalState &gs, core::SymbolRef what,
+unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(const core::GlobalState &gs, core::SymbolRef what,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                const core::Loc queryLoc, string_view prefix,
                                                                size_t sortIdx) const {
     ENFORCE(what.exists());
+    ENFORCE(what.data(gs)->isMethod());
+    auto supportsSnippets = config->getClientConfig().clientCompletionItemSnippetSupport;
+    auto markupKind = config->getClientConfig().clientCompletionItemMarkupKind;
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
 
     // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
@@ -276,51 +423,44 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForSymbol(const core::Globa
     if (!resultType) {
         resultType = core::Types::untypedUntracked();
     }
-    if (what.data(gs)->isMethod()) {
-        item->kind = CompletionItemKind::Method;
-        if (what.exists()) {
-            item->detail = methodDetail(gs, what, receiverType, nullptr, constraint);
-        }
 
-        u4 queryStart = queryLoc.beginPos();
-        u4 prefixSize = prefix.size();
-        auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
-        auto replacementRange = Range::fromLoc(gs, replacementLoc);
+    item->kind = CompletionItemKind::Method;
+    item->detail = what.data(gs)->show(gs);
 
-        string replacementText;
-        if (config->getClientConfig().clientCompletionItemSnippetSupport) {
-            item->insertTextFormat = InsertTextFormat::Snippet;
-            replacementText = methodSnippet(gs, what);
-        } else {
-            item->insertTextFormat = InsertTextFormat::PlainText;
-            replacementText = string(what.data(gs)->name.data(gs)->shortName(gs));
-        }
+    u4 queryStart = queryLoc.beginPos();
+    u4 prefixSize = prefix.size();
+    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
+    auto replacementRange = Range::fromLoc(gs, replacementLoc);
 
-        if (replacementRange != nullptr) {
-            item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
-        } else {
-            // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
-            item->insertText = replacementText;
-        }
-
-        optional<string> documentation = nullopt;
-        if (what.data(gs)->loc().file().exists()) {
-            documentation =
-                findDocumentation(what.data(gs)->loc().file().data(gs).source(), what.data(gs)->loc().beginPos());
-        }
-        if (documentation != nullopt) {
-            if (documentation->find("@deprecated") != documentation->npos) {
-                item->deprecated = true;
-            }
-            item->documentation = make_unique<MarkupContent>(config->getClientConfig().clientCompletionItemMarkupKind,
-                                                             documentation.value());
-        }
-    } else if (what.data(gs)->isStaticField()) {
-        item->kind = CompletionItemKind::Constant;
-        item->detail = resultType->show(gs);
-    } else if (what.data(gs)->isClassOrModule()) {
-        item->kind = CompletionItemKind::Class;
+    string replacementText;
+    if (supportsSnippets) {
+        item->insertTextFormat = InsertTextFormat::Snippet;
+        replacementText = methodSnippet(gs, what, receiverType, constraint);
+    } else {
+        item->insertTextFormat = InsertTextFormat::PlainText;
+        replacementText = string(what.data(gs)->name.data(gs)->shortName(gs));
     }
+
+    if (replacementRange != nullptr) {
+        item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
+    } else {
+        // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
+        item->insertText = replacementText;
+    }
+
+    optional<string> documentation = nullopt;
+    if (what.data(gs)->loc().file().exists()) {
+        documentation =
+            findDocumentation(what.data(gs)->loc().file().data(gs).source(), what.data(gs)->loc().beginPos());
+    }
+
+    auto prettyType = prettyTypeForMethod(gs, what, receiverType, nullptr, constraint);
+    item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
+
+    if (documentation != nullopt && documentation->find("@deprecated") != documentation->npos) {
+        item->deprecated = true;
+    }
+
     return item;
 }
 
@@ -338,8 +478,7 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
                     sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                     // hide singletons
                     hasSimilarName(gs, sym.data(gs)->name, pattern)) {
-                    items.push_back(
-                        getCompletionItemForSymbol(gs, sym, receiverType, nullptr, queryLoc, pattern, items.size()));
+                    items.push_back(getCompletionItemForConstant(gs, sym, items.size()));
                 }
             }
         } while (owner != core::Symbols::root());
@@ -349,13 +488,6 @@ void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core
 unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker &typechecker, const MessageId &id,
                                                                   const CompletionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
-    if (!config->opts.lspAutocompleteEnabled && !config->opts.lspAutocompleteMethodsEnabled) {
-        response->error =
-            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                       "The `Autocomplete` LSP feature is experimental and disabled by default.");
-        return response;
-    }
-
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
@@ -383,83 +515,100 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
 
     auto &queryResponses = result.responses;
     vector<unique_ptr<CompletionItem>> items;
-    if (!queryResponses.empty()) {
-        auto resp = move(queryResponses[0]);
+    if (queryResponses.empty()) {
+        response->result = std::move(emptyResult);
+        return response;
+    }
 
-        if (auto sendResp = resp->isSend()) {
-            auto prefix = sendResp->callerSideName.data(gs)->shortName(gs);
-            config->logger->debug("Looking for method similar to {}", prefix);
+    auto resp = move(queryResponses[0]);
 
-            // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
-            auto similarKeywords = sendResp->isPrivateOk ? allSimilarKeywords(prefix) : vector<RubyKeyword>{};
+    if (auto sendResp = resp->isSend()) {
+        auto prefix = sendResp->callerSideName.data(gs)->shortName(gs);
+        config->logger->debug("Looking for method similar to {}", prefix);
 
-            auto similarMethodsByName = allSimilarMethods(gs, *sendResp->dispatchResult, prefix);
-            for (auto &[methodName, similarMethods] : similarMethodsByName) {
-                fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
-                    if (left.depth != right.depth) {
-                        return left.depth < right.depth;
-                    }
+        // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
+        auto similarKeywords = sendResp->isPrivateOk ? allSimilarKeywords(prefix) : vector<RubyKeyword>{};
 
-                    return left.method._id < right.method._id;
-                });
-            }
-
-            auto deduped = vector<SimilarMethod>{};
-            for (auto &[methodName, similarMethods] : similarMethodsByName) {
-                if (methodName.data(gs)->kind == core::NameKind::UNIQUE &&
-                    methodName.data(gs)->unique.uniqueNameKind == core::UniqueNameKind::MangleRename) {
-                    // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
-                    // unique names, because we want each overload to show up but those use unique names.
-                    continue;
-                }
-
-                // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
-                auto similarMethod = similarMethods[0];
-
-                if (similarMethod.method.data(gs)->isPrivate() && !sendResp->isPrivateOk) {
-                    continue;
-                }
-
-                deduped.emplace_back(similarMethod);
-            }
-
-            fast_sort(deduped, [&](const auto &left, const auto &right) -> bool {
+        auto similarMethodsByName = allSimilarMethods(gs, *sendResp->dispatchResult, prefix);
+        for (auto &[methodName, similarMethods] : similarMethodsByName) {
+            fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
                 if (left.depth != right.depth) {
                     return left.depth < right.depth;
                 }
 
-                auto leftShortName = left.method.data(gs)->name.data(gs)->shortName(gs);
-                auto rightShortName = right.method.data(gs)->name.data(gs)->shortName(gs);
-                if (leftShortName != rightShortName) {
-                    if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
-                        return true;
-                    }
-                    if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
-                        return false;
-                    }
-
-                    return leftShortName < rightShortName;
-                }
-
                 return left.method._id < right.method._id;
             });
-
-            // TODO(jez) Do something smarter here than "all matching keywords always come first"
-            for (auto &similarKeyword : similarKeywords) {
-                items.push_back(
-                    getCompletionItemForKeyword(gs, *config, similarKeyword, queryLoc, prefix, items.size()));
-            }
-            for (auto &similarMethod : deduped) {
-                items.push_back(getCompletionItemForSymbol(gs, similarMethod.method, similarMethod.receiverType,
-                                                           similarMethod.constr.get(), queryLoc, prefix, items.size()));
-            }
-        } else if (auto constantResp = resp->isConstant()) {
-            if (!config->opts.lspAutocompleteEnabled) {
-                response->result = std::move(emptyResult);
-                return response;
-            }
-            findSimilarConstantOrIdent(gs, constantResp->retType.type, queryLoc, items);
         }
+
+        auto locals = localsForMethod(gs, typechecker, sendResp->enclosingMethod);
+        fast_sort(locals, [&gs](const auto &left, const auto &right) {
+            // Sort by actual name, not by NameRef id
+            if (left._name != right._name) {
+                return left._name.data(gs)->shortName(gs) < right._name.data(gs)->shortName(gs);
+            } else {
+                return left < right;
+            }
+        });
+        auto similarLocals =
+            sendResp->isPrivateOk ? allSimilarLocals(gs, locals, prefix) : vector<core::LocalVariable>{};
+
+        auto deduped = vector<SimilarMethod>{};
+        for (auto &[methodName, similarMethods] : similarMethodsByName) {
+            if (methodName.data(gs)->kind == core::NameKind::UNIQUE &&
+                methodName.data(gs)->unique.uniqueNameKind == core::UniqueNameKind::MangleRename) {
+                // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
+                // unique names, because we want each overload to show up but those use unique names.
+                continue;
+            }
+
+            // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
+            auto similarMethod = similarMethods[0];
+
+            if (similarMethod.method.data(gs)->isPrivate() && !sendResp->isPrivateOk) {
+                continue;
+            }
+
+            deduped.emplace_back(similarMethod);
+        }
+
+        fast_sort(deduped, [&](const auto &left, const auto &right) -> bool {
+            if (left.depth != right.depth) {
+                return left.depth < right.depth;
+            }
+
+            auto leftShortName = left.method.data(gs)->name.data(gs)->shortName(gs);
+            auto rightShortName = right.method.data(gs)->name.data(gs)->shortName(gs);
+            if (leftShortName != rightShortName) {
+                if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
+                    return true;
+                }
+                if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
+                    return false;
+                }
+
+                return leftShortName < rightShortName;
+            }
+
+            return left.method._id < right.method._id;
+        });
+
+        // TODO(jez) Do something smarter here than "all keywords then all locals then all methods"
+        for (auto &similarKeyword : similarKeywords) {
+            items.push_back(getCompletionItemForKeyword(gs, *config, similarKeyword, queryLoc, prefix, items.size()));
+        }
+        for (auto &similarLocal : similarLocals) {
+            items.push_back(getCompletionItemForLocal(gs, *config, similarLocal, queryLoc, prefix, items.size()));
+        }
+        for (auto &similarMethod : deduped) {
+            items.push_back(getCompletionItemForMethod(gs, similarMethod.method, similarMethod.receiverType,
+                                                       similarMethod.constr.get(), queryLoc, prefix, items.size()));
+        }
+    } else if (auto constantResp = resp->isConstant()) {
+        if (!config->opts.lspAutocompleteEnabled) {
+            response->result = std::move(emptyResult);
+            return response;
+        }
+        findSimilarConstantOrIdent(gs, constantResp->retType.type, queryLoc, items);
     }
 
     response->result = make_unique<CompletionList>(false, move(items));

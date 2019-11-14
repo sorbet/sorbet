@@ -362,6 +362,23 @@ class Hash < Object
   sig {returns(T::Enumerator[[K, V]])}
   def delete_if(&blk); end
 
+  # Retrieves the value object corresponding to the each key objects repeatedly.
+  #
+  # ~~~ruby
+  # h = { foo: {bar: {baz: 1}}}
+  #
+  # h.dig(:foo, :bar, :baz)           #=> 1
+  # h.dig(:foo, :zot)                 #=> nil
+  # ~~~
+  sig do
+    params(
+      key: K,
+      rest: T.untyped
+    )
+    .returns(T.untyped)
+  end
+  def dig(key, *rest); end
+
   # Calls *block* once for each key in *hsh*, passing the key-value pair as
   # parameters.
   #
@@ -553,16 +570,16 @@ class Hash < Object
   end
   def has_value?(arg0); end
 
-  sig {returns(Hash)}
+  sig {returns(T::Hash[T.untyped, T.untyped])}
   sig do
     params(
         default: BasicObject,
     )
-    .returns(Hash)
+    .returns(T::Hash[T.untyped, T.untyped])
   end
   sig do
     params(
-        blk: T.proc.params(hash: Hash, key: BasicObject).returns(BasicObject)
+        blk: T.proc.params(hash: T::Hash[T.untyped, T.untyped], key: BasicObject).returns(BasicObject)
     )
     .void
   end

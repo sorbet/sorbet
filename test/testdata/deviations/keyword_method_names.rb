@@ -77,8 +77,6 @@ def method_named_else(x)
   x.else # ok
   x
     .else # ok
-  x.
-    else # error: unexpected token
 end
 
 def method_named_elsif(x)

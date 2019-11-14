@@ -3,7 +3,6 @@
 #include "absl/synchronization/mutex.h"
 
 #include "core/Error.h"
-#include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Loc.h"
 #include "core/Names.h"
@@ -99,6 +98,7 @@ public:
     SymbolRef lookupStaticInitForClass(SymbolRef klass) const;
 
     NameRef enterNameUTF8(std::string_view nm);
+    NameRef lookupNameUTF8(std::string_view nm) const;
 
     NameRef lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const;
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num);
@@ -169,7 +169,7 @@ public:
     bool ensureCleanStrings = false;
 
     // So we can know whether we're running in autogen mode.
-    // Right now this is only used to turn certain DSL passes on or off.
+    // Right now this is only used to turn certain Rewriter passes on or off.
     // Think very hard before looking at this value in namer / resolver!
     // (hint: probably you want to find an alternate solution)
     bool runningUnderAutogen = false;

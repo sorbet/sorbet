@@ -79,6 +79,9 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
             ENFORCE(cctx.ctx.owner.data(cctx.ctx)->isMethod());
             klass = cctx.ctx.owner.data(cctx.ctx)->owner;
             break;
+        case ast::UnresolvedIdent::Global:
+            klass = core::Symbols::root();
+            break;
         default:
             // These should have been removed in the namer
             Exception::notImplemented();
@@ -89,8 +92,10 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
     if (!sym.exists()) {
         auto fnd = cctx.discoveredUndeclaredFields.find(id->name);
         if (fnd == cctx.discoveredUndeclaredFields.end()) {
-            if (auto e = cctx.ctx.state.beginError(id->loc, core::errors::CFG::UndeclaredVariable)) {
-                e.setHeader("Use of undeclared variable `{}`", id->name.show(cctx.ctx));
+            if (id->kind != ast::UnresolvedIdent::Global) {
+                if (auto e = cctx.ctx.state.beginError(id->loc, core::errors::CFG::UndeclaredVariable)) {
+                    e.setHeader("Use of undeclared variable `{}`", id->name.show(cctx.ctx));
+                }
             }
             auto ret = cctx.newTemporary(id->name);
             cctx.discoveredUndeclaredFields[id->name] = ret;
@@ -211,10 +216,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = current;
             },
             [&](ast::UnresolvedConstantLit *a) { Exception::raise("Should have been eliminated by namer/resolver"); },
-            [&](ast::Field *a) {
-                current->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(global2Local(cctx, a->symbol)));
-                ret = current;
-            },
             [&](ast::ConstantLit *a) {
                 if (a->symbol == core::Symbols::StubModule()) {
                     current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(core::Symbols::untyped()));
@@ -239,8 +240,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 core::LocalVariable lhs;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a->lhs.get())) {
                     lhs = global2Local(cctx, lhsIdent->symbol);
-                } else if (auto field = ast::cast_tree<ast::Field>(a->lhs.get())) {
-                    lhs = global2Local(cctx, field->symbol);
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a->lhs.get())) {
                     lhs = lhsLocal->localVariable;
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a->lhs.get())) {
@@ -322,8 +321,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s->fun, move(argFlags), newRubyBlockId);
                     auto send = make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, s->isPrivateOk(), link);
-                    auto solveConstraint = make_unique<SolveConstraint>(link);
                     core::LocalVariable sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
+                    auto solveConstraint = make_unique<SolveConstraint>(link, sendTemp);
                     current->exprs.emplace_back(sendTemp, s->loc, move(send));
                     core::LocalVariable restoreSelf = cctx.newTemporary(core::Names::selfRestore());
                     synthesizeExpr(current, restoreSelf, core::Loc::none(),
@@ -438,7 +437,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 if (cctx.nextScope == nullptr) {
                     if (auto e = cctx.ctx.state.beginError(a->loc, core::errors::CFG::NoNextScope)) {
-                        e.setHeader("No `do` block around `next`");
+                        e.setHeader("No `{}` block around `{}`", "do", "next");
                     }
                     // I guess just keep going into deadcode?
                     unconditionalJump(afterNext, cctx.inWhat.deadBlock(), cctx.inWhat, a->loc);
@@ -471,7 +470,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 if (cctx.breakScope == nullptr) {
                     if (auto e = cctx.ctx.state.beginError(a->loc, core::errors::CFG::NoNextScope)) {
-                        e.setHeader("No `do` block around `break`");
+                        e.setHeader("No `{}` block around `{}`", "do", "break");
                     }
                     // I guess just keep going into deadcode?
                     unconditionalJump(afterBreak, cctx.inWhat.deadBlock(), cctx.inWhat, a->loc);
@@ -484,7 +483,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Retry *a) {
                 if (cctx.rescueScope == nullptr) {
                     if (auto e = cctx.ctx.state.beginError(a->loc, core::errors::CFG::NoNextScope)) {
-                        e.setHeader("No `begin` block around `retry`");
+                        e.setHeader("No `{}` block around `{}`", "begin", "retry");
                     }
                     // I guess just keep going into deadcode?
                     unconditionalJump(current, cctx.inWhat.deadBlock(), cctx.inWhat, a->loc);

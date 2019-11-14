@@ -3,6 +3,7 @@
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
 #include "common/Timer.h"
+#include "common/sort.h"
 #include "common/typecase.h"
 #include "core/Error.h"
 #include "core/GlobalState.h"
@@ -784,10 +785,6 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
             p.putU4(a->cnst._id);
             pickle(p, file, a->scope);
         },
-        [&](ast::Field *a) {
-            pickleAstHeader(p, 9, a);
-            p.putU4(a->symbol._id);
-        },
         [&](ast::Local *a) {
             pickleAstHeader(p, 10, a);
             p.putU4(a->localVariable._name._id);
@@ -989,10 +986,6 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             NameRef cnst = unpickleNameRef(p, gs);
             auto scope = unpickleExpr(p, gs, file);
             return ast::MK::UnresolvedConstant(loc, std::move(scope), cnst);
-        }
-        case 9: {
-            SymbolRef sym(gs, p.getU4());
-            return make_unique<ast::Field>(loc, sym);
         }
         case 10: {
             NameRef nm = unpickleNameRef(p, gs);

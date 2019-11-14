@@ -20,7 +20,7 @@ unfinished or confusing section!
 - [Phases](#phases)
   - [Parser](#parser)
   - [Desugar](#desugar)
-  - [DSL](#dsl)
+  - [Rewriter](#rewriter)
   - [LocalVars](#localvars)
   - [Namer](#namer)
   - [Resolver](#resolver)
@@ -120,8 +120,8 @@ another or make modifications within the IR they were given.
 | 1   | [Parser], `-p parse-tree`        |                     |                                   |
 |     |                                  | [`parser::Node`]    |                                   |
 | 2   | [Desugar], `-p desugar-tree`     |                     |                                   |
-| 3   |                                  | [`ast::Expression`] | [DSL]                             |
-| 4   |                                  | [`ast::Expression`] | [LocalVars], `-p dsl-tree`        |
+| 3   |                                  | [`ast::Expression`] | [Rewriter]                             |
+| 4   |                                  | [`ast::Expression`] | [LocalVars], `-p rewrite-tree`        |
 | 5   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
 | 6   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
 | 6   |                                  | [`ast::Expression`] | [Flattener], `-p flatten-tree`    |
@@ -161,7 +161,7 @@ The header itself is generated using [parser/tools/generate_ast.cc].
 
 In general, the IR the parser generates is intended to model Ruby very
 granularly, but is frequently redundant for the purpose of typechecking. We use
-the Desugar and DSL passes to simplify the IR before typechecking.
+the Desugar and Rewriter passes to simplify the IR before typechecking.
 
 
 ### Desugar
@@ -188,9 +188,9 @@ If you pass the `-p desugar-tree` or `-p desugar-tree-raw` option to `sorbet`,
 you can see what a Ruby program looks like after being desugared.
 
 
-### DSL
+### Rewriter
 
-The DSL pass is sort of like a domain-specific desugar pass. It takes
+The Rewriter pass is sort of like a domain-specific desugar pass. It takes
 [`ast::Expression`]s and rewrites specific Ruby DSLs and metaprogramming into
 code that Sorbet can analyze. DSL in this context can have a broad meaning. Some
 examples of DSLs that are rewritten by this pass:
@@ -201,16 +201,16 @@ examples of DSLs that are rewritten by this pass:
 
 - `Chalk::ODM`'s `prop` definitions are written similarly to `attr_reader`
 
-The core dsl pass lives in [dsl/dsl.cc].
-Each DSL pass lives in its own file in the [dsl/] folder.
+The core Rewriter pass lives in [rewriter/rewriter.cc].
+Each Rewriter pass lives in its own file in the [rewriter/] folder.
 
 In the future, we anticipate rewriting the DSL phase with a plugin architecture.
 This will allow for a wider audience of Rubyists to teach Sorbet about DSLs
 they've written.
 
-We artificially limit what code we call from DSL passes. Sometimes it would be
+We artificially limit what code we call from Rewriter passes. Sometimes it would be
 convenient to call into other phases of Sorbet, but instead we've reimplemented
-functionality in the DSL pass. This keeps the surface area of the API we'll have
+functionality in the Rewriter pass. This keeps the surface area of the API we'll have
 to present to plugins in the future small.
 
 
@@ -627,7 +627,7 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 <!-- Phase descriptions -->
 [parser]: #parser
 [desugar]: #desugar
-[dsl]: #dsl
+[rewriter]: #rewriter
 [localvars]: #localvars
 [namer]: #namer
 [resolver]: #resolver
@@ -647,8 +647,8 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 <!-- Files -->
 [parser/tools/generate_ast.cc]: ../parser/tools/generate_ast.cc
 [ast/desugar/Desugar.cc]: ../ast/desugar/Desugar.cc
-[dsl/dsl.cc]: ../dsl/dsl.cc
-[dsl/]: ../dsl/
+[rewriter/rewriter.cc]: ../rewriter/rewriter.cc
+[rewriter/]: ../rewriter/
 [namer/namer.cc]: ../namer/namer.cc
 [resolver/resolver.cc]: ../resolver/resolver.cc
 [cfg/CFG.h]: ../cfg/CFG.h

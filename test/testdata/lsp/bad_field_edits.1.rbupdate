@@ -1,0 +1,5 @@
+# typed: true
+# assert-fast-path: bad_field_edits.rb
+class A
+  @@foo = T.let(0, Integer)
+end

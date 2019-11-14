@@ -258,28 +258,35 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
         /* For file update events, convert to a SorbetWorkspaceEdit and commit the changes to GlobalState. */
         case LSPMethod::TextDocumentDidOpen: {
             auto &params = get<unique_ptr<DidOpenTextDocumentParams>>(msg->asNotification().params);
-            openFiles.insert(config->remoteName2Local(params->textDocument->uri));
-            auto newParams = make_unique<SorbetWorkspaceEditParams>();
-            canonicalizeEdits(nextVersion++, move(params), newParams->updates);
-            msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
-            shouldEnqueue = shouldMerge = true;
+            // Ignore files not in workspace.
+            if (config->isUriInWorkspace(params->textDocument->uri)) {
+                openFiles.insert(config->remoteName2Local(params->textDocument->uri));
+                auto newParams = make_unique<SorbetWorkspaceEditParams>();
+                canonicalizeEdits(nextVersion++, move(params), newParams->updates);
+                msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
+                shouldEnqueue = shouldMerge = true;
+            }
             break;
         }
         case LSPMethod::TextDocumentDidClose: {
             auto &params = get<unique_ptr<DidCloseTextDocumentParams>>(msg->asNotification().params);
-            openFiles.erase(config->remoteName2Local(params->textDocument->uri));
-            auto newParams = make_unique<SorbetWorkspaceEditParams>();
-            canonicalizeEdits(nextVersion++, move(params), newParams->updates);
-            msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
-            shouldEnqueue = shouldMerge = true;
+            if (config->isUriInWorkspace(params->textDocument->uri)) {
+                openFiles.erase(config->remoteName2Local(params->textDocument->uri));
+                auto newParams = make_unique<SorbetWorkspaceEditParams>();
+                canonicalizeEdits(nextVersion++, move(params), newParams->updates);
+                msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
+                shouldEnqueue = shouldMerge = true;
+            }
             break;
         }
         case LSPMethod::TextDocumentDidChange: {
             auto &params = get<unique_ptr<DidChangeTextDocumentParams>>(msg->asNotification().params);
-            auto newParams = make_unique<SorbetWorkspaceEditParams>();
-            canonicalizeEdits(nextVersion++, move(params), newParams->updates);
-            msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
-            shouldEnqueue = shouldMerge = true;
+            if (config->isUriInWorkspace(params->textDocument->uri)) {
+                auto newParams = make_unique<SorbetWorkspaceEditParams>();
+                canonicalizeEdits(nextVersion++, move(params), newParams->updates);
+                msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
+                shouldEnqueue = shouldMerge = true;
+            }
             break;
         }
         case LSPMethod::SorbetWatchmanFileChange: {

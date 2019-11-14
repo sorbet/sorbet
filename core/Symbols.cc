@@ -2,6 +2,8 @@
 #include "absl/strings/match.h"
 #include "common/JSON.h"
 #include "common/Levenstein.h"
+#include "common/formatting.h"
+#include "common/sort.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
 #include "core/Hashing.h"
@@ -1147,6 +1149,13 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     result = mix(result, this->hasSig());
     for (auto &arg : this->methodArgumentHash(gs)) {
         result = mix(result, arg);
+    }
+
+    if (name == core::Names::unresolvedAncestors()) {
+        // This is a synthetic method that encodes the superclasses of its owning class in its return type.
+        // If the return type changes, we must take the slow path.
+        ENFORCE(resultType);
+        result = mix(result, resultType->hash(gs));
     }
 
     return result;

@@ -19,8 +19,8 @@ passes=(
   parse-tree-json
   desugar-tree
   desugar-tree-raw
-  dsl-tree
-  dsl-tree-raw
+  rewrite-tree
+  rewrite-tree-raw
   symbol-table
   symbol-table-raw
   name-tree
@@ -35,7 +35,7 @@ passes=(
   cfg-raw
   cfg-json
   autogen
-  # document-symbols
+  document-symbols
 )
 
 bazel build //main:sorbet //test:print_document_symbols -c opt
@@ -66,7 +66,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
       candidate="$basename.$pass.exp"
       args=()
       if [ "$pass" = "autogen" ]; then
-        args=("--stop-after=namer --skip-dsl-passes")
+        args=("--stop-after=namer --skip-rewriter-passes")
       fi
       if ! [ -e "$candidate" ]; then
         continue

@@ -445,4 +445,21 @@ TEST_F(ProtocolTest, SorbetURIsWork) {
     ASSERT_EQ(readFile(myMethodDefLoc->uri), fileContents);
 }
 
+// Tests that Sorbet does not crash when a file URI falls outside of the workspace.
+TEST_F(ProtocolTest, DoesNotCrashOnNonWorkspaceURIs) {
+    const bool supportsMarkdown = false;
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->supportsSorbetURIs = true;
+
+    auto initializeResponses = sorbet::test::initializeLSP(
+        "/Users/jvilk/stripe/areallybigfoldername", "file://Users/jvilk/stripe/areallybigfoldername", *lspWrapper,
+        nextId, supportsMarkdown, make_optional(move(initOptions)));
+
+    auto fileUri = "file:///Users/jvilk/Desktop/test.rb";
+    auto didOpenParams =
+        make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(fileUri, "ruby", 1, "# typed: true\n1\n"));
+    auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
+    lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(didOpenNotif)));
+}
+
 } // namespace sorbet::test::lsp

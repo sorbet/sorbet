@@ -162,15 +162,15 @@ class Date
   # An array of strings of abbreviated day names in
   # [`English`](https://docs.ruby-lang.org/en/2.6.0/English.html). The first is
   # "Sun".
-  ABBR_DAYNAMES = T.let(T.unsafe(nil), Array)
+  ABBR_DAYNAMES = T.let(T.unsafe(nil), T::Array[T.untyped])
   # An array of strings of abbreviated month names in
   # [`English`](https://docs.ruby-lang.org/en/2.6.0/English.html). The first
   # element is nil.
-  ABBR_MONTHNAMES = T.let(T.unsafe(nil), Array)
+  ABBR_MONTHNAMES = T.let(T.unsafe(nil), T::Array[T.untyped])
   # An array of strings of the full names of days of the week in
   # [`English`](https://docs.ruby-lang.org/en/2.6.0/English.html). The first is
   # "Sunday".
-  DAYNAMES = T.let(T.unsafe(nil), Array)
+  DAYNAMES = T.let(T.unsafe(nil), T::Array[T.untyped])
   # The Julian day number of the day of calendar reform for England and her
   # colonies.
   ENGLAND = T.let(T.unsafe(nil), Integer)
@@ -186,7 +186,7 @@ class Date
   # An array of strings of full month names in
   # [`English`](https://docs.ruby-lang.org/en/2.6.0/English.html). The first
   # element is nil.
-  MONTHNAMES = T.let(T.unsafe(nil), Array)
+  MONTHNAMES = T.let(T.unsafe(nil), T::Array[T.untyped])
 
   sig do
     params(
@@ -1165,12 +1165,12 @@ class Date
       arg0: String,
       comp: T::Boolean
     )
-    .returns(Hash)
+    .returns(T::Hash[T.untyped, T.untyped])
   end
   def self._parse(arg0, comp=true); end
 
   # Returns a hash of parsed elements.
-  sig {params(arg0: String).returns(Hash)}
+  sig {params(arg0: String).returns(T::Hash[T.untyped, T.untyped])}
   def self._iso8601(arg0); end
 
   # Creates a new [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html) object
@@ -1185,7 +1185,7 @@ class Date
   def self.iso8601(*arg0); end
 
   # Returns a hash of parsed elements.
-  sig {params(arg0: String).returns(Hash)}
+  sig {params(arg0: String).returns(T::Hash[T.untyped, T.untyped])}
   def self._rfc3339(arg0); end
 
   # Creates a new [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html) object
@@ -1198,7 +1198,7 @@ class Date
   def self.rfc3339(*arg0); end
 
   # Returns a hash of parsed elements.
-  sig {params(arg0: String).returns(Hash)}
+  sig {params(arg0: String).returns(T::Hash[T.untyped, T.untyped])}
   def self._xmlschema(arg0); end
 
   # Creates a new [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html) object
@@ -1212,11 +1212,11 @@ class Date
   def self.xmlschema(*arg0); end
 
   # Returns a hash of parsed elements.
-  sig {params(arg0: String).returns(Hash)}
+  sig {params(arg0: String).returns(T::Hash[T.untyped, T.untyped])}
   def self._rfc2822(arg0); end
 
   # Returns a hash of parsed elements.
-  sig {params(arg0: String).returns(Hash)}
+  sig {params(arg0: String).returns(T::Hash[T.untyped, T.untyped])}
   def self._rfc822(arg0); end
 
   # Creates a new [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html) object
@@ -1240,7 +1240,7 @@ class Date
   def self.rfc822(*arg0); end
 
   # Returns a hash of parsed elements.
-  sig {params(arg0: String).returns(Hash)}
+  sig {params(arg0: String).returns(T::Hash[T.untyped, T.untyped])}
   def self._httpdate(arg0); end
 
   # Creates a new [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html) object
@@ -1254,7 +1254,7 @@ class Date
   def self.httpdate(*arg0); end
 
   # Returns a hash of parsed elements.
-  sig {params(arg0: String).returns(Hash)}
+  sig {params(arg0: String).returns(T::Hash[T.untyped, T.untyped])}
   def self._jisx0301(arg0); end
 
   # Creates a new [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html) object

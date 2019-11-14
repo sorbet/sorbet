@@ -2,10 +2,12 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/synchronization/notification.h"
 #include "ast/treemap/treemap.h"
+#include "common/sort.h"
 #include "common/typecase.h"
 #include "core/Unfreeze.h"
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/LSPMessage.h"
+#include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/LocalVarSaver.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/pipeline/pipeline.h"
@@ -28,9 +30,8 @@ void LSPTypechecker::initialize(LSPFileUpdates updates) {
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates) {
-    bool committed = true;
     auto run = runTypechecking(move(updates));
-    committed = !run.canceled;
+    auto committed = !run.canceled;
     commitTypecheckRun(move(run));
     return committed;
 }
@@ -415,19 +416,9 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     Timer timeit(config->logger, "query");
     prodCategoryCounterInc("lsp.updates", "query");
     ENFORCE(gs->errorQueue->isEmpty());
-    vector<ast::ParsedFile> updatedIndexed;
-    for (auto &f : filesForQuery) {
-        const int id = f.id();
-        const auto it = indexedFinalGS.find(id);
-        const auto &parsedFile = it == indexedFinalGS.end() ? indexed[id] : it->second;
-        if (parsedFile.tree) {
-            updatedIndexed.emplace_back(ast::ParsedFile{parsedFile.tree->deepCopy(), parsedFile.file});
-        }
-    }
-
     ENFORCE(gs->lspQuery.isEmpty());
     gs->lspQuery = q;
-    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
+    auto resolved = getResolved(filesForQuery);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
     pipeline::typecheck(gs, move(resolved), config->opts, config->workers);
@@ -455,7 +446,7 @@ TypecheckRun LSPTypechecker::retypecheck(LSPFileUpdates updates) const {
     return runTypechecking(move(updates));
 }
 
-const ast::ParsedFile &LSPTypechecker::getIndex(core::FileRef fref) const {
+const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
     const auto id = fref.id();
     auto treeFinalGS = indexedFinalGS.find(id);
     if (treeFinalGS != indexedFinalGS.end()) {
@@ -463,6 +454,17 @@ const ast::ParsedFile &LSPTypechecker::getIndex(core::FileRef fref) const {
     }
     ENFORCE(id < indexed.size());
     return indexed[id];
+}
+
+vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs) const {
+    vector<ast::ParsedFile> updatedIndexed;
+    for (auto fref : frefs) {
+        auto &indexed = getIndexed(fref);
+        if (indexed.tree) {
+            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree->deepCopy(), indexed.file});
+        }
+    }
+    return pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
 }
 
 const std::vector<core::FileHash> &LSPTypechecker::getFileHashes() const {

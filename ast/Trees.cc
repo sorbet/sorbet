@@ -17,7 +17,6 @@ template class std::unique_ptr<sorbet::ast::Next>;
 template class std::unique_ptr<sorbet::ast::Return>;
 template class std::unique_ptr<sorbet::ast::RescueCase>;
 template class std::unique_ptr<sorbet::ast::Rescue>;
-template class std::unique_ptr<sorbet::ast::Field>;
 template class std::unique_ptr<sorbet::ast::Local>;
 template class std::unique_ptr<sorbet::ast::UnresolvedIdent>;
 template class std::unique_ptr<sorbet::ast::RestArg>;
@@ -147,11 +146,6 @@ Rescue::Rescue(core::Loc loc, unique_ptr<Expression> body, RESCUE_CASE_store res
       ensure(std::move(ensure)) {
     categoryCounterInc("trees", "rescue");
     histogramInc("trees.rescue.rescuecases", this->rescueCases.size());
-    _sanityCheck();
-}
-
-Field::Field(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(symbol) {
-    categoryCounterInc("trees", "field");
     _sanityCheck();
 }
 
@@ -453,7 +447,7 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "flags =";
     const pair<int, string_view> flags[] = {
         {SelfMethod, "self"sv},
-        {DSLSynthesized, "dsl"sv},
+        {RewriterSynthesized, "rewriter"sv},
     };
     for (auto &ent : flags) {
         if ((this->flags & ent.first) != 0) {
@@ -609,10 +603,6 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Field::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return this->symbol.dataAllowingNone(gs)->showFullName(gs);
-}
-
 string Local::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return this->localVariable.toString(gs);
 }
@@ -624,16 +614,6 @@ string Local::nodeName() {
 bool Expression::isSelfReference() const {
     auto asLocal = cast_tree_const<Local>(this);
     return asLocal && asLocal->localVariable == core::LocalVariable::selfVariable();
-}
-
-string Field::showRaw(const core::GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << nodeName() << "{" << '\n';
-    printTabs(buf, tabs + 1);
-    buf << "symbol = " << this->symbol.dataAllowingNone(gs)->name.data(gs)->showRaw(gs) << '\n';
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
 }
 
 string Local::showRaw(const core::GlobalState &gs, int tabs) {
@@ -1042,9 +1022,6 @@ string If::nodeName() {
 }
 string While::nodeName() {
     return "While";
-}
-string Field::nodeName() {
-    return "Field";
 }
 string UnresolvedIdent::nodeName() {
     return "UnresolvedIdent";

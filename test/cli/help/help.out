@@ -76,15 +76,15 @@ Usage:
                                 using `watchman` on your PATH. (default: watchman)
       --enable-experimental-lsp-autocomplete
                                 Enable experimental LSP feature: Autocomplete
-      --enable-experimental-lsp-autocomplete-methods
-                                Enable experimental LSP feature:
-                                Autocomplete, but only for methods
       --enable-experimental-lsp-workspace-symbols
                                 Enable experimental LSP feature: Workspace
                                 Symbols
       --enable-experimental-lsp-document-symbol
                                 Enable experimental LSP feature: Document
                                 Symbol
+      --enable-experimental-lsp-document-highlight
+                                Enable experimental LSP feature: Document
+                                Highlight
       --enable-experimental-lsp-signature-help
                                 Enable experimental LSP feature: Signature
                                 Help
@@ -140,16 +140,16 @@ Usage:
  dev options:
   -p, --print type              Print: [parse-tree, parse-tree-json,
                                 parse-tree-whitequark, desugar-tree, desugar-tree-raw,
-                                dsl-tree, dsl-tree-raw, index-tree,
-                                index-tree-raw, name-tree, name-tree-raw, resolve-tree,
-                                resolve-tree-raw, flatten-tree,
-                                flatten-tree-raw, ast, ast-raw, cfg, cfg-raw, cfg-json,
-                                cfg-proto, symbol-table, symbol-table-raw,
-                                symbol-table-json, symbol-table-full,
+                                rewrite-tree, rewrite-tree-raw, index-tree,
+                                index-tree-raw, name-tree, name-tree-raw,
+                                resolve-tree, resolve-tree-raw, flatten-tree,
+                                flatten-tree-raw, ast, ast-raw, cfg, cfg-raw,
+                                cfg-json, cfg-proto, symbol-table,
+                                symbol-table-raw, symbol-table-json, symbol-table-full,
                                 symbol-table-full-raw, symbol-table-full-json,
-                                file-table-json, missing-constants, plugin-generated-code,
-                                autogen, autogen-msgpack, autogen-classlist,
-                                autogen-autoloader, autogen-subclasses]
+                                file-table-json, missing-constants,
+                                plugin-generated-code, autogen, autogen-msgpack,
+                                autogen-classlist, autogen-autoloader, autogen-subclasses]
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of
                                 subclasses. This option must be used in
@@ -157,11 +157,11 @@ Usage:
       --autogen-subclasses-ignore string
                                 Like --ignore, but it only affects `-p
                                 autogen-subclasses`.
-      --stop-after phase        Stop After: [init, parser, desugarer, dsl,
-                                local-vars, namer, resolver, cfg, inferencer]
-                                (default: inferencer)
+      --stop-after phase        Stop After: [init, parser, desugarer,
+                                rewriter, local-vars, namer, resolver, cfg,
+                                inferencer] (default: inferencer)
       --no-stdlib               Do not load included rbi files for stdlib
-      --skip-dsl-passes         Do not run DSL passess
+      --skip-rewriter-passes    Do not run Rewriter passess
       --wait-for-dbg            Wait for debugger on start
       --stress-incremental-resolver
                                 Force incremental updates to discover

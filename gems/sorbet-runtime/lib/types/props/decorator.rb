@@ -552,7 +552,7 @@ class T::Props::Decorator
     nil
   end
 
-  # returns the type of the hash key, or nil. Any CustomType could be a key, but we only expect Opus::Enum right now.
+  # returns the type of the hash key, or nil. Any CustomType could be a key, but we only expect T::Enum right now.
   sig do
     params(type: PropType)
     .returns(T.nilable(Module))
@@ -571,12 +571,6 @@ class T::Props::Decorator
 
   # From T::Props::Utils.deep_clone_object, plus String
   TYPES_NOT_NEEDING_CLONE = [TrueClass, FalseClass, NilClass, Symbol, String, Numeric]
-  if defined?(Opus) && defined?(Opus::Enum)
-    TYPES_NOT_NEEDING_CLONE << Opus::Enum
-  end
-  if defined?(T::Enum)
-    TYPES_NOT_NEEDING_CLONE << T::Enum
-  end
 
   sig {params(type: PropType).returns(T::Boolean)}
   private def shallow_clone_ok(type)

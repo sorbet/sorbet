@@ -149,7 +149,7 @@ public:
 
     enum Flags {
         SelfMethod = 1,
-        DSLSynthesized = 2,
+        RewriterSynthesized = 2,
     };
 
     MethodDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
@@ -163,8 +163,16 @@ public:
         return (flags & SelfMethod) != 0;
     }
 
-    bool isDSLSynthesized() const {
-        return (flags & DSLSynthesized) != 0;
+    bool isRewriterSynthesized() const {
+        return (flags & RewriterSynthesized) != 0;
+    }
+
+    void setIsSelf(bool isSelf) {
+        if (isSelf) {
+            flags |= SelfMethod;
+        } else {
+            flags &= ~SelfMethod;
+        }
     }
 
 private:
@@ -310,21 +318,6 @@ private:
 };
 // CheckSize(Rescue, 64, 8);
 
-class Field final : public Reference {
-public:
-    core::SymbolRef symbol;
-
-    Field(core::Loc loc, core::SymbolRef symbol);
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-private:
-    virtual void _sanityCheck();
-};
-// CheckSize(Field, 24, 8);
-
 class Local final : public Reference {
 public:
     core::LocalVariable localVariable;
@@ -461,7 +454,7 @@ public:
     core::NameRef fun;
 
     static const int PRIVATE_OK = 1 << 0;
-    static const int DSL_SYNTHESIZED = 1 << 1;
+    static const int REWRITER_SYNTHESIZED = 1 << 1;
     u4 flags;
 
     std::unique_ptr<Expression> recv;
@@ -478,8 +471,8 @@ public:
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
-    bool isDSLSynthesized() const {
-        return (flags & DSL_SYNTHESIZED) != 0;
+    bool isRewriterSynthesized() const {
+        return (flags & REWRITER_SYNTHESIZED) != 0;
     }
 
     bool isPrivateOk() const {

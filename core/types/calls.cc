@@ -1,5 +1,6 @@
 #include "absl/strings/match.h"
 #include "common/common.h"
+#include "common/sort.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
@@ -326,10 +327,9 @@ TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
     }
 
     if (auto *classType = cast_type<ClassType>(tp.get())) {
-        if (classType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum()) ||
-            classType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
-            // Opus::Enum instances are allowed to stand for themselves in type syntax positions.
-            // See the note in type_syntax.cc regarding Opus::Enum.
+        if (classType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
+            // T::Enum instances are allowed to stand for themselves in type syntax positions.
+            // See the note in type_syntax.cc regarding T::Enum.
             return tp;
         }
 

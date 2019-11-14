@@ -36,7 +36,7 @@ def foo(x)
   when B
     T.reveal_type(x) # Revealed type: `B`
   else
-    # (3) Use T.absurd to ask Sorbet to error when there missing cases.
+    # (3) Use T.absurd to ask Sorbet to error when there are missing cases.
     T.absurd(x) # error: didn't handle case for `C`
   end
 end

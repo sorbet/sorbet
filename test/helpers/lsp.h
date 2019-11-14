@@ -10,6 +10,8 @@ using namespace sorbet::realmain::lsp;
 
 std::string filePathToUri(std::string_view prefixUrl, std::string_view filePath);
 
+bool isUriATestFile(std::string_view prefixUrl, std::string_view uri);
+
 std::string uriToFilePath(std::string_view prefixUrl, std::string_view uri);
 
 /** Creates the parameters to the `initialize` message, which advertises the client's capabilities. */
@@ -20,6 +22,9 @@ makeInitializeParams(std::variant<std::string, JSONNullObject> rootPath,
 
 /** Create an LSPMessage containing a textDocument/definition request. */
 std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character);
+
+/** Create an LSPMessage containing a WorkspaceSymbol request. */
+std::unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query);
 
 /** Create an LSPMessage containing a textDocument/didChange request. */
 std::unique_ptr<LSPMessage> makeDidChange(std::string_view uri, std::string_view contents, int version);

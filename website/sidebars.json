@@ -29,6 +29,7 @@
       "type-aliases",
       "exhaustiveness",
       "tstruct",
+      "tenum",
       "untyped",
       "procs",
       "abstract",

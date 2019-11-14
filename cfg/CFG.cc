@@ -1,6 +1,8 @@
 #include "cfg/CFG.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
+#include "common/Timer.h"
+#include "common/formatting.h"
 
 // helps debugging
 template class std::unique_ptr<sorbet::cfg::CFG>;
@@ -78,6 +80,9 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {
                 blockReads.insert(v->fallback);
                 blockReadsAndWrites.insert(v->fallback);
+            } else if (auto *v = cast_instruction<SolveConstraint>(bind.value.get())) {
+                blockReads.insert(v->send);
+                blockReadsAndWrites.insert(v->send);
             }
 
             auto fnd = blockReads.find(bind.bind.variable);

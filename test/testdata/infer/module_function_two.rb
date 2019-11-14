@@ -6,7 +6,7 @@ module Foo
     b
   end
 
-  def bar(a:) # error: Method `Foo.bar` redefined with mismatched argument attribute `isKeyword`.
+  def bar(a:) # error: Method `Foo.bar` redefined with argument `a` as a keyword argument
     a
   end
 end

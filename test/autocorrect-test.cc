@@ -4,6 +4,7 @@
 #include "common/common.h"
 #include "core/Context.h"
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"

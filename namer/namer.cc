@@ -4,6 +4,7 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
+#include "common/Timer.h"
 #include "common/typecase.h"
 #include "core/Context.h"
 #include "core/Names.h"
@@ -270,7 +271,8 @@ public:
         return klass;
     }
 
-    bool handleNamerDSL(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &line) {
+    bool handleNamerRewriter(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass,
+                             unique_ptr<ast::Expression> &line) {
         if (addAncestor(ctx, klass, line)) {
             return true;
         }
@@ -344,8 +346,9 @@ public:
         klass->symbol.data(ctx)->addLoc(ctx, klass->declLoc);
         klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
-        auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
-                                  [&](unique_ptr<ast::Expression> &line) { return handleNamerDSL(ctx, klass, line); });
+        auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(), [&](unique_ptr<ast::Expression> &line) {
+            return handleNamerRewriter(ctx, klass, line);
+        });
         klass->rhs.erase(toRemove, klass->rhs.end());
 
         if (!klass->ancestors.empty()) {
@@ -449,23 +452,45 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
-        ast::MethodDef *mdef;
-        if (original->args.size() == 1 && (mdef = ast::cast_tree<ast::MethodDef>(original->args[0].get())) != nullptr) {
+        core::SymbolRef method;
+        if (original->args.size() == 1) {
+            if (auto mdef = ast::cast_tree<ast::MethodDef>(original->args[0].get())) {
+                // this handles the `private def foo` case
+                method = mdef->symbol;
+            } else if (auto sym = ast::cast_tree<ast::Literal>(original->args[0].get())) {
+                // this handles the `private :foo` case
+                if (!sym->isSymbol(ctx)) {
+                    return original;
+                }
+                auto name = sym->asSymbol(ctx);
+                auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+                if (original->fun._id == core::Names::privateClassMethod()._id) {
+                    owner = owner.data(ctx)->singletonClass(ctx);
+                }
+                method = ctx.state.lookupMethodSymbol(owner, name);
+                if (method == core::Symbols::noSymbol()) {
+                    return original;
+                }
+            } else {
+                return original;
+            }
             switch (original->fun._id) {
                 case core::Names::private_()._id:
                 case core::Names::privateClassMethod()._id:
-                    mdef->symbol.data(ctx)->setPrivate();
+                    method.data(ctx)->setPrivate();
                     break;
                 case core::Names::protected_()._id:
-                    mdef->symbol.data(ctx)->setProtected();
+                    method.data(ctx)->setProtected();
                     break;
                 case core::Names::public_()._id:
-                    mdef->symbol.data(ctx)->setPublic();
+                    method.data(ctx)->setPublic();
                     break;
                 default:
                     return original;
             }
-            return std::move(original->args[0]);
+            if (ast::isa_tree<ast::MethodDef>(original->args[0].get())) {
+                return std::move(original->args[0]);
+            }
         }
         return original;
     }
@@ -527,35 +552,39 @@ public:
 
             if (symArg.flags.isKeyword != methodArg.keyword) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), "isKeyword", symArg.flags.isKeyword, methodArg.keyword);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                    e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
+                                methodArg.local.toString(ctx), methodArg.keyword ? "keyword" : "non-keyword");
+                    e.addErrorLine(
+                        sym.data(ctx)->loc(),
+                        "The corresponding argument `{}` in the previous definition was {}a keyword argument",
+                        symArg.show(ctx), symArg.flags.isKeyword ? "" : "not ");
                 }
                 return;
             }
-            if (symArg.flags.isBlock != methodArg.block) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), "isBlock", symArg.flags.isBlock, methodArg.block);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
-                }
-                return;
-            }
+            // because of how we synthesize block args, this condition should always be true. In particular: the last
+            // thing in our list of arguments will always be a block arg, either an explicit one or an implicit one, and
+            // the only situation in which a block arg will ever be seen is as the last argument in the
+            // list. Consequently, the only situation in which a block arg will be matched up with a non-block arg is
+            // when the lists are different lengths: but in that case, we'll have bailed out of this function already
+            // with the "without matching argument count" error above. So, as long as we have maintained the intended
+            // invariants around methods and arguments, we do not need to ever issue an error about non-matching
+            // isBlock-ness.
+            ENFORCE(symArg.flags.isBlock == methodArg.block);
             if (symArg.flags.isRepeated != methodArg.repeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader(
-                        "Method `{}` redefined with mismatched argument attribute `{}`. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), "isRepeated", symArg.flags.isRepeated, methodArg.repeated);
-                    e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
+                    e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
+                                methodArg.local.toString(ctx), methodArg.repeated ? "splat" : "non-splat");
+                    e.addErrorLine(sym.data(ctx)->loc(),
+                                   "The corresponding argument `{}` in the previous definition was {}a splat argument",
+                                   symArg.show(ctx), symArg.flags.isRepeated ? "" : "not ");
                 }
                 return;
             }
             if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader("Method `{}` redefined with mismatched argument name. Expected: `{}`, got: `{}`",
-                                sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
+                    e.setHeader(
+                        "Method `{}` redefined with mismatched keyword argument name. Expected: `{}`, got: `{}`",
+                        sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return;
@@ -625,8 +654,8 @@ public:
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
         method->symbol.data(ctx)->addLoc(ctx, method->declLoc);
-        if (method->isDSLSynthesized()) {
-            method->symbol.data(ctx)->setDSLSynthesized();
+        if (method->isRewriterSynthesized()) {
+            method->symbol.data(ctx)->setRewriterSynthesized();
         }
         return method;
     }
@@ -635,24 +664,11 @@ public:
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size());
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size(), "{}: {} != {}",
                 method->name.showRaw(ctx), method->args.size(), method->symbol.data(ctx)->arguments().size());
+        // all methods at definition time are public, but their visibility may be changed later
+        method->symbol.data(ctx)->setPublic();
         // Not all information is unfortunately available in the symbol. Original argument names aren't.
         // method->args.clear();
         return method;
-    }
-
-    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
-                                                             unique_ptr<ast::UnresolvedIdent> nm) {
-        ENFORCE(nm->kind != ast::UnresolvedIdent::Local, "Unresolved local left after `name_locals`");
-
-        if (nm->kind == ast::UnresolvedIdent::Global) {
-            auto sym = ctx.state.lookupSymbol(core::Symbols::root(), nm->name);
-            if (!sym.exists()) {
-                sym = ctx.state.enterFieldSymbol(nm->loc, core::Symbols::root(), nm->name);
-            }
-            return make_unique<ast::Field>(nm->loc, sym);
-        } else {
-            return nm;
-        }
     }
 
     // Returns the SymbolRef corresponding to the class `self.class`, unless the
@@ -678,7 +694,7 @@ public:
     unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         // forbid dynamic constant definition
         auto ownerData = ctx.owner.data(ctx);
-        if (!ownerData->isClassOrModule() && !ownerData->isDSLSynthesized()) {
+        if (!ownerData->isClassOrModule() && !ownerData->isRewriterSynthesized()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::DynamicConstantAssignment)) {
                 e.setHeader("Dynamic constant assignment");
             }
@@ -964,7 +980,7 @@ std::vector<ast::ParsedFile> Namer::run(core::MutableContext ctx, std::vector<as
             {
                 Timer timeit(ctx.state.tracer(), "naming", {{"file", (string)file.data(ctx).path()}});
                 core::ErrorRegion errs(ctx.state, file);
-                tree.tree = ast::TreeMap::apply(ctx, nameInserter, std::move(tree.tree));
+                tree.tree = ast::ShallowMap::apply(ctx, nameInserter, std::move(tree.tree));
             }
         } catch (SorbetException &) {
             Exception::failInFuzzer();

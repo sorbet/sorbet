@@ -4,8 +4,11 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
+#include "common/formatting.h"
+#include "common/sort.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
+#include <iterator>
 #include <regex>
 
 using namespace std;
@@ -37,6 +40,7 @@ const UnorderedMap<
         {"apply-completion", ApplyCompletionAssertion::make},
         {"apply-code-action", ApplyCodeActionAssertion::make},
         {"no-stdlib", BooleanPropertyAssertion::make},
+        {"symbol-search", SymbolSearchAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -350,9 +354,13 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
     return assertions;
 }
 
-unique_ptr<Location> RangeAssertion::getLocation(string_view uriPrefix) {
+unique_ptr<Location> RangeAssertion::getLocation(string_view uriPrefix) const {
     auto uri = filePathToUri(uriPrefix, filename);
     return make_unique<Location>(uri, range->copy());
+}
+
+unique_ptr<DocumentHighlight> RangeAssertion::getDocumentHighlight() {
+    return make_unique<DocumentHighlight>(range->copy());
 }
 
 pair<string_view, int> getSymbolAndVersion(string_view assertionContents) {
@@ -388,6 +396,16 @@ vector<unique_ptr<Location>> &extractLocations(ResponseMessage &respMsg) {
         return empty;
     }
     return get<vector<unique_ptr<Location>>>(locationsOrNull);
+}
+
+vector<unique_ptr<DocumentHighlight>> &extractDocumentHighlights(ResponseMessage &respMsg) {
+    static vector<unique_ptr<DocumentHighlight>> empty;
+    auto &result = *(respMsg.result);
+    auto &highlightsOrNull = get<variant<JSONNullObject, vector<unique_ptr<DocumentHighlight>>>>(result);
+    if (auto isNull = get_if<JSONNullObject>(&highlightsOrNull)) {
+        return empty;
+    }
+    return get<vector<unique_ptr<DocumentHighlight>>>(highlightsOrNull);
 }
 
 void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
@@ -493,6 +511,59 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
                 "Sorbet returned references for a location that should not report references.\nGiven location "
                 "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
                 prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *foundLocation), *foundLocation->range,
+                                        ""));
+        }
+        return;
+    }
+
+    assertLocationsMatch(sourceFileContents, uriPrefix, symbol, allLocs, line, character, locSourceLine, locFilename,
+                         locations);
+}
+
+void UsageAssertion::checkHighlights(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                     LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string_view symbol,
+                                     const Location &queryLoc, const vector<shared_ptr<RangeAssertion>> &allLocs) {
+    const int line = queryLoc.range->start->line;
+    // Can only query with one character, so just use the first one.
+    const int character = queryLoc.range->start->character;
+    auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
+    string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
+
+    int id = nextId++;
+    auto request = make_unique<LSPMessage>(make_unique<RequestMessage>(
+        "2.0", id, LSPMethod::TextDocumentDocumentHighlight,
+        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(queryLoc.uri)),
+                                                make_unique<Position>(line, character))));
+
+    auto responses = lspWrapper.getLSPResponsesFor(move(request));
+    if (responses.size() != 1) {
+        EXPECT_EQ(1, responses.size())
+            << "Unexpected number of responses to a `textDocument/documentHighlight` request.";
+        return;
+    }
+
+    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    auto &respMsg = responses.at(0)->asResponse();
+    ASSERT_TRUE(respMsg.result.has_value());
+    ASSERT_FALSE(respMsg.error.has_value());
+    auto &highlights = extractDocumentHighlights(respMsg);
+
+    // Convert highlights to locations, used by common test functions across assertions involving multiple files.
+    vector<unique_ptr<Location>> locations;
+    for (auto const &highlight : highlights) {
+        auto location = make_unique<Location>(queryLoc.uri, move(highlight->range));
+        locations.push_back(move(location));
+    }
+
+    if (symbol == NOTHING_LABEL) {
+        // Special case: This location should not report usages of anything.
+        for (auto &foundLocation : locations) {
+            auto actualFilePath = uriToFilePath(uriPrefix, foundLocation->uri);
+            ADD_FAILURE_AT(actualFilePath.c_str(), foundLocation->range->start->line + 1) << fmt::format(
+                "Sorbet returned references for a highlight that should not report references.\nGiven location "
+                "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
+                prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
                 prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *foundLocation), *foundLocation->range,
                                         ""));
         }
@@ -1124,6 +1195,307 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         EXPECT_EQ(actualEditedFileContents, expectedEditedFileContents) << fmt::format(
             "Invalid quick fix result. Expected edited result ({}) to be:\n{}\n...but actually resulted in:\n{}",
             expectedUpdatedFilePath, expectedEditedFileContents, actualEditedFileContents);
+    }
+}
+
+SymbolSearchAssertion::SymbolSearchAssertion(std::string_view filename, std::unique_ptr<Range> &range,
+                                             int assertionLine, std::string_view query, std::optional<std::string> name,
+                                             std::optional<std::string> container, std::optional<int> rank,
+                                             std::optional<std::string> uri)
+    : RangeAssertion(filename, range, assertionLine), query(query), name(name), container(container), rank(rank),
+      uri(uri) {}
+
+string SymbolSearchAssertion::toString() const {
+    auto namePart = name.has_value() ? fmt::format(", name=\"{}\"", name.value()) : "";
+    auto containerPart = container.has_value() ? fmt::format(", container=\"{}\"", container.value()) : "";
+    auto rankPart = rank.has_value() ? fmt::format(", rank={}", rank.value()) : "";
+    auto uriPart = uri.has_value() ? fmt::format(", uri=\"{}\"", uri.value()) : "";
+    return fmt::format("symbol-search: \"{}\"{}{}{}{}", query, namePart, containerPart, rankPart, uriPart);
+}
+
+shared_ptr<SymbolSearchAssertion> SymbolSearchAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                              int assertionLine, string_view assertionContents,
+                                                              string_view assertionType) {
+    static const regex contentsRegex(R"(^\s*\"([^\"]+)\"\s*(,.*\S)?\s*$)");
+    smatch topMatches;
+    string assertionContentsString = string(assertionContents);
+    if (!regex_match(assertionContentsString, topMatches, contentsRegex)) {
+        ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1) << fmt::format(
+            "Improperly formatted assertion. Expected 'symbol-search: \"<query>\"[, ...options]*'. Found '{}'",
+            assertionContents);
+        return nullptr;
+    }
+    auto query = topMatches[1].str();
+    optional<string> remainingOptions = nullopt;
+    if (topMatches[2].matched) {
+        remainingOptions = topMatches[2].str();
+    }
+
+    // Parse options
+    optional<string> name = nullopt;
+    optional<string> container = nullopt;
+    optional<int> rank = nullopt;
+    optional<string> uri = nullopt;
+    // regex groups:
+    //   1 => name
+    //   2 => value
+    //   3 => string contents of value
+    //   4 => digits value
+    //   5 =>  remaining options
+    static const regex optionsRegex(R"(^,\s*([a-z]+)\s*=\s*(\"([^\"]*)\"|(\d+))\s*(,.*)?\s*$)");
+    while (remainingOptions.has_value()) {
+        smatch matches;
+        if (!regex_match(*remainingOptions, matches, optionsRegex)) {
+            ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1) << fmt::format(
+                "Improperly formatted assertion. Could not parse '{}' for symbol-search.", *remainingOptions);
+            return nullptr;
+        }
+        auto optionName = matches[1].str();
+        auto optionValue = matches[2].str();
+        optional<string> valueStringContents = nullopt;
+        optional<int> valueAsInt = nullopt;
+        if (matches[3].matched) {
+            valueStringContents = matches[3].str();
+        } else if (matches[4].matched) {
+            valueAsInt = atoi(matches[4].str().c_str());
+        }
+        if (matches[5].matched) {
+            remainingOptions = matches[5].str();
+        } else {
+            remainingOptions = nullopt;
+        }
+
+        if (optionName == "name") {
+            if (!valueStringContents.has_value()) {
+                ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
+                    << fmt::format("Improperly formatted `symbol-search` assertion.\n"
+                                   "Expected `name = \"str\"`, got `{} = {}` in:\n{}\n",
+                                   optionName, optionValue, assertionContents);
+            }
+            name = valueStringContents;
+        } else if (optionName == "container") {
+            if (!valueStringContents.has_value()) {
+                ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
+                    << fmt::format("Improperly formatted `symbol-search` assertion.\n"
+                                   "Expected `container = \"str\"`, got `{} = {}` in:\n{}\n",
+                                   optionName, optionValue, assertionContents);
+            }
+            container = valueStringContents;
+        } else if (optionName == "rank") {
+            if (!valueAsInt.has_value()) {
+                ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
+                    << fmt::format("Improperly formatted `symbol-search` assertion.\n"
+                                   "Expected `rank = integer`, got `{} = {}` in:\n{}\n",
+                                   optionName, optionValue, assertionContents);
+            }
+            rank = valueAsInt;
+        } else if (optionName == "uri") {
+            if (!valueStringContents.has_value()) {
+                ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
+                    << fmt::format("Improperly formatted `symbol-search` assertion.\n"
+                                   "Expected `uri = \"substr\"`, got `{} = {}` in:\n{}\n",
+                                   optionName, optionValue, assertionContents);
+            }
+            uri = valueStringContents;
+        } else {
+            ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
+                << fmt::format("Improperly formatted `symbol-search` assertion for query {}.\n"
+                               "Valid args are name, container, rank, and uri, could not parse `{} = {}` in:\n{}\n",
+                               query, optionName, optionValue, assertionContents);
+        }
+    }
+    return make_shared<SymbolSearchAssertion>(filename, range, assertionLine, query, name, container, rank, uri);
+}
+
+bool SymbolSearchAssertion::matches(std::string_view uriPrefix, const SymbolInformation &symbol) const {
+    auto assertionLocation = getLocation(uriPrefix);
+    auto &symbolLocation = symbol.location;
+    if (uri.has_value()) {
+        if (symbolLocation->uri.find(*uri) == string::npos) {
+            return false;
+        }
+    } else {
+        if (assertionLocation->uri != symbolLocation->uri) {
+            return false;
+        }
+        if (assertionLocation->range->start->line != symbolLocation->range->start->line) {
+            return false;
+        }
+    }
+    if (name.has_value() && *name != symbol.name) {
+        return false;
+    }
+    if (container.has_value() && *container != symbol.containerName) {
+        return false;
+    }
+    return true;
+}
+namespace {
+string pluralized_count(string_view word, int count) {
+    return fmt::format("{} {}{}", count, word, (count == 1) ? "" : "s");
+}
+
+void addFailureAtLocationWithSource(const Location &location,
+                                    const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                    string_view uriPrefix, std::string_view message) {
+    if (!isUriATestFile(uriPrefix, location.uri)) {
+        ADD_FAILURE_AT(location.uri.c_str(), location.range->start->line + 1)
+            << fmt::format("{}\n(source unavailable for {})\n", message, location.uri);
+        return;
+    }
+    auto sourceLine = getLine(sourceFileContents, uriPrefix, location);
+    ADD_FAILURE_AT(location.uri.c_str(), location.range->start->line + 1)
+        << fmt::format("{}\n{}\n", message, prettyPrintRangeComment(sourceLine, *location.range, ""));
+}
+
+void matchSymbolsToAssertions(string_view query, const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
+                              vector<pair<SymbolInformation &, SymbolSearchAssertion *>> &symbolMatchStates,
+                              const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                              string_view uriPrefix, string_view errorPrefix) {
+    vector<shared_ptr<SymbolSearchAssertion>> unmatchedAssertions;
+    vector<reference_wrapper<SymbolInformation>> unmatchedSymbols;
+    // Find assertions with no matching symbol
+    for (auto &assertion : assertions) {
+        SymbolInformation *matchingSymbol = nullptr;
+        for (auto &symbolMatchState : symbolMatchStates) {
+            auto &symbol = symbolMatchState.first;
+            if (!assertion->matches(uriPrefix, symbolMatchState.first)) {
+                continue;
+            }
+            auto previousMatchingAssertion = symbolMatchState.second;
+            if (previousMatchingAssertion != nullptr) {
+                addFailureAtLocationWithSource(*assertion->getLocation(uriPrefix), sourceFileContents, uriPrefix,
+                                               fmt::format("More than one assertion matches symbol:\n {}\n"
+                                                           "At least these two assertions match this symbol:\n"
+                                                           "  {}:{}: {}\n"
+                                                           "  {}:{}: {}\n"
+                                                           "Please refine your test to avoid ambiguity.",
+                                                           symbol.toJSON(true), previousMatchingAssertion->filename,
+                                                           previousMatchingAssertion->assertionLine + 1,
+                                                           previousMatchingAssertion->toString(), assertion->filename,
+                                                           assertion->assertionLine + 1, assertion->toString()));
+            } else if (matchingSymbol == nullptr) {
+                symbolMatchState.second = &*assertion; // record the match
+                matchingSymbol = &symbolMatchState.first;
+            } else {
+                addFailureAtLocationWithSource(*assertion->getLocation(uriPrefix), sourceFileContents, uriPrefix,
+                                               fmt::format("More than one symbol matches assertion:\n {}\n"
+                                                           "Found matching symbols:\n  {}\n  {}\n"
+                                                           "Please refine your test to avoid ambiguity.",
+                                                           assertion->toString(), matchingSymbol->toJSON(true),
+                                                           symbol.toJSON(true)));
+            }
+        }
+        if (matchingSymbol == nullptr) {
+            unmatchedAssertions.push_back(assertion);
+        }
+    }
+    // Collect symbols without a matching assertion
+    for (auto [symbol, assertion] : symbolMatchStates) {
+        if (assertion != nullptr) {
+            continue;
+        }
+        Location &location = *symbol.location.get();
+        if (!isUriATestFile(uriPrefix, location.uri)) {
+            continue; // ignore extra symbols returned from standard library (not test files)
+        }
+        unmatchedSymbols.push_back(symbol);
+    }
+
+    for (auto &assertion : unmatchedAssertions) {
+        addFailureAtLocationWithSource(
+            *assertion->getLocation(uriPrefix), sourceFileContents, uriPrefix,
+            fmt::format("{}No results matched `workspace/symbol` expectation: {}", errorPrefix, assertion->toString()));
+    }
+    for (auto &symbol : unmatchedSymbols) {
+        addFailureAtLocationWithSource(*symbol.get().location, sourceFileContents, uriPrefix,
+                                       fmt::format("{}Unexpected result from `workspace/symbol` query \"{}\": {}\n",
+                                                   errorPrefix, query, symbol.get().toJSON(true)));
+    }
+
+    if (!unmatchedAssertions.empty() || !unmatchedSymbols.empty()) {
+        auto numFailures = unmatchedAssertions.size() + unmatchedSymbols.size();
+        ADD_FAILURE() << fmt::format("{}`workspace/symbol` query \"{}\" {}: {}, {}\n", errorPrefix, query,
+                                     pluralized_count("failure", numFailures),
+                                     pluralized_count("unsatisfied expectation", unmatchedAssertions.size()),
+                                     pluralized_count("unexpected result", unmatchedSymbols.size()));
+    }
+}
+
+void checkSymbolsReturnedInRankOrder(string_view query,
+                                     vector<pair<SymbolInformation &, SymbolSearchAssertion *>> &symbolMatchStates,
+                                     const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                     string_view uriPrefix, string_view errorPrefix) {
+    pair<SymbolInformation &, SymbolSearchAssertion *> *left = nullptr;
+    for (auto &right : symbolMatchStates) {
+        if (right.second == nullptr || !right.second->rank.has_value()) {
+            continue;
+        }
+        if (left != nullptr) {
+            auto leftAssertion = left->second;
+            if (leftAssertion != nullptr || leftAssertion->rank.has_value()) {
+                auto rightAssertion = right.second;
+                auto &leftSymbol = left->first;
+                auto &rightSymbol = right.first;
+                if (*leftAssertion->rank > *rightAssertion->rank) {
+                    ADD_FAILURE() << fmt::format(
+                        "Symbols not returned in ascending `rank` order for query `{}`:\n"
+                        "Symbol for assertion #1 ({} {}) should appear *after* symbol for assertion #2 ({} {}).\n"
+                        "Assertion #1: {}\nAssertion #2: {}\nSymbol #1:\n{}\nSymbol #2:\n{}\n",
+                        query, leftSymbol.containerName.value_or(""), leftSymbol.name,
+                        rightSymbol.containerName.value_or(""), rightSymbol.name, leftAssertion->toString(),
+                        rightAssertion->toString(), leftSymbol.toJSON(true), rightSymbol.toJSON(true));
+                }
+            }
+        }
+        left = &right;
+    }
+}
+
+void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
+                      const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
+                      int &nextId, string_view uriPrefix, string_view errorPrefix) {
+    const int id = nextId++;
+
+    // Request results from LSP
+    auto responses = lspWrapper.getLSPResponsesFor(makeWorkspaceSymbolRequest(id, query));
+    ASSERT_EQ(1, responses.size()) << "Unexpected number of responses to a `workspace/symbol` request.";
+    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    auto &respMsg = responses.at(0)->asResponse();
+    ASSERT_TRUE(respMsg.result.has_value());
+    ASSERT_FALSE(respMsg.error.has_value());
+    auto &result = *(respMsg.result);
+    // symbolAssertionMatches maintains the ordering from the LSP results and
+    // stores the pairing of symbols <=> assertions.
+    vector<pair<SymbolInformation &, SymbolSearchAssertion *>> symbolAssertionMatches;
+    if (auto symbolInfos = get_if<vector<unique_ptr<SymbolInformation>>>(
+            &get<variant<JSONNullObject, vector<unique_ptr<SymbolInformation>>>>(result))) {
+        for (auto &symbolInfo : *symbolInfos) {
+            symbolAssertionMatches.emplace_back(*symbolInfo, nullptr);
+        }
+        constexpr int MAX_RESULTS = 50; // see MAX_RESULTS in workspace_symbols.cc
+        if (symbolInfos->size() > MAX_RESULTS) {
+            ADD_FAILURE() << fmt::format(
+                "Too many results for `workspace/symbol` request for `{}`. [Expected no more than {}, got {}].", query,
+                MAX_RESULTS, symbolInfos->size());
+        }
+    }
+    matchSymbolsToAssertions(query, assertions, symbolAssertionMatches, sourceFileContents, uriPrefix, errorPrefix);
+    checkSymbolsReturnedInRankOrder(query, symbolAssertionMatches, sourceFileContents, uriPrefix, errorPrefix);
+}
+} // namespace
+
+void SymbolSearchAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
+                                     const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                     LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+    UnorderedMap<std::string, vector<shared_ptr<SymbolSearchAssertion>>> queryToAssertionsMap;
+    for (auto &assertion : assertions) {
+        if (auto searchAssertion = dynamic_pointer_cast<SymbolSearchAssertion>(assertion)) {
+            queryToAssertionsMap[searchAssertion->query].push_back(searchAssertion);
+        }
+    }
+    for (auto entry : queryToAssertionsMap) {
+        checkAllForQuery(entry.first, entry.second, sourceFileContents, lspWrapper, nextId, uriPrefix, errorPrefix);
     }
 }
 

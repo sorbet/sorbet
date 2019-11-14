@@ -177,7 +177,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
 }; // namespace
 
 void Resolver::finalizeAncestors(core::GlobalState &gs) {
-    Timer timer(gs.errorQueue->logger, "resolver.finalize_ancestors");
+    Timer timer(gs.tracer(), "resolver.finalize_ancestors");
     int methodCount = 0;
     int classCount = 0;
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
@@ -351,7 +351,7 @@ InlinedVector<core::SymbolRef, 4> ParentLinearizationInformation::fullLinearizat
 }
 
 void Resolver::computeLinearization(core::GlobalState &gs) {
-    Timer timer(gs.errorQueue->logger, "resolver.compute_linearization");
+    Timer timer(gs.tracer(), "resolver.compute_linearization");
 
     // TODO: this does not support `prepend`
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
@@ -364,7 +364,7 @@ void Resolver::computeLinearization(core::GlobalState &gs) {
 }
 
 void Resolver::finalizeSymbols(core::GlobalState &gs) {
-    Timer timer(gs.errorQueue->logger, "resolver.finalize_resolution");
+    Timer timer(gs.tracer(), "resolver.finalize_resolution");
     // TODO(nelhage): Properly this first loop should go in finalizeAncestors,
     // but we currently compute mixes_in_class_methods during the same AST walk
     // that resolves types and we don't want to introduce additional passes if

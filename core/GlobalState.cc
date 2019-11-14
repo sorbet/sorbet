@@ -13,6 +13,7 @@
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
+#include "core/ErrorQueue.h"
 #include "core/errors/infer.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 
@@ -284,10 +285,6 @@ void GlobalState::initEmpty() {
     id = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
     ENFORCE(id == Symbols::Singleton());
 
-    id = enterClassSymbol(Loc::none(), Symbols::Opus(), core::Names::Constants::Enum());
-    id.data(*this)->setIsModule(false);
-    ENFORCE(id == Symbols::OpusEnum());
-
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum());
     id.data(*this)->setIsModule(false);
     ENFORCE(id == Symbols::T_Enum());
@@ -298,7 +295,7 @@ void GlobalState::initEmpty() {
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Bottom()] = Symbols::bottom();
     Context ctx(*this, Symbols::root());
 
-    // Synthesize <Magic>#build_hash(*vs : T.untyped) => Hash
+    // Synthesize <Magic>#<build-hash>(*vs : T.untyped) => Hash
     SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildHash());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
@@ -310,7 +307,7 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
-    // Synthesize <Magic>#build_array(*vs : T.untyped) => Array
+    // Synthesize <Magic>#<build-array>(*vs : T.untyped) => Array
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildArray());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
@@ -335,11 +332,12 @@ void GlobalState::initEmpty() {
         arg.flags.isBlock = true;
     }
 
-    // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
+    // Synthesize <Magic>#<defined>(*arg0: String) => Boolean
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::defined_p());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::Object();
+        arg.flags.isRepeated = true;
+        arg.type = Types::String();
     }
     method.data(*this)->resultType = Types::any(ctx, Types::nilClass(), Types::String());
     {
@@ -872,6 +870,32 @@ string_view GlobalState::enterString(string_view nm) {
     return string_view(from, nm.size());
 }
 
+NameRef GlobalState::lookupNameUTF8(string_view nm) const {
+    const auto hs = _hash(nm);
+    unsigned int hashTableSize = namesByHash.size();
+    unsigned int mask = hashTableSize - 1;
+    auto bucketId = hs & mask;
+    unsigned int probeCount = 1;
+
+    while (namesByHash[bucketId].second != 0u) {
+        auto &bucket = namesByHash[bucketId];
+        if (bucket.first == hs) {
+            auto nameId = bucket.second;
+            auto &nm2 = names[nameId];
+            if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
+                counterInc("names.utf8.hit");
+                return nm2.ref(*this);
+            } else {
+                counterInc("names.hash_collision.utf8");
+            }
+        }
+        bucketId = (bucketId + probeCount) & mask;
+        probeCount++;
+    }
+
+    return core::NameRef::noName();
+}
+
 NameRef GlobalState::enterNameUTF8(string_view nm) {
     const auto hs = _hash(nm);
     unsigned int hashTableSize = namesByHash.size();
@@ -930,7 +954,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.data(*this)->kind == NameKind::UTF8 ||
                 (original.data(*this)->kind == NameKind::UNIQUE &&
                  (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
-                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::OpusEnum)),
+                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::TEnum)),
             "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());
@@ -1415,8 +1439,9 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
                 return false;
             }
         } else if (level == StrictLevel::Stdlib) {
-            level = StrictLevel::True;
-            if (what == errors::Resolver::OverloadNotAllowed || what == errors::Resolver::VariantTypeMemberInClass) {
+            level = StrictLevel::Strict;
+            if (what == errors::Resolver::OverloadNotAllowed || what == errors::Resolver::VariantTypeMemberInClass ||
+                what == errors::Infer::UntypedMethod) {
                 return false;
             }
         }

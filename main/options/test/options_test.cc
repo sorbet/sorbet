@@ -35,7 +35,7 @@ TEST(OptionsTest, DefaultConstructorMatchesReadOptions) {
     EXPECT_EQ(empty.noErrorCount, opts.noErrorCount);
     EXPECT_EQ(empty.autocorrect, opts.autocorrect);
     EXPECT_EQ(empty.waitForDebugger, opts.waitForDebugger);
-    EXPECT_EQ(empty.skipDSLPasses, opts.skipDSLPasses);
+    EXPECT_EQ(empty.skipRewriterPasses, opts.skipRewriterPasses);
     EXPECT_EQ(empty.suggestRuntimeProfiledType, opts.suggestRuntimeProfiledType);
     EXPECT_EQ(empty.threads, opts.threads);
     EXPECT_EQ(empty.logLevel, opts.logLevel);
@@ -69,10 +69,10 @@ TEST(OptionsTest, DefaultConstructorMatchesReadOptions) {
     EXPECT_EQ(empty.relativeIgnorePatterns.size(), opts.relativeIgnorePatterns.size());
     EXPECT_EQ(empty.inputFileNames.size(), opts.inputFileNames.size());
     EXPECT_EQ(empty.lspAutocompleteEnabled, opts.lspAutocompleteEnabled);
-    EXPECT_EQ(empty.lspAutocompleteMethodsEnabled, opts.lspAutocompleteMethodsEnabled);
     EXPECT_EQ(empty.lspQuickFixEnabled, opts.lspQuickFixEnabled);
     EXPECT_EQ(empty.lspWorkspaceSymbolsEnabled, opts.lspWorkspaceSymbolsEnabled);
     EXPECT_EQ(empty.lspDocumentSymbolEnabled, opts.lspDocumentSymbolEnabled);
+    EXPECT_EQ(empty.lspDocumentHighlightEnabled, opts.lspDocumentHighlightEnabled);
     EXPECT_EQ(empty.lspSignatureHelpEnabled, opts.lspSignatureHelpEnabled);
     EXPECT_EQ(empty.inlineInput, opts.inlineInput);
     EXPECT_EQ(empty.debugLogFile, opts.debugLogFile);

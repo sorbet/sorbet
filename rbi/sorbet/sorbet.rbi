@@ -107,6 +107,18 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def delete_if(&blk); end
+
+  sig {returns(T::Boolean)}
+  def empty?(); end
+
+  sig do
+    params(
         key: String,
     )
     .returns(String)
@@ -131,11 +143,57 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def keep_if(&blk); end
+
+  sig do
+    params(
+        name: String,
+    )
+    .returns(T.nilable(String))
+  end
+  def key(name); end
+
+  sig do
+    params(
         key: String
     )
     .returns(T::Boolean)
   end
   def key?(key); end
+
+  sig do
+    returns(T::Array[String])
+  end
+  def keys; end
+
+  sig {returns(Integer)}
+  def length(); end
+
+  sig {void}
+  def rehash(); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(T::Hash[String, String])
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def reject(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(T.nilable(Sorbet::Private::Static::ENVClass))
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def reject!(&blk); end
 
   sig do
     params(
@@ -151,11 +209,6 @@ class Sorbet::Private::Static::ENVClass
     .returns(T::Hash[String, T.nilable(String)])
   end
   def update(key, &blk); end
-
-  sig do
-    returns(T::Array[String])
-  end
-  def keys; end
 end
 # [`ENV`](https://docs.ruby-lang.org/en/2.6.0/ENV.html) is a hash-like accessor
 # for environment variables.

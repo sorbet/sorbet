@@ -123,7 +123,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
         suffix: String,
     )
     .returns(String)
@@ -293,7 +293,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -389,7 +389,7 @@ class File < IO
   # ```
   sig do
     params(
-        path: String,
+        path: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -511,7 +511,7 @@ class File < IO
   sig do
     params(
         pattern: String,
-        path: String,
+        path: T.any(String, Pathname),
         flags: Integer,
     )
     .returns(T::Boolean)
@@ -852,7 +852,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns([String, String])
   end

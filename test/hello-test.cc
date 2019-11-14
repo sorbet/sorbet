@@ -7,6 +7,7 @@
 #include "ast/treemap/treemap.h"
 #include "common/common.h"
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"

@@ -15,11 +15,12 @@
 #include "cfg/proto/proto.h"
 #include "common/FileOps.h"
 #include "common/common.h"
+#include "common/formatting.h"
+#include "common/sort.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
-#include "dsl/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
@@ -28,6 +29,7 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "resolver/resolver.h"
+#include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "test/LSPTest.h"
@@ -113,8 +115,8 @@ public:
 };
 
 UnorderedSet<string> knownExpectations = {
-    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "dsl-tree",
-    "dsl-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
+    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
+    "rewrite-tree-raw", "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
     "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",          "cfg-raw",          "cfg-json",
     "autogen",          "document-symbols"};
 
@@ -255,26 +257,26 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         handler.addObserved("desugar-tree", [&]() { return desugared.tree->toString(*gs); });
         handler.addObserved("desugar-tree-raw", [&]() { return desugared.tree->showRaw(*gs); });
 
-        ast::ParsedFile dslUnwound;
+        ast::ParsedFile rewriten;
         ast::ParsedFile localNamed;
 
         if (!test.expectations.contains("autogen")) {
-            // DSL
+            // Rewriter
             {
                 core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
-                dslUnwound =
-                    testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree)), desugared.file});
+                rewriten = testSerialize(
+                    *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
             }
 
-            handler.addObserved("dsl-tree", [&]() { return dslUnwound.tree->toString(*gs); });
-            handler.addObserved("dsl-tree-raw", [&]() { return dslUnwound.tree->showRaw(*gs); });
+            handler.addObserved("rewrite-tree", [&]() { return rewriten.tree->toString(*gs); });
+            handler.addObserved("rewrite-tree-raw", [&]() { return rewriten.tree->showRaw(*gs); });
 
-            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
+            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
         } else {
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
-            if (test.expectations.contains("dsl-tree-raw") || test.expectations.contains("dsl-tree")) {
-                ADD_FAILURE() << "Running DSL passes with autogen isn't supported";
+            if (test.expectations.contains("rewrite-tree-raw") || test.expectations.contains("rewrite-tree")) {
+                ADD_FAILURE() << "Running Rewriter passes with autogen isn't supported";
             }
         }
 
@@ -480,10 +482,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         handler.addObserved("desguar-tree", [&]() { return file.tree->toString(*gs); });
         handler.addObserved("desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
-        // DSL pass
-        file = testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(file.tree)), file.file});
-        handler.addObserved("dsl-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved("dsl-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        // Rewriter pass
+        file = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(file.tree)), file.file});
+        handler.addObserved("rewrite-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("rewrite-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
         // local vars
         file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
@@ -834,7 +836,7 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
 }
 
 TEST_P(LSPTest, All) {
-    string rootPath = "/Users/jvilk/stripe/pay-server";
+    string rootPath = fmt::format("/Users/{}/stripe/sorbet", std::getenv("USER"));
     string rootUri = fmt::format("file://{}", rootPath);
 
     // filename => URI
@@ -967,6 +969,16 @@ TEST_P(LSPTest, All) {
                     // Check that a reference request at this location returns entryAssertions.
                     UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
                                           entryAssertions);
+                    // Check that a highlight request at this location returns all of the entryAssertions for the same
+                    // file as the request.
+                    vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
+                    for (auto &e : entryAssertions) {
+                        if (absl::StartsWith(e->getLocation(rootUri)->uri, queryLoc->uri)) {
+                            filteredEntryAssertions.push_back(e);
+                        }
+                    }
+                    UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol,
+                                                    *queryLoc, filteredEntryAssertions);
                 } else {
                     ADD_FAILURE() << fmt::format(
                         "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "
@@ -994,6 +1006,9 @@ TEST_P(LSPTest, All) {
     // Completion assertions
     CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
     ApplyCompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+
+    // Workspace Symbol assertions
+    SymbolSearchAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
 
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
@@ -1074,7 +1089,8 @@ TEST_P(LSPTest, All) {
             HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId, rootUri);
         }
     }
-} // namespace sorbet::test
+}
+// namespace sorbet::test
 
 INSTANTIATE_TEST_SUITE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 INSTANTIATE_TEST_SUITE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);

@@ -747,7 +747,7 @@ class Array < Object
   # [ "a", nil, "b", nil, "c" ].compact! #=> [ "a", "b", "c" ]
   # [ "a", "b", "c" ].compact!           #=> nil
   # ```
-  sig {returns(T::Array[Elem])}
+  sig {returns(T.nilable(T::Array[Elem]))}
   def compact!(); end
 
   # Appends the elements of `other_ary`s to `self`.
@@ -1335,6 +1335,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
+  sig {returns(T::Enumerator[Elem])}
   def keep_if(&blk); end
 
   # Returns the last element(s) of `self`. If the array is empty, the first form
@@ -1607,7 +1608,7 @@ class Array < Object
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(T::Array[Elem]))
   end
   sig {returns(T::Enumerator[Elem])}
   def reject!(&blk); end
@@ -1884,7 +1885,7 @@ class Array < Object
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(T::Array[Elem]))
   end
   sig {returns(T::Enumerator[Elem])}
   def select!(&blk); end
@@ -2203,7 +2204,7 @@ class Array < Object
   # c = [["student","sam"], ["student","george"], ["teacher","matz"]]
   # c.uniq! {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
   # ```
-  sig {returns(T::Array[Elem])}
+  sig {returns(T.nilable(T::Array[Elem]))}
   def uniq!(); end
 
   # Prepends objects to the front of `self`, moving other elements upwards. See

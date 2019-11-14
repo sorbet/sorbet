@@ -25,7 +25,6 @@ cc_library(
         "//core/proto",
         "//core/serialize",
         "//definition_validator",
-        "//dsl",
         "//flattener",
         "//infer",
         "//local_vars",
@@ -37,6 +36,7 @@ cc_library(
         "//payload/text",
         "//plugin",
         "//resolver",
+        "//rewriter",
     ],
 )
 
@@ -66,7 +66,6 @@ cc_library(
         "//core",
         "//core/serialize",
         "//definition_validator",
-        "//dsl",
         "//flattener",
         "//infer",
         "//local_vars",
@@ -76,5 +75,6 @@ cc_library(
         "//payload/binary",
         "//payload/text",
         "//resolver",
+        "//rewriter",
     ],
 )

@@ -7,6 +7,7 @@
 #include "ast/desugar/Desugar.h"
 #include "ast/verifier/verifier.h"
 #include "common/common.h"
+#include "common/formatting.h"
 #include "core/Names.h"
 #include "core/errors/desugar.h"
 #include "core/errors/internal.h"
@@ -299,7 +300,7 @@ unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::Loc loc, parser::M
                 stats.emplace_back(desugarMlhs(dctx, mlhs->loc, mlhs, std::move(val)));
             } else {
                 unique_ptr<Expression> lh = node2TreeImpl(dctx, std::move(c));
-                if (auto restArg = ast::cast_tree<ast::RestArg>(lh.get())) {
+                if (auto restArg = cast_tree<RestArg>(lh.get())) {
                     if (auto e =
                             dctx.ctx.state.beginError(lh->loc, core::errors::Desugar::UnsupportedRestArgsDestructure)) {
                         e.setHeader("Unsupported rest args in destructure");
@@ -1460,7 +1461,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     recv = MK::Local(loc, dctx.enclosingBlockArg);
                 } else {
                     // No enclosing block arg can happen when e.g. yield is called in a class / at the top-level.
-                    recv = MK::Unsafe(loc, ast::MK::Nil(loc));
+                    recv = MK::Unsafe(loc, MK::Nil(loc));
                 }
                 unique_ptr<Expression> res = MK::Send(loc, std::move(recv), core::Names::call(), std::move(args));
                 result.swap(res);
@@ -1470,7 +1471,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 cases.reserve(rescue->rescue.size());
                 for (auto &node : rescue->rescue) {
                     unique_ptr<Expression> rescueCaseExpr = node2TreeImpl(dctx, std::move(node));
-                    auto rescueCase = cast_tree<ast::RescueCase>(rescueCaseExpr.get());
+                    auto rescueCase = cast_tree<RescueCase>(rescueCaseExpr.get());
                     ENFORCE(rescueCase != nullptr, "rescue case cast failed");
                     cases.emplace_back(rescueCase);
                     rescueCaseExpr.release();
@@ -1485,13 +1486,13 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto exceptionsExpr = node2TreeImpl(dctx, std::move(resbody->exception));
                 if (isa_tree<EmptyTree>(exceptionsExpr.get())) {
                     // No exceptions captured
-                } else if (auto exceptionsArray = cast_tree<ast::Array>(exceptionsExpr.get())) {
+                } else if (auto exceptionsArray = cast_tree<Array>(exceptionsExpr.get())) {
                     ENFORCE(exceptionsArray != nullptr, "exception array cast failed");
 
                     for (auto &elem : exceptionsArray->elems) {
                         exceptions.emplace_back(std::move(elem));
                     }
-                } else if (auto exceptionsSend = cast_tree<ast::Send>(exceptionsExpr.get())) {
+                } else if (auto exceptionsSend = cast_tree<Send>(exceptionsExpr.get())) {
                     ENFORCE(exceptionsSend->fun == core::Names::splat() || exceptionsSend->fun == core::Names::to_a() ||
                                 exceptionsSend->fun == core::Names::concat(),
                             "Unknown exceptionSend function");
@@ -1531,7 +1532,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             [&](parser::Ensure *ensure) {
                 auto bodyExpr = node2TreeImpl(dctx, std::move(ensure->body));
                 auto ensureExpr = node2TreeImpl(dctx, std::move(ensure->ensure));
-                auto rescue = cast_tree<ast::Rescue>(bodyExpr.get());
+                auto rescue = cast_tree<Rescue>(bodyExpr.get());
                 if (rescue != nullptr) {
                     rescue->ensure = std::move(ensureExpr);
                     result.swap(bodyExpr);
@@ -1618,10 +1619,21 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(res);
             },
             [&](parser::Defined *defined) {
-                auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(),
-                                     // Intentionally drop the defined->value since we shouldn't typecheck if it exists
-                                     // or not node2TreeImpl(dctx, std::move(defined->value)));
-                                     MK::Nil(loc));
+                auto value = node2TreeImpl(dctx, std::move(defined->value));
+                auto loc = value->loc;
+                Send::ARGS_store args;
+                while (!isa_tree<EmptyTree>(value.get())) {
+                    auto lit = cast_tree<UnresolvedConstantLit>(value.get());
+                    if (lit == nullptr) {
+                        args.clear();
+                        break;
+                    }
+                    args.emplace_back(MK::String(lit->loc, lit->cnst));
+                    value = std::move(lit->scope);
+                }
+                absl::c_reverse(args);
+                auto res =
+                    MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(), std::move(args));
                 result.swap(res);
             },
             [&](parser::LineLiteral *line) {

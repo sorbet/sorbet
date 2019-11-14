@@ -29,7 +29,7 @@ where what the phases of Sorbet actually do are documented.
 │    │ ast::Expression │    │    │ ast::Expression │    │   │ ast::Expression │    │
 │    └─────────────────┘    │    └─────────────────┘    │   └─────────────────┘    │
 │             │             │             │             │            │             │
-│             │ dsl         │             │ dsl         │            │ dsl         │
+│             │ rewriter         │             │ rewriter         │            │ rewriter         │
 │             ▼             │             ▼             │            ▼             │
 │    ┌─────────────────┐    │    ┌─────────────────┐    │   ┌─────────────────┐    │
 │    │ ast::Expression │    │    │ ast::Expression │    │   │ ast::Expression │    │

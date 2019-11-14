@@ -65,7 +65,7 @@ module OuterModule
 
     sig {params(fname: String, lname: String).returns(String)}
     def keyword_args_with_defaults(fname: "Jane", lname: "Doe")
-      # ^ hover: def keyword_args_with_defaults(fname:…, lname:…); end
+      # ^ hover: def keyword_args_with_defaults(fname: …, lname: …); end
       "#{fname}:#{lname}"
     end
 
@@ -104,7 +104,7 @@ module OuterModule
         keyword_args_no_defaults(fname: s, lname: s),
         # ^ hover: def keyword_args_no_defaults(fname:, lname:); end
         keyword_args_with_defaults,
-        # ^ hover: def keyword_args_with_defaults(fname:…, lname:…); end
+        # ^ hover: def keyword_args_with_defaults(fname: …, lname: …); end
         splat_args,
         # ^ hover: def splat_args(*names); end
         splat_args(s, s, s, s, s),
@@ -118,7 +118,7 @@ module OuterModule
         # ^ hover:   pos,
         # ^ hover:   *splat,
         # ^ hover:   required_key:,
-        # ^ hover:   optional_key:…,
+        # ^ hover:   optional_key: …,
         # ^ hover:   **kwargs,
         # ^ hover:   &block_arg
         # ^ hover: )
@@ -134,7 +134,7 @@ module OuterModule
         qualified.keyword_args_no_defaults(fname: s, lname: s),
         #         ^ hover: def keyword_args_no_defaults(fname:, lname:); end
         qualified.keyword_args_with_defaults(fname: s, lname: s),
-        #         ^ hover: def keyword_args_with_defaults(fname:…, lname:…); end
+        #         ^ hover: def keyword_args_with_defaults(fname: …, lname: …); end
         qualified.splat_args(s, s, s, s, s),
         #         ^ hover: def splat_args(*names); end
         qualified.double_splat_args(a: s, b: s, c: s),
@@ -144,7 +144,7 @@ module OuterModule
         #         ^ hover:   pos,
         #         ^ hover:   *splat,
         #         ^ hover:   required_key:,
-        #         ^ hover:   optional_key:…,
+        #         ^ hover:   optional_key: …,
         #         ^ hover:   **kwargs,
         #         ^ hover:   &block_arg
         #         ^ hover: )
