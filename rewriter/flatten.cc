@@ -161,6 +161,10 @@ class FlattenWalk {
             }
             moveQueue[idx] = {move(expr), staticLevel};
         }
+
+        bool atTopLevel() const {
+            return stack.empty();
+        }
     };
 
     // each entry on this corresponds to a class or module scope in which we might in turn have nested methods. We only
@@ -367,8 +371,15 @@ public:
         auto &methods = curMethodSet();
         // if we get a MethodData back, then we need to move this and replace it
         if (auto md = methods.popScope()) {
-            // we'll replace MethodDefs with the symbol that corresponds to the name of the method
-            auto replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
+            unique_ptr<ast::Expression> replacement;
+
+            if (methods.atTopLevel()) {
+                replacement = ast::MK::EmptyTree();
+            } else {
+                // we'll replace MethodDefs with the symbol that corresponds to the name of the method
+                replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
+            }
+
             methods.addExpr(*md, move(methodDef));
             return replacement;
         }
