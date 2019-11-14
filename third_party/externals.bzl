@@ -23,9 +23,17 @@ def sorbet_llvm_externals():
         )
 
     http_archive(
+        name = "org_llvm_linux",
+        url = "https://releases.llvm.org/9.0.0/clang%2bllvm-9.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz",
+        build_file = "//third_party:llvm-linux.BUILD",
+        sha256 = "bea706c8f6992497d08488f44e77b8f0f87f5b275295b974aa8b194efba18cb8",
+        strip_prefix = "clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-14.04",
+    )
+
+    http_archive(
         name = "org_llvm_darwin",
-        url = "https://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-darwin-apple.tar.xz",
-        build_file = "//third_party:llvm.BUILD",
+        url = "https://releases.llvm.org/9.0.0/clang%2bllvm-9.0.0-x86_64-darwin-apple.tar.xz",
+        build_file = "//third_party:llvm-darwin.BUILD",
         sha256 = "b46e3fe3829d4eb30ad72993bf28c76b1e1f7e38509fbd44192a2ef7c0126fc7",
         strip_prefix = "clang+llvm-9.0.0-x86_64-darwin-apple",
     )

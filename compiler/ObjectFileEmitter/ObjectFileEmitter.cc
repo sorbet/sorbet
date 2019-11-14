@@ -62,7 +62,7 @@ void ObjectFileEmitter::run(llvm::LLVMContext &lctx, unique_ptr<llvm::Module> mo
                             string_view objectName) {
     /* setup target */
     std::string error;
-    auto targetTriple = "x86_64-apple-darwin18.2.0";
+    auto targetTriple = llvm::sys::getDefaultTargetTriple();
     auto target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
 
     // Print an error and exit if we couldn't find the requested target.

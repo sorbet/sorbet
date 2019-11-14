@@ -10,7 +10,6 @@ compilation_database(
     testonly = True,
     targets = [
         # BEGIN compile_commands targets
-        "//test/llvm:kaleidoscope",
         "//main:sorbet",
         "//plugin_injector:plugin_injector",
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",

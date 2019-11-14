@@ -9,8 +9,10 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "@com_stripe_ruby_typer//core",
-        "@org_llvm_darwin",
-    ],
+    ] + select({
+        "@com_stripe_ruby_typer//tools/config:linux": ["@org_llvm_linux"],
+        "@com_stripe_ruby_typer//tools/config:darwin": ["@org_llvm_darwin"],
+    }),
 )
 
 load("@com_stripe_ruby_typer//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
@@ -41,6 +43,7 @@ cc_library(
         "-std=c99",
         "-O1",
         "-g",
+        "-fPIC",
         "-march=x86-64",
     ],
     linkstatic = 1,  # we are doing this only for llvm ir
@@ -57,13 +60,19 @@ sh_binary(
     srcs = ["tools/postprocess_payload.sh"],
 )
 
+sh_binary(
+    name = "generate_payload_bc_orig_generator",
+    srcs = ["tools/generate_payload_bc_orig_generator.sh"],
+)
+
 genrule(
     name = "generate_payload_bc_orig",
     outs = [
         "payload.bc.orig",
     ],
-    cmd = "$(location :llvm-ar) -x $(locations :pseudo_lib) payload.o && otool  -s __LLVM __bitcode payload.o | tail -n +3 > bitcode.dump && xxd -r -seek -$$((16#$$(head -n 1 bitcode.dump| cut -f 1))) bitcode.dump $(location payload.bc.orig)",
+    cmd = "$(location :generate_payload_bc_orig_generator) $(location :llvm-ar) $(location payload.bc.orig) $(locations :pseudo_lib)",
     tools = [
+        ":generate_payload_bc_orig_generator",
         ":llvm-ar",
         ":pseudo_lib",
     ],

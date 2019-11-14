@@ -63,7 +63,11 @@ for ext in "llo"; do
             echo "No LLVMIR found at" "${actual[@]}"
             exit 1
         fi
-        diff <(cat "${actual[@]}") "$exp";
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+          diff \
+            <(grep -v 'target triple =' < "${actual[@]}") \
+            <(grep -v 'target triple =' < "$exp")
+        fi
     fi
 done
 
