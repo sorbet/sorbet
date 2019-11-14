@@ -142,14 +142,6 @@ void sorbet_arrayPush(VALUE array, VALUE element) __attribute__((always_inline))
     rb_ary_push(array, element);
 }
 
-void sorbet_arrayStore(VALUE array, long idx, VALUE value) __attribute__((always_inline)) {
-    rb_ary_store(array, idx, value);
-}
-
-VALUE sorbet_arrayGet(VALUE array, long idx) __attribute__((always_inline)) {
-    return rb_ary_entry(array, idx);
-}
-
 // ****
 // ****                       Operations on Hashes
 // ****
