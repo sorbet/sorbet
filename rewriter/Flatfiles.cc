@@ -16,7 +16,7 @@ optional<core::NameRef> getFieldName(core::MutableContext ctx, ast::Send& send) 
             return propLit->asSymbol(ctx);
         }
     }
-    if (send.args.size() >= 1) {
+    if (send.args.size() >= 2) {
         if (auto propLit = ast::cast_tree<ast::Literal>(send.args[1].get())) {
             if (propLit->isSymbol(ctx)) {
                 return propLit->asSymbol(ctx);
@@ -30,13 +30,24 @@ void Flatfiles::run(core::MutableContext ctx, ast::ClassDef *klass) {
     if (klass->kind != ast::Class || klass->ancestors.empty()) {
         return;
     }
-    auto from = ctx.state.enterNameUTF8("from");
-    auto field = ctx.state.enterNameUTF8("field");
-    auto pattern = ctx.state.enterNameUTF8("pattern");
+
+    // this will now only run if you have declared `flatfile!` in the body of the class
+    bool isFlatfile = false;
+    for (auto &stat : klass->rhs) {
+        if (auto send = ast::cast_tree<ast::Send>(stat.get())) {
+            if (send->fun == core::Names::declareFlatfile()) {
+                isFlatfile = true;
+            }
+        }
+    }
+    if (!isFlatfile) {
+        return;
+    }
+
     vector<unique_ptr<ast::Expression>> methods;
     for (auto &stat : klass->rhs) {
         if (auto send = ast::cast_tree<ast::Send>(stat.get())) {
-            if ((send->fun != from && send->fun != pattern && send->fun != field) || !send->recv->isSelfReference() || send->args.size() < 1) {
+            if ((send->fun != core::Names::from() && send->fun != core::Names::field() && send->fun != core::Names::pattern()) || !send->recv->isSelfReference() || send->args.size() < 1) {
                 continue;
             }
             auto name = getFieldName(ctx, *send);

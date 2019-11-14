@@ -146,6 +146,13 @@ NameDef names[] = {
     {"privateClassMethod", "private_class_method"},
     {"moduleFunction", "module_function"},
     {"aliasMethod", "alias_method"},
+
+    {"from"},
+    {"field"},
+    {"pattern"},
+    {"declareFlatfile", "flatfile!"},
+
+    // type alias names
     {"typeAlias", "type_alias"},
     {"typeMember", "type_member"},
     {"typeTemplate", "type_template"},
