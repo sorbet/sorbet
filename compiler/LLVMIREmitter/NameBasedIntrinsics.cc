@@ -213,6 +213,66 @@ public:
     }
 } IdentityIntrinsic;
 
+class CallWithBlock : public NameBasedIntrinsicMethod {
+public:
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
+                                  const BasicBlockMap &blockMap,
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                  int rubyBlockId) const override {
+        // args[0] is the receiver
+        // args[1] is the method
+        // args[2] is the block
+        // args[3...] are the remaining arguements
+        // equivalent to (args[0]).args[1](*args[3..], &args[2])
+
+        auto &builder = builderCast(build);
+        // TODO: this implementation generates code that is stupidly slow, we should be able to reuse instrinsics here
+        // one day
+        auto recv = MK::varGet(cs, i->args[0].variable, builder, blockMap, aliases, rubyBlockId);
+        auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
+        ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        core::NameRef funName(cs, lit->value);
+        auto rawId = MK::getRubyIdFor(cs, builder, funName.data(cs)->shortName(cs));
+        auto block = MK::varGet(cs, i->args[2].variable, builder, blockMap, aliases, rubyBlockId);
+        auto blockAsProc = builder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
+                                              {
+                                                  block,
+                                                  MK::getRubyIdFor(cs, builder, "to_proc"),
+                                                  llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+                                                  llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
+                                              });
+
+        {
+            int argId = -1;
+            for (auto &arg : i->args) {
+                if (argId < 3) {
+                    continue;
+                }
+                argId += 1;
+                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+                                          llvm::ConstantInt::get(cs, llvm::APInt(64, argId - 3, true))};
+                auto var = MK::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
+                builder.CreateStore(
+                    var, builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
+            }
+        }
+
+        llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
+                                  llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
+
+        auto rawCall =
+            builder.CreateCall(cs.module->getFunction("sorbet_callFuncProc"),
+                               {recv, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size() - 3, true)),
+                                builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), blockAsProc},
+                               "rawSendWithProcResult");
+
+        return rawCall;
+    }
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::callWithBlock()};
+    }
+} CallWithBlock;
+
 enum ShouldTakeReciever {
     TakesReciever,
     NoReciever,
@@ -273,8 +333,10 @@ static const vector<CallCMethod> knownCMethods{
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
-    vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic,  &DefineMethodIntrinsic, &DefineClassIntrinsic,
-                                                 &BuildArrayIntrinsic, &BuildHashIntrinsic,    &IdentityIntrinsic};
+    vector<const NameBasedIntrinsicMethod *> ret{
+        &DoNothingIntrinsic, &DefineMethodIntrinsic, &DefineClassIntrinsic, &BuildArrayIntrinsic,
+        &BuildHashIntrinsic, &IdentityIntrinsic,     &CallWithBlock,
+    };
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }
