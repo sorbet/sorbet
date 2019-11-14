@@ -71,7 +71,7 @@ class MyTest
 
     describe "a non-ideal situation" do
       it "contains nested describes" do
-        describe "nobody should write this but we should still handle it" do
+        describe "nobody should write this but we should still parse it" do
         end
       end
     end

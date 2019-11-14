@@ -58,8 +58,9 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
     return results;
 }
 
-inline bool isNamespaceSeparator(char ch) {
-    return ch == ':' || ch == '.';
+/** Allow these symbols to act as namespace separators in user queries. */
+inline bool canBeLeadingNamespaceSeparator(char ch) {
+    return ch == ':' || ch == '.' || ch == '#' || ch == ' ';
 }
 
 /** Returns a pair of {rank, query_length_matched} for the given symbol/query. */
@@ -70,8 +71,11 @@ pair<int, string_view::const_iterator> partialMatchSymbol(string_view symbol, st
     auto queryIter = queryBegin;
     pair<int, string_view::const_iterator> result = {0, queryIter};
     // Consume leading namespacing punctuation, e.g. to make `::f` matchable against `module Foo`.
-    while (queryIter != queryEnd && isNamespaceSeparator(*queryIter)) {
+    while (queryIter != queryEnd && canBeLeadingNamespaceSeparator(*queryIter)) {
         queryIter++;
+    }
+    while (symbolIter != symbolEnd && canBeLeadingNamespaceSeparator(*symbolIter)) {
+        symbolIter++;
     }
     char previousSymbolCh = 0;
     char symbolCh = 0;

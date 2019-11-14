@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < ()
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({}).void()
       end
-      def <test_works outside><<C <todo sym>>>(&<blk>)
+      def <it 'works outside'><<C <todo sym>>>(&<blk>)
         <self>.outside_method()
       end
     end
@@ -19,7 +19,7 @@ class <emptyTree><<C <root>>> < ()
         ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({}).void()
         end
-        def <test_allows constants inside of IT><<C <todo sym>>>(&<blk>)
+        def <it 'allows constants inside of IT'><<C <todo sym>>>(&<blk>)
           ::Module.const_set(:"CONST", 10)
         end
       end
@@ -31,7 +31,7 @@ class <emptyTree><<C <root>>> < ()
         ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({}).void()
         end
-        def <test_allows let-ed constants inside of IT><<C <todo sym>>>(&<blk>)
+        def <it 'allows let-ed constants inside of IT'><<C <todo sym>>>(&<blk>)
           ::Module.const_set(:"C2", <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
         end
       end
@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < ()
         ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({}).void()
         end
-        def <test_allows path constants inside of IT><<C <todo sym>>>(&<blk>)
+        def <it 'allows path constants inside of IT'><<C <todo sym>>>(&<blk>)
           begin
             <emptyTree>
             <emptyTree>::<C C3>.new()
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
-    class <emptyTree>::<C <class_some inner tests>><<C <todo sym>>> < (<self>)
+    class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
       begin
         def inside_method<<C <todo sym>>>(&<blk>)
           <emptyTree>
@@ -61,7 +61,7 @@ class <emptyTree><<C <root>>> < ()
           ::T::Sig::WithoutRuntime.sig() do ||
             <self>.params({}).void()
           end
-          def <test_works inside><<C <todo sym>>>(&<blk>)
+          def <it 'works inside'><<C <todo sym>>>(&<blk>)
             begin
               <self>.outside_method()
               <self>.inside_method()
@@ -103,7 +103,7 @@ class <emptyTree><<C <root>>> < ()
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({}).void()
       end
-      def <test_can read foo><<C <todo sym>>>(&<blk>)
+      def <it 'can read foo'><<C <todo sym>>>(&<blk>)
         begin
           <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
           <self>.instance_helper()
@@ -119,13 +119,13 @@ class <emptyTree><<C <root>>> < ()
       @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
     end
 
-    class <emptyTree>::<C <class_Object>><<C <todo sym>>> < (<self>)
+    class <emptyTree>::<C <describe 'Object'>><<C <todo sym>>> < (<self>)
       begin
         begin
           ::T::Sig::WithoutRuntime.sig() do ||
             <self>.params({}).void()
           end
-          def <test_Object><<C <todo sym>>>(&<blk>)
+          def <it 'Object'><<C <todo sym>>>(&<blk>)
             <emptyTree>
           end
         end
@@ -133,7 +133,7 @@ class <emptyTree><<C <root>>> < ()
           ::T::Sig::WithoutRuntime.sig() do ||
             <self>.params({}).void()
           end
-          def <test_Object><<C <todo sym>>>(&<blk>)
+          def <it 'Object'><<C <todo sym>>>(&<blk>)
             <emptyTree>
           end
         end
@@ -150,16 +150,16 @@ class <emptyTree><<C <root>>> < ()
       <self>.junk()
     end
 
-    class <emptyTree>::<C <class_a non-ideal situation>><<C <todo sym>>> < (<self>)
+    class <emptyTree>::<C <describe 'a non-ideal situation'>><<C <todo sym>>> < (<self>)
       begin
-        class <emptyTree>::<C <class_nobody should write this but we should still handle it>><<C <todo sym>>> < (<self>)
+        class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)
           <emptyTree>
         end
         begin
           ::T::Sig::WithoutRuntime.sig() do ||
             <self>.params({}).void()
           end
-          def <test_contains nested describes><<C <todo sym>>>(&<blk>)
+          def <it 'contains nested describes'><<C <todo sym>>>(&<blk>)
             <emptyTree>
           end
         end
