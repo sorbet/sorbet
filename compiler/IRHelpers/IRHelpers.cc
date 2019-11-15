@@ -11,6 +11,7 @@
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include <string_view>
 // ^^^ violate poisons
+#include "compiler/Errors/Errors.h"
 #include "core/core.h"
 using namespace std;
 namespace sorbet::compiler {
@@ -30,6 +31,14 @@ llvm::StructType *CompilerState::getValueType() {
     auto intType = llvm::Type::getInt64Ty(lctx);
     return llvm::StructType::create(lctx, intType, "RV");
 };
+
+void CompilerState::failCompilation(const core::Loc &loc, ConstExprStr msg) const {
+    if (auto e = gs.beginError(loc, core::errors::Compiler::Unanalyzable)) {
+        e.setHeader(msg);
+    }
+
+    throw AbortCompilation(msg.str);
+}
 
 void CompilerState::trace(string_view msg) const {
     gs.trace(msg);

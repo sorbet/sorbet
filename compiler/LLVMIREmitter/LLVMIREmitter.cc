@@ -381,9 +381,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         }
                     },
                     [&](cfg::Unanalyzable *i) {
-                        if (auto e = cs.gs.beginError(bind.loc, core::errors::Compiler::Unanalyzable)) {
-                            e.setHeader("Unsupported node: `{}`", i->toString(core::Context(cs.gs, cfg.symbol)));
-                        }
+                        cs.failCompilation(bind.loc, "exceptions are not supported in compiled mode");
                     },
                     [&](cfg::LoadArg *i) {
                         /* intentionally omitted, it's part of method preambula */

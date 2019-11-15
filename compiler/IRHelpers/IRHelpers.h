@@ -1,9 +1,12 @@
+#include "common/ConstExprStr.h"
+#include "common/Exception.h"
 #include <memory>
 #include <string_view>
 
 namespace sorbet::core {
 class GlobalState;
-};
+class Loc;
+}; // namespace sorbet::core
 namespace llvm {
 class Module;
 class LLVMContext;
@@ -46,9 +49,16 @@ public:
 
     // tracing
     void trace(std::string_view) const;
+    void failCompilation(const core::Loc &loc, ConstExprStr msg) const;
 };
 class IRHelpers {
 public:
     static std::unique_ptr<llvm::Module> readDefaultModule(const char *name, llvm::LLVMContext &);
+};
+
+class AbortCompilation : public sorbet::SorbetException {
+public:
+    AbortCompilation(const std::string &message) : SorbetException(message){};
+    AbortCompilation(const char *message) : SorbetException(message){};
 };
 } // namespace sorbet::compiler

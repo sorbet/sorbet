@@ -31,6 +31,7 @@ public:
     llvm::LLVMContext lctx;
     unique_ptr<llvm::Module> combinedModule;
     core::FileRef file;
+    bool aborted = false;
 };
 
 class LLVMSemanticExtension : public SemanticExtension {
@@ -69,6 +70,10 @@ public:
             ENFORCE(!threadState->file.exists());
             return;
         }
+        if (threadState->aborted) {
+            threadState->file = core::FileRef();
+            return;
+        }
 
         ENFORCE(threadState->file.exists());
         ENFORCE(f == threadState->file);
@@ -86,6 +91,9 @@ public:
             return;
         }
         auto threadState = getThreadState();
+        if (threadState->aborted) {
+            return;
+        }
         llvm::LLVMContext &lctx = threadState->lctx;
         string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
@@ -105,6 +113,8 @@ public:
             sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
             string fileName = objectFileName(gs, cfg.symbol.data(gs)->loc().file());
             sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol, fileName);
+        } catch (sorbet::compiler::AbortCompilation &) {
+            threadState->aborted = true;
         } catch (...) {
             // cleanup
             module = nullptr;
