@@ -14,8 +14,5 @@ cc_library(
         "//compiler/IRHelpers",
         "@com_stripe_ruby_typer//core",
         "@spdlog",
-    ] + select({
-        "@com_stripe_ruby_typer//tools/config:linux": ["@org_llvm_linux"],
-        "@com_stripe_ruby_typer//tools/config:darwin": ["@llvm//:core"],
-    }),
+    ],
 )

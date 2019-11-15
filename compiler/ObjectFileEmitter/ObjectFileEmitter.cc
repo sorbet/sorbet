@@ -28,11 +28,9 @@ namespace sorbet::compiler {
 
 void ObjectFileEmitter::init() {
     // Initialize the target registry etc.
-    llvm::InitializeAllTargetInfos();
-    llvm::InitializeAllTargets();
-    llvm::InitializeAllTargetMCs();
-    llvm::InitializeAllAsmParsers();
-    llvm::InitializeAllAsmPrinters();
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmPrinter();
+    llvm::InitializeNativeTargetAsmParser();
 }
 
 bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, const string &fileName,
@@ -80,6 +78,7 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     llvm::TargetOptions opt;
     auto relocationModel = llvm::Optional<llvm::Reloc::Model>(llvm::Reloc::PIC_);
     auto targetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, relocationModel);
+    ENFORCE(targetMachine);
 
     // We encode this value in our `.exp` files right now so we have to hard
     // code it to something that doesn't chance accross sytems.

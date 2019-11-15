@@ -13,10 +13,11 @@ cc_library(
     deps = [
         "@com_stripe_ruby_typer//core",
         "//compiler/Errors",
-    ] + select({
-        "@com_stripe_ruby_typer//tools/config:linux": ["@org_llvm_linux"],
-        "@com_stripe_ruby_typer//tools/config:darwin": ["@llvm//:core"],
-    }),
+        "@llvm//:core",
+        "@llvm//:x86_code_gen",
+        "@llvm//:x86_asm_parser",
+        "@llvm//:passes",
+    ],
 )
 
 load("@com_stripe_ruby_typer//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one

@@ -17,8 +17,5 @@ cc_library(
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",
         "@spdlog",
-    ] + select({
-        "@com_stripe_ruby_typer//tools/config:linux": ["@org_llvm_linux"],
-        "@com_stripe_ruby_typer//tools/config:darwin": ["@llvm//:core"],
-    }),
+    ],
 )

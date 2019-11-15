@@ -19,7 +19,7 @@ string_view getDefaultModuleBitcode();
 std::unique_ptr<llvm::Module> IRHelpers::readDefaultModule(const char *name, llvm::LLVMContext &lctx) {
     auto bitCode = getDefaultModuleBitcode();
     llvm::StringRef bitcodeAsStringRef(bitCode.data(), bitCode.size());
-    auto memoryBuffer = llvm::MemoryBuffer::getMemBuffer(bitcodeAsStringRef);
+    auto memoryBuffer = llvm::MemoryBuffer::getMemBuffer(bitcodeAsStringRef, "payload", false);
     auto ret = llvm::parseBitcodeFile(*memoryBuffer, lctx);
     return move(ret.get());
 }
