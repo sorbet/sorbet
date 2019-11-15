@@ -29,3 +29,11 @@ def sorbet_llvm_externals():
         sha256 = "36cdf1fad0d564248ed6a30ce825a8c86cdb7bca0923f3094173a188ee475c3c",
         strip_prefix = "llvm-project-f9f30f2ecba520fa1ce33ae7c27c807a0e7199be/llvm",
     )
+
+    http_archive(
+        name = "zlib_archive",
+        url = "https://zlib.net/zlib-1.2.11.tar.gz",
+        build_file = "//third_party:zlib.BUILD",
+        sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
+        strip_prefix = "zlib-1.2.11",
+    )
