@@ -55,26 +55,38 @@ class <emptyTree><<C <root>>> < ()
           end
         end
         <self>.puts("main")
-        <emptyTree>::<C A>.each() do |@a, @@b, $c, d, <emptyTree>::<C E>.e=()|
+        <emptyTree>::<C A>.each() do ||
           begin
-            <self>.puts(@a.inspect())
-            <self>.puts(@@b.inspect())
-            <self>.puts($c.inspect())
-            <self>.puts(d.inspect())
-            <self>.puts(<emptyTree>::<C E>.e().inspect())
+            begin
+              <assignTemp>$7 = forTemp$6
+              <assignTemp>$8 = ::<Magic>.<expand-splat>(<assignTemp>$7, 5, 0)
+              @a = <assignTemp>$8.[](0)
+              @@b = <assignTemp>$8.[](1)
+              $c = <assignTemp>$8.[](2)
+              d = <assignTemp>$8.[](3)
+              <emptyTree>::<C E>.e=(<assignTemp>$8.[](4))
+              <assignTemp>$7
+            end
+            begin
+              <self>.puts(@a.inspect())
+              <self>.puts(@@b.inspect())
+              <self>.puts($c.inspect())
+              <self>.puts(d.inspect())
+              <self>.puts(<emptyTree>::<C E>.e().inspect())
+            end
           end
         end
         <emptyTree>::<C A>.each() do |*forTemp|
           begin
             begin
-              <assignTemp>$6 = forTemp.to_a()
-              <assignTemp>$7 = ::<Magic>.<expand-splat>(<assignTemp>$6, 5, 0)
-              @a = <assignTemp>$7.[](0)
-              @@b = <assignTemp>$7.[](1)
-              $c = <assignTemp>$7.[](2)
-              d = <assignTemp>$7.[](3)
-              <emptyTree>::<C E>.e=(<assignTemp>$7.[](4))
-              <assignTemp>$6
+              <assignTemp>$9 = forTemp.to_a()
+              <assignTemp>$10 = ::<Magic>.<expand-splat>(<assignTemp>$9, 5, 0)
+              @a = <assignTemp>$10.[](0)
+              @@b = <assignTemp>$10.[](1)
+              $c = <assignTemp>$10.[](2)
+              d = <assignTemp>$10.[](3)
+              <emptyTree>::<C E>.e=(<assignTemp>$10.[](4))
+              <assignTemp>$9
             end
             <self>.puts(@a.inspect())
             <self>.puts(@@b.inspect())
