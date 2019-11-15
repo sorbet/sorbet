@@ -13,6 +13,7 @@ compilation_database(
         "//main:sorbet",
         "//plugin_injector:plugin_injector",
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",
+        "//compiler/Linker:Linker",
         "//compiler/LLVMIREmitter:LLVMIREmitter",
         "//compiler/IRHelpers:pseudo_lib",
         "//compiler/IRHelpers:generate_load_payload",
