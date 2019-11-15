@@ -197,6 +197,59 @@ Suit.has_serialized?(<span class="hljs-string">'bad value'</span>)
 <pre><code class="hljs css language-ruby">Suit.values
 <span class="hljs-comment"># =&gt; [#&lt;Suit::Spades&gt;, #&lt;Suit::Heart&gt;, #&lt;Suit::Clubs&gt;, #&lt;Suit::Diamonds&gt;]</span>
 </code></pre>
+<h2><a class="anchor" aria-hidden="true" id="attaching-metadata-to-an-enum"></a><a href="#attaching-metadata-to-an-enum" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Attaching metadata to an enum</h2>
+<p>It can be tempting to “attach metadata” to each enum value by overriding the
+constructor for a <code>T::Enum</code> subclass such that it accepts more information and
+stores it on an instance variable.</p>
+<p>This is <strong>strongly discouraged</strong>. It’s likely that Sorbet will enforce this
+discouragement with a future change.</p>
+<p>Concretely, consider some code like this that is discouraged:</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20attr_reader%20%3Arank%0A%0A%20%20sig%20%7Bparams(serialized_val%3A%20String%2C%20rank%3A%20Integer).void%7D%0A%20%20def%20initialize(serialized_val%2C%20rank)%0A%20%20%20%20super(serialized_val)%0A%20%20%20%20%40rank%20%3D%20T.let(rank%2C%20Integer)%0A%20%20end%0A%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new('spades'%2C%201)%0A%20%20%20%20Hearts%20%3D%20new('hearts'%2C%202)%0A%20%20%20%20Clubs%20%3D%20new('clubs'%2C%203)%0A%20%20%20%20Diamonds%20%3D%20new('diamonds'%2C%204)%0A%20%20end%0Aend%0A">→
+View on sorbet.run</a></p>
+<p>This code is discouraged because it…</p>
+<ul>
+<li>overrides the <code>T::Enum</code> constructor, making it brittle to potential future
+changes in the <code>T::Enum</code> API.</li>
+<li>stores state on each enum value. Enum values are singleton instances, meaning
+that if someone accidentally mutates this state, it’s observed globally
+throughout an entire program.</li>
+</ul>
+<p>Rather than thinking of enums as data containers, instead think of them as dumb
+immutable values. A more idiomatic way to express the code above looks similar
+to the example given in the section [Converting enums to other
+types](#converting-enums-to-other types) above:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suit</span> &lt; T::Enum</span>
+  extend T::Sig
+
+  enums <span class="hljs-keyword">do</span>
+    Spades = new
+    Hearts = new
+    Clubs = new
+    Diamonds = new
+  <span class="hljs-keyword">end</span>
+
+  sig {returns(Integer)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">rank</span></span>
+    <span class="hljs-keyword">case</span> <span class="hljs-keyword">self</span>
+    <span class="hljs-keyword">when</span> Spades <span class="hljs-keyword">then</span> <span class="hljs-number">1</span>
+    <span class="hljs-keyword">when</span> Hearts <span class="hljs-keyword">then</span> <span class="hljs-number">2</span>
+    <span class="hljs-keyword">when</span> Clubs <span class="hljs-keyword">then</span> <span class="hljs-number">3</span>
+    <span class="hljs-keyword">when</span> Diamonds <span class="hljs-keyword">then</span> <span class="hljs-number">4</span>
+    <span class="hljs-keyword">else</span> T.absurd(<span class="hljs-keyword">self</span>)
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new%0A%20%20%20%20Hearts%20%3D%20new%0A%20%20%20%20Clubs%20%3D%20new%0A%20%20%20%20Diamonds%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20def%20rank%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Spades%20then%201%0A%20%20%20%20when%20Hearts%20then%202%0A%20%20%20%20when%20Clubs%20then%203%0A%20%20%20%20when%20Diamonds%20then%204%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend">→
+View on sorbet.run</a></p>
+<p>This example uses <a href="/docs/exhaustiveness">exhaustiveness</a> on the enum to associate a
+rank with each suit. It does this without needing to override anything built
+into <code>T::Enum</code>, and without mutating state.</p>
+<blockquote>
+<p>If you need exhaustiveness over a set of cases which do carry data, see
+<a href="/docs/sealed#approximating-algebraic-data-types">Approximating algebraic data types</a>.</p>
+</blockquote>
 <h2><a class="anchor" aria-hidden="true" id="what-s-next"></a><a href="#what-s-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
 <ul>
 <li><p><a href="/docs/union-types">Union types</a></p>
@@ -211,7 +264,7 @@ definitions.</p></li>
 <p>For union types, sealed classes, and enums, Sorbet has powerful exhaustiveness
 checking that can statically catch when certain cases have not been handled.</p></li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/tstruct"><span class="arrow-prev">← </span><span>T::Struct</span></a><a class="docs-next button" href="/docs/untyped"><span>T.untyped</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#exhaustiveness">Exhaustiveness</a></li><li><a href="#converting-enums-to-other-types">Converting enums to other types</a></li><li><a href="#listing-the-values-of-an-enum">Listing the values of an enum</a></li><li><a href="#what-s-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/tstruct"><span class="arrow-prev">← </span><span>T::Struct</span></a><a class="docs-next button" href="/docs/untyped"><span>T.untyped</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#exhaustiveness">Exhaustiveness</a></li><li><a href="#converting-enums-to-other-types">Converting enums to other types</a></li><li><a href="#listing-the-values-of-an-enum">Listing the values of an enum</a></li><li><a href="#attaching-metadata-to-an-enum">Attaching metadata to an enum</a></li><li><a href="#what-s-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
