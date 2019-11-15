@@ -9,6 +9,7 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/FileOps.h"
+#include "common/Timer.h"
 #include "common/sort.h"
 #include "common/typecase.h"
 #include "compiler/Errors/Errors.h"
@@ -478,6 +479,7 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
 } // namespace
 
 void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
+    Timer timer(cs.gs.tracer(), "LLVMIREmitter::run");
     UnorderedMap<core::LocalVariable, Alias> aliases;
     auto func = LLVMIREmitterHelpers::cleanFunctionBody(cs, LLVMIREmitterHelpers::getOrCreateFunction(cs, md->symbol));
     {

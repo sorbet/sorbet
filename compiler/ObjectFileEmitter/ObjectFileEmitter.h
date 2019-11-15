@@ -3,7 +3,9 @@
 
 #include <memory>
 #include <string_view>
-
+namespace spdlog {
+class logger;
+}
 namespace llvm {
 class LLVMContext;
 class Module;
@@ -14,8 +16,8 @@ namespace sorbet::compiler {
 class ObjectFileEmitter {
 public:
     static void init();
-    static void run(llvm::LLVMContext &lctx, std::unique_ptr<llvm::Module> module, std::string_view targetDir,
-                    std::string_view fileName);
+    static bool run(spdlog::logger &logger, llvm::LLVMContext &lctx, std::unique_ptr<llvm::Module> module,
+                    std::string_view targetDir, std::string_view fileName);
 };
 } // namespace sorbet::compiler
 #endif

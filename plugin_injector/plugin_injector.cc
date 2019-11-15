@@ -79,7 +79,7 @@ public:
         ENFORCE(f == threadState->file);
         if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
             string fileName = objectFileName(gs, f);
-            sorbet::compiler::ObjectFileEmitter::run(lctx, move(module), irOutputDir.value(), fileName);
+            sorbet::compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
         }
         ENFORCE(threadState->combinedModule == nullptr);
         threadState->file = core::FileRef();

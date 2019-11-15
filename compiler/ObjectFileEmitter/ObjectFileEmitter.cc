@@ -18,6 +18,7 @@
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 // ^^^ violate our poisons
 #include "common/FileOps.h"
+#include "common/Timer.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 
 #include <string_view>
@@ -36,8 +37,9 @@ void ObjectFileEmitter::init() {
 void outputLLVM(llvm::legacy::PassManager &pm, string_view dir, string_view fileNameWithoutExtension,
                 const unique_ptr<llvm::Module> &module) {}
 
-void outputObjectFile(llvm::legacy::PassManager &pm, string_view dir, string_view fileNameWithoutExtension,
+bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, const string &fileName,
                       unique_ptr<llvm::Module> module, llvm::TargetMachine *targetMachine) {
+    Timer timer(logger, "objectFileEmission");
     std::error_code ec;
     auto fileName = ((string)dir) + "/" + (string)fileNameWithoutExtension + ".o";
     llvm::raw_fd_ostream dest(fileName, ec, llvm::sys::fs::OF_None);
