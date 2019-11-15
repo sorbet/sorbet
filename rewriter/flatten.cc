@@ -162,10 +162,6 @@ class FlattenWalk {
             }
             moveQueue[idx] = {move(expr), staticLevel};
         }
-
-        bool atTopLevel() const {
-            return stack.empty();
-        }
     };
 
     // each entry on this corresponds to a class or module scope in which we might in turn have nested methods. We only
@@ -233,14 +229,6 @@ class FlattenWalk {
             return rhs;
         }
 
-        ast::ClassDef::RHS_store newRhs;
-
-        for (auto &m : rhs) {
-            if (!ast::isa_tree<ast::EmptyTree>(m.get())) {
-                newRhs.emplace_back(move(m));
-            }
-        }
-
         auto exprs = popCurMethodDefs();
         // this adds all the methods at the appropriate 'staticness' level
 
@@ -268,8 +256,8 @@ class FlattenWalk {
         // this vector contains all the possible RHS target locations that we might move to
         vector<ast::ClassDef::RHS_store *> targets;
         // 0 and 1 both go into the class itself
-        targets.emplace_back(&newRhs);
-        targets.emplace_back(&newRhs);
+        targets.emplace_back(&rhs);
+        targets.emplace_back(&rhs);
         // 2 and up go into the to-be-created `class << self` blocks
         for (auto &tgt : nestedBlocks) {
             targets.emplace_back(&tgt);
@@ -290,10 +278,10 @@ class FlattenWalk {
                                make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
                                                                  core::Names::singleton()),
                                {}, std::move(body), ast::ClassDefKind::Class);
-            newRhs.emplace_back(std::move(classDef));
+            rhs.emplace_back(std::move(classDef));
         }
 
-        return newRhs;
+        return rhs;
     }
 
 public:
@@ -378,15 +366,7 @@ public:
         auto &methods = curMethodSet();
         // if we get a MethodData back, then we need to move this and replace it
         if (auto md = methods.popScope()) {
-            unique_ptr<ast::Expression> replacement;
-
-            if (methods.atTopLevel()) {
-                replacement = ast::MK::EmptyTree();
-            } else {
-                // we'll replace MethodDefs with the symbol that corresponds to the name of the method
-                replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
-            }
-
+            auto replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
             methods.addExpr(*md, move(methodDef));
             return replacement;
         }
