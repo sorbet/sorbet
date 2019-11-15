@@ -1098,18 +1098,47 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             },
             [&](parser::For *for_) {
                 ast::MethodDef::ARGS_store args;
-                if (auto *mlhs = parser::cast_node<parser::Mlhs>(for_->vars.get())) {
+                bool canProvideNiceDesugar = true;
+                auto mlhsNode = std::move(for_->vars);
+                if (auto *mlhs = parser::cast_node<parser::Mlhs>(mlhsNode.get())) {
                     for (auto &c : mlhs->exprs) {
-                        args.emplace_back(node2TreeImpl(dctx, move(c)));
+                        if (!parser::isa_node<parser::LVarLhs>(c.get())) {
+                            canProvideNiceDesugar = false;
+                            break;
+                        }
+                    }
+                    if (canProvideNiceDesugar) {
+                        for (auto &c : mlhs->exprs) {
+                            args.emplace_back(node2TreeImpl(dctx, move(c)));
+                        }
                     }
                 } else {
-                    unique_ptr<Expression> lhs = node2TreeImpl(dctx, std::move(for_->vars));
-                    args.emplace_back(move(lhs));
+                    canProvideNiceDesugar = parser::isa_node<parser::LVarLhs>(mlhsNode.get());
+                    if (canProvideNiceDesugar) {
+                        unique_ptr<Expression> lhs = node2TreeImpl(dctx, std::move(mlhsNode));
+                        args.emplace_back(move(lhs));
+                    } else {
+                        parser::NodeVec vars;
+                        vars.emplace_back(std::move(mlhsNode));
+                        mlhsNode = make_unique<parser::Mlhs>(loc, std::move(vars));
+                    }
                 }
 
                 auto body = node2TreeImpl(dctx, std::move(for_->body));
 
-                auto block = MK::Block(loc, std::move(body), std::move(args));
+                unique_ptr<ast::Block> block;
+                if (canProvideNiceDesugar) {
+                    block = MK::Block(loc, std::move(body), std::move(args));
+                } else {
+                    auto temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
+                                                               ++dctx.uniqueCounter);
+
+                    unique_ptr<parser::Node> masgn =
+                        make_unique<parser::Masgn>(loc, std::move(mlhsNode), make_unique<parser::LVar>(loc, temp));
+
+                    body = MK::InsSeq1(loc, node2TreeImpl(dctx, std::move(masgn)), move(body));
+                    block = MK::Block(loc, std::move(body), std::move(args));
+                }
 
                 Send::ARGS_store noargs;
                 auto res = MK::Send(loc, node2TreeImpl(dctx, std::move(for_->expr)), core::Names::each(),
