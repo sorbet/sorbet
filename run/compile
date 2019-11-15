@@ -24,7 +24,7 @@ else
 fi
 
 outputfiles=$(find "$llvmir" -maxdepth 1 -name "*.rb.so" -o -name "*.rb.bundle")
-if [! ${#output[@]} -gt 0 ]; then 
+if [ ! ${#output[@]} -gt 0 ]; then 
         echo "No output files output from Sorbet"
         exit 1;
 fi
