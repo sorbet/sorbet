@@ -30,10 +30,12 @@ template <class Elem, class Queue> class AbstractConcurrentBoundedQueue {
     Queue _queue;
     std::atomic<int> elementsLeftToPush; // double serves as a counter and as safe publication marker
     std::atomic<int> elementsPopped;
+    const bool unbounded;
 
 public:
     const int bound;
-    AbstractConcurrentBoundedQueue(int bound) noexcept : elementsLeftToPush(bound), elementsPopped(0), bound(bound) {}
+    AbstractConcurrentBoundedQueue(int bound, bool unbounded = false) noexcept
+        : elementsLeftToPush(bound), elementsPopped(0), unbounded(unbounded), bound(bound) {}
     AbstractConcurrentBoundedQueue(const AbstractConcurrentBoundedQueue &other) = delete;
     AbstractConcurrentBoundedQueue(AbstractConcurrentBoundedQueue &&other) = delete;
 
@@ -55,13 +57,15 @@ public:
 
     template <typename Rep, typename Period>
     inline DequeueResult wait_pop_timed(Elem &elem, std::chrono::duration<Rep, Period> const &timeout,
-                                        spdlog::logger &log, bool silent = false) noexcept {
+                                        spdlog::logger &log) noexcept {
         DequeueResult ret;
         if (!sorbet::emscripten_build) {
             ret.shouldRetry = elementsLeftToPush.load(std::memory_order_acquire) != 0;
             if (ret.shouldRetry) {
                 std::unique_ptr<sorbet::Timer> time;
-                if (!silent) {
+                // Don't create a timer in the unbounded case; the common case is a 250 ms timeout.
+                // If queue is unbounded, shouldRetry is ~always true regardless of if a queue entry will arrive soon.
+                if (!unbounded) {
                     time = std::make_unique<sorbet::Timer>(log, "wait_pop_timed");
                 }
                 ret.returned = _queue.wait_dequeue_timed(elem, timeout);
@@ -91,7 +95,8 @@ using ConcurrentBoundedQueue = AbstractConcurrentBoundedQueue<Elem, moodycamel::
 template <class Elem>
 class ConcurrentUnBoundedQueue : public AbstractConcurrentBoundedQueue<Elem, moodycamel::ConcurrentQueue<Elem>> {
 public:
-    ConcurrentUnBoundedQueue() : AbstractConcurrentBoundedQueue<Elem, moodycamel::ConcurrentQueue<Elem>>(INT_MAX){};
+    ConcurrentUnBoundedQueue()
+        : AbstractConcurrentBoundedQueue<Elem, moodycamel::ConcurrentQueue<Elem>>(INT_MAX, true){};
 };
 
 template <class Elem>
@@ -101,7 +106,7 @@ template <class Elem>
 class BlockingUnBoundedQueue : public AbstractConcurrentBoundedQueue<Elem, moodycamel::BlockingConcurrentQueue<Elem>> {
 public:
     BlockingUnBoundedQueue()
-        : AbstractConcurrentBoundedQueue<Elem, moodycamel::BlockingConcurrentQueue<Elem>>(INT_MAX){};
+        : AbstractConcurrentBoundedQueue<Elem, moodycamel::BlockingConcurrentQueue<Elem>>(INT_MAX, true){};
 };
 
 #ifdef _MACH_BOOLEAN_H_
