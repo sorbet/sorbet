@@ -34,9 +34,6 @@ void ObjectFileEmitter::init() {
     llvm::InitializeAllAsmPrinters();
 }
 
-void outputLLVM(llvm::legacy::PassManager &pm, string_view dir, string_view fileNameWithoutExtension,
-                const unique_ptr<llvm::Module> &module) {}
-
 bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, const string &fileName,
                       unique_ptr<llvm::Module> module, llvm::TargetMachine *targetMachine) {
     Timer timer(logger, "objectFileEmission");
