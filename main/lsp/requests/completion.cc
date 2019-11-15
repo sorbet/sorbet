@@ -418,16 +418,41 @@ core::SymbolRef firstMethodAfterQuery(LSPTypechecker &typechecker, const core::L
     return nextMethodFinder.result();
 }
 
+// This code is ugly but I'm convinced it's because of C++'s baroque string APIs, not for lack
+// of trying to make this code prettier. If you're up to the challenge, feel free.
+string suggestedSigToSnippet(string_view suggestedSig) {
+    auto result = fmt::format("{}${{0}}", suggestedSig);
+
+    auto tabstopId = 1;
+    size_t replaceFrom = 0;
+    while (true) {
+        string needle = "T.untyped";
+        replaceFrom = result.find(needle, replaceFrom);
+        if (replaceFrom == string::npos) {
+            break;
+        }
+
+        auto replaceWith = fmt::format("${{{}:T.untyped}}", tabstopId);
+        result.replace(replaceFrom, needle.size(), replaceWith);
+        tabstopId++;
+        replaceFrom += replaceWith.size();
+    }
+
+    return result;
+}
+
 constexpr string_view suggestSigDocs =
     "Sorbet suggests this signature given the method below. Sorbet's suggested sigs are imperfect. It doesn't always "
     "guess the correct types (or any types at all), but they're usually a good starting point."sv;
 
-unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const MarkupKind markupKind, core::SymbolRef what,
-                                         core::TypePtr receiverType, const core::Loc queryLoc, string_view prefix,
-                                         size_t sortIdx) {
+unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const LSPClientConfiguration &clientConfig,
+                                         core::SymbolRef what, core::TypePtr receiverType, const core::Loc queryLoc,
+                                         string_view prefix, size_t sortIdx) {
     ENFORCE(receiverType != nullptr);
 
     const auto &gs = typechecker.state();
+    const auto markupKind = clientConfig.clientCompletionItemMarkupKind;
+    const auto supportSnippets = clientConfig.clientCompletionItemSnippetSupport;
 
     auto targetMethod = firstMethodAfterQuery(typechecker, queryLoc);
     if (!targetMethod.exists()) {
@@ -483,7 +508,15 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const Mark
     // SigSuggestion.cc computes the replacement text assuming it will be inserted immediately in front of the def,
     // which means it has a newline and indentation at the end of the replacement. We don't need that whitespace
     // because we can just replace the prefix that the user has already started typing.
-    auto replacementText = absl::StripTrailingAsciiWhitespace(editResponse->replacement);
+    auto suggestedSig = absl::StripTrailingAsciiWhitespace(editResponse->replacement);
+    string replacementText;
+    if (supportSnippets) {
+        item->insertTextFormat = InsertTextFormat::Snippet;
+        replacementText = suggestedSigToSnippet(suggestedSig);
+    } else {
+        item->insertTextFormat = InsertTextFormat::PlainText;
+        replacementText = suggestedSig;
+    }
 
     if (replacementRange != nullptr) {
         item->textEdit = make_unique<TextEdit>(std::move(replacementRange), string(replacementText));
@@ -491,7 +524,7 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const Mark
         item->insertText = replacementText;
     }
 
-    item->documentation = formatRubyMarkup(markupKind, replacementText, suggestSigDocs);
+    item->documentation = formatRubyMarkup(markupKind, suggestedSig, suggestSigDocs);
 
     return item;
 }
@@ -506,11 +539,12 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
     const auto &gs = typechecker.state();
     ENFORCE(what.exists());
     ENFORCE(what.data(gs)->isMethod());
-    auto supportsSnippets = config->getClientConfig().clientCompletionItemSnippetSupport;
-    auto markupKind = config->getClientConfig().clientCompletionItemMarkupKind;
+    auto clientConfig = config->getClientConfig();
+    auto supportsSnippets = clientConfig.clientCompletionItemSnippetSupport;
+    auto markupKind = clientConfig.clientCompletionItemMarkupKind;
 
     if (what == core::Symbols::sig()) {
-        if (auto item = trySuggestSig(typechecker, markupKind, what, receiverType, queryLoc, prefix, sortIdx)) {
+        if (auto item = trySuggestSig(typechecker, clientConfig, what, receiverType, queryLoc, prefix, sortIdx)) {
             return item;
         }
     }
