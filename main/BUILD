@@ -11,10 +11,7 @@ cc_binary(
         ],
         "//conditions:default": [],
     }),
-    linkstatic = select({
-        "@com_stripe_ruby_typer//tools/config:linux": False,
-        "@com_stripe_ruby_typer//tools/config:darwin": True,
-    }),
+    linkstatic = 1,
     visibility = ["//visibility:public"],
     deps = [
         "//compiler/ObjectFileEmitter",
