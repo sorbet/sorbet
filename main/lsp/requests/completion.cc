@@ -470,12 +470,12 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const LSPC
         return nullptr;
     }
 
-    auto attachedClass = receiverSym.data(gs)->attachedClass(gs);
-    if (attachedClass == core::Symbols::root()) {
-        attachedClass = core::Symbols::Object();
+    if (receiverSym == core::Symbols::rootSingleton()) {
+        receiverSym = core::Symbols::Object().data(gs)->lookupSingletonClass(gs);
     }
-    if (!attachedClass.exists() || attachedClass != targetMethod.data(gs)->owner) {
-        // The targetMethodd we were going to suggest a sig for is not actually in the same scope as this sig.
+    auto methodOwner = targetMethod.data(gs)->owner;
+    if (!(methodOwner == receiverSym || methodOwner == receiverSym.data(gs)->attachedClass(gs))) {
+        // The targetMethod we were going to suggest a sig for is not actually in the same scope as this sig.
         return nullptr;
     }
 
