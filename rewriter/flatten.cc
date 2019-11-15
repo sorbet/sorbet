@@ -366,6 +366,7 @@ public:
         auto &methods = curMethodSet();
         // if we get a MethodData back, then we need to move this and replace it
         if (auto md = methods.popScope()) {
+            // we'll replace MethodDefs with the symbol that corresponds to the name of the method
             auto replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
             methods.addExpr(*md, move(methodDef));
             return replacement;
