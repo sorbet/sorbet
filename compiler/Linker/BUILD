@@ -15,6 +15,6 @@ cc_library(
         "@spdlog",
     ] + select({
         "@com_stripe_ruby_typer//tools/config:linux": ["@org_llvm_linux"],
-        "@com_stripe_ruby_typer//tools/config:darwin": ["@org_llvm_darwin"],
+        "@com_stripe_ruby_typer//tools/config:darwin": ["@llvm//:core"],
     }),
 )
