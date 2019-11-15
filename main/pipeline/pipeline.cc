@@ -997,8 +997,8 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 }
             }
         }
-        for (auto &extension : gs.semanticExtensions) {
-            extension->finishTypecheckProject(gs);
+        for (auto &extension : gs->semanticExtensions) {
+            extension->finishTypecheckProject(*gs);
         }
 
         if (opts.print.SymbolTable.enabled) {
