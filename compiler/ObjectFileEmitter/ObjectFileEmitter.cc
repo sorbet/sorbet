@@ -128,12 +128,15 @@ void ObjectFileEmitter::run(llvm::LLVMContext &lctx, unique_ptr<llvm::Module> mo
     auto nameOpt = ((string)dir) + "/" + (string)objectName + ".llo";
     llvm::raw_fd_ostream lloFile(nameOpt, ec1, llvm::sys::fs::F_Text);
     pm.add(llvm::createPrintModulePass(lloFile, ""));
+    {
+        Timer timer(logger, "functionPasses");
 
-    fnPasses.doInitialization();
-    for (llvm::Function &func : *module) {
-        fnPasses.run(func);
+        fnPasses.doInitialization();
+        for (llvm::Function &func : *module) {
+            fnPasses.run(func);
+        }
+        fnPasses.doFinalization();
     }
-    fnPasses.doFinalization();
     if (debug_mode) {
         pm.add(llvm::createVerifierPass());
     }
