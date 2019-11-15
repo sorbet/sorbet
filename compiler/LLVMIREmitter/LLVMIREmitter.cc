@@ -176,7 +176,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 }
                 const auto a = blockMap.rubyBlockArgs[funcId][i];
                 if (!a._name.exists()) {
-                    cs.failCompilation(md->loc, "this method has a block argument construct that's not supported.")
+                    cs.failCompilation(md->loc, "this method has a block argument construct that's not supported.");
                 }
 
                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};

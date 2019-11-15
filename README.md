@@ -28,3 +28,7 @@ Now when you run it there are some useful functions for debugging:
 # Building on linux
 
 `apt get install libncurses-dev`
+
+# Differences from Sorbet development.
+ - All code in sorbet_llvm should be exception safe.
+   - the most common way to make some code non-exception safe is to use pointer juggling with `unique_ptr.release`. Don't use it in sorbet_llvm
