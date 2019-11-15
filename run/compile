@@ -23,8 +23,8 @@ else
     $sorbet --silence-dev-message --no-error-count --suppress-non-critical --llvm-ir-folder "$llvmir" "$@"
 fi
 
-outputfiles=$(find "$llvmir" -maxdepth 1 -name "*.rb.so" -o -name "*.rb.bundle")
-if [ ! ${#output[@]} -gt 0 ]; then 
+outputfiles=$(find "$llvmir"/ -maxdepth 1 -name "*.so" -o -name "*.bundle")
+if [ ! ${#outputfiles[@]} -gt 0 ]; then 
         echo "No output files output from Sorbet"
         exit 1;
 fi
