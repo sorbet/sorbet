@@ -19,6 +19,7 @@
 // ^^^ violate our poisons
 #include "common/FileOps.h"
 #include "common/Timer.h"
+#include "compiler/Linker/Linker.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 
 #include <string_view>
@@ -38,27 +39,27 @@ bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, con
                       unique_ptr<llvm::Module> module, llvm::TargetMachine *targetMachine) {
     Timer timer(logger, "objectFileEmission");
     std::error_code ec;
-    auto fileName = ((string)dir) + "/" + (string)fileNameWithoutExtension + ".o";
     llvm::raw_fd_ostream dest(fileName, ec, llvm::sys::fs::OF_None);
 
     if (ec) {
         llvm::errs() << "Could not open file: " << ec.message();
-        return;
+        return false;
     }
 
     auto fileType = llvm::TargetMachine::CGFT_ObjectFile;
 
     if (targetMachine->addPassesToEmitFile(pm, dest, nullptr, fileType, !debug_mode)) {
         llvm::errs() << "TheTargetMachine can't emit a file of this type";
-        return;
+        return false;
     }
 
     pm.run(*module);
     dest.flush();
+    return true;
 }
 
-void ObjectFileEmitter::run(llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module, string_view dir,
-                            string_view objectName) {
+bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module,
+                            string_view dir, string_view objectName) {
     /* setup target */
     std::string error;
     auto targetTriple = llvm::sys::getDefaultTargetTriple();
@@ -69,7 +70,7 @@ void ObjectFileEmitter::run(llvm::LLVMContext &lctx, unique_ptr<llvm::Module> mo
     // TargetRegistry or we have a bogus target triple.
     if (!target) {
         llvm::errs() << error;
-        return;
+        return false;
     }
 
     auto cpu = "skylake"; // this should probably not be hardcoded in future, but for now, this is what llc uses on
@@ -140,7 +141,16 @@ void ObjectFileEmitter::run(llvm::LLVMContext &lctx, unique_ptr<llvm::Module> mo
     if (debug_mode) {
         pm.add(llvm::createVerifierPass());
     }
-    outputObjectFile(pm, dir, string(objectName), move(module), targetMachine);
+    auto objectFileName = (string)fmt::format("{}/{}.o", dir, objectName);
+    auto soNamePrefix = (string)fmt::format("{}/{}", dir, objectName);
+    if (!outputObjectFile(logger, pm, objectFileName, move(module), targetMachine)) {
+        return false;
+    }
+    if (!Linker::run(logger, {objectFileName}, soNamePrefix)) {
+        return false;
+    }
+    FileOps::removeFile(objectFileName);
+    return true;
 }
 
 } // namespace sorbet::compiler
