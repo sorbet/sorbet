@@ -521,7 +521,7 @@ class Enumerator::Lazy < Enumerator
   # ```
   sig do
     type_parameters(:U).params(
-        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+        blk: T.proc.params(arg0: Elem).returns(T::Enumerable[T.type_parameter(:U)]),
     )
     .returns(Enumerator::Lazy[T.type_parameter(:U)])
   end
