@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 def ack(m, n)
     if m == 0 then
         n + 1
