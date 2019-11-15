@@ -1,17 +1,14 @@
 #!/bin/bash
-set -eo pipefail
+set -exo pipefail
 
 base="$( dirname "${BASH_SOURCE[0]}" )"/..
 
 if [ -f main/sorbet ]; then
     sorbet=main/sorbet
-    ld=external/llvm_toolchain/bin/ld
 else
     sorbet="$base/bazel-bin/main/sorbet"
-    ld="$base/bazel-sorbet_llvm/external/llvm_toolchain/bin/ld"
     if [ ! -f "$sorbet" ]; then
         cd "$base"
-        bazel build @llvm_toolchain//:bin/ld main:sorbet 2> /dev/null
         cd - > /dev/null
     fi
 fi
@@ -26,19 +23,8 @@ else
     $sorbet --silence-dev-message --no-error-count --suppress-non-critical --llvm-ir-folder "$llvmir" "$@"
 fi
 
-for o in "$llvmir"/*.o; do
-    if [ ! -f "$o" ]; then
-        echo "No .o files output from Sorbet"
+outputfiles=$(find "$llvmir" -maxdepth 1 -name "*.rb.so" -o -name "*.rb.bundle")
+if [! ${#output[@]} -gt 0 ]; then 
+        echo "No output files output from Sorbet"
         exit 1;
-    fi
-
-    if [[ "$OSTYPE" == "linux-gnu" ]]; then
-      so="${o%.o}.so"
-      # echo "Linking: $so"
-      "$ld" -o "$so" "$o" -shared --allow-shlib-undefined
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-      bundle="${o%.o}.bundle"
-      # echo "Linking: $bundle"
-      "$ld" -bundle -o "$bundle" "$o" -undefined dynamic_lookup -macosx_version_min 10.14 -lSystem
-    fi
-done
+fi
