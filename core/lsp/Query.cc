@@ -27,6 +27,11 @@ Query Query::createVarQuery(core::SymbolRef owner, core::LocalVariable variable)
     return Query(Query::Kind::VAR, core::Loc::none(), owner, variable);
 }
 
+Query Query::createSuggestSigQuery(core::SymbolRef method) {
+    ENFORCE(method.exists());
+    return Query(Query::Kind::SUGGEST_SIG, core::Loc::none(), method, core::LocalVariable());
+}
+
 bool Query::matchesSymbol(const core::SymbolRef &symbol) const {
     return kind == Query::Kind::SYMBOL && this->symbol == symbol;
 }
@@ -40,6 +45,10 @@ bool Query::matchesLoc(const core::Loc &loc) const {
 
 bool Query::matchesVar(const core::SymbolRef &owner, const core::LocalVariable &var) const {
     return kind == Query::Kind::VAR && var.exists() && this->symbol == owner && this->variable == var;
+}
+
+bool Query::matchesSuggestSig(const core::SymbolRef &method) const {
+    return kind == Query::Kind::SUGGEST_SIG && this->symbol == method;
 }
 
 bool Query::isEmpty() const {

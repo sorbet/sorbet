@@ -33,6 +33,10 @@ const DefinitionResponse *QueryResponse::isDefinition() const {
     return get_if<DefinitionResponse>(&response);
 }
 
+const EditResponse *QueryResponse::isEdit() const {
+    return get_if<EditResponse>(&response);
+}
+
 core::Loc QueryResponse::getLoc() const {
     if (auto ident = isIdent()) {
         return ident->termLoc;
@@ -44,6 +48,8 @@ core::Loc QueryResponse::getLoc() const {
         return constant->termLoc;
     } else if (auto def = isDefinition()) {
         return def->termLoc;
+    } else if (auto edit = isEdit()) {
+        return edit->loc;
     } else {
         return core::Loc::none();
     }
@@ -62,7 +68,7 @@ core::TypePtr QueryResponse::getRetType() const {
         return def->retType.type;
     } else {
         // Should never happen, as the above checks should be exhaustive.
-        Exception::raise("Invalid QueryResponse object.");
+        Exception::raise("QueryResponse is of type that does not have retType.");
     }
 }
 
