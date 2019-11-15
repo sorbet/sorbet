@@ -186,7 +186,7 @@ It can be tempting to "attach metadata" to each enum value by overriding the
 constructor for a `T::Enum` subclass such that it accepts more information and
 stores it on an instance variable.
 
-This is **strongly discouraged**. It's likely that Sorbet will enforced this
+This is **strongly discouraged**. It's likely that Sorbet will enforce this
 discouragement with a future change.
 
 Concretely, consider some code like this that is discouraged:
