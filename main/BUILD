@@ -11,7 +11,14 @@ cc_binary(
         ],
         "//conditions:default": [],
     }),
-    linkstatic = 1,
+    linkstatic = select({
+        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    malloc = select({
+        "@com_stripe_ruby_typer//main:jemalloc": "@jemalloc//:jemalloc",
+        "//conditions:default": "@bazel_tools//tools/cpp:malloc",
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//compiler/ObjectFileEmitter",

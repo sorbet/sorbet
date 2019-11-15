@@ -5,7 +5,10 @@ cc_library(
         "IRHelpers.h",
         "IRHelpers_gen.cc",
     ],
-    linkstatic = 1,
+    linkstatic = select({
+        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "@com_stripe_ruby_typer//core",

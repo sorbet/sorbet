@@ -4,7 +4,10 @@ cc_library(
         "DefinitionRewriter.cc",
         "DefinitionRewriter.h",
     ],
-    linkstatic = 1,
+    linkstatic = select({
+        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//compiler/Names",
