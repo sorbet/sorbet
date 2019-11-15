@@ -480,7 +480,8 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     edits.emplace_back(core::AutocorrectSuggestion::Edit{replacementLoc, replacementContents});
 
     if (ctx.state.lspQuery.matchesSuggestSig(methodSymbol)) {
-        core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::EditResponse(replacementLoc, replacementContents));
+        core::lsp::QueryResponse::pushQueryResponse(
+            ctx, core::lsp::EditResponse(replacementLoc, std::move(replacementContents)));
     }
 
     if (auto edit = maybeSuggestExtendTSig(ctx, methodSymbol)) {

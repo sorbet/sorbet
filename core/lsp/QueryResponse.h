@@ -64,7 +64,7 @@ public:
 
 class EditResponse final {
 public:
-    EditResponse(core::Loc loc, std::string replacement) : loc(loc), replacement(replacement){};
+    EditResponse(core::Loc loc, std::string replacement) : loc(loc), replacement(std::move(replacement)){};
     const core::Loc loc;
     const std::string replacement;
 };

@@ -2,7 +2,6 @@
 #define RUBY_TYPER_LSP_NEXTMETHODFINDER_H
 
 #include "ast/ast.h"
-#include <vector>
 
 namespace sorbet::realmain::lsp {
 
