@@ -16,7 +16,7 @@ bool Linker::run(spdlog::logger &log, vector<string> objectFiles, string outputF
     Exception::notImplemented();
 #endif
 
-    // this should probably be changed to dirrect dependency on lld source and fork+call to main of it.
+    // this should probably be changed to direct dependency on lld source and fork+call to main of it.
     // https://github.com/llvm-mirror/lld/blob/64b024a57c56c3528d6be3d14be5e3da42614a6f/tools/lld/lld.cpp#L147 is what
     // to cargocult
     string executable = "ld";
