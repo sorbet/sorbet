@@ -7,7 +7,7 @@ licenses(["notice"])
 exports_files(["LICENSE.TXT"])
 
 load(
-    "@org_tensorflow//third_party/llvm:llvm.bzl",
+    "@com_stripe_sorbet_llvm//third_party/llvm:llvm.bzl",
     "cmake_var_string",
     "expand_cmake_vars",
     "gentbl",
@@ -18,7 +18,7 @@ load(
     "llvm_support_platform_specific_srcs_glob",
 )
 load(
-    "@org_tensorflow//third_party:common.bzl",
+    "@com_stripe_sorbet_llvm//third_party/llvm:common.bzl",
     "template_rule",
 )
 
