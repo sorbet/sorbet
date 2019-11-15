@@ -87,7 +87,7 @@ llvm::Value *MK::getRubyIdFor(CompilerState &cs, llvm::IRBuilderBase &builder, s
         auto ret =
             new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(8);
+        ret->setAlignment(llvm::MaybeAlign(8));
         // create constructor
         std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
         auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);

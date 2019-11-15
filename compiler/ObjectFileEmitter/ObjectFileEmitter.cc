@@ -46,7 +46,7 @@ bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, con
         return false;
     }
 
-    auto fileType = llvm::TargetMachine::CGFT_ObjectFile;
+    auto fileType = llvm::CGFT_ObjectFile;
 
     if (targetMachine->addPassesToEmitFile(pm, dest, nullptr, fileType, !debug_mode)) {
         llvm::errs() << "TheTargetMachine can't emit a file of this type";
