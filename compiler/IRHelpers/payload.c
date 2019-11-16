@@ -845,8 +845,8 @@ VALUE sorbet_rb_int_neq(VALUE recv, int argc, const VALUE *const restrict argv) 
 // ****                       Compile-time only intrinsics. These should be eliminated by passes.
 // ****
 
-VALUE sorbet_i_getRubyClass(const char *const className, long classNameLen); // todo: mark __readonly__, apparently there's no C-level syntax for it
-VALUE sorbet_i_getRubyConstant(const char *const className, long classNameLen);
+VALUE sorbet_i_getRubyClass(const char *const className, long classNameLen) __attribute__((const));
+VALUE sorbet_i_getRubyConstant(const char *const className, long classNameLen) __attribute__((const));
 
 VALUE sorbet_only_exists_to_keep_functions_alive() {
     // this function will be nuked but it exists to keep forward definitions alive for clang

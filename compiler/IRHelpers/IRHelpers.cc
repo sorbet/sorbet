@@ -17,20 +17,11 @@ using namespace std;
 namespace sorbet::compiler {
 string_view getDefaultModuleBitcode();
 
-// If possible, plesase write attributes in C code. Unfortunately, not all attributes have C function equivalent
-const vector<std::pair<string, llvm::Attribute::AttrKind>> additionalFunctionAttributes = {
-    {"sorbet_i_getRubyConstant", llvm::Attribute::ReadNone},
-    {"sorbet_i_getRubyClass", llvm::Attribute::ReadNone},
-};
-
 std::unique_ptr<llvm::Module> IRHelpers::readDefaultModule(const char *name, llvm::LLVMContext &lctx) {
     auto bitCode = getDefaultModuleBitcode();
     llvm::StringRef bitcodeAsStringRef(bitCode.data(), bitCode.size());
     auto memoryBuffer = llvm::MemoryBuffer::getMemBuffer(bitcodeAsStringRef, "payload", false);
     auto ret = llvm::parseBitcodeFile(*memoryBuffer, lctx);
-    for (const auto &[funName, attr] : additionalFunctionAttributes) {
-        ret.get()->getFunction(funName)->addFnAttr(attr);
-    }
     ret.get()->getFunction("sorbet_only_exists_to_keep_functions_alive")->eraseFromParent();
     return move(ret.get());
 }
