@@ -21,6 +21,7 @@
 #include "common/Timer.h"
 #include "compiler/Linker/Linker.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
+#include "compiler/Passes/Passes.h"
 
 #include <string_view>
 using namespace std;
@@ -124,10 +125,15 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     for (auto pass : Passes::standardLowerings()) {
         pm.add(pass);
     }
+    std::error_code ec1;
+    // print lowered IR
+    auto nameOptl = ((string)dir) + "/" + (string)objectName + ".lll";
+    llvm::raw_fd_ostream lllFile(nameOptl, ec1, llvm::sys::fs::F_Text);
+    pm.add(llvm::createPrintModulePass(lllFile, ""));
+
     pmbuilder.populateModulePassManager(pm);
     pmbuilder.populateLTOPassManager(pm);
     // print optimized IR
-    std::error_code ec1;
     auto nameOpt = ((string)dir) + "/" + (string)objectName + ".llo";
     llvm::raw_fd_ostream lloFile(nameOpt, ec1, llvm::sys::fs::F_Text);
     pm.add(llvm::createPrintModulePass(lloFile, ""));
