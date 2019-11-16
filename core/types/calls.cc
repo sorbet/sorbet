@@ -1135,6 +1135,33 @@ public:
     }
 } Class_new;
 
+/**
+ * This is a special version of `new` that will return `T.attached_class`
+ * instead.
+ */
+class Class_selfNew : public IntrinsicMethod {
+public:
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        SymbolRef self = unwrapSymbol(thisType);
+
+        auto attachedClass = self.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+        if (!attachedClass.exists()) {
+            return;
+        }
+        auto instanceTy = make_type<SelfTypeParam>(attachedClass);
+        DispatchArgs innerArgs{Names::initialize(), args.locs, args.args, instanceTy, instanceTy, args.block};
+        auto dispatched = instanceTy->dispatchCall(ctx, innerArgs);
+
+        for (auto &err : res.main.errors) {
+            dispatched.main.errors.emplace_back(std::move(err));
+        }
+        res.main.errors.clear();
+        res.returnType = instanceTy;
+        res.main = move(dispatched.main);
+        res.main.sendTp = instanceTy;
+    }
+} Class_selfNew;
+
 class T_Generic_squareBrackets : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
@@ -2110,6 +2137,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
 
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
+    {Symbols::Class(), Intrinsic::Kind::Instance, Names::selfNew(), &Class_selfNew},
 
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
