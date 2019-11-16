@@ -32,18 +32,10 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @.str.10 = private unnamed_addr constant [45 x i8] c"%s: Expected type %s, got %s with value %li\0B\00", align 1
 @.str.11 = private unnamed_addr constant [16 x i8] c"CompiledClosure\00", align 1
 @closureInfo = local_unnamed_addr constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.11, i32 0, i32 0), %struct.anon.1 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
-@guard_epoch_T = linkonce local_unnamed_addr global i64 0
-@guarded_const_T = linkonce local_unnamed_addr global i64 0
-@str_T = private unnamed_addr constant [2 x i8] c"T\00", align 1
 @rubyIdPrecomputed_unsafe = internal unnamed_addr global i64 0, align 8
 @str_unsafe = private unnamed_addr constant [7 x i8] c"unsafe\00", align 1
-@guard_epoch_Object = linkonce local_unnamed_addr global i64 0
-@guarded_const_Object = linkonce local_unnamed_addr global i64 0
-@str_Object = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 @rubyIdPrecomputed_new = internal unnamed_addr global i64 0, align 8
 @str_new = private unnamed_addr constant [4 x i8] c"new\00", align 1
-@guard_epoch_A = linkonce local_unnamed_addr global i64 0
-@guarded_const_A = linkonce local_unnamed_addr global i64 0
 @rubyIdPrecomputed_read = internal unnamed_addr global i64 0, align 8
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
@@ -51,11 +43,16 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @rubyIdPrecomputed_write = internal unnamed_addr global i64 0, align 8
 @llvm.global_ctors = appending global [5 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_unsafe, i8* bitcast (i64* @rubyIdPrecomputed_unsafe to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_new, i8* bitcast (i64* @rubyIdPrecomputed_new to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_read, i8* bitcast (i64* @rubyIdPrecomputed_read to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_write, i8* bitcast (i64* @rubyIdPrecomputed_write to i8*) }]
 @str_F = private unnamed_addr constant [2 x i8] c"F\00", align 1
-@str_cast.6 = private unnamed_addr constant [5 x i8] c"cast\00", align 1
-@str_A.7 = private unnamed_addr constant [2 x i8] c"A\00", align 1
-@"str_<undeclared-field-stub>.8" = private unnamed_addr constant [24 x i8] c"<undeclared-field-stub>\00", align 1
-@str_write.10 = private unnamed_addr constant [6 x i8] c"write\00", align 1
-@str_read.11 = private unnamed_addr constant [5 x i8] c"read\00", align 1
+@str_cast.16 = private unnamed_addr constant [5 x i8] c"cast\00", align 1
+@"str_<undeclared-field-stub>.18" = private unnamed_addr constant [24 x i8] c"<undeclared-field-stub>\00", align 1
+@str_write.28 = private unnamed_addr constant [6 x i8] c"write\00", align 1
+@str_read.36 = private unnamed_addr constant [5 x i8] c"read\00", align 1
+@guard_epoch_T = linkonce local_unnamed_addr global i64 0
+@guarded_const_T = linkonce local_unnamed_addr global i64 0
+@str_T.38 = private unnamed_addr constant [2 x i8] c"T\00", align 1
+@guard_epoch_A = linkonce local_unnamed_addr global i64 0
+@guarded_const_A = linkonce local_unnamed_addr global i64 0
+@str_A.39 = private unnamed_addr constant [2 x i8] c"A\00", align 1
 
 ; Function Attrs: nounwind ssp uwtable
 define weak void @dbg_sorbet_validate_id(i64 %0, i8* %1) local_unnamed_addr #0 {
@@ -407,11 +404,11 @@ declare i64 @rb_const_get(i64, i64) local_unnamed_addr #3
 declare i64 @rb_const_get_from(i64, i64) local_unnamed_addr #3
 
 ; Function Attrs: noinline nounwind ssp uwtable
-define internal fastcc i64 @sorbet_getConstant(i8* %0, i64 %1) unnamed_addr #6 {
-  %3 = load i64, i64* @rb_cObject, align 8, !tbaa !7
-  %4 = tail call i64 @rb_intern2(i8* %0, i64 %1) #18
-  %5 = tail call fastcc i64 @sorbet_getConstantAt(i64 %3, i64 %4)
-  ret i64 %5
+define internal fastcc i64 @sorbet_getConstant(i8* %0) unnamed_addr #6 {
+  %2 = load i64, i64* @rb_cObject, align 8, !tbaa !7
+  %3 = tail call i64 @rb_intern2(i8* %0, i64 1) #18
+  %4 = tail call fastcc i64 @sorbet_getConstantAt(i64 %2, i64 %3)
+  ret i64 %4
 }
 
 ; Function Attrs: noinline nounwind ssp uwtable
@@ -463,7 +460,7 @@ declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr #3
 define internal fastcc void @sorbet_cast_failure(i64 %0) unnamed_addr #10 {
   %2 = load i64, i64* @rb_eTypeError, align 8, !tbaa !7
   %3 = tail call i8* @rb_obj_classname(i64 %0) #18
-  tail call void (i64, i8*, ...) @rb_raise(i64 %2, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @.str.10, i64 0, i64 0), i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast.6, i64 0, i64 0), i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.7, i64 0, i64 0), i8* %3, i64 %0) #19
+  tail call void (i64, i8*, ...) @rb_raise(i64 %2, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @.str.10, i64 0, i64 0), i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast.16, i64 0, i64 0), i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.39, i64 0, i64 0), i8* %3, i64 %0) #19
   unreachable
 }
 
@@ -525,7 +522,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal void @Constr_rubyIdPrecomputed_read() #13 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read.11, i64 0, i64 0), i64 4) #18
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read.36, i64 0, i64 0), i64 4) #18
   store i64 %0, i64* @rubyIdPrecomputed_read, align 8
   ret void
 }
@@ -541,7 +538,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal void @Constr_rubyIdPrecomputed_write() #13 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_write.10, i64 0, i64 0), i64 5) #18
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_write.28, i64 0, i64 0), i64 5) #18
   store i64 %0, i64* @rubyIdPrecomputed_write, align 8
   ret void
 }
@@ -559,157 +556,139 @@ typeTestSuccess.i:
   %rubyId_write.i = load i64, i64* @rubyIdPrecomputed_write, align 8
   %2 = load i64, i64* @guard_epoch_T, align 8
   %3 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath.i = icmp eq i64 %2, %3
-  br i1 %canTakeFastPath.i, label %afterSymCallIntrinsic_unsafe.i, label %const_slowPath.i, !prof !13, !misexpect !14
+  %needTakeSlowPath.i = icmp eq i64 %2, %3
+  br i1 %needTakeSlowPath.i, label %afterSymCallIntrinsic_unsafe.i, label %4, !prof !13
 
-const_slowPath.i:                                 ; preds = %typeTestSuccess.i
-  %4 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1) #18
-  store i64 %4, i64* @guarded_const_T, align 8
-  %5 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  store i64 %5, i64* @guard_epoch_T, align 8
+4:                                                ; preds = %typeTestSuccess.i
+  %5 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.38, i64 0, i64 0)) #18
+  store i64 %5, i64* @guarded_const_T, align 8
+  %6 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  store i64 %6, i64* @guard_epoch_T, align 8
   br label %afterSymCallIntrinsic_unsafe.i
 
-afterSymCallIntrinsic_unsafe.i:                   ; preds = %const_slowPath.i, %typeTestSuccess.i
-  %6 = phi i64 [ %5, %const_slowPath.i ], [ %2, %typeTestSuccess.i ]
+afterSymCallIntrinsic_unsafe.i:                   ; preds = %4, %typeTestSuccess.i
   %callArgsAddr3.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %0, i64* %callArgsAddr3.i, align 8
-  %7 = load i64, i64* @guard_epoch_Object, align 8
-  %canTakeFastPath53.i = icmp eq i64 %7, %6
-  br i1 %canTakeFastPath53.i, label %afterSymCallIntrinsic_unsafe.const_continue51_crit_edge.i, label %const_slowPath52.i, !prof !13, !misexpect !14
+  %7 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.39, i64 0, i64 0), i64 %0) #18
+  %8 = load i64, i64* @guard_epoch_A, align 8
+  %9 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %needTakeSlowPath.i.i = icmp eq i64 %8, %9
+  br i1 %needTakeSlowPath.i.i, label %typeTestSuccess.i.i.i, label %10, !prof !13
 
-afterSymCallIntrinsic_unsafe.const_continue51_crit_edge.i: ; preds = %afterSymCallIntrinsic_unsafe.i
-  %.pre18.i = load i64, i64* @guarded_const_Object, align 8
-  br label %const_continue51.i
+10:                                               ; preds = %afterSymCallIntrinsic_unsafe.i
+  %11 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.39, i64 0, i64 0)) #18
+  store i64 %11, i64* @guarded_const_A, align 8
+  %12 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  store i64 %12, i64* @guard_epoch_A, align 8
+  br label %typeTestSuccess.i.i.i
 
-const_continue51.i:                               ; preds = %const_slowPath52.i, %afterSymCallIntrinsic_unsafe.const_continue51_crit_edge.i
-  %8 = phi i64 [ %.pre18.i, %afterSymCallIntrinsic_unsafe.const_continue51_crit_edge.i ], [ %34, %const_slowPath52.i ]
-  %9 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.7, i64 0, i64 0), i64 %8) #18
-  %10 = load i64, i64* @guard_epoch_A, align 8
-  %11 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath.i.i = icmp eq i64 %10, %11
-  br i1 %canTakeFastPath.i.i, label %typeTestSuccess.i.i.i, label %const_slowPath.i.i, !prof !13, !misexpect !14
-
-typeTestSuccess.i.i.i:                            ; preds = %const_slowPath.i.i, %const_continue51.i
-  %12 = phi i64 [ %30, %const_slowPath.i.i ], [ %10, %const_continue51.i ]
+typeTestSuccess.i.i.i:                            ; preds = %10, %afterSymCallIntrinsic_unsafe.i
+  %13 = phi i64 [ %12, %10 ], [ %8, %afterSymCallIntrinsic_unsafe.i ]
   %rubyId_write.i.i.i = load i64, i64* @rubyIdPrecomputed_write, align 8
   %rubyId_read.i.i.i = load i64, i64* @rubyIdPrecomputed_read, align 8
-  %13 = load i64, i64* @guard_epoch_T, align 8
-  %canTakeFastPath27.i.i.i = icmp eq i64 %13, %12
-  br i1 %canTakeFastPath27.i.i.i, label %afterSymCallIntrinsic_unsafe.i.i.i, label %const_slowPath26.i.i.i, !prof !13, !misexpect !14
+  %14 = load i64, i64* @guard_epoch_T, align 8
+  %needTakeSlowPath41.i.i.i = icmp eq i64 %14, %13
+  br i1 %needTakeSlowPath41.i.i.i, label %afterSymCallIntrinsic_unsafe.i.i.i, label %15, !prof !13
 
-const_slowPath26.i.i.i:                           ; preds = %typeTestSuccess.i.i.i
-  %14 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1) #18
-  store i64 %14, i64* @guarded_const_T, align 8
-  %15 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  store i64 %15, i64* @guard_epoch_T, align 8
+15:                                               ; preds = %typeTestSuccess.i.i.i
+  %16 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.38, i64 0, i64 0)) #18
+  store i64 %16, i64* @guarded_const_T, align 8
+  %17 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  store i64 %17, i64* @guard_epoch_T, align 8
   br label %afterSymCallIntrinsic_unsafe.i.i.i
 
-afterSymCallIntrinsic_unsafe.i.i.i:               ; preds = %const_slowPath26.i.i.i, %typeTestSuccess.i.i.i
+afterSymCallIntrinsic_unsafe.i.i.i:               ; preds = %15, %typeTestSuccess.i.i.i
   %rawSym.i.i.i = tail call i64 @rb_id2sym(i64 %rubyId_write.i.i.i) #18
-  %16 = load i64, i64* @guard_epoch_A, align 8
-  %17 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath41.i.i.i = icmp eq i64 %16, %17
-  br i1 %canTakeFastPath41.i.i.i, label %afterSymCallIntrinsic_unsafe.const_continue39_crit_edge.i.i.i, label %const_slowPath40.i.i.i, !prof !13, !misexpect !14
+  %18 = load i64, i64* @guard_epoch_A, align 8
+  %19 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %needTakeSlowPath43.i.i.i = icmp eq i64 %18, %19
+  br i1 %needTakeSlowPath43.i.i.i, label %afterSymCallIntrinsic_unsafe._crit_edge.i.i.i, label %20, !prof !13
 
-afterSymCallIntrinsic_unsafe.const_continue39_crit_edge.i.i.i: ; preds = %afterSymCallIntrinsic_unsafe.i.i.i
+afterSymCallIntrinsic_unsafe._crit_edge.i.i.i:    ; preds = %afterSymCallIntrinsic_unsafe.i.i.i
   %.pre25.i.i.i = load i64, i64* @guarded_const_A, align 8
-  br label %const_continue39.i.i.i
+  br label %23
 
-const_continue39.i.i.i:                           ; preds = %const_slowPath40.i.i.i, %afterSymCallIntrinsic_unsafe.const_continue39_crit_edge.i.i.i
-  %18 = phi i64 [ %.pre25.i.i.i, %afterSymCallIntrinsic_unsafe.const_continue39_crit_edge.i.i.i ], [ %21, %const_slowPath40.i.i.i ]
-  tail call void @rb_define_method(i64 %18, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_write.10, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#write" to i64 (...)*), i32 -1) #18
-  %19 = load i64, i64* @guard_epoch_T, align 8
-  %20 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath45.i.i.i = icmp eq i64 %19, %20
-  br i1 %canTakeFastPath45.i.i.i, label %afterSymCallIntrinsic_unsafe49.i.i.i, label %const_slowPath44.i.i.i, !prof !13, !misexpect !14
-
-const_slowPath40.i.i.i:                           ; preds = %afterSymCallIntrinsic_unsafe.i.i.i
-  %21 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.7, i64 0, i64 0), i64 1) #18
+20:                                               ; preds = %afterSymCallIntrinsic_unsafe.i.i.i
+  %21 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.39, i64 0, i64 0)) #18
   store i64 %21, i64* @guarded_const_A, align 8
   %22 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
   store i64 %22, i64* @guard_epoch_A, align 8
-  br label %const_continue39.i.i.i
+  br label %23
 
-const_slowPath44.i.i.i:                           ; preds = %const_continue39.i.i.i
-  %23 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1) #18
-  store i64 %23, i64* @guarded_const_T, align 8
-  %24 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  store i64 %24, i64* @guard_epoch_T, align 8
-  br label %afterSymCallIntrinsic_unsafe49.i.i.i
-
-afterSymCallIntrinsic_unsafe49.i.i.i:             ; preds = %const_slowPath44.i.i.i, %const_continue39.i.i.i
-  %rawSym64.i.i.i = tail call i64 @rb_id2sym(i64 %rubyId_read.i.i.i) #18
-  %25 = load i64, i64* @guard_epoch_A, align 8
+23:                                               ; preds = %20, %afterSymCallIntrinsic_unsafe._crit_edge.i.i.i
+  %24 = phi i64 [ %.pre25.i.i.i, %afterSymCallIntrinsic_unsafe._crit_edge.i.i.i ], [ %21, %20 ]
+  tail call void @rb_define_method(i64 %24, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_write.28, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#write" to i64 (...)*), i32 -1) #18
+  %25 = load i64, i64* @guard_epoch_T, align 8
   %26 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath67.i.i.i = icmp eq i64 %25, %26
-  br i1 %canTakeFastPath67.i.i.i, label %afterSymCallIntrinsic_unsafe49.const_continue65_crit_edge.i.i.i, label %const_slowPath66.i.i.i, !prof !13, !misexpect !14
+  %needTakeSlowPath44.i.i.i = icmp eq i64 %25, %26
+  br i1 %needTakeSlowPath44.i.i.i, label %afterSymCallIntrinsic_unsafe28.i.i.i, label %27, !prof !13
 
-afterSymCallIntrinsic_unsafe49.const_continue65_crit_edge.i.i.i: ; preds = %afterSymCallIntrinsic_unsafe49.i.i.i
+27:                                               ; preds = %23
+  %28 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.38, i64 0, i64 0)) #18
+  store i64 %28, i64* @guarded_const_T, align 8
+  %29 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  store i64 %29, i64* @guard_epoch_T, align 8
+  br label %afterSymCallIntrinsic_unsafe28.i.i.i
+
+afterSymCallIntrinsic_unsafe28.i.i.i:             ; preds = %27, %23
+  %rawSym37.i.i.i = tail call i64 @rb_id2sym(i64 %rubyId_read.i.i.i) #18
+  %30 = load i64, i64* @guard_epoch_A, align 8
+  %31 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %needTakeSlowPath48.i.i.i = icmp eq i64 %30, %31
+  br i1 %needTakeSlowPath48.i.i.i, label %afterSymCallIntrinsic_unsafe28._crit_edge.i.i.i, label %32, !prof !13
+
+afterSymCallIntrinsic_unsafe28._crit_edge.i.i.i:  ; preds = %afterSymCallIntrinsic_unsafe28.i.i.i
   %.pre27.i.i.i = load i64, i64* @guarded_const_A, align 8
   br label %"Init_func_A.<static-init>.exit.i"
 
-const_slowPath66.i.i.i:                           ; preds = %afterSymCallIntrinsic_unsafe49.i.i.i
-  %27 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.7, i64 0, i64 0), i64 1) #18
-  store i64 %27, i64* @guarded_const_A, align 8
-  %28 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  store i64 %28, i64* @guard_epoch_A, align 8
+32:                                               ; preds = %afterSymCallIntrinsic_unsafe28.i.i.i
+  %33 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.39, i64 0, i64 0)) #18
+  store i64 %33, i64* @guarded_const_A, align 8
+  %34 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  store i64 %34, i64* @guard_epoch_A, align 8
   br label %"Init_func_A.<static-init>.exit.i"
 
-const_slowPath.i.i:                               ; preds = %const_continue51.i
-  %29 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.7, i64 0, i64 0), i64 1) #18
-  store i64 %29, i64* @guarded_const_A, align 8
-  %30 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  store i64 %30, i64* @guard_epoch_A, align 8
-  br label %typeTestSuccess.i.i.i
-
-"Init_func_A.<static-init>.exit.i":               ; preds = %const_slowPath66.i.i.i, %afterSymCallIntrinsic_unsafe49.const_continue65_crit_edge.i.i.i
-  %31 = phi i64 [ %.pre27.i.i.i, %afterSymCallIntrinsic_unsafe49.const_continue65_crit_edge.i.i.i ], [ %27, %const_slowPath66.i.i.i ]
-  tail call void @rb_define_method(i64 %31, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read.11, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#read" to i64 (...)*), i32 -1) #18
-  %32 = load i64, i64* @guard_epoch_A, align 8
-  %33 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath58.i = icmp eq i64 %32, %33
-  br i1 %canTakeFastPath58.i, label %"Init_func_A.<static-init>.exit.const_continue56_crit_edge.i", label %const_slowPath57.i, !prof !13, !misexpect !14
-
-"Init_func_A.<static-init>.exit.const_continue56_crit_edge.i": ; preds = %"Init_func_A.<static-init>.exit.i"
-  %.pre19.i = load i64, i64* @guarded_const_A, align 8
-  br label %"func_<root>.<static-init>$111.exit"
-
-const_slowPath52.i:                               ; preds = %afterSymCallIntrinsic_unsafe.i
-  %34 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0), i64 6) #18
-  store i64 %34, i64* @guarded_const_Object, align 8
-  %35 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  store i64 %35, i64* @guard_epoch_Object, align 8
-  br label %const_continue51.i
-
-const_slowPath57.i:                               ; preds = %"Init_func_A.<static-init>.exit.i"
-  %36 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.7, i64 0, i64 0), i64 1) #18
-  store i64 %36, i64* @guarded_const_A, align 8
+"Init_func_A.<static-init>.exit.i":               ; preds = %32, %afterSymCallIntrinsic_unsafe28._crit_edge.i.i.i
+  %35 = phi i64 [ %.pre27.i.i.i, %afterSymCallIntrinsic_unsafe28._crit_edge.i.i.i ], [ %33, %32 ]
+  tail call void @rb_define_method(i64 %35, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read.36, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#read" to i64 (...)*), i32 -1) #18
+  %36 = load i64, i64* @guard_epoch_A, align 8
   %37 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  store i64 %37, i64* @guard_epoch_A, align 8
+  %needTakeSlowPath75.i = icmp eq i64 %36, %37
+  br i1 %needTakeSlowPath75.i, label %"Init_func_A.<static-init>.exit._crit_edge.i", label %38, !prof !13
+
+"Init_func_A.<static-init>.exit._crit_edge.i":    ; preds = %"Init_func_A.<static-init>.exit.i"
+  %.pre17.i = load i64, i64* @guarded_const_A, align 8
   br label %"func_<root>.<static-init>$111.exit"
 
-"func_<root>.<static-init>$111.exit":             ; preds = %"Init_func_A.<static-init>.exit.const_continue56_crit_edge.i", %const_slowPath57.i
-  %38 = phi i64 [ %.pre19.i, %"Init_func_A.<static-init>.exit.const_continue56_crit_edge.i" ], [ %36, %const_slowPath57.i ]
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_new.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !15
-  %39 = call i64 @rb_funcallv(i64 %38, i64 %rubyId_new.i, i32 0, i64* nonnull %callArgsAddr3.i) #18
-  call void @dbg_sorbet_validate_id(i64 %rubyId_read.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !18
-  %40 = call i64 @rb_funcallv(i64 %39, i64 %rubyId_read.i, i32 0, i64* nonnull %callArgsAddr3.i) #18
-  store i64 %40, i64* %callArgsAddr3.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !21
-  %41 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr3.i) #18
-  %42 = call i64 @rb_str_new(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @userStr_value, i64 0, i64 0), i64 5) #18
-  store i64 %42, i64* %callArgsAddr3.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_write.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !24
-  %43 = call i64 @rb_funcallv(i64 %39, i64 %rubyId_write.i, i32 1, i64* nonnull %callArgsAddr3.i) #18
-  call void @dbg_sorbet_validate_id(i64 %rubyId_read.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !27
-  %44 = call i64 @rb_funcallv(i64 %39, i64 %rubyId_read.i, i32 0, i64* nonnull %callArgsAddr3.i) #18
-  store i64 %44, i64* %callArgsAddr3.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !30
-  %45 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr3.i) #18
-  %46 = call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_<undeclared-field-stub>.8", i64 0, i64 0)) #18
-  store i64 %46, i64* %callArgsAddr3.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !33
-  %47 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr3.i) #18
+38:                                               ; preds = %"Init_func_A.<static-init>.exit.i"
+  %39 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.39, i64 0, i64 0)) #18
+  store i64 %39, i64* @guarded_const_A, align 8
+  %40 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  store i64 %40, i64* @guard_epoch_A, align 8
+  br label %"func_<root>.<static-init>$111.exit"
+
+"func_<root>.<static-init>$111.exit":             ; preds = %"Init_func_A.<static-init>.exit._crit_edge.i", %38
+  %41 = phi i64 [ %.pre17.i, %"Init_func_A.<static-init>.exit._crit_edge.i" ], [ %39, %38 ]
+  tail call void @dbg_sorbet_validate_id(i64 %rubyId_new.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !14
+  %42 = call i64 @rb_funcallv(i64 %41, i64 %rubyId_new.i, i32 0, i64* nonnull %callArgsAddr3.i) #18
+  call void @dbg_sorbet_validate_id(i64 %rubyId_read.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !17
+  %43 = call i64 @rb_funcallv(i64 %42, i64 %rubyId_read.i, i32 0, i64* nonnull %callArgsAddr3.i) #18
+  store i64 %43, i64* %callArgsAddr3.i, align 8
+  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !20
+  %44 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr3.i) #18
+  %45 = call i64 @rb_str_new(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @userStr_value, i64 0, i64 0), i64 5) #18
+  store i64 %45, i64* %callArgsAddr3.i, align 8
+  call void @dbg_sorbet_validate_id(i64 %rubyId_write.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !23
+  %46 = call i64 @rb_funcallv(i64 %42, i64 %rubyId_write.i, i32 1, i64* nonnull %callArgsAddr3.i) #18
+  call void @dbg_sorbet_validate_id(i64 %rubyId_read.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !26
+  %47 = call i64 @rb_funcallv(i64 %42, i64 %rubyId_read.i, i32 0, i64* nonnull %callArgsAddr3.i) #18
+  store i64 %47, i64* %callArgsAddr3.i, align 8
+  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !29
+  %48 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr3.i) #18
+  %49 = call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_<undeclared-field-stub>.18", i64 0, i64 0)) #18
+  store i64 %49, i64* %callArgsAddr3.i, align 8
+  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !32
+  %50 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr3.i) #18
   call fastcc void @sorbet_setConstant(i64 %0) #18
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %1)
   ret void
@@ -719,7 +698,7 @@ const_slowPath57.i:                               ; preds = %"Init_func_A.<stati
 define i64 @"func_A#write"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #15 {
 functionEntryInitializers:
   %0 = icmp eq i32 %argc, 1
-  br i1 %0, label %fillRequiredArgs, label %argCountFailBlock, !prof !36, !misexpect !37
+  br i1 %0, label %fillRequiredArgs, label %argCountFailBlock, !prof !35, !misexpect !36
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call fastcc void @sorbet_rb_error_arity(i32 %argc, i32 1, i32 1)
@@ -729,32 +708,32 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %rawArg_v = load i64, i64* %argArray, align 8
   %1 = load i64, i64* @guard_epoch_A, align 8
   %2 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath = icmp eq i64 %1, %2
-  br i1 %canTakeFastPath, label %fillRequiredArgs.const_continue_crit_edge, label %const_slowPath, !prof !13, !misexpect !14
+  %needTakeSlowPath = icmp eq i64 %1, %2
+  br i1 %needTakeSlowPath, label %fillRequiredArgs._crit_edge, label %3, !prof !13
 
-fillRequiredArgs.const_continue_crit_edge:        ; preds = %fillRequiredArgs
+fillRequiredArgs._crit_edge:                      ; preds = %fillRequiredArgs
   %.pre = load i64, i64* @guarded_const_A, align 8
-  br label %const_continue
+  br label %6
 
-const_continue:                                   ; preds = %fillRequiredArgs.const_continue_crit_edge, %const_slowPath
-  %3 = phi i64 [ %.pre, %fillRequiredArgs.const_continue_crit_edge ], [ %6, %const_slowPath ]
-  %4 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %3) #18
-  %5 = icmp eq i64 %4, 20
-  br i1 %5, label %typeTestSuccess, label %typeTestFail, !prof !13, !misexpect !14
+3:                                                ; preds = %fillRequiredArgs
+  %4 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.39, i64 0, i64 0)) #18
+  store i64 %4, i64* @guarded_const_A, align 8
+  %5 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  store i64 %5, i64* @guard_epoch_A, align 8
+  br label %6
 
-const_slowPath:                                   ; preds = %fillRequiredArgs
-  %6 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.7, i64 0, i64 0), i64 1) #18
-  store i64 %6, i64* @guarded_const_A, align 8
-  %7 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  store i64 %7, i64* @guard_epoch_A, align 8
-  br label %const_continue
+6:                                                ; preds = %fillRequiredArgs._crit_edge, %3
+  %7 = phi i64 [ %.pre, %fillRequiredArgs._crit_edge ], [ %4, %3 ]
+  %8 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %7) #18
+  %9 = icmp eq i64 %8, 20
+  br i1 %9, label %typeTestSuccess, label %typeTestFail, !prof !37, !misexpect !38
 
-typeTestSuccess:                                  ; preds = %const_continue
-  %8 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_<undeclared-field-stub>.8", i64 0, i64 0), i64 %rawArg_v) #18
-  %9 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_<undeclared-field-stub>.8", i64 0, i64 0)) #18
-  ret i64 %9
+typeTestSuccess:                                  ; preds = %6
+  %10 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_<undeclared-field-stub>.18", i64 0, i64 0), i64 %rawArg_v) #18
+  %11 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_<undeclared-field-stub>.18", i64 0, i64 0)) #18
+  ret i64 %11
 
-typeTestFail:                                     ; preds = %const_continue
+typeTestFail:                                     ; preds = %6
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw)
   unreachable
 }
@@ -763,7 +742,7 @@ typeTestFail:                                     ; preds = %const_continue
 define i64 @"func_A#read"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #15 {
 functionEntryInitializers:
   %tooManyArgs = icmp eq i32 %argc, 0
-  br i1 %tooManyArgs, label %fillRequiredArgs, label %argCountFailBlock, !prof !13, !misexpect !37
+  br i1 %tooManyArgs, label %fillRequiredArgs, label %argCountFailBlock, !prof !37, !misexpect !36
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call fastcc void @sorbet_rb_error_arity(i32 %argc, i32 0, i32 0)
@@ -772,31 +751,31 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %0 = load i64, i64* @guard_epoch_A, align 8
   %1 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %canTakeFastPath = icmp eq i64 %0, %1
-  br i1 %canTakeFastPath, label %fillRequiredArgs.const_continue_crit_edge, label %const_slowPath, !prof !13, !misexpect !14
+  %needTakeSlowPath = icmp eq i64 %0, %1
+  br i1 %needTakeSlowPath, label %fillRequiredArgs._crit_edge, label %2, !prof !13
 
-fillRequiredArgs.const_continue_crit_edge:        ; preds = %fillRequiredArgs
+fillRequiredArgs._crit_edge:                      ; preds = %fillRequiredArgs
   %.pre = load i64, i64* @guarded_const_A, align 8
-  br label %const_continue
+  br label %5
 
-const_continue:                                   ; preds = %fillRequiredArgs.const_continue_crit_edge, %const_slowPath
-  %2 = phi i64 [ %.pre, %fillRequiredArgs.const_continue_crit_edge ], [ %5, %const_slowPath ]
-  %3 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %2) #18
-  %4 = icmp eq i64 %3, 20
-  br i1 %4, label %typeTestSuccess, label %typeTestFail, !prof !13, !misexpect !14
+2:                                                ; preds = %fillRequiredArgs
+  %3 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.39, i64 0, i64 0)) #18
+  store i64 %3, i64* @guarded_const_A, align 8
+  %4 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  store i64 %4, i64* @guard_epoch_A, align 8
+  br label %5
 
-const_slowPath:                                   ; preds = %fillRequiredArgs
-  %5 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A.7, i64 0, i64 0), i64 1) #18
-  store i64 %5, i64* @guarded_const_A, align 8
-  %6 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  store i64 %6, i64* @guard_epoch_A, align 8
-  br label %const_continue
+5:                                                ; preds = %fillRequiredArgs._crit_edge, %2
+  %6 = phi i64 [ %.pre, %fillRequiredArgs._crit_edge ], [ %3, %2 ]
+  %7 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %6) #18
+  %8 = icmp eq i64 %7, 20
+  br i1 %8, label %typeTestSuccess, label %typeTestFail, !prof !37, !misexpect !38
 
-typeTestSuccess:                                  ; preds = %const_continue
-  %7 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_<undeclared-field-stub>.8", i64 0, i64 0)) #18
-  ret i64 %7
+typeTestSuccess:                                  ; preds = %5
+  %9 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_<undeclared-field-stub>.18", i64 0, i64 0)) #18
+  ret i64 %9
 
-typeTestFail:                                     ; preds = %const_continue
+typeTestFail:                                     ; preds = %5
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw)
   unreachable
 }
@@ -841,28 +820,29 @@ attributes #19 = { noreturn nounwind }
 !10 = !{!"int", !4, i64 0}
 !11 = !{!12, !12, i64 0}
 !12 = !{!"long long", !4, i64 0}
-!13 = !{!"branch_weights", i32 2000, i32 1}
-!14 = !{!"misexpect", i64 0, i64 2000, i64 1}
-!15 = !{!16}
-!16 = distinct !{!16, !17, !"sorbet_callFunc: argument 0"}
-!17 = distinct !{!17, !"sorbet_callFunc"}
-!18 = !{!19}
-!19 = distinct !{!19, !20, !"sorbet_callFunc: argument 0"}
-!20 = distinct !{!20, !"sorbet_callFunc"}
-!21 = !{!22}
-!22 = distinct !{!22, !23, !"sorbet_callFunc: argument 0"}
-!23 = distinct !{!23, !"sorbet_callFunc"}
-!24 = !{!25}
-!25 = distinct !{!25, !26, !"sorbet_callFunc: argument 0"}
-!26 = distinct !{!26, !"sorbet_callFunc"}
-!27 = !{!28}
-!28 = distinct !{!28, !29, !"sorbet_callFunc: argument 0"}
-!29 = distinct !{!29, !"sorbet_callFunc"}
-!30 = !{!31}
-!31 = distinct !{!31, !32, !"sorbet_callFunc: argument 0"}
-!32 = distinct !{!32, !"sorbet_callFunc"}
-!33 = !{!34}
-!34 = distinct !{!34, !35, !"sorbet_callFunc: argument 0"}
-!35 = distinct !{!35, !"sorbet_callFunc"}
-!36 = !{!"branch_weights", i32 4000000, i32 4001}
-!37 = !{!"misexpect", i64 1, i64 2000, i64 1}
+!13 = !{!"branch_weights", i32 10000, i32 1}
+!14 = !{!15}
+!15 = distinct !{!15, !16, !"sorbet_callFunc: argument 0"}
+!16 = distinct !{!16, !"sorbet_callFunc"}
+!17 = !{!18}
+!18 = distinct !{!18, !19, !"sorbet_callFunc: argument 0"}
+!19 = distinct !{!19, !"sorbet_callFunc"}
+!20 = !{!21}
+!21 = distinct !{!21, !22, !"sorbet_callFunc: argument 0"}
+!22 = distinct !{!22, !"sorbet_callFunc"}
+!23 = !{!24}
+!24 = distinct !{!24, !25, !"sorbet_callFunc: argument 0"}
+!25 = distinct !{!25, !"sorbet_callFunc"}
+!26 = !{!27}
+!27 = distinct !{!27, !28, !"sorbet_callFunc: argument 0"}
+!28 = distinct !{!28, !"sorbet_callFunc"}
+!29 = !{!30}
+!30 = distinct !{!30, !31, !"sorbet_callFunc: argument 0"}
+!31 = distinct !{!31, !"sorbet_callFunc"}
+!32 = !{!33}
+!33 = distinct !{!33, !34, !"sorbet_callFunc: argument 0"}
+!34 = distinct !{!34, !"sorbet_callFunc"}
+!35 = !{!"branch_weights", i32 4000000, i32 4001}
+!36 = !{!"misexpect", i64 1, i64 2000, i64 1}
+!37 = !{!"branch_weights", i32 2000, i32 1}
+!38 = !{!"misexpect", i64 0, i64 2000, i64 1}
