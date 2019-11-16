@@ -11,12 +11,12 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "@com_stripe_ruby_typer//core",
         "//compiler/Errors",
+        "@com_stripe_ruby_typer//core",
         "@llvm//:core",
-        "@llvm//:x86_code_gen",
-        "@llvm//:x86_asm_parser",
         "@llvm//:passes",
+        "@llvm//:x86_asm_parser",
+        "@llvm//:x86_code_gen",
     ],
 )
 
