@@ -1,9 +1,10 @@
 cc_library(
-    name = "ObjectFileEmitter",
-    srcs = [
-        "ObjectFileEmitter.cc",
-        "ObjectFileEmitter.h",
-    ],
+    name = "Passes",
+    srcs = glob([
+        "*.cc",
+        "*.h",
+    ]),
+    hdrs = ["Passes.h"],
     linkstatic = select({
         "@com_stripe_ruby_typer//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -11,9 +12,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//compiler/IRHelpers",
-        "//compiler/Linker",
-        "//compiler/Passes",
-        "@com_stripe_ruby_typer//core",
+        "//compiler/Names",
         "@spdlog",
     ],
 )
