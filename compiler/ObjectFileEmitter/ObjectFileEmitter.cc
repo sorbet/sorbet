@@ -121,7 +121,6 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     pmbuilder.VerifyInput = debug_mode;
     targetMachine->adjustPassManager(pmbuilder);
     pmbuilder.populateFunctionPassManager(fnPasses);
-    pm.add(llvm::createVerifierPass());
     pmbuilder.populateModulePassManager(pm);
     pmbuilder.populateLTOPassManager(pm);
     // print optimized IR
