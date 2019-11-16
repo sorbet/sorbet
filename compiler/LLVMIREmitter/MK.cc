@@ -141,116 +141,17 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
     return owner + showClassNameWithoutOwner(gs, sym);
 }
 
-// TODO: add more from https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/include/ruby/ruby.h#L1962. Will
-// need to modify core sorbet for it.
-const vector<pair<core::SymbolRef, string>> knownSymbolMapping = {
-    {core::Symbols::Kernel(), "rb_mKernel"},
-    {core::Symbols::Enumerable(), "rb_mEnumerable"},
-    {core::Symbols::BasicObject(), "rb_cBasicObject"},
-    {core::Symbols::Object(), "rb_cObject"},
-    {core::Symbols::Array(), "rb_cArray"},
-    {core::Symbols::Class(), "rb_cClass"},
-    {core::Symbols::FalseClass(), "rb_cFalseClass"},
-    {core::Symbols::TrueClass(), "rb_cTrueClass"},
-    {core::Symbols::Float(), "rb_cFloat"},
-    {core::Symbols::Hash(), "rb_cHash"},
-    {core::Symbols::Integer(), "rb_cInteger"},
-    {core::Symbols::Module(), "rb_cModule"},
-    {core::Symbols::NilClass(), "rb_cNilClass"},
-    {core::Symbols::Proc(), "rb_cProc"},
-    {core::Symbols::Range(), "rb_cRange"},
-    {core::Symbols::Rational(), "rb_cRational"},
-    {core::Symbols::Regexp(), "rb_cRegexp"},
-    {core::Symbols::String(), "rb_cString"},
-    {core::Symbols::Struct(), "rb_cStruct"},
-    {core::Symbols::Symbol(), "rb_cSymbol"},
-    {core::Symbols::StandardError(), "rb_eStandardError"},
-};
-
 } // namespace
 
 llvm::Value *MK::getRubyConstantValueRaw(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &build) {
     auto &builder = builderCast(build);
     sym = removeRoot(sym);
-    for (const auto &[knownSym, name] : knownSymbolMapping) {
-        if (sym == knownSym) {
-            auto tp = llvm::Type::getInt64Ty(cs);
-            auto &nm = name; // C++ bindings don't play well with captures
-            auto globalDeclaration = cs.module->getOrInsertGlobal(name, tp, [&] {
-                auto ret =
-                    new llvm::GlobalVariable(*cs.module, tp, true, llvm::GlobalVariable::ExternalLinkage, nullptr, nm);
-                return ret;
-            });
-            return builder.CreateLoad(globalDeclaration);
-        }
-    }
     auto str = showClassName(cs, sym);
     ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
-    auto loaderName = "const_load" + str;
-    auto continuePath = llvm::BasicBlock::Create(cs, "const_continue", builder.GetInsertBlock()->getParent());
-    auto slowPath = llvm::BasicBlock::Create(cs, "const_slowPath", builder.GetInsertBlock()->getParent());
-    auto guardEpochName = "guard_epoch_" + str;
-    auto guardedConstName = "guarded_const_" + str;
-
-    auto tp = llvm::Type::getInt64Ty(cs);
-
-    auto guardEpochDeclaration = cs.module->getOrInsertGlobal(guardEpochName, tp, [&] {
-        auto ret = new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::LinkOnceAnyLinkage,
-                                            llvm::ConstantInt::get(tp, 0), guardEpochName);
-        return ret;
-    });
-
-    auto guardedConstDeclaration = cs.module->getOrInsertGlobal(guardedConstName, tp, [&] {
-        auto ret = new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::LinkOnceAnyLinkage,
-                                            llvm::ConstantInt::get(tp, 0), guardedConstName);
-        return ret;
-    });
-
-    auto canTakeFastPath =
-        builder.CreateICmpEQ(builder.CreateLoad(guardEpochDeclaration),
-                             builder.CreateCall(cs.module->getFunction("sorbet_getConstantEpoch")), "canTakeFastPath");
-    auto expected = MK::setExpectedBool(cs, builder, canTakeFastPath, true);
-
-    builder.CreateCondBr(expected, continuePath, slowPath);
-    builder.SetInsertPoint(slowPath);
-    auto recomputeFunName = "const_recompute_" + str;
-    auto recomputeFun = cs.module->getFunction(recomputeFunName);
-    if (!recomputeFun) {
-        // generate something logically similar to
-        // VALUE const_load_FOO() {
-        //    if (const_guard == constant_epoch()) {
-        //      return guarded_const;
-        //    } else {
-        //      guardedConst = sorbet_getConstant("FOO");
-        //      const_guard = constant_epoch();
-        //      return guarded_const;
-        //    }
-        //
-        //    It's not exactly this as I'm doing some tunnings, more specifically, the "else" branch will be marked cold
-        //    and shared across all modules
-
-        auto recomputeFunT = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), {}, false /*not varargs*/);
-        recomputeFun = llvm::Function::Create(recomputeFunT, llvm::Function::LinkOnceAnyLinkage,
-                                              llvm::Twine("const_recompute_") + str, *cs.module);
-        recomputeFun->addFnAttr(llvm::Attribute::AlwaysInline);
-        llvm::IRBuilder<> functionBuilder(cs);
-
-        functionBuilder.SetInsertPoint(llvm::BasicBlock::Create(cs, "", recomputeFun));
-
-        functionBuilder.CreateStore(
-            functionBuilder.CreateCall(
-                cs.module->getFunction("sorbet_getConstant"),
-                {MK::toCString(cs, str, functionBuilder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))}),
-            guardedConstDeclaration);
-        functionBuilder.CreateStore(functionBuilder.CreateCall(cs.module->getFunction("sorbet_getConstantEpoch")),
-                                    guardEpochDeclaration);
-        functionBuilder.CreateRetVoid();
-    }
-    builder.CreateCall(recomputeFun);
-    builder.CreateBr(continuePath);
-    builder.SetInsertPoint(continuePath);
-
-    return builder.CreateLoad(guardedConstDeclaration);
+    auto functionName = sym.data(cs)->isClassOrModule() ? "sorbet_i_getRubyClass" : "sorbet_i_getRubyConstant";
+    return builder.CreateCall(
+        cs.module->getFunction(functionName),
+        {MK::toCString(cs, str, builder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
 }
 
 llvm::Constant *MK::toCString(CompilerState &cs, string_view str, llvm::IRBuilderBase &builder) {
