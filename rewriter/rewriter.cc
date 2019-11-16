@@ -156,7 +156,11 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
-        return InterfaceWrapper::run(ctx, std::move(send));
+        if (auto expr = InterfaceWrapper::run(ctx, send.get())) {
+            return expr;
+        }
+
+        return send;
     }
 
 private:
