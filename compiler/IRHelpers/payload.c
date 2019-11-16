@@ -849,6 +849,7 @@ VALUE sorbet_i_getRubyClass(const char *const className, long classNameLen); // 
 VALUE sorbet_i_getRubyConstant(const char *const className, long classNameLen);
 
 VALUE sorbet_only_exists_to_keep_functions_alive() {
+    // this function will be nuked but it exists to keep forward definitions alive for clang
     return sorbet_i_getRubyClass(0, 2) + sorbet_i_getRubyConstant(0, 2);
 }
 #endif
