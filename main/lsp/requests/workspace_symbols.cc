@@ -19,6 +19,9 @@ public:
     static constexpr size_t MAX_RESULTS = 50;
     static constexpr size_t MAX_LOCATIONS_PER_SYMBOL = 10;
 
+    // Given the best match, don't return things more than 100x worse
+    static constexpr size_t WORST_TO_BEST_RATIO = 100;
+
     SymbolMatcher(const LSPConfiguration &config, const core::GlobalState &gs);
 
     vector<unique_ptr<SymbolInformation>> doQuery(string_view query, size_t maxResults = MAX_RESULTS);
@@ -58,19 +61,38 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
     return results;
 }
 
-/** Allow these symbols to act as namespace separators in user queries. */
+/** Is a symbol that can act as a namespace separator in user queries. */
 inline bool canBeLeadingNamespaceSeparator(char ch) {
-    return ch == ':' || ch == '.' || ch == '#' || ch == ' ';
+    return ch == ':' || ch == '.' || ch == '#' || isspace(ch);
 }
 
-/** Returns a pair of {rank, query_length_matched} for the given symbol/query. */
-pair<int, string_view::const_iterator> partialMatchSymbol(string_view symbol, string_view::const_iterator queryBegin,
-                                                          string_view::const_iterator queryEnd, bool prefixOnly) {
+/** Is symbol that can skip to the next word boundary within a symbol. */
+inline bool canMatchWordBoundary(char ch) {
+    return isspace(ch);
+}
+
+inline bool isEligibleSymbol(const core::GlobalState &gs, const core::SymbolData &symbolData,
+                             const core::NameData &nameData) {
+    if (nameData->kind == core::NameKind::UNIQUE) {
+        return false;
+    }
+    return true;
+}
+
+struct PartialMatch {
+    uint score = 0;
+    string_view::const_iterator matchEnd = nullptr; // progress in query match
+};
+
+/** Returns a PartialMatch the given symbol/query. */
+PartialMatch partialMatchSymbol(string_view symbol, string_view::const_iterator queryBegin,
+                                string_view::const_iterator queryEnd, bool prefixOnly, uint ceilingScore) {
     auto symbolIter = symbol.begin();
     auto symbolEnd = symbol.end();
     auto queryIter = queryBegin;
-    pair<int, string_view::const_iterator> result = {0, queryIter};
-    // Consume leading namespacing punctuation, e.g. to make `::f` matchable against `module Foo`.
+    auto matchEnd = queryBegin;
+    // Consume leading namespacing punctuation, e.g. to make `::f` matchable
+    // against `module Foo`.
     while (queryIter != queryEnd && canBeLeadingNamespaceSeparator(*queryIter)) {
         queryIter++;
     }
@@ -79,39 +101,55 @@ pair<int, string_view::const_iterator> partialMatchSymbol(string_view symbol, st
     }
     char previousSymbolCh = 0;
     char symbolCh = 0;
-    while (queryIter != queryEnd) {
+    uint score = 1;
+    while (queryIter != queryEnd && symbolIter != symbolEnd && score < ceilingScore) {
         auto queryCh = *queryIter++;
+        bool okToMatchWordBoundary = canMatchWordBoundary(queryCh);
         bool queryCharIsLower = islower(queryCh);
         int symbolCharsConsumed = 0;
+        int boundariesCrossed = 0;
+        bool previousWordBoundary = true;
         while (symbolIter != symbolEnd) {
             previousSymbolCh = symbolCh;
             symbolCh = *symbolIter++;
             symbolCharsConsumed++;
+            bool onWordBoundary = !isalnum(previousSymbolCh) || isupper(symbolCh);
+            if (onWordBoundary && !previousWordBoundary) {
+                boundariesCrossed += 1;
+            }
             if (queryCh == symbolCh || (queryCharIsLower && tolower(queryCh) == tolower(symbolCh))) {
                 if (symbolCharsConsumed == 1) {
+                    score += 1;
                     if (queryCh != symbolCh) {
-                        result.first += 1; // matching character not quite as good
+                        score += 2; // penalize case-insensitive match
                     }
-                    result.second = queryIter;
+                    matchEnd = queryIter;
                     break;
-                } else if (!isalnum(previousSymbolCh) || isupper(symbolCh)) {
+                } else if (onWordBoundary) {
                     // On a word boundary
-                    result.first += 100 + symbolCharsConsumed;
-                    result.second = queryIter;
+                    score = score + 5 * boundariesCrossed;
+                    matchEnd = queryIter;
                     break;
                 } else if (!prefixOnly) {
                     // middle of word...can sometimes match, but steep penalty
-                    result.first += 200 + symbolCharsConsumed;
-                    result.second = queryIter;
+                    score = 5 * score + symbolCharsConsumed;
+                    matchEnd = queryIter;
                     break;
                 }
+            } else if (onWordBoundary && okToMatchWordBoundary) {
+                // consume queryCh, but put symbolCh back to let it match next queryCh
+                // (allows whitespace to be used for more natural searches)
+                symbolIter--;
+                break;
             }
+            previousWordBoundary = onWordBoundary;
         }
     }
-    if (result.second != queryBegin) {
-        result.first += symbol.length(); // penalize longer symbols
+    score += symbol.length();
+    if (score >= ceilingScore) {
+        return {1, queryBegin};
     }
-    return result;
+    return {score, matchEnd};
 }
 } // namespace
 
@@ -123,61 +161,97 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     if (queryBegin == queryEnd) {
         return results;
     }
-    struct ScoreInfo {
-        u4 symbolIndex = 0;
-        int score = 0;
-        string_view::const_iterator queryIter = nullptr; // progress in query match
-    };
-    vector<ScoreInfo> scoreInfos(gs.symbolsUsed());
-    scoreInfos[0].queryIter = queryBegin;
+    size_t ceilingScore = INT_MAX;
+    vector<PartialMatch> partialMatches(gs.symbolsUsed());
     // First pass: prefix-only matches on namespace
-    for (u4 symbolIndex = 1; symbolIndex < gs.symbolsUsed(); symbolIndex++) {
-        auto &scoreInfo = scoreInfos[symbolIndex];
-        auto symbolData = core::SymbolRef(gs, symbolIndex).data(gs);
-        auto nameData = symbolData->name.data(gs);
-        if (nameData->kind == core::NameKind::UNIQUE) {
-            continue;
-        }
-        auto [ownerSymbolIndex, ownerScore, ownerQueryIter] = scoreInfos[symbolData->owner._id];
-        if (ownerSymbolIndex == 0 || ownerQueryIter == nullptr) {
-            ownerScore = 0;
-            ownerQueryIter = queryBegin;
-        }
-        auto shortName = nameData->shortName(gs);
-        auto [partialScore, partialQueryIter] = partialMatchSymbol(shortName, ownerQueryIter, queryEnd, true);
-        scoreInfo.symbolIndex = symbolIndex;
-        scoreInfo.score = ownerScore + partialScore;
-        scoreInfo.queryIter = partialQueryIter;
-    }
-
-    // Second pass: record matches and (try a little harder by relaxing the prefix-only requirement for non-matches)
-    // Don't update partialScoreInfos, because we are using it to keep the prefix-only scores for owner-namespaces.
-    vector<pair<u4, int>> candidates;
-    for (u4 symbolIndex = 1; symbolIndex < gs.symbolsUsed(); symbolIndex++) {
-        auto &scoreInfo = scoreInfos[symbolIndex];
-        auto symbolRef = core::SymbolRef(gs, scoreInfo.symbolIndex);
-        if (hideSymbol(gs, symbolRef)) {
-            continue; // symbol ineligible
-        }
-        auto symbolData = core::SymbolRef(gs, scoreInfo.symbolIndex).data(gs);
-        auto [ownerSymbolIndex, ownerScore, ownerQueryIter] = scoreInfos[symbolData->owner._id];
-        optional<int> bestScore = nullopt;
-        if (scoreInfo.queryIter == queryEnd && !(ownerQueryIter == queryEnd && ownerScore <= scoreInfo.score)) {
-            bestScore = scoreInfo.score;
-        }
-        auto shortName = symbolData->name.data(gs)->shortName(gs);
-        auto [score, queryIter] = partialMatchSymbol(shortName, queryBegin, queryEnd, false);
-        if (queryIter == queryEnd && (!bestScore.has_value() || *bestScore > score)) {
-            bestScore = score;
-        }
-        if (ownerQueryIter != nullptr && ownerQueryIter != queryBegin && ownerQueryIter != queryEnd) {
-            auto [score, queryIter] = partialMatchSymbol(shortName, ownerQueryIter, queryEnd, false);
-            if (queryIter == queryEnd && (!bestScore.has_value() || *bestScore > score)) {
-                bestScore = ownerScore + score;
+    {
+        Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass1");
+        for (u4 symbolIndex = 1; symbolIndex < gs.symbolsUsed(); symbolIndex++) {
+            auto symbolRef = core::SymbolRef(gs, symbolIndex);
+            auto symbolData = symbolRef.data(gs);
+            auto nameData = symbolData->name.data(gs);
+            if (!isEligibleSymbol(gs, symbolData, nameData)) {
+                continue;
+            }
+            auto shortName = nameData->shortName(gs);
+            auto &partialMatch = partialMatches[symbolIndex] =
+                partialMatchSymbol(shortName, queryBegin, queryEnd, true, ceilingScore);
+            for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
+                 previousAncestorRef != ancestorRef && ancestorRef.exists();
+                 previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.data(gs)->owner) {
+                auto &ancestorMatch = partialMatches[ancestorRef._id];
+                auto ancestorEnd = ancestorMatch.matchEnd;
+                if (ancestorEnd == queryBegin || ancestorEnd == nullptr) {
+                    break; // no further ancestor will be of any help
+                }
+                if (ancestorEnd == queryEnd) {
+                    continue; // ancestor matched everything, so skip to its parent
+                }
+                auto ancestorScore = ancestorMatch.score;
+                auto plusMatch =
+                    partialMatchSymbol(shortName, ancestorEnd, queryEnd, true, ceilingScore - ancestorScore);
+                if (plusMatch.matchEnd - partialMatch.matchEnd > 0) {
+                    partialMatch.score = ancestorScore + plusMatch.score;
+                    partialMatch.matchEnd = plusMatch.matchEnd;
+                } else if (plusMatch.matchEnd == partialMatch.matchEnd) {
+                    auto combinedScore = ancestorScore + plusMatch.score;
+                    if (combinedScore < partialMatch.score) {
+                        partialMatch.score = combinedScore;
+                    }
+                }
+            }
+            if (partialMatch.matchEnd == queryEnd) {
+                // update ceiling so we stop looking at bad matches
+                ceilingScore = min(ceilingScore, partialMatch.score * WORST_TO_BEST_RATIO);
             }
         }
-        if (bestScore.has_value()) {
-            candidates.emplace_back(scoreInfo.symbolIndex, *bestScore);
+    }
+
+    // Second pass: record matches and (try a little harder by relaxing the
+    // prefix-only requirement for non-matches) Don't update partialMatches,
+    // because we will continue using it to keep the prefix-only scores for
+    // owner-namespaces.
+    vector<pair<u4, int>> candidates;
+    {
+        Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass2");
+        for (u4 symbolIndex = 1; symbolIndex < gs.symbolsUsed(); symbolIndex++) {
+            auto symbolRef = core::SymbolRef(gs, symbolIndex);
+            auto symbolData = symbolRef.data(gs);
+            auto nameData = symbolData->name.data(gs);
+            if (!isEligibleSymbol(gs, symbolData, nameData)) {
+                continue;
+            }
+            auto shortName = nameData->shortName(gs);
+            optional<uint> bestScore = nullopt;
+            auto partialMatch = partialMatchSymbol(shortName, queryBegin, queryEnd, false, ceilingScore);
+            if (partialMatch.matchEnd == queryEnd) {
+                bestScore = partialMatch.score;
+            }
+            for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
+                 previousAncestorRef != ancestorRef && ancestorRef.exists();
+                 previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.data(gs)->owner) {
+                auto [ancestorScore, ancestorEnd] = partialMatches[ancestorRef._id];
+                if (ancestorEnd == queryBegin || ancestorEnd == nullptr) {
+                    break; // no further ancestor will be of any help
+                }
+                if (ancestorEnd == queryEnd) {
+                    continue; // ancestor matched everything, so skip to its parent
+                }
+                auto bestOrCeilingScore = bestScore.value_or(ceilingScore);
+                if (ancestorScore >= bestOrCeilingScore) {
+                    continue; // matching this ancestor would be worse
+                }
+                auto [plusScore, plusEnd] =
+                    partialMatchSymbol(shortName, ancestorEnd, queryEnd, false, bestOrCeilingScore - ancestorScore);
+                if (plusEnd == queryEnd) {
+                    bestScore = min(bestOrCeilingScore, ancestorScore + plusScore);
+                }
+            }
+            if (bestScore.has_value()) {
+                // update ceiling so we stop looking at bad matches
+                ceilingScore = min(ceilingScore, *bestScore * WORST_TO_BEST_RATIO);
+                candidates.emplace_back(symbolIndex, *bestScore);
+            }
         }
     }
     fast_sort(candidates, [](pair<u4, int> &left, pair<u4, int> &right) -> bool { return left.second < right.second; });
@@ -193,18 +267,20 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     }
     ENFORCE(results.size() <= maxResults);
     return results;
-}
+} // namespace sorbet::realmain::lsp
 
 unique_ptr<ResponseMessage> LSPLoop::handleWorkspaceSymbols(LSPTypechecker &typechecker, const MessageId &id,
                                                             const WorkspaceSymbolParams &params) const {
+    Timer timeit(typechecker.state().tracer(), "LSPLoop::handleWorkspaceSymbols");
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::WorkspaceSymbol);
     if (!config->opts.lspWorkspaceSymbolsEnabled) {
         response->error =
-            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                       "The `Workspace Symbols` LSP feature is experimental and disabled by default.");
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "The `Workspace Symbols` LSP feature is "
+                                                                           "experimental and disabled by default.");
         return response;
     }
 
+    ShowOperation op(*config, "References", "Workspace symbol search...");
     prodCategoryCounterInc("lsp.messages.processed", "workspace.symbols");
     SymbolMatcher matcher(*config, typechecker.state());
     response->result = matcher.doQuery(params.query);
