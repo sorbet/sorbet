@@ -649,6 +649,17 @@ VALUE sorbet_boolToRuby(_Bool b) {
 // ****                       Name Based Intrinsics
 // ****
 
+VALUE sorbet_buildHashIntrinsic(VALUE recv, int argc, const VALUE *const restrict argv) {
+    // this comes from internal.h
+    void rb_hash_bulk_insert(long, const VALUE *, VALUE);
+
+    VALUE ret = rb_hash_new();
+    if (argc != 0) {
+        rb_hash_bulk_insert(argc, argv, ret);
+    }
+    return ret;
+}
+
 VALUE sorbet_buildArrayIntrinsic(VALUE recv, int argc, const VALUE *const restrict argv) {
     if (argc == 0) {
         return rb_ary_new();

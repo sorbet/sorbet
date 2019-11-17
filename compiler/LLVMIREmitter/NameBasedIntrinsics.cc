@@ -152,32 +152,6 @@ public:
     }
 } DefineClassIntrinsic;
 
-class BuildHashIntrinsic : public NameBasedIntrinsicMethod {
-public:
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
-                                  const BasicBlockMap &blockMap,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int rubyBlockId) const override {
-        auto &builder = builderCast(build);
-        auto ret = builder.CreateCall(cs.module->getFunction("sorbet_newRubyHash"), {}, "rawHashLiteral");
-        // TODO(perf): in 2.7 use rb_hash_bulk_insert will give 2x speedup
-        int argc = 0;
-        while (argc < i->args.size()) {
-            auto key = i->args[argc].variable;
-            auto value = i->args[argc + 1].variable;
-            builder.CreateCall(cs.module->getFunction("sorbet_hashStore"),
-                               {ret, MK::varGet(cs, key, builder, blockMap, aliases, rubyBlockId),
-                                MK::varGet(cs, value, builder, blockMap, aliases, rubyBlockId)});
-            argc += 2;
-        }
-        return ret;
-    }
-
-    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::buildHash()};
-    }
-} BuildHashIntrinsic;
-
 class IdentityIntrinsic : public NameBasedIntrinsicMethod {
 public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
@@ -308,13 +282,14 @@ public:
 static const vector<CallCMethod> knownCMethods{
     {"<expand-splat>", "sorbet_splatIntrinsic", NoReciever},
     {"defined?", "sorbet_definedIntinsic", NoReciever},
+    {"<build-hash>", "sorbet_buildHashIntrinsic", NoReciever},
     {"<build-array>", "sorbet_buildArrayIntrinsic", NoReciever},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{
-        &DoNothingIntrinsic, &DefineMethodIntrinsic, &DefineClassIntrinsic,
-        &BuildHashIntrinsic, &IdentityIntrinsic,     &CallWithBlock,
+        &DoNothingIntrinsic, &DefineMethodIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic, &CallWithBlock,
+
     };
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
