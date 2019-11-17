@@ -507,7 +507,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     }
     /* run verifier */
     ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
-    // cs.runCheapOptimizations(func);
+    cs.runCheapOptimizations(func);
 }
 
 void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, string_view objectName) {
