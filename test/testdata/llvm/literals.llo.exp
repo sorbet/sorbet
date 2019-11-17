@@ -10,12 +10,10 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 %struct.anon = type { i64, i8*, %union.anon.0 }
 %union.anon.0 = type { i64 }
 
-@.str = private unnamed_addr constant [16 x i8] c"ERROR: %s is 0\0A\00", align 1
-@.str.1 = private unnamed_addr constant [5 x i8] c"%li\0B\00", align 1
+@.str = private unnamed_addr constant [5 x i8] c"%li\0B\00", align 1
 @rb_cObject = external local_unnamed_addr constant i64, align 8
-@.str.6 = private unnamed_addr constant [5 x i8] c"func\00", align 1
-@.str.11 = private unnamed_addr constant [16 x i8] c"CompiledClosure\00", align 1
-@closureInfo = local_unnamed_addr constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.11, i32 0, i32 0), %struct.anon.1 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
+@.str.7 = private unnamed_addr constant [16 x i8] c"CompiledClosure\00", align 1
+@closureInfo = local_unnamed_addr constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.7, i32 0, i32 0), %struct.anon.1 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
 @str_str = private unnamed_addr constant [4 x i8] c"str\00", align 1
@@ -24,42 +22,22 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @llvm.global_ctors = appending global [2 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_sym, i8* bitcast (i64* @rubyIdPrecomputed_sym to i8*) }]
 
 ; Function Attrs: nounwind ssp uwtable
-define weak void @dbg_sorbet_validate_id(i64 %0, i8* %1) local_unnamed_addr #0 {
-  %3 = icmp eq i64 %0, 0
-  br i1 %3, label %4, label %6, !prof !0
-
-4:                                                ; preds = %2
-  %5 = tail call i32 (i8*, ...) @printf(i8* nonnull dereferenceable(1) getelementptr inbounds ([16 x i8], [16 x i8]* @.str, i64 0, i64 0), i8* %1)
-  tail call void @abort() #8
-  unreachable
-
-6:                                                ; preds = %2
-  ret void
-}
-
-; Function Attrs: nofree nounwind
-declare i32 @printf(i8* nocapture readonly, ...) local_unnamed_addr #1
-
-; Function Attrs: cold noreturn
-declare void @abort() local_unnamed_addr #2
-
-; Function Attrs: nounwind ssp uwtable
 define weak i8* @dbg_pi(i64 %0) local_unnamed_addr #0 {
-  %2 = tail call i8* @rb_id2name(i64 %0) #9
+  %2 = tail call i8* @rb_id2name(i64 %0) #6
   ret i8* %2
 }
 
-declare i8* @rb_id2name(i64) local_unnamed_addr #3
+declare i8* @rb_id2name(i64) local_unnamed_addr #1
 
 ; Function Attrs: nounwind ssp uwtable
 define weak i8* @dbg_p(i64 %0) local_unnamed_addr #0 {
-  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.1, i64 0, i64 0), i64 %0) #9
+  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i64 0, i64 0), i64 %0) #6
   %3 = inttoptr i64 %2 to %struct.RBasic*
   %4 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %3, i64 0, i32 0
-  %5 = load i64, i64* %4, align 8, !tbaa !1
+  %5 = load i64, i64* %4, align 8, !tbaa !0
   %6 = and i64 %5, 8192
   %7 = icmp eq i64 %6, 0
-  %8 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.1, i64 0, i64 0), i64 %0) #9
+  %8 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i64 0, i64 0), i64 %0) #6
   %9 = inttoptr i64 %8 to %struct.RString*
   br i1 %7, label %10, label %13
 
@@ -70,7 +48,7 @@ define weak i8* @dbg_p(i64 %0) local_unnamed_addr #0 {
 
 13:                                               ; preds = %1
   %14 = getelementptr inbounds %struct.RString, %struct.RString* %9, i64 0, i32 1, i32 0, i32 1
-  %15 = load i8*, i8** %14, align 8, !tbaa !6
+  %15 = load i8*, i8** %14, align 8, !tbaa !5
   br label %16
 
 16:                                               ; preds = %13, %10
@@ -78,33 +56,33 @@ define weak i8* @dbg_p(i64 %0) local_unnamed_addr #0 {
   ret i8* %17
 }
 
-declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #3
+declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #1
 
-declare i64 @rb_str_new(i8*, i64) local_unnamed_addr #3
+declare i64 @rb_str_new(i8*, i64) local_unnamed_addr #1
 
-declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #3
+declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #1
 
-declare i64 @rb_id2sym(i64) local_unnamed_addr #3
+declare i64 @rb_id2sym(i64) local_unnamed_addr #1
 
-declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #3
+declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #1
 
 ; Function Attrs: nounwind ssp uwtable
 define internal void @sorbet_Closure_mark(i8* %0) #0 {
   %2 = bitcast i8* %0 to i32*
-  %3 = load i32, i32* %2, align 8, !tbaa !7
+  %3 = load i32, i32* %2, align 8, !tbaa !6
   %4 = sext i32 %3 to i64
   %5 = getelementptr inbounds i8, i8* %0, i64 8
   %6 = bitcast i8* %5 to i64*
-  tail call void @rb_gc_mark_values(i64 %4, i64* nonnull %6) #9
+  tail call void @rb_gc_mark_values(i64 %4, i64* nonnull %6) #6
   ret void
 }
 
-declare void @rb_gc_mark_values(i64, i64*) local_unnamed_addr #3
+declare void @rb_gc_mark_values(i64, i64*) local_unnamed_addr #1
 
 ; Function Attrs: norecurse nounwind readnone ssp uwtable
-define internal i64 @sorbet_Closure_size(i8* nocapture readonly %0) #4 {
+define internal i64 @sorbet_Closure_size(i8* nocapture readonly %0) #2 {
   %2 = bitcast i8* %0 to i32*
-  %3 = load i32, i32* %2, align 8, !tbaa !7
+  %3 = load i32, i32* %2, align 8, !tbaa !6
   %4 = sext i32 %3 to i64
   %5 = shl nsw i64 %4, 3
   %6 = add nsw i64 %5, 8
@@ -112,23 +90,23 @@ define internal i64 @sorbet_Closure_size(i8* nocapture readonly %0) #4 {
 }
 
 ; Function Attrs: nounwind ssp
-define internal void @Constr_rubyIdPrecomputed_puts() #5 {
+define internal void @Constr_rubyIdPrecomputed_puts() #3 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts, i64 0, i64 0), i64 4) #9
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts, i64 0, i64 0), i64 4) #6
   store i64 %0, i64* @rubyIdPrecomputed_puts, align 8
   ret void
 }
 
 ; Function Attrs: nounwind ssp
-define internal void @Constr_rubyIdPrecomputed_sym() #5 {
+define internal void @Constr_rubyIdPrecomputed_sym() #3 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_sym, i64 0, i64 0), i64 3) #9
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_sym, i64 0, i64 0), i64 3) #6
   store i64 %0, i64* @rubyIdPrecomputed_sym, align 8
   ret void
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_llvm_literals() local_unnamed_addr #6 {
+define void @Init_test_testdata_llvm_literals() local_unnamed_addr #4 {
 "func_<root>.<static-init>$111.exit":
   %callArgs.i = alloca [1 x i64], align 8
   %0 = load i64, i64* @rb_cObject, align 8
@@ -138,76 +116,44 @@ define void @Init_test_testdata_llvm_literals() local_unnamed_addr #6 {
   %rubyId_sym.i = load i64, i64* @rubyIdPrecomputed_sym, align 8
   %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
   store i64 85, i64* %callArgsAddr.i, align 8
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #9, !noalias !9
-  %2 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #9
+  %2 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #6
   store i64 56565211319773434, i64* %callArgsAddr.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #9, !noalias !12
-  %3 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #9
-  %4 = call i64 @rb_str_new(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_str, i64 0, i64 0), i64 3) #9
+  %3 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #6
+  %4 = call i64 @rb_str_new(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_str, i64 0, i64 0), i64 3) #6
   store i64 %4, i64* %callArgsAddr.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #9, !noalias !15
-  %5 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #9
-  %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_sym.i) #9
+  %5 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #6
+  %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_sym.i) #6
   store i64 %rawSym.i, i64* %callArgsAddr.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #9, !noalias !18
-  %6 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #9
+  %6 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #6
   store i64 0, i64* %callArgsAddr.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #9, !noalias !21
-  %7 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #9
+  %7 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #6
   store i64 20, i64* %callArgsAddr.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #9, !noalias !24
-  %8 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #9
+  %8 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #6
   store i64 8, i64* %callArgsAddr.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #9, !noalias !27
-  %9 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #9
+  %9 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #6
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %1)
   ret void
 }
 
 ; Function Attrs: argmemonly nounwind willreturn
-declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #7
+declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #5
 
 ; Function Attrs: argmemonly nounwind willreturn
-declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #7
+declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #5
 
 attributes #0 = { nounwind ssp uwtable }
-attributes #1 = { nofree nounwind }
-attributes #2 = { cold noreturn }
-attributes #3 = { "addedToSilenceEmptyAttrsError" }
-attributes #4 = { norecurse nounwind readnone ssp uwtable }
-attributes #5 = { nounwind ssp }
-attributes #6 = { nounwind sspreq }
-attributes #7 = { argmemonly nounwind willreturn }
-attributes #8 = { cold noreturn nounwind }
-attributes #9 = { nounwind }
+attributes #1 = { "addedToSilenceEmptyAttrsError" }
+attributes #2 = { norecurse nounwind readnone ssp uwtable }
+attributes #3 = { nounwind ssp }
+attributes #4 = { nounwind sspreq }
+attributes #5 = { argmemonly nounwind willreturn }
+attributes #6 = { nounwind }
 
-!0 = !{!"branch_weights", i32 1, i32 2000}
-!1 = !{!2, !3, i64 0}
-!2 = !{!"RBasic", !3, i64 0, !3, i64 8}
-!3 = !{!"long", !4, i64 0}
-!4 = !{!"omnipotent char", !5, i64 0}
-!5 = !{!"Simple C/C++ TBAA"}
-!6 = !{!4, !4, i64 0}
-!7 = !{!8, !8, i64 0}
-!8 = !{!"int", !4, i64 0}
-!9 = !{!10}
-!10 = distinct !{!10, !11, !"sorbet_callFunc: argument 0"}
-!11 = distinct !{!11, !"sorbet_callFunc"}
-!12 = !{!13}
-!13 = distinct !{!13, !14, !"sorbet_callFunc: argument 0"}
-!14 = distinct !{!14, !"sorbet_callFunc"}
-!15 = !{!16}
-!16 = distinct !{!16, !17, !"sorbet_callFunc: argument 0"}
-!17 = distinct !{!17, !"sorbet_callFunc"}
-!18 = !{!19}
-!19 = distinct !{!19, !20, !"sorbet_callFunc: argument 0"}
-!20 = distinct !{!20, !"sorbet_callFunc"}
-!21 = !{!22}
-!22 = distinct !{!22, !23, !"sorbet_callFunc: argument 0"}
-!23 = distinct !{!23, !"sorbet_callFunc"}
-!24 = !{!25}
-!25 = distinct !{!25, !26, !"sorbet_callFunc: argument 0"}
-!26 = distinct !{!26, !"sorbet_callFunc"}
-!27 = !{!28}
-!28 = distinct !{!28, !29, !"sorbet_callFunc: argument 0"}
-!29 = distinct !{!29, !"sorbet_callFunc"}
+!0 = !{!1, !2, i64 0}
+!1 = !{!"RBasic", !2, i64 0, !2, i64 8}
+!2 = !{!"long", !3, i64 0}
+!3 = !{!"omnipotent char", !4, i64 0}
+!4 = !{!"Simple C/C++ TBAA"}
+!5 = !{!3, !3, i64 0}
+!6 = !{!7, !7, i64 0}
+!7 = !{!"int", !3, i64 0}
