@@ -649,6 +649,13 @@ VALUE sorbet_boolToRuby(_Bool b) {
 // ****                       Name Based Intrinsics
 // ****
 
+VALUE sorbet_buildArrayIntrinsic(VALUE recv, int argc, const VALUE *const restrict argv) {
+    if (argc == 0) {
+        return rb_ary_new();
+    }
+    return rb_ary_new_from_values(argc, argv);
+}
+
 VALUE sorbet_splatIntrinsic(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 3);
     VALUE arr = argv[0];

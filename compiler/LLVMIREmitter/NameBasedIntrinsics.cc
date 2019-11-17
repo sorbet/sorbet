@@ -152,28 +152,6 @@ public:
     }
 } DefineClassIntrinsic;
 
-class BuildArrayIntrinsic : public NameBasedIntrinsicMethod {
-public:
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
-                                  const BasicBlockMap &blockMap,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int rubyBlockId) const override {
-        auto &builder = builderCast(build);
-        auto ret =
-            builder.CreateCall(cs.module->getFunction("sorbet_newRubyArray"),
-                               {llvm::ConstantInt::get(cs, llvm::APInt(64, i->args.size(), true))}, "rawArrayLiteral");
-        for (int argc = 0; argc < i->args.size(); argc++) {
-            auto value = i->args[argc].variable;
-            builder.CreateCall(cs.module->getFunction("sorbet_arrayPush"),
-                               {ret, MK::varGet(cs, value, builder, blockMap, aliases, rubyBlockId)});
-        }
-        return ret;
-    }
-    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::buildArray()};
-    }
-} BuildArrayIntrinsic;
-
 class BuildHashIntrinsic : public NameBasedIntrinsicMethod {
 public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
@@ -330,11 +308,12 @@ public:
 static const vector<CallCMethod> knownCMethods{
     {"<expand-splat>", "sorbet_splatIntrinsic", NoReciever},
     {"defined?", "sorbet_definedIntinsic", NoReciever},
+    {"<build-array>", "sorbet_buildArrayIntrinsic", NoReciever},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{
-        &DoNothingIntrinsic, &DefineMethodIntrinsic, &DefineClassIntrinsic, &BuildArrayIntrinsic,
+        &DoNothingIntrinsic, &DefineMethodIntrinsic, &DefineClassIntrinsic,
         &BuildHashIntrinsic, &IdentityIntrinsic,     &CallWithBlock,
     };
     for (auto &method : knownCMethods) {
