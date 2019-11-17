@@ -545,8 +545,8 @@ typeTestSuccess._crit_edge:                       ; preds = %typeTestSuccess
   %15 = icmp ne i64 %14, 0
   %16 = and i64 %rawArg_arg, 3
   %17 = icmp eq i64 %16, 2
-  %or.cond33 = or i1 %15, %17
-  br i1 %or.cond33, label %typeTestSuccess24, label %18
+  %or.cond = or i1 %15, %17
+  br i1 %or.cond, label %typeTestSuccess24, label %18
 
 typeTestFail:                                     ; preds = %fillRequiredArgs
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0))
@@ -687,7 +687,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %4 = and i64 %rawArg_arg, 1
   %5 = icmp eq i64 %4, 0
-  br i1 %5, label %typeTestFail30, label %typeTestSuccess34, !prof !0, !misexpect !14
+  br i1 %5, label %typeTestFail30, label %"fastSymCallIntrinsic_+", !prof !0, !misexpect !14
 
 typeTestFail:                                     ; preds = %fillRequiredArgs
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0))
@@ -697,21 +697,21 @@ typeTestFail30:                                   ; preds = %typeTestSuccess
   tail call fastcc void @sorbet_cast_failure(i64 %rawArg_arg, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0))
   unreachable
 
-typeTestSuccess34:                                ; preds = %typeTestSuccess
+"fastSymCallIntrinsic_+":                         ; preds = %typeTestSuccess
   %6 = add nsw i64 %rawArg_arg, -1
   %7 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %rawArg_arg, i64 %6) #17
   %8 = extractvalue { i64, i1 } %7, 1
   %9 = extractvalue { i64, i1 } %7, 0
   br i1 %8, label %10, label %sorbet_rb_int_plus.exit
 
-10:                                               ; preds = %typeTestSuccess34
+10:                                               ; preds = %"fastSymCallIntrinsic_+"
   %11 = ashr i64 %9, 1
   %12 = xor i64 %11, -9223372036854775808
   %13 = tail call i64 @rb_int2big(i64 %12) #17, !noalias !28
   br label %sorbet_rb_int_plus.exit
 
-sorbet_rb_int_plus.exit:                          ; preds = %typeTestSuccess34, %10
-  %14 = phi i64 [ %13, %10 ], [ %9, %typeTestSuccess34 ]
+sorbet_rb_int_plus.exit:                          ; preds = %"fastSymCallIntrinsic_+", %10
+  %14 = phi i64 [ %13, %10 ], [ %9, %"fastSymCallIntrinsic_+" ]
   ret i64 %14
 }
 

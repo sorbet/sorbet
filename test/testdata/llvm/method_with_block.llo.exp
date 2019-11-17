@@ -680,22 +680,22 @@ typeTestFail.i:                                   ; preds = %sorbet_isa_class_of
   unreachable
 
 "func_<root>.<static-init>$111.exit":             ; preds = %typeTestSuccess.i, %25
-  %callArgsAddr3.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
+  %callArgsAddr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_foo.i) #17
   tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#foo" to i64 (...)*), i32 -1) #17
-  store i64 %0, i64* %callArgsAddr3.i, align 8
+  store i64 %0, i64* %callArgsAddr.i, align 8
   %rawSym45.i = tail call i64 @rb_id2sym(i64 %rubyId_boo.i) #17
   tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_boo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#boo" to i64 (...)*), i32 -1) #17
   %28 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %8, align 8, !tbaa !20
   %29 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %28, i64 0, i32 1, i64 0
   %30 = load i64, i64* %29, align 8
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_foo.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !33
-  %31 = call i64 @rb_block_call(i64 %30, i64 %rubyId_foo.i, i32 0, i64* nonnull %callArgsAddr3.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$111$block_1" to i64 (...)*), i64 %5) #17
+  %31 = call i64 @rb_block_call(i64 %30, i64 %rubyId_foo.i, i32 0, i64* nonnull %callArgsAddr.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$111$block_1" to i64 (...)*), i64 %5) #17
   %32 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %8, align 8, !tbaa !20
   %33 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %32, i64 0, i32 1, i64 0
   %34 = load i64, i64* %33, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_boo.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !36
-  %35 = call i64 @rb_block_call(i64 %34, i64 %rubyId_boo.i, i32 0, i64* nonnull %callArgsAddr3.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$111$block_2" to i64 (...)*), i64 %5) #17
+  %35 = call i64 @rb_block_call(i64 %34, i64 %rubyId_boo.i, i32 0, i64* nonnull %callArgsAddr.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$111$block_2" to i64 (...)*), i64 %5) #17
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %1)
   ret void
 }

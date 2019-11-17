@@ -418,18 +418,18 @@ typeTestSuccess.i:
   br label %"func_<root>.<static-init>$111.exit"
 
 "func_<root>.<static-init>$111.exit":             ; preds = %typeTestSuccess.i, %6
-  %callArgsAddr3.i = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 %2, i64* %callArgsAddr3.i, align 8
+  %callArgsAddr.i = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0
+  store i64 %2, i64* %callArgsAddr.i, align 8
   %9 = tail call i64 @rb_ary_new_capa(i64 1) #13
   %10 = tail call i64 @rb_ary_push(i64 %9, i64 3) #13
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_map.i) #13
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_to_proc.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #13, !noalias !14
   %11 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_to_proc.i, i32 0, i64* null) #13
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_map.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #13, !noalias !17
-  %12 = call i64 @rb_funcall_with_block(i64 %9, i64 %rubyId_map.i, i32 0, i64* nonnull %callArgsAddr3.i, i64 %11) #13
-  store i64 %12, i64* %callArgsAddr3.i, align 8
+  %12 = call i64 @rb_funcall_with_block(i64 %9, i64 %rubyId_map.i, i32 0, i64* nonnull %callArgsAddr.i, i64 %11) #13
+  store i64 %12, i64* %callArgsAddr.i, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #13, !noalias !20
-  %13 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr3.i) #13
+  %13 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #13
   call void @llvm.lifetime.end.p0i8(i64 24, i8* nonnull %1)
   ret void
 }

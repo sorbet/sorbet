@@ -597,12 +597,12 @@ typeTestSuccess.i:
   br label %"func_<root>.<static-init>$111.exit"
 
 "func_<root>.<static-init>$111.exit":             ; preds = %typeTestSuccess.i, %5
-  %callArgsAddr3.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 %0, i64* %callArgsAddr3.i, align 8
+  %callArgsAddr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
+  store i64 %0, i64* %callArgsAddr.i, align 8
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_foo.i) #16
   tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#foo" to i64 (...)*), i32 -1) #16
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_foo.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !29
-  %8 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_foo.i, i32 0, i64* nonnull %callArgsAddr3.i) #16
+  %8 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_foo.i, i32 0, i64* nonnull %callArgsAddr.i) #16
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %1)
   ret void
 }

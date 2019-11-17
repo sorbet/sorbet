@@ -238,33 +238,33 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
 typeTestSuccess:                                  ; preds = %fillFromDefaultBlockDone
   %33 = and i64 %el2.sroa.0.0, 1
   %34 = icmp eq i64 %33, 0
-  br i1 %34, label %typeTestFail35, label %typeTestSuccess34, !prof !0, !misexpect !11
+  br i1 %34, label %typeTestFail35, label %"fastSymCallIntrinsic_+", !prof !0, !misexpect !11
 
 typeTestFail:                                     ; preds = %fillFromDefaultBlockDone, %fillRequiredArgs
-  %el1.sroa.0.147 = phi i64 [ %el1.sroa.0.1, %fillFromDefaultBlockDone ], [ 8, %fillRequiredArgs ]
-  tail call fastcc void @sorbet_cast_failure(i64 %el1.sroa.0.147, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0))
+  %el1.sroa.0.149 = phi i64 [ %el1.sroa.0.1, %fillFromDefaultBlockDone ], [ 8, %fillRequiredArgs ]
+  tail call fastcc void @sorbet_cast_failure(i64 %el1.sroa.0.149, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0))
   unreachable
 
-typeTestSuccess34:                                ; preds = %typeTestSuccess
+typeTestFail35:                                   ; preds = %typeTestSuccess
+  tail call fastcc void @sorbet_cast_failure(i64 %el2.sroa.0.0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0))
+  unreachable
+
+"fastSymCallIntrinsic_+":                         ; preds = %typeTestSuccess
   %35 = add nsw i64 %el2.sroa.0.0, -1
   %36 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %el1.sroa.0.1, i64 %35) #13
   %37 = extractvalue { i64, i1 } %36, 1
   %38 = extractvalue { i64, i1 } %36, 0
   br i1 %37, label %39, label %sorbet_rb_int_plus.exit
 
-39:                                               ; preds = %typeTestSuccess34
+39:                                               ; preds = %"fastSymCallIntrinsic_+"
   %40 = ashr i64 %38, 1
   %41 = xor i64 %40, -9223372036854775808
   %42 = tail call i64 @rb_int2big(i64 %41) #13, !noalias !12
   br label %sorbet_rb_int_plus.exit
 
-sorbet_rb_int_plus.exit:                          ; preds = %typeTestSuccess34, %39
-  %43 = phi i64 [ %42, %39 ], [ %38, %typeTestSuccess34 ]
+sorbet_rb_int_plus.exit:                          ; preds = %"fastSymCallIntrinsic_+", %39
+  %43 = phi i64 [ %42, %39 ], [ %38, %"fastSymCallIntrinsic_+" ]
   ret i64 %43
-
-typeTestFail35:                                   ; preds = %typeTestSuccess
-  tail call fastcc void @sorbet_cast_failure(i64 %el2.sroa.0.0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0))
-  unreachable
 }
 
 ; Function Attrs: nounwind ssp

@@ -432,8 +432,8 @@ afterSymCallIntrinsic_unsafe41.i:                 ; preds = %21, %afterSymCallIn
   %24 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Baz.3, i64 0, i64 0), i64 %0) #12
   %25 = load i64, i64* @guard_epoch_Baz, align 8
   %26 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %needTakeSlowPath.i2.i = icmp eq i64 %25, %26
-  br i1 %needTakeSlowPath.i2.i, label %"func_<root>.<static-init>$111.exit", label %27, !prof !13
+  %needTakeSlowPath.i1.i = icmp eq i64 %25, %26
+  br i1 %needTakeSlowPath.i1.i, label %"func_<root>.<static-init>$111.exit", label %27, !prof !13
 
 27:                                               ; preds = %afterSymCallIntrinsic_unsafe41.i
   %28 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Baz.3, i64 0, i64 0), i64 3) #12

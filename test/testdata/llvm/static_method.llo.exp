@@ -445,8 +445,8 @@ typeTestSuccess.i:
   br label %afterSymCallIntrinsic_unsafe.i
 
 afterSymCallIntrinsic_unsafe.i:                   ; preds = %4, %typeTestSuccess.i
-  %callArgsAddr3.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 %0, i64* %callArgsAddr3.i, align 8
+  %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
+  store i64 %0, i64* %callArgsAddr.i, align 8
   %7 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo.2, i64 0, i64 0)) #17
   %8 = load i64, i64* @guard_epoch_Foo, align 8
   %9 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
@@ -484,11 +484,11 @@ typeTestSuccess.i.i.i:                            ; preds = %10, %entry._crit_ed
   tail call void @rb_define_singleton_method(i64 %14, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @func_Foo.bar to i64 (...)*), i32 -1) #17
   %19 = load i64, i64* @guard_epoch_Foo, align 8
   %20 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %needTakeSlowPath40.i = icmp eq i64 %19, %20
-  br i1 %needTakeSlowPath40.i, label %"Init_func_Foo.<static-init>.exit._crit_edge.i", label %21, !prof !13
+  %needTakeSlowPath39.i = icmp eq i64 %19, %20
+  br i1 %needTakeSlowPath39.i, label %"Init_func_Foo.<static-init>.exit._crit_edge.i", label %21, !prof !13
 
 "Init_func_Foo.<static-init>.exit._crit_edge.i":  ; preds = %"Init_func_Foo.<static-init>.exit.i"
-  %.pre9.i = load i64, i64* @guarded_const_Foo, align 8
+  %.pre.i = load i64, i64* @guarded_const_Foo, align 8
   br label %"func_<root>.<static-init>$111.exit"
 
 21:                                               ; preds = %"Init_func_Foo.<static-init>.exit.i"
@@ -499,12 +499,12 @@ typeTestSuccess.i.i.i:                            ; preds = %10, %entry._crit_ed
   br label %"func_<root>.<static-init>$111.exit"
 
 "func_<root>.<static-init>$111.exit":             ; preds = %"Init_func_Foo.<static-init>.exit._crit_edge.i", %21
-  %24 = phi i64 [ %.pre9.i, %"Init_func_Foo.<static-init>.exit._crit_edge.i" ], [ %22, %21 ]
+  %24 = phi i64 [ %.pre.i, %"Init_func_Foo.<static-init>.exit._crit_edge.i" ], [ %22, %21 ]
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_bar.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !14
-  %25 = call i64 @rb_funcallv(i64 %24, i64 %rubyId_bar.i, i32 0, i64* nonnull %callArgsAddr3.i) #17
-  store i64 %25, i64* %callArgsAddr3.i, align 8
+  %25 = call i64 @rb_funcallv(i64 %24, i64 %rubyId_bar.i, i32 0, i64* nonnull %callArgsAddr.i) #17
+  store i64 %25, i64* %callArgsAddr.i, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #17, !noalias !17
-  %26 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr3.i) #17
+  %26 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #17
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %1)
   ret void
 }

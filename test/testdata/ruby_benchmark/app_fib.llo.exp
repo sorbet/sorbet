@@ -638,8 +638,8 @@ typeTestSuccess.i:
   br label %afterSymCallIntrinsic_unsafe.i
 
 afterSymCallIntrinsic_unsafe.i:                   ; preds = %4, %typeTestSuccess.i
-  %callArgsAddr3.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 %0, i64* %callArgsAddr3.i, align 8
+  %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
+  store i64 %0, i64* %callArgsAddr.i, align 8
   %7 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_HasFib.2, i64 0, i64 0), i64 %0) #19
   %8 = load i64, i64* @guard_epoch_HasFib, align 8
   %9 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
@@ -758,14 +758,14 @@ typeTestFail.i.i.i:                               ; preds = %sorbet_isa_class_of
   %rawSym31.i.i.i = call i64 @rb_id2sym(i64 %rubyId_fib.i.i.i) #19
   call void @rb_define_singleton_method(i64 %36, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_fib, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @func_HasFib.fib to i64 (...)*), i32 -1) #19
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %15) #19
-  store i64 69, i64* %callArgsAddr3.i, align 8
+  store i64 69, i64* %callArgsAddr.i, align 8
   %57 = load i64, i64* @guard_epoch_HasFib, align 8
   %58 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
-  %needTakeSlowPath37.i = icmp eq i64 %57, %58
-  br i1 %needTakeSlowPath37.i, label %"Init_func_HasFib.<static-init>.exit._crit_edge.i", label %59, !prof !16
+  %needTakeSlowPath36.i = icmp eq i64 %57, %58
+  br i1 %needTakeSlowPath36.i, label %"Init_func_HasFib.<static-init>.exit._crit_edge.i", label %59, !prof !16
 
 "Init_func_HasFib.<static-init>.exit._crit_edge.i": ; preds = %"Init_func_HasFib.<static-init>.exit.i"
-  %.pre9.i = load i64, i64* @guarded_const_HasFib, align 8
+  %.pre.i = load i64, i64* @guarded_const_HasFib, align 8
   br label %"func_<root>.<static-init>$111.exit"
 
 59:                                               ; preds = %"Init_func_HasFib.<static-init>.exit.i"
@@ -776,9 +776,9 @@ typeTestFail.i.i.i:                               ; preds = %sorbet_isa_class_of
   br label %"func_<root>.<static-init>$111.exit"
 
 "func_<root>.<static-init>$111.exit":             ; preds = %"Init_func_HasFib.<static-init>.exit._crit_edge.i", %59
-  %62 = phi i64 [ %.pre9.i, %"Init_func_HasFib.<static-init>.exit._crit_edge.i" ], [ %60, %59 ]
+  %62 = phi i64 [ %.pre.i, %"Init_func_HasFib.<static-init>.exit._crit_edge.i" ], [ %60, %59 ]
   call void @dbg_sorbet_validate_id(i64 %rubyId_fib.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #19, !noalias !25
-  %63 = call i64 @rb_funcallv(i64 %62, i64 %rubyId_fib.i, i32 1, i64* nonnull %callArgsAddr3.i) #19
+  %63 = call i64 @rb_funcallv(i64 %62, i64 %rubyId_fib.i, i32 1, i64* nonnull %callArgsAddr.i) #19
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %1)
   ret void
 }
@@ -791,20 +791,6 @@ functionEntryInitializers:
   %0 = icmp eq i32 %argc, 1
   br i1 %0, label %fillRequiredArgs, label %argCountFailBlock, !prof !28, !misexpect !29
 
-BB3:                                              ; preds = %sorbet_rb_int_lt.exit
-  %rawSendResult39 = tail call fastcc i64 @sorbet_rb_int_minus(i64 %rawArg_n, i64 3)
-  store i64 %rawSendResult39, i64* %callArgsAddr, align 8
-  %1 = tail call i32 @ruby_stack_check() #19
-  %directSendResult = call i64 @func_HasFib.fib(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw)
-  %rawSendResult60 = tail call fastcc i64 @sorbet_rb_int_minus(i64 %rawArg_n, i64 5)
-  store i64 %rawSendResult60, i64* %callArgsAddr, align 8
-  %2 = tail call i32 @ruby_stack_check() #19
-  %directSendResult74 = call i64 @func_HasFib.fib(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw)
-  %3 = and i64 %directSendResult, 1
-  %4 = icmp eq i64 %3, 0
-  store i64 %directSendResult74, i64* %callArgsAddr, align 8
-  br i1 %4, label %"slowSymCallIntrinsic_+", label %"fastSymCallIntrinsic_+", !prof !0, !misexpect !21
-
 BB4:                                              ; preds = %112, %110, %101, %99, %93, %46, %30, %25, %"slowSymCallIntrinsic_+", %sorbet_rb_int_lt.exit
   %"<returnMethodTemp>.sroa.0.0" = phi i64 [ 3, %sorbet_rb_int_lt.exit ], [ %22, %"slowSymCallIntrinsic_+" ], [ %113, %112 ], [ %111, %110 ], [ %47, %46 ], [ %33, %30 ], [ %29, %25 ], [ %102, %101 ], [ %98, %93 ], [ -9223372036854775806, %99 ]
   ret i64 %"<returnMethodTemp>.sroa.0.0"
@@ -815,63 +801,77 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %rawArg_n = load i64, i64* %argArray, align 8
-  %5 = and i64 %rawArg_n, 1
-  %6 = icmp eq i64 %5, 0
-  br i1 %6, label %typeTestFail, label %typeTestSuccess21, !prof !0, !misexpect !21
+  %1 = and i64 %rawArg_n, 1
+  %2 = icmp eq i64 %1, 0
+  br i1 %2, label %typeTestFail, label %typeTestSuccess21, !prof !0, !misexpect !21
 
 typeTestFail:                                     ; preds = %fillRequiredArgs
   tail call fastcc void @sorbet_cast_failure(i64 %rawArg_n, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_sig, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0))
   unreachable
 
 typeTestSuccess21:                                ; preds = %fillRequiredArgs
-  %7 = load i64, i64* @guard_epoch_HasFib, align 8
-  %8 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
-  %needTakeSlowPath = icmp eq i64 %7, %8
-  br i1 %needTakeSlowPath, label %typeTestSuccess21._crit_edge, label %9, !prof !16
+  %3 = load i64, i64* @guard_epoch_HasFib, align 8
+  %4 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
+  %needTakeSlowPath = icmp eq i64 %3, %4
+  br i1 %needTakeSlowPath, label %typeTestSuccess21._crit_edge, label %5, !prof !16
 
 typeTestSuccess21._crit_edge:                     ; preds = %typeTestSuccess21
   %.pre = load i64, i64* @guarded_const_HasFib, align 8
-  br label %12
+  br label %8
 
-9:                                                ; preds = %typeTestSuccess21
-  %10 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_HasFib.2, i64 0, i64 0), i64 6) #19
-  store i64 %10, i64* @guarded_const_HasFib, align 8
-  %11 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
-  store i64 %11, i64* @guard_epoch_HasFib, align 8
-  br label %12
+5:                                                ; preds = %typeTestSuccess21
+  %6 = tail call fastcc i64 @sorbet_getConstant(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_HasFib.2, i64 0, i64 0), i64 6) #19
+  store i64 %6, i64* @guarded_const_HasFib, align 8
+  %7 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
+  store i64 %7, i64* @guard_epoch_HasFib, align 8
+  br label %8
 
-12:                                               ; preds = %typeTestSuccess21._crit_edge, %9
-  %13 = phi i64 [ %.pre, %typeTestSuccess21._crit_edge ], [ %10, %9 ]
-  %14 = icmp eq i64 %13, %selfRaw
-  br i1 %14, label %sorbet_rb_int_lt.exit, label %15
+8:                                                ; preds = %typeTestSuccess21._crit_edge, %5
+  %9 = phi i64 [ %.pre, %typeTestSuccess21._crit_edge ], [ %6, %5 ]
+  %10 = icmp eq i64 %9, %selfRaw
+  br i1 %10, label %sorbet_rb_int_lt.exit, label %11
 
-15:                                               ; preds = %12
-  %16 = load i64, i64* @rb_cModule, align 8, !tbaa !7
-  %17 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %16) #19
-  %18 = icmp eq i64 %17, 0
-  br i1 %18, label %typeTestFail25, label %sorbet_isa_class_of.exit, !prof !20
+11:                                               ; preds = %8
+  %12 = load i64, i64* @rb_cModule, align 8, !tbaa !7
+  %13 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %12) #19
+  %14 = icmp eq i64 %13, 0
+  br i1 %14, label %typeTestFail25, label %sorbet_isa_class_of.exit, !prof !20
 
-sorbet_isa_class_of.exit:                         ; preds = %15
-  %19 = tail call i64 @rb_class_inherited_p(i64 %selfRaw, i64 %13) #11
-  %20 = icmp eq i64 %19, 0
-  br i1 %20, label %typeTestFail25, label %sorbet_rb_int_lt.exit, !prof !0, !misexpect !21
+sorbet_isa_class_of.exit:                         ; preds = %11
+  %15 = tail call i64 @rb_class_inherited_p(i64 %selfRaw, i64 %9) #11
+  %16 = icmp eq i64 %15, 0
+  br i1 %16, label %typeTestFail25, label %sorbet_rb_int_lt.exit, !prof !0, !misexpect !21
 
-sorbet_rb_int_lt.exit:                            ; preds = %sorbet_isa_class_of.exit, %12
+sorbet_rb_int_lt.exit:                            ; preds = %sorbet_isa_class_of.exit, %8
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
   store i64 7, i64* %callArgsAddr, align 8
-  %21 = icmp slt i64 %rawArg_n, 6
-  br i1 %21, label %BB4, label %BB3
+  %17 = icmp slt i64 %rawArg_n, 6
+  br i1 %17, label %BB4, label %fastSymCallIntrinsic_-
 
-typeTestFail25:                                   ; preds = %sorbet_isa_class_of.exit, %15
+typeTestFail25:                                   ; preds = %sorbet_isa_class_of.exit, %11
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(HasFib)", i64 0, i64 0))
   unreachable
 
-"slowSymCallIntrinsic_+":                         ; preds = %BB3
+fastSymCallIntrinsic_-:                           ; preds = %sorbet_rb_int_lt.exit
+  %rawSendResult39 = tail call fastcc i64 @sorbet_rb_int_minus(i64 %rawArg_n, i64 3)
+  store i64 %rawSendResult39, i64* %callArgsAddr, align 8
+  %18 = tail call i32 @ruby_stack_check() #19
+  %directSendResult = call i64 @func_HasFib.fib(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw)
+  %rawSendResult60 = tail call fastcc i64 @sorbet_rb_int_minus(i64 %rawArg_n, i64 5)
+  store i64 %rawSendResult60, i64* %callArgsAddr, align 8
+  %19 = tail call i32 @ruby_stack_check() #19
+  %directSendResult74 = call i64 @func_HasFib.fib(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw)
+  %20 = and i64 %directSendResult, 1
+  %21 = icmp eq i64 %20, 0
+  store i64 %directSendResult74, i64* %callArgsAddr, align 8
+  br i1 %21, label %"slowSymCallIntrinsic_+", label %"fastSymCallIntrinsic_+", !prof !0, !misexpect !21
+
+"slowSymCallIntrinsic_+":                         ; preds = %fastSymCallIntrinsic_-
   tail call void @dbg_sorbet_validate_id(i64 %"rubyId_+", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #19, !noalias !30
   %22 = call i64 @rb_funcallv(i64 %directSendResult, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr) #19
   br label %BB4
 
-"fastSymCallIntrinsic_+":                         ; preds = %BB3
+"fastSymCallIntrinsic_+":                         ; preds = %fastSymCallIntrinsic_-
   %23 = and i64 %directSendResult74, 1
   %24 = icmp eq i64 %23, 0
   br i1 %24, label %34, label %25, !prof !0

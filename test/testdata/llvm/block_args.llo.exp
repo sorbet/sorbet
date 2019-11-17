@@ -158,8 +158,8 @@ functionEntryInitializers:
   br i1 %default0, label %fillFromDefaultBlockDone.thread, label %fillFromDefaultBlockDone, !prof !0, !misexpect !10
 
 fillFromDefaultBlockDone.thread:                  ; preds = %functionEntryInitializers
-  %callArgsAddr19 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
-  store i64 3, i64* %callArgsAddr19, align 8
+  %callArgsAddr21 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
+  store i64 3, i64* %callArgsAddr21, align 8
   br label %"slowSymCallIntrinsic_+"
 
 fillFromDefaultBlockDone:                         ; preds = %functionEntryInitializers
@@ -175,10 +175,10 @@ fillFromDefaultBlockDone:                         ; preds = %functionEntryInitia
   ret i64 %"symIntrinsicRawPhi_+"
 
 "slowSymCallIntrinsic_+":                         ; preds = %fillFromDefaultBlockDone, %fillFromDefaultBlockDone.thread
-  %callArgsAddr24 = phi i64* [ %callArgsAddr19, %fillFromDefaultBlockDone.thread ], [ %callArgsAddr, %fillFromDefaultBlockDone ]
-  %x.sroa.0.023 = phi i64 [ 8, %fillFromDefaultBlockDone.thread ], [ %rawArg_x, %fillFromDefaultBlockDone ]
+  %callArgsAddr26 = phi i64* [ %callArgsAddr21, %fillFromDefaultBlockDone.thread ], [ %callArgsAddr, %fillFromDefaultBlockDone ]
+  %x.sroa.0.025 = phi i64 [ 8, %fillFromDefaultBlockDone.thread ], [ %rawArg_x, %fillFromDefaultBlockDone ]
   tail call void @dbg_sorbet_validate_id(i64 %"rubyId_+", i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #13, !noalias !12
-  %2 = call i64 @rb_funcallv(i64 %x.sroa.0.023, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr24) #13
+  %2 = call i64 @rb_funcallv(i64 %x.sroa.0.025, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr26) #13
   br label %"afterSymCallIntrinsic_+"
 
 "fastSymCallIntrinsic_+":                         ; preds = %fillFromDefaultBlockDone
