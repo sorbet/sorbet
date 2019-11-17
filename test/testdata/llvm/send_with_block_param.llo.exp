@@ -93,9 +93,7 @@ define weak i8* @dbg_p(i64 %0) local_unnamed_addr #0 {
 
 declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #3
 
-declare i64 @rb_ary_new_capa(i64) local_unnamed_addr #3
-
-declare i64 @rb_ary_push(i64, i64) local_unnamed_addr #3
+declare i64 @rb_ary_new_from_values(i64, i64*) local_unnamed_addr #3
 
 declare i64 @rb_hash_new() local_unnamed_addr #3
 
@@ -422,17 +420,16 @@ typeTestSuccess.i:
   %guardUpdated.i = icmp eq i64 %8, %7
   tail call void @llvm.assume(i1 %guardUpdated.i) #15
   %callArgsAddr.i = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 %2, i64* %callArgsAddr.i, align 8
-  %9 = tail call i64 @rb_ary_new_capa(i64 1) #15
-  %10 = tail call i64 @rb_ary_push(i64 %9, i64 3) #15
-  %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_map.i) #15
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_to_proc.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !14
-  %11 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_to_proc.i, i32 0, i64* null) #15
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_map.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !17
-  %12 = call i64 @rb_funcall_with_block(i64 %9, i64 %rubyId_map.i, i32 0, i64* nonnull %callArgsAddr.i, i64 %11) #15
-  store i64 %12, i64* %callArgsAddr.i, align 8
+  store i64 3, i64* %callArgsAddr.i, align 8
+  %9 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgsAddr.i) #15
+  %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_map.i) #15
+  call void @dbg_sorbet_validate_id(i64 %rubyId_to_proc.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !14
+  %10 = call i64 @rb_funcallv(i64 %2, i64 %rubyId_to_proc.i, i32 0, i64* null) #15
+  call void @dbg_sorbet_validate_id(i64 %rubyId_map.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !17
+  %11 = call i64 @rb_funcall_with_block(i64 %9, i64 %rubyId_map.i, i32 0, i64* nonnull %callArgsAddr.i, i64 %10) #15
+  store i64 %11, i64* %callArgsAddr.i, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !20
-  %13 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #15
+  %12 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #15
   call void @llvm.lifetime.end.p0i8(i64 24, i8* nonnull %1)
   ret void
 }

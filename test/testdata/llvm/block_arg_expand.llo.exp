@@ -93,9 +93,7 @@ define weak i8* @dbg_p(i64 %0) local_unnamed_addr #0 {
 
 declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #3
 
-declare i64 @rb_ary_new_capa(i64) local_unnamed_addr #3
-
-declare i64 @rb_ary_push(i64, i64) local_unnamed_addr #3
+declare i64 @rb_ary_new_from_values(i64, i64*) local_unnamed_addr #3
 
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #3
 
@@ -287,9 +285,9 @@ constr:
 ; Function Attrs: nounwind sspreq
 define void @Init_test_testdata_llvm_block_arg_expand() local_unnamed_addr #10 {
 entry:
-  %callArgs.i = alloca [2 x i64], align 8
+  %callArgs.i = alloca <2 x i64>, align 16
   %0 = load i64, i64* @rb_cObject, align 8
-  %1 = bitcast [2 x i64]* %callArgs.i to i8*
+  %1 = bitcast <2 x i64>* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %1)
   %2 = tail call i8* @ruby_xmalloc(i64 16) #13
   %3 = bitcast i8* %2 to i32*
@@ -328,14 +326,13 @@ typeTestFail.i:                                   ; preds = %sorbet_isa_class_of
   unreachable
 
 "func_<root>.<static-init>$111.exit":             ; preds = %entry, %sorbet_isa_class_of.exit.i
-  %23 = tail call i64 @rb_ary_new_capa(i64 2) #13
-  %24 = tail call i64 @rb_ary_push(i64 %23, i64 3) #13
-  %25 = tail call i64 @rb_ary_push(i64 %23, i64 5) #13
-  %26 = tail call i64 @rb_ary_new_capa(i64 1) #13
-  %27 = tail call i64 @rb_ary_push(i64 %26, i64 %23) #13
-  %28 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_each.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #13, !noalias !19
-  %29 = call i64 @rb_block_call(i64 %26, i64 %rubyId_each.i, i32 0, i64* nonnull %28, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$111$block_1" to i64 (...)*), i64 %5) #13
+  %callArgsAddr.i = getelementptr inbounds <2 x i64>, <2 x i64>* %callArgs.i, i64 0, i64 0
+  store <2 x i64> <i64 3, i64 5>, <2 x i64>* %callArgs.i, align 16
+  %23 = call i64 @rb_ary_new_from_values(i64 2, i64* nonnull %callArgsAddr.i) #13
+  store i64 %23, i64* %callArgsAddr.i, align 16
+  %24 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgsAddr.i) #13
+  call void @dbg_sorbet_validate_id(i64 %rubyId_each.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #13, !noalias !19
+  %25 = call i64 @rb_block_call(i64 %24, i64 %rubyId_each.i, i32 0, i64* nonnull %callArgsAddr.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$111$block_1" to i64 (...)*), i64 %5) #13
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %1)
   ret void
 }
