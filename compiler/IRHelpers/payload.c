@@ -617,6 +617,9 @@ _Bool sorbet_isa_Proc(VALUE obj) __attribute__((const)) {
     return rb_obj_is_proc(obj) == Qtrue;
 }
 
+VALUE rb_obj_is_kind_of(VALUE, VALUE) __attribute__((const));
+VALUE rb_class_inherited_p(VALUE, VALUE) __attribute__((const));
+
 _Bool sorbet_isa(VALUE obj, VALUE class) __attribute__((const)) {
     return rb_obj_is_kind_of(obj, class) == Qtrue;
 }
