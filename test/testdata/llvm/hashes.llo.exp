@@ -83,8 +83,6 @@ declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #3
 
 declare i64 @rb_hash_new() local_unnamed_addr #3
 
-declare i64 @rb_hash_aset(i64, i64, i64) local_unnamed_addr #3
-
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #3
 
 declare i64 @rb_id2sym(i64) local_unnamed_addr #3
@@ -113,6 +111,8 @@ define internal i64 @sorbet_Closure_size(i8* nocapture readonly %0) #4 {
   %6 = add nsw i64 %5, 8
   ret i64 %6
 }
+
+declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind ssp
 define internal void @Constr_rubyIdPrecomputed_a() #5 {
@@ -150,13 +150,19 @@ define void @Init_test_testdata_llvm_hashes() local_unnamed_addr #6 {
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_a.i) #9
   %rawSym15.i = tail call i64 @rb_id2sym(i64 %rubyId_b.i) #9
-  %2 = tail call i64 @rb_hash_new() #9
-  %3 = tail call i64 @rb_hash_aset(i64 %2, i64 %rawSym.i, i64 3) #9
-  %4 = tail call i64 @rb_hash_aset(i64 %2, i64 %rawSym15.i, i64 5) #9
   %callArgsAddr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 0
+  store i64 %rawSym.i, i64* %callArgsAddr.i, align 8
+  %callArgsAddr19.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 1
+  store i64 3, i64* %callArgsAddr19.i, align 8
+  %callArgsAddr21.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 2
+  store i64 %rawSym15.i, i64* %callArgsAddr21.i, align 8
+  %callArgsAddr23.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 3
+  store i64 5, i64* %callArgsAddr23.i, align 8
+  %2 = tail call i64 @rb_hash_new() #9, !noalias !9
+  call void @rb_hash_bulk_insert(i64 4, i64* nonnull %callArgsAddr.i, i64 %2) #9
   store i64 %2, i64* %callArgsAddr.i, align 8
-  tail call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #9, !noalias !9
-  %5 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #9
+  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #9, !noalias !12
+  %3 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #9
   call void @llvm.lifetime.end.p0i8(i64 32, i8* nonnull %1)
   ret void
 }
@@ -188,5 +194,8 @@ attributes #9 = { nounwind }
 !7 = !{!8, !8, i64 0}
 !8 = !{!"int", !4, i64 0}
 !9 = !{!10}
-!10 = distinct !{!10, !11, !"sorbet_callFunc: argument 0"}
-!11 = distinct !{!11, !"sorbet_callFunc"}
+!10 = distinct !{!10, !11, !"sorbet_buildHashIntrinsic: argument 0"}
+!11 = distinct !{!11, !"sorbet_buildHashIntrinsic"}
+!12 = !{!13}
+!13 = distinct !{!13, !14, !"sorbet_callFunc: argument 0"}
+!14 = distinct !{!14, !"sorbet_callFunc"}

@@ -97,8 +97,6 @@ declare i64 @rb_ary_new_from_values(i64, i64*) local_unnamed_addr #3
 
 declare i64 @rb_hash_new() local_unnamed_addr #3
 
-declare i64 @rb_hash_aset(i64, i64, i64) local_unnamed_addr #3
-
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #3
 
 declare i64 @rb_id2sym(i64) local_unnamed_addr #3
@@ -357,6 +355,8 @@ define internal i64 @sorbet_Closure_size(i8* nocapture readonly %0) #8 {
   ret i64 %6
 }
 
+declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #3
+
 declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind ssp
@@ -394,41 +394,43 @@ constr:
 ; Function Attrs: nounwind sspreq
 define void @Init_test_testdata_llvm_send_with_block_param() local_unnamed_addr #10 {
 typeTestSuccess.i:
-  %callArgs.i = alloca [3 x i64], align 8
+  %callArgs.i = alloca [3 x i64], align 16
   %0 = load i64, i64* @rb_cObject, align 8
   %1 = bitcast [3 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 24, i8* nonnull %1)
   %rubyId_map.i = load i64, i64* @rubyIdPrecomputed_map, align 8
   %rubyId_to_proc.i = load i64, i64* @rubyIdPrecomputed_to_proc, align 8
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
-  %2 = tail call i64 @rb_hash_new() #15
-  %3 = tail call i64 @rb_hash_aset(i64 %2, i64 3, i64 5) #15
+  %callArgsAddr.i = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0
+  %2 = bitcast [3 x i64]* %callArgs.i to <2 x i64>*
+  store <2 x i64> <i64 3, i64 5>, <2 x i64>* %2, align 16
+  %3 = tail call i64 @rb_hash_new() #15, !noalias !11
+  call void @rb_hash_bulk_insert(i64 2, i64* nonnull %callArgsAddr.i, i64 %3) #15
   %4 = load i64, i64* @guard_epoch_T, align 8
-  %5 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %5 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
   %needTakeSlowPath.i = icmp eq i64 %4, %5
-  br i1 %needTakeSlowPath.i, label %"func_<root>.<static-init>$111.exit", label %6, !prof !13
+  br i1 %needTakeSlowPath.i, label %"func_<root>.<static-init>$111.exit", label %6, !prof !16
 
 6:                                                ; preds = %typeTestSuccess.i
-  tail call void @const_recompute_T() #15
+  call void @const_recompute_T() #15
   %.pre.i = load i64, i64* @guard_epoch_T, align 8
-  %.pre2.i = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %.pre2.i = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
   br label %"func_<root>.<static-init>$111.exit"
 
 "func_<root>.<static-init>$111.exit":             ; preds = %typeTestSuccess.i, %6
   %7 = phi i64 [ %4, %typeTestSuccess.i ], [ %.pre2.i, %6 ]
   %8 = phi i64 [ %4, %typeTestSuccess.i ], [ %.pre.i, %6 ]
   %guardUpdated.i = icmp eq i64 %8, %7
-  tail call void @llvm.assume(i1 %guardUpdated.i) #15
-  %callArgsAddr.i = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 3, i64* %callArgsAddr.i, align 8
+  call void @llvm.assume(i1 %guardUpdated.i) #15
+  store i64 3, i64* %callArgsAddr.i, align 16
   %9 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgsAddr.i) #15
   %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_map.i) #15
-  call void @dbg_sorbet_validate_id(i64 %rubyId_to_proc.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !14
-  %10 = call i64 @rb_funcallv(i64 %2, i64 %rubyId_to_proc.i, i32 0, i64* null) #15
-  call void @dbg_sorbet_validate_id(i64 %rubyId_map.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !17
+  call void @dbg_sorbet_validate_id(i64 %rubyId_to_proc.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !17
+  %10 = call i64 @rb_funcallv(i64 %3, i64 %rubyId_to_proc.i, i32 0, i64* null) #15
+  call void @dbg_sorbet_validate_id(i64 %rubyId_map.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !20
   %11 = call i64 @rb_funcall_with_block(i64 %9, i64 %rubyId_map.i, i32 0, i64* nonnull %callArgsAddr.i, i64 %10) #15
-  store i64 %11, i64* %callArgsAddr.i, align 8
-  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !20
+  store i64 %11, i64* %callArgsAddr.i, align 16
+  call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #15, !noalias !23
   %12 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #15
   call void @llvm.lifetime.end.p0i8(i64 24, i8* nonnull %1)
   ret void
@@ -441,7 +443,7 @@ declare void @llvm.assume(i1) #11
 define linkonce void @const_recompute_T() local_unnamed_addr #12 {
   %1 = tail call fastcc i64 @sorbet_getConstant()
   store i64 %1, i64* @guarded_const_T, align 8
-  %2 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %2 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
   store i64 %2, i64* @guard_epoch_T, align 8
   ret void
 }
@@ -481,15 +483,18 @@ attributes #16 = { noreturn nounwind }
 !8 = !{!2, !3, i64 8}
 !9 = !{!10, !10, i64 0}
 !10 = !{!"int", !4, i64 0}
-!11 = !{!12, !12, i64 0}
-!12 = !{!"long long", !4, i64 0}
-!13 = !{!"branch_weights", i32 10000, i32 1}
-!14 = !{!15}
-!15 = distinct !{!15, !16, !"sorbet_callFunc: argument 0"}
-!16 = distinct !{!16, !"sorbet_callFunc"}
+!11 = !{!12}
+!12 = distinct !{!12, !13, !"sorbet_buildHashIntrinsic: argument 0"}
+!13 = distinct !{!13, !"sorbet_buildHashIntrinsic"}
+!14 = !{!15, !15, i64 0}
+!15 = !{!"long long", !4, i64 0}
+!16 = !{!"branch_weights", i32 10000, i32 1}
 !17 = !{!18}
-!18 = distinct !{!18, !19, !"sorbet_callFuncProc: argument 0"}
-!19 = distinct !{!19, !"sorbet_callFuncProc"}
+!18 = distinct !{!18, !19, !"sorbet_callFunc: argument 0"}
+!19 = distinct !{!19, !"sorbet_callFunc"}
 !20 = !{!21}
-!21 = distinct !{!21, !22, !"sorbet_callFunc: argument 0"}
-!22 = distinct !{!22, !"sorbet_callFunc"}
+!21 = distinct !{!21, !22, !"sorbet_callFuncProc: argument 0"}
+!22 = distinct !{!22, !"sorbet_callFuncProc"}
+!23 = !{!24}
+!24 = distinct !{!24, !25, !"sorbet_callFunc: argument 0"}
+!25 = distinct !{!25, !"sorbet_callFunc"}
