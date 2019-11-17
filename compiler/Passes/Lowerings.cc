@@ -112,10 +112,10 @@ public:
                                  builder.CreateCall(module.getFunction("sorbet_getConstantEpoch")), "needTakeSlowPath");
 
         auto splitPoint = builder.CreateLoad(guardedConstDeclaration);
-        builder.CreateUnaryIntrinsic(
-            llvm::Intrinsic::ID::assume,
-            builder.CreateICmpNE(builder.CreateLoad(guardEpochDeclaration),
-                                 builder.CreateCall(module.getFunction("sorbet_getConstantEpoch")), "guardUpdated")
+        builder.CreateIntrinsic(
+            llvm::Intrinsic::ID::assume, {},
+            {builder.CreateICmpEQ(builder.CreateLoad(guardEpochDeclaration),
+                                  builder.CreateCall(module.getFunction("sorbet_getConstantEpoch")), "guardUpdated")}
 
         );
 
