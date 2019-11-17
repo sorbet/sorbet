@@ -112,6 +112,13 @@ public:
                                  builder.CreateCall(module.getFunction("sorbet_getConstantEpoch")), "needTakeSlowPath");
 
         auto splitPoint = builder.CreateLoad(guardedConstDeclaration);
+        builder.CreateUnaryIntrinsic(
+            llvm::Intrinsic::ID::assume,
+            builder.CreateICmpNE(builder.CreateLoad(guardEpochDeclaration),
+                                 builder.CreateCall(module.getFunction("sorbet_getConstantEpoch")), "guardUpdated")
+
+        );
+
         auto slowPathTerm = llvm::SplitBlockAndInsertIfThen(needTakeSlowPath, splitPoint, false,
                                                             llvm::MDBuilder(lctx).createBranchWeights(1, 10000));
         builder.SetInsertPoint(slowPathTerm);
@@ -134,15 +141,17 @@ public:
             auto recomputeFunT = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), {}, false /*not varargs*/);
             recomputeFun = llvm::Function::Create(recomputeFunT, llvm::Function::LinkOnceAnyLinkage,
                                                   llvm::Twine("const_recompute_") + str, module);
-            recomputeFun->addFnAttr(llvm::Attribute::AlwaysInline);
             llvm::IRBuilder<> functionBuilder(lctx);
 
             functionBuilder.SetInsertPoint(llvm::BasicBlock::Create(lctx, "", recomputeFun));
 
+            auto zero = llvm::ConstantInt::get(lctx, llvm::APInt(64, 0));
+            llvm::Constant *indicesString[] = {zero, zero};
             functionBuilder.CreateStore(
-                functionBuilder.CreateCall(module.getFunction("sorbet_getConstant"),
-                                           {functionBuilder.CreateGlobalStringPtr(str, llvm::Twine("str_") + str),
-                                            llvm::ConstantInt::get(lctx, llvm::APInt(64, str.length()))}),
+                functionBuilder.CreateCall(
+                    module.getFunction("sorbet_getConstant"),
+                    {llvm::ConstantExpr::getInBoundsGetElementPtr(global->getValueType(), global, indicesString),
+                     llvm::ConstantInt::get(lctx, llvm::APInt(64, str.length()))}),
                 guardedConstDeclaration);
             functionBuilder.CreateStore(functionBuilder.CreateCall(module.getFunction("sorbet_getConstantEpoch")),
                                         guardEpochDeclaration);
