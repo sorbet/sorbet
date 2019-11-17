@@ -14,13 +14,6 @@ void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 // ****                       Internal Helper Functions
 // ****
 
-void dbg_sorbet_validate_id(ID value, char *name) __attribute__((weak)) {
-    if (UNLIKELY(value == 0)) {
-        printf("ERROR: %s is 0\n", name);
-        abort();
-    }
-}
-
 const char *dbg_pi(ID id) __attribute__((weak)) {
     return rb_id2name(id);
 }
@@ -190,7 +183,6 @@ ID sorbet_symToID(VALUE sym) __attribute__((always_inline)) {
 }
 
 VALUE sorbet_IDToSym(ID id) __attribute__((always_inline)) {
-    dbg_sorbet_validate_id(id, "id");
     return ID2SYM(id);
 }
 
@@ -250,12 +242,10 @@ _Bool sorbet_testIsString(VALUE value) __attribute__((always_inline)) {
 // ****
 
 VALUE sorbet_instanceVariableGet(VALUE receiver, ID name) __attribute__((always_inline)) {
-    dbg_sorbet_validate_id(name, "name");
     return rb_ivar_get(receiver, name);
 }
 
 VALUE sorbet_instanceVariableSet(VALUE receiver, ID name, VALUE newValue) __attribute__((always_inline)) {
-    dbg_sorbet_validate_id(name, "name");
     return rb_ivar_set(receiver, name, newValue);
 }
 
@@ -268,12 +258,10 @@ void sorbet_globalVariableSet(const char *name, VALUE newValue) __attribute__((a
 }
 
 VALUE sorbet_classVariableGet(VALUE _class, ID name) __attribute__((always_inline)) {
-    dbg_sorbet_validate_id(name, "name");
     return rb_cvar_get(_class, name);
 }
 
 void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) __attribute__((always_inline)) {
-    dbg_sorbet_validate_id(name, "name");
     rb_cvar_set(_class, name, newValue);
 }
 
@@ -442,20 +430,17 @@ VALUE sorbet_callBlock(VALUE array) __attribute__((always_inline)) {
 
 VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv)
     __attribute__((always_inline)) {
-    dbg_sorbet_validate_id(func, "func");
     return rb_funcallv(recv, func, argc, argv);
 }
 
 VALUE sorbet_callFuncProc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv,
                           VALUE proc) __attribute__((always_inline)) {
-    dbg_sorbet_validate_id(func, "func");
     return rb_funcall_with_block(recv, func, argc, argv, proc);
 }
 
 VALUE sorbet_callFuncBlock(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv,
                            VALUE (*blockImpl)(VALUE, VALUE, int, VALUE *, VALUE), VALUE closure)
     __attribute__((always_inline)) {
-    dbg_sorbet_validate_id(func, "func");
     return rb_block_call(recv, func, argc, argv, blockImpl, closure);
 }
 
