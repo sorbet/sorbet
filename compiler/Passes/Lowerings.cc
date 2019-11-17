@@ -32,10 +32,15 @@ public:
 const vector<pair<string, string>> knownSymbolMapping = {
     {"Kernel", "rb_mKernel"},
     {"Enumerable", "rb_mEnumerable"},
+    {"Comparable", "rb_mComparable"},
     {"BasicObject", "rb_cBasicObject"},
     {"Object", "rb_cObject"},
     {"Array", "rb_cArray"},
     {"Class", "rb_cClass"},
+    {"Method", "rb_cMethod"},
+    {"Module", "rb_cModule"},
+    {"Numeric", "rb_cNumeric"},
+    {"NillClass", "rb_cNillClass"},
     {"FalseClass", "rb_cFalseClass"},
     {"TrueClass", "rb_cTrueClass"},
     {"Float", "rb_cFloat"},
@@ -51,6 +56,8 @@ const vector<pair<string, string>> knownSymbolMapping = {
     {"Struct", "rb_cStruct"},
     {"Symbol", "rb_cSymbol"},
     {"StandardError", "rb_eStandardError"},
+    {"NameError", "rb_eNameError"},
+    {"NoMethodError", "rb_eNoMethodError"},
 };
 
 class ConstantLoading : public IRIntrinsic {
