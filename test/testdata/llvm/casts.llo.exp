@@ -416,7 +416,8 @@ define internal i64 @sorbet_Closure_size(i8* nocapture readonly %0) #10 {
   ret i64 %6
 }
 
-declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #3
+; Function Attrs: nounwind readnone
+declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #7
 
 declare i64 @rb_int2big(i64) local_unnamed_addr #3
 
@@ -440,7 +441,7 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %rawArg_arg = load i64, i64* %argArray, align 8
   %1 = load i64, i64* @rb_cObject, align 8
-  %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #19
+  %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #7
   %3 = icmp eq i64 %2, 20
   br i1 %3, label %typeTestSuccess, label %typeTestFail, !prof !13, !misexpect !14
 
@@ -470,7 +471,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   tail call void @llvm.assume(i1 %guardUpdated)
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_all, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #19, !noalias !18
   %13 = call i64 @rb_funcallv(i64 %12, i64 %rubyId_all, i32 2, i64* nonnull %callArgsAddr) #19
-  %14 = call i64 @rb_obj_is_kind_of(i64 %rawArg_arg, i64 %5) #19
+  %14 = call i64 @rb_obj_is_kind_of(i64 %rawArg_arg, i64 %5) #7
   %15 = icmp eq i64 %14, 20
   br i1 %15, label %typeTestSuccess24, label %typeTestFail25, !prof !13, !misexpect !14
 
@@ -509,7 +510,7 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %rawArg_arg = load i64, i64* %argArray, align 8
   %1 = load i64, i64* @rb_cObject, align 8
-  %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #19
+  %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #7
   %3 = icmp eq i64 %2, 20
   br i1 %3, label %typeTestSuccess, label %typeTestFail, !prof !13, !misexpect !14
 
@@ -597,7 +598,7 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %rawArg_arg = load i64, i64* %argArray, align 8
   %1 = load i64, i64* @rb_cObject, align 8
-  %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #19
+  %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #7
   %3 = icmp eq i64 %2, 20
   br i1 %3, label %typeTestSuccess, label %typeTestFail, !prof !13, !misexpect !14
 
@@ -677,7 +678,7 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %rawArg_arg = load i64, i64* %argArray, align 8
   %1 = load i64, i64* @rb_cObject, align 8
-  %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #19
+  %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #7
   %3 = icmp eq i64 %2, 20
   br i1 %3, label %typeTestSuccess, label %typeTestFail, !prof !13, !misexpect !14
 
@@ -735,7 +736,7 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %rawArg_arg = load i64, i64* %argArray, align 8
   %1 = load i64, i64* @rb_cObject, align 8
-  %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #19
+  %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #7
   %3 = icmp eq i64 %2, 20
   br i1 %3, label %typeTestSuccess, label %typeTestFail, !prof !13, !misexpect !14
 

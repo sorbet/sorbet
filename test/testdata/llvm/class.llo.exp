@@ -410,13 +410,13 @@ typeTestSuccess.i.i.i:                            ; preds = %9, %afterSymCallInt
 
 14:                                               ; preds = %typeTestSuccess.i.i.i
   tail call void @const_recompute_T() #14
-  %.pre4.i.i.i = load i64, i64* @guard_epoch_T, align 8
-  %.pre5.i.i.i = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %.pre3.i.i.i = load i64, i64* @guard_epoch_T, align 8
+  %.pre4.i.i.i = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
   br label %afterSymCallIntrinsic_unsafe.i.i.i
 
 afterSymCallIntrinsic_unsafe.i.i.i:               ; preds = %14, %typeTestSuccess.i.i.i
-  %15 = phi i64 [ %10, %typeTestSuccess.i.i.i ], [ %.pre5.i.i.i, %14 ]
-  %16 = phi i64 [ %10, %typeTestSuccess.i.i.i ], [ %.pre4.i.i.i, %14 ]
+  %15 = phi i64 [ %10, %typeTestSuccess.i.i.i ], [ %.pre4.i.i.i, %14 ]
+  %16 = phi i64 [ %10, %typeTestSuccess.i.i.i ], [ %.pre3.i.i.i, %14 ]
   %guardUpdated28.i.i.i = icmp eq i64 %16, %15
   tail call void @llvm.assume(i1 %guardUpdated28.i.i.i) #14
   %17 = tail call i64 @rb_define_class_under(i64 %12, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Bar, i64 0, i64 0), i64 %0) #14

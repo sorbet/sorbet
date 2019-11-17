@@ -411,7 +411,8 @@ define internal i64 @sorbet_Closure_size(i8* nocapture readonly %0) #10 {
 
 declare i64 @rb_data_typed_object_wrap(i64, i8*, %struct.rb_data_type_struct*) local_unnamed_addr #3
 
-declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #3
+; Function Attrs: nounwind readnone
+declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #7
 
 declare void @rb_ary_detransient(i64) local_unnamed_addr #3
 
@@ -449,7 +450,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %12 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %11, i64 0, i32 1, i64 0
   %13 = load i64, i64* %12, align 8
   %14 = load i64, i64* @rb_cObject, align 8
-  %15 = tail call i64 @rb_obj_is_kind_of(i64 %13, i64 %14) #18
+  %15 = tail call i64 @rb_obj_is_kind_of(i64 %13, i64 %14) #7
   %16 = icmp eq i64 %15, 20
   br i1 %16, label %typeTestSuccess, label %typeTestFail, !prof !14, !misexpect !16
 

@@ -424,7 +424,8 @@ define internal i64 @sorbet_Closure_size(i8* nocapture readonly %0) #10 {
   ret i64 %6
 }
 
-declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #3
+; Function Attrs: nounwind readnone
+declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #7
 
 declare void @rb_freeze_singleton_class(i64) local_unnamed_addr #3
 
@@ -517,65 +518,65 @@ typeTestSuccess.i.i.i:                            ; preds = %10, %afterSymCallIn
   tail call void @llvm.assume(i1 %guardUpdated.i.i) #18
   %rubyId_write.i.i.i = load i64, i64* @rubyIdPrecomputed_write, align 8
   %rubyId_read.i.i.i = load i64, i64* @rubyIdPrecomputed_read, align 8
-  %.pre2.i.i = load i64, i64* @guard_epoch_T, align 8
-  %needTakeSlowPath41.i.i.i = icmp eq i64 %.pre2.i.i, %11
-  br i1 %needTakeSlowPath41.i.i.i, label %"Init_func_A.<static-init>.exit.i", label %14, !prof !13
+  %14 = load i64, i64* @guard_epoch_T, align 8
+  %needTakeSlowPath41.i.i.i = icmp eq i64 %14, %11
+  br i1 %needTakeSlowPath41.i.i.i, label %"Init_func_A.<static-init>.exit.i", label %15, !prof !13
 
-14:                                               ; preds = %typeTestSuccess.i.i.i
+15:                                               ; preds = %typeTestSuccess.i.i.i
   tail call void @const_recompute_T() #18
-  %.pre4.i.i.i = load i64, i64* @guard_epoch_T, align 8
-  %.pre5.i.i.i = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %.pre3.i.i.i = load i64, i64* @guard_epoch_T, align 8
+  %.pre4.i.i.i = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
   br label %"Init_func_A.<static-init>.exit.i"
 
-"Init_func_A.<static-init>.exit.i":               ; preds = %14, %typeTestSuccess.i.i.i
-  %15 = phi i64 [ %.pre5.i.i.i, %14 ], [ %11, %typeTestSuccess.i.i.i ]
-  %16 = phi i64 [ %.pre4.i.i.i, %14 ], [ %11, %typeTestSuccess.i.i.i ]
-  %guardUpdated42.i.i.i = icmp eq i64 %16, %15
+"Init_func_A.<static-init>.exit.i":               ; preds = %15, %typeTestSuccess.i.i.i
+  %16 = phi i64 [ %.pre4.i.i.i, %15 ], [ %11, %typeTestSuccess.i.i.i ]
+  %17 = phi i64 [ %.pre3.i.i.i, %15 ], [ %11, %typeTestSuccess.i.i.i ]
+  %guardUpdated42.i.i.i = icmp eq i64 %17, %16
   tail call void @llvm.assume(i1 %guardUpdated42.i.i.i) #18
   %rawSym.i.i.i = tail call i64 @rb_id2sym(i64 %rubyId_write.i.i.i) #18
   tail call void @rb_define_method(i64 %13, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_write, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#write" to i64 (...)*), i32 -1) #18
   %rawSym37.i.i.i = tail call i64 @rb_id2sym(i64 %rubyId_read.i.i.i) #18
   tail call void @rb_define_method(i64 %13, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#read" to i64 (...)*), i32 -1) #18
-  %17 = load i64, i64* @guard_epoch_A, align 8
-  %18 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
-  %needTakeSlowPath83.i = icmp eq i64 %17, %18
-  br i1 %needTakeSlowPath83.i, label %"func_<root>.<static-init>$111.exit", label %19, !prof !13
+  %18 = load i64, i64* @guard_epoch_A, align 8
+  %19 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
+  %needTakeSlowPath83.i = icmp eq i64 %18, %19
+  br i1 %needTakeSlowPath83.i, label %"func_<root>.<static-init>$111.exit", label %20, !prof !13
 
-19:                                               ; preds = %"Init_func_A.<static-init>.exit.i"
+20:                                               ; preds = %"Init_func_A.<static-init>.exit.i"
   tail call void @const_recompute_A() #18
   %.pre3.i = load i64, i64* @guard_epoch_A, align 8
   %.pre4.i = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !11
   br label %"func_<root>.<static-init>$111.exit"
 
-"func_<root>.<static-init>$111.exit":             ; preds = %"Init_func_A.<static-init>.exit.i", %19
-  %20 = phi i64 [ %17, %"Init_func_A.<static-init>.exit.i" ], [ %.pre4.i, %19 ]
-  %21 = phi i64 [ %17, %"Init_func_A.<static-init>.exit.i" ], [ %.pre3.i, %19 ]
-  %22 = load i64, i64* @guarded_const_A, align 8
-  %guardUpdated84.i = icmp eq i64 %21, %20
+"func_<root>.<static-init>$111.exit":             ; preds = %"Init_func_A.<static-init>.exit.i", %20
+  %21 = phi i64 [ %18, %"Init_func_A.<static-init>.exit.i" ], [ %.pre4.i, %20 ]
+  %22 = phi i64 [ %18, %"Init_func_A.<static-init>.exit.i" ], [ %.pre3.i, %20 ]
+  %23 = load i64, i64* @guarded_const_A, align 8
+  %guardUpdated84.i = icmp eq i64 %22, %21
   tail call void @llvm.assume(i1 %guardUpdated84.i) #18
   tail call void @dbg_sorbet_validate_id(i64 %rubyId_new.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !14
-  %23 = call i64 @rb_funcallv(i64 %22, i64 %rubyId_new.i, i32 0, i64* nonnull %callArgsAddr.i) #18
+  %24 = call i64 @rb_funcallv(i64 %23, i64 %rubyId_new.i, i32 0, i64* nonnull %callArgsAddr.i) #18
   call void @dbg_sorbet_validate_id(i64 %rubyId_new.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !17
-  %24 = call i64 @rb_funcallv(i64 %22, i64 %rubyId_new.i, i32 0, i64* nonnull %callArgsAddr.i) #18
+  %25 = call i64 @rb_funcallv(i64 %23, i64 %rubyId_new.i, i32 0, i64* nonnull %callArgsAddr.i) #18
   call void @dbg_sorbet_validate_id(i64 %rubyId_read.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !20
-  %25 = call i64 @rb_funcallv(i64 %23, i64 %rubyId_read.i, i32 0, i64* nonnull %callArgsAddr.i) #18
-  store i64 %25, i64* %callArgsAddr.i, align 8
+  %26 = call i64 @rb_funcallv(i64 %24, i64 %rubyId_read.i, i32 0, i64* nonnull %callArgsAddr.i) #18
+  store i64 %26, i64* %callArgsAddr.i, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !23
-  %26 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #18
-  %27 = call i64 @rb_str_new(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_value, i64 0, i64 0), i64 5) #18
-  store i64 %27, i64* %callArgsAddr.i, align 8
+  %27 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #18
+  %28 = call i64 @rb_str_new(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_value, i64 0, i64 0), i64 5) #18
+  store i64 %28, i64* %callArgsAddr.i, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_write.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !26
-  %28 = call i64 @rb_funcallv(i64 %23, i64 %rubyId_write.i, i32 1, i64* nonnull %callArgsAddr.i) #18
+  %29 = call i64 @rb_funcallv(i64 %24, i64 %rubyId_write.i, i32 1, i64* nonnull %callArgsAddr.i) #18
   call void @dbg_sorbet_validate_id(i64 %rubyId_read.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !29
-  %29 = call i64 @rb_funcallv(i64 %23, i64 %rubyId_read.i, i32 0, i64* nonnull %callArgsAddr.i) #18
-  store i64 %29, i64* %callArgsAddr.i, align 8
+  %30 = call i64 @rb_funcallv(i64 %24, i64 %rubyId_read.i, i32 0, i64* nonnull %callArgsAddr.i) #18
+  store i64 %30, i64* %callArgsAddr.i, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !32
-  %30 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #18
+  %31 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #18
   call void @dbg_sorbet_validate_id(i64 %rubyId_read.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !35
-  %31 = call i64 @rb_funcallv(i64 %24, i64 %rubyId_read.i, i32 0, i64* nonnull %callArgsAddr.i) #18
-  store i64 %31, i64* %callArgsAddr.i, align 8
+  %32 = call i64 @rb_funcallv(i64 %25, i64 %rubyId_read.i, i32 0, i64* nonnull %callArgsAddr.i) #18
+  store i64 %32, i64* %callArgsAddr.i, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #18, !noalias !38
-  %32 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #18
+  %33 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #18
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %1)
   ret void
 }
@@ -610,7 +611,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %7 = load i64, i64* @guarded_const_A, align 8
   %guardUpdated = icmp eq i64 %6, %5
   tail call void @llvm.assume(i1 %guardUpdated)
-  %8 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %7) #18
+  %8 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %7) #7
   %9 = icmp eq i64 %8, 20
   br i1 %9, label %typeTestSuccess, label %typeTestFail, !prof !43, !misexpect !44
 
@@ -663,7 +664,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %6 = load i64, i64* @guarded_const_A, align 8
   %guardUpdated = icmp eq i64 %5, %4
   tail call void @llvm.assume(i1 %guardUpdated)
-  %7 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %6) #18
+  %7 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %6) #7
   %8 = icmp eq i64 %7, 20
   br i1 %8, label %typeTestSuccess, label %typeTestFail, !prof !43, !misexpect !44
 

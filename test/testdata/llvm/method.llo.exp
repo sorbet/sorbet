@@ -392,7 +392,8 @@ define internal i64 @sorbet_Closure_size(i8* nocapture readonly %0) #10 {
   ret i64 %6
 }
 
-declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #3
+; Function Attrs: nounwind readnone
+declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #7
 
 declare i64 @rb_int2big(i64) local_unnamed_addr #3
 
@@ -439,7 +440,7 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %rawArg_name = load i64, i64* %argArray, align 8
   %6 = load i64, i64* @rb_cObject, align 8
-  %7 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %6) #19
+  %7 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %6) #7
   %8 = icmp eq i64 %7, 20
   br i1 %8, label %BB2.preheader, label %typeTestFail, !prof !13, !misexpect !14
 
