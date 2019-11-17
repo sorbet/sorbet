@@ -66,7 +66,7 @@ llvm::Value *MK::getRubyFloatRaw(CompilerState &cs, llvm::IRBuilderBase &builder
 
 llvm::Value *MK::getRubyStringRaw(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str) {
     llvm::StringRef userStr(str.data(), str.length());
-    auto rawCString = builderCast(builder).CreateGlobalStringPtr(userStr, {"userStr_", userStr});
+    auto rawCString = MK::toCString(cs, str, builder);
     return builderCast(builder).CreateCall(
         cs.module->getFunction("sorbet_CPtrToRubyString"),
         {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length(), true))}, "rawRubyStr");
@@ -95,9 +95,7 @@ llvm::Value *MK::getRubyIdFor(CompilerState &cs, llvm::IRBuilderBase &builder, s
 
         auto bb = llvm::BasicBlock::Create(cs, "constr", constr);
         globalInitBuilder.SetInsertPoint(bb);
-        llvm::Constant *indicesString[] = {zero, zero};
-        auto gv = builder.CreateGlobalString(name, {"str_", name}, 0);
-        auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(gv->getValueType(), gv, indicesString);
+        auto rawCString = MK::toCString(cs, idName, builder);
         auto rawID = globalInitBuilder.CreateCall(
             cs.module->getFunction("sorbet_IDIntern"),
             {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, idName.length()))}, "rawId");
