@@ -35,7 +35,7 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
 @rubyIdPrecomputed_times = internal unnamed_addr global i64 0, align 8
 @str_times = private unnamed_addr constant [6 x i8] c"times\00", align 1
-@userStr_hi = private unnamed_addr constant [3 x i8] c"hi\00", align 1
+@str_hi = private unnamed_addr constant [3 x i8] c"hi\00", align 1
 @rubyIdPrecomputed_unsafe = internal unnamed_addr global i64 0, align 8
 @str_unsafe = private unnamed_addr constant [7 x i8] c"unsafe\00", align 1
 @rubyIdPrecomputed_foo = internal unnamed_addr global i64 0, align 8
@@ -582,7 +582,7 @@ typeTestSuccess.i:
   %1 = bitcast [2 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %1)
   %rubyId_foo.i = load i64, i64* @rubyIdPrecomputed_foo, align 8
-  %2 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @userStr_hi, i64 0, i64 0), i64 2) #16
+  %2 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @str_hi, i64 0, i64 0), i64 2) #16
   tail call fastcc void @sorbet_setConstant(i64 %0, i64 %2) #16
   %3 = load i64, i64* @guard_epoch_T, align 8
   %4 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !17

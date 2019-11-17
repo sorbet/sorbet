@@ -35,7 +35,7 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @rubyIdPrecomputed_read = internal unnamed_addr global i64 0, align 8
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
-@userStr_value = private unnamed_addr constant [6 x i8] c"value\00", align 1
+@str_value = private unnamed_addr constant [6 x i8] c"value\00", align 1
 @rubyIdPrecomputed_write = internal unnamed_addr global i64 0, align 8
 @llvm.global_ctors = appending global [5 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_unsafe, i8* bitcast (i64* @rubyIdPrecomputed_unsafe to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_new, i8* bitcast (i64* @rubyIdPrecomputed_new to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_read, i8* bitcast (i64* @rubyIdPrecomputed_read to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_write, i8* bitcast (i64* @rubyIdPrecomputed_write to i8*) }]
 @str_F = private unnamed_addr constant [2 x i8] c"F\00", align 1
@@ -609,7 +609,7 @@ afterSymCallIntrinsic_unsafe28._crit_edge.i.i.i:  ; preds = %afterSymCallIntrins
   store i64 %43, i64* %callArgsAddr3.i, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_puts.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !20
   %44 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr3.i) #16
-  %45 = call i64 @rb_str_new(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @userStr_value, i64 0, i64 0), i64 5) #16
+  %45 = call i64 @rb_str_new(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_value, i64 0, i64 0), i64 5) #16
   store i64 %45, i64* %callArgsAddr3.i, align 8
   call void @dbg_sorbet_validate_id(i64 %rubyId_write.i, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.6, i64 0, i64 0)) #16, !noalias !23
   %46 = call i64 @rb_funcallv(i64 %42, i64 %rubyId_write.i, i32 1, i64* nonnull %callArgsAddr3.i) #16

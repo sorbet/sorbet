@@ -41,11 +41,11 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @str_foo.13 = private unnamed_addr constant [4 x i8] c"foo\00", align 1
 @rubyIdPrecomputed_boo = internal unnamed_addr global i64 0, align 8
 @str_boo.21 = private unnamed_addr constant [4 x i8] c"boo\00", align 1
-@userStr_heey = private unnamed_addr constant [5 x i8] c"heey\00", align 1
+@str_heey = private unnamed_addr constant [5 x i8] c"heey\00", align 1
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
 @llvm.global_ctors = appending global [5 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_call, i8* bitcast (i64* @rubyIdPrecomputed_call to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_unsafe, i8* bitcast (i64* @rubyIdPrecomputed_unsafe to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_foo, i8* bitcast (i64* @rubyIdPrecomputed_foo to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_boo, i8* bitcast (i64* @rubyIdPrecomputed_boo to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }]
-@userStr_boohey = private unnamed_addr constant [7 x i8] c"boohey\00", align 1
+@str_boohey = private unnamed_addr constant [7 x i8] c"boohey\00", align 1
 @guard_epoch_T = linkonce local_unnamed_addr global i64 0
 @guarded_const_T = linkonce local_unnamed_addr global i64 0
 @str_T.23 = private unnamed_addr constant [2 x i8] c"T\00", align 1
@@ -532,7 +532,7 @@ sorbet_isa_Array.exit:                            ; preds = %argArrayExpandArray
   br label %fillRequiredArgs
 
 fillRequiredArgs:                                 ; preds = %sorbet_isa_Array.exit, %argArrayExpandArrayTest, %10, %functionEntryInitializers
-  %11 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @userStr_heey, i64 0, i64 0), i64 4) #17
+  %11 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_heey, i64 0, i64 0), i64 4) #17
   %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
   store i64 %11, i64* %callArgsAddr, align 8
   %12 = inttoptr i64 %captures to %struct.RTypedData*
@@ -576,7 +576,7 @@ sorbet_isa_Array.exit:                            ; preds = %argArrayExpandArray
   br label %fillRequiredArgs
 
 fillRequiredArgs:                                 ; preds = %sorbet_isa_Array.exit, %argArrayExpandArrayTest, %10, %functionEntryInitializers
-  %11 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @userStr_boohey, i64 0, i64 0), i64 6) #17
+  %11 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_boohey, i64 0, i64 0), i64 6) #17
   %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
   store i64 %11, i64* %callArgsAddr, align 8
   %12 = inttoptr i64 %captures to %struct.RTypedData*
