@@ -152,17 +152,26 @@ llvm::Value *MK::getRubyConstantValueRaw(CompilerState &cs, core::SymbolRef sym,
         {MK::toCString(cs, str, builder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
 }
 
-llvm::Constant *MK::toCString(CompilerState &cs, string_view str, llvm::IRBuilderBase &builder) {
+llvm::Value *MK::toCString(CompilerState &cs, string_view str, llvm::IRBuilderBase &builder) {
     llvm::StringRef valueRef(str.data(), str.length());
-    auto globalName = "str_" + (string)str;
-    auto global = cs.module->getGlobalVariable(globalName, true /*allow internal*/);
-    if (global) {
-        auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-        llvm::Constant *indicesString[] = {zero, zero};
-        auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(global->getValueType(), global, indicesString);
-        return rawCString;
-    }
-    return builderCast(builder).CreateGlobalStringPtr(valueRef, globalName);
+    auto globalName = "addr_str_" + (string)str;
+    auto globalDeclaration =
+        static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(globalName, builder.getInt8PtrTy(), [&] {
+            auto valueGlobal = builder.CreateGlobalString(valueRef, llvm::Twine("str_") + valueRef);
+            auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
+            llvm::Constant *indicesString[] = {zero, zero};
+            auto addrGlobalInitializer =
+                llvm::ConstantExpr::getInBoundsGetElementPtr(valueGlobal->getValueType(), valueGlobal, indicesString);
+            auto addrGlobal =
+                new llvm::GlobalVariable(*cs.module, builder.getInt8PtrTy(), true,
+                                         llvm::GlobalVariable::InternalLinkage, addrGlobalInitializer, globalName);
+            addrGlobal->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+            addrGlobal->setAlignment(llvm::MaybeAlign(8));
+
+            return addrGlobal;
+        }));
+
+    return builderCast(builder).CreateLoad(globalDeclaration);
 }
 
 namespace {

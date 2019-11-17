@@ -116,7 +116,7 @@ public:
     static llvm::Value *getRubyStringRaw(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str);
     static llvm::Value *getIsTruthyU1(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
     static llvm::Value *getRubyConstantValueRaw(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &builder);
-    static llvm::Constant *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
+    static llvm::Value *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
     static llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                          const core::TypePtr &type);
     static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
