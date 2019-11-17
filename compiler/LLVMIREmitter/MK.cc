@@ -153,8 +153,16 @@ llvm::Value *MK::getRubyConstantValueRaw(CompilerState &cs, core::SymbolRef sym,
 }
 
 llvm::Constant *MK::toCString(CompilerState &cs, string_view str, llvm::IRBuilderBase &builder) {
-    llvm::StringRef nameRef(str.data(), str.length());
-    return builderCast(builder).CreateGlobalStringPtr(nameRef, llvm::Twine("str_") + nameRef);
+    llvm::StringRef valueRef(str.data(), str.length());
+    auto globalName = "str_" + (string)str;
+    auto global = cs.module->getGlobalVariable(globalName, true /*allow internal*/);
+    if (global) {
+        auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
+        llvm::Constant *indicesString[] = {zero, zero};
+        auto rawCString = llvm::ConstantExpr::getInBoundsGetElementPtr(global->getValueType(), global, indicesString);
+        return rawCString;
+    }
+    return builderCast(builder).CreateGlobalStringPtr(valueRef, globalName);
 }
 
 namespace {
