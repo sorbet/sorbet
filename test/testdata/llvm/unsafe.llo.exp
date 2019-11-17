@@ -30,7 +30,7 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @llvm.global_ctors = appending global [2 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_unsafe, i8* bitcast (i64* @rubyIdPrecomputed_unsafe to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_puts, i8* bitcast (i64* @rubyIdPrecomputed_puts to i8*) }]
 @guard_epoch_T = linkonce local_unnamed_addr global i64 0
 @guarded_const_T = linkonce local_unnamed_addr global i64 0
-@str_T.5 = private unnamed_addr constant [2 x i8] c"T\00", align 1
+@str_T.1 = private unnamed_addr constant [2 x i8] c"T\00", align 1
 
 ; Function Attrs: nounwind ssp uwtable
 define weak void @dbg_sorbet_validate_id(i64 %0, i8* %1) local_unnamed_addr #0 {
@@ -315,7 +315,7 @@ declare i64 @rb_const_get_from(i64, i64) local_unnamed_addr #3
 ; Function Attrs: noinline nounwind ssp uwtable
 define internal fastcc i64 @sorbet_getConstant() unnamed_addr #4 {
   %1 = load i64, i64* @rb_cObject, align 8, !tbaa !7
-  %2 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.5, i64 0, i64 0), i64 1) #13
+  %2 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T.1, i64 0, i64 0), i64 1) #13
   %3 = tail call fastcc i64 @sorbet_getConstantAt(i64 %1, i64 %2)
   ret i64 %3
 }

@@ -30,8 +30,8 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @"str_T.class_of(<root>)" = private unnamed_addr constant [19 x i8] c"T.class_of(<root>)\00", align 1
 @rubyIdPrecomputed_each = internal unnamed_addr global i64 0, align 8
 @str_each = private unnamed_addr constant [5 x i8] c"each\00", align 1
-@str_let.1 = private unnamed_addr constant [4 x i8] c"let\00", align 1
-@str_Integer.2 = private unnamed_addr constant [8 x i8] c"Integer\00", align 1
+@str_let = private unnamed_addr constant [4 x i8] c"let\00", align 1
+@str_Integer = private unnamed_addr constant [8 x i8] c"Integer\00", align 1
 @"rubyIdPrecomputed_+" = internal unnamed_addr global i64 0, align 8
 @"str_+" = private unnamed_addr constant [2 x i8] c"+\00", align 1
 @llvm.global_ctors = appending global [2 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_each, i8* bitcast (i64* @rubyIdPrecomputed_each to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_+", i8* bitcast (i64* @"rubyIdPrecomputed_+" to i8*) }]
@@ -242,7 +242,7 @@ typeTestSuccess:                                  ; preds = %fillFromDefaultBloc
 
 typeTestFail:                                     ; preds = %fillFromDefaultBlockDone, %fillRequiredArgs
   %el1.sroa.0.147 = phi i64 [ %el1.sroa.0.1, %fillFromDefaultBlockDone ], [ 8, %fillRequiredArgs ]
-  tail call fastcc void @sorbet_cast_failure(i64 %el1.sroa.0.147, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_let.1, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer.2, i64 0, i64 0))
+  tail call fastcc void @sorbet_cast_failure(i64 %el1.sroa.0.147, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0))
   unreachable
 
 typeTestSuccess34:                                ; preds = %typeTestSuccess
@@ -263,7 +263,7 @@ sorbet_rb_int_plus.exit:                          ; preds = %typeTestSuccess34, 
   ret i64 %43
 
 typeTestFail35:                                   ; preds = %typeTestSuccess
-  tail call fastcc void @sorbet_cast_failure(i64 %el2.sroa.0.0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_let.1, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer.2, i64 0, i64 0))
+  tail call fastcc void @sorbet_cast_failure(i64 %el2.sroa.0.0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0))
   unreachable
 }
 
