@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < ()
           <self>.params({}).void()
         end
         def <it 'allows path constants inside of IT'><<C <todo sym>>>(&<blk>)
-          <emptyTree>
+          <emptyTree>::<C C3>.new()
         end
       end
     end

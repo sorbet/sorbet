@@ -17,7 +17,7 @@ struct CleanupWalk {
             }
         }
         if (newStore.empty()) {
-            return ast::MK::EmptyTree();
+            return move(insSeq->expr);
         }
         insSeq->stats = std::move(newStore);
         return insSeq;
