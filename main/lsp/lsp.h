@@ -1,18 +1,11 @@
 #ifndef RUBY_TYPER_LSPLOOP_H
 #define RUBY_TYPER_LSPLOOP_H
 
-#include "ast/ast.h"
-#include "common/kvstore/KeyValueStore.h"
-#include "core/ErrorQueue.h"
-#include "core/NameHash.h"
 #include "core/core.h"
-#include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
-#include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPPreprocessor.h"
 #include "main/lsp/LSPTypecheckerCoordinator.h"
 #include <chrono>
-#include <deque>
 #include <optional>
 
 //  _     ____  ____
@@ -24,6 +17,9 @@
 //
 // This is an implementation of LSP protocol (version 3.13) for Sorbet
 namespace sorbet::realmain::lsp {
+
+class LSPInput;
+class LSPConfiguration;
 
 enum class LSPErrorCodes {
     // Defined by JSON RPC
@@ -120,9 +116,9 @@ public:
      * Runs the language server on a dedicated thread. Returns the final global state if it exits cleanly, or nullopt
      * on error.
      *
-     * Reads input messages from inputFd.
+     * Reads input messages from the provided input object.
      */
-    std::optional<std::unique_ptr<core::GlobalState>> runLSP(int inputFd);
+    std::optional<std::unique_ptr<core::GlobalState>> runLSP(std::shared_ptr<LSPInput> input);
     void processRequest(std::unique_ptr<LSPMessage> msg);
     void processRequest(const std::string &json);
     /**

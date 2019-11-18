@@ -10,6 +10,7 @@
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
 #include "main/autogen/subclasses.h"
+#include "main/lsp/LSPInput.h"
 #include "main/lsp/lsp.h"
 #endif
 
@@ -467,7 +468,7 @@ int realmain(int argc, char *argv[]) {
                       Version::full_version_string);
         auto output = make_shared<lsp::LSPStdout>(logger);
         lsp::LSPLoop loop(move(gs), make_shared<lsp::LSPConfiguration>(opts, output, *workers, logger));
-        gs = loop.runLSP(STDIN_FILENO).value_or(nullptr);
+        gs = loop.runLSP(make_shared<lsp::LSPFDInput>(logger, STDIN_FILENO)).value_or(nullptr);
 #endif
     } else {
         Timer timeall(logger, "wall_time");

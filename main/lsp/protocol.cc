@@ -1,9 +1,9 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/synchronization/notification.h"
-#include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "lsp.h"
+#include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPPreprocessor.h"
 #include "main/lsp/watchman/WatchmanProcess.h"
 #include "main/options/options.h" // For EarlyReturnWithCode.
@@ -12,70 +12,6 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-
-/**
- * Attempts to read an LSP message from the file descriptor. Returns a nullptr if it fails.
- *
- * Extra bits read are stored into `buffer`.
- *
- * Throws an exception on read error or EOF.
- */
-unique_ptr<LSPMessage> getNewRequest(const shared_ptr<spd::logger> &logger, int inputFd, string &buffer) {
-    int length = -1;
-    string allRead;
-    {
-        // Break and return if a timeout occurs. Bound loop to prevent infinite looping here. There's typically only two
-        // lines in a header.
-        for (int i = 0; i < 10; i += 1) {
-            auto maybeLine = FileOps::readLineFromFd(inputFd, buffer);
-            if (!maybeLine) {
-                // Line not read. Abort. Store what was read thus far back into buffer
-                // for use in next call to function.
-                buffer = absl::StrCat(allRead, buffer);
-                return nullptr;
-            }
-            const string &line = *maybeLine;
-            absl::StrAppend(&allRead, line, "\n");
-            if (line == "\r") {
-                // End of headers.
-                break;
-            }
-            sscanf(line.c_str(), "Content-Length: %i\r", &length);
-        }
-        logger->trace("final raw read: {}, length: {}", allRead, length);
-    }
-
-    if (length < 0) {
-        logger->trace("No \"Content-Length: %i\" header found.");
-        // Throw away what we've read and start over.
-        return nullptr;
-    }
-
-    if (buffer.length() < length) {
-        // Need to read more.
-        int moreNeeded = length - buffer.length();
-        vector<char> buf(moreNeeded);
-        int result = FileOps::readFd(inputFd, buf);
-        if (result > 0) {
-            buffer.append(buf.begin(), buf.begin() + result);
-        }
-        if (result == -1) {
-            Exception::raise("Error reading file or EOF.");
-        }
-        if (result != moreNeeded) {
-            // Didn't get enough data. Return read data to `buffer`.
-            buffer = absl::StrCat(allRead, buffer);
-            return nullptr;
-        }
-    }
-
-    ENFORCE(buffer.length() >= length);
-
-    string json = buffer.substr(0, length);
-    buffer.erase(0, length);
-    logger->debug("Read: {}\n", json);
-    return LSPMessage::fromClient(json);
-}
 
 class NotifyOnDestruction {
     absl::Mutex &mutex;
@@ -169,7 +105,7 @@ void LSPLoop::maybeStartCommitSlowPathEdit(const LSPMessage &msg) const {
     }
 }
 
-optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
+optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> input) {
     // Naming convention: thread that executes this function is called typechecking thread
 
     // Incoming queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
@@ -226,15 +162,14 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(int inputFd) {
             });
     }
 
-    auto readerThread = runInAThread("lspReader", [&incomingQueue, &incomingMtx, logger = logger, inputFd] {
+    auto readerThread = runInAThread("lspReader", [&incomingQueue, &incomingMtx, logger = logger, input = move(input)] {
         // Thread that executes this lambda is called reader thread.
         // This thread _intentionally_ does not capture `this`.
         NotifyOnDestruction notify(incomingMtx, incomingQueue.terminate);
-        string buffer;
         try {
             auto timeit = make_unique<Timer>(logger, "getNewRequest");
             while (true) {
-                auto msg = getNewRequest(logger, inputFd, buffer);
+                auto msg = input->read();
                 {
                     absl::MutexLock lck(&incomingMtx); // guards guardedState.
                     if (msg) {
