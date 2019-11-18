@@ -71,8 +71,7 @@ inline bool canMatchWordBoundary(char ch) {
     return isspace(ch);
 }
 
-inline bool isEligibleSymbol(const core::GlobalState &gs, const core::SymbolData &symbolData,
-                             const core::NameData &nameData) {
+inline bool isEligibleSymbol(const core::NameData &nameData) {
     if (nameData->kind == core::NameKind::UNIQUE) {
         return false;
     }
@@ -84,7 +83,7 @@ struct PartialMatch {
     string_view::const_iterator matchEnd = nullptr; // progress in query match
 };
 
-/** Returns a PartialMatch the given symbol/query. */
+/** Returns a PartialMatch for the given symbol/query. */
 PartialMatch partialMatchSymbol(string_view symbol, string_view::const_iterator queryBegin,
                                 string_view::const_iterator queryEnd, bool prefixOnly, uint ceilingScore) {
     auto symbolIter = symbol.begin();
@@ -170,7 +169,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
             auto symbolRef = core::SymbolRef(gs, symbolIndex);
             auto symbolData = symbolRef.data(gs);
             auto nameData = symbolData->name.data(gs);
-            if (!isEligibleSymbol(gs, symbolData, nameData)) {
+            if (!isEligibleSymbol(nameData)) {
                 continue;
             }
             auto shortName = nameData->shortName(gs);
@@ -218,14 +217,15 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
             auto symbolRef = core::SymbolRef(gs, symbolIndex);
             auto symbolData = symbolRef.data(gs);
             auto nameData = symbolData->name.data(gs);
-            if (!isEligibleSymbol(gs, symbolData, nameData)) {
+            if (!isEligibleSymbol(nameData)) {
                 continue;
             }
             auto shortName = nameData->shortName(gs);
-            optional<uint> bestScore = nullopt;
-            auto partialMatch = partialMatchSymbol(shortName, queryBegin, queryEnd, false, ceilingScore);
-            if (partialMatch.matchEnd == queryEnd) {
-                bestScore = partialMatch.score;
+            uint bestScore = ceilingScore;
+            auto [partialScore, partialMatchEnd] =
+                partialMatchSymbol(shortName, queryBegin, queryEnd, false, ceilingScore);
+            if (partialMatchEnd == queryEnd) {
+                bestScore = partialScore;
             }
             for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
                  previousAncestorRef != ancestorRef && ancestorRef.exists();
@@ -237,20 +237,19 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
                 if (ancestorEnd == queryEnd) {
                     continue; // ancestor matched everything, so skip to its parent
                 }
-                auto bestOrCeilingScore = bestScore.value_or(ceilingScore);
-                if (ancestorScore >= bestOrCeilingScore) {
+                if (ancestorScore >= bestScore) {
                     continue; // matching this ancestor would be worse
                 }
                 auto [plusScore, plusEnd] =
-                    partialMatchSymbol(shortName, ancestorEnd, queryEnd, false, bestOrCeilingScore - ancestorScore);
+                    partialMatchSymbol(shortName, ancestorEnd, queryEnd, false, bestScore - ancestorScore);
                 if (plusEnd == queryEnd) {
-                    bestScore = min(bestOrCeilingScore, ancestorScore + plusScore);
+                    bestScore = min(bestScore, ancestorScore + plusScore);
                 }
             }
-            if (bestScore.has_value()) {
+            if (bestScore < ceilingScore) {
                 // update ceiling so we stop looking at bad matches
-                ceilingScore = min(ceilingScore, *bestScore * WORST_TO_BEST_RATIO);
-                candidates.emplace_back(symbolIndex, *bestScore);
+                ceilingScore = min(ceilingScore, bestScore * WORST_TO_BEST_RATIO);
+                candidates.emplace_back(symbolIndex, bestScore);
             }
         }
     }
