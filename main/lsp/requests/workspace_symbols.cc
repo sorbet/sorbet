@@ -90,7 +90,6 @@ PartialMatch partialMatchSymbol(string_view symbol, string_view::const_iterator 
     auto symbolIter = symbol.begin();
     auto symbolEnd = symbol.end();
     auto queryIter = queryBegin;
-    auto matchEnd = queryBegin;
     // Consume leading namespacing punctuation, e.g. to make `::f` matchable
     // against `module Foo`.
     while (queryIter != queryEnd && canBeLeadingNamespaceSeparator(*queryIter)) {
@@ -99,6 +98,7 @@ PartialMatch partialMatchSymbol(string_view symbol, string_view::const_iterator 
     while (symbolIter != symbolEnd && canBeLeadingNamespaceSeparator(*symbolIter)) {
         symbolIter++;
     }
+    auto matchEnd = queryIter;
     char previousSymbolCh = 0;
     char symbolCh = 0;
     uint score = 1;
@@ -132,7 +132,7 @@ PartialMatch partialMatchSymbol(string_view symbol, string_view::const_iterator 
                     break;
                 } else if (!prefixOnly) {
                     // middle of word...can sometimes match, but steep penalty
-                    score = 5 * score + symbolCharsConsumed;
+                    score = 5 * (score + symbolCharsConsumed);
                     matchEnd = queryIter;
                     break;
                 }
