@@ -44,10 +44,7 @@ class <emptyTree><<C <root>>> < ()
           <self>.params({}).void()
         end
         def <it 'allows path constants inside of IT'><<C <todo sym>>>(&<blk>)
-          begin
-            <emptyTree>
-            <emptyTree>::<C C3>.new()
-          end
+          <emptyTree>
         end
       end
     end
@@ -152,9 +149,7 @@ class <emptyTree><<C <root>>> < ()
 
     class <emptyTree>::<C <describe 'a non-ideal situation'>><<C <todo sym>>> < (<self>)
       begin
-        class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)
-          <emptyTree>
-        end
+        class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)        end
         begin
           ::T::Sig::WithoutRuntime.sig() do ||
             <self>.params({}).void()
@@ -172,8 +167,6 @@ class <emptyTree><<C <root>>> < ()
   end
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
-    class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
-      <emptyTree>
-    end
+    class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)    end
   end
 end

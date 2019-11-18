@@ -1,7 +1,5 @@
 class <emptyTree><<C <root>>> < ()
-  class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>
-  end
+  class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)  end
 
   class <emptyTree>::<C SomeDataInterface><<C <todo sym>>> < (::<todo sym>)
     ::T::Sig::WithoutRuntime.sig() do ||

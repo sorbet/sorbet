@@ -25,9 +25,7 @@ ClassDef{
 }
 --- desugar-tree-raw end ---
 --- rewrite-tree start ---
-class <emptyTree><<C <root>>> < ()
-  1
-end
+class <emptyTree><<C <root>>> < ()end
 --- rewrite-tree end ---
 --- rewrite-tree-raw start ---
 ClassDef{
@@ -35,14 +33,11 @@ ClassDef{
   name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
-    Literal{ value = 1 }
   ]
 }
 --- rewrite-tree-raw end ---
 --- index-tree start ---
-class <emptyTree><<C <root>>> < ()
-  1
-end
+class <emptyTree><<C <root>>> < ()end
 --- index-tree end ---
 --- index-tree-raw start ---
 ClassDef{
@@ -50,15 +45,12 @@ ClassDef{
   name = EmptyTree<<C <U <root>>>>
   ancestors = []
   rhs = [
-    Literal{ value = 1 }
   ]
 }
 --- index-tree-raw end ---
 --- name-tree start ---
 begin
-  class <emptyTree><<C <root>>> < ()
-    1
-  end
+  class <emptyTree><<C <root>>> < ()  end
   <emptyTree>
 end
 --- name-tree end ---
@@ -70,7 +62,6 @@ InsSeq{
       name = EmptyTree<<C <U <root>>>>
       ancestors = []
       rhs = [
-        Literal{ value = 1 }
       ]
     }
   ],
@@ -79,9 +70,7 @@ InsSeq{
 --- name-tree-raw end ---
 --- resolve-tree start ---
 begin
-  class <emptyTree><<C <root>>> < ()
-    1
-  end
+  class <emptyTree><<C <root>>> < ()  end
   <emptyTree>
 end
 --- resolve-tree end ---
@@ -93,7 +82,6 @@ InsSeq{
       name = EmptyTree<<C <U <root>>>>
       ancestors = []
       rhs = [
-        Literal{ value = 1 }
       ]
     }
   ],
@@ -105,7 +93,7 @@ begin
   <emptyTree>
   class <emptyTree><<C <root>>> < ()
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      1
+      <emptyTree>
     end
   end
   <emptyTree>
@@ -126,7 +114,7 @@ InsSeq{
           args = [Local{
               localVariable = <U <blk>>
             }]
-          rhs = Literal{ value = 1 }
+          rhs = EmptyTree
         }
       ]
     }
@@ -139,7 +127,7 @@ begin
   <emptyTree>
   class <emptyTree><<C <root>>> < ()
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      1
+      <emptyTree>
     end
   end
   <emptyTree>
@@ -160,7 +148,7 @@ InsSeq{
           args = [Local{
               localVariable = <U <blk>>
             }]
-          rhs = Literal{ value = 1 }
+          rhs = EmptyTree
         }
       ]
     }
@@ -177,7 +165,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -203,7 +191,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l&nbsp;value = Cast {\l&nbsp;&nbsp;cast = T.cast,\l&nbsp;&nbsp;value = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;&nbsp;type = NilClass,\l&nbsp;&nbsp;},\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;type = Integer(1),\l&nbsp;},\l&nbsp;value = Literal { value = Integer(1) },\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <finalReturn>>,\l&nbsp;&nbsp;type = T.noreturn,\l&nbsp;},\l&nbsp;value = Return {\l&nbsp;&nbsp;what = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;&nbsp;type = Integer(1),\l&nbsp;&nbsp;},\l&nbsp;},\l}\l<unconditional>\l"
+        label = "block[id=0]()\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l&nbsp;value = Cast {\l&nbsp;&nbsp;cast = T.cast,\l&nbsp;&nbsp;value = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;&nbsp;type = NilClass,\l&nbsp;&nbsp;},\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <finalReturn>>,\l&nbsp;&nbsp;type = T.noreturn,\l&nbsp;},\l&nbsp;value = Return {\l&nbsp;&nbsp;what = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;&nbsp;type = NilClass,\l&nbsp;&nbsp;},\l&nbsp;},\l}\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -241,10 +229,10 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
 <           args = [Local{
 <           flags = self
 <           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-<           rhs = Literal{ value = 1 }
+<           rhs = EmptyTree
 <         MethodDef{
 <         }
-<       1
+<       <emptyTree>
 <       ]
 <       ancestors = []
 <       kind = class
