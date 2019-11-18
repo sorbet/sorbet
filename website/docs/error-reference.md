@@ -475,6 +475,10 @@ class C
 end
 ```
 
+## 5054
+
+Use of `implementation` has been replaced by `override`.
+
 ## 6002
 
 In `# typed: strict` files, Sorbet requires that all instance and class
