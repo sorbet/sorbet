@@ -92,6 +92,12 @@ Usage:
                                 Enable experimental LSP feature: Quick Fix
       --enable-all-experimental-lsp-features
                                 Enable every experimental LSP feature.
+                                (WARNING: can be crashy; for developer use only. End
+                                users should prefer to use
+                                `--enable-all-beta-lsp-features`, instead.)
+      --enable-all-beta-lsp-features
+                                Enable (expected-to-be-non-crashy)
+                                early-access LSP features.
       --ignore string           Ignores input files that contain the given
                                 string in their paths (relative to the input
                                 path passed to Sorbet). Strings beginning with /
