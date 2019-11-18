@@ -301,6 +301,10 @@ void GlobalState::initEmpty() {
     }
     ENFORCE(id == Symbols::sig());
 
+    // Enumerable::Lazy
+    id = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
+    ENFORCE(id == Symbols::Lazy());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
