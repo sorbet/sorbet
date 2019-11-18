@@ -303,7 +303,7 @@ void GlobalState::initEmpty() {
 
     // Enumerable::Lazy
     id = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
-    ENFORCE(id == Symbols::Lazy());
+    ENFORCE(id == Symbols::Enumerator_Lazy());
 
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();

@@ -745,7 +745,7 @@ core::TypePtr flatmapHack(core::Context ctx, core::TypePtr receiver, core::TypeP
         return returnType;
     }
 
-    if (receiver->derivesFrom(ctx, core::Symbols::Lazy())) {
+    if (receiver->derivesFrom(ctx, core::Symbols::Enumerator_Lazy())) {
         return returnType;
     }
 

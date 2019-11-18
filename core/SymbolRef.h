@@ -397,7 +397,7 @@ public:
         return SymbolRef(nullptr, 83);
     }
 
-    static SymbolRef Lazy() {
+    static SymbolRef Enumerator_Lazy() {
         return SymbolRef(nullptr, 84);
     }
 
