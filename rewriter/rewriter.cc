@@ -21,6 +21,7 @@
 #include "rewriter/TEnum.h"
 #include "rewriter/TypeMembers.h"
 #include "rewriter/attr_reader.h"
+#include "rewriter/cleanup.h"
 #include "rewriter/flatten.h"
 #include "rewriter/module_function.h"
 
@@ -169,7 +170,8 @@ unique_ptr<ast::Expression> Rewriter::run(core::MutableContext ctx, unique_ptr<a
     // around, which is why it runs all at once and is not expressed as a `patch` method like the other DSL passes. This
     // is a rare case: in general, we should *not* add new DSL passes here.
     auto flattened = Flatten::run(ctx, std::move(ast));
-    auto verifiedResult = ast::Verifier::run(ctx, std::move(flattened));
+    auto cleaned = Cleanup::run(ctx, std::move(flattened));
+    auto verifiedResult = ast::Verifier::run(ctx, std::move(cleaned));
     return verifiedResult;
 }
 
