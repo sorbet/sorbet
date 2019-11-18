@@ -76,16 +76,8 @@ class <emptyTree><<C <root>>> < ()
     end
   end
 
-  <self>.arr().each() do |*forTemp$8|
-    begin
-      begin
-        <assignTemp>$9 = forTemp$8
-        <assignTemp>$10 = ::<Magic>.<expand-splat>(<assignTemp>$9, 1, 0)
-        x = <assignTemp>$10.[](0)
-        <assignTemp>$9
-      end
-      <emptyTree>
-    end
+  <self>.arr().each() do |x|
+    <emptyTree>
   end
 
   while 0.!=(1)
@@ -157,16 +149,16 @@ class <emptyTree><<C <root>>> < ()
   end
 
   begin
-    <assignTemp>$11 = 1
-    <assignTemp>$12 = ::<Magic>.<expand-splat>(<assignTemp>$11, 2, 0)
-    a = <assignTemp>$12.[](0)
+    <assignTemp>$8 = 1
+    <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 2, 0)
+    a = <assignTemp>$9.[](0)
     begin
-      <assignTemp>$13 = <assignTemp>$12.[](1)
-      <assignTemp>$14 = ::<Magic>.<expand-splat>(<assignTemp>$13, 1, 0)
-      x = <assignTemp>$14.[](0)
-      <assignTemp>$13
+      <assignTemp>$10 = <assignTemp>$9.[](1)
+      <assignTemp>$11 = ::<Magic>.<expand-splat>(<assignTemp>$10, 1, 0)
+      x = <assignTemp>$11.[](0)
+      <assignTemp>$10
     end
-    <assignTemp>$11
+    <assignTemp>$8
   end
 
   4
@@ -190,10 +182,10 @@ rescue <emptyTree>::<C E> => x
   nil
 
   begin
-    <assignTemp>$15 = y.to_a()
-    <assignTemp>$16 = ::<Magic>.<expand-splat>(<assignTemp>$15, 0, 0)
-    x = <assignTemp>$16.slice(::Range.new(0, -1, false))
-    <assignTemp>$15
+    <assignTemp>$12 = y.to_a()
+    <assignTemp>$13 = ::<Magic>.<expand-splat>(<assignTemp>$12, 0, 0)
+    x = <assignTemp>$13.slice(::Range.new(0, -1, false))
+    <assignTemp>$12
   end
 
   "foo".concat(<self>.bar().to_s()).intern()

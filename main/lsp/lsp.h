@@ -93,7 +93,7 @@ class LSPLoop {
                                                                   const CompletionParams &params) const;
     std::unique_ptr<ResponseMessage> handleTextDocumentCodeAction(LSPTypechecker &typechecker, const MessageId &id,
                                                                   const CodeActionParams &params) const;
-    std::unique_ptr<CompletionItem> getCompletionItemForMethod(const core::GlobalState &gs, core::SymbolRef what,
+    std::unique_ptr<CompletionItem> getCompletionItemForMethod(LSPTypechecker &typechecker, core::SymbolRef what,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                const core::Loc queryLoc, std::string_view prefix,

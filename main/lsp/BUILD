@@ -15,6 +15,7 @@ cc_library(
         "LSPTypecheckerCoordinator.h",
         "LocalVarFinder.h",
         "LocalVarSaver.h",
+        "NextMethodFinder.h",
         "ShowOperation.h",
         "TimeTravelingGlobalState.h",
         "json_types.h",

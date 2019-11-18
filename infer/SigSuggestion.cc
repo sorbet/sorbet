@@ -2,6 +2,7 @@
 #include "common/common.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
+#include "core/lsp/QueryResponse.h"
 #include <optional>
 
 using namespace std;
@@ -321,6 +322,12 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         guessedSomethingUseful = true;
     }
 
+    auto lspQueryMatches = ctx.state.lspQuery.matchesSuggestSig(methodSymbol);
+    if (lspQueryMatches) {
+        // Even a sig with no useful types is still useful interactively (saves on typing)
+        guessedSomethingUseful = true;
+    }
+
     core::TypePtr guessedReturnType;
     if (!constr.isEmpty()) {
         if (!constr.solve(ctx)) {
@@ -333,7 +340,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             guessedReturnType = core::Types::untypedUntracked();
         }
 
-        guessedSomethingUseful = guessedSomethingUseful || !guessedReturnType->isUntyped();
+        guessedSomethingUseful |= !guessedReturnType->isUntyped();
     } else {
         guessedReturnType = methodReturnType;
     }
@@ -474,8 +481,14 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
 
     vector<core::AutocorrectSuggestion::Edit> edits;
 
-    string sig = to_string(ss);
-    edits.emplace_back(core::AutocorrectSuggestion::Edit{replacementLoc, fmt::format("{}\n{}", sig, spaces)});
+    auto sig = to_string(ss);
+    auto replacementContents = fmt::format("{}\n{}", sig, spaces);
+    edits.emplace_back(core::AutocorrectSuggestion::Edit{replacementLoc, replacementContents});
+
+    if (lspQueryMatches) {
+        core::lsp::QueryResponse::pushQueryResponse(
+            ctx, core::lsp::EditResponse(replacementLoc, std::move(replacementContents)));
+    }
 
     if (auto edit = maybeSuggestExtendTSig(ctx, methodSymbol)) {
         edits.emplace_back(edit.value());

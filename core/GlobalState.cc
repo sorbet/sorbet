@@ -289,6 +289,18 @@ void GlobalState::initEmpty() {
     id.data(*this)->setIsModule(false);
     ENFORCE(id == Symbols::T_Enum());
 
+    // T::Sig#sig
+    id = enterMethodSymbol(Loc::none(), Symbols::T_Sig(), Names::sig());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        arg.flags.isDefault = true;
+    }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    ENFORCE(id == Symbols::sig());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();

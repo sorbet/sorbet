@@ -1,4 +1,5 @@
 #include "absl/algorithm/container.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "ast/treemap/treemap.h"
@@ -7,6 +8,7 @@
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LocalVarFinder.h"
+#include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/lsp.h"
 
 using namespace std;
@@ -282,6 +284,19 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
     }
 }
 
+// This is an approximation. It takes advantage of the fact that nearly all of the time,
+// the prefix being used to suggest completion items actually accurred in the source text
+// of the file, immediately before the queryLoc.
+//
+// This is somewhat brittle, but has worked well so far.
+unique_ptr<Range> replacementRangeForQuery(const core::GlobalState &gs, core::Loc queryLoc, string_view prefix) {
+    auto queryStart = queryLoc.beginPos();
+    u4 prefixSize = prefix.size();
+    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
+    // Sometimes Range::fromLoc returns nullptr (commonly when running under a fuzzer which disables certain loc info).
+    return Range::fromLoc(gs, replacementLoc);
+}
+
 unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &gs, const LSPConfiguration &config,
                                                        const RubyKeyword &rubyKeyword, const core::Loc queryLoc,
                                                        string_view prefix, size_t sortIdx) {
@@ -289,10 +304,6 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
     auto markupKind = config.getClientConfig().clientCompletionItemMarkupKind;
     auto item = make_unique<CompletionItem>(rubyKeyword.keyword);
     item->sortText = fmt::format("{:06d}", sortIdx);
-
-    // TODO(jez) This should probably be a helper function (see getCompletionItemForMethod)
-    u4 queryStart = queryLoc.beginPos();
-    u4 prefixSize = prefix.size();
 
     string replacementText;
     if (rubyKeyword.snippet.has_value() && supportSnippets) {
@@ -305,12 +316,9 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
         replacementText = rubyKeyword.keyword;
     }
 
-    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
-    auto replacementRange = Range::fromLoc(gs, replacementLoc);
-    if (replacementRange != nullptr) {
+    if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
         item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
     } else {
-        // Range::fromLoc failed... maybe the fuzzer is running?
         item->insertText = replacementText;
     }
 
@@ -366,16 +374,10 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
     item->sortText = fmt::format("{:06d}", sortIdx);
     item->kind = CompletionItemKind::Variable;
 
-    // TODO(jez) This should probably be a helper function (see getCompletionItemForMethod)
-    u4 queryStart = queryLoc.beginPos();
-    u4 prefixSize = prefix.size();
-    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
-    auto replacementRange = Range::fromLoc(gs, replacementLoc);
     auto replacementText = label;
-    if (replacementRange != nullptr) {
+    if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
         item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
     } else {
-        // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
         item->insertText = replacementText;
     }
     item->insertTextFormat = InsertTextFormat::PlainText;
@@ -402,17 +404,151 @@ vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPType
     return localVarFinder.result();
 }
 
+core::SymbolRef firstMethodAfterQuery(LSPTypechecker &typechecker, const core::Loc queryLoc) {
+    const auto &gs = typechecker.state();
+    auto files = vector<core::FileRef>{queryLoc.file()};
+    auto resolved = typechecker.getResolved(files);
+
+    NextMethodFinder nextMethodFinder(queryLoc);
+    auto ctx = core::Context{gs, core::Symbols::root()};
+    for (auto &t : resolved) {
+        t.tree = ast::TreeMap::apply(ctx, nextMethodFinder, move(t.tree));
+    }
+
+    return nextMethodFinder.result();
+}
+
+// This code is ugly but I'm convinced it's because of C++'s baroque string APIs, not for lack
+// of trying to make this code prettier. If you're up to the challenge, feel free.
+string suggestedSigToSnippet(string_view suggestedSig) {
+    auto result = fmt::format("{}${{0}}", suggestedSig);
+
+    auto tabstopId = 1;
+    size_t replaceFrom = 0;
+    while (true) {
+        string needle = "T.untyped";
+        replaceFrom = result.find(needle, replaceFrom);
+        if (replaceFrom == string::npos) {
+            break;
+        }
+
+        auto replaceWith = fmt::format("${{{}:T.untyped}}", tabstopId);
+        result.replace(replaceFrom, needle.size(), replaceWith);
+        tabstopId++;
+        replaceFrom += replaceWith.size();
+    }
+
+    return result;
+}
+
+constexpr string_view suggestSigDocs =
+    "Sorbet suggests this signature given the method below. Sorbet's suggested sigs are imperfect. It doesn't always "
+    "guess the correct types (or any types at all), but they're usually a good starting point."sv;
+
+unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const LSPClientConfiguration &clientConfig,
+                                         core::SymbolRef what, core::TypePtr receiverType, const core::Loc queryLoc,
+                                         string_view prefix, size_t sortIdx) {
+    ENFORCE(receiverType != nullptr);
+
+    const auto &gs = typechecker.state();
+    const auto markupKind = clientConfig.clientCompletionItemMarkupKind;
+    const auto supportSnippets = clientConfig.clientCompletionItemSnippetSupport;
+
+    auto targetMethod = firstMethodAfterQuery(typechecker, queryLoc);
+    if (!targetMethod.exists()) {
+        return nullptr;
+    }
+
+    core::SymbolRef receiverSym;
+    if (auto classType = core::cast_type<core::ClassType>(receiverType.get())) {
+        receiverSym = classType->symbol;
+    } else if (auto appliedType = core::cast_type<core::AppliedType>(receiverType.get())) {
+        receiverSym = appliedType->klass;
+    } else {
+        // receiverType is not a simple type. This can happen for any number of strange and uncommon reasons, like:
+        // x = T.let(self, T.nilable(T::Sig));  x.sig {void}
+        return nullptr;
+    }
+
+    if (receiverSym == core::Symbols::rootSingleton()) {
+        receiverSym = core::Symbols::Object().data(gs)->lookupSingletonClass(gs);
+    }
+    auto methodOwner = targetMethod.data(gs)->owner;
+    if (!(methodOwner == receiverSym || methodOwner == receiverSym.data(gs)->attachedClass(gs))) {
+        // The targetMethod we were going to suggest a sig for is not actually in the same scope as this sig.
+        return nullptr;
+    }
+
+    auto queryFiles = vector<core::FileRef>{queryLoc.file()};
+    auto queryResult = typechecker.query(core::lsp::Query::createSuggestSigQuery(targetMethod), queryFiles);
+    if (queryResult.error) {
+        return nullptr;
+    }
+
+    auto &queryResponses = queryResult.responses;
+    if (queryResponses.empty()) {
+        return nullptr;
+    }
+
+    auto editResponse = queryResponses[0]->isEdit();
+    if (editResponse == nullptr) {
+        return nullptr;
+    }
+
+    auto item = make_unique<CompletionItem>("sig");
+    item->kind = CompletionItemKind::Method;
+    item->sortText = fmt::format("{:06d}", sortIdx);
+    item->detail = fmt::format("Suggested sig for {}", targetMethod.data(gs)->name.data(gs)->shortName(gs));
+
+    u4 queryStart = queryLoc.beginPos();
+    u4 prefixSize = prefix.size();
+    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
+    auto replacementRange = Range::fromLoc(gs, replacementLoc);
+
+    // SigSuggestion.cc computes the replacement text assuming it will be inserted immediately in front of the def,
+    // which means it has a newline and indentation at the end of the replacement. We don't need that whitespace
+    // because we can just replace the prefix that the user has already started typing.
+    auto suggestedSig = absl::StripTrailingAsciiWhitespace(editResponse->replacement);
+    string replacementText;
+    if (supportSnippets) {
+        item->insertTextFormat = InsertTextFormat::Snippet;
+        replacementText = suggestedSigToSnippet(suggestedSig);
+    } else {
+        item->insertTextFormat = InsertTextFormat::PlainText;
+        replacementText = suggestedSig;
+    }
+
+    if (replacementRange != nullptr) {
+        item->textEdit = make_unique<TextEdit>(std::move(replacementRange), string(replacementText));
+    } else {
+        item->insertText = replacementText;
+    }
+
+    item->documentation = formatRubyMarkup(markupKind, suggestedSig, suggestSigDocs);
+
+    return item;
+}
+
 } // namespace
 
-unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(const core::GlobalState &gs, core::SymbolRef what,
+unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &typechecker, core::SymbolRef what,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                const core::Loc queryLoc, string_view prefix,
                                                                size_t sortIdx) const {
+    const auto &gs = typechecker.state();
     ENFORCE(what.exists());
     ENFORCE(what.data(gs)->isMethod());
-    auto supportsSnippets = config->getClientConfig().clientCompletionItemSnippetSupport;
-    auto markupKind = config->getClientConfig().clientCompletionItemMarkupKind;
+    auto clientConfig = config->getClientConfig();
+    auto supportsSnippets = clientConfig.clientCompletionItemSnippetSupport;
+    auto markupKind = clientConfig.clientCompletionItemMarkupKind;
+
+    if (what == core::Symbols::sig()) {
+        if (auto item = trySuggestSig(typechecker, clientConfig, what, receiverType, queryLoc, prefix, sortIdx)) {
+            return item;
+        }
+    }
+
     auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
 
     // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
@@ -427,11 +563,6 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(const core::Globa
     item->kind = CompletionItemKind::Method;
     item->detail = what.data(gs)->show(gs);
 
-    u4 queryStart = queryLoc.beginPos();
-    u4 prefixSize = prefix.size();
-    auto replacementLoc = core::Loc{queryLoc.file(), queryStart - prefixSize, queryStart};
-    auto replacementRange = Range::fromLoc(gs, replacementLoc);
-
     string replacementText;
     if (supportsSnippets) {
         item->insertTextFormat = InsertTextFormat::Snippet;
@@ -441,10 +572,9 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(const core::Globa
         replacementText = string(what.data(gs)->name.data(gs)->shortName(gs));
     }
 
-    if (replacementRange != nullptr) {
+    if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
         item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
     } else {
-        // TODO(jez) Why is replacementRange nullptr? instrument this and investigate when it fails
         item->insertText = replacementText;
     }
 
@@ -492,7 +622,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
 
-    const core::GlobalState &gs = typechecker.state();
+    const auto &gs = typechecker.state();
     auto uri = params.textDocument->uri;
     auto fref = config->uri2FileRef(gs, uri);
     if (!fref.exists()) {
@@ -600,7 +730,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
             items.push_back(getCompletionItemForLocal(gs, *config, similarLocal, queryLoc, prefix, items.size()));
         }
         for (auto &similarMethod : deduped) {
-            items.push_back(getCompletionItemForMethod(gs, similarMethod.method, similarMethod.receiverType,
+            items.push_back(getCompletionItemForMethod(typechecker, similarMethod.method, similarMethod.receiverType,
                                                        similarMethod.constr.get(), queryLoc, prefix, items.size()));
         }
     } else if (auto constantResp = resp->isConstant()) {
