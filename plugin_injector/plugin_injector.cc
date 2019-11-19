@@ -72,7 +72,10 @@ public:
         this->forceCompiled = forceCompiled;
     }
 
-    virtual void finishTypecheck(const core::GlobalState &gs, const core::FileRef &f) const override {
+    virtual void finishTypecheck(const core::GlobalState &gs) const override {
+    }
+
+    virtual void finishTypecheckFile(const core::GlobalState &gs, const core::FileRef &f) const override {
         if (!shouldCompile(gs, f)) {
             return;
         }
