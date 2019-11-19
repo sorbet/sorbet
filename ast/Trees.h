@@ -148,8 +148,11 @@ public:
     u4 flags;
 
     enum Flags {
-        SelfMethod = 1,
-        RewriterSynthesized = 2,
+        SelfMethod = 0x01,
+        RewriterSynthesized = 0x02,
+        MethodPrivate = 0x04,
+        MethodProtected = 0x08,
+        MethodPublic = 0x10,
     };
 
     MethodDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
