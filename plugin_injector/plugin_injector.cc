@@ -152,8 +152,7 @@ public:
         threadState->file = core::FileRef();
     };
 
-    virtual void finishTypecheck(const core::GlobalState &gs) const override {
-    }
+    virtual void finishTypecheck(const core::GlobalState &gs) const override {}
 
     virtual ~LLVMSemanticExtension(){};
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) override {
