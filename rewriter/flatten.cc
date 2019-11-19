@@ -149,6 +149,9 @@ class FlattenWalk {
             }
         }
 
+        // this refers to a syntactic top-level, in particular, a top-level not contained within a send of some kind. We
+        // use this so that we can sometimes replace a MethodDef with its corresponding send, but only in a context
+        // where we something might actually be using the result of a MethodDef
         bool atClassTopLevel() const {
             return sendDepth == 0;
         }
