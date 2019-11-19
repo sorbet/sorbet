@@ -1259,7 +1259,7 @@ public:
         Timer timeit(ctx.state.tracer(), "resolver.type_params");
 
         for (auto &tree : trees) {
-            tree.tree = ast::TreeMap::apply(ctx, params, std::move(tree.tree));
+            tree.tree = ast::ShallowMap::apply(ctx, params, std::move(tree.tree));
         }
 
         // loop over any out-of-order type_member/type_alias references
