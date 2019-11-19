@@ -170,6 +170,18 @@ public:
         return (flags & RewriterSynthesized) != 0;
     }
 
+    bool isPrivate() const {
+        return (flags & MethodPrivate) != 0;
+    }
+
+    bool isProtected() const {
+        return (flags & MethodProtected) != 0;
+    }
+
+    bool isPublic() const {
+        return (flags & MethodPublic) != 0;
+    }
+
     void setIsSelf(bool isSelf) {
         if (isSelf) {
             flags |= SelfMethod;
