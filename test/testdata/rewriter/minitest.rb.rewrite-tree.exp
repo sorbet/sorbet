@@ -1,52 +1,21 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
     begin
-      <emptyTree>
-      <emptyTree>
-    end
-
-    begin
       <emptyTree>::<C CONST> = ::T.unsafe(nil)
-      begin
-        <emptyTree>
-        <emptyTree>
-      end
+      <emptyTree>
     end
 
     begin
       <emptyTree>::<C C2> = ::T.let(::T.unsafe(nil), <emptyTree>::<C Integer>)
-      begin
-        <emptyTree>
-        <emptyTree>
-      end
+      <emptyTree>
     end
 
     begin
       <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
-      begin
-<<<<<<< HEAD
-        ::T::Sig::WithoutRuntime.sig() do ||
-          <self>.params({}).void()
-        end
-        def <it 'allows path constants inside of IT'><<C <todo sym>>>(&<blk>)
-          <emptyTree>::<C C3>.new()
-        end
-=======
-        <emptyTree>
-        <emptyTree>
->>>>>>> Update exp files
-      end
+      <emptyTree>
     end
 
     class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
-      begin
-        <emptyTree>
-        begin
-          <emptyTree>
-          <emptyTree>
-        end
-      end
-
       def inside_method<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
@@ -63,37 +32,11 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
-    begin
-      <emptyTree>
-      <emptyTree>
-    end
-
-    begin
-      <emptyTree>
-      <emptyTree>
-    end
-
-    begin
-      <emptyTree>
-      <emptyTree>
-    end
-
     <self>.random_method() do ||
       @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
     end
 
     class <emptyTree>::<C <describe 'Object'>><<C <todo sym>>> < (<self>)
-      begin
-        begin
-          <emptyTree>
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          <emptyTree>
-        end
-      end
-
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({}).void()
       end
@@ -120,10 +63,7 @@ class <emptyTree><<C <root>>> < ()
     class <emptyTree>::<C <describe 'a non-ideal situation'>><<C <todo sym>>> < (<self>)
       begin
         class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)        end
-        begin
-          <emptyTree>
-          <emptyTree>
-        end
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -139,10 +79,6 @@ class <emptyTree><<C <root>>> < ()
       <emptyTree>
     end
 
-<<<<<<< HEAD
-  module <emptyTree>::<C Mod><<C <todo sym>>> < ()
-    class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)    end
-=======
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).void()
     end
@@ -172,10 +108,7 @@ class <emptyTree><<C <root>>> < ()
     end
 
     def <it 'allows path constants inside of IT'><<C <todo sym>>>(&<blk>)
-      begin
-        <emptyTree>
-        <emptyTree>::<C C3>.new()
-      end
+      <emptyTree>::<C C3>.new()
     end
 
     def instance_helper<<C <todo sym>>>(&<blk>)
@@ -230,6 +163,5 @@ class <emptyTree><<C <root>>> < ()
 
   def junk<<C <todo sym>>>(&<blk>)
     <emptyTree>
->>>>>>> Update exp files
   end
 end

@@ -11,7 +11,7 @@ begin
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       <self>.foobar() do ||
-        <emptyTree>
+        :"a_method"
       end
     end
   end

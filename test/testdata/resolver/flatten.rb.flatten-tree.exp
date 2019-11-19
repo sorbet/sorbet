@@ -40,10 +40,7 @@ begin
     <emptyTree>
 
     def foo(<blk>)
-      begin
-        :"food"
-        :"foos"
-      end
+      <emptyTree>
     end
 
     def food(<blk>)
@@ -55,10 +52,7 @@ begin
     end
 
     def self.sfoo(<blk>)
-      begin
-        :"sfood"
-        :"sfoos"
-      end
+      <emptyTree>
     end
 
     def sfood(<blk>)

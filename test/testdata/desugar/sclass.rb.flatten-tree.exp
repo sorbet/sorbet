@@ -142,7 +142,7 @@ begin
     <emptyTree>
 
     def wrapper(<blk>)
-      :"e"
+      <emptyTree>
     end
 
     def self.<static-init>(<blk>)
@@ -215,7 +215,7 @@ begin
   end
   class <singleton class><<Class:G>> < ()
     def self.<static-init>(<blk>)
-      :"inner"
+      <emptyTree>
     end
   end
   class ::H<<C H>> < (::<todo sym>)
