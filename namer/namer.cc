@@ -665,7 +665,13 @@ public:
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size(), "{}: {} != {}",
                 method->name.showRaw(ctx), method->args.size(), method->symbol.data(ctx)->arguments().size());
         // all methods at definition time are public, but their visibility may be changed later
-        method->symbol.data(ctx)->setPublic();
+        if (method->isPrivate()) {
+            method->symbol.data(ctx)->setPrivate();
+        } else if (method->isProtected()) {
+            method->symbol.data(ctx)->setProtected();
+        } else {
+            method->symbol.data(ctx)->setPublic();
+        }
         // Not all information is unfortunately available in the symbol. Original argument names aren't.
         // method->args.clear();
         return method;
