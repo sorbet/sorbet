@@ -85,7 +85,7 @@ def register_sorbet_dependencies():
         remote = "https://github.com/jemalloc/jemalloc.git",
         commit = "ea6b3e973b477b8061e0076bb257dbd7f3faa756",  # 5.2.1
         build_file = "@com_stripe_ruby_typer//third_party:jemalloc.BUILD",
-        shallow_since = "1554252642 -0700",
+        shallow_since = "1565035161 -0700",
     )
 
     new_git_repository(
