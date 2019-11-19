@@ -32,6 +32,9 @@ begin
 
     def self.<static-init>(<blk>)
       begin
+        :"foo"
+        :"foo"
+        :"foo"
         <self>.sig() do ||
           <self>.params({:"a" => ::Integer}).returns(::Integer)
         end

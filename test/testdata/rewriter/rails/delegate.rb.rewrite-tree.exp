@@ -2,6 +2,28 @@ class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C GoodUsages><<C <todo sym>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
+    :"foo"
+
+    :"bar"
+
+    :"baz"
+
+    :"ball"
+
+    :"string_foo"
+
+    :"string_bar"
+
+    :"symbol_foo"
+
+    :"symbol_bar"
+
+    :"true_foo"
+
+    :"true_bar"
+
+    :"usages"
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
     end
@@ -111,6 +133,10 @@ class <emptyTree><<C <root>>> < ()
   end
 
   class <emptyTree>::<C WorksWithoutExtendingTSig><<C <todo sym>>> < (::<todo sym>)
+    :"foo"
+
+    :"bar"
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())
     end
@@ -160,6 +186,8 @@ class <emptyTree><<C <root>>> < ()
     <self>.include(<emptyTree>::<C Enumerable>)
 
     <emptyTree>::<C Elem> = <self>.type_member()
+
+    :"each"
 
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"arg0" => ::T.untyped(), :"<blk>" => ::T.nilable(::Proc)}).returns(::T.untyped())

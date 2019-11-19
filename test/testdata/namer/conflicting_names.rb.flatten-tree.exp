@@ -20,8 +20,12 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::A::Foo)
+        :"Foo"
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::A::Foo)
+          <emptyTree>
+        end
         <emptyTree>
       end
     end

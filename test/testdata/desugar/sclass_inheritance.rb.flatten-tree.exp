@@ -36,6 +36,7 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
+        :"main"
         <self>.main()
         <emptyTree>
       end
@@ -78,7 +79,11 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_for_ide(::MM)
+      begin
+        :"newer"
+        ::Sorbet::Private::Static.keep_for_ide(::MM)
+        <emptyTree>
+      end
     end
   end
   class ::C<<C C>> < (::A)

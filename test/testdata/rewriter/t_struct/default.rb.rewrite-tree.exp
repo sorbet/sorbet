@@ -1,5 +1,13 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C Default><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    :"initialize"
+
+    :"foo"
+
+    :"foo="
+
+    :"initialize<defaultArg>1"
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"foo" => <emptyTree>::<C Integer>}).void()
     end

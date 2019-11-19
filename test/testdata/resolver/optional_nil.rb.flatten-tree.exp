@@ -62,6 +62,14 @@ begin
 
     def self.<static-init>(<blk>)
       begin
+        :"foo"
+        :"bar"
+        :"qux"
+        :"baz"
+        :"foo<defaultArg>1"
+        :"bar<defaultArg>1"
+        :"qux<defaultArg>1"
+        :"baz<defaultArg>1"
         <self>.sig() do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end

@@ -88,7 +88,7 @@ subgraph "cluster_::<Class:Test>#<static-init>" {
     "bb::<Class:Test>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Test>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Test) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Test>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Test>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Test) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Test>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Test>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Symbol(:\"normalize_params\") = :\"normalize_params\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"normalize_params\")\l<unconditional>\l"
     ];
 
     "bb::<Class:Test>#<static-init>_0" -> "bb::<Class:Test>#<static-init>_1" [style="bold"];

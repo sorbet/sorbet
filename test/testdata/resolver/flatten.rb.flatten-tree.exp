@@ -34,6 +34,7 @@ begin
         ::A.sfood()
         ::A.sfoos()
         ::A.new().sfoos()
+        :"applies_to_integer"
         <self>.applies_to_integer(:"quux")
         <self>.sig() do ||
           <self>.params({:"x" => ::Integer}).void()
@@ -59,7 +60,10 @@ begin
     <emptyTree>
 
     def foo(<blk>)
-      <emptyTree>
+      begin
+        :"food"
+        :"foos"
+      end
     end
 
     def food(<blk>)
@@ -71,7 +75,10 @@ begin
     end
 
     def self.sfoo(<blk>)
-      <emptyTree>
+      begin
+        :"sfood"
+        :"sfoos"
+      end
     end
 
     def sfood(<blk>)
@@ -83,7 +90,11 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      <emptyTree>
+      begin
+        :"foo"
+        :"sfoo"
+        <emptyTree>
+      end
     end
   end
   <emptyTree>

@@ -504,7 +504,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cblock-pre-call-temp\u003e$5",
+      "unique_name": "\u003cblock-pre-call-temp\u003e$6",
       "type": {
        "kind": "CLASS",
        "class_full_name": "Sorbet::Private::Static::Void"
@@ -545,7 +545,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cselfRestore\u003e$6",
+      "unique_name": "\u003cselfRestore\u003e$7",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -635,7 +635,7 @@
    "bindings": [
     {
      "bind": {
-      "unique_name": "\u003cstatTemp\u003e$3",
+      "unique_name": "\u003cstatTemp\u003e$4",
       "type": {
        "kind": "CLASS",
        "class_full_name": "Sorbet::Private::Static::Void"
@@ -658,7 +658,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cstatTemp\u003e$24",
+      "unique_name": "\u003cstatTemp\u003e$25",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -686,7 +686,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cstatTemp\u003e$25",
+      "unique_name": "\u003cstatTemp\u003e$26",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -720,7 +720,7 @@
     },
     {
      "bind": {
-      "unique_name": "keep_for_ide$26",
+      "unique_name": "keep_for_ide$27",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -754,7 +754,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cstatTemp\u003e$23",
+      "unique_name": "\u003cstatTemp\u003e$24",
       "type": {
        "kind": "CLASS",
        "class_full_name": "Sorbet::Private::Static::Void"
@@ -764,7 +764,7 @@
       "kind": "SEND",
       "send": {
        "receiver": {
-        "unique_name": "\u003cstatTemp\u003e$24",
+        "unique_name": "\u003cstatTemp\u003e$25",
         "type": {
          "kind": "APPLIED",
          "applied": {
@@ -781,7 +781,7 @@
        "method": "keep_for_ide",
        "arguments": [
         {
-         "unique_name": "\u003cstatTemp\u003e$25",
+         "unique_name": "\u003cstatTemp\u003e$26",
          "type": {
           "kind": "APPLIED",
           "applied": {
@@ -808,7 +808,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cstatTemp\u003e$28",
+      "unique_name": "\u003cstatTemp\u003e$29",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -836,7 +836,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cstatTemp\u003e$29",
+      "unique_name": "\u003cstatTemp\u003e$30",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -870,7 +870,7 @@
     },
     {
      "bind": {
-      "unique_name": "keep_for_ide$30",
+      "unique_name": "keep_for_ide$31",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -904,7 +904,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cstatTemp\u003e$27",
+      "unique_name": "\u003cstatTemp\u003e$28",
       "type": {
        "kind": "CLASS",
        "class_full_name": "Sorbet::Private::Static::Void"
@@ -914,7 +914,7 @@
       "kind": "SEND",
       "send": {
        "receiver": {
-        "unique_name": "\u003cstatTemp\u003e$28",
+        "unique_name": "\u003cstatTemp\u003e$29",
         "type": {
          "kind": "APPLIED",
          "applied": {
@@ -931,7 +931,7 @@
        "method": "keep_for_ide",
        "arguments": [
         {
-         "unique_name": "\u003cstatTemp\u003e$29",
+         "unique_name": "\u003cstatTemp\u003e$30",
          "type": {
           "kind": "APPLIED",
           "applied": {
@@ -1029,7 +1029,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003chashTemp\u003e$13",
+      "unique_name": "\u003chashTemp\u003e$14",
       "type": {
        "kind": "LITERAL",
        "literal": {
@@ -1064,7 +1064,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003chashTemp\u003e$14",
+      "unique_name": "\u003chashTemp\u003e$15",
       "type": {}
      },
      "instruction": {
@@ -1087,7 +1087,7 @@
     },
     {
      "bind": {
-      "unique_name": "keep_for_ide$15",
+      "unique_name": "keep_for_ide$16",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -1121,7 +1121,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003chashTemp\u003e$16",
+      "unique_name": "\u003chashTemp\u003e$17",
       "type": {
        "kind": "LITERAL",
        "literal": {
@@ -1156,7 +1156,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003chashTemp\u003e$17",
+      "unique_name": "\u003chashTemp\u003e$18",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -1190,7 +1190,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003chashTemp\u003e$18",
+      "unique_name": "\u003chashTemp\u003e$19",
       "type": {
        "kind": "LITERAL",
        "literal": {
@@ -1225,7 +1225,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003chashTemp\u003e$19",
+      "unique_name": "\u003chashTemp\u003e$20",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -1259,7 +1259,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cmagic\u003e$20",
+      "unique_name": "\u003cmagic\u003e$21",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -1287,7 +1287,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cstatTemp\u003e$12",
+      "unique_name": "\u003cstatTemp\u003e$13",
       "type": {
        "kind": "SHAPE",
        "shape": {
@@ -1348,7 +1348,7 @@
       "kind": "SEND",
       "send": {
        "receiver": {
-        "unique_name": "\u003cmagic\u003e$20",
+        "unique_name": "\u003cmagic\u003e$21",
         "type": {
          "kind": "APPLIED",
          "applied": {
@@ -1365,7 +1365,7 @@
        "method": "\u003cbuild-hash\u003e",
        "arguments": [
         {
-         "unique_name": "\u003chashTemp\u003e$13",
+         "unique_name": "\u003chashTemp\u003e$14",
          "type": {
           "kind": "LITERAL",
           "literal": {
@@ -1375,11 +1375,11 @@
          }
         },
         {
-         "unique_name": "\u003chashTemp\u003e$14",
+         "unique_name": "\u003chashTemp\u003e$15",
          "type": {}
         },
         {
-         "unique_name": "\u003chashTemp\u003e$16",
+         "unique_name": "\u003chashTemp\u003e$17",
          "type": {
           "kind": "LITERAL",
           "literal": {
@@ -1389,7 +1389,7 @@
          }
         },
         {
-         "unique_name": "\u003chashTemp\u003e$17",
+         "unique_name": "\u003chashTemp\u003e$18",
          "type": {
           "kind": "APPLIED",
           "applied": {
@@ -1404,7 +1404,7 @@
          }
         },
         {
-         "unique_name": "\u003chashTemp\u003e$18",
+         "unique_name": "\u003chashTemp\u003e$19",
          "type": {
           "kind": "LITERAL",
           "literal": {
@@ -1414,7 +1414,7 @@
          }
         },
         {
-         "unique_name": "\u003chashTemp\u003e$19",
+         "unique_name": "\u003chashTemp\u003e$20",
          "type": {
           "kind": "APPLIED",
           "applied": {
@@ -1447,7 +1447,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cstatTemp\u003e$10",
+      "unique_name": "\u003cstatTemp\u003e$11",
       "type": {
        "kind": "CLASS",
        "class_full_name": "T::Private::Methods::DeclBuilder"
@@ -1466,7 +1466,7 @@
        "method": "params",
        "arguments": [
         {
-         "unique_name": "\u003cstatTemp\u003e$12",
+         "unique_name": "\u003cstatTemp\u003e$13",
          "type": {
           "kind": "SHAPE",
           "shape": {
@@ -1542,7 +1542,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cstatTemp\u003e$21",
+      "unique_name": "\u003cstatTemp\u003e$22",
       "type": {
        "kind": "APPLIED",
        "applied": {
@@ -1576,7 +1576,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cblockReturnTemp\u003e$9",
+      "unique_name": "\u003cblockReturnTemp\u003e$10",
       "type": {
        "kind": "CLASS",
        "class_full_name": "T::Private::Methods::DeclBuilder"
@@ -1586,7 +1586,7 @@
       "kind": "SEND",
       "send": {
        "receiver": {
-        "unique_name": "\u003cstatTemp\u003e$10",
+        "unique_name": "\u003cstatTemp\u003e$11",
         "type": {
          "kind": "CLASS",
          "class_full_name": "T::Private::Methods::DeclBuilder"
@@ -1595,7 +1595,7 @@
        "method": "returns",
        "arguments": [
         {
-         "unique_name": "\u003cstatTemp\u003e$21",
+         "unique_name": "\u003cstatTemp\u003e$22",
          "type": {
           "kind": "APPLIED",
           "applied": {
@@ -1628,7 +1628,7 @@
     },
     {
      "bind": {
-      "unique_name": "\u003cblockReturnTemp\u003e$22",
+      "unique_name": "\u003cblockReturnTemp\u003e$23",
       "type": {
        "kind": "CLASS",
        "class_full_name": "T.noreturn"

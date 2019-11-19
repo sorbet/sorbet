@@ -4,6 +4,8 @@ class <emptyTree><<C <root>>> < ()
   end
 
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    :"foo"
+
     def foo<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
@@ -12,6 +14,8 @@ class <emptyTree><<C <root>>> < ()
   <emptyTree>::<C A>.new().foo()
 
   class <emptyTree>::<C B><<C <todo sym>>> < (::<todo sym>)
+    :"bar"
+
     <self>.sig() do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
@@ -32,6 +36,8 @@ class <emptyTree><<C <root>>> < ()
   <emptyTree>::<C T>.let(<emptyTree>::<C C>.new(), <emptyTree>::<C M>)
 
   class <emptyTree>::<C D><<C <todo sym>>> < (::<todo sym>)
+    :"qux"
+
     <self>.sig() do ||
       <self>.void()
     end

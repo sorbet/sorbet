@@ -1,5 +1,7 @@
 class <emptyTree><<C <root>>> < ()
   module <emptyTree>::<C Interface><<C <todo sym>>> < ()
+    :"some_method"
+
     def some_method<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
@@ -8,12 +10,18 @@ class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C SomeClass><<C <todo sym>>> < (::<todo sym>)
     <self>.include(<emptyTree>::<C Interface>)
 
+    :"other_method"
+
     def other_method<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
   end
 
   class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)
+    :"wrap_instance"
+
+    :"wrap_instance<defaultArg>1"
+
     def self.wrap_instance<<C <todo sym>>>(x, y = <emptyTree>, &<blk>)
       <emptyTree>
     end
@@ -22,6 +30,8 @@ class <emptyTree><<C <root>>> < ()
       nil
     end
   end
+
+  :"testit"
 
   def testit<<C <todo sym>>>(&<blk>)
     begin

@@ -42,7 +42,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      <emptyTree>
+      :"f"
     end
   end
   <emptyTree>

@@ -69,7 +69,14 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      <emptyTree>
+      begin
+        :"yielder"
+        :"blockpass"
+        :"mixed"
+        :"blockyield"
+        :"main"
+        <emptyTree>
+      end
     end
   end
   <emptyTree>

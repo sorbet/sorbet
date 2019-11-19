@@ -35,7 +35,7 @@ InsSeq{
           args = [Local{
               localVariable = <U <blk>>
             }]
-          rhs = EmptyTree
+          rhs = Literal{ value = :"foo" }
         }
       ]
     }

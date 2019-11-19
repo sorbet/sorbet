@@ -60,7 +60,7 @@ subgraph "cluster_::<Class:Trigger>#<static-init>" {
     "bb::<Class:Trigger>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Trigger>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Trigger) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Trigger>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Trigger>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Trigger) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Trigger>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Trigger>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Symbol(:\"trigger\") = :\"trigger\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"trigger\")\l<unconditional>\l"
     ];
 
     "bb::<Class:Trigger>#<static-init>_0" -> "bb::<Class:Trigger>#<static-init>_1" [style="bold"];

@@ -60,6 +60,8 @@ begin
 
     def self.<static-init>(<blk>)
       begin
+        :"normal_method"
+        :"normal_static_method"
         begin
           <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerClass)

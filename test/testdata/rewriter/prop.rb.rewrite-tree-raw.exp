@@ -14,6 +14,8 @@ ClassDef{
           symbol = ::<todo sym>
         }]
       rhs = [
+        Literal{ value = :"prop" }
+
         Send{
           recv = Local{
             localVariable = <U <self>>
@@ -276,6 +278,14 @@ ClassDef{
             }
           ]
         }
+
+        Literal{ value = :"foo" }
+
+        Literal{ value = :"foo=" }
+
+        Literal{ value = :"foo2" }
+
+        Literal{ value = :"foo2=" }
 
         Send{
           recv = ConstantLit{
@@ -606,6 +616,26 @@ ClassDef{
           symbol = ::<todo sym>
         }]
       rhs = [
+        Literal{ value = :"default" }
+
+        Literal{ value = :"default=" }
+
+        Literal{ value = :"t_nilable" }
+
+        Literal{ value = :"t_nilable=" }
+
+        Literal{ value = :"type" }
+
+        Literal{ value = :"type=" }
+
+        Literal{ value = :"object" }
+
+        Literal{ value = :"object=" }
+
+        Literal{ value = :"array" }
+
+        Literal{ value = :"array=" }
+
         ClassDef{
           kind = class
           name = UnresolvedConstantLit{
@@ -614,6 +644,10 @@ ClassDef{
           }<<C <U <todo sym>>>>
           ancestors = []
           rhs = [
+            Literal{ value = :"array=" }
+
+            Literal{ value = :"array" }
+
             Send{
               recv = ConstantLit{
                 orig = nullptr
@@ -820,6 +854,14 @@ ClassDef{
           ]
         }
 
+        Literal{ value = :"array_of" }
+
+        Literal{ value = :"array_of=" }
+
+        Literal{ value = :"array_of_explicit" }
+
+        Literal{ value = :"array_of_explicit=" }
+
         ClassDef{
           kind = class
           name = UnresolvedConstantLit{
@@ -828,6 +870,10 @@ ClassDef{
           }<<C <U <todo sym>>>>
           ancestors = []
           rhs = [
+            Literal{ value = :"array_of_explicit=" }
+
+            Literal{ value = :"array_of_explicit" }
+
             Send{
               recv = ConstantLit{
                 orig = nullptr
@@ -1034,6 +1080,10 @@ ClassDef{
           ]
         }
 
+        Literal{ value = :"t_array" }
+
+        Literal{ value = :"t_array=" }
+
         ClassDef{
           kind = class
           name = UnresolvedConstantLit{
@@ -1042,6 +1092,10 @@ ClassDef{
           }<<C <U <todo sym>>>>
           ancestors = []
           rhs = [
+            Literal{ value = :"t_array=" }
+
+            Literal{ value = :"t_array" }
+
             Send{
               recv = ConstantLit{
                 orig = nullptr
@@ -1275,6 +1329,10 @@ ClassDef{
           ]
         }
 
+        Literal{ value = :"hash_of" }
+
+        Literal{ value = :"hash_of=" }
+
         ClassDef{
           kind = class
           name = UnresolvedConstantLit{
@@ -1283,6 +1341,10 @@ ClassDef{
           }<<C <U <todo sym>>>>
           ancestors = []
           rhs = [
+            Literal{ value = :"hash_of=" }
+
+            Literal{ value = :"hash_of" }
+
             Send{
               recv = ConstantLit{
                 orig = nullptr
@@ -1536,6 +1598,12 @@ ClassDef{
           ]
         }
 
+        Literal{ value = :"const_explicit" }
+
+        Literal{ value = :"const" }
+
+        Literal{ value = :"no_class_arg" }
+
         ClassDef{
           kind = class
           name = UnresolvedConstantLit{
@@ -1544,6 +1612,10 @@ ClassDef{
           }<<C <U <todo sym>>>>
           ancestors = []
           rhs = [
+            Literal{ value = :"no_class_arg=" }
+
+            Literal{ value = :"no_class_arg" }
+
             Send{
               recv = ConstantLit{
                 orig = nullptr
@@ -1749,6 +1821,48 @@ ClassDef{
             }
           ]
         }
+
+        Literal{ value = :"enum_prop" }
+
+        Literal{ value = :"foreign" }
+
+        Literal{ value = :"foreign=" }
+
+        Literal{ value = :"foreign_" }
+
+        Literal{ value = :"foreign_!" }
+
+        Literal{ value = :"foreign_lazy" }
+
+        Literal{ value = :"foreign_lazy=" }
+
+        Literal{ value = :"foreign_lazy_" }
+
+        Literal{ value = :"foreign_lazy_!" }
+
+        Literal{ value = :"foreign_proc" }
+
+        Literal{ value = :"foreign_proc=" }
+
+        Literal{ value = :"foreign_proc_" }
+
+        Literal{ value = :"foreign_proc_!" }
+
+        Literal{ value = :"foreign_invalid" }
+
+        Literal{ value = :"foreign_invalid=" }
+
+        Literal{ value = :"foreign_invalid_" }
+
+        Literal{ value = :"foreign_invalid_!" }
+
+        Literal{ value = :"ifunset" }
+
+        Literal{ value = :"ifunset=" }
+
+        Literal{ value = :"ifunset_nilable" }
+
+        Literal{ value = :"ifunset_nilable=" }
 
         Send{
           recv = ConstantLit{
@@ -5245,6 +5359,14 @@ ClassDef{
           symbol = ::<todo sym>
         }]
       rhs = [
+        Literal{ value = :"token" }
+
+        Literal{ value = :"token=" }
+
+        Literal{ value = :"created" }
+
+        Literal{ value = :"created=" }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -5562,6 +5684,12 @@ ClassDef{
           symbol = ::<todo sym>
         }]
       rhs = [
+        Literal{ value = :"token" }
+
+        Literal{ value = :"token=" }
+
+        Literal{ value = :"created" }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -5798,6 +5926,8 @@ ClassDef{
           symbol = ::<todo sym>
         }]
       rhs = [
+        Literal{ value = :"merchant" }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -5882,6 +6012,18 @@ ClassDef{
           symbol = ::<todo sym>
         }]
       rhs = [
+        Literal{ value = :"foo" }
+
+        Literal{ value = :"encrypted_foo" }
+
+        Literal{ value = :"foo=" }
+
+        Literal{ value = :"encrypted_foo=" }
+
+        Literal{ value = :"bar" }
+
+        Literal{ value = :"encrypted_bar" }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -6574,6 +6716,8 @@ ClassDef{
         }
       ]
     }
+
+    Literal{ value = :"main" }
 
     MethodDef{
       flags = 0

@@ -1,5 +1,7 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C NotAODM><<C <todo sym>>> < (::<todo sym>)
+    :"prop"
+
     <self>.prop()
 
     <self>.prop(:"foo", :"not_a_string")
@@ -27,6 +29,14 @@ class <emptyTree><<C <root>>> < ()
 
   class <emptyTree>::<C SomeODM><<C <todo sym>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    :"foo"
+
+    :"foo="
+
+    :"foo2"
+
+    :"foo2="
 
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C String>)
@@ -64,7 +74,31 @@ class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)  end
 
   class <emptyTree>::<C AdvancedODM><<C <todo sym>>> < (::<todo sym>)
+    :"default"
+
+    :"default="
+
+    :"t_nilable"
+
+    :"t_nilable="
+
+    :"type"
+
+    :"type="
+
+    :"object"
+
+    :"object="
+
+    :"array"
+
+    :"array="
+
     class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      :"array="
+
+      :"array"
+
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
       end
@@ -82,7 +116,19 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
+    :"array_of"
+
+    :"array_of="
+
+    :"array_of_explicit"
+
+    :"array_of_explicit="
+
     class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      :"array_of_explicit="
+
+      :"array_of_explicit"
+
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
       end
@@ -100,7 +146,15 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
+    :"t_array"
+
+    :"t_array="
+
     class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      :"t_array="
+
+      :"t_array"
+
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"arg0" => <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
       end
@@ -118,7 +172,15 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
+    :"hash_of"
+
+    :"hash_of="
+
     class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      :"hash_of="
+
+      :"hash_of"
+
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"arg0" => <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
       end
@@ -136,7 +198,17 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
+    :"const_explicit"
+
+    :"const"
+
+    :"no_class_arg"
+
     class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      :"no_class_arg="
+
+      :"no_class_arg"
+
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
       end
@@ -153,6 +225,48 @@ class <emptyTree><<C <root>>> < ()
         ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
       end
     end
+
+    :"enum_prop"
+
+    :"foreign"
+
+    :"foreign="
+
+    :"foreign_"
+
+    :"foreign_!"
+
+    :"foreign_lazy"
+
+    :"foreign_lazy="
+
+    :"foreign_lazy_"
+
+    :"foreign_lazy_!"
+
+    :"foreign_proc"
+
+    :"foreign_proc="
+
+    :"foreign_proc_"
+
+    :"foreign_proc_!"
+
+    :"foreign_invalid"
+
+    :"foreign_invalid="
+
+    :"foreign_invalid_"
+
+    :"foreign_invalid_!"
+
+    :"ifunset"
+
+    :"ifunset="
+
+    :"ifunset_nilable"
+
+    :"ifunset_nilable="
 
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C String>)
@@ -492,6 +606,14 @@ class <emptyTree><<C <root>>> < ()
   end
 
   class <emptyTree>::<C PropHelpers><<C <todo sym>>> < (::<todo sym>)
+    :"token"
+
+    :"token="
+
+    :"created"
+
+    :"created="
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(::String)
     end
@@ -526,6 +648,12 @@ class <emptyTree><<C <root>>> < ()
   end
 
   class <emptyTree>::<C PropHelpers2><<C <todo sym>>> < (::<todo sym>)
+    :"token"
+
+    :"token="
+
+    :"created"
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(::String)
     end
@@ -552,6 +680,8 @@ class <emptyTree><<C <root>>> < ()
   end
 
   class <emptyTree>::<C ShardingProp><<C <todo sym>>> < (::<todo sym>)
+    :"merchant"
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(::String)
     end
@@ -562,6 +692,18 @@ class <emptyTree><<C <root>>> < ()
   end
 
   class <emptyTree>::<C EncryptedProp><<C <todo sym>>> < (::<todo sym>)
+    :"foo"
+
+    :"encrypted_foo"
+
+    :"foo="
+
+    :"encrypted_foo="
+
+    :"bar"
+
+    :"encrypted_bar"
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(::T.nilable(::String))
     end
@@ -610,6 +752,8 @@ class <emptyTree><<C <root>>> < ()
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
     end
   end
+
+  :"main"
 
   def main<<C <todo sym>>>(&<blk>)
     begin

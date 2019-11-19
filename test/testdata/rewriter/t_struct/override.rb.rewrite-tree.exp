@@ -1,6 +1,14 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C Override><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    :"initialize"
+
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    :"foo"
+
+    :"foo="
+
+    :"initialize"
 
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"foo" => <emptyTree>::<C String>}).void()

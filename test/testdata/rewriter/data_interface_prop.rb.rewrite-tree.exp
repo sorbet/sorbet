@@ -2,6 +2,14 @@ class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)  end
 
   class <emptyTree>::<C SomeDataInterface><<C <todo sym>>> < (::<todo sym>)
+    :"foo"
+
+    :"foo="
+
+    :"foo_"
+
+    :"foo_!"
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C String>)
     end
@@ -34,6 +42,8 @@ class <emptyTree><<C <root>>> < ()
       ::T.unsafe(nil)
     end
   end
+
+  :"test"
 
   def test<<C <todo sym>>>(&<blk>)
     begin

@@ -56,6 +56,7 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::H)
           <emptyTree>
         end
+        :"main"
         <self>.main()
         <emptyTree>
       end
@@ -142,7 +143,7 @@ begin
     <emptyTree>
 
     def wrapper(<blk>)
-      <emptyTree>
+      :"e"
     end
 
     def self.<static-init>(<blk>)
@@ -208,14 +209,19 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        <emptyTree>
+        :"wrapper"
+        :"g"
+        begin
+          <emptyTree>
+          <emptyTree>
+        end
         <emptyTree>
       end
     end
   end
   class <singleton class><<Class:G>> < ()
     def self.<static-init>(<blk>)
-      <emptyTree>
+      :"inner"
     end
   end
   class ::H<<C H>> < (::<todo sym>)
@@ -245,7 +251,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      <emptyTree>
+      :"h"
     end
   end
   <emptyTree>

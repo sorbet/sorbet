@@ -71,6 +71,8 @@ class <emptyTree><<C <root>>> < ()
 
     <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.instance(), <emptyTree>::<C Z$1>)
 
+    :"something_outside"
+
     def something_outside<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end

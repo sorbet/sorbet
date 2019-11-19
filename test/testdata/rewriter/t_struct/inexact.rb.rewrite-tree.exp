@@ -1,5 +1,13 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C Inexact><<C <todo sym>>> < (<emptyTree>::<C T>::<C InexactStruct>)
+    :"foo"
+
+    :"foo="
+
+    :"bar"
+
+    :"bar="
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C Integer>)
     end

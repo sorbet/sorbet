@@ -75,6 +75,14 @@ begin
 
     def self.<static-init>(<blk>)
       begin
+        :"initialize"
+        :"v1"
+        :"v1="
+        :"v2"
+        :"v2="
+        :"v3"
+        :"v4="
+        :"v5="
         <self>.sig() do ||
           <self>.void()
         end

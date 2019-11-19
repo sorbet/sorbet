@@ -1,6 +1,48 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C TestDSLBuilder><<C <todo sym>>> < (::<todo sym>)
+    :"opt_string"
+
+    :"get_opt_string"
+
+    :"opt_string"
+
+    :"opt_int_defaulted"
+
+    :"get_opt_int_defaulted"
+
+    :"opt_int_defaulted"
+
+    :"req_string"
+
+    :"get_req_string"
+
+    :"req_string"
+
+    :"implied_string"
+
+    :"get_implied_string"
+
+    :"implied_string"
+
+    :"no_getter"
+
+    :"get_no_setter"
+
+    :"no_setter"
+
     <self>.dsl_optional(:"no_getter_or_setter", <emptyTree>::<C String>, {:"skip_getter" => true, :"skip_setter" => true})
+
+    :"class_of"
+
+    :"get_class_of"
+
+    :"class_of"
+
+    :"root_const"
+
+    :"get_root_const"
+
+    :"root_const"
 
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"opt_string" => <emptyTree>::<C String>}).returns(::NilClass)
@@ -199,6 +241,8 @@ class <emptyTree><<C <root>>> < ()
     <emptyTree>::<C T>.assert_type!(<self>.get_opt_int_defaulted(), <emptyTree>::<C Integer>)
 
     <emptyTree>::<C T>.assert_type!(<self>.get_req_string(), <emptyTree>::<C String>)
+
+    :"test_instance_methods"
 
     def test_instance_methods<<C <todo sym>>>(&<blk>)
       begin

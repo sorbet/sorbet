@@ -2,6 +2,46 @@ class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C GoodUsages><<C <todo sym>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
+    :"both"
+
+    :"both"
+
+    :"both="
+
+    :"both="
+
+    :"foo"
+
+    :"foo"
+
+    :"foo="
+
+    :"foo="
+
+    :"no_instance"
+
+    :"no_instance="
+
+    :"no_instance_reader"
+
+    :"no_instance_reader="
+
+    :"no_instance_reader="
+
+    :"bar"
+
+    :"bar"
+
+    :"bar="
+
+    :"no_instance_writer"
+
+    :"no_instance_writer"
+
+    :"no_instance_writer="
+
+    :"usages"
+
     <self>.both()
 
     <self>.both=(1)

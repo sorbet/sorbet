@@ -1,5 +1,7 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C None><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    :"initialize"
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).void()
     end

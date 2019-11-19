@@ -1,21 +1,30 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
+    :"outside_method"
+
+    :"<it \'works outside\'>"
+
     begin
       <emptyTree>::<C CONST> = ::T.unsafe(nil)
-      <emptyTree>
+      :"<it \'allows constants inside of IT\'>"
     end
 
     begin
       <emptyTree>::<C C2> = ::T.let(::T.unsafe(nil), <emptyTree>::<C Integer>)
-      <emptyTree>
+      :"<it \'allows let-ed constants inside of IT\'>"
     end
 
     begin
       <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
-      <emptyTree>
+      :"<it \'allows path constants inside of IT\'>"
     end
 
     class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
+      begin
+        :"inside_method"
+        :"<it \'works inside\'>"
+      end
+
       def inside_method<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
@@ -32,11 +41,26 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
+    :"instance_helper"
+
+    :"initialize"
+
+    :"<after>"
+
+    :"<it \'can read foo\'>"
+
+    :"random_method"
+
     <self>.random_method() do ||
       @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
     end
 
     class <emptyTree>::<C <describe 'Object'>><<C <todo sym>>> < (<self>)
+      begin
+        :"<it \'Object\'>"
+        :"<it \'Object\'>"
+      end
+
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({}).void()
       end
@@ -53,6 +77,8 @@ class <emptyTree><<C <root>>> < ()
         <emptyTree>
       end
     end
+
+    :"it"
 
     <self>.it("ignores methods without a block")
 
@@ -63,7 +89,7 @@ class <emptyTree><<C <root>>> < ()
     class <emptyTree>::<C <describe 'a non-ideal situation'>><<C <todo sym>>> < (<self>)
       begin
         class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)        end
-        <emptyTree>
+        :"<it \'contains nested describes\'>"
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -156,6 +182,8 @@ class <emptyTree><<C <root>>> < ()
       <emptyTree>
     end
   end
+
+  :"junk"
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
     class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)    end
