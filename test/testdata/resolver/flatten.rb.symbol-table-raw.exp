@@ -1,6 +1,6 @@
-class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=34:12})
-  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=34:12}
+class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4}, Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=41:34})
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>)
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=41:34}
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/flatten.rb start=2:1 end=2:8}
     method <C <U A>><U foo> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=3:3 end=3:10}
@@ -18,5 +18,11 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <S <C <U A>> $1><U sfoo> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=9:3 end=9:16}
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
     method <S <C <U A>> $1><U sfoos> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=12:5 end=12:19}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
+  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed}
+    method <C <U Object>><U applies_to_integer> (x, <blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/resolver/flatten.rb start=39:1 end=39:26}
+      argument x<> -> Integer @ Loc {file=test/testdata/resolver/flatten.rb start=38:14 end=38:15}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
+    method <C <U Object>><U quux> (<blk>) @ Loc {file=test/testdata/resolver/flatten.rb start=41:20 end=41:28}
       argument <blk><block> @ Loc {file=test/testdata/resolver/flatten.rb start=??? end=???}
 

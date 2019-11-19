@@ -1,6 +1,20 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < ()
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def applies_to_integer(x, <blk>)
+      <emptyTree>
+    end
+
+    def quux(<blk>)
+      <emptyTree>
+    end
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -20,6 +34,11 @@ begin
         ::A.sfood()
         ::A.sfoos()
         ::A.new().sfoos()
+        <self>.applies_to_integer(:"quux")
+        <self>.sig() do ||
+          <self>.params({:"x" => ::Integer}).void()
+        end
+        ::Sorbet::Private::Static.keep_for_ide(::T::Sig)
         <emptyTree>
       end
     end
