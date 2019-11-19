@@ -164,7 +164,8 @@ class LLVMSemanticExtensionProvider : public SemanticExtensionProvider {
 public:
     virtual void injectOptions(cxxopts::Options &optsBuilder) const override {
         optsBuilder.add_options("compiler")("llvm-ir-folder", "Output LLVM IR to directory", cxxopts::value<string>());
-        optsBuilder.add_options("compiler")("force-compiled", "Force all files to this compiled level", cxxopts::value<bool>());
+        optsBuilder.add_options("compiler")("force-compiled", "Force all files to this compiled level",
+                                            cxxopts::value<bool>());
     };
     virtual std::unique_ptr<SemanticExtension> readOptions(cxxopts::ParseResult &providedOptions) const override {
         optional<string> irOutputDir;
