@@ -106,6 +106,8 @@ class FlattenWalk {
         vector<MovedItem> moveQueue;
         // this is where we track the current state of which methods we're contained in
         vector<MethodData> stack;
+        // this tracks whether we're inside a send or not
+        u4 sendDepth = 0;
 
         ClassScope() = default;
 
@@ -145,6 +147,10 @@ class FlattenWalk {
                 stack.pop_back();
                 return std::nullopt;
             }
+        }
+
+        bool atClassTopLevel() const {
+            return sendDepth == 0;
         }
 
         // this moves an expression to the already-allocated space
@@ -329,13 +335,15 @@ public:
     }
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
+        auto &methods = curMethodSet();
+        methods.sendDepth++;
         // we might want to move sigs, so we mostly use the same logic that we use for methods. The one exception is
         // that we don't know the 'staticness level' of a sig, as it depends on the method that follows it (whether that
         // method has a `self.` or not), so we'll fill that information in later
         if (shouldMoveSend(send)) {
             auto scopeType =
                 send->fun == core::Names::sig() ? ScopeType::StaticMethodScope : ScopeType::VisibilityModScope;
-            curMethodSet().pushScope(computeScopeInfo(scopeType));
+            methods.pushScope(computeScopeInfo(scopeType));
         }
 
         return send;
@@ -343,6 +351,7 @@ public:
 
     unique_ptr<ast::Expression> postTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
         auto &methods = curMethodSet();
+        methods.sendDepth--;
         // if it's not a send, then we didn't make a stack frame for it
         if (!shouldMoveSend(send)) {
             return send;
@@ -367,7 +376,12 @@ public:
         // if we get a MethodData back, then we need to move this and replace it
         if (auto md = methods.popScope()) {
             // we'll replace MethodDefs with the symbol that corresponds to the name of the method
-            auto replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
+            unique_ptr<ast::Expression> replacement;
+            if (methods.atClassTopLevel()) {
+                replacement = ast::MK::EmptyTree();
+            } else {
+                replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
+            }
             methods.addExpr(*md, move(methodDef));
             return replacement;
         }
