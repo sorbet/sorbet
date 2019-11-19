@@ -11,6 +11,7 @@
 #include "main/autogen/autoloader.h"
 #include "main/autogen/subclasses.h"
 #include "main/lsp/LSPInput.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/lsp.h"
 #endif
 
@@ -165,15 +166,6 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
 }
 
 #ifndef SORBET_REALMAIN_MIN
-class LSPStdout final : public lsp::LSPOutput {
-    void rawWrite(std::unique_ptr<lsp::LSPMessage> msg) {
-        auto json = msg->toJSON();
-        string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", json.length(), json);
-        logger->debug("Write: {}\n", json);
-        cout << outResult << flush;
-    }
-};
-
 struct AutogenResult {
     struct Serialized {
         // Selectively populated based on print options
