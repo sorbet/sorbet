@@ -32,3 +32,10 @@ A.sfood # error: Method `sfood` does not exist on `T.class_of(A)`
 
 A.sfoos
 A.new.sfoos # error: Method `sfoos` does not exist on `A`
+
+
+extend T::Sig
+sig { params(x: Integer).void }
+def applies_to_integer(x); end
+
+applies_to_integer(def quux; end) # error: Expected `Integer` but found `Symbol(:"foo")`
