@@ -8,6 +8,7 @@ cc_library(
     hdrs = [
         "DefLocSaver.h",
         "LSPConfiguration.h",
+        "LSPInput.h",
         "LSPMessage.h",
         "LSPOutput.h",
         "LSPPreprocessor.h",
