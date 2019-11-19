@@ -61,9 +61,7 @@ class <emptyTree><<C <root>>> < ()
     end
   end
 
-  class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>
-  end
+  class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)  end
 
   class <emptyTree>::<C AdvancedODM><<C <todo sym>>> < (::<todo sym>)
     ::T::Sig::WithoutRuntime.sig() do ||

@@ -592,7 +592,6 @@ ClassDef{
           symbol = ::<todo sym>
         }]
       rhs = [
-        EmptyTree
       ]
     }
 
