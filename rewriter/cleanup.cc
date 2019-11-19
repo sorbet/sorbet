@@ -9,8 +9,7 @@ using namespace std;
 namespace sorbet::rewriter {
 
 // This pass gets rid of some unnecessary nodes that are likely to have gotten created in the course of the rewriter
-// pass: mostly EmptyTree nodes, but it also gets rid of bare literals inside a ClassDef context, as these on their own
-// are sometimes created by the flattening pass but should never be semantically meaningful.
+// pass, specifically by removing EmptyTree nodes whenever they are created
 struct CleanupWalk {
     unique_ptr<ast::Expression> postTransformInsSeq(core::Context ctx, unique_ptr<ast::InsSeq> insSeq) {
         ast::InsSeq::STATS_store newStore;
@@ -29,7 +28,7 @@ struct CleanupWalk {
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         ast::ClassDef::RHS_store newStore;
         for (auto &m : classDef->rhs) {
-            if (!(ast::isa_tree<ast::EmptyTree>(m.get()) || ast::isa_tree<ast::Literal>(m.get()))) {
+            if (!ast::isa_tree<ast::EmptyTree>(m.get())) {
                 newStore.emplace_back(move(m));
             }
         }

@@ -166,16 +166,7 @@ Opus::Require.on_autoload('Yabba::Dabba::Jazz::JazBaz')
 class Yabba::Dabba::Jazz::JazBaz
 end
 
-Opus::Require.autoload_map(Yabba::Dabba::Jazz::JazBaz, {
-  VALUE: "autoloader/Yabba/Dabba/Jazz/JazBaz/VALUE.rb",
-})
-
---- output/Yabba/Dabba/Jazz/JazBaz/VALUE.rb
-# frozen_string_literal: true
-# typed: true
-
-
-Opus::Require.for_autoload(nil, "test/cli/autogen-autoloader/bar.rb")
+Opus::Require.for_autoload(Yabba::Dabba::Jazz::JazBaz, "test/cli/autogen-autoloader/bar.rb")
 
 --- output/Yabba/Dabba/NoBehavior.rb
 # frozen_string_literal: true
