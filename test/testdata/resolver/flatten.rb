@@ -38,4 +38,4 @@ extend T::Sig
 sig { params(x: Integer).void }
 def applies_to_integer(x); end
 
-applies_to_integer(def quux; end) # error: Expected `Integer` but found `Symbol(:"foo")`
+applies_to_integer(def quux; end) # error: Expected `Integer` but found `Symbol(:"quux")`
