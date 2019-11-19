@@ -72,33 +72,20 @@ public:
         this->forceCompiled = forceCompiled;
     }
 
-    virtual void finishTypecheck(const core::GlobalState &gs) const override {
-    }
-
-    virtual void finishTypecheckFile(const core::GlobalState &gs, const core::FileRef &f) const override {
-        if (!shouldCompile(gs, f)) {
+    virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override {
+        if (!shouldCompile(ctx, klass->loc.file())) {
             return;
         }
-        auto threadState = getThreadState();
-        llvm::LLVMContext &lctx = threadState->lctx;
-        unique_ptr<llvm::Module> module = move(threadState->combinedModule);
-        if (!module) {
-            ENFORCE(!threadState->file.exists());
-            return;
+        if (klass->loc.file().data(ctx).strictLevel < core::StrictLevel::True) {
+            if (auto e = ctx.state.beginError(klass->loc, core::errors::Compiler::Untyped)) {
+                e.setHeader("File must be `typed: true` or higher to be compiled");
+            }
         }
-        if (threadState->aborted) {
-            threadState->file = core::FileRef();
+        if (!ast::isa_tree<ast::EmptyTree>(klass->name.get())) {
             return;
         }
 
-        ENFORCE(threadState->file.exists());
-        ENFORCE(f == threadState->file);
-        if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
-            string fileName = objectFileName(gs, f);
-            sorbet::compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
-        }
-        ENFORCE(threadState->combinedModule == nullptr);
-        threadState->file = core::FileRef();
+        sorbet::compiler::DefinitionRewriter::run(ctx, klass);
     };
 
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
@@ -139,21 +126,34 @@ public:
         }
     };
 
-    virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override {
-        if (!shouldCompile(ctx, klass->loc.file())) {
+    virtual void finishTypecheckFile(const core::GlobalState &gs, const core::FileRef &f) const override {
+        if (!shouldCompile(gs, f)) {
             return;
         }
-        if (klass->loc.file().data(ctx).strictLevel < core::StrictLevel::True) {
-            if (auto e = ctx.state.beginError(klass->loc, core::errors::Compiler::Untyped)) {
-                e.setHeader("File must be `typed: true` or higher to be compiled");
-            }
+        auto threadState = getThreadState();
+        llvm::LLVMContext &lctx = threadState->lctx;
+        unique_ptr<llvm::Module> module = move(threadState->combinedModule);
+        if (!module) {
+            ENFORCE(!threadState->file.exists());
+            return;
         }
-        if (!ast::isa_tree<ast::EmptyTree>(klass->name.get())) {
+        if (threadState->aborted) {
+            threadState->file = core::FileRef();
             return;
         }
 
-        sorbet::compiler::DefinitionRewriter::run(ctx, klass);
+        ENFORCE(threadState->file.exists());
+        ENFORCE(f == threadState->file);
+        if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
+            string fileName = objectFileName(gs, f);
+            sorbet::compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
+        }
+        ENFORCE(threadState->combinedModule == nullptr);
+        threadState->file = core::FileRef();
     };
+
+    virtual void finishTypecheck(const core::GlobalState &gs) const override {
+    }
 
     virtual ~LLVMSemanticExtension(){};
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) override {
