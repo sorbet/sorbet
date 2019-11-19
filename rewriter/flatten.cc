@@ -229,14 +229,6 @@ class FlattenWalk {
             return rhs;
         }
 
-        ast::ClassDef::RHS_store newRhs;
-
-        for (auto &m : rhs) {
-            if (!ast::isa_tree<ast::Literal>(m.get())) {
-                newRhs.emplace_back(move(m));
-            }
-        }
-
         auto exprs = popCurMethodDefs();
         // this adds all the methods at the appropriate 'staticness' level
 
@@ -264,8 +256,8 @@ class FlattenWalk {
         // this vector contains all the possible RHS target locations that we might move to
         vector<ast::ClassDef::RHS_store *> targets;
         // 0 and 1 both go into the class itself
-        targets.emplace_back(&newRhs);
-        targets.emplace_back(&newRhs);
+        targets.emplace_back(&rhs);
+        targets.emplace_back(&rhs);
         // 2 and up go into the to-be-created `class << self` blocks
         for (auto &tgt : nestedBlocks) {
             targets.emplace_back(&tgt);
@@ -286,10 +278,10 @@ class FlattenWalk {
                                make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
                                                                  core::Names::singleton()),
                                {}, std::move(body), ast::ClassDefKind::Class);
-            newRhs.emplace_back(std::move(classDef));
+            rhs.emplace_back(std::move(classDef));
         }
 
-        return newRhs;
+        return rhs;
     }
 
 public:
