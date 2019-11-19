@@ -55,12 +55,15 @@ public:
 
     template <typename Rep, typename Period>
     inline DequeueResult wait_pop_timed(Elem &elem, std::chrono::duration<Rep, Period> const &timeout,
-                                        spdlog::logger &log) noexcept {
+                                        spdlog::logger &log, bool silent = false) noexcept {
         DequeueResult ret;
         if (!sorbet::emscripten_build) {
             ret.shouldRetry = elementsLeftToPush.load(std::memory_order_acquire) != 0;
             if (ret.shouldRetry) {
-                sorbet::Timer time(log, "wait_pop_timed");
+                std::unique_ptr<sorbet::Timer> time;
+                if (!silent) {
+                    time = std::make_unique<sorbet::Timer>(log, "wait_pop_timed");
+                }
                 ret.returned = _queue.wait_dequeue_timed(elem, timeout);
             } else { // all elements has been pushed, no need to wait.
                 ret.returned = _queue.try_dequeue(elem);

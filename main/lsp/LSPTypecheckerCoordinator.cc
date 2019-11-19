@@ -61,7 +61,8 @@ unique_ptr<Joinable> LSPTypecheckerCoordinator::startTypecheckerThread() {
 
         while (!shouldTerminate) {
             function<void()> lambda;
-            auto result = lambdas.wait_pop_timed(lambda, WorkerPool::BLOCK_INTERVAL(), *config->logger);
+            // Note: Pass in 'true' for silent to avoid spamming log with wait_pop_timed entries.
+            auto result = lambdas.wait_pop_timed(lambda, WorkerPool::BLOCK_INTERVAL(), *config->logger, true);
             if (result.gotItem()) {
                 lambda();
             }
