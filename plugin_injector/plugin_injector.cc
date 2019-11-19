@@ -36,6 +36,7 @@ public:
 
 class LLVMSemanticExtension : public SemanticExtension {
     optional<string> irOutputDir;
+    bool forceCompiled;
     mutable struct {
         UnorderedMap<std::thread::id, shared_ptr<ThreadState>> states;
         absl::Mutex mtx;
@@ -54,13 +55,25 @@ class LLVMSemanticExtension : public SemanticExtension {
         }
     }
 
+    bool shouldCompile(const core::GlobalState &gs, const core::FileRef &f) const {
+        if (!irOutputDir.has_value()) {
+            return false;
+        }
+        if (forceCompiled) {
+            return true;
+        }
+        // TODO parse this the same way as `typed:`
+        return f.data(gs).source().find("# compiled: true\n") != string_view::npos;
+    }
+
 public:
-    LLVMSemanticExtension(optional<string> irOutputDir) {
+    LLVMSemanticExtension(optional<string> irOutputDir, bool forceCompiled) {
         this->irOutputDir = move(irOutputDir);
+        this->forceCompiled = forceCompiled;
     }
 
     virtual void finishTypecheckFile(const core::GlobalState &gs, const core::FileRef &f) const override {
-        if (!irOutputDir.has_value()) {
+        if (!shouldCompile(gs, f)) {
             return;
         }
         auto threadState = getThreadState();
@@ -87,7 +100,7 @@ public:
 
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
                            std::unique_ptr<ast::MethodDef> &md) const override {
-        if (!irOutputDir.has_value()) {
+        if (!shouldCompile(gs, cfg.symbol.data(gs)->loc().file())) {
             return;
         }
         auto threadState = getThreadState();
@@ -124,7 +137,7 @@ public:
     };
 
     virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override {
-        if (!irOutputDir.has_value()) {
+        if (!shouldCompile(ctx, klass->loc.file())) {
             return;
         }
         if (klass->loc.file().data(ctx).strictLevel < core::StrictLevel::True) {
@@ -141,7 +154,7 @@ public:
 
     virtual ~LLVMSemanticExtension(){};
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) override {
-        return make_unique<LLVMSemanticExtension>(this->irOutputDir);
+        return make_unique<LLVMSemanticExtension>(this->irOutputDir, this->forceCompiled);
     };
     virtual void merge(const core::GlobalState &from, core::GlobalState &to, core::GlobalSubstitution &subst) override {
     }
@@ -150,14 +163,19 @@ public:
 class LLVMSemanticExtensionProvider : public SemanticExtensionProvider {
 public:
     virtual void injectOptions(cxxopts::Options &optsBuilder) const override {
-        optsBuilder.add_options("lvm")("llvm-ir-folder", "Output LLVM IR to directory", cxxopts::value<string>());
+        optsBuilder.add_options("compiler")("llvm-ir-folder", "Output LLVM IR to directory", cxxopts::value<string>());
+        optsBuilder.add_options("compiler")("force-compiled", "Force all files to this compiled level", cxxopts::value<bool>());
     };
     virtual std::unique_ptr<SemanticExtension> readOptions(cxxopts::ParseResult &providedOptions) const override {
         optional<string> irOutputDir;
+        bool forceCompiled = false;
         if (providedOptions.count("llvm-ir-folder") > 0) {
             irOutputDir = providedOptions["llvm-ir-folder"].as<string>();
         }
-        return make_unique<LLVMSemanticExtension>(irOutputDir);
+        if (providedOptions.count("force-compiled") > 0) {
+            forceCompiled = providedOptions["force-compiled"].as<bool>();
+        }
+        return make_unique<LLVMSemanticExtension>(irOutputDir, forceCompiled);
     };
     virtual ~LLVMSemanticExtensionProvider(){};
 };
