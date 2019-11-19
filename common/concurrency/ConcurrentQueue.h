@@ -63,7 +63,7 @@ public:
             ret.shouldRetry = elementsLeftToPush.load(std::memory_order_acquire) != 0;
             if (ret.shouldRetry) {
                 std::unique_ptr<sorbet::Timer> time;
-                // Don't create a timer in the unbounded case; the common case is a timeout.
+                // Don't create a timer in the unbounded case; the common case is a 250 ms timeout.
                 // If queue is unbounded, shouldRetry is ~always true regardless of if a queue entry will arrive soon.
                 if (!unbounded) {
                     time = std::make_unique<sorbet::Timer>(log, "wait_pop_timed");
