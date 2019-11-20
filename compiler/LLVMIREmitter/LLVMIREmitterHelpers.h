@@ -119,10 +119,12 @@ public:
     static llvm::Value *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
     static llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                          const core::TypePtr &type);
+    static void pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::CFG &cfg);
+    static void popControlFrame(CompilerState &cs, llvm::IRBuilderBase &builder);
+
     static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
                                const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                int rubyBlockId);
-
     static void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &builder,
                        const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
                        int rubyBlockId);
