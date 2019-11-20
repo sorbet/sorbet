@@ -10,8 +10,8 @@ void ProtocolTest::SetUp() {
     rootPath = "/Users/jvilk/stripe/pay-server";
     rootUri = fmt::format("file://{}", rootPath);
     fs = make_shared<MockFileSystem>(rootPath);
-    lspWrapper = make_unique<LSPWrapper>(rootPath);
-    lspWrapper->opts.fs = fs;
+    lspWrapper = LSPWrapper::createSingleThreaded(rootPath);
+    lspWrapper->opts->fs = fs;
     lspWrapper->enableAllExperimentalFeatures();
 }
 

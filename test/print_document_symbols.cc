@@ -50,19 +50,19 @@ pair<string, vector<string>> findEditsToApply(string_view filePath) {
 }
 
 int printDocumentSymbols(string_view filePath) {
-    LSPWrapper lspWrapper("", false);
-    lspWrapper.enableAllExperimentalFeatures();
+    auto lspWrapper = LSPWrapper::createSingleThreaded("");
+    lspWrapper->enableAllExperimentalFeatures();
     int nextId = 1;
     int fileId = 1;
     auto [fileUri, fileEdits] = findEditsToApply(filePath);
-    test::initializeLSP("", uriPrefix, lspWrapper, nextId);
+    test::initializeLSP("", uriPrefix, *lspWrapper, nextId);
     {
         // Initialize empty file.
         auto params =
             make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(fileUri, "ruby", fileId++, ""));
         auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params));
         // Discard responses.
-        lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+        lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
     }
 
     for (auto &fileEdit : fileEdits) {
@@ -71,14 +71,14 @@ int printDocumentSymbols(string_view filePath) {
         auto params = make_unique<DidChangeTextDocumentParams>(
             make_unique<VersionedTextDocumentIdentifier>(fileUri, static_cast<double>(fileId++)), move(edits));
         auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(params));
-        lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+        lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
     }
 
     auto docSymbolParams = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(fileUri));
     auto req =
         make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(docSymbolParams));
     // Make documentSymbol request.
-    auto responses = lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(req)));
+    auto responses = lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(req)));
 
     if (responses.size() == 1 && responses.at(0)->isResponse()) {
         cout << responses.at(0)->toJSON(true) << "\n";

@@ -80,6 +80,16 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
             } else {
                 logger->error(errorInfo->message);
             }
+        } else if (method == LSPMethod::SorbetFence) {
+            // Ensure all prior messages have finished processing before sending response.
+            typecheckerCoord.syncRun([&](auto &tc) -> void {
+                // Send the same fence back to acknowledge the fence.
+                // NOTE: Fence is a notification rather than a request so that we don't have to worry about clashes with
+                // client-chosen IDs when using fences internally.
+                auto response =
+                    make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, move(msg.asNotification().params));
+                config->output->write(move(response));
+            });
         }
     } else if (msg.isRequest()) {
         Timer timeit(logger, "request", {{"method", convertLSPMethodToString(method)}});

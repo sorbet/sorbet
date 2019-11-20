@@ -1299,6 +1299,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "initialized",
                                      "shutdown",
                                      "sorbet/error",
+                                     "sorbet/fence",
                                      "sorbet/readFile",
                                      "sorbet/showOperation",
                                      "sorbet/typecheckRunInfo",
@@ -1403,6 +1404,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"sorbet/watchmanFileChange", WatchmanQueryResponse},
                                                 {"sorbet/showOperation", SorbetShowOperationParams},
                                                 {"sorbet/error", SorbetErrorParams},
+                                                {"sorbet/fence", JSONInt},
                                                 {"sorbet/workspaceEdit", SorbetWorkspaceEditParams},
                                                 {"sorbet/typecheckRunInfo", SorbetTypecheckRunInfo},
                                             });

@@ -16,13 +16,13 @@ const auto fileName = "file.rb";
 const auto filePath = fmt::format("{}/{}", rootPath, fileName);
 const auto fileUri = sorbet::test::filePathToUri(rootUri, fileName);
 
-sorbet::realmain::options::Options mkOpts(std::string_view contents) {
-    sorbet::realmain::options::Options opts;
-    opts.fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
-    opts.fs->writeFile(filePath, contents);
-    opts.lspDocumentSymbolEnabled = true;
-    opts.rawInputDirNames.emplace_back(rootPath);
-    opts.inputFileNames.emplace_back(filePath);
+std::shared_ptr<sorbet::realmain::options::Options> mkOpts(std::string_view contents) {
+    auto opts = std::make_shared<sorbet::realmain::options::Options>();
+    opts->fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
+    opts->fs->writeFile(filePath, contents);
+    opts->lspDocumentSymbolEnabled = true;
+    opts->rawInputDirNames.emplace_back(rootPath);
+    opts->inputFileNames.emplace_back(filePath);
     return opts;
 }
 
@@ -35,13 +35,14 @@ std::unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain:
     return gs;
 }
 
-sorbet::realmain::lsp::LSPWrapper mkLSPWrapper(std::string_view contents) {
+std::unique_ptr<sorbet::realmain::lsp::LSPWrapper> mkLSPWrapper(std::string_view contents) {
     std::unique_ptr<sorbet::KeyValueStore> kvStore;
     auto opts = mkOpts(contents);
-    static const auto commonGs = mkGlobalState(opts, kvStore);
+    static const auto commonGs = mkGlobalState(*opts, kvStore);
     // TODO how to use opts and avoid another mkOpts()?
-    auto lspWrapper = sorbet::realmain::lsp::LSPWrapper(commonGs->deepCopy(true), mkOpts(contents), console, true);
-    lspWrapper.enableAllExperimentalFeatures();
+    auto lspWrapper = sorbet::realmain::lsp::LSPWrapper::createSingleThreaded(commonGs->deepCopy(true),
+                                                                              mkOpts(contents), console, true);
+    lspWrapper->enableAllExperimentalFeatures();
     return lspWrapper;
 }
 
@@ -53,9 +54,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     std::string contents((const char *)data, size);
     auto lspWrapper = mkLSPWrapper(contents);
     int nextId = 0;
-    sorbet::test::initializeLSP(rootPath, rootUri, lspWrapper, nextId);
+    sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId);
     ENFORCE(lspWrapper
-                .getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::RequestMessage>(
+                ->getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::RequestMessage>(
                     "2.0", nextId++, sorbet::test::LSPMethod::TextDocumentDocumentSymbol,
                     std::make_unique<sorbet::test::DocumentSymbolParams>(
                         std::make_unique<sorbet::test::TextDocumentIdentifier>(fileUri)))))

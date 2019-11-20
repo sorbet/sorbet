@@ -426,7 +426,7 @@ TEST_F(ProtocolTest, SorbetURIsWork) {
     const bool supportsMarkdown = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
-    lspWrapper->opts.lspDirsMissingFromClient.emplace_back("/folder");
+    lspWrapper->opts->lspDirsMissingFromClient.emplace_back("/folder");
     auto initializeResponses =
         sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown, move(initOptions));
     updateDiagnostics(initializeResponses);
