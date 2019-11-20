@@ -106,7 +106,7 @@ constr:
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_llvm_literals() local_unnamed_addr #4 {
+define void @Init_test_testdata_compiler_literals() local_unnamed_addr #4 {
 "func_<root>.<static-init>$111.exit":
   %callArgs.i = alloca [1 x i64], align 8
   %0 = load i64, i64* @rb_cObject, align 8

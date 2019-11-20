@@ -261,7 +261,7 @@ constr:
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_llvm_block_arg_expand() local_unnamed_addr #8 {
+define void @Init_test_testdata_compiler_block_arg_expand() local_unnamed_addr #8 {
 entry:
   %callArgs.i = alloca <2 x i64>, align 16
   %0 = load i64, i64* @rb_cObject, align 8

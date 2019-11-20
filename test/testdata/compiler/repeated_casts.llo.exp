@@ -475,7 +475,7 @@ constr:
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_llvm_repeated_casts() local_unnamed_addr #11 {
+define void @Init_test_testdata_compiler_repeated_casts() local_unnamed_addr #11 {
 typeTestSuccess.i:
   %0 = load i64, i64* @rb_cObject, align 8
   %rubyId_doubleCast.i = load i64, i64* @rubyIdPrecomputed_doubleCast, align 8

@@ -505,7 +505,7 @@ constr:
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_llvm_method() local_unnamed_addr #12 {
+define void @Init_test_testdata_compiler_method() local_unnamed_addr #12 {
 typeTestSuccess.i:
   %callArgs.i = alloca [2 x i64], align 8
   %0 = load i64, i64* @rb_cObject, align 8
