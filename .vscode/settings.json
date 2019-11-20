@@ -7,6 +7,7 @@
   // syntax highlighting colors to "bleed" into adjacent lines. Thus, we disable it.
   // We should revisit this option next time we upgrade clang.
   "clangd.semanticHighlighting": false,
+  "clangd.arguments": ["-header-insertion=never"],
   "files.associations": {
     "*.rbi": "ruby",
     "*.rbupdated": "ruby",
