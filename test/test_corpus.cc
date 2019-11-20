@@ -108,7 +108,8 @@ public:
             return m;
         }
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
-        cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+        auto symbol = cfg->symbol;
+        cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));
         cfgs.push_back(move(cfg));
         return m;
     }
@@ -507,7 +508,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     // resolver
     trees = resolver::Resolver::runTreePasses(ctx, move(newTrees));
 
-    for (auto &resolvedTree : newTrees) {
+    for (auto &resolvedTree : trees) {
         handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
         handler.addObserved("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
     }
@@ -639,7 +640,7 @@ bool isTestMessage(const LSPMessage &msg) {
 
 // "Newly pushed diagnostics always replace previously pushed diagnostics. There is no merging that happens
 // on the client side." Only keep the newest diagnostics for a file.
-void updateDiagnostics(string_view rootUri, UnorderedMap<string, string> &testFileUris,
+void updateDiagnostics(const LSPConfiguration &config, UnorderedMap<string, string> &testFileUris,
                        vector<unique_ptr<LSPMessage>> &responses,
                        map<string, vector<unique_ptr<Diagnostic>>> &diagnostics) {
     for (auto &response : responses) {
@@ -650,7 +651,7 @@ void updateDiagnostics(string_view rootUri, UnorderedMap<string, string> &testFi
         auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
         ASSERT_TRUE(maybeDiagnosticParams.has_value());
         auto &diagnosticParams = *maybeDiagnosticParams;
-        auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
+        auto filename = uriToFilePath(config, diagnosticParams->uri);
         EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
             << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
 
@@ -681,7 +682,7 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
 
 void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, UnorderedSet<string> &filenames,
                              vector<shared_ptr<RangeAssertion>> &assertions, UnorderedMap<string, string> &testFileUris,
-                             string_view rootUri, int &nextId) {
+                             int &nextId) {
     UnorderedMap<string, vector<shared_ptr<ApplyCodeActionAssertion>>> applyCodeActionAssertionsByFilename;
     for (auto &assertion : assertions) {
         if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
@@ -769,7 +770,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
                 // Ensure that the received code action applies correctly.
                 if (it2 != receivedCodeActionsByTitle.end()) {
                     auto codeAction = move(it2->second);
-                    codeActionAssertion->check(test.sourceFileContents, *codeAction.get(), rootUri);
+                    codeActionAssertion->check(test.sourceFileContents, lspWrapper, *codeAction.get());
 
                     // Some bookkeeping to make surfacing errors re. extra/insufficient
                     // apply-code-action annotations easier.
@@ -836,23 +837,24 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
 }
 
 TEST_P(LSPTest, All) {
-    string rootPath = fmt::format("/Users/{}/stripe/sorbet", std::getenv("USER"));
-    string rootUri = fmt::format("file://{}", rootPath);
-
-    // filename => URI
-    UnorderedMap<string, string> testFileUris;
-    for (auto &filename : filenames) {
-        testFileUris[filename] = filePathToUri(rootUri, filename);
-    }
+    const auto &config = lspWrapper->config();
 
     // Perform initialize / initialized handshake.
     {
+        string rootPath = fmt::format("/Users/{}/stripe/sorbet", std::getenv("USER"));
+        string rootUri = fmt::format("file://{}", rootPath);
         auto sorbetInitOptions = make_unique<SorbetInitializationOptions>();
         sorbetInitOptions->enableTypecheckInfo = true;
         auto initializedResponses =
             initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true, move(sorbetInitOptions));
         EXPECT_EQ(0, countNonTestMessages(initializedResponses))
             << "Should not receive any response to 'initialized' message.";
+    }
+
+    // filename => URI; do post-initialization so LSPConfiguration has rootUri set.
+    UnorderedMap<string, string> testFileUris;
+    for (auto &filename : filenames) {
+        testFileUris[filename] = filePathToUri(config, filename);
     }
 
     // Tell LSP that we opened a bunch of brand new, empty files (the test files).
@@ -882,11 +884,11 @@ TEST_P(LSPTest, All) {
             vector<unique_ptr<LSPMessage>> updates;
             for (auto &filename : filenames) {
                 auto textDocContents = test.sourceFileContents[filename]->source();
-                updates.push_back(makeDidChange(testFileUris[filename],
-                                                string(textDocContents.begin(), textDocContents.end()), 2 + i));
+                updates.push_back(
+                    makeChange(testFileUris[filename], string(textDocContents.begin(), textDocContents.end()), 2 + i));
             }
-            auto responses = lspWrapper->getLSPResponsesFor(updates);
-            updateDiagnostics(rootUri, testFileUris, responses, diagnostics);
+            auto responses = lspWrapper->getLSPResponsesFor(move(updates));
+            updateDiagnostics(config, testFileUris, responses, diagnostics);
             slowPathPassed = ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
             if (i == 2) {
@@ -898,7 +900,7 @@ TEST_P(LSPTest, All) {
     for (auto &filename : filenames) {
         testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[filename], filename);
     }
-    testQuickFixCodeActions(*lspWrapper, test, filenames, assertions, testFileUris, rootUri, nextId);
+    testQuickFixCodeActions(*lspWrapper, test, filenames, assertions, testFileUris, nextId);
 
     // Usage and def assertions
     {
@@ -963,22 +965,22 @@ TEST_P(LSPTest, All) {
                 auto entry = defAssertions.find(version);
                 if (entry != defAssertions.end()) {
                     auto &def = entry->second;
-                    auto queryLoc = assertion->getLocation(rootUri);
+                    auto queryLoc = assertion->getLocation(config);
                     // Check that a definition request at this location returns def.
-                    def->check(test.sourceFileContents, *lspWrapper, nextId, rootUri, *queryLoc);
+                    def->check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc);
                     // Check that a reference request at this location returns entryAssertions.
-                    UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
+                    UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
                                           entryAssertions);
                     // Check that a highlight request at this location returns all of the entryAssertions for the same
                     // file as the request.
                     vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
                     for (auto &e : entryAssertions) {
-                        if (absl::StartsWith(e->getLocation(rootUri)->uri, queryLoc->uri)) {
+                        if (absl::StartsWith(e->getLocation(config)->uri, queryLoc->uri)) {
                             filteredEntryAssertions.push_back(e);
                         }
                     }
-                    UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol,
-                                                    *queryLoc, filteredEntryAssertions);
+                    UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
+                                                    filteredEntryAssertions);
                 } else {
                     ADD_FAILURE() << fmt::format(
                         "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "
@@ -992,23 +994,22 @@ TEST_P(LSPTest, All) {
         for (auto &[symbol, typeDefAndAssertions] : typeDefMap) {
             auto &[typeDefs, typeAssertions] = typeDefAndAssertions;
             for (auto &typeAssertion : typeAssertions) {
-                auto queryLoc = typeAssertion->getLocation(rootUri);
+                auto queryLoc = typeAssertion->getLocation(config);
                 // Check that a type definition request at this location returns type-def.
-                TypeDefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
-                                        typeDefs);
+                TypeDefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc, typeDefs);
             }
         }
     }
 
     // Hover assertions
-    HoverAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+    HoverAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 
     // Completion assertions
-    CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
-    ApplyCompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+    CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
+    ApplyCompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 
     // Workspace Symbol assertions
-    SymbolSearchAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+    SymbolSearchAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
@@ -1032,14 +1033,14 @@ TEST_P(LSPTest, All) {
                 auto originalFile = test.folder + update.first;
                 auto updateFile = test.folder + update.second;
                 auto fileContents = FileOps::read(updateFile);
-                lspUpdates.push_back(makeDidChange(testFileUris[originalFile], fileContents, baseVersion + version));
+                lspUpdates.push_back(makeChange(testFileUris[originalFile], fileContents, baseVersion + version));
                 updatesAndContents[originalFile] =
                     make_shared<core::File>(string(originalFile), move(fileContents), core::File::Type::Normal);
             }
             auto assertions = RangeAssertion::parseAssertions(updatesAndContents);
             auto assertFastPath = FastPathAssertion::get(assertions);
             auto assertSlowPath = BooleanPropertyAssertion::getValue("assert-slow-path", assertions);
-            auto responses = lspWrapper->getLSPResponsesFor(lspUpdates);
+            auto responses = lspWrapper->getLSPResponsesFor(move(lspUpdates));
             bool foundTypecheckRunInfo = false;
 
             for (auto &r : responses) {
@@ -1069,7 +1070,7 @@ TEST_P(LSPTest, All) {
                 ADD_FAILURE() << errorPrefix << "Sorbet did not send expected typechecking metadata.";
             }
 
-            updateDiagnostics(rootUri, testFileUris, responses, diagnostics);
+            updateDiagnostics(config, testFileUris, responses, diagnostics);
 
             for (auto &update : updates) {
                 auto originalFile = test.folder + update.first;
@@ -1086,7 +1087,7 @@ TEST_P(LSPTest, All) {
             }
 
             // Check any new HoverAssertions in the updates.
-            HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId, rootUri);
+            HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
         }
     }
 }

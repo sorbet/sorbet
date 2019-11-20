@@ -10,7 +10,7 @@
 namespace sorbet::realmain::lsp {
 
 class LSPOutputToVector;
-
+class LSPConfiguration;
 class LSPWrapper final {
     static const std::string EMPTY_STRING;
 
@@ -23,7 +23,7 @@ class LSPWrapper final {
     std::unique_ptr<WorkerPool> workers;
     std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
     std::shared_ptr<spd::logger> typeErrorsConsole;
-    std::shared_ptr<LSPConfiguration> config;
+    std::shared_ptr<LSPConfiguration> config_;
     std::shared_ptr<LSPOutputToVector> output;
 
     /** Contains shared constructor logic. */
@@ -49,6 +49,8 @@ public:
                const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath);
     ~LSPWrapper();
 
+    const LSPConfiguration &config() const;
+
     /**
      * Send a message to LSP, and returns any responses.
      */
@@ -62,7 +64,7 @@ public:
     /**
      * Sends multiple messages to LSP, and returns any responses.
      */
-    std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(std::vector<std::unique_ptr<LSPMessage>> &messages);
+    std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(std::vector<std::unique_ptr<LSPMessage>> messages);
 
     /**
      * Enable an experimental LSP feature.

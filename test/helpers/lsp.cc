@@ -10,16 +10,13 @@
 namespace sorbet::test {
 using namespace std;
 
-string filePathToUri(string_view prefixUrl, string_view filePath) {
-    return fmt::format("{}/{}", prefixUrl, filePath);
+string filePathToUri(const LSPConfiguration &config, string_view filePath) {
+    return fmt::format("{}/{}", config.getClientConfig().rootUri, filePath);
 }
 
-bool isUriATestFile(string_view prefixUrl, string_view uri) {
-    return absl::StartsWith(uri, prefixUrl);
-}
-
-string uriToFilePath(string_view prefixUrl, string_view uri) {
-    if (!isUriATestFile(prefixUrl, uri)) {
+string uriToFilePath(const LSPConfiguration &config, string_view uri) {
+    string_view prefixUrl = config.getClientConfig().rootUri;
+    if (!config.isUriInWorkspace(uri)) {
         ADD_FAILURE() << fmt::format(
             "Unrecognized URI: `{}` is not contained in root URI `{}`, and thus does not correspond to a test file.",
             uri, prefixUrl);
@@ -27,6 +24,7 @@ string uriToFilePath(string_view prefixUrl, string_view uri) {
     }
     return string(uri.substr(prefixUrl.length() + 1));
 }
+
 template <typename T = DynamicRegistrationOption>
 std::unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
     auto option = std::make_unique<T>();
@@ -241,7 +239,7 @@ void assertResponseError(int code, string_view msg, const LSPMessage &response) 
         "Expected a response message with error `{}: {}`, but received:\n{}", code, msg, response.toJSON());
 }
 
-void assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage &response) {
+void assertNotificationMessage(LSPMethod expectedMethod, const LSPMessage &response) {
     ASSERT_TRUE(response.isNotification()) << fmt::format(
         "Expected a notification, but received the following response message instead: {}", response.toJSON());
     ASSERT_EQ(expectedMethod, response.method()) << "Unexpected method on notification message.";
@@ -257,8 +255,8 @@ optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMess
 }
 
 unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, const Range &range, int &nextId,
-                                                    string_view filename, string_view uriPrefix) {
-    auto uri = filePathToUri(uriPrefix, filename);
+                                                    string_view filename) {
+    auto uri = filePathToUri(lspWrapper.config(), filename);
     auto pos = make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(uri), range.start->copy());
     auto id = nextId++;
     auto msg =
@@ -324,14 +322,20 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
 
     // Complete initialization handshake with an 'initialized' message.
     {
-        rapidjson::Value emptyObject(rapidjson::kObjectType);
         auto initialized =
             make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>());
         return lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(initialized)));
     }
 }
 
-unique_ptr<LSPMessage> makeDidChange(std::string_view uri, std::string_view contents, int version) {
+unique_ptr<LSPMessage> makeOpen(string_view uri, string_view contents, int version) {
+    auto params = make_unique<DidOpenTextDocumentParams>(
+        make_unique<TextDocumentItem>(string(uri), "ruby", static_cast<double>(version), string(contents)));
+    return make_unique<LSPMessage>(
+        make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params)));
+}
+
+unique_ptr<LSPMessage> makeChange(std::string_view uri, std::string_view contents, int version) {
     auto textDoc = make_unique<VersionedTextDocumentIdentifier>(string(uri), static_cast<double>(version));
     auto textDocChange = make_unique<TextDocumentContentChangeEvent>(string(contents));
     vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;

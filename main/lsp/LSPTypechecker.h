@@ -8,7 +8,6 @@
 #include "core/NameHash.h"
 #include "core/core.h"
 #include "main/lsp/LSPConfiguration.h"
-#include "main/lsp/LSPOutput.h"
 
 namespace sorbet::realmain::lsp {
 

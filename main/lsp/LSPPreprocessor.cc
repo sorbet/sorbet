@@ -1,6 +1,7 @@
 #include "main/lsp/LSPPreprocessor.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"

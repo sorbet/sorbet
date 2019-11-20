@@ -2,11 +2,12 @@
 #define RUBY_TYPER_LSPCONFIGURATION_H
 
 #include "common/concurrency/WorkerPool.h"
-#include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "main/options/options.h"
 
 namespace sorbet::realmain::lsp {
+
+class LSPOutput;
 
 /**
  * Client options sent during initialization.

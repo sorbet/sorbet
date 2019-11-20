@@ -1,5 +1,6 @@
 #include "common/Timer.h"
-#include "lsp.h"
+#include "main/lsp/LSPOutput.h"
+#include "main/lsp/lsp.h"
 
 using namespace std;
 

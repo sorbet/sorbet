@@ -1,5 +1,6 @@
-#include "wrapper.h"
+#include "main/lsp/wrapper.h"
 #include "core/errors/namer.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
 #include <regex>
@@ -15,7 +16,7 @@ vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(unique_ptr<LSPMess
     return output->getOutput();
 }
 
-vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<LSPMessage>> &messages) {
+vector<unique_ptr<LSPMessage>> LSPWrapper::getLSPResponsesFor(vector<unique_ptr<LSPMessage>> messages) {
     lspLoop->processRequests(move(messages));
     return output->getOutput();
 }
@@ -29,9 +30,9 @@ void LSPWrapper::instantiate(std::unique_ptr<core::GlobalState> gs, const shared
     output = make_shared<LSPOutputToVector>();
     ENFORCE(gs->errorQueue->ignoreFlushes); // LSP needs this
     workers = WorkerPool::create(0, *logger);
-    config = make_shared<LSPConfiguration>(opts, output, *workers, logger, true, disableFastPath);
+    config_ = make_shared<LSPConfiguration>(opts, output, *workers, logger, true, disableFastPath);
     // Configure LSPLoop to disable configatron.
-    lspLoop = make_unique<LSPLoop>(std::move(gs), config);
+    lspLoop = make_unique<LSPLoop>(std::move(gs), config_);
 }
 
 LSPWrapper::LSPWrapper(options::Options &&options, std::string_view rootPath, bool disableFastPath)
@@ -104,6 +105,10 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
 
 int LSPWrapper::getTypecheckCount() {
     return lspLoop->getTypecheckCount();
+}
+
+const LSPConfiguration &LSPWrapper::config() const {
+    return *config_;
 }
 
 } // namespace sorbet::realmain::lsp
