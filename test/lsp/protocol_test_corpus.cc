@@ -246,7 +246,8 @@ TEST_F(ProtocolTest, DoesNotMergeFileChangesAcrossNonDelayableRequests) {
 }
 
 TEST_F(ProtocolTest, NotInitialized) {
-    auto msgs = send(*getDefinition("foo.rb", 12, 24));
+    // Don't use `getDefinition`; it only works post-initialization.
+    auto msgs = send(*makeDefinitionRequest(nextId++, "foo.rb", 12, 24));
     ASSERT_EQ(msgs.size(), 1);
     auto &msg1 = msgs.at(0);
     ASSERT_NO_FATAL_FAILURE(assertResponseError(-32002, "not initialize", *msg1));
@@ -256,7 +257,8 @@ TEST_F(ProtocolTest, NotInitialized) {
 TEST_F(ProtocolTest, WorkspaceEditIgnoredWhenNotInitialized) {
     // Purposefully send a vector of requests to trigger merging, which should turn this into a WorkspaceEdit.
     vector<unique_ptr<LSPMessage>> toSend;
-    toSend.push_back(openFile("bar.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"));
+    // Avoid using `openFile`, as it only works post-initialization.
+    toSend.push_back(makeOpen("bar.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n", 1));
     // This update should be ignored.
     assertDiagnostics(send(move(toSend)), {});
     // We shouldn't have any code errors post-initialization since the previous edit was ignored.
@@ -354,7 +356,7 @@ TEST_F(ProtocolTest, IgnoresUnrecognizedNotifications) {
 // Ensures that notifications that have an improper params shape are handled gracefully / not responded to.
 TEST_F(ProtocolTest, IgnoresNotificationsThatDontTypecheck) {
     assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/didChange\",\"params\":{}}"), {});
+    assertDiagnostics(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/didChange","params":{}})"), {});
 }
 
 // Ensures that unrecognized requests are responded to.
@@ -423,7 +425,7 @@ TEST_F(ProtocolTest, SorbetURIsWork) {
     const bool supportsMarkdown = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
-    lspWrapper->opts.lspDirsMissingFromClient.push_back("/folder");
+    lspWrapper->opts.lspDirsMissingFromClient.emplace_back("/folder");
     auto initializeResponses =
         sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown, move(initOptions));
     updateDiagnostics(initializeResponses);

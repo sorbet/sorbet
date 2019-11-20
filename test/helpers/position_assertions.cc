@@ -82,26 +82,26 @@ string prettyPrintRangeComment(string_view sourceLine, const Range &range, strin
                        string(numLeadingSpaces + sourceLineNumber.length() + 1, ' '), string(numCarets, '^'), comment);
 }
 
-string_view getLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, string_view uriPrefix,
-                    const Location &loc) {
-    auto filename = uriToFilePath(uriPrefix, loc.uri);
+string_view getLine(const LSPConfiguration &config,
+                    const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const Location &loc) {
+    auto filename = uriToFilePath(config, loc.uri);
     auto foundFile = sourceFileContents.find(filename);
     EXPECT_NE(sourceFileContents.end(), foundFile) << fmt::format("Unable to find file `{}`", filename);
     auto &file = foundFile->second;
     return file->getLine(loc.range->start->line + 1);
 }
 
-void assertLocationsMatch(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, string_view uriPrefix,
-                          string_view symbol, const vector<shared_ptr<RangeAssertion>> &allLocs, int line,
-                          int character, string_view locSourceLine, string_view locFilename,
-                          vector<unique_ptr<Location>> &locations) {
+void assertLocationsMatch(const LSPConfiguration &config,
+                          const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, string_view symbol,
+                          const vector<shared_ptr<RangeAssertion>> &allLocs, int line, int character,
+                          string_view locSourceLine, string_view locFilename, vector<unique_ptr<Location>> &locations) {
     fast_sort(locations,
               [&](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
 
     auto expectedLocationsIt = allLocs.begin();
     auto actualLocationsIt = locations.begin();
     while (expectedLocationsIt != allLocs.end() && actualLocationsIt != locations.end()) {
-        auto expectedLocation = (*expectedLocationsIt)->getLocation(uriPrefix);
+        auto expectedLocation = (*expectedLocationsIt)->getLocation(config);
         auto &actualLocation = *actualLocationsIt;
 
         // If true, the expectedLocation is a subset of the actualLocation
@@ -114,26 +114,26 @@ void assertLocationsMatch(const UnorderedMap<string, shared_ptr<core::File>> &so
             const int cmp = expectedLocation->cmp(*actualLocation);
             if (cmp < 0) {
                 // Expected location is *before* actual location.
-                auto expectedFilePath = uriToFilePath(uriPrefix, expectedLocation->uri);
+                auto expectedFilePath = uriToFilePath(config, expectedLocation->uri);
                 ADD_FAILURE_AT(expectedFilePath.c_str(), expectedLocation->range->start->line + 1)
                     << fmt::format("Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
                                    "did not report reference at:\n{}",
                                    symbol,
                                    prettyPrintRangeComment(
                                        locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
-                                   prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedLocation),
+                                   prettyPrintRangeComment(getLine(config, sourceFileContents, *expectedLocation),
                                                            *expectedLocation->range, ""));
                 expectedLocationsIt++;
             } else if (cmp > 0) {
                 // Expected location is *after* actual location
-                auto actualFilePath = uriToFilePath(uriPrefix, actualLocation->uri);
+                auto actualFilePath = uriToFilePath(config, actualLocation->uri);
                 ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1)
                     << fmt::format("Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
                                    "at:\n{}\nSorbet reported an unexpected (additional?) reference at:\n{}",
                                    symbol,
                                    prettyPrintRangeComment(
                                        locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
-                                   prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation),
+                                   prettyPrintRangeComment(getLine(config, sourceFileContents, *actualLocation),
                                                            *actualLocation->range, ""));
                 actualLocationsIt++;
             } else {
@@ -147,28 +147,27 @@ void assertLocationsMatch(const UnorderedMap<string, shared_ptr<core::File>> &so
     }
 
     while (expectedLocationsIt != allLocs.end()) {
-        auto expectedLocation = (*expectedLocationsIt)->getLocation(uriPrefix);
-        auto expectedFilePath = uriToFilePath(uriPrefix, expectedLocation->uri);
+        auto expectedLocation = (*expectedLocationsIt)->getLocation(config);
+        auto expectedFilePath = uriToFilePath(config, expectedLocation->uri);
         ADD_FAILURE_AT(expectedFilePath.c_str(), expectedLocation->range->start->line + 1) << fmt::format(
             "Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
             "did not report reference at:\n{}",
             symbol,
             prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
-            prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *expectedLocation), *expectedLocation->range,
+            prettyPrintRangeComment(getLine(config, sourceFileContents, *expectedLocation), *expectedLocation->range,
                                     ""));
         expectedLocationsIt++;
     }
 
     while (actualLocationsIt != locations.end()) {
         auto &actualLocation = *actualLocationsIt;
-        auto actualFilePath = uriToFilePath(uriPrefix, actualLocation->uri);
+        auto actualFilePath = uriToFilePath(config, actualLocation->uri);
         ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1) << fmt::format(
             "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
             "at:\n{}\nSorbet reported an unexpected (additional?) reference at:\n{}",
             symbol,
             prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
-            prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *actualLocation), *actualLocation->range,
-                                    ""));
+            prettyPrintRangeComment(getLine(config, sourceFileContents, *actualLocation), *actualLocation->range, ""));
         actualLocationsIt++;
     }
 }
@@ -354,8 +353,8 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
     return assertions;
 }
 
-unique_ptr<Location> RangeAssertion::getLocation(string_view uriPrefix) const {
-    auto uri = filePathToUri(uriPrefix, filename);
+unique_ptr<Location> RangeAssertion::getLocation(const LSPConfiguration &config) const {
+    auto uri = filePathToUri(config, filename);
     return make_unique<Location>(uri, range->copy());
 }
 
@@ -409,14 +408,15 @@ vector<unique_ptr<DocumentHighlight>> &extractDocumentHighlights(ResponseMessage
 }
 
 void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
-                         int &nextId, string_view uriPrefix, const Location &queryLoc) {
+                         int &nextId, const Location &queryLoc) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
-    auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
-    auto defSourceLine = getLine(sourceFileContents, uriPrefix, *getLocation(uriPrefix));
-    string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
-    string defUri = filePathToUri(uriPrefix, filename);
+    const auto &config = lspWrapper.config();
+    auto locSourceLine = getLine(config, sourceFileContents, queryLoc);
+    auto defSourceLine = getLine(config, sourceFileContents, *getLocation(config));
+    string locFilename = uriToFilePath(config, queryLoc.uri);
+    string defUri = filePathToUri(config, filename);
 
     const int id = nextId++;
     auto responses = lspWrapper.getLSPResponsesFor(makeDefinitionRequest(id, queryLoc.uri, line, character));
@@ -435,7 +435,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
                 "Sorbet returned a definition for a location that we expected no definition for. For "
                 "location:\n{}\nFound definition:\n{}",
                 prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *location), *location->range, ""));
+                prettyPrintRangeComment(getLine(config, sourceFileContents, *location), *location->range, ""));
         }
         return;
     }
@@ -452,8 +452,8 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
             "Sorbet unexpectedly returned multiple locations for definition of symbol `{}`.\nFor "
             "location:\n{}\nSorbet returned the following definition locations:\n{}",
             symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-            fmt::map_join(locations, "\n", [&sourceFileContents, &uriPrefix](const auto &arg) -> string {
-                return prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *arg), *arg->range, "");
+            fmt::map_join(locations, "\n", [&config, &sourceFileContents](const auto &arg) -> string {
+                return prettyPrintRangeComment(getLine(config, sourceFileContents, *arg), *arg->range, "");
             }));
         return;
     }
@@ -466,7 +466,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
         string foundLocationString = "null";
         if (location != nullptr) {
             foundLocationString =
-                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *location), *location->range, "");
+                prettyPrintRangeComment(getLine(config, sourceFileContents, *location), *location->range, "");
         }
 
         ADD_FAILURE_AT(filename.c_str(), line + 1)
@@ -478,13 +478,14 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
 }
 
 void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                           LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string_view symbol,
-                           const Location &queryLoc, const vector<shared_ptr<RangeAssertion>> &allLocs) {
+                           LSPWrapper &lspWrapper, int &nextId, string_view symbol, const Location &queryLoc,
+                           const vector<shared_ptr<RangeAssertion>> &allLocs) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
-    auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
-    string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
+    const auto &config = lspWrapper.config();
+    auto locSourceLine = getLine(config, sourceFileContents, queryLoc);
+    string locFilename = uriToFilePath(config, queryLoc.uri);
 
     auto referenceParams =
         make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(queryLoc.uri),
@@ -506,29 +507,30 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
     if (symbol == NOTHING_LABEL) {
         // Special case: This location should not report usages of anything.
         for (auto &foundLocation : locations) {
-            auto actualFilePath = uriToFilePath(uriPrefix, foundLocation->uri);
+            auto actualFilePath = uriToFilePath(config, foundLocation->uri);
             ADD_FAILURE_AT(actualFilePath.c_str(), foundLocation->range->start->line + 1) << fmt::format(
                 "Sorbet returned references for a location that should not report references.\nGiven location "
                 "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
                 prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *foundLocation), *foundLocation->range,
+                prettyPrintRangeComment(getLine(config, sourceFileContents, *foundLocation), *foundLocation->range,
                                         ""));
         }
         return;
     }
 
-    assertLocationsMatch(sourceFileContents, uriPrefix, symbol, allLocs, line, character, locSourceLine, locFilename,
+    assertLocationsMatch(config, sourceFileContents, symbol, allLocs, line, character, locSourceLine, locFilename,
                          locations);
 }
 
 void UsageAssertion::checkHighlights(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                     LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string_view symbol,
-                                     const Location &queryLoc, const vector<shared_ptr<RangeAssertion>> &allLocs) {
+                                     LSPWrapper &lspWrapper, int &nextId, string_view symbol, const Location &queryLoc,
+                                     const vector<shared_ptr<RangeAssertion>> &allLocs) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
-    auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
-    string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
+    const auto &config = lspWrapper.config();
+    auto locSourceLine = getLine(config, sourceFileContents, queryLoc);
+    string locFilename = uriToFilePath(config, queryLoc.uri);
 
     int id = nextId++;
     auto request = make_unique<LSPMessage>(make_unique<RequestMessage>(
@@ -559,18 +561,18 @@ void UsageAssertion::checkHighlights(const UnorderedMap<string, shared_ptr<core:
     if (symbol == NOTHING_LABEL) {
         // Special case: This location should not report usages of anything.
         for (auto &foundLocation : locations) {
-            auto actualFilePath = uriToFilePath(uriPrefix, foundLocation->uri);
+            auto actualFilePath = uriToFilePath(config, foundLocation->uri);
             ADD_FAILURE_AT(actualFilePath.c_str(), foundLocation->range->start->line + 1) << fmt::format(
                 "Sorbet returned references for a highlight that should not report references.\nGiven location "
                 "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
                 prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *foundLocation), *foundLocation->range,
+                prettyPrintRangeComment(getLine(config, sourceFileContents, *foundLocation), *foundLocation->range,
                                         ""));
         }
         return;
     }
 
-    assertLocationsMatch(sourceFileContents, uriPrefix, symbol, allLocs, line, character, locSourceLine, locFilename,
+    assertLocationsMatch(config, sourceFileContents, symbol, allLocs, line, character, locSourceLine, locFilename,
                          locations);
 }
 
@@ -603,13 +605,14 @@ shared_ptr<TypeDefAssertion> TypeDefAssertion::make(string_view filename, unique
 }
 
 void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                             LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string_view symbol,
-                             const Location &queryLoc, const std::vector<std::shared_ptr<RangeAssertion>> &typeDefs) {
+                             LSPWrapper &lspWrapper, int &nextId, string_view symbol, const Location &queryLoc,
+                             const std::vector<std::shared_ptr<RangeAssertion>> &typeDefs) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
-    auto locSourceLine = getLine(sourceFileContents, uriPrefix, queryLoc);
-    string locFilename = uriToFilePath(uriPrefix, queryLoc.uri);
+    const auto &config = lspWrapper.config();
+    auto locSourceLine = getLine(config, sourceFileContents, queryLoc);
+    string locFilename = uriToFilePath(config, queryLoc.uri);
 
     const int id = nextId++;
     auto request = make_unique<LSPMessage>(make_unique<RequestMessage>(
@@ -629,12 +632,12 @@ void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> 
     if (symbol == NOTHING_LABEL) {
         // can't add type-def for NOTHING_LABEL
         for (auto &location : locations) {
-            auto filePath = uriToFilePath(uriPrefix, location->uri);
+            auto filePath = uriToFilePath(config, location->uri);
             ADD_FAILURE_AT(filePath.c_str(), location->range->start->line + 1) << fmt::format(
                 "Sorbet returned references for a location that should not report references.\nGiven go to type def "
                 "here:\n{}\nSorbet reported an unexpected definition at:\n{}",
                 prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(getLine(sourceFileContents, uriPrefix, *location), *location->range, ""));
+                prettyPrintRangeComment(getLine(config, sourceFileContents, *location), *location->range, ""));
         }
         return;
     }
@@ -648,7 +651,7 @@ void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> 
         return;
     }
 
-    assertLocationsMatch(sourceFileContents, uriPrefix, symbol, typeDefs, line, character, locSourceLine, locFilename,
+    assertLocationsMatch(config, sourceFileContents, symbol, typeDefs, line, character, locSourceLine, locFilename,
                          locations);
 }
 
@@ -917,10 +920,10 @@ HoverAssertion::HoverAssertion(string_view filename, unique_ptr<Range> &range, i
 
 void HoverAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
                               const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                              LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+                              LSPWrapper &wrapper, int &nextId, string errorPrefix) {
     for (auto assertion : assertions) {
         if (auto assertionOfType = dynamic_pointer_cast<HoverAssertion>(assertion)) {
-            assertionOfType->check(sourceFileContents, wrapper, nextId, uriPrefix, errorPrefix);
+            assertionOfType->check(sourceFileContents, wrapper, nextId, errorPrefix);
         }
     }
 }
@@ -952,8 +955,9 @@ bool containsLine(string_view text, string_view line) {
 }
 
 void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
-                           int &nextId, string_view uriPrefix, string errorPrefix) {
-    auto uri = filePathToUri(uriPrefix, filename);
+                           int &nextId, string errorPrefix) {
+    const auto &config = wrapper.config();
+    auto uri = filePathToUri(config, filename);
     auto pos = make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(uri), range->start->copy());
     auto id = nextId++;
     auto msg = make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentHover, move(pos)));
@@ -991,22 +995,22 @@ CompletionAssertion::CompletionAssertion(string_view filename, unique_ptr<Range>
 
 void CompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
                                    const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                   LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+                                   LSPWrapper &wrapper, int &nextId, string errorPrefix) {
     for (auto assertion : assertions) {
         if (auto assertionOfType = dynamic_pointer_cast<CompletionAssertion>(assertion)) {
-            assertionOfType->check(sourceFileContents, wrapper, nextId, uriPrefix, errorPrefix);
+            assertionOfType->check(sourceFileContents, wrapper, nextId, errorPrefix);
         }
     }
 }
 
 void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
-    auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename, uriPrefix);
+                                LSPWrapper &wrapper, int &nextId, string errorPrefix) {
+    auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename);
     ASSERT_NE(completionList, nullptr) << "doTextDocumentCompletion failed; see error above.";
 
     // TODO(jez) Add ability to expect CompletionItemKind of each item
     string actualMessage =
-        completionList->items.size() == 0
+        completionList->items.empty()
             ? "(nothing)"
             : fmt::format("{}", fmt::map_join(completionList->items.begin(), completionList->items.end(), ", ",
                                               [](const auto &item) -> string { return item->label; }));
@@ -1062,18 +1066,17 @@ ApplyCompletionAssertion::ApplyCompletionAssertion(string_view filename, unique_
 
 void ApplyCompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
                                         const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                        LSPWrapper &wrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+                                        LSPWrapper &wrapper, int &nextId, string errorPrefix) {
     for (auto assertion : assertions) {
         if (auto assertionOfType = dynamic_pointer_cast<ApplyCompletionAssertion>(assertion)) {
-            assertionOfType->check(sourceFileContents, wrapper, nextId, uriPrefix, errorPrefix);
+            assertionOfType->check(sourceFileContents, wrapper, nextId, errorPrefix);
         }
     }
 }
 
 void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                                     LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix,
-                                     std::string errorPrefix) {
-    auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename, uriPrefix);
+                                     LSPWrapper &wrapper, int &nextId, std::string errorPrefix) {
+    auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename);
     ASSERT_NE(completionList, nullptr) << "doTextDocumentCompletion failed; see error above.";
 
     auto &items = completionList->items;
@@ -1149,9 +1152,10 @@ string ApplyCodeActionAssertion::toString() const {
 }
 
 void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                                     const CodeAction &codeAction, std::string_view rootUri) {
+                                     LSPWrapper &wrapper, const CodeAction &codeAction) {
+    const auto &config = wrapper.config();
     for (auto &c : *codeAction.edit.value()->documentChanges) {
-        auto filename = uriToFilePath(rootUri, c->textDocument->uri);
+        auto filename = uriToFilePath(config, c->textDocument->uri);
         auto it = sourceFileContents.find(filename);
         ASSERT_NE(it, sourceFileContents.end()) << fmt::format("Unable to find referenced source file `{}`", filename);
         auto &file = it->second;
@@ -1198,12 +1202,11 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
     }
 }
 
-SymbolSearchAssertion::SymbolSearchAssertion(std::string_view filename, std::unique_ptr<Range> &range,
-                                             int assertionLine, std::string_view query, std::optional<std::string> name,
-                                             std::optional<std::string> container, std::optional<int> rank,
-                                             std::optional<std::string> uri)
-    : RangeAssertion(filename, range, assertionLine), query(query), name(name), container(container), rank(rank),
-      uri(uri) {}
+SymbolSearchAssertion::SymbolSearchAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                             string_view query, optional<std::string> name, optional<string> container,
+                                             std::optional<int> rank, optional<string> uri)
+    : RangeAssertion(filename, range, assertionLine), query(query), name(move(name)), container(move(container)),
+      rank(rank), uri(move(uri)) {}
 
 string SymbolSearchAssertion::toString() const {
     auto namePart = name.has_value() ? fmt::format(", name=\"{}\"", name.value()) : "";
@@ -1307,8 +1310,8 @@ shared_ptr<SymbolSearchAssertion> SymbolSearchAssertion::make(string_view filena
     return make_shared<SymbolSearchAssertion>(filename, range, assertionLine, query, name, container, rank, uri);
 }
 
-bool SymbolSearchAssertion::matches(std::string_view uriPrefix, const SymbolInformation &symbol) const {
-    auto assertionLocation = getLocation(uriPrefix);
+bool SymbolSearchAssertion::matches(const LSPConfiguration &config, const SymbolInformation &symbol) const {
+    auto assertionLocation = getLocation(config);
     auto &symbolLocation = symbol.location;
     if (uri.has_value()) {
         if (symbolLocation->uri.find(*uri) == string::npos) {
@@ -1337,13 +1340,13 @@ string pluralized_count(string_view word, int count) {
 
 void addFailureAtLocationWithSource(const Location &location,
                                     const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                    string_view uriPrefix, std::string_view message) {
-    if (!isUriATestFile(uriPrefix, location.uri)) {
+                                    const LSPConfiguration &config, std::string_view message) {
+    if (!config.isUriInWorkspace(location.uri)) {
         ADD_FAILURE_AT(location.uri.c_str(), location.range->start->line + 1)
             << fmt::format("{}\n(source unavailable for {})\n", message, location.uri);
         return;
     }
-    auto sourceLine = getLine(sourceFileContents, uriPrefix, location);
+    auto sourceLine = getLine(config, sourceFileContents, location);
     ADD_FAILURE_AT(location.uri.c_str(), location.range->start->line + 1)
         << fmt::format("{}\n{}\n", message, prettyPrintRangeComment(sourceLine, *location.range, ""));
 }
@@ -1351,7 +1354,7 @@ void addFailureAtLocationWithSource(const Location &location,
 void matchSymbolsToAssertions(string_view query, const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
                               vector<pair<SymbolInformation &, SymbolSearchAssertion *>> &symbolMatchStates,
                               const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                              string_view uriPrefix, string_view errorPrefix) {
+                              const LSPConfiguration &config, string_view errorPrefix) {
     vector<shared_ptr<SymbolSearchAssertion>> unmatchedAssertions;
     vector<reference_wrapper<SymbolInformation>> unmatchedSymbols;
     // Find assertions with no matching symbol
@@ -1359,12 +1362,12 @@ void matchSymbolsToAssertions(string_view query, const vector<shared_ptr<SymbolS
         SymbolInformation *matchingSymbol = nullptr;
         for (auto &symbolMatchState : symbolMatchStates) {
             auto &symbol = symbolMatchState.first;
-            if (!assertion->matches(uriPrefix, symbolMatchState.first)) {
+            if (!assertion->matches(config, symbolMatchState.first)) {
                 continue;
             }
             auto previousMatchingAssertion = symbolMatchState.second;
             if (previousMatchingAssertion != nullptr) {
-                addFailureAtLocationWithSource(*assertion->getLocation(uriPrefix), sourceFileContents, uriPrefix,
+                addFailureAtLocationWithSource(*assertion->getLocation(config), sourceFileContents, config,
                                                fmt::format("More than one assertion matches symbol:\n {}\n"
                                                            "At least these two assertions match this symbol:\n"
                                                            "  {}:{}: {}\n"
@@ -1378,7 +1381,7 @@ void matchSymbolsToAssertions(string_view query, const vector<shared_ptr<SymbolS
                 symbolMatchState.second = &*assertion; // record the match
                 matchingSymbol = &symbolMatchState.first;
             } else {
-                addFailureAtLocationWithSource(*assertion->getLocation(uriPrefix), sourceFileContents, uriPrefix,
+                addFailureAtLocationWithSource(*assertion->getLocation(config), sourceFileContents, config,
                                                fmt::format("More than one symbol matches assertion:\n {}\n"
                                                            "Found matching symbols:\n  {}\n  {}\n"
                                                            "Please refine your test to avoid ambiguity.",
@@ -1396,19 +1399,19 @@ void matchSymbolsToAssertions(string_view query, const vector<shared_ptr<SymbolS
             continue;
         }
         Location &location = *symbol.location.get();
-        if (!isUriATestFile(uriPrefix, location.uri)) {
+        if (!config.isUriInWorkspace(location.uri)) {
             continue; // ignore extra symbols returned from standard library (not test files)
         }
-        unmatchedSymbols.push_back(symbol);
+        unmatchedSymbols.emplace_back(symbol);
     }
 
     for (auto &assertion : unmatchedAssertions) {
         addFailureAtLocationWithSource(
-            *assertion->getLocation(uriPrefix), sourceFileContents, uriPrefix,
+            *assertion->getLocation(config), sourceFileContents, config,
             fmt::format("{}No results matched `workspace/symbol` expectation: {}", errorPrefix, assertion->toString()));
     }
     for (auto &symbol : unmatchedSymbols) {
-        addFailureAtLocationWithSource(*symbol.get().location, sourceFileContents, uriPrefix,
+        addFailureAtLocationWithSource(*symbol.get().location, sourceFileContents, config,
                                        fmt::format("{}Unexpected result from `workspace/symbol` query \"{}\": {}\n",
                                                    errorPrefix, query, symbol.get().toJSON(true)));
     }
@@ -1423,9 +1426,7 @@ void matchSymbolsToAssertions(string_view query, const vector<shared_ptr<SymbolS
 }
 
 void checkSymbolsReturnedInRankOrder(string_view query,
-                                     vector<pair<SymbolInformation &, SymbolSearchAssertion *>> &symbolMatchStates,
-                                     const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                     string_view uriPrefix, string_view errorPrefix) {
+                                     vector<pair<SymbolInformation &, SymbolSearchAssertion *>> &symbolMatchStates) {
     pair<SymbolInformation &, SymbolSearchAssertion *> *left = nullptr;
     for (auto &right : symbolMatchStates) {
         if (right.second == nullptr || !right.second->rank.has_value()) {
@@ -1454,7 +1455,7 @@ void checkSymbolsReturnedInRankOrder(string_view query,
 
 void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
                       const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
-                      int &nextId, string_view uriPrefix, string_view errorPrefix) {
+                      int &nextId, string_view errorPrefix) {
     const int id = nextId++;
 
     // Request results from LSP
@@ -1480,14 +1481,15 @@ void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAss
                 MAX_RESULTS, symbolInfos->size());
         }
     }
-    matchSymbolsToAssertions(query, assertions, symbolAssertionMatches, sourceFileContents, uriPrefix, errorPrefix);
-    checkSymbolsReturnedInRankOrder(query, symbolAssertionMatches, sourceFileContents, uriPrefix, errorPrefix);
+    matchSymbolsToAssertions(query, assertions, symbolAssertionMatches, sourceFileContents, lspWrapper.config(),
+                             errorPrefix);
+    checkSymbolsReturnedInRankOrder(query, symbolAssertionMatches);
 }
 } // namespace
 
 void SymbolSearchAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
                                      const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                     LSPWrapper &lspWrapper, int &nextId, string_view uriPrefix, string errorPrefix) {
+                                     LSPWrapper &lspWrapper, int &nextId, string errorPrefix) {
     UnorderedMap<std::string, vector<shared_ptr<SymbolSearchAssertion>>> queryToAssertionsMap;
     for (auto &assertion : assertions) {
         if (auto searchAssertion = dynamic_pointer_cast<SymbolSearchAssertion>(assertion)) {
@@ -1495,7 +1497,7 @@ void SymbolSearchAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &a
         }
     }
     for (auto entry : queryToAssertionsMap) {
-        checkAllForQuery(entry.first, entry.second, sourceFileContents, lspWrapper, nextId, uriPrefix, errorPrefix);
+        checkAllForQuery(entry.first, entry.second, sourceFileContents, lspWrapper, nextId, errorPrefix);
     }
 }
 

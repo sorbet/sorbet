@@ -22,12 +22,6 @@ int errorComparison(std::string_view aFilename, const Range &a, std::string_view
  */
 std::string prettyPrintRangeComment(std::string_view sourceLine, const Range &range, std::string_view comment);
 
-// Converts a relative file path into an absolute file:// URI.
-std::string filePathToUri(std::string_view prefixUrl, std::string_view filePath);
-
-// Converts a URI into a relative file path.
-std::string uriToFilePath(std::string_view prefixUrl, std::string_view uri);
-
 class ErrorAssertion;
 
 /**
@@ -73,7 +67,7 @@ public:
     int cmp(const RangeAssertion &b) const;
 
     // Returns a Location object for this assertion's filename and range.
-    std::unique_ptr<Location> getLocation(std::string_view uriPrefix) const;
+    std::unique_ptr<Location> getLocation(const LSPConfiguration &config) const;
 
     // Returns a DocumentHighlight object for this assertion's range.
     std::unique_ptr<DocumentHighlight> getDocumentHighlight();
@@ -121,7 +115,7 @@ public:
                  int version);
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
-               int &nextId, std::string_view uriPrefix, const Location &queryLoc);
+               int &nextId, const Location &queryLoc);
 
     std::string toString() const override;
 };
@@ -134,13 +128,13 @@ public:
                                                 std::string_view assertionType);
 
     static void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                      LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string_view symbol,
-                      const Location &queryLoc, const std::vector<std::shared_ptr<RangeAssertion>> &allLocs);
+                      LSPWrapper &wrapper, int &nextId, std::string_view symbol, const Location &queryLoc,
+                      const std::vector<std::shared_ptr<RangeAssertion>> &allLocs);
 
     // Runs assertions for documentHighlight LSP results.
     static void checkHighlights(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                                LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string_view symbol,
-                                const Location &queryLoc, const std::vector<std::shared_ptr<RangeAssertion>> &allLocs);
+                                LSPWrapper &wrapper, int &nextId, std::string_view symbol, const Location &queryLoc,
+                                const std::vector<std::shared_ptr<RangeAssertion>> &allLocs);
 
     const std::string symbol;
     const int version;
@@ -165,8 +159,8 @@ public:
                      std::string_view symbol);
 
     static void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                      LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string_view symbol,
-                      const Location &queryLoc, const std::vector<std::shared_ptr<RangeAssertion>> &allLocs);
+                      LSPWrapper &wrapper, int &nextId, std::string_view symbol, const Location &queryLoc,
+                      const std::vector<std::shared_ptr<RangeAssertion>> &allLocs);
 
     std::string toString() const override;
 };
@@ -234,7 +228,7 @@ public:
     /** Checks all HoverAssertions within the assertion vector. Skips over non-hover assertions.*/
     static void checkAll(const std::vector<std::shared_ptr<RangeAssertion>> &assertions,
                          const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                         LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+                         LSPWrapper &wrapper, int &nextId, std::string errorPrefix = "");
 
     HoverAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                    std::string_view message);
@@ -242,7 +236,7 @@ public:
     const std::string message;
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
-               int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+               int &nextId, std::string errorPrefix = "");
 
     std::string toString() const override;
 };
@@ -256,7 +250,7 @@ public:
     /** Checks all CompletionAssertions within the assertion vector. Skips over non-CompletionAssertions. */
     static void checkAll(const std::vector<std::shared_ptr<RangeAssertion>> &assertions,
                          const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                         LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+                         LSPWrapper &wrapper, int &nextId, std::string errorPrefix = "");
 
     CompletionAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                         std::string_view message);
@@ -264,7 +258,7 @@ public:
     const std::string message;
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
-               int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+               int &nextId, std::string errorPrefix = "");
 
     std::string toString() const override;
 };
@@ -279,7 +273,7 @@ public:
     /** Checks all ApplyCompletionAssertions within the assertion vector. Skips over non-ApplyCompletionAssertions. */
     static void checkAll(const std::vector<std::shared_ptr<RangeAssertion>> &assertions,
                          const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                         LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+                         LSPWrapper &wrapper, int &nextId, std::string errorPrefix = "");
 
     ApplyCompletionAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                              std::string_view version, int index);
@@ -290,7 +284,7 @@ public:
     const int index;
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
-               int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+               int &nextId, std::string errorPrefix = "");
 
     std::string toString() const override;
 };
@@ -305,8 +299,8 @@ public:
     ApplyCodeActionAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                              std::string_view version, std::string_view title);
 
-    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-               const CodeAction &codeAction, std::string_view rootUri);
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+               const CodeAction &codeAction);
 
     const std::string title;
     const std::string version;
@@ -340,17 +334,17 @@ public:
     /** Checks all SymbolSearchAssertions within the assertion vector. Skips over non-CompletionAssertions. */
     static void checkAll(const std::vector<std::shared_ptr<RangeAssertion>> &assertions,
                          const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                         LSPWrapper &wrapper, int &nextId, std::string_view uriPrefix, std::string errorPrefix = "");
+                         LSPWrapper &wrapper, int &nextId, std::string errorPrefix = "");
 
     SymbolSearchAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                           std::string_view query, std::optional<std::string> name, std::optional<std::string> container,
                           std::optional<int> rank, std::optional<std::string> uri);
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
-               int &nextId, std::string_view uriPrefix, const Location &queryLoc);
+               int &nextId, const Location &queryLoc);
 
     /** Returns true if the given symbol matches this assertion. */
-    bool matches(std::string_view uriPrefix, const SymbolInformation &symbol) const;
+    bool matches(const LSPConfiguration &config, const SymbolInformation &symbol) const;
 
     std::string toString() const override;
 };

@@ -8,11 +8,9 @@
 namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
-std::string filePathToUri(std::string_view prefixUrl, std::string_view filePath);
+std::string filePathToUri(const LSPConfiguration &config, std::string_view filePath);
 
-bool isUriATestFile(std::string_view prefixUrl, std::string_view uri);
-
-std::string uriToFilePath(std::string_view prefixUrl, std::string_view uri);
+std::string uriToFilePath(const LSPConfiguration &config, std::string_view uri);
 
 /** Creates the parameters to the `initialize` message, which advertises the client's capabilities. */
 std::unique_ptr<InitializeParams>
@@ -26,8 +24,11 @@ std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, 
 /** Create an LSPMessage containing a WorkspaceSymbol request. */
 std::unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query);
 
+/** Create an LSPMessage containing a textDocument/didOpen request. */
+std::unique_ptr<LSPMessage> makeOpen(std::string_view uri, std::string_view contents, int version);
+
 /** Create an LSPMessage containing a textDocument/didChange request. */
-std::unique_ptr<LSPMessage> makeDidChange(std::string_view uri, std::string_view contents, int version);
+std::unique_ptr<LSPMessage> makeChange(std::string_view uri, std::string_view contents, int version);
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities);
@@ -40,7 +41,7 @@ void assertResponseMessage(int expectedId, const LSPMessage &response);
 void assertResponseError(int code, std::string_view msg, const LSPMessage &response);
 
 /** Asserts that the LSPMessage is a NotificationMessage with the given method. */
-void assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage &response);
+void assertNotificationMessage(LSPMethod expectedMethod, const LSPMessage &response);
 
 /** Retrieves the PublishDiagnosticsParam from a publishDiagnostics message, if applicable. Non-fatal fails and returns
  * an empty optional if it cannot be found. */
@@ -49,7 +50,7 @@ std::optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(Notificatio
 /** Use the LSPWrapper to make a textDocument/completion request.
  */
 std::unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, const Range &range, int &nextId,
-                                                         std::string_view filename, std::string_view uriPrefix);
+                                                         std::string_view filename);
 
 /** Sends boilerplate initialization / initialized messages to start a new LSP session. */
 std::vector<std::unique_ptr<LSPMessage>>

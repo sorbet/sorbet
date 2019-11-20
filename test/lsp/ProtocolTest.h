@@ -33,8 +33,6 @@ protected:
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
 
-    bool paused = false;
-
     virtual ~ProtocolTest() = default;
 
     void SetUp() override;
