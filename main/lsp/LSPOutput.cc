@@ -17,6 +17,7 @@ bool isServerNotification(const LSPMethod method) {
         case LSPMethod::WindowShowMessage:
         case LSPMethod::SorbetTypecheckRunInfo:
         case LSPMethod::SorbetShowOperation:
+        case LSPMethod::SorbetFence:
             return true;
         default:
             return false;
