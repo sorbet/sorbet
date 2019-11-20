@@ -148,8 +148,11 @@ public:
     u4 flags;
 
     enum Flags {
-        SelfMethod = 1,
-        RewriterSynthesized = 2,
+        SelfMethod = 0x01,
+        RewriterSynthesized = 0x02,
+        MethodPrivate = 0x04,
+        MethodProtected = 0x08,
+        MethodPublic = 0x10,
     };
 
     MethodDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
@@ -165,6 +168,18 @@ public:
 
     bool isRewriterSynthesized() const {
         return (flags & RewriterSynthesized) != 0;
+    }
+
+    bool isPrivate() const {
+        return (flags & MethodPrivate) != 0;
+    }
+
+    bool isProtected() const {
+        return (flags & MethodProtected) != 0;
+    }
+
+    bool isPublic() const {
+        return (flags & MethodPublic) != 0;
     }
 
     void setIsSelf(bool isSelf) {

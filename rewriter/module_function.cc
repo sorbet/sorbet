@@ -79,11 +79,12 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::rewriteDefn(core::MutableCon
 
     auto sig = ast::cast_tree_const<ast::Send>(prevStat);
     bool hasSig = sig && sig->fun == core::Names::sig();
-    auto loc = expr->loc;
 
     // this creates a private copy of the method
     unique_ptr<ast::Expression> privateCopy = expr->deepCopy();
-    stats.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::private_(), move(privateCopy)));
+    auto privateDef = ast::cast_tree<ast::MethodDef>(privateCopy.get());
+    privateDef->flags |= ast::MethodDef::MethodPrivate;
+    stats.emplace_back(move(privateCopy));
 
     // as well as a public static copy of the method
     if (hasSig) {
