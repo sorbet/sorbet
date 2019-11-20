@@ -10,7 +10,7 @@ load(":compiler_tests.bzl", "compiler_tests")
 compiler_tests(
     "test_corpus",
     glob([
-        "testdata/llvm/**/*.rb",
+        "testdata/compiler/**/*.rb",
     ]),
 )
 
