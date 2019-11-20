@@ -10,7 +10,16 @@ void ProtocolTest::SetUp() {
     rootPath = "/Users/jvilk/stripe/pay-server";
     rootUri = fmt::format("file://{}", rootPath);
     fs = make_shared<MockFileSystem>(rootPath);
-    lspWrapper = LSPWrapper::createSingleThreaded(rootPath);
+    bool useMultithreading = GetParam();
+    auto opts = make_shared<realmain::options::Options>();
+    opts->disableWatchman = true;
+    if (useMultithreading) {
+        // TODO: Add async ability to ProtocolTest. For now, send methods on wrapper aren't available.
+        lspWrapper = LSPWrapper::createMultiThreaded(
+            [](auto msg) -> void { ADD_FAILURE() << "Unexpected message: " << msg->toJSON() << "\n"; }, rootPath, opts);
+    } else {
+        lspWrapper = LSPWrapper::createSingleThreaded(rootPath, opts);
+    }
     lspWrapper->opts->fs = fs;
     lspWrapper->enableAllExperimentalFeatures();
 }

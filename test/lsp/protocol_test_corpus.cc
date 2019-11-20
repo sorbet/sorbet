@@ -11,7 +11,7 @@ using namespace std;
 using namespace sorbet::realmain::lsp;
 
 // Adds two new files that have errors, and asserts that Sorbet returns errors for both of them.
-TEST_F(ProtocolTest, AddFile) {
+TEST_P(ProtocolTest, AddFile) {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(send(*openFile("yolo1.rb", "")), {});
 
@@ -35,7 +35,7 @@ TEST_F(ProtocolTest, AddFile) {
 }
 
 // Write to the same file twice. Sorbet should only return errors from the second version.
-TEST_F(ProtocolTest, AddFileJoiningRequests) {
+TEST_P(ProtocolTest, AddFileJoiningRequests) {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     requests.push_back(
@@ -46,7 +46,7 @@ TEST_F(ProtocolTest, AddFileJoiningRequests) {
 }
 
 // Cancels requests before they are processed, and ensures that they are actually not processed.
-TEST_F(ProtocolTest, Cancellation) {
+TEST_P(ProtocolTest, Cancellation) {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(
         send(*openFile("foo.rb",
@@ -85,7 +85,7 @@ TEST_F(ProtocolTest, Cancellation) {
 }
 
 // Asserts that Sorbet returns an empty result when requesting definitions in untyped Ruby files.
-TEST_F(ProtocolTest, DefinitionError) {
+TEST_P(ProtocolTest, DefinitionError) {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(send(*openFile("foobar.rb", "class Foobar\n  def bar\n    1\n  end\nend\n\nbar\n")), {});
     auto defResponses = send(*getDefinition("foobar.rb", 6, 1));
@@ -101,7 +101,7 @@ TEST_F(ProtocolTest, DefinitionError) {
 }
 
 // Ensures that Sorbet merges didChanges that are interspersed with canceled requests.
-TEST_F(ProtocolTest, MergeDidChangeAfterCancellation) {
+TEST_P(ProtocolTest, MergeDidChangeAfterCancellation) {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // File is fine at first.
@@ -151,7 +151,7 @@ TEST_F(ProtocolTest, MergeDidChangeAfterCancellation) {
 }
 
 // Applies all consecutive file changes at once.
-TEST_F(ProtocolTest, MergesDidChangesAcrossFiles) {
+TEST_P(ProtocolTest, MergesDidChangesAcrossFiles) {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // File is fine at first.
@@ -185,7 +185,7 @@ TEST_F(ProtocolTest, MergesDidChangesAcrossFiles) {
                                    {"foo.rb", 7, "Method `blah` does not exist"}});
 }
 
-TEST_F(ProtocolTest, MergesDidChangesAcrossDelayableRequests) {
+TEST_P(ProtocolTest, MergesDidChangesAcrossDelayableRequests) {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // Invalid: Returns false.
@@ -216,7 +216,7 @@ TEST_F(ProtocolTest, MergesDidChangesAcrossDelayableRequests) {
     EXPECT_TRUE(msgs.at(2)->isResponse());
 }
 
-TEST_F(ProtocolTest, DoesNotMergeFileChangesAcrossNonDelayableRequests) {
+TEST_P(ProtocolTest, DoesNotMergeFileChangesAcrossNonDelayableRequests) {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     requests.push_back(openFile("foo.rb", "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
@@ -246,7 +246,7 @@ TEST_F(ProtocolTest, DoesNotMergeFileChangesAcrossNonDelayableRequests) {
     }
 }
 
-TEST_F(ProtocolTest, NotInitialized) {
+TEST_P(ProtocolTest, NotInitialized) {
     // Don't use `getDefinition`; it only works post-initialization.
     auto msgs = send(*makeDefinitionRequest(nextId++, "foo.rb", 12, 24));
     ASSERT_EQ(msgs.size(), 1);
@@ -255,7 +255,7 @@ TEST_F(ProtocolTest, NotInitialized) {
 }
 
 // There's a different code path that checks for workspace edits before initialization occurs.
-TEST_F(ProtocolTest, WorkspaceEditIgnoredWhenNotInitialized) {
+TEST_P(ProtocolTest, WorkspaceEditIgnoredWhenNotInitialized) {
     // Purposefully send a vector of requests to trigger merging, which should turn this into a WorkspaceEdit.
     vector<unique_ptr<LSPMessage>> toSend;
     // Avoid using `openFile`, as it only works post-initialization.
@@ -266,7 +266,7 @@ TEST_F(ProtocolTest, WorkspaceEditIgnoredWhenNotInitialized) {
     assertDiagnostics(initializeLSP(), {});
 }
 
-TEST_F(ProtocolTest, InitializeAndShutdown) {
+TEST_P(ProtocolTest, InitializeAndShutdown) {
     assertDiagnostics(initializeLSP(), {});
     auto resp = send(LSPMessage(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Shutdown, JSONNullObject())));
     ASSERT_EQ(resp.size(), 1) << "Expected a single response to shutdown request.";
@@ -276,7 +276,7 @@ TEST_F(ProtocolTest, InitializeAndShutdown) {
 }
 
 // Some clients send an empty string for the root uri.
-TEST_F(ProtocolTest, EmptyRootUriInitialization) {
+TEST_P(ProtocolTest, EmptyRootUriInitialization) {
     // Manually reset rootUri before initializing.
     rootUri = "";
     assertDiagnostics(initializeLSP(), {});
@@ -298,7 +298,7 @@ TEST_F(ProtocolTest, EmptyRootUriInitialization) {
 }
 
 // Monaco sends null for the root URI.
-TEST_F(ProtocolTest, MonacoInitialization) {
+TEST_P(ProtocolTest, MonacoInitialization) {
     // Null is functionally equivalent to an empty rootUri. Manually reset rootUri before initializing.
     rootUri = "";
     const bool supportsMarkdown = true;
@@ -331,7 +331,7 @@ TEST_F(ProtocolTest, MonacoInitialization) {
     }
 }
 
-TEST_F(ProtocolTest, CompletionOnNonClass) {
+TEST_P(ProtocolTest, CompletionOnNonClass) {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(send(*openFile("yolo1.rb", "# typed: true\nclass A\nend\nA")), {});
 
@@ -347,7 +347,7 @@ TEST_F(ProtocolTest, CompletionOnNonClass) {
 }
 
 // Ensures that unrecognized notifications are ignored.
-TEST_F(ProtocolTest, IgnoresUnrecognizedNotifications) {
+TEST_P(ProtocolTest, IgnoresUnrecognizedNotifications) {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"workspace/"
                               "didChangeConfiguration\",\"params\":{\"settings\":{\"ruby-typer\":{}}}}"),
@@ -355,13 +355,13 @@ TEST_F(ProtocolTest, IgnoresUnrecognizedNotifications) {
 }
 
 // Ensures that notifications that have an improper params shape are handled gracefully / not responded to.
-TEST_F(ProtocolTest, IgnoresNotificationsThatDontTypecheck) {
+TEST_P(ProtocolTest, IgnoresNotificationsThatDontTypecheck) {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/didChange","params":{}})"), {});
 }
 
 // Ensures that unrecognized requests are responded to.
-TEST_F(ProtocolTest, RejectsUnrecognizedRequests) {
+TEST_P(ProtocolTest, RejectsUnrecognizedRequests) {
     assertDiagnostics(initializeLSP(), {});
     auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"workspace/"
                              "didChangeConfiguration\",\"id\":9001,\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
@@ -377,7 +377,7 @@ TEST_F(ProtocolTest, RejectsUnrecognizedRequests) {
 }
 
 // Ensures that requests that have an improper params shape are responded to with an error.
-TEST_F(ProtocolTest, RejectsRequestsThatDontTypecheck) {
+TEST_P(ProtocolTest, RejectsRequestsThatDontTypecheck) {
     assertDiagnostics(initializeLSP(), {});
     auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/"
                              "hover\",\"id\":9001,\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
@@ -393,13 +393,13 @@ TEST_F(ProtocolTest, RejectsRequestsThatDontTypecheck) {
 }
 
 // Ensures that the server ignores invalid JSON.
-TEST_F(ProtocolTest, SilentlyIgnoresInvalidJSONMessages) {
+TEST_P(ProtocolTest, SilentlyIgnoresInvalidJSONMessages) {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(sendRaw("{"), {});
 }
 
 // If a client doesn't support markdown, send hover as plaintext.
-TEST_F(ProtocolTest, RespectsHoverTextLimitations) {
+TEST_P(ProtocolTest, RespectsHoverTextLimitations) {
     const bool supportsMarkdown = false;
     auto initializeResponses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown);
     updateDiagnostics(initializeResponses);
@@ -422,7 +422,7 @@ TEST_F(ProtocolTest, RespectsHoverTextLimitations) {
 }
 
 // Tests that Sorbet returns sorbet: URIs for payload references & files not on client, and that readFile works on them.
-TEST_F(ProtocolTest, SorbetURIsWork) {
+TEST_P(ProtocolTest, SorbetURIsWork) {
     const bool supportsMarkdown = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
@@ -481,7 +481,7 @@ TEST_F(ProtocolTest, DoesNotTypecheckSorbetURIs) {
 }
 
 // Tests that Sorbet does not crash when a file URI falls outside of the workspace.
-TEST_F(ProtocolTest, DoesNotCrashOnNonWorkspaceURIs) {
+TEST_P(ProtocolTest, DoesNotCrashOnNonWorkspaceURIs) {
     const bool supportsMarkdown = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
@@ -496,5 +496,8 @@ TEST_F(ProtocolTest, DoesNotCrashOnNonWorkspaceURIs) {
     auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
     lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(didOpenNotif)));
 }
+
+// Run these tests in single-threaded mode.
+INSTANTIATE_TEST_SUITE_P(SingleThreadedProtocolTests, ProtocolTest, testing::Values(false));
 
 } // namespace sorbet::test::lsp
