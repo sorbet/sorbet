@@ -26,7 +26,8 @@ $ruby --disable=gems --disable=did_you_mean "$rbrunfile" 2>&1 | tee "$rbout"
 echo "Run Sorbet: force_compile=1 llvmir=$llvmir run/ruby $rb"
 echo "Temp Dir: $llvmir"
 echo "Running Sorbet Compiler..."
-run/compile "$llvmir" "$rb"
+# shellcheck disable=SC2086
+run/compile "$llvmir" ${rb/__*/__*}
 set +e
 force_compile=1 llvmir=$llvmir run/ruby "$rb" --disable=gems --disable=did_you_mean 2> "$srberr" | tee "$srbout"
 code=$?
