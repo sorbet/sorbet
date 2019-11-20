@@ -19,6 +19,9 @@ namespace sorbet::pipeline::semantic_extension {
 namespace {
 string objectFileName(const core::GlobalState &gs, const core::FileRef &f) {
     string sourceFile(f.data(gs).path());
+    if (sourceFile[0] == '.' && sourceFile[1] == '/') {
+        sourceFile = sourceFile.substr(2);
+    }
     absl::c_replace(sourceFile, '/', '_');
     absl::c_replace(sourceFile, '.', '_');
     sourceFile.replace(sourceFile.find("_rb"), 3, ".rb");
