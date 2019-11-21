@@ -52,6 +52,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
                 --suppress-non-critical \
                 --llvm-ir-folder \
                 "$llvmir" \
+                --force-compiled \
                 "${srcs[@]}" \
                 2\> "$llvmir/update_testdata_exp.stderr"\; \
                 cat "$llvmir/*.$ext" \| grep -v \'^target triple =\' \> "$exp" \
