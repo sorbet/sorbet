@@ -335,7 +335,7 @@ unique_ptr<LSPMessage> makeOpen(string_view uri, string_view contents, int versi
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params)));
 }
 
-unique_ptr<LSPMessage> makeChange(std::string_view uri, std::string_view contents, int version) {
+unique_ptr<LSPMessage> makeChange(string_view uri, string_view contents, int version) {
     auto textDoc = make_unique<VersionedTextDocumentIdentifier>(string(uri), static_cast<double>(version));
     auto textDocChange = make_unique<TextDocumentContentChangeEvent>(string(contents));
     vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;
@@ -345,6 +345,12 @@ unique_ptr<LSPMessage> makeChange(std::string_view uri, std::string_view content
     auto didChangeNotif =
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
     return make_unique<LSPMessage>(move(didChangeNotif));
+}
+
+unique_ptr<LSPMessage> makeClose(string_view uri) {
+    auto didCloseParams = make_unique<DidCloseTextDocumentParams>(make_unique<TextDocumentIdentifier>(string(uri)));
+    auto didCloseNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidClose, move(didCloseParams));
+    return make_unique<LSPMessage>(move(didCloseNotif));
 }
 
 } // namespace sorbet::test

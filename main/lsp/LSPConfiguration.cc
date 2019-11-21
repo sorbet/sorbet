@@ -7,8 +7,10 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-constexpr string_view sorbetScheme = "sorbet:";
-constexpr string_view httpsScheme = "https";
+namespace {
+constexpr string_view sorbetScheme = "sorbet:"sv;
+constexpr string_view httpsScheme = "https"sv;
+} // namespace
 
 namespace {
 
@@ -130,12 +132,12 @@ string LSPConfiguration::localName2Remote(string_view filePath) const {
 
 string LSPConfiguration::remoteName2Local(string_view uri) const {
     assertHasClientConfig();
-    const bool isSorbetURI = absl::StartsWith(uri, sorbetScheme);
-    if (!isUriInWorkspace(uri)) {
+    if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
         logger->error("Unrecognized URI received from client: {}", uri);
         return string(uri);
     }
 
+    const bool isSorbetURI = this->isSorbetUri(uri);
     const string_view root = isSorbetURI ? sorbetScheme : clientConfig->rootUri;
     const char *start = uri.data() + root.length();
     if (*start == '/') {
@@ -159,7 +161,7 @@ string LSPConfiguration::remoteName2Local(string_view uri) const {
 
 core::FileRef LSPConfiguration::uri2FileRef(const core::GlobalState &gs, string_view uri) const {
     assertHasClientConfig();
-    if (!isUriInWorkspace(uri)) {
+    if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
         return core::FileRef();
     }
     auto needle = remoteName2Local(uri);
@@ -180,7 +182,7 @@ string LSPConfiguration::fileRef2Uri(const core::GlobalState &gs, core::FileRef 
                 uri = string(messageFile.path());
             }
         } else {
-            uri = localName2Remote(file.data(gs).path());
+            uri = localName2Remote(messageFile.path());
         }
     }
     return uri;
@@ -216,10 +218,14 @@ bool LSPConfiguration::isFileIgnored(string_view filePath) const {
     return FileOps::isFileIgnored(rootPath, filePath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
 }
 
+bool LSPConfiguration::isSorbetUri(string_view uri) const {
+    assertHasClientConfig();
+    return clientConfig->enableSorbetURIs && absl::StartsWith(uri, sorbetScheme);
+}
+
 bool LSPConfiguration::isUriInWorkspace(string_view uri) const {
     assertHasClientConfig();
-    return absl::StartsWith(uri, clientConfig->rootUri) ||
-           (clientConfig->enableSorbetURIs && absl::StartsWith(uri, sorbetScheme));
+    return absl::StartsWith(uri, clientConfig->rootUri);
 }
 
 void LSPConfiguration::markInitialized() {

@@ -42,11 +42,7 @@ unique_ptr<LSPMessage> ProtocolTest::closeFile(string_view path) {
             sourceFileContents.erase(it);
         }
     }
-
-    auto uri = getUri(path);
-    auto didCloseParams = make_unique<DidCloseTextDocumentParams>(make_unique<TextDocumentIdentifier>(uri));
-    auto didCloseNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidClose, move(didCloseParams));
-    return make_unique<LSPMessage>(move(didCloseNotif));
+    return makeClose(getUri(path));
 }
 
 unique_ptr<LSPMessage> ProtocolTest::changeFile(string_view path, string_view newContents, int version) {

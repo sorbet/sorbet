@@ -422,7 +422,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<WatchmanQueryResponse> 
     updates.versionEnd = v;
     for (auto file : queryResponse->files) {
         // Don't append rootPath if it is empty.
-        string localPath = config->rootPath.size() > 0 ? absl::StrCat(config->rootPath, "/", file) : file;
+        string localPath = !config->rootPath.empty() ? absl::StrCat(config->rootPath, "/", file) : file;
         // Editor contents supercede file system updates.
         if (!config->isFileIgnored(localPath) && !openFiles.contains(localPath)) {
             updates.updatedFiles.push_back(make_shared<core::File>(
