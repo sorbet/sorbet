@@ -1,24 +1,30 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C Record><<C <todo sym>>> < (::<todo sym>)
-    def self.ff_from<<C <todo sym>>>(*_, &<blk>)
+    def self.flatfile<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
 
-    def self.ff_pattern<<C <todo sym>>>(*_, &<blk>)
+    def self.from<<C <todo sym>>>(*_, &<blk>)
       <emptyTree>
     end
 
-    def self.ff_field<<C <todo sym>>>(*_, &<blk>)
+    def self.pattern<<C <todo sym>>>(*_, &<blk>)
+      <emptyTree>
+    end
+
+    def self.field<<C <todo sym>>>(*_, &<blk>)
       <emptyTree>
     end
   end
 
   class <emptyTree>::<C Flatfile><<C <todo sym>>> < (<emptyTree>::<C Record>)
-    <self>.ff_from(<emptyTree>::<C Range>.new(1, 2), :"foo")
-
-    <self>.ff_pattern(::Regexp.new("A-Za-z", 0), :"bar")
-
-    <self>.ff_field(:"baz")
+    <self>.flatfile() do ||
+      begin
+        <self>.from(<emptyTree>::<C Range>.new(1, 2), :"foo")
+        <self>.pattern(::Regexp.new("A-Za-z", 0), :"bar")
+        <self>.field(:"baz")
+      end
+    end
 
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(::T.untyped())
