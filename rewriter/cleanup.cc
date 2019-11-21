@@ -29,9 +29,14 @@ struct CleanupWalk {
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         ast::ClassDef::RHS_store newStore;
         for (auto &m : classDef->rhs) {
-            if (!ast::isa_tree<ast::EmptyTree>(m.get())) {
-                newStore.emplace_back(move(m));
+            if (ast::isa_tree<ast::EmptyTree>(m.get())) {
+                continue;
+            } else if (auto lit = ast::cast_tree<ast::Literal>(m.get())) {
+                if (lit->isSymbol(ctx)) {
+                    continue;
+                }
             }
+            newStore.emplace_back(move(m));
         }
         classDef->rhs = std::move(newStore);
         return classDef;
