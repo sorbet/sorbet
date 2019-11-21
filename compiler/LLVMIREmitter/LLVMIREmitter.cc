@@ -317,16 +317,15 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         MK::varSet(cs, bind.bind.variable, rawCall, builder, blockMap, aliases, bb->rubyBlockId);
                     },
                     [&](cfg::Return *i) {
-                        ENFORCE(bb->rubyBlockId == 0, "returns through multiple stacks not implemented");
                         isTerminated = true;
-                        MK::popControlFrame(cs, builder);
+                        ENFORCE(bb->rubyBlockId == 0, "returns through multiple stacks not implemented");
                         auto var = MK::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
                         builder.CreateRet(var);
                     },
                     [&](cfg::BlockReturn *i) {
                         ENFORCE(bb->rubyBlockId != 0, "should never happen");
+
                         isTerminated = true;
-                        MK::popControlFrame(cs, builder);
                         auto var = MK::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
                         builder.CreateRet(var);
                     },
@@ -474,8 +473,6 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
         builder.CreateUnreachable();
         builder.SetInsertPoint(successBlock);
     }
-
-    MK::pushControlFrame(cs, builder, cfg);
     builder.CreateBr(blockMap.userEntryBlockByFunction[0]);
 }
 
@@ -508,7 +505,6 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
         builder.SetInsertPoint(blockMap.functionInitializersByFunction[funId]);
         builder.CreateBr(blockMap.argumentSetupBlocksByFunction[funId]);
     }
-
     /* run verifier */
     ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
     cs.runCheapOptimizations(func);

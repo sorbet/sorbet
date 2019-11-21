@@ -541,19 +541,6 @@ VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
 }
 
 // ****
-// ****                       Control Frames
-// ****
-
-void sorbet_pushControlFrame() {
-    // rb_vm_push_frame();
-}
-
-void sorbet_popControlFrame() {
-    // rb_execution_context_t *ec = GET_EC();
-    // rb_vm_pop_frame(ec);
-}
-
-// ****
 // ****                       Implementation helpers for type tests
 // ****
 
