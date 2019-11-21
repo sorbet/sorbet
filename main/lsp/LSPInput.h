@@ -16,17 +16,17 @@ class LSPMessage;
 class ResponseMessage;
 class NotificationMessage;
 
-struct ReadOutput {
-    FileOps::ReadResult result;
-    std::unique_ptr<LSPMessage> message;
-};
-
 /**
  * Interface for receiving messages from the client. It is _not_ thread safe, and assumes that only one thread will be
  * reading from it at a time.
  */
 class LSPInput {
 public:
+    struct ReadOutput {
+        FileOps::ReadResult result;
+        std::unique_ptr<LSPMessage> message;
+    };
+
     LSPInput() = default;
     virtual ~LSPInput() = default;
     /**

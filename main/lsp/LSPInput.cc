@@ -9,7 +9,7 @@ namespace sorbet::realmain::lsp {
 
 LSPFDInput::LSPFDInput(shared_ptr<spdlog::logger> logger, int inputFd) : logger(move(logger)), inputFd(inputFd) {}
 
-ReadOutput LSPFDInput::read(int timeoutMs) {
+LSPInput::ReadOutput LSPFDInput::read(int timeoutMs) {
     int length = -1;
     string allRead;
     {
@@ -66,7 +66,7 @@ ReadOutput LSPFDInput::read(int timeoutMs) {
     return ReadOutput{FileOps::ReadResult::Success, LSPMessage::fromClient(json)};
 }
 
-ReadOutput LSPProgrammaticInput::read(int timeoutMs) {
+LSPInput::ReadOutput LSPProgrammaticInput::read(int timeoutMs) {
     absl::MutexLock lock(&mtx);
     if (closed && available.empty()) {
         return ReadOutput{FileOps::ReadResult::ErrorOrEof};
