@@ -460,7 +460,7 @@ TEST_P(ProtocolTest, DoesNotTypecheckSorbetURIs) {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
     initOptions->enableTypecheckInfo = true;
-    lspWrapper->opts.lspDirsMissingFromClient.emplace_back("/folder");
+    lspWrapper->opts->lspDirsMissingFromClient.emplace_back("/folder");
     sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown, move(initOptions));
 
     string fileContents = "# typed: true\n[0,1,2,3].select {|x| x > 0}\ndef myMethod; end;\n";
