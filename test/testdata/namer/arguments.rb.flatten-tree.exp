@@ -37,12 +37,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      begin
-        :"take_arguments"
-        :"take_arguments<defaultArg>1"
-        :"take_arguments<defaultArg>2"
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   <emptyTree>

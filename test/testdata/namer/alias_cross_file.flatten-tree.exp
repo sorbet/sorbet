@@ -19,12 +19,8 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      begin
-        :"test_resolve"
-        <self>.sig() do ||
-          <self>.returns(::T2)
-        end
-        <emptyTree>
+      <self>.sig() do ||
+        <self>.returns(::T2)
       end
     end
   end

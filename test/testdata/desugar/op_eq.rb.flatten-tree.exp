@@ -94,14 +94,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      begin
-        :"b"
-        :"b="
-        :"y"
-        :"z"
-        :"example"
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   <emptyTree>

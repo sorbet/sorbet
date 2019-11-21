@@ -34,7 +34,6 @@ begin
         ::A.sfood()
         ::A.sfoos()
         ::A.new().sfoos()
-        :"applies_to_integer"
         <self>.applies_to_integer(:"quux")
         <self>.sig() do ||
           <self>.params({:"x" => ::Integer}).void()
@@ -90,11 +89,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      begin
-        :"foo"
-        :"sfoo"
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   <emptyTree>

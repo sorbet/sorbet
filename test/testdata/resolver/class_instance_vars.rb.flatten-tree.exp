@@ -58,14 +58,9 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      begin
-        :"initialize"
-        @@class_var = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::String)
-          T.let("hi", String)
-        end
-        :"hi"
-        <emptyTree>
+      @@class_var = begin
+        ::Sorbet::Private::Static.keep_for_typechecking(::String)
+        T.let("hi", String)
       end
     end
   end
@@ -100,7 +95,6 @@ begin
         @@class_var
         @@mixin_cvar
         @@undefined_cvar
-        :"child_method"
         ::Sorbet::Private::Static.keep_for_ide(::Mixin)
         <emptyTree>
       end

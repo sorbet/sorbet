@@ -1,9 +1,5 @@
 class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
-    :"outside_method"
-
-    :"<it \'works outside\'>"
-
     begin
       <emptyTree>::<C CONST> = ::T.unsafe(nil)
       :"<it \'allows constants inside of IT\'>"
@@ -41,16 +37,6 @@ class <emptyTree><<C <root>>> < ()
       end
     end
 
-    :"instance_helper"
-
-    :"initialize"
-
-    :"<after>"
-
-    :"<it \'can read foo\'>"
-
-    :"random_method"
-
     <self>.random_method() do ||
       @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
     end
@@ -77,8 +63,6 @@ class <emptyTree><<C <root>>> < ()
         <emptyTree>
       end
     end
-
-    :"it"
 
     <self>.it("ignores methods without a block")
 
@@ -182,8 +166,6 @@ class <emptyTree><<C <root>>> < ()
       <emptyTree>
     end
   end
-
-  :"junk"
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
     class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)    end

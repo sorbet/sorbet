@@ -116,17 +116,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      begin
-        :"i_like_ifs"
-        :"i_like_exps"
-        :"return_in_one_branch1"
-        :"return_in_one_branch2"
-        :"variables"
-        :"variables_and_loop"
-        :"variables_loop_if"
-        :"take_arguments"
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   <emptyTree>

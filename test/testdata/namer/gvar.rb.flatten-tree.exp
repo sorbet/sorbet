@@ -26,7 +26,6 @@ begin
       begin
         $b = 2
         $a
-        :"meth"
         <emptyTree>
       end
     end

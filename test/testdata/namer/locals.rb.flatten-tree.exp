@@ -35,7 +35,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      :"method"
+      <emptyTree>
     end
   end
   <emptyTree>

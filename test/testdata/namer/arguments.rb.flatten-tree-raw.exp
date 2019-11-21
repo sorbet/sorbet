@@ -251,14 +251,7 @@ InsSeq{
           args = [Local{
               localVariable = <U <blk>>
             }]
-          rhs = InsSeq{
-            stats = [
-              Literal{ value = :"take_arguments" }
-              Literal{ value = :"take_arguments<defaultArg>1" }
-              Literal{ value = :"take_arguments<defaultArg>2" }
-            ],
-            expr = EmptyTree
-          }
+          rhs = EmptyTree
         }
       ]
     }

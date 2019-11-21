@@ -81,17 +81,7 @@ begin
     end
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        :"baz1"
-        :"baz2"
-        :"baz3"
-        :"baz4"
-        :"baz5"
-        :"baz6"
-        :"baz7"
-        :"baz8"
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   <emptyTree>
