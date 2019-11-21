@@ -106,6 +106,7 @@ public:
     std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc) const;
     bool isFileIgnored(std::string_view filePath) const;
     bool isUriInWorkspace(std::string_view uri) const;
+    bool isSorbetUri(std::string_view uri) const;
 };
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPCONFIGURATION_H

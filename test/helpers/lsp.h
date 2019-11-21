@@ -24,11 +24,14 @@ std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, 
 /** Create an LSPMessage containing a WorkspaceSymbol request. */
 std::unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query);
 
-/** Create an LSPMessage containing a textDocument/didOpen request. */
+/** Create an LSPMessage containing a textDocument/didOpen notification. */
 std::unique_ptr<LSPMessage> makeOpen(std::string_view uri, std::string_view contents, int version);
 
-/** Create an LSPMessage containing a textDocument/didChange request. */
+/** Create an LSPMessage containing a textDocument/didChange notification. */
 std::unique_ptr<LSPMessage> makeChange(std::string_view uri, std::string_view contents, int version);
+
+/** Create an LSPMessage containing a textDocument/didClose notification. */
+std::unique_ptr<LSPMessage> makeClose(std::string_view uri);
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities);
