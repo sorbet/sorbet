@@ -147,9 +147,10 @@ NameDef names[] = {
     {"moduleFunction", "module_function"},
     {"aliasMethod", "alias_method"},
 
-    {"ff_from"},
-    {"ff_field"},
-    {"ff_pattern"},
+    {"flatfile"},
+    {"from"},
+    {"field"},
+    {"pattern"},
 
     // type alias names
     {"typeAlias", "type_alias"},
