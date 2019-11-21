@@ -14,7 +14,7 @@ void LSPTest::SetUp() {
 
     shared_ptr<realmain::options::Options> opts = make_shared<realmain::options::Options>();
     opts->noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
-    lspWrapper = LSPWrapper::createSingleThreaded("", move(opts), fastpathDisabled);
+    lspWrapper = SingleThreadedLSPWrapper::create("", move(opts), fastpathDisabled);
     lspWrapper->enableAllExperimentalFeatures();
 
     if (test.expectations.find("autogen") != test.expectations.end()) {
