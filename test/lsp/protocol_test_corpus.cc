@@ -455,7 +455,7 @@ TEST_P(ProtocolTest, SorbetURIsWork) {
 }
 
 // Tests that Sorbet URIs are not typechecked.
-TEST_F(ProtocolTest, DoesNotTypecheckSorbetURIs) {
+TEST_P(ProtocolTest, DoesNotTypecheckSorbetURIs) {
     const bool supportsMarkdown = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
