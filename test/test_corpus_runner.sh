@@ -15,15 +15,28 @@ cleanup() {
 
 # trap cleanup EXIT
 
+
+cyan=$'\x1b[0;36m'
+cnone=$'\x1b[0m'
+in_color() {
+    local color="$1"
+    shift
+    echo "$color$*$cnone"
+}
+debug() {
+    echo "(Debug) $1:"
+    in_color $cyan "$2"
+}
+
 ruby="./external/ruby_2_6_3/ruby"
 
 echo "Source: $rb"
 echo "require './run/tools/preamble.rb'; require './$rb';" > "$rbrunfile"
-echo "(Debug) To run Ruby locally: bazel-bin/$ruby $rbrunfile"
+debug "To run Ruby locally" "bazel-bin/$ruby $rbrunfile"
 echo "Running Ruby..."
 $ruby --disable=gems --disable=did_you_mean "$rbrunfile" 2>&1 | tee "$rbout"
 
-echo "(Debug) To run Sorbet locally: bazel-bin/main/sorbet --llvm-ir-folder=$llvmir --force-compiled ${rb/__*/__*}"
+debug "To run Sorbet locally" "bazel-bin/main/sorbet --llvm-ir-folder=$llvmir --force-compiled ${rb/__*/__*}"
 echo "Running Sorbet Compiler..."
 # shellcheck disable=SC2086
 run/compile "$llvmir" ${rb/__*/__*}
@@ -39,7 +52,7 @@ for i in "$llvmir"/*.bundle; do
     echo "Bundle: $i"
 done
 
-echo "(Debug) To debug your compiled ruby locally: tools/scripts/lldb.sh $llvmir $rb"
+debug "To debug your compiled ruby locally" "tools/scripts/lldb.sh $llvmir $rb"
 echo "Running Sorbet Compiled Ruby..."
 set +e
 force_compile=1 llvmir=$llvmir run/ruby "$rb" --disable=gems --disable=did_you_mean 2> "$srberr" | tee "$srbout"
