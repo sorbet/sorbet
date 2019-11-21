@@ -139,7 +139,7 @@ makeInitializeParams(variant<string, JSONNullObject> rootPath, variant<string, J
     initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities(supportsMarkdown);
     initializeParams->trace = TraceKind::Off;
 
-    string stringRootUri = "";
+    string stringRootUri;
     if (auto str = get_if<string>(&rootUri)) {
         stringRootUri = *str;
     }
@@ -261,7 +261,7 @@ unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, cons
     auto id = nextId++;
     auto msg =
         make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion, move(pos)));
-    auto responses = lspWrapper.getLSPResponsesFor(move(msg));
+    auto responses = getLSPResponsesFor(lspWrapper, move(msg));
     if (responses.size() != 1) {
         ADD_FAILURE() << "Expected to get 1 response";
         return nullptr;
@@ -298,7 +298,7 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
             makeInitializeParams(string(rootPath), string(rootUri), supportsMarkdown, move(initOptions));
         auto message = make_unique<LSPMessage>(
             make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize, move(initializeParams)));
-        auto responses = lspWrapper.getLSPResponsesFor(move(message));
+        auto responses = getLSPResponsesFor(lspWrapper, move(message));
 
         // Should just have an 'initialize' response.
         EXPECT_EQ(1, responses.size());
@@ -324,7 +324,7 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
     {
         auto initialized =
             make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>());
-        return lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(initialized)));
+        return getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(initialized)));
     }
 }
 
@@ -351,6 +351,56 @@ unique_ptr<LSPMessage> makeClose(string_view uri) {
     auto didCloseParams = make_unique<DidCloseTextDocumentParams>(make_unique<TextDocumentIdentifier>(string(uri)));
     auto didCloseNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidClose, move(didCloseParams));
     return make_unique<LSPMessage>(move(didCloseNotif));
+}
+
+vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, vector<unique_ptr<LSPMessage>> messages) {
+    if (auto stWrapper = dynamic_cast<SingleThreadedLSPWrapper *>(&wrapper)) {
+        return stWrapper->getLSPResponsesFor(move(messages));
+    } else if (auto mtWrapper = dynamic_cast<MultiThreadedLSPWrapper *>(&wrapper)) {
+        // Fences are only used in tests. Use an ID that is likely to be unique to this method.
+        const int fenceId = 909090;
+        // Chase messages with a fence, and wait for a fence response.
+        messages.push_back(
+            make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, fenceId)));
+        // ASSUMPTION: There are no other messages still being processed. This should be true if the tests are
+        // disciplined. Also, even if they aren't, what should we do with stray messages? Passing them on seems most
+        // correct.
+        mtWrapper->send(messages);
+
+        vector<unique_ptr<LSPMessage>> responses;
+        bool foundFence = false;
+        while (true) {
+            // In tests, wait a maximum of 10 seconds for a response. Feel free to rachet downward.
+            auto msg = mtWrapper->read(10000);
+            // Ignore nullptrs.
+            if (msg) {
+                if (msg->isNotification() && msg->method() == LSPMethod::SorbetFence &&
+                    get<int>(msg->asNotification().params) == fenceId) {
+                    foundFence = true;
+                    break;
+                }
+                responses.push_back(move(msg));
+            } else {
+                // We should be guaranteed to receive the fence response, so if this happens something is seriously
+                // wrong.
+                ADD_FAILURE() << "MultithreadedLSPWrapper::read() timed out; the language server might be hung.";
+                return {};
+            }
+        }
+        if (!foundFence) {
+            ADD_FAILURE() << "MultithreadedLSPWrapper exited before sending a sorbet/fence response!";
+        }
+        return responses;
+    } else {
+        ADD_FAILURE() << "LSPWrapper is neither a single nor a multi threaded LSP wrapper; should be impossible!";
+        return {};
+    }
+}
+
+vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, unique_ptr<LSPMessage> message) {
+    vector<unique_ptr<LSPMessage>> messages;
+    messages.push_back(move(message));
+    return getLSPResponsesFor(wrapper, move(messages));
 }
 
 } // namespace sorbet::test

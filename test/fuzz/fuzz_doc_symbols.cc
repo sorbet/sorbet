@@ -35,13 +35,13 @@ std::unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain:
     return gs;
 }
 
-std::unique_ptr<sorbet::realmain::lsp::LSPWrapper> mkLSPWrapper(std::string_view contents) {
+std::unique_ptr<sorbet::realmain::lsp::SingleThreadedLSPWrapper> mkLSPWrapper(std::string_view contents) {
     std::unique_ptr<sorbet::KeyValueStore> kvStore;
     auto opts = mkOpts(contents);
     static const auto commonGs = mkGlobalState(*opts, kvStore);
     // TODO how to use opts and avoid another mkOpts()?
-    auto lspWrapper = sorbet::realmain::lsp::LSPWrapper::createSingleThreaded(commonGs->deepCopy(true),
-                                                                              mkOpts(contents), console, true);
+    auto lspWrapper = sorbet::realmain::lsp::SingleThreadedLSPWrapper::createWithGlobalState(
+        commonGs->deepCopy(true), mkOpts(contents), console, true);
     lspWrapper->enableAllExperimentalFeatures();
     return lspWrapper;
 }

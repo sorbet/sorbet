@@ -50,7 +50,7 @@ pair<string, vector<string>> findEditsToApply(string_view filePath) {
 }
 
 int printDocumentSymbols(string_view filePath) {
-    auto lspWrapper = LSPWrapper::createSingleThreaded("");
+    auto lspWrapper = SingleThreadedLSPWrapper::create();
     lspWrapper->enableAllExperimentalFeatures();
     int nextId = 1;
     int fileId = 1;

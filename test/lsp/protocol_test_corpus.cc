@@ -494,7 +494,7 @@ TEST_P(ProtocolTest, DoesNotCrashOnNonWorkspaceURIs) {
     auto didOpenParams =
         make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(fileUri, "ruby", 1, "# typed: true\n1\n"));
     auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
-    lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(didOpenNotif)));
+    getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(move(didOpenNotif)));
 }
 
 // Run these tests in single-threaded mode.

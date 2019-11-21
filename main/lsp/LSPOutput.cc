@@ -3,6 +3,7 @@
 #include "main/lsp/json_types.h"
 #include "spdlog/spdlog.h"
 #include <iostream>
+#include <iterator>
 
 using namespace std;
 
@@ -63,7 +64,23 @@ void LSPOutputToVector::rawWrite(unique_ptr<LSPMessage> msg) {
 
 vector<unique_ptr<LSPMessage>> LSPOutputToVector::getOutput() {
     absl::MutexLock lock(&mtx);
-    return move(output);
+    vector<unique_ptr<LSPMessage>> messages;
+    messages.insert(messages.end(), make_move_iterator(output.begin()), make_move_iterator(output.end()));
+    output.clear();
+    return messages;
+}
+
+unique_ptr<LSPMessage> LSPOutputToVector::read(int timeoutMs) {
+    absl::MutexLock lock(&mtx);
+    mtx.AwaitWithTimeout(absl::Condition(
+                             +[](deque<unique_ptr<LSPMessage>> *output) -> bool { return !output->empty(); }, &output),
+                         absl::Milliseconds(timeoutMs));
+    if (output.empty()) {
+        return nullptr;
+    }
+    auto msg = move(output.front());
+    output.pop_front();
+    return msg;
 }
 
 } // namespace sorbet::realmain::lsp
