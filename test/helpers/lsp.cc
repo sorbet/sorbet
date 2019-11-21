@@ -368,27 +368,21 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, vector<un
         mtWrapper->send(messages);
 
         vector<unique_ptr<LSPMessage>> responses;
-        bool foundFence = false;
         while (true) {
             // In tests, wait a maximum of 10 seconds for a response. Feel free to rachet downward.
             auto msg = mtWrapper->read(10000);
-            // Ignore nullptrs.
-            if (msg) {
-                if (msg->isNotification() && msg->method() == LSPMethod::SorbetFence &&
-                    get<int>(msg->asNotification().params) == fenceId) {
-                    foundFence = true;
-                    break;
-                }
-                responses.push_back(move(msg));
-            } else {
+            if (!msg) {
                 // We should be guaranteed to receive the fence response, so if this happens something is seriously
                 // wrong.
                 ADD_FAILURE() << "MultithreadedLSPWrapper::read() timed out; the language server might be hung.";
-                return {};
+                break;
             }
-        }
-        if (!foundFence) {
-            ADD_FAILURE() << "MultithreadedLSPWrapper exited before sending a sorbet/fence response!";
+
+            if (msg->isNotification() && msg->method() == LSPMethod::SorbetFence &&
+                get<int>(msg->asNotification().params) == fenceId) {
+                break;
+            }
+            responses.push_back(move(msg));
         }
         return responses;
     } else {

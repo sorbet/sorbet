@@ -3,7 +3,6 @@
 #include "main/lsp/json_types.h"
 #include "spdlog/spdlog.h"
 #include <iostream>
-#include <iterator>
 
 using namespace std;
 
