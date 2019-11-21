@@ -671,7 +671,7 @@ void readOptions(Options &opts,
                                   opts.inputFileNames.end());
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
-        // bool enableBetaLSPFeatures = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
+        opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
         opts.lspQuickFixEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-quick-fix"].as<bool>();
         opts.lspDocumentSymbolEnabled =
