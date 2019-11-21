@@ -198,7 +198,6 @@ struct Options {
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspAutocompleteEnabled = false;
     bool lspQuickFixEnabled = false;
-    bool lspWorkspaceSymbolsEnabled = false;
     bool lspDocumentHighlightEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;
