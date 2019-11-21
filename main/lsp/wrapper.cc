@@ -12,7 +12,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 namespace {
-void fixGS(core::GlobalState &gs, options::Options &opts) {
+void setRequiredLSPOptionsAndFlags(core::GlobalState &gs, options::Options &opts) {
     if (!opts.stripeMode) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced
         // in Stripe code.
@@ -188,7 +188,7 @@ unique_ptr<LSPWrapper> LSPWrapper::createInternal(unique_ptr<core::GlobalState> 
                                                   optional<function<void(unique_ptr<LSPMessage>)>> &&processResponse,
                                                   shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
                                                   shared_ptr<spd::logger> typeErrorsConsole) {
-    fixGS(*gs, *options);
+    setRequiredLSPOptionsAndFlags(*gs, *options);
     auto workers = WorkerPool::create(options->threads, *logger);
     bool multithreadingEnabled = processResponse.has_value();
     shared_ptr<LSPOutput> output;
