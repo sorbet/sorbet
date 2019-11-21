@@ -39,17 +39,6 @@ vector<unique_ptr<ast::Expression>> Private::run(core::MutableContext ctx, ast::
         }
     }
 
-    if (send->fun == core::Names::private_() || send->fun == core::Names::privateClassMethod()) {
-        mdef->flags |= ast::MethodDef::MethodPrivate;
-        empty.emplace_back(move(send->args.front()));
-    } else if (send->fun == core::Names::protected_()) {
-        mdef->flags |= ast::MethodDef::MethodProtected;
-        empty.emplace_back(move(send->args.front()));
-    } else if (send->fun == core::Names::public_()) {
-        mdef->flags |= ast::MethodDef::MethodPublic;
-        empty.emplace_back(move(send->args.front()));
-    }
-
     return empty;
 }
 
