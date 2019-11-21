@@ -369,8 +369,9 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, vector<un
 
         vector<unique_ptr<LSPMessage>> responses;
         while (true) {
-            // In tests, wait a maximum of 10 seconds for a response. Feel free to rachet downward.
-            auto msg = mtWrapper->read(10000);
+            // In tests, wait a maximum of 20 seconds for a response. It seems like sanitized builds running locally
+            // take ~10 seconds.
+            auto msg = mtWrapper->read(20000);
             if (!msg) {
                 // We should be guaranteed to receive the fence response, so if this happens something is seriously
                 // wrong.

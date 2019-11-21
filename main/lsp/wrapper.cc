@@ -78,7 +78,7 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Opt
                        std::shared_ptr<spd::logger> logger,
                        shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
                        shared_ptr<spd::logger> typeErrorsConsole, bool disableFastPath)
-    : workers(WorkerPool::create(opts->threads, *logger)), stderrColorSink(move(stderrColorSink)),
+    : logger(logger), workers(WorkerPool::create(opts->threads, *logger)), stderrColorSink(move(stderrColorSink)),
       typeErrorsConsole(move(typeErrorsConsole)), output(make_shared<LSPOutputToVector>()),
       config_(make_shared<LSPConfiguration>(*opts, output, *workers, move(logger), true, disableFastPath)),
       lspLoop(make_shared<LSPLoop>(std::move(gs), config_)), opts(move(opts)) {}

@@ -14,6 +14,8 @@ class LSPProgrammaticInput;
 class LSPConfiguration;
 
 class LSPWrapper {
+    // Bugfix: WorkerPool destructor assumes that logger is alive when it runs, so keep around logger until it finishes.
+    const std::shared_ptr<spd::logger> logger;
     /**
      * Sorbet assumes we 'own' the following three objects; keep them alive to avoid memory errors.
      */
