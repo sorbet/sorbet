@@ -39,7 +39,7 @@ for i in "$llvmir"/*.bundle; do
     echo "Bundle: $i"
 done
 
-echo "(Debug) To run your compiled ruby locally: force_compile=1 llvmir=$llvmir run/ruby $rb"
+echo "(Debug) To debug your compiled ruby locally: tools/scripts/lldb.sh $llvmir $rb"
 echo "Running Sorbet Compiled Ruby..."
 set +e
 force_compile=1 llvmir=$llvmir run/ruby "$rb" --disable=gems --disable=did_you_mean 2> "$srberr" | tee "$srbout"
