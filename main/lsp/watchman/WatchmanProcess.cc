@@ -59,12 +59,12 @@ void WatchmanProcess::start() {
 
         while (!isStopped()) {
             auto maybeLine = FileOps::readLineFromFd(fd, buffer);
-            if (!maybeLine) {
+            if (maybeLine.result != FileOps::ReadResult::Success) {
                 // Timeout occurred. See if we should abort before reading further.
                 continue;
             }
 
-            const string &line = *maybeLine;
+            const string &line = *maybeLine.output;
             // Line found!
             rapidjson::MemoryPoolAllocator<> alloc;
             rapidjson::Document d(&alloc);

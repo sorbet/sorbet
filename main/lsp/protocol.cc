@@ -166,28 +166,29 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
         // Thread that executes this lambda is called reader thread.
         // This thread _intentionally_ does not capture `this`.
         NotifyOnDestruction notify(incomingMtx, incomingQueue.terminate);
-        try {
-            auto timeit = make_unique<Timer>(logger, "getNewRequest");
-            while (true) {
-                auto msg = input->read();
-                {
-                    absl::MutexLock lck(&incomingMtx); // guards guardedState.
-                    if (msg) {
-                        tagNewRequest(logger, *msg);
-                        incomingQueue.counters = mergeCounters(move(incomingQueue.counters));
-                        incomingQueue.pendingRequests.push_back(move(msg));
-                        // Reset span now that we've found a request.
-                        timeit = make_unique<Timer>(logger, "getNewRequest");
-                    }
-                    // Check if it's time to exit.
-                    if (incomingQueue.terminate) {
-                        // Another thread exited.
-                        break;
-                    }
+        auto timeit = make_unique<Timer>(logger, "getNewRequest");
+        while (true) {
+            auto readResult = input->read();
+            if (readResult.result == FileOps::ReadResult::ErrorOrEof) {
+                // Exit loop if there is an error reading from input.
+                break;
+            }
+            {
+                absl::MutexLock lck(&incomingMtx); // guards guardedState.
+                auto &msg = readResult.message;
+                if (msg) {
+                    tagNewRequest(logger, *msg);
+                    incomingQueue.counters = mergeCounters(move(incomingQueue.counters));
+                    incomingQueue.pendingRequests.push_back(move(msg));
+                    // Reset span now that we've found a request.
+                    timeit = make_unique<Timer>(logger, "getNewRequest");
+                }
+                // Check if it's time to exit.
+                if (incomingQueue.terminate) {
+                    // Another thread exited.
+                    break;
                 }
             }
-        } catch (FileReadException e) {
-            // Failed to read from input stream. Ignore. NotifyOnDestruction will take care of exiting cleanly.
         }
         logger->debug("Reader thread terminating");
     });
