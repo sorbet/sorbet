@@ -19,15 +19,28 @@ ruby="./external/ruby_2_6_3/ruby"
 
 echo "Source: $rb"
 echo "require './run/tools/preamble.rb'; require './$rb';" > "$rbrunfile"
-echo "Run Ruby: bazel-bin/$ruby $rbrunfile"
+echo "(Debug) To run Ruby locally: bazel-bin/$ruby $rbrunfile"
 echo "Running Ruby..."
 $ruby --disable=gems --disable=did_you_mean "$rbrunfile" 2>&1 | tee "$rbout"
 
-echo "Run Sorbet: force_compile=1 llvmir=$llvmir run/ruby $rb"
-echo "Temp Dir: $llvmir"
+echo "(Debug) To run Sorbet locally: bazel-bin/main/sorbet --llvm-ir-folder=$llvmir --force-compiled ${rb/__*/__*}"
 echo "Running Sorbet Compiler..."
 # shellcheck disable=SC2086
 run/compile "$llvmir" ${rb/__*/__*}
+
+echo "Run LLDB: lldb bazel-bin/$ruby -- $rb"
+for i in "$llvmir"/*.llo; do
+    echo "LLVM IR: $i"
+done
+for i in "$llvmir"/*.ll; do
+    echo "LLVM IR (unoptimized): $i"
+done
+for i in "$llvmir"/*.bundle; do
+    echo "Bundle: $i"
+done
+
+echo "(Debug) To run your compiled ruby locally: force_compile=1 llvmir=$llvmir run/ruby $rb"
+echo "Running Sorbet Compiled Ruby..."
 set +e
 force_compile=1 llvmir=$llvmir run/ruby "$rb" --disable=gems --disable=did_you_mean 2> "$srberr" | tee "$srbout"
 code=$?
@@ -42,17 +55,6 @@ if [ $code -ne 0 ]; then
         exit $code
     fi
 fi
-
-echo "Run LLDB: lldb bazel-bin/$ruby -- $rb"
-for i in "$llvmir"/*.llo; do
-    echo "LLVM IR: $i"
-done
-for i in "$llvmir"/*.ll; do
-    echo "LLVM IR (unoptimized): $i"
-done
-for i in "$llvmir"/*.bundle; do
-    echo "Bundle: $i"
-done
 
 diff -a "$rbout" "$srbout"
 
