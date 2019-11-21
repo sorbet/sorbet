@@ -64,6 +64,8 @@ class LSPConfiguration {
     std::atomic<bool> initialized;
     // Throws if clientConfig is not set. Must be called before accessing `clientConfig` in LSPConfiguration methods.
     void assertHasClientConfig() const;
+    // Does the given URI correspond to a `sorbet:` URI?
+    bool isSorbetUri(std::string_view uri) const;
 
 public:
     // The following properties are configured when the language server is created.
@@ -105,8 +107,13 @@ public:
     // returns nullptr if this loc doesn't exist
     std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc) const;
     bool isFileIgnored(std::string_view filePath) const;
+
+    /**
+     * Returns 'true' if the URI corresponds to a path within the active workspace.
+     * Note: Does *not* return 'true' for URIs corresponding to sorbet: URIs. While these are valid URIs, they are not
+     * actually within the workspace.
+     */
     bool isUriInWorkspace(std::string_view uri) const;
-    bool isSorbetUri(std::string_view uri) const;
 };
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPCONFIGURATION_H

@@ -356,7 +356,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentPa
     updates.versionStart = v;
     updates.versionEnd = v;
     string_view uri = changeParams->textDocument->uri;
-    if (config->isUriInWorkspace(uri) && !config->isSorbetUri(uri)) {
+    if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (config->isFileIgnored(localPath)) {
             return;
@@ -392,7 +392,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentPara
     updates.versionStart = v;
     updates.versionEnd = v;
     string_view uri = openParams->textDocument->uri;
-    if (config->isUriInWorkspace(uri) && !config->isSorbetUri(uri)) {
+    if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
             updates.updatedFiles.push_back(make_shared<core::File>(
@@ -406,7 +406,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentPar
     updates.versionStart = v;
     updates.versionEnd = v;
     string_view uri = closeParams->textDocument->uri;
-    if (config->isUriInWorkspace(uri) && !config->isSorbetUri(uri)) {
+    if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
             // Use contents of file on disk.

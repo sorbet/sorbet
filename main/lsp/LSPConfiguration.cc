@@ -132,7 +132,7 @@ string LSPConfiguration::localName2Remote(string_view filePath) const {
 
 string LSPConfiguration::remoteName2Local(string_view uri) const {
     assertHasClientConfig();
-    if (!isUriInWorkspace(uri)) {
+    if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
         logger->error("Unrecognized URI received from client: {}", uri);
         return string(uri);
     }
@@ -161,7 +161,7 @@ string LSPConfiguration::remoteName2Local(string_view uri) const {
 
 core::FileRef LSPConfiguration::uri2FileRef(const core::GlobalState &gs, string_view uri) const {
     assertHasClientConfig();
-    if (!isUriInWorkspace(uri)) {
+    if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
         return core::FileRef();
     }
     auto needle = remoteName2Local(uri);
@@ -219,12 +219,13 @@ bool LSPConfiguration::isFileIgnored(string_view filePath) const {
 }
 
 bool LSPConfiguration::isSorbetUri(string_view uri) const {
+    assertHasClientConfig();
     return clientConfig->enableSorbetURIs && absl::StartsWith(uri, sorbetScheme);
 }
 
 bool LSPConfiguration::isUriInWorkspace(string_view uri) const {
     assertHasClientConfig();
-    return absl::StartsWith(uri, clientConfig->rootUri) || isSorbetUri(uri);
+    return absl::StartsWith(uri, clientConfig->rootUri);
 }
 
 void LSPConfiguration::markInitialized() {

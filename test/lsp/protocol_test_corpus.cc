@@ -10,13 +10,6 @@ namespace sorbet::test::lsp {
 using namespace std;
 using namespace sorbet::realmain::lsp;
 
-namespace {
-void assertTookFastPath(const NotificationMessage &notif) {
-    auto &info = get<unique_ptr<SorbetTypecheckRunInfo>>(notif.params);
-    ASSERT_TRUE(info->tookFastPath);
-}
-} // namespace
-
 // Adds two new files that have errors, and asserts that Sorbet returns errors for both of them.
 TEST_F(ProtocolTest, AddFile) {
     assertDiagnostics(initializeLSP(), {});
@@ -461,8 +454,8 @@ TEST_F(ProtocolTest, SorbetURIsWork) {
     ASSERT_EQ(arrayRBI, arrayRBIURLEncodeColon);
 }
 
-// Tests that Sorbet URIs don't take the slow path (read: don't define new files!) when opened and closed.
-TEST_F(ProtocolTest, SorbetURIsTakeFastPath) {
+// Tests that Sorbet URIs are not typechecked.
+TEST_F(ProtocolTest, DoesNotTypecheckSorbetURIs) {
     const bool supportsMarkdown = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
@@ -484,9 +477,7 @@ TEST_F(ProtocolTest, SorbetURIsTakeFastPath) {
     openClose.push_back(makeOpen(selectLoc->uri, contents, 1));
     openClose.push_back(makeClose(selectLoc->uri));
     auto responses = send(move(openClose));
-    ASSERT_EQ(1, responses.size());
-    ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::SorbetTypecheckRunInfo, *responses.at(0)));
-    ASSERT_NO_FATAL_FAILURE(assertTookFastPath(responses.at(0)->asNotification()));
+    ASSERT_EQ(0, responses.size());
 }
 
 // Tests that Sorbet does not crash when a file URI falls outside of the workspace.
