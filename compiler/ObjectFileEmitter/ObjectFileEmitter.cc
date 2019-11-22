@@ -170,8 +170,8 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createGlobalDCEPass());     // Remove dead fns and globals.
     pm.add(llvm::createConstantMergePass()); // Merge dup global constants
 
-    // pm.add(llvm::createHotColdSplittingPass());
-    // pm.add(llvm::createMergeFunctionsPass());
+    pm.add(llvm::createHotColdSplittingPass());
+    pm.add(llvm::createMergeFunctionsPass());
     pm.add(llvm::createLoopSinkPass());
     pm.add(llvm::createInstSimplifyLegacyPass());
     pm.add(llvm::createDivRemPairsPass());
