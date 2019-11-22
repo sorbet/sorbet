@@ -510,7 +510,11 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     }
 
     /* run verifier */
-    ENFORCE(!llvm::verifyFunction(*func, &llvm::errs()), "see above");
+    if (debug_mode && !llvm::verifyFunction(*func, &llvm::errs())) {
+        fmt::print("failed to verify:\n");
+        func->dump();
+        ENFORCE(false);
+    }
     cs.runCheapOptimizations(func);
 }
 
