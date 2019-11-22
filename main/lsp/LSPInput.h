@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_LSPINPUT_H
 
 #include "absl/synchronization/mutex.h"
+#include "common/FileOps.h"
 #include <deque>
 #include <memory>
 #include <vector>
@@ -21,15 +22,18 @@ class NotificationMessage;
  */
 class LSPInput {
 public:
+    struct ReadOutput {
+        FileOps::ReadResult result;
+        std::unique_ptr<LSPMessage> message;
+    };
+
     LSPInput() = default;
     virtual ~LSPInput() = default;
     /**
-     * Blockingly reads the next message from the client with the given timeout (in milliseconds). Returns nullptr if no
-     * message read within timeout.
-     *
-     * Throws a FileReadException on error or EOF.
+     * Blockingly reads the next message from the client with the given timeout (in milliseconds). Returns an output
+     * object that indicates if the read succeeded, timed out, or failed.
      */
-    virtual std::unique_ptr<LSPMessage> read(int timeoutMs = 100) = 0;
+    virtual ReadOutput read(int timeoutMs = 100) = 0;
 };
 
 /**
@@ -47,7 +51,7 @@ public:
     const int inputFd;
     LSPFDInput(std::shared_ptr<spdlog::logger> logger, int inputFd);
 
-    std::unique_ptr<LSPMessage> read(int timeoutMs) override;
+    ReadOutput read(int timeoutMs) override;
 };
 
 /**
@@ -64,7 +68,7 @@ class LSPProgrammaticInput final : public LSPInput {
 public:
     LSPProgrammaticInput() = default;
 
-    std::unique_ptr<LSPMessage> read(int timeoutMs) override;
+    ReadOutput read(int timeoutMs) override;
 
     /** Send the given message to input. */
     void write(std::unique_ptr<LSPMessage> message);

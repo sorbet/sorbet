@@ -9,6 +9,12 @@ namespace sorbet {
 
 class FileOps final {
 public:
+    enum class ReadResult { Timeout, Success, ErrorOrEof };
+    struct ReadLineOutput {
+        ReadResult result;
+        std::optional<std::string> output = std::nullopt;
+    };
+
     static bool exists(std::string_view filename);
     static bool isFile(std::string_view path, std::string_view ignorePattern, const int pos);
     static bool isFolder(std::string_view path, std::string_view ignorePattern, const int pos);
@@ -43,8 +49,7 @@ public:
      * Returns:
      * - Length of data read if > 0.
      * - 0 if timeout occurs.
-     *
-     * Throws FileReadException on EOF or error.
+     * - <0 if an error or EOF occurs.
      */
     static int readFd(int fd, std::vector<char> &output, int timeoutMs = 100);
     /**
@@ -52,14 +57,8 @@ public:
      * Timeout is specified in milliseconds.
      *
      * Stores any extra bits read into `buffer`.
-     *
-     * Returns:
-     * - nullopt if timeout occurs or read() did not yield a newline.
-     * - string if a line was found. The string does not contain the ending newline character.
-     *
-     * Throws FileReadException on EOF or error.
      */
-    static std::optional<std::string> readLineFromFd(int fd, std::string &buffer, int timeoutMs = 100);
+    static ReadLineOutput readLineFromFd(int fd, std::string &buffer, int timeoutMs = 100);
 };
 
 } // namespace sorbet

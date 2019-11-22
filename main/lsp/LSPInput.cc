@@ -1,5 +1,4 @@
 #include "main/lsp/LSPInput.h"
-#include "common/FileOps.h"
 #include "main/lsp/LSPMessage.h"
 #include "spdlog/spdlog.h"
 #include <iterator>
@@ -10,7 +9,7 @@ namespace sorbet::realmain::lsp {
 
 LSPFDInput::LSPFDInput(shared_ptr<spdlog::logger> logger, int inputFd) : logger(move(logger)), inputFd(inputFd) {}
 
-unique_ptr<LSPMessage> LSPFDInput::read(int timeoutMs) {
+LSPInput::ReadOutput LSPFDInput::read(int timeoutMs) {
     int length = -1;
     string allRead;
     {
@@ -18,13 +17,13 @@ unique_ptr<LSPMessage> LSPFDInput::read(int timeoutMs) {
         // lines in a header.
         for (int i = 0; i < 10; i += 1) {
             auto maybeLine = FileOps::readLineFromFd(inputFd, buffer, timeoutMs);
-            if (!maybeLine) {
+            if (maybeLine.result != FileOps::ReadResult::Success) {
                 // Line not read. Abort. Store what was read thus far back into buffer
                 // for use in next call to function.
                 buffer = absl::StrCat(allRead, buffer);
-                return nullptr;
+                return ReadOutput{maybeLine.result};
             }
-            const string &line = *maybeLine;
+            const string &line = *maybeLine.output;
             absl::StrAppend(&allRead, line, "\n");
             if (line == "\r") {
                 // End of headers.
@@ -38,7 +37,7 @@ unique_ptr<LSPMessage> LSPFDInput::read(int timeoutMs) {
     if (length < 0) {
         logger->trace("No \"Content-Length: %i\" header found.");
         // Throw away what we've read and start over.
-        return nullptr;
+        return ReadOutput{FileOps::ReadResult::Timeout};
     }
 
     if (buffer.length() < length) {
@@ -49,13 +48,13 @@ unique_ptr<LSPMessage> LSPFDInput::read(int timeoutMs) {
         if (result > 0) {
             buffer.append(buf.begin(), buf.begin() + result);
         }
-        if (result == -1) {
-            Exception::raise("Error reading file or EOF.");
+        if (result < 0) {
+            return ReadOutput{FileOps::ReadResult::ErrorOrEof};
         }
         if (result != moreNeeded) {
             // Didn't get enough data. Return read data to `buffer`.
             buffer = absl::StrCat(allRead, buffer);
-            return nullptr;
+            return ReadOutput{FileOps::ReadResult::Timeout};
         }
     }
 
@@ -64,13 +63,13 @@ unique_ptr<LSPMessage> LSPFDInput::read(int timeoutMs) {
     string json = buffer.substr(0, length);
     buffer.erase(0, length);
     logger->debug("Read: {}\n", json);
-    return LSPMessage::fromClient(json);
+    return ReadOutput{FileOps::ReadResult::Success, LSPMessage::fromClient(json)};
 }
 
-unique_ptr<LSPMessage> LSPProgrammaticInput::read(int timeoutMs) {
+LSPInput::ReadOutput LSPProgrammaticInput::read(int timeoutMs) {
     absl::MutexLock lock(&mtx);
     if (closed && available.empty()) {
-        throw sorbet::FileReadException("EOF");
+        return ReadOutput{FileOps::ReadResult::ErrorOrEof};
     }
 
     mtx.AwaitWithTimeout(
@@ -79,12 +78,12 @@ unique_ptr<LSPMessage> LSPProgrammaticInput::read(int timeoutMs) {
         absl::Milliseconds(timeoutMs));
 
     if (available.empty()) {
-        return nullptr;
+        return ReadOutput{FileOps::ReadResult::Timeout};
     }
 
     auto msg = move(available.front());
     available.pop_front();
-    return msg;
+    return ReadOutput{FileOps::ReadResult::Success, move(msg)};
 }
 
 void LSPProgrammaticInput::write(unique_ptr<LSPMessage> message) {

@@ -133,30 +133,27 @@ int sorbet::FileOps::readFd(int fd, std::vector<char> &output, int timeoutMs) {
     timeout.tv_usec = (timeoutMs % 1000) * 1000;
 
     auto rv = select(fd + 1, &set, nullptr, nullptr, &timeout);
-    if (rv == -1) {
-        throw sorbet::FileReadException(fmt::format("Error during select(): {}", errno));
-    } else if (rv == 0) {
-        // A timeout occurred.
-        return 0;
-    } else {
-        auto read = ::read(fd, output.data(), output.size());
-        if (read == 0) {
-            throw sorbet::FileReadException("EOF");
-        } else if (read < 0) {
-            throw sorbet::FileReadException(fmt::format("Error during read(): {}", errno));
-        }
-        // `read` is size read.
-        return read;
+    if (rv <= 0) {
+        // A timeout (0) or error (<0) occurred
+        return rv;
     }
+
+    auto read = ::read(fd, output.data(), output.size());
+    if (read <= 0) {
+        // An error occurred.
+        return -2;
+    }
+    // `read` is size read.
+    return read;
 }
 
-optional<string> sorbet::FileOps::readLineFromFd(int fd, string &buffer, int timeoutMs) {
+sorbet::FileOps::ReadLineOutput sorbet::FileOps::readLineFromFd(int fd, string &buffer, int timeoutMs) {
     auto bufferFnd = buffer.find('\n');
     if (bufferFnd != string::npos) {
         // Edge case: Last time this was called, we read multiple lines.
         string line = buffer.substr(0, bufferFnd);
         buffer.erase(0, bufferFnd + 1);
-        return line;
+        return ReadLineOutput{ReadResult::Success, line};
     }
 
     constexpr int BUFF_SIZE = 1024 * 8;
@@ -164,8 +161,9 @@ optional<string> sorbet::FileOps::readLineFromFd(int fd, string &buffer, int tim
 
     int result = FileOps::readFd(fd, buf, timeoutMs);
     if (result == 0) {
-        // Timeout.
-        return nullopt;
+        return ReadLineOutput{ReadResult::Timeout};
+    } else if (result < 0) {
+        return ReadLineOutput{ReadResult::ErrorOrEof};
     }
 
     // Store whatever we read into buffer, and see if we received a full line.
@@ -180,10 +178,10 @@ optional<string> sorbet::FileOps::readLineFromFd(int fd, string &buffer, int tim
             // Skip over the newline.
             buffer.append(fnd + 1, end);
         }
-        return line;
+        return ReadLineOutput{ReadResult::Success, line};
     } else {
         buffer.append(buf.begin(), end);
-        return nullopt;
+        return ReadLineOutput{ReadResult::Timeout};
     }
 }
 
