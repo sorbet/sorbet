@@ -80,6 +80,7 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     bool runExpensiveInstructionConbining = false; // true in O3
     bool unnecessaryForUs = false;                 // phases that don't do anything due to us not being a c++ compiler
 
+    pm.add(llvm::createSROAPass()); // this is super useful for us so we want to run it early
     if (unnecessaryForUs) {
         pm.add(llvm::createForceFunctionAttrsLegacyPass());
     }
@@ -104,7 +105,6 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createFunctionInliningPass(optLevel, sizeLevel, false));
     pm.add(llvm::createPostOrderFunctionAttrsLegacyPass());
     // pm.add(llvm::createArgumentPromotionPass()); // O3
-    pm.add(llvm::createSROAPass());
     pm.add(llvm::createEarlyCSEPass(true /* Enable mem-ssa. */));
     if (unnecessaryForUs) {
         pm.add(llvm::createSpeculativeExecutionIfHasBranchDivergencePass());
