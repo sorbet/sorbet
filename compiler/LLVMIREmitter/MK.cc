@@ -263,10 +263,7 @@ llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llv
 void MK::pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &build, core::SymbolRef sym) {
     auto &builder = builderCast(build);
     auto funcName = sym.data(cs)->name.data(cs)->shortName(cs);
-    auto rawCString = MK::toCString(cs, funcName, builder);
-    auto funcNameId =
-        builder.CreateCall(cs.module->getFunction("sorbet_IDIntern"),
-                           {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, funcName.length()))}, "rawId");
+    auto funcNameId = MK::getRubyIdFor(cs, builder, funcName);
     auto recv = MK::getRubyConstantValueRaw(cs, sym.data(cs)->owner, builder);
     builder.CreateCall(cs.module->getFunction("sorbet_pushControlFrame"), {recv, funcNameId});
 }

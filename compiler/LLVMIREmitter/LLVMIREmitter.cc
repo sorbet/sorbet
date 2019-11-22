@@ -448,6 +448,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
 
 void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
                          const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases) {
+    cs.functionEntryInitializers = blockMap.functionInitializersByFunction[0];
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(blockMap.sigVerificationBlock);
     int argId = -1;
