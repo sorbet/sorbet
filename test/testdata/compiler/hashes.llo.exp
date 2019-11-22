@@ -14,6 +14,7 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @rb_cObject = external local_unnamed_addr constant i64, align 8
 @.str.7 = private unnamed_addr constant [16 x i8] c"CompiledClosure\00", align 1
 @closureInfo = local_unnamed_addr constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.7, i32 0, i32 0), %struct.anon.1 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
+@"str_<static-init>" = private unnamed_addr constant [14 x i8] c"<static-init>\00", align 1
 @rubyIdPrecomputed_a = internal unnamed_addr global i64 0, align 8
 @str_a = private unnamed_addr constant [2 x i8] c"a\00", align 1
 @rubyIdPrecomputed_b = internal unnamed_addr global i64 0, align 8
@@ -126,6 +127,7 @@ define void @Init_test_testdata_compiler_hashes() local_unnamed_addr #4 {
   %rubyId_a.i = load i64, i64* @rubyIdPrecomputed_a, align 8
   %rubyId_b.i = load i64, i64* @rubyIdPrecomputed_b, align 8
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
+  %2 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"str_<static-init>", i64 0, i64 0), i64 13) #6
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_a.i) #6
   %rawSym15.i = tail call i64 @rb_id2sym(i64 %rubyId_b.i) #6
   %callArgsAddr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 0
@@ -136,10 +138,10 @@ define void @Init_test_testdata_compiler_hashes() local_unnamed_addr #4 {
   store i64 %rawSym15.i, i64* %callArgsAddr21.i, align 8
   %callArgsAddr23.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 3
   store i64 5, i64* %callArgsAddr23.i, align 8
-  %2 = tail call i64 @rb_hash_new() #6, !noalias !8
-  call void @rb_hash_bulk_insert(i64 4, i64* nonnull %callArgsAddr.i, i64 %2) #6
-  store i64 %2, i64* %callArgsAddr.i, align 8
-  %3 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #6
+  %3 = tail call i64 @rb_hash_new() #6, !noalias !8
+  call void @rb_hash_bulk_insert(i64 4, i64* nonnull %callArgsAddr.i, i64 %3) #6
+  store i64 %3, i64* %callArgsAddr.i, align 8
+  %4 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #6
   call void @llvm.lifetime.end.p0i8(i64 32, i8* nonnull %1)
   ret void
 }

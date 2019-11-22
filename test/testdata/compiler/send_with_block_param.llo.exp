@@ -21,6 +21,7 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @.str.2 = private unnamed_addr constant [36 x i8] c"%li\0B does not refer to class/module\00", align 1
 @.str.7 = private unnamed_addr constant [16 x i8] c"CompiledClosure\00", align 1
 @closureInfo = local_unnamed_addr constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.7, i32 0, i32 0), %struct.anon.1 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
+@"str_<static-init>" = private unnamed_addr constant [14 x i8] c"<static-init>\00", align 1
 @str_T = private unnamed_addr constant [2 x i8] c"T\00", align 1
 @rubyIdPrecomputed_unsafe = internal unnamed_addr global i64 0, align 8
 @str_unsafe = private unnamed_addr constant [7 x i8] c"unsafe\00", align 1
@@ -379,34 +380,35 @@ typeTestSuccess.i:
   %rubyId_map.i = load i64, i64* @rubyIdPrecomputed_map, align 8
   %rubyId_to_proc.i = load i64, i64* @rubyIdPrecomputed_to_proc, align 8
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
+  %2 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"str_<static-init>", i64 0, i64 0), i64 13) #12
   %callArgsAddr.i = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0
-  %2 = bitcast [3 x i64]* %callArgs.i to <2 x i64>*
-  store <2 x i64> <i64 3, i64 5>, <2 x i64>* %2, align 16
-  %3 = tail call i64 @rb_hash_new() #12, !noalias !10
-  call void @rb_hash_bulk_insert(i64 2, i64* nonnull %callArgsAddr.i, i64 %3) #12
-  %4 = load i64, i64* @guard_epoch_T, align 8
-  %5 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !13
-  %needTakeSlowPath.i = icmp eq i64 %4, %5
-  br i1 %needTakeSlowPath.i, label %"func_<root>.<static-init>$111.exit", label %6, !prof !15
+  %3 = bitcast [3 x i64]* %callArgs.i to <2 x i64>*
+  store <2 x i64> <i64 3, i64 5>, <2 x i64>* %3, align 16
+  %4 = tail call i64 @rb_hash_new() #12, !noalias !10
+  call void @rb_hash_bulk_insert(i64 2, i64* nonnull %callArgsAddr.i, i64 %4) #12
+  %5 = load i64, i64* @guard_epoch_T, align 8
+  %6 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !13
+  %needTakeSlowPath.i = icmp eq i64 %5, %6
+  br i1 %needTakeSlowPath.i, label %"func_<root>.<static-init>$111.exit", label %7, !prof !15
 
-6:                                                ; preds = %typeTestSuccess.i
+7:                                                ; preds = %typeTestSuccess.i
   call void @const_recompute_T() #12
   %.pre.i = load i64, i64* @guard_epoch_T, align 8
   %.pre2.i = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !13
   br label %"func_<root>.<static-init>$111.exit"
 
-"func_<root>.<static-init>$111.exit":             ; preds = %typeTestSuccess.i, %6
-  %7 = phi i64 [ %4, %typeTestSuccess.i ], [ %.pre2.i, %6 ]
-  %8 = phi i64 [ %4, %typeTestSuccess.i ], [ %.pre.i, %6 ]
-  %guardUpdated.i = icmp eq i64 %8, %7
+"func_<root>.<static-init>$111.exit":             ; preds = %typeTestSuccess.i, %7
+  %8 = phi i64 [ %5, %typeTestSuccess.i ], [ %.pre2.i, %7 ]
+  %9 = phi i64 [ %5, %typeTestSuccess.i ], [ %.pre.i, %7 ]
+  %guardUpdated.i = icmp eq i64 %9, %8
   call void @llvm.assume(i1 %guardUpdated.i) #12
   store i64 3, i64* %callArgsAddr.i, align 16
-  %9 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgsAddr.i) #12
+  %10 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgsAddr.i) #12
   %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_map.i) #12
-  %10 = call i64 @rb_funcallv(i64 %3, i64 %rubyId_to_proc.i, i32 0, i64* null) #12
-  %11 = call i64 @rb_funcall_with_block(i64 %9, i64 %rubyId_map.i, i32 0, i64* nonnull %callArgsAddr.i, i64 %10) #12
-  store i64 %11, i64* %callArgsAddr.i, align 16
-  %12 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #12
+  %11 = call i64 @rb_funcallv(i64 %4, i64 %rubyId_to_proc.i, i32 0, i64* null) #12
+  %12 = call i64 @rb_funcall_with_block(i64 %10, i64 %rubyId_map.i, i32 0, i64* nonnull %callArgsAddr.i, i64 %11) #12
+  store i64 %12, i64* %callArgsAddr.i, align 16
+  %13 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #12
   call void @llvm.lifetime.end.p0i8(i64 24, i8* nonnull %1)
   ret void
 }
