@@ -71,7 +71,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             tools = [":generate_out_file"],
             cmd = "$(location :generate_out_file) $(location {}) $(locations {})".format(expected_outfile, filegroup_name),
         )
-        
+
         native.sh_test(
             name = "test_{}/{}".format(test_name_prefix, name),
             srcs = ["test_corpus_forwarder.sh"],
