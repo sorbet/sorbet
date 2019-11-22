@@ -223,8 +223,8 @@ void addLTOPasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createGlobalsAAWrapperPass());
     pm.add(llvm::createLICMPass(100, 250));
     pm.add(llvm::createMergedLoadStoreMotionPass());
-    pm.add(llvm::createGVNPass(false));
-    // pm.add(llvm::createNewGVNPass()); // by default clang uses _old_ GVN
+    // pm.add(llvm::createGVNPass(false));
+    pm.add(llvm::createNewGVNPass()); // by default clang uses _old_ GVN
     pm.add(llvm::createMemCpyOptPass());
     pm.add(llvm::createDeadStoreEliminationPass());
     pm.add(llvm::createIndVarSimplifyPass());
