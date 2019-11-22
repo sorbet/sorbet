@@ -203,6 +203,7 @@ public:
     };
     virtual bool runOnModule(llvm::Module &mod) override {
         CallInstVisitor visitor;
+        mod.getFunction("__sorbet_only_exists_to_keep_functions_alive__")->eraseFromParent();
         for (const auto &[name, instr] : irIntrinsics) {
             auto fun = mod.getFunction(name);
             if (fun) {

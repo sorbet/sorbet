@@ -30,7 +30,6 @@ std::unique_ptr<llvm::Module> IRHelpers::readDefaultModule(const char *name, llv
     for (const auto &[funName, attr] : additionalFunctionAttributes) {
         ret.get()->getFunction(funName)->addFnAttr(attr);
     }
-    ret.get()->getFunction("__sorbet_only_exists_to_keep_functions_alive__")->eraseFromParent();
     return move(ret.get());
 }
 

@@ -869,6 +869,7 @@ VALUE sorbet_i_getRubyConstant(const char *const className, long classNameLen) _
 
 VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) {
     // this function will be nuked but it exists to keep forward definitions alive for clang
-    return sorbet_i_getRubyClass(0, 2) + sorbet_i_getRubyConstant(0, 2);
+    return (long)&sorbet_i_getRubyClass + (long)&sorbet_i_getRubyConstant + (long)&sorbet_getConstantEpoch +
+           (long)&sorbet_getConstant;
 }
 #endif
