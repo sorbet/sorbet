@@ -1,0 +1,85 @@
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C Record><<C <todo sym>>> < (::<todo sym>)
+    def self.flatfile<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    def self.from<<C <todo sym>>>(*_, &<blk>)
+      <emptyTree>
+    end
+
+    def self.pattern<<C <todo sym>>>(*_, &<blk>)
+      <emptyTree>
+    end
+
+    def self.field<<C <todo sym>>>(*_, &<blk>)
+      <emptyTree>
+    end
+  end
+
+  class <emptyTree>::<C Flatfile><<C <todo sym>>> < (<emptyTree>::<C Record>)
+    <self>.flatfile() do ||
+      begin
+        <self>.from(<emptyTree>::<C Range>.new(1, 2), :"foo")
+        <self>.pattern(::Regexp.new("A-Za-z", 0), :"bar")
+        <self>.field(:"baz")
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def foo<<C <todo sym>>>(&<blk>)
+      nil
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def foo=<<C <todo sym>>>(arg0, &<blk>)
+      nil
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def bar<<C <todo sym>>>(&<blk>)
+      nil
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def bar=<<C <todo sym>>>(arg0, &<blk>)
+      nil
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.untyped())
+    end
+
+    def baz<<C <todo sym>>>(&<blk>)
+      nil
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+    end
+
+    def baz=<<C <todo sym>>>(arg0, &<blk>)
+      nil
+    end
+  end
+
+  t = <emptyTree>::<C Flatfile>.new()
+
+  t.foo=(t.foo().+(1))
+
+  t.bar=(t.bar().+(1))
+
+  t.baz=(t.baz().+(1))
+end
