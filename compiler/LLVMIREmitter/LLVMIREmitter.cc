@@ -447,7 +447,9 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
             }
         } else {
             // handle dead block. TODO: this should throw
-            builder.CreateRet(MK::getRubyNilRaw(cs, builder));
+            auto var = MK::getRubyNilRaw(cs, builder);
+            MK::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
+            builder.CreateBr(blockMap.postProcessBlock);
         }
     }
 }
