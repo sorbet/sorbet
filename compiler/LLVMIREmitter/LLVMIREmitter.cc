@@ -326,13 +326,14 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         MK::popControlFrame(cs, builder);
                         auto var = MK::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
                         MK::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
+                        builder.CreateBr(blockMap.postProcessBlock);
                     },
                     [&](cfg::BlockReturn *i) {
                         ENFORCE(bb->rubyBlockId != 0, "should never happen");
                         isTerminated = true;
                         MK::popControlFrame(cs, builder);
                         auto var = MK::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
-                        MK::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
+                        builder.CreateRet(var);
                     },
                     [&](cfg::LoadSelf *i) {
                         auto var = MK::varGet(cs, i->fallback, builder, blockMap, aliases, bb->rubyBlockId);
@@ -442,8 +443,6 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     builder.CreateBr(
                         blockMap.llvmBlocksBySorbetBlocks[blockMap.basicBlockJumpOverrides[bb->bexit.thenb->id]]);
                 }
-            } else {
-                builder.CreateBr(blockMap.postProcessBlock);
             }
         } else {
             // handle dead block. TODO: this should throw
