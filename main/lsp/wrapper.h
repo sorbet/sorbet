@@ -33,7 +33,6 @@ class LSPWrapper final {
 public:
     enum class LSPExperimentalFeature {
         Autocomplete = 4,
-        WorkspaceSymbols = 5,
         DocumentSymbol = 6,
         SignatureHelp = 7,
         QuickFix = 8,

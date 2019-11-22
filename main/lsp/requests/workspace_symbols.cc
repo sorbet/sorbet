@@ -272,13 +272,6 @@ unique_ptr<ResponseMessage> LSPLoop::handleWorkspaceSymbols(LSPTypechecker &type
                                                             const WorkspaceSymbolParams &params) const {
     Timer timeit(typechecker.state().tracer(), "LSPLoop::handleWorkspaceSymbols");
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::WorkspaceSymbol);
-    if (!config->opts.lspWorkspaceSymbolsEnabled) {
-        response->error =
-            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "The `Workspace Symbols` LSP feature is "
-                                                                           "experimental and disabled by default.");
-        return response;
-    }
-
     ShowOperation op(*config, "References", "Workspace symbol search...");
     prodCategoryCounterInc("lsp.messages.processed", "workspace.symbols");
     SymbolMatcher matcher(*config, typechecker.state());

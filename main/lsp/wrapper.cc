@@ -73,7 +73,6 @@ LSPWrapper::~LSPWrapper() {}
 
 void LSPWrapper::enableAllExperimentalFeatures() {
     enableExperimentalFeature(LSPExperimentalFeature::Autocomplete);
-    enableExperimentalFeature(LSPExperimentalFeature::WorkspaceSymbols);
     enableExperimentalFeature(LSPExperimentalFeature::DocumentHighlight);
     enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
     enableExperimentalFeature(LSPExperimentalFeature::SignatureHelp);
@@ -87,9 +86,6 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
             break;
         case LSPExperimentalFeature::QuickFix:
             opts.lspQuickFixEnabled = true;
-            break;
-        case LSPExperimentalFeature::WorkspaceSymbols:
-            opts.lspWorkspaceSymbolsEnabled = true;
             break;
         case LSPExperimentalFeature::DocumentHighlight:
             opts.lspDocumentHighlightEnabled = true;

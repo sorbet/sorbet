@@ -195,10 +195,11 @@ struct Options {
     // List of directories not available editor-side. References to files in these directories should be sent via
     // sorbet: URIs to clients that support them.
     std::vector<std::string> lspDirsMissingFromClient;
+    // Enable stable-but-not-yet-shipped features suitable for late-stage beta-testing.
+    bool lspAllBetaFeaturesEnabled = false;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspAutocompleteEnabled = false;
     bool lspQuickFixEnabled = false;
-    bool lspWorkspaceSymbolsEnabled = false;
     bool lspDocumentHighlightEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;
