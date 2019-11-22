@@ -853,6 +853,27 @@ class Hash < Object
   end
   def select(&blk); end
 
+  # Returns a new hash consisting of entries for which the block returns true.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # h = { "a" => 100, "b" => 200, "c" => 300 }
+  # h.select {|k,v| k > "a"}  #=> {"b" => 200, "c" => 300}
+  # h.select {|k,v| v < 200}  #=> {"a" => 100}
+  # ```
+  #
+  # [`Hash#filter`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-filter)
+  # is an alias for
+  # [`Hash#select`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-select).
+  sig do
+    params(
+        blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
+    )
+    .returns(T::Hash[K, V])
+  end
+  def filter(&blk); end
+
   # Equivalent to
   # [`Hash#keep_if`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-keep_if),
   # but returns `nil` if no changes were made.
@@ -867,6 +888,21 @@ class Hash < Object
     .returns(T::Hash[K, V])
   end
   def select!(&blk); end
+
+  # Equivalent to
+  # [`Hash#keep_if`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-keep_if),
+  # but returns `nil` if no changes were made.
+  #
+  # [`Hash#filter!`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-filter-21)
+  # is an alias for
+  # [`Hash#select!`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-select-21).
+  sig do
+    params(
+        blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
+    )
+    .returns(T::Hash[K, V])
+  end
+  def filter!(&blk); end
 
   # Removes a key-value pair from *hsh* and returns it as the two-item array `[`
   # *key, value* `]`, or the hash's default value if the hash is empty.

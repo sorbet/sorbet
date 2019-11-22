@@ -1864,6 +1864,35 @@ class Array < Object
   sig {returns(T::Enumerator[Elem])}
   def select(&blk); end
 
+  # Returns a new array containing all elements of `ary` for which the given
+  # `block` returns a true value.
+  #
+  # If no block is given, an
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # returned instead.
+  #
+  # ```ruby
+  # [1,2,3,4,5].select {|num| num.even? }     #=> [2, 4]
+  #
+  # a = %w[ a b c d e f ]
+  # a.select {|v| v =~ /[aeiou]/ }    #=> ["a", "e"]
+  # ```
+  #
+  # See also
+  # [`Enumerable#select`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-select).
+  #
+  # [`Array#filter`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-filter)
+  # is an alias for
+  # [`Array#select`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-select).
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T::Array[Elem])
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def filter(&blk); end
+
   # Invokes the given block passing in successive elements from `self`, deleting
   # elements for which the block returns a `false` value.
   #
@@ -1889,6 +1918,32 @@ class Array < Object
   end
   sig {returns(T::Enumerator[Elem])}
   def select!(&blk); end
+
+  # Invokes the given block passing in successive elements from `self`, deleting
+  # elements for which the block returns a `false` value.
+  #
+  # The array may not be changed instantly every time the block is called.
+  #
+  # If changes were made, it will return `self`, otherwise it returns `nil`.
+  #
+  # If no block is given, an
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # returned instead.
+  #
+  # See also
+  # [`Array#keep_if`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-keep_if).
+  #
+  # [`Array#filter!`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-filter-21)
+  # is an alias for
+  # [`Array#select!`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-select-21).
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.nilable(T::Array[Elem]))
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def filter!(&blk); end
 
   # Removes the first element of `self` and returns it (shifting all other
   # elements down by one). Returns `nil` if the array is empty.

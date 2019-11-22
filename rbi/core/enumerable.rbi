@@ -1270,6 +1270,32 @@ module Enumerable
   sig {returns(T::Enumerator[Elem])}
   def select(&blk); end
 
+  # Returns an array containing all elements of `enum` for which the given
+  # `block` returns a true value.
+  #
+  # If no block is given, an
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # returned instead.
+  #
+  # ```ruby
+  # (1..10).find_all { |i|  i % 3 == 0 }   #=> [3, 6, 9]
+  #
+  # [1,2,3,4,5].select { |num|  num.even?  }   #=> [2, 4]
+  #
+  # [:foo, :bar].filter { |x| x == :foo }   #=> [:foo]
+  # ```
+  #
+  # See also
+  # [`Enumerable#reject`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-reject).
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T::Array[Elem])
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def filter(&blk); end
+
   # Returns an array containing the items in *enum*.
   #
   # ```ruby

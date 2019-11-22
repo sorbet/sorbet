@@ -17,8 +17,6 @@ class Array
 
   def dig(*_); end
 
-  def filter!(); end
-
   def flatten!(*_); end
 
   def pack(*_); end
@@ -3959,8 +3957,6 @@ module Enumerable
   def chunk_while(); end
 
   def each_entry(*_); end
-
-  def filter(); end
 
   def grep_v(_); end
 
@@ -8060,8 +8056,6 @@ class Hash
 
   def fetch_values(*_); end
 
-  def filter!(); end
-
   def flatten(*_); end
 
   def index(_); end
@@ -8621,8 +8615,6 @@ class Set
   def divide(&func); end
 
   def eql?(o); end
-
-  def filter!(&block); end
 
   def flatten_merge(set, seen=T.unsafe(nil)); end
 
