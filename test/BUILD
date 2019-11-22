@@ -29,3 +29,13 @@ sh_binary(
         "@ruby_2_6_3//:ruby",
     ],
 )
+
+sh_binary(
+    name = "generate_out_file",
+    srcs = ["generate_out_file.sh"],
+    data = [
+        "//run:runtimeoverrides",
+        "@ruby_2_6_3//:ruby",
+    ],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)

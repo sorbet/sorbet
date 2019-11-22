@@ -2,15 +2,15 @@
 set -eo pipefail
 
 rb=${1/--single_test=/}
+rbout=${2/--expected_output=/}
 
 llvmir=$(mktemp -d)
 rbrunfile=$(mktemp)
-rbout=$(mktemp)
 srbout=$(mktemp)
 srberr=$(mktemp)
 
 cleanup() {
-    rm -r "$llvmir" "$rbrunfile" "$rbout" "$srbout" "$srberr"
+    rm -r "$llvmir" "$rbrunfile" "$srbout" "$srberr"
 }
 
 # trap cleanup EXIT
@@ -33,8 +33,6 @@ ruby="./external/ruby_2_6_3/ruby"
 echo "Source: $rb"
 echo "require './run/tools/preamble.rb'; require './$rb';" > "$rbrunfile"
 debug "To run Ruby locally" "bazel-bin/$ruby $rbrunfile"
-echo "Running Ruby..."
-$ruby --disable=gems --disable=did_you_mean "$rbrunfile" 2>&1 | tee "$rbout"
 
 debug "To run Sorbet locally" "bazel-bin/main/sorbet --llvm-ir-folder=$llvmir --force-compiled ${rb/__*/__*}"
 echo "Running Sorbet Compiler..."
