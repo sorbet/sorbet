@@ -3,17 +3,17 @@
 
 namespace sorbet::compiler {
 
-core::NameRef Names::sorbet_defineTopClassOrModule(const core::GlobalState &gs) {
+core::NameRef Names::defineTopClassOrModule(const core::GlobalState &gs) {
     auto ret = gs.lookupNameUTF8("<sorbet_defineTopClassOrModule>");
     ENFORCE(ret.exists(), "Did you forget to call Names::init");
     return ret;
 }
-core::NameRef Names::sorbet_defineMethod(const core::GlobalState &gs) {
+core::NameRef Names::defineMethod(const core::GlobalState &gs) {
     auto ret = gs.lookupNameUTF8("<sorbet_defineMethod>");
     ENFORCE(ret.exists(), "Did you forget to call Names::init");
     return ret;
 }
-core::NameRef Names::sorbet_defineMethodSingleton(const core::GlobalState &gs) {
+core::NameRef Names::defineMethodSingleton(const core::GlobalState &gs) {
     auto ret = gs.lookupNameUTF8("<sorbet_defineMethodSingleton>");
     ENFORCE(ret.exists(), "Did you forget to call Names::init");
     return ret;

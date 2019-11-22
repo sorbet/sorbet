@@ -67,7 +67,7 @@ public:
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                   int rubyBlockId) const override {
         auto &builder = builderCast(build);
-        bool isSelf = i->fun == Names::sorbet_defineMethodSingleton(cs);
+        bool isSelf = i->fun == Names::defineMethodSingleton(cs);
         ENFORCE(i->args.size() == 2);
         auto ownerSym = typeToSym(cs, i->args[0].type);
 
@@ -100,7 +100,7 @@ public:
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {Names::sorbet_defineMethod(cs), Names::sorbet_defineMethodSingleton(cs)};
+        return {Names::defineMethod(cs), Names::defineMethodSingleton(cs)};
     }
 } DefineMethodIntrinsic;
 
@@ -148,7 +148,7 @@ public:
         return MK::getRubyNilRaw(cs, builder);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {Names::sorbet_defineTopClassOrModule(cs)};
+        return {Names::defineTopClassOrModule(cs)};
     }
 } DefineClassIntrinsic;
 
