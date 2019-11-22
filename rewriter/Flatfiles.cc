@@ -35,7 +35,7 @@ ast::Send *asFlatfileDo(ast::Expression *stat) {
     }
 }
 
-void handle_field_definition(core::MutableContext ctx, unique_ptr<ast::Expression> &stat,
+void handleFieldDefinition(core::MutableContext ctx, unique_ptr<ast::Expression> &stat,
                              vector<unique_ptr<ast::Expression>> &methods) {
     if (auto send = ast::cast_tree<ast::Send>(stat.get())) {
         if ((send->fun != core::Names::from() && send->fun != core::Names::field() &&
@@ -68,11 +68,11 @@ void Flatfiles::run(core::MutableContext ctx, ast::ClassDef *klass) {
         if (auto flatfileBlock = asFlatfileDo(stat.get())) {
             if (auto insSeq = ast::cast_tree<ast::InsSeq>(flatfileBlock->block->body.get())) {
                 for (auto &stat : insSeq->stats) {
-                    handle_field_definition(ctx, stat, methods);
+                    handleFieldDefinition(ctx, stat, methods);
                 }
-                handle_field_definition(ctx, insSeq->expr, methods);
+                handleFieldDefinition(ctx, insSeq->expr, methods);
             } else {
-                handle_field_definition(ctx, flatfileBlock->block->body, methods);
+                handleFieldDefinition(ctx, flatfileBlock->block->body, methods);
             }
         }
     }
