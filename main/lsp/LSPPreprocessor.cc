@@ -37,6 +37,52 @@ void cancelTimer(unique_ptr<Timer> &timer) {
     }
 }
 
+void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, const CancelParams &cancelParams) {
+    for (auto &current : pendingRequests) {
+        if (current->isRequest()) {
+            auto &request = current->asRequest();
+            if (request.id == cancelParams.id) {
+                // We didn't start processing it yet -- great! Cancel it and return.
+                current->canceled = true;
+                // Don't report a latency metric for canceled requests.
+                cancelTimer(current->timer);
+                return;
+            }
+        }
+    }
+    // Else... it's too late; we have either already processed it, or are currently processing it. Swallow cancellation
+    // and ignore.
+}
+
+string readFile(string_view path, const FileSystem &fs) {
+    try {
+        return fs.readFile(path);
+    } catch (FileNotFoundException e) {
+        // Act as if file is completely empty.
+        // NOTE: It is not appropriate to throw an error here. Sorbet does not differentiate between Watchman updates
+        // that specify if a file has changed or has been deleted, so this is the 'golden path' for deleted files.
+        // TODO(jvilk): Use Tombstone files instead.
+        return "";
+    }
+}
+
+string_view getFileContents(LSPFileUpdates &updates, const core::GlobalState &initialGS, string_view path) {
+    // Get last file in array matching path. There may be duplicates (which will be culled before committing).
+    const auto &updatedFiles = updates.updatedFiles;
+    for (auto it = updatedFiles.rbegin(); it != updatedFiles.rend(); it++) {
+        if ((*it)->path() == path) {
+            return (*it)->source();
+        }
+    }
+
+    auto currentFileRef = initialGS.findFileByPath(path);
+    if (currentFileRef.exists()) {
+        return currentFileRef.data(initialGS).source();
+    } else {
+        return "";
+    }
+}
+
 } // namespace
 
 LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, const shared_ptr<LSPConfiguration> &config,
@@ -98,8 +144,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
 
         // Avoid canceling if the currently-running slow path has already been canceled.
         if (!gs.wasTypecheckingCanceled()) {
-            for (auto it = pendingRequests.begin(); it != pendingRequests.end(); it++) {
-                const auto &msg = *it;
+            for (auto &msg : pendingRequests) {
                 if (msg->isNotification() && msg->method() == LSPMethod::SorbetWorkspaceEdit) {
                     Timer timeit(logger, "tryCancelSlowPath");
                     auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg->asNotification().params);
@@ -134,23 +179,6 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
     ttgs.pruneBefore(earliestActiveEditVersion);
 }
 
-void cancelRequest(std::deque<std::unique_ptr<LSPMessage>> &pendingRequests, const CancelParams &cancelParams) {
-    for (auto &current : pendingRequests) {
-        if (current->isRequest()) {
-            auto &request = current->asRequest();
-            if (request.id == cancelParams.id) {
-                // We didn't start processing it yet -- great! Cancel it and return.
-                current->canceled = true;
-                // Don't report a latency metric for canceled requests.
-                cancelTimer(current->timer);
-                return;
-            }
-        }
-    }
-    // Else... it's too late; we have either already processed it, or are currently processing it. Swallow cancellation
-    // and ignore.
-}
-
 unique_ptr<core::GlobalState> LSPPreprocessor::getTypecheckingGS() const {
     return ttgs.getGlobalState().deepCopy();
 }
@@ -170,7 +198,8 @@ unique_ptr<LSPMessage> LSPPreprocessor::makeAndCommitWorkspaceEdit(unique_ptr<So
 
 bool LSPPreprocessor::ensureInitialized(LSPMethod method, const LSPMessage &msg) const {
     if (config->isInitialized() || method == LSPMethod::Initialize || method == LSPMethod::Initialized ||
-        method == LSPMethod::Exit || method == LSPMethod::Shutdown || method == LSPMethod::SorbetError) {
+        method == LSPMethod::Exit || method == LSPMethod::Shutdown || method == LSPMethod::SorbetError ||
+        method == LSPMethod::SorbetFence) {
         return true;
     }
     config->logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
@@ -319,35 +348,6 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
         if (shouldMerge) {
             mergeFileChanges(stateMtx, state);
         }
-    }
-}
-
-string readFile(string_view path, const FileSystem &fs) {
-    try {
-        return fs.readFile(path);
-    } catch (FileNotFoundException e) {
-        // Act as if file is completely empty.
-        // NOTE: It is not appropriate to throw an error here. Sorbet does not differentiate between Watchman updates
-        // that specify if a file has changed or has been deleted, so this is the 'golden path' for deleted files.
-        // TODO(jvilk): Use Tombstone files instead.
-        return "";
-    }
-}
-
-string_view getFileContents(LSPFileUpdates &updates, const core::GlobalState &initialGS, string_view path) {
-    // Get last file in array matching path. There may be duplicates (which will be culled before committing).
-    const auto &updatedFiles = updates.updatedFiles;
-    for (auto it = updatedFiles.rbegin(); it != updatedFiles.rend(); it++) {
-        if ((*it)->path() == path) {
-            return (*it)->source();
-        }
-    }
-
-    auto currentFileRef = initialGS.findFileByPath(path);
-    if (currentFileRef.exists()) {
-        return currentFileRef.data(initialGS).source();
-    } else {
-        return "";
     }
 }
 

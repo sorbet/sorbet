@@ -10,8 +10,15 @@ void ProtocolTest::SetUp() {
     rootPath = "/Users/jvilk/stripe/pay-server";
     rootUri = fmt::format("file://{}", rootPath);
     fs = make_shared<MockFileSystem>(rootPath);
-    lspWrapper = make_unique<LSPWrapper>(rootPath);
-    lspWrapper->opts.fs = fs;
+    bool useMultithreading = GetParam();
+    auto opts = make_shared<realmain::options::Options>();
+    opts->disableWatchman = true;
+    if (useMultithreading) {
+        lspWrapper = MultiThreadedLSPWrapper::create(rootPath, opts);
+    } else {
+        lspWrapper = SingleThreadedLSPWrapper::create(rootPath, opts);
+    }
+    lspWrapper->opts->fs = fs;
     lspWrapper->enableAllExperimentalFeatures();
 }
 
@@ -102,7 +109,7 @@ vector<unique_ptr<LSPMessage>> verify(const vector<unique_ptr<LSPMessage>> &msgs
 }
 
 std::vector<std::unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const std::string &json) {
-    auto responses = verify(lspWrapper->getLSPResponsesFor(json));
+    auto responses = verify(getLSPResponsesFor(*lspWrapper, LSPMessage::fromClient(json)));
     updateDiagnostics(responses);
     return responses;
 }
@@ -114,7 +121,7 @@ vector<unique_ptr<LSPMessage>> ProtocolTest::send(const LSPMessage &message) {
 
 vector<unique_ptr<LSPMessage>> ProtocolTest::send(vector<unique_ptr<LSPMessage>> messages) {
     vector<unique_ptr<LSPMessage>> reparsedMessages = verify(messages);
-    auto responses = verify(lspWrapper->getLSPResponsesFor(move(reparsedMessages)));
+    auto responses = verify(getLSPResponsesFor(*lspWrapper, move(reparsedMessages)));
     updateDiagnostics(responses);
     return responses;
 }

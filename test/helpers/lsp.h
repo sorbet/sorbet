@@ -61,5 +61,11 @@ initializeLSP(std::string_view rootPath, std::string_view rootUri, LSPWrapper &l
               bool supportsMarkdown = true,
               std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions = std::nullopt);
 
+/** Sends the given messages to LSPWrapper, and returns all responses to those messages. Works with single and
+ * multithreaded LSP wrappers. */
+std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, std::unique_ptr<LSPMessage> message);
+std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper,
+                                                            std::vector<std::unique_ptr<LSPMessage>> messages);
+
 } // namespace sorbet::test
 #endif // TEST_HELPERS_LSP_H

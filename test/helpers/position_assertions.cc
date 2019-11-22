@@ -419,7 +419,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
     string defUri = filePathToUri(config, filename);
 
     const int id = nextId++;
-    auto responses = lspWrapper.getLSPResponsesFor(makeDefinitionRequest(id, queryLoc.uri, line, character));
+    auto responses = getLSPResponsesFor(lspWrapper, makeDefinitionRequest(id, queryLoc.uri, line, character));
     ASSERT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/definition` request.";
     ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
 
@@ -492,8 +492,9 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
                                      // TODO: Try with this false, too.
                                      make_unique<Position>(line, character), make_unique<ReferenceContext>(true));
     int id = nextId++;
-    auto responses = lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(
-        make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentReferences, move(referenceParams))));
+    auto responses =
+        getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(make_unique<RequestMessage>(
+                                           "2.0", id, LSPMethod::TextDocumentReferences, move(referenceParams))));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/references` request.";
         return;
@@ -538,7 +539,7 @@ void UsageAssertion::checkHighlights(const UnorderedMap<string, shared_ptr<core:
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(queryLoc.uri)),
                                                 make_unique<Position>(line, character))));
 
-    auto responses = lspWrapper.getLSPResponsesFor(move(request));
+    auto responses = getLSPResponsesFor(lspWrapper, move(request));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size())
             << "Unexpected number of responses to a `textDocument/documentHighlight` request.";
@@ -619,7 +620,7 @@ void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> 
         "2.0", id, LSPMethod::TextDocumentTypeDefinition,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(queryLoc.uri)),
                                                 make_unique<Position>(line, character))));
-    auto responses = lspWrapper.getLSPResponsesFor(move(request));
+    auto responses = getLSPResponsesFor(lspWrapper, move(request));
     ASSERT_EQ(1, responses.size());
 
     ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
@@ -961,7 +962,7 @@ void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
     auto pos = make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(uri), range->start->copy());
     auto id = nextId++;
     auto msg = make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentHover, move(pos)));
-    auto responses = wrapper.getLSPResponsesFor(move(msg));
+    auto responses = getLSPResponsesFor(wrapper, move(msg));
     ASSERT_EQ(responses.size(), 1);
     auto &responseMsg = responses.at(0);
     ASSERT_TRUE(responseMsg->isResponse());
@@ -1459,7 +1460,7 @@ void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAss
     const int id = nextId++;
 
     // Request results from LSP
-    auto responses = lspWrapper.getLSPResponsesFor(makeWorkspaceSymbolRequest(id, query));
+    auto responses = getLSPResponsesFor(lspWrapper, makeWorkspaceSymbolRequest(id, query));
     ASSERT_EQ(1, responses.size()) << "Unexpected number of responses to a `workspace/symbol` request.";
     ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
     auto &respMsg = responses.at(0)->asResponse();

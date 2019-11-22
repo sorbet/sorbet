@@ -715,7 +715,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
                 make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri), error->range->copy(),
                                               make_unique<CodeActionContext>(move(diagnostics)));
             auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
-            auto responses = lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(req)));
+            auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
             EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a codeAction request.";
             if (responses.size() != 1) {
                 continue;
@@ -817,7 +817,7 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
 
     auto params = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(string(uri)));
     auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
-    auto responses = lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(req)));
+    auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
     ASSERT_EQ(responses.size(), 1) << "Did not receive exactly one response for a documentSymbols request.";
     auto &msg = responses.at(0);
     ASSERT_TRUE(msg->isResponse());
@@ -862,8 +862,8 @@ TEST_P(LSPTest, All) {
         for (auto &filename : filenames) {
             auto params = make_unique<DidOpenTextDocumentParams>(
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
-            auto responses = lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(
-                make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params))));
+            auto responses = getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(make_unique<NotificationMessage>(
+                                                                 "2.0", LSPMethod::TextDocumentDidOpen, move(params))));
             EXPECT_EQ(0, countNonTestMessages(responses))
                 << "Should not receive any response to opening an empty file.";
         }
@@ -887,7 +887,7 @@ TEST_P(LSPTest, All) {
                 updates.push_back(
                     makeChange(testFileUris[filename], string(textDocContents.begin(), textDocContents.end()), 2 + i));
             }
-            auto responses = lspWrapper->getLSPResponsesFor(move(updates));
+            auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
             updateDiagnostics(config, testFileUris, responses, diagnostics);
             slowPathPassed = ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
@@ -1040,7 +1040,7 @@ TEST_P(LSPTest, All) {
             auto assertions = RangeAssertion::parseAssertions(updatesAndContents);
             auto assertFastPath = FastPathAssertion::get(assertions);
             auto assertSlowPath = BooleanPropertyAssertion::getValue("assert-slow-path", assertions);
-            auto responses = lspWrapper->getLSPResponsesFor(move(lspUpdates));
+            auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
             bool foundTypecheckRunInfo = false;
 
             for (auto &r : responses) {

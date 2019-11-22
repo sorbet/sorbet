@@ -155,6 +155,9 @@ bool LSPMessage::isDelayable() const {
         case LSPMethod::SorbetWatchmanFileChange:
         // A file read. Should not be reordered with respect to file updates.
         case LSPMethod::SorbetReadFile:
+        // An internal message whose response ensures that the previously-submitted messages have finished processing.
+        // This _cannot_ be reordered.
+        case LSPMethod::SorbetFence:
             return false;
         // VS Code requests document symbols automatically and in the background. It's OK to delay these requests.
         case LSPMethod::TextDocumentDocumentSymbol:

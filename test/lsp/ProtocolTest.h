@@ -15,7 +15,10 @@ struct ExpectedDiagnostic {
     std::string message;
 };
 
-class ProtocolTest : public testing::Test {
+/**
+ * If parameter is 'true', LSP is configured in multithreaded mode.
+ */
+class ProtocolTest : public testing::TestWithParam<bool> {
 protected:
     std::unique_ptr<LSPWrapper> lspWrapper;
     std::string rootPath;
@@ -33,7 +36,7 @@ protected:
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
 
-    virtual ~ProtocolTest() = default;
+    ~ProtocolTest() override = default;
 
     void SetUp() override;
 

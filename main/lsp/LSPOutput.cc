@@ -17,6 +17,7 @@ bool isServerNotification(const LSPMethod method) {
         case LSPMethod::WindowShowMessage:
         case LSPMethod::SorbetTypecheckRunInfo:
         case LSPMethod::SorbetShowOperation:
+        case LSPMethod::SorbetFence:
             return true;
         default:
             return false;
@@ -61,7 +62,24 @@ void LSPOutputToVector::rawWrite(unique_ptr<LSPMessage> msg) {
 }
 
 vector<unique_ptr<LSPMessage>> LSPOutputToVector::getOutput() {
-    return move(output);
+    absl::MutexLock lock(&mtx);
+    vector<unique_ptr<LSPMessage>> messages;
+    messages.insert(messages.end(), make_move_iterator(output.begin()), make_move_iterator(output.end()));
+    output.clear();
+    return messages;
+}
+
+unique_ptr<LSPMessage> LSPOutputToVector::read(int timeoutMs) {
+    absl::MutexLock lock(&mtx);
+    mtx.AwaitWithTimeout(absl::Condition(
+                             +[](deque<unique_ptr<LSPMessage>> *output) -> bool { return !output->empty(); }, &output),
+                         absl::Milliseconds(timeoutMs));
+    if (output.empty()) {
+        return nullptr;
+    }
+    auto msg = move(output.front());
+    output.pop_front();
+    return msg;
 }
 
 } // namespace sorbet::realmain::lsp
