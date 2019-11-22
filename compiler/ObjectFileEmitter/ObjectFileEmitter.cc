@@ -71,14 +71,15 @@ bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, con
     return true;
 }
 
+constexpr bool runExpensiveInstructionConbining = false; // true in O3
+
 void addModulePasses(llvm::legacy::PassManager &pm) {
     // this is intended to mimic llvm::PassManagerBuilder::populateModulePassManager
     // while disabling optimizations that don't help us much to speedup and adding ones that do. Please explicitly
     // leave comments with added/removed passes
     // pmbuilder.populateModulePassManager(pm);
 
-    bool runExpensiveInstructionConbining = false; // true in O3
-    bool unnecessaryForUs = false;                 // phases that don't do anything due to us not being a c++ compiler
+    bool unnecessaryForUs = false; // phases that don't do anything due to us not being a c++ compiler
 
     pm.add(llvm::createSROAPass()); // this is super useful for us so we want to run it early
     if (unnecessaryForUs) {
@@ -177,6 +178,77 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createDivRemPairsPass());
     pm.add(llvm::createCFGSimplificationPass());
 }
+void addLTOPasses(llvm::legacy::PassManager &pm) {
+    // this is intended to mimic llvm::PassManagerBuilder::populateLTOPassManager
+    // while disabling optimizations that don't help us much to speedup and adding ones that do. Please explicitly
+    // leave comments with added/removed passes
+    // pmbuilder.populateLTOPassManager(pm);
+
+    // these are optimizations
+    pm.add(llvm::createGlobalDCEPass());
+    pm.add(llvm::createTypeBasedAAWrapperPass());
+    pm.add(llvm::createScopedNoAliasAAWrapperPass());
+    pm.add(llvm::createForceFunctionAttrsLegacyPass());
+    pm.add(llvm::createInferFunctionAttrsLegacyPass());
+    pm.add(llvm::createCallSiteSplittingPass());
+    pm.add(llvm::createPGOIndirectCallPromotionLegacyPass(true, false));
+    pm.add(llvm::createIPSCCPPass());
+    pm.add(llvm::createCalledValuePropagationPass()); // should follow IPSCCP
+    pm.add(llvm::createAttributorLegacyPass());
+    pm.add(llvm::createPostOrderFunctionAttrsLegacyPass());
+    pm.add(llvm::createReversePostOrderFunctionAttrsPass());
+    pm.add(llvm::createGlobalSplitPass());
+    pm.add(llvm::createWholeProgramDevirtPass(nullptr, nullptr));
+    pm.add(llvm::createGlobalOptimizerPass());
+    pm.add(llvm::createPromoteMemoryToRegisterPass());
+    pm.add(llvm::createConstantMergePass());
+    pm.add(llvm::createDeadArgEliminationPass());
+    // pm.add(llvm::createAggressiveInstCombinerPass()); // O3
+    pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
+
+    pm.add(llvm::createFunctionInliningPass(optLevel, sizeLevel, false));
+    pm.add(llvm::createPruneEHPass());
+    pm.add(llvm::createGlobalOptimizerPass());
+    pm.add(llvm::createGlobalDCEPass());
+    pm.add(llvm::createArgumentPromotionPass());
+    pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
+    pm.add(llvm::createJumpThreadingPass());
+    pm.add(llvm::createSROAPass());
+    pm.add(llvm::createTailCallEliminationPass());
+    pm.add(llvm::createPostOrderFunctionAttrsLegacyPass());
+    pm.add(llvm::createGlobalsAAWrapperPass());
+    pm.add(llvm::createLICMPass(100, 250));
+    pm.add(llvm::createMergedLoadStoreMotionPass());
+    pm.add(llvm::createGVNPass(false));
+    // pm.add(llvm::createNewGVNPass()); // by default clang uses _old_ GVN
+    pm.add(llvm::createMemCpyOptPass());
+    pm.add(llvm::createDeadStoreEliminationPass());
+    pm.add(llvm::createIndVarSimplifyPass());
+    pm.add(llvm::createLoopDeletionPass());
+    pm.add(llvm::createSimpleLoopUnrollPass(2, false, false));
+    pm.add(llvm::createLoopVectorizePass(false, false));
+    pm.add(llvm::createLoopUnrollPass(2, false, false));
+    pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
+    pm.add(llvm::createCFGSimplificationPass());
+    pm.add(llvm::createSCCPPass());
+    pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
+    pm.add(llvm::createBitTrackingDCEPass());
+    pm.add(llvm::createSLPVectorizerPass());
+    pm.add(llvm::createAlignmentFromAssumptionsPass());
+    pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
+    pm.add(llvm::createJumpThreadingPass());
+
+    // non-optimization passes
+    pm.add(llvm::createCrossDSOCFIPass());
+    pm.add(llvm::createLowerTypeTestsPass(nullptr, nullptr));
+
+    // late optimization passes
+    // pm.add(llvm::createHotColdSplittingPass());
+    pm.add(llvm::createCFGSimplificationPass());
+    pm.add(llvm::createEliminateAvailableExternallyPass());
+    pm.add(llvm::createGlobalDCEPass());
+    // pm.add(llvm::createMergeFunctionsPass());
+}
 }; // namespace
 
 void ObjectFileEmitter::init() {
@@ -260,7 +332,7 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     // Module passes
     addModulePasses(pm);
     // LTO passes
-    pmbuilder.populateLTOPassManager(pm);
+    addLTOPasses(pm);
     // print optimized IR
     auto nameOpt = ((string)dir) + "/" + (string)objectName + ".llo";
     llvm::raw_fd_ostream lloFile(nameOpt, ec1, llvm::sys::fs::F_Text);
