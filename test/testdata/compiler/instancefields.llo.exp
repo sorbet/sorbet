@@ -487,16 +487,15 @@ afterSymCallIntrinsic_unsafe.i:                   ; preds = %4, %typeTestSuccess
 
 8:                                                ; preds = %afterSymCallIntrinsic_unsafe.i
   tail call void @const_recompute_A() #15
-  %.pre = load i64, i64* @guard_epoch_A, align 8
   br label %typeTestSuccess.i.i.i
 
 typeTestSuccess.i.i.i:                            ; preds = %8, %afterSymCallIntrinsic_unsafe.i
-  %9 = phi i64 [ %.pre, %8 ], [ %6, %afterSymCallIntrinsic_unsafe.i ]
-  %10 = load i64, i64* @guarded_const_A, align 8
+  %9 = load i64, i64* @guarded_const_A, align 8
+  %10 = load i64, i64* @guard_epoch_A, align 8
   %rubyId_write.i.i.i = load i64, i64* @rubyIdPrecomputed_write, align 8
   %rubyId_read.i.i.i = load i64, i64* @rubyIdPrecomputed_read, align 8
   %11 = load i64, i64* @guard_epoch_T, align 8
-  %needTakeSlowPath42.i.i.i = icmp eq i64 %11, %9
+  %needTakeSlowPath42.i.i.i = icmp eq i64 %11, %10
   br i1 %needTakeSlowPath42.i.i.i, label %"Init_func_A.<static-init>.exit.i", label %12, !prof !12
 
 12:                                               ; preds = %typeTestSuccess.i.i.i
@@ -505,9 +504,9 @@ typeTestSuccess.i.i.i:                            ; preds = %8, %afterSymCallInt
 
 "Init_func_A.<static-init>.exit.i":               ; preds = %12, %typeTestSuccess.i.i.i
   %rawSym.i.i.i = tail call i64 @rb_id2sym(i64 %rubyId_write.i.i.i) #15
-  tail call void @rb_define_method(i64 %10, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_write, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#write" to i64 (...)*), i32 -1) #15
+  tail call void @rb_define_method(i64 %9, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_write, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#write" to i64 (...)*), i32 -1) #15
   %rawSym37.i.i.i = tail call i64 @rb_id2sym(i64 %rubyId_read.i.i.i) #15
-  tail call void @rb_define_method(i64 %10, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#read" to i64 (...)*), i32 -1) #15
+  tail call void @rb_define_method(i64 %9, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#read" to i64 (...)*), i32 -1) #15
   %13 = load i64, i64* @guard_epoch_A, align 8
   %14 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !10
   %needTakeSlowPath84.i = icmp eq i64 %13, %14

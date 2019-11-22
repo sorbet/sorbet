@@ -377,14 +377,13 @@ afterSymCallIntrinsic_unsafe.i:                   ; preds = %3, %typeTestSuccess
 
 7:                                                ; preds = %afterSymCallIntrinsic_unsafe.i
   tail call void @const_recompute_Foo() #10
-  %.pre = load i64, i64* @guard_epoch_Foo, align 8
   br label %typeTestSuccess.i.i.i
 
 typeTestSuccess.i.i.i:                            ; preds = %7, %afterSymCallIntrinsic_unsafe.i
-  %8 = phi i64 [ %.pre, %7 ], [ %5, %afterSymCallIntrinsic_unsafe.i ]
-  %9 = load i64, i64* @guarded_const_Foo, align 8
+  %8 = load i64, i64* @guarded_const_Foo, align 8
+  %9 = load i64, i64* @guard_epoch_Foo, align 8
   %10 = load i64, i64* @guard_epoch_T, align 8
-  %needTakeSlowPath28.i.i.i = icmp eq i64 %10, %8
+  %needTakeSlowPath28.i.i.i = icmp eq i64 %10, %9
   br i1 %needTakeSlowPath28.i.i.i, label %afterSymCallIntrinsic_unsafe.i.i.i, label %11, !prof !12
 
 11:                                               ; preds = %typeTestSuccess.i.i.i
@@ -392,7 +391,7 @@ typeTestSuccess.i.i.i:                            ; preds = %7, %afterSymCallInt
   br label %afterSymCallIntrinsic_unsafe.i.i.i
 
 afterSymCallIntrinsic_unsafe.i.i.i:               ; preds = %11, %typeTestSuccess.i.i.i
-  %12 = tail call i64 @rb_define_class_under(i64 %9, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Bar, i64 0, i64 0), i64 %0) #10
+  %12 = tail call i64 @rb_define_class_under(i64 %8, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Bar, i64 0, i64 0), i64 %0) #10
   %13 = load i64, i64* @"guard_epoch_Foo::Bar", align 8
   %14 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !10
   %needTakeSlowPath.i.i.i.i = icmp eq i64 %13, %14

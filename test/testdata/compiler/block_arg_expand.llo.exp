@@ -162,11 +162,10 @@ argArrayExpand:                                   ; preds = %sorbet_isa_Array.ex
 
 12:                                               ; preds = %argArrayExpand
   tail call void @rb_ary_detransient(i64 %arg1_maybeExpandToFullArgs) #12
-  %.pre = load i64, i64* %6, align 8, !tbaa !0
   br label %13
 
 13:                                               ; preds = %12, %argArrayExpand
-  %14 = phi i64 [ %.pre, %12 ], [ %7, %argArrayExpand ]
+  %14 = load i64, i64* %6, align 8, !tbaa !0
   %15 = and i64 %14, 8192
   %16 = icmp eq i64 %15, 0
   %17 = inttoptr i64 %arg1_maybeExpandToFullArgs to %struct.RArray*

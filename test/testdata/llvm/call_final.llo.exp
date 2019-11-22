@@ -548,15 +548,14 @@ afterSymCallIntrinsic_unsafe41.i:                 ; preds = %45, %40
 
 49:                                               ; preds = %afterSymCallIntrinsic_unsafe41.i
   call void @const_recompute_B() #17
-  %.pre = load i64, i64* @guard_epoch_B, align 8
   br label %typeTestSuccess.i.i.i
 
 typeTestSuccess.i.i.i:                            ; preds = %49, %afterSymCallIntrinsic_unsafe41.i
-  %50 = phi i64 [ %.pre, %49 ], [ %47, %afterSymCallIntrinsic_unsafe41.i ]
-  %51 = load i64, i64* @guarded_const_B, align 8
+  %50 = load i64, i64* @guarded_const_B, align 8
+  %51 = load i64, i64* @guard_epoch_B, align 8
   %rubyId_caller.i.i.i = load i64, i64* @rubyIdPrecomputed_caller, align 8
   %52 = load i64, i64* @guard_epoch_T, align 8
-  %needTakeSlowPath19.i.i.i = icmp eq i64 %52, %50
+  %needTakeSlowPath19.i.i.i = icmp eq i64 %52, %51
   br i1 %needTakeSlowPath19.i.i.i, label %"func_<root>.<static-init>$111.exit", label %53, !prof !12
 
 53:                                               ; preds = %typeTestSuccess.i.i.i
@@ -565,7 +564,7 @@ typeTestSuccess.i.i.i:                            ; preds = %49, %afterSymCallIn
 
 "func_<root>.<static-init>$111.exit":             ; preds = %typeTestSuccess.i.i.i, %53
   %rawSym.i.i.i = call i64 @rb_id2sym(i64 %rubyId_caller.i.i.i) #17
-  call void @rb_define_method(i64 %51, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_caller, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_B#caller" to i64 (...)*), i32 -1) #17
+  call void @rb_define_method(i64 %50, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_caller, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_B#caller" to i64 (...)*), i32 -1) #17
   ret void
 }
 
@@ -780,30 +779,33 @@ typeTestSuccess7.i:                               ; preds = %afterCallFinal_foo
   %15 = load i64, i64* @guard_epoch_A, align 8
   %16 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !10
   %needTakeSlowPath.i = icmp eq i64 %15, %16
-  br i1 %needTakeSlowPath.i, label %func_A.foo.exit, label %17, !prof !12
+  br i1 %needTakeSlowPath.i, label %18, label %17, !prof !12
 
 17:                                               ; preds = %typeTestSuccess7.i
   tail call void @const_recompute_A() #17
-  %.pre = load i64, i64* @guarded_const_A, align 8
-  %18 = icmp eq i64 %.pre, %11
-  br i1 %18, label %func_A.foo.exit, label %19
+  br label %18
 
-19:                                               ; preds = %17
-  %20 = load i64, i64* @rb_cModule, align 8, !tbaa !6
-  %21 = tail call i64 @rb_obj_is_kind_of(i64 %11, i64 %20) #5
-  %22 = icmp eq i64 %21, 0
-  br i1 %22, label %codeRepl18.i, label %sorbet_isa_class_of.exit.i, !prof !16
+18:                                               ; preds = %17, %typeTestSuccess7.i
+  %19 = load i64, i64* @guarded_const_A, align 8
+  %20 = icmp eq i64 %19, %11
+  br i1 %20, label %func_A.foo.exit, label %21
 
-sorbet_isa_class_of.exit.i:                       ; preds = %19
-  %23 = tail call i64 @rb_class_inherited_p(i64 %11, i64 %.pre) #5
+21:                                               ; preds = %18
+  %22 = load i64, i64* @rb_cModule, align 8, !tbaa !6
+  %23 = tail call i64 @rb_obj_is_kind_of(i64 %11, i64 %22) #5
   %24 = icmp eq i64 %23, 0
-  br i1 %24, label %codeRepl18.i, label %func_A.foo.exit, !prof !17, !misexpect !18
+  br i1 %24, label %codeRepl18.i, label %sorbet_isa_class_of.exit.i, !prof !16
 
-codeRepl18.i:                                     ; preds = %sorbet_isa_class_of.exit.i, %19
+sorbet_isa_class_of.exit.i:                       ; preds = %21
+  %25 = tail call i64 @rb_class_inherited_p(i64 %11, i64 %19) #5
+  %26 = icmp eq i64 %25, 0
+  br i1 %26, label %codeRepl18.i, label %func_A.foo.exit, !prof !17, !misexpect !18
+
+codeRepl18.i:                                     ; preds = %sorbet_isa_class_of.exit.i, %21
   tail call fastcc void @func_A.foo.cold.2(i64 %11) #20
   unreachable
 
-func_A.foo.exit:                                  ; preds = %typeTestSuccess7.i, %17, %sorbet_isa_class_of.exit.i
+func_A.foo.exit:                                  ; preds = %18, %sorbet_isa_class_of.exit.i
   ret i64 %rawArg_a
 }
 

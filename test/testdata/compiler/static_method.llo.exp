@@ -441,15 +441,14 @@ afterSymCallIntrinsic_unsafe.i:                   ; preds = %4, %typeTestSuccess
 
 8:                                                ; preds = %afterSymCallIntrinsic_unsafe.i
   tail call void @const_recompute_Foo() #15
-  %.pre = load i64, i64* @guard_epoch_Foo, align 8
   br label %typeTestSuccess.i.i.i
 
 typeTestSuccess.i.i.i:                            ; preds = %8, %afterSymCallIntrinsic_unsafe.i
-  %9 = phi i64 [ %.pre, %8 ], [ %6, %afterSymCallIntrinsic_unsafe.i ]
-  %10 = load i64, i64* @guarded_const_Foo, align 8
+  %9 = load i64, i64* @guarded_const_Foo, align 8
+  %10 = load i64, i64* @guard_epoch_Foo, align 8
   %rubyId_bar.i.i.i = load i64, i64* @rubyIdPrecomputed_bar, align 8
   %11 = load i64, i64* @guard_epoch_T, align 8
-  %needTakeSlowPath19.i.i.i = icmp eq i64 %11, %9
+  %needTakeSlowPath19.i.i.i = icmp eq i64 %11, %10
   br i1 %needTakeSlowPath19.i.i.i, label %"Init_func_Foo.<static-init>.exit.i", label %12, !prof !12
 
 12:                                               ; preds = %typeTestSuccess.i.i.i
@@ -458,7 +457,7 @@ typeTestSuccess.i.i.i:                            ; preds = %8, %afterSymCallInt
 
 "Init_func_Foo.<static-init>.exit.i":             ; preds = %12, %typeTestSuccess.i.i.i
   %rawSym.i.i.i = tail call i64 @rb_id2sym(i64 %rubyId_bar.i.i.i) #15
-  tail call void @rb_define_singleton_method(i64 %10, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @func_Foo.bar to i64 (...)*), i32 -1) #15
+  tail call void @rb_define_singleton_method(i64 %9, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @func_Foo.bar to i64 (...)*), i32 -1) #15
   %13 = load i64, i64* @guard_epoch_Foo, align 8
   %14 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !10
   %needTakeSlowPath40.i = icmp eq i64 %13, %14
