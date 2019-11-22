@@ -26,6 +26,7 @@ struct BasicBlockMap {
     std::vector<llvm::Value *> escapedClosure;
     UnorderedMap<core::LocalVariable, int> escapedVariableIndeces;
     llvm::BasicBlock *sigVerificationBlock;
+    llvm::BasicBlock *postProcessBlock;
     std::vector<std::shared_ptr<core::SendAndBlockLink>> blockLinks;
     std::vector<std::vector<core::LocalVariable>> rubyBlockArgs;
     std::vector<llvm::Function *> rubyBlocks2Functions;

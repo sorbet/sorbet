@@ -10,6 +10,7 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/sort.h"
+#include "compiler/Names/Names.h"
 
 using namespace std;
 namespace sorbet::compiler {
@@ -56,6 +57,16 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
             builder.CreateStore(MK::getRubyNilRaw(cs, builder), store);
         }
     }
+
+    {
+        // reserve the magical return value
+        auto name = Names::returnValue(cs);
+        auto var = core::LocalVariable{name, 1};
+        auto nameStr = name.data(cs)->toString(cs);
+        llvmVariables[var] =
+            builder.CreateAlloca(cs.getValueType(), nullptr, llvm::StringRef(nameStr.data(), nameStr.length()));
+    }
+
     return llvmVariables;
 }
 
@@ -293,6 +304,8 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
         }
     }
 
+    llvm::BasicBlock *postProcessBlock = llvm::BasicBlock::Create(cs, "postProcess");
+
     BasicBlockMap approximation{cfg.symbol,
                                 functionInitializersByFunction,
                                 argumentSetupBlocksByFunction,
@@ -303,6 +316,7 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
                                 escapedClosure,
                                 std::move(escapedVariableIndices),
                                 sigVerificationBlock,
+                                postProcessBlock,
                                 move(blockLinks),
                                 move(rubyBlockArgs),
                                 move(rubyBlock2Function),
