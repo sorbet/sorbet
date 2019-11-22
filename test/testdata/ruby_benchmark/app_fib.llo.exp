@@ -692,8 +692,8 @@ typeTestSuccess.i.i.i:                            ; preds = %sorbet_isa_class_of
   store i64 %rawSym.i.i.i, i64* %callArgsAddr.i.i.i, align 8
   %38 = load i64, i64* @"guard_epoch_T::Sig::WithoutRuntime", align 8
   %39 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
-  %needTakeSlowPath35.i.i.i = icmp eq i64 %38, %39
-  br i1 %needTakeSlowPath35.i.i.i, label %41, label %40, !prof !16
+  %needTakeSlowPath36.i.i.i = icmp eq i64 %38, %39
+  br i1 %needTakeSlowPath36.i.i.i, label %41, label %40, !prof !16
 
 40:                                               ; preds = %typeTestSuccess.i.i.i
   tail call void @"const_recompute_T::Sig::WithoutRuntime"() #18
@@ -704,8 +704,8 @@ typeTestSuccess.i.i.i:                            ; preds = %sorbet_isa_class_of
   %43 = call i64 @rb_block_call(i64 %42, i64 %rubyId_sig.i.i.i, i32 1, i64* nonnull %callArgsAddr.i.i.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_HasFib.<static-init>$block_1" to i64 (...)*), i64 %15) #18
   %44 = load i64, i64* @guard_epoch_T, align 8
   %45 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
-  %needTakeSlowPath37.i.i.i = icmp eq i64 %44, %45
-  br i1 %needTakeSlowPath37.i.i.i, label %"Init_func_HasFib.<static-init>.exit.i", label %46, !prof !16
+  %needTakeSlowPath38.i.i.i = icmp eq i64 %44, %45
+  br i1 %needTakeSlowPath38.i.i.i, label %"Init_func_HasFib.<static-init>.exit.i", label %46, !prof !16
 
 46:                                               ; preds = %41
   call void @const_recompute_T() #18
@@ -723,8 +723,8 @@ codeRepl:                                         ; preds = %32, %sorbet_isa_cla
   store i64 69, i64* %callArgsAddr.i, align 8
   %47 = load i64, i64* @guard_epoch_HasFib, align 8
   %48 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !14
-  %needTakeSlowPath36.i = icmp eq i64 %47, %48
-  br i1 %needTakeSlowPath36.i, label %"func_<root>.<static-init>$111.exit", label %49, !prof !16
+  %needTakeSlowPath37.i = icmp eq i64 %47, %48
+  br i1 %needTakeSlowPath37.i, label %"func_<root>.<static-init>$111.exit", label %49, !prof !16
 
 49:                                               ; preds = %"Init_func_HasFib.<static-init>.exit.i"
   call void @const_recompute_HasFib() #18
@@ -782,12 +782,12 @@ typeTestSuccess21:                                ; preds = %fillRequiredArgs
   %10 = load i64, i64* @rb_cModule, align 8, !tbaa !6
   %11 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %10) #5
   %12 = icmp eq i64 %11, 0
-  br i1 %12, label %codeRepl113, label %sorbet_isa_class_of.exit, !prof !20
+  br i1 %12, label %codeRepl114, label %sorbet_isa_class_of.exit, !prof !20
 
 sorbet_isa_class_of.exit:                         ; preds = %9
   %13 = tail call i64 @rb_class_inherited_p(i64 %selfRaw, i64 %7) #5
   %14 = icmp eq i64 %13, 0
-  br i1 %14, label %codeRepl113, label %sorbet_rb_int_lt.exit, !prof !10, !misexpect !21
+  br i1 %14, label %codeRepl114, label %sorbet_rb_int_lt.exit, !prof !10, !misexpect !21
 
 sorbet_rb_int_lt.exit:                            ; preds = %sorbet_isa_class_of.exit, %6
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
@@ -795,7 +795,7 @@ sorbet_rb_int_lt.exit:                            ; preds = %sorbet_isa_class_of
   %15 = icmp slt i64 %rawArg_n, 6
   br i1 %15, label %BB4, label %fastSymCallIntrinsic_-
 
-codeRepl113:                                      ; preds = %9, %sorbet_isa_class_of.exit
+codeRepl114:                                      ; preds = %9, %sorbet_isa_class_of.exit
   tail call fastcc void @func_HasFib.fib.cold.2(i64 %selfRaw) #20
   unreachable
 

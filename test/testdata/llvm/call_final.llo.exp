@@ -512,8 +512,8 @@ typeTestSuccess.i.i3.i:                           ; preds = %sorbet_isa_class_of
   store i64 %rawSym.i.i2.i, i64* %callArgsAddr.i.i.i, align 8
   %37 = load i64, i64* @"guard_epoch_T::Sig::WithoutRuntime", align 8
   %38 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !10
-  %needTakeSlowPath35.i.i.i = icmp eq i64 %37, %38
-  br i1 %needTakeSlowPath35.i.i.i, label %40, label %39, !prof !12
+  %needTakeSlowPath36.i.i.i = icmp eq i64 %37, %38
+  br i1 %needTakeSlowPath36.i.i.i, label %40, label %39, !prof !12
 
 39:                                               ; preds = %typeTestSuccess.i.i3.i
   tail call void @"const_recompute_T::Sig::WithoutRuntime"() #17
@@ -524,8 +524,8 @@ typeTestSuccess.i.i3.i:                           ; preds = %sorbet_isa_class_of
   %42 = call i64 @rb_block_call(i64 %41, i64 %rubyId_sig.i.i.i, i32 1, i64* nonnull %callArgsAddr.i.i.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_A.<static-init>$block_1" to i64 (...)*), i64 %14) #17
   %43 = load i64, i64* @guard_epoch_T, align 8
   %44 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !10
-  %needTakeSlowPath37.i.i.i = icmp eq i64 %43, %44
-  br i1 %needTakeSlowPath37.i.i.i, label %afterSymCallIntrinsic_unsafe41.i, label %45, !prof !12
+  %needTakeSlowPath38.i.i.i = icmp eq i64 %43, %44
+  br i1 %needTakeSlowPath38.i.i.i, label %afterSymCallIntrinsic_unsafe41.i, label %45, !prof !12
 
 45:                                               ; preds = %40
   call void @const_recompute_T() #17
@@ -556,8 +556,8 @@ typeTestSuccess.i.i.i:                            ; preds = %49, %afterSymCallIn
   %51 = load i64, i64* @guarded_const_B, align 8
   %rubyId_caller.i.i.i = load i64, i64* @rubyIdPrecomputed_caller, align 8
   %52 = load i64, i64* @guard_epoch_T, align 8
-  %needTakeSlowPath18.i.i.i = icmp eq i64 %52, %50
-  br i1 %needTakeSlowPath18.i.i.i, label %"func_<root>.<static-init>$111.exit", label %53, !prof !12
+  %needTakeSlowPath19.i.i.i = icmp eq i64 %52, %50
+  br i1 %needTakeSlowPath19.i.i.i, label %"func_<root>.<static-init>$111.exit", label %53, !prof !12
 
 53:                                               ; preds = %typeTestSuccess.i.i.i
   call void @const_recompute_T() #17
@@ -608,17 +608,17 @@ typeTestSuccess7:                                 ; preds = %fillRequiredArgs
   %10 = load i64, i64* @rb_cModule, align 8, !tbaa !6
   %11 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %10) #5
   %12 = icmp eq i64 %11, 0
-  br i1 %12, label %codeRepl17, label %sorbet_isa_class_of.exit, !prof !16
+  br i1 %12, label %codeRepl18, label %sorbet_isa_class_of.exit, !prof !16
 
 sorbet_isa_class_of.exit:                         ; preds = %9
   %13 = tail call i64 @rb_class_inherited_p(i64 %selfRaw, i64 %7) #5
   %14 = icmp eq i64 %13, 0
-  br i1 %14, label %codeRepl17, label %typeTestSuccess10, !prof !17, !misexpect !18
+  br i1 %14, label %codeRepl18, label %typeTestSuccess10, !prof !17, !misexpect !18
 
 typeTestSuccess10:                                ; preds = %sorbet_isa_class_of.exit, %6
   ret i64 %rawArg_n
 
-codeRepl17:                                       ; preds = %9, %sorbet_isa_class_of.exit
+codeRepl18:                                       ; preds = %9, %sorbet_isa_class_of.exit
   tail call fastcc void @func_A.foo.cold.2(i64 %selfRaw) #19
   unreachable
 }
@@ -754,8 +754,8 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
 typeTestSuccess:                                  ; preds = %4
   %8 = load i64, i64* @guard_epoch_B, align 8
   %9 = load i64, i64* @guard_epoch_A, align 8
-  %needTakeSlowPath15 = icmp eq i64 %9, %8
-  br i1 %needTakeSlowPath15, label %afterCallFinal_foo, label %10, !prof !12
+  %needTakeSlowPath16 = icmp eq i64 %9, %8
+  br i1 %needTakeSlowPath16, label %afterCallFinal_foo, label %10, !prof !12
 
 10:                                               ; preds = %typeTestSuccess
   tail call void @const_recompute_A() #17
@@ -792,14 +792,14 @@ typeTestSuccess7.i:                               ; preds = %afterCallFinal_foo
   %20 = load i64, i64* @rb_cModule, align 8, !tbaa !6
   %21 = tail call i64 @rb_obj_is_kind_of(i64 %11, i64 %20) #5
   %22 = icmp eq i64 %21, 0
-  br i1 %22, label %codeRepl17.i, label %sorbet_isa_class_of.exit.i, !prof !16
+  br i1 %22, label %codeRepl18.i, label %sorbet_isa_class_of.exit.i, !prof !16
 
 sorbet_isa_class_of.exit.i:                       ; preds = %19
   %23 = tail call i64 @rb_class_inherited_p(i64 %11, i64 %.pre) #5
   %24 = icmp eq i64 %23, 0
-  br i1 %24, label %codeRepl17.i, label %func_A.foo.exit, !prof !17, !misexpect !18
+  br i1 %24, label %codeRepl18.i, label %func_A.foo.exit, !prof !17, !misexpect !18
 
-codeRepl17.i:                                     ; preds = %sorbet_isa_class_of.exit.i, %19
+codeRepl18.i:                                     ; preds = %sorbet_isa_class_of.exit.i, %19
   tail call fastcc void @func_A.foo.cold.2(i64 %11) #20
   unreachable
 

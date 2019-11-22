@@ -413,7 +413,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %1 = load i64, i64* @rb_cObject, align 8
   %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #5
   %3 = icmp eq i64 %2, 20
-  br i1 %3, label %typeTestSuccess, label %codeRepl46, !prof !12, !misexpect !13
+  br i1 %3, label %typeTestSuccess, label %codeRepl47, !prof !12, !misexpect !13
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %4 = load i64, i64* @guard_epoch_A, align 8
@@ -431,7 +431,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %10 = icmp eq i64 %9, 20
   br i1 %10, label %typeTestSuccess31, label %codeRepl, !prof !12, !misexpect !13
 
-codeRepl46:                                       ; preds = %fillRequiredArgs
+codeRepl47:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#doubleCast.cold.2"(i64 %selfRaw) #16
   unreachable
 
@@ -509,8 +509,8 @@ typeTestSuccess.i.i.i:                            ; preds = %7, %afterSymCallInt
   %9 = load i64, i64* @guarded_const_A, align 8
   %rubyId_foo.i.i.i = load i64, i64* @rubyIdPrecomputed_foo, align 8
   %10 = load i64, i64* @guard_epoch_T, align 8
-  %needTakeSlowPath18.i.i.i = icmp eq i64 %10, %8
-  br i1 %needTakeSlowPath18.i.i.i, label %"func_<root>.<static-init>$111.exit", label %11, !prof !16
+  %needTakeSlowPath19.i.i.i = icmp eq i64 %10, %8
+  br i1 %needTakeSlowPath19.i.i.i, label %"func_<root>.<static-init>$111.exit", label %11, !prof !16
 
 11:                                               ; preds = %typeTestSuccess.i.i.i
   tail call void @const_recompute_T() #14

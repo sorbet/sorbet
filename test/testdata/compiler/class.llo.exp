@@ -384,8 +384,8 @@ typeTestSuccess.i.i.i:                            ; preds = %7, %afterSymCallInt
   %8 = phi i64 [ %.pre, %7 ], [ %5, %afterSymCallIntrinsic_unsafe.i ]
   %9 = load i64, i64* @guarded_const_Foo, align 8
   %10 = load i64, i64* @guard_epoch_T, align 8
-  %needTakeSlowPath27.i.i.i = icmp eq i64 %10, %8
-  br i1 %needTakeSlowPath27.i.i.i, label %afterSymCallIntrinsic_unsafe.i.i.i, label %11, !prof !12
+  %needTakeSlowPath28.i.i.i = icmp eq i64 %10, %8
+  br i1 %needTakeSlowPath28.i.i.i, label %afterSymCallIntrinsic_unsafe.i.i.i, label %11, !prof !12
 
 11:                                               ; preds = %typeTestSuccess.i.i.i
   tail call void @const_recompute_T() #10

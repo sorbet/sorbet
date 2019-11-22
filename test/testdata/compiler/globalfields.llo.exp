@@ -505,8 +505,8 @@ typeTestSuccess.i.i.i:                            ; preds = %8, %afterSymCallInt
   %rubyId_write.i.i.i = load i64, i64* @rubyIdPrecomputed_write, align 8
   %rubyId_read.i.i.i = load i64, i64* @rubyIdPrecomputed_read, align 8
   %11 = load i64, i64* @guard_epoch_T, align 8
-  %needTakeSlowPath41.i.i.i = icmp eq i64 %11, %9
-  br i1 %needTakeSlowPath41.i.i.i, label %"Init_func_A.<static-init>.exit.i", label %12, !prof !12
+  %needTakeSlowPath42.i.i.i = icmp eq i64 %11, %9
+  br i1 %needTakeSlowPath42.i.i.i, label %"Init_func_A.<static-init>.exit.i", label %12, !prof !12
 
 12:                                               ; preds = %typeTestSuccess.i.i.i
   tail call void @const_recompute_T() #15
@@ -519,8 +519,8 @@ typeTestSuccess.i.i.i:                            ; preds = %8, %afterSymCallInt
   tail call void @rb_define_method(i64 %10, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#read" to i64 (...)*), i32 -1) #15
   %13 = load i64, i64* @guard_epoch_A, align 8
   %14 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !10
-  %needTakeSlowPath74.i = icmp eq i64 %13, %14
-  br i1 %needTakeSlowPath74.i, label %"func_<root>.<static-init>$111.exit", label %15, !prof !12
+  %needTakeSlowPath75.i = icmp eq i64 %13, %14
+  br i1 %needTakeSlowPath75.i, label %"func_<root>.<static-init>$111.exit", label %15, !prof !12
 
 15:                                               ; preds = %"Init_func_A.<static-init>.exit.i"
   tail call void @const_recompute_A() #15

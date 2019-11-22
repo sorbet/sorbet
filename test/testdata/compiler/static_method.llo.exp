@@ -449,8 +449,8 @@ typeTestSuccess.i.i.i:                            ; preds = %8, %afterSymCallInt
   %10 = load i64, i64* @guarded_const_Foo, align 8
   %rubyId_bar.i.i.i = load i64, i64* @rubyIdPrecomputed_bar, align 8
   %11 = load i64, i64* @guard_epoch_T, align 8
-  %needTakeSlowPath18.i.i.i = icmp eq i64 %11, %9
-  br i1 %needTakeSlowPath18.i.i.i, label %"Init_func_Foo.<static-init>.exit.i", label %12, !prof !12
+  %needTakeSlowPath19.i.i.i = icmp eq i64 %11, %9
+  br i1 %needTakeSlowPath19.i.i.i, label %"Init_func_Foo.<static-init>.exit.i", label %12, !prof !12
 
 12:                                               ; preds = %typeTestSuccess.i.i.i
   tail call void @const_recompute_T() #15
@@ -461,8 +461,8 @@ typeTestSuccess.i.i.i:                            ; preds = %8, %afterSymCallInt
   tail call void @rb_define_singleton_method(i64 %10, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @func_Foo.bar to i64 (...)*), i32 -1) #15
   %13 = load i64, i64* @guard_epoch_Foo, align 8
   %14 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !10
-  %needTakeSlowPath39.i = icmp eq i64 %13, %14
-  br i1 %needTakeSlowPath39.i, label %"func_<root>.<static-init>$111.exit", label %15, !prof !12
+  %needTakeSlowPath40.i = icmp eq i64 %13, %14
+  br i1 %needTakeSlowPath40.i, label %"func_<root>.<static-init>$111.exit", label %15, !prof !12
 
 15:                                               ; preds = %"Init_func_Foo.<static-init>.exit.i"
   tail call void @const_recompute_Foo() #15

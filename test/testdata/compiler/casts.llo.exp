@@ -421,7 +421,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %1 = load i64, i64* @rb_cObject, align 8
   %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #5
   %3 = icmp eq i64 %2, 20
-  br i1 %3, label %typeTestSuccess, label %codeRepl29, !prof !12, !misexpect !13
+  br i1 %3, label %typeTestSuccess, label %codeRepl30, !prof !12, !misexpect !13
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %4 = load i64, i64* @rb_cBasicObject, align 8
@@ -446,7 +446,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %13 = icmp eq i64 %12, 20
   br i1 %13, label %typeTestSuccess24, label %codeRepl, !prof !12, !misexpect !13
 
-codeRepl29:                                       ; preds = %fillRequiredArgs
+codeRepl30:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#fooAll.cold.2"(i64 %selfRaw) #18
   unreachable
 
@@ -491,7 +491,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %1 = load i64, i64* @rb_cObject, align 8
   %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #5
   %3 = icmp eq i64 %2, 20
-  br i1 %3, label %typeTestSuccess, label %codeRepl33, !prof !12, !misexpect !13
+  br i1 %3, label %typeTestSuccess, label %codeRepl34, !prof !12, !misexpect !13
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %4 = load i64, i64* @rb_cInteger, align 8
@@ -519,7 +519,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %or.cond = or i1 %13, %15
   br i1 %or.cond, label %typeTestSuccess24, label %16
 
-codeRepl33:                                       ; preds = %fillRequiredArgs
+codeRepl34:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#fooAll.cold.2"(i64 %selfRaw)
   unreachable
 
@@ -580,7 +580,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %1 = load i64, i64* @rb_cObject, align 8
   %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #5
   %3 = icmp eq i64 %2, 20
-  br i1 %3, label %typeTestSuccess, label %codeRepl31, !prof !12, !misexpect !13
+  br i1 %3, label %typeTestSuccess, label %codeRepl32, !prof !12, !misexpect !13
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %4 = load i64, i64* @rb_cFloat, align 8
@@ -621,7 +621,7 @@ sorbet_isa_Float.exit:                            ; preds = %14
   %24 = icmp eq i64 %23, 4
   br i1 %24, label %typeTestSuccess24, label %orContinue
 
-codeRepl31:                                       ; preds = %fillRequiredArgs
+codeRepl32:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#fooAll.cold.2"(i64 %selfRaw)
   unreachable
 
@@ -661,14 +661,14 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %1 = load i64, i64* @rb_cObject, align 8
   %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #5
   %3 = icmp eq i64 %2, 20
-  br i1 %3, label %typeTestSuccess, label %codeRepl50, !prof !12, !misexpect !13
+  br i1 %3, label %typeTestSuccess, label %codeRepl51, !prof !12, !misexpect !13
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %4 = and i64 %rawArg_arg, 1
   %5 = icmp eq i64 %4, 0
   br i1 %5, label %codeRepl, label %6, !prof !18, !misexpect !13
 
-codeRepl50:                                       ; preds = %fillRequiredArgs
+codeRepl51:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#fooAll.cold.2"(i64 %selfRaw)
   unreachable
 
@@ -727,7 +727,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %1 = load i64, i64* @rb_cObject, align 8
   %2 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %1) #5
   %3 = icmp eq i64 %2, 20
-  br i1 %3, label %typeTestSuccess, label %codeRepl27, !prof !12, !misexpect !13
+  br i1 %3, label %typeTestSuccess, label %codeRepl28, !prof !12, !misexpect !13
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %4 = load i64, i64* @rb_cInteger, align 8
@@ -760,7 +760,7 @@ sorbet_isa_Array.exit:                            ; preds = %8
   %20 = icmp eq i64 %19, 7
   br i1 %20, label %typeTestSuccess22, label %codeRepl, !prof !12, !misexpect !13
 
-codeRepl27:                                       ; preds = %fillRequiredArgs
+codeRepl28:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#fooAll.cold.2"(i64 %selfRaw)
   unreachable
 
