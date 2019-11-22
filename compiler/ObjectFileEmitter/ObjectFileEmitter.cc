@@ -131,7 +131,8 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createLoopDeletionPass());
     pm.add(llvm::createSimpleLoopUnrollPass(2, false, false));
     pm.add(llvm::createMergedLoadStoreMotionPass());
-    pm.add(llvm::createGVNPass(false)); // createNewGVNPass()
+    // pm.add(llvm::createGVNPass(false));
+    pm.add(llvm::createNewGVNPass()); // by default clang uses _old_ GVN
     pm.add(llvm::createMemCpyOptPass());
     pm.add(llvm::createSCCPPass());
     pm.add(llvm::createBitTrackingDCEPass());
