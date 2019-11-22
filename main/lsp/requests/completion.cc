@@ -253,9 +253,9 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
                      const core::TypeConstraint *constraint) {
     fmt::memory_buffer result;
     fmt::format_to(result, "{}", method.data(gs)->name.data(gs)->shortName(gs));
-    vector<string> typeAndArgNames;
+    auto nextTabstop = 1;
 
-    int i = 1;
+    vector<string> typeAndArgNames;
     if (method.data(gs)->isMethod()) {
         for (auto &argSym : method.data(gs)->arguments()) {
             fmt::memory_buffer argBuf;
@@ -270,9 +270,9 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
             }
             if (argSym.type) {
                 auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint)->show(gs);
-                fmt::format_to(argBuf, "${{{}:{}}}", i++, resultType);
+                fmt::format_to(argBuf, "${{{}:{}}}", nextTabstop++, resultType);
             } else {
-                fmt::format_to(argBuf, "${{{}}}", i++);
+                fmt::format_to(argBuf, "${{{}}}", nextTabstop++);
             }
             typeAndArgNames.emplace_back(to_string(argBuf));
         }
