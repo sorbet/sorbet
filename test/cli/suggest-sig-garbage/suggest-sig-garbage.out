@@ -12,6 +12,35 @@ suggest-sig-garbage.rb:92: Method `with_block` uses `yield` but does not mention
     93 |  yield
           ^^^^^
 
+suggest-sig-garbage.rb:124: `generated` is deprecated. See docs for alternatives https://srb.help/5056
+     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig-garbage.rb:124: Deleted
+     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+     125 |def fooCondGeneratedCurly(a, cond)
+
+suggest-sig-garbage.rb:135: `generated` is deprecated. See docs for alternatives https://srb.help/5056
+     135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
+     136 |  returns(T.untyped).
+     137 |  generated
+  Autocorrect: Done
+    suggest-sig-garbage.rb:134: Deleted
+     134 |sig do
+     135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
+     136 |  returns(T.untyped).
+     137 |  generated
+     138 |end
+     139 |def fooCondGeneratedDo(a, cond)
+
+suggest-sig-garbage.rb:147: `generated` is deprecated. See docs for alternatives https://srb.help/5056
+     147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig-garbage.rb:147: Deleted
+     147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+     148 |def updatesUntypedToProfiled(a, cond)
+
 suggest-sig-garbage.rb:5: This function does not have a `sig` https://srb.help/7017
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
@@ -199,7 +228,7 @@ suggest-sig-garbage.rb:125: This function does not have a `sig` https://srb.help
   Autocorrect: Done
     suggest-sig-garbage.rb:124: Replaced with `sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 `
-     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
+     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
      125 |def fooCondGeneratedCurly(a, cond)
 
 suggest-sig-garbage.rb:139: This function does not have a `sig` https://srb.help/7017
@@ -209,7 +238,7 @@ suggest-sig-garbage.rb:139: This function does not have a `sig` https://srb.help
     suggest-sig-garbage.rb:134: Replaced with `sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 `
      134 |sig do
-     135 |  params(a: T.untyped, cond: T::Boolean).
+     135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
      136 |  returns(T.untyped).
      137 |  generated
      138 |end
@@ -221,7 +250,7 @@ suggest-sig-garbage.rb:148: This function does not have a `sig` https://srb.help
   Autocorrect: Done
     suggest-sig-garbage.rb:147: Replaced with `sig {params(a: ::T::Utils::RuntimeProfiled, cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 `
-     147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
+     147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
      148 |def updatesUntypedToProfiled(a, cond)
 
 suggest-sig-garbage.rb:152: This function does not have a `sig` https://srb.help/7017
@@ -288,7 +317,7 @@ suggest-sig-garbage.rb:108: Method `sig` does not exist on `T.class_of(TestCaras
 suggest-sig-garbage.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
      108 |  sig {params(merchant: Merchant).void}
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 39
+Errors: 42
 
 --------------------------------------------------------------------------
 
@@ -436,7 +465,6 @@ def cantRun(a)
   1
 end
 
-sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 def fooCondGeneratedCurly(a, cond)
   if cond
     takesInt(a)
@@ -446,7 +474,6 @@ def fooCondGeneratedCurly(a, cond)
 end
 
 
-sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 def fooCondGeneratedDo(a, cond)
   if cond
     takesInt(a)
@@ -455,7 +482,6 @@ def fooCondGeneratedDo(a, cond)
   end
 end
 
-sig {params(a: ::T::Utils::RuntimeProfiled, cond: T::Boolean).returns(::T::Utils::RuntimeProfiled)}
 def updatesUntypedToProfiled(a, cond)
   a.baz
 end
