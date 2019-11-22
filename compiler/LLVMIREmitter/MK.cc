@@ -260,6 +260,16 @@ llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llv
     return ret;
 }
 
+void MK::pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &build, cfg::CFG &cfg) {
+    auto &builder = builderCast(build);
+    builder.CreateCall(cs.module->getFunction("sorbet_pushControlFrame"), {});
+}
+
+void MK::popControlFrame(CompilerState &cs, llvm::IRBuilderBase &build) {
+    auto &builder = builderCast(build);
+    builder.CreateCall(cs.module->getFunction("sorbet_popControlFrame"), {});
+}
+
 namespace {
 llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &builder, const BasicBlockMap &blockMap) {
     auto sym = blockMap.forMethod.data(cs)->owner;
