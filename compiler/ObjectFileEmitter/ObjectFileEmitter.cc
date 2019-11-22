@@ -72,14 +72,13 @@ bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, con
 }
 
 constexpr bool runExpensiveInstructionConbining = false; // true in O3
+constexpr bool unnecessaryForUs = false; // phases that don't do anything due to us not being a c++ compiler
 
 void addModulePasses(llvm::legacy::PassManager &pm) {
     // this is intended to mimic llvm::PassManagerBuilder::populateModulePassManager
     // while disabling optimizations that don't help us much to speedup and adding ones that do. Please explicitly
     // leave comments with added/removed passes
     // pmbuilder.populateModulePassManager(pm);
-
-    bool unnecessaryForUs = false; // phases that don't do anything due to us not being a c++ compiler
 
     pm.add(llvm::createSROAPass()); // this is super useful for us so we want to run it early
     if (unnecessaryForUs) {
@@ -188,7 +187,9 @@ void addLTOPasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createGlobalDCEPass());
     pm.add(llvm::createTypeBasedAAWrapperPass());
     pm.add(llvm::createScopedNoAliasAAWrapperPass());
-    pm.add(llvm::createForceFunctionAttrsLegacyPass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createForceFunctionAttrsLegacyPass());
+    }
     pm.add(llvm::createInferFunctionAttrsLegacyPass());
     pm.add(llvm::createCallSiteSplittingPass());
     pm.add(llvm::createPGOIndirectCallPromotionLegacyPass(true, false));
@@ -198,7 +199,10 @@ void addLTOPasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createPostOrderFunctionAttrsLegacyPass());
     pm.add(llvm::createReversePostOrderFunctionAttrsPass());
     pm.add(llvm::createGlobalSplitPass());
-    pm.add(llvm::createWholeProgramDevirtPass(nullptr, nullptr));
+
+    if (unnecessaryForUs) {
+        pm.add(llvm::createWholeProgramDevirtPass(nullptr, nullptr));
+    }
     pm.add(llvm::createGlobalOptimizerPass());
     pm.add(llvm::createPromoteMemoryToRegisterPass());
     pm.add(llvm::createConstantMergePass());
@@ -240,7 +244,10 @@ void addLTOPasses(llvm::legacy::PassManager &pm) {
 
     // non-optimization passes
     pm.add(llvm::createCrossDSOCFIPass());
-    pm.add(llvm::createLowerTypeTestsPass(nullptr, nullptr));
+
+    if (unnecessaryForUs) {
+        pm.add(llvm::createLowerTypeTestsPass(nullptr, nullptr));
+    }
 
     // late optimization passes
     // pm.add(llvm::createHotColdSplittingPass());
