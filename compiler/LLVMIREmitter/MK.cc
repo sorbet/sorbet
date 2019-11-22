@@ -260,9 +260,15 @@ llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llv
     return ret;
 }
 
-void MK::pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &build, cfg::CFG &cfg) {
+void MK::pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &build, core::SymbolRef sym) {
     auto &builder = builderCast(build);
-    builder.CreateCall(cs.module->getFunction("sorbet_pushControlFrame"), {});
+    auto funcName = sym.data(cs)->name.data(cs)->shortName(cs);
+    auto rawCString = MK::toCString(cs, funcName, builder);
+    auto funcNameId =
+        builder.CreateCall(cs.module->getFunction("sorbet_IDIntern"),
+                           {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, funcName.length()))}, "rawId");
+    auto recv = MK::getRubyConstantValueRaw(cs, sym.data(cs)->owner, builder);
+    builder.CreateCall(cs.module->getFunction("sorbet_pushControlFrame"), {recv, funcNameId});
 }
 
 void MK::popControlFrame(CompilerState &cs, llvm::IRBuilderBase &build) {

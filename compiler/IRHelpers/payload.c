@@ -544,7 +544,7 @@ VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
 // ****                       Control Frames
 // ****
 
-void sorbet_pushControlFrame() {
+void sorbet_pushControlFrame(VALUE recv, ID func) {
     // rb_vm_push_frame();
 }
 

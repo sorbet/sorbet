@@ -119,7 +119,7 @@ public:
     static llvm::Value *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
     static llvm::Value *createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                          const core::TypePtr &type);
-    static void pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::CFG &cfg);
+    static void pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &builder, core::SymbolRef sym);
     static void popControlFrame(CompilerState &cs, llvm::IRBuilderBase &builder);
 
     static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,

@@ -475,7 +475,7 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
         builder.SetInsertPoint(successBlock);
     }
 
-    MK::pushControlFrame(cs, builder, cfg);
+    MK::pushControlFrame(cs, builder, cfg.symbol);
     builder.CreateBr(blockMap.userEntryBlockByFunction[0]);
 }
 
