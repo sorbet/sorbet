@@ -36,7 +36,7 @@ ast::Send *asFlatfileDo(ast::Expression *stat) {
 }
 
 void handleFieldDefinition(core::MutableContext ctx, unique_ptr<ast::Expression> &stat,
-                             vector<unique_ptr<ast::Expression>> &methods) {
+                           vector<unique_ptr<ast::Expression>> &methods) {
     if (auto send = ast::cast_tree<ast::Send>(stat.get())) {
         if ((send->fun != core::Names::from() && send->fun != core::Names::field() &&
              send->fun != core::Names::pattern()) ||
