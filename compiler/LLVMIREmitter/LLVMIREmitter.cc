@@ -265,6 +265,10 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     }
 }
 
+core::LocalVariable returnValue(CompilerState &cs) {
+    return {Names::returnValue(cs), 1};
+}
+
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
                   UnorderedMap<core::LocalVariable, Alias> &aliases) {
     llvm::IRBuilder<> builder(cs);
@@ -321,14 +325,14 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         isTerminated = true;
                         MK::popControlFrame(cs, builder);
                         auto var = MK::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
-                        builder.CreateRet(var);
+                        MK::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
                     },
                     [&](cfg::BlockReturn *i) {
                         ENFORCE(bb->rubyBlockId != 0, "should never happen");
                         isTerminated = true;
                         MK::popControlFrame(cs, builder);
                         auto var = MK::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
-                        builder.CreateRet(var);
+                        MK::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
                     },
                     [&](cfg::LoadSelf *i) {
                         auto var = MK::varGet(cs, i->fallback, builder, blockMap, aliases, bb->rubyBlockId);
@@ -438,12 +442,22 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     builder.CreateBr(
                         blockMap.llvmBlocksBySorbetBlocks[blockMap.basicBlockJumpOverrides[bb->bexit.thenb->id]]);
                 }
+            } else {
+                builder.CreateBr(blockMap.postProcessBlock);
             }
         } else {
             // handle dead block. TODO: this should throw
             builder.CreateRet(MK::getRubyNilRaw(cs, builder));
         }
     }
+}
+
+void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
+                     UnorderedMap<core::LocalVariable, Alias> &aliases) {
+    llvm::IRBuilder<> builder(cs);
+    builder.SetInsertPoint(blockMap.postProcessBlock);
+    auto var = MK::varGet(cs, returnValue(cs), builder, blockMap, aliases, 0);
+    builder.CreateRet(var);
 }
 
 void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
@@ -505,6 +519,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     emitSigVerification(cs, cfg, md, blockMap, aliases);
 
     emitUserBody(cs, cfg, blockMap, aliases);
+    emitPostProcess(cs, cfg, blockMap, aliases);
     for (int funId = 0; funId < blockMap.functionInitializersByFunction.size(); funId++) {
         builder.SetInsertPoint(blockMap.functionInitializersByFunction[funId]);
         builder.CreateBr(blockMap.argumentSetupBlocksByFunction[funId]);

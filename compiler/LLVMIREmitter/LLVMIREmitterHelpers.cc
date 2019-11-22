@@ -304,7 +304,7 @@ BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerSta
         }
     }
 
-    llvm::BasicBlock *postProcessBlock = llvm::BasicBlock::Create(cs, "postProcess");
+    llvm::BasicBlock *postProcessBlock = llvm::BasicBlock::Create(cs, "postProcess", mainFunc);
 
     BasicBlockMap approximation{cfg.symbol,
                                 functionInitializersByFunction,
