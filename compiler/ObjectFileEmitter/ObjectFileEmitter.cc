@@ -172,6 +172,10 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
 
     pm.add(llvm::createHotColdSplittingPass());
     pm.add(llvm::createMergeFunctionsPass());
+    // START SORBET ADDITION
+    // after splitting hot/cold paths, inline hot paths before GVN
+    pm.add(llvm::createFunctionInliningPass(optLevel, sizeLevel, false));
+    // END SORBET ADDITION
     pm.add(llvm::createLoopSinkPass());
     pm.add(llvm::createInstSimplifyLegacyPass());
     pm.add(llvm::createDivRemPairsPass());
@@ -233,6 +237,25 @@ void addLTOPasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createLoopVectorizePass(false, false));
     pm.add(llvm::createLoopUnrollPass(2, false, false));
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
+    {
+        // Sorbet modifications, run our lowering super late in pipeline
+        // this allows other optimizations to move intrinsics around as black boxes and keep optimizing them under
+        // assumptions(that are marked with function attributes)
+        for (auto pass : Passes::standardLowerings()) {
+            pm.add(pass);
+        }
+
+        {
+            pm.add(llvm::createFunctionInliningPass(optLevel, sizeLevel, false));
+            pm.add(llvm::createPruneEHPass());
+            pm.add(llvm::createGlobalOptimizerPass());
+            pm.add(llvm::createGlobalDCEPass());
+            pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
+            pm.add(llvm::createTailCallEliminationPass());
+            // pm.add(llvm::createNewGVNPass()); // a single benchmark(fib) benefits from this. Wonder if pay-server
+            // does?
+        }
+    }
     pm.add(llvm::createCFGSimplificationPass());
     pm.add(llvm::createSCCPPass());
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
@@ -328,9 +351,6 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     pmbuilder.VerifyInput = debug_mode;
     targetMachine->adjustPassManager(pmbuilder);
     pmbuilder.populateFunctionPassManager(fnPasses);
-    for (auto pass : Passes::standardLowerings()) {
-        pm.add(pass);
-    }
     std::error_code ec1;
     // print lowered IR
     auto nameOptl = ((string)dir) + "/" + (string)objectName + ".lll";
