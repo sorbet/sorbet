@@ -401,7 +401,20 @@ vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPType
         t.tree = ast::TreeMap::apply(ctx, localVarFinder, move(t.tree));
     }
 
-    return localVarFinder.result();
+    auto result = localVarFinder.result();
+    fast_sort(result, [&gs](const auto &left, const auto &right) {
+        // Sort by actual name, not by NameRef id
+        if (left._name != right._name) {
+            return left._name.data(gs)->shortName(gs) < right._name.data(gs)->shortName(gs);
+        } else {
+            return left < right;
+        }
+    });
+
+    // Dedup
+    auto it = unique(result.begin(), result.end());
+    result.erase(it, result.end());
+    return result;
 }
 
 core::SymbolRef firstMethodAfterQuery(LSPTypechecker &typechecker, const core::Loc queryLoc) {
@@ -671,14 +684,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
         }
 
         auto locals = localsForMethod(gs, typechecker, sendResp->enclosingMethod);
-        fast_sort(locals, [&gs](const auto &left, const auto &right) {
-            // Sort by actual name, not by NameRef id
-            if (left._name != right._name) {
-                return left._name.data(gs)->shortName(gs) < right._name.data(gs)->shortName(gs);
-            } else {
-                return left < right;
-            }
-        });
+
         auto similarLocals =
             sendResp->isPrivateOk ? allSimilarLocals(gs, locals, prefix) : vector<core::LocalVariable>{};
 
