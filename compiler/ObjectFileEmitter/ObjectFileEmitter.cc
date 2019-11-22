@@ -78,8 +78,11 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     // pmbuilder.populateModulePassManager(pm);
 
     bool runExpensiveInstructionConbining = false; // true in O3
+    bool unnecessaryForUs = false;                 // phases that don't do anything due to us not being a c++ compiler
 
-    pm.add(llvm::createForceFunctionAttrsLegacyPass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createForceFunctionAttrsLegacyPass());
+    }
     pm.add(llvm::createTypeBasedAAWrapperPass());
     pm.add(llvm::createScopedNoAliasAAWrapperPass());
     pm.add(llvm::createInferFunctionAttrsLegacyPass());
@@ -103,13 +106,17 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     // pm.add(llvm::createArgumentPromotionPass()); // O3
     pm.add(llvm::createSROAPass());
     pm.add(llvm::createEarlyCSEPass(true /* Enable mem-ssa. */));
-    pm.add(llvm::createSpeculativeExecutionIfHasBranchDivergencePass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createSpeculativeExecutionIfHasBranchDivergencePass());
+    }
     pm.add(llvm::createJumpThreadingPass());
     pm.add(llvm::createCorrelatedValuePropagationPass());
     pm.add(llvm::createCFGSimplificationPass());
     // pm.add(llvm::createAggressiveInstCombinerPass()); // O3
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
-    pm.add(llvm::createLibCallsShrinkWrapPass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createLibCallsShrinkWrapPass());
+    }
     pm.add(llvm::createPGOMemOPSizeOptLegacyPass());
     pm.add(llvm::createTailCallEliminationPass());
     pm.add(llvm::createCFGSimplificationPass());
