@@ -70,6 +70,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             srcs = [filegroup_name],
             tools = [":generate_out_file"],
             cmd = "$(location :generate_out_file) $(location {}) $(locations {})".format(expected_outfile, filegroup_name),
+            tags = tags + extra_tags,
         )
 
         native.sh_test(
