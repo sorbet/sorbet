@@ -666,7 +666,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %4 = and i64 %rawArg_arg, 1
   %5 = icmp eq i64 %4, 0
-  br i1 %5, label %typeTestFail30, label %"fastSymCallIntrinsic_+", !prof !18, !misexpect !13
+  br i1 %5, label %typeTestFail30, label %6, !prof !18, !misexpect !13
 
 typeTestFail:                                     ; preds = %fillRequiredArgs
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0))
@@ -676,22 +676,22 @@ typeTestFail30:                                   ; preds = %typeTestSuccess
   tail call fastcc void @sorbet_cast_failure(i64 %rawArg_arg, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0))
   unreachable
 
-"fastSymCallIntrinsic_+":                         ; preds = %typeTestSuccess
-  %6 = add nsw i64 %rawArg_arg, -1
-  %7 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %rawArg_arg, i64 %6) #15
-  %8 = extractvalue { i64, i1 } %7, 1
-  %9 = extractvalue { i64, i1 } %7, 0
-  br i1 %8, label %10, label %sorbet_rb_int_plus.exit
+6:                                                ; preds = %typeTestSuccess
+  %7 = add nsw i64 %rawArg_arg, -1
+  %8 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %rawArg_arg, i64 %7) #15
+  %9 = extractvalue { i64, i1 } %8, 1
+  %10 = extractvalue { i64, i1 } %8, 0
+  br i1 %9, label %11, label %sorbet_rb_int_plus.exit
 
-10:                                               ; preds = %"fastSymCallIntrinsic_+"
-  %11 = ashr i64 %9, 1
-  %12 = xor i64 %11, -9223372036854775808
-  %13 = tail call i64 @rb_int2big(i64 %12) #15, !noalias !19
+11:                                               ; preds = %6
+  %12 = ashr i64 %10, 1
+  %13 = xor i64 %12, -9223372036854775808
+  %14 = tail call i64 @rb_int2big(i64 %13) #15, !noalias !19
   br label %sorbet_rb_int_plus.exit
 
-sorbet_rb_int_plus.exit:                          ; preds = %"fastSymCallIntrinsic_+", %10
-  %14 = phi i64 [ %13, %10 ], [ %9, %"fastSymCallIntrinsic_+" ]
-  ret i64 %14
+sorbet_rb_int_plus.exit:                          ; preds = %6, %11
+  %15 = phi i64 [ %14, %11 ], [ %10, %6 ]
+  ret i64 %15
 }
 
 ; Function Attrs: nounwind ssp
