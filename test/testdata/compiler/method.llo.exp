@@ -47,7 +47,7 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 
 ; Function Attrs: nounwind ssp uwtable
 define weak i8* @dbg_pi(i64 %0) local_unnamed_addr #0 {
-  %2 = tail call i8* @rb_id2name(i64 %0) #15
+  %2 = tail call i8* @rb_id2name(i64 %0) #16
   ret i8* %2
 }
 
@@ -55,13 +55,13 @@ declare i8* @rb_id2name(i64) local_unnamed_addr #1
 
 ; Function Attrs: nounwind ssp uwtable
 define weak i8* @dbg_p(i64 %0) local_unnamed_addr #0 {
-  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i64 0, i64 0), i64 %0) #15
+  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i64 0, i64 0), i64 %0) #16
   %3 = inttoptr i64 %2 to %struct.RBasic*
   %4 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %3, i64 0, i32 0
   %5 = load i64, i64* %4, align 8, !tbaa !0
   %6 = and i64 %5, 8192
   %7 = icmp eq i64 %6, 0
-  %8 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i64 0, i64 0), i64 %0) #15
+  %8 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i64 0, i64 0), i64 %0) #16
   %9 = inttoptr i64 %8 to %struct.RString*
   br i1 %7, label %10, label %13
 
@@ -92,9 +92,9 @@ declare i8* @rb_obj_classname(i64) local_unnamed_addr #1
 
 ; Function Attrs: noinline nounwind ssp uwtable
 define internal fastcc i64 @sorbet_getConstantAt(i64 %0, i64 %1) unnamed_addr #2 {
-  %3 = tail call i64 @rb_id2sym(i64 %1) #15
-  %4 = tail call %struct.OnigEncodingTypeST* @rb_enc_get(i64 %3) #15
-  %5 = tail call i8* @rb_id2name(i64 %1) #15
+  %3 = tail call i64 @rb_id2sym(i64 %1) #16
+  %4 = tail call %struct.OnigEncodingTypeST* @rb_enc_get(i64 %3) #16
+  %5 = tail call i8* @rb_id2name(i64 %1) #16
   %6 = tail call i64 @strlen(i8* nonnull dereferenceable(1) %5)
   %7 = getelementptr inbounds i8, i8* %5, i64 %6
   %8 = icmp sgt i64 %6, 0
@@ -107,7 +107,7 @@ define internal fastcc i64 @sorbet_getConstantAt(i64 %0, i64 %1) unnamed_addr #2
 .loopexit10:                                      ; preds = %rb_obj_freeze_inline.exit, %44, %41, %28, %101
   %11 = phi i64 [ %102, %101 ], [ %3, %28 ], [ %3, %44 ], [ %3, %41 ], [ %66, %rb_obj_freeze_inline.exit ]
   %12 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !6
-  tail call void (i64, i8*, ...) @rb_raise(i64 %12, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @.str.1, i64 0, i64 0), i64 %14, i64 %11) #16
+  tail call void (i64, i8*, ...) @rb_raise(i64 %12, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @.str.1, i64 0, i64 0), i64 %14, i64 %11) #17
   unreachable
 
 13:                                               ; preds = %109, %9
@@ -148,7 +148,7 @@ define internal fastcc i64 @sorbet_getConstantAt(i64 %0, i64 %1) unnamed_addr #2
   %33 = ptrtoint i8* %29 to i64
   %34 = ptrtoint i8* %15 to i64
   %35 = sub i64 %33, %34
-  %36 = tail call i64 @rb_check_id_cstr(i8* %15, i64 %35, %struct.OnigEncodingTypeST* %4) #15
+  %36 = tail call i64 @rb_check_id_cstr(i8* %15, i64 %35, %struct.OnigEncodingTypeST* %4) #16
   %37 = sub i64 %34, %10
   br i1 %30, label %38, label %48
 
@@ -188,7 +188,7 @@ define internal fastcc i64 @sorbet_getConstantAt(i64 %0, i64 %1) unnamed_addr #2
 
 61:                                               ; preds = %56, %48
   %62 = load i64, i64* @rb_eTypeError, align 8, !tbaa !6
-  tail call void (i64, i8*, ...) @rb_raise(i64 %62, i8* getelementptr inbounds ([36 x i8], [36 x i8]* @.str.2, i64 0, i64 0), i64 %3) #16
+  tail call void (i64, i8*, ...) @rb_raise(i64 %62, i8* getelementptr inbounds ([36 x i8], [36 x i8]* @.str.2, i64 0, i64 0), i64 %3) #17
   unreachable
 
 63:                                               ; preds = %56
@@ -196,7 +196,7 @@ define internal fastcc i64 @sorbet_getConstantAt(i64 %0, i64 %1) unnamed_addr #2
   br i1 %64, label %65, label %98
 
 65:                                               ; preds = %63
-  %66 = tail call i64 @rb_str_subseq(i64 %3, i64 %37, i64 %35) #15
+  %66 = tail call i64 @rb_str_subseq(i64 %3, i64 %37, i64 %35) #16
   %67 = and i64 %66, 7
   %68 = icmp ne i64 %67, 0
   %69 = and i64 %66, -9
@@ -224,28 +224,28 @@ define internal fastcc i64 @sorbet_getConstantAt(i64 %0, i64 %1) unnamed_addr #2
   br i1 %85, label %86, label %rb_obj_freeze_inline.exit
 
 86:                                               ; preds = %78
-  tail call void @rb_freeze_singleton_class(i64 %66) #15
+  tail call void @rb_freeze_singleton_class(i64 %66) #16
   br label %rb_obj_freeze_inline.exit
 
 rb_obj_freeze_inline.exit:                        ; preds = %65, %72, %78, %86
-  %87 = tail call i32 @rb_is_const_name(i64 %66) #15
+  %87 = tail call i32 @rb_is_const_name(i64 %66) #16
   %88 = icmp eq i32 %87, 0
   br i1 %88, label %.loopexit10, label %rb_class_of.exit
 
 rb_class_of.exit:                                 ; preds = %rb_obj_freeze_inline.exit
   %89 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %57, i64 0, i32 1
   %90 = load i64, i64* %89, align 8, !tbaa !6
-  %91 = tail call i32 @rb_method_basic_definition_p(i64 %90, i64 2737) #15
+  %91 = tail call i32 @rb_method_basic_definition_p(i64 %90, i64 2737) #16
   %92 = icmp eq i32 %91, 0
   br i1 %92, label %93, label %96
 
 93:                                               ; preds = %rb_class_of.exit
-  %94 = tail call i64 @rb_str_intern(i64 %66) #15
-  %95 = tail call i64 @rb_const_missing(i64 %14, i64 %94) #15
+  %94 = tail call i64 @rb_str_intern(i64 %66) #16
+  %95 = tail call i64 @rb_const_missing(i64 %14, i64 %94) #16
   br label %109
 
 96:                                               ; preds = %rb_class_of.exit
-  %97 = tail call i64 @rb_mod_const_missing(i64 %14, i64 %66) #16
+  %97 = tail call i64 @rb_mod_const_missing(i64 %14, i64 %66) #17
   unreachable
 
 98:                                               ; preds = %63
@@ -254,7 +254,7 @@ rb_class_of.exit:                                 ; preds = %rb_obj_freeze_inlin
   br i1 %100, label %101, label %103
 
 101:                                              ; preds = %98
-  %102 = tail call i64 @rb_id2sym(i64 %36) #15
+  %102 = tail call i64 @rb_id2sym(i64 %36) #16
   br label %.loopexit10
 
 103:                                              ; preds = %98
@@ -262,11 +262,11 @@ rb_class_of.exit:                                 ; preds = %rb_obj_freeze_inlin
   br i1 %104, label %105, label %107
 
 105:                                              ; preds = %103
-  %106 = tail call i64 @rb_const_get(i64 %14, i64 %36) #15
+  %106 = tail call i64 @rb_const_get(i64 %14, i64 %36) #16
   br label %109
 
 107:                                              ; preds = %103
-  %108 = tail call i64 @rb_const_get_from(i64 %14, i64 %36) #15
+  %108 = tail call i64 @rb_const_get_from(i64 %14, i64 %36) #16
   br label %109
 
 109:                                              ; preds = %107, %105, %93
@@ -312,7 +312,7 @@ declare i64 @rb_const_get_from(i64, i64) local_unnamed_addr #1
 ; Function Attrs: noinline nounwind ssp uwtable
 define internal fastcc i64 @sorbet_getConstant() unnamed_addr #2 {
   %1 = load i64, i64* @rb_cObject, align 8, !tbaa !6
-  %2 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1) #15
+  %2 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_T, i64 0, i64 0), i64 1) #16
   %3 = tail call fastcc i64 @sorbet_getConstantAt(i64 %1, i64 %2)
   ret i64 %3
 }
@@ -323,26 +323,26 @@ declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #1
 
 ; Function Attrs: nounwind ssp uwtable
 define internal fastcc i64 @sorbet_rb_arity_error_new(i32 %0) unnamed_addr #0 {
-  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str.3, i64 0, i64 0), i32 %0, i32 1) #15
+  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([50 x i8], [50 x i8]* @.str.3, i64 0, i64 0), i32 %0, i32 1) #16
   %3 = load i64, i64* @rb_eArgError, align 8, !tbaa !6
-  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #15
+  %4 = tail call i64 @rb_exc_new_str(i64 %3, i64 %2) #16
   ret i64 %4
 }
 
 declare i64 @rb_exc_new_str(i64, i64) local_unnamed_addr #1
 
-; Function Attrs: cold noreturn nounwind optsize ssp uwtable
+; Function Attrs: cold minsize noreturn nounwind optsize ssp uwtable
 define internal fastcc void @sorbet_cast_failure(i64 %0) unnamed_addr #6 {
   %2 = load i64, i64* @rb_eTypeError, align 8, !tbaa !6
-  %3 = tail call i8* @rb_obj_classname(i64 %0) #15
-  tail call void (i64, i8*, ...) @rb_raise(i64 %2, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @.str.6, i64 0, i64 0), i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0), i8* %3, i64 %0) #16
+  %3 = tail call i8* @rb_obj_classname(i64 %0) #16
+  tail call void (i64, i8*, ...) @rb_raise(i64 %2, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @.str.6, i64 0, i64 0), i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0), i8* %3, i64 %0) #17
   unreachable
 }
 
 ; Function Attrs: noreturn nounwind ssp uwtable
 define internal fastcc void @sorbet_rb_error_arity(i32 %0) unnamed_addr #7 {
   %2 = tail call fastcc i64 @sorbet_rb_arity_error_new(i32 %0)
-  tail call void @rb_exc_raise(i64 %2) #16
+  tail call void @rb_exc_raise(i64 %2) #17
   unreachable
 }
 
@@ -356,7 +356,7 @@ define internal void @sorbet_Closure_mark(i8* %0) #0 {
   %4 = sext i32 %3 to i64
   %5 = getelementptr inbounds i8, i8* %0, i64 8
   %6 = bitcast i8* %5 to i64*
-  tail call void @rb_gc_mark_values(i64 %4, i64* nonnull %6) #15
+  tail call void @rb_gc_mark_values(i64 %4, i64* nonnull %6) #16
   ret void
 }
 
@@ -403,11 +403,11 @@ BB3:                                              ; preds = %"afterSymCallIntrin
   ret i64 8
 
 BB5:                                              ; preds = %"afterSymCallIntrinsic_<"
-  %3 = call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"str_hello ", i64 0, i64 0), i64 6) #15
+  %3 = call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"str_hello ", i64 0, i64 0), i64 6) #16
   store i64 %rawArg_name, i64* %callArgsAddr, align 8
-  %4 = call i64 @rb_funcallv(i64 %3, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr) #15
+  %4 = call i64 @rb_funcallv(i64 %3, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr) #16
   store i64 %4, i64* %callArgsAddr, align 8
-  %5 = call i64 @rb_funcallv(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #15
+  %5 = call i64 @rb_funcallv(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #16
   store i64 3, i64* %callArgsAddr, align 8
   br i1 %2, label %"fastSymCallIntrinsic_+", label %"slowSymCallIntrinsic_+"
 
@@ -420,14 +420,14 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %6 = load i64, i64* @rb_cObject, align 8
   %7 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %6) #5
   %8 = icmp eq i64 %7, 20
-  br i1 %8, label %BB2.preheader, label %typeTestFail, !prof !12, !misexpect !13
+  br i1 %8, label %BB2.preheader, label %codeRepl, !prof !12, !misexpect !13
 
 BB2.preheader:                                    ; preds = %fillRequiredArgs
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
   br label %BB2
 
-typeTestFail:                                     ; preds = %fillRequiredArgs
-  tail call fastcc void @sorbet_cast_failure(i64 %selfRaw)
+codeRepl:                                         ; preds = %fillRequiredArgs
+  tail call fastcc void @"func_Object#hello.cold.1"(i64 %selfRaw) #18
   unreachable
 
 "afterSymCallIntrinsic_<":                        ; preds = %"slowSymCallIntrinsic_<", %sorbet_rb_int_lt.exit
@@ -437,7 +437,7 @@ typeTestFail:                                     ; preds = %fillRequiredArgs
   br i1 %10, label %BB3, label %BB5
 
 "slowSymCallIntrinsic_<":                         ; preds = %BB2
-  %11 = call i64 @rb_funcallv(i64 %i.sroa.0.0, i64 %"rubyId_<", i32 1, i64* nonnull %callArgsAddr) #15
+  %11 = call i64 @rb_funcallv(i64 %i.sroa.0.0, i64 %"rubyId_<", i32 1, i64* nonnull %callArgsAddr) #16
   br label %"afterSymCallIntrinsic_<"
 
 sorbet_rb_int_lt.exit:                            ; preds = %BB2
@@ -446,11 +446,11 @@ sorbet_rb_int_lt.exit:                            ; preds = %BB2
   br label %"afterSymCallIntrinsic_<"
 
 "slowSymCallIntrinsic_+":                         ; preds = %BB5
-  %14 = call i64 @rb_funcallv(i64 %i.sroa.0.0, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr) #15
+  %14 = call i64 @rb_funcallv(i64 %i.sroa.0.0, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr) #16
   br label %BB2.backedge
 
 "fastSymCallIntrinsic_+":                         ; preds = %BB5
-  %15 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0, i64 2) #15
+  %15 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0, i64 2) #16
   %16 = extractvalue { i64, i1 } %15, 1
   %17 = extractvalue { i64, i1 } %15, 0
   br i1 %16, label %18, label %BB2.backedge
@@ -458,7 +458,7 @@ sorbet_rb_int_lt.exit:                            ; preds = %BB2
 18:                                               ; preds = %"fastSymCallIntrinsic_+"
   %19 = ashr i64 %17, 1
   %20 = xor i64 %19, -9223372036854775808
-  %21 = call i64 @rb_int2big(i64 %20) #15, !noalias !14
+  %21 = call i64 @rb_int2big(i64 %20) #16, !noalias !14
   br label %BB2.backedge
 
 BB2.backedge:                                     ; preds = %18, %"fastSymCallIntrinsic_+", %"slowSymCallIntrinsic_+"
@@ -469,7 +469,7 @@ BB2.backedge:                                     ; preds = %18, %"fastSymCallIn
 ; Function Attrs: nounwind ssp
 define internal void @Constr_rubyIdPrecomputed_hello() #11 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello, i64 0, i64 0), i64 5) #15
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello, i64 0, i64 0), i64 5) #16
   store i64 %0, i64* @rubyIdPrecomputed_hello, align 8
   ret void
 }
@@ -477,7 +477,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal void @"Constr_rubyIdPrecomputed_<"() #11 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_<", i64 0, i64 0), i64 1) #15
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_<", i64 0, i64 0), i64 1) #16
   store i64 %0, i64* @"rubyIdPrecomputed_<", align 8
   ret void
 }
@@ -485,7 +485,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal void @"Constr_rubyIdPrecomputed_+"() #11 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+", i64 0, i64 0), i64 1) #15
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+", i64 0, i64 0), i64 1) #16
   store i64 %0, i64* @"rubyIdPrecomputed_+", align 8
   ret void
 }
@@ -493,7 +493,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal void @Constr_rubyIdPrecomputed_puts() #11 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts, i64 0, i64 0), i64 4) #15
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts, i64 0, i64 0), i64 4) #16
   store i64 %0, i64* @rubyIdPrecomputed_puts, align 8
   ret void
 }
@@ -501,7 +501,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal void @"Constr_rubyIdPrecomputed_<static-init>"() #11 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"str_<static-init>", i64 0, i64 0), i64 13) #15
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"str_<static-init>", i64 0, i64 0), i64 13) #16
   store i64 %0, i64* @"rubyIdPrecomputed_<static-init>", align 8
   ret void
 }
@@ -509,7 +509,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal void @Constr_rubyIdPrecomputed_unsafe() #11 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_unsafe, i64 0, i64 0), i64 6) #15
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_unsafe, i64 0, i64 0), i64 6) #16
   store i64 %0, i64* @rubyIdPrecomputed_unsafe, align 8
   ret void
 }
@@ -528,16 +528,16 @@ typeTestSuccess.i:
   br i1 %needTakeSlowPath.i, label %"func_<root>.<static-init>$111.exit", label %4, !prof !19
 
 4:                                                ; preds = %typeTestSuccess.i
-  tail call void @const_recompute_T() #15
+  tail call void @const_recompute_T() #16
   br label %"func_<root>.<static-init>$111.exit"
 
 "func_<root>.<static-init>$111.exit":             ; preds = %typeTestSuccess.i, %4
   %callArgsAddr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
-  %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_hello.i) #15
-  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#hello" to i64 (...)*), i32 -1) #15
-  %5 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_sorbet, i64 0, i64 0), i64 6) #15
+  %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_hello.i) #16
+  tail call void @rb_define_method(i64 %0, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#hello" to i64 (...)*), i32 -1) #16
+  %5 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_sorbet, i64 0, i64 0), i64 6) #16
   store i64 %5, i64* %callArgsAddr.i, align 8
-  %6 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_hello.i, i32 1, i64* nonnull %callArgsAddr.i) #15
+  %6 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_hello.i, i32 1, i64* nonnull %callArgsAddr.i) #16
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %1)
   ret void
 }
@@ -557,13 +557,20 @@ declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #14
 ; Function Attrs: argmemonly nounwind willreturn
 declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #14
 
+; Function Attrs: cold minsize noreturn nounwind sspreq uwtable
+define internal fastcc void @"func_Object#hello.cold.1"(i64 %selfRaw) unnamed_addr #15 {
+newFuncRoot:
+  tail call fastcc void @sorbet_cast_failure(i64 %selfRaw)
+  unreachable
+}
+
 attributes #0 = { nounwind ssp uwtable }
 attributes #1 = { "addedToSilenceEmptyAttrsError" }
 attributes #2 = { noinline nounwind ssp uwtable }
 attributes #3 = { argmemonly nofree nounwind readonly }
 attributes #4 = { noreturn }
 attributes #5 = { nounwind readnone }
-attributes #6 = { cold noreturn nounwind optsize ssp uwtable }
+attributes #6 = { cold minsize noreturn nounwind optsize ssp uwtable }
 attributes #7 = { noreturn nounwind ssp uwtable }
 attributes #8 = { norecurse nounwind readnone ssp uwtable }
 attributes #9 = { nounwind readnone speculatable willreturn }
@@ -572,8 +579,10 @@ attributes #11 = { nounwind ssp }
 attributes #12 = { nounwind sspreq }
 attributes #13 = { ssp }
 attributes #14 = { argmemonly nounwind willreturn }
-attributes #15 = { nounwind }
-attributes #16 = { noreturn nounwind }
+attributes #15 = { cold minsize noreturn nounwind sspreq uwtable }
+attributes #16 = { nounwind }
+attributes #17 = { noreturn nounwind }
+attributes #18 = { noinline }
 
 !0 = !{!1, !2, i64 0}
 !1 = !{!"RBasic", !2, i64 0, !2, i64 8}

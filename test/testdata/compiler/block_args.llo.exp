@@ -82,7 +82,7 @@ declare i64 @rb_funcallv(i64, i64, i32, i64*) local_unnamed_addr #1
 
 declare i64 @rb_block_call(i64, i64, i32, i64*, i64 (...)*, i64) local_unnamed_addr #1
 
-; Function Attrs: cold noreturn nounwind optsize ssp uwtable
+; Function Attrs: cold minsize noreturn nounwind optsize ssp uwtable
 define internal fastcc void @sorbet_cast_failure(i64 %0) unnamed_addr #3 {
   %2 = load i64, i64* @rb_eTypeError, align 8, !tbaa !6
   %3 = tail call i8* @rb_obj_classname(i64 %0) #10
@@ -268,7 +268,7 @@ declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #9
 attributes #0 = { nounwind ssp uwtable }
 attributes #1 = { "addedToSilenceEmptyAttrsError" }
 attributes #2 = { noreturn }
-attributes #3 = { cold noreturn nounwind optsize ssp uwtable }
+attributes #3 = { cold minsize noreturn nounwind optsize ssp uwtable }
 attributes #4 = { norecurse nounwind readnone ssp uwtable }
 attributes #5 = { nounwind readnone }
 attributes #6 = { nounwind readnone speculatable willreturn }
