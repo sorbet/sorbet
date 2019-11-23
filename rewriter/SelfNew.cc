@@ -6,24 +6,22 @@
 namespace sorbet::rewriter {
 
 std::unique_ptr<ast::Expression> SelfNew::run(core::MutableContext ctx, ast::Send *send) {
-    if (send->fun != core::Names::new_()) {
+    if (send->fun != core::Names::new_() || !send->recv->isSelfReference()) {
         return nullptr;
     }
 
-    auto *recv = ast::cast_tree<ast::Local>(send->recv.get());
-    if (recv == nullptr || recv->localVariable._name != core::Names::selfLocal()) {
-        return nullptr;
+    ast::Send::ARGS_store args;
+
+    args.emplace_back(std::move(send->recv));
+
+    for (auto &arg : send->args) {
+        args.emplace_back(std::move(arg));
     }
 
-    // This is unfortunate: the desugar pass adds a `self` node for the receiver
-    // if there is an EmptyTree after parsing, and the only way we can tell it
-    // wasn't there originally is to test if the Loc is zero-width.
-    if (recv->loc.beginPos() == recv->loc.endPos()) {
-        return nullptr;
-    }
+    auto magic = ast::MK::Constant(send->loc, core::Symbols::Magic());
 
-    return ast::MK::Send(send->loc, std::move(send->recv), core::Names::selfNew(),
-                         std::move(send->args));
+    return ast::MK::Send(send->loc, std::move(magic), core::Names::selfNew(), std::move(args), send->flags,
+                         std::move(send->block));
 }
 
 } // namespace sorbet::rewriter

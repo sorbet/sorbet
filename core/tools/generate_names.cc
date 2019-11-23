@@ -275,7 +275,6 @@ NameDef names[] = {
     {"blockPassTemp", "<block-pass>"},
     {"forTemp"},
     {"new_", "new"},
-    {"selfNew", "<self-new>"},
     {"blockCall", "<block-call>"},
     {"blockBreakAssign", "<block-break-assign>"},
     {"arg", "<arg>"},
@@ -338,6 +337,7 @@ NameDef names[] = {
     {"callWithBlock", "<call-with-block>"},
     {"callWithSplatAndBlock", "<call-with-splat-and-block>"},
     {"enumerable_to_h"},
+    {"selfNew", "<self-new>"},
 
     // GlobalState initEmpty()
     {"Top", "<any>", true},

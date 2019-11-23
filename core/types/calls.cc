@@ -1135,33 +1135,6 @@ public:
     }
 } Class_new;
 
-/**
- * This is a special version of `new` that will return `T.attached_class`
- * instead.
- */
-class Class_selfNew : public IntrinsicMethod {
-public:
-    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
-        SymbolRef self = unwrapSymbol(thisType);
-
-        auto attachedClass = self.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
-        if (!attachedClass.exists()) {
-            return;
-        }
-        auto instanceTy = make_type<SelfTypeParam>(attachedClass);
-        DispatchArgs innerArgs{Names::initialize(), args.locs, args.args, instanceTy, instanceTy, args.block};
-        auto dispatched = instanceTy->dispatchCall(ctx, innerArgs);
-
-        for (auto &err : res.main.errors) {
-            dispatched.main.errors.emplace_back(std::move(err));
-        }
-        res.main.errors.clear();
-        res.returnType = instanceTy;
-        res.main = move(dispatched.main);
-        res.main.sendTp = instanceTy;
-    }
-} Class_selfNew;
-
 class T_Generic_squareBrackets : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
@@ -1732,6 +1705,70 @@ public:
     }
 } Magic_suggestUntypedConstantType;
 
+/**
+ * This is a special version of `new` that will return `T.attached_class`
+ * instead.
+ */
+class Magic_selfNew : public IntrinsicMethod {
+public:
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        // args[0] is the Class to create an instance of
+        // args[1..] are the arguments to the constructor
+
+        if (args.args.empty()) {
+            res.returnType = core::Types::untypedUntracked();
+            return;
+        }
+
+        auto selfTy = args.args[0]->type;
+        SymbolRef self = unwrapSymbol(selfTy.get());
+
+        InlinedVector<const TypeAndOrigins *, 2> sendArgStore;
+        InlinedVector<Loc, 2> sendArgLocs;
+        for (int i = 1; i < args.args.size(); ++i) {
+            sendArgStore.emplace_back(args.args[i]);
+            sendArgLocs.emplace_back(args.locs.args[i]);
+        }
+        CallLocs sendLocs{args.locs.call, args.locs.args[0], sendArgLocs};
+
+        TypePtr returnTy;
+        DispatchResult dispatched;
+        if (!self.data(ctx)->isSingletonClass(ctx)) {
+            // In the case that `self` is not a singleton class, we know that
+            // this was a call to `new` outside of a self context. Dispatch to
+            // an instance method named new, and see what happens.
+            DispatchArgs innerArgs{Names::new_(), sendLocs, sendArgStore, selfTy, selfTy, args.block};
+            dispatched = selfTy->dispatchCall(ctx, innerArgs);
+            returnTy = dispatched.returnType;
+        } else {
+            // Otherwise, we know that this is the proper new intrinsic, and we
+            // should be returning something of type `T.attached_class`
+            auto attachedClass = self.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+
+            // TODO(trevor): I think this can actually be an enforce, as it
+            // should only ever happen if self is `T.untyped`
+            if (!attachedClass.exists()) {
+                return;
+            }
+            auto instanceTy = self.data(ctx)->attachedClass(ctx).data(ctx)->externalType(ctx);
+            DispatchArgs innerArgs{Names::initialize(), sendLocs, sendArgStore, instanceTy, instanceTy, args.block};
+            dispatched = instanceTy->dispatchCall(ctx, innerArgs);
+
+            // The return type from dispatch is ignored, and we return
+            // `T.attached_class` instead.
+            returnTy = make_type<SelfTypeParam>(attachedClass);
+        }
+
+        for (auto &err : res.main.errors) {
+            dispatched.main.errors.emplace_back(std::move(err));
+        }
+        res.main.errors.clear();
+        res.main = move(dispatched.main);
+        res.returnType = returnTy;
+        res.main.sendTp = returnTy;
+    }
+} Magic_selfNew;
+
 class DeclBuilderForProcs_void : public IntrinsicMethod {
 public:
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
@@ -2137,7 +2174,6 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
 
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
-    {Symbols::Class(), Intrinsic::Kind::Instance, Names::selfNew(), &Class_selfNew},
 
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
@@ -2146,6 +2182,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfNew(), &Magic_selfNew},
 
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::void_(), &DeclBuilderForProcs_void},
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::returns(),
