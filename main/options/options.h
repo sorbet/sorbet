@@ -98,6 +98,7 @@ enum Phase {
     NAMER,
     RESOLVER,
     CFG,
+    SEMANTIC_EXTENSION,
     INFERENCER,
 };
 

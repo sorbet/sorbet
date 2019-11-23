@@ -144,6 +144,7 @@ const vector<StopAfterOptions> stop_after_options({
     {"namer", Phase::NAMER},
     {"resolver", Phase::RESOLVER},
     {"cfg", Phase::CFG},
+    {"semantic-extension", Phase::SEMANTIC_EXTENSION},
     {"inferencer", Phase::INFERENCER},
 });
 
