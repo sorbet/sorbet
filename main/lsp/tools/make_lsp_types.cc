@@ -814,10 +814,10 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto DidChangeTextDocumentParams =
         makeObject("DidChangeTextDocumentParams",
-                   {
-                       makeField("textDocument", VersionedTextDocumentIdentifier),
-                       makeField("contentChanges", makeArray(TextDocumentContentChangeEvent)),
-                   },
+                   {makeField("textDocument", VersionedTextDocumentIdentifier),
+                    makeField("contentChanges", makeArray(TextDocumentContentChangeEvent)),
+                    makeField("sorbetTestingExpectedPreemptions", makeOptional(JSONInt)),
+                    makeField("sorbetTestingExpectedCancellation", makeOptional(JSONInt))},
                    classTypes);
 
     auto TextDocumentChangeRegistrationOptions =
@@ -1279,11 +1279,14 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        "LSPFileUpdates updates;",
                    });
 
+    auto SorbetTypecheckRunStatus =
+        makeIntEnum("SorbetTypecheckRunStatus", {{"started", 1}, {"ended", 2}, {"canceled", 3}}, enumTypes);
+
     auto SorbetTypecheckRunInfo = makeObject("SorbetTypecheckRunInfo",
                                              {
-                                                 makeField("tookFastPath", JSONBool),
+                                                 makeField("status", SorbetTypecheckRunStatus),
+                                                 makeField("isFastPath", JSONBool),
                                                  makeField("filesTypechecked", makeArray(JSONString)),
-                                                 makeField("canceled", JSONBool),
                                              },
                                              classTypes);
 

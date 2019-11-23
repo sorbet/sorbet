@@ -245,7 +245,7 @@ void assertNotificationMessage(LSPMethod expectedMethod, const LSPMessage &respo
     ASSERT_EQ(expectedMethod, response.method()) << "Unexpected method on notification message.";
 }
 
-optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMessage &notifMsg) {
+optional<const PublishDiagnosticsParams *> getPublishDiagnosticParams(const NotificationMessage &notifMsg) {
     auto publishDiagnosticParams = get_if<unique_ptr<PublishDiagnosticsParams>>(&notifMsg.params);
     if (!publishDiagnosticParams || !*publishDiagnosticParams) {
         ADD_FAILURE() << "textDocument/publishDiagnostics message is missing parameters.";
@@ -335,13 +335,16 @@ unique_ptr<LSPMessage> makeOpen(string_view uri, string_view contents, int versi
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params)));
 }
 
-unique_ptr<LSPMessage> makeChange(string_view uri, string_view contents, int version) {
+unique_ptr<LSPMessage> makeChange(string_view uri, string_view contents, int version,
+                                  optional<bool> expectedCancelation, optional<int> expectedPreemptions) {
     auto textDoc = make_unique<VersionedTextDocumentIdentifier>(string(uri), static_cast<double>(version));
     auto textDocChange = make_unique<TextDocumentContentChangeEvent>(string(contents));
     vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;
     textChanges.push_back(move(textDocChange));
 
     auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
+    didChangeParams->sorbetTestingExpectedPreemptions = expectedPreemptions;
+    didChangeParams->sorbetTestingExpectedCancellation = expectedCancelation;
     auto didChangeNotif =
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
     return make_unique<LSPMessage>(move(didChangeNotif));

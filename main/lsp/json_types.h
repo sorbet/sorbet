@@ -36,6 +36,8 @@ struct LSPFileUpdates {
     // (Tests only) Indicates that the slow path expects to be preempted this many times. The slow path will wait until
     // either this happens, or a timeout occurs.
     int expectedPreemptions = 0;
+    // (Tests only) Indicates that the slow path expects to be canceled.
+    bool expectedCancelation = false;
 };
 
 class DeserializationError : public std::runtime_error {

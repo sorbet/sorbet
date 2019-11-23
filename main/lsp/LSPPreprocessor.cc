@@ -356,6 +356,8 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentPa
                                         LSPFileUpdates &updates) const {
     updates.versionStart = v;
     updates.versionEnd = v;
+    updates.expectedPreemptions = changeParams->sorbetTestingExpectedPreemptions.value_or(0);
+    updates.expectedCancelation = changeParams->sorbetTestingExpectedCancellation.value_or(false);
     string_view uri = changeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
@@ -461,6 +463,8 @@ void LSPPreprocessor::mergeEdits(LSPFileUpdates &to, LSPFileUpdates &from) {
     to.canceledSlowPath = to.canceledSlowPath || from.canceledSlowPath;
     // `to` now includes the contents of `from`.
     to.versionEnd = from.versionEnd;
+    to.expectedPreemptions += from.expectedCancelation;
+    to.expectedCancelation = to.expectedCancelation || from.expectedCancelation;
     // No need to update versionStart, as to comes before from.
     ENFORCE(ttgs.comesBefore(to.versionStart, from.versionStart));
     if (to.canTakeFastPath) {

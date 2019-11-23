@@ -22,8 +22,9 @@ void ProtocolTest::SetUp() {
     lspWrapper->enableAllExperimentalFeatures();
 }
 
-vector<unique_ptr<LSPMessage>> ProtocolTest::initializeLSP() {
-    auto responses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId);
+vector<unique_ptr<LSPMessage>> ProtocolTest::initializeLSP(bool supportsMarkdown,
+                                                           optional<unique_ptr<SorbetInitializationOptions>> opts) {
+    auto responses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown, move(opts));
     updateDiagnostics(responses);
     return responses;
 }
@@ -52,10 +53,11 @@ unique_ptr<LSPMessage> ProtocolTest::closeFile(string_view path) {
     return makeClose(getUri(path));
 }
 
-unique_ptr<LSPMessage> ProtocolTest::changeFile(string_view path, string_view newContents, int version) {
+unique_ptr<LSPMessage> ProtocolTest::changeFile(string_view path, string_view newContents, int version,
+                                                optional<bool> expectedCancelation, optional<int> expectedPreemptions) {
     sourceFileContents[string(path)] =
         make_shared<core::File>(string(path), string(newContents), core::File::Type::Normal);
-    return makeChange(getUri(path), newContents, version);
+    return makeChange(getUri(path), newContents, version, expectedCancelation, expectedPreemptions);
 }
 
 unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {
@@ -126,17 +128,39 @@ vector<unique_ptr<LSPMessage>> ProtocolTest::send(vector<unique_ptr<LSPMessage>>
     return responses;
 }
 
+void ProtocolTest::sendAsyncRaw(const string &json) {
+    auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
+    wrapper.send(json);
+}
+
+void ProtocolTest::sendAsync(const LSPMessage &message) {
+    sendAsyncRaw(message.toJSON());
+}
+
+unique_ptr<LSPMessage> ProtocolTest::readAsync() {
+    auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
+    auto msg = wrapper.read(20000);
+    if (msg) {
+        updateDiagnostics(*msg);
+    }
+    return msg;
+}
+
+void ProtocolTest::updateDiagnostics(const LSPMessage &msg) {
+    if (msg.isNotification() && msg.method() == LSPMethod::TextDocumentPublishDiagnostics) {
+        if (auto diagnosticParams = getPublishDiagnosticParams(msg.asNotification())) {
+            // Will explicitly overwrite older diagnostics that are irrelevant.
+            // TODO: Have a better way of copying.
+            rapidjson::MemoryPoolAllocator<> alloc;
+            diagnostics[uriToFilePath(lspWrapper->config(), (*diagnosticParams)->uri)] =
+                move(PublishDiagnosticsParams::fromJSONValue(*(*diagnosticParams)->toJSONValue(alloc))->diagnostics);
+        }
+    }
+}
+
 void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messages) {
     for (auto &msg : messages) {
-        if (msg->isNotification() && msg->method() == LSPMethod::TextDocumentPublishDiagnostics) {
-            if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
-                // Will explicitly overwrite older diagnostics that are irrelevant.
-                // TODO: Have a better way of copying.
-                rapidjson::MemoryPoolAllocator<> alloc;
-                diagnostics[uriToFilePath(lspWrapper->config(), (*diagnosticParams)->uri)] = move(
-                    PublishDiagnosticsParams::fromJSONValue(*(*diagnosticParams)->toJSONValue(alloc))->diagnostics);
-            }
-        }
+        updateDiagnostics(*msg);
     }
 }
 

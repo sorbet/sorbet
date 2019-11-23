@@ -28,7 +28,9 @@ std::unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view 
 std::unique_ptr<LSPMessage> makeOpen(std::string_view uri, std::string_view contents, int version);
 
 /** Create an LSPMessage containing a textDocument/didChange notification. */
-std::unique_ptr<LSPMessage> makeChange(std::string_view uri, std::string_view contents, int version);
+std::unique_ptr<LSPMessage> makeChange(std::string_view uri, std::string_view contents, int version,
+                                       std::optional<bool> expectedCancelation = std::nullopt,
+                                       std::optional<int> expectedPreemptions = std::nullopt);
 
 /** Create an LSPMessage containing a textDocument/didClose notification. */
 std::unique_ptr<LSPMessage> makeClose(std::string_view uri);
@@ -48,7 +50,7 @@ void assertNotificationMessage(LSPMethod expectedMethod, const LSPMessage &respo
 
 /** Retrieves the PublishDiagnosticsParam from a publishDiagnostics message, if applicable. Non-fatal fails and returns
  * an empty optional if it cannot be found. */
-std::optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMessage &notifMsg);
+std::optional<const PublishDiagnosticsParams *> getPublishDiagnosticParams(const NotificationMessage &notifMsg);
 
 /** Use the LSPWrapper to make a textDocument/completion request.
  */

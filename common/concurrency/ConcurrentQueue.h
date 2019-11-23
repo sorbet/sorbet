@@ -83,6 +83,10 @@ public:
     int enqueuedEstimate() {
         return bound - elementsLeftToPush.load(std::memory_order_relaxed);
     }
+
+    size_t queueSizeEstimate() {
+        return _queue.size_approx();
+    }
 };
 
 template <class Elem>

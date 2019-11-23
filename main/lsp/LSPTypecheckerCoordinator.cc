@@ -11,7 +11,7 @@ LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPC
 void LSPTypecheckerCoordinator::asyncRunInternal(function<void()> &&lambda, bool canPreemptSlowPath) {
     if (hasDedicatedThread) {
         // We can only preempt if this lambda will run next. We have no notion of a queue of preemption lambdas.
-        if (canPreemptSlowPath && lambdas.enqueuedEstimate() - lambdas.doneEstimate() == 0) {
+        if (canPreemptSlowPath && lambdas.queueSizeEstimate() == 0) {
             if (typechecker.tryPreemptSlowPath(lambda)) {
                 // lambda is guaranteed to preempt slow path.
                 config->logger->debug("Preempting slow path.");
@@ -22,7 +22,7 @@ void LSPTypecheckerCoordinator::asyncRunInternal(function<void()> &&lambda, bool
         }
 
         // Debug
-        if (canPreemptSlowPath && lambdas.enqueuedEstimate() - lambdas.doneEstimate() > 0) {
+        if (canPreemptSlowPath && lambdas.queueSizeEstimate() > 0) {
             config->logger->debug("Preemption attempt failed: Blocking request exists in queue.");
         } else {
             config->logger->debug("Request cannot preempt.");
