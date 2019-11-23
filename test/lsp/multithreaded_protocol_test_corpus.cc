@@ -46,18 +46,23 @@ TEST_P(ProtocolTest, CancelingSlowPathUpdatesDiagnostics) {
     auto opts = make_unique<SorbetInitializationOptions>();
     opts->enableTypecheckInfo = true;
     initializeLSP(true, move(opts));
-    // New file; should take slow path.
-    send(*openFile("foo.rb", "#typed: true\nclass Foo\nend"));
+    // New file; should take slow path. It will have an error.
+    send(*openFile("foo.rb",
+                   "#typed: true\nclass Foo\nextend T::Sig\nsig {returns(String)}\ndef hello\n  10\nend\nend"));
+    assertDiagnostics({}, {{"foo.rb", 5, "Returning value that does not conform to method result type"}});
 
     // Send an update that should take slow path, and that will wait for a preemption to happen.
     // The following happens asynchronously.
-    sendAsync(*changeFile("foo.rb", "#typed: true\nclass Foo\ndef me\nend", 2, true /* expected cancelation */));
+    sendAsync(*changeFile(
+        "foo.rb", "#typed: true\nclass Foo\nextend T::Sig\nsig {returns(String)}\ndef hello\n  10\nend\ndef me\nend", 2,
+        true /* expected cancelation */));
 
     // Wait for update to start.
     ASSERT_NO_FATAL_FAILURE(assertTypecheckRunInfo(readAsync(), SorbetTypecheckRunStatus::started, false));
 
     // Send an update that should take fast path (corrects syntax error).
-    sendAsync(*changeFile("foo.rb", "#typed: true\nclass Foo\nend", 3));
+    sendAsync(*changeFile(
+        "foo.rb", "#typed: true\nclass Foo\nextend T::Sig\nsig {returns(String)}\ndef hello\n  '10'\nend\nend", 3));
 
     // Ensure that cancelation occurs.
     ASSERT_NO_FATAL_FAILURE(assertTypecheckRunInfo(readAsync(), SorbetTypecheckRunStatus::canceled, false));
@@ -76,8 +81,12 @@ TEST_P(ProtocolTest, CancelingSlowPathUpdatesDiagnostics) {
         }
         diagnostics.push_back(move(msg));
     }
+
+    // Fast path should reset errors.
     assertDiagnostics(move(diagnostics), {});
 }
+
+// TODO: Could we take fast path but the hashes on a new file disagree?
 
 // Run these tests in multi-threaded mode.
 INSTANTIATE_TEST_SUITE_P(MultithreadedProtocolTests, ProtocolTest, testing::Values(true));

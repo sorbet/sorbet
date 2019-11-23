@@ -13,6 +13,7 @@
 #include "main/lsp/LocalVarSaver.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/pipeline/pipeline.h"
+#include <algorithm>
 
 namespace sorbet::realmain::lsp {
 using namespace std;
@@ -69,6 +70,7 @@ vector<core::FileRef> LSPTypechecker::restore(LSPTypecheckerUndoState &undoState
             "2.0", LSPMethod::TextDocumentPublishDiagnostics,
             make_unique<PublishDiagnosticsParams>(config->localName2Remote(file), move(diagnostics)))));
     }
+    filesThatHaveErrors = undoState.filesThatHaveErrors;
 
     // Finally, restore the old global state.
     gs = move(undoState.gs);
@@ -106,8 +108,17 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, bool cancelableAndPreempt
         ENFORCE(cancellationUndoState.has_value());
         if (cancellationUndoState.has_value()) {
             // This is the typecheck that caused us to cancel the previous slow path. Un-commit all typechecker changes.
-            addToTypecheck = restore(cancellationUndoState.value());
+            auto oldFilesWithErrors = restore(cancellationUndoState.value());
             cancellationUndoState = nullopt;
+            // Retypecheck any files that previously had errors that aren't in the new update.
+            vector<core::FileRef> newUpdatedFiles;
+            for (auto &tree : updates.updatedFileIndexes) {
+                newUpdatedFiles.push_back(tree.file);
+            }
+            fast_sort(newUpdatedFiles);
+            fast_sort(oldFilesWithErrors);
+            std::set_difference(oldFilesWithErrors.begin(), oldFilesWithErrors.end(), newUpdatedFiles.begin(),
+                                newUpdatedFiles.end(), std::inserter(addToTypecheck, addToTypecheck.begin()));
         }
     }
 
@@ -336,8 +347,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelableAndPreem
         prodCategoryCounterInc("lsp.updates", "slowpath");
         // No need to keep around cancelation state!
         cancellationUndoState = nullopt;
-        sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::ended, false, {});
         pushDiagnostics(updates.versionEnd, move(affectedFiles), move(out.first));
+        sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::ended, false, {});
         return true;
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
@@ -472,6 +483,7 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool tookFastPat
     unique_ptr<absl::MutexLock> gsLock;
 
     if (couldBeCanceled) {
+        ENFORCE(updates.updatedGS.has_value());
         gsLock = make_unique<absl::MutexLock>(&gsMutex);
         cancellationUndoState = make_optional<LSPTypecheckerUndoState>(updates.versionEnd, move(gs),
                                                                        std::move(indexedFinalGS), filesThatHaveErrors);
@@ -525,8 +537,8 @@ void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
 
     Timer timeit(logger, "commitTypecheckRun");
     commitFileUpdates(run.updates, run.tookFastPath, false);
-    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::ended, true, run.filesTypechecked);
     pushDiagnostics(run.updates.versionEnd, move(run.filesTypechecked), move(run.errors));
+    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::ended, true, run.filesTypechecked);
 }
 
 unique_ptr<core::GlobalState> LSPTypechecker::destroy() {
