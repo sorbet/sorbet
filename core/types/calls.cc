@@ -1752,7 +1752,7 @@ public:
             DispatchArgs innerArgs{Names::initialize(), sendLocs, sendArgStore, instanceTy, instanceTy, args.block};
             dispatched = instanceTy->dispatchCall(ctx, innerArgs);
 
-            // The return type from dispatch is ignored, and we return
+            // The return type from dispatched is ignored, and we return
             // `T.attached_class` instead.
             returnTy = make_type<SelfTypeParam>(attachedClass);
         }
