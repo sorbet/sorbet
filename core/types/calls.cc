@@ -1745,11 +1745,9 @@ public:
             // should be returning something of type `T.attached_class`
             auto attachedClass = self.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
 
-            // TODO(trevor): I think this can actually be an enforce, as it
-            // should only ever happen if self is `T.untyped`
-            if (!attachedClass.exists()) {
-                return;
-            }
+            // AttachedClass will only be missing on `T.untyped`
+            ENFORCE(attachedClass.exists());
+
             auto instanceTy = self.data(ctx)->attachedClass(ctx).data(ctx)->externalType(ctx);
             DispatchArgs innerArgs{Names::initialize(), sendLocs, sendArgStore, instanceTy, instanceTy, args.block};
             dispatched = instanceTy->dispatchCall(ctx, innerArgs);
