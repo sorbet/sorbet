@@ -772,6 +772,15 @@ fixnum:
     rb_ary_store(ary, offset, argv[1]);
     return argv[1];
 }
+VALUE sorbet_rb_hash_square_br(VALUE recv, int argc, const VALUE *const restrict argv) {
+    rb_check_arity(argc, 1, 1);
+    return rb_hash_aref(recv, argv[0]);
+}
+
+VALUE sorbet_rb_hash_square_br_eq(VALUE recv, int argc, const VALUE *const restrict argv) {
+    rb_check_arity(argc, 2, 2);
+    return rb_hash_aset(recv, argv[0], argv[1]);
+}
 
 VALUE sorbet_rb_int_plus(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
