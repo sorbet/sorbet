@@ -1,1 +1,9 @@
 No errors! Great job.
+class ::<root> < ::Object () @ test/cli/stop-after-semantic-extension/stop-after-semantic-extension.rb:3
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/stop-after-semantic-extension/stop-after-semantic-extension.rb:3
+      argument <blk><block> @ Loc {file=test/cli/stop-after-semantic-extension/stop-after-semantic-extension.rb start=??? end=???}
+  class ::Object < ::BasicObject ()
+    method ::Object#foo (<blk>) @ test/cli/stop-after-semantic-extension/stop-after-semantic-extension.rb:3
+      argument <blk><block> @ Loc {file=test/cli/stop-after-semantic-extension/stop-after-semantic-extension.rb start=??? end=???}
+

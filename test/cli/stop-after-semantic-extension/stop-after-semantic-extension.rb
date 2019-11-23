@@ -1,3 +1,5 @@
 # typed: true
 
-1 + "1"
+def foo
+  1 + "1"
+end
