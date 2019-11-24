@@ -60,6 +60,11 @@ typecheck() {
   if [ -n "$SRB_SORBET_EXE" ]; then
     # shellcheck disable=SC2086
     "$SRB_SORBET_EXE" "${args[@]}"
+  elif command -v sorbet > /dev/null; then
+    # if sorbet has been installed and placed somewhere on the path 
+    # such as from Homebre -- use that.
+    # This is a solution for those who are using platforms such as jruby
+    sorbet "${args[@]}"
   else
     # We're using bash string operations here to avoid forking.
     # Using dirname / basename / etc. would mean ~15ms for each call.
