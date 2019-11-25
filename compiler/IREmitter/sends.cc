@@ -11,6 +11,7 @@
 #include "common/FileOps.h"
 #include "common/sort.h"
 #include "common/typecase.h"
+#include "compiler/Core/CompilerState.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
@@ -18,7 +19,6 @@
 #include "compiler/IREmitter/Payload.h"
 #include "compiler/IREmitter/SymbolBasedIntrinsicMethod.h"
 #include "compiler/Names/Names.h"
-#include "compiler/Core/CompilerState.h"
 #include <string_view>
 
 using namespace std;
