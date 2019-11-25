@@ -1,6 +1,6 @@
 #ifndef SORBET_COMPILER_LLVM_IR_EMITTER_H
 #define SORBET_COMPILER_LLVM_IR_EMITTER_H
-#include "compiler/Payload/ForwardDeclarations.h"
+#include "compiler/Core/ForwardDeclarations.h"
 #include <string_view>
 
 namespace sorbet::compiler {

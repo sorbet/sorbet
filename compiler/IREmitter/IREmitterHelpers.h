@@ -1,7 +1,7 @@
 #ifndef SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
 #define SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
 #include "IREmitter.h"
-#include "compiler/Payload/ForwardDeclarations.h"
+#include "compiler/Core/ForwardDeclarations.h"
 #include <string_view>
 #include <vector>
 

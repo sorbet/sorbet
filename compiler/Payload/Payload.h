@@ -1,6 +1,6 @@
 #include "common/ConstExprStr.h"
 #include "common/Exception.h"
-#include "compiler/Payload/ForwardDeclarations.h"
+#include "compiler/Core/ForwardDeclarations.h"
 #include <memory>
 #include <string_view>
 
