@@ -22,7 +22,7 @@ const vector<std::pair<string, llvm::Attribute::AttrKind>> additionalFunctionAtt
     {"ruby_stack_check", llvm::Attribute::InaccessibleMemOnly},
 };
 
-std::unique_ptr<llvm::Module> Payload::readDefaultModule(const char *name, llvm::LLVMContext &lctx) {
+std::unique_ptr<llvm::Module> PayloadLoader::readDefaultModule(const char *name, llvm::LLVMContext &lctx) {
     auto bitCode = getDefaultModuleBitcode();
     llvm::StringRef bitcodeAsStringRef(bitCode.data(), bitCode.size());
     auto memoryBuffer = llvm::MemoryBuffer::getMemBuffer(bitcodeAsStringRef, "payload", false);

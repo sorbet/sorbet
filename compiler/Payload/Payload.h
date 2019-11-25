@@ -51,7 +51,7 @@ public:
     void trace(std::string_view) const;
     void failCompilation(const core::Loc &loc, ConstExprStr msg) const;
 };
-class Payload {
+class PayloadLoader {
 public:
     static std::unique_ptr<llvm::Module> readDefaultModule(const char *name, llvm::LLVMContext &);
 };
