@@ -59,7 +59,7 @@ llvm::Value *MK::getRubyIntRaw(CompilerState &cs, llvm::IRBuilderBase &builder, 
                                            {llvm::ConstantInt::get(cs, llvm::APInt(64, num, true))}, "rawRubyInt");
 }
 
-llvm::Value *MK::getRubyFloatRaw(CompilerState &cs, llvm::IRBuilderBase &builder, double num) {
+llvm::Value *MK::doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, double num) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_doubleToRubyValue"),
                                            {llvm::ConstantFP::get(llvm::Type::getDoubleTy(cs), num)}, "rawRubyInt");
 }
