@@ -365,7 +365,11 @@ string AppliedType::show(const GlobalState &gs) const {
                 fmt::format_to(buf, ")");
             }
 
-            fmt::format_to(buf, ".returns({})", return_type->show(gs));
+            if (return_type == core::Types::void_()) {
+                fmt::format_to(buf, ".void");
+            } else {
+                fmt::format_to(buf, ".returns({})", return_type->show(gs));
+            }
             return to_string(buf);
         } else {
             fmt::format_to(buf, "{}", this->klass.data(gs)->show(gs));
