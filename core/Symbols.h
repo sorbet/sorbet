@@ -104,7 +104,6 @@ public:
     Loc loc() const;
     const InlinedVector<Loc, 2> &locs() const;
     inline InlinedVector<Loc, 2> &locs() {
-        ENFORCE(isClassOrModule());
         return locs_;
     }
 

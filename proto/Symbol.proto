@@ -72,7 +72,7 @@ message Symbol {
 //    repeated Flag flags = 11;
 
     // ALL
-//    string resultType = 12;
+    string resultType = 12;
     // Loc loc = 13; Replaced by locs = 15
     repeated Symbol children = 14;
     repeated Loc locs = 15;

@@ -123,6 +123,16 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         }
     }
 
+    if (showFull) {
+        if (data->resultType) {
+            symbolProto.set_resulttype(data->resultType.get()->show(gs));
+        }
+
+        for (auto loc : data->locs()) {
+            *symbolProto.add_locs() = toProto(gs, loc);	
+        }
+    }
+
     for (auto pair : data->membersStableOrderSlow(gs)) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
             pair.first == Names::classMethods() || pair.first == Names::Constants::AttachedClass()) {
