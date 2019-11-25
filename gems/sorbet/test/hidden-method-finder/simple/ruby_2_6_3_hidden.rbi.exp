@@ -3952,8 +3952,6 @@ class Encoding
 end
 
 module Enumerable
-  def chain(*_); end
-
   def chunk(); end
 
   def chunk_while(); end
@@ -3980,8 +3978,6 @@ module Enumerable
 end
 
 class Enumerator
-  def +(_); end
-
   def each_with_index(); end
 end
 
@@ -4000,12 +3996,6 @@ class Enumerator::ArithmeticSequence
 end
 
 class Enumerator::ArithmeticSequence
-end
-
-class Enumerator::Chain
-end
-
-class Enumerator::Chain
 end
 
 class Enumerator::Generator
