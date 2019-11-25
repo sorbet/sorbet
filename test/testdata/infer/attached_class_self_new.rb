@@ -8,6 +8,11 @@ class NoArgs
     T.reveal_type(self.new) # error: Revealed type: `T.class_of(NoArgs)::<AttachedClass>`
   end
 
+  sig {returns(T.experimental_attached_class)}
+  def self.make_implicit_new
+    T.reveal_type(new) # error: Revealed type: `T.class_of(NoArgs)::<AttachedClass>`
+  end
+
 end
 
 class PosArgs
