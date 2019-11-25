@@ -371,6 +371,29 @@ public:
                      std::move(arg));
     }
 
+    static std::unique_ptr<Expression> SelfNew(core::Loc loc, ast::Send::ARGS_store args, u4 flags = 0,
+                                               std::unique_ptr<ast::Block> block = nullptr) {
+        auto magic = Constant(loc, core::Symbols::Magic());
+        return Send(loc, std::move(magic), core::Names::selfNew(), std::move(args), flags, std::move(block));
+    }
+
+    static bool isMagicClass(ast::Expression *expr) {
+        if (auto *recv = cast_tree<ConstantLit>(expr)) {
+            return recv->symbol == core::Symbols::Magic();
+        } else {
+            return false;
+        }
+    }
+
+    static bool isSelfNew(ast::Send *send) {
+
+        if (send->fun != core::Names::selfNew()) {
+            return false;
+        }
+
+        return isMagicClass(send->recv.get());
+    }
+
     static class Local *arg2Local(Expression *arg) {
         while (true) {
             if (auto *local = cast_tree<class Local>(arg)) {

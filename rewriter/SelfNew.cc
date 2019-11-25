@@ -18,10 +18,8 @@ std::unique_ptr<ast::Expression> SelfNew::run(core::MutableContext ctx, ast::Sen
         args.emplace_back(std::move(arg));
     }
 
-    auto magic = ast::MK::Constant(send->loc, core::Symbols::Magic());
 
-    return ast::MK::Send(send->loc, std::move(magic), core::Names::selfNew(), std::move(args), send->flags,
-                         std::move(send->block));
+    return ast::MK::SelfNew(send->loc, std::move(args), send->flags, std::move(send->block));
 }
 
 } // namespace sorbet::rewriter
