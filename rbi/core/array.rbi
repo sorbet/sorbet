@@ -1566,8 +1566,8 @@ class Array < Object
   # a.rassoc("four")   #=> nil
   # ```
   sig do
-    type_parameters(:U).params(
-        arg0: T.type_parameter(:U),
+    params(
+        arg0: T.untyped,
     )
     .returns(T.nilable(Elem))
   end
