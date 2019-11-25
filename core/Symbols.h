@@ -103,6 +103,11 @@ public:
 
     Loc loc() const;
     const InlinedVector<Loc, 2> &locs() const;
+    inline InlinedVector<Loc, 2> &locs() {
+        ENFORCE(isClassOrModule());
+        return locs_;
+    }
+
     void addLoc(const core::GlobalState &gs, core::Loc loc);
 
     u4 hash(const GlobalState &gs) const;

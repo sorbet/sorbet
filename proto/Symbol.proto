@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package com.stripe.rubytyper;
 import "proto/Name.proto";
+import "proto/Loc.proto";
 
 message Symbol {
     enum Kind {
@@ -74,7 +75,7 @@ message Symbol {
 //    string resultType = 12;
     // Loc loc = 13; Replaced by locs = 15
     repeated Symbol children = 14;
-//    repeated Loc locs = 15;
+    repeated Loc locs = 15;
 
     int32 aliasTo = 16;
 }
