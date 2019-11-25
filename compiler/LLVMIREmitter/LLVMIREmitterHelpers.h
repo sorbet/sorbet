@@ -96,7 +96,7 @@ public:
                                                           llvm::Function *mainFunc);
 };
 
-class MK {
+class Payload {
 public:
     // api for actual code emission
     static llvm::Value *idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName);
