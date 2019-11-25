@@ -7,7 +7,7 @@
 #include "compiler/DefinitionRewriter/DefinitionRewriter.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IRHelpers/IRHelpers.h"
-#include "compiler/LLVMIREmitter/LLVMIREmitter.h"
+#include "compiler/IREmitter/IREmitter.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "core/ErrorQueue.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
@@ -116,9 +116,9 @@ public:
         ENFORCE(threadState->file.exists());
         compiler::CompilerState state(gs, lctx, module.get());
         try {
-            sorbet::compiler::LLVMIREmitter::run(state, cfg, md, functionName);
+            sorbet::compiler::IREmitter::run(state, cfg, md, functionName);
             string fileName = objectFileName(gs, cfg.symbol.data(gs)->loc().file());
-            sorbet::compiler::LLVMIREmitter::buildInitFor(state, cfg.symbol, fileName);
+            sorbet::compiler::IREmitter::buildInitFor(state, cfg.symbol, fileName);
         } catch (sorbet::compiler::AbortCompilation &) {
             threadState->aborted = true;
         } catch (...) {

@@ -15,7 +15,7 @@ compilation_database(
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",
         "//compiler/Passes:Passes",
         "//compiler/Linker:Linker",
-        "//compiler/LLVMIREmitter:LLVMIREmitter",
+        "//compiler/IREmitter:IREmitter",
         "//compiler/IRHelpers:pseudo_lib",
         "//compiler/IRHelpers:generate_load_payload",
         "//compiler/IRHelpers:IRHelpers",

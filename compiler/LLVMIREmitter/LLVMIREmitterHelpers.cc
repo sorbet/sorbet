@@ -2,10 +2,10 @@
 #include "llvm/IR/DerivedTypes.h" // FunctionType
 #include "llvm/IR/IRBuilder.h"
 
-// needef for LLVMIREmitterHelpers
+// needef for IREmitterHelpers
 #include "core/core.h"
 // ^^^ violate our poisons
-#include "LLVMIREmitterHelpers.h"
+#include "IREmitterHelpers.h"
 #include "Payload.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -202,7 +202,7 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
     return res;
 };
 
-BasicBlockMap LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
+BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                                      unique_ptr<ast::MethodDef> &md,
                                                                      UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                                      llvm::Function *mainFunc) {
@@ -350,7 +350,7 @@ string getFunctionNamePrefix(CompilerState &cs, core::SymbolRef sym) {
 }
 } // namespace
 
-string LLVMIREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym) {
+string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym) {
     auto maybeAttachedOwner = sym.data(cs)->owner.data(cs)->attachedClass(cs);
     string prefix = "func_";
     if (maybeAttachedOwner.exists()) {
@@ -370,7 +370,7 @@ string LLVMIREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef 
     return prefix + suffix;
 }
 
-bool LLVMIREmitterHelpers::isStaticInit(CompilerState &cs, core::SymbolRef sym) {
+bool IREmitterHelpers::isStaticInit(CompilerState &cs, core::SymbolRef sym) {
     auto name = sym.data(cs)->name;
     return (name.data(cs)->kind == core::NameKind::UTF8 ? name : name.data(cs)->unique.original) ==
            core::Names::staticInit();
@@ -378,7 +378,7 @@ bool LLVMIREmitterHelpers::isStaticInit(CompilerState &cs, core::SymbolRef sym) 
 
 namespace {
 llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::SymbolRef sym) {
-    if (LLVMIREmitterHelpers::isStaticInit(cs, sym)) {
+    if (IREmitterHelpers::isStaticInit(cs, sym)) {
         // this is top level code that shoudln't be callable externally.
         // Even more, sorbet reuses symbols used for these and thus if we mark them non-private we'll get link errors
         return llvm::Function::InternalLinkage;
@@ -402,30 +402,30 @@ getOrCreateFunctionWithName(CompilerState &cs, std::string name, llvm::FunctionT
 
 }; // namespace
 
-llvm::Function *LLVMIREmitterHelpers::lookupFunction(CompilerState &cs, core::SymbolRef sym) {
-    auto func = cs.module->getFunction(LLVMIREmitterHelpers::getFunctionName(cs, sym));
+llvm::Function *IREmitterHelpers::lookupFunction(CompilerState &cs, core::SymbolRef sym) {
+    auto func = cs.module->getFunction(IREmitterHelpers::getFunctionName(cs, sym));
     return func;
 }
-llvm::Function *LLVMIREmitterHelpers::getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym) {
-    return getOrCreateFunctionWithName(cs, LLVMIREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
+llvm::Function *IREmitterHelpers::getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym) {
+    return getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
                                        llvm::Function::WeakAnyLinkage);
 }
 
-llvm::Function *LLVMIREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
-    return getOrCreateFunctionWithName(cs, LLVMIREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
+llvm::Function *IREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
+    return getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
                                        getFunctionLinkageType(cs, sym), true);
 }
 
-llvm::Function *LLVMIREmitterHelpers::getInitFunction(CompilerState &cs, core::SymbolRef sym) {
+llvm::Function *IREmitterHelpers::getInitFunction(CompilerState &cs, core::SymbolRef sym) {
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
     auto linkageType = llvm::Function::InternalLinkage;
-    auto baseName = LLVMIREmitterHelpers::getFunctionName(cs, sym);
+    auto baseName = IREmitterHelpers::getFunctionName(cs, sym);
 
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
     return getOrCreateFunctionWithName(cs, "Init_" + baseName, ft, linkageType);
 }
 
-llvm::Function *LLVMIREmitterHelpers::cleanFunctionBody(CompilerState &cs, llvm::Function *func) {
+llvm::Function *IREmitterHelpers::cleanFunctionBody(CompilerState &cs, llvm::Function *func) {
     func->getBasicBlockList().clear();
     return func;
 }

@@ -1,6 +1,6 @@
 #ifndef SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
 #define SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
-#include "LLVMIREmitter.h"
+#include "IREmitter.h"
 #include <string_view>
 #include <vector>
 
@@ -67,7 +67,7 @@ struct Alias {
     }
 };
 
-class LLVMIREmitterHelpers {
+class IREmitterHelpers {
 public:
     static bool isStaticInit(CompilerState &cs, core::SymbolRef sym);
     static std::string getFunctionName(CompilerState &cs, core::SymbolRef sym);

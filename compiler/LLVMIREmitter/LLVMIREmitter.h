@@ -21,7 +21,7 @@ class MethodDef;
 
 namespace sorbet::compiler {
 class CompilerState;
-class LLVMIREmitter {
+class IREmitter {
 public:
     static void run(CompilerState &, cfg::CFG &cfg, std::unique_ptr<ast::MethodDef> &md,
                     const std::string &functionName);

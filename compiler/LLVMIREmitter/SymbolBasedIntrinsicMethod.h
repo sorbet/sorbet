@@ -1,7 +1,7 @@
 #ifndef SORBET_COMPILER_LLVMIREMITTER_SYMINTRINSICS_H
 #define SORBET_COMPILER_LLVMIREMITTER_SYMINTRINSICS_H
 
-#include "LLVMIREmitterHelpers.h"
+#include "IREmitterHelpers.h"
 #include <string_view>
 #include <vector>
 

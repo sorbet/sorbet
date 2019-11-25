@@ -1,6 +1,6 @@
 #ifndef SORBET_COMPILER_PAYLOAD_H
 #define SORBET_COMPILER_PAYLOAD_H
-#include "LLVMIREmitterHelpers.h"
+#include "IREmitterHelpers.h"
 
 namespace sorbet::compiler {
 

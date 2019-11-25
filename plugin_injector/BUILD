@@ -11,7 +11,7 @@ cc_library(
     deps = [
         "//compiler/DefinitionRewriter",
         "//compiler/Errors",
-        "//compiler/LLVMIREmitter",
+        "//compiler/IREmitter",
         "//compiler/ObjectFileEmitter",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",

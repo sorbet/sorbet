@@ -13,11 +13,11 @@
 #include "common/typecase.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IRHelpers/IRHelpers.h"
-#include "compiler/LLVMIREmitter/LLVMIREmitter.h"
-#include "compiler/LLVMIREmitter/LLVMIREmitterHelpers.h"
-#include "compiler/LLVMIREmitter/NameBasedIntrinsics.h"
-#include "compiler/LLVMIREmitter/Payload.h"
-#include "compiler/LLVMIREmitter/SymbolBasedIntrinsicMethod.h"
+#include "compiler/IREmitter/IREmitter.h"
+#include "compiler/IREmitter/IREmitterHelpers.h"
+#include "compiler/IREmitter/NameBasedIntrinsics.h"
+#include "compiler/IREmitter/Payload.h"
+#include "compiler/IREmitter/SymbolBasedIntrinsicMethod.h"
 #include "compiler/Names/Names.h"
 #include <string_view>
 
@@ -30,7 +30,7 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 
 }; // namespace
 
-llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
+llvm::Value *IREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
                                                   const BasicBlockMap &blockMap,
                                                   UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId) {
     for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics()) {
@@ -58,7 +58,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                     builder.CreateBr(afterSend);
                     builder.SetInsertPoint(slowPath);
                     auto slowPathRes =
-                        LLVMIREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, rubyBlockId);
+                        IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, rubyBlockId);
                     auto slowPathEnd = builder.GetInsertBlock();
                     builder.CreateBr(afterSend);
                     builder.SetInsertPoint(afterSend);
@@ -88,7 +88,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
     if (recvClass.exists()) {
         auto funSym = recvClass.data(cs)->findMember(cs, i->fun);
         if (funSym.exists() && funSym.data(cs)->isFinalMethod()) {
-            auto llvmFunc = LLVMIREmitterHelpers::lookupFunction(cs, funSym);
+            auto llvmFunc = IREmitterHelpers::lookupFunction(cs, funSym);
             if (llvmFunc != nullptr) {
                 auto methodName = i->fun.data(cs)->shortName(cs);
                 llvm::StringRef methodNameRef(methodName.data(), methodName.size());
@@ -106,12 +106,12 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                 builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
                 builder.SetInsertPoint(fastPath);
                 auto fastPathRes =
-                    LLVMIREmitterHelpers::emitMethodCallDirrect(cs, build, funSym, i, blockMap, aliases, rubyBlockId);
+                    IREmitterHelpers::emitMethodCallDirrect(cs, build, funSym, i, blockMap, aliases, rubyBlockId);
                 auto fastPathEnd = builder.GetInsertBlock();
                 builder.CreateBr(afterSend);
                 builder.SetInsertPoint(slowPath);
                 auto slowPathRes =
-                    LLVMIREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, rubyBlockId);
+                    IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, rubyBlockId);
                 auto slowPathEnd = builder.GetInsertBlock();
                 builder.CreateBr(afterSend);
                 builder.SetInsertPoint(afterSend);
@@ -123,16 +123,16 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
         }
     }
 
-    return LLVMIREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, rubyBlockId);
+    return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, rubyBlockId);
 }
 
-llvm::Value *LLVMIREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm::IRBuilderBase &build,
+llvm::Value *IREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm::IRBuilderBase &build,
                                                          core::SymbolRef funSym, cfg::Send *i,
                                                          const BasicBlockMap &blockMap,
                                                          UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                          int rubyBlockId) {
     auto &builder = builderCast(build);
-    auto llvmFunc = LLVMIREmitterHelpers::lookupFunction(cs, funSym);
+    auto llvmFunc = IREmitterHelpers::lookupFunction(cs, funSym);
     ENFORCE(llvmFunc != nullptr);
     // TODO: insert type guard
     {
@@ -160,7 +160,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm
     return rawCall;
 }
 
-llvm::Value *LLVMIREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
+llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
                                                            const BasicBlockMap &blockMap,
                                                            UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                            int rubyBlockId) {

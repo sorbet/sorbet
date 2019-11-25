@@ -3,11 +3,11 @@
 #include "llvm/Transforms/Utils/ModuleUtils.h" // appendToGlobalCtors
 // ^^^ violate our poisons
 
-// needef for LLVMIREmitterHelpers
+// needef for IREmitterHelpers
 #include "common/typecase.h"
 #include "core/core.h"
 
-#include "LLVMIREmitterHelpers.h"
+#include "IREmitterHelpers.h"
 #include "Payload.h"
 #include "compiler/IRHelpers/IRHelpers.h"
 #include <string>

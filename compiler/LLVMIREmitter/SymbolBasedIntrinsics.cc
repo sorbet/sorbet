@@ -13,10 +13,10 @@
 #include "common/typecase.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IRHelpers/IRHelpers.h"
-#include "compiler/LLVMIREmitter/LLVMIREmitter.h"
-#include "compiler/LLVMIREmitter/LLVMIREmitterHelpers.h"
-#include "compiler/LLVMIREmitter/Payload.h"
-#include "compiler/LLVMIREmitter/SymbolBasedIntrinsicMethod.h"
+#include "compiler/IREmitter/IREmitter.h"
+#include "compiler/IREmitter/IREmitterHelpers.h"
+#include "compiler/IREmitter/Payload.h"
+#include "compiler/IREmitter/SymbolBasedIntrinsicMethod.h"
 #include "compiler/Names/Names.h"
 #include <string_view>
 using namespace std;

@@ -7,7 +7,7 @@
 #include "llvm/Transforms/Utils/ModuleUtils.h" // appendToGlobalCtors
 // ^^^ violate our poisons
 
-// needef for LLVMIREmitterHelpers
+// needef for IREmitterHelpers
 #include "Passes.h"
 #include "common/typecase.h"
 #include "compiler/IRHelpers/IRHelpers.h"

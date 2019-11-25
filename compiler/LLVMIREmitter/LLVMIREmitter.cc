@@ -14,9 +14,9 @@
 #include "common/typecase.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IRHelpers/IRHelpers.h"
-#include "compiler/LLVMIREmitter/LLVMIREmitter.h"
-#include "compiler/LLVMIREmitter/LLVMIREmitterHelpers.h"
-#include "compiler/LLVMIREmitter/Payload.h"
+#include "compiler/IREmitter/IREmitter.h"
+#include "compiler/IREmitter/IREmitterHelpers.h"
+#include "compiler/IREmitter/Payload.h"
 #include "compiler/Names/Names.h"
 #include <string_view>
 
@@ -237,7 +237,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                                                             to_string(optionalMethodIndex) + " does not exist");
                         auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
                         ENFORCE(argMethod.exists());
-                        auto fillDefaultFunc = LLVMIREmitterHelpers::getOrCreateFunction(cs, argMethod);
+                        auto fillDefaultFunc = IREmitterHelpers::getOrCreateFunction(cs, argMethod);
                         rawValue =
                             builder.CreateCall(fillDefaultFunc, {argCountRaw, argArrayRaw,
                                                                  func->arg_begin() + 2 /* this is wrong for block*/});
@@ -320,7 +320,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         }
 
                         auto rawCall =
-                            LLVMIREmitterHelpers::emitMethodCall(cs, builder, i, blockMap, aliases, bb->rubyBlockId);
+                            IREmitterHelpers::emitMethodCall(cs, builder, i, blockMap, aliases, bb->rubyBlockId);
                         Payload::varSet(cs, bind.bind.variable, rawCall, builder, blockMap, aliases, bb->rubyBlockId);
                     },
                     [&](cfg::Return *i) {
@@ -504,10 +504,10 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
 
 } // namespace
 
-void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
-    Timer timer(cs.gs.tracer(), "LLVMIREmitter::run");
+void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
+    Timer timer(cs.gs.tracer(), "IREmitter::run");
     UnorderedMap<core::LocalVariable, Alias> aliases;
-    auto func = LLVMIREmitterHelpers::cleanFunctionBody(cs, LLVMIREmitterHelpers::getOrCreateFunction(cs, md->symbol));
+    auto func = IREmitterHelpers::cleanFunctionBody(cs, IREmitterHelpers::getOrCreateFunction(cs, md->symbol));
     {
         // setup function argument names
         func->arg_begin()->setName("argc");
@@ -519,7 +519,7 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
     llvm::IRBuilder<> builder(cs);
 
-    const BasicBlockMap blockMap = LLVMIREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, aliases, func);
+    const BasicBlockMap blockMap = IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, aliases, func);
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
@@ -542,27 +542,27 @@ void LLVMIREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Method
     cs.runCheapOptimizations(func);
 }
 
-void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, string_view objectName) {
+void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, string_view objectName) {
     llvm::IRBuilder<> builder(cs);
 
     auto owner = sym.data(cs)->owner;
     auto isRoot = owner == core::Symbols::rootSingleton();
     llvm::Function *entryFunc;
 
-    if (LLVMIREmitterHelpers::isStaticInit(cs, sym) && isRoot) {
+    if (IREmitterHelpers::isStaticInit(cs, sym) && isRoot) {
         auto baseName = objectName.substr(0, objectName.rfind(".rb"));
         auto linkageType = llvm::Function::ExternalLinkage;
         std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
         auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
         entryFunc = llvm::Function::Create(ft, linkageType, "Init_" + (string)baseName, *cs.module);
     } else {
-        entryFunc = LLVMIREmitterHelpers::getInitFunction(cs, sym);
+        entryFunc = IREmitterHelpers::getInitFunction(cs, sym);
     }
 
     auto bb = llvm::BasicBlock::Create(cs, "entry", entryFunc);
     builder.SetInsertPoint(bb);
 
-    if (LLVMIREmitterHelpers::isStaticInit(cs, sym)) {
+    if (IREmitterHelpers::isStaticInit(cs, sym)) {
         core::SymbolRef staticInit;
         auto attachedClass = owner.data(cs)->attachedClass(cs);
         if (isRoot) {
@@ -572,7 +572,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, 
         }
 
         // Call the LLVM method that was made by run() from this Init_ method
-        auto staticInitName = LLVMIREmitterHelpers::getFunctionName(cs, staticInit);
+        auto staticInitName = IREmitterHelpers::getFunctionName(cs, staticInit);
         auto staticInitFunc = cs.module->getFunction(staticInitName);
         ENFORCE(staticInitFunc, staticInitName + " does not exist");
         builder.CreateCall(staticInitFunc,

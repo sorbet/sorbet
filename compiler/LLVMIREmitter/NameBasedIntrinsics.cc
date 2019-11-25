@@ -13,10 +13,10 @@
 #include "common/typecase.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IRHelpers/IRHelpers.h"
-#include "compiler/LLVMIREmitter/LLVMIREmitter.h"
-#include "compiler/LLVMIREmitter/LLVMIREmitterHelpers.h"
-#include "compiler/LLVMIREmitter/NameBasedIntrinsics.h"
-#include "compiler/LLVMIREmitter/Payload.h"
+#include "compiler/IREmitter/IREmitter.h"
+#include "compiler/IREmitter/IREmitterHelpers.h"
+#include "compiler/IREmitter/NameBasedIntrinsics.h"
+#include "compiler/IREmitter/Payload.h"
 #include "compiler/Names/Names.h"
 #include <string_view>
 using namespace std;
@@ -84,8 +84,8 @@ public:
         auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
         ENFORCE(funcSym.exists());
         ENFORCE(funcSym.data(cs)->isMethod());
-        auto llvmFuncName = LLVMIREmitterHelpers::getFunctionName(cs, funcSym);
-        auto funcHandle = LLVMIREmitterHelpers::getOrCreateFunction(cs, funcSym);
+        auto llvmFuncName = IREmitterHelpers::getFunctionName(cs, funcSym);
+        auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
         auto universalSignature =
             llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
         auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
@@ -96,7 +96,7 @@ public:
                                       Payload::toCString(cs, funcNameRef.show(cs), builder), ptr,
                                       llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
-        builder.CreateCall(LLVMIREmitterHelpers::getInitFunction(cs, funcSym), {});
+        builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
         return Payload::rubyNil(cs, builder);
     }
 
@@ -144,8 +144,8 @@ public:
         }
 
         auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
-        auto llvmFuncName = LLVMIREmitterHelpers::getFunctionName(cs, funcSym);
-        builder.CreateCall(LLVMIREmitterHelpers::getInitFunction(cs, funcSym), {});
+        auto llvmFuncName = IREmitterHelpers::getFunctionName(cs, funcSym);
+        builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
         return Payload::rubyNil(cs, builder);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
