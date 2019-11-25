@@ -770,6 +770,39 @@ class Hash < Object
   end
   def merge(*arg0, &blk); end
 
+  # Adds the contents of *other_hash* to *hsh*. If no block is specified,
+  # entries with duplicate keys are overwritten with the values from
+  # *other_hash*, otherwise the value of each duplicate key is determined by
+  # calling the block with the key, its value in *hsh* and its value in
+  # *other_hash*.
+  #
+  # ```ruby
+  # h1 = { "a" => 100, "b" => 200 }
+  # h2 = { "b" => 254, "c" => 300 }
+  # h1.merge!(h2)   #=> {"a"=>100, "b"=>254, "c"=>300}
+  # h1              #=> {"a"=>100, "b"=>254, "c"=>300}
+  #
+  # h1 = { "a" => 100, "b" => 200 }
+  # h2 = { "b" => 254, "c" => 300 }
+  # h1.merge!(h2) { |key, v1, v2| v1 }
+  #                 #=> {"a"=>100, "b"=>200, "c"=>300}
+  # h1              #=> {"a"=>100, "b"=>200, "c"=>300}
+  # ```
+  sig do
+    type_parameters(:A ,:B).params(
+        other_hash: T::Hash[T.type_parameter(:A), T.type_parameter(:B)],
+    )
+    .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
+  end
+  sig do
+    type_parameters(:A ,:B).params(
+        other_hash: T::Hash[T.type_parameter(:A), T.type_parameter(:B)],
+        blk: T.proc.params(key: K, oldval: V, newval: T.type_parameter(:B)).returns(T.any(V, T.type_parameter(:B))),
+    )
+    .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
+  end
+  def merge!(other_hash, &blk); end
+
   # Searches through the hash comparing *obj* with the value using `==`. Returns
   # the first key-value pair (two-element array) that matches. See also
   # `Array#rassoc`.
