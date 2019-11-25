@@ -239,7 +239,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                             builder.CreateCall(fillDefaultFunc, {argCountRaw, argArrayRaw,
                                                                  func->arg_begin() + 2 /* this is wrong for block*/});
                     } else {
-                        rawValue = MK::getRubyNilRaw(cs, builder);
+                        rawValue = MK::rubyNil(cs, builder);
                     }
                     auto argIndex = i + minArgCount;
                     auto a = blockMap.rubyBlockArgs[funcId][argIndex];
@@ -351,7 +351,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::NilClass())) {
-                            MK::varSet(cs, bind.bind.variable, MK::getRubyNilRaw(cs, builder), builder, blockMap,
+                            MK::varSet(cs, bind.bind.variable, MK::rubyNil(cs, builder), builder, blockMap,
                                        aliases, bb->rubyBlockId);
                             return;
                         }
@@ -446,7 +446,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
             }
         } else {
             // handle dead block. TODO: this should throw
-            auto var = MK::getRubyNilRaw(cs, builder);
+            auto var = MK::rubyNil(cs, builder);
             MK::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
             builder.CreateBr(blockMap.postProcessBlock);
         }

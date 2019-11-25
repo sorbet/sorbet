@@ -53,7 +53,7 @@ public:
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                   int rubyBlockId) const override {
-        return MK::getRubyNilRaw(cs, build);
+        return MK::rubyNil(cs, build);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::keepForIde(), core::Names::keepForTypechecking()};
@@ -96,7 +96,7 @@ public:
                                       llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
         builder.CreateCall(LLVMIREmitterHelpers::getInitFunction(cs, funcSym), {});
-        return MK::getRubyNilRaw(cs, builder);
+        return MK::rubyNil(cs, builder);
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -145,7 +145,7 @@ public:
         auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
         auto llvmFuncName = LLVMIREmitterHelpers::getFunctionName(cs, funcSym);
         builder.CreateCall(LLVMIREmitterHelpers::getInitFunction(cs, funcSym), {});
-        return MK::getRubyNilRaw(cs, builder);
+        return MK::rubyNil(cs, builder);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {Names::defineTopClassOrModule(cs)};
@@ -266,7 +266,7 @@ public:
         if (takesReciever == TakesReciever) {
             var = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
         } else {
-            var = MK::getRubyNilRaw(cs, builder);
+            var = MK::rubyNil(cs, builder);
         }
 
         return builder.CreateCall(cs.module->getFunction(cMethod),

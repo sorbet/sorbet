@@ -33,7 +33,7 @@ llvm::Value *MK::unboxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, 
     return builderCast(builder).CreateLoad(builderCast(builder).CreateStructGEP(target, 0), "rawRubyValue");
 }
 
-llvm::Value *MK::getRubyNilRaw(CompilerState &cs, llvm::IRBuilderBase &builder) {
+llvm::Value *MK::rubyNil(CompilerState &cs, llvm::IRBuilderBase &builder) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyNil"), {}, "nilValueRaw");
 }
 
