@@ -471,7 +471,7 @@ __attribute__((__noreturn__)) {
              rb_obj_classname(value), value);
 }
 
-void sorbet_rb_error_arity(int argc, int min, int max) __attribute__((__noreturn__)) {
+void sorbet_raiseArity(int argc, int min, int max) __attribute__((__noreturn__)) {
     rb_exc_raise(sorbet_rb_arity_error_new(argc, min, max));
 }
 
@@ -632,7 +632,7 @@ _Bool sorbet_isa_class_of(VALUE obj, VALUE class) __attribute__((const)) {
 
 void sorbet_ensure_arity(int argc, int expected) {
     if (argc != expected) {
-        sorbet_rb_error_arity(argc, expected, expected);
+        sorbet_raiseArity(argc, expected, expected);
     }
 }
 

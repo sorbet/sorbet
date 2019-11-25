@@ -338,7 +338,7 @@ VALUE rb_arity_error_new(int argc, int min, int max) {
     return rb_exc_new3(rb_eArgError, err_mess);
 }
 
-void rb_error_arity(int argc, int min, int max) {
+void raiseArity(int argc, int min, int max) {
     rb_exc_raise(rb_arity_error_new(argc, min, max));
 }
 

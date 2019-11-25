@@ -362,7 +362,7 @@ define internal fastcc void @sorbet_cast_failure(i64 %0, i8* %1, i8* %2) unnamed
 }
 
 ; Function Attrs: noreturn nounwind ssp uwtable
-define internal fastcc void @sorbet_rb_error_arity(i32 %0) unnamed_addr #7 {
+define internal fastcc void @sorbet_raiseArity(i32 %0) unnamed_addr #7 {
   %2 = tail call fastcc i64 @sorbet_rb_arity_error_new(i32 %0)
   tail call void @rb_exc_raise(i64 %2) #19
   unreachable
@@ -543,7 +543,7 @@ functionEntryInitializers:
   br i1 %0, label %fillRequiredArgs, label %argCountFailBlock, !prof !19, !misexpect !20
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call fastcc void @sorbet_rb_error_arity(i32 %argc)
+  tail call fastcc void @sorbet_raiseArity(i32 %argc)
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
@@ -702,7 +702,7 @@ functionEntryInitializers:
   br i1 %0, label %fillRequiredArgs, label %argCountFailBlock, !prof !19, !misexpect !20
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call fastcc void @sorbet_rb_error_arity(i32 %argc)
+  tail call fastcc void @sorbet_raiseArity(i32 %argc)
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers

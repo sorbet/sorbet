@@ -110,7 +110,7 @@ public:
     static llvm::Value *rubyNil(CompilerState &cs, llvm::IRBuilderBase &builder);
     static llvm::Value *rubyFalse(CompilerState &cs, llvm::IRBuilderBase &builder);
     static llvm::Value *rubyTrue(CompilerState &cs, llvm::IRBuilderBase &builder);
-    static void rb_error_arity(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *currentArgCount,
+    static void raiseArity(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *currentArgCount,
                                      int minArgs, int maxArgs);
     static llvm::Value *longToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, long num);
     static llvm::Value *doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, double num);
