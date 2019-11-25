@@ -107,7 +107,7 @@ long sorbet_rubyStringLength(VALUE value) __attribute__((always_inline)) {
     return RSTRING_LEN(value);
 }
 
-VALUE sorbet_CPtrToRubyString(const char *ptr, long length) __attribute__((always_inline)) {
+VALUE sorbet_cPtrToRubyString(const char *ptr, long length) __attribute__((always_inline)) {
     return rb_str_new(ptr, length);
 }
 
