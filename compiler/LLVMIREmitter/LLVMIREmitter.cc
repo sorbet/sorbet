@@ -87,7 +87,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true))};
                 auto rawArg1Value =
                     builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "arg1_maybeExpandToFullArgs");
-                auto isArray = MK::createTypeTestU1(cs, builder, rawArg1Value,
+                auto isArray = MK::typeTest(cs, builder, rawArg1Value,
                                                     core::make_type<core::ClassType>(core::Symbols::Array()));
                 auto typeTestEnd = builder.GetInsertBlock();
 
@@ -401,7 +401,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     },
                     [&](cfg::Cast *i) {
                         auto val = MK::varGet(cs, i->value.variable, builder, blockMap, aliases, bb->rubyBlockId);
-                        auto passedTypeTest = MK::createTypeTestU1(cs, builder, val, bind.bind.type);
+                        auto passedTypeTest = MK::typeTest(cs, builder, val, bind.bind.type);
                         auto successBlock =
                             llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
 
@@ -475,7 +475,7 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
         if (!expectedType) {
             continue;
         }
-        auto passedTypeTest = MK::createTypeTestU1(cs, builder, var, expectedType);
+        auto passedTypeTest = MK::typeTest(cs, builder, var, expectedType);
         auto successBlock = llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
 
         auto failBlock = llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());

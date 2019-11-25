@@ -193,7 +193,7 @@ const vector<pair<core::SymbolRef, string>> optimizedTypeTests = {
 };
 }
 
-llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val,
+llvm::Value *MK::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val,
                                   const core::TypePtr &type) {
     auto &builder = builderCast(b);
     llvm::Value *ret = nullptr;
@@ -217,19 +217,19 @@ llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llv
                                      {val, MK::getRubyConstant(cs, ct->symbol, builder)});
         },
         [&](core::AppliedType *at) {
-            auto base = createTypeTestU1(cs, builder, val, core::make_type<core::ClassType>(at->klass));
+            auto base = typeTest(cs, builder, val, core::make_type<core::ClassType>(at->klass));
             ret = base;
             // todo: ranges, hashes, sets, enumerator, and, overall, enumerables
         },
         [&](core::OrType *ct) {
             // TODO: reoder types so that cheap test is done first
-            auto left = createTypeTestU1(cs, builder, val, ct->left);
+            auto left = typeTest(cs, builder, val, ct->left);
             auto rightBlockStart = llvm::BasicBlock::Create(cs, "orRight", builder.GetInsertBlock()->getParent());
             auto contBlock = llvm::BasicBlock::Create(cs, "orContinue", builder.GetInsertBlock()->getParent());
             auto leftEnd = builder.GetInsertBlock();
             builder.CreateCondBr(left, contBlock, rightBlockStart);
             builder.SetInsertPoint(rightBlockStart);
-            auto right = createTypeTestU1(cs, builder, val, ct->right);
+            auto right = typeTest(cs, builder, val, ct->right);
             auto rightEnd = builder.GetInsertBlock();
             builder.CreateBr(contBlock);
             builder.SetInsertPoint(contBlock);
@@ -240,13 +240,13 @@ llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llv
         },
         [&](core::AndType *ct) {
             // TODO: reoder types so that cheap test is done first
-            auto left = createTypeTestU1(cs, builder, val, ct->left);
+            auto left = typeTest(cs, builder, val, ct->left);
             auto rightBlockStart = llvm::BasicBlock::Create(cs, "andRight", builder.GetInsertBlock()->getParent());
             auto contBlock = llvm::BasicBlock::Create(cs, "andContinue", builder.GetInsertBlock()->getParent());
             auto leftEnd = builder.GetInsertBlock();
             builder.CreateCondBr(left, rightBlockStart, contBlock);
             builder.SetInsertPoint(rightBlockStart);
-            auto right = createTypeTestU1(cs, builder, val, ct->right);
+            auto right = typeTest(cs, builder, val, ct->right);
             auto rightEnd = builder.GetInsertBlock();
             builder.CreateBr(contBlock);
             builder.SetInsertPoint(contBlock);

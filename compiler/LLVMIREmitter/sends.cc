@@ -42,7 +42,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                     auto &builder = builderCast(build);
                     auto recv = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
 
-                    auto typeTest = MK::createTypeTestU1(cs, builder, recv, core::make_type<core::ClassType>(c));
+                    auto typeTest = MK::typeTest(cs, builder, recv, core::make_type<core::ClassType>(c));
 
                     auto afterSend = llvm::BasicBlock::Create(cs, llvm::Twine("afterSymCallIntrinsic_") + methodNameRef,
                                                               builder.GetInsertBlock()->getParent());
@@ -94,7 +94,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                 auto &builder = builderCast(build);
                 auto recv = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
 
-                auto typeTest = MK::createTypeTestU1(cs, builder, recv, core::make_type<core::ClassType>(recvClass));
+                auto typeTest = MK::typeTest(cs, builder, recv, core::make_type<core::ClassType>(recvClass));
 
                 auto afterSend = llvm::BasicBlock::Create(cs, llvm::Twine("afterCallFinal_") + methodNameRef,
                                                           builder.GetInsertBlock()->getParent());
