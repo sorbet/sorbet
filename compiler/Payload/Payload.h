@@ -1,5 +1,4 @@
 #include "common/Exception.h"
-#include "compiler/Core/CompilerState.h"
 
 namespace sorbet::compiler {
 class PayloadLoader {
