@@ -31,7 +31,10 @@ module Opus::Types::Test
         end
       end
 
+      class Child < Base; end
+
       assert_equal(Base.make.class, Base)
+      assert_equal(Child.make.class, Child)
     end
 
     it 'does not throw when the returned value is bad' do
