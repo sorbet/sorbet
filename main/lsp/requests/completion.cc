@@ -282,6 +282,29 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
         fmt::format_to(result, "({})", fmt::join(typeAndArgNames, ", "));
     }
 
+    ENFORCE(!method.data(gs)->arguments().empty());
+    auto &blkArg = method.data(gs)->arguments().back();
+    ENFORCE(blkArg.flags.isBlock);
+
+    auto ctx = core::Context{gs, core::Symbols::root()};
+    auto hasBlockType = blkArg.type != nullptr && !blkArg.type->isUntyped();
+    if (hasBlockType && !core::Types::isSubType(ctx, core::Types::nilClass(), blkArg.type)) {
+        string blkArgs;
+        if (auto *appliedType = core::cast_type<core::AppliedType>(blkArg.type.get())) {
+            if (appliedType->targs.size() >= 2) {
+                // The first element in targs is the return type.
+                auto targs_it = appliedType->targs.begin();
+                targs_it++;
+                blkArgs = fmt::format(" |{}|", fmt::map_join(targs_it, appliedType->targs.end(), ", ", [&](auto targ) {
+                                          auto resultType = getResultType(gs, targ, method, receiverType, constraint);
+                                          return fmt::format("${{{}:{}}}", nextTabstop++, resultType->show(gs));
+                                      }));
+            }
+        }
+
+        fmt::format_to(result, " do{}\n  ${{{}}}\nend", blkArgs, nextTabstop++);
+    }
+
     fmt::format_to(result, "${{0}}");
     return to_string(result);
 }
