@@ -62,7 +62,7 @@ typecheck() {
     "$SRB_SORBET_EXE" "${args[@]}"
   elif command -v sorbet > /dev/null; then
     # if sorbet has been installed and placed somewhere on the path 
-    # such as from Homebre -- use that.
+    # such as from Homebrew -- use that.
     # This is a solution for those who are using platforms such as jruby
     sorbet "${args[@]}"
   else
