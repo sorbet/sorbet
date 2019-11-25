@@ -108,7 +108,7 @@ public:
         // md->loc.toString(gs));
         ENFORCE(md->loc.file().exists());
         if (!module) {
-            module = sorbet::compiler::Payload::readDefaultModule(functionName.data(), lctx);
+            module = sorbet::compiler::PayloadLoader::readDefaultModule(functionName.data(), lctx);
             threadState->file = md->loc.file();
         } else {
             ENFORCE(threadState->file == md->loc.file());
