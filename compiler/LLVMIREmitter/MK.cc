@@ -72,7 +72,7 @@ llvm::Value *MK::getRubyStringRaw(CompilerState &cs, llvm::IRBuilderBase &builde
         {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length(), true))}, "rawRubyStr");
 }
 
-llvm::Value *MK::getIsTruthyU1(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
+llvm::Value *MK::testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_testIsTruthy"), {val}, "cond");
 }
 

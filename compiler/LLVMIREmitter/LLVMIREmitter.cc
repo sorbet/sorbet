@@ -433,7 +433,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
             if (!isTerminated) {
                 if (bb->bexit.thenb != bb->bexit.elseb && bb->bexit.cond.variable != core::LocalVariable::blockCall()) {
                     auto var = MK::varGet(cs, bb->bexit.cond.variable, builder, blockMap, aliases, bb->rubyBlockId);
-                    auto condValue = MK::getIsTruthyU1(cs, builder, var);
+                    auto condValue = MK::testIsTruthy(cs, builder, var);
 
                     builder.CreateCondBr(
                         condValue,
