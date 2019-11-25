@@ -874,8 +874,7 @@ VALUE sorbet_rb_int_to_s(VALUE x, int argc, const VALUE *const restrict argv) {
     rb_check_arity(argc, 0, 1);
     if (argc == 1) {
         base = NUM2INT(argv[0]);
-    }
-    else {
+    } else {
         base = 10;
     }
     if (LIKELY(FIXNUM_P(x))) {
