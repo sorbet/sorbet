@@ -10,7 +10,7 @@
 // needef for IREmitterHelpers
 #include "Passes.h"
 #include "common/typecase.h"
-#include "compiler/Payload/Payload.h"
+#include "compiler/Core/CompilerState.h"
 #include "core/core.h"
 #include <string>
 

@@ -9,7 +9,7 @@
 
 #include "IREmitterHelpers.h"
 #include "Payload.h"
-#include "compiler/Payload/Payload.h"
+#include "compiler/Core/CompilerState.h"
 #include <string>
 
 using namespace std;

@@ -1,4 +1,4 @@
-#include "compiler/Payload/Payload.h"
+#include "compiler/Core/CompilerState.h"
 #include "llvm/IR/DerivedTypes.h" // FunctionType
 #include "llvm/IR/IRBuilder.h"
 

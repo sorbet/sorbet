@@ -17,7 +17,7 @@
 #include "compiler/IREmitter/NameBasedIntrinsics.h"
 #include "compiler/IREmitter/Payload.h"
 #include "compiler/Names/Names.h"
-#include "compiler/Payload/Payload.h"
+#include "compiler/Core/CompilerState.h"
 #include <string_view>
 using namespace std;
 namespace sorbet::compiler {
