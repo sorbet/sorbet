@@ -1,4 +1,4 @@
-#include "compiler/IRHelpers/IRHelpers.h"
+#include "compiler/Payload/Payload.h"
 #include "llvm/IR/DerivedTypes.h" // FunctionType
 #include "llvm/IR/IRBuilder.h"
 

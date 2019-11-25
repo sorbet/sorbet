@@ -1,9 +1,9 @@
 cc_library(
-    name = "IRHelpers",
+    name = "Payload",
     srcs = [
-        "IRHelpers.cc",
-        "IRHelpers.h",
-        "IRHelpers_gen.cc",
+        "Payload.cc",
+        "Payload.h",
+        "Payload_gen.cc",
     ],
     linkstatic = select({
         "@com_stripe_ruby_typer//tools/config:linkshared": 0,
@@ -102,9 +102,9 @@ genrule(
     name = "generate_payload_gen_cc",
     srcs = ["payload.bc"],
     outs = [
-        "IRHelpers_gen.cc",
+        "Payload_gen.cc",
     ],
-    cmd = "$(location :generate_load_payload) $(location payload.bc) $(location IRHelpers_gen.cc)",
+    cmd = "$(location :generate_load_payload) $(location payload.bc) $(location Payload_gen.cc)",
     tools = [
         ":generate_load_payload",
     ],

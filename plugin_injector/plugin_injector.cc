@@ -7,7 +7,7 @@
 #include "compiler/DefinitionRewriter/DefinitionRewriter.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IREmitter/IREmitter.h"
-#include "compiler/IRHelpers/IRHelpers.h"
+#include "compiler/Payload/Payload.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "core/ErrorQueue.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
@@ -108,7 +108,7 @@ public:
         // md->loc.toString(gs));
         ENFORCE(md->loc.file().exists());
         if (!module) {
-            module = sorbet::compiler::IRHelpers::readDefaultModule(functionName.data(), lctx);
+            module = sorbet::compiler::Payload::readDefaultModule(functionName.data(), lctx);
             threadState->file = md->loc.file();
         } else {
             ENFORCE(threadState->file == md->loc.file());

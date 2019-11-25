@@ -1,5 +1,5 @@
 ; ModuleID = 'payload'
-source_filename = "compiler/IRHelpers/payload.c"
+source_filename = "compiler/Payload/payload.c"
 target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 
 %struct.rb_data_type_struct = type { i8*, %struct.anon.1, %struct.rb_data_type_struct*, i8*, i64 }

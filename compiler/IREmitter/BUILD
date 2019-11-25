@@ -12,7 +12,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//compiler/Errors",
-        "//compiler/IRHelpers",
+        "//compiler/Payload",
         "//compiler/Names",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",
