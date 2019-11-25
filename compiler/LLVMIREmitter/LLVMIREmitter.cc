@@ -346,7 +346,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::TrueClass())) {
-                            MK::varSet(cs, bind.bind.variable, MK::getRubyTrueRaw(cs, builder), builder, blockMap,
+                            MK::varSet(cs, bind.bind.variable, MK::rubyTrue(cs, builder), builder, blockMap,
                                        aliases, bb->rubyBlockId);
                             return;
                         }

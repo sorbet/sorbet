@@ -41,7 +41,7 @@ llvm::Value *MK::getRubyFalseRaw(CompilerState &cs, llvm::IRBuilderBase &builder
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyFalse"), {}, "falseValueRaw");
 }
 
-llvm::Value *MK::getRubyTrueRaw(CompilerState &cs, llvm::IRBuilderBase &builder) {
+llvm::Value *MK::rubyTrue(CompilerState &cs, llvm::IRBuilderBase &builder) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
 }
 
