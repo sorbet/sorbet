@@ -12,12 +12,12 @@
 #include "common/sort.h"
 #include "common/typecase.h"
 #include "compiler/Errors/Errors.h"
-#include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/IREmitter/NameBasedIntrinsics.h"
 #include "compiler/IREmitter/Payload.h"
 #include "compiler/IREmitter/SymbolBasedIntrinsicMethod.h"
+#include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/Names/Names.h"
 #include <string_view>
 
@@ -31,8 +31,8 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 }; // namespace
 
 llvm::Value *IREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
-                                                  const BasicBlockMap &blockMap,
-                                                  UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId) {
+                                              const BasicBlockMap &blockMap,
+                                              UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId) {
     for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics()) {
         if (absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), i->fun)) {
             auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
@@ -127,10 +127,10 @@ llvm::Value *IREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilder
 }
 
 llvm::Value *IREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm::IRBuilderBase &build,
-                                                         core::SymbolRef funSym, cfg::Send *i,
-                                                         const BasicBlockMap &blockMap,
-                                                         UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                                         int rubyBlockId) {
+                                                     core::SymbolRef funSym, cfg::Send *i,
+                                                     const BasicBlockMap &blockMap,
+                                                     UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                                     int rubyBlockId) {
     auto &builder = builderCast(build);
     auto llvmFunc = IREmitterHelpers::lookupFunction(cs, funSym);
     ENFORCE(llvmFunc != nullptr);
@@ -161,9 +161,9 @@ llvm::Value *IREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm::IR
 }
 
 llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
-                                                           const BasicBlockMap &blockMap,
-                                                           UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                                           int rubyBlockId) {
+                                                       const BasicBlockMap &blockMap,
+                                                       UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                                       int rubyBlockId) {
     auto &builder = builderCast(build);
     auto str = i->fun.data(cs)->shortName(cs);
     auto rawId = Payload::idIntern(cs, builder, str);

@@ -13,10 +13,10 @@
 #include "common/sort.h"
 #include "common/typecase.h"
 #include "compiler/Errors/Errors.h"
-#include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/IREmitter/Payload.h"
+#include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/Names/Names.h"
 #include <string_view>
 

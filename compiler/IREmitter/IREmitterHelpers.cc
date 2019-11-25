@@ -203,9 +203,9 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
 };
 
 BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
-                                                                     unique_ptr<ast::MethodDef> &md,
-                                                                     UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                                                     llvm::Function *mainFunc) {
+                                                                 unique_ptr<ast::MethodDef> &md,
+                                                                 UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                                                 llvm::Function *mainFunc) {
     vector<llvm::Function *> rubyBlock2Function = getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlock] = findCaptures(cs, md, cfg);
