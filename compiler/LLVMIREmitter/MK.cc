@@ -141,7 +141,7 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
 
 } // namespace
 
-llvm::Value *MK::getRubyConstantValueRaw(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &build) {
+llvm::Value *MK::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &build) {
     auto &builder = builderCast(build);
     sym = removeRoot(sym);
     auto str = showClassName(cs, sym);
@@ -210,11 +210,11 @@ llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llv
             // todo: handle attached of attached class
             if (attachedClass.exists()) {
                 ret = builder.CreateCall(cs.module->getFunction("sorbet_isa_class_of"),
-                                         {val, MK::getRubyConstantValueRaw(cs, attachedClass, builder)});
+                                         {val, MK::getRubyConstant(cs, attachedClass, builder)});
                 return;
             }
             ret = builder.CreateCall(cs.module->getFunction("sorbet_isa"),
-                                     {val, MK::getRubyConstantValueRaw(cs, ct->symbol, builder)});
+                                     {val, MK::getRubyConstant(cs, ct->symbol, builder)});
         },
         [&](core::AppliedType *at) {
             auto base = createTypeTestU1(cs, builder, val, core::make_type<core::ClassType>(at->klass));
@@ -264,7 +264,7 @@ void MK::pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &build, core::S
     auto &builder = builderCast(build);
     auto funcName = sym.data(cs)->name.data(cs)->shortName(cs);
     auto funcNameId = MK::getRubyIdFor(cs, builder, funcName);
-    auto recv = MK::getRubyConstantValueRaw(cs, sym.data(cs)->owner, builder);
+    auto recv = MK::getRubyConstant(cs, sym.data(cs)->owner, builder);
     builder.CreateCall(cs.module->getFunction("sorbet_pushControlFrame"), {recv, funcNameId});
 }
 
@@ -278,7 +278,7 @@ llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &bu
     auto sym = blockMap.forMethod.data(cs)->owner;
     ENFORCE(sym.data(cs)->isClassOrModule());
 
-    return MK::getRubyConstantValueRaw(cs, sym.data(cs)->topAttachedClass(cs), builder);
+    return MK::getRubyConstant(cs, sym.data(cs)->topAttachedClass(cs), builder);
 };
 
 } // namespace
@@ -292,7 +292,7 @@ llvm::Value *MK::varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBu
         auto alias = aliases.at(local);
 
         if (alias.kind == Alias::AliasKind::Constant) {
-            return MK::getRubyConstantValueRaw(cs, alias.constantSym, builder);
+            return MK::getRubyConstant(cs, alias.constantSym, builder);
         } else if (alias.kind == Alias::AliasKind::GlobalField) {
             return builder.CreateCall(
                 cs.module->getFunction("sorbet_globalVariableGet"),
@@ -332,7 +332,7 @@ void MK::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, 
             auto name = sym.data(cs.gs)->name.show(cs.gs);
             auto owner = sym.data(cs.gs)->owner;
             builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
-                               {MK::getRubyConstantValueRaw(cs, owner, builder), MK::toCString(cs, name, builder),
+                               {MK::getRubyConstant(cs, owner, builder), MK::toCString(cs, name, builder),
                                 llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
         } else if (alias.kind == Alias::AliasKind::GlobalField) {
             builder.CreateCall(

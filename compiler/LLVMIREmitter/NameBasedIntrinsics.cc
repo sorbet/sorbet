@@ -91,7 +91,7 @@ public:
 
         auto rubyFunc = cs.module->getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
         ENFORCE(rubyFunc);
-        builder.CreateCall(rubyFunc, {MK::getRubyConstantValueRaw(cs, ownerSym, builder),
+        builder.CreateCall(rubyFunc, {MK::getRubyConstant(cs, ownerSym, builder),
                                       MK::toCString(cs, funcNameRef.show(cs), builder), ptr,
                                       llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
@@ -125,11 +125,11 @@ public:
         auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
 
         if (sym.data(cs)->owner != core::Symbols::root()) {
-            auto getOwner = MK::getRubyConstantValueRaw(cs, sym.data(cs)->owner, builder);
+            auto getOwner = MK::getRubyConstant(cs, sym.data(cs)->owner, builder);
             if (isModule) {
                 builder.CreateCall(cs.module->getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
             } else {
-                auto rawCall = MK::getRubyConstantValueRaw(cs, sym.data(cs)->superClass(), builder);
+                auto rawCall = MK::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
                 builder.CreateCall(cs.module->getFunction("sorbet_defineNestedClass"),
                                    {getOwner, classNameCStr, rawCall});
             }
@@ -137,7 +137,7 @@ public:
             if (isModule) {
                 builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
             } else {
-                auto rawCall = MK::getRubyConstantValueRaw(cs, sym.data(cs)->superClass(), builder);
+                auto rawCall = MK::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
                 builder.CreateCall(cs.module->getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
             }
         }

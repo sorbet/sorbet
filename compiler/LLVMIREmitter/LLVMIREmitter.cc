@@ -572,7 +572,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, 
                            {
                                llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
-                               MK::getRubyConstantValueRaw(cs, owner, builder),
+                               MK::getRubyConstant(cs, owner, builder),
                            },
                            staticInitName);
     }
