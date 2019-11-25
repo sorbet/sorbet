@@ -1121,6 +1121,11 @@ public:
                 return;
             }
         }
+        if (attachedClass.data(ctx)->isClassOrModuleAbstract()) {
+            if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::AbstractClassInstantiated)) {
+                e.setHeader("Attempt to instantiate abstract class `{}`", attachedClass.data(ctx)->show(ctx));
+            }
+        }
         auto instanceTy = attachedClass.data(ctx)->externalType(ctx);
         DispatchArgs innerArgs{Names::initialize(), args.locs, args.args, instanceTy, instanceTy, args.block};
         auto dispatched = instanceTy->dispatchCall(ctx, innerArgs);
