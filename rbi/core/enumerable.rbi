@@ -76,6 +76,22 @@ module Enumerable
   end
   def any?(&blk); end
 
+  # Returns an enumerator object generated from this enumerator and given
+  # enumerables.
+  #
+  # ```ruby
+  # e = (1..3).chain([4, 5])
+  # e.to_a #=> [1, 2, 3, 4, 5]
+  # ```
+  sig do
+    type_parameters(:T)
+    .params(
+      enums: T::Enumerable[T.type_parameter(:T)],
+    )
+    .returns(T::Enumerator[T.any(Elem, T.type_parameter(:T))])
+  end
+  def chain(*enums); end
+
   # Returns a new array with the results of running *block* once for every
   # element in *enum*.
   #

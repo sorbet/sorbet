@@ -200,6 +200,22 @@ class Enumerator < Object
   end
   def initialize(arg0=T.unsafe(nil), &blk); end
 
+  # Returns an enumerator object generated from this enumerator and a given
+  # enumerable.
+  #
+  # ```ruby
+  # e = (1..3).each + [4, 5]
+  # e.to_a #=> [1, 2, 3, 4, 5]
+  # ```
+  sig do
+    type_parameters(:T)
+    .params(
+      other: T::Enumerable[T.type_parameter(:T)],
+    )
+    .returns(T::Enumerator[T.any(Elem, T.type_parameter(:T))])
+  end
+  def +(other); end
+
   # Creates a printable version of *e*.
   sig {returns(String)}
   def inspect(); end
@@ -407,6 +423,64 @@ class Enumerator::Generator < Object
 
   extend T::Generic
   Elem = type_member(:out)
+end
+
+# [`Enumerator::Chain`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/Chain.html)
+# is a subclass of
+# [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html), which
+# represents a chain of enumerables that works as a single enumerator.
+#
+# This type of objects can be created by
+# [`Enumerable#chain`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-chain)
+# and
+# [`Enumerator#+`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html#method-i-2B).
+class Enumerator::Chain < Enumerator
+  sig do
+    type_parameters(:T)
+    .params(
+      args: T::Enumerable[T.type_parameter(:T)],
+    )
+    .returns(T::Enumerator[T.any(Elem, T.type_parameter(:T))])
+  end
+  sig do
+    type_parameters(:T)
+    .params(
+        args: T.any(Integer, T.proc.returns(Integer)),
+        blk: T.proc.params(arg0: Enumerator::Yielder).void,
+    )
+    .void
+  end
+  def initialize(*args, &blk); end
+
+  # Iterates over the elements of the first enumerable by calling the "each"
+  # method on it with the given arguments, then proceeds to the following
+  # enumerables in sequence until all of the enumerables are exhausted.
+  #
+  # If no block is given, returns an enumerator.
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.untyped)
+  end
+  sig {returns(T.self_type)}
+  def each(&blk); end
+
+  # Returns a printable version of the enumerator chain.
+  sig {returns(String)}
+  def inspect(); end
+
+  # Rewinds the enumerator chain by calling the "rewind" method on each
+  # enumerable in reverse order. Each call is performed only if the enumerable
+  # responds to the method.
+  sig {returns(T.self_type)}
+  def rewind(); end
+
+  # Returns the total size of the enumerator chain calculated by summing up the
+  # size of each enumerable in the chain. If any of the enumerables reports its
+  # size as nil or Float::INFINITY, that value is returned as the total size.
+  sig {returns(T.nilable(T.any(Integer, Float)))}
+  def size(); end
 end
 
 # [`Lazy`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/Lazy.html)
