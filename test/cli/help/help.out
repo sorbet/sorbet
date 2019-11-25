@@ -162,7 +162,7 @@ Usage:
                                 autogen-subclasses`.
       --stop-after phase        Stop After: [init, parser, desugarer,
                                 rewriter, local-vars, namer, resolver, cfg,
-                                inferencer] (default: inferencer)
+                                semantic-extension, inferencer] (default: inferencer)
       --no-stdlib               Do not load included rbi files for stdlib
       --skip-rewriter-passes    Do not run Rewriter passess
       --wait-for-dbg            Wait for debugger on start
