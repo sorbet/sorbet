@@ -20,12 +20,14 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 };
 } // namespace
 
-llvm::Value *Payload::setExpectedBool(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value, bool expected) {
+llvm::Value *Payload::setExpectedBool(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value,
+                                      bool expected) {
     return builderCast(builder).CreateIntrinsic(llvm::Intrinsic::ID::expect, {llvm::Type::getInt1Ty(cs)},
                                                 {value, builder.getInt1(expected)});
 }
 
-void Payload::boxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *target, llvm::Value *rawData) {
+void Payload::boxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *target,
+                          llvm::Value *rawData) {
     builderCast(builder).CreateStore(rawData, builderCast(builder).CreateStructGEP(target, 0));
 }
 
@@ -45,8 +47,8 @@ llvm::Value *Payload::rubyTrue(CompilerState &cs, llvm::IRBuilderBase &builder) 
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
 }
 
-void Payload::raiseArity(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *currentArgCount,
-                              int minArgs, int maxArgs) {
+void Payload::raiseArity(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *currentArgCount, int minArgs,
+                         int maxArgs) {
     builderCast(builder).CreateCall(cs.module->getFunction("sorbet_raiseArity"),
                                     {currentArgCount, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgs, true)),
                                      llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgs, true))
@@ -193,8 +195,7 @@ const vector<pair<core::SymbolRef, string>> optimizedTypeTests = {
 };
 }
 
-llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val,
-                                  const core::TypePtr &type) {
+llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val, const core::TypePtr &type) {
     auto &builder = builderCast(b);
     llvm::Value *ret = nullptr;
     typecase(
@@ -284,8 +285,8 @@ llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &bu
 } // namespace
 
 llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &build,
-                        const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                        int rubyBlockId) {
+                             const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases,
+                             int rubyBlockId) {
     auto &builder = builderCast(build);
     if (aliases.contains(local)) {
         // alias to a field or constant
@@ -322,7 +323,8 @@ llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm:
 }
 
 void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &build,
-                const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId) {
+                     const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
+                     int rubyBlockId) {
     auto &builder = builderCast(build);
     if (aliases.contains(local)) {
         // alias to a field or constant

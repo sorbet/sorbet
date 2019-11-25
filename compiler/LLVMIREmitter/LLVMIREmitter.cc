@@ -88,7 +88,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 auto rawArg1Value =
                     builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "arg1_maybeExpandToFullArgs");
                 auto isArray = Payload::typeTest(cs, builder, rawArg1Value,
-                                                    core::make_type<core::ClassType>(core::Symbols::Array()));
+                                                 core::make_type<core::ClassType>(core::Symbols::Array()));
                 auto typeTestEnd = builder.GetInsertBlock();
 
                 builder.CreateCondBr(isArray, argExpandBlock, afterArgArrayExpandBlock);
@@ -165,7 +165,8 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             // box `self`
             if (!isBlock) {
                 auto selfArgRaw = func->arg_begin() + 2;
-                Payload::varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, blockMap, aliases, funcId);
+                Payload::varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, blockMap, aliases,
+                                funcId);
             }
 
             for (auto i = 0; i < maxArgCount; i++) {
@@ -196,8 +197,9 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             //
             if (blkArgName.exists() && blockMap.usesBlockArgs) {
                 // TODO: I don't think this correctly handles blocks with block args
-                Payload::varSet(cs, blkArgName, builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")),
-                           builder, blockMap, aliases, 0);
+                Payload::varSet(cs, blkArgName,
+                                builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")), builder,
+                                blockMap, aliases, 0);
             }
             builder.CreateBr(checkBlocks[0]);
         }
@@ -342,17 +344,17 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     [&](cfg::Literal *i) {
                         if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {
                             Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, blockMap,
-                                       aliases, bb->rubyBlockId);
+                                            aliases, bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::TrueClass())) {
                             Payload::varSet(cs, bind.bind.variable, Payload::rubyTrue(cs, builder), builder, blockMap,
-                                       aliases, bb->rubyBlockId);
+                                            aliases, bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::NilClass())) {
                             Payload::varSet(cs, bind.bind.variable, Payload::rubyNil(cs, builder), builder, blockMap,
-                                       aliases, bb->rubyBlockId);
+                                            aliases, bb->rubyBlockId);
                             return;
                         }
 
@@ -361,12 +363,15 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
                                 auto rawInt = Payload::longToRubyValue(cs, builder, litType->value);
-                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, blockMap, aliases, bb->rubyBlockId);
+                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, blockMap, aliases,
+                                                bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::Float: {
-                                auto rawInt = Payload::doubleToRubyValue(cs, builder, absl::bit_cast<double>(litType->value));
-                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, blockMap, aliases, bb->rubyBlockId);
+                                auto rawInt =
+                                    Payload::doubleToRubyValue(cs, builder, absl::bit_cast<double>(litType->value));
+                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, blockMap, aliases,
+                                                bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::Symbol: {
@@ -375,14 +380,14 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                                 auto rawRubySym =
                                     builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
                                 Payload::varSet(cs, bind.bind.variable, rawRubySym, builder, blockMap, aliases,
-                                           bb->rubyBlockId);
+                                                bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
                                 auto rawRubyString = Payload::cPtrToRubyString(cs, builder, str);
                                 Payload::varSet(cs, bind.bind.variable, rawRubyString, builder, blockMap, aliases,
-                                           bb->rubyBlockId);
+                                                bb->rubyBlockId);
                                 break;
                             }
                             default:
@@ -422,7 +427,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             Payload::varSet(cs, bind.bind.variable, val, builder, blockMap, aliases, bb->rubyBlockId);
                         } else if (i->cast == core::Names::assertType()) {
                             Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, blockMap,
-                                       aliases, bb->rubyBlockId);
+                                            aliases, bb->rubyBlockId);
                         }
                     },
                     [&](cfg::TAbsurd *i) { cs.trace("TAbsurd\n"); });
@@ -432,7 +437,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
             }
             if (!isTerminated) {
                 if (bb->bexit.thenb != bb->bexit.elseb && bb->bexit.cond.variable != core::LocalVariable::blockCall()) {
-                    auto var = Payload::varGet(cs, bb->bexit.cond.variable, builder, blockMap, aliases, bb->rubyBlockId);
+                    auto var =
+                        Payload::varGet(cs, bb->bexit.cond.variable, builder, blockMap, aliases, bb->rubyBlockId);
                     auto condValue = Payload::testIsTruthy(cs, builder, var);
 
                     builder.CreateCondBr(
