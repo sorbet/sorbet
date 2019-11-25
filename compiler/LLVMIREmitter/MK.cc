@@ -149,7 +149,7 @@ llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, ll
     auto functionName = sym.data(cs)->isClassOrModule() ? "sorbet_i_getRubyClass" : "sorbet_i_getRubyConstant";
     return builder.CreateCall(
         cs.module->getFunction(functionName),
-        {MK::toCString(cs, str, builder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
+        {Payload::toCString(cs, str, builder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
 }
 
 llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuilderBase &builder) {
@@ -296,7 +296,7 @@ llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm:
         } else if (alias.kind == Alias::AliasKind::GlobalField) {
             return builder.CreateCall(
                 cs.module->getFunction("sorbet_globalVariableGet"),
-                {MK::toCString(cs, alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder)});
+                {Payload::toCString(cs, alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder)});
 
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
@@ -332,12 +332,12 @@ void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *
             auto name = sym.data(cs.gs)->name.show(cs.gs);
             auto owner = sym.data(cs.gs)->owner;
             builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
-                               {MK::getRubyConstant(cs, owner, builder), Payload::toCString(cs, name, builder),
+                               {Payload::getRubyConstant(cs, owner, builder), Payload::toCString(cs, name, builder),
                                 llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
         } else if (alias.kind == Alias::AliasKind::GlobalField) {
             builder.CreateCall(
                 cs.module->getFunction("sorbet_globalVariableSet"),
-                {MK::toCString(cs, alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder), var});
+                {Payload::toCString(cs, alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder), var});
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             builder.CreateCall(cs.module->getFunction("sorbet_classVariableSet"),
                                {getClassVariableStoreClass(cs, builder, blockMap),
@@ -345,7 +345,7 @@ void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             builder.CreateCall(
                 cs.module->getFunction("sorbet_instanceVariableSet"),
-                {MK::varGet(cs, core::LocalVariable::selfVariable(), builder, blockMap, aliases, rubyBlockId),
+                {Payload::varGet(cs, core::LocalVariable::selfVariable(), builder, blockMap, aliases, rubyBlockId),
                  Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs)), var});
         }
         return;

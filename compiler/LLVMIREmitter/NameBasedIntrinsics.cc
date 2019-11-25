@@ -91,7 +91,7 @@ public:
 
         auto rubyFunc = cs.module->getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
         ENFORCE(rubyFunc);
-        builder.CreateCall(rubyFunc, {MK::getRubyConstant(cs, ownerSym, builder),
+        builder.CreateCall(rubyFunc, {Payload::getRubyConstant(cs, ownerSym, builder),
                                       Payload::toCString(cs, funcNameRef.show(cs), builder), ptr,
                                       llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
