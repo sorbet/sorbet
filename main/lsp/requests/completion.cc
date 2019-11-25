@@ -251,13 +251,14 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
 
 string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiverType,
                      const core::TypeConstraint *constraint) {
-    auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
-    vector<string> typeAndArgNames;
+    fmt::memory_buffer result;
+    fmt::format_to(result, "{}", method.data(gs)->name.data(gs)->shortName(gs));
+    auto nextTabstop = 1;
 
-    int i = 1;
+    vector<string> typeAndArgNames;
     if (method.data(gs)->isMethod()) {
         for (auto &argSym : method.data(gs)->arguments()) {
-            string s;
+            fmt::memory_buffer argBuf;
             if (argSym.flags.isBlock) {
                 continue;
             }
@@ -265,23 +266,24 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
                 continue;
             }
             if (argSym.flags.isKeyword) {
-                absl::StrAppend(&s, argSym.name.data(gs)->shortName(gs), ": ");
+                fmt::format_to(argBuf, "{}: ", argSym.name.data(gs)->shortName(gs));
             }
             if (argSym.type) {
-                absl::StrAppend(&s, "${", i++, ":",
-                                getResultType(gs, argSym.type, method, receiverType, constraint)->show(gs), "}");
+                auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint)->show(gs);
+                fmt::format_to(argBuf, "${{{}:{}}}", nextTabstop++, resultType);
             } else {
-                absl::StrAppend(&s, "${", i++, "}");
+                fmt::format_to(argBuf, "${{{}}}", nextTabstop++);
             }
-            typeAndArgNames.emplace_back(s);
+            typeAndArgNames.emplace_back(to_string(argBuf));
         }
     }
 
-    if (typeAndArgNames.empty()) {
-        return fmt::format("{}{}", shortName, "${0}");
-    } else {
-        return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames, ", "), "${0}");
+    if (!typeAndArgNames.empty()) {
+        fmt::format_to(result, "({})", fmt::join(typeAndArgNames, ", "));
     }
+
+    fmt::format_to(result, "${{0}}");
+    return to_string(result);
 }
 
 // This is an approximation. It takes advantage of the fact that nearly all of the time,
