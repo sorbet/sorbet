@@ -17,8 +17,8 @@
 #include "compiler/IREmitter/NameBasedIntrinsics.h"
 #include "compiler/IREmitter/Payload.h"
 #include "compiler/IREmitter/SymbolBasedIntrinsicMethod.h"
-#include "compiler/Payload/Payload.h"
 #include "compiler/Names/Names.h"
+#include "compiler/Payload/Payload.h"
 #include <string_view>
 
 using namespace std;

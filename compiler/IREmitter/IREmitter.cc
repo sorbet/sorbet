@@ -16,8 +16,8 @@
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/IREmitter/Payload.h"
-#include "compiler/Payload/Payload.h"
 #include "compiler/Names/Names.h"
+#include "compiler/Payload/Payload.h"
 #include <string_view>
 
 using namespace std;

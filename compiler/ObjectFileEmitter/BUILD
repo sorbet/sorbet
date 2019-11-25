@@ -10,9 +10,9 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//compiler/Payload",
         "//compiler/Linker",
         "//compiler/Passes",
+        "//compiler/Payload",
         "@com_stripe_ruby_typer//core",
         "@spdlog",
     ],

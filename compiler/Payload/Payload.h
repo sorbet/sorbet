@@ -1,24 +1,8 @@
 #include "common/ConstExprStr.h"
 #include "common/Exception.h"
+#include "compiler/Payload/ForwardDeclarations.h"
 #include <memory>
 #include <string_view>
-
-namespace sorbet::core {
-class GlobalState;
-class Loc;
-}; // namespace sorbet::core
-namespace llvm {
-class Module;
-class LLVMContext;
-class Type;
-class StructType;
-class FunctionType;
-class IRBuilderBase;
-class BasicBlock;
-class Value;
-class Function;
-class AllocaInst;
-}; // namespace llvm
 
 namespace sorbet::compiler {
 class CompilerState {

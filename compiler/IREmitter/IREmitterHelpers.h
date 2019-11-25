@@ -1,19 +1,10 @@
 #ifndef SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
 #define SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
 #include "IREmitter.h"
+#include "compiler/Payload/ForwardDeclarations.h"
 #include <string_view>
 #include <vector>
 
-namespace sorbet::cfg {
-class Send;
-}; // namespace sorbet::cfg
-
-namespace llvm {
-class Function;
-class BasicBlock;
-class AllocaInst;
-class IRBuilderBase;
-}; // namespace llvm
 namespace sorbet::compiler {
 struct BasicBlockMap {
     core::SymbolRef forMethod;

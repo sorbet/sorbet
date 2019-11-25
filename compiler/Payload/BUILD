@@ -1,8 +1,9 @@
 cc_library(
     name = "Payload",
-    srcs = [
-        "Payload.cc",
-        "Payload.h",
+    srcs = glob([
+        "*.cc",
+        "*.h",
+    ]) + [
         "Payload_gen.cc",
     ],
     linkstatic = select({
