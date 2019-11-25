@@ -553,6 +553,13 @@ list.each do |elem|
 end
 ```
 
+## 5056
+
+Generated method signatures have been removed from Sorbet.
+
+For alternatives, see [Enabling Runtime Checks](runtime.md) which talks about
+how to change the runtime behavior when method signatures encounter a problem.
+
 ## 7002
 
 This is a standard type mismatch. A method's `sig` declares one type, but the
