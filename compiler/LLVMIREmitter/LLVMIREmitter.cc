@@ -360,7 +360,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         ENFORCE(litType);
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
-                                auto rawInt = MK::getRubyIntRaw(cs, builder, litType->value);
+                                auto rawInt = MK::longToRubyValue(cs, builder, litType->value);
                                 MK::varSet(cs, bind.bind.variable, rawInt, builder, blockMap, aliases, bb->rubyBlockId);
                                 break;
                             }

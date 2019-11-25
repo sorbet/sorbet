@@ -54,7 +54,7 @@ void MK::emitArgumentMismatch(CompilerState &cs, llvm::IRBuilderBase &builder, l
                                     });
     builderCast(builder).CreateUnreachable();
 }
-llvm::Value *MK::getRubyIntRaw(CompilerState &cs, llvm::IRBuilderBase &builder, long num) {
+llvm::Value *MK::longToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, long num) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_longToRubyValue"),
                                            {llvm::ConstantInt::get(cs, llvm::APInt(64, num, true))}, "rawRubyInt");
 }
