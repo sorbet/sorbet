@@ -94,6 +94,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Integer(), "/", "sorbet_rb_int_div"},
     {core::Symbols::Integer(), ">", "sorbet_rb_int_gt"},
     {core::Symbols::Integer(), "<", "sorbet_rb_int_lt"},
+    {core::Symbols::Integer(), "to_s", "sorbet_rb_int_to_s"},
     {core::Symbols::Integer(), "==", "sorbet_rb_int_equal"},
     {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq"},
 };
