@@ -87,7 +87,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true))};
                 auto rawArg1Value =
                     builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "arg1_maybeExpandToFullArgs");
-                auto isArray = MK::typeTest(cs, builder, rawArg1Value,
+                auto isArray = Payload::typeTest(cs, builder, rawArg1Value,
                                                     core::make_type<core::ClassType>(core::Symbols::Array()));
                 auto typeTestEnd = builder.GetInsertBlock();
 
@@ -125,17 +125,17 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
             auto tooManyArgs = builder.CreateICmpUGT(
                 argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgCount)), "tooManyArgs");
-            auto expected1 = MK::setExpectedBool(cs, builder, tooManyArgs, false);
+            auto expected1 = Payload::setExpectedBool(cs, builder, tooManyArgs, false);
             builder.CreateCondBr(expected1, argCountFailBlock, argCountSecondCheckBlock);
 
             builder.SetInsertPoint(argCountSecondCheckBlock);
             auto tooFewArgs = builder.CreateICmpULT(
                 argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgCount)), "tooFewArgs");
-            auto expected2 = MK::setExpectedBool(cs, builder, tooFewArgs, false);
+            auto expected2 = Payload::setExpectedBool(cs, builder, tooFewArgs, false);
             builder.CreateCondBr(expected2, argCountFailBlock, argCountSuccessBlock);
 
             builder.SetInsertPoint(argCountFailBlock);
-            MK::raiseArity(cs, builder, argCountRaw, minArgCount, maxArgCount);
+            Payload::raiseArity(cs, builder, argCountRaw, minArgCount, maxArgCount);
 
             builder.SetInsertPoint(argCountSuccessBlock);
         }
@@ -165,7 +165,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             // box `self`
             if (!isBlock) {
                 auto selfArgRaw = func->arg_begin() + 2;
-                MK::varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, blockMap, aliases, funcId);
+                Payload::varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, blockMap, aliases, funcId);
             }
 
             for (auto i = 0; i < maxArgCount; i++) {
@@ -184,7 +184,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 auto name = a._name.data(cs)->shortName(cs);
                 llvm::StringRef nameRef(name.data(), name.length());
                 auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
-                MK::varSet(cs, a, rawValue, builder, blockMap, aliases, funcId);
+                Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, funcId);
                 if (i >= minArgCount) {
                     // check if we need to fill in the next variable from the arg
                     builder.CreateBr(checkBlocks[i - minArgCount + 1]);
@@ -196,7 +196,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             //
             if (blkArgName.exists() && blockMap.usesBlockArgs) {
                 // TODO: I don't think this correctly handles blocks with block args
-                MK::varSet(cs, blkArgName, builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")),
+                Payload::varSet(cs, blkArgName, builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")),
                            builder, blockMap, aliases, 0);
             }
             builder.CreateBr(checkBlocks[0]);
@@ -209,7 +209,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 auto argCount =
                     builder.CreateICmpEQ(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
                                          llvm::Twine("default") + llvm::Twine(i));
-                auto expected = MK::setExpectedBool(cs, builder, argCount, false);
+                auto expected = Payload::setExpectedBool(cs, builder, argCount, false);
                 builder.CreateCondBr(expected, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
             }
         }
@@ -239,12 +239,12 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                             builder.CreateCall(fillDefaultFunc, {argCountRaw, argArrayRaw,
                                                                  func->arg_begin() + 2 /* this is wrong for block*/});
                     } else {
-                        rawValue = MK::rubyNil(cs, builder);
+                        rawValue = Payload::rubyNil(cs, builder);
                     }
                     auto argIndex = i + minArgCount;
                     auto a = blockMap.rubyBlockArgs[funcId][argIndex];
 
-                    MK::varSet(cs, a, rawValue, builder, blockMap, aliases, 0);
+                    Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, 0);
                 }
                 builder.CreateBr(fillFromDefaultBlocks[i + 1]);
             }
@@ -284,8 +284,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
-                        auto var = MK::varGet(cs, i->what, builder, blockMap, aliases, bb->rubyBlockId);
-                        MK::varSet(cs, bind.bind.variable, var, builder, blockMap, aliases, bb->rubyBlockId);
+                        auto var = Payload::varGet(cs, i->what, builder, blockMap, aliases, bb->rubyBlockId);
+                        Payload::varSet(cs, bind.bind.variable, var, builder, blockMap, aliases, bb->rubyBlockId);
                     },
                     [&](cfg::Alias *i) {
                         if (i->what == core::Symbols::Magic_undeclaredFieldStub()) {
@@ -305,8 +305,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         }
                     },
                     [&](cfg::SolveConstraint *i) {
-                        auto var = MK::varGet(cs, i->send, builder, blockMap, aliases, bb->rubyBlockId);
-                        MK::varSet(cs, bind.bind.variable, var, builder, blockMap, aliases, bb->rubyBlockId);
+                        auto var = Payload::varGet(cs, i->send, builder, blockMap, aliases, bb->rubyBlockId);
+                        Payload::varSet(cs, bind.bind.variable, var, builder, blockMap, aliases, bb->rubyBlockId);
                     },
                     [&](cfg::Send *i) {
                         if (i->recv.variable._name == core::Names::blkArg() &&
@@ -318,40 +318,40 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
 
                         auto rawCall =
                             LLVMIREmitterHelpers::emitMethodCall(cs, builder, i, blockMap, aliases, bb->rubyBlockId);
-                        MK::varSet(cs, bind.bind.variable, rawCall, builder, blockMap, aliases, bb->rubyBlockId);
+                        Payload::varSet(cs, bind.bind.variable, rawCall, builder, blockMap, aliases, bb->rubyBlockId);
                     },
                     [&](cfg::Return *i) {
                         ENFORCE(bb->rubyBlockId == 0, "returns through multiple stacks not implemented");
                         isTerminated = true;
-                        MK::popControlFrame(cs, builder);
-                        auto var = MK::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
-                        MK::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
+                        Payload::popControlFrame(cs, builder);
+                        auto var = Payload::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
+                        Payload::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
                         builder.CreateBr(blockMap.postProcessBlock);
                     },
                     [&](cfg::BlockReturn *i) {
                         ENFORCE(bb->rubyBlockId != 0, "should never happen");
                         isTerminated = true;
-                        MK::popControlFrame(cs, builder);
-                        auto var = MK::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
+                        Payload::popControlFrame(cs, builder);
+                        auto var = Payload::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
                         builder.CreateRet(var);
                     },
                     [&](cfg::LoadSelf *i) {
-                        auto var = MK::varGet(cs, i->fallback, builder, blockMap, aliases, bb->rubyBlockId);
-                        MK::varSet(cs, bind.bind.variable, var, builder, blockMap, aliases, bb->rubyBlockId);
+                        auto var = Payload::varGet(cs, i->fallback, builder, blockMap, aliases, bb->rubyBlockId);
+                        Payload::varSet(cs, bind.bind.variable, var, builder, blockMap, aliases, bb->rubyBlockId);
                     },
                     [&](cfg::Literal *i) {
                         if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {
-                            MK::varSet(cs, bind.bind.variable, MK::rubyFalse(cs, builder), builder, blockMap,
+                            Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, blockMap,
                                        aliases, bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::TrueClass())) {
-                            MK::varSet(cs, bind.bind.variable, MK::rubyTrue(cs, builder), builder, blockMap,
+                            Payload::varSet(cs, bind.bind.variable, Payload::rubyTrue(cs, builder), builder, blockMap,
                                        aliases, bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::NilClass())) {
-                            MK::varSet(cs, bind.bind.variable, MK::rubyNil(cs, builder), builder, blockMap,
+                            Payload::varSet(cs, bind.bind.variable, Payload::rubyNil(cs, builder), builder, blockMap,
                                        aliases, bb->rubyBlockId);
                             return;
                         }
@@ -360,28 +360,28 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         ENFORCE(litType);
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
-                                auto rawInt = MK::longToRubyValue(cs, builder, litType->value);
-                                MK::varSet(cs, bind.bind.variable, rawInt, builder, blockMap, aliases, bb->rubyBlockId);
+                                auto rawInt = Payload::longToRubyValue(cs, builder, litType->value);
+                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, blockMap, aliases, bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::Float: {
-                                auto rawInt = MK::doubleToRubyValue(cs, builder, absl::bit_cast<double>(litType->value));
-                                MK::varSet(cs, bind.bind.variable, rawInt, builder, blockMap, aliases, bb->rubyBlockId);
+                                auto rawInt = Payload::doubleToRubyValue(cs, builder, absl::bit_cast<double>(litType->value));
+                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, blockMap, aliases, bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::Symbol: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
-                                auto rawId = MK::idIntern(cs, builder, str);
+                                auto rawId = Payload::idIntern(cs, builder, str);
                                 auto rawRubySym =
                                     builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
-                                MK::varSet(cs, bind.bind.variable, rawRubySym, builder, blockMap, aliases,
+                                Payload::varSet(cs, bind.bind.variable, rawRubySym, builder, blockMap, aliases,
                                            bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
-                                auto rawRubyString = MK::cPtrToRubyString(cs, builder, str);
-                                MK::varSet(cs, bind.bind.variable, rawRubyString, builder, blockMap, aliases,
+                                auto rawRubyString = Payload::cPtrToRubyString(cs, builder, str);
+                                Payload::varSet(cs, bind.bind.variable, rawRubyString, builder, blockMap, aliases,
                                            bb->rubyBlockId);
                                 break;
                             }
@@ -400,28 +400,28 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         /* intentionally omitted, it's part of method preambula */
                     },
                     [&](cfg::Cast *i) {
-                        auto val = MK::varGet(cs, i->value.variable, builder, blockMap, aliases, bb->rubyBlockId);
-                        auto passedTypeTest = MK::typeTest(cs, builder, val, bind.bind.type);
+                        auto val = Payload::varGet(cs, i->value.variable, builder, blockMap, aliases, bb->rubyBlockId);
+                        auto passedTypeTest = Payload::typeTest(cs, builder, val, bind.bind.type);
                         auto successBlock =
                             llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
 
                         auto failBlock =
                             llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
 
-                        auto expected = MK::setExpectedBool(cs, builder, passedTypeTest, true);
+                        auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
                         builder.CreateCondBr(expected, successBlock, failBlock);
                         builder.SetInsertPoint(failBlock);
                         // this will throw exception
                         builder.CreateCall(cs.module->getFunction("sorbet_cast_failure"),
-                                           {val, MK::toCString(cs, i->cast.data(cs)->shortName(cs), builder),
-                                            MK::toCString(cs, bind.bind.type->show(cs), builder)});
+                                           {val, Payload::toCString(cs, i->cast.data(cs)->shortName(cs), builder),
+                                            Payload::toCString(cs, bind.bind.type->show(cs), builder)});
                         builder.CreateUnreachable();
                         builder.SetInsertPoint(successBlock);
 
                         if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {
-                            MK::varSet(cs, bind.bind.variable, val, builder, blockMap, aliases, bb->rubyBlockId);
+                            Payload::varSet(cs, bind.bind.variable, val, builder, blockMap, aliases, bb->rubyBlockId);
                         } else if (i->cast == core::Names::assertType()) {
-                            MK::varSet(cs, bind.bind.variable, MK::rubyFalse(cs, builder), builder, blockMap,
+                            Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, blockMap,
                                        aliases, bb->rubyBlockId);
                         }
                     },
@@ -432,8 +432,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
             }
             if (!isTerminated) {
                 if (bb->bexit.thenb != bb->bexit.elseb && bb->bexit.cond.variable != core::LocalVariable::blockCall()) {
-                    auto var = MK::varGet(cs, bb->bexit.cond.variable, builder, blockMap, aliases, bb->rubyBlockId);
-                    auto condValue = MK::testIsTruthy(cs, builder, var);
+                    auto var = Payload::varGet(cs, bb->bexit.cond.variable, builder, blockMap, aliases, bb->rubyBlockId);
+                    auto condValue = Payload::testIsTruthy(cs, builder, var);
 
                     builder.CreateCondBr(
                         condValue,
@@ -446,8 +446,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
             }
         } else {
             // handle dead block. TODO: this should throw
-            auto var = MK::rubyNil(cs, builder);
-            MK::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
+            auto var = Payload::rubyNil(cs, builder);
+            Payload::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
             builder.CreateBr(blockMap.postProcessBlock);
         }
     }
@@ -457,7 +457,7 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &bloc
                      UnorderedMap<core::LocalVariable, Alias> &aliases) {
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(blockMap.postProcessBlock);
-    auto var = MK::varGet(cs, returnValue(cs), builder, blockMap, aliases, 0);
+    auto var = Payload::varGet(cs, returnValue(cs), builder, blockMap, aliases, 0);
     builder.CreateRet(var);
 }
 
@@ -470,28 +470,28 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
     for (auto &argInfo : cfg.symbol.data(cs)->arguments()) {
         argId += 1;
         auto local = blockMap.rubyBlockArgs[0][argId];
-        auto var = MK::varGet(cs, local, builder, blockMap, aliases, 0);
+        auto var = Payload::varGet(cs, local, builder, blockMap, aliases, 0);
         auto &expectedType = argInfo.type;
         if (!expectedType) {
             continue;
         }
-        auto passedTypeTest = MK::typeTest(cs, builder, var, expectedType);
+        auto passedTypeTest = Payload::typeTest(cs, builder, var, expectedType);
         auto successBlock = llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
 
         auto failBlock = llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
 
-        auto expected = MK::setExpectedBool(cs, builder, passedTypeTest, true);
+        auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
         builder.CreateCondBr(expected, successBlock, failBlock);
         builder.SetInsertPoint(failBlock);
         // this will throw exception
         builder.CreateCall(
             cs.module->getFunction("sorbet_cast_failure"),
-            {var, MK::toCString(cs, "sig", builder), MK::toCString(cs, expectedType->show(cs), builder)});
+            {var, Payload::toCString(cs, "sig", builder), Payload::toCString(cs, expectedType->show(cs), builder)});
         builder.CreateUnreachable();
         builder.SetInsertPoint(successBlock);
     }
 
-    MK::pushControlFrame(cs, builder, cfg.symbol);
+    Payload::pushControlFrame(cs, builder, cfg.symbol);
     builder.CreateBr(blockMap.userEntryBlockByFunction[0]);
 }
 
@@ -572,7 +572,7 @@ void LLVMIREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, 
                            {
                                llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
-                               MK::getRubyConstant(cs, owner, builder),
+                               Payload::getRubyConstant(cs, owner, builder),
                            },
                            staticInitName);
     }

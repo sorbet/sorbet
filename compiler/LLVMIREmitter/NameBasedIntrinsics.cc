@@ -53,7 +53,7 @@ public:
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                   int rubyBlockId) const override {
-        return MK::rubyNil(cs, build);
+        return Payload::rubyNil(cs, build);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::keepForIde(), core::Names::keepForTypechecking()};
@@ -92,11 +92,11 @@ public:
         auto rubyFunc = cs.module->getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
         ENFORCE(rubyFunc);
         builder.CreateCall(rubyFunc, {MK::getRubyConstant(cs, ownerSym, builder),
-                                      MK::toCString(cs, funcNameRef.show(cs), builder), ptr,
+                                      Payload::toCString(cs, funcNameRef.show(cs), builder), ptr,
                                       llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
         builder.CreateCall(LLVMIREmitterHelpers::getInitFunction(cs, funcSym), {});
-        return MK::rubyNil(cs, builder);
+        return Payload::rubyNil(cs, builder);
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -121,15 +121,15 @@ public:
         auto &builder = builderCast(build);
         auto sym = typeToSym(cs, i->args[0].type);
         // this is wrong and will not work for `class <<self`
-        auto classNameCStr = MK::toCString(cs, showClassNameWithoutOwner(cs, sym), builder);
+        auto classNameCStr = Payload::toCString(cs, showClassNameWithoutOwner(cs, sym), builder);
         auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
 
         if (sym.data(cs)->owner != core::Symbols::root()) {
-            auto getOwner = MK::getRubyConstant(cs, sym.data(cs)->owner, builder);
+            auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
             if (isModule) {
                 builder.CreateCall(cs.module->getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
             } else {
-                auto rawCall = MK::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
+                auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
                 builder.CreateCall(cs.module->getFunction("sorbet_defineNestedClass"),
                                    {getOwner, classNameCStr, rawCall});
             }
@@ -137,7 +137,7 @@ public:
             if (isModule) {
                 builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
             } else {
-                auto rawCall = MK::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
+                auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
                 builder.CreateCall(cs.module->getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
             }
         }
@@ -145,7 +145,7 @@ public:
         auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
         auto llvmFuncName = LLVMIREmitterHelpers::getFunctionName(cs, funcSym);
         builder.CreateCall(LLVMIREmitterHelpers::getInitFunction(cs, funcSym), {});
-        return MK::rubyNil(cs, builder);
+        return Payload::rubyNil(cs, builder);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {Names::defineTopClassOrModule(cs)};
@@ -158,7 +158,7 @@ public:
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                   int rubyBlockId) const override {
-        return MK::varGet(cs, i->args[0].variable, build, blockMap, aliases, rubyBlockId);
+        return Payload::varGet(cs, i->args[0].variable, build, blockMap, aliases, rubyBlockId);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::suggestType()};
@@ -180,16 +180,16 @@ public:
         auto &builder = builderCast(build);
         // TODO: this implementation generates code that is stupidly slow, we should be able to reuse instrinsics here
         // one day
-        auto recv = MK::varGet(cs, i->args[0].variable, builder, blockMap, aliases, rubyBlockId);
+        auto recv = Payload::varGet(cs, i->args[0].variable, builder, blockMap, aliases, rubyBlockId);
         auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
         ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         core::NameRef funName(cs, lit->value);
-        auto rawId = MK::idIntern(cs, builder, funName.data(cs)->shortName(cs));
-        auto block = MK::varGet(cs, i->args[2].variable, builder, blockMap, aliases, rubyBlockId);
+        auto rawId = Payload::idIntern(cs, builder, funName.data(cs)->shortName(cs));
+        auto block = Payload::varGet(cs, i->args[2].variable, builder, blockMap, aliases, rubyBlockId);
         auto blockAsProc = builder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
                                               {
                                                   block,
-                                                  MK::idIntern(cs, builder, "to_proc"),
+                                                  Payload::idIntern(cs, builder, "to_proc"),
                                                   llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                                   llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
                                               });
@@ -203,7 +203,7 @@ public:
                 argId += 1;
                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                           llvm::ConstantInt::get(cs, llvm::APInt(64, argId - 3, true))};
-                auto var = MK::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
+                auto var = Payload::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
                 builder.CreateStore(
                     var, builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
             }
@@ -253,7 +253,7 @@ public:
                 argId += 1;
                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                           llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
-                auto var = MK::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
+                auto var = Payload::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
                 builder.CreateStore(
                     var, builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
             }
@@ -264,9 +264,9 @@ public:
 
         llvm::Value *var;
         if (takesReciever == TakesReciever) {
-            var = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+            var = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
         } else {
-            var = MK::rubyNil(cs, builder);
+            var = Payload::rubyNil(cs, builder);
         }
 
         return builder.CreateCall(cs.module->getFunction(cMethod),

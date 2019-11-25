@@ -40,9 +40,9 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                     auto methodName = i->fun.data(cs)->shortName(cs);
                     llvm::StringRef methodNameRef(methodName.data(), methodName.size());
                     auto &builder = builderCast(build);
-                    auto recv = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+                    auto recv = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
 
-                    auto typeTest = MK::typeTest(cs, builder, recv, core::make_type<core::ClassType>(c));
+                    auto typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(c));
 
                     auto afterSend = llvm::BasicBlock::Create(cs, llvm::Twine("afterSymCallIntrinsic_") + methodNameRef,
                                                               builder.GetInsertBlock()->getParent());
@@ -92,9 +92,9 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                 auto methodName = i->fun.data(cs)->shortName(cs);
                 llvm::StringRef methodNameRef(methodName.data(), methodName.size());
                 auto &builder = builderCast(build);
-                auto recv = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+                auto recv = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
 
-                auto typeTest = MK::typeTest(cs, builder, recv, core::make_type<core::ClassType>(recvClass));
+                auto typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(recvClass));
 
                 auto afterSend = llvm::BasicBlock::Create(cs, llvm::Twine("afterCallFinal_") + methodNameRef,
                                                           builder.GetInsertBlock()->getParent());
@@ -141,7 +141,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm
             argId += 1;
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                       llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
-            auto var = MK::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
+            auto var = Payload::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
             builder.CreateStore(var,
                                 builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
         }
@@ -149,7 +149,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm
     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
                               llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
 
-    auto var = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+    auto var = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
     builder.CreateCall(cs.module->getFunction("sorbet_checkStack"), {});
     llvm::Value *rawCall =
         builder.CreateCall(llvmFunc,
@@ -165,7 +165,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, ll
                                                            int rubyBlockId) {
     auto &builder = builderCast(build);
     auto str = i->fun.data(cs)->shortName(cs);
-    auto rawId = MK::idIntern(cs, builder, str);
+    auto rawId = Payload::idIntern(cs, builder, str);
 
     // fill in args
     {
@@ -174,7 +174,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, ll
             argId += 1;
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                       llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
-            auto var = MK::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
+            auto var = Payload::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
             builder.CreateStore(var,
                                 builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
         }
@@ -186,7 +186,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, ll
     // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
     // to get inline caching.
     // before this, perf will not be good
-    auto var = MK::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+    auto var = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
     llvm::Value *rawCall;
     if (i->link != nullptr) {
         // this send has a block!
