@@ -37,7 +37,7 @@ class BigFoo; extend T::Sig
     end
   end
 
-  sig {generated.params(num1: Integer, num2: String).returns(Integer)}
+  sig {generated.params(num1: Integer, num2: String).returns(Integer)} # error: `generated` is deprecated
   def self.bar(num1, num2)
               # ^ hover: Integer
                    # ^ hover: String
@@ -47,7 +47,7 @@ class BigFoo; extend T::Sig
                            # ^^^^^^^^^^^^^^^ hover: String
   end
 
-  sig {generated.void}
+  sig {generated.void} # error: `generated` is deprecated
   def self.baz
   end
 

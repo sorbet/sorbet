@@ -2,6 +2,6 @@
 
 extend T::Sig
 
-sig {returns(NilClass).generated}
+sig {returns(NilClass).generated} # error: `generated` is deprecated
 def generated
 end
