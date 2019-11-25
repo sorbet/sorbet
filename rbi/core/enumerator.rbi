@@ -435,6 +435,8 @@ end
 # and
 # [`Enumerator#+`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html#method-i-2B).
 class Enumerator::Chain < Enumerator
+  Elem = type_member(:out)
+
   sig do
     type_parameters(:T)
     .params(
