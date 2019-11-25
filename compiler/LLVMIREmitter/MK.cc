@@ -20,7 +20,7 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 };
 } // namespace
 
-llvm::Value *MK::setExpectedBool(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value, bool expected) {
+llvm::Value *Payload::setExpectedBool(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value, bool expected) {
     return builderCast(builder).CreateIntrinsic(llvm::Intrinsic::ID::expect, {llvm::Type::getInt1Ty(cs)},
                                                 {value, builder.getInt1(expected)});
 }
@@ -29,19 +29,19 @@ void Payload::boxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm:
     builderCast(builder).CreateStore(rawData, builderCast(builder).CreateStructGEP(target, 0));
 }
 
-llvm::Value *MK::unboxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *target) {
+llvm::Value *Payload::unboxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *target) {
     return builderCast(builder).CreateLoad(builderCast(builder).CreateStructGEP(target, 0), "rawRubyValue");
 }
 
-llvm::Value *MK::rubyNil(CompilerState &cs, llvm::IRBuilderBase &builder) {
+llvm::Value *Payload::rubyNil(CompilerState &cs, llvm::IRBuilderBase &builder) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyNil"), {}, "nilValueRaw");
 }
 
-llvm::Value *MK::rubyFalse(CompilerState &cs, llvm::IRBuilderBase &builder) {
+llvm::Value *Payload::rubyFalse(CompilerState &cs, llvm::IRBuilderBase &builder) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyFalse"), {}, "falseValueRaw");
 }
 
-llvm::Value *MK::rubyTrue(CompilerState &cs, llvm::IRBuilderBase &builder) {
+llvm::Value *Payload::rubyTrue(CompilerState &cs, llvm::IRBuilderBase &builder) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
 }
 
@@ -54,17 +54,17 @@ void Payload::raiseArity(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::
                                     });
     builderCast(builder).CreateUnreachable();
 }
-llvm::Value *MK::longToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, long num) {
+llvm::Value *Payload::longToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, long num) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_longToRubyValue"),
                                            {llvm::ConstantInt::get(cs, llvm::APInt(64, num, true))}, "rawRubyInt");
 }
 
-llvm::Value *MK::doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, double num) {
+llvm::Value *Payload::doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, double num) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_doubleToRubyValue"),
                                            {llvm::ConstantFP::get(llvm::Type::getDoubleTy(cs), num)}, "rawRubyInt");
 }
 
-llvm::Value *MK::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str) {
+llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str) {
     llvm::StringRef userStr(str.data(), str.length());
     auto rawCString = Payload::toCString(cs, str, builder);
     return builderCast(builder).CreateCall(
@@ -72,11 +72,11 @@ llvm::Value *MK::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &builde
         {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length(), true))}, "rawRubyStr");
 }
 
-llvm::Value *MK::testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
+llvm::Value *Payload::testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_testIsTruthy"), {val}, "cond");
 }
 
-llvm::Value *MK::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName) {
+llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName) {
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     auto name = llvm::StringRef(idName.data(), idName.length());
     llvm::Constant *indices[] = {zero};
@@ -141,7 +141,7 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
 
 } // namespace
 
-llvm::Value *MK::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &build) {
+llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &build) {
     auto &builder = builderCast(build);
     sym = removeRoot(sym);
     auto str = showClassName(cs, sym);
@@ -152,7 +152,7 @@ llvm::Value *MK::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::I
         {MK::toCString(cs, str, builder), llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
 }
 
-llvm::Value *MK::toCString(CompilerState &cs, string_view str, llvm::IRBuilderBase &builder) {
+llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuilderBase &builder) {
     llvm::StringRef valueRef(str.data(), str.length());
     auto globalName = "addr_str_" + (string)str;
     auto globalDeclaration =
@@ -193,7 +193,7 @@ const vector<pair<core::SymbolRef, string>> optimizedTypeTests = {
 };
 }
 
-llvm::Value *MK::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val,
+llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val,
                                   const core::TypePtr &type) {
     auto &builder = builderCast(b);
     llvm::Value *ret = nullptr;
@@ -283,7 +283,7 @@ llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &bu
 
 } // namespace
 
-llvm::Value *MK::varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &build,
+llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &build,
                         const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases,
                         int rubyBlockId) {
     auto &builder = builderCast(build);
