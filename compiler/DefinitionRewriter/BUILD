@@ -10,8 +10,8 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//compiler/Core",
         "//compiler/Names",
-        "//compiler/Payload",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//ast/treemap",
         "@spdlog",
