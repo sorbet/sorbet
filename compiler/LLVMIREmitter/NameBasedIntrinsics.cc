@@ -184,12 +184,12 @@ public:
         auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
         ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         core::NameRef funName(cs, lit->value);
-        auto rawId = MK::getRubyIdFor(cs, builder, funName.data(cs)->shortName(cs));
+        auto rawId = MK::IDIntern(cs, builder, funName.data(cs)->shortName(cs));
         auto block = MK::varGet(cs, i->args[2].variable, builder, blockMap, aliases, rubyBlockId);
         auto blockAsProc = builder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
                                               {
                                                   block,
-                                                  MK::getRubyIdFor(cs, builder, "to_proc"),
+                                                  MK::IDIntern(cs, builder, "to_proc"),
                                                   llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                                   llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
                                               });
