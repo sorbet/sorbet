@@ -380,7 +380,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             }
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
-                                auto rawRubyString = MK::getRubyStringRaw(cs, builder, str);
+                                auto rawRubyString = MK::CPtrToRubyString(cs, builder, str);
                                 MK::varSet(cs, bind.bind.variable, rawRubyString, builder, blockMap, aliases,
                                            bb->rubyBlockId);
                                 break;

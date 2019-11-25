@@ -114,7 +114,7 @@ public:
                                      int minArgs, int maxArgs);
     static llvm::Value *longToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, long num);
     static llvm::Value *doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, double num);
-    static llvm::Value *getRubyStringRaw(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str);
+    static llvm::Value *CPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str);
     static llvm::Value *testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
     static llvm::Value *getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &builder);
     static llvm::Value *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);

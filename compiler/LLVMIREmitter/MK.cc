@@ -64,7 +64,7 @@ llvm::Value *MK::doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &build
                                            {llvm::ConstantFP::get(llvm::Type::getDoubleTy(cs), num)}, "rawRubyInt");
 }
 
-llvm::Value *MK::getRubyStringRaw(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str) {
+llvm::Value *MK::CPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str) {
     llvm::StringRef userStr(str.data(), str.length());
     auto rawCString = MK::toCString(cs, str, builder);
     return builderCast(builder).CreateCall(
