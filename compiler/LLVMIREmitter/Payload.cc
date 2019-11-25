@@ -8,6 +8,7 @@
 #include "core/core.h"
 
 #include "LLVMIREmitterHelpers.h"
+#include "Payload.h"
 #include "compiler/IRHelpers/IRHelpers.h"
 #include <string>
 

@@ -6,6 +6,7 @@
 #include "core/core.h"
 // ^^^ violate our poisons
 #include "LLVMIREmitterHelpers.h"
+#include "Payload.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"

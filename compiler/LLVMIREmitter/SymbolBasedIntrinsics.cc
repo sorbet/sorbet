@@ -15,6 +15,7 @@
 #include "compiler/IRHelpers/IRHelpers.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitter.h"
 #include "compiler/LLVMIREmitter/LLVMIREmitterHelpers.h"
+#include "compiler/LLVMIREmitter/Payload.h"
 #include "compiler/LLVMIREmitter/SymbolBasedIntrinsicMethod.h"
 #include "compiler/Names/Names.h"
 #include <string_view>
