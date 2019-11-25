@@ -37,7 +37,7 @@ class BigFoo; extend T::Sig
     end
   end
 
-  sig {generated.params(num1: Integer, num2: String).returns(Integer)} # error: `generated` is deprecated
+  sig {params(num1: Integer, num2: String).returns(Integer)}
   def self.bar(num1, num2)
               # ^ hover: Integer
                    # ^ hover: String
@@ -47,7 +47,7 @@ class BigFoo; extend T::Sig
                            # ^^^^^^^^^^^^^^^ hover: String
   end
 
-  sig {generated.void} # error: `generated` is deprecated
+  sig {void}
   def self.baz
   end
 
@@ -92,11 +92,11 @@ end
 
 def main
   BigFoo.bar(10, "hello")
-        # ^ hover: sig {generated.params(num1: Integer, num2: String).returns(Integer)}
+        # ^ hover: sig {params(num1: Integer, num2: String).returns(Integer)}
         # ^ hover: ```ruby
         # Checks that we're sending Markdown.
   BigFoo.baz
-        # ^ hover: sig {generated.void}
+        # ^ hover: sig {void}
   l = BigFoo.anotherFunc
 # ^ hover: [Integer, String] (2-tuple)
 
