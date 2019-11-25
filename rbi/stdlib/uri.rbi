@@ -1419,6 +1419,21 @@ class URI::HTTP < URI::Generic
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
   WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+
+  # Returns the full path for an HTTP request, as required by Net::HTTP::Get.
+  #
+  # If the [URI](https://ruby-doc.org/stdlib-2.5.1/libdoc/uri/rdoc/URI.html)
+  # contains a query, the full path is URI#path + '?' + URI#query. Otherwise,
+  # the path is simply URI#path.
+  #
+  # Example:
+  #
+  # ```ruby
+  # newuri = URI::HTTP.build(path: '/foo/bar', query: 'test=true')
+  # newuri.request_uri # => "/foo/bar?test=true"
+  # ```
+  sig { returns(String) }
+  def request_uri; end
 end
 
 # The default port for
