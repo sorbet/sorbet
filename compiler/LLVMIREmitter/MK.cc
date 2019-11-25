@@ -45,7 +45,7 @@ llvm::Value *MK::getRubyTrueRaw(CompilerState &cs, llvm::IRBuilderBase &builder)
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
 }
 
-void MK::emitArgumentMismatch(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *currentArgCount,
+void MK::rb_error_arity(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *currentArgCount,
                               int minArgs, int maxArgs) {
     builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rb_error_arity"),
                                     {currentArgCount, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgs, true)),

@@ -135,7 +135,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             builder.CreateCondBr(expected2, argCountFailBlock, argCountSuccessBlock);
 
             builder.SetInsertPoint(argCountFailBlock);
-            MK::emitArgumentMismatch(cs, builder, argCountRaw, minArgCount, maxArgCount);
+            MK::rb_error_arity(cs, builder, argCountRaw, minArgCount, maxArgCount);
 
             builder.SetInsertPoint(argCountSuccessBlock);
         }
