@@ -1002,13 +1002,13 @@ class Array < Object
   # ```
   # a -- b -- c --
   # ```
-  sig {returns(T::Enumerator[Elem])}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
     .returns(T::Array[Elem])
   end
+  sig {returns(T::Enumerator[Elem])}
   def each(&blk); end
 
   # Same as
