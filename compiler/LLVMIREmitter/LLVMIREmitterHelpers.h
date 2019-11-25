@@ -99,7 +99,7 @@ public:
 class MK {
 public:
     // api for actual code emission
-    static llvm::Value *IDIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName);
+    static llvm::Value *idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName);
     static llvm::Value *setExpectedBool(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *boolean,
                                         bool expected);
     // boxed raw value from rawData into target. Assumes that types are compatible.

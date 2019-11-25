@@ -76,7 +76,7 @@ llvm::Value *MK::testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &builder, l
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_testIsTruthy"), {val}, "cond");
 }
 
-llvm::Value *MK::IDIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName) {
+llvm::Value *MK::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName) {
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     auto name = llvm::StringRef(idName.data(), idName.length());
     llvm::Constant *indices[] = {zero};
@@ -97,7 +97,7 @@ llvm::Value *MK::IDIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::
         globalInitBuilder.SetInsertPoint(bb);
         auto rawCString = MK::toCString(cs, idName, builder);
         auto rawID = globalInitBuilder.CreateCall(
-            cs.module->getFunction("sorbet_IDIntern"),
+            cs.module->getFunction("sorbet_idIntern"),
             {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, idName.length()))}, "rawId");
         globalInitBuilder.CreateStore(rawID,
                                       llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
@@ -263,7 +263,7 @@ llvm::Value *MK::createTypeTestU1(CompilerState &cs, llvm::IRBuilderBase &b, llv
 void MK::pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &build, core::SymbolRef sym) {
     auto &builder = builderCast(build);
     auto funcName = sym.data(cs)->name.data(cs)->shortName(cs);
-    auto funcNameId = MK::IDIntern(cs, builder, funcName);
+    auto funcNameId = MK::idIntern(cs, builder, funcName);
     auto recv = MK::getRubyConstant(cs, sym.data(cs)->owner, builder);
     builder.CreateCall(cs.module->getFunction("sorbet_pushControlFrame"), {recv, funcNameId});
 }
@@ -301,12 +301,12 @@ llvm::Value *MK::varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBu
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
                                       {getClassVariableStoreClass(cs, builder, blockMap),
-                                       MK::IDIntern(cs, builder, alias.classField.data(cs)->shortName(cs))});
+                                       MK::idIntern(cs, builder, alias.classField.data(cs)->shortName(cs))});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             return builder.CreateCall(
                 cs.module->getFunction("sorbet_instanceVariableGet"),
                 {varGet(cs, core::LocalVariable::selfVariable(), builder, blockMap, aliases, rubyBlockId),
-                 MK::IDIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
+                 MK::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
         }
     }
     if (blockMap.escapedVariableIndeces.contains(local)) {
@@ -341,12 +341,12 @@ void MK::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, 
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             builder.CreateCall(cs.module->getFunction("sorbet_classVariableSet"),
                                {getClassVariableStoreClass(cs, builder, blockMap),
-                                MK::IDIntern(cs, builder, alias.classField.data(cs)->shortName(cs)), var});
+                                MK::idIntern(cs, builder, alias.classField.data(cs)->shortName(cs)), var});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             builder.CreateCall(
                 cs.module->getFunction("sorbet_instanceVariableSet"),
                 {MK::varGet(cs, core::LocalVariable::selfVariable(), builder, blockMap, aliases, rubyBlockId),
-                 MK::IDIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs)), var});
+                 MK::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs)), var});
         }
         return;
     }

@@ -165,7 +165,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, ll
                                                            int rubyBlockId) {
     auto &builder = builderCast(build);
     auto str = i->fun.data(cs)->shortName(cs);
-    auto rawId = MK::IDIntern(cs, builder, str);
+    auto rawId = MK::idIntern(cs, builder, str);
 
     // fill in args
     {

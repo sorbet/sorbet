@@ -155,7 +155,7 @@ VALUE in), VALUE closure) { return rb_hash_foreach(hash, func, closure);
 // ****                       Operations on Ruby ID's
 // ****
 
-ID sorbet_IDIntern(const char *value) {
+ID sorbet_idIntern(const char *value) {
     return rb_intern(value);
 }
 
@@ -268,7 +268,7 @@ VALUE sorbet_get_constant(std::string_view name) {
     std::size_t nexIt = name.find("::", it);
     while (nexIt != std::string_view::npos) {
         cnst = sorbet_getConstant(cnst,
-sorbet_IDIntern(std::string(name.substr(it, nexIt)).c_str())); it = nexIt + 2;
+sorbet_idIntern(std::string(name.substr(it, nexIt)).c_str())); it = nexIt + 2;
         nexIt = name.find("::", it);
     }
     return cnst;

@@ -174,7 +174,7 @@ VALUE in), VALUE closure) { return rb_hash_foreach(hash, func, closure);
 // ****                       Operations on Ruby ID's
 // ****
 
-ID sorbet_IDIntern(const char *value, long length) __attribute__((always_inline)) {
+ID sorbet_idIntern(const char *value, long length) __attribute__((always_inline)) {
     return rb_intern2(value, length);
 }
 

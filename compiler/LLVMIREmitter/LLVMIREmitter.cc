@@ -371,7 +371,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             }
                             case core::LiteralType::LiteralTypeKind::Symbol: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
-                                auto rawId = MK::IDIntern(cs, builder, str);
+                                auto rawId = MK::idIntern(cs, builder, str);
                                 auto rawRubySym =
                                     builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
                                 MK::varSet(cs, bind.bind.variable, rawRubySym, builder, blockMap, aliases,

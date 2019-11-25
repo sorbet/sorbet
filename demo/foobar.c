@@ -9,14 +9,14 @@ VALUE has_array(VALUE a1, VALUE a2) {
 }
 
 VALUE rb_return_nil() {
-    sorbet_IDIntern("stuff");
+    sorbet_idIntern("stuff");
     return sorbet_rubyNil();
 }
 
 /* calling converntion that we'll use */
 VALUE my_method(int argc, VALUE *argv, VALUE self) {
     VALUE arr[0];
-    return sorbet_callFunc(self, sorbet_IDIntern("puts"), 0, arr);
+    return sorbet_callFunc(self, sorbet_idIntern("puts"), 0, arr);
 }
 
 void Init_foobar() {
