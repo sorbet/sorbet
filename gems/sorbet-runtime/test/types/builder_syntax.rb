@@ -426,7 +426,17 @@ module Opus::Types::Test
         end
       end
 
-      # TODO(jez) it forbids generated
+      it 'forbids generated' do
+        e = assert_raises(NameError) do
+          Class.new do
+            extend T::Sig
+            sig {void.generated}
+            def self.foo; end
+            foo
+          end
+        end
+        assert_includes(e.message, "generated")
+      end
 
       it 'disallows return then void' do
         e = assert_raises(ArgumentError) do
