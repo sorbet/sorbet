@@ -4,11 +4,12 @@
 #include "absl/synchronization/mutex.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
+#include "compiler/Core/CompilerState.h"
 #include "compiler/DefinitionRewriter/DefinitionRewriter.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
-#include "compiler/Core/CompilerState.h"
+#include "compiler/Payload/Payload.h"
 #include "core/ErrorQueue.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>

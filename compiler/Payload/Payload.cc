@@ -11,6 +11,7 @@
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include <string_view>
 // ^^^ violate poisons
+#include "compiler/Core/CompilerState.h"
 #include "compiler/Errors/Errors.h"
 #include "core/core.h"
 using namespace std;
