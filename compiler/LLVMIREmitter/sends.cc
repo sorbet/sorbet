@@ -50,7 +50,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                                                              builder.GetInsertBlock()->getParent());
                     auto fastPath = llvm::BasicBlock::Create(cs, llvm::Twine("fastSymCallIntrinsic_") + methodNameRef,
                                                              builder.GetInsertBlock()->getParent());
-                    builder.CreateCondBr(MK::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
+                    builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
                     builder.SetInsertPoint(fastPath);
                     auto fastPathRes = symbolBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, rubyBlockId);
                     auto fastPathEnd = builder.GetInsertBlock();
@@ -102,7 +102,7 @@ llvm::Value *LLVMIREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBui
                                                          builder.GetInsertBlock()->getParent());
                 auto fastPath = llvm::BasicBlock::Create(cs, llvm::Twine("fastCallFinal_") + methodNameRef,
                                                          builder.GetInsertBlock()->getParent());
-                builder.CreateCondBr(MK::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
+                builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
                 builder.SetInsertPoint(fastPath);
                 auto fastPathRes =
                     LLVMIREmitterHelpers::emitMethodCallDirrect(cs, build, funSym, i, blockMap, aliases, rubyBlockId);
