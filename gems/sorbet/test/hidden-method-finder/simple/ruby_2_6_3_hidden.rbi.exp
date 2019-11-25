@@ -8066,8 +8066,6 @@ class Hash
 
   def index(_); end
 
-  def merge!(*_); end
-
   def replace(_); end
 
   def slice(*_); end
