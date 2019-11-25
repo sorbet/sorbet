@@ -128,8 +128,8 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             symbolProto.set_resulttype(data->resultType.get()->show(gs));
         }
 
-        for (auto loc : data->locs()) {
-            *symbolProto.add_locs() = toProto(gs, loc);	
+        for (const auto &loc : data->locs()) {
+            *symbolProto.add_locs() = toProto(gs, loc);
         }
     }
 
