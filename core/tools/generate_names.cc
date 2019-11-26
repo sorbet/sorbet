@@ -105,7 +105,6 @@ NameDef names[] = {
     {"void_", "void"},
     {"checked"},
     {"on_failure"},
-    {"generated"},
 
     {"all"},
     {"any"},
