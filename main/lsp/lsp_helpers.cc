@@ -94,6 +94,7 @@ constexpr int MAX_PRETTY_WIDTH = 80;
 string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
                           core::TypePtr retType, const core::TypeConstraint *constraint) {
     ENFORCE(method.exists());
+    ENFORCE(method.data(gs)->dealias(gs) == method);
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
         return "";
@@ -185,8 +186,10 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
         methodData->owner.data(gs)->attachedClass(gs).exists()) {
         methodNamePrefix = "self.";
     }
-    vector<string> arguments;
-    for (auto &argSym : methodData->arguments()) {
+    vector<string> prettyArgs;
+    const auto &arguments = methodData->dealias(gs).data(gs)->arguments();
+    ENFORCE(!arguments.empty(), "Should have at least a block arg");
+    for (const auto &argSym : arguments) {
         // Don't display synthetic arguments (like blk).
         if (argSym.isSyntheticBlockArgument()) {
             continue;
@@ -206,33 +209,33 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
         } else if (argSym.flags.isBlock) {
             prefix = "&";
         }
-        arguments.emplace_back(fmt::format("{}{}{}", prefix, argSym.argumentName(gs), suffix));
+        prettyArgs.emplace_back(fmt::format("{}{}{}", prefix, argSym.argumentName(gs), suffix));
     }
 
     string argListPrefix = "";
     string argListSeparator = "";
     string argListSuffix = "";
-    if (arguments.size() > 0) {
+    if (prettyArgs.size() > 0) {
         argListPrefix = "(";
         argListSeparator = ", ";
         argListSuffix = ")";
     }
 
     auto result = fmt::format("def {}{}{}{}{}; end", methodNamePrefix, methodName, argListPrefix,
-                              fmt::join(arguments, argListSeparator), argListSuffix);
-    if (arguments.size() > 0 && result.length() >= MAX_PRETTY_WIDTH) {
+                              fmt::join(prettyArgs, argListSeparator), argListSuffix);
+    if (prettyArgs.size() > 0 && result.length() >= MAX_PRETTY_WIDTH) {
         argListPrefix = "(\n  ";
         argListSeparator = ",\n  ";
         argListSuffix = "\n)";
         result = fmt::format("def {}{}{}{}{}\nend", methodNamePrefix, methodName, argListPrefix,
-                             fmt::join(arguments, argListSeparator), argListSuffix);
+                             fmt::join(prettyArgs, argListSeparator), argListSuffix);
     }
     return result;
 }
 
 string prettyTypeForMethod(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
                            core::TypePtr retType, const core::TypeConstraint *constraint) {
-    return fmt::format("{}\n{}", prettySigForMethod(gs, method, receiver, retType, constraint),
+    return fmt::format("{}\n{}", prettySigForMethod(gs, method.data(gs)->dealias(gs), receiver, retType, constraint),
                        prettyDefForMethod(gs, method));
 }
 
