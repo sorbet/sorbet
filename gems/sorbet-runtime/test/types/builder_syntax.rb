@@ -426,26 +426,16 @@ module Opus::Types::Test
         end
       end
 
-      it 'forbids .generated and then .checked' do
-        ex = assert_raises do
+      it 'forbids generated' do
+        e = assert_raises(NameError) do
           Class.new do
             extend T::Sig
-            sig {generated.returns(Integer).checked(:never)}
-            def self.foo; end; foo
+            sig {void.generated}
+            def self.foo; end
+            foo
           end
         end
-        assert_includes(ex.message, "You can't use .checked with .generated.")
-      end
-
-      it 'forbids .generated and then .on_failure' do
-        ex = assert_raises do
-          Class.new do
-            extend T::Sig
-            sig {generated.returns(Integer).on_failure(:soft, notify: '')}
-            def self.foo; end; foo
-          end
-        end
-        assert_includes(ex.message, "You can't use .on_failure with .generated.")
+        assert_includes(e.message, "generated")
       end
 
       it 'disallows return then void' do

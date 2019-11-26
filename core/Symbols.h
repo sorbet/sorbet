@@ -84,7 +84,7 @@ public:
         static constexpr u4 METHOD_OVERLOADED = 0x0000'0040;
         static constexpr u4 METHOD_ABSTRACT = 0x0000'0080;
         static constexpr u4 METHOD_GENERIC = 0x0000'0100;
-        static constexpr u4 METHOD_GENERATED_SIG = 0x0000'0200;
+        [[deprecated]] static constexpr u4 METHOD_GENERATED_SIG = 0x0000'0200;
         static constexpr u4 METHOD_OVERRIDABLE = 0x0000'0400;
         static constexpr u4 METHOD_FINAL = 0x0000'0800;
         static constexpr u4 METHOD_OVERRIDE = 0x0000'1000;
@@ -217,11 +217,6 @@ public:
     inline bool isOverride() const {
         ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_OVERRIDE) != 0;
-    }
-
-    inline bool hasGeneratedSig() const {
-        ENFORCE(isMethod());
-        return (flags & Symbol::Flags::METHOD_GENERATED_SIG) != 0;
     }
 
     inline bool isCovariant() const {
@@ -414,16 +409,6 @@ public:
     inline bool isFinalMethod() const {
         ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_FINAL) != 0;
-    }
-
-    inline void setHasGeneratedSig() {
-        ENFORCE(isMethod());
-        flags |= Symbol::Flags::METHOD_GENERATED_SIG;
-    }
-
-    inline void unsetHasGeneratedSig() {
-        ENFORCE(isMethod());
-        flags &= ~Symbol::Flags::METHOD_GENERATED_SIG;
     }
 
     inline void setPublic() {

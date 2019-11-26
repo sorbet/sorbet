@@ -339,29 +339,6 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     break;
                 case core::Names::on_failure()._id:
                     break;
-                case core::Names::generated()._id:
-                    sig.seen.generated = true;
-
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::GeneratedDeprecated)) {
-                        e.setHeader("`{}` is deprecated. See docs for alternatives", "generated");
-
-                        auto file = sigSend->loc.file();
-                        auto [sigStart, sigEnd] = sigSend->loc.position(ctx);
-
-                        auto maybeReplaceStart = core::Loc::pos2Offset(file.data(ctx), {sigStart.line, 1});
-                        ENFORCE(maybeReplaceStart.has_value());
-                        auto replaceStart = maybeReplaceStart.value();
-
-                        auto replaceEnd = sigSend->loc.endPos();
-                        if (auto nextLine = core::Loc::pos2Offset(file.data(ctx), {sigEnd.line + 1, 1})) {
-                            replaceEnd = nextLine.value();
-                        }
-
-                        auto replacementLoc = core::Loc{file, replaceStart, replaceEnd};
-
-                        e.replaceWith("Delete entire sig", replacementLoc, "");
-                    }
-                    break;
                 case core::Names::final_()._id:
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         reportedInvalidMethod = true;

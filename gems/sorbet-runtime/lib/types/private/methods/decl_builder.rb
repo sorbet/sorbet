@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Private::Methods
-  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :generated)
+  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters)
 
   class DeclBuilder
     attr_reader :decl
@@ -28,7 +28,6 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # on_failure
         nil, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
-        ARG_NOT_PROVIDED, # generated
       )
     end
 
@@ -88,9 +87,6 @@ module T::Private::Methods
       if level == :never && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't use .checked(:never) with .on_failure because .on_failure will have no effect.")
       end
-      if !decl.generated.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't use .checked with .generated.")
-      end
       if !T::Private::RuntimeLevels::LEVELS.include?(level)
         raise BuilderError.new("Invalid `checked` level '#{level}'. Use one of: #{T::Private::RuntimeLevels::LEVELS}.")
       end
@@ -109,29 +105,8 @@ module T::Private::Methods
       if decl.checked == :never
         raise BuilderError.new("You can't use .on_failure with .checked(:never) because .on_failure will have no effect.")
       end
-      if !decl.generated.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't use .on_failure with .generated.")
-      end
 
       decl.on_failure = args
-
-      self
-    end
-
-    def generated
-      check_live!
-
-      if !decl.generated.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't call .generated multiple times in a signature.")
-      end
-      if !decl.checked.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't use .generated with .checked.")
-      end
-      if !decl.on_failure.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't use .generated with .on_failure.")
-      end
-
-      decl.generated = true
 
       self
     end
@@ -237,9 +212,6 @@ module T::Private::Methods
       end
       if decl.on_failure.equal?(ARG_NOT_PROVIDED)
         decl.on_failure = nil
-      end
-      if decl.generated.equal?(ARG_NOT_PROVIDED)
-        decl.generated = false
       end
       if decl.params.equal?(ARG_NOT_PROVIDED)
         decl.params = {}

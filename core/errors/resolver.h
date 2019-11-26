@@ -60,7 +60,7 @@ constexpr ErrorClass InvalidTypeMemberBounds{5052, StrictLevel::False};
 constexpr ErrorClass ParentTypeBoundsMismatch{5053, StrictLevel::False};
 constexpr ErrorClass ImplementationDeprecated{5054, StrictLevel::False};
 constexpr ErrorClass TypeMemberCycle{5055, StrictLevel::False};
-constexpr ErrorClass GeneratedDeprecated{5056, StrictLevel::False};
+// constexpr ErrorClass GeneratedDeprecated{5056, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif
