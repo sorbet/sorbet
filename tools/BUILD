@@ -10,6 +10,7 @@ compilation_database(
     testonly = True,
     targets = [
         # BEGIN compile_commands targets
+        "//third_party/xxd:xxd",
         "//main:sorbet",
         "//plugin_injector:plugin_injector",
         "//compiler/Payload:pseudo_lib",
