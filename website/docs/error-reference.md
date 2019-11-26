@@ -555,7 +555,7 @@ end
 
 ## 5056
 
-The `generated` annotation has been deprecated from Sorbet.
+The `generated` annotation in method signatures is deprecated.
 
 For alternatives, see [Enabling Runtime Checks](runtime.md) which talks about
 how to change the runtime behavior when method signatures encounter a problem.
