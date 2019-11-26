@@ -594,10 +594,12 @@ public:
     };
 
     std::vector<ArgInfo> &arguments() {
+        ENFORCE(isMethod());
         return arguments_;
     }
 
     const std::vector<ArgInfo> &arguments() const {
+        ENFORCE(isMethod());
         return arguments_;
     }
 
