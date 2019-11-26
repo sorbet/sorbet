@@ -1135,15 +1135,11 @@ u4 Symbol::hash(const GlobalState &gs) const {
     return result;
 }
 
-// Bitmask for all method flags ignored when calculating the shape hash of a method symbol.
-constexpr u4 METHOD_FLAGS_IGNORED_IN_SHAPE_HASH = Symbol::Flags::METHOD_GENERATED_SIG;
-
 u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     ENFORCE(isMethod());
 
     u4 result = _hash(name.data(gs)->shortName(gs));
-    // Mark ignored flags to ON for shape hash.
-    result = mix(result, this->flags | METHOD_FLAGS_IGNORED_IN_SHAPE_HASH);
+    result = mix(result, this->flags);
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
     result = mix(result, this->hasSig());
