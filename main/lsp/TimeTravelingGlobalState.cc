@@ -148,7 +148,7 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(u4 version,
     shared_ptr<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>> resultq =
         make_shared<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>>(files.size());
 
-    // TODO: Use workers later?
+    // TODO: Use workers later? Pass in workers as argument, default to `0`?
     auto workers = WorkerPool::create(0, *config->logger);
     workers->multiplexJob("lspStateHash", [fileq, resultq, files, version, &logger]() {
         vector<pair<int, core::FileHash>> threadResult;
@@ -240,7 +240,8 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
         fileToPos[fref.id()] = i;
     }
 
-    auto trees = pipeline::index(gs, frefs, config->opts, config->workers, kvstore);
+    auto workers = WorkerPool::create(0, *config->logger);
+    auto trees = pipeline::index(gs, frefs, config->opts, *workers, kvstore);
     update.updatedFileIndexes.resize(trees.size());
     newUpdate.update.updatedFileIndexes.resize(trees.size());
     for (auto &ast : trees) {

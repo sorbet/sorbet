@@ -459,7 +459,7 @@ int realmain(int argc, char *argv[]) {
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       Version::full_version_string);
         auto output = make_shared<lsp::LSPStdout>(logger);
-        lsp::LSPLoop loop(move(gs), make_shared<lsp::LSPConfiguration>(opts, output, *workers, logger));
+        lsp::LSPLoop loop(move(gs), make_shared<lsp::LSPConfiguration>(opts, output, logger), *workers);
         gs = loop.runLSP(make_shared<lsp::LSPFDInput>(logger, STDIN_FILENO)).value_or(nullptr);
 #endif
     } else {

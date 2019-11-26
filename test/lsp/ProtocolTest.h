@@ -79,8 +79,6 @@ protected:
 
     void sendAsync(const LSPMessage &message);
 
-    std::unique_ptr<LSPMessage> readAsync();
-
     void assertDiagnostics(std::vector<std::unique_ptr<LSPMessage>> messages, std::vector<ExpectedDiagnostic> expected);
 
     std::string readFile(std::string_view uri);
@@ -94,6 +92,9 @@ protected:
      */
     void updateDiagnostics(const std::vector<std::unique_ptr<LSPMessage>> &messages);
     void updateDiagnostics(const LSPMessage &message);
+
+public:
+    std::unique_ptr<LSPMessage> readAsync();
 };
 
 } // namespace sorbet::test::lsp

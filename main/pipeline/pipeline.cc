@@ -926,7 +926,8 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 }
 
 ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                      const options::Options &opts, WorkerPool &workers, bool preemptible) {
+                                      const options::Options &opts, WorkerPool &workers, bool cancelable,
+                                      bool preemptible) {
     vector<ast::ParsedFile> typecheck_result;
 
     {
@@ -957,38 +958,39 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob(
-                "typecheck", [ctx, &opts, &typecheckMutex = gs->typecheckMutex, fileq, resultq, preemptible]() {
-                    typecheck_thread_result threadResult;
-                    ast::ParsedFile job;
-                    int processedByThread = 0;
-                    {
-                        for (auto result = fileq->try_pop(job); !result.done() && !ctx.state.wasTypecheckingCanceled();
-                             result = fileq->try_pop(job)) {
-                            unique_ptr<absl::ReaderMutexLock> lock;
-                            if (preemptible) {
-                                // Acquire a reader lock here. Parks the thread if the typechecker thread is trying to
-                                // grab the lock to preempt typechecking.
-                                lock = make_unique<absl::ReaderMutexLock>(typecheckMutex.get());
-                            }
-                            if (result.gotItem()) {
-                                processedByThread++;
-                                core::FileRef file = job.file;
-                                try {
-                                    threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
-                                } catch (SorbetException &) {
-                                    Exception::failInFuzzer();
-                                    ctx.state.tracer().error("Exception typing file: {} (backtrace is above)",
-                                                             file.data(ctx).path());
-                                }
+            workers.multiplexJob("typecheck", [ctx, &opts, &typecheckMutex = gs->typecheckMutex, fileq, resultq,
+                                               cancelable, preemptible]() {
+                typecheck_thread_result threadResult;
+                ast::ParsedFile job;
+                int processedByThread = 0;
+                {
+                    for (auto result = fileq->try_pop(job);
+                         !result.done() && (!cancelable || !ctx.state.wasTypecheckingCanceled());
+                         result = fileq->try_pop(job)) {
+                        unique_ptr<absl::ReaderMutexLock> lock;
+                        if (preemptible) {
+                            // Acquire a reader lock here. Parks the thread if the typechecker thread is trying to
+                            // grab the lock to preempt typechecking.
+                            lock = make_unique<absl::ReaderMutexLock>(typecheckMutex.get());
+                        }
+                        if (result.gotItem()) {
+                            processedByThread++;
+                            core::FileRef file = job.file;
+                            try {
+                                threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
+                            } catch (SorbetException &) {
+                                Exception::failInFuzzer();
+                                ctx.state.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                         file.data(ctx).path());
                             }
                         }
                     }
-                    if (processedByThread > 0) {
-                        threadResult.counters = getAndClearThreadCounters();
-                        resultq->push(move(threadResult), processedByThread);
-                    }
-                });
+                }
+                if (processedByThread > 0) {
+                    threadResult.counters = getAndClearThreadCounters();
+                    resultq->push(move(threadResult), processedByThread);
+                }
+            });
 
             typecheck_thread_result threadResult;
             {
@@ -1002,7 +1004,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
                     gs->errorQueue->flushErrors();
-                    if (ctx.state.wasTypecheckingCanceled()) {
+                    if (cancelable && ctx.state.wasTypecheckingCanceled()) {
                         return ast::ParsedFilesOrCancelled();
                     }
 

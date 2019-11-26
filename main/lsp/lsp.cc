@@ -11,8 +11,9 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config)
-    : config(config), preprocessor(move(initialGS), config), typecheckerCoord(config),
+LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config,
+                 WorkerPool &workers)
+    : config(config), preprocessor(move(initialGS), config), typecheckerCoord(config, workers),
       lastMetricUpdateTime(chrono::steady_clock::now()) {}
 
 LSPQueryResult LSPLoop::queryByLoc(LSPTypechecker &typechecker, string_view uri, const Position &pos,

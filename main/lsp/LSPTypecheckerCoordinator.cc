@@ -5,8 +5,8 @@
 namespace sorbet::realmain::lsp {
 using namespace std;
 
-LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPConfiguration> &config)
-    : shouldTerminate(false), typechecker(config), config(config), hasDedicatedThread(false) {}
+LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(shared_ptr<const LSPConfiguration> config, WorkerPool &workers)
+    : shouldTerminate(false), typechecker(config, workers), config(move(config)), hasDedicatedThread(false) {}
 
 void LSPTypecheckerCoordinator::asyncRunInternal(function<void()> &&lambda, bool canPreemptSlowPath) {
     if (hasDedicatedThread) {

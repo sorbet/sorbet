@@ -27,7 +27,7 @@ class LSPTypecheckerCoordinator final {
     void asyncRunInternal(std::function<void()> &&lambda, bool canPreemptSlowPath);
 
 public:
-    LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config);
+    LSPTypecheckerCoordinator(std::shared_ptr<const LSPConfiguration> config, WorkerPool &workers);
 
     /**
      * Runs lambda with exclusive access to GlobalState. lambda runs on typechecker thread. These cannot preeempt the

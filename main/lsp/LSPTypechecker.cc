@@ -88,19 +88,19 @@ void LSPTypecheckerUndoState::recordEvictedState(ast::ParsedFile replacedIndexTr
     }
 }
 
-LSPTypechecker::LSPTypechecker(const std::shared_ptr<const LSPConfiguration> &config)
-    : typecheckerThreadId(this_thread::get_id()), config(config) {}
+LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config, WorkerPool &workers)
+    : typecheckerThreadId(this_thread::get_id()), workers(workers), config(move(config)) {}
 
 void LSPTypechecker::initialize(LSPFileUpdates updates) {
     globalStateHashes = move(updates.updatedFileHashes);
     indexed = move(updates.updatedFileIndexes);
     ENFORCE(globalStateHashes.size() == indexed.size());
-    // Initialization typecheck is not cancelable.
+    // Initialization typecheck is not cancelable, but is preemptible.
     auto committed = runSlowPath(move(updates), false);
     ENFORCE(committed);
 }
 
-bool LSPTypechecker::typecheck(LSPFileUpdates updates, bool cancelableAndPreemptible) {
+bool LSPTypechecker::typecheck(LSPFileUpdates updates, bool cancelable) {
     vector<core::FileRef> addToTypecheck;
     if (updates.canceledSlowPath) {
         // This update canceled the last slow path, so we should have undo state to restore to go to the point _before_
@@ -138,7 +138,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, bool cancelableAndPreempt
     } else {
         // No need to add any files to typecheck, as it'll retypecheck all files.
         // TODO: In future, have it prioritize old files with errors.
-        return runSlowPath(move(updates), cancelableAndPreemptible);
+        return runSlowPath(move(updates), cancelable);
     }
 }
 
@@ -219,6 +219,7 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates) const {
     ENFORCE(gs->lspQuery.isEmpty());
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
     // Disable multithreading for fast path since it can preempt a slow path that is already monopolizing all workers.
+    // TODO: Use workers *iff* a slow path isn't preempted right now.
     auto workers = WorkerPool::create(0, gs->tracer());
     pipeline::typecheck(gs, move(resolved), config->opts, *workers);
     auto out = gs->errorQueue->drainWithQueryResponses();
@@ -241,7 +242,8 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
 }
 } // namespace
 
-bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelableAndPreemptible) {
+bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelable) {
+    const bool preemptible = true;
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
 
@@ -265,7 +267,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelableAndPreem
 
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
-    const bool committed = finalGS->tryCommitEpoch(updates.versionEnd, cancelableAndPreemptible, [&]() -> void {
+    const bool committed = finalGS->tryCommitEpoch(updates.versionEnd, cancelable, [&]() -> void {
         // Index the updated files using finalGS.
         {
             core::UnfreezeFileTable fileTableAccess(*finalGS);
@@ -283,7 +285,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelableAndPreem
         // Before making preemption or cancelation possible, pre-commit the changes from this slow path so that
         // preempted queries can use them and the code after this lambda can assume that this step happened.
         updates.updatedGS = move(finalGS);
-        commitFileUpdates(updates, false, cancelableAndPreemptible);
+        commitFileUpdates(updates, false, cancelable);
 
         // Copy the indexes of unchanged files.
         for (const auto &tree : indexed) {
@@ -300,8 +302,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelableAndPreem
         if (gs->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
         }
-        auto maybeResolved =
-            pipeline::resolve(gs, move(indexedCopies), config->opts, config->workers, config->skipConfigatron);
+        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, config->skipConfigatron);
         if (!maybeResolved.hasResult()) {
             return;
         }
@@ -331,7 +332,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelableAndPreem
             return;
         }
 
-        pipeline::typecheck(gs, move(resolved), config->opts, config->workers, cancelableAndPreemptible);
+        pipeline::typecheck(gs, move(resolved), config->opts, workers, cancelable, preemptible);
         if (gs->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.typecheck.sleep");
         }
@@ -354,7 +355,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelableAndPreem
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
         // Update responsible will use state in `cancellationUndoState` to restore typechecker to the point before
         // this slow path.
-        ENFORCE(cancelableAndPreemptible);
+        ENFORCE(cancelable);
         sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::canceled, false, {});
         return false;
     }

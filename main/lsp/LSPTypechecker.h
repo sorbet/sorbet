@@ -93,13 +93,14 @@ class LSPTypechecker final {
      * LSPTypechecker to its pre-slow-path state. */
     std::optional<LSPTypecheckerUndoState> cancellationUndoState;
     std::shared_ptr<std::shared_ptr<std::function<void()>>> preemptFunction;
+    /** Worker threads for slow path typechecking. */
+    WorkerPool &workers;
 
     std::shared_ptr<const LSPConfiguration> config;
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns `true` if slow path successfully
-     * completed, or `false` if it was canceled. If `typecheckLock` is supplied, operation is cancelable and
-     * preemptible. */
-    bool runSlowPath(LSPFileUpdates updates, bool cancelableAndPreemptible);
+     * completed, or `false` if it was canceled. */
+    bool runSlowPath(LSPFileUpdates updates, bool cancelable);
     /** Runs incremental typechecking on the provided updates. */
     TypecheckRun runFastPath(LSPFileUpdates updates) const;
 
@@ -123,7 +124,7 @@ class LSPTypechecker final {
     std::vector<core::FileRef> restore(LSPTypecheckerUndoState &undoState);
 
 public:
-    LSPTypechecker(const std::shared_ptr<const LSPConfiguration> &config);
+    LSPTypechecker(std::shared_ptr<const LSPConfiguration> config, WorkerPool &workers);
     ~LSPTypechecker() = default;
 
     /**
@@ -138,7 +139,7 @@ public:
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
      * canceled. Guaranteed to return `true` if `cancelableAndPreemptible` is `false`.
      */
-    bool typecheck(LSPFileUpdates updates, bool cancelableAndPreemptible);
+    bool typecheck(LSPFileUpdates updates, bool cancelable);
 
     /**
      * Re-typechecks the provided input to re-produce error messages. Input *must* match already committed state!

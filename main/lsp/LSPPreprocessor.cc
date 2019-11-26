@@ -150,7 +150,9 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &stateMtx, QueueState &state)
                     auto combinedUpdates = ttgs.getCombinedUpdates(committed + 1, params->updates.versionEnd);
                     // Cancel if combined updates end up taking the fast path, or if the new updates will just take the
                     // slow path a second time when the current slow path finishes.
-                    if ((combinedUpdates.canTakeFastPath || !params->updates.canTakeFastPath) &&
+                    // Don't bother canceling if the edit has already canceled the currently-running slow path.
+                    if (!combinedUpdates.canceledSlowPath &&
+                        (combinedUpdates.canTakeFastPath || !params->updates.canTakeFastPath) &&
                         gs.tryCancelSlowPath(params->updates.versionEnd)) {
                         if (combinedUpdates.canTakeFastPath) {
                             logger->debug(

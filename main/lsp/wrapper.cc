@@ -80,8 +80,8 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Opt
                        shared_ptr<spd::logger> typeErrorsConsole, bool disableFastPath)
     : logger(logger), workers(WorkerPool::create(opts->threads, *logger)), stderrColorSink(move(stderrColorSink)),
       typeErrorsConsole(move(typeErrorsConsole)), output(make_shared<LSPOutputToVector>()),
-      config_(make_shared<LSPConfiguration>(*opts, output, *workers, move(logger), true, disableFastPath)),
-      lspLoop(make_shared<LSPLoop>(std::move(gs), config_)), opts(move(opts)) {}
+      config_(make_shared<LSPConfiguration>(*opts, output, move(logger), true, disableFastPath)),
+      lspLoop(make_shared<LSPLoop>(std::move(gs), config_, *workers)), opts(move(opts)) {}
 
 SingleThreadedLSPWrapper::SingleThreadedLSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> opts,
                                                    shared_ptr<spd::logger> logger,
