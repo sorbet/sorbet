@@ -8,6 +8,7 @@
 using namespace std;
 namespace sorbet::rewriter {
 
+// this only looks for sigs of the 'correct' shape (i.e. sigs with blocks that contain a send that also end with `void`)
 bool isSig(const ast::Send *send) {
     if (send->fun != core::Names::sig()) {
         return false;
@@ -69,14 +70,14 @@ void maybeAddLet(core::MutableContext ctx, ast::Expression *expr,
 
 // this walks through the chain of sends contained in the body of the `sig` block to find the `params` one, if it
 // exists; and otherwise returns a null pointer
-ast::Hash *findParamHash(const ast::Send *send) {
+const ast::Hash *findParamHash(const ast::Send *send) {
     while (send && send->fun != core::Names::params()) {
-        send = ast::cast_tree<ast::Send>(send->recv.get());
+        send = ast::cast_tree_const<ast::Send>(send->recv.get());
     }
     if (!send || send->args.size() != 1) {
         return nullptr;
     }
-    return ast::cast_tree<ast::Hash>(send->args.front().get());
+    return ast::cast_tree_const<ast::Hash>(send->args.front().get());
 }
 
 void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const ast::Expression *prevStat) {
@@ -92,13 +93,13 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
     if (!sig || !isSig(sig)) {
         return;
     }
-    auto block = ast::cast_tree<ast::Block>(sig->block.get());
+    auto block = ast::cast_tree_const<ast::Block>(sig->block.get());
     if (!block) {
         return;
     }
 
     // walk through, find the `params()` invocation, and get its hash
-    auto argHash = findParamHash(ast::cast_tree<ast::Send>(block->body.get()));
+    auto argHash = findParamHash(ast::cast_tree_const<ast::Send>(block->body.get()));
     if (!argHash) {
         return;
     }
