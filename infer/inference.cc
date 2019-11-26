@@ -217,7 +217,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         counterInc("infer.methods_typechecked.no_errors");
     }
 
-    if ((missingReturnType || cfg->symbol.data(ctx)->hasGeneratedSig()) && guessTypes) {
+    if (missingReturnType && guessTypes) {
         if (auto e = ctx.state.beginError(cfg->symbol.data(ctx)->loc(), core::errors::Infer::UntypedMethod)) {
             e.setHeader("This function does not have a `{}`", "sig");
             auto maybeAutocorrect = SigSuggestion::maybeSuggestSig(ctx, cfg, methodReturnType, *constr);

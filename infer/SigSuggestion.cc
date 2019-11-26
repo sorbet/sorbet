@@ -11,28 +11,6 @@ namespace sorbet::infer {
 
 namespace {
 
-optional<u4> startOfExistingSig(core::Context ctx, core::Loc loc) {
-    auto file = loc.file();
-    ENFORCE(file.exists());
-    auto textBeforeTheMethod = loc.file().data(ctx).source().substr(0, loc.beginPos());
-    auto lastSigCurly = textBeforeTheMethod.rfind("sig {");
-    auto lastSigDo = textBeforeTheMethod.rfind("sig do");
-    if (lastSigCurly != string_view::npos) {
-        if (lastSigDo != string_view::npos) {
-            return max(lastSigCurly, lastSigDo);
-        } else {
-            return lastSigCurly;
-        }
-    } else {
-        if (lastSigDo != string_view::npos) {
-            return lastSigDo;
-        } else {
-            // failed to find sig
-            return nullopt;
-        }
-    }
-}
-
 bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
     ENFORCE(enclosingClass.exists());
     auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
@@ -384,8 +362,6 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         return nullopt;
     }
 
-    // Note: Before running any substantial codemod to add generated sigs at Stripe, be sure to insert `generated.`
-    // in all the suggested sigs. (Either change this line below and recompile, or post-process using sed).
     fmt::format_to(ss, "sig {{");
 
     ENFORCE(!methodSymbol.data(ctx)->arguments().empty(), "There should always be at least one arg (the block arg).");
@@ -466,17 +442,8 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         return nullopt;
     }
 
-    if (hasExistingSig && !methodSymbol.data(ctx)->hasGeneratedSig()) {
-        return nullopt;
-    }
-
     if (hasExistingSig) {
-        if (auto existingStart = startOfExistingSig(ctx, loc)) {
-            replacementLoc = core::Loc(loc.file(), *existingStart, replacementLoc.endPos());
-        } else {
-            // Had existing sig, but couldn't find where it started, so give up suggesting a sig.
-            return nullopt;
-        }
+        return nullopt;
     }
 
     vector<core::AutocorrectSuggestion::Edit> edits;
