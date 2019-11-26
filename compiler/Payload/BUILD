@@ -75,7 +75,7 @@ genrule(
     outs = [
         "payload.bc.orig",
     ],
-    cmd = "$(location :generate_payload_bc_orig_generator) $(location :llvm-ar) $(location payload.bc.orig) $(locations :pseudo_lib) $(location //third_party/xxd)",
+    cmd = "$(location :generate_payload_bc_orig_generator) $(location :llvm-ar) $(location payload.bc.orig) $(location //third_party/xxd) $(locations :pseudo_lib)",
     tools = [
         ":generate_payload_bc_orig_generator",
         ":llvm-ar",

@@ -3,8 +3,8 @@ set -e
 
 ar=$1
 output=$2
-afile=$3
-xxd=$4
+xxd=$3
+afile=$4
 
 $ar -x "$afile" payload.o
 
