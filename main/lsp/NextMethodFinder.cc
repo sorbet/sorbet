@@ -11,12 +11,21 @@ unique_ptr<ast::MethodDef> NextMethodFinder::preTransformMethodDef(core::Context
     ENFORCE(methodDef->symbol != core::Symbols::todo());
 
     auto currentMethod = methodDef->symbol;
-    auto currentLoc = currentMethod.data(ctx)->loc();
 
-    if (!currentLoc.exists() || currentLoc.file() != this->queryLoc.file()) {
+    auto &currentMethodLocs = currentMethod.data(ctx)->locs();
+    auto inFileOfQuery = [&](const auto &loc) { return loc.file() == this->queryLoc.file(); };
+    auto maybeCurrentLoc = absl::c_find_if(currentMethodLocs, inFileOfQuery);
+    if (maybeCurrentLoc == currentMethodLocs.end()) {
+        return methodDef;
+    }
+
+    auto currentLoc = *maybeCurrentLoc;
+    if (!currentLoc.exists()) {
         // Defensive in case location information is disabled (e.g., certain fuzzer modes)
         return methodDef;
     }
+
+    ENFORCE(currentLoc.file() == this->queryLoc.file());
 
     if (currentLoc.beginPos() < queryLoc.beginPos()) {
         // Current method is before query, not after.
