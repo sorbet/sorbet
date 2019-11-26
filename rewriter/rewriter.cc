@@ -25,6 +25,7 @@
 #include "rewriter/attr_reader.h"
 #include "rewriter/cleanup.h"
 #include "rewriter/flatten.h"
+#include "rewriter/initializer.h"
 #include "rewriter/module_function.h"
 
 using namespace std;
@@ -128,6 +129,8 @@ public:
                         return;
                     }
                 },
+
+                [&](ast::MethodDef *mdef) { Initializer::run(ctx, mdef, prevStat); },
 
                 [&](ast::Expression *e) {});
 
