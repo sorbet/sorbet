@@ -256,26 +256,25 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
     auto nextTabstop = 1;
 
     vector<string> typeAndArgNames;
-    if (method.data(gs)->isMethod()) {
-        for (auto &argSym : method.data(gs)->arguments()) {
-            fmt::memory_buffer argBuf;
-            if (argSym.flags.isBlock) {
-                continue;
-            }
-            if (argSym.flags.isDefault) {
-                continue;
-            }
-            if (argSym.flags.isKeyword) {
-                fmt::format_to(argBuf, "{}: ", argSym.name.data(gs)->shortName(gs));
-            }
-            if (argSym.type) {
-                auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint)->show(gs);
-                fmt::format_to(argBuf, "${{{}:{}}}", nextTabstop++, resultType);
-            } else {
-                fmt::format_to(argBuf, "${{{}}}", nextTabstop++);
-            }
-            typeAndArgNames.emplace_back(to_string(argBuf));
+    for (auto &argSym : method.data(gs)->arguments()) {
+        fmt::memory_buffer argBuf;
+        if (argSym.flags.isBlock) {
+            // Blocks are handled below
+            continue;
         }
+        if (argSym.flags.isDefault) {
+            continue;
+        }
+        if (argSym.flags.isKeyword) {
+            fmt::format_to(argBuf, "{}: ", argSym.name.data(gs)->shortName(gs));
+        }
+        if (argSym.type) {
+            auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint)->show(gs);
+            fmt::format_to(argBuf, "${{{}:{}}}", nextTabstop++, resultType);
+        } else {
+            fmt::format_to(argBuf, "${{{}}}", nextTabstop++);
+        }
+        typeAndArgNames.emplace_back(to_string(argBuf));
     }
 
     if (!typeAndArgNames.empty()) {
