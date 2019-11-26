@@ -32,8 +32,10 @@ bool isSig(const ast::Send *send) {
     return true;
 }
 
+// if expr is of the form `@var = local`, and `local` is typed, then replace it with with `@var = T.let(local,
+// type_of_local)`
 void maybeAddLet(core::MutableContext ctx, ast::Expression *expr,
-                 UnorderedMap<core::NameRef, ast::Expression *> &argTypeMap) {
+                 const UnorderedMap<core::NameRef, ast::Expression *> &argTypeMap) {
     auto assn = ast::cast_tree<ast::Assign>(expr);
     if (!assn) {
         return;
@@ -49,10 +51,10 @@ void maybeAddLet(core::MutableContext ctx, ast::Expression *expr,
         return;
     }
 
-    auto typeExpr = argTypeMap[rhs->name];
-    if (typeExpr) {
+    auto typeExpr = argTypeMap.find(rhs->name);
+    if (typeExpr != argTypeMap.end()) {
         auto loc = rhs->loc;
-        auto newLet = ast::MK::Let(loc, move(assn->rhs), typeExpr->deepCopy());
+        auto newLet = ast::MK::Let(loc, move(assn->rhs), typeExpr->second->deepCopy());
         assn->rhs = move(newLet);
     }
 }
@@ -70,12 +72,14 @@ ast::Hash *findParamHash(const ast::Send *send) {
 }
 
 void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const ast::Expression *prevStat) {
+    // this should only run in an `initialize` that has a sig
     if (methodDef->name != core::Names::initialize()) {
         return;
     }
     if (prevStat == nullptr) {
         return;
     }
+    // make sure that the `sig` block looks like a valid sig block
     auto sig = ast::cast_tree_const<ast::Send>(prevStat);
     if (!sig || !isSig(sig)) {
         return;
@@ -85,11 +89,13 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
         return;
     }
 
+    // walk through, find the `params()` invocation, and get its hash
     auto argHash = findParamHash(ast::cast_tree<ast::Send>(block->body.get()));
     if (!argHash) {
         return;
     }
 
+    // build a lookup table that maps from names to the expressions they have
     UnorderedMap<core::NameRef, ast::Expression *> argTypeMap;
     for (int i = 0; i < argHash->keys.size(); i++) {
         auto argName = ast::cast_tree<ast::Literal>(argHash->keys[i].get());
@@ -99,6 +105,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
         }
     }
 
+    // look through the rhs to find statements of the form `@var = local`
     if (auto stmts = ast::cast_tree<ast::InsSeq>(methodDef->rhs.get())) {
         for (auto &s : stmts->stats) {
             maybeAddLet(ctx, s.get(), argTypeMap);
