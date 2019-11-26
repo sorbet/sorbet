@@ -32,6 +32,14 @@ bool isSig(const ast::Send *send) {
     return true;
 }
 
+bool isCopyableType(const ast::Expression *typeExpr) {
+    auto send = ast::cast_tree_const<ast::Send>(typeExpr);
+    if (send && send->fun == core::Names::typeParameter()) {
+        return false;
+    }
+    return true;
+}
+
 // if expr is of the form `@var = local`, and `local` is typed, then replace it with with `@var = T.let(local,
 // type_of_local)`
 void maybeAddLet(core::MutableContext ctx, ast::Expression *expr,
@@ -52,7 +60,7 @@ void maybeAddLet(core::MutableContext ctx, ast::Expression *expr,
     }
 
     auto typeExpr = argTypeMap.find(rhs->name);
-    if (typeExpr != argTypeMap.end()) {
+    if (typeExpr != argTypeMap.end() && isCopyableType(typeExpr->second)) {
         auto loc = rhs->loc;
         auto newLet = ast::MK::Let(loc, move(assn->rhs), typeExpr->second->deepCopy());
         assn->rhs = move(newLet);
