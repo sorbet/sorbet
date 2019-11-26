@@ -57,6 +57,18 @@ void maybeAddLet(core::MutableContext ctx, ast::Expression *expr,
     }
 }
 
+// this walks through the chain of sends contained in the body of the `sig` block to find the `params` one, if it
+// exists; and otherwise returns a null pointer
+ast::Hash *findParamHash(const ast::Send *send) {
+    while (send && send->fun != core::Names::params()) {
+        send = ast::cast_tree<ast::Send>(send->recv.get());
+    }
+    if (!send || send->args.size() != 1) {
+        return nullptr;
+    }
+    return ast::cast_tree<ast::Hash>(send->args.front().get());
+}
+
 void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const ast::Expression *prevStat) {
     if (methodDef->name != core::Names::initialize()) {
         return;
@@ -73,16 +85,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
         return;
     }
 
-    auto body = ast::cast_tree<ast::Send>(block->body.get());
-    if (!body) {
-        return;
-    }
-
-    auto params = ast::cast_tree<ast::Send>(body->recv.get());
-    if (!params || params->fun != core::Names::params() || params->args.size() != 1) {
-        return;
-    }
-    auto argHash = ast::cast_tree<ast::Hash>(params->args.front().get());
+    auto argHash = findParamHash(ast::cast_tree<ast::Send>(block->body.get()));
     if (!argHash) {
         return;
     }
