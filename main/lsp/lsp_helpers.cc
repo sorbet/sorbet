@@ -111,9 +111,6 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
     string accessFlagString = "";
     string sigCall = "sig";
     if (sym->isMethod()) {
-        if (sym->hasGeneratedSig()) {
-            flags.emplace_back("generated");
-        }
         if (sym->isFinalMethod()) {
             sigCall = "sig(:final)";
         }
