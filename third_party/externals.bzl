@@ -1,6 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//third_party:sorbet_version.bzl", "SORBET_VERSION", "SORBET_SHALLOW_SINCE")
+load("//third_party:sorbet_version.bzl", "SORBET_SHALLOW_SINCE", "SORBET_VERSION")
 
 # We define our externals here instead of directly in WORKSPACE
 # because putting the `new_git_repository` calls here instead of there
