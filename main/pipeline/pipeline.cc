@@ -367,6 +367,19 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
     if (!absl::StartsWith(filePath, "/") && !absl::StartsWith(filePath, "./")) {
         filePath.insert(0, "./");
     }
+
+    if (fileData.originalSigil == core::StrictLevel::None) {
+        level = core::StrictLevel::False;
+    } else {
+        level = fileData.originalSigil;
+    }
+
+    core::StrictLevel minStrict = opts.forceMinStrict;
+    core::StrictLevel maxStrict = opts.forceMaxStrict;
+    if (level <= core::StrictLevel::Max && level > core::StrictLevel::Ignore) {
+        level = max(min(level, maxStrict), minStrict);
+    }
+
     auto fnd = opts.strictnessOverrides.find(filePath);
     if (fnd != opts.strictnessOverrides.end()) {
         if (fnd->second == fileData.originalSigil && fnd->second > opts.forceMinStrict &&
@@ -377,18 +390,6 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
             }
         }
         level = fnd->second;
-    } else {
-        if (fileData.originalSigil == core::StrictLevel::None) {
-            level = core::StrictLevel::False;
-        } else {
-            level = fileData.originalSigil;
-        }
-    }
-
-    core::StrictLevel minStrict = opts.forceMinStrict;
-    core::StrictLevel maxStrict = opts.forceMaxStrict;
-    if (level <= core::StrictLevel::Max && level > core::StrictLevel::Ignore) {
-        level = max(min(level, maxStrict), minStrict);
     }
 
     if (gs.runningUnderAutogen) {
