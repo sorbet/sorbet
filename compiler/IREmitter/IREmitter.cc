@@ -285,6 +285,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
         builder.SetInsertPoint(block);
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
+                Payload::setLineNumber(cs, builder, bind.loc);
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
@@ -335,7 +336,6 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     [&](cfg::BlockReturn *i) {
                         ENFORCE(bb->rubyBlockId != 0, "should never happen");
                         isTerminated = true;
-                        Payload::popControlFrame(cs, builder);
                         auto var = Payload::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
                         builder.CreateRet(var);
                     },
@@ -474,6 +474,8 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
     cs.functionEntryInitializers = blockMap.functionInitializersByFunction[0];
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(blockMap.sigVerificationBlock);
+    Payload::pushControlFrame(cs, builder, cfg.symbol);
+
     int argId = -1;
     for (auto &argInfo : cfg.symbol.data(cs)->arguments()) {
         argId += 1;
@@ -499,7 +501,6 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
         builder.SetInsertPoint(successBlock);
     }
 
-    Payload::pushControlFrame(cs, builder, cfg.symbol);
     builder.CreateBr(blockMap.userEntryBlockByFunction[0]);
 }
 

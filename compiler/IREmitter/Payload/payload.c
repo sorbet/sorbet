@@ -14,6 +14,9 @@
 #include "internal.h"
 #include "ruby.h"
 
+// This is probably a bad idea but is needed for our copy of vm_push_frame
+#include "vm_core.h"
+
 // Paul's and Dmitry's laptops have different attributes for this function in system libraries.
 void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 
@@ -552,13 +555,101 @@ VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
 // ****                       Control Frames
 // ****
 
-void sorbet_pushControlFrame(VALUE recv, ID func) {
-    // rb_vm_push_frame();
+// Trying to be a copy of vm_push_frame
+static inline rb_control_frame_t *sorbet_vm_push_frame(rb_execution_context_t *ec, const rb_iseq_t *iseq, VALUE type,
+                                                       VALUE self, VALUE specval, VALUE cref_or_me, const VALUE *pc,
+                                                       VALUE *sp, int local_size, int stack_max) {
+    rb_control_frame_t *const cfp = RUBY_VM_NEXT_CONTROL_FRAME(ec->cfp);
+
+    // vm_check_frame(type, specval, cref_or_me, iseq);
+    VM_ASSERT(local_size >= 0);
+
+    /* check stack overflow */
+    // CHECK_VM_STACK_OVERFLOW0(cfp, sp, local_size + stack_max);
+    // vm_check_canary(ec, sp);
+
+    ec->cfp = cfp;
+
+    /* setup new frame */
+    cfp->pc = (VALUE *)pc;
+    cfp->iseq = (rb_iseq_t *)iseq;
+    cfp->self = self;
+    cfp->block_code = NULL;
+
+    /* setup vm value stack */
+
+    /* initialize local variables */
+    for (int i = 0; i < local_size; i++) {
+        *sp++ = Qnil;
+    }
+
+    /* setup ep with managing data */
+    VM_ASSERT(VM_ENV_DATA_INDEX_ME_CREF == -2);
+    VM_ASSERT(VM_ENV_DATA_INDEX_SPECVAL == -1);
+    VM_ASSERT(VM_ENV_DATA_INDEX_FLAGS == -0);
+    *sp++ = cref_or_me; /* ep[-2] / Qnil or T_IMEMO(cref) or T_IMEMO(ment) */
+    *sp++ = specval /* ep[-1] / block handler or prev env ptr */;
+    *sp = type; /* ep[-0] / ENV_FLAGS */
+
+    /* Store initial value of ep as bp to skip calculation cost of bp on JIT cancellation. */
+    cfp->ep = sp;
+    // cfp->__bp__ = cfp->sp = sp + 1;
+
+#if VM_DEBUG_BP_CHECK
+    cfp->bp_check = sp + 1;
+#endif
+
+    if (VMDEBUG == 2) {
+        SDR();
+    }
+
+    return cfp;
 }
 
-void sorbet_popControlFrame() {
-    // rb_execution_context_t *ec = GET_EC();
-    // rb_vm_pop_frame(ec);
+struct rb_compile_option_struct {
+    unsigned int inline_const_cache : 1;
+    unsigned int peephole_optimization : 1;
+    unsigned int tailcall_optimization : 1;
+    unsigned int specialized_instruction : 1;
+    unsigned int operands_unification : 1;
+    unsigned int instructions_unification : 1;
+    unsigned int stack_caching : 1;
+    unsigned int frozen_string_literal : 1;
+    unsigned int debug_frozen_string_literal : 1;
+    unsigned int coverage_enabled : 1;
+    int debug_level;
+};
+
+void sorbet_pushControlFrame(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE lineno) {
+    rb_execution_context_t *ec = GET_EC();
+    rb_vm_pop_frame(ec);
+
+    ec = GET_EC();
+    const rb_control_frame_t *cfp = ec->cfp;
+    VALUE block_handler = rb_vm_frame_block_handler(cfp);
+    const rb_compile_option_t COMPILE_OPTION_FALSE = {0};
+    const rb_iseq_t *iseq =
+        rb_iseq_new_with_opt(0, funcName, filename, Qnil, lineno, 0, ISEQ_TYPE_TOP, &COMPILE_OPTION_FALSE);
+    const rb_method_entry_t *me = rb_method_entry_at(recv, func);
+    const VALUE *pc = iseq->body->iseq_encoded;
+    sorbet_vm_push_frame(ec, iseq, VM_FRAME_MAGIC_TOP | VM_ENV_FLAG_LOCAL | VM_FRAME_FLAG_FINISH, recv, block_handler,
+                         (VALUE)me, pc, cfp->sp, 0, 0);
+}
+
+void sorbet_popControlFrame() {}
+
+void sorbet_setLineNumber(VALUE lineno) {
+    /*
+      rb_execution_context_t *ec = GET_EC();
+      const rb_control_frame_t *cfp = ec->cfp;
+      const rb_iseq_t *iseq = cfp->iseq;
+      const struct rb_iseq_constant_body *const body = iseq->body;
+      // size_t size = body->insns_info.size;
+      unsigned int *positions = body->insns_info.positions;
+      if (positions) {
+          positions[0] = lineno;
+      }
+      */
 }
 
 // ****

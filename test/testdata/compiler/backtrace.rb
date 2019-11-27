@@ -4,10 +4,12 @@ def foo
 end
 
 def bar
-  bt = caller
-  bt.map do |row|
-    row.gsub(/^[^:]*:/, '')
-  end
+  bt = Thread.current.backtrace.join("\n")
+  bt = bt.gsub(/^.*com_stripe_sorbet_llvm\//, '')
+  bt = bt.gsub(/^.*tmp\..*:/, ':')
+  # for now line numbers are off
+  bt = bt.gsub(/:[0-9]*/, ':')
+  bt
 end
 
-# puts foo
+puts foo

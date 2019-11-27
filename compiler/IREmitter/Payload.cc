@@ -261,15 +261,32 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
 
 void Payload::pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &build, core::SymbolRef sym) {
     auto &builder = builderCast(build);
-    auto funcName = sym.data(cs)->name.data(cs)->shortName(cs);
+    auto funcName =
+        IREmitterHelpers::isStaticInit(cs, sym) ? "<top (required)>" : sym.data(cs)->name.data(cs)->shortName(cs);
     auto funcNameId = Payload::idIntern(cs, builder, funcName);
+    auto funcNameValue = Payload::cPtrToRubyString(cs, builder, funcName);
     auto recv = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
-    builder.CreateCall(cs.module->getFunction("sorbet_pushControlFrame"), {recv, funcNameId});
+    auto filename = sym.data(cs)->loc().file().data(cs).path();
+    auto filenameValue = Payload::cPtrToRubyString(cs, builder, filename);
+    auto lineno = sym.data(cs)->loc().position(cs).first.line;
+    auto linenoValue = Payload::longToRubyValue(cs, builder, lineno);
+    builder.CreateCall(cs.module->getFunction("sorbet_pushControlFrame"),
+                       {recv, funcNameValue, funcNameId, filenameValue, linenoValue});
 }
 
 void Payload::popControlFrame(CompilerState &cs, llvm::IRBuilderBase &build) {
     auto &builder = builderCast(build);
     builder.CreateCall(cs.module->getFunction("sorbet_popControlFrame"), {});
+}
+
+void Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc) {
+    if (!loc.exists()) {
+        return;
+    }
+    auto &builder = builderCast(build);
+    auto lineno = loc.position(cs).first.line;
+    auto linenoValue = Payload::longToRubyValue(cs, builder, lineno);
+    builder.CreateCall(cs.module->getFunction("sorbet_setLineNumber"), {linenoValue});
 }
 
 namespace {

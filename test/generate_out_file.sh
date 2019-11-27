@@ -40,9 +40,13 @@ cleanup() {
 
 ruby="$(rlocation ruby_2_6_3/ruby)"
 preamble="$(rlocation com_stripe_sorbet_llvm/run/tools/preamble.rb)"
+patch_require="$(rlocation com_stripe_sorbet_llvm/run/tools/patch_require.rb)"
 if [ "${preamble:0:1}" != "/" ]; then
     preamble="./$preamble"
 fi
+if [ "${patch_require:0:1}" != "/" ]; then
+    patch_require="./$patch_require"
+fi
 
-echo "require '$preamble'; require './$rb';" > "$rbrunfile"
-$ruby --disable=gems --disable=did_you_mean "$rbrunfile" > "$rbout"
+echo "require './$rb';" > "$rbrunfile"
+llvmir=/tmp $ruby --disable=gems --disable=did_you_mean  -r "$preamble" -r "$patch_require" "$rbrunfile" > "$rbout"
