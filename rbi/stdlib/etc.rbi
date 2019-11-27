@@ -622,6 +622,34 @@ end
 class Etc::Passwd < Struct
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
+
+  # Contains the short login name of the user as a String.
+  sig { returns(String) }
+  def name; end
+
+  # Contains the encrypted password of the user as a String.
+  #
+  # An 'x' is returned if shadow passwords are in use.
+  # An '*' is returned if the user cannot log in using a password.
+  sig { returns(String) }
+  def passwd; end
+
+  # Contains the integer user ID (uid) of the user.
+  sig { returns(Integer) }
+  def uid; end
+
+  # Contains the integer group ID (gid) of the user's primary group.
+  sig { returns(Integer) }
+  def gid; end
+
+  # Contains the path to the home directory of the user as a String.
+  sig { returns(String) }
+  def dir; end
+
+  # Contains the path to the login shell of the user as a String.
+  sig { returns(String) }
+  def shell; end
+
   class << self
     extend T::Generic
     Elem = type_member(fixed: T.untyped)
