@@ -3,7 +3,7 @@
 #include "llvm/IR/DerivedTypes.h" // FunctionType, StructType
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Verifier.h"
-// ^^^ violate our poisons
+
 #include "absl/base/casts.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"

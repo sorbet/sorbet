@@ -1,8 +1,8 @@
-#include "compiler/Core/CompilerState.h"
+// These violate our poisons so have to happen first
 #include "llvm/IR/DerivedTypes.h" // FunctionType
 #include "llvm/IR/IRBuilder.h"
 
-// ^^^ violate our poisons
+#include "compiler/Core/CompilerState.h"
 #include "IREmitterHelpers.h"
 #include "Payload.h"
 #include "ast/Helpers.h"

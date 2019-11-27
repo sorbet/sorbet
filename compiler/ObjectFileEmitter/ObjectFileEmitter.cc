@@ -1,3 +1,4 @@
+// These violate our poisons so have to happen first
 #include "llvm/Analysis/GlobalsModRef.h"
 #include "llvm/Analysis/ScopedNoAliasAA.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
@@ -33,15 +34,16 @@
 #include "llvm/Transforms/Utils/Mem2Reg.h"
 #include "llvm/Transforms/Utils/PromoteMemToReg.h"
 #include "llvm/Transforms/Vectorize.h"
-// ^^^ violate our poisons
+
 #include "common/FileOps.h"
 #include "common/Timer.h"
 #include "compiler/Linker/Linker.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "compiler/Passes/Passes.h"
-
 #include <string_view>
+
 using namespace std;
+
 namespace sorbet::compiler {
 namespace {
 

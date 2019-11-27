@@ -1,3 +1,4 @@
+// These violate our poisons so have to happen first
 #include "llvm/IR/DerivedTypes.h" // FunctionType
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/InstVisitor.h"
@@ -5,9 +6,7 @@
 #include "llvm/Pass.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Transforms/Utils/ModuleUtils.h" // appendToGlobalCtors
-// ^^^ violate our poisons
 
-// needef for IREmitterHelpers
 #include "Passes.h"
 #include "common/typecase.h"
 #include "compiler/Core/CompilerState.h"

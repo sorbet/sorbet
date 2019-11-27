@@ -1,6 +1,7 @@
+// These violate our poisons so have to happen first
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
-// ^^^ violate our poisons so they go first
+
 #include "absl/synchronization/mutex.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
