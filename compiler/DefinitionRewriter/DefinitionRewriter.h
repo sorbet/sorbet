@@ -2,7 +2,6 @@
 #define SORBET_COMPILER_DEFINITON_REWRITER_H
 
 #include "compiler/Core/ForwardDeclarations.h"
-#include "core/NameRef.h"
 
 namespace sorbet::compiler {
 class DefinitionRewriter {
