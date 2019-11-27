@@ -12,7 +12,7 @@
 // ^^^ violate poisons
 #include "compiler/Core/CompilerState.h"
 #include "compiler/Errors/Errors.h"
-#include "compiler/Payload/AbortCompilation.h"
+#include "compiler/Core/AbortCompilation.h"
 #include "core/core.h"
 
 namespace sorbet::compiler {

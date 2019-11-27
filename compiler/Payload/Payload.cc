@@ -11,7 +11,7 @@
 #include <string_view>
 // ^^^ violate poisons
 #include "compiler/Errors/Errors.h"
-#include "compiler/Payload/AbortCompilation.h"
+#include "compiler/Core/AbortCompilation.h"
 #include "core/core.h"
 
 using namespace std;
