@@ -23,9 +23,8 @@ public:
 
 class IdentResponse final {
 public:
-    IdentResponse(core::SymbolRef owner, core::Loc termLoc, core::LocalVariable variable, core::TypeAndOrigins retType)
-        : owner(owner), termLoc(termLoc), variable(variable), retType(std::move(retType)){};
-    const core::SymbolRef owner;
+    IdentResponse(core::Loc termLoc, core::LocalVariable variable, core::TypeAndOrigins retType)
+        : termLoc(termLoc), variable(variable), retType(std::move(retType)){};
     const core::Loc termLoc;
     const core::LocalVariable variable;
     const core::TypeAndOrigins retType;
@@ -33,19 +32,16 @@ public:
 
 class LiteralResponse final {
 public:
-    LiteralResponse(core::SymbolRef owner, core::Loc termLoc, core::TypeAndOrigins retType)
-        : owner(owner), termLoc(termLoc), retType(std::move(retType)){};
-    const core::SymbolRef owner;
+    LiteralResponse(core::Loc termLoc, core::TypeAndOrigins retType) : termLoc(termLoc), retType(std::move(retType)){};
     const core::Loc termLoc;
     const core::TypeAndOrigins retType;
 };
 
 class ConstantResponse final {
 public:
-    ConstantResponse(core::SymbolRef owner, core::SymbolRef symbol, core::Loc termLoc, core::NameRef name,
-                     core::TypeAndOrigins receiver, core::TypeAndOrigins retType)
-        : owner(owner), symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
-    const core::SymbolRef owner;
+    ConstantResponse(core::SymbolRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins receiver,
+                     core::TypeAndOrigins retType)
+        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
     const core::SymbolRef symbol;
     const core::Loc termLoc;
     const core::NameRef name;

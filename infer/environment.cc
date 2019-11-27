@@ -830,8 +830,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.origins = typeAndOrigin.origins;
 
                 if (lspQueryMatch) {
-                    core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::IdentResponse(ctx.owner, bind.loc, i->what, tp));
+                    core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::IdentResponse(bind.loc, i->what, tp));
                 }
 
                 ENFORCE((bind.loc.exists() && bind.loc.file().data(ctx).hasParseErrors) || !tp.origins.empty(),
@@ -1014,8 +1013,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.origins.emplace_back(bind.loc);
 
                 if (lspQueryMatch) {
-                    core::lsp::QueryResponse::pushQueryResponse(ctx,
-                                                                core::lsp::LiteralResponse(ctx.owner, bind.loc, tp));
+                    core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::LiteralResponse(bind.loc, tp));
                 }
             },
             [&](cfg::TAbsurd *i) {

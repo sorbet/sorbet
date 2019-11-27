@@ -70,10 +70,10 @@ LSPLoop::handleTextDocumentDocumentHighlight(LSPTypechecker &typechecker, const 
                 }
             } else if (fileIsTyped && resp->isIdent()) {
                 auto identResp = resp->isIdent();
-                auto loc = identResp->owner.data(gs)->loc();
+                auto loc = identResp->termLoc;
                 if (loc.exists()) {
                     auto run2 = typechecker.query(
-                        core::lsp::Query::createVarQuery(identResp->owner, identResp->variable), {loc.file()});
+                        core::lsp::Query::createVarQuery(core::Symbols::noSymbol(), identResp->variable), {loc.file()});
                     auto locations = extractLocations(gs, run2.responses);
                     response->result = locationsToDocumentHighlights(move(locations));
                 }
