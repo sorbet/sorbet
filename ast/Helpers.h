@@ -386,7 +386,6 @@ public:
     }
 
     static bool isSelfNew(ast::Send *send) {
-
         if (send->fun != core::Names::selfNew()) {
             return false;
         }

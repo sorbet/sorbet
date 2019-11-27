@@ -18,7 +18,6 @@ std::unique_ptr<ast::Expression> SelfNew::run(core::MutableContext ctx, ast::Sen
         args.emplace_back(std::move(arg));
     }
 
-
     return ast::MK::SelfNew(send->loc, std::move(args), send->flags, std::move(send->block));
 }
 
