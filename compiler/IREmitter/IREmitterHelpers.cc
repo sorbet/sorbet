@@ -2,8 +2,6 @@
 #include "llvm/IR/DerivedTypes.h" // FunctionType
 #include "llvm/IR/IRBuilder.h"
 
-// needef for IREmitterHelpers
-#include "core/core.h"
 // ^^^ violate our poisons
 #include "IREmitterHelpers.h"
 #include "Payload.h"
