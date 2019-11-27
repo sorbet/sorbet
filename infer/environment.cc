@@ -830,7 +830,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.origins = typeAndOrigin.origins;
 
                 if (lspQueryMatch) {
-                    core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::IdentResponse(bind.loc, i->what, tp));
+                    core::lsp::QueryResponse::pushQueryResponse(
+                        ctx, core::lsp::IdentResponse(bind.loc, i->what, tp, ctx.owner));
                 }
 
                 ENFORCE((bind.loc.exists() && bind.loc.file().data(ctx).hasParseErrors) || !tp.origins.empty(),

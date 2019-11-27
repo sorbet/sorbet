@@ -21,8 +21,15 @@ unique_ptr<ast::Local> LocalVarSaver::postTransformLocal(core::Context ctx, uniq
         // No need for type information; this is for a reference request.
         // Let the default constructor make tp.type an empty shared_ptr and tp.origins an empty vector
         core::TypeAndOrigins tp;
-        core::lsp::QueryResponse::pushQueryResponse(ctx,
-                                                    core::lsp::IdentResponse(local->loc, local->localVariable, tp));
+
+        auto enclosingMethod = ctx.owner;
+        if (enclosingMethod.data(ctx)->isClassOrModule()) {
+            enclosingMethod = ctx.owner == core::Symbols::root() ? ctx.state.lookupStaticInitForFile(local->loc)
+                                                                 : ctx.state.lookupStaticInitForClass(ctx.owner);
+        }
+
+        core::lsp::QueryResponse::pushQueryResponse(
+            ctx, core::lsp::IdentResponse(local->loc, local->localVariable, tp, enclosingMethod));
     }
 
     return local;
@@ -39,7 +46,7 @@ unique_ptr<ast::MethodDef> LocalVarSaver::postTransformMethodDef(core::Context c
                 // (Ditto)
                 core::TypeAndOrigins tp;
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx, core::lsp::IdentResponse(localExp->loc, localExp->localVariable, tp));
+                    ctx, core::lsp::IdentResponse(localExp->loc, localExp->localVariable, tp, methodDef->symbol));
             }
         }
     }

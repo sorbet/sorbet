@@ -23,11 +23,13 @@ public:
 
 class IdentResponse final {
 public:
-    IdentResponse(core::Loc termLoc, core::LocalVariable variable, core::TypeAndOrigins retType)
-        : termLoc(termLoc), variable(variable), retType(std::move(retType)){};
+    IdentResponse(core::Loc termLoc, core::LocalVariable variable, core::TypeAndOrigins retType,
+                  core::SymbolRef enclosingMethod)
+        : termLoc(termLoc), variable(variable), retType(std::move(retType)), enclosingMethod(enclosingMethod){};
     const core::Loc termLoc;
     const core::LocalVariable variable;
     const core::TypeAndOrigins retType;
+    const core::SymbolRef enclosingMethod;
 };
 
 class LiteralResponse final {

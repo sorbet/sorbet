@@ -50,7 +50,8 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentReferences(LSPTypechecker
                 auto loc = identResp->termLoc;
                 if (loc.exists()) {
                     auto run2 = typechecker.query(
-                        core::lsp::Query::createVarQuery(core::Symbols::noSymbol(), identResp->variable), {loc.file()});
+                        core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable),
+                        {loc.file()});
                     response->result = extractLocations(gs, run2.responses);
                 }
             } else if (fileIsTyped && resp->isSend()) {

@@ -31,7 +31,7 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
                 tp.type = argType.type;
                 tp.origins.emplace_back(localExp->loc);
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx, core::lsp::IdentResponse(localExp->loc, localExp->localVariable, tp));
+                    ctx, core::lsp::IdentResponse(localExp->loc, localExp->localVariable, tp, methodDef->symbol));
                 return methodDef;
             }
         }
