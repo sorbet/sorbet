@@ -2,10 +2,19 @@
 #define GRANITA_H
 // Paul's and Dmitry's laptops have different attributes for this function in system libraries.
 void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
+
+// These are public Ruby headers. Feel free to add more from the include/ruby
+// directory
 #include "include/ruby/encoding.h" // for rb_encoding
+
+// These are special "public" headers which don't live in include/ruby for some
+// reason
 #include "internal.h"
 #include "ruby.h"
+
+// This probably shouldn't be here
 #include "vm_core.h"
+
 // for explanation of WTF is happening here, see ruby.h and
 // https://silverhammermba.github.io/emberb/c/ and
 // http://clalance.blogspot.com/2011/01/writing-ruby-extensions-in-c-part-9.html
