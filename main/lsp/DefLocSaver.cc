@@ -31,7 +31,7 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
                 tp.type = argType.type;
                 tp.origins.emplace_back(localExp->loc);
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx, core::lsp::IdentResponse(methodDef->symbol, localExp->loc, localExp->localVariable, tp));
+                    ctx, core::lsp::IdentResponse(localExp->loc, localExp->localVariable, tp, methodDef->symbol));
                 return methodDef;
             }
         }
@@ -67,8 +67,8 @@ unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core:
             core::TypeAndOrigins tp;
             tp.type = sym.data(ctx.state)->resultType;
             tp.origins.emplace_back(sym.data(ctx.state)->loc());
-            core::lsp::QueryResponse::pushQueryResponse(
-                ctx, core::lsp::ConstantResponse(klass, sym, id->loc, id->name, tp, tp));
+            core::lsp::QueryResponse::pushQueryResponse(ctx,
+                                                        core::lsp::ConstantResponse(sym, id->loc, id->name, tp, tp));
         }
     }
     return id;
@@ -90,7 +90,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             }
 
             core::lsp::QueryResponse::pushQueryResponse(
-                ctx, core::lsp::ConstantResponse(ctx.owner, symbol, lit->loc, symbol.data(ctx)->name, tp, tp));
+                ctx, core::lsp::ConstantResponse(symbol, lit->loc, symbol.data(ctx)->name, tp, tp));
         }
         lit = ast::cast_tree<ast::ConstantLit>(lit->original->scope.get());
         if (lit) {
