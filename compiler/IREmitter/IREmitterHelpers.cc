@@ -2,13 +2,13 @@
 #include "llvm/IR/DerivedTypes.h" // FunctionType
 #include "llvm/IR/IRBuilder.h"
 
-#include "compiler/Core/CompilerState.h"
 #include "IREmitterHelpers.h"
 #include "Payload.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/sort.h"
+#include "compiler/Core/CompilerState.h"
 #include "compiler/IREmitter/BasicBlockMap.h"
 #include "compiler/Names/Names.h"
 

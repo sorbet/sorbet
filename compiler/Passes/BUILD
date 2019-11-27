@@ -11,8 +11,8 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//compiler/Names",
         "//compiler/IREmitter/Payload",
+        "//compiler/Names",
         "@spdlog",
     ],
 )

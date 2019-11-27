@@ -13,8 +13,8 @@ cc_library(
     deps = [
         "//compiler/Core",
         "//compiler/Errors",
-        "//compiler/Names",
         "//compiler/IREmitter/Payload",
+        "//compiler/Names",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",
         "@spdlog",
