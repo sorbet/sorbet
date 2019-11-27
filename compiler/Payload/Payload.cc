@@ -1,11 +1,11 @@
 #include "llvm/Bitcode/BitcodeReader.h"
 #include "llvm/IR/Module.h"
-#include <string_view>
 // ^^^ violate poisons
 #include "Payload.h"
 #include "compiler/Core/AbortCompilation.h"
 #include "compiler/Errors/Errors.h"
 #include "core/core.h"
+#include <string_view>
 
 using namespace std;
 

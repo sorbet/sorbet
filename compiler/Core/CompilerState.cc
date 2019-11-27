@@ -6,12 +6,12 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
-#include <string_view>
 // ^^^ violate poisons
 #include "compiler/Core/AbortCompilation.h"
 #include "compiler/Core/CompilerState.h"
 #include "compiler/Errors/Errors.h"
 #include "core/core.h"
+#include <string_view>
 
 using namespace std;
 
