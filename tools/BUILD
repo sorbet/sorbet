@@ -20,10 +20,10 @@ compilation_database(
         "//compiler/Linker:Linker",
         "//compiler/IREmitter:IREmitter",
         "//compiler/Payload:Payload",
-        "//compiler/Errors:Errors",
         "//compiler/DefinitionRewriter:DefinitionRewriter",
         "//compiler/Names:Names",
         "//compiler/Core:Core",
+        "//compiler/Errors:Errors",
         # END compile_commands targets
     ],
 )
