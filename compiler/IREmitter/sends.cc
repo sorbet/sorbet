@@ -38,7 +38,7 @@ llvm::Value *IREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilder
         if (absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), i->fun)) {
             auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
             for (auto &c : potentialClasses) {
-                if (i->recv.type->derivesFrom(cs, c)) {
+                if ((!i->recv.type->isUntyped()) && i->recv.type->derivesFrom(cs, c)) {
                     auto methodName = i->fun.data(cs)->shortName(cs);
                     llvm::StringRef methodNameRef(methodName.data(), methodName.size());
                     auto &builder = builderCast(build);
