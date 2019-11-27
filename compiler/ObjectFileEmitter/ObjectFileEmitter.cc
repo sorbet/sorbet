@@ -43,7 +43,6 @@
 #include <string_view>
 
 using namespace std;
-
 namespace sorbet::compiler {
 namespace {
 

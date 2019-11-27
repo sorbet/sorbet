@@ -11,7 +11,6 @@
 #include <string>
 
 using namespace std;
-
 namespace sorbet::compiler {
 namespace {
 llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {

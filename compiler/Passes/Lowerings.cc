@@ -14,9 +14,7 @@
 #include <string>
 
 using namespace std;
-
 namespace sorbet::compiler {
-
 namespace {
 
 class IRIntrinsic {

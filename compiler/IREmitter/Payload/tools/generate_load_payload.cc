@@ -8,7 +8,6 @@
 #include <vector>
 
 using namespace std;
-
 int main(int argc, char **argv) {
     {
         ofstream out(argv[2], ios::trunc);

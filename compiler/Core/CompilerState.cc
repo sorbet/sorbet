@@ -14,7 +14,6 @@
 #include <string_view>
 
 using namespace std;
-
 namespace sorbet::compiler {
 
 CompilerState::CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module)

@@ -20,6 +20,7 @@
 #include "compiler/IREmitter/SymbolBasedIntrinsicMethod.h"
 #include "compiler/Names/Names.h"
 #include <string_view>
+
 using namespace std;
 namespace sorbet::compiler {
 namespace {

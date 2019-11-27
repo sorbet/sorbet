@@ -4,7 +4,6 @@
 #include "compiler/Names/Names.h"
 
 using namespace std;
-
 namespace sorbet::compiler {
 
 class DefinitionRewriterWalker {
