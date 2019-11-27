@@ -369,7 +369,8 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
     }
     auto fnd = opts.strictnessOverrides.find(filePath);
     if (fnd != opts.strictnessOverrides.end()) {
-        if (fnd->second == fileData.originalSigil && fnd->second > opts.forceMinStrict && fnd->second < opts.forceMaxStrict) {
+        if (fnd->second == fileData.originalSigil && fnd->second > opts.forceMinStrict &&
+            fnd->second < opts.forceMaxStrict) {
             core::ErrorRegion errs(gs, file);
             if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
                 e.setHeader("Useless override of strictness level");
