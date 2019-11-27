@@ -13,10 +13,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//compiler/Core",
-        "//compiler/Errors",
-        "@llvm//:passes",
-        "@llvm//:x86_asm_parser",
-        "@llvm//:x86_code_gen",
     ],
 )
 
