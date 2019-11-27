@@ -1,7 +1,9 @@
 #ifndef GRANITA_H
 #define GRANITA_H
-// Paul's and Dmitry's laptops have different attributes for this function in system libraries.
-void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
+
+// for explanation of WTF is happening here, see ruby.h and
+// https://silverhammermba.github.io/emberb/c/ and
+// http://clalance.blogspot.com/2011/01/writing-ruby-extensions-in-c-part-9.html
 
 // These are public Ruby headers. Feel free to add more from the include/ruby
 // directory
@@ -12,9 +14,8 @@ void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 #include "internal.h"
 #include "ruby.h"
 
-// for explanation of WTF is happening here, see ruby.h and
-// https://silverhammermba.github.io/emberb/c/ and
-// http://clalance.blogspot.com/2011/01/writing-ruby-extensions-in-c-part-9.html
+// Paul's and Dmitry's laptops have different attributes for this function in system libraries.
+void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 
 // ****
 // ****                       Internal Helper Functions
