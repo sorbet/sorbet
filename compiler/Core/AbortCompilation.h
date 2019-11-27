@@ -1,3 +1,5 @@
+#include "common/Exception.h"
+
 namespace sorbet::compiler {
 class AbortCompilation : public sorbet::SorbetException {
 public:

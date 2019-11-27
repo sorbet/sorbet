@@ -1,5 +1,5 @@
-#include "common/Exception.h"
 #include "compiler/Core/ForwardDeclarations.h"
+#include <memory>
 
 namespace sorbet::compiler {
 class PayloadLoader {
