@@ -2,29 +2,11 @@
 #define SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
 #include "IREmitter.h"
 #include "compiler/Core/ForwardDeclarations.h"
-#include "core/core.h"
+#include "compiler/IREmitter/BasicBlockMap.h"
 #include <string_view>
 #include <vector>
 
 namespace sorbet::compiler {
-struct BasicBlockMap {
-    core::SymbolRef forMethod;
-    std::vector<llvm::BasicBlock *> functionInitializersByFunction;
-    std::vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
-    std::vector<llvm::BasicBlock *> userEntryBlockByFunction;
-    std::vector<llvm::BasicBlock *> llvmBlocksBySorbetBlocks;
-    std::vector<int> basicBlockJumpOverrides;
-    std::vector<llvm::AllocaInst *> sendArgArrayByBlock;
-    std::vector<llvm::Value *> escapedClosure;
-    UnorderedMap<core::LocalVariable, int> escapedVariableIndeces;
-    llvm::BasicBlock *sigVerificationBlock;
-    llvm::BasicBlock *postProcessBlock;
-    std::vector<std::shared_ptr<core::SendAndBlockLink>> blockLinks;
-    std::vector<std::vector<core::LocalVariable>> rubyBlockArgs;
-    std::vector<llvm::Function *> rubyBlocks2Functions;
-    UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
-    bool usesBlockArgs;
-};
 
 struct Alias {
     enum class AliasKind { Constant, InstanceField, ClassField, GlobalField };
