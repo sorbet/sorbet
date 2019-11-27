@@ -1,3 +1,6 @@
+#ifndef SORBET_COMPILER_CORE_COMPILER_STATE_H
+#define SORBET_COMPILER_CORE_COMPILER_STATE_H
+
 #include "common/ConstExprStr.h"
 #include "common/Exception.h"
 #include "compiler/Core/ForwardDeclarations.h"
@@ -36,3 +39,5 @@ public:
     void failCompilation(const core::Loc &loc, ConstExprStr msg) const;
 };
 } // namespace sorbet::compiler
+
+#endif
