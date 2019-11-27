@@ -21,10 +21,12 @@ class MutableContext;
 class SymbolRef;
 class NameRef;
 } // namespace sorbet::core
+
 namespace sorbet::ast {
 class ClassDef;
 class MethodDef;
 } // namespace sorbet::ast
+
 namespace sorbet::cfg {
 class CFG;
 class Send;
