@@ -13,4 +13,10 @@ def foo
     T.reveal_type(d) # error: Revealed type: `T::Range[Integer]`
     T.reveal_type(e) # error: Revealed type: `Integer`
     T.reveal_type(f) # error: Revealed type: `String`
+
+    # testing for endless ranges
+    g = (1..)
+    h = Range.new(1, nil)
+    T.reveal_type(g) # error: Revealed type: `T::Range[Integer]`
+    T.reveal_type(h) # error: Revealed type: `T::Range[Integer]`
 end

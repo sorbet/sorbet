@@ -204,6 +204,70 @@ ClassDef{
               }
             ]
           }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U f>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U g>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                EmptyTree
+              ]
+            }
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U h>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = nil }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U g>
+              }
+            ]
+          }
         ],
         expr = Send{
           recv = UnresolvedConstantLit{
@@ -215,7 +279,7 @@ ClassDef{
           args = [
             UnresolvedIdent{
               kind = Local
-              name = <U f>
+              name = <U h>
             }
           ]
         }
