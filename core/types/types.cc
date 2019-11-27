@@ -859,6 +859,66 @@ TypePtr Types::widen(Context ctx, const TypePtr &type) {
     return ret;
 }
 
+TypePtr Types::unwrapSkolemVariables(Context ctx, const TypePtr &type) {
+    ENFORCE(type != nullptr);
+
+    TypePtr ret;
+
+    typecase(
+        type.get(),
+        [&](AndType *andType) {
+            ret = AndType::make_shared(unwrapSkolemVariables(ctx, andType->left),
+                                       unwrapSkolemVariables(ctx, andType->right));
+        },
+        [&](OrType *orType) {
+            ret = OrType::make_shared(unwrapSkolemVariables(ctx, orType->left),
+                                      unwrapSkolemVariables(ctx, orType->right));
+        },
+        [&](ShapeType *shape) {
+            std::vector<TypePtr> values;
+            values.reserve(shape->values.size());
+
+            for (auto &value : shape->values) {
+                values.emplace_back(unwrapSkolemVariables(ctx, value));
+            }
+
+            ret = make_type<ShapeType>(unwrapSkolemVariables(ctx, shape->underlying_), shape->keys, std::move(values));
+        },
+        [&](TupleType *tuple) {
+            std::vector<TypePtr> elems;
+            elems.reserve(tuple->elems.size());
+
+            for (auto &value : tuple->elems) {
+                elems.emplace_back(unwrapSkolemVariables(ctx, value));
+            }
+
+            ret = make_type<TupleType>(unwrapSkolemVariables(ctx, tuple->underlying_), std::move(elems));
+        },
+        [&](MetaType *meta) { ret = make_type<MetaType>(unwrapSkolemVariables(ctx, meta->wrapped)); },
+        [&](AppliedType *appliedType) {
+            vector<TypePtr> newTargs;
+            newTargs.reserve(appliedType->targs.size());
+            for (const auto &t : appliedType->targs) {
+                newTargs.emplace_back(unwrapSkolemVariables(ctx, t));
+            }
+            ret = make_type<AppliedType>(appliedType->klass, newTargs);
+        },
+        [&](SelfTypeParam *param) {
+            auto sym = param->definition;
+            if (sym.data(ctx)->owner == ctx.owner) {
+                ENFORCE(cast_type<LambdaParam>(sym.data(ctx)->resultType.get()) != nullptr);
+                ret = sym.data(ctx)->resultType;
+            } else {
+                ret = type;
+            }
+        },
+        [&](Type *tp) { ret = type; });
+
+    ENFORCE(ret != nullptr);
+
+    return ret;
+}
+
 core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *ty) {
     if (!ty->derivesFrom(ctx, core::Symbols::Module())) {
         return core::Symbols::noSymbol();
