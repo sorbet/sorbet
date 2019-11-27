@@ -337,6 +337,7 @@ NameDef names[] = {
     {"callWithBlock", "<call-with-block>"},
     {"callWithSplatAndBlock", "<call-with-splat-and-block>"},
     {"enumerable_to_h"},
+    {"selfNew", "<self-new>"},
 
     // GlobalState initEmpty()
     {"Top", "<any>", true},

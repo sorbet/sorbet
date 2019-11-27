@@ -427,6 +427,18 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
+    // Synthesize <Magic>#<self-new>(arg: *T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::selfNew());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+        arg.flags.isRepeated = true;
+    }
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
     // Synthesize <DeclBuilderForProcs>#<params>(args: Hash) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {

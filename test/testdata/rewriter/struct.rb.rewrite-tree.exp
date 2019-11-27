@@ -209,9 +209,9 @@ class <emptyTree><<C <root>>> < ()
 
       <self>.include(<emptyTree>::<C MyMixin>)
 
-      <self>.new().x()
+      ::<Magic>.<self-new>(<self>).x()
 
-      <self>.new().foo()
+      ::<Magic>.<self-new>(<self>).foo()
 
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"x" => ::BasicObject}).void()
@@ -235,13 +235,13 @@ class <emptyTree><<C <root>>> < ()
 
       <self>.include(<emptyTree>::<C MyMixin>)
 
-      <self>.new().x()
+      ::<Magic>.<self-new>(<self>).x()
 
-      <self>.new().foo()
+      ::<Magic>.<self-new>(<self>).foo()
 
-      <self>.new(1, 2)
+      ::<Magic>.<self-new>(<self>, 1, 2)
 
-      <self>.new({:"giberish" => 1})
+      ::<Magic>.<self-new>(<self>, {:"giberish" => 1})
 
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"x" => ::BasicObject}).void()

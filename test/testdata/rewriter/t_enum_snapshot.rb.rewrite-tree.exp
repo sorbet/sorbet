@@ -34,8 +34,8 @@ class <emptyTree><<C <root>>> < ()
   class <emptyTree>::<C NotAnEnum><<C <todo sym>>> < (::<todo sym>)
     <self>.enums() do ||
       begin
-        <emptyTree>::<C X> = <self>.new()
-        <emptyTree>::<C Y> = <emptyTree>::<C T>.let(<self>.new(), <self>)
+        <emptyTree>::<C X> = ::<Magic>.<self-new>(<self>)
+        <emptyTree>::<C Y> = <emptyTree>::<C T>.let(::<Magic>.<self-new>(<self>), <self>)
       end
     end
   end

@@ -82,11 +82,11 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
         return badConst(ctx, stat->loc, klass->loc);
     }
 
-    if (rhs->fun != core::Names::new_() && rhs->fun != core::Names::let()) {
+    if (rhs->fun != core::Names::selfNew() && rhs->fun != core::Names::let()) {
         return badConst(ctx, stat->loc, klass->loc);
     }
 
-    if (rhs->fun == core::Names::new_() && !rhs->recv->isSelfReference()) {
+    if (rhs->fun == core::Names::selfNew() && !ast::MK::isMagicClass(rhs->recv.get())) {
         return badConst(ctx, stat->loc, klass->loc);
     }
 
@@ -105,14 +105,14 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
             return badConst(ctx, stat->loc, klass->loc);
         }
 
-        if (!(arg0->fun == core::Names::new_() && arg0->recv->isSelfReference())) {
+        if (!ast::MK::isSelfNew(arg0)) {
             return badConst(ctx, stat->loc, klass->loc);
         }
     }
 
     // By this point, we have something that looks like
     //
-    //   A = new | T.let(new, ...)
+    //   A = Magic.<self-new>(self) | T.let(Magic.<self-new>(self), ...)
     //
     // So we're good to process this thing as a new T::Enum value.
 

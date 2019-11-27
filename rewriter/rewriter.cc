@@ -18,6 +18,7 @@
 #include "rewriter/ProtobufDescriptorPool.h"
 #include "rewriter/Rails.h"
 #include "rewriter/Regexp.h"
+#include "rewriter/SelfNew.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TypeMembers.h"
@@ -155,8 +156,18 @@ public:
         return classDef;
     }
 
+    // NOTE: this case differs from the `Send` typecase branch in `postTransformClassDef` above, as it will apply to all
+    // sends, not just those that are present in the RHS of a `ClassDef`.
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
-        return InterfaceWrapper::run(ctx, std::move(send));
+        if (auto expr = InterfaceWrapper::run(ctx, send.get())) {
+            return expr;
+        }
+
+        if (auto expr = SelfNew::run(ctx, send.get())) {
+            return expr;
+        }
+
+        return send;
     }
 
 private:

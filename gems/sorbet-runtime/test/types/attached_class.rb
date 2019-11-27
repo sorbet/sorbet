@@ -20,6 +20,23 @@ module Opus::Types::Test
       assert_equal(A.make.class, A)
     end
 
+    it 'can type self methods that use self.new' do
+
+      class Base
+        extend T::Sig
+
+        sig {returns(T.experimental_attached_class)}
+        def self.make
+          self.new
+        end
+      end
+
+      class Child < Base; end
+
+      assert_equal(Base.make.class, Base)
+      assert_equal(Child.make.class, Child)
+    end
+
     it 'does not throw when the returned value is bad' do
 
       class Base

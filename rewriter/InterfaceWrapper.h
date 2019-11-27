@@ -22,7 +22,7 @@ namespace sorbet::rewriter {
  */
 class InterfaceWrapper final {
 public:
-    static std::unique_ptr<ast::Expression> run(core::MutableContext ctx, std::unique_ptr<ast::Send> send);
+    static std::unique_ptr<ast::Expression> run(core::MutableContext ctx, ast::Send *send);
 
     InterfaceWrapper() = delete;
 };
