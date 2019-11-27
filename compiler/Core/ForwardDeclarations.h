@@ -19,6 +19,7 @@ class GlobalState;
 class Loc;
 class MutableContext;
 class SymbolRef;
+class NameRef;
 } // namespace sorbet::core
 namespace sorbet::ast {
 class ClassDef;

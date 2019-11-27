@@ -1,9 +1,10 @@
 #ifndef COMPILER_NAMES_H
 #define COMPILER_NAMES_H
 
-#include "core/NameRef.h"
+#include "compiler/Core/ForwardDeclarations.h"
 
 namespace sorbet::compiler {
+
 class Names {
 public:
     static core::NameRef defineTopClassOrModule(const core::GlobalState &gs);
@@ -13,5 +14,6 @@ public:
 
     static void init(core::GlobalState &gs);
 };
+
 } // namespace sorbet::compiler
 #endif
