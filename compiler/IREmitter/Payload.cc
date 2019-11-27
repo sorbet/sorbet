@@ -3,12 +3,9 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/Transforms/Utils/ModuleUtils.h" // appendToGlobalCtors
 
-// needef for IREmitterHelpers
-#include "common/typecase.h"
-#include "core/core.h"
-
 #include "IREmitterHelpers.h"
 #include "Payload.h"
+#include "common/typecase.h"
 #include "compiler/Core/CompilerState.h"
 #include "compiler/IREmitter/BasicBlockMap.h"
 #include <string>
