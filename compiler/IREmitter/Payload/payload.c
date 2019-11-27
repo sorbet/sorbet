@@ -12,9 +12,6 @@ void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 #include "internal.h"
 #include "ruby.h"
 
-// This probably shouldn't be here
-#include "vm_core.h"
-
 // for explanation of WTF is happening here, see ruby.h and
 // https://silverhammermba.github.io/emberb/c/ and
 // http://clalance.blogspot.com/2011/01/writing-ruby-extensions-in-c-part-9.html
@@ -356,6 +353,7 @@ VALUE sorbet_getConstantAt(VALUE mod, ID id) __attribute__((noinline)) {
         if (!id) {
             part = rb_str_subseq(name, beglen, len);
             OBJ_FREEZE(part);
+            VALUE idConst_missing = rb_intern("const_missing");
             if (!rb_is_const_name(part)) {
                 name = part;
                 goto wrong_name;
