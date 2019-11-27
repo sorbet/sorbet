@@ -10,6 +10,7 @@
 #include "IREmitterHelpers.h"
 #include "Payload.h"
 #include "compiler/Core/CompilerState.h"
+#include "compiler/IREmitter/BasicBlockMap.h"
 #include <string>
 
 using namespace std;

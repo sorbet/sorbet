@@ -6,6 +6,9 @@
 #include <vector>
 
 namespace sorbet::compiler {
+
+struct BasicBlockMap;
+
 class NameBasedIntrinsicMethod {
 public:
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &builder,

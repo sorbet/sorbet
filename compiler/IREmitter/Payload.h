@@ -3,6 +3,8 @@
 
 namespace sorbet::compiler {
 
+struct BasicBlockMap;
+
 // This class serves as forwarder to payload.c, which are the c wrappers for
 // Ruby functions. These functions can (and do) use information known during
 // compile time to dispatch to different c functions, but other than that, they

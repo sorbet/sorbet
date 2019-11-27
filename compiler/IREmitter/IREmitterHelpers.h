@@ -2,11 +2,12 @@
 #define SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
 #include "IREmitter.h"
 #include "compiler/Core/ForwardDeclarations.h"
-#include "compiler/IREmitter/BasicBlockMap.h"
 #include <string_view>
 #include <vector>
 
 namespace sorbet::compiler {
+
+struct BasicBlockMap;
 
 struct Alias {
     enum class AliasKind { Constant, InstanceField, ClassField, GlobalField };

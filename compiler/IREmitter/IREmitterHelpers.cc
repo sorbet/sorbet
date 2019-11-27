@@ -9,6 +9,7 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/sort.h"
+#include "compiler/IREmitter/BasicBlockMap.h"
 #include "compiler/Names/Names.h"
 
 using namespace std;

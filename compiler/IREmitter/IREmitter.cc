@@ -14,6 +14,7 @@
 #include "common/typecase.h"
 #include "compiler/Core/CompilerState.h"
 #include "compiler/Errors/Errors.h"
+#include "compiler/IREmitter/BasicBlockMap.h"
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/IREmitter/Payload.h"
