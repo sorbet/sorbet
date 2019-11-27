@@ -54,3 +54,12 @@ my_struct.z # => 0.5
 my_struct.x = 4
 my_struct.x # => 4
 ```
+
+## Converting structs to other types
+
+A particularly common case is to convert an struct to a Hash. Because this is so
+common, this conversion has been built in (it still must be explicitly called):
+
+```ruby
+my_struct.serialize # => '{ x: 3 }'
+```
