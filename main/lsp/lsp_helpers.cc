@@ -19,7 +19,7 @@ LSPLoop::extractLocations(const core::GlobalState &gs,
         if (loc.exists() && loc.file().exists()) {
             auto fileIsTyped = loc.file().data(gs).strictLevel >= core::StrictLevel::True;
             // If file is untyped, only support responses involving constants and definitions.
-            if (fileIsTyped || q->isConstant() || q->isDefinition()) {
+            if (fileIsTyped || q->isConstant() || q->isField() || q->isDefinition()) {
                 addLocIfExists(gs, locations, loc);
             }
         }

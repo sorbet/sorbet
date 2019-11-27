@@ -48,7 +48,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypechecker &typ
         auto resp = move(queryResponses[0]);
 
         optional<string> documentation = nullopt;
-        if (resp->isConstant() || resp->isDefinition()) {
+        if (resp->isConstant() || resp->isField() || resp->isDefinition()) {
             auto origins = resp->getTypeAndOrigins().origins;
             if (!origins.empty()) {
                 auto loc = origins[0];

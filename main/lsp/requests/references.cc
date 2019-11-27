@@ -41,6 +41,8 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentReferences(LSPTypechecker
             // If file is untyped, only supports find reference requests from constants and class definitions.
             if (auto constResp = resp->isConstant()) {
                 response->result = getReferencesToSymbol(typechecker, constResp->symbol);
+            } else if (auto fieldResp = resp->isField()) {
+                response->result = getReferencesToSymbol(typechecker, fieldResp->symbol);
             } else if (auto defResp = resp->isDefinition()) {
                 if (fileIsTyped || defResp->symbol.data(gs)->isClassOrModule()) {
                     response->result = getReferencesToSymbol(typechecker, defResp->symbol);

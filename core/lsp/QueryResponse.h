@@ -50,6 +50,16 @@ public:
     const core::TypeAndOrigins retType;
 };
 
+class FieldResponse final {
+public:
+    FieldResponse(core::SymbolRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
+        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
+    const core::SymbolRef symbol;
+    const core::Loc termLoc;
+    const core::NameRef name;
+    const core::TypeAndOrigins retType;
+};
+
 class DefinitionResponse final {
 public:
     DefinitionResponse(core::SymbolRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
@@ -67,7 +77,8 @@ public:
     const std::string replacement;
 };
 
-typedef std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, DefinitionResponse, EditResponse>
+typedef std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, FieldResponse, DefinitionResponse,
+                     EditResponse>
     QueryResponseVariant;
 
 /**
@@ -104,6 +115,11 @@ public:
      * Returns nullptr unless this is a Constant.
      */
     const ConstantResponse *isConstant() const;
+
+    /**
+     * Returns nullptr unless this is a Field.
+     */
+    const FieldResponse *isField() const;
 
     /**
      * Returns nullptr unless this is a Definition.
