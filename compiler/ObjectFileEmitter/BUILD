@@ -12,7 +12,7 @@ cc_library(
     deps = [
         "//compiler/Linker",
         "//compiler/Passes",
-        "//compiler/Payload",
+        "//compiler/IREmitter/Payload",
         "@com_stripe_ruby_typer//core",
         "@spdlog",
     ],

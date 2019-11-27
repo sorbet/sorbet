@@ -12,7 +12,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//compiler/Names",
-        "//compiler/Payload",
+        "//compiler/IREmitter/Payload",
         "@spdlog",
     ],
 )

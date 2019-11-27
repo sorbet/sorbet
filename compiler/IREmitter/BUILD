@@ -14,7 +14,7 @@ cc_library(
         "//compiler/Core",
         "//compiler/Errors",
         "//compiler/Names",
-        "//compiler/Payload",
+        "//compiler/IREmitter/Payload",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",
         "@spdlog",
