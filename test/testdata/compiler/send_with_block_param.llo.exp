@@ -12,8 +12,8 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 
 @.str = private unnamed_addr constant [5 x i8] c"%li\0B\00", align 1
 @rb_cObject = external local_unnamed_addr constant i64, align 8
-@.str.7 = private unnamed_addr constant [16 x i8] c"CompiledClosure\00", align 1
-@closureInfo = local_unnamed_addr constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.7, i32 0, i32 0), %struct.anon.1 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
+@.str.8 = private unnamed_addr constant [16 x i8] c"CompiledClosure\00", align 1
+@closureInfo = local_unnamed_addr constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.8, i32 0, i32 0), %struct.anon.1 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
 @"rubyIdPrecomputed_<static-init>" = internal unnamed_addr global i64 0, align 8
 @"str_<static-init>" = private unnamed_addr constant [14 x i8] c"<static-init>\00", align 1
 @rubyIdPrecomputed_unsafe = internal unnamed_addr global i64 0, align 8

@@ -19,9 +19,9 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @.str = private unnamed_addr constant [5 x i8] c"%li\0B\00", align 1
 @rb_cObject = external local_unnamed_addr constant i64, align 8
 @rb_eTypeError = external local_unnamed_addr global i64, align 8
-@.str.6 = private unnamed_addr constant [45 x i8] c"%s: Expected type %s, got %s with value %li\0B\00", align 1
-@.str.7 = private unnamed_addr constant [16 x i8] c"CompiledClosure\00", align 1
-@closureInfo = constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.7, i32 0, i32 0), %struct.anon.1 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
+@.str.7 = private unnamed_addr constant [45 x i8] c"%s: Expected type %s, got %s with value %li\0B\00", align 1
+@.str.8 = private unnamed_addr constant [16 x i8] c"CompiledClosure\00", align 1
+@closureInfo = constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.8, i32 0, i32 0), %struct.anon.1 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
 @rb_cData = external local_unnamed_addr constant i64, align 8
 @rb_cModule = external local_unnamed_addr constant i64, align 8
 @"rubyIdPrecomputed_<static-init>" = internal unnamed_addr global i64 0, align 8
@@ -88,7 +88,7 @@ declare i64 @rb_block_call(i64, i64, i32, i64*, i64 (...)*, i64) local_unnamed_a
 define internal fastcc void @sorbet_cast_failure(i64 %0, i8* %1, i8* %2) unnamed_addr #3 {
   %4 = load i64, i64* @rb_eTypeError, align 8, !tbaa !6
   %5 = tail call i8* @rb_obj_classname(i64 %0) #12
-  tail call void (i64, i8*, ...) @rb_raise(i64 %4, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @.str.6, i64 0, i64 0), i8* %1, i8* %2, i8* %5, i64 %0) #13
+  tail call void (i64, i8*, ...) @rb_raise(i64 %4, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @.str.7, i64 0, i64 0), i8* %1, i8* %2, i8* %5, i64 %0) #13
   unreachable
 }
 
