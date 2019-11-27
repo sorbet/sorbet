@@ -9138,6 +9138,12 @@ end
 
 module URI
   extend ::URI::Escape
+  def self.decode_www_form(str, enc=T.unsafe(nil), separator: T.unsafe(nil), use__charset_: T.unsafe(nil), isindex: T.unsafe(nil)); end
+
+  def self.encode_www_form(enum, enc=T.unsafe(nil)); end
+
+  def self.encode_www_form_component(str, enc=T.unsafe(nil)); end
+
   def self.get_encoding(label); end
 
 end
