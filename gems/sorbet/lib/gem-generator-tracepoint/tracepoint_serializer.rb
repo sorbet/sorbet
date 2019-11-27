@@ -16,12 +16,17 @@ module Sorbet::Private
     class TracepointSerializer
       SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `]
 
-      # These methods don't match the signatures of their parents, so if we let
-      # them monkeypatch, they won't be subtypes anymore. Just don't support the
-      # bad monkeypatches.
       BAD_METHODS = [
+        # These methods don't match the signatures of their parents, so if we let
+        # them monkeypatch, they won't be subtypes anymore. Just don't support the
+        # bad monkeypatches.
         ['activesupport', 'Time', :to_s],
         ['activesupport', 'Time', :initialize],
+
+        # These methods cause TracepointSerializer to hang the Ruby process when
+        # running Ruby 2.3. See https://github.com/sorbet/sorbet/issues/1145
+        ['activesupport', 'ActiveSupport::Deprecation', :new],
+        ['activesupport', 'ActiveSupport::Deprecation', :allocate],
       ]
 
       HEADER = Sorbet::Private::Serialize.header('true', 'gems')
