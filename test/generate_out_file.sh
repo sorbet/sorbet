@@ -40,6 +40,9 @@ cleanup() {
 
 ruby="$(rlocation ruby_2_6_3/ruby)"
 preamble="$(rlocation com_stripe_sorbet_llvm/run/tools/preamble.rb)"
+if [ "${preamble:0:1}" != "/" ]; then
+    preamble="./$preamble"
+fi
 
-echo "require './$preamble'; require './$rb';" > "$rbrunfile"
+echo "require '$preamble'; require './$rb';" > "$rbrunfile"
 $ruby --disable=gems --disable=did_you_mean "$rbrunfile" > "$rbout"
