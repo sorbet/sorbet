@@ -43,7 +43,9 @@ protected:
     /** Get an absolute file URI for the given relative file path. */
     std::string getUri(std::string_view filePath);
 
-    std::vector<std::unique_ptr<LSPMessage>> initializeLSP();
+    std::vector<std::unique_ptr<LSPMessage>>
+    initializeLSP(bool supportsMarkdown = true,
+                  std::optional<std::unique_ptr<SorbetInitializationOptions>> opts = std::nullopt);
 
     std::unique_ptr<LSPMessage> openFile(std::string_view path, std::string_view contents);
 

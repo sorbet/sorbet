@@ -22,8 +22,9 @@ void ProtocolTest::SetUp() {
     lspWrapper->enableAllExperimentalFeatures();
 }
 
-vector<unique_ptr<LSPMessage>> ProtocolTest::initializeLSP() {
-    auto responses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId);
+vector<unique_ptr<LSPMessage>> ProtocolTest::initializeLSP(bool supportsMarkdown,
+                                                           optional<unique_ptr<SorbetInitializationOptions>> opts) {
+    auto responses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown, move(opts));
     updateDiagnostics(responses);
     return responses;
 }
