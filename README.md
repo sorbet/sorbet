@@ -116,7 +116,7 @@ Early in our project we've defined some guidelines for how working with sorbet s
 
 3.  Build Sorbet
 
-    - `bazel build //main:sorbet --config=dbg`
+    - `./bazel build //main:sorbet --config=dbg`
 
 4.  Run Sorbet!
 
@@ -142,7 +142,7 @@ the reasons why it's fast:
 There are multiple ways to build `sorbet`. This one is the most common:
 
 ```
-bazel build //main:sorbet --config=dbg
+./bazel build //main:sorbet --config=dbg
 ```
 
 This will build an executable in `bazel-bin/main/sorbet` (see "Running Sorbet"
@@ -784,7 +784,7 @@ You are encouraged to play around with various clang-based tools which use the
 
     ```shell
     # Build clang-format with bazel
-    bazel build //tools:clang-format
+    ./bazel build //tools:clang-format
 
     # Once bazel runs again, this symlink to clang-format will go away.
     # We need to copy it out of bazel so our editor can use it:
