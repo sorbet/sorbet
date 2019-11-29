@@ -568,17 +568,23 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const LSPC
 
 } // namespace
 
-unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &typechecker, core::SymbolRef what,
+unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &typechecker, core::SymbolRef maybeAlias,
                                                                core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                const core::Loc queryLoc, string_view prefix,
                                                                size_t sortIdx) const {
     const auto &gs = typechecker.state();
-    ENFORCE(what.exists());
-    ENFORCE(what.data(gs)->isMethod());
+    ENFORCE(maybeAlias.exists());
+    ENFORCE(maybeAlias.data(gs)->isMethod());
     auto clientConfig = config->getClientConfig();
     auto supportsSnippets = clientConfig.clientCompletionItemSnippetSupport;
     auto markupKind = clientConfig.clientCompletionItemMarkupKind;
+
+    auto label = string(maybeAlias.data(gs)->name.data(gs)->shortName(gs));
+
+    // Intuition for when to use maybeAlias vs what: if it needs to know the original name: maybeAlias.
+    // If it needs to know the types / arity: what. Default to `what` if you don't know.
+    auto what = maybeAlias.data(gs)->dealias(gs);
 
     if (what == core::Symbols::sig()) {
         if (auto item = trySuggestSig(typechecker, clientConfig, what, receiverType, queryLoc, prefix, sortIdx)) {
@@ -586,7 +592,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
         }
     }
 
-    auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
+    auto item = make_unique<CompletionItem>(label);
 
     // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
     // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
@@ -598,7 +604,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
     }
 
     item->kind = CompletionItemKind::Method;
-    item->detail = what.data(gs)->show(gs);
+    item->detail = maybeAlias.data(gs)->show(gs);
 
     string replacementText;
     if (supportsSnippets) {
@@ -606,7 +612,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
         replacementText = methodSnippet(gs, what, receiverType, constraint);
     } else {
         item->insertTextFormat = InsertTextFormat::PlainText;
-        replacementText = string(what.data(gs)->name.data(gs)->shortName(gs));
+        replacementText = label;
     }
 
     if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
@@ -621,7 +627,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
             findDocumentation(what.data(gs)->loc().file().data(gs).source(), what.data(gs)->loc().beginPos());
     }
 
-    auto prettyType = prettyTypeForMethod(gs, what, receiverType, nullptr, constraint);
+    auto prettyType = prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint);
     item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
 
     if (documentation != nullopt && documentation->find("@deprecated") != documentation->npos) {
