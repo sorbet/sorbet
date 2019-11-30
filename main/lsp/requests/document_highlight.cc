@@ -64,6 +64,8 @@ LSPLoop::handleTextDocumentDocumentHighlight(LSPTypechecker &typechecker, const 
             // If file is untyped, only supports find reference requests from constants and class definitions.
             if (auto constResp = resp->isConstant()) {
                 response->result = getHighlightsToSymbolInFile(typechecker, uri, constResp->symbol);
+            } else if (auto fieldResp = resp->isField()) {
+                response->result = getHighlightsToSymbolInFile(typechecker, uri, fieldResp->symbol);
             } else if (auto defResp = resp->isDefinition()) {
                 if (fileIsTyped || defResp->symbol.data(gs)->isClassOrModule()) {
                     response->result = getHighlightsToSymbolInFile(typechecker, uri, defResp->symbol);

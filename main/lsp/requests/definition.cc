@@ -29,8 +29,8 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentDefinition(LSPTypechecker
                 config->uri2FileRef(gs, params.textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
 
-            // Only support go-to-definition on constants in untyped files.
-            if (resp->isConstant() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
+            // Only support go-to-definition on constants and fields in untyped files.
+            if (resp->isConstant() || resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
                 auto retType = resp->getTypeAndOrigins();
                 for (auto &originLoc : retType.origins) {
                     addLocIfExists(gs, result, originLoc);

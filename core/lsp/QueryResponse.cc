@@ -29,6 +29,10 @@ const ConstantResponse *QueryResponse::isConstant() const {
     return get_if<ConstantResponse>(&response);
 }
 
+const FieldResponse *QueryResponse::isField() const {
+    return get_if<FieldResponse>(&response);
+}
+
 const DefinitionResponse *QueryResponse::isDefinition() const {
     return get_if<DefinitionResponse>(&response);
 }
@@ -46,6 +50,8 @@ core::Loc QueryResponse::getLoc() const {
         return literal->termLoc;
     } else if (auto constant = isConstant()) {
         return constant->termLoc;
+    } else if (auto field = isField()) {
+        return field->termLoc;
     } else if (auto def = isDefinition()) {
         return def->termLoc;
     } else if (auto edit = isEdit()) {
@@ -64,6 +70,8 @@ core::TypePtr QueryResponse::getRetType() const {
         return literal->retType.type;
     } else if (auto constant = isConstant()) {
         return constant->retType.type;
+    } else if (auto field = isField()) {
+        return field->retType.type;
     } else if (auto def = isDefinition()) {
         return def->retType.type;
     } else {
@@ -79,6 +87,8 @@ const core::TypeAndOrigins &QueryResponse::getTypeAndOrigins() const {
         return literal->retType;
     } else if (auto constant = isConstant()) {
         return constant->retType;
+    } else if (auto field = isField()) {
+        return field->retType;
     } else if (auto def = isDefinition()) {
         return def->retType;
     } else {
