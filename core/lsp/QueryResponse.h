@@ -41,8 +41,7 @@ public:
 
 class ConstantResponse final {
 public:
-    ConstantResponse(core::SymbolRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins receiver,
-                     core::TypeAndOrigins retType)
+    ConstantResponse(core::SymbolRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
         : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
     const core::SymbolRef symbol;
     const core::Loc termLoc;

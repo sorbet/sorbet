@@ -89,7 +89,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             }
 
             core::lsp::QueryResponse::pushQueryResponse(
-                ctx, core::lsp::ConstantResponse(symbol, lit->loc, symbol.data(ctx)->name, tp, tp));
+                ctx, core::lsp::ConstantResponse(symbol, lit->loc, symbol.data(ctx)->name, tp));
         }
         lit = ast::cast_tree<ast::ConstantLit>(lit->original->scope.get());
         if (lit) {
