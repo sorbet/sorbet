@@ -4,4 +4,4 @@ dir=$(mktemp -d)
 echo "T.reveal_type(1)" > "$dir/file.rb"
 mkdir "$dir/no-read"
 chmod 000 "$dir/no-read"
-main/sorbet --silence-dev-message "$dir" 2>&1
+main/sorbet --silence-dev-message "$dir" 2>&1 | sed "s,$dir,dir,"
