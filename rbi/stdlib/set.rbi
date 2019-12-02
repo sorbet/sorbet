@@ -389,6 +389,16 @@ class Set < Object
   end
   def select!(&blk); end
 
+  # Equivalent to [`Set#select!`](https://docs.ruby-lang.org/en/2.6.0/Set.html#method-i-select-21)
+  # Alias for: [select!](https://docs.ruby-lang.org/en/2.6.0/Set.html#method-i-select-21)
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.nilable(T.self_type))
+  end
+  def filter!(&blk); end
+
   # Returns the number of elements.
   #
   # Also aliased as:
