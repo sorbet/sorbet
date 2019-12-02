@@ -152,6 +152,8 @@ unique_ptr<LSPMessage> ProtocolTest::readAsync() {
     auto msg = wrapper.read(20000);
     if (msg) {
         updateDiagnostics(*msg);
+    } else {
+        ADD_FAILURE() << "Timeout waiting for LSP response.";
     }
     return msg;
 }
