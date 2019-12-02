@@ -559,8 +559,42 @@ module SecureRandom
   # p SecureRandom.random_number #=> 0.596506046187744
   # p SecureRandom.random_number #=> 0.350621695741409
   # ~~~
+  sig {returns(Float)}
   sig do
-    params(n: Integer).returns(Numeric)
+    params(
+      n: T.nilable(Float)
+    )
+    .returns(Float)
+  end
+  sig do
+    params(
+      n: T.nilable(Integer)
+    )
+    .returns(Integer)
+  end
+  sig do
+    params(
+      n: T.nilable(Numeric)
+    )
+    .returns(Numeric)
+  end
+  sig do
+    params(
+      n: T.nilable(T::Range[Float])
+    )
+    .returns(Float)
+  end
+  sig do
+    params(
+      n: T.nilable(T::Range[Integer])
+    )
+    .returns(Integer)
+  end
+  sig do
+    params(
+      n: T.nilable(T::Range[Numeric])
+    )
+    .returns(Numeric)
   end
   def self.random_number(n=0); end
 
