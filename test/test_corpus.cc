@@ -1035,7 +1035,7 @@ TEST_P(LSPTest, All) {
                         if (params->status == SorbetTypecheckRunStatus::Ended) {
                             foundTypecheckRunInfo = true;
                             if (assertSlowPath.value_or(false)) {
-                                EXPECT_EQ(params->tookFastPath, false)
+                                EXPECT_EQ(params->fastPath, false)
                                     << errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.";
                             }
                             if (assertFastPath.has_value()) {
