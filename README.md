@@ -4,6 +4,22 @@ This project uses the Control Flow Graph from Sorbet to emit some LLVM bytecode
 which compiles to a Ruby C-extension which you should load after your Ruby code
 to replaces some of your functions with more optimized versions.
 
+# Getting Started
+
+This project uses [Bazel](https://bazel.build/). Download all dependencies, build
+the project and run the tests with a single command (warning this will take a while
+as it has to build LLVM):
+
+```
+    ./bazel build //test:test
+```
+
+To just rebuild the compiler itself, run
+
+```
+    ./bazel test //main:sorbet
+```
+
 # Debugging
 
 So you're getting a segfault when running ruby? Here are some helpful ways to
