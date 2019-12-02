@@ -559,7 +559,11 @@ class Sorbet::Private::GemLoader
         puts "NameError: #{e}"
       end
     else
-      require gem # rubocop:disable PrisonGuard/NoDynamicRequire
+      begin
+        require gem # rubocop:disable PrisonGuard/NoDynamicRequire
+      rescue NameError => e
+        puts "NameError: #{e}"
+      end
     end
   end
 
@@ -580,9 +584,15 @@ class Sorbet::Private::GemLoader
       begin
         require_gem(gemspec.name)
       rescue LoadError
+      rescue NameError => e
+        puts "NameError: #{e}"
       end
     end
-    Bundler.require
+    begin
+      Bundler.require
+    rescue NameError => e
+      puts "NameError: #{e}"
+    end
   end
 end
 # rubocop:enable PrisonGuard/AutogenLoaderPreamble
