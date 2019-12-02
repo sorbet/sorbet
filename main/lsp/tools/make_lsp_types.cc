@@ -817,6 +817,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                    {
                        makeField("textDocument", VersionedTextDocumentIdentifier),
                        makeField("contentChanges", makeArray(TextDocumentContentChangeEvent)),
+                       // Used in tests only.
+                       makeField("sorbetCancellationExpected", makeOptional(JSONBool)),
                    },
                    classTypes);
 
@@ -1279,9 +1281,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        "LSPFileUpdates updates;",
                    });
 
+    auto SorbetTypecheckRunStatus =
+        makeIntEnum("SorbetTypecheckRunStatus", {{"Started", 0}, {"Cancelled", 1}, {"Ended", 2}}, enumTypes);
+
     auto SorbetTypecheckRunInfo = makeObject("SorbetTypecheckRunInfo",
                                              {
-                                                 makeField("tookFastPath", JSONBool),
+                                                 makeField("status", SorbetTypecheckRunStatus),
+                                                 makeField("fastPath", JSONBool),
                                                  makeField("filesTypechecked", makeArray(JSONString)),
                                              },
                                              classTypes);

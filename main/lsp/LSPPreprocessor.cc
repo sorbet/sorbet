@@ -164,6 +164,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
                                 params->updates.versionStart, params->updates.versionEnd);
                             combinedUpdates.updatedGS = getTypecheckingGS();
                         }
+                        combinedUpdates.cancellationExpected = params->updates.cancellationExpected;
                         params->updates = move(combinedUpdates);
                     }
                     break;
@@ -355,6 +356,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentPa
                                         LSPFileUpdates &updates) const {
     updates.versionStart = v;
     updates.versionEnd = v;
+    updates.cancellationExpected = changeParams->sorbetCancellationExpected.value_or(false);
     string_view uri = changeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
@@ -474,6 +476,7 @@ void LSPPreprocessor::mergeEdits(LSPFileUpdates &to, LSPFileUpdates &from) {
         ttgs.travel(from.versionEnd);
         to.updatedGS = getTypecheckingGS();
     }
+    to.cancellationExpected = to.cancellationExpected || from.cancellationExpected;
     ENFORCE(sanityCheckUpdate(ttgs.getGlobalState(), to));
 }
 

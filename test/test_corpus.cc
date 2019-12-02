@@ -1030,14 +1030,17 @@ TEST_P(LSPTest, All) {
             for (auto &r : responses) {
                 if (r->isNotification()) {
                     if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
-                        foundTypecheckRunInfo = true;
                         auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
-                        if (assertSlowPath.value_or(false)) {
-                            EXPECT_EQ(params->tookFastPath, false)
-                                << errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.";
-                        }
-                        if (assertFastPath.has_value()) {
-                            (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                        // Ignore started messages.
+                        if (params->status == SorbetTypecheckRunStatus::Ended) {
+                            foundTypecheckRunInfo = true;
+                            if (assertSlowPath.value_or(false)) {
+                                EXPECT_EQ(params->tookFastPath, false)
+                                    << errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.";
+                            }
+                            if (assertFastPath.has_value()) {
+                                (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                            }
                         }
                     } else if (r->method() != LSPMethod::TextDocumentPublishDiagnostics) {
                         ADD_FAILURE() << errorPrefix
