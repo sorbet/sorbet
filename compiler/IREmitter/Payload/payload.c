@@ -11,6 +11,7 @@
 
 // These are special "public" headers which don't live in include/ruby for some
 // reason
+#include "id.h"
 #include "internal.h"
 #include "ruby.h"
 
@@ -863,6 +864,24 @@ VALUE sorbet_rb_int_lt(VALUE recv, int argc, const VALUE *const restrict argv) {
         }
     } else if (RB_TYPE_P(recv, T_BIGNUM)) {
         return rb_big_lt(recv, y);
+    }
+    return Qnil;
+}
+
+VALUE sorbet_rb_int_le(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    VALUE y = argv[0];
+    if (LIKELY(FIXNUM_P(recv))) {
+        if (LIKELY(FIXNUM_P(y))) {
+            if (FIX2LONG(recv) <= FIX2LONG(y)) {
+                return Qtrue;
+            }
+            return Qfalse;
+        } else {
+            return rb_num_coerce_relop(recv, y, idLE);
+        }
+    } else if (RB_TYPE_P(recv, T_BIGNUM)) {
+        return rb_big_le(recv, y);
     }
     return Qnil;
 }
