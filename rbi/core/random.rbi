@@ -424,3 +424,196 @@ module Random::Formatter
   sig {returns(String)}
   def uuid(); end
 end
+
+# ## Secure random number generator interface.
+#
+# This library is an interface for secure random number generator which is
+# suitable for generating session key in HTTP cookies, etc.
+#
+# You can use this library in your application by requiring it:
+#
+# ~~~ruby
+# require 'securerandom'
+# ~~~
+#
+# It supports following secure random number generators.
+#
+# * openssl
+# * /dev/urandom
+# * Win32
+#
+# ### Examples
+#
+# Hexadecimal string.
+#
+# ~~~ruby
+# require 'securerandom'
+#
+# p SecureRandom.hex(10) #=> "52750b30ffbc7de3b362"
+# p SecureRandom.hex(10) #=> "92b15d6c8dc4beb5f559"
+# p SecureRandom.hex(13) #=> "39b290146bea6ce975c37cfc23"
+# ~~~
+#
+# Base64 string.
+#
+# ~~~ruby
+# p SecureRandom.base64(10) #=> "EcmTPZwWRAozdA=="
+# p SecureRandom.base64(10) #=> "KO1nIU+p9DKxGg=="
+# p SecureRandom.base64(12) #=> "7kJSM/MzBJI+75j8"
+# ~~~~
+#
+# Binary string.
+#
+# ~~~ruby
+# p SecureRandom.random_bytes(10) #=> "\016\t{\370g\310pbr\301"
+# p SecureRandom.random_bytes(10) #=> "\323U\030TO\234\357\020\a\337"
+# ~~~
+module SecureRandom
+  # SecureRandom.base64 generates a random base64 string.
+  #
+  # The argument _n_ specifies the length, in bytes, of the random number
+  # to be generated. The length of the result string is about 4/3 of _n_.
+  #
+  # If _n_ is not specified or is nil, 16 is assumed.
+  # It may be larger in future.
+  #
+  # The result may contain A-Z, a-z, 0-9, "+", "/" and "=".
+  #
+  #   p SecureRandom.base64 #=> "/2BuBuLf3+WfSKyQbRcc/A=="
+  #   p SecureRandom.base64 #=> "6BbW0pxO0YENxn38HMUbcQ=="
+  #
+  # If secure random number generator is not available,
+  # NotImplementedError is raised.
+  #
+  # See RFC 3548 for the definition of base64.
+  sig do
+    params(n: T.nilable(Integer)).returns(String)
+  end
+  def self.base64(n=nil); end
+
+  sig do
+    params(n: Integer).returns(String)
+  end
+  def self.gen_random(n); end
+
+  # SecureRandom.hex generates a random hexadecimal string.
+  #
+  # The argument _n_ specifies the length, in bytes, of the random number to be
+  # generated.
+  # The length of the resulting hexadecimal string is twice _n_.
+  #
+  # If _n_ is not specified or is nil, 16 is assumed.
+  # It may be larger in future.
+  #
+  # The result may contain 0-9 and a-f.
+  #
+  # ~~~ruby
+  # p SecureRandom.hex #=> "eb693ec8252cd630102fd0d0fb7c3485"
+  # p SecureRandom.hex #=> "91dc3bfb4de5b11d029d376634589b61"
+  # ~~~
+  #
+  # If secure random number generator is not available,
+  # NotImplementedError is raised.
+  sig do
+    params(n: T.nilable(Integer)).returns(String)
+  end
+  def self.hex(n=nil); end
+
+  # SecureRandom.random_bytes generates a random binary string.
+  #
+  # The argument _n_ specifies the length of the result string.
+  #
+  # If _n_ is not specified or is nil, 16 is assumed.
+  # It may be larger in future.
+  #
+  # The result may contain any byte: "\x00" - "\xff".
+  #
+  # ~~~ruby
+  # p SecureRandom.random_bytes #=> "\xD8\\\xE0\xF4\r\xB2\xFC*WM\xFF\x83\x18\xF45\xB6"
+  # p SecureRandom.random_bytes #=> "m\xDC\xFC/\a\x00Uf\xB2\xB2P\xBD\xFF6S\x97"
+  # ~~~
+  #
+  # If secure random number generator is not available,
+  # NotImplementedError is raised.
+  sig do
+    params(n: T.nilable(Integer)).returns(String)
+  end
+  def self.random_bytes(n=nil); end
+
+  # SecureRandom.random_number generates a random number.
+  #
+  # If a positive integer is given as _n_,
+  # SecureRandom.random_number returns an integer:
+  # 0 <= SecureRandom.random_number(n) < n.
+  #
+  # ~~~ruby
+  # p SecureRandom.random_number(100) #=> 15
+  # p SecureRandom.random_number(100) #=> 88
+  # ~~~
+  #
+  # If 0 is given or an argument is not given,
+  # SecureRandom.random_number returns a float:
+  # 0.0 <= SecureRandom.random_number() < 1.0.
+  #
+  # ~~~ruby
+  # p SecureRandom.random_number #=> 0.596506046187744
+  # p SecureRandom.random_number #=> 0.350621695741409
+  # ~~~
+  sig do
+    params(n: Integer).returns(Numeric)
+  end
+  def self.random_number(n=0); end
+
+  # SecureRandom.urlsafe_base64 generates a random URL-safe base64 string.
+  #
+  # The argument _n_ specifies the length, in bytes, of the random number
+  # to be generated. The length of the result string is about 4/3 of _n_.
+  #
+  # If _n_ is not specified or is nil, 16 is assumed.
+  # It may be larger in future.
+  #
+  # The boolean argument _padding_ specifies the padding.
+  # If it is false or nil, padding is not generated.
+  # Otherwise padding is generated.
+  # By default, padding is not generated because "=" may be used as a URL delimiter.
+  #
+  # The result may contain A-Z, a-z, 0-9, "-" and "_".
+  # "=" is also used if _padding_ is true.
+  #
+  # ~~~ruby
+  # p SecureRandom.urlsafe_base64 #=> "b4GOKm4pOYU_-BOXcrUGDg"
+  # p SecureRandom.urlsafe_base64 #=> "UZLdOkzop70Ddx-IJR0ABg"
+  #
+  # p SecureRandom.urlsafe_base64(nil, true) #=> "i0XQ-7gglIsHGV2_BNPrdQ=="
+  # p SecureRandom.urlsafe_base64(nil, true) #=> "-M8rLhr7JEpJlqFGUMmOxg=="
+  # ~~~
+  #
+  # If secure random number generator is not available,
+  # NotImplementedError is raised.
+  #
+  # See RFC 3548 for the definition of URL-safe base64.
+  sig do
+    params(
+      n: T.nilable(Integer),
+      padding: T.nilable(T::Boolean)
+    ).returns(String)
+  end
+  def self.urlsafe_base64(n=nil, padding=false); end
+
+  # SecureRandom.uuid generates a v4 random UUID (Universally Unique IDentifier).
+  #
+  # ~~~ruby
+  # p SecureRandom.uuid #=> "2d931510-d99f-494a-8c67-87feb05e1594"
+  # p SecureRandom.uuid #=> "bad85eb9-0713-4da7-8d36-07a8e4b00eab"
+  # p SecureRandom.uuid #=> "62936e70-1815-439b-bf89-8492855a7e6b"
+  # ~~~
+  #
+  # The version 4 UUID is purely random (except the version).
+  # It doesn't contain meaningful information such as MAC address, time, etc.
+  #
+  # See RFC 4122 for details of UUID.
+  sig do
+    returns(String)
+  end
+  def self.uuid; end
+end
