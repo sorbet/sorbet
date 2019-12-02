@@ -123,12 +123,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                    "std::unique_ptr<Location> copy() const;",
                                });
 
-    auto DiagnosticRelatedInformation = makeObject("DiagnosticRelatedInformation",
-                                                   {
-                                                       makeField("location", Location),
-                                                       makeField("message", JSONString),
-                                                   },
-                                                   classTypes);
+    auto DiagnosticRelatedInformation =
+        makeObject("DiagnosticRelatedInformation",
+                   {
+                       makeField("location", Location),
+                       makeField("message", JSONString),
+                   },
+                   classTypes, {"std::unique_ptr<DiagnosticRelatedInformation> copy() const;"});
 
     auto DiagnosticSeverity =
         makeIntEnum("DiagnosticSeverity", {{"Error", 1}, {"Warning", 2}, {"Information", 3}, {"Hint", 4}}, enumTypes);
@@ -143,7 +144,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        makeField("message", JSONString),
                        makeField("relatedInformation", makeOptional(makeArray(DiagnosticRelatedInformation))),
                    },
-                   classTypes);
+                   classTypes, {"std::unique_ptr<Diagnostic> copy() const;"});
 
     auto Command = makeObject("Command",
                               {

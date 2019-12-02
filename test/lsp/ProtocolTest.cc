@@ -162,10 +162,11 @@ void ProtocolTest::updateDiagnostics(const LSPMessage &msg) {
     if (msg.isNotification() && msg.method() == LSPMethod::TextDocumentPublishDiagnostics) {
         if (auto diagnosticParams = getPublishDiagnosticParams(msg.asNotification())) {
             // Will explicitly overwrite older diagnostics that are irrelevant.
-            // TODO: Have a better way of copying.
-            rapidjson::MemoryPoolAllocator<> alloc;
-            diagnostics[uriToFilePath(lspWrapper->config(), (*diagnosticParams)->uri)] =
-                move(PublishDiagnosticsParams::fromJSONValue(*(*diagnosticParams)->toJSONValue(alloc))->diagnostics);
+            vector<unique_ptr<Diagnostic>> diagnostics;
+            for (const auto &d : (*diagnosticParams)->diagnostics) {
+                diagnostics.push_back(d->copy());
+            }
+            this->diagnostics[uriToFilePath(lspWrapper->config(), (*diagnosticParams)->uri)] = move(diagnostics);
         }
     }
 }

@@ -640,7 +640,11 @@ void updateDiagnostics(const LSPConfiguration &config, UnorderedMap<string, stri
             << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
 
         // Will explicitly overwrite older diagnostics that are irrelevant.
-        diagnostics[filename] = move(diagnosticParams->diagnostics);
+        vector<unique_ptr<Diagnostic>> copiedDiagnostics;
+        for (const auto &d : diagnosticParams->diagnostics) {
+            copiedDiagnostics.push_back(d->copy());
+        }
+        diagnostics[filename] = move(copiedDiagnostics);
     }
 }
 
