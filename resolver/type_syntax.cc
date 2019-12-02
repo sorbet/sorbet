@@ -13,26 +13,26 @@ namespace sorbet::resolver {
 // Forward declarations for the local versions of getResultType, getResultTypeAndBind, and parseSig that skolemize type
 // members.
 namespace {
-core::TypePtr getResultTypeWithSkolems(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &sigBeingParsed,
+core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &sigBeingParsed,
                                        TypeSyntaxArgs args);
 
-TypeSyntax::ResultType getResultTypeAndBindWithSkolems(core::MutableContext ctx, ast::Expression &expr,
+TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
                                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args);
 
-ParsedSig parseSigWithSkolems(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
+ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
                               TypeSyntaxArgs args);
 } // namespace
 
 ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
                                TypeSyntaxArgs args) {
-    auto result = parseSigWithSkolems(ctx, sigSend, parent, args);
+    auto result = parseSigWithSelfTypeParams(ctx, sigSend, parent, args);
 
     for (auto &arg : result.argTypes) {
-        auto type = core::Types::unwrapSkolemVariables(ctx, arg.type);
+        auto type = core::Types::unwrapSelfTypeParam(ctx, arg.type);
         arg.type = type;
     }
 
-    auto returns = core::Types::unwrapSkolemVariables(ctx, result.returns);
+    auto returns = core::Types::unwrapSelfTypeParam(ctx, result.returns);
     result.returns = returns;
 
     return result;
@@ -40,14 +40,14 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
 
 core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, ast::Expression &expr,
                                         const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
-    return core::Types::unwrapSkolemVariables(
-        ctx, getResultTypeWithSkolems(ctx, expr, sigBeingParsed, args.withoutRebind()));
+    return core::Types::unwrapSelfTypeParam(ctx,
+                                            getResultTypeWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()));
 }
 
 TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr,
                                                         const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
-    auto result = getResultTypeAndBindWithSkolems(ctx, expr, sigBeingParsed, args);
-    result.type = core::Types::unwrapSkolemVariables(ctx, result.type);
+    auto result = getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args);
+    result.type = core::Types::unwrapSelfTypeParam(ctx, result.type);
     return result;
 }
 
@@ -107,7 +107,7 @@ bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
 
 namespace {
 
-ParsedSig parseSigWithSkolems(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
+ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
                               TypeSyntaxArgs args) {
     ParsedSig sig;
 
@@ -223,7 +223,7 @@ ParsedSig parseSigWithSkolems(core::MutableContext ctx, ast::Send *sigSend, cons
                     }
 
                     bool validBind = false;
-                    auto bind = getResultTypeWithSkolems(ctx, *(send->args.front()), *parent, args);
+                    auto bind = getResultTypeWithSelfTypeParams(ctx, *(send->args.front()), *parent, args);
                     if (auto classType = core::cast_type<core::ClassType>(bind.get())) {
                         sig.bind = classType->symbol;
                         validBind = true;
@@ -284,7 +284,7 @@ ParsedSig parseSigWithSkolems(core::MutableContext ctx, ast::Send *sigSend, cons
                         if (lit && lit->isSymbol(ctx)) {
                             core::NameRef name = lit->asSymbol(ctx);
                             auto resultAndBind =
-                                getResultTypeAndBindWithSkolems(ctx, *value, *parent, args.withRebind());
+                                getResultTypeAndBindWithSelfTypeParams(ctx, *value, *parent, args.withRebind());
                             sig.argTypes.emplace_back(
                                 ParsedSig::ArgSpec{key->loc, name, resultAndBind.type, resultAndBind.rebind});
                         }
@@ -370,7 +370,7 @@ ParsedSig parseSigWithSkolems(core::MutableContext ctx, ast::Send *sigSend, cons
                         break;
                     }
 
-                    sig.returns = getResultTypeWithSkolems(ctx, *(send->args.front()), *parent, args);
+                    sig.returns = getResultTypeWithSelfTypeParams(ctx, *(send->args.front()), *parent, args);
 
                     break;
                 }
@@ -427,17 +427,17 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             if (send->args.size() != 1) {
                 return core::Types::untypedUntracked(); // error will be reported in infer.
             }
-            return core::Types::any(ctx, getResultTypeWithSkolems(ctx, *(send->args[0]), sig, args),
+            return core::Types::any(ctx, getResultTypeWithSelfTypeParams(ctx, *(send->args[0]), sig, args),
                                     core::Types::nilClass());
         case core::Names::all()._id: {
             if (send->args.empty()) {
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
             }
-            auto result = getResultTypeWithSkolems(ctx, *(send->args[0]), sig, args);
+            auto result = getResultTypeWithSelfTypeParams(ctx, *(send->args[0]), sig, args);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::all(ctx, result, getResultTypeWithSkolems(ctx, *(send->args[i]), sig, args));
+                result = core::Types::all(ctx, result, getResultTypeWithSelfTypeParams(ctx, *(send->args[i]), sig, args));
                 i++;
             }
             return result;
@@ -447,10 +447,10 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
             }
-            auto result = getResultTypeWithSkolems(ctx, *(send->args[0]), sig, args);
+            auto result = getResultTypeWithSelfTypeParams(ctx, *(send->args[0]), sig, args);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::any(ctx, result, getResultTypeWithSkolems(ctx, *(send->args[i]), sig, args));
+                result = core::Types::any(ctx, result, getResultTypeWithSelfTypeParams(ctx, *(send->args[i]), sig, args));
                 i++;
             }
             return result;
@@ -583,12 +583,12 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
     }
 }
 
-core::TypePtr getResultTypeWithSkolems(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &sigBeingParsed,
+core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &sigBeingParsed,
                                        TypeSyntaxArgs args) {
-    return getResultTypeAndBindWithSkolems(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
+    return getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
 }
 
-TypeSyntax::ResultType getResultTypeAndBindWithSkolems(core::MutableContext ctx, ast::Expression &expr,
+TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
                                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     // Ensure that we only check types from a class context
     auto ctxOwnerData = ctx.owner.data(ctx);
@@ -600,7 +600,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSkolems(core::MutableContext ctx,
         [&](ast::Array *arr) {
             vector<core::TypePtr> elems;
             for (auto &el : arr->elems) {
-                elems.emplace_back(getResultTypeWithSkolems(ctx, *el, sigBeingParsed, args.withoutSelfType()));
+                elems.emplace_back(getResultTypeWithSelfTypeParams(ctx, *el, sigBeingParsed, args.withoutSelfType()));
             }
             result.type = core::TupleType::build(ctx, elems);
         },
@@ -610,7 +610,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSkolems(core::MutableContext ctx,
 
             for (auto &ktree : hash->keys) {
                 auto &vtree = hash->values[&ktree - &hash->keys.front()];
-                auto val = getResultTypeWithSkolems(ctx, *vtree, sigBeingParsed, args.withoutSelfType());
+                auto val = getResultTypeWithSelfTypeParams(ctx, *vtree, sigBeingParsed, args.withoutSelfType());
                 auto lit = ast::cast_tree<ast::Literal>(ktree.get());
                 if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
                     ENFORCE(core::cast_type<core::LiteralType>(lit->value.get()));
@@ -776,7 +776,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSkolems(core::MutableContext ctx,
         },
         [&](ast::Send *s) {
             if (isTProc(ctx, s)) {
-                auto sig = parseSigWithSkolems(ctx, s, &sigBeingParsed, args.withoutSelfType());
+                auto sig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args.withoutSelfType());
                 if (sig.bind.exists()) {
                     if (!args.allowRebind) {
                         if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -857,7 +857,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSkolems(core::MutableContext ctx,
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(arg->loc);
                 ty.type = core::make_type<core::MetaType>(
-                    getResultTypeWithSkolems(ctx, *arg, sigBeingParsed, args.withoutSelfType()));
+                    getResultTypeWithSelfTypeParams(ctx, *arg, sigBeingParsed, args.withoutSelfType()));
                 holders.emplace_back(make_unique<core::TypeAndOrigins>(move(ty)));
                 targs.emplace_back(holders.back().get());
                 argLocs.emplace_back(arg->loc);

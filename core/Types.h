@@ -161,7 +161,7 @@ public:
     static std::optional<int> getProcArity(const AppliedType &type);
 
     /** Unwrap SelfTypeParam instances that belong to the given owner, to a bare LambdaParam */
-    static TypePtr unwrapSkolemVariables(Context ctx, const TypePtr &ty);
+    static TypePtr unwrapSelfTypeParam(Context ctx, const TypePtr &ty);
 
     // Given a type, return a SymbolRef for the Ruby class that has that type, or no symbol if no such class exists.
     // This is an internal method for implementing intrinsics. In the future we should make all updateKnowledge methods
@@ -473,7 +473,7 @@ private:
     friend TypePtr Types::lub(Context ctx, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass);
-    friend TypePtr Types::unwrapSkolemVariables(Context ctx, const TypePtr &t1);
+    friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
     friend class Symbol; // the actual method is `recordSealedSubclass(MutableContext ctx, SymbolRef subclass)`,
                          // but refering to it introduces a cycle
 
@@ -518,7 +518,7 @@ private:
     friend TypePtr glbGround(Context ctx, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(Context ctx, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr Types::unwrapSkolemVariables(Context ctx, const TypePtr &t1);
+    friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
