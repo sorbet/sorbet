@@ -9027,10 +9027,6 @@ end
 class URI::File
 end
 
-class URI::HTTP
-  def request_uri(); end
-end
-
 class URI::LDAP
   def attributes(); end
 
