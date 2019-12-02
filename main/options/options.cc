@@ -603,7 +603,7 @@ void addFilesFromDir(Options &opts, string_view dir, shared_ptr<spdlog::logger> 
     vector<string> containedFiles;
     try {
         containedFiles = opts.fs->listFilesInDir(fileNormalized, {".rb", ".rbi"}, true, opts.absoluteIgnorePatterns,
-                                                      opts.relativeIgnorePatterns);
+                                                 opts.relativeIgnorePatterns);
     } catch (sorbet::FileNotFoundException) {
         logger->error("Directory `{}` not found", dir);
         throw EarlyReturnWithCode(1);
