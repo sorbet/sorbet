@@ -29,7 +29,7 @@ std::unique_ptr<LSPMessage> makeOpen(std::string_view uri, std::string_view cont
 
 /** Create an LSPMessage containing a textDocument/didChange notification. */
 std::unique_ptr<LSPMessage> makeChange(std::string_view uri, std::string_view contents, int version,
-                                       bool cancellationExpected);
+                                       bool cancellationExpected = false);
 
 /** Create an LSPMessage containing a textDocument/didClose notification. */
 std::unique_ptr<LSPMessage> makeClose(std::string_view uri);
