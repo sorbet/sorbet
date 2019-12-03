@@ -470,11 +470,14 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &bloc
 }
 
 void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
-                         const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases) {
+                         const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases,
+                         bool disableBacktrace) {
     cs.functionEntryInitializers = blockMap.functionInitializersByFunction[0];
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(blockMap.sigVerificationBlock);
-    Payload::pushControlFrame(cs, builder, cfg.symbol);
+    if (!disableBacktrace) {
+        Payload::pushControlFrame(cs, builder, cfg.symbol);
+    }
 
     int argId = -1;
     for (auto &argInfo : cfg.symbol.data(cs)->arguments()) {
@@ -506,7 +509,8 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
 
 } // namespace
 
-void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
+void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName,
+                    bool disableBacktrace) {
     Timer timer(cs.gs.tracer(), "IREmitter::run");
     UnorderedMap<core::LocalVariable, Alias> aliases;
     auto func = IREmitterHelpers::cleanFunctionBody(cs, IREmitterHelpers::getOrCreateFunction(cs, md->symbol));
@@ -526,7 +530,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
     setupArguments(cs, cfg, md, blockMap, aliases);
-    emitSigVerification(cs, cfg, md, blockMap, aliases);
+    emitSigVerification(cs, cfg, md, blockMap, aliases, disableBacktrace);
 
     emitUserBody(cs, cfg, blockMap, aliases);
     emitPostProcess(cs, cfg, blockMap, aliases);
