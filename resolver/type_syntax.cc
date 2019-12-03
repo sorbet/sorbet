@@ -10,6 +10,47 @@ using namespace std;
 
 namespace sorbet::resolver {
 
+// Forward declarations for the local versions of getResultType, getResultTypeAndBind, and parseSig that skolemize type
+// members.
+namespace {
+core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
+                                              const ParsedSig &sigBeingParsed, TypeSyntaxArgs args);
+
+TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
+                                                              const ParsedSig &sigBeingParsed, TypeSyntaxArgs args);
+
+ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
+                                     TypeSyntaxArgs args);
+} // namespace
+
+ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
+                               TypeSyntaxArgs args) {
+    auto result = parseSigWithSelfTypeParams(ctx, sigSend, parent, args);
+
+    for (auto &arg : result.argTypes) {
+        arg.type = core::Types::unwrapSelfTypeParam(ctx, arg.type);
+    }
+
+    if (result.returns != nullptr) {
+        result.returns = core::Types::unwrapSelfTypeParam(ctx, result.returns);
+    }
+
+    return result;
+}
+
+core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, ast::Expression &expr,
+                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
+    return core::Types::unwrapSelfTypeParam(
+        ctx, getResultTypeWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()));
+}
+
+TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr,
+                                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
+    auto result = getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args);
+    result.type = core::Types::unwrapSelfTypeParam(ctx, result.type);
+    return result;
+}
+
 core::TypePtr getResultLiteral(core::Context ctx, unique_ptr<ast::Expression> &expr) {
     core::TypePtr result;
     typecase(
@@ -64,8 +105,10 @@ bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
     return false;
 }
 
-ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
-                               TypeSyntaxArgs args) {
+namespace {
+
+ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
+                                     TypeSyntaxArgs args) {
     ParsedSig sig;
 
     vector<ast::Send *> sends;
@@ -180,7 +223,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                     }
 
                     bool validBind = false;
-                    auto bind = getResultType(ctx, *(send->args.front()), *parent, args);
+                    auto bind = getResultTypeWithSelfTypeParams(ctx, *(send->args.front()), *parent, args);
                     if (auto classType = core::cast_type<core::ClassType>(bind.get())) {
                         sig.bind = classType->symbol;
                         validBind = true;
@@ -240,7 +283,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                         auto lit = ast::cast_tree<ast::Literal>(key.get());
                         if (lit && lit->isSymbol(ctx)) {
                             core::NameRef name = lit->asSymbol(ctx);
-                            auto resultAndBind = getResultTypeAndBind(ctx, *value, *parent, args.withRebind());
+                            auto resultAndBind =
+                                getResultTypeAndBindWithSelfTypeParams(ctx, *value, *parent, args.withRebind());
                             sig.argTypes.emplace_back(
                                 ParsedSig::ArgSpec{key->loc, name, resultAndBind.type, resultAndBind.rebind});
                         }
@@ -326,7 +370,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                         break;
                     }
 
-                    sig.returns = getResultType(ctx, *(send->args.front()), *parent, args);
+                    sig.returns = getResultTypeWithSelfTypeParams(ctx, *(send->args.front()), *parent, args);
 
                     break;
                 }
@@ -383,17 +427,18 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             if (send->args.size() != 1) {
                 return core::Types::untypedUntracked(); // error will be reported in infer.
             }
-            return core::Types::any(ctx, TypeSyntax::getResultType(ctx, *(send->args[0]), sig, args),
+            return core::Types::any(ctx, getResultTypeWithSelfTypeParams(ctx, *(send->args[0]), sig, args),
                                     core::Types::nilClass());
         case core::Names::all()._id: {
             if (send->args.empty()) {
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
             }
-            auto result = TypeSyntax::getResultType(ctx, *(send->args[0]), sig, args);
+            auto result = getResultTypeWithSelfTypeParams(ctx, *(send->args[0]), sig, args);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::all(ctx, result, TypeSyntax::getResultType(ctx, *(send->args[i]), sig, args));
+                result =
+                    core::Types::all(ctx, result, getResultTypeWithSelfTypeParams(ctx, *(send->args[i]), sig, args));
                 i++;
             }
             return result;
@@ -403,10 +448,11 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
             }
-            auto result = TypeSyntax::getResultType(ctx, *(send->args[0]), sig, args);
+            auto result = getResultTypeWithSelfTypeParams(ctx, *(send->args[0]), sig, args);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::any(ctx, result, TypeSyntax::getResultType(ctx, *(send->args[i]), sig, args));
+                result =
+                    core::Types::any(ctx, result, getResultTypeWithSelfTypeParams(ctx, *(send->args[i]), sig, args));
                 i++;
             }
             return result;
@@ -539,24 +585,24 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
     }
 }
 
-core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, ast::Expression &expr,
-                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
-    return getResultTypeAndBind(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
+core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
+                                              const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
+    return getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
 }
 
-TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr,
-                                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
+TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
+                                                              const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     // Ensure that we only check types from a class context
     auto ctxOwnerData = ctx.owner.data(ctx);
     ENFORCE(ctxOwnerData->isClassOrModule(), "getResultTypeAndBind wasn't called with a class owner");
 
-    ResultType result;
+    TypeSyntax::ResultType result;
     typecase(
         &expr,
         [&](ast::Array *arr) {
             vector<core::TypePtr> elems;
             for (auto &el : arr->elems) {
-                elems.emplace_back(getResultType(ctx, *el, sigBeingParsed, args.withoutSelfType()));
+                elems.emplace_back(getResultTypeWithSelfTypeParams(ctx, *el, sigBeingParsed, args.withoutSelfType()));
             }
             result.type = core::TupleType::build(ctx, elems);
         },
@@ -566,7 +612,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
 
             for (auto &ktree : hash->keys) {
                 auto &vtree = hash->values[&ktree - &hash->keys.front()];
-                auto val = getResultType(ctx, *vtree, sigBeingParsed, args.withoutSelfType());
+                auto val = getResultTypeWithSelfTypeParams(ctx, *vtree, sigBeingParsed, args.withoutSelfType());
                 auto lit = ast::cast_tree<ast::Literal>(ktree.get());
                 if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
                     ENFORCE(core::cast_type<core::LiteralType>(lit->value.get()));
@@ -683,10 +729,10 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                     // 3. if it's a type_member type, be used in an instance method
                     if (usedOnSourceClass &&
                         ((isTypeTemplate && ctxIsSingleton) || !(isTypeTemplate || ctxIsSingleton))) {
-                        auto *lambdaParam = core::cast_type<core::LambdaParam>(symData->resultType.get());
-                        ENFORCE(lambdaParam != nullptr);
-                        result.type =
-                            core::make_type<core::LambdaParam>(sym, lambdaParam->lowerBound, lambdaParam->upperBound);
+                        // At this point, we maake a skolemized variable that will be unwrapped at the end of type
+                        // parsing using Types::unwrapSkolemVariables. The justification for this is that type
+                        // constructors like `Types::any` do not expect to see bound variables, and will panic.
+                        result.type = core::make_type<core::SelfTypeParam>(sym);
                     } else {
                         if (auto e =
                                 ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
@@ -732,7 +778,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
         },
         [&](ast::Send *s) {
             if (isTProc(ctx, s)) {
-                auto sig = parseSig(ctx, s, &sigBeingParsed, args.withoutSelfType());
+                auto sig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args.withoutSelfType());
                 if (sig.bind.exists()) {
                     if (!args.allowRebind) {
                         if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -813,7 +859,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(arg->loc);
                 ty.type = core::make_type<core::MetaType>(
-                    TypeSyntax::getResultType(ctx, *arg, sigBeingParsed, args.withoutSelfType()));
+                    getResultTypeWithSelfTypeParams(ctx, *arg, sigBeingParsed, args.withoutSelfType()));
                 holders.emplace_back(make_unique<core::TypeAndOrigins>(move(ty)));
                 targs.emplace_back(holders.back().get());
                 argLocs.emplace_back(arg->loc);
@@ -911,7 +957,8 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
     ENFORCE(result.type.get() != nullptr);
     result.type->sanityCheck(ctx);
     return result;
-} // namespace sorbet::resolver
+}
+} // namespace
 
 ParsedSig::TypeArgSpec &ParsedSig::enterTypeArgByName(core::NameRef name) {
     for (auto &current : typeArgs) {

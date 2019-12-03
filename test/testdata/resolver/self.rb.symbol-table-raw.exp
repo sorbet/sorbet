@@ -17,7 +17,7 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <C <U TestSelfGeneric>><U good1> (s, <blk>) -> AppliedType {
       klass = <C <U TestSelfGeneric>>
       targs = [
-        <C <U Elem>> = SelfTypeParam(<C <U TestSelfGeneric>><C <U Elem>>)
+        <C <U Elem>> = LambdaParam(<C <U TestSelfGeneric>><C <U Elem>>, lower=T.noreturn, upper=<any>)
       ]
     } @ Loc {file=test/testdata/resolver/self.rb start=32:3 end=32:15}
       argument s<> -> TestSelfGeneric[TestSelfGeneric::Elem] @ Loc {file=test/testdata/resolver/self.rb start=29:12 end=29:13}
@@ -25,7 +25,7 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <C <U TestSelfGeneric>><U pass> (<blk>) -> AppliedType {
       klass = <C <U TestSelfGeneric>>
       targs = [
-        <C <U Elem>> = SelfTypeParam(<C <U TestSelfGeneric>><C <U Elem>>)
+        <C <U Elem>> = LambdaParam(<C <U TestSelfGeneric>><C <U Elem>>, lower=T.noreturn, upper=<any>)
       ]
     } @ Loc {file=test/testdata/resolver/self.rb start=39:3 end=39:13}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
