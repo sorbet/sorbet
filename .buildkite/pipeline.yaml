@@ -90,4 +90,16 @@ steps:
     command: .buildkite/publish-ruby-gems.sh
     <<: *elastic
 
+  - label: ":linux: build-java-ruby-gems.sh"
+    command: .buildkite/build-static-release-java.rb
+    artifact_paths: _out_/**/*
+    <<: *elastic
+
+  # we run the publish step again just to publish the java platform
+  # this is only done after a successful previous publish so we know
+  # we have uploaded both linux & mac sorbet-static gems
+  - label: ":linux: publish-ruby-gems.sh (java platform)"
+    command: .buildkite/publish-ruby-gems.sh
+    <<: *elastic
+
   - wait: ~
