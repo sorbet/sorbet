@@ -28,12 +28,12 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
     auto result = parseSigWithSelfTypeParams(ctx, sigSend, parent, args);
 
     for (auto &arg : result.argTypes) {
-        auto type = core::Types::unwrapSelfTypeParam(ctx, arg.type);
-        arg.type = type;
+        arg.type = core::Types::unwrapSelfTypeParam(ctx, arg.type);
     }
 
-    auto returns = core::Types::unwrapSelfTypeParam(ctx, result.returns);
-    result.returns = returns;
+    if (result.returns != nullptr) {
+        result.returns = core::Types::unwrapSelfTypeParam(ctx, result.returns);
+    }
 
     return result;
 }
