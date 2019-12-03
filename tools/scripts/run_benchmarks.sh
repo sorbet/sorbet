@@ -24,7 +24,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
     cp "$this_src" tmp/bench/target.rb
     pushd tmp/bench &>/dev/null
     echo -en "${this_src#test/testdata/ruby_benchmark/}\t"
-    ../../run/compile . target.rb &>/dev/null
+    ../../run/compile . target.rb --disable-backtrace &>/dev/null
     (time for _ in {1..10}; do ../../bazel-bin/external/ruby_2_6_3/ruby -r ../../run/tools/preamble.rb ./target.rb --disable=gems --disable=did_you_mean ; done) 2>&1|grep real | cut -d$'\t' -f 2 > ruby_runtime
 
     minutes_ruby=$(cut -d "m" -f1 < ruby_runtime)
