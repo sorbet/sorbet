@@ -13,14 +13,14 @@ namespace sorbet::resolver {
 // Forward declarations for the local versions of getResultType, getResultTypeAndBind, and parseSig that skolemize type
 // members.
 namespace {
-core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &sigBeingParsed,
-                                       TypeSyntaxArgs args);
+core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
+                                              const ParsedSig &sigBeingParsed, TypeSyntaxArgs args);
 
 TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
-                                                       const ParsedSig &sigBeingParsed, TypeSyntaxArgs args);
+                                                              const ParsedSig &sigBeingParsed, TypeSyntaxArgs args);
 
 ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
-                              TypeSyntaxArgs args);
+                                     TypeSyntaxArgs args);
 } // namespace
 
 ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
@@ -40,8 +40,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
 
 core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, ast::Expression &expr,
                                         const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
-    return core::Types::unwrapSelfTypeParam(ctx,
-                                            getResultTypeWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()));
+    return core::Types::unwrapSelfTypeParam(
+        ctx, getResultTypeWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()));
 }
 
 TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr,
@@ -108,7 +108,7 @@ bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
 namespace {
 
 ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
-                              TypeSyntaxArgs args) {
+                                     TypeSyntaxArgs args) {
     ParsedSig sig;
 
     vector<ast::Send *> sends;
@@ -437,7 +437,8 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             auto result = getResultTypeWithSelfTypeParams(ctx, *(send->args[0]), sig, args);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::all(ctx, result, getResultTypeWithSelfTypeParams(ctx, *(send->args[i]), sig, args));
+                result =
+                    core::Types::all(ctx, result, getResultTypeWithSelfTypeParams(ctx, *(send->args[i]), sig, args));
                 i++;
             }
             return result;
@@ -450,7 +451,8 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             auto result = getResultTypeWithSelfTypeParams(ctx, *(send->args[0]), sig, args);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::any(ctx, result, getResultTypeWithSelfTypeParams(ctx, *(send->args[i]), sig, args));
+                result =
+                    core::Types::any(ctx, result, getResultTypeWithSelfTypeParams(ctx, *(send->args[i]), sig, args));
                 i++;
             }
             return result;
@@ -583,13 +585,13 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
     }
 }
 
-core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &sigBeingParsed,
-                                       TypeSyntaxArgs args) {
+core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
+                                              const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     return getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
 }
 
 TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
-                                                       const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
+                                                              const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     // Ensure that we only check types from a class context
     auto ctxOwnerData = ctx.owner.data(ctx);
     ENFORCE(ctxOwnerData->isClassOrModule(), "getResultTypeAndBind wasn't called with a class owner");
