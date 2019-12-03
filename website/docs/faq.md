@@ -43,6 +43,8 @@ are two options:
 If you're having problems making a change to Sorbet, we're happy to help on
 Slack! See the [Community](/community) page for an invite link.
 
+[rbi-folder]: https://github.com/sorbet/sorbet/tree/master/rbi
+
 ## What's the difference between `T.let`, `T.cast`, and `T.unsafe`?
 
 [→ Type Assertions](type-assertions.md)
