@@ -663,11 +663,6 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
 
-    if (!config->opts.lspAutocompleteEnabled) {
-        response->result = std::move(emptyResult);
-        return response;
-    }
-
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
 
     const auto &gs = typechecker.state();
