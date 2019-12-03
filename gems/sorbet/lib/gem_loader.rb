@@ -583,7 +583,8 @@ class Sorbet::Private::GemLoader
     specs.sort_by(&:name).each do |gemspec|
       begin
         require_gem(gemspec.name)
-      rescue LoadError
+      rescue LoadError => e
+        puts "LoadError: #{e}"
       rescue NameError => e
         puts "NameError: #{e}"
       end
