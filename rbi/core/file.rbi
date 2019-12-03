@@ -260,7 +260,7 @@ class File < IO
   # See also `Dir::rmdir`.
   sig do
     params(
-        files: String,
+        files: T.any(String, Pathname),
     )
     .returns(Integer)
   end
