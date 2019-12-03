@@ -265,6 +265,9 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
         if (argSym.flags.isDefault) {
             continue;
         }
+        if (argSym.flags.isRepeated) {
+            continue;
+        }
         if (argSym.flags.isKeyword) {
             fmt::format_to(argBuf, "{}: ", argSym.name.data(gs)->shortName(gs));
         }
