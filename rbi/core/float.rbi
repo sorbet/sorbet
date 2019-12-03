@@ -797,7 +797,7 @@ class Float < Numeric
   # (-1.0/0.0).infinite?   #=> -1
   # (+1.0/0.0).infinite?   #=> 1
   # ```
-  sig {returns(Object)}
+  sig {returns(T.nilable(Integer))}
   def infinite?(); end
 
   # Alias for:
