@@ -33,7 +33,7 @@ public:
     static llvm::Value *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
     static llvm::Value *typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                  const core::TypePtr &type);
-    static void pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &builder, core::SymbolRef sym);
+    static void switchControlFrameToRubyFrame(CompilerState &cs, llvm::IRBuilderBase &builder, core::SymbolRef sym);
     static void popControlFrame(CompilerState &cs, llvm::IRBuilderBase &builder);
     static void setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc);
 

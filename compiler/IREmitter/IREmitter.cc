@@ -476,7 +476,7 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(blockMap.sigVerificationBlock);
     if (!disableBacktrace) {
-        Payload::pushControlFrame(cs, builder, cfg.symbol);
+        Payload::switchControlFrameToRubyFrame(cs, builder, cfg.symbol);
     }
 
     int argId = -1;
