@@ -78,7 +78,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             srcs = ["test_corpus_forwarder.sh"],
             args = ["--single_test=$(location {})".format(sentinel), "--expected_output=$(location {})".format(expected_outfile)] + extra_args,
             data = data,
-            size = "small",
+            size = "medium",
             tags = tags + extra_tags,
         )
 
