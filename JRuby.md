@@ -69,7 +69,7 @@ Sorbet team does not publish a `sorbet-static` gem for the Java platform.
 
 The workaround is to fetch the Gem manually for your arch and install it.
 
-For instance on OSX you would do:
+For instance on macOS you would do:
 ```
 # download the most recent one
 gem fetch sorbet-static --platform universal-darwin
