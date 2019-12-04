@@ -11,7 +11,6 @@
 
 // These are special "public" headers which don't live in include/ruby for some
 // reason
-#include "id.h"
 #include "internal.h"
 #include "ruby.h"
 
