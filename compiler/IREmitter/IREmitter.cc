@@ -49,6 +49,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     llvm::IRBuilder<> builder(cs);
     for (auto funcId = 0; funcId < blockMap.rubyBlocks2Functions.size(); funcId++) {
         auto func = blockMap.rubyBlocks2Functions[funcId];
+        cs.functionEntryInitializers = blockMap.functionInitializersByFunction[funcId];
         builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[funcId]);
         auto maxArgCount = 0;
         auto minArgCount = 0;
