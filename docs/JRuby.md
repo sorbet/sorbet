@@ -1,4 +1,4 @@
-## JRuby
+# JRuby
 
 > The Ruby Programming Language on the JVM
 
@@ -9,22 +9,25 @@ The use of Sorbet on the JVM is **NOT SUPPORTED** by the Sorbet
 development team however this document services as a getting started guide
 for those who wish to trot on a unsupported path.
 
-### Performance
+> Any bug reports that only reproduce on JRuby are likely to not get fixed 
+> or potentially even closed.
+
+## Performance
 
 TBD
 
-### Gotchas
+## Gotchas
 
-#### RBI for Java Code
+### RBI for Java Code
 
 The `srb` tool can auto-generate RBI files for your gems however it cannot
-do so for your Java code :(
+do so for your Java code.
 
 > The technical reason is because the Java code is never officially `required`
 > so that it never ends up being triggered through TracePoint
 
-To move past the woes of the type-checker, I have found the following hand
-curated pattern for Java RBI files good:
+To move past the woes of the type-checker, the following hand
+curated pattern for Java RBI files has worked well:
 
 ```
 tree ./sorbet
@@ -37,11 +40,10 @@ tree ./sorbet
     |-------------  org_slf4j.rbi
 ```
 
-Basically, I take the _maven coordinates_ for a given java packet (replaced with
+Essentially, take the _maven coordinates_ for a given java package (replaced with
 underscores) and hand-create an RBI file for it.
 
-You can put as much as you need depending on the `# typed:` sigils you are aiming
-for.
+Put as much as you need depending on the `# typed:` sigils you are aiming for.
 
 ```ruby
 # typed: strong
@@ -59,7 +61,7 @@ module Java
 end
 ```
 
-#### Installing sorbet-static
+### Installing sorbet-static
 
 You might have added `sorbet` to your Gemfile but noticed that sorbet-static
 was not included and that `srb` failed!
@@ -77,7 +79,7 @@ gem fetch sorbet-static --platform universal-darwin
 gem install --local sorbet-static-*-universal-darwin-*.gem
 ```
 
-#### Debug Flag
+### Debug Flag
 
 When running the `srb` command to generate RBI files for any gems, you may depend
 on -- make sure to have the `--debug` flag enabled.
@@ -96,7 +98,7 @@ jruby -J-Djruby.objectspace.enabled=true -J-Djruby.compile.mode=OFF \
        -J-Djruby.debug.fullTrace=true --debug srb rbi gems
 ```
 
-#### Naming Convention For Java code
+### Naming Convention For Java code
 
 You can reference a Java class in JRuby in a couple of different ways.
 
