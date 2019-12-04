@@ -43,7 +43,7 @@ vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blo
 }
 
 void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const BasicBlockMap &blockMap,
-                    UnorderedMap<core::LocalVariable, Alias> &aliases) {
+                    UnorderedMap<core::LocalVariable, Alias> &aliases, bool disableBacktrace) {
     // this function effectively generate an optimized build of
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(cs);
@@ -259,6 +259,12 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             builder.CreateBr(fillFromDefaultBlocks[numOptionalArgs]);
             builder.SetInsertPoint(fillFromDefaultBlocks[numOptionalArgs]);
         }
+        {
+            // Switch the current control frame from a C frame to a Ruby-esque one
+            if (!disableBacktrace) {
+                Payload::switchControlFrameToRubyFrame(cs, builder, cfg.symbol);
+            }
+        }
 
         if (!isBlock) {
             // jump to user body
@@ -469,14 +475,10 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &bloc
 }
 
 void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
-                         const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                         bool disableBacktrace) {
+                         const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases) {
     cs.functionEntryInitializers = blockMap.functionInitializersByFunction[0];
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(blockMap.sigVerificationBlock);
-    if (!disableBacktrace) {
-        Payload::switchControlFrameToRubyFrame(cs, builder, cfg.symbol);
-    }
 
     int argId = -1;
     for (auto &argInfo : cfg.symbol.data(cs)->arguments()) {
@@ -528,8 +530,8 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
-    setupArguments(cs, cfg, md, blockMap, aliases);
-    emitSigVerification(cs, cfg, md, blockMap, aliases, disableBacktrace);
+    setupArguments(cs, cfg, md, blockMap, aliases, disableBacktrace);
+    emitSigVerification(cs, cfg, md, blockMap, aliases);
 
     emitUserBody(cs, cfg, blockMap, aliases);
     emitPostProcess(cs, cfg, blockMap, aliases);
