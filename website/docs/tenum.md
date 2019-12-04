@@ -301,7 +301,7 @@ view full example on sorbet.run</a>
 Now we can use the type `DayOfWeek` for "any day of the week" or the types
 `Weekday` & `Weekend` in places where only one specific enum is allowed.
 
-There are a couple limitations with this approach.
+There are a couple limitations with this approach:
 
 1.  Sorbet doesn't allow calling methods on `T::Enum` when we have a value of
     type `DayOfWeek`. Since it's an interface, only the methods defined that
