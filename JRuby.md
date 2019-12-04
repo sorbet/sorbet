@@ -5,7 +5,7 @@
 This document serves as a getting-started guide for those wishing to use
 [Sorbet](https://sorbet.org) with [JRuby](https://www.jruby.org/).
 
-The use of Sorbet on the JVM is not **officially** supported by the Sorbet
+The use of Sorbet on the JVM is **NOT SUPPORTED** by the Sorbet
 development team however this document services as a getting started guide
 for those who wish to trot on a unsupported path.
 
@@ -114,4 +114,3 @@ by removing the dots and converting to CamelCase.
 
 If you don't, Sorbet will think that Java class use such as `org.foo.department.Widget`
 are a series of method calls.
-
