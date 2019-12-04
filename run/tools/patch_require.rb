@@ -13,6 +13,8 @@ module Kernel
       if name.start_with?('./')
         root_name = root_name[2..-1]
       end
+      # Our paths are terrible...
+      root_name = root_name.gsub(/.*test_testdata/, 'test_testdata')
       if RUBY_PLATFORM == "x86_64-linux"
         suffix = '.so'
       elsif RUBY_PLATFORM == "x86_64-darwin18"

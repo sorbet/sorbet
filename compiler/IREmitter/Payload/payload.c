@@ -620,7 +620,7 @@ struct rb_compile_option_struct {
     int debug_level;
 };
 
-void sorbet_pushControlFrame(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE lineno) {
+void sorbet_pushControlFrame(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath, VALUE lineno) {
     rb_execution_context_t *ec = GET_EC();
     rb_vm_pop_frame(ec);
 
@@ -629,7 +629,7 @@ void sorbet_pushControlFrame(VALUE recv, VALUE funcName, ID func, VALUE filename
     VALUE block_handler = rb_vm_frame_block_handler(cfp);
     const rb_compile_option_t COMPILE_OPTION_FALSE = {0};
     const rb_iseq_t *iseq =
-        rb_iseq_new_with_opt(0, funcName, filename, Qnil, lineno, 0, ISEQ_TYPE_TOP, &COMPILE_OPTION_FALSE);
+        rb_iseq_new_with_opt(0, funcName, filename, realpath, lineno, 0, ISEQ_TYPE_TOP, &COMPILE_OPTION_FALSE);
     const rb_method_entry_t *me = rb_method_entry_at(recv, func);
     const VALUE *pc = iseq->body->iseq_encoded;
     sorbet_vm_push_frame(ec, iseq, VM_FRAME_MAGIC_TOP | VM_ENV_FLAG_LOCAL | VM_FRAME_FLAG_FINISH, recv, block_handler,

@@ -268,10 +268,13 @@ void Payload::pushControlFrame(CompilerState &cs, llvm::IRBuilderBase &build, co
     auto recv = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
     auto filename = sym.data(cs)->loc().file().data(cs).path();
     auto filenameValue = Payload::cPtrToRubyString(cs, builder, filename);
+    // TODO make this a real absoluate path
+    auto realpath = fmt::format("{}{}", cs.gs.pathPrefix, filename);
+    auto realpathValue = Payload::cPtrToRubyString(cs, builder, realpath);
     auto lineno = sym.data(cs)->loc().position(cs).first.line;
     auto linenoValue = Payload::longToRubyValue(cs, builder, lineno);
     builder.CreateCall(cs.module->getFunction("sorbet_pushControlFrame"),
-                       {recv, funcNameValue, funcNameId, filenameValue, linenoValue});
+                       {recv, funcNameValue, funcNameId, filenameValue, realpathValue, linenoValue});
 }
 
 void Payload::popControlFrame(CompilerState &cs, llvm::IRBuilderBase &build) {
