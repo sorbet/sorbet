@@ -34,7 +34,7 @@ pushd tmp/bench &>/dev/null
     minutes_baseline=$(cut -d "m" -f1 < baseline_time)
     seconds_baseline=$(cut -d "m" -f2 < baseline_time | cut -d "s" -f 1)
     baseline_time=$(echo "scale=3;(${minutes_baseline} * 60 + ${seconds_baseline})/10"| bc)
-    echo -e "baseline:\t$baseline_time"
+    echo -e "ruby vm startup time:\t$baseline_time"
 popd &>/dev/null
 
 
