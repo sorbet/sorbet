@@ -859,13 +859,11 @@ VALUE sorbet_rb_int_lt(VALUE recv, int argc, const VALUE *const restrict argv) {
             return rb_big_cmp(y, recv) == INT2FIX(+1) ? Qtrue : Qfalse;
         } else if (RB_TYPE_P(y, T_FLOAT)) {
             return rb_integer_float_cmp(recv, y) == INT2FIX(-1) ? Qtrue : Qfalse;
-        } else {
-            return rb_num_coerce_relop(recv, y, '<');
         }
     } else if (RB_TYPE_P(recv, T_BIGNUM)) {
         return rb_big_lt(recv, y);
     }
-    return Qnil;
+    return rb_num_coerce_relop(recv, y, '<');
 }
 
 VALUE sorbet_rb_int_le(VALUE recv, int argc, const VALUE *const restrict argv) {
@@ -873,17 +871,16 @@ VALUE sorbet_rb_int_le(VALUE recv, int argc, const VALUE *const restrict argv) {
     VALUE y = argv[0];
     if (LIKELY(FIXNUM_P(recv))) {
         if (LIKELY(FIXNUM_P(y))) {
-            if (FIX2LONG(recv) <= FIX2LONG(y)) {
-                return Qtrue;
-            }
-            return Qfalse;
-        } else {
-            return rb_num_coerce_relop(recv, y, idLE);
+            return FIX2LONG(recv) <= FIX2LONG(y) ? Qtrue : Qfalse;
+        } else if (RB_TYPE_P(y, T_BIGNUM)) {
+            return rb_big_cmp(y, recv) != INT2FIX(-1) ? Qtrue : Qfalse;
+        } else if (RB_TYPE_P(y, T_FLOAT)) {
+            return rb_integer_float_cmp(recv, y) != INT2FIX(+1) ? Qtrue : Qfalse;
         }
     } else if (RB_TYPE_P(recv, T_BIGNUM)) {
         return rb_big_le(recv, y);
     }
-    return Qnil;
+    return rb_num_coerce_relop(recv, y, idLE);
 }
 
 VALUE sorbet_rb_int_equal(VALUE recv, int argc, const VALUE *const restrict argv) {
