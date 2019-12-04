@@ -40,7 +40,7 @@ tree ./sorbet
 Basically, I take the _maven coordinates_ for a given java packet (replaced with
 underscores) and hand-create an RBI file for it.
 
-You can put as much as you need depending on the `#typed` sigils you are aiming
+You can put as much as you need depending on the `# typed:` sigils you are aiming
 for.
 
 ```ruby
