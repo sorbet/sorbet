@@ -581,18 +581,15 @@ void sorbet_switchControlFrameToRubyFrame(VALUE recv, VALUE funcName, ID func, V
     cfp->pc = pc;
 }
 
-void sorbet_setLineNumber(VALUE lineno) {
-    /*
-      rb_execution_context_t *ec = GET_EC();
-      const rb_control_frame_t *cfp = ec->cfp;
-      const rb_iseq_t *iseq = cfp->iseq;
-      const struct rb_iseq_constant_body *const body = iseq->body;
-      // size_t size = body->insns_info.size;
-      unsigned int *positions = body->insns_info.positions;
-      if (positions) {
-          positions[0] = lineno;
-      }
-      */
+struct iseq_insn_info_entry {
+    int line_no;
+    rb_event_flag_t events;
+};
+
+void sorbet_setLineNumber(int lineno) {
+    rb_execution_context_t *ec = GET_EC();
+    struct iseq_insn_info_entry *body = (struct iseq_insn_info_entry *)ec->cfp->iseq->body->insns_info.body;
+    body->line_no = lineno;
 }
 
 // ****

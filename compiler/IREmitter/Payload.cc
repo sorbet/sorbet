@@ -283,8 +283,8 @@ void Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core:
     }
     auto &builder = builderCast(build);
     auto lineno = loc.position(cs).first.line;
-    auto linenoValue = Payload::longToRubyValue(cs, builder, lineno);
-    builder.CreateCall(cs.module->getFunction("sorbet_setLineNumber"), {linenoValue});
+    builder.CreateCall(cs.module->getFunction("sorbet_setLineNumber"),
+                       {llvm::ConstantInt::get(cs, llvm::APInt(32, lineno))});
 }
 
 namespace {
