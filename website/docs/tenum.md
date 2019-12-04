@@ -242,6 +242,95 @@ into `T::Enum`, and without mutating state.
 > If you need exhaustiveness over a set of cases which do carry data, see
 > [Approximating algebraic data types](sealed.md#approximating-algebraic-data-types).
 
+## Defining one enum as a subset of another enum
+
+One thing that comes up from time to time is having one large enum, but knowing
+that in certain places only a subset of those enums are valid. With `T::Enum`,
+there are a number of ways to encode this:
+
+1.  By using a [sealed module](sealed.md)
+2.  By explicitly converting between multiple enums
+
+Let's elaborate on those two one at a time.
+
+All the examples below will be for days of the week. There are 7 days total, but
+there are two clear groups: weekdays and weekends, and sometimes it makes sense
+to have the type system enforce that a value can **only** be a weekday enum
+value or **only** a weekend enum value.
+
+### By using a sealed module
+
+[Sealed modules](sealed.md) are a way to limit where a module is allowed to be
+included. See [the docs](sealed.md) if you'd like to learn more, but here's how
+they can be used together with `T::Enum`:
+
+```ruby
+# (1) Define an interface / module
+module DayOfWeek
+  extend T::Helpers
+  sealed!
+end
+
+class Weekday < T::Enum
+  # (2) include DayOfWeek when defining the Weekday enum
+  include DayOfWeek
+
+  enums do
+    Monday = new
+    Tuesday = new
+    Wednesday = new
+    Thursday = new
+    Friday = new
+  end
+end
+
+class Weekend < T::Enum
+  # (3) ditto
+  include DayOfWeek
+
+  enums do
+    Saturday = new
+    Sunday = new
+  end
+end
+```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Module%0A%20%20include%20T%3A%3ASig%0Aend%0A%0Amodule%20DayOfWeek%0A%20%20extend%20T%3A%3AHelpers%0A%20%20sealed!%0Aend%0A%0Aclass%20Weekday%20%3C%20T%3A%3AEnum%0A%20%20include%20DayOfWeek%0A%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%20%20end%0Aend%0A%0Aclass%20Weekend%20%3C%20T%3A%3AEnum%0A%20%20include%20DayOfWeek%0A%0A%20%20enums%20do%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0Aend%0A%0Asig%20%7Bparams(day%3A%20DayOfWeek).void%7D%0Adef%20foo(day)%0A%20%20case%20day%0A%20%20when%20Weekday%3A%3AMonday%20then%20nil%0A%20%20when%20Weekday%3A%3ATuesday%20then%20nil%0A%20%20when%20Weekday%3A%3AWednesday%20then%20nil%0A%20%20when%20Weekday%3A%3AThursday%20then%20nil%0A%20%20when%20Weekday%3A%3AFriday%20then%20nil%0A%0A%20%20when%20Weekend%3A%3ASaturday%20then%20nil%0A%20%20%23when%20Weekend%3A%3ASunday%20then%20nil%0A%20%20else%20T.absurd(day)%0A%20%20end%0Aend%0A">→
+view full example on sorbet.run</a>
+
+Now we can use the type `DayOfWeek` for "any day of the week" or the types
+`Weekday` & `Weekend` in places where only one specific enum is allowed.
+
+There are a couple limitations with this approach.
+
+1.  Sorbet doesn't allow calling methods on `T::Enum` when we have a value of
+    type `DayOfWeek`. Since it's an interface, only the methods defined that
+    interface can be called (so for example `day_of_week.serialize` doesn't type
+    check).
+
+    One way to get around this is to declare [abstract methods](abstract.md) for
+    all of the `T::Enum` methods that we'd like to be able to call (`serialize`,
+    for example).
+
+2.  It's not the case that `T.class_of(DayOfWeek)` is a valid
+    `T.class_of(T::Enum)`. This means that we can't pass `DayOfWeek` (the class
+    object) to a method that calls `enum_class.values` on whatever enum class it
+    was given to list the valid values of an enum.
+
+The second approach addresses these two issues, at the cost of some verbosity.
+
+### By explicitly converting between multiple enums
+
+The second approach is to define multiple enums, each of which overlap values
+with the other enums, and to define explicit conversion functions between the
+enums:
+
+<a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Module%0A%20%20include%20T%3A%3ASig%0Aend%0A%0Aclass%20DayOfWeek%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(T.nilable(Weekday))%7D%0A%20%20def%20to_weekday%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Monday%20then%20Weekday%3A%3AMonday%0A%20%20%20%20when%20Tuesday%20then%20Weekday%3A%3ATuesday%0A%20%20%20%20when%20Wednesday%20then%20Weekday%3A%3AWednesday%0A%20%20%20%20when%20Thursday%20then%20Weekday%3A%3AThursday%0A%20%20%20%20when%20Friday%20then%20Weekday%3A%3AFriday%0A%20%20%20%20when%20Saturday%20then%20nil%0A%20%20%20%20when%20Sunday%20then%20nil%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0A%0A%20%20sig%20%7Breturns(T.nilable(Weekend))%7D%0A%20%20def%20to_weekend%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Saturday%20then%20Weekend%3A%3ASaturday%0A%20%20%20%20when%20Sunday%20then%20Weekend%3A%3ASunday%0A%20%20%20%20when%20Monday%20then%20nil%0A%20%20%20%20when%20Tuesday%20then%20nil%0A%20%20%20%20when%20Wednesday%20then%20nil%0A%20%20%20%20when%20Thursday%20then%20nil%0A%20%20%20%20when%20Friday%20then%20nil%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0Aclass%20Weekday%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(DayOfWeek)%7D%0A%20%20def%20to_day_of_week%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Monday%20then%20DayOfWeek%3A%3AMonday%0A%20%20%20%20when%20Tuesday%20then%20DayOfWeek%3A%3ATuesday%0A%20%20%20%20when%20Wednesday%20then%20DayOfWeek%3A%3AWednesday%0A%20%20%20%20when%20Thursday%20then%20DayOfWeek%3A%3AThursday%0A%20%20%20%20when%20Friday%20then%20DayOfWeek%3A%3AFriday%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0Aclass%20Weekend%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(DayOfWeek)%7D%0A%20%20def%20to_day_of_week%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Saturday%20then%20DayOfWeek%3A%3ASaturday%0A%20%20%20%20when%20Sunday%20then%20DayOfWeek%3A%3ASunday%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A">→
+View full example on sorbet.run</a>
+
+As you can see, this example is significantly more verbose, but it is an
+alternative when the type safety is worth the tradeoff.
+
 ## What's next?
 
 - [Union types](union-types.md)
