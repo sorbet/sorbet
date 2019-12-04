@@ -277,11 +277,6 @@ void Payload::switchControlFrameToRubyFrame(CompilerState &cs, llvm::IRBuilderBa
                        {recv, funcNameValue, funcNameId, filenameValue, realpathValue, linenoValue});
 }
 
-void Payload::popControlFrame(CompilerState &cs, llvm::IRBuilderBase &build) {
-    auto &builder = builderCast(build);
-    builder.CreateCall(cs.module->getFunction("sorbet_popControlFrame"), {});
-}
-
 void Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc) {
     if (!loc.exists()) {
         return;

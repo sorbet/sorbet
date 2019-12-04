@@ -581,8 +581,6 @@ void sorbet_switchControlFrameToRubyFrame(VALUE recv, VALUE funcName, ID func, V
     cfp->pc = pc;
 }
 
-void sorbet_popControlFrame() {}
-
 void sorbet_setLineNumber(VALUE lineno) {
     /*
       rb_execution_context_t *ec = GET_EC();

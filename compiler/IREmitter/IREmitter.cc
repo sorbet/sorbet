@@ -328,7 +328,6 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     [&](cfg::Return *i) {
                         ENFORCE(bb->rubyBlockId == 0, "returns through multiple stacks not implemented");
                         isTerminated = true;
-                        Payload::popControlFrame(cs, builder);
                         auto var = Payload::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
                         Payload::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
                         builder.CreateBr(blockMap.postProcessBlock);

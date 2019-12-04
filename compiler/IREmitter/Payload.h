@@ -34,7 +34,6 @@ public:
     static llvm::Value *typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                  const core::TypePtr &type);
     static void switchControlFrameToRubyFrame(CompilerState &cs, llvm::IRBuilderBase &builder, core::SymbolRef sym);
-    static void popControlFrame(CompilerState &cs, llvm::IRBuilderBase &builder);
     static void setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc);
 
     static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
