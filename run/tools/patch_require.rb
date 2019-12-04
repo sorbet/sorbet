@@ -30,7 +30,7 @@ module Kernel
       if ENV['force_compile']
         raise "No compiled extension: #{cext}"
       end
-      $stderr.puts "SorbetLLVM interpreting: #{name}"
+      # $stderr.puts "SorbetLLVM interpreting: #{name}"
     end
 
     sorbet_old_require(name)
