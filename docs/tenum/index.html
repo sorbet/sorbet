@@ -250,6 +250,79 @@ into <code>T::Enum</code>, and without mutating state.</p>
 <p>If you need exhaustiveness over a set of cases which do carry data, see
 <a href="/docs/sealed#approximating-algebraic-data-types">Approximating algebraic data types</a>.</p>
 </blockquote>
+<h2><a class="anchor" aria-hidden="true" id="defining-one-enum-as-a-subset-of-another-enum"></a><a href="#defining-one-enum-as-a-subset-of-another-enum" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining one enum as a subset of another enum</h2>
+<p>One thing that comes up from time to time is having one large enum, but knowing
+that in certain places only a subset of those enums are valid. With <code>T::Enum</code>,
+there are a number of ways to encode this:</p>
+<ol>
+<li>By using a <a href="/docs/sealed">sealed module</a></li>
+<li>By explicitly converting between multiple enums</li>
+</ol>
+<p>Let’s elaborate on those two one at a time.</p>
+<p>All the examples below will be for days of the week. There are 7 days total, but
+there are two clear groups: weekdays and weekends, and sometimes it makes sense
+to have the type system enforce that a value can <strong>only</strong> be a weekday enum
+value or <strong>only</strong> a weekend enum value.</p>
+<h3><a class="anchor" aria-hidden="true" id="by-using-a-sealed-module"></a><a href="#by-using-a-sealed-module" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>By using a sealed module</h3>
+<p><a href="/docs/sealed">Sealed modules</a> are a way to limit where a module is allowed to be
+included. See <a href="/docs/sealed">the docs</a> if you’d like to learn more, but here’s how
+they can be used together with <code>T::Enum</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) Define an interface / module</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">DayOfWeek</span></span>
+  extend T::Helpers
+  sealed!
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Weekday</span> &lt; T::Enum</span>
+  <span class="hljs-comment"># (2) include DayOfWeek when defining the Weekday enum</span>
+  <span class="hljs-keyword">include</span> DayOfWeek
+
+  enums <span class="hljs-keyword">do</span>
+    Monday = new
+    Tuesday = new
+    Wednesday = new
+    Thursday = new
+    Friday = new
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Weekend</span> &lt; T::Enum</span>
+  <span class="hljs-comment"># (3) ditto</span>
+  <span class="hljs-keyword">include</span> DayOfWeek
+
+  enums <span class="hljs-keyword">do</span>
+    Saturday = new
+    Sunday = new
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Module%0A%20%20include%20T%3A%3ASig%0Aend%0A%0Amodule%20DayOfWeek%0A%20%20extend%20T%3A%3AHelpers%0A%20%20sealed!%0Aend%0A%0Aclass%20Weekday%20%3C%20T%3A%3AEnum%0A%20%20include%20DayOfWeek%0A%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%20%20end%0Aend%0A%0Aclass%20Weekend%20%3C%20T%3A%3AEnum%0A%20%20include%20DayOfWeek%0A%0A%20%20enums%20do%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0Aend%0A%0Asig%20%7Bparams(day%3A%20DayOfWeek).void%7D%0Adef%20foo(day)%0A%20%20case%20day%0A%20%20when%20Weekday%3A%3AMonday%20then%20nil%0A%20%20when%20Weekday%3A%3ATuesday%20then%20nil%0A%20%20when%20Weekday%3A%3AWednesday%20then%20nil%0A%20%20when%20Weekday%3A%3AThursday%20then%20nil%0A%20%20when%20Weekday%3A%3AFriday%20then%20nil%0A%0A%20%20when%20Weekend%3A%3ASaturday%20then%20nil%0A%20%20%23when%20Weekend%3A%3ASunday%20then%20nil%0A%20%20else%20T.absurd(day)%0A%20%20end%0Aend%0A">→
+view full example on sorbet.run</a></p>
+<p>Now we can use the type <code>DayOfWeek</code> for “any day of the week” or the types
+<code>Weekday</code> &amp; <code>Weekend</code> in places where only one specific enum is allowed.</p>
+<p>There are a couple limitations with this approach:</p>
+<ol>
+<li><p>Sorbet doesn’t allow calling methods on <code>T::Enum</code> when we have a value of
+type <code>DayOfWeek</code>. Since it’s an interface, only the methods defined that
+interface can be called (so for example <code>day_of_week.serialize</code> doesn’t type
+check).</p>
+<p>One way to get around this is to declare <a href="/docs/abstract">abstract methods</a> for
+all of the <code>T::Enum</code> methods that we’d like to be able to call (<code>serialize</code>,
+for example).</p></li>
+<li><p>It’s not the case that <code>T.class_of(DayOfWeek)</code> is a valid
+<code>T.class_of(T::Enum)</code>. This means that we can’t pass <code>DayOfWeek</code> (the class
+object) to a method that calls <code>enum_class.values</code> on whatever enum class it
+was given to list the valid values of an enum.</p></li>
+</ol>
+<p>The second approach addresses these two issues, at the cost of some verbosity.</p>
+<h3><a class="anchor" aria-hidden="true" id="by-explicitly-converting-between-multiple-enums"></a><a href="#by-explicitly-converting-between-multiple-enums" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>By explicitly converting between multiple enums</h3>
+<p>The second approach is to define multiple enums, each of which overlap values
+with the other enums, and to define explicit conversion functions between the
+enums:</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Module%0A%20%20include%20T%3A%3ASig%0Aend%0A%0Aclass%20DayOfWeek%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(T.nilable(Weekday))%7D%0A%20%20def%20to_weekday%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Monday%20then%20Weekday%3A%3AMonday%0A%20%20%20%20when%20Tuesday%20then%20Weekday%3A%3ATuesday%0A%20%20%20%20when%20Wednesday%20then%20Weekday%3A%3AWednesday%0A%20%20%20%20when%20Thursday%20then%20Weekday%3A%3AThursday%0A%20%20%20%20when%20Friday%20then%20Weekday%3A%3AFriday%0A%20%20%20%20when%20Saturday%20then%20nil%0A%20%20%20%20when%20Sunday%20then%20nil%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0A%0A%20%20sig%20%7Breturns(T.nilable(Weekend))%7D%0A%20%20def%20to_weekend%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Saturday%20then%20Weekend%3A%3ASaturday%0A%20%20%20%20when%20Sunday%20then%20Weekend%3A%3ASunday%0A%20%20%20%20when%20Monday%20then%20nil%0A%20%20%20%20when%20Tuesday%20then%20nil%0A%20%20%20%20when%20Wednesday%20then%20nil%0A%20%20%20%20when%20Thursday%20then%20nil%0A%20%20%20%20when%20Friday%20then%20nil%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0Aclass%20Weekday%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(DayOfWeek)%7D%0A%20%20def%20to_day_of_week%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Monday%20then%20DayOfWeek%3A%3AMonday%0A%20%20%20%20when%20Tuesday%20then%20DayOfWeek%3A%3ATuesday%0A%20%20%20%20when%20Wednesday%20then%20DayOfWeek%3A%3AWednesday%0A%20%20%20%20when%20Thursday%20then%20DayOfWeek%3A%3AThursday%0A%20%20%20%20when%20Friday%20then%20DayOfWeek%3A%3AFriday%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0Aclass%20Weekend%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(DayOfWeek)%7D%0A%20%20def%20to_day_of_week%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Saturday%20then%20DayOfWeek%3A%3ASaturday%0A%20%20%20%20when%20Sunday%20then%20DayOfWeek%3A%3ASunday%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A">→
+View full example on sorbet.run</a></p>
+<p>As you can see, this example is significantly more verbose, but it is an
+alternative when the type safety is worth the tradeoff.</p>
 <h2><a class="anchor" aria-hidden="true" id="what-s-next"></a><a href="#what-s-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
 <ul>
 <li><p><a href="/docs/union-types">Union types</a></p>
@@ -264,7 +337,7 @@ definitions.</p></li>
 <p>For union types, sealed classes, and enums, Sorbet has powerful exhaustiveness
 checking that can statically catch when certain cases have not been handled.</p></li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/tstruct"><span class="arrow-prev">← </span><span>T::Struct</span></a><a class="docs-next button" href="/docs/untyped"><span>T.untyped</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#exhaustiveness">Exhaustiveness</a></li><li><a href="#converting-enums-to-other-types">Converting enums to other types</a></li><li><a href="#listing-the-values-of-an-enum">Listing the values of an enum</a></li><li><a href="#attaching-metadata-to-an-enum">Attaching metadata to an enum</a></li><li><a href="#what-s-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/tstruct"><span class="arrow-prev">← </span><span>T::Struct</span></a><a class="docs-next button" href="/docs/untyped"><span>T.untyped</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#exhaustiveness">Exhaustiveness</a></li><li><a href="#converting-enums-to-other-types">Converting enums to other types</a></li><li><a href="#listing-the-values-of-an-enum">Listing the values of an enum</a></li><li><a href="#attaching-metadata-to-an-enum">Attaching metadata to an enum</a></li><li><a href="#defining-one-enum-as-a-subset-of-another-enum">Defining one enum as a subset of another enum</a><ul class="toc-headings"><li><a href="#by-using-a-sealed-module">By using a sealed module</a></li><li><a href="#by-explicitly-converting-between-multiple-enums">By explicitly converting between multiple enums</a></li></ul></li><li><a href="#what-s-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
