@@ -881,6 +881,12 @@ VALUE sorbet_rb_int_lt(VALUE recv, int argc, const VALUE *const restrict argv) {
     return rb_num_coerce_relop(recv, y, '<');
 }
 
+VALUE sorbet_rb_int_ge(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    VALUE res = sorbet_rb_int_lt(recv, argc, argv);
+    return res == Qtrue ? Qfalse : Qtrue;
+}
+
 VALUE sorbet_rb_int_le(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
     VALUE res = sorbet_rb_int_gt(recv, argc, argv);
