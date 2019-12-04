@@ -4,7 +4,7 @@ set -euo pipefail
 
 discovery=1
 if [[ $# -eq 1 ]]; then
-  input=$(realpath $1)
+  input=$(realpath "$1")
   discovery=""
 fi
 
@@ -26,7 +26,7 @@ if [[ "1" == "$discovery" ]]; then
       rb_src+=("$line")
   done < <(find "${paths[@]}" -name '*.rb' | grep -v disabled | sort)
 else
-  rb_src=($input)
+  rb_src=("$input")
 fi
 
 pushd tmp/bench &>/dev/null
