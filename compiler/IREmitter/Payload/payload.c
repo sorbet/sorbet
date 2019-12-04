@@ -569,7 +569,7 @@ struct rb_compile_option_struct {
     int debug_level;
 };
 
-void sorbet_switchControlFrameToRubyFrame(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath,
+void sorbet_setRubyStackFrame(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath,
                                           VALUE lineno) {
     rb_execution_context_t *ec = GET_EC();
     rb_control_frame_t *cfp = ec->cfp;

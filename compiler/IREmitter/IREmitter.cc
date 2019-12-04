@@ -263,7 +263,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         {
             // Switch the current control frame from a C frame to a Ruby-esque one
             if (!disableBacktrace) {
-                Payload::switchControlFrameToRubyFrame(cs, builder, cfg.symbol);
+                Payload::setRubyStackFrame(cs, builder, cfg.symbol);
             }
         }
 

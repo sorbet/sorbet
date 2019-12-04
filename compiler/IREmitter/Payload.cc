@@ -259,7 +259,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
     return ret;
 }
 
-void Payload::switchControlFrameToRubyFrame(CompilerState &cs, llvm::IRBuilderBase &build, core::SymbolRef sym) {
+void Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build, core::SymbolRef sym) {
     auto &builder = builderCast(build);
     auto funcName =
         IREmitterHelpers::isStaticInit(cs, sym) ? "<top (required)>" : sym.data(cs)->name.data(cs)->shortName(cs);
@@ -273,7 +273,7 @@ void Payload::switchControlFrameToRubyFrame(CompilerState &cs, llvm::IRBuilderBa
     auto realpathValue = Payload::cPtrToRubyString(cs, builder, realpath);
     auto lineno = sym.data(cs)->loc().position(cs).first.line;
     auto linenoValue = Payload::longToRubyValue(cs, builder, lineno);
-    builder.CreateCall(cs.module->getFunction("sorbet_switchControlFrameToRubyFrame"),
+    builder.CreateCall(cs.module->getFunction("sorbet_setRubyStackFrame"),
                        {recv, funcNameValue, funcNameId, filenameValue, realpathValue, linenoValue});
 }
 
