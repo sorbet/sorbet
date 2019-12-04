@@ -281,7 +281,7 @@ core::LocalVariable returnValue(CompilerState &cs) {
 }
 
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
-                  UnorderedMap<core::LocalVariable, Alias> &aliases) {
+                  UnorderedMap<core::LocalVariable, Alias> &aliases, bool disableBacktrace) {
     llvm::IRBuilder<> builder(cs);
     UnorderedSet<core::LocalVariable> loadYieldParamsResults; // methods calls on these are ignored
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
@@ -292,7 +292,9 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
         builder.SetInsertPoint(block);
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
-                Payload::setLineNumber(cs, builder, bind.loc);
+                if (!disableBacktrace) {
+                    Payload::setLineNumber(cs, builder, bind.loc);
+                }
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
@@ -534,7 +536,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     setupArguments(cs, cfg, md, blockMap, aliases, disableBacktrace);
     emitSigVerification(cs, cfg, md, blockMap, aliases);
 
-    emitUserBody(cs, cfg, blockMap, aliases);
+    emitUserBody(cs, cfg, blockMap, aliases, disableBacktrace);
     emitPostProcess(cs, cfg, blockMap, aliases);
     for (int funId = 0; funId < blockMap.functionInitializersByFunction.size(); funId++) {
         builder.SetInsertPoint(blockMap.functionInitializersByFunction[funId]);
