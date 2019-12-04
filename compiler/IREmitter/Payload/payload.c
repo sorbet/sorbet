@@ -11,6 +11,7 @@
 
 // These are special "public" headers which don't live in include/ruby for some
 // reason
+#include "id.h"
 #include "internal.h"
 #include "ruby.h"
 
@@ -872,7 +873,22 @@ VALUE sorbet_rb_int_div(VALUE recv, int argc, const VALUE *const restrict argv) 
 
 VALUE sorbet_rb_int_gt(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
-    return rb_int_gt(recv, argv[0]);
+    VALUE y = argv[0];
+    if (LIKELY(FIXNUM_P(recv))) {
+        if (LIKELY(FIXNUM_P(y))) {
+            if (FIX2LONG(recv) > FIX2LONG(y)) {
+                return Qtrue;
+            }
+            return Qfalse;
+        } else if (RB_TYPE_P(y, T_BIGNUM)) {
+            return rb_big_cmp(y, recv) == INT2FIX(-1) ? Qtrue : Qfalse;
+        } else if (RB_TYPE_P(y, T_FLOAT)) {
+            return rb_integer_float_cmp(recv, y) == INT2FIX(+1) ? Qtrue : Qfalse;
+        }
+    } else if (RB_TYPE_P(recv, T_BIGNUM)) {
+        return rb_big_gt(recv, y);
+    }
+    return rb_num_coerce_relop(recv, y, '>');
 }
 
 VALUE sorbet_rb_int_lt(VALUE recv, int argc, const VALUE *const restrict argv) {
@@ -888,13 +904,23 @@ VALUE sorbet_rb_int_lt(VALUE recv, int argc, const VALUE *const restrict argv) {
             return rb_big_cmp(y, recv) == INT2FIX(+1) ? Qtrue : Qfalse;
         } else if (RB_TYPE_P(y, T_FLOAT)) {
             return rb_integer_float_cmp(recv, y) == INT2FIX(-1) ? Qtrue : Qfalse;
-        } else {
-            return rb_num_coerce_relop(recv, y, '<');
         }
     } else if (RB_TYPE_P(recv, T_BIGNUM)) {
         return rb_big_lt(recv, y);
     }
-    return Qnil;
+    return rb_num_coerce_relop(recv, y, '<');
+}
+
+VALUE sorbet_rb_int_ge(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    VALUE res = sorbet_rb_int_lt(recv, argc, argv);
+    return res == Qtrue ? Qfalse : Qtrue;
+}
+
+VALUE sorbet_rb_int_le(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    VALUE res = sorbet_rb_int_gt(recv, argc, argv);
+    return res == Qtrue ? Qfalse : Qtrue;
 }
 
 VALUE sorbet_rb_int_equal(VALUE recv, int argc, const VALUE *const restrict argv) {
