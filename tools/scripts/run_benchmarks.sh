@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+discovery=1
+if [[ $# -eq 1 ]]; then
+  input=$(realpath $1)
+  discovery=""
+fi
+
 cd "$(dirname "$0")"
 cd ../..
 # we are now at the repo root.
@@ -15,12 +21,25 @@ bazel run @ruby_2_6_3//:ruby -c opt -- --version
 paths=(test/testdata/ruby_benchmark)
 
 rb_src=()
-while IFS='' read -r line; do
-    rb_src+=("$line")
-done < <(find "${paths[@]}" -name '*.rb' | grep -v disabled | sort)
+if [[ "1" == "$discovery" ]]; then
+  while IFS='' read -r line; do
+      rb_src+=("$line")
+  done < <(find "${paths[@]}" -name '*.rb' | grep -v disabled | sort)
+else
+  rb_src=($input)
+fi
+
+pushd tmp/bench &>/dev/null
+    (time for _ in {1..10}; do ../../bazel-bin/external/ruby_2_6_3/ruby -r ../../run/tools/preamble.rb -e 1 --disable=gems --disable=did_you_mean ; done) 2>&1|grep real | cut -d$'\t' -f 2 > baseline_time
+    minutes_baseline=$(cut -d "m" -f1 < baseline_time)
+    seconds_baseline=$(cut -d "m" -f2 < baseline_time | cut -d "s" -f 1)
+    baseline_time=$(echo "scale=3;(${minutes_baseline} * 60 + ${seconds_baseline})/10"| bc)
+    echo -e "baseline:\t$baseline_time"
+popd &>/dev/null
+
 
 echo -e "source\tinterpreted\tcompiled"
-for this_src in "${rb_src[@]}" DUMMY; do
+for this_src in "${rb_src[@]}"; do
     cp "$this_src" tmp/bench/target.rb
     pushd tmp/bench &>/dev/null
     echo -en "${this_src#test/testdata/ruby_benchmark/}\t"
