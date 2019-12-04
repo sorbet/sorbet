@@ -435,6 +435,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal i64 @"func_<root>.<static-init>$111$block_1"(i64 %firstYieldArgRaw, i64 %captures, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #9 {
 functionEntryInitializers:
+  %0 = alloca i64, align 8
   %callArgs = alloca [2 x i64], align 8
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %arrayExpansionSizeGuard = icmp eq i32 %argc, 1
@@ -442,58 +443,59 @@ functionEntryInitializers:
 
 argArrayExpandArrayTest:                          ; preds = %functionEntryInitializers
   %arg1_maybeExpandToFullArgs = load i64, i64* %argArray, align 8
-  %0 = and i64 %arg1_maybeExpandToFullArgs, 7
-  %1 = icmp ne i64 %0, 0
-  %2 = and i64 %arg1_maybeExpandToFullArgs, -9
-  %3 = icmp eq i64 %2, 0
-  %4 = or i1 %1, %3
-  br i1 %4, label %fillRequiredArgs, label %sorbet_isa_Array.exit
+  %1 = and i64 %arg1_maybeExpandToFullArgs, 7
+  %2 = icmp ne i64 %1, 0
+  %3 = and i64 %arg1_maybeExpandToFullArgs, -9
+  %4 = icmp eq i64 %3, 0
+  %5 = or i1 %2, %4
+  br i1 %5, label %fillRequiredArgs, label %sorbet_isa_Array.exit
 
 sorbet_isa_Array.exit:                            ; preds = %argArrayExpandArrayTest
-  %5 = inttoptr i64 %arg1_maybeExpandToFullArgs to %struct.RBasic*
-  %6 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %5, i64 0, i32 0
-  %7 = load i64, i64* %6, align 8, !tbaa !0
-  %8 = and i64 %7, 33554463
-  %9 = icmp eq i64 %8, 33554439
-  br i1 %9, label %10, label %fillRequiredArgs
+  %6 = inttoptr i64 %arg1_maybeExpandToFullArgs to %struct.RBasic*
+  %7 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %6, i64 0, i32 0
+  %8 = load i64, i64* %7, align 8, !tbaa !0
+  %9 = and i64 %8, 33554463
+  %10 = icmp eq i64 %9, 33554439
+  br i1 %10, label %11, label %fillRequiredArgs
 
-10:                                               ; preds = %sorbet_isa_Array.exit
+11:                                               ; preds = %sorbet_isa_Array.exit
   tail call void @rb_ary_detransient(i64 %arg1_maybeExpandToFullArgs) #13
   br label %fillRequiredArgs
 
-fillRequiredArgs:                                 ; preds = %sorbet_isa_Array.exit, %argArrayExpandArrayTest, %10, %functionEntryInitializers
-  %11 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
-  %12 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %11, i64 0, i32 2
-  %13 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %12, align 8, !tbaa !13
-  %14 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %13, i64 0, i32 2
-  %15 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** %14, align 8, !tbaa !27
-  %16 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %15, i64 0, i32 2
-  %17 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %16, align 8, !tbaa !16
-  %18 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %17, i64 0, i32 5, i32 0
-  %19 = load %struct.iseq_insn_info_entry*, %struct.iseq_insn_info_entry** %18, align 8, !tbaa !30
-  %20 = getelementptr inbounds %struct.iseq_insn_info_entry, %struct.iseq_insn_info_entry* %19, i64 0, i32 0
-  store i32 14, i32* %20, align 4, !tbaa !31
-  %21 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_heey, i64 0, i64 0), i64 4) #13
-  %22 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
-  %23 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %22, i64 0, i32 2
-  %24 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %23, align 8, !tbaa !13
-  %25 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %24, i64 0, i32 2
-  %26 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** %25, align 8, !tbaa !27
-  %27 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %26, i64 0, i32 2
-  %28 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %27, align 8, !tbaa !16
-  %29 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %28, i64 0, i32 5, i32 0
-  %30 = load %struct.iseq_insn_info_entry*, %struct.iseq_insn_info_entry** %29, align 8, !tbaa !30
-  %31 = getelementptr inbounds %struct.iseq_insn_info_entry, %struct.iseq_insn_info_entry* %30, i64 0, i32 0
-  store i32 14, i32* %31, align 4, !tbaa !31
-  %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
-  store i64 %21, i64* %callArgsAddr, align 8
-  %32 = inttoptr i64 %captures to %struct.RTypedData*
-  %33 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %32, i64 0, i32 3
-  %34 = bitcast i8** %33 to %struct.sorbet_Closure**
-  %35 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %34, align 8, !tbaa !34
-  %36 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %35, i64 0, i32 1, i64 0
-  %37 = load i64, i64* %36, align 8
-  %38 = call i64 @rb_funcallv(i64 %37, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #13
+fillRequiredArgs:                                 ; preds = %sorbet_isa_Array.exit, %argArrayExpandArrayTest, %11, %functionEntryInitializers
+  %12 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #13
+  %13 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([44 x i8], [44 x i8]* @"str_test/testdata/compiler/method_with_block.rb", i64 0, i64 0), i64 43) #13
+  %14 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([44 x i8], [44 x i8]* @"str_test/testdata/compiler/method_with_block.rb", i64 0, i64 0), i64 43) #13
+  %15 = bitcast i64* %0 to %struct.rb_compile_option_struct*
+  %16 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
+  %17 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %16, i64 0, i32 2
+  %18 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %17, align 8, !tbaa !13
+  %19 = bitcast i64* %0 to i8*
+  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %19) #13
+  store i64 0, i64* %0, align 8
+  %20 = call %struct.rb_iseq_struct* @rb_iseq_new_with_opt(%struct.rb_ast_body_struct* null, i64 %12, i64 %13, i64 %14, i64 7, %struct.rb_iseq_struct* null, i32 0, %struct.rb_compile_option_struct* nonnull %15) #13
+  %21 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %20, i64 0, i32 2
+  %22 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %21, align 8, !tbaa !16
+  %23 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %22, i64 0, i32 2
+  %24 = bitcast i64** %23 to i64*
+  %25 = load i64, i64* %24, align 8, !tbaa !18
+  %26 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %18, i64 0, i32 2
+  store %struct.rb_iseq_struct* %20, %struct.rb_iseq_struct** %26, align 8, !tbaa !27
+  %27 = bitcast %struct.rb_control_frame_struct* %18 to i64*
+  store i64 %25, i64* %27, align 8, !tbaa !29
+  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %19) #13
+  %28 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
+  %29 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %28, i64 0, i32 2
+  %30 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %29, align 8, !tbaa !13
+  %31 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %30, i64 0, i32 2
+  %32 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** %31, align 8, !tbaa !27
+  %33 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %32, i64 0, i32 2
+  %34 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %33, align 8, !tbaa !16
+  %35 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %34, i64 0, i32 5, i32 0
+  %36 = load %struct.iseq_insn_info_entry*, %struct.iseq_insn_info_entry** %35, align 8, !tbaa !30
+  %37 = getelementptr inbounds %struct.iseq_insn_info_entry, %struct.iseq_insn_info_entry* %36, i64 0, i32 0
+  store i32 14, i32* %37, align 4, !tbaa !31
+  %38 = call i64 @rb_str_new(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_heey, i64 0, i64 0), i64 4) #13
   %39 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %40 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %39, i64 0, i32 2
   %41 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %40, align 8, !tbaa !13
@@ -504,13 +506,34 @@ fillRequiredArgs:                                 ; preds = %sorbet_isa_Array.ex
   %46 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %45, i64 0, i32 5, i32 0
   %47 = load %struct.iseq_insn_info_entry*, %struct.iseq_insn_info_entry** %46, align 8, !tbaa !30
   %48 = getelementptr inbounds %struct.iseq_insn_info_entry, %struct.iseq_insn_info_entry* %47, i64 0, i32 0
-  store i32 13, i32* %48, align 4, !tbaa !31
-  ret i64 %38
+  store i32 14, i32* %48, align 4, !tbaa !31
+  %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
+  store i64 %38, i64* %callArgsAddr, align 8
+  %49 = inttoptr i64 %captures to %struct.RTypedData*
+  %50 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %49, i64 0, i32 3
+  %51 = bitcast i8** %50 to %struct.sorbet_Closure**
+  %52 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %51, align 8, !tbaa !34
+  %53 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %52, i64 0, i32 1, i64 0
+  %54 = load i64, i64* %53, align 8
+  %55 = call i64 @rb_funcallv(i64 %54, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #13
+  %56 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
+  %57 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %56, i64 0, i32 2
+  %58 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %57, align 8, !tbaa !13
+  %59 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %58, i64 0, i32 2
+  %60 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** %59, align 8, !tbaa !27
+  %61 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %60, i64 0, i32 2
+  %62 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %61, align 8, !tbaa !16
+  %63 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %62, i64 0, i32 5, i32 0
+  %64 = load %struct.iseq_insn_info_entry*, %struct.iseq_insn_info_entry** %63, align 8, !tbaa !30
+  %65 = getelementptr inbounds %struct.iseq_insn_info_entry, %struct.iseq_insn_info_entry* %64, i64 0, i32 0
+  store i32 13, i32* %65, align 4, !tbaa !31
+  ret i64 %55
 }
 
 ; Function Attrs: nounwind ssp
 define internal i64 @"func_<root>.<static-init>$111$block_2"(i64 %firstYieldArgRaw, i64 %captures, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #9 {
 functionEntryInitializers:
+  %0 = alloca i64, align 8
   %callArgs = alloca [2 x i64], align 8
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %arrayExpansionSizeGuard = icmp eq i32 %argc, 1
@@ -518,58 +541,59 @@ functionEntryInitializers:
 
 argArrayExpandArrayTest:                          ; preds = %functionEntryInitializers
   %arg1_maybeExpandToFullArgs = load i64, i64* %argArray, align 8
-  %0 = and i64 %arg1_maybeExpandToFullArgs, 7
-  %1 = icmp ne i64 %0, 0
-  %2 = and i64 %arg1_maybeExpandToFullArgs, -9
-  %3 = icmp eq i64 %2, 0
-  %4 = or i1 %1, %3
-  br i1 %4, label %fillRequiredArgs, label %sorbet_isa_Array.exit
+  %1 = and i64 %arg1_maybeExpandToFullArgs, 7
+  %2 = icmp ne i64 %1, 0
+  %3 = and i64 %arg1_maybeExpandToFullArgs, -9
+  %4 = icmp eq i64 %3, 0
+  %5 = or i1 %2, %4
+  br i1 %5, label %fillRequiredArgs, label %sorbet_isa_Array.exit
 
 sorbet_isa_Array.exit:                            ; preds = %argArrayExpandArrayTest
-  %5 = inttoptr i64 %arg1_maybeExpandToFullArgs to %struct.RBasic*
-  %6 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %5, i64 0, i32 0
-  %7 = load i64, i64* %6, align 8, !tbaa !0
-  %8 = and i64 %7, 33554463
-  %9 = icmp eq i64 %8, 33554439
-  br i1 %9, label %10, label %fillRequiredArgs
+  %6 = inttoptr i64 %arg1_maybeExpandToFullArgs to %struct.RBasic*
+  %7 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %6, i64 0, i32 0
+  %8 = load i64, i64* %7, align 8, !tbaa !0
+  %9 = and i64 %8, 33554463
+  %10 = icmp eq i64 %9, 33554439
+  br i1 %10, label %11, label %fillRequiredArgs
 
-10:                                               ; preds = %sorbet_isa_Array.exit
+11:                                               ; preds = %sorbet_isa_Array.exit
   tail call void @rb_ary_detransient(i64 %arg1_maybeExpandToFullArgs) #13
   br label %fillRequiredArgs
 
-fillRequiredArgs:                                 ; preds = %sorbet_isa_Array.exit, %argArrayExpandArrayTest, %10, %functionEntryInitializers
-  %11 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
-  %12 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %11, i64 0, i32 2
-  %13 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %12, align 8, !tbaa !13
-  %14 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %13, i64 0, i32 2
-  %15 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** %14, align 8, !tbaa !27
-  %16 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %15, i64 0, i32 2
-  %17 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %16, align 8, !tbaa !16
-  %18 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %17, i64 0, i32 5, i32 0
-  %19 = load %struct.iseq_insn_info_entry*, %struct.iseq_insn_info_entry** %18, align 8, !tbaa !30
-  %20 = getelementptr inbounds %struct.iseq_insn_info_entry, %struct.iseq_insn_info_entry* %19, i64 0, i32 0
-  store i32 18, i32* %20, align 4, !tbaa !31
-  %21 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_boohey, i64 0, i64 0), i64 6) #13
-  %22 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
-  %23 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %22, i64 0, i32 2
-  %24 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %23, align 8, !tbaa !13
-  %25 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %24, i64 0, i32 2
-  %26 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** %25, align 8, !tbaa !27
-  %27 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %26, i64 0, i32 2
-  %28 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %27, align 8, !tbaa !16
-  %29 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %28, i64 0, i32 5, i32 0
-  %30 = load %struct.iseq_insn_info_entry*, %struct.iseq_insn_info_entry** %29, align 8, !tbaa !30
-  %31 = getelementptr inbounds %struct.iseq_insn_info_entry, %struct.iseq_insn_info_entry* %30, i64 0, i32 0
-  store i32 18, i32* %31, align 4, !tbaa !31
-  %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
-  store i64 %21, i64* %callArgsAddr, align 8
-  %32 = inttoptr i64 %captures to %struct.RTypedData*
-  %33 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %32, i64 0, i32 3
-  %34 = bitcast i8** %33 to %struct.sorbet_Closure**
-  %35 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %34, align 8, !tbaa !34
-  %36 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %35, i64 0, i32 1, i64 0
-  %37 = load i64, i64* %36, align 8
-  %38 = call i64 @rb_funcallv(i64 %37, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #13
+fillRequiredArgs:                                 ; preds = %sorbet_isa_Array.exit, %argArrayExpandArrayTest, %11, %functionEntryInitializers
+  %12 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #13
+  %13 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([44 x i8], [44 x i8]* @"str_test/testdata/compiler/method_with_block.rb", i64 0, i64 0), i64 43) #13
+  %14 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([44 x i8], [44 x i8]* @"str_test/testdata/compiler/method_with_block.rb", i64 0, i64 0), i64 43) #13
+  %15 = bitcast i64* %0 to %struct.rb_compile_option_struct*
+  %16 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
+  %17 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %16, i64 0, i32 2
+  %18 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %17, align 8, !tbaa !13
+  %19 = bitcast i64* %0 to i8*
+  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %19) #13
+  store i64 0, i64* %0, align 8
+  %20 = call %struct.rb_iseq_struct* @rb_iseq_new_with_opt(%struct.rb_ast_body_struct* null, i64 %12, i64 %13, i64 %14, i64 7, %struct.rb_iseq_struct* null, i32 0, %struct.rb_compile_option_struct* nonnull %15) #13
+  %21 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %20, i64 0, i32 2
+  %22 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %21, align 8, !tbaa !16
+  %23 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %22, i64 0, i32 2
+  %24 = bitcast i64** %23 to i64*
+  %25 = load i64, i64* %24, align 8, !tbaa !18
+  %26 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %18, i64 0, i32 2
+  store %struct.rb_iseq_struct* %20, %struct.rb_iseq_struct** %26, align 8, !tbaa !27
+  %27 = bitcast %struct.rb_control_frame_struct* %18 to i64*
+  store i64 %25, i64* %27, align 8, !tbaa !29
+  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %19) #13
+  %28 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
+  %29 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %28, i64 0, i32 2
+  %30 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %29, align 8, !tbaa !13
+  %31 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %30, i64 0, i32 2
+  %32 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** %31, align 8, !tbaa !27
+  %33 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %32, i64 0, i32 2
+  %34 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %33, align 8, !tbaa !16
+  %35 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %34, i64 0, i32 5, i32 0
+  %36 = load %struct.iseq_insn_info_entry*, %struct.iseq_insn_info_entry** %35, align 8, !tbaa !30
+  %37 = getelementptr inbounds %struct.iseq_insn_info_entry, %struct.iseq_insn_info_entry* %36, i64 0, i32 0
+  store i32 18, i32* %37, align 4, !tbaa !31
+  %38 = call i64 @rb_str_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_boohey, i64 0, i64 0), i64 6) #13
   %39 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %40 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %39, i64 0, i32 2
   %41 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %40, align 8, !tbaa !13
@@ -580,8 +604,28 @@ fillRequiredArgs:                                 ; preds = %sorbet_isa_Array.ex
   %46 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %45, i64 0, i32 5, i32 0
   %47 = load %struct.iseq_insn_info_entry*, %struct.iseq_insn_info_entry** %46, align 8, !tbaa !30
   %48 = getelementptr inbounds %struct.iseq_insn_info_entry, %struct.iseq_insn_info_entry* %47, i64 0, i32 0
-  store i32 17, i32* %48, align 4, !tbaa !31
-  ret i64 %38
+  store i32 18, i32* %48, align 4, !tbaa !31
+  %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
+  store i64 %38, i64* %callArgsAddr, align 8
+  %49 = inttoptr i64 %captures to %struct.RTypedData*
+  %50 = getelementptr inbounds %struct.RTypedData, %struct.RTypedData* %49, i64 0, i32 3
+  %51 = bitcast i8** %50 to %struct.sorbet_Closure**
+  %52 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %51, align 8, !tbaa !34
+  %53 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %52, i64 0, i32 1, i64 0
+  %54 = load i64, i64* %53, align 8
+  %55 = call i64 @rb_funcallv(i64 %54, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr) #13
+  %56 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
+  %57 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %56, i64 0, i32 2
+  %58 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %57, align 8, !tbaa !13
+  %59 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %58, i64 0, i32 2
+  %60 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** %59, align 8, !tbaa !27
+  %61 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %60, i64 0, i32 2
+  %62 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %61, align 8, !tbaa !16
+  %63 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %62, i64 0, i32 5, i32 0
+  %64 = load %struct.iseq_insn_info_entry*, %struct.iseq_insn_info_entry** %63, align 8, !tbaa !30
+  %65 = getelementptr inbounds %struct.iseq_insn_info_entry, %struct.iseq_insn_info_entry* %64, i64 0, i32 0
+  store i32 17, i32* %65, align 4, !tbaa !31
+  ret i64 %55
 }
 
 ; Function Attrs: nounwind ssp
