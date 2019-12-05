@@ -7,7 +7,7 @@ class AAA
   YYY = 1
 end
 
-p AA # error: Unable to resolve
+p AAA${0} # error: Unable to resolve
 #   ^ completion: AAA
 #   ^ apply-completion: [A] item: 0
 
