@@ -61,12 +61,9 @@ if ! gem fetch sorbet-static --platform universal-darwin --version "$release_ver
   with_backoff gem push --verbose "_out_/gems/sorbet-static-$release_version-universal-darwin-"*.gem
 fi
 
-# only publish the java gem if it exists 
-# this script is run once again after the build-static-release-java.rb
-if [ -f "_out_/gems/sorbet-static-$release_version-java.gem" ]; then
-  if ! gem fetch sorbet-static --platform java --version "$release_version" | grep -q "ERROR"; then
-    with_backoff gem push --verbose "_out_/gems/sorbet-static-$release_version-java.gem"
-  fi
+# Push the java gem
+if ! gem fetch sorbet-static --platform java --version "$release_version" | grep -q "ERROR"; then
+  with_backoff gem push --verbose "_out_/gems/sorbet-static-$release_version-java.gem"
 fi
 
 if ! gem list --remote rubygems.org --exact 'sorbet-runtime' | grep -q "$release_version"; then
