@@ -2,7 +2,6 @@
 // minimal build to speedup compilation. Remove extra features
 #else
 // has to go first, as it violates poisons
-#include "cfg/proto/proto.h"
 #include "core/proto/proto.h"
 #include "namer/configatron/configatron.h"
 #include "plugin/Plugins.h"
@@ -72,19 +71,6 @@ public:
         if (print.CFGRaw.enabled) {
             print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
         }
-#ifndef SORBET_REALMAIN_MIN
-        if ((print.CFGJson.enabled || print.CFGProto.enabled) && cfg->shouldExport(ctx.state)) {
-            auto proto = cfg::Proto::toProto(ctx.state, *cfg);
-            if (print.CFGJson.enabled) {
-                string buf = core::Proto::toJSON(proto);
-                print.CFGJson.print(buf);
-            } else {
-                // The proto wire format allows simply concatenating repeated message fields
-                string buf = cfg::Proto::toMulti(proto).SerializeAsString();
-                print.CFGProto.print(buf);
-            }
-        }
-#endif
         return m;
     }
 };

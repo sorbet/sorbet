@@ -217,8 +217,6 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 }
 
 --- cfg-raw end ---
---- cfg-json start ---
---- cfg-json end ---
 --- symbol-table start ---
 class ::<root> < ::Object () @ (... removed core rbi locs ..., -e:1, https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1)
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()

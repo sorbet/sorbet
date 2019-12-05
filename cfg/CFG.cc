@@ -254,8 +254,4 @@ string BasicBlock::showRaw(core::Context ctx) const {
 Binding::Binding(core::LocalVariable bind, core::Loc loc, unique_ptr<Instruction> value)
     : bind(bind), loc(loc), value(std::move(value)) {}
 
-bool CFG::shouldExport(const core::GlobalState &gs) const {
-    return false;
-}
-
 } // namespace sorbet::cfg

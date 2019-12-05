@@ -33,7 +33,6 @@ passes=(
   ast-raw
   cfg
   cfg-raw
-  cfg-json
   autogen
   document-symbols
 )

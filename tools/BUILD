@@ -77,7 +77,6 @@ compilation_database(
         "//common/kvstore:kvstore",
         "//common/crypto_hashing:crypto_hashing",
         "//common:common_test",
-        "//cfg/proto:proto",
         "//core/proto:proto",
         "//proto/pay-server:pay-server",
         "//proto:proto",
