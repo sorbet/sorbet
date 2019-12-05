@@ -9,17 +9,21 @@ set -o errexit
 # _out_/gems/ should have the Linux & Mac sorbet-static gem
 mkdir -p gems/sorbet-static/libexec
 
+git_commit_count=$(git rev-list --count HEAD)
+prefix="0.4"
+release_version="$prefix.${git_commit_count}"
+
 for platform in universal-darwin x86_64-linux
 do
-  gem unpack _out_/gems/sorbet-static-${release_version}-${platform}*.gem
+  gem unpack _out_/gems/sorbet-static-"${release_version}"-${platform}*.gem
 
   case $platform in
     x86_64-linux)
-        mv sorbet-static-${release_version}-${platform}/libexec/sorbet  gems/sorbet-static/libexec/linux.sorbet
+        mv sorbet-static-"${release_version}"-${platform}/libexec/sorbet  gems/sorbet-static/libexec/linux.sorbet
     ;;
 
     universal-darwin)
-        mv sorbet-static-${release_version}-${platform}*/libexec/sorbet gems/sorbet-static/libexec/mac.sorbet
+        mv sorbet-static-"${release_version}"-${platform}*/libexec/sorbet gems/sorbet-static/libexec/mac.sorbet
     ;;
   esac
 
@@ -35,4 +39,4 @@ gem build sorbet-static.gemspec
 
 popd
 
-mv gems/sorbet-static/sorbet-static-${release_version}-java.gem _out_/gems
+mv gems/sorbet-static/sorbet-static-"${release_version}"-java.gem _out_/gems
