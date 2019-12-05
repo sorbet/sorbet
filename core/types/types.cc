@@ -614,10 +614,12 @@ TypePtr Types::resultTypeAsSeenFrom(Context ctx, TypePtr what, SymbolRef fromWha
 }
 
 TypePtr Types::getProcReturnType(Context ctx, const TypePtr &procType) {
-    if (!procType->derivesFrom(ctx, Symbols::Proc())) {
+    auto procType_ = Types::dropSubtypesOf(ctx, procType, Symbols::NilClass());
+
+    if (!procType_->derivesFrom(ctx, Symbols::Proc())) {
         return Types::untypedUntracked();
     }
-    auto *applied = cast_type<AppliedType>(procType.get());
+    auto *applied = cast_type<AppliedType>(procType_.get());
     if (applied == nullptr || applied->targs.empty()) {
         return Types::untypedUntracked();
     }
