@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e 
-
 # Based on the output of build-static-release.sh
 # _out_/gems/ should have the Linux & Mac sorbet-static gem
 mkdir -p gems/sorbet-static/libexec
