@@ -186,13 +186,15 @@ extend T::Sig
 <span class="hljs-comment"># (1) Use `.bind(String)` to say "will be run in the context of a String":</span>
 sig {params(<span class="hljs-symbol">blk:</span> T.proc.bind(String).returns(String)).returns(String)}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span>
-  <span class="hljs-string">"hello"</span>.instance_exec(&amp;blk)
+  <span class="hljs-string">"hello"</span>.instance_eval(&amp;blk)
 <span class="hljs-keyword">end</span>
 
-puts foo <span class="hljs-keyword">do</span>
+upcased = foo <span class="hljs-keyword">do</span>
   <span class="hljs-comment"># (2) Sorbet knows that `self.upcase` is available because of the `.bind`</span>
-  <span class="hljs-keyword">self</span>.upcase <span class="hljs-comment"># =&gt; "HELLO"</span>
+  <span class="hljs-keyword">self</span>.upcase
 <span class="hljs-keyword">end</span>
+
+puts(upcased) <span class="hljs-comment"># =&gt; "HELLO"</span>
 </code></pre>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/untyped"><span class="arrow-prev">← </span><span>T.untyped</span></a><a class="docs-next button" href="/docs/abstract"><span>Abstract Classes &amp; Interfaces</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#optional-blocks">Optional blocks</a></li><li><a href="#annotating-methods-that-use-yield">Annotating methods that use <code>yield</code></a></li><li><a href="#modifying-the-self-type">Modifying the self type</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
