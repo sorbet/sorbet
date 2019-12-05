@@ -12,7 +12,6 @@
 #include "ProgressIndicator.h"
 #include "absl/strings/escaping.h" // BytesToHexString
 #include "absl/strings/match.h"
-#include "absl/synchronization/blocking_counter.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
@@ -953,27 +952,27 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
             fileq->push(move(resolved), 1);
         }
 
-        // Note: If workerCount is 0, the lambda will run once.
-        absl::BlockingCounter workerCounter(max(1, workers.workerCount()));
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob("typecheck", [ctx, &opts, &workerCounter, fileq, resultq]() {
+            workers.multiplexJob("typecheck", [ctx, &opts, fileq, resultq]() {
                 typecheck_thread_result threadResult;
                 ast::ParsedFile job;
                 int processedByThread = 0;
 
                 {
-                    for (auto result = fileq->try_pop(job); !result.done() && !ctx.state.wasTypecheckingCanceled();
-                         result = fileq->try_pop(job)) {
+                    for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                         if (result.gotItem()) {
                             processedByThread++;
-                            core::FileRef file = job.file;
-                            try {
-                                threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
-                            } catch (SorbetException &) {
-                                Exception::failInFuzzer();
-                                ctx.state.tracer().error("Exception typing file: {} (backtrace is above)",
-                                                         file.data(ctx).path());
+                            // Only actually do the work if typechecking hasn't been canceled.
+                            if (!ctx.state.wasTypecheckingCanceled()) {
+                                core::FileRef file = job.file;
+                                try {
+                                    threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
+                                } catch (SorbetException &) {
+                                    Exception::failInFuzzer();
+                                    ctx.state.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                             file.data(ctx).path());
+                                }
                             }
                         }
                     }
@@ -982,7 +981,6 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                     threadResult.counters = getAndClearThreadCounters();
                     resultq->push(move(threadResult), processedByThread);
                 }
-                workerCounter.DecrementCount();
             });
 
             typecheck_thread_result threadResult;
@@ -997,11 +995,9 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
                     gs->errorQueue->flushErrors();
-                    if (ctx.state.wasTypecheckingCanceled()) {
-                        // Wait for all threads to exit.
-                        workerCounter.Wait();
-                        return ast::ParsedFilesOrCancelled();
-                    }
+                }
+                if (ctx.state.wasTypecheckingCanceled()) {
+                    return ast::ParsedFilesOrCancelled();
                 }
             }
         }
