@@ -89,6 +89,8 @@ public:
     WorkerPoolImpl(int size, spd::logger &logger);
     ~WorkerPoolImpl();
 
+    int workerCount() const override;
+
     void multiplexJob(std::string_view taskName, Task t) override;
 };
 };     // namespace sorbet

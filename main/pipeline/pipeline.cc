@@ -12,6 +12,7 @@
 #include "ProgressIndicator.h"
 #include "absl/strings/escaping.h" // BytesToHexString
 #include "absl/strings/match.h"
+#include "absl/synchronization/blocking_counter.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
@@ -952,9 +953,11 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
             fileq->push(move(resolved), 1);
         }
 
+        // Note: If workerCount is 0, the lambda will run once.
+        absl::BlockingCounter workerCounter(max(1, workers.workerCount()));
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob("typecheck", [ctx, &opts, fileq, resultq]() {
+            workers.multiplexJob("typecheck", [ctx, &opts, &workerCounter, fileq, resultq]() {
                 typecheck_thread_result threadResult;
                 ast::ParsedFile job;
                 int processedByThread = 0;
@@ -979,6 +982,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                     threadResult.counters = getAndClearThreadCounters();
                     resultq->push(move(threadResult), processedByThread);
                 }
+                workerCounter.DecrementCount();
             });
 
             typecheck_thread_result threadResult;
@@ -994,6 +998,8 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
                     gs->errorQueue->flushErrors();
                     if (ctx.state.wasTypecheckingCanceled()) {
+                        // Wait for all threads to exit.
+                        workerCounter.Wait();
                         return ast::ParsedFilesOrCancelled();
                     }
                 }
