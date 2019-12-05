@@ -52,8 +52,14 @@ with_backoff() {
 #
 # (By failure here, we mean that RubyGems.org 502'd for some reason.)
 for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
-  with_backoff gem push --verbose "$gem_archive" || true
+  if ! gem list --remote rubygems.org --exact 'sorbet-static' | grep -q "$release_version"; then
+    with_backoff gem push --verbose "$gem_archive"
+  fi
 done
 
-with_backoff gem push --verbose "_out_/gems/sorbet-runtime-$release_version.gem" || true
-with_backoff gem push --verbose "_out_/gems/sorbet-$release_version.gem" || true
+if ! gem list --remote rubygems.org --exact 'sorbet-runtime' | grep -q "$release_version"; then
+  with_backoff gem push --verbose "_out_/gems/sorbet-runtime-$release_version.gem"
+fi
+if ! gem list --remote rubygems.org --exact 'sorbet' | grep -q "$release_version"; then
+  with_backoff gem push --verbose "_out_/gems/sorbet-$release_version.gem"
+fi
