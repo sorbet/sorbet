@@ -6,7 +6,9 @@ sidebar_label: Abstract Classes & Interfaces
 
 Sorbet supports abstract classes, abstract methods, and interfaces. Abstract
 methods ensure that a particular method gets implemented anywhere the class or
-module is inherited, included, or extended.
+module is inherited, included, or extended. An abstract class or module is one
+that contains one or more abstract methods. An interface is a class or module
+that must have only abstract methods.
 
 Keep in mind:
 
