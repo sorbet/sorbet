@@ -76,13 +76,16 @@ end
 ```
 
 It's common to use this technique to add type annotations for instance variables
-in functions that memoize their result:
+in functions that memoize their results by lazily initializing instance
+variables:
 
 ```ruby
-sig {returns(String)}
-def current_user
-  @user = T.let(@user, T.nilable(String))
-  @user ||= ENV.fetch('USER')
+module B
+  sig {returns(String)}
+  def current_user
+    @user = T.let(@user, T.nilable(String))
+    @user ||= ENV.fetch('USER')
+  end
 end
 ```
 
