@@ -366,10 +366,13 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
     return item;
 }
 
-unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const core::SymbolRef what,
-                                                        size_t sortIdx) {
+unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const LSPConfiguration &config,
+                                                        const core::SymbolRef what, const core::Loc queryLoc,
+                                                        string_view prefix, size_t sortIdx) {
     ENFORCE(what.exists());
-    auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
+    auto supportSnippets = config.getClientConfig().clientCompletionItemSnippetSupport;
+    auto label = string(what.data(gs)->name.data(gs)->shortName(gs));
+    auto item = make_unique<CompletionItem>(label);
 
     // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
     // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
@@ -389,6 +392,23 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
     } else {
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
     }
+
+    string replacementText;
+    if (supportSnippets) {
+        item->insertTextFormat = InsertTextFormat::Snippet;
+        replacementText = fmt::format("{}${{0}}", label);
+    } else {
+        item->insertTextFormat = InsertTextFormat::PlainText;
+        replacementText = label;
+    }
+
+    if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
+        item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
+    } else {
+        item->insertText = replacementText;
+    }
+
+    // TODO(jez) Find documentation for constants
 
     return item;
 }
@@ -642,8 +662,8 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
 
 void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::ConstantResponse &resp,
                                   const core::Loc queryLoc, vector<unique_ptr<CompletionItem>> &items) const {
-    auto pattern = resp.name.data(gs)->shortName(gs);
-    config->logger->debug("Looking for constant similar to {}", pattern);
+    auto prefix = resp.name.data(gs)->shortName(gs);
+    config->logger->debug("Looking for constant similar to {}", prefix);
     auto scope = resp.scope;
     do {
         for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
@@ -651,8 +671,8 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
             if (sym.exists() && (sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField()) &&
                 sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                 // hide singletons
-                hasSimilarName(gs, sym.data(gs)->name, pattern)) {
-                items.push_back(getCompletionItemForConstant(gs, sym, items.size()));
+                hasSimilarName(gs, sym.data(gs)->name, prefix)) {
+                items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
             }
         }
         scope = scope.data(gs)->owner;

@@ -11,7 +11,7 @@ p AA # error: Unable to resolve
 #   ^ completion: AAA
 #   ^ apply-completion: [A] item: 0
 
-p AAA::B # error: Unable to resolve
+p AAA::BBB${0} # error: Unable to resolve
 #       ^ completion: BBB
 #       ^ apply-completion: [B] item: 0
 
