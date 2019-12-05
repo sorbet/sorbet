@@ -5,6 +5,11 @@
 # either linux or mac
 set -o errexit
 
+echo "--- Dowloading artifacts"
+rm -rf release
+rm -rf _out_
+buildkite-agent artifact download "_out_/**/*" .
+
 # Based on the output of build-static-release.sh
 # _out_/gems/ should have the Linux & Mac sorbet-static gem
 mkdir -p gems/sorbet-static/libexec
@@ -21,7 +26,7 @@ do
     x86_64-linux)
         mv sorbet-static-"${release_version}"-${platform}/libexec/sorbet  gems/sorbet-static/libexec/linux.sorbet
     ;;
-
+ine.
     universal-darwin)
         mv sorbet-static-"${release_version}"-${platform}*/libexec/sorbet gems/sorbet-static/libexec/mac.sorbet
     ;;
