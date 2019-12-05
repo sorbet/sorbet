@@ -265,6 +265,9 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
         if (argSym.flags.isDefault) {
             continue;
         }
+        if (argSym.flags.isRepeated) {
+            continue;
+        }
         if (argSym.flags.isKeyword) {
             fmt::format_to(argBuf, "{}: ", argSym.name.data(gs)->shortName(gs));
         }
@@ -637,8 +640,8 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
     return item;
 }
 
-void LSPLoop::findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
-                                         const core::Loc queryLoc, vector<unique_ptr<CompletionItem>> &items) const {
+void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::TypePtr receiverType,
+                                  const core::Loc queryLoc, vector<unique_ptr<CompletionItem>> &items) const {
     if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
         auto pattern = c->symbol.data(gs)->name.data(gs)->shortName(gs);
         config->logger->debug("Looking for constant similar to {}", pattern);
@@ -774,7 +777,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
             response->result = std::move(emptyResult);
             return response;
         }
-        findSimilarConstantOrIdent(gs, constantResp->retType.type, queryLoc, items);
+        findSimilarConstant(gs, constantResp->retType.type, queryLoc, items);
     }
 
     response->result = make_unique<CompletionList>(false, move(items));

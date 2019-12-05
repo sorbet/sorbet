@@ -1,0 +1,16 @@
+PATH
+  remote: .
+  specs:
+    bad-gem (0.0.0)
+
+GEM
+  specs:
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bad-gem!
+
+BUNDLED WITH
+   1.17.3

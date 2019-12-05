@@ -400,10 +400,7 @@ TEST_P(ProtocolTest, SilentlyIgnoresInvalidJSONMessages) {
 
 // If a client doesn't support markdown, send hover as plaintext.
 TEST_P(ProtocolTest, RespectsHoverTextLimitations) {
-    const bool supportsMarkdown = false;
-    auto initializeResponses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown);
-    updateDiagnostics(initializeResponses);
-    assertDiagnostics(move(initializeResponses), {});
+    assertDiagnostics(initializeLSP(false /* supportsMarkdown */), {});
 
     assertDiagnostics(send(*openFile("foobar.rb", "# typed: true\n1\n")), {});
 
@@ -427,10 +424,7 @@ TEST_P(ProtocolTest, SorbetURIsWork) {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
     lspWrapper->opts->lspDirsMissingFromClient.emplace_back("/folder");
-    auto initializeResponses =
-        sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown, move(initOptions));
-    updateDiagnostics(initializeResponses);
-    assertDiagnostics(move(initializeResponses), {});
+    assertDiagnostics(initializeLSP(supportsMarkdown, move(initOptions)), {});
 
     string fileContents = "# typed: true\n[0,1,2,3].select {|x| x > 0}\ndef myMethod; end;\n";
     assertDiagnostics(send(*openFile("folder/foo.rb", fileContents)), {});
@@ -461,7 +455,8 @@ TEST_P(ProtocolTest, DoesNotTypecheckSorbetURIs) {
     initOptions->supportsSorbetURIs = true;
     initOptions->enableTypecheckInfo = true;
     lspWrapper->opts->lspDirsMissingFromClient.emplace_back("/folder");
-    sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown, move(initOptions));
+    // Don't assert diagnostics; it will fail due to the spurious typecheckinfo message.
+    initializeLSP(supportsMarkdown, move(initOptions));
 
     string fileContents = "# typed: true\n[0,1,2,3].select {|x| x > 0}\ndef myMethod; end;\n";
     send(*openFile("folder/foo.rb", fileContents));

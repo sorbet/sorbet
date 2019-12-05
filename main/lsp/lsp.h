@@ -94,9 +94,8 @@ class LSPLoop {
                                                                const core::TypeConstraint *constraint,
                                                                const core::Loc queryLoc, std::string_view prefix,
                                                                size_t sortIdx) const;
-    void findSimilarConstantOrIdent(const core::GlobalState &gs, const core::TypePtr receiverType,
-                                    const core::Loc queryLoc,
-                                    std::vector<std::unique_ptr<CompletionItem>> &items) const;
+    void findSimilarConstant(const core::GlobalState &gs, const core::TypePtr receiverType, const core::Loc queryLoc,
+                             std::vector<std::unique_ptr<CompletionItem>> &items) const;
     std::unique_ptr<ResponseMessage> handleTextSignatureHelp(LSPTypechecker &typechecker, const MessageId &id,
                                                              const TextDocumentPositionParams &params) const;
 
