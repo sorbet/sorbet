@@ -335,7 +335,7 @@ llvm_defines = select({
 ]
 
 llvm_copts = select({
-    "//conditions:default": [],
+    "//conditions:default": ["-fno-lto"],  # don't compile llvm with lto. It's too slow to compile and not worth it
 })
 
 # Platform specific sources for libSupport.
