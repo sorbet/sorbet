@@ -156,6 +156,7 @@ module Sorbet::Private
               receiver = singleton ? Sorbet::Private::RealStdlib.real_singleton_class(tp.self) : tp.self
 
               # JRuby the main Object is not a module
+              # so lets skip it, otherwise RealStdlib#real_instance_methods raises an exception since it expects one.
               next unless receiver.is_a?(Module)
 
               methods = Sorbet::Private::RealStdlib.real_instance_methods(receiver, false) + Sorbet::Private::RealStdlib.real_private_instance_methods(receiver, false)
