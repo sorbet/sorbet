@@ -70,7 +70,7 @@ steps:
     <<: *elastic
 
   - label: ":linux: build-static-release-java.sh"
-    command: .buildkite/build-static-release-java.rb
+    command: .buildkite/build-static-release-java.sh
     artifact_paths: _out_/**/*
     <<: *elastic
 
