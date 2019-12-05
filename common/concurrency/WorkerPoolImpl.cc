@@ -75,8 +75,4 @@ void WorkerPoolImpl::multiplexJob_(WorkerPoolImpl::Task_ t) {
     }
 }
 
-int WorkerPoolImpl::workerCount() const {
-    return size;
-}
-
 }; // namespace sorbet
