@@ -55,11 +55,14 @@ class T::Private::Methods::Signature
     declared_param_names = raw_arg_types.keys
     missing_names = param_names - declared_param_names
     extra_names = declared_param_names - param_names
+
+    should_raise = @check_level == :always || (@check_level == :tests && T::Private::RuntimeLevels.check_tests?)
+
     if !missing_names.empty?
-      raise "The declaration for `#{method.name}` is missing parameter(s): #{missing_names.join(', ')}"
+      raise "The declaration for `#{method.name}` is missing parameter(s): #{missing_names.join(', ')}" if should_raise
     end
     if !extra_names.empty?
-      raise "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}"
+      raise "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}" if should_raise
     end
 
     parameters.zip(raw_arg_types) do |(param_kind, param_name), (type_name, raw_type)|
@@ -87,7 +90,7 @@ class T::Private::Methods::Signature
         if @arg_types.length > @req_arg_count
           # Note that this is actually is supported by Ruby, but it would add complexity to
           # support it here, and I'm happy to discourage its use anyway.
-          raise "Required params after optional params are not supported in method declarations. Method: #{method_desc}"
+          raise "Required params after optional params are not supported in method declarations. Method: #{method_desc}" if should_raise
         end
         @arg_types << [param_name, type]
         @req_arg_count += 1
@@ -110,7 +113,7 @@ class T::Private::Methods::Signature
         @keyrest_name = param_name
         @keyrest_type = type
       else
-        raise "Unexpected param_kind: `#{param_kind}`. Method: #{method_desc}"
+        raise "Unexpected param_kind: `#{param_kind}`. Method: #{method_desc}" if should_raise
       end
     end
   end
