@@ -365,40 +365,36 @@ public:
         return SymbolRef(nullptr, 75);
     }
 
-    static SymbolRef T_CFGExport() {
+    static SymbolRef T_Sig_WithoutRuntime() {
         return SymbolRef(nullptr, 76);
     }
 
-    static SymbolRef T_Sig_WithoutRuntime() {
+    static SymbolRef Enumerator() {
         return SymbolRef(nullptr, 77);
     }
 
-    static SymbolRef Enumerator() {
+    static SymbolRef T_Enumerator() {
         return SymbolRef(nullptr, 78);
     }
 
-    static SymbolRef T_Enumerator() {
+    static SymbolRef T_Struct() {
         return SymbolRef(nullptr, 79);
     }
 
-    static SymbolRef T_Struct() {
+    static SymbolRef Singleton() {
         return SymbolRef(nullptr, 80);
     }
 
-    static SymbolRef Singleton() {
+    static SymbolRef T_Enum() {
         return SymbolRef(nullptr, 81);
     }
 
-    static SymbolRef T_Enum() {
+    static SymbolRef sig() {
         return SymbolRef(nullptr, 82);
     }
 
-    static SymbolRef sig() {
-        return SymbolRef(nullptr, 83);
-    }
-
     static SymbolRef Enumerator_Lazy() {
-        return SymbolRef(nullptr, 84);
+        return SymbolRef(nullptr, 83);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

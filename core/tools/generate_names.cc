@@ -412,7 +412,6 @@ NameDef names[] = {
     {"Net", "Net", true},
     {"IMAP", "IMAP", true},
     {"Protocol", "Protocol", true},
-    {"CFGExport", "CFGExport", true},
     {"WithoutRuntime", "WithoutRuntime", true},
     {"Singleton", "Singleton", true},
     {"AttachedClass", "<AttachedClass>", true},
