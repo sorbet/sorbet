@@ -387,6 +387,8 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         // TODO(jez) Handle isStaticFieldTypeAlias (hover has special handling to show the type for these)
         item->kind = CompletionItemKind::Constant;
         item->detail = resultType->show(gs);
+    } else if (what.data(gs)->isTypeMember()) {
+        item->kind = CompletionItemKind::Constant;
     } else if (what.data(gs)->isClassOrModule()) {
         item->kind = CompletionItemKind::Class;
     } else {
@@ -668,7 +670,8 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
     do {
         for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
             auto sym = member.second;
-            if (sym.exists() && (sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField()) &&
+            if (sym.exists() &&
+                (sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField() || sym.data(gs)->isTypeMember()) &&
                 sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                 // hide singletons
                 hasSimilarName(gs, sym.data(gs)->name, prefix)) {
