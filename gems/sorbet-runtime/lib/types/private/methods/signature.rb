@@ -2,6 +2,10 @@
 # typed: true
 
 class T::Private::Methods::Signature
+
+  class SignatureError < StandardError; end
+  end
+
   attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type, :block_name,
               :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind,
               :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_rest, :has_keyrest,
@@ -56,13 +60,11 @@ class T::Private::Methods::Signature
     missing_names = param_names - declared_param_names
     extra_names = declared_param_names - param_names
 
-    should_raise = @check_level == :always || (@check_level == :tests && T::Private::RuntimeLevels.check_tests?)
-
     if !missing_names.empty?
-      raise "The declaration for `#{method.name}` is missing parameter(s): #{missing_names.join(', ')}" if should_raise
+      raise SignatureError.new "The declaration for `#{method.name}` is missing parameter(s): #{missing_names.join(', ')}"
     end
     if !extra_names.empty?
-      raise "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}" if should_raise
+      raise SignatureError.new "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}"
     end
 
     parameters.zip(raw_arg_types) do |(param_kind, param_name), (type_name, raw_type)|
@@ -78,7 +80,7 @@ class T::Private::Methods::Signature
                  "optional keyword parameters to the end of the method list."
         end
 
-        raise "Parameter `#{type_name}` is declared out of order (declared as arg number " \
+        raise SignatureError.new "Parameter `#{type_name}` is declared out of order (declared as arg number " \
               "#{declared_param_names.index(type_name) + 1}, defined in the method as arg number " \
               "#{param_names.index(type_name) + 1}).#{hint}\nMethod: #{method_desc}"
       end
@@ -90,7 +92,7 @@ class T::Private::Methods::Signature
         if @arg_types.length > @req_arg_count
           # Note that this is actually is supported by Ruby, but it would add complexity to
           # support it here, and I'm happy to discourage its use anyway.
-          raise "Required params after optional params are not supported in method declarations. Method: #{method_desc}" if should_raise
+          raise SignatureError.new "Required params after optional params are not supported in method declarations. Method: #{method_desc}"
         end
         @arg_types << [param_name, type]
         @req_arg_count += 1
@@ -113,7 +115,7 @@ class T::Private::Methods::Signature
         @keyrest_name = param_name
         @keyrest_type = type
       else
-        raise "Unexpected param_kind: `#{param_kind}`. Method: #{method_desc}" if should_raise
+        raise SignatureError.new "Unexpected param_kind: `#{param_kind}`. Method: #{method_desc}"
       end
     end
   end

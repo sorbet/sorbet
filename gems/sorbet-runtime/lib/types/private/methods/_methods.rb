@@ -258,7 +258,7 @@ module T::Private::Methods
     current_declaration =
       begin
         run_builder(declaration_block)
-      rescue DeclBuilder::BuilderError => e
+      rescue DeclBuilder::BuilderError, Signature::SignatureError => e
         T::Configuration.sig_builder_error_handler(e, declaration_block.loc)
         nil
       end
