@@ -667,36 +667,35 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
     }
 
     fmt::format_to(buf, "\n");
-    if (!isMethod()) {
-        for (auto pair : membersStableOrderSlow(gs)) {
-            if (!pair.second.exists()) {
-                ENFORCE(ref(gs) == core::Symbols::root());
-                continue;
-            }
-
-            if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-                pair.first == Names::classMethods()) {
-                continue;
-            }
-
-            if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
-                bool hadPrintableChild = false;
-                for (auto childPair : pair.second.data(gs)->members()) {
-                    if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
-                        hadPrintableChild = true;
-                        break;
-                    }
-                }
-                if (!hadPrintableChild) {
-                    continue;
-                }
-            }
-
-            auto str = pair.second.data(gs)->toStringWithOptions(gs, tabs + 1, showFull, showRaw);
-            ENFORCE(!str.empty());
-            fmt::format_to(buf, "{}", move(str));
+    for (auto pair : membersStableOrderSlow(gs)) {
+        if (!pair.second.exists()) {
+            ENFORCE(ref(gs) == core::Symbols::root());
+            continue;
         }
-    } else {
+
+        if (pair.first == Names::singleton() || pair.first == Names::attached() ||
+            pair.first == Names::classMethods()) {
+            continue;
+        }
+
+        if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
+            bool hadPrintableChild = false;
+            for (auto childPair : pair.second.data(gs)->members()) {
+                if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
+                    hadPrintableChild = true;
+                    break;
+                }
+            }
+            if (!hadPrintableChild) {
+                continue;
+            }
+        }
+
+        auto str = pair.second.data(gs)->toStringWithOptions(gs, tabs + 1, showFull, showRaw);
+        ENFORCE(!str.empty());
+        fmt::format_to(buf, "{}", move(str));
+    }
+    if (isMethod()) {
         for (auto &arg : arguments()) {
             auto str = arg.toString(gs);
             ENFORCE(!str.empty());
