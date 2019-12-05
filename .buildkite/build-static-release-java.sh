@@ -26,7 +26,7 @@ do
     x86_64-linux)
         mv sorbet-static-"${release_version}"-${platform}/libexec/sorbet  gems/sorbet-static/libexec/linux.sorbet
     ;;
-ine.
+
     universal-darwin)
         mv sorbet-static-"${release_version}"-${platform}*/libexec/sorbet gems/sorbet-static/libexec/mac.sorbet
     ;;
