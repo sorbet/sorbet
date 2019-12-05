@@ -41,10 +41,12 @@ public:
 
 class ConstantResponse final {
 public:
-    ConstantResponse(core::SymbolRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
-        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
+    ConstantResponse(core::SymbolRef symbol, core::Loc termLoc, core::SymbolRef scope, core::NameRef name,
+                     core::TypeAndOrigins retType)
+        : symbol(symbol), termLoc(termLoc), scope(scope), name(name), retType(std::move(retType)){};
     const core::SymbolRef symbol;
     const core::Loc termLoc;
+    const core::SymbolRef scope;
     const core::NameRef name;
     const core::TypeAndOrigins retType;
 };

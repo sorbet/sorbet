@@ -88,8 +88,16 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                 tp.type = resultType == nullptr ? core::Types::untyped(ctx, symbol) : resultType;
             }
 
-            core::lsp::QueryResponse::pushQueryResponse(
-                ctx, core::lsp::ConstantResponse(symbol, lit->loc, symbol.data(ctx)->name, tp));
+            core::SymbolRef scope;
+            if (lit->resolutionScope.exists()) {
+                ENFORCE(symbol == core::Symbols::StubModule());
+                scope = lit->resolutionScope;
+            } else {
+                scope = symbol.data(ctx)->owner;
+            }
+
+            auto resp = core::lsp::ConstantResponse(symbol, lit->loc, scope, lit->original->cnst, tp);
+            core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
         }
         lit = ast::cast_tree<ast::ConstantLit>(lit->original->scope.get());
         if (lit) {
