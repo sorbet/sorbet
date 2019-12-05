@@ -5,6 +5,7 @@
 
 #include "IREmitterHelpers.h"
 #include "Payload.h"
+#include "ast/Trees.h"
 #include "common/typecase.h"
 #include "compiler/Core/CompilerState.h"
 #include "compiler/IREmitter/BasicBlockMap.h"
@@ -259,32 +260,36 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
     return ret;
 }
 
-void Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build, core::SymbolRef sym) {
+void Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build, unique_ptr<ast::MethodDef> &md) {
     auto &builder = builderCast(build);
+    auto loc = md->loc;
+    auto sym = md->symbol;
     auto funcName =
         IREmitterHelpers::isStaticInit(cs, sym) ? "<top (required)>" : sym.data(cs)->name.data(cs)->shortName(cs);
     auto funcNameId = Payload::idIntern(cs, builder, funcName);
     auto funcNameValue = Payload::cPtrToRubyString(cs, builder, funcName);
     auto recv = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
-    auto filename = sym.data(cs)->loc().file().data(cs).path();
+    auto filename = loc.file().data(cs).path();
     auto filenameValue = Payload::cPtrToRubyString(cs, builder, filename);
     // TODO make this a real absoluate path
-    auto realpath = fmt::format("{}{}", cs.gs.pathPrefix, filename);
+    auto realpath = fmt::format("{}", filename);
     auto realpathValue = Payload::cPtrToRubyString(cs, builder, realpath);
-    auto lineno = sym.data(cs)->loc().position(cs).first.line;
-    auto linenoValue = Payload::longToRubyValue(cs, builder, lineno);
+    auto pos = loc.position(cs);
     builder.CreateCall(cs.module->getFunction("sorbet_setRubyStackFrame"),
-                       {recv, funcNameValue, funcNameId, filenameValue, realpathValue, linenoValue});
+                       {recv, funcNameValue, funcNameId, filenameValue, realpathValue,
+                        llvm::ConstantInt::get(cs, llvm::APInt(32, pos.first.line)),
+                        llvm::ConstantInt::get(cs, llvm::APInt(32, pos.second.line))});
 }
 
-void Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc) {
+void Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::SymbolRef sym) {
     if (!loc.exists()) {
         return;
     }
     auto &builder = builderCast(build);
     auto lineno = loc.position(cs).first.line;
+    auto offset = lineno - sym.data(cs)->loc().position(cs).first.line;
     builder.CreateCall(cs.module->getFunction("sorbet_setLineNumber"),
-                       {llvm::ConstantInt::get(cs, llvm::APInt(32, lineno))});
+                       {llvm::ConstantInt::get(cs, llvm::APInt(32, offset))});
 }
 
 namespace {

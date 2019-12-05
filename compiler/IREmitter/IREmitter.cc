@@ -263,7 +263,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         {
             // Switch the current control frame from a C frame to a Ruby-esque one
             if (!disableBacktrace) {
-                Payload::setRubyStackFrame(cs, builder, cfg.symbol);
+                Payload::setRubyStackFrame(cs, builder, md);
             }
         }
 
@@ -293,7 +293,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
                 if (!disableBacktrace) {
-                    Payload::setLineNumber(cs, builder, bind.loc);
+                    Payload::setLineNumber(cs, builder, bind.loc, cfg.symbol);
                 }
                 typecase(
                     bind.value.get(),

@@ -33,6 +33,10 @@ const char *dbg_p(VALUE obj) __attribute__((weak)) {
     return ret;
 }
 
+void stopInDebugger() {
+    __asm__("int $3");
+}
+
 // ****
 // ****                       Singletons
 // ****
@@ -555,6 +559,7 @@ VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {
 // ****                       Control Frames
 // ****
 
+/* From inseq.h */
 struct rb_compile_option_struct {
     unsigned int inline_const_cache : 1;
     unsigned int peephole_optimization : 1;
@@ -569,26 +574,54 @@ struct rb_compile_option_struct {
     int debug_level;
 };
 
-void sorbet_setRubyStackFrame(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath, VALUE lineno) {
-    rb_execution_context_t *ec = GET_EC();
-    rb_control_frame_t *cfp = ec->cfp;
-    const rb_compile_option_t COMPILE_OPTION_FALSE = {0};
-    const rb_iseq_t *iseq =
-        rb_iseq_new_with_opt(0, funcName, filename, realpath, lineno, 0, ISEQ_TYPE_TOP, &COMPILE_OPTION_FALSE);
-    const VALUE *pc = iseq->body->iseq_encoded;
-    cfp->iseq = iseq;
-    cfp->pc = pc;
-}
-
 struct iseq_insn_info_entry {
     int line_no;
     rb_event_flag_t events;
 };
 
-void sorbet_setLineNumber(int lineno) {
+void rb_iseq_insns_info_encode_positions(const rb_iseq_t *iseq);
+/* End from inseq.h */
+
+const rb_iseq_t *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath,
+                                                int startline, int endline) {
+    // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
+    // this function should be retained (for GC purposes) by something else.
+
+    rb_iseq_t *iseq = rb_iseq_new(0, funcName, filename, realpath, 0, ISEQ_TYPE_TOP);
+
+    // Even if start and end are on the same line, we still want one insns_info made
+    int insn_num = endline - startline + 1;
+    struct iseq_insn_info_entry *insns_info = ALLOC_N(struct iseq_insn_info_entry, insn_num);
+    unsigned int *positions = ALLOC_N(unsigned int, insn_num);
+    for (int i = 0; i < insn_num; i++) {
+        int lineno = i + startline;
+        positions[i] = i;
+        insns_info[i].line_no = lineno;
+    }
+    iseq->body->insns_info.body = insns_info;
+    iseq->body->insns_info.positions = positions;
+    // One iseq per line
+    iseq->body->iseq_size = insn_num;
+    iseq->body->insns_info.size = insn_num;
+    rb_iseq_insns_info_encode_positions(iseq);
+    iseq->body->iseq_encoded = 0x0;
+
+    return iseq;
+}
+
+const VALUE **sorbet_setRubyStackFrame(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath,
+                                       int startline, int endline) {
     rb_execution_context_t *ec = GET_EC();
-    struct iseq_insn_info_entry *body = (struct iseq_insn_info_entry *)ec->cfp->iseq->body->insns_info.body;
-    body->line_no = lineno;
+    rb_control_frame_t *cfp = ec->cfp;
+    const rb_iseq_t *iseq =
+        sorbet_allocateRubyStackFrames(recv, funcName, func, filename, realpath, startline, endline);
+    cfp->iseq = iseq;
+    return &ec->cfp->pc;
+}
+
+void sorbet_setLineNumber(int offset) {
+    // use pos+1 because PC should point at the next instruction
+    GET_EC()->cfp->pc = ((VALUE *)0x0) + offset + 1;
 }
 
 // ****
