@@ -241,12 +241,12 @@ A class was defined as the subclass of a `type_alias`. It also occurs if a
 
 ```ruby
 # typed: true
-A = T.type_alias(Integer)
+A = T.type_alias {Integer}
 class B < A; end # error: Superclasses and mixins may not be type aliases
 
 module M; end
 
-AliasModule = T.type_alias(M)
+AliasModule = T.type_alias {M}
 class C
   include AliasModule # error: Superclasses and mixins may not be type aliases
 end
@@ -367,15 +367,15 @@ Once a type alias is created, all subsequent aliases must also be type aliases.
 Concretely, this is not allowed:
 
 ```ruby
-A = T.type_alias(Integer)
+A = T.type_alias {Integer}
 B = A # error: Reassigning a type alias is not allowed
 ```
 
 while this is:
 
 ```ruby
-A = T.type_alias(Integer)
-B = T.type_alias(A)
+A = T.type_alias {Integer}
+B = T.type_alias {A}
 ```
 
 (Why? This is due to design tradeoffs to enforce stronger internal invariants.
@@ -475,6 +475,10 @@ class C
 end
 ```
 
+## 5054
+
+Use of `implementation` has been replaced by `override`.
+
 ## 6002
 
 In `# typed: strict` files, Sorbet requires that all instance and class
@@ -548,6 +552,13 @@ list.each do |elem|
   found_valid = true if valid?(elem) # ok
 end
 ```
+
+## 5056
+
+The `generated` annotation in method signatures is deprecated.
+
+For alternatives, see [Enabling Runtime Checks](runtime.md) which talks about
+how to change the runtime behavior when method signatures encounter a problem.
 
 ## 7002
 

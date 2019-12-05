@@ -1,0 +1,39 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::Test)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Test<<C Test>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    def test_next_break(<blk>)
+      <self>.each() do ||
+        begin
+          if <self>.rand()
+            next(Unresolved: <emptyTree>::<C Foo>)
+          else
+            <emptyTree>
+          end
+          if <self>.rand()
+            break(Unresolved: <emptyTree>::<C Bar>)
+          else
+            <emptyTree>
+          end
+        end
+      end
+    end
+
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

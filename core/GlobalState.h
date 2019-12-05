@@ -3,7 +3,6 @@
 #include "absl/synchronization/mutex.h"
 
 #include "core/Error.h"
-#include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Loc.h"
 #include "core/Names.h"
@@ -90,7 +89,7 @@ public:
     SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
     }
-    SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name);
+    SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;
 
     SymbolRef staticInitForFile(Loc loc);
     SymbolRef staticInitForClass(SymbolRef klass, Loc loc);
@@ -99,6 +98,7 @@ public:
     SymbolRef lookupStaticInitForClass(SymbolRef klass) const;
 
     NameRef enterNameUTF8(std::string_view nm);
+    NameRef lookupNameUTF8(std::string_view nm) const;
 
     NameRef lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const;
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num);
@@ -127,22 +127,22 @@ public:
 
     // These methods are here to make it easier to print the symbol table in lldb.
     // (don't have to remember the default args)
-    std::string toString() {
+    std::string toString() const {
         bool showFull = false;
         bool showRaw = false;
         return toStringWithOptions(showFull, showRaw);
     }
-    std::string toStringFull() {
+    std::string toStringFull() const {
         bool showFull = true;
         bool showRaw = false;
         return toStringWithOptions(showFull, showRaw);
     }
-    std::string showRaw() {
+    std::string showRaw() const {
         bool showFull = false;
         bool showRaw = true;
         return toStringWithOptions(showFull, showRaw);
     }
-    std::string showRawFull() {
+    std::string showRawFull() const {
         bool showFull = true;
         bool showRaw = true;
         return toStringWithOptions(showFull, showRaw);
@@ -169,11 +169,13 @@ public:
     bool ensureCleanStrings = false;
 
     // So we can know whether we're running in autogen mode.
-    // Right now this is only used to turn certain DSL passes on or off.
+    // Right now this is only used to turn certain Rewriter passes on or off.
     // Think very hard before looking at this value in namer / resolver!
     // (hint: probably you want to find an alternate solution)
     bool runningUnderAutogen = false;
     bool censorForSnapshotTests = false;
+
+    bool sleepInSlowPath = false;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;

@@ -1,0 +1,6 @@
+s(:assign,
+  s(:lvasgn, :o),
+  s(:hash,
+    s(:pair,
+      s(:sym, :a),
+      s(:int, "1"))))

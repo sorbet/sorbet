@@ -1,0 +1,2 @@
+s(:kwbegin,
+  s(:ensure, nil, nil))

@@ -15,11 +15,12 @@
 #include "cfg/proto/proto.h"
 #include "common/FileOps.h"
 #include "common/common.h"
+#include "common/formatting.h"
+#include "common/sort.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
-#include "dsl/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
@@ -28,6 +29,7 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "resolver/resolver.h"
+#include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "test/LSPTest.h"
@@ -106,16 +108,17 @@ public:
             return m;
         }
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
-        cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+        auto symbol = cfg->symbol;
+        cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));
         cfgs.push_back(move(cfg));
         return m;
     }
 };
 
 UnorderedSet<string> knownExpectations = {
-    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "ast",       "ast-raw",       "dsl-tree",
-    "dsl-tree-raw",     "symbol-table",    "symbol-table-raw",      "name-tree", "name-tree-raw", "resolve-tree",
-    "resolve-tree-raw", "flattened-tree",  "flattened-tree-raw",    "cfg",       "cfg-raw",       "cfg-json",
+    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
+    "rewrite-tree-raw", "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
+    "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",          "cfg-raw",          "cfg-json",
     "autogen",          "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
@@ -252,29 +255,29 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             desugared = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
         }
 
-        handler.addObserved("ast", [&]() { return desugared.tree->toString(*gs); });
-        handler.addObserved("ast-raw", [&]() { return desugared.tree->showRaw(*gs); });
+        handler.addObserved("desugar-tree", [&]() { return desugared.tree->toString(*gs); });
+        handler.addObserved("desugar-tree-raw", [&]() { return desugared.tree->showRaw(*gs); });
 
-        ast::ParsedFile dslUnwound;
+        ast::ParsedFile rewriten;
         ast::ParsedFile localNamed;
 
         if (!test.expectations.contains("autogen")) {
-            // DSL
+            // Rewriter
             {
                 core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
-                dslUnwound =
-                    testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree)), desugared.file});
+                rewriten = testSerialize(
+                    *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
             }
 
-            handler.addObserved("dsl-tree", [&]() { return dslUnwound.tree->toString(*gs); });
-            handler.addObserved("dsl-tree-raw", [&]() { return dslUnwound.tree->showRaw(*gs); });
+            handler.addObserved("rewrite-tree", [&]() { return rewriten.tree->toString(*gs); });
+            handler.addObserved("rewrite-tree-raw", [&]() { return rewriten.tree->showRaw(*gs); });
 
-            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
+            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
         } else {
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
-            if (test.expectations.contains("dsl-tree-raw") || test.expectations.contains("dsl-tree")) {
-                ADD_FAILURE() << "Running DSL passes with autogen isn't supported";
+            if (test.expectations.contains("rewrite-tree-raw") || test.expectations.contains("rewrite-tree")) {
+                ADD_FAILURE() << "Running Rewriter passes with autogen isn't supported";
             }
         }
 
@@ -343,8 +346,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         resolvedTree = flatten::runOne(ctx, move(resolvedTree));
 
-        handler.addObserved("flattened-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.addObserved("flattened-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved("flatten-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("flatten-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
 
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
@@ -477,13 +480,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         core::MutableContext ctx(*gs, core::Symbols::root());
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
-        handler.addObserved("ast", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved("ast-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved("desguar-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
-        // DSL pass
-        file = testSerialize(*gs, ast::ParsedFile{dsl::DSL::run(ctx, move(file.tree)), file.file});
-        handler.addObserved("dsl-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved("dsl-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        // Rewriter pass
+        file = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(file.tree)), file.file});
+        handler.addObserved("rewrite-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("rewrite-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
         // local vars
         file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
@@ -505,7 +508,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     // resolver
     trees = resolver::Resolver::runTreePasses(ctx, move(newTrees));
 
-    for (auto &resolvedTree : newTrees) {
+    for (auto &resolvedTree : trees) {
         handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
         handler.addObserved("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
     }
@@ -637,7 +640,7 @@ bool isTestMessage(const LSPMessage &msg) {
 
 // "Newly pushed diagnostics always replace previously pushed diagnostics. There is no merging that happens
 // on the client side." Only keep the newest diagnostics for a file.
-void updateDiagnostics(string_view rootUri, UnorderedMap<string, string> &testFileUris,
+void updateDiagnostics(const LSPConfiguration &config, UnorderedMap<string, string> &testFileUris,
                        vector<unique_ptr<LSPMessage>> &responses,
                        map<string, vector<unique_ptr<Diagnostic>>> &diagnostics) {
     for (auto &response : responses) {
@@ -648,7 +651,7 @@ void updateDiagnostics(string_view rootUri, UnorderedMap<string, string> &testFi
         auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
         ASSERT_TRUE(maybeDiagnosticParams.has_value());
         auto &diagnosticParams = *maybeDiagnosticParams;
-        auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
+        auto filename = uriToFilePath(config, diagnosticParams->uri);
         EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
             << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
 
@@ -679,7 +682,7 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
 
 void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, UnorderedSet<string> &filenames,
                              vector<shared_ptr<RangeAssertion>> &assertions, UnorderedMap<string, string> &testFileUris,
-                             string_view rootUri, int &nextId) {
+                             int &nextId) {
     UnorderedMap<string, vector<shared_ptr<ApplyCodeActionAssertion>>> applyCodeActionAssertionsByFilename;
     for (auto &assertion : assertions) {
         if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
@@ -712,7 +715,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
                 make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri), error->range->copy(),
                                               make_unique<CodeActionContext>(move(diagnostics)));
             auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
-            auto responses = lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(req)));
+            auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
             EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a codeAction request.";
             if (responses.size() != 1) {
                 continue;
@@ -767,7 +770,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
                 // Ensure that the received code action applies correctly.
                 if (it2 != receivedCodeActionsByTitle.end()) {
                     auto codeAction = move(it2->second);
-                    codeActionAssertion->check(test.sourceFileContents, *codeAction.get(), rootUri);
+                    codeActionAssertion->check(test.sourceFileContents, lspWrapper, *codeAction.get());
 
                     // Some bookkeeping to make surfacing errors re. extra/insufficient
                     // apply-code-action annotations easier.
@@ -814,7 +817,7 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
 
     auto params = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(string(uri)));
     auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
-    auto responses = lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(req)));
+    auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
     ASSERT_EQ(responses.size(), 1) << "Did not receive exactly one response for a documentSymbols request.";
     auto &msg = responses.at(0);
     ASSERT_TRUE(msg->isResponse());
@@ -829,22 +832,17 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
         get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
 
     // Simple string comparison, just like other *.exp files.
-    EXPECT_EQ(documentSymbolsToString(receivedSymbolResponse), documentSymbolsToString(expectedSymbolResponse))
+    EXPECT_EQ(documentSymbolsToString(expectedSymbolResponse), documentSymbolsToString(receivedSymbolResponse))
         << "Mismatch on: " << expectedSymbolsPath;
 }
 
 TEST_P(LSPTest, All) {
-    string rootPath = "/Users/jvilk/stripe/pay-server";
-    string rootUri = fmt::format("file://{}", rootPath);
-
-    // filename => URI
-    UnorderedMap<string, string> testFileUris;
-    for (auto &filename : filenames) {
-        testFileUris[filename] = filePathToUri(rootUri, filename);
-    }
+    const auto &config = lspWrapper->config();
 
     // Perform initialize / initialized handshake.
     {
+        string rootPath = fmt::format("/Users/{}/stripe/sorbet", std::getenv("USER"));
+        string rootUri = fmt::format("file://{}", rootPath);
         auto sorbetInitOptions = make_unique<SorbetInitializationOptions>();
         sorbetInitOptions->enableTypecheckInfo = true;
         auto initializedResponses =
@@ -853,13 +851,19 @@ TEST_P(LSPTest, All) {
             << "Should not receive any response to 'initialized' message.";
     }
 
+    // filename => URI; do post-initialization so LSPConfiguration has rootUri set.
+    UnorderedMap<string, string> testFileUris;
+    for (auto &filename : filenames) {
+        testFileUris[filename] = filePathToUri(config, filename);
+    }
+
     // Tell LSP that we opened a bunch of brand new, empty files (the test files).
     {
         for (auto &filename : filenames) {
             auto params = make_unique<DidOpenTextDocumentParams>(
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
-            auto responses = lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(
-                make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params))));
+            auto responses = getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(make_unique<NotificationMessage>(
+                                                                 "2.0", LSPMethod::TextDocumentDidOpen, move(params))));
             EXPECT_EQ(0, countNonTestMessages(responses))
                 << "Should not receive any response to opening an empty file.";
         }
@@ -880,11 +884,11 @@ TEST_P(LSPTest, All) {
             vector<unique_ptr<LSPMessage>> updates;
             for (auto &filename : filenames) {
                 auto textDocContents = test.sourceFileContents[filename]->source();
-                updates.push_back(makeDidChange(testFileUris[filename],
-                                                string(textDocContents.begin(), textDocContents.end()), 2 + i));
+                updates.push_back(
+                    makeChange(testFileUris[filename], string(textDocContents.begin(), textDocContents.end()), 2 + i));
             }
-            auto responses = lspWrapper->getLSPResponsesFor(updates);
-            updateDiagnostics(rootUri, testFileUris, responses, diagnostics);
+            auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
+            updateDiagnostics(config, testFileUris, responses, diagnostics);
             slowPathPassed = ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
             if (i == 2) {
@@ -896,7 +900,7 @@ TEST_P(LSPTest, All) {
     for (auto &filename : filenames) {
         testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[filename], filename);
     }
-    testQuickFixCodeActions(*lspWrapper, test, filenames, assertions, testFileUris, rootUri, nextId);
+    testQuickFixCodeActions(*lspWrapper, test, filenames, assertions, testFileUris, nextId);
 
     // Usage and def assertions
     {
@@ -961,12 +965,22 @@ TEST_P(LSPTest, All) {
                 auto entry = defAssertions.find(version);
                 if (entry != defAssertions.end()) {
                     auto &def = entry->second;
-                    auto queryLoc = assertion->getLocation(rootUri);
+                    auto queryLoc = assertion->getLocation(config);
                     // Check that a definition request at this location returns def.
-                    def->check(test.sourceFileContents, *lspWrapper, nextId, rootUri, *queryLoc);
+                    def->check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc);
                     // Check that a reference request at this location returns entryAssertions.
-                    UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
+                    UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
                                           entryAssertions);
+                    // Check that a highlight request at this location returns all of the entryAssertions for the same
+                    // file as the request.
+                    vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
+                    for (auto &e : entryAssertions) {
+                        if (absl::StartsWith(e->getLocation(config)->uri, queryLoc->uri)) {
+                            filteredEntryAssertions.push_back(e);
+                        }
+                    }
+                    UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
+                                                    filteredEntryAssertions);
                 } else {
                     ADD_FAILURE() << fmt::format(
                         "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "
@@ -980,19 +994,22 @@ TEST_P(LSPTest, All) {
         for (auto &[symbol, typeDefAndAssertions] : typeDefMap) {
             auto &[typeDefs, typeAssertions] = typeDefAndAssertions;
             for (auto &typeAssertion : typeAssertions) {
-                auto queryLoc = typeAssertion->getLocation(rootUri);
+                auto queryLoc = typeAssertion->getLocation(config);
                 // Check that a type definition request at this location returns type-def.
-                TypeDefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
-                                        typeDefs);
+                TypeDefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc, typeDefs);
             }
         }
     }
 
     // Hover assertions
-    HoverAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+    HoverAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 
     // Completion assertions
-    CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+    CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
+    ApplyCompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
+
+    // Workspace Symbol assertions
+    SymbolSearchAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
@@ -1016,14 +1033,14 @@ TEST_P(LSPTest, All) {
                 auto originalFile = test.folder + update.first;
                 auto updateFile = test.folder + update.second;
                 auto fileContents = FileOps::read(updateFile);
-                lspUpdates.push_back(makeDidChange(testFileUris[originalFile], fileContents, baseVersion + version));
+                lspUpdates.push_back(makeChange(testFileUris[originalFile], fileContents, baseVersion + version));
                 updatesAndContents[originalFile] =
                     make_shared<core::File>(string(originalFile), move(fileContents), core::File::Type::Normal);
             }
             auto assertions = RangeAssertion::parseAssertions(updatesAndContents);
             auto assertFastPath = FastPathAssertion::get(assertions);
             auto assertSlowPath = BooleanPropertyAssertion::getValue("assert-slow-path", assertions);
-            auto responses = lspWrapper->getLSPResponsesFor(lspUpdates);
+            auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
             bool foundTypecheckRunInfo = false;
 
             for (auto &r : responses) {
@@ -1053,7 +1070,7 @@ TEST_P(LSPTest, All) {
                 ADD_FAILURE() << errorPrefix << "Sorbet did not send expected typechecking metadata.";
             }
 
-            updateDiagnostics(rootUri, testFileUris, responses, diagnostics);
+            updateDiagnostics(config, testFileUris, responses, diagnostics);
 
             for (auto &update : updates) {
                 auto originalFile = test.folder + update.first;
@@ -1070,10 +1087,11 @@ TEST_P(LSPTest, All) {
             }
 
             // Check any new HoverAssertions in the updates.
-            HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId, rootUri);
+            HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
         }
     }
-} // namespace sorbet::test
+}
+// namespace sorbet::test
 
 INSTANTIATE_TEST_SUITE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 INSTANTIATE_TEST_SUITE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);

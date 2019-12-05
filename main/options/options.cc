@@ -6,6 +6,8 @@
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
+#include "common/formatting.h"
+#include "common/sort.h"
 #include "core/Error.h"
 #include "core/errors/infer.h"
 #include "main/options/ConfigParser.h"
@@ -30,36 +32,38 @@ const vector<PrintOptions> print_options({
     {"parse-tree", &Printers::ParseTree},
     {"parse-tree-json", &Printers::ParseTreeJson},
     {"parse-tree-whitequark", &Printers::ParseTreeWhitequark},
-    {"ast", &Printers::Desugared},
-    {"ast-raw", &Printers::DesugaredRaw},
-    {"dsl-tree", &Printers::DSLTree},
-    {"dsl-tree-raw", &Printers::DSLTreeRaw},
+    {"desugar-tree", &Printers::DesugarTree},
+    {"desugar-tree-raw", &Printers::DesugarTreeRaw},
+    {"rewrite-tree", &Printers::RewriterTree},
+    {"rewrite-tree-raw", &Printers::RewriterTreeRaw},
     {"index-tree", &Printers::IndexTree, true},
     {"index-tree-raw", &Printers::IndexTreeRaw, true},
+    {"name-tree", &Printers::NameTree, true},
+    {"name-tree-raw", &Printers::NameTreeRaw, true},
+    {"resolve-tree", &Printers::ResolveTree, true},
+    {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
+    {"flatten-tree", &Printers::FlattenTree, true},
+    {"flatten-tree-raw", &Printers::FlattenTreeRaw, true},
+    {"ast", &Printers::AST, true},
+    {"ast-raw", &Printers::ASTRaw, true},
+    {"cfg", &Printers::CFG, true},
+    {"cfg-raw", &Printers::CFGRaw, true},
+    {"cfg-json", &Printers::CFGJson, true},
+    {"cfg-proto", &Printers::CFGProto, true},
     {"symbol-table", &Printers::SymbolTable, true},
     {"symbol-table-raw", &Printers::SymbolTableRaw, true},
     {"symbol-table-json", &Printers::SymbolTableJson, true},
     {"symbol-table-full", &Printers::SymbolTableFull, true},
     {"symbol-table-full-raw", &Printers::SymbolTableFullRaw, true},
     {"symbol-table-full-json", &Printers::SymbolTableFullJson, true},
-    {"name-tree", &Printers::NameTree, true},
-    {"name-tree-raw", &Printers::NameTreeRaw, true},
     {"file-table-json", &Printers::FileTableJson, true},
-    {"resolve-tree", &Printers::ResolveTree, true},
-    {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
     {"missing-constants", &Printers::MissingConstants, true},
-    {"flattened-tree", &Printers::FlattenedTree, true},
-    {"flattened-tree-raw", &Printers::FlattenedTreeRaw, true},
-    {"cfg", &Printers::CFG, true},
-    {"cfg-raw", &Printers::CFGRaw, true},
-    {"cfg-json", &Printers::CFGJson, true},
-    {"cfg-proto", &Printers::CFGProto, true},
+    {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
     {"autogen-classlist", &Printers::AutogenClasslist, true},
     {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
     {"autogen-subclasses", &Printers::AutogenSubclasses, true},
-    {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -87,35 +91,37 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         ParseTree,
         ParseTreeJson,
         ParseTreeWhitequark,
-        Desugared,
-        DesugaredRaw,
-        DSLTree,
-        DSLTreeRaw,
+        DesugarTree,
+        DesugarTreeRaw,
+        RewriterTree,
+        RewriterTreeRaw,
         IndexTree,
         IndexTreeRaw,
+        NameTree,
+        NameTreeRaw,
+        ResolveTree,
+        ResolveTreeRaw,
+        FlattenTree,
+        FlattenTreeRaw,
+        AST,
+        ASTRaw,
+        CFG,
+        CFGRaw,
+        CFGJson,
+        CFGProto,
         SymbolTable,
         SymbolTableRaw,
         SymbolTableJson,
         SymbolTableFull,
         SymbolTableFullRaw,
-        NameTree,
-        NameTreeRaw,
         FileTableJson,
-        ResolveTree,
-        ResolveTreeRaw,
         MissingConstants,
-        FlattenedTree,
-        FlattenedTreeRaw,
-        CFG,
-        CFGRaw,
-        CFGJson,
-        CFGProto,
+        PluginGeneratedCode,
         Autogen,
         AutogenMsgPack,
         AutogenClasslist,
         AutogenAutoloader,
         AutogenSubclasses,
-        PluginGeneratedCode,
     });
 }
 
@@ -133,7 +139,7 @@ const vector<StopAfterOptions> stop_after_options({
     {"init", Phase::INIT},
     {"parser", Phase::PARSER},
     {"desugarer", Phase::DESUGARER},
-    {"dsl", Phase::DSL},
+    {"rewriter", Phase::REWRITER},
     {"local-vars", Phase::LOCAL_VARS},
     {"namer", Phase::NAMER},
     {"resolver", Phase::RESOLVER},
@@ -336,14 +342,19 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.watchmanPath));
     options.add_options("advanced")("enable-experimental-lsp-autocomplete",
                                     "Enable experimental LSP feature: Autocomplete");
-    options.add_options("advanced")("enable-experimental-lsp-workspace-symbols",
-                                    "Enable experimental LSP feature: Workspace Symbols");
     options.add_options("advanced")("enable-experimental-lsp-document-symbol",
                                     "Enable experimental LSP feature: Document Symbol");
+    options.add_options("advanced")("enable-experimental-lsp-document-highlight",
+                                    "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
     options.add_options("advanced")("enable-experimental-lsp-quick-fix", "Enable experimental LSP feature: Quick Fix");
-    options.add_options("advanced")("enable-all-experimental-lsp-features", "Enable every experimental LSP feature.");
+    options.add_options("advanced")(
+        "enable-all-experimental-lsp-features",
+        "Enable every experimental LSP feature. (WARNING: can be crashy; for developer use only. "
+        "End users should prefer to use `--enable-all-beta-lsp-features`, instead.)");
+    options.add_options("advanced")("enable-all-beta-lsp-features",
+                                    "Enable (expected-to-be-non-crashy) early-access LSP features.");
     options.add_options("advanced")(
         "ignore",
         "Ignores input files that contain the given string in their paths (relative to the input path passed to "
@@ -398,10 +409,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options("dev")("skip-dsl-passes", "Do not run DSL passess");
+    options.add_options("dev")("skip-rewriter-passes", "Do not run Rewriter passess");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("stress-incremental-resolver",
                                "Force incremental updates to discover resolver & namer bugs");
+    options.add_options("dev")("sleep-in-slow-path", "Add some sleeps to slow path to artificially slow it down");
     options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
     options.add_options("dev")("censor-for-snapshot-tests",
@@ -584,12 +596,21 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
     return true;
 }
 
-void addFilesFromDir(Options &opts, string_view dir) {
+void addFilesFromDir(Options &opts, string_view dir, shared_ptr<spdlog::logger> logger) {
     auto fileNormalized = stripTrailingSlashes(dir);
     opts.rawInputDirNames.emplace_back(fileNormalized);
     // Expand directory into list of files.
-    auto containedFiles = opts.fs->listFilesInDir(fileNormalized, {".rb", ".rbi"}, true, opts.absoluteIgnorePatterns,
-                                                  opts.relativeIgnorePatterns);
+    vector<string> containedFiles;
+    try {
+        containedFiles = opts.fs->listFilesInDir(fileNormalized, {".rb", ".rbi"}, true, opts.absoluteIgnorePatterns,
+                                                 opts.relativeIgnorePatterns);
+    } catch (sorbet::FileNotFoundException) {
+        logger->error("Directory `{}` not found", dir);
+        throw EarlyReturnWithCode(1);
+    } catch (sorbet::FileNotDirException) {
+        logger->error("Path `{}` is not a directory", dir);
+        throw EarlyReturnWithCode(1);
+    }
     opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
     opts.inputFileNames.insert(opts.inputFileNames.end(), std::make_move_iterator(containedFiles.begin()),
                                std::make_move_iterator(containedFiles.end()));
@@ -619,7 +640,7 @@ void readOptions(Options &opts,
             struct stat s;
             for (auto &file : rawFiles) {
                 if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
-                    addFilesFromDir(opts, file);
+                    addFilesFromDir(opts, file, logger);
                 } else {
                     opts.rawInputFileNames.push_back(file);
                     opts.inputFileNames.push_back(file);
@@ -637,15 +658,7 @@ void readOptions(Options &opts,
             auto rawDirs = raw["dir"].as<vector<string>>();
             for (auto &dir : rawDirs) {
                 // Since we don't stat here, we're unsure if the directory exists / is a directory.
-                try {
-                    addFilesFromDir(opts, dir);
-                } catch (sorbet::FileNotFoundException) {
-                    logger->error("Directory `{}` not found", dir);
-                    throw EarlyReturnWithCode(1);
-                } catch (sorbet::FileNotDirException) {
-                    logger->error("Path `{}` is not a directory", dir);
-                    throw EarlyReturnWithCode(1);
-                }
+                addFilesFromDir(opts, dir, logger);
             }
         }
 
@@ -659,12 +672,13 @@ void readOptions(Options &opts,
                                   opts.inputFileNames.end());
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
+        opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
         opts.lspQuickFixEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-quick-fix"].as<bool>();
-        opts.lspWorkspaceSymbolsEnabled =
-            enableAllLSPFeatures || raw["enable-experimental-lsp-workspace-symbols"].as<bool>();
         opts.lspDocumentSymbolEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
+        opts.lspDocumentHighlightEnabled =
+            enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
@@ -772,11 +786,12 @@ void readOptions(Options &opts,
         if (raw.count("configatron-file")) {
             opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
         }
-        opts.skipDSLPasses = raw["skip-dsl-passes"].as<bool>();
+        opts.skipRewriterPasses = raw["skip-rewriter-passes"].as<bool>();
         opts.storeState = raw["store-state"].as<string>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
+        opts.sleepInSlowPath = raw["sleep-in-slow-path"].as<bool>();
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();

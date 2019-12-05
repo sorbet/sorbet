@@ -209,6 +209,333 @@ module Etc
   SC_XOPEN_STREAMS = T.let(T.unsafe(nil), Integer)
   SC_XOPEN_UNIX = T.let(T.unsafe(nil), Integer)
   SC_XOPEN_VERSION = T.let(T.unsafe(nil), Integer)
+
+  # Returns system configuration variable using confstr().
+  #
+  # *name* should be a constant under `Etc` which begins with `CS_`.
+  #
+  # The return value is a string or nil. nil means no configuration-defined
+  # value. (confstr() returns 0 but errno is not set.)
+  #
+  # ```ruby
+  # Etc.confstr(Etc::CS_PATH) #=> "/bin:/usr/bin"
+  #
+  # # GNU/Linux
+  # Etc.confstr(Etc::CS_GNU_LIBC_VERSION) #=> "glibc 2.18"
+  # Etc.confstr(Etc::CS_GNU_LIBPTHREAD_VERSION) #=> "NPTL 2.18"
+  # ```
+  sig do
+    params(p1: Integer).returns(T.nilable(String))
+  end
+  def self.confstr(p1); end
+
+  # Ends the process of scanning through the /etc/group file begun by
+  # [`::getgrent`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-getgrent),
+  # and closes the file.
+  sig do
+    void
+  end
+  def self.endgrent; end
+
+  # Ends the process of scanning through the /etc/passwd file begun with
+  # [`::getpwent`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-getpwent),
+  # and closes the file.
+  sig do
+    void
+  end
+  def self.endpwent; end
+
+  # Returns an entry from the /etc/group file.
+  #
+  # The first time it is called it opens the file and returns the first entry;
+  # each successive call returns the next entry, or `nil` if the end of the file
+  # has been reached.
+  #
+  # To close the file when processing is complete, call
+  # [`::endgrent`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-endgrent).
+  #
+  # Each entry is returned as a
+  # [`Group`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Group) struct
+  sig do
+    returns(T.nilable(Etc::Group))
+  end
+  def self.getgrent; end
+
+  # Returns information about the group with specified integer `group_id`, as
+  # found in /etc/group.
+  #
+  # The information is returned as a
+  # [`Group`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Group) struct.
+  #
+  # See the unix manpage for `getgrgid(3)` for more detail.
+  #
+  # ### Example:
+  #
+  # ```ruby
+  # Etc.getgrgid(100)
+  # #=> #<struct Etc::Group name="users", passwd="x", gid=100, mem=["meta", "root"]>
+  # ```
+  sig do
+    params(group_id: Integer).returns(T.nilable(Etc::Group))
+  end
+  def self.getgrgid(group_id); end
+
+  # Returns information about the group with specified `name`, as found in
+  # /etc/group.
+  #
+  # The information is returned as a
+  # [`Group`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Group) struct.
+  #
+  # See the unix manpage for `getgrnam(3)` for more detail.
+  #
+  # ### Example:
+  #
+  # ```ruby
+  # Etc.getgrnam('users')
+  # #=> #<struct Etc::Group name="users", passwd="x", gid=100, mem=["meta", "root"]>
+  # ```
+  sig do
+    params(name: String).returns(T.nilable(Etc::Group))
+  end
+  def self.getgrnam(name); end
+
+  # Returns the short user name of the currently logged in user. Unfortunately,
+  # it is often rather easy to fool
+  # [`::getlogin`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-getlogin).
+  #
+  # Avoid
+  # [`::getlogin`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-getlogin)
+  # for security-related purposes.
+  #
+  # If
+  # [`::getlogin`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-getlogin)
+  # fails, try
+  # [`::getpwuid`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-getpwuid).
+  #
+  # See the unix manpage for `getpwuid(3)` for more detail.
+  #
+  # e.g.
+  #
+  # ```
+  # Etc.getlogin -> 'guest'
+  # ```
+  sig do
+    returns(String)
+  end
+  def self.getlogin; end
+
+  # Returns an entry from the /etc/passwd file.
+  #
+  # The first time it is called it opens the file and returns the first entry;
+  # each successive call returns the next entry, or `nil` if the end of the file
+  # has been reached.
+  #
+  # To close the file when processing is complete, call
+  # [`::endpwent`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-endpwent).
+  #
+  # Each entry is returned as a
+  # [`Passwd`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Passwd) struct.
+  sig do
+    returns(T.nilable(Etc::Passwd))
+  end
+  def self.getpwent; end
+
+  # Returns the /etc/passwd information for the user with specified login
+  # `name`.
+  #
+  # The information is returned as a
+  # [`Passwd`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Passwd) struct.
+  #
+  # See the unix manpage for `getpwnam(3)` for more detail.
+  #
+  # ### Example:
+  #
+  # ```ruby
+  # Etc.getpwnam('root')
+  # #=> #<struct Etc::Passwd name="root", passwd="x", uid=0, gid=0, gecos="root",dir="/root", shell="/bin/bash">
+  # ```
+  sig do
+    params(name: String).returns(T.nilable(Etc::Passwd))
+  end
+  def self.getpwnam(name); end
+
+  # Returns the /etc/passwd information for the user with the given integer
+  # `uid`.
+  #
+  # The information is returned as a
+  # [`Passwd`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Passwd) struct.
+  #
+  # If `uid` is omitted, the value from `Passwd[:uid]` is returned instead.
+  #
+  # See the unix manpage for `getpwuid(3)` for more detail.
+  #
+  # ### Example:
+  #
+  # ```ruby
+  # Etc.getpwuid(0)
+  # #=> #<struct Etc::Passwd name="root", passwd="x", uid=0, gid=0, gecos="root",dir="/root", shell="/bin/bash">
+  # ```
+  sig do
+    params(uid: Integer).returns(T.nilable(Etc::Passwd))
+  end
+  def self.getpwuid(uid=T.unsafe(nil)); end
+
+  # Provides a convenient Ruby iterator which executes a block for each entry in
+  # the /etc/group file.
+  #
+  # The code block is passed an
+  # [`Group`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Group) struct.
+  #
+  # See
+  # [`::getgrent`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-getgrent)
+  # above for details.
+  #
+  # Example:
+  #
+  # ```ruby
+  # require 'etc'
+  #
+  # Etc.group {|g|
+  #   puts g.name + ": " + g.mem.join(', ')
+  # }
+  # ```
+  sig do
+    returns(T.nilable(Etc::Group))
+  end
+  def self.group; end
+
+  # Returns the number of online processors.
+  #
+  # The result is intended as the number of processes to use all available
+  # processors.
+  #
+  # This method is implemented using:
+  # *   sched\_getaffinity(): Linux
+  # *   sysconf(\_SC\_NPROCESSORS\_ONLN): GNU/Linux, NetBSD, FreeBSD, OpenBSD,
+  #     DragonFly BSD, OpenIndiana, Mac OS X, AIX
+  #
+  #
+  # Example:
+  #
+  # ```ruby
+  # require 'etc'
+  # p Etc.nprocessors #=> 4
+  # ```
+  #
+  # The result might be smaller number than physical cpus especially when ruby
+  # process is bound to specific cpus. This is intended for getting better
+  # parallel processing.
+  #
+  # Example: (Linux)
+  #
+  # ```
+  # linux$ taskset 0x3 ./ruby -retc -e "p Etc.nprocessors"  #=> 2
+  # ```
+  sig do
+    returns(Integer)
+  end
+  def self.nprocessors; end
+
+  # Provides a convenient Ruby iterator which executes a block for each entry in
+  # the /etc/passwd file.
+  #
+  # The code block is passed an
+  # [`Passwd`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Passwd) struct.
+  #
+  # See
+  # [`::getpwent`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-getpwent)
+  # above for details.
+  #
+  # Example:
+  #
+  # ```ruby
+  # require 'etc'
+  #
+  # Etc.passwd {|u|
+  #   puts u.name + " = " + u.gecos
+  # }
+  # ```
+  sig do
+    params(
+      blk: T.nilable(T.proc.params(struct: Etc::Passwd).void)
+    ).returns(T.nilable(Etc::Passwd))
+  end
+  def self.passwd(&blk); end
+
+  # Resets the process of reading the /etc/group file, so that the next call to
+  # [`::getgrent`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-getgrent)
+  # will return the first entry again.
+  sig do
+    void
+  end
+  def self.setgrent; end
+
+  # Resets the process of reading the /etc/passwd file, so that the next call to
+  # [`::getpwent`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#method-c-getpwent)
+  # will return the first entry again.
+  sig do
+    void
+  end
+  def self.setpwent; end
+
+  # Returns system configuration variable using sysconf().
+  #
+  # *name* should be a constant under `Etc` which begins with `SC_`.
+  #
+  # The return value is an integer or nil. nil means indefinite limit.
+  # (sysconf() returns -1 but errno is not set.)
+  #
+  # ```ruby
+  # Etc.sysconf(Etc::SC_ARG_MAX) #=> 2097152
+  # Etc.sysconf(Etc::SC_LOGIN_NAME_MAX) #=> 256
+  # ```
+  sig do
+    params(p1: Integer).returns(Integer)
+  end
+  def self.sysconf(p1); end
+
+  # Returns system configuration directory.
+  #
+  # This is typically "/etc", but is modified by the prefix used when Ruby was
+  # compiled. For example, if Ruby is built and installed in /usr/local, returns
+  # "/usr/local/etc" on other platforms than Windows. On Windows, this always
+  # returns the directory provided by the system.
+  sig do
+    returns(String)
+  end
+  def self.sysconfdir; end
+
+  # Returns system temporary directory; typically "/tmp".
+  sig do
+    returns(String)
+  end
+  def self.systmpdir; end
+
+  # Returns the system information obtained by uname system call.
+  #
+  # The return value is a hash which has 5 keys at least:
+  #
+  # ```
+  # :sysname, :nodename, :release, :version, :machine
+  # ```
+  #
+  # Example:
+  #
+  # ```ruby
+  # require 'etc'
+  # require 'pp'
+  #
+  # pp Etc.uname
+  # #=> {:sysname=>"Linux",
+  # #    :nodename=>"boron",
+  # #    :release=>"2.6.18-6-xen-686",
+  # #    :version=>"#1 SMP Thu Nov 5 19:54:42 UTC 2009",
+  # #    :machine=>"i686"}
+  # ```
+  sig do
+    returns(String)
+  end
+  def self.uname; end
 end
 
 # [`Group`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Group)
@@ -237,6 +564,10 @@ end
 class Etc::Group < Struct
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
+  class << self
+    extend T::Generic
+    Elem = type_member(fixed: T.untyped)
+  end
 end
 
 # [`Passwd`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Passwd)
@@ -291,4 +622,36 @@ end
 class Etc::Passwd < Struct
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
+
+  # Contains the short login name of the user as a String.
+  sig { returns(String) }
+  def name; end
+
+  # Contains the encrypted password of the user as a String.
+  #
+  # An 'x' is returned if shadow passwords are in use.
+  # An '*' is returned if the user cannot log in using a password.
+  sig { returns(String) }
+  def passwd; end
+
+  # Contains the integer user ID (uid) of the user.
+  sig { returns(Integer) }
+  def uid; end
+
+  # Contains the integer group ID (gid) of the user's primary group.
+  sig { returns(Integer) }
+  def gid; end
+
+  # Contains the path to the home directory of the user as a String.
+  sig { returns(String) }
+  def dir; end
+
+  # Contains the path to the login shell of the user as a String.
+  sig { returns(String) }
+  def shell; end
+
+  class << self
+    extend T::Generic
+    Elem = type_member(fixed: T.untyped)
+  end
 end

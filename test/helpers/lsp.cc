@@ -2,11 +2,28 @@
 #include <cxxopts.hpp>
 // has to go first as it violates requirements
 
+#include "absl/strings/match.h"
 #include "common/common.h"
+#include "common/sort.h"
 #include "test/helpers/lsp.h"
 
 namespace sorbet::test {
 using namespace std;
+
+string filePathToUri(const LSPConfiguration &config, string_view filePath) {
+    return fmt::format("{}/{}", config.getClientConfig().rootUri, filePath);
+}
+
+string uriToFilePath(const LSPConfiguration &config, string_view uri) {
+    string_view prefixUrl = config.getClientConfig().rootUri;
+    if (!config.isUriInWorkspace(uri)) {
+        ADD_FAILURE() << fmt::format(
+            "Unrecognized URI: `{}` is not contained in root URI `{}`, and thus does not correspond to a test file.",
+            uri, prefixUrl);
+        return "";
+    }
+    return string(uri.substr(prefixUrl.length() + 1));
+}
 
 template <typename T = DynamicRegistrationOption>
 std::unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
@@ -122,7 +139,7 @@ makeInitializeParams(variant<string, JSONNullObject> rootPath, variant<string, J
     initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities(supportsMarkdown);
     initializeParams->trace = TraceKind::Off;
 
-    string stringRootUri = "";
+    string stringRootUri;
     if (auto str = get_if<string>(&rootUri)) {
         stringRootUri = *str;
     }
@@ -141,6 +158,11 @@ unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int l
         "2.0", id, LSPMethod::TextDocumentDefinition,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
                                                 make_unique<Position>(line, character))));
+}
+
+unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query) {
+    return make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::WorkspaceSymbol,
+                                                               make_unique<WorkspaceSymbolParams>(string(query))));
 }
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
@@ -178,7 +200,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     EXPECT_TRUE(capabilities.typeDefinitionProvider.value_or(false));
     EXPECT_FALSE(capabilities.implementationProvider.has_value());
     EXPECT_TRUE(capabilities.referencesProvider.value_or(false));
-    EXPECT_FALSE(capabilities.documentHighlightProvider.has_value());
+    EXPECT_TRUE(capabilities.documentHighlightProvider.has_value());
     EXPECT_TRUE(capabilities.documentSymbolProvider.value_or(false));
     EXPECT_TRUE(capabilities.workspaceSymbolProvider.value_or(false));
     EXPECT_TRUE(capabilities.codeActionProvider.has_value());
@@ -217,7 +239,7 @@ void assertResponseError(int code, string_view msg, const LSPMessage &response) 
         "Expected a response message with error `{}: {}`, but received:\n{}", code, msg, response.toJSON());
 }
 
-void assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage &response) {
+void assertNotificationMessage(LSPMethod expectedMethod, const LSPMessage &response) {
     ASSERT_TRUE(response.isNotification()) << fmt::format(
         "Expected a notification, but received the following response message instead: {}", response.toJSON());
     ASSERT_EQ(expectedMethod, response.method()) << "Unexpected method on notification message.";
@@ -232,6 +254,38 @@ optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMess
     return (*publishDiagnosticParams).get();
 }
 
+unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, const Range &range, int &nextId,
+                                                    string_view filename) {
+    auto uri = filePathToUri(lspWrapper.config(), filename);
+    auto pos = make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(uri), range.start->copy());
+    auto id = nextId++;
+    auto msg =
+        make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion, move(pos)));
+    auto responses = getLSPResponsesFor(lspWrapper, move(msg));
+    if (responses.size() != 1) {
+        ADD_FAILURE() << "Expected to get 1 response";
+        return nullptr;
+    }
+    auto &responseMsg = responses.at(0);
+    if (!responseMsg->isResponse()) {
+        ADD_FAILURE() << "Expected response to actually be a response.";
+    }
+    auto &response = responseMsg->asResponse();
+    if (!response.result.has_value()) {
+        ADD_FAILURE() << "Expected result to have a value.";
+    }
+
+    auto completionList = move(get<unique_ptr<CompletionList>>(*response.result));
+    fast_sort(completionList->items, [&](const auto &left, const auto &right) -> bool {
+        string leftText = left->sortText.has_value() ? left->sortText.value() : left->label;
+        string rightText = right->sortText.has_value() ? right->sortText.value() : right->label;
+
+        return leftText < rightText;
+    });
+
+    return completionList;
+}
+
 vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view rootUri, LSPWrapper &lspWrapper,
                                              int &nextId, bool supportsMarkdown,
                                              optional<unique_ptr<SorbetInitializationOptions>> initOptions) {
@@ -244,7 +298,7 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
             makeInitializeParams(string(rootPath), string(rootUri), supportsMarkdown, move(initOptions));
         auto message = make_unique<LSPMessage>(
             make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize, move(initializeParams)));
-        auto responses = lspWrapper.getLSPResponsesFor(move(message));
+        auto responses = getLSPResponsesFor(lspWrapper, move(message));
 
         // Should just have an 'initialize' response.
         EXPECT_EQ(1, responses.size());
@@ -268,15 +322,21 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
 
     // Complete initialization handshake with an 'initialized' message.
     {
-        rapidjson::Value emptyObject(rapidjson::kObjectType);
         auto initialized =
             make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>());
-        return lspWrapper.getLSPResponsesFor(make_unique<LSPMessage>(move(initialized)));
+        return getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(initialized)));
     }
 }
 
-unique_ptr<LSPMessage> makeDidChange(std::string_view uri, std::string_view contents, int version) {
-    auto textDoc = make_unique<VersionedTextDocumentIdentifier>(string(uri), version);
+unique_ptr<LSPMessage> makeOpen(string_view uri, string_view contents, int version) {
+    auto params = make_unique<DidOpenTextDocumentParams>(
+        make_unique<TextDocumentItem>(string(uri), "ruby", static_cast<double>(version), string(contents)));
+    return make_unique<LSPMessage>(
+        make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params)));
+}
+
+unique_ptr<LSPMessage> makeChange(string_view uri, string_view contents, int version) {
+    auto textDoc = make_unique<VersionedTextDocumentIdentifier>(string(uri), static_cast<double>(version));
     auto textDocChange = make_unique<TextDocumentContentChangeEvent>(string(contents));
     vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;
     textChanges.push_back(move(textDocChange));
@@ -285,6 +345,57 @@ unique_ptr<LSPMessage> makeDidChange(std::string_view uri, std::string_view cont
     auto didChangeNotif =
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
     return make_unique<LSPMessage>(move(didChangeNotif));
+}
+
+unique_ptr<LSPMessage> makeClose(string_view uri) {
+    auto didCloseParams = make_unique<DidCloseTextDocumentParams>(make_unique<TextDocumentIdentifier>(string(uri)));
+    auto didCloseNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidClose, move(didCloseParams));
+    return make_unique<LSPMessage>(move(didCloseNotif));
+}
+
+vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, vector<unique_ptr<LSPMessage>> messages) {
+    if (auto stWrapper = dynamic_cast<SingleThreadedLSPWrapper *>(&wrapper)) {
+        return stWrapper->getLSPResponsesFor(move(messages));
+    } else if (auto mtWrapper = dynamic_cast<MultiThreadedLSPWrapper *>(&wrapper)) {
+        // Fences are only used in tests. Use an ID that is likely to be unique to this method.
+        const int fenceId = 909090;
+        // Chase messages with a fence, and wait for a fence response.
+        messages.push_back(
+            make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, fenceId)));
+        // ASSUMPTION: There are no other messages still being processed. This should be true if the tests are
+        // disciplined. Also, even if they aren't, what should we do with stray messages? Passing them on seems most
+        // correct.
+        mtWrapper->send(messages);
+
+        vector<unique_ptr<LSPMessage>> responses;
+        while (true) {
+            // In tests, wait a maximum of 20 seconds for a response. It seems like sanitized builds running locally
+            // take ~10 seconds.
+            auto msg = mtWrapper->read(20000);
+            if (!msg) {
+                // We should be guaranteed to receive the fence response, so if this happens something is seriously
+                // wrong.
+                ADD_FAILURE() << "MultithreadedLSPWrapper::read() timed out; the language server might be hung.";
+                break;
+            }
+
+            if (msg->isNotification() && msg->method() == LSPMethod::SorbetFence &&
+                get<int>(msg->asNotification().params) == fenceId) {
+                break;
+            }
+            responses.push_back(move(msg));
+        }
+        return responses;
+    } else {
+        ADD_FAILURE() << "LSPWrapper is neither a single nor a multi threaded LSP wrapper; should be impossible!";
+        return {};
+    }
+}
+
+vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, unique_ptr<LSPMessage> message) {
+    vector<unique_ptr<LSPMessage>> messages;
+    messages.push_back(move(message));
+    return getLSPResponsesFor(wrapper, move(messages));
 }
 
 } // namespace sorbet::test

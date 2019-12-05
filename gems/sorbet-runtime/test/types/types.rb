@@ -82,6 +82,11 @@ module Opus::Types::Test
         type = T.any(Integer, Class.new, String)
         assert_equal("T.any(Integer, String)", type.name)
       end
+
+      it "unwraps aliased types" do
+        type = T.any(String, Integer, T::Private::Types::TypeAlias.new(-> {Integer}))
+        assert_equal("T.any(Integer, String)", type.name)
+      end
     end
 
     describe "Intersection" do
@@ -121,6 +126,12 @@ module Opus::Types::Test
           "T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2, String)",
           type.name
         )
+      end
+
+      it "unwraps aliased types" do
+        type_alias = T::Private::Types::TypeAlias.new(-> {Mixin1})
+        type = T.all(@type, type_alias)
+        assert_equal("T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2)", type.name)
       end
     end
 
@@ -341,15 +352,6 @@ module Opus::Types::Test
         assert_nil(msg)
       end
 
-      it 'fails if the type is wrong' do
-        type = T::Enumerator[Float]
-        value = [1, 2, 3].each
-        msg = type.error_message_for_obj(value)
-        expected_error = "Expected type T::Enumerator[Float], " \
-                         "got T::Enumerator[Integer]"
-        assert_equal(expected_error, msg)
-      end
-
       it 'can have its metatype instantiated' do
         assert_equal([1, 2, 3], T::Enumerator[Integer].new do |x|
           x << 1
@@ -508,6 +510,13 @@ module Opus::Types::Test
         assert_nil(msg)
       end
 
+      it 'does not check potentially non-finite enumerables' do
+        type = T::Enumerable[Integer]
+        value = ["bad"].cycle
+        msg = type.error_message_for_obj(value)
+        assert_nil(msg)
+      end
+
       it 'can serialize enumerables whose each throws' do
         type = T::Enumerable[Integer]
         value = Class.new(Array) do
@@ -518,6 +527,45 @@ module Opus::Types::Test
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Enumerable[Integer], got T::Array[T.untyped]"
         assert_equal(expected_error, msg)
+      end
+    end
+
+    describe 'TypeAlias' do
+      # TODO nroman get rid of this helper after `T.type_alias` accepts a block.
+      def make_type_alias(&blk)
+        T::Private::Types::TypeAlias.new(blk)
+      end
+
+      it 'delegates name' do
+        type = make_type_alias {T.any(Integer, String)}
+        assert_equal('T.any(Integer, String)', type.name)
+      end
+
+      it 'delegates equality' do
+        assert(T.any(Integer, String) == make_type_alias {T.any(Integer, String)})
+        assert(make_type_alias {T.any(Integer, String)} == T.any(Integer, String))
+        assert(make_type_alias {T.any(Integer, String)} == make_type_alias {T.any(Integer, String)})
+
+        refute(make_type_alias {T.any(Integer, Float)} == make_type_alias {T.any(Integer, String)})
+      end
+
+      it 'passes a validation' do
+        type = make_type_alias {T.any(Integer, String)}
+        msg = type.error_message_for_obj(1)
+        assert_nil(msg)
+      end
+
+      it 'provides errors on failed validation' do
+        type = make_type_alias {T.any(Integer, String)}
+        msg = type.error_message_for_obj(true)
+        assert_equal('Expected type T.any(Integer, String), got type TrueClass', msg)
+      end
+
+      it 'defers block evaluation' do
+        crash_type = make_type_alias {raise 'crash'}
+        assert_raises(RuntimeError) do
+          crash_type.error_message_for_obj(1)
+        end
       end
     end
 
@@ -585,42 +633,28 @@ module Opus::Types::Test
       end
     end
 
-    describe "OpusEnum" do
+    describe "TEnum" do
       before do
-        class ::Opus::Enum
-          extend T::Sig
-          extend T::Generic
-          extend Enumerable
-
-          Elem = type_template
-
-          def initialize(serialized_val = nil); end
-          def inspect; @const_name || '__UNINITIALIZED'; end
-          def self.each(&blk); end
-
-          # This doesn't exist in Opus::Enum--it's here to be able to implement #inspect
-          def const_name=(const_name); @const_name = const_name; end
-        end
-
-        class ::MyEnum < ::Opus::Enum
-          A = new; A.const_name = 'A'
-          B = new; B.const_name = 'B'
-          C = new; C.const_name = 'C'
+        class ::MyEnum < ::T::Enum
+          enums do
+            A = new
+            B = new
+            C = new
+          end
         end
       end
 
       after do
-        ::Opus.send(:remove_const, :Enum)
         ::Object.send(:remove_const, :MyEnum)
       end
 
-      it 'allows Opus::Enum values when coercing' do
+      it 'allows T::Enum values when coercing' do
         a = T::Utils.coerce(::MyEnum::A)
-        assert_instance_of(T::Types::OpusEnum, a)
+        assert_instance_of(T::Types::TEnum, a)
         assert_equal(a.val, ::MyEnum::A)
       end
 
-      it 'allows Opus::Enum values in a sig params' do
+      it 'allows T::Enum values in a sig params' do
         c = Class.new do
           extend T::Sig
           sig {params(x: MyEnum::A).void}
@@ -637,7 +671,7 @@ module Opus::Types::Test
         end
       end
 
-      it 'allows Opus::Enum values in a sig returns' do
+      it 'allows T::Enum values in a sig returns' do
         c = Class.new do
           extend T::Sig
           sig {returns(MyEnum::A)}
@@ -654,7 +688,7 @@ module Opus::Types::Test
         end
       end
 
-      it 'allows Opus::Enum values in a union' do
+      it 'allows T::Enum values in a union' do
         c = Class.new do
           extend T::Sig
           sig {params(x: T.any(MyEnum::A, MyEnum::B)).void}

@@ -40,15 +40,27 @@ Loc::Detail Loc::offset2Pos(const File &file, u4 off) {
     return pos;
 }
 
-u4 Loc::pos2Offset(const File &file, Loc::Detail pos) {
+optional<u4> Loc::pos2Offset(const File &file, Loc::Detail pos) {
     auto l = pos.line - 1;
-    auto lineOffset = file.lineBreaks()[l];
+    auto &lineBreaks = file.lineBreaks();
+    if (!(0 <= l && l < lineBreaks.size())) {
+        return nullopt;
+    }
+    auto lineOffset = lineBreaks[l];
     return lineOffset + pos.column;
 }
 
-Loc Loc::fromDetails(const GlobalState &gs, FileRef fileRef, Loc::Detail begin, Loc::Detail end) {
+optional<Loc> Loc::fromDetails(const GlobalState &gs, FileRef fileRef, Loc::Detail begin, Loc::Detail end) {
     const auto &file = fileRef.data(gs);
-    return Loc(fileRef, pos2Offset(file, begin), pos2Offset(file, end));
+    const auto beginOff = pos2Offset(file, begin);
+    if (!beginOff.has_value()) {
+        return nullopt;
+    }
+    const auto endOff = pos2Offset(file, end);
+    if (!endOff.has_value()) {
+        return nullopt;
+    }
+    return Loc(fileRef, beginOff.value(), endOff.value());
 }
 
 pair<Loc::Detail, Loc::Detail> Loc::position(const GlobalState &gs) const {
@@ -208,7 +220,9 @@ bool Loc::operator!=(const Loc &rhs) const {
 
 pair<Loc, u4> Loc::findStartOfLine(const GlobalState &gs) const {
     auto startDetail = this->position(gs).first;
-    u4 lineStart = Loc::pos2Offset(this->file().data(gs), {startDetail.line, 1});
+    auto maybeLineStart = Loc::pos2Offset(this->file().data(gs), {startDetail.line, 1});
+    ENFORCE(maybeLineStart.has_value());
+    auto lineStart = maybeLineStart.value();
     std::string_view lineView = this->file().data(gs).source().substr(lineStart);
 
     size_t padding = lineView.find_first_not_of(" \t");

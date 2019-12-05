@@ -152,4 +152,5 @@ vector<unique_ptr<core::ErrorQueueMessage>> ErrorQueue::drainAll() {
 
     return out;
 }
+
 } // namespace sorbet::core

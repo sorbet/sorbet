@@ -1,0 +1,44 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::Main)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Main<<C Main>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def foo<foo$1>(a, <blk>)
+      a
+    end
+
+    def foo<foo$2>(a, b, <blk>)
+      <emptyTree>
+    end
+
+    def foo(a, b, c, <blk>)
+      <emptyTree>
+    end
+
+    def self.<static-init>(<blk>)
+      begin
+        <self>.sig() do ||
+          <self>.params({:"a" => ::Integer}).returns(::Integer)
+        end
+        ::Sorbet::Private::Static.keep_for_ide(::T::Sig)
+        <emptyTree>
+      end
+    end
+  end
+  <emptyTree>
+end

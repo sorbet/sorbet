@@ -46,26 +46,20 @@ struct Printers {
     PrinterConfig ParseTree;
     PrinterConfig ParseTreeJson;
     PrinterConfig ParseTreeWhitequark;
-    PrinterConfig Desugared;
-    PrinterConfig DesugaredRaw;
-    PrinterConfig DSLTree;
-    PrinterConfig DSLTreeRaw;
+    PrinterConfig DesugarTree;
+    PrinterConfig DesugarTreeRaw;
+    PrinterConfig RewriterTree;
+    PrinterConfig RewriterTreeRaw;
     PrinterConfig IndexTree;
     PrinterConfig IndexTreeRaw;
     PrinterConfig NameTree;
     PrinterConfig NameTreeRaw;
-    PrinterConfig SymbolTable;
-    PrinterConfig SymbolTableRaw;
-    PrinterConfig SymbolTableJson;
-    PrinterConfig SymbolTableFull;
-    PrinterConfig SymbolTableFullRaw;
-    PrinterConfig SymbolTableFullJson;
-    PrinterConfig FileTableJson;
     PrinterConfig ResolveTree;
     PrinterConfig ResolveTreeRaw;
-    PrinterConfig MissingConstants;
-    PrinterConfig FlattenedTree;
-    PrinterConfig FlattenedTreeRaw;
+    PrinterConfig FlattenTree;
+    PrinterConfig FlattenTreeRaw;
+    PrinterConfig AST;
+    PrinterConfig ASTRaw;
     PrinterConfig CFG;
     PrinterConfig CFGRaw;
     // cfg-json format outputs a JSON object for each CFG, separated by newlines.
@@ -75,12 +69,20 @@ struct Printers {
     // See CFG.proto for details
     PrinterConfig CFGProto;
     PrinterConfig TypedSource;
+    PrinterConfig SymbolTable;
+    PrinterConfig SymbolTableRaw;
+    PrinterConfig SymbolTableJson;
+    PrinterConfig SymbolTableFull;
+    PrinterConfig SymbolTableFullRaw;
+    PrinterConfig SymbolTableFullJson;
+    PrinterConfig FileTableJson;
+    PrinterConfig MissingConstants;
+    PrinterConfig PluginGeneratedCode;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
     PrinterConfig AutogenClasslist;
     PrinterConfig AutogenAutoloader;
     PrinterConfig AutogenSubclasses;
-    PrinterConfig PluginGeneratedCode;
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
@@ -91,7 +93,7 @@ enum Phase {
     INIT,
     PARSER,
     DESUGARER,
-    DSL,
+    REWRITER,
     LOCAL_VARS,
     NAMER,
     RESOLVER,
@@ -135,10 +137,11 @@ struct Options {
     bool disableWatchman = false;
     std::string watchmanPath = "watchman";
     bool stressIncrementalResolver = false;
+    bool sleepInSlowPath = false;
     bool noErrorCount = false;
     bool autocorrect = false;
     bool waitForDebugger = false;
-    bool skipDSLPasses = false;
+    bool skipRewriterPasses = false;
     bool suggestRuntimeProfiledType = false;
     bool censorForSnapshotTests = false;
     int threads = 0;
@@ -192,13 +195,14 @@ struct Options {
     // List of directories not available editor-side. References to files in these directories should be sent via
     // sorbet: URIs to clients that support them.
     std::vector<std::string> lspDirsMissingFromClient;
+    // Enable stable-but-not-yet-shipped features suitable for late-stage beta-testing.
+    bool lspAllBetaFeaturesEnabled = false;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspAutocompleteEnabled = false;
     bool lspQuickFixEnabled = false;
-    bool lspWorkspaceSymbolsEnabled = false;
+    bool lspDocumentHighlightEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;
-    bool lspHoverEnabled = false;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;

@@ -1,0 +1,9 @@
+s(:masgn,
+  s(:mlhs,
+    s(:send,
+      s(:self), :a=),
+    s(:send,
+      s(:self), :[]=,
+      s(:int, "1"),
+      s(:int, "2"))),
+  s(:lvar, :foo))

@@ -1,5 +1,6 @@
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/Timer.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 
@@ -313,7 +314,7 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
         auto isRBI = absl::c_any_of(method.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isRBI(); });
         if (!method.data(ctx)->isOverride() && method.data(ctx)->hasSig() &&
             overridenMethod.data(ctx)->isOverridable() && !anyIsInterface && overridenMethod.data(ctx)->hasSig() &&
-            !method.data(ctx)->isDSLSynthesized() && !isRBI) {
+            !method.data(ctx)->isRewriterSynthesized() && !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
                             method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), "override.");
@@ -321,7 +322,7 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
             }
         }
         if (!method.data(ctx)->isOverride() && method.data(ctx)->hasSig() && overridenMethod.data(ctx)->isAbstract() &&
-            overridenMethod.data(ctx)->hasSig() && !method.data(ctx)->isDSLSynthesized() && !isRBI) {
+            overridenMethod.data(ctx)->hasSig() && !method.data(ctx)->isRewriterSynthesized() && !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
                             method.data(ctx)->show(ctx), overridenMethod.data(ctx)->show(ctx), "override.");
@@ -329,7 +330,7 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
             }
         }
         if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable()) &&
-            !method.data(ctx)->isIncompatibleOverride() && !isRBI && !method.data(ctx)->isDSLSynthesized()) {
+            !method.data(ctx)->isIncompatibleOverride() && !isRBI && !method.data(ctx)->isRewriterSynthesized()) {
             if (overridenMethod.data(ctx)->isFinalMethod()) {
                 if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
                     e.setHeader("Method overrides a final method `{}`", overridenMethod.data(ctx)->show(ctx));
@@ -383,8 +384,15 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
         return;
     }
     for (const auto [name, sym] : klass.data(gs)->members()) {
-        if (!sym.exists() || !sym.data(gs)->isMethod() || sym.data(gs)->name == core::Names::staticInit() ||
-            sym.data(gs)->isFinalMethod()) {
+        // We only care about method symbols that exist.
+        if (!sym.exists() || !sym.data(gs)->isMethod() ||
+            // Method is 'final', and passes the check.
+            sym.data(gs)->isFinalMethod() ||
+            // <static-init> is a fake method Sorbet synthesizes for typechecking.
+            sym.data(gs)->name == core::Names::staticInit() ||
+            // <unresolved-ancestors> is a fake method Sorbet synthesizes to ensure class hierarchy changes in IDE take
+            // slow path.
+            sym.data(gs)->name == core::Names::unresolvedAncestors()) {
             continue;
         }
         if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::FinalModuleNonFinalMethod)) {
@@ -578,7 +586,7 @@ ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     Timer timeit(ctx.state.tracer(), "validateSymbols");
 
     ValidateWalk validate;
-    tree.tree = ast::TreeMap::apply(ctx, validate, std::move(tree.tree));
+    tree.tree = ast::ShallowMap::apply(ctx, validate, std::move(tree.tree));
     return tree;
 }
 

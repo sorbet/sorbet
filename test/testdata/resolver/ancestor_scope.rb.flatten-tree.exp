@@ -1,0 +1,68 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Other)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Test)
+          ::Sorbet::Private::Static.keep_for_ide(::Other)
+          <emptyTree>
+        end
+        begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Test::Mixin)
+          T.assert_type!(::Test.new(), Test::Mixin)
+        end
+        begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Test::Other)
+          T.assert_type!(::Test.new(), Test::Other)
+        end
+        begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Other)
+          T.assert_type!(::Test.new(), Other)
+        end
+        <emptyTree>
+      end
+    end
+  end
+  class ::Other<<C Other>> < (::<todo sym>)
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  class ::Test<<C Test>> < (::Other, ::Test::Mixin, ::Test::Other)
+    def self.<static-init>(<blk>)
+      begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Test::Mixin)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Test::Other)
+          <emptyTree>
+        end
+        ::Sorbet::Private::Static.keep_for_ide(::Test::Mixin)
+        ::Sorbet::Private::Static.keep_for_ide(::Test::Other)
+        <emptyTree>
+      end
+    end
+  end
+  module ::Test::Mixin<<C Mixin>> < ()
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  module ::Test::Other<<C Other>> < ()
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

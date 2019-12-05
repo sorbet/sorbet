@@ -112,21 +112,17 @@ build:reduce-intermediate-file-size-base --config=shared-libs
 # extend reduce-intermediate-file-size with -Os
 build:reduce-intermediate-file-size --copt=-Os --linkopt=-Os --config=reduce-intermediate-file-size-base
 
-build:buildfarm --curses=no --config=reduce-intermediate-file-size
-test:buildfarm --curses=no
+build:buildfarm --config=reduce-intermediate-file-size
 test:buildfarm --test_output=errors
 build:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
 build:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm
 
 build:travis --config=test-sanitized-linux
-build:travis --curses=no
 test:travis --ram_utilization_factor=10
 test:travis --test_strategy=standalone
-test:travis --curses=no
 test:travis --test_output=errors
 
 # this is a variant of buildfarm that doen't specify -Os or any sanitizer flags
-build:buildfarm-ruby --curses=no
 build:buildfarm-ruby --define jemalloc=false
 build:buildfarm-ruby --copt=-O2
 # this includes --spawn_strategy=standalone --genrule_strategy=standalone, which
@@ -136,7 +132,7 @@ build:buildfarm-ruby --nostamp
 build:buildfarm-ruby --define release=false
 build:buildfarm-ruby --config=forcedebug
 build:buildfarm-ruby --config=reduce-intermediate-file-size-base
-test:buildfarm-ruby --curses=no --test_output=errors
+test:buildfarm-ruby --test_output=errors
 
 ##
 ## Shared fragments of configuration
@@ -188,9 +184,9 @@ build:ubsan --define unsanitized=false
 build:ubsan --copt=-DHAS_SANITIZER
 
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
 build:sanitize-linux --config=sanitize
 
 build:sanitize-mac --config=sanitize

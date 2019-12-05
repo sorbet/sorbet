@@ -44,7 +44,7 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
   end
 
   it 'checks types' do
-    assert_raises(T::Props::InvalidValueError) do
+    assert_raises(TypeError) do
       MyStruct.new(name: 100)
     end
   end

@@ -111,7 +111,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     end
 
     it 'Validates you pass a type' do
-      assert_prop_error(/Invalid value for type constraint/, error: RuntimeError) do
+      assert_prop_error(/Invalid String literal for type constraint.*Got a String with value `goat`/, error: RuntimeError) do
         prop :foo, "goat"
       end
     end
@@ -175,13 +175,12 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
   describe 'validating prop values' do
     it 'validates subdoc hashes have the correct values' do
 
-      assert_raises(T::Props::InvalidValueError) do
+      assert_raises(TypeError) do
         StructHash.new(the_hash: {'foo' => {}})
       end
 
       # no raise:
       StructHash.new(the_hash: {'foo' => StructHash::InnerStruct.new})
-
     end
   end
 

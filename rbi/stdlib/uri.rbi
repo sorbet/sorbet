@@ -165,14 +165,43 @@ module URI
   REL_URI_REF = T.let(T.unsafe(nil), Regexp)
   RFC3986_PARSER = T.let(T.unsafe(nil), URI::RFC3986_Parser)
   SCHEME = T.let(T.unsafe(nil), Regexp)
-  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), Hash)
-  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), Hash)
+  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   UNSAFE = T.let(T.unsafe(nil), Regexp)
   URI_REF = T.let(T.unsafe(nil), Regexp)
   USERINFO = T.let(T.unsafe(nil), Regexp)
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
-  WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
+  WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+
+  # Decode URL-encoded form data from given `str`.
+  #
+  # This decodes application/x-www-form-urlencoded data and returns array of key-value array.
+  #
+  # This refers [url.spec.whatwg.org/#concept-urlencoded-parser](http://url.spec.whatwg.org/#concept-urlencoded-parser),
+  # so this supports only &-separator, don't support ;-separator.
+  #
+  # ~~~ruby
+  # ary = ::decode_www_form(“a=1&a=2&b=3”)
+  # p ary #=> [['a', '1'], ['a', '2'], ['b', '3']]
+  # p ary.assoc('a').last #=> '1'
+  # p ary.assoc('b').last #=> '3'
+  # p ary.rassoc('a').last #=> '2'
+  # p Hash # => {“a”=>“2”, “b”=>“3”}
+  # ~~~
+  #
+  # See [::decode_www_form_component](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-decode_www_form_component),
+  # [::encode_www_form](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-encode_www_form)
+  sig do
+    params(
+      str: String,
+      enc: Encoding,
+      separator: String,
+      use__charset_: T::Boolean,
+      isindex: T::Boolean
+    ).returns(T::Array[[String, String]])
+  end
+  def self.decode_www_form(str, enc = Encoding::UTF_8, separator: '&', use__charset_: false, isindex: false); end
 
   # Decodes given `str` of URL-encoded form data.
   #
@@ -188,7 +217,67 @@ module URI
     )
     .returns(T::Array[[String, String]])
   end
-  def self.decode_www_form_component(str, enc=T.unsafe(nil)); end
+  def self.decode_www_form_component(str, enc=Encoding::UTF_8); end
+
+  # Generate URL-encoded form data from given enum.
+  #
+  # This generates application/x-www-form-urlencoded data defined in HTML5 from
+  # given an [Enumerable](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html)
+  # object.
+  #
+  # This internally uses
+  # [::encode_www_form_component](https://docs.ruby-lang.org/en/2.1.0/URI.html#method-c-encode_www_form_component).
+  #
+  # This method doesn't convert the encoding of given items, so convert them
+  # before call this method if you want to send data as other than original
+  # encoding or mixed encoding data. (Strings which are encoded in an HTML5
+  # ASCII incompatible encoding are converted to UTF-8.)
+  #
+  # This method doesn't handle files. When you send a file,
+  # use multipart/form-data.
+  #
+  # This refers [url.spec.whatwg.org/#concept-urlencoded-serializer](http://url.spec.whatwg.org/#concept-urlencoded-serializer)
+  #
+  # ~~~ruby
+  # URI.encode_www_form([["q", "ruby"], ["lang", "en"]])
+  # #=> "q=ruby&lang=en"
+  # URI.encode_www_form("q" => "ruby", "lang" => "en")
+  # #=> "q=ruby&lang=en"
+  # URI.encode_www_form("q" => ["ruby", "perl"], "lang" => "en")
+  # #=> "q=ruby&q=perl&lang=en"
+  # URI.encode_www_form([["q", "ruby"], ["q", "perl"], ["lang", "en"]])
+  # #=> "q=ruby&q=perl&lang=en"
+  # ~~~
+  #
+  # See [::encode_www_form_component](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-encode_www_form_component),
+  # [::decode_www_form](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-decode_www_form)
+  sig do
+    params(
+      enum: T::Enumerable[Object],
+      enc: T.nilable(Encoding)
+    ).returns(String)
+  end
+  def self.encode_www_form(enum, enc=nil); end
+
+  # Encode given `str` to URL-encoded form data.
+  #
+  # This method doesn't convert *, -, ., 0-9, A-Z, _, a-z, but does convert SP
+  # (ASCII space) to + and converts others to %XX.
+  #
+  # If `enc` is given, convert `str` to the encoding before percent encoding.
+  #
+  # This is an implementation of
+  # [www.w3.org/TR/html5/forms.html#url-encoded-form-data](http://www.w3.org/TR/html5/forms.html#url-encoded-form-data)
+  #
+  # See [::decode_www_form_component](https://docs.ruby-lang.org/en/2.1.0/URI.html#method-c-decode_www_form_component),
+  # [::encode_www_form](https://docs.ruby-lang.org/en/2.1.0/URI.html#method-c-encode_www_form)
+  sig do
+    params(
+      str: Object,
+      enc: T.nilable(Encoding)
+    ).returns(String)
+  end
+  def self.encode_www_form_component(str, enc=nil); end
 
   sig do
     params(
@@ -238,7 +327,7 @@ module URI
   sig do
     params(
         str: String,
-        schemes: Array,
+        schemes: T::Array[T.untyped],
         blk: BasicObject,
     )
     .returns(T::Array[String])
@@ -377,7 +466,7 @@ module URI
   # ```
   sig do
     params(
-        schemes: Array,
+        schemes: T::Array[T.untyped],
     )
     .returns(T::Array[String])
   end
@@ -495,7 +584,7 @@ class URI::FTP < URI::Generic
   # An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of the
   # available components for
   # [`URI::FTP`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html).
-  COMPONENT = T.let(T.unsafe(nil), Array)
+  COMPONENT = T.let(T.unsafe(nil), T::Array[T.untyped])
   DEFAULT_PARSER = T.let(T.unsafe(nil), URI::RFC2396_Parser)
   # A Default port of 21 for
   # [`URI::FTP`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html).
@@ -513,8 +602,8 @@ class URI::FTP < URI::Generic
   REL_URI_REF = T.let(T.unsafe(nil), Regexp)
   RFC3986_PARSER = T.let(T.unsafe(nil), URI::RFC3986_Parser)
   SCHEME = T.let(T.unsafe(nil), Regexp)
-  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), Hash)
-  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), Hash)
+  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   # Typecode is "a", "i", or "d".
   #
   # *   "a" indicates a text file (the
@@ -522,7 +611,7 @@ class URI::FTP < URI::Generic
   #     ASCII)
   # *   "i" indicates a binary file (FTP command IMAGE)
   # *   "d" indicates the contents of a directory should be displayed
-  TYPECODE = T.let(T.unsafe(nil), Array)
+  TYPECODE = T.let(T.unsafe(nil), T::Array[T.untyped])
   # Typecode prefix ";type=".
   TYPECODE_PREFIX = T.let(T.unsafe(nil), String)
   UNSAFE = T.let(T.unsafe(nil), Regexp)
@@ -531,7 +620,7 @@ class URI::FTP < URI::Generic
   USE_REGISTRY = T.let(T.unsafe(nil), FalseClass)
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
-  WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
+  WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 end
 
 # Base class for all [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
@@ -547,7 +636,7 @@ class URI::Generic < Object
   # An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of the
   # available components for
   # [`URI::Generic`](https://docs.ruby-lang.org/en/2.6.0/URI/Generic.html).
-  COMPONENT = T.let(T.unsafe(nil), Array)
+  COMPONENT = T.let(T.unsafe(nil), T::Array[T.untyped])
   DEFAULT_PARSER = T.let(T.unsafe(nil), URI::RFC2396_Parser)
   # A Default port of nil for
   # [`URI::Generic`](https://docs.ruby-lang.org/en/2.6.0/URI/Generic.html).
@@ -565,15 +654,15 @@ class URI::Generic < Object
   REL_URI_REF = T.let(T.unsafe(nil), Regexp)
   RFC3986_PARSER = T.let(T.unsafe(nil), URI::RFC3986_Parser)
   SCHEME = T.let(T.unsafe(nil), Regexp)
-  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), Hash)
-  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), Hash)
+  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   UNSAFE = T.let(T.unsafe(nil), Regexp)
   URI_REF = T.let(T.unsafe(nil), Regexp)
   USERINFO = T.let(T.unsafe(nil), Regexp)
   USE_REGISTRY = T.let(T.unsafe(nil), FalseClass)
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
-  WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
+  WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
   # Alias for:
   # [`merge`](https://docs.ruby-lang.org/en/2.6.0/URI/Generic.html#method-i-merge)
@@ -780,7 +869,7 @@ class URI::Generic < Object
   # uri.host = "foo.com"
   # uri.to_s  #=> "http://foo.com"
   # ```
-  sig {params(v: String).returns(T.untyped)}
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def host=(v); end
 
   # Extract the host part of the
@@ -796,7 +885,7 @@ class URI::Generic < Object
   # uri.hostname      #=> "::1"
   # uri.host          #=> "[::1]"
   # ```
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   def hostname; end
 
   # Sets the host part of the
@@ -814,7 +903,7 @@ class URI::Generic < Object
   # ```
   #
   # If the argument seems to be an IPv6 address, it is wrapped with brackets.
-  sig {params(v: String).returns(T.untyped)}
+  sig {params(v: T.nilable(String)).returns(T.untyped)}
   def hostname=(v); end
 
   # == Args
@@ -840,7 +929,7 @@ class URI::Generic < Object
   #   Parser for internal use [URI::DEFAULT_PARSER by default].
   # `arg_check`::
   #   Check arguments [false by default].
-  # 
+  #
   # Creates a new URI::Generic instance from `generic` components without check.
   sig do
     params(
@@ -1392,7 +1481,7 @@ class URI::HTTP < URI::Generic
   # An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of the
   # available components for
   # [`URI::HTTP`](https://docs.ruby-lang.org/en/2.6.0/URI/HTTP.html).
-  COMPONENT = T.let(T.unsafe(nil), Array)
+  COMPONENT = T.let(T.unsafe(nil), T::Array[T.untyped])
   DEFAULT_PARSER = T.let(T.unsafe(nil), URI::RFC2396_Parser)
   # A Default port of 80 for
   # [`URI::HTTP`](https://docs.ruby-lang.org/en/2.6.0/URI/HTTP.html).
@@ -1410,15 +1499,30 @@ class URI::HTTP < URI::Generic
   REL_URI_REF = T.let(T.unsafe(nil), Regexp)
   RFC3986_PARSER = T.let(T.unsafe(nil), URI::RFC3986_Parser)
   SCHEME = T.let(T.unsafe(nil), Regexp)
-  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), Hash)
-  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), Hash)
+  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   UNSAFE = T.let(T.unsafe(nil), Regexp)
   URI_REF = T.let(T.unsafe(nil), Regexp)
   USERINFO = T.let(T.unsafe(nil), Regexp)
   USE_REGISTRY = T.let(T.unsafe(nil), FalseClass)
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
-  WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
+  WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+
+  # Returns the full path for an HTTP request, as required by Net::HTTP::Get.
+  #
+  # If the [URI](https://ruby-doc.org/stdlib-2.5.1/libdoc/uri/rdoc/URI.html)
+  # contains a query, the full path is URI#path + '?' + URI#query. Otherwise,
+  # the path is simply URI#path.
+  #
+  # Example:
+  #
+  # ```ruby
+  # newuri = URI::HTTP.build(path: '/foo/bar', query: 'test=true')
+  # newuri.request_uri # => "/foo/bar?test=true"
+  # ```
+  sig { returns(String) }
+  def request_uri; end
 end
 
 # The default port for
@@ -1431,7 +1535,7 @@ class URI::HTTPS < URI::HTTP
   ABS_PATH = T.let(T.unsafe(nil), Regexp)
   ABS_URI = T.let(T.unsafe(nil), Regexp)
   ABS_URI_REF = T.let(T.unsafe(nil), Regexp)
-  COMPONENT = T.let(T.unsafe(nil), Array)
+  COMPONENT = T.let(T.unsafe(nil), T::Array[T.untyped])
   DEFAULT_PARSER = T.let(T.unsafe(nil), URI::RFC2396_Parser)
   # A Default port of 443 for
   # [`URI::HTTPS`](https://docs.ruby-lang.org/en/2.6.0/URI/HTTPS.html)
@@ -1449,15 +1553,15 @@ class URI::HTTPS < URI::HTTP
   REL_URI_REF = T.let(T.unsafe(nil), Regexp)
   RFC3986_PARSER = T.let(T.unsafe(nil), URI::RFC3986_Parser)
   SCHEME = T.let(T.unsafe(nil), Regexp)
-  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), Hash)
-  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), Hash)
+  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   UNSAFE = T.let(T.unsafe(nil), Regexp)
   URI_REF = T.let(T.unsafe(nil), Regexp)
   USERINFO = T.let(T.unsafe(nil), Regexp)
   USE_REGISTRY = T.let(T.unsafe(nil), FalseClass)
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
-  WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
+  WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 end
 
 # Not a [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) component.
@@ -1478,7 +1582,7 @@ class URI::LDAP < URI::Generic
   # An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of the
   # available components for
   # [`URI::LDAP`](https://docs.ruby-lang.org/en/2.6.0/URI/LDAP.html).
-  COMPONENT = T.let(T.unsafe(nil), Array)
+  COMPONENT = T.let(T.unsafe(nil), T::Array[T.untyped])
   DEFAULT_PARSER = T.let(T.unsafe(nil), URI::RFC2396_Parser)
   # A Default port of 389 for
   # [`URI::LDAP`](https://docs.ruby-lang.org/en/2.6.0/URI/LDAP.html).
@@ -1502,19 +1606,19 @@ class URI::LDAP < URI::Generic
   # *   SCOPE\_ONE  - one level under the Base DN, not including the base DN and
   #     not including any entries under this
   # *   SCOPE\_SUB  - subtrees, all entries at all levels
-  SCOPE = T.let(T.unsafe(nil), Array)
+  SCOPE = T.let(T.unsafe(nil), T::Array[T.untyped])
   SCOPE_BASE = T.let(T.unsafe(nil), String)
   SCOPE_ONE = T.let(T.unsafe(nil), String)
   SCOPE_SUB = T.let(T.unsafe(nil), String)
-  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), Hash)
-  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), Hash)
+  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   UNSAFE = T.let(T.unsafe(nil), Regexp)
   URI_REF = T.let(T.unsafe(nil), Regexp)
   USERINFO = T.let(T.unsafe(nil), Regexp)
   USE_REGISTRY = T.let(T.unsafe(nil), FalseClass)
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
-  WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
+  WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 end
 
 # The default port for
@@ -1527,7 +1631,7 @@ class URI::LDAPS < URI::LDAP
   ABS_PATH = T.let(T.unsafe(nil), Regexp)
   ABS_URI = T.let(T.unsafe(nil), Regexp)
   ABS_URI_REF = T.let(T.unsafe(nil), Regexp)
-  COMPONENT = T.let(T.unsafe(nil), Array)
+  COMPONENT = T.let(T.unsafe(nil), T::Array[T.untyped])
   DEFAULT_PARSER = T.let(T.unsafe(nil), URI::RFC2396_Parser)
   # A Default port of 636 for
   # [`URI::LDAPS`](https://docs.ruby-lang.org/en/2.6.0/URI/LDAPS.html)
@@ -1545,19 +1649,19 @@ class URI::LDAPS < URI::LDAP
   REL_URI_REF = T.let(T.unsafe(nil), Regexp)
   RFC3986_PARSER = T.let(T.unsafe(nil), URI::RFC3986_Parser)
   SCHEME = T.let(T.unsafe(nil), Regexp)
-  SCOPE = T.let(T.unsafe(nil), Array)
+  SCOPE = T.let(T.unsafe(nil), T::Array[T.untyped])
   SCOPE_BASE = T.let(T.unsafe(nil), String)
   SCOPE_ONE = T.let(T.unsafe(nil), String)
   SCOPE_SUB = T.let(T.unsafe(nil), String)
-  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), Hash)
-  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), Hash)
+  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   UNSAFE = T.let(T.unsafe(nil), Regexp)
   URI_REF = T.let(T.unsafe(nil), Regexp)
   USERINFO = T.let(T.unsafe(nil), Regexp)
   USE_REGISTRY = T.let(T.unsafe(nil), FalseClass)
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
-  WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
+  WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 end
 
 # RFC6068, the mailto URL scheme.
@@ -1568,7 +1672,7 @@ class URI::MailTo < URI::Generic
   # An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of the
   # available components for
   # [`URI::MailTo`](https://docs.ruby-lang.org/en/2.6.0/URI/MailTo.html).
-  COMPONENT = T.let(T.unsafe(nil), Array)
+  COMPONENT = T.let(T.unsafe(nil), T::Array[T.untyped])
   DEFAULT_PARSER = T.let(T.unsafe(nil), URI::RFC2396_Parser)
   # A Default port of nil for
   # [`URI::MailTo`](https://docs.ruby-lang.org/en/2.6.0/URI/MailTo.html).
@@ -1588,15 +1692,15 @@ class URI::MailTo < URI::Generic
   REL_URI_REF = T.let(T.unsafe(nil), Regexp)
   RFC3986_PARSER = T.let(T.unsafe(nil), URI::RFC3986_Parser)
   SCHEME = T.let(T.unsafe(nil), Regexp)
-  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), Hash)
-  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), Hash)
+  TBLDECWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  TBLENCWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   UNSAFE = T.let(T.unsafe(nil), Regexp)
   URI_REF = T.let(T.unsafe(nil), Regexp)
   USERINFO = T.let(T.unsafe(nil), Regexp)
   USE_REGISTRY = T.let(T.unsafe(nil), FalseClass)
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
-  WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
+  WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 end
 
 # Includes URI::REGEXP::PATTERN

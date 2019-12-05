@@ -15,6 +15,36 @@ See
 [Limitations of flow-sensitivity](flow-sensitive.md#limitations-of-flow-sensitivity)
 for a fully working example.
 
+## It looks like Sorbet's types for the stdlib are wrong.
+
+Sorbet uses [RBI files](rbi.md) to annotate the types for the Ruby standard
+library. Every RBI file for the Ruby standard library is maintained by hand.
+This means they're able to have fine grained types, but it also means that
+sometimes they're incomplete or inaccurate.
+
+The Sorbet team is usually too busy to respond to requests to fix individual
+bugs in these type annotations for the Ruby standard library. That means there
+are two options:
+
+1.  Submit a pull request to fix the type annotations yourself.
+
+    Every RBI file for the Ruby standard library lives [here][rbi-folder] in the
+    Sorbet repo. Find which RBI file you need to edit, and submit a pull request
+    on GitHub with the changes.
+
+    This is the preferred option, because then every Sorbet user will benefit.
+
+2.  Use an [escape hatch](troubleshooting.md#escape-hatches) to opt out of
+    static type checks.
+
+    Use this option if you can't afford to wait for Sorbet to be fixed and
+    published. (Sorbet publishes new versions to RubyGems nightly).
+
+If you're having problems making a change to Sorbet, we're happy to help on
+Slack! See the [Community](/community) page for an invite link.
+
+[rbi-folder]: https://github.com/sorbet/sorbet/tree/master/rbi
+
 ## What's the difference between `T.let`, `T.cast`, and `T.unsafe`?
 
 [→ Type Assertions](type-assertions.md)

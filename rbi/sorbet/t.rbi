@@ -3,14 +3,14 @@ module T::Sig
   # We could provide a more-complete signature, but these are already
   # parsed in C++, so there's no need to emit errors twice.
 
-  sig {params(arg: T.nilable(Symbol), blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
-  def sig(arg=nil, &blk); end
+  sig {params(arg0: T.nilable(Symbol), blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
+  def sig(arg0=nil, &blk); end
 end
 module T::Sig::WithoutRuntime
   # At runtime, does nothing, but statically it is treated exactly the same
   # as T::Sig#sig. Only use it in cases where you can't use T::Sig#sig.
-  sig {params(arg: T.nilable(Symbol), blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
-  def self.sig(arg=nil, &blk); end
+  sig {params(arg0: T.nilable(Symbol), blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
+  def self.sig(arg0=nil, &blk); end
 end
 
 module T
@@ -55,7 +55,8 @@ module T
   def self.reveal_type(value); end
   def self.type_parameter(name); end
   def self.self_type; end
-  def self.type_alias(type); end
+  def self.experimental_attached_class; end
+  def self.type_alias(type=nil, &blk); end
 
   sig {params(arg: T.untyped).returns(T.untyped)}
   def self.must(arg); end
@@ -111,7 +112,7 @@ end
 module T::CFGExport
 end
 
-T::Boolean = T.type_alias(T.any(TrueClass, FalseClass))
+T::Boolean = T.type_alias {T.any(TrueClass, FalseClass)}
 
 module T::Configuration
   def self.call_validation_error_handler(signature, opts); end
@@ -119,6 +120,7 @@ module T::Configuration
   def self.default_checked_level=(default_checked_level); end
   def self.enable_checking_for_sigs_marked_checked_tests; end
   def self.enable_final_checks_on_hooks; end
+  def self.enable_legacy_t_enum_migration_mode; end
   def self.reset_final_checks_on_hooks; end
   def self.hard_assert_handler(str, extra); end
   def self.hard_assert_handler=(value); end
@@ -151,6 +153,7 @@ end
 module T::Utils
   def self.arity(method); end
   def self.coerce(val); end
+  def self.resolve_alias(type); end
   def self.run_all_sig_blocks; end
   def self.signature_for_instance_method(mod, method_name); end
   def self.unwrap_nilable(type); end

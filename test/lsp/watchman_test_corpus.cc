@@ -9,7 +9,7 @@ using namespace std;
 using namespace sorbet::realmain::lsp;
 
 // Adds a file to the file system with an error, and asserts that Sorbet returns an error.
-TEST_F(ProtocolTest, UpdateFileOnFileSystem) {
+TEST_P(ProtocolTest, UpdateFileOnFileSystem) {
     assertDiagnostics(initializeLSP(), {});
     writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
     ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
@@ -17,7 +17,7 @@ TEST_F(ProtocolTest, UpdateFileOnFileSystem) {
 }
 
 // Creates an empty file and deletes it.
-TEST_F(ProtocolTest, CreateAndDeleteEmptyFile) {
+TEST_P(ProtocolTest, CreateAndDeleteEmptyFile) {
     assertDiagnostics(initializeLSP(), {});
     writeFilesToFS({{"foo.rb", ""}});
     assertDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
@@ -27,7 +27,7 @@ TEST_F(ProtocolTest, CreateAndDeleteEmptyFile) {
 }
 
 // Adds a file with an error, and then deletes that file. Asserts that Sorbet no longer complains about the file.
-TEST_F(ProtocolTest, DeleteFileWithErrors) {
+TEST_P(ProtocolTest, DeleteFileWithErrors) {
     assertDiagnostics(initializeLSP(), {});
     writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
     ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
@@ -38,13 +38,13 @@ TEST_F(ProtocolTest, DeleteFileWithErrors) {
 }
 
 // Informs Sorbet about a file update for a file it does not know about and is deleted on disk. Should be a no-op.
-TEST_F(ProtocolTest, DeleteFileUnknownToSorbet) {
+TEST_P(ProtocolTest, DeleteFileUnknownToSorbet) {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
 }
 
 // Updates a file, opens it in editor (but it's empty), closes file without saving to disk.
-TEST_F(ProtocolTest, IgnoresLSPFileUpdatesWhileFileIsOpen) {
+TEST_P(ProtocolTest, IgnoresLSPFileUpdatesWhileFileIsOpen) {
     assertDiagnostics(initializeLSP(), {});
 
     ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
@@ -61,7 +61,7 @@ TEST_F(ProtocolTest, IgnoresLSPFileUpdatesWhileFileIsOpen) {
 
 // Ensures that Sorbet correctly remembers that a file is not open in the editor when it combines a file close event
 // with another type of file update.
-TEST_F(ProtocolTest, CorrectlyUpdatesFileOpenStatusWhenClosedCombinedWithOtherUpdates) {
+TEST_P(ProtocolTest, CorrectlyUpdatesFileOpenStatusWhenClosedCombinedWithOtherUpdates) {
     assertDiagnostics(initializeLSP(), {});
 
     ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
@@ -82,7 +82,7 @@ TEST_F(ProtocolTest, CorrectlyUpdatesFileOpenStatusWhenClosedCombinedWithOtherUp
 }
 
 // If file closes and is not on disk, Sorbet clears diagnostics.
-TEST_F(ProtocolTest, HandlesClosedAndDeletedFile) {
+TEST_P(ProtocolTest, HandlesClosedAndDeletedFile) {
     assertDiagnostics(initializeLSP(), {});
     ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
     assertDiagnostics(
@@ -91,7 +91,7 @@ TEST_F(ProtocolTest, HandlesClosedAndDeletedFile) {
 }
 
 // Sorbet merges all pending watchman updates into a single update.
-TEST_F(ProtocolTest, MergesMultipleWatchmanUpdates) {
+TEST_P(ProtocolTest, MergesMultipleWatchmanUpdates) {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // If processed serially, these would cause slow path runs (new files).
@@ -119,5 +119,8 @@ TEST_F(ProtocolTest, MergesMultipleWatchmanUpdates) {
                        "typechecking {} times.",
                        lspWrapper->getTypecheckCount());
 }
+
+// Run these tests in single-threaded mode.
+INSTANTIATE_TEST_SUITE_P(SingleThreadedProtocolTests, ProtocolTest, testing::Values(false));
 
 } // namespace sorbet::test::lsp

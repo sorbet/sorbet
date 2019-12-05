@@ -1,0 +1,4 @@
+s(:array,
+  s(:dstr,
+    s(:begin,
+      s(:int, "1"))))

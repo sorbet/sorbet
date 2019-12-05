@@ -3,6 +3,7 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
+#include "common/sort.h"
 #include "lsp.h"
 
 using namespace std;
@@ -18,7 +19,7 @@ LSPLoop::extractLocations(const core::GlobalState &gs,
         if (loc.exists() && loc.file().exists()) {
             auto fileIsTyped = loc.file().data(gs).strictLevel >= core::StrictLevel::True;
             // If file is untyped, only support responses involving constants and definitions.
-            if (fileIsTyped || q->isConstant() || q->isDefinition()) {
+            if (fileIsTyped || q->isConstant() || q->isField() || q->isDefinition()) {
                 addLocIfExists(gs, locations, loc);
             }
         }
@@ -45,7 +46,9 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
     // static-init for a class
-    if (data->name == core::Names::staticInit()) {
+    if (data->name == core::Names::staticInit() ||
+        // <unresolved-ancestors> is a fake method created to ensure IDE takes slow path for class hierarchy changes
+        data->name == core::Names::unresolvedAncestors() || data->name == core::Names::Constants::AttachedClass()) {
         return true;
     }
     // static-init for a file
@@ -53,6 +56,7 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         data->name.data(gs)->unique.original == core::Names::staticInit()) {
         return true;
     }
+    // <block>
     if (data->name.data(gs)->kind == core::NameKind::UNIQUE &&
         data->name.data(gs)->unique.original == core::Names::blockTemp()) {
         return true;
@@ -66,12 +70,31 @@ bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view
     return fnd != string_view::npos;
 }
 
-// iff a sig has more than this many parameters, then print it as a multi-line sig.
-constexpr int NUM_ARGS_CUTOFF_FOR_MULTILINE_SIG = 4;
+unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, string_view rubyMarkup,
+                                           optional<string_view> explanation) {
+    // format rubyMarkup
+    string formattedTypeString;
+    if (markupKind == MarkupKind::Markdown && rubyMarkup.length() > 0) {
+        formattedTypeString = fmt::format("```ruby\n{}\n```", rubyMarkup);
+    } else {
+        formattedTypeString = string(rubyMarkup);
+    }
 
-string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
-                    const core::TypeConstraint *constraint) {
+    string content =
+        absl::StrCat(formattedTypeString, explanation.has_value() ? "\n\n---\n\n" : "", explanation.value_or(""));
+
+    return make_unique<MarkupContent>(markupKind, move(content));
+}
+
+// iff a sig has more than this many parameters, then print it as a multi-line sig.
+constexpr int MAX_PRETTY_SIG_ARGS = 4;
+// iff a `def` would be this wide or wider, expand it to be a multi-line def.
+constexpr int MAX_PRETTY_WIDTH = 80;
+
+string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
+                          core::TypePtr retType, const core::TypeConstraint *constraint) {
     ENFORCE(method.exists());
+    ENFORCE(method.data(gs)->dealias(gs) == method);
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
         return "";
@@ -89,9 +112,6 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
     string accessFlagString = "";
     string sigCall = "sig";
     if (sym->isMethod()) {
-        if (sym->hasGeneratedSig()) {
-            flags.emplace_back("generated");
-        }
         if (sym->isFinalMethod()) {
             sigCall = "sig(:final)";
         }
@@ -121,31 +141,30 @@ string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::T
     }
 
     string flagString = "";
-    string paramsString = "";
-    if (typeAndArgNames.size() > NUM_ARGS_CUTOFF_FOR_MULTILINE_SIG) {
-        if (!flags.empty()) {
-            flagString = fmt::format("{}\n  .", fmt::join(flags, "\n  ."));
-        }
-        if (!typeAndArgNames.empty()) {
-            paramsString = fmt::format("params(\n    {}\n  )\n  .", fmt::join(typeAndArgNames, ",\n    "));
-        }
-        return fmt::format("{}{} do\n  {}{}{}\nend", accessFlagString, sigCall, flagString, paramsString,
-                           methodReturnType);
-    } else {
-        if (!flags.empty()) {
-            flagString = fmt::format("{}.", fmt::join(flags, "."));
-        }
-        if (!typeAndArgNames.empty()) {
-            paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
-        }
-        return fmt::format("{}{} {{{}{}{}}}", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
+    if (!flags.empty()) {
+        flagString = fmt::format("{}.", fmt::join(flags, "."));
     }
+    string paramsString = "";
+    if (!typeAndArgNames.empty()) {
+        paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
+    }
+
+    auto oneline =
+        fmt::format("{}{} {{{}{}{}}}", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
+    if (oneline.size() <= MAX_PRETTY_WIDTH && typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
+        return oneline;
+    }
+
+    if (!flags.empty()) {
+        flagString = fmt::format("{}\n  .", fmt::join(flags, "\n  ."));
+    }
+    if (!typeAndArgNames.empty()) {
+        paramsString = fmt::format("params(\n    {}\n  )\n  .", fmt::join(typeAndArgNames, ",\n    "));
+    }
+    return fmt::format("{}{} do\n  {}{}{}\nend", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
 }
 
-// iff a `def` would be this wide or wider, expand it to be a multi-line def.
-constexpr int WIDTH_CUTOFF_FOR_MULTILINE_DEF = 80;
-
-string methodDefinition(const core::GlobalState &gs, core::SymbolRef method) {
+string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
     ENFORCE(method.exists());
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
@@ -164,8 +183,10 @@ string methodDefinition(const core::GlobalState &gs, core::SymbolRef method) {
         methodData->owner.data(gs)->attachedClass(gs).exists()) {
         methodNamePrefix = "self.";
     }
-    vector<string> arguments;
-    for (auto &argSym : methodData->arguments()) {
+    vector<string> prettyArgs;
+    const auto &arguments = methodData->dealias(gs).data(gs)->arguments();
+    ENFORCE(!arguments.empty(), "Should have at least a block arg");
+    for (const auto &argSym : arguments) {
         // Don't display synthetic arguments (like blk).
         if (argSym.isSyntheticBlockArgument()) {
             continue;
@@ -176,7 +197,7 @@ string methodDefinition(const core::GlobalState &gs, core::SymbolRef method) {
             if (argSym.flags.isRepeated) {
                 prefix = "**"; // variadic keyword args
             } else if (argSym.flags.isDefault) {
-                suffix = ":…"; // optional keyword (has a default value)
+                suffix = ": …"; // optional keyword (has a default value)
             } else {
                 suffix = ":"; // required keyword
             }
@@ -185,28 +206,34 @@ string methodDefinition(const core::GlobalState &gs, core::SymbolRef method) {
         } else if (argSym.flags.isBlock) {
             prefix = "&";
         }
-        arguments.emplace_back(fmt::format("{}{}{}", prefix, argSym.argumentName(gs), suffix));
+        prettyArgs.emplace_back(fmt::format("{}{}{}", prefix, argSym.argumentName(gs), suffix));
     }
 
     string argListPrefix = "";
     string argListSeparator = "";
     string argListSuffix = "";
-    if (arguments.size() > 0) {
+    if (prettyArgs.size() > 0) {
         argListPrefix = "(";
         argListSeparator = ", ";
         argListSuffix = ")";
     }
 
     auto result = fmt::format("def {}{}{}{}{}; end", methodNamePrefix, methodName, argListPrefix,
-                              fmt::join(arguments, argListSeparator), argListSuffix);
-    if (arguments.size() > 0 && result.length() >= WIDTH_CUTOFF_FOR_MULTILINE_DEF) {
+                              fmt::join(prettyArgs, argListSeparator), argListSuffix);
+    if (prettyArgs.size() > 0 && result.length() >= MAX_PRETTY_WIDTH) {
         argListPrefix = "(\n  ";
         argListSeparator = ",\n  ";
         argListSuffix = "\n)";
         result = fmt::format("def {}{}{}{}{}\nend", methodNamePrefix, methodName, argListPrefix,
-                             fmt::join(arguments, argListSeparator), argListSuffix);
+                             fmt::join(prettyArgs, argListSeparator), argListSuffix);
     }
     return result;
+}
+
+string prettyTypeForMethod(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
+                           core::TypePtr retType, const core::TypeConstraint *constraint) {
+    return fmt::format("{}\n{}", prettySigForMethod(gs, method.data(gs)->dealias(gs), receiver, retType, constraint),
+                       prettyDefForMethod(gs, method));
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,

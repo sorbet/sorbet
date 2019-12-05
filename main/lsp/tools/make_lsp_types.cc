@@ -120,6 +120,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                classTypes,
                                {
                                    "int cmp(const Location &b) const;",
+                                   "std::unique_ptr<Location> copy() const;",
                                });
 
     auto DiagnosticRelatedInformation = makeObject("DiagnosticRelatedInformation",
@@ -1298,6 +1299,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "initialized",
                                      "shutdown",
                                      "sorbet/error",
+                                     "sorbet/fence",
                                      "sorbet/readFile",
                                      "sorbet/showOperation",
                                      "sorbet/typecheckRunInfo",
@@ -1310,6 +1312,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "textDocument/didChange",
                                      "textDocument/didClose",
                                      "textDocument/didOpen",
+                                     "textDocument/documentHighlight",
                                      "textDocument/documentSymbol",
                                      "textDocument/hover",
                                      "textDocument/publishDiagnostics",
@@ -1325,6 +1328,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
         makeDiscriminatedUnion(methodField, {
                                                 {"initialize", InitializeParams},
                                                 {"shutdown", makeOptional(JSONNull)},
+                                                {"textDocument/documentHighlight", TextDocumentPositionParams},
                                                 {"textDocument/documentSymbol", DocumentSymbolParams},
                                                 {"textDocument/definition", TextDocumentPositionParams},
                                                 {"textDocument/typeDefinition", TextDocumentPositionParams},
@@ -1349,6 +1353,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
         {
             {"initialize", InitializeResult},
             {"shutdown", JSONNull},
+            // DocumentHighlight[] | null
+            {"textDocument/documentHighlight", makeVariant({JSONNull, makeArray(DocumentHighlight)})},
             // DocumentSymbol[] | SymbolInformation[] | null
             // Sorbet only uses DocumentSymbol[].
             {"textDocument/documentSymbol", makeVariant({JSONNull, makeArray(DocumentSymbol)})},
@@ -1398,6 +1404,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"sorbet/watchmanFileChange", WatchmanQueryResponse},
                                                 {"sorbet/showOperation", SorbetShowOperationParams},
                                                 {"sorbet/error", SorbetErrorParams},
+                                                {"sorbet/fence", JSONInt},
                                                 {"sorbet/workspaceEdit", SorbetWorkspaceEditParams},
                                                 {"sorbet/typecheckRunInfo", SorbetTypecheckRunInfo},
                                             });

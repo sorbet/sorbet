@@ -1,0 +1,34 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        $a = 1
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <emptyTree>
+        end
+        <emptyTree>
+      end
+    end
+  end
+  class ::A<<C A>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    def meth(<blk>)
+      [$a, $b, $c]
+    end
+
+    def self.<static-init>(<blk>)
+      begin
+        $b = 2
+        $a
+        <emptyTree>
+      end
+    end
+  end
+  <emptyTree>
+end

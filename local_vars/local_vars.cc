@@ -1,5 +1,6 @@
 #include "local_vars.h"
 #include "absl/strings/match.h"
+#include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "common/typecase.h"
 #include "core/core.h"
@@ -34,23 +35,23 @@ class LocalNameInserter {
             },
             [&](ast::RestArg *rest) {
                 named = nameArg(move(rest->expr));
-                named.expr = make_unique<ast::RestArg>(arg->loc, move(named.expr));
+                named.expr = ast::MK::RestArg(arg->loc, move(named.expr));
             },
             [&](ast::KeywordArg *kw) {
                 named = nameArg(move(kw->expr));
-                named.expr = make_unique<ast::KeywordArg>(arg->loc, move(named.expr));
+                named.expr = ast::MK::KeywordArg(arg->loc, move(named.expr));
             },
             [&](ast::OptionalArg *opt) {
                 named = nameArg(move(opt->expr));
-                named.expr = make_unique<ast::OptionalArg>(arg->loc, move(named.expr), move(opt->default_));
+                named.expr = ast::MK::OptionalArg(arg->loc, move(named.expr), move(opt->default_));
             },
             [&](ast::BlockArg *blk) {
                 named = nameArg(move(blk->expr));
-                named.expr = make_unique<ast::BlockArg>(arg->loc, move(named.expr));
+                named.expr = ast::MK::BlockArg(arg->loc, move(named.expr));
             },
             [&](ast::ShadowArg *shadow) {
                 named = nameArg(move(shadow->expr));
-                named.expr = make_unique<ast::ShadowArg>(arg->loc, move(named.expr));
+                named.expr = ast::MK::ShadowArg(arg->loc, move(named.expr));
             },
             [&](ast::Local *local) {
                 named.name = local->localVariable._name;
@@ -73,19 +74,6 @@ class LocalNameInserter {
             unique_ptr<ast::Reference> refExpImpl(refExp);
             arg.release();
             auto named = nameArg(move(refExpImpl));
-            if (nameSet.contains(named.name) && !absl::StartsWith(named.name.data(ctx)->shortName(ctx), "_")) {
-                if (auto e = ctx.state.beginError(named.loc, core::errors::Namer::RepeatedArgument)) {
-                    ENFORCE(!scopeStack.empty());
-                    auto frame = scopeStack.back();
-                    e.setHeader("Duplicated argument name `{}`", named.name.show(ctx));
-                    if (frame.insideMethod) {
-                        e.addErrorLine(frame.loc, "In argument list of method");
-                    } else if (frame.insideBlock) {
-                        e.addErrorLine(frame.loc, "In argument list of block");
-                    }
-                    ENFORCE(frame.insideMethod || frame.insideBlock);
-                }
-            }
             nameSet.insert(named.name);
             namedArgs.emplace_back(move(named));
         }

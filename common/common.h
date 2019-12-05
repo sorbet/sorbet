@@ -8,12 +8,9 @@
 static_assert(false, "Need c++14 to compile this codebase");
 #endif
 
-#include "absl/algorithm/container.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/container/inlined_vector.h"
-#include "pdqsort.h"
-#include "spdlog/fmt/fmt.h"
 #include "spdlog/spdlog.h"
 #include <stdint.h>
 #include <string>
@@ -135,60 +132,6 @@ template <class From, class To> To *fast_cast(From *what) {
 } // namespace sorbet
 
 std::string demangle(const char *mangled);
-
-namespace fmt {
-template <typename It, typename Char, class UnaryOp, typename UnaryOpResult> struct arg_map_join {
-    It begin;
-    It end;
-    basic_string_view<Char> sep;
-    const UnaryOp &mapper;
-
-    arg_map_join(It begin, It end, basic_string_view<Char> sep, const UnaryOp &mapper)
-        : begin(begin), end(end), sep(sep), mapper(mapper) {}
-};
-
-template <typename It, typename Char, class UnaryOp, typename UnaryOpResult>
-struct formatter<arg_map_join<It, Char, UnaryOp, UnaryOpResult>, Char> : formatter<UnaryOpResult, Char> {
-    template <typename FormatContext>
-    auto format(const arg_map_join<It, Char, UnaryOp, UnaryOpResult> &value, FormatContext &ctx)
-        -> decltype(ctx.out()) {
-        typedef formatter<UnaryOpResult, Char> base;
-
-        auto it = value.begin;
-        auto out = ctx.out();
-        if (it != value.end) {
-            out = base::format(std::invoke(value.mapper, *it++), ctx);
-            while (it != value.end) {
-                out = std::copy(value.sep.begin(), value.sep.end(), out);
-                ctx.advance_to(out);
-                out = base::format(std::invoke(value.mapper, *it++), ctx);
-            }
-        }
-        return out;
-    }
-};
-
-template <typename It, class UnaryOp> auto map_join(It begin, It end, std::string_view sep, const UnaryOp &mapper) {
-    return arg_map_join<It, char, UnaryOp,
-                        typename std::result_of<UnaryOp(typename std::iterator_traits<It>::value_type)>::type>(
-        begin, end, sep, mapper);
-}
-template <typename Container, class UnaryOp>
-auto map_join(const Container &collection, std::string_view sep, const UnaryOp &mapper) {
-    return arg_map_join<typename Container::const_iterator, char, UnaryOp,
-                        typename std::result_of<UnaryOp(
-                            typename std::iterator_traits<typename Container::const_iterator>::value_type)>::type>(
-        collection.begin(), collection.end(), sep, mapper);
-}
-} // namespace fmt
-
-template <class Container, class Compare> inline void fast_sort(Container &container, Compare &&comp) {
-    pdqsort(container.begin(), container.end(), std::forward<Compare>(comp));
-};
-
-template <class Container> inline void fast_sort(Container &container) {
-    pdqsort(container.begin(), container.end());
-};
 
 /* use fast_sort */
 #pragma GCC poison sort c_sort

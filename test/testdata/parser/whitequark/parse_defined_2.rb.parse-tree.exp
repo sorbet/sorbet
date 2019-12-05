@@ -1,5 +1,0 @@
-Defined {
-  value = IVar {
-    name = <U @foo>
-  }
-}

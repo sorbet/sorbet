@@ -244,7 +244,7 @@ class CSV < Object
   # :   `false`
   # **`:quote_empty`**
   # :   `true`
-  DEFAULT_OPTIONS = T.let(T.unsafe(nil), Hash)
+  DEFAULT_OPTIONS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   # The version of the installed library.
   VERSION = T.let(T.unsafe(nil), String)
 
@@ -363,6 +363,12 @@ class CSV < Object
     .returns(T::Array[T::Array[T.nilable(String)]])
   end
   def self.read(path, options=T.unsafe(nil)); end
+
+  sig { params(row: T.any(T::Array[T.untyped], CSV::Row)).void }
+  def <<(row); end
+
+  sig { params(str: String, options: T.untyped, blk: T.proc.params(csv: CSV).void).returns(String) }
+  def self.generate(str = "", **options, &blk); end
 end
 
 # A [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) is part

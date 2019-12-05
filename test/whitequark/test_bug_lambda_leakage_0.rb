@@ -1,0 +1,3 @@
+# typed: true
+
+->(scope) {}; scope

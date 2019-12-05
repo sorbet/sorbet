@@ -1,5 +1,0 @@
-Preexe {
-  body = Integer {
-    val = "1"
-  }
-}

@@ -15,7 +15,10 @@ struct ExpectedDiagnostic {
     std::string message;
 };
 
-class ProtocolTest : public testing::Test {
+/**
+ * If parameter is 'true', LSP is configured in multithreaded mode.
+ */
+class ProtocolTest : public testing::TestWithParam<bool> {
 protected:
     std::unique_ptr<LSPWrapper> lspWrapper;
     std::string rootPath;
@@ -33,16 +36,16 @@ protected:
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
 
-    bool paused = false;
-
-    virtual ~ProtocolTest() = default;
+    ~ProtocolTest() override = default;
 
     void SetUp() override;
 
     /** Get an absolute file URI for the given relative file path. */
     std::string getUri(std::string_view filePath);
 
-    std::vector<std::unique_ptr<LSPMessage>> initializeLSP();
+    std::vector<std::unique_ptr<LSPMessage>>
+    initializeLSP(bool supportsMarkdown = true,
+                  std::optional<std::unique_ptr<SorbetInitializationOptions>> opts = std::nullopt);
 
     std::unique_ptr<LSPMessage> openFile(std::string_view path, std::string_view contents);
 

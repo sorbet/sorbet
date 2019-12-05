@@ -1,5 +1,0 @@
-class <emptyTree><<C <root>>> < ()
-  def self.<static-init><<static-init>$CENSORED>(<blk>)
-    1.+("hi")
-  end
-end

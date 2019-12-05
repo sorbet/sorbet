@@ -2,6 +2,7 @@
 #include "common/common.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
+#include "core/lsp/QueryResponse.h"
 #include <optional>
 
 using namespace std;
@@ -9,28 +10,6 @@ using namespace std;
 namespace sorbet::infer {
 
 namespace {
-
-optional<u4> startOfExistingSig(core::Context ctx, core::Loc loc) {
-    auto file = loc.file();
-    ENFORCE(file.exists());
-    auto textBeforeTheMethod = loc.file().data(ctx).source().substr(0, loc.beginPos());
-    auto lastSigCurly = textBeforeTheMethod.rfind("sig {");
-    auto lastSigDo = textBeforeTheMethod.rfind("sig do");
-    if (lastSigCurly != string_view::npos) {
-        if (lastSigDo != string_view::npos) {
-            return max(lastSigCurly, lastSigDo);
-        } else {
-            return lastSigCurly;
-        }
-    } else {
-        if (lastSigDo != string_view::npos) {
-            return lastSigDo;
-        } else {
-            // failed to find sig
-            return nullopt;
-        }
-    }
-}
 
 bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
     ENFORCE(enclosingClass.exists());
@@ -61,21 +40,24 @@ optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context
     auto [classStart, classEnd] = classLoc->position(ctx);
 
     core::Loc::Detail thisLineStart = {classStart.line, 1};
-    core::Loc thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
-    auto [_, thisLinePadding] = thisLineLoc.findStartOfLine(ctx);
+    auto thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
+    ENFORCE(thisLineLoc.has_value());
+    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(ctx);
 
-    ENFORCE(classStart.line + 1 <= classLoc->file().data(ctx).lineBreaks().size());
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
-    core::Loc nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
-    auto [replacementLoc, nextLinePadding] = nextLineLoc.findStartOfLine(ctx);
+    auto nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
+    if (!nextLineLoc.has_value()) {
+        return nullopt;
+    }
+    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(ctx);
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return core::AutocorrectSuggestion::Edit{nextLineLoc, fmt::format("{}extend T::Sig\n", prefix)};
+    return core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Sig\n", prefix)};
 }
 
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
-    ENFORCE(component.method.exists());
+    ENFORCE(component.method.exists() && component.method != core::Symbols::untyped());
     const auto &args = component.method.data(ctx)->arguments();
     if (argId >= args.size()) {
         return nullptr;
@@ -122,7 +104,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::Loc bindLoc, cfg::Sen
         core::TypePtr thisType;
         auto iter = &dispatchInfo;
         while (iter != nullptr) {
-            if (iter->main.method.exists()) {
+            if (iter->main.method.exists() && iter->main.method != core::Symbols::untyped()) {
                 auto argType = extractArgType(ctx, *snd, iter->main, i);
                 if (argType && !argType->isUntyped()) {
                     if (!thisType) {
@@ -296,8 +278,8 @@ bool childNeedsOverride(core::Context ctx, core::SymbolRef childSymbol, core::Sy
         !parentSymbol.data(ctx)->loc().file().data(ctx).isRBI() &&
         // that isn't the constructor...
         childSymbol.data(ctx)->name != core::Names::initialize() &&
-        // and wasn't DSL synthesized (beause we can't change DSL'd sigs).
-        !parentSymbol.data(ctx)->isDSLSynthesized() &&
+        // and wasn't Rewriter synthesized (beause we can't change DSL'd sigs).
+        !parentSymbol.data(ctx)->isRewriterSynthesized() &&
         // It has a sig...
         parentSymbol.data(ctx)->resultType != nullptr &&
         //  that is either overridable...
@@ -308,8 +290,9 @@ bool childNeedsOverride(core::Context ctx, core::SymbolRef childSymbol, core::Sy
 
 } // namespace
 
-bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, unique_ptr<cfg::CFG> &cfg,
-                                    const core::TypePtr &methodReturnType, core::TypeConstraint &constr) {
+optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Context ctx, unique_ptr<cfg::CFG> &cfg,
+                                                                     const core::TypePtr &methodReturnType,
+                                                                     core::TypeConstraint &constr) {
     core::SymbolRef methodSymbol = cfg->symbol;
 
     bool guessedSomethingUseful = false;
@@ -317,10 +300,16 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         guessedSomethingUseful = true;
     }
 
+    auto lspQueryMatches = ctx.state.lspQuery.matchesSuggestSig(methodSymbol);
+    if (lspQueryMatches) {
+        // Even a sig with no useful types is still useful interactively (saves on typing)
+        guessedSomethingUseful = true;
+    }
+
     core::TypePtr guessedReturnType;
     if (!constr.isEmpty()) {
         if (!constr.solve(ctx)) {
-            return false;
+            return nullopt;
         }
 
         guessedReturnType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
@@ -329,7 +318,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
             guessedReturnType = core::Types::untypedUntracked();
         }
 
-        guessedSomethingUseful = guessedSomethingUseful || !guessedReturnType->isUntyped();
+        guessedSomethingUseful |= !guessedReturnType->isUntyped();
     } else {
         guessedReturnType = methodReturnType;
     }
@@ -344,7 +333,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     };
     bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->arguments(), isBadArg);
     if (hasBadArg) {
-        return false;
+        return nullopt;
     }
 
     auto guessedArgumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
@@ -367,13 +356,12 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     }
 
     auto loc = methodSymbol.data(ctx)->loc();
-    // Sometimes the methodSymbol we're looking at has been synthesized by a DSL pass, so no 'def' exists in the source
+    // Sometimes the methodSymbol we're looking at has been synthesized by a Rewriter pass, so no 'def' exists in the
+    // source
     if (loc.file().data(ctx).source().substr(loc.beginPos(), 3) != "def") {
-        return false;
+        return nullopt;
     }
 
-    // Note: Before running any substantial codemod to add generated sigs at Stripe, be sure to insert `generated.`
-    // in all the suggested sigs. (Either change this line below and recompile, or post-process using sed).
     fmt::format_to(ss, "sig {{");
 
     ENFORCE(!methodSymbol.data(ctx)->arguments().empty(), "There should always be at least one arg (the block arg).");
@@ -422,7 +410,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         fmt::format_to(ss, ").");
     }
     if (!guessedSomethingUseful) {
-        return false;
+        return nullopt;
     }
 
     if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
@@ -451,34 +439,29 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     bool hasExistingSig = methodSymbol.data(ctx)->resultType != nullptr;
 
     if (!loc.file().exists()) {
-        return false;
-    }
-
-    if (hasExistingSig && !methodSymbol.data(ctx)->hasGeneratedSig()) {
-        return false;
+        return nullopt;
     }
 
     if (hasExistingSig) {
-        if (auto existingStart = startOfExistingSig(ctx, loc)) {
-            replacementLoc = core::Loc(loc.file(), *existingStart, replacementLoc.endPos());
-        } else {
-            // Had existing sig, but couldn't find where it started, so give up suggesting a sig.
-            return false;
-        }
+        return nullopt;
     }
 
     vector<core::AutocorrectSuggestion::Edit> edits;
 
-    string sig = to_string(ss);
-    edits.emplace_back(core::AutocorrectSuggestion::Edit{replacementLoc, fmt::format("{}\n{}", sig, spaces)});
+    auto sig = to_string(ss);
+    auto replacementContents = fmt::format("{}\n{}", sig, spaces);
+    edits.emplace_back(core::AutocorrectSuggestion::Edit{replacementLoc, replacementContents});
+
+    if (lspQueryMatches) {
+        core::lsp::QueryResponse::pushQueryResponse(
+            ctx, core::lsp::EditResponse(replacementLoc, std::move(replacementContents)));
+    }
 
     if (auto edit = maybeSuggestExtendTSig(ctx, methodSymbol)) {
         edits.emplace_back(edit.value());
     }
 
-    e.addAutocorrect(core::AutocorrectSuggestion{fmt::format("Add `{}`", sig), edits});
-
-    return true;
+    return core::AutocorrectSuggestion{fmt::format("Add `{}`", sig), edits};
 }
 
 } // namespace sorbet::infer

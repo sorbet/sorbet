@@ -10,7 +10,7 @@ Class.new(Parent)
 Class.new {|cls| cls.superclass}
 Class.new(Parent) {|cls| cls.superclass}
 
-# Our ClassNew DSL pass can only re-write Class.new where the lefthand
+# Our ClassNew Rewriter pass can only re-write Class.new where the lefthand
 # side is assigned to a constant
 Class.new(Parent).foo # error: Method `foo` does not exist on `Class`
 c = Class.new(Parent)

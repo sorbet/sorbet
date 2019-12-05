@@ -2,6 +2,8 @@
 #include "absl/strings/match.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
+#include "common/formatting.h"
+#include "common/sort.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
 
@@ -102,7 +104,7 @@ void showHelper(core::Context ctx, fmt::memory_buffer &buf, const DefTree &node,
     }
 }
 
-string DefTree::show(core::Context ctx, int level) {
+string DefTree::show(core::Context ctx, int level) const {
     fmt::memory_buffer buf;
     showHelper(ctx, buf, *this, 0);
     return to_string(buf);

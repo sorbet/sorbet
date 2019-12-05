@@ -634,9 +634,9 @@ class Array < Object
   # ```
   sig do
     params(
-        arg0: Elem,
+      arg0: T.untyped,
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(Elem))
   end
   def assoc(arg0); end
 
@@ -747,7 +747,7 @@ class Array < Object
   # [ "a", nil, "b", nil, "c" ].compact! #=> [ "a", "b", "c" ]
   # [ "a", "b", "c" ].compact!           #=> nil
   # ```
-  sig {returns(T::Array[Elem])}
+  sig {returns(T.nilable(T::Array[Elem]))}
   def compact!(); end
 
   # Appends the elements of `other_ary`s to `self`.
@@ -1002,13 +1002,13 @@ class Array < Object
   # ```
   # a -- b -- c --
   # ```
-  sig {returns(T::Enumerator[Elem])}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
     .returns(T::Array[Elem])
   end
+  sig {returns(T::Enumerator[Elem])}
   def each(&blk); end
 
   # Same as
@@ -1335,6 +1335,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
+  sig {returns(T::Enumerator[Elem])}
   def keep_if(&blk); end
 
   # Returns the last element(s) of `self`. If the array is empty, the first form
@@ -1565,8 +1566,8 @@ class Array < Object
   # a.rassoc("four")   #=> nil
   # ```
   sig do
-    type_parameters(:U).params(
-        arg0: T.type_parameter(:U),
+    params(
+        arg0: T.untyped,
     )
     .returns(T.nilable(Elem))
   end
@@ -1607,7 +1608,7 @@ class Array < Object
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(T::Array[Elem]))
   end
   sig {returns(T::Enumerator[Elem])}
   def reject!(&blk); end
@@ -1863,6 +1864,35 @@ class Array < Object
   sig {returns(T::Enumerator[Elem])}
   def select(&blk); end
 
+  # Returns a new array containing all elements of `ary` for which the given
+  # `block` returns a true value.
+  #
+  # If no block is given, an
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # returned instead.
+  #
+  # ```ruby
+  # [1,2,3,4,5].select {|num| num.even? }     #=> [2, 4]
+  #
+  # a = %w[ a b c d e f ]
+  # a.select {|v| v =~ /[aeiou]/ }    #=> ["a", "e"]
+  # ```
+  #
+  # See also
+  # [`Enumerable#select`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-select).
+  #
+  # [`Array#filter`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-filter)
+  # is an alias for
+  # [`Array#select`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-select).
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T::Array[Elem])
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def filter(&blk); end
+
   # Invokes the given block passing in successive elements from `self`, deleting
   # elements for which the block returns a `false` value.
   #
@@ -1884,10 +1914,36 @@ class Array < Object
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(T::Array[Elem]))
   end
   sig {returns(T::Enumerator[Elem])}
   def select!(&blk); end
+
+  # Invokes the given block passing in successive elements from `self`, deleting
+  # elements for which the block returns a `false` value.
+  #
+  # The array may not be changed instantly every time the block is called.
+  #
+  # If changes were made, it will return `self`, otherwise it returns `nil`.
+  #
+  # If no block is given, an
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # returned instead.
+  #
+  # See also
+  # [`Array#keep_if`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-keep_if).
+  #
+  # [`Array#filter!`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-filter-21)
+  # is an alias for
+  # [`Array#select!`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-select-21).
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.nilable(T::Array[Elem]))
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def filter!(&blk); end
 
   # Removes the first element of `self` and returns it (shifting all other
   # elements down by one). Returns `nil` if the array is empty.
@@ -1967,14 +2023,14 @@ class Array < Object
     params(
         arg0: T::Range[Integer],
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(T::Array[Elem]))
   end
   sig do
     params(
         arg0: Integer,
         arg1: Integer,
     )
-    .returns(T::Array[Elem])
+    .returns(T.nilable(T::Array[Elem]))
   end
   sig do
     params(
@@ -2203,7 +2259,7 @@ class Array < Object
   # c = [["student","sam"], ["student","george"], ["teacher","matz"]]
   # c.uniq! {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
   # ```
-  sig {returns(T::Array[Elem])}
+  sig {returns(T.nilable(T::Array[Elem]))}
   def uniq!(); end
 
   # Prepends objects to the front of `self`, moving other elements upwards. See

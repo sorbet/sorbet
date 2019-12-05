@@ -1205,8 +1205,8 @@ class Integer < Numeric
   # 18.truncate(-1)      #=> 10
   # (-18).truncate(-1)   #=> -10
   # ```
-  sig {returns(Integer)}
-  def truncate(); end
+  sig {params(ndigits: Integer).returns(Integer)}
+  def truncate(ndigits=0); end
 
   # Iterates the given block, passing in integer values from `int` up to and
   # including `limit`.

@@ -1,4 +1,22 @@
 digraph "normalize_params.rb" {
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
+    color = blue;
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Test) = alias <C Test>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(Test))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::Test#normalize_params" {
     label = "::Test#normalize_params";
     color = blue;
@@ -6,61 +24,79 @@ subgraph "cluster_::Test#normalize_params" {
     "bb::Test#normalize_params_1" [shape = parallelogram];
 
     "bb::Test#normalize_params_0" [
-        label = "block[id=0]()\l<self>: Test = cast(<self>: NilClass, Test);\lv: T.untyped = load_arg(v)\l<statTemp>$5: T.class_of(Hash) = alias <C Hash>\l<ifTemp>$3: T.untyped = v: T.untyped.is_a?(<statTemp>$5: T.class_of(Hash))\l<ifTemp>$3: T.untyped\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Test = cast(<self>: NilClass, Test);\lv: T.untyped = load_arg(v)\l<statTemp>$5: T.class_of(Hash) = alias <C Hash>\l<ifTemp>$3: T.untyped = v: T.untyped.is_a?(<statTemp>$5: T.class_of(Hash))\l<ifTemp>$3: T.untyped\l"
     ];
 
     "bb::Test#normalize_params_0" -> "bb::Test#normalize_params_2" [style="bold"];
     "bb::Test#normalize_params_0" -> "bb::Test#normalize_params_3" [style="tapered"];
 
     "bb::Test#normalize_params_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_1" -> "bb::Test#normalize_params_1" [style="bold"];
     "bb::Test#normalize_params_2" [
-        label = "block[id=2](<self>: Test, v: T::Hash[T.untyped, T.untyped])\l<statTemp>$8: T::Array[[T.untyped, T.untyped]] = v: T::Hash[T.untyped, T.untyped].to_a()\l<statTemp>$6: T.untyped = <self>: Test.normalize_params(<statTemp>$8: T::Array[[T.untyped, T.untyped]])\l<returnMethodTemp>$2: T.untyped = <statTemp>$6: T.untyped.sort()\l<unconditional>\l"
+        label = "block[id=2, rubyBlockId=0](<self>: Test, v: T::Hash[T.untyped, T.untyped])\l<statTemp>$8: T::Array[[T.untyped, T.untyped]] = v: T::Hash[T.untyped, T.untyped].to_a()\l<statTemp>$6: T.untyped = <self>: Test.normalize_params(<statTemp>$8: T::Array[[T.untyped, T.untyped]])\l<returnMethodTemp>$2: T.untyped = <statTemp>$6: T.untyped.sort()\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_2" -> "bb::Test#normalize_params_11" [style="bold"];
     "bb::Test#normalize_params_3" [
-        label = "block[id=3](<self>: Test, v: T.untyped)\l<statTemp>$12: T.class_of(Array) = alias <C Array>\l<ifTemp>$10: T.untyped = v: T.untyped.is_a?(<statTemp>$12: T.class_of(Array))\l<ifTemp>$10: T.untyped\l"
+        label = "block[id=3, rubyBlockId=0](<self>: Test, v: T.untyped)\l<statTemp>$12: T.class_of(Array) = alias <C Array>\l<ifTemp>$10: T.untyped = v: T.untyped.is_a?(<statTemp>$12: T.class_of(Array))\l<ifTemp>$10: T.untyped\l"
     ];
 
     "bb::Test#normalize_params_3" -> "bb::Test#normalize_params_4" [style="bold"];
     "bb::Test#normalize_params_3" -> "bb::Test#normalize_params_5" [style="tapered"];
 
     "bb::Test#normalize_params_4" [
-        label = "block[id=4](<self>: Test, v: T::Array[T.untyped])\l<block-pre-call-temp>$14: Sorbet::Private::Static::Void = v: T::Array[T.untyped].map()\l<selfRestore>$15: Test = <self>\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=0](<self>: Test, v: T::Array[T.untyped])\l<block-pre-call-temp>$14: Sorbet::Private::Static::Void = v: T::Array[T.untyped].map()\l<selfRestore>$15: Test = <self>\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_4" -> "bb::Test#normalize_params_6" [style="bold"];
     "bb::Test#normalize_params_5" [
-        label = "block[id=5](v: T.untyped)\l<returnMethodTemp>$2: T.untyped = v\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=0](v: T.untyped)\l<returnMethodTemp>$2: T.untyped = v\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_5" -> "bb::Test#normalize_params_11" [style="bold"];
     "bb::Test#normalize_params_6" [
-        label = "block[id=6](<self>: Test, <selfRestore>$15: Test)\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=6, rubyBlockId=1](<self>: Test, <selfRestore>$15: Test, <block-pre-call-temp>$14: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_9" [style="bold"];
     "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_7" [style="tapered"];
 
     "bb::Test#normalize_params_7" [
-        label = "block[id=7](<selfRestore>$15: Test)\l<returnMethodTemp>$2: T::Array[T.untyped] = Solve<map>\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](<selfRestore>$15: Test, <block-pre-call-temp>$14: Sorbet::Private::Static::Void)\l<returnMethodTemp>$2: T::Array[T.untyped] = Solve<<block-pre-call-temp>$14, map>\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_7" -> "bb::Test#normalize_params_11" [style="bold"];
     "bb::Test#normalize_params_9" [
-        label = "block[id=9](<self>: Test, <selfRestore>$15: Test)\louterLoops: 1\l<self>: Test = loadSelf\l<blk>$16: [T.untyped] = load_yield_params(map)\l<blk>$17: Integer(0) = 0\le$1: T.untyped = <blk>$16: [T.untyped].[](<blk>$17: Integer(0))\l<blockReturnTemp>$18: T.untyped = <self>: Test.normalize_params(e$1: T.untyped)\l<blockReturnTemp>$21: T.noreturn = blockreturn<map> <blockReturnTemp>$18: T.untyped\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=1](<self>: Test, <selfRestore>$15: Test, <block-pre-call-temp>$14: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: Test = loadSelf\l<blk>$16: [T.untyped] = load_yield_params(map)\l<blk>$17: Integer(0) = 0\le$1: T.untyped = <blk>$16: [T.untyped].[](<blk>$17: Integer(0))\l<blockReturnTemp>$18: T.untyped = <self>: Test.normalize_params(e$1: T.untyped)\l<blockReturnTemp>$21: T.noreturn = blockreturn<map> <blockReturnTemp>$18: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_9" -> "bb::Test#normalize_params_6" [style="bold"];
     "bb::Test#normalize_params_11" [
-        label = "block[id=11](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=11, rubyBlockId=0](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_11" -> "bb::Test#normalize_params_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:Test>#<static-init>" {
+    label = "::<Class:Test>#<static-init>";
+    color = blue;
+    "bb::<Class:Test>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Test>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:Test>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Test) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Test>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Test>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Test>#<static-init>_0" -> "bb::<Class:Test>#<static-init>_1" [style="bold"];
+    "bb::<Class:Test>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Test>#<static-init>_1" -> "bb::<Class:Test>#<static-init>_1" [style="bold"];
 }
 
 }

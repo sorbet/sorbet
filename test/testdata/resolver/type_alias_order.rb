@@ -4,10 +4,10 @@
 # ensuring that type aliases are tracked as dependencies to other type aliases.
 
 module Foo
-  Table = T.type_alias(Types::TABLE)
+  Table = T.type_alias {Types::TABLE}
   Values = T.let([], Table)
 end
 
 module Types
-  TABLE = T.type_alias(T::Array[Integer])
+  TABLE = T.type_alias {T::Array[Integer]}
 end

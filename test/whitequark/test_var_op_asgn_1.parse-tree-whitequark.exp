@@ -1,0 +1,3 @@
+s(:op_asgn,
+  s(:ivasgn, :@a), :|,
+  s(:int, "1"))

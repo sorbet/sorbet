@@ -23,14 +23,10 @@ module T::Props::Utils
       h
     when Regexp
       what.dup
+    when T::Enum
+      what
     else
-      # Some unfortunate nastiness to get around Opus::Enum potentially not
-      # being defined.
-      if defined?(Opus) && defined?(Opus::Enum) && what.class == Opus::Enum
-        what
-      else
-        what.clone
-      end
+      what.clone
     end
     freeze ? result.freeze : result
   end

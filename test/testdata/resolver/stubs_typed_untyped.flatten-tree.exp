@@ -1,0 +1,36 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Foo)
+          <emptyTree>
+        end
+        Unresolved: <emptyTree>::<C Bar>
+        Unresolved: ::Foo::<C Bar>
+        <emptyTree>
+      end
+    end
+  end
+  module ::Foo<<C Foo>> < ()
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        Unresolved: <emptyTree>::<C Bar>
+        Unresolved: ::Foo::<C Bar>
+        <emptyTree>
+      end
+    end
+  end
+  <emptyTree>
+end

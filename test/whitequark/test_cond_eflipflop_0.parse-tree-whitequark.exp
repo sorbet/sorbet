@@ -1,0 +1,4 @@
+s(:if,
+  s(:eflipflop,
+    s(:lvar, :foo),
+    s(:lvar, :bar)), nil, nil)

@@ -1,4 +1,22 @@
 digraph "meta_types.rb" {
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
+    color = blue;
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(TestMetaType) = alias <C TestMetaType>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(TestMetaType))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::TestMetaType#_" {
     label = "::TestMetaType#_";
     color = blue;
@@ -6,12 +24,12 @@ subgraph "cluster_::TestMetaType#_" {
     "bb::TestMetaType#__1" [shape = parallelogram];
 
     "bb::TestMetaType#__0" [
-        label = "block[id=0]()\l<self>: TestMetaType = cast(<self>: NilClass, TestMetaType);\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestMetaType = cast(<self>: NilClass, TestMetaType);\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#__0" -> "bb::TestMetaType#__1" [style="bold"];
     "bb::TestMetaType#__1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#__1" -> "bb::TestMetaType#__1" [style="bold"];
@@ -24,49 +42,67 @@ subgraph "cluster_::TestMetaType#testit" {
     "bb::TestMetaType#testit_1" [shape = parallelogram];
 
     "bb::TestMetaType#testit_0" [
-        label = "block[id=0]()\l<self>: TestMetaType = cast(<self>: NilClass, TestMetaType);\lkeep_for_ide$7: T.class_of(T) = alias <C T>\l<statTemp>$6: T.class_of(T::Array) = alias <C Array>\l<statTemp>$8: T.class_of(String) = alias <C String>\l<statTemp>$5: <Type: T::Array[String]> = <statTemp>$6: T.class_of(T::Array).[](<statTemp>$8: T.class_of(String))\l<statTemp>$3: NilClass = <self>: TestMetaType.puts(<statTemp>$5: <Type: T::Array[String]>)\l<ifTemp>$12: T.untyped = <self>: TestMetaType._()\l<ifTemp>$12: T.untyped\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestMetaType = cast(<self>: NilClass, TestMetaType);\l<statTemp>$6: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$7: T.class_of(T) = alias <C T>\l<statTemp>$8: T.class_of(String) = alias <C String>\l<statTemp>$5: <Type: T::Array[String]> = <statTemp>$6: T.class_of(T::Array).[](<statTemp>$8: T.class_of(String))\l<statTemp>$3: NilClass = <self>: TestMetaType.puts(<statTemp>$5: <Type: T::Array[String]>)\l<ifTemp>$12: T.untyped = <self>: TestMetaType._()\l<ifTemp>$12: T.untyped\l"
     ];
 
     "bb::TestMetaType#testit_0" -> "bb::TestMetaType#testit_2" [style="bold"];
     "bb::TestMetaType#testit_0" -> "bb::TestMetaType#testit_3" [style="tapered"];
 
     "bb::TestMetaType#testit_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_1" -> "bb::TestMetaType#testit_1" [style="bold"];
     "bb::TestMetaType#testit_2" [
-        label = "block[id=2](<self>: TestMetaType)\lkeep_for_ide$15: T.class_of(T) = alias <C T>\l<statTemp>$14: T.class_of(T::Array) = alias <C Array>\l<statTemp>$16: T.class_of(String) = alias <C String>\l<statTemp>$11: <Type: T::Array[String]> = <statTemp>$14: T.class_of(T::Array).[](<statTemp>$16: T.class_of(String))\l<unconditional>\l"
+        label = "block[id=2, rubyBlockId=0](<self>: TestMetaType)\l<statTemp>$14: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$15: T.class_of(T) = alias <C T>\l<statTemp>$16: T.class_of(String) = alias <C String>\l<statTemp>$11: <Type: T::Array[String]> = <statTemp>$14: T.class_of(T::Array).[](<statTemp>$16: T.class_of(String))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_2" -> "bb::TestMetaType#testit_4" [style="bold"];
     "bb::TestMetaType#testit_3" [
-        label = "block[id=3](<self>: TestMetaType)\l<statTemp>$11: FalseClass = false\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<self>: TestMetaType)\l<statTemp>$11: FalseClass = false\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_3" -> "bb::TestMetaType#testit_4" [style="bold"];
     "bb::TestMetaType#testit_4" [
-        label = "block[id=4](<statTemp>$11: Object, <self>: TestMetaType)\l<statTemp>$9: NilClass = <self>: TestMetaType.puts(<statTemp>$11: Object)\l<ifTemp>$19: T.untyped = <self>: TestMetaType._()\l<ifTemp>$19: T.untyped\l"
+        label = "block[id=4, rubyBlockId=0](<statTemp>$11: Object, <self>: TestMetaType)\l<statTemp>$9: NilClass = <self>: TestMetaType.puts(<statTemp>$11: Object)\l<ifTemp>$19: T.untyped = <self>: TestMetaType._()\l<ifTemp>$19: T.untyped\l"
     ];
 
     "bb::TestMetaType#testit_4" -> "bb::TestMetaType#testit_5" [style="bold"];
     "bb::TestMetaType#testit_4" -> "bb::TestMetaType#testit_6" [style="tapered"];
 
     "bb::TestMetaType#testit_5" [
-        label = "block[id=5](<self>: TestMetaType)\lkeep_for_ide$22: T.class_of(T) = alias <C T>\l<statTemp>$21: T.class_of(T::Array) = alias <C Array>\l<statTemp>$23: T.class_of(String) = alias <C String>\l<statTemp>$18: <Type: T::Array[String]> = <statTemp>$21: T.class_of(T::Array).[](<statTemp>$23: T.class_of(String))\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=0](<self>: TestMetaType)\l<statTemp>$21: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$22: T.class_of(T) = alias <C T>\l<statTemp>$23: T.class_of(String) = alias <C String>\l<statTemp>$18: <Type: T::Array[String]> = <statTemp>$21: T.class_of(T::Array).[](<statTemp>$23: T.class_of(String))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_5" -> "bb::TestMetaType#testit_7" [style="bold"];
     "bb::TestMetaType#testit_6" [
-        label = "block[id=6](<self>: TestMetaType)\lkeep_for_ide$25: T.class_of(T) = alias <C T>\l<statTemp>$24: T.class_of(T::Array) = alias <C Array>\l<statTemp>$26: T.class_of(Float) = alias <C Float>\l<statTemp>$18: <Type: T::Array[Float]> = <statTemp>$24: T.class_of(T::Array).[](<statTemp>$26: T.class_of(Float))\l<unconditional>\l"
+        label = "block[id=6, rubyBlockId=0](<self>: TestMetaType)\l<statTemp>$24: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$25: T.class_of(T) = alias <C T>\l<statTemp>$26: T.class_of(Float) = alias <C Float>\l<statTemp>$18: <Type: T::Array[Float]> = <statTemp>$24: T.class_of(T::Array).[](<statTemp>$26: T.class_of(Float))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_6" -> "bb::TestMetaType#testit_7" [style="bold"];
     "bb::TestMetaType#testit_7" [
-        label = "block[id=7](<statTemp>$18: Object, <self>: TestMetaType)\l<returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$18: Object)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](<statTemp>$18: Object, <self>: TestMetaType)\l<returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$18: Object)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_7" -> "bb::TestMetaType#testit_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:TestMetaType>#<static-init>" {
+    label = "::<Class:TestMetaType>#<static-init>";
+    color = blue;
+    "bb::<Class:TestMetaType>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:TestMetaType>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:TestMetaType>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(TestMetaType) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U TestMetaType>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestMetaType>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:TestMetaType>#<static-init>_0" -> "bb::<Class:TestMetaType>#<static-init>_1" [style="bold"];
+    "bb::<Class:TestMetaType>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:TestMetaType>#<static-init>_1" -> "bb::<Class:TestMetaType>#<static-init>_1" [style="bold"];
 }
 
 }

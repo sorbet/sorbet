@@ -1,0 +1,5 @@
+s(:begin,
+  s(:assign,
+    s(:lvasgn, :var),
+    s(:int, "10")),
+  s(:lvar, :var))

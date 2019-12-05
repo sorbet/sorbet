@@ -1,0 +1,10 @@
+tmp="$(mktemp).rb"
+pre="test/cli/autocorrect-lazy-type-alias/pre.rb"
+post="test/cli/autocorrect-lazy-type-alias/post.rb"
+cp "$pre" "$tmp"
+main/sorbet --silence-dev-message -a "$tmp"
+echo "BEGIN DIFF"
+diff "$post" "$tmp"
+echo "END DIFF"
+
+rm -f "$tmp"

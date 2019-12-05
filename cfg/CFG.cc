@@ -1,6 +1,8 @@
 #include "cfg/CFG.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
+#include "common/Timer.h"
+#include "common/formatting.h"
 
 // helps debugging
 template class std::unique_ptr<sorbet::cfg::CFG>;
@@ -11,17 +13,18 @@ using namespace std;
 
 namespace sorbet::cfg {
 
-BasicBlock *CFG::freshBlock(int outerLoops) {
+BasicBlock *CFG::freshBlock(int outerLoops, int rubyBlockId) {
     int id = this->maxBasicBlockId++;
     auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
     r->id = id;
     r->outerLoops = outerLoops;
+    r->rubyBlockId = rubyBlockId;
     return r.get();
 }
 
 CFG::CFG() {
-    freshBlock(0); // entry;
-    freshBlock(0); // dead code;
+    freshBlock(0, 0); // entry;
+    freshBlock(0, 0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond.variable = core::LocalVariable::noVariable();
@@ -77,6 +80,9 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {
                 blockReads.insert(v->fallback);
                 blockReadsAndWrites.insert(v->fallback);
+            } else if (auto *v = cast_instruction<SolveConstraint>(bind.value.get())) {
+                blockReads.insert(v->send);
+                blockReadsAndWrites.insert(v->send);
             }
 
             auto fnd = blockReads.find(bind.bind.variable);
@@ -136,7 +142,7 @@ void CFG::sanityCheck(core::Context ctx) {
     }
 }
 
-string CFG::toString(core::Context ctx) {
+string CFG::toString(core::Context ctx) const {
     fmt::memory_buffer buf;
     string symbolName = this->symbol.data(ctx)->showFullName(ctx);
     fmt::format_to(buf,
@@ -169,7 +175,7 @@ string CFG::toString(core::Context ctx) {
     return to_string(buf);
 }
 
-string CFG::showRaw(core::Context ctx) {
+string CFG::showRaw(core::Context ctx) const {
     fmt::memory_buffer buf;
     string symbolName = this->symbol.data(ctx)->showFullName(ctx);
     fmt::format_to(buf,
@@ -202,17 +208,17 @@ string CFG::showRaw(core::Context ctx) {
     return to_string(buf);
 }
 
-string BasicBlock::toString(core::Context ctx) {
+string BasicBlock::toString(core::Context ctx) const {
     fmt::memory_buffer buf;
     fmt::format_to(
-        buf, "block[id={}]({})\n", this->id,
+        buf, "block[id={}, rubyBlockId={}]({})\n", this->id, this->rubyBlockId,
         fmt::map_join(
             this->args.begin(), this->args.end(), ", ", [&](const auto &arg) -> auto { return arg.toString(ctx); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(buf, "outerLoops: {}\n", this->outerLoops);
     }
-    for (Binding &exp : this->exprs) {
+    for (const Binding &exp : this->exprs) {
         fmt::format_to(buf, "{} = {}\n", exp.bind.toString(ctx), exp.value->toString(ctx));
     }
     if (this->bexit.cond.variable.exists()) {
@@ -223,7 +229,7 @@ string BasicBlock::toString(core::Context ctx) {
     return to_string(buf);
 }
 
-string BasicBlock::showRaw(core::Context ctx) {
+string BasicBlock::showRaw(core::Context ctx) const {
     fmt::memory_buffer buf;
     fmt::format_to(
         buf, "block[id={}]({})\n", this->id,
@@ -233,7 +239,7 @@ string BasicBlock::showRaw(core::Context ctx) {
     if (this->outerLoops > 0) {
         fmt::format_to(buf, "outerLoops: {}\n", this->outerLoops);
     }
-    for (Binding &exp : this->exprs) {
+    for (const Binding &exp : this->exprs) {
         fmt::format_to(buf, "Binding {{\n&nbsp;bind = {},\n&nbsp;value = {},\n}}\n", exp.bind.showRaw(ctx, 1),
                        exp.value->showRaw(ctx, 1));
     }

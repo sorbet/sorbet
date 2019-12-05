@@ -1,0 +1,4 @@
+s(:if,
+  s(:lvar, :foo),
+  s(:lvar, :bar),
+  s(:lvar, :baz))

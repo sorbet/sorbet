@@ -24,7 +24,7 @@ class B; end
 class C; end
 
 # (1) Define a type alias as a union type of A, B, or C
-AorBorC = T.type_alias(T.any(A, B, C))
+AorBorC = T.type_alias {T.any(A, B, C)}
 
 sig {params(x: AorBorC).void}
 def foo(x)
@@ -36,7 +36,7 @@ def foo(x)
   when B
     T.reveal_type(x) # Revealed type: `B`
   else
-    # (3) Use T.absurd to ask Sorbet to error when there missing cases.
+    # (3) Use T.absurd to ask Sorbet to error when there are missing cases.
     T.absurd(x) # error: didn't handle case for `C`
   end
 end
@@ -144,7 +144,7 @@ to `T.any(A, B, C)` and reuse it throughout our codebase. This means we can
 update the alias in one place, instead of at every individual method!
 
 ```ruby
-AorBorC = T.type_alias(T.any(A, B, C))
+AorBorC = T.type_alias {T.any(A, B, C)}
 
 sig {params(x: AorBorC).void}
 def foo(x)

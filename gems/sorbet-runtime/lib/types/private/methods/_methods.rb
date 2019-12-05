@@ -302,7 +302,6 @@ module T::Private::Methods
         check_level: current_declaration.checked,
         on_failure: current_declaration.on_failure,
         override_allow_incompatible: current_declaration.override_allow_incompatible,
-        generated: current_declaration.generated,
       )
 
       SignatureValidation.validate(signature)

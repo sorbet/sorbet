@@ -356,6 +356,7 @@ module T::Configuration
     String
     Symbol
     Time
+    T::Enum
   }).freeze
 
   def self.scalar_types
@@ -382,6 +383,15 @@ module T::Configuration
     end
   end
 
+  def self.enable_legacy_t_enum_migration_mode
+    @legacy_t_enum_migration_mode = true
+  end
+  def self.disable_legacy_t_enum_migration_mode
+    @legacy_t_enum_migration_mode = false
+  end
+  def self.legacy_t_enum_migration_mode?
+    @legacy_t_enum_migration_mode || false
+  end
 
   private_class_method def self.validate_lambda_given!(value)
     if !value.nil? && !value.respond_to?(:call)

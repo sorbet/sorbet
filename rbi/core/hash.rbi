@@ -162,7 +162,7 @@ class Hash < Object
   # ```
   sig do
     type_parameters(:U, :V).params(
-      arg0: T::Array[[T.type_parameter(:U), T.type_parameter(:V)]],
+      arg0: T.any(T::Array[[T.type_parameter(:U), T.type_parameter(:V)]], T::Hash[T.type_parameter(:U), T.type_parameter(:V)]),
     )
     .returns(T::Hash[T.type_parameter(:U), T.type_parameter(:V)])
   end
@@ -362,6 +362,23 @@ class Hash < Object
   sig {returns(T::Enumerator[[K, V]])}
   def delete_if(&blk); end
 
+  # Retrieves the value object corresponding to the each key objects repeatedly.
+  #
+  # ~~~ruby
+  # h = { foo: {bar: {baz: 1}}}
+  #
+  # h.dig(:foo, :bar, :baz)           #=> 1
+  # h.dig(:foo, :zot)                 #=> nil
+  # ~~~
+  sig do
+    params(
+      key: K,
+      rest: T.untyped
+    )
+    .returns(T.untyped)
+  end
+  def dig(key, *rest); end
+
   # Calls *block* once for each key in *hsh*, passing the key-value pair as
   # parameters.
   #
@@ -553,16 +570,16 @@ class Hash < Object
   end
   def has_value?(arg0); end
 
-  sig {returns(Hash)}
+  sig {returns(T::Hash[T.untyped, T.untyped])}
   sig do
     params(
         default: BasicObject,
     )
-    .returns(Hash)
+    .returns(T::Hash[T.untyped, T.untyped])
   end
   sig do
     params(
-        blk: T.proc.params(hash: Hash, key: BasicObject).returns(BasicObject)
+        blk: T.proc.params(hash: T::Hash[T.untyped, T.untyped], key: BasicObject).returns(BasicObject)
     )
     .void
   end
@@ -753,6 +770,39 @@ class Hash < Object
   end
   def merge(*arg0, &blk); end
 
+  # Adds the contents of *other_hash* to *hsh*. If no block is specified,
+  # entries with duplicate keys are overwritten with the values from
+  # *other_hash*, otherwise the value of each duplicate key is determined by
+  # calling the block with the key, its value in *hsh* and its value in
+  # *other_hash*.
+  #
+  # ```ruby
+  # h1 = { "a" => 100, "b" => 200 }
+  # h2 = { "b" => 254, "c" => 300 }
+  # h1.merge!(h2)   #=> {"a"=>100, "b"=>254, "c"=>300}
+  # h1              #=> {"a"=>100, "b"=>254, "c"=>300}
+  #
+  # h1 = { "a" => 100, "b" => 200 }
+  # h2 = { "b" => 254, "c" => 300 }
+  # h1.merge!(h2) { |key, v1, v2| v1 }
+  #                 #=> {"a"=>100, "b"=>200, "c"=>300}
+  # h1              #=> {"a"=>100, "b"=>200, "c"=>300}
+  # ```
+  sig do
+    type_parameters(:A ,:B).params(
+        other_hash: T::Hash[T.type_parameter(:A), T.type_parameter(:B)],
+    )
+    .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
+  end
+  sig do
+    type_parameters(:A ,:B).params(
+        other_hash: T::Hash[T.type_parameter(:A), T.type_parameter(:B)],
+        blk: T.proc.params(key: K, oldval: V, newval: T.type_parameter(:B)).returns(T.any(V, T.type_parameter(:B))),
+    )
+    .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
+  end
+  def merge!(other_hash, &blk); end
+
   # Searches through the hash comparing *obj* with the value using `==`. Returns
   # the first key-value pair (two-element array) that matches. See also
   # `Array#rassoc`.
@@ -836,6 +886,27 @@ class Hash < Object
   end
   def select(&blk); end
 
+  # Returns a new hash consisting of entries for which the block returns true.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # h = { "a" => 100, "b" => 200, "c" => 300 }
+  # h.select {|k,v| k > "a"}  #=> {"b" => 200, "c" => 300}
+  # h.select {|k,v| v < 200}  #=> {"a" => 100}
+  # ```
+  #
+  # [`Hash#filter`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-filter)
+  # is an alias for
+  # [`Hash#select`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-select).
+  sig do
+    params(
+        blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
+    )
+    .returns(T::Hash[K, V])
+  end
+  def filter(&blk); end
+
   # Equivalent to
   # [`Hash#keep_if`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-keep_if),
   # but returns `nil` if no changes were made.
@@ -850,6 +921,21 @@ class Hash < Object
     .returns(T::Hash[K, V])
   end
   def select!(&blk); end
+
+  # Equivalent to
+  # [`Hash#keep_if`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-keep_if),
+  # but returns `nil` if no changes were made.
+  #
+  # [`Hash#filter!`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-filter-21)
+  # is an alias for
+  # [`Hash#select!`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-select-21).
+  sig do
+    params(
+        blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
+    )
+    .returns(T::Hash[K, V])
+  end
+  def filter!(&blk); end
 
   # Removes a key-value pair from *hsh* and returns it as the two-item array `[`
   # *key, value* `]`, or the hash's default value if the hash is empty.

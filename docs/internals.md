@@ -20,7 +20,7 @@ unfinished or confusing section!
 - [Phases](#phases)
   - [Parser](#parser)
   - [Desugar](#desugar)
-  - [DSL](#dsl)
+  - [Rewriter](#rewriter)
   - [LocalVars](#localvars)
   - [Namer](#namer)
   - [Resolver](#resolver)
@@ -119,11 +119,12 @@ another or make modifications within the IR they were given.
 |     |                                  | source files        |                                   |
 | 1   | [Parser], `-p parse-tree`        |                     |                                   |
 |     |                                  | [`parser::Node`]    |                                   |
-| 2   | [Desugar], `-p ast`              |                     |                                   |
-| 3   |                                  | [`ast::Expression`] | [DSL]                             |
-| 4   |                                  | [`ast::Expression`] | [LocalVars], `-p dsl-tree`        |
+| 2   | [Desugar], `-p desugar-tree`     |                     |                                   |
+| 3   |                                  | [`ast::Expression`] | [Rewriter]                             |
+| 4   |                                  | [`ast::Expression`] | [LocalVars], `-p rewrite-tree`        |
 | 5   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
 | 6   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
+| 6   |                                  | [`ast::Expression`] | [Flattener], `-p flatten-tree`    |
 | 7   | [CFG], `-p cfg --stop-after cfg` |                     |                                   |
 | 8   |                                  | [`cfg::CFG`]        | [Infer], `-p cfg`                 |
 
@@ -160,7 +161,7 @@ The header itself is generated using [parser/tools/generate_ast.cc].
 
 In general, the IR the parser generates is intended to model Ruby very
 granularly, but is frequently redundant for the purpose of typechecking. We use
-the Desugar and DSL passes to simplify the IR before typechecking.
+the Desugar and Rewriter passes to simplify the IR before typechecking.
 
 
 ### Desugar
@@ -183,13 +184,13 @@ Some examples of things we desugar in this pass:
 - compound assignment operators (`+=`) become normal assignments (`x = x + 1`)
 - `unless <cond>` becomes `if !<cond>`
 
-If you pass the `-p ast` or `-p ast-raw` option to `sorbet`, you can see what a
-Ruby program looks like after being desugared.
+If you pass the `-p desugar-tree` or `-p desugar-tree-raw` option to `sorbet`,
+you can see what a Ruby program looks like after being desugared.
 
 
-### DSL
+### Rewriter
 
-The DSL pass is sort of like a domain-specific desugar pass. It takes
+The Rewriter pass is sort of like a domain-specific desugar pass. It takes
 [`ast::Expression`]s and rewrites specific Ruby DSLs and metaprogramming into
 code that Sorbet can analyze. DSL in this context can have a broad meaning. Some
 examples of DSLs that are rewritten by this pass:
@@ -200,16 +201,16 @@ examples of DSLs that are rewritten by this pass:
 
 - `Chalk::ODM`'s `prop` definitions are written similarly to `attr_reader`
 
-The core dsl pass lives in [dsl/dsl.cc].
-Each DSL pass lives in its own file in the [dsl/] folder.
+The core Rewriter pass lives in [rewriter/rewriter.cc].
+Each Rewriter pass lives in its own file in the [rewriter/] folder.
 
 In the future, we anticipate rewriting the DSL phase with a plugin architecture.
 This will allow for a wider audience of Rubyists to teach Sorbet about DSLs
 they've written.
 
-We artificially limit what code we call from DSL passes. Sometimes it would be
+We artificially limit what code we call from Rewriter passes. Sometimes it would be
 convenient to call into other phases of Sorbet, but instead we've reimplemented
-functionality in the DSL pass. This keeps the surface area of the API we'll have
+functionality in the Rewriter pass. This keeps the surface area of the API we'll have
 to present to plugins in the future small.
 
 
@@ -343,6 +344,17 @@ passes to tease apart some implicit dependencies to achieve more parallelism and
 more modularity. In particular, it's feasible that we enter `Symbol`s for
 constants and then resolve constants before entering `Symbol`s for methods and
 resolving sigs.
+
+### Flattener
+
+The flattener is (currently) the final pass that processes the ast. The goal
+here is to move around all the nodes so that the final result only had top level
+classes and they only contain method definitions. All the bodies of the classes
+are moved to special `<static-init>` methods. The top level statements in
+the file are moved to a `<static-init>` method on the synthetic `<root>` object.
+
+You can always view the final result of all ast transforms with `-p ast`.
+
 
 ### CFG
 
@@ -615,7 +627,7 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 <!-- Phase descriptions -->
 [parser]: #parser
 [desugar]: #desugar
-[dsl]: #dsl
+[rewriter]: #rewriter
 [localvars]: #localvars
 [namer]: #namer
 [resolver]: #resolver
@@ -635,8 +647,8 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 <!-- Files -->
 [parser/tools/generate_ast.cc]: ../parser/tools/generate_ast.cc
 [ast/desugar/Desugar.cc]: ../ast/desugar/Desugar.cc
-[dsl/dsl.cc]: ../dsl/dsl.cc
-[dsl/]: ../dsl/
+[rewriter/rewriter.cc]: ../rewriter/rewriter.cc
+[rewriter/]: ../rewriter/
 [namer/namer.cc]: ../namer/namer.cc
 [resolver/resolver.cc]: ../resolver/resolver.cc
 [cfg/CFG.h]: ../cfg/CFG.h

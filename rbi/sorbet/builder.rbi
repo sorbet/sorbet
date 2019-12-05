@@ -4,9 +4,6 @@ class T::Private::Methods::DeclBuilder
   def type_parameters(*params); end
 
   sig {returns(T::Private::Methods::DeclBuilder)}
-  def generated; end
-
-  sig {returns(T::Private::Methods::DeclBuilder)}
   def abstract; end
 
   sig {returns(T::Private::Methods::DeclBuilder)}

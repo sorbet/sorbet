@@ -1,0 +1,5 @@
+s(:send,
+  s(:begin,
+    s(:iflipflop,
+      s(:lvar, :foo),
+      s(:lvar, :bar))), :!)

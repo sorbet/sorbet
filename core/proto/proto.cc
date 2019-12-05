@@ -54,8 +54,11 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
                 case UniqueNameKind::ResolverMissingClass:
                     protoName.set_unique(com::stripe::rubytyper::Name::RESOLVER_MISSING_CLASS);
                     break;
-                case UniqueNameKind::OpusEnum:
+                case UniqueNameKind::TEnum:
                     protoName.set_unique(com::stripe::rubytyper::Name::OPUS_ENUM);
+                    break;
+                case UniqueNameKind::DefaultArg:
+                    protoName.set_unique(com::stripe::rubytyper::Name::DEFAULT_ARG);
                     break;
             }
             break;
@@ -122,7 +125,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
 
     for (auto pair : data->membersStableOrderSlow(gs)) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-            pair.first == Names::classMethods()) {
+            pair.first == Names::classMethods() || pair.first == Names::Constants::AttachedClass()) {
             continue;
         }
 

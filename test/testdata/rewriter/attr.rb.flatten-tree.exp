@@ -1,0 +1,102 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::TestAttr)
+        <emptyTree>
+      end
+    end
+  end
+  class ::TestAttr<<C TestAttr>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def initialize(<blk>)
+      begin
+        @v1 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+          T.let(0, Integer)
+        end
+        @v2 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::String)
+          T.let("", String)
+        end
+        @v6 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::String)
+          T.let("", String)
+        end
+      end
+    end
+
+    def v1(<blk>)
+      @v1
+    end
+
+    def v1=(v1, <blk>)
+      @v1 = v1
+    end
+
+    def v2(<blk>)
+      @v2
+    end
+
+    def v2=(v2, <blk>)
+      @v2 = v2
+    end
+
+    def v3(<blk>)
+      @v3
+    end
+
+    def v4=(v4, <blk>)
+      @v4 = v4
+    end
+
+    def v5=(v5, <blk>)
+      @v5 = v5
+    end
+
+    def self.<static-init>(<blk>)
+      begin
+        <self>.sig() do ||
+          <self>.void()
+        end
+        <self>.sig() do ||
+          <self>.returns(::Integer)
+        end
+        <self>.sig() do ||
+          <self>.params({:"v1" => ::Integer}).returns(::Integer)
+        end
+        <self>.sig() do ||
+          <self>.returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"v2" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.returns(::String)
+        end
+        ::Sorbet::Private::Static.keep_for_ide(::T::Sig)
+        <emptyTree>
+      end
+    end
+  end
+  <emptyTree>
+end

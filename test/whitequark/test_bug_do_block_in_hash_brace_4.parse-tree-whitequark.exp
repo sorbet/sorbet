@@ -1,0 +1,10 @@
+s(:send, nil, :p,
+  s(:sym, :foo),
+  s(:hash,
+    s(:kwsplat,
+      s(:block,
+        s(:send, nil, :proc), nil, nil)),
+    s(:pair,
+      s(:sym, :b),
+      s(:block,
+        s(:send, nil, :proc), nil, nil))))

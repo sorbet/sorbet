@@ -1,0 +1,1010 @@
+test/cli/no-did-you-mean/no-did-you-mean.rb:205: Unable to resolve constant `MyClass` https://srb.help/5002
+     205 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:205: Replace with `Class`
+     205 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:205: Replace with `MyClass9`
+     205 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:205: Replace with `MyClass8`
+     205 |p MyClass
+            ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
+    68 |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
+    11 |class MyClass9; end
+        ^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:10: Did you mean: `MyClass8`?
+    10 |class MyClass8; end
+        ^^^^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:206: Unable to resolve constant `MyClass` https://srb.help/5002
+     206 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:206: Replace with `Class`
+     206 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:206: Replace with `MyClass9`
+     206 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:206: Replace with `MyClass8`
+     206 |p MyClass
+            ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
+    68 |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
+    11 |class MyClass9; end
+        ^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:10: Did you mean: `MyClass8`?
+    10 |class MyClass8; end
+        ^^^^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:207: Unable to resolve constant `MyClass` https://srb.help/5002
+     207 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:207: Replace with `Class`
+     207 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:207: Replace with `MyClass9`
+     207 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:207: Replace with `MyClass8`
+     207 |p MyClass
+            ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
+    68 |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
+    11 |class MyClass9; end
+        ^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:10: Did you mean: `MyClass8`?
+    10 |class MyClass8; end
+        ^^^^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:208: Unable to resolve constant `MyClass` https://srb.help/5002
+     208 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:208: Replace with `Class`
+     208 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:208: Replace with `MyClass9`
+     208 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:208: Replace with `MyClass8`
+     208 |p MyClass
+            ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
+    68 |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
+    11 |class MyClass9; end
+        ^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:10: Did you mean: `MyClass8`?
+    10 |class MyClass8; end
+        ^^^^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:209: Unable to resolve constant `MyClass` https://srb.help/5002
+     209 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:209: Replace with `Class`
+     209 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:209: Replace with `MyClass9`
+     209 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:209: Replace with `MyClass8`
+     209 |p MyClass
+            ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
+    68 |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
+    11 |class MyClass9; end
+        ^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:10: Did you mean: `MyClass8`?
+    10 |class MyClass8; end
+        ^^^^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:210: Unable to resolve constant `MyClass` https://srb.help/5002
+     210 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:210: Replace with `Class`
+     210 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:210: Replace with `MyClass9`
+     210 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:210: Replace with `MyClass8`
+     210 |p MyClass
+            ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
+    68 |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
+    11 |class MyClass9; end
+        ^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:10: Did you mean: `MyClass8`?
+    10 |class MyClass8; end
+        ^^^^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:211: Unable to resolve constant `MyClass` https://srb.help/5002
+     211 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:211: Replace with `Class`
+     211 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:211: Replace with `MyClass9`
+     211 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:211: Replace with `MyClass8`
+     211 |p MyClass
+            ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
+    68 |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
+    11 |class MyClass9; end
+        ^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:10: Did you mean: `MyClass8`?
+    10 |class MyClass8; end
+        ^^^^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:212: Unable to resolve constant `MyClass` https://srb.help/5002
+     212 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:212: Replace with `Class`
+     212 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:212: Replace with `MyClass9`
+     212 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:212: Replace with `MyClass8`
+     212 |p MyClass
+            ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
+    68 |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
+    11 |class MyClass9; end
+        ^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:10: Did you mean: `MyClass8`?
+    10 |class MyClass8; end
+        ^^^^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:213: Unable to resolve constant `MyClass` https://srb.help/5002
+     213 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:213: Replace with `Class`
+     213 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:213: Replace with `MyClass9`
+     213 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:213: Replace with `MyClass8`
+     213 |p MyClass
+            ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
+    68 |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
+    11 |class MyClass9; end
+        ^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:10: Did you mean: `MyClass8`?
+    10 |class MyClass8; end
+        ^^^^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:214: Unable to resolve constant `MyClass` https://srb.help/5002
+     214 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:214: Replace with `Class`
+     214 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:214: Replace with `MyClass9`
+     214 |p MyClass
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:214: Replace with `MyClass8`
+     214 |p MyClass
+            ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
+    68 |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
+    11 |class MyClass9; end
+        ^^^^^^^^^^^^^^
+    test/cli/no-did-you-mean/no-did-you-mean.rb:10: Did you mean: `MyClass8`?
+    10 |class MyClass8; end
+        ^^^^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:215: Unable to resolve constant `MyClass` https://srb.help/5002
+     215 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:216: Unable to resolve constant `MyClass` https://srb.help/5002
+     216 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:217: Unable to resolve constant `MyClass` https://srb.help/5002
+     217 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:218: Unable to resolve constant `MyClass` https://srb.help/5002
+     218 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:219: Unable to resolve constant `MyClass` https://srb.help/5002
+     219 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:220: Unable to resolve constant `MyClass` https://srb.help/5002
+     220 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:221: Unable to resolve constant `MyClass` https://srb.help/5002
+     221 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:222: Unable to resolve constant `MyClass` https://srb.help/5002
+     222 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:223: Unable to resolve constant `MyClass` https://srb.help/5002
+     223 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:224: Unable to resolve constant `MyClass` https://srb.help/5002
+     224 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:225: Unable to resolve constant `MyClass` https://srb.help/5002
+     225 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:226: Unable to resolve constant `MyClass` https://srb.help/5002
+     226 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:227: Unable to resolve constant `MyClass` https://srb.help/5002
+     227 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:228: Unable to resolve constant `MyClass` https://srb.help/5002
+     228 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:229: Unable to resolve constant `MyClass` https://srb.help/5002
+     229 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:230: Unable to resolve constant `MyClass` https://srb.help/5002
+     230 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:231: Unable to resolve constant `MyClass` https://srb.help/5002
+     231 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:232: Unable to resolve constant `MyClass` https://srb.help/5002
+     232 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:233: Unable to resolve constant `MyClass` https://srb.help/5002
+     233 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:234: Unable to resolve constant `MyClass` https://srb.help/5002
+     234 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:235: Unable to resolve constant `MyClass` https://srb.help/5002
+     235 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:236: Unable to resolve constant `MyClass` https://srb.help/5002
+     236 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:237: Unable to resolve constant `MyClass` https://srb.help/5002
+     237 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:238: Unable to resolve constant `MyClass` https://srb.help/5002
+     238 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:239: Unable to resolve constant `MyClass` https://srb.help/5002
+     239 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:240: Unable to resolve constant `MyClass` https://srb.help/5002
+     240 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:241: Unable to resolve constant `MyClass` https://srb.help/5002
+     241 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:242: Unable to resolve constant `MyClass` https://srb.help/5002
+     242 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:243: Unable to resolve constant `MyClass` https://srb.help/5002
+     243 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:244: Unable to resolve constant `MyClass` https://srb.help/5002
+     244 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:245: Unable to resolve constant `MyClass` https://srb.help/5002
+     245 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:246: Unable to resolve constant `MyClass` https://srb.help/5002
+     246 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:247: Unable to resolve constant `MyClass` https://srb.help/5002
+     247 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:248: Unable to resolve constant `MyClass` https://srb.help/5002
+     248 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:249: Unable to resolve constant `MyClass` https://srb.help/5002
+     249 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:250: Unable to resolve constant `MyClass` https://srb.help/5002
+     250 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:251: Unable to resolve constant `MyClass` https://srb.help/5002
+     251 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:252: Unable to resolve constant `MyClass` https://srb.help/5002
+     252 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:253: Unable to resolve constant `MyClass` https://srb.help/5002
+     253 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:254: Unable to resolve constant `MyClass` https://srb.help/5002
+     254 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:255: Unable to resolve constant `MyClass` https://srb.help/5002
+     255 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:256: Unable to resolve constant `MyClass` https://srb.help/5002
+     256 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:257: Unable to resolve constant `MyClass` https://srb.help/5002
+     257 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:258: Unable to resolve constant `MyClass` https://srb.help/5002
+     258 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:259: Unable to resolve constant `MyClass` https://srb.help/5002
+     259 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:260: Unable to resolve constant `MyClass` https://srb.help/5002
+     260 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:261: Unable to resolve constant `MyClass` https://srb.help/5002
+     261 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:262: Unable to resolve constant `MyClass` https://srb.help/5002
+     262 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:263: Unable to resolve constant `MyClass` https://srb.help/5002
+     263 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:264: Unable to resolve constant `MyClass` https://srb.help/5002
+     264 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:265: Unable to resolve constant `MyClass` https://srb.help/5002
+     265 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:266: Unable to resolve constant `MyClass` https://srb.help/5002
+     266 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:267: Unable to resolve constant `MyClass` https://srb.help/5002
+     267 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:268: Unable to resolve constant `MyClass` https://srb.help/5002
+     268 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:269: Unable to resolve constant `MyClass` https://srb.help/5002
+     269 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:270: Unable to resolve constant `MyClass` https://srb.help/5002
+     270 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:271: Unable to resolve constant `MyClass` https://srb.help/5002
+     271 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:272: Unable to resolve constant `MyClass` https://srb.help/5002
+     272 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:273: Unable to resolve constant `MyClass` https://srb.help/5002
+     273 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:274: Unable to resolve constant `MyClass` https://srb.help/5002
+     274 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:275: Unable to resolve constant `MyClass` https://srb.help/5002
+     275 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:276: Unable to resolve constant `MyClass` https://srb.help/5002
+     276 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:277: Unable to resolve constant `MyClass` https://srb.help/5002
+     277 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:278: Unable to resolve constant `MyClass` https://srb.help/5002
+     278 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:279: Unable to resolve constant `MyClass` https://srb.help/5002
+     279 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:280: Unable to resolve constant `MyClass` https://srb.help/5002
+     280 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:281: Unable to resolve constant `MyClass` https://srb.help/5002
+     281 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:282: Unable to resolve constant `MyClass` https://srb.help/5002
+     282 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:283: Unable to resolve constant `MyClass` https://srb.help/5002
+     283 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:284: Unable to resolve constant `MyClass` https://srb.help/5002
+     284 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:285: Unable to resolve constant `MyClass` https://srb.help/5002
+     285 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:286: Unable to resolve constant `MyClass` https://srb.help/5002
+     286 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:287: Unable to resolve constant `MyClass` https://srb.help/5002
+     287 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:288: Unable to resolve constant `MyClass` https://srb.help/5002
+     288 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:289: Unable to resolve constant `MyClass` https://srb.help/5002
+     289 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:290: Unable to resolve constant `MyClass` https://srb.help/5002
+     290 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:291: Unable to resolve constant `MyClass` https://srb.help/5002
+     291 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:292: Unable to resolve constant `MyClass` https://srb.help/5002
+     292 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:293: Unable to resolve constant `MyClass` https://srb.help/5002
+     293 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:294: Unable to resolve constant `MyClass` https://srb.help/5002
+     294 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:295: Unable to resolve constant `MyClass` https://srb.help/5002
+     295 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:296: Unable to resolve constant `MyClass` https://srb.help/5002
+     296 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:297: Unable to resolve constant `MyClass` https://srb.help/5002
+     297 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:298: Unable to resolve constant `MyClass` https://srb.help/5002
+     298 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:299: Unable to resolve constant `MyClass` https://srb.help/5002
+     299 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:300: Unable to resolve constant `MyClass` https://srb.help/5002
+     300 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:301: Unable to resolve constant `MyClass` https://srb.help/5002
+     301 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:302: Unable to resolve constant `MyClass` https://srb.help/5002
+     302 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:303: Unable to resolve constant `MyClass` https://srb.help/5002
+     303 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:304: Unable to resolve constant `MyClass` https://srb.help/5002
+     304 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:305: Unable to resolve constant `MyClass` https://srb.help/5002
+     305 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:306: Unable to resolve constant `MyClass` https://srb.help/5002
+     306 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:307: Unable to resolve constant `MyClass` https://srb.help/5002
+     307 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:308: Unable to resolve constant `MyClass` https://srb.help/5002
+     308 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:309: Unable to resolve constant `MyClass` https://srb.help/5002
+     309 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:310: Unable to resolve constant `MyClass` https://srb.help/5002
+     310 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:311: Unable to resolve constant `MyClass` https://srb.help/5002
+     311 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:312: Unable to resolve constant `MyClass` https://srb.help/5002
+     312 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:313: Unable to resolve constant `MyClass` https://srb.help/5002
+     313 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:314: Unable to resolve constant `MyClass` https://srb.help/5002
+     314 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:315: Unable to resolve constant `MyClass` https://srb.help/5002
+     315 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:316: Unable to resolve constant `MyClass` https://srb.help/5002
+     316 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:317: Unable to resolve constant `MyClass` https://srb.help/5002
+     317 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:318: Unable to resolve constant `MyClass` https://srb.help/5002
+     318 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:319: Unable to resolve constant `MyClass` https://srb.help/5002
+     319 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:320: Unable to resolve constant `MyClass` https://srb.help/5002
+     320 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:321: Unable to resolve constant `MyClass` https://srb.help/5002
+     321 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:322: Unable to resolve constant `MyClass` https://srb.help/5002
+     322 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:323: Unable to resolve constant `MyClass` https://srb.help/5002
+     323 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:324: Unable to resolve constant `MyClass` https://srb.help/5002
+     324 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:325: Unable to resolve constant `MyClass` https://srb.help/5002
+     325 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:326: Unable to resolve constant `MyClass` https://srb.help/5002
+     326 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:327: Unable to resolve constant `MyClass` https://srb.help/5002
+     327 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:328: Unable to resolve constant `MyClass` https://srb.help/5002
+     328 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:329: Unable to resolve constant `MyClass` https://srb.help/5002
+     329 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:330: Unable to resolve constant `MyClass` https://srb.help/5002
+     330 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:331: Unable to resolve constant `MyClass` https://srb.help/5002
+     331 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:332: Unable to resolve constant `MyClass` https://srb.help/5002
+     332 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:333: Unable to resolve constant `MyClass` https://srb.help/5002
+     333 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:334: Unable to resolve constant `MyClass` https://srb.help/5002
+     334 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:335: Unable to resolve constant `MyClass` https://srb.help/5002
+     335 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:336: Unable to resolve constant `MyClass` https://srb.help/5002
+     336 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:337: Unable to resolve constant `MyClass` https://srb.help/5002
+     337 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:338: Unable to resolve constant `MyClass` https://srb.help/5002
+     338 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:339: Unable to resolve constant `MyClass` https://srb.help/5002
+     339 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:340: Unable to resolve constant `MyClass` https://srb.help/5002
+     340 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:341: Unable to resolve constant `MyClass` https://srb.help/5002
+     341 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:342: Unable to resolve constant `MyClass` https://srb.help/5002
+     342 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:343: Unable to resolve constant `MyClass` https://srb.help/5002
+     343 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:344: Unable to resolve constant `MyClass` https://srb.help/5002
+     344 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:345: Unable to resolve constant `MyClass` https://srb.help/5002
+     345 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:346: Unable to resolve constant `MyClass` https://srb.help/5002
+     346 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:347: Unable to resolve constant `MyClass` https://srb.help/5002
+     347 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:348: Unable to resolve constant `MyClass` https://srb.help/5002
+     348 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:349: Unable to resolve constant `MyClass` https://srb.help/5002
+     349 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:350: Unable to resolve constant `MyClass` https://srb.help/5002
+     350 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:351: Unable to resolve constant `MyClass` https://srb.help/5002
+     351 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:352: Unable to resolve constant `MyClass` https://srb.help/5002
+     352 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:353: Unable to resolve constant `MyClass` https://srb.help/5002
+     353 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:354: Unable to resolve constant `MyClass` https://srb.help/5002
+     354 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:355: Unable to resolve constant `MyClass` https://srb.help/5002
+     355 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:356: Unable to resolve constant `MyClass` https://srb.help/5002
+     356 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:357: Unable to resolve constant `MyClass` https://srb.help/5002
+     357 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:358: Unable to resolve constant `MyClass` https://srb.help/5002
+     358 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:359: Unable to resolve constant `MyClass` https://srb.help/5002
+     359 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:360: Unable to resolve constant `MyClass` https://srb.help/5002
+     360 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:361: Unable to resolve constant `MyClass` https://srb.help/5002
+     361 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:362: Unable to resolve constant `MyClass` https://srb.help/5002
+     362 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:363: Unable to resolve constant `MyClass` https://srb.help/5002
+     363 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:364: Unable to resolve constant `MyClass` https://srb.help/5002
+     364 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:365: Unable to resolve constant `MyClass` https://srb.help/5002
+     365 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:366: Unable to resolve constant `MyClass` https://srb.help/5002
+     366 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:367: Unable to resolve constant `MyClass` https://srb.help/5002
+     367 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:368: Unable to resolve constant `MyClass` https://srb.help/5002
+     368 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:369: Unable to resolve constant `MyClass` https://srb.help/5002
+     369 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:370: Unable to resolve constant `MyClass` https://srb.help/5002
+     370 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:371: Unable to resolve constant `MyClass` https://srb.help/5002
+     371 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:372: Unable to resolve constant `MyClass` https://srb.help/5002
+     372 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:373: Unable to resolve constant `MyClass` https://srb.help/5002
+     373 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:374: Unable to resolve constant `MyClass` https://srb.help/5002
+     374 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:375: Unable to resolve constant `MyClass` https://srb.help/5002
+     375 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:376: Unable to resolve constant `MyClass` https://srb.help/5002
+     376 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:377: Unable to resolve constant `MyClass` https://srb.help/5002
+     377 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:378: Unable to resolve constant `MyClass` https://srb.help/5002
+     378 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:379: Unable to resolve constant `MyClass` https://srb.help/5002
+     379 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:380: Unable to resolve constant `MyClass` https://srb.help/5002
+     380 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:381: Unable to resolve constant `MyClass` https://srb.help/5002
+     381 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:382: Unable to resolve constant `MyClass` https://srb.help/5002
+     382 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:383: Unable to resolve constant `MyClass` https://srb.help/5002
+     383 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:384: Unable to resolve constant `MyClass` https://srb.help/5002
+     384 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:385: Unable to resolve constant `MyClass` https://srb.help/5002
+     385 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:386: Unable to resolve constant `MyClass` https://srb.help/5002
+     386 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:387: Unable to resolve constant `MyClass` https://srb.help/5002
+     387 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:388: Unable to resolve constant `MyClass` https://srb.help/5002
+     388 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:389: Unable to resolve constant `MyClass` https://srb.help/5002
+     389 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:390: Unable to resolve constant `MyClass` https://srb.help/5002
+     390 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:391: Unable to resolve constant `MyClass` https://srb.help/5002
+     391 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:392: Unable to resolve constant `MyClass` https://srb.help/5002
+     392 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:393: Unable to resolve constant `MyClass` https://srb.help/5002
+     393 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:394: Unable to resolve constant `MyClass` https://srb.help/5002
+     394 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:395: Unable to resolve constant `MyClass` https://srb.help/5002
+     395 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:396: Unable to resolve constant `MyClass` https://srb.help/5002
+     396 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:397: Unable to resolve constant `MyClass` https://srb.help/5002
+     397 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:398: Unable to resolve constant `MyClass` https://srb.help/5002
+     398 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:399: Unable to resolve constant `MyClass` https://srb.help/5002
+     399 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:400: Unable to resolve constant `MyClass` https://srb.help/5002
+     400 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:401: Unable to resolve constant `MyClass` https://srb.help/5002
+     401 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:402: Unable to resolve constant `MyClass` https://srb.help/5002
+     402 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:403: Unable to resolve constant `MyClass` https://srb.help/5002
+     403 |p MyClass
+            ^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:404: Unable to resolve constant `MyClass` https://srb.help/5002
+     404 |p MyClass
+            ^^^^^^^
+Errors: 200

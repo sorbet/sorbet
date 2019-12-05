@@ -636,13 +636,13 @@ module Kernel
   # Array(nil)         #=> []
   # Array(1)           #=> [1]
   # ```
-  sig {params(x: NilClass).returns([])}
   sig do
     params(
         x: BasicObject,
     )
     .returns(T::Array[T.untyped])
   end
+  sig {params(x: NilClass).returns([])}
   def Array(x); end
 
   # Create a new

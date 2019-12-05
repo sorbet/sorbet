@@ -1,0 +1,9 @@
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C BlockTest><<C <todo sym>>> < (::<todo sym>)
+    def blockPass<<C <todo sym>>>(&<blk>)
+      <self>.foo(1, 2, 3) do |x, y|
+        x
+      end
+    end
+  end
+end

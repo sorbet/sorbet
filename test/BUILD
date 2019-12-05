@@ -20,7 +20,6 @@ cc_binary(
         "//cfg/proto",
         "//core",
         "//definition_validator",
-        "//dsl",
         "//flattener",
         "//infer",
         "//local_vars",
@@ -29,6 +28,7 @@ cc_binary(
         "//namer",
         "//payload",
         "//resolver",
+        "//rewriter",
         "//test/helpers",
         "@com_google_googletest//:gtest",
         "@cxxopts",
@@ -160,6 +160,16 @@ pipeline_tests(
 )
 
 pipeline_tests(
+    "whitequark_parser_corpus",
+    glob([
+        "whitequark/**/*.rb",
+        "whitequark/**/*.exp",
+    ]),
+    "WhitequarkParserTests",
+    filter = "WhitequarkParserTests",
+)
+
+pipeline_tests(
     "test_corpus_lsp",
     glob([
         "testdata/**/*.rb",
@@ -173,4 +183,9 @@ pipeline_tests(
 test_suite(
     name = "test",
     tests = ["test_corpus"],
+)
+
+test_suite(
+    name = "whitequark_parser_tests",
+    tests = ["whitequark_parser_corpus"],
 )

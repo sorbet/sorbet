@@ -2,9 +2,8 @@
 
 # it used to take us waaay to long to register huge sealed classes
 
-class HugeEnum < Opus::Enum
+class HugeEnum < T::Enum
   include T::Props::Serializable
-  Elem = type_template(fixed: self)
   enums do
   Val000 = new()
   Val001 = new()

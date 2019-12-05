@@ -1,0 +1,6 @@
+s(:or_asgn,
+  s(:send,
+    s(:lvar, :foo), :[],
+    s(:int, "0"),
+    s(:int, "1")),
+  s(:int, "2"))

@@ -11,40 +11,50 @@ class TypeConstraint;
 class SendResponse final {
 public:
     SendResponse(core::Loc termLoc, std::shared_ptr<core::DispatchResult> dispatchResult, core::NameRef callerSideName,
-                 bool isPrivateOk)
+                 bool isPrivateOk, core::SymbolRef enclosingMethod)
         : dispatchResult(std::move(dispatchResult)), callerSideName(callerSideName), termLoc(termLoc),
-          isPrivateOk(isPrivateOk){};
+          isPrivateOk(isPrivateOk), enclosingMethod(enclosingMethod){};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
     const core::NameRef callerSideName;
     const core::Loc termLoc;
     const bool isPrivateOk;
+    const core::SymbolRef enclosingMethod;
 };
 
 class IdentResponse final {
 public:
-    IdentResponse(core::SymbolRef owner, core::Loc termLoc, core::LocalVariable variable, core::TypeAndOrigins retType)
-        : owner(owner), termLoc(termLoc), variable(variable), retType(std::move(retType)){};
-    const core::SymbolRef owner;
+    IdentResponse(core::Loc termLoc, core::LocalVariable variable, core::TypeAndOrigins retType,
+                  core::SymbolRef enclosingMethod)
+        : termLoc(termLoc), variable(variable), retType(std::move(retType)), enclosingMethod(enclosingMethod){};
     const core::Loc termLoc;
     const core::LocalVariable variable;
     const core::TypeAndOrigins retType;
+    const core::SymbolRef enclosingMethod;
 };
 
 class LiteralResponse final {
 public:
-    LiteralResponse(core::SymbolRef owner, core::Loc termLoc, core::TypeAndOrigins retType)
-        : owner(owner), termLoc(termLoc), retType(std::move(retType)){};
-    const core::SymbolRef owner;
+    LiteralResponse(core::Loc termLoc, core::TypeAndOrigins retType) : termLoc(termLoc), retType(std::move(retType)){};
     const core::Loc termLoc;
     const core::TypeAndOrigins retType;
 };
 
 class ConstantResponse final {
 public:
-    ConstantResponse(core::SymbolRef owner, core::SymbolRef symbol, core::Loc termLoc, core::NameRef name,
-                     core::TypeAndOrigins receiver, core::TypeAndOrigins retType)
-        : owner(owner), symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
-    const core::SymbolRef owner;
+    ConstantResponse(core::SymbolRef symbol, core::Loc termLoc, core::SymbolRef scope, core::NameRef name,
+                     core::TypeAndOrigins retType)
+        : symbol(symbol), termLoc(termLoc), scope(scope), name(name), retType(std::move(retType)){};
+    const core::SymbolRef symbol;
+    const core::Loc termLoc;
+    const core::SymbolRef scope;
+    const core::NameRef name;
+    const core::TypeAndOrigins retType;
+};
+
+class FieldResponse final {
+public:
+    FieldResponse(core::SymbolRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
+        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
     const core::SymbolRef symbol;
     const core::Loc termLoc;
     const core::NameRef name;
@@ -61,7 +71,15 @@ public:
     const core::TypeAndOrigins retType;
 };
 
-typedef std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, DefinitionResponse>
+class EditResponse final {
+public:
+    EditResponse(core::Loc loc, std::string replacement) : loc(loc), replacement(std::move(replacement)){};
+    const core::Loc loc;
+    const std::string replacement;
+};
+
+typedef std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, FieldResponse, DefinitionResponse,
+                     EditResponse>
     QueryResponseVariant;
 
 /**
@@ -100,9 +118,19 @@ public:
     const ConstantResponse *isConstant() const;
 
     /**
+     * Returns nullptr unless this is a Field.
+     */
+    const FieldResponse *isField() const;
+
+    /**
      * Returns nullptr unless this is a Definition.
      */
     const DefinitionResponse *isDefinition() const;
+
+    /**
+     * Returns nullptr unless this is an Edit.
+     */
+    const EditResponse *isEdit() const;
 
     /**
      * Returns the source code location for the specific expression that this

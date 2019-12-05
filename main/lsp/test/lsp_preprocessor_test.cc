@@ -1,15 +1,18 @@
 #include "gtest/gtest.h"
 // has to go first as it violates our requirements
 
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/TimeTravelingGlobalState.h"
 #include "main/lsp/lsp.h"
 #include "payload/payload.h"
 #include "spdlog/sinks/null_sink.h"
 #include "test/helpers/MockFileSystem.h"
+#include "test/helpers/lsp.h"
 #include <climits>
 #include <memory>
 
 using namespace std;
+using namespace sorbet::test;
 
 namespace sorbet::realmain::lsp::test {
 
@@ -23,14 +26,23 @@ options::Options makeOptions(string_view rootPath) {
     return opts;
 }
 
-static auto nullSink = make_shared<spd::sinks::null_sink_mt>();
-static auto logger = make_shared<spd::logger>("console", nullSink);
-static auto typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", nullSink);
-static auto nullOpts = makeOptions("");
-static auto workers = WorkerPool::create(0, *logger);
+auto nullSink = make_shared<spd::sinks::null_sink_mt>();
+auto logger = make_shared<spd::logger>("console", nullSink);
+auto typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", nullSink);
+auto nullOpts = makeOptions("");
+auto workers = WorkerPool::create(0, *logger);
 
-LSPConfiguration makeConfig(const options::Options &opts = nullOpts) {
-    return LSPConfiguration(opts, logger, true, false);
+shared_ptr<LSPConfiguration> makeConfig(const options::Options &opts = nullOpts, bool enableShowOpNotifs = false,
+                                        bool initialize = true) {
+    auto config = make_shared<LSPConfiguration>(opts, make_shared<LSPOutputToVector>(), *workers, logger, true, false);
+    InitializeParams initParams("", "", make_unique<ClientCapabilities>());
+    initParams.initializationOptions = make_unique<SorbetInitializationOptions>();
+    initParams.initializationOptions.value()->supportsOperationNotifications = enableShowOpNotifs;
+    config->setClientConfig(make_shared<LSPClientConfiguration>(initParams));
+    if (initialize) {
+        config->markInitialized();
+    }
+    return config;
 }
 
 unique_ptr<core::GlobalState> makeGS(const options::Options &opts = nullOpts) {
@@ -41,35 +53,18 @@ unique_ptr<core::GlobalState> makeGS(const options::Options &opts = nullOpts) {
     return gs;
 }
 
-static auto nullConfig = makeConfig();
+auto nullConfig = makeConfig();
 
-TimeTravelingGlobalState makeTTGS(const LSPConfiguration &config = nullConfig, u4 initialVersion = 0) {
-    return TimeTravelingGlobalState(config, logger, *workers, makeGS(config.opts), initialVersion);
+TimeTravelingGlobalState makeTTGS(const shared_ptr<LSPConfiguration> &config = nullConfig, u4 initialVersion = 0) {
+    return TimeTravelingGlobalState(config, makeGS(config->opts), initialVersion);
 }
 
-LSPPreprocessor makePreprocessor(const LSPConfiguration &config = nullConfig, u4 initialVersion = 0) {
-    return LSPPreprocessor(makeGS(config.opts), config, *workers, logger, initialVersion);
+LSPPreprocessor makePreprocessor(const shared_ptr<LSPConfiguration> &config = nullConfig, u4 initialVersion = 0) {
+    return LSPPreprocessor(makeGS(config->opts), config, initialVersion);
 }
 
 bool comesBeforeSymmetric(const TimeTravelingGlobalState &ttgs, u4 a, u4 b) {
     return ttgs.comesBefore(a, b) && !ttgs.comesBefore(b, a);
-}
-
-unique_ptr<LSPMessage> makeOpen(string_view path, u4 version, string_view source) {
-    auto params = make_unique<DidOpenTextDocumentParams>(
-        make_unique<TextDocumentItem>(string(path), "ruby", version, string(source)));
-    return make_unique<LSPMessage>(
-        make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params)));
-}
-
-unique_ptr<LSPMessage> makeChange(string_view path, u4 version, string_view source) {
-    auto contentChange = make_unique<TextDocumentContentChangeEvent>(string(source));
-    vector<unique_ptr<TextDocumentContentChangeEvent>> changes;
-    changes.push_back(move(contentChange));
-    auto params = make_unique<DidChangeTextDocumentParams>(
-        make_unique<VersionedTextDocumentIdentifier>(string(path), version), move(changes));
-    return make_unique<LSPMessage>(
-        make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(params)));
 }
 
 unique_ptr<LSPMessage> makeWatchman(vector<string> files) {
@@ -231,10 +226,10 @@ TEST(LSPPreprocessor, IgnoresWatchmanUpdatesFromOpenFiles) { // NOLINT
 
     string fileContents = "# typed: true\n1+1";
     opts.fs->writeFile("foo.rb", "");
-    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", 1, fileContents), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", fileContents, 1), mtx);
     preprocessor.preprocessAndEnqueue(state, makeWatchman({"foo.rb"}), mtx);
 
-    ASSERT_TRUE(state.pendingRequests.size() == 1);
+    ASSERT_EQ(1, state.pendingRequests.size());
 
     const auto updates = getUpdates(state, 0).value();
     // Version didn't change because it ignored the watchman update.
@@ -263,10 +258,10 @@ TEST(LSPPreprocessor, ClonesTypecheckingGSAtCorrectLogicalTime) { // NOLINT
     absl::Mutex mtx;
 
     // Apply one update, slow path.
-    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", 1, fileV1), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", fileV1, 1), mtx);
     // Pop it off the queue to prevent a merge.
     state.pendingRequests.clear();
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fileV2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fileV2, 2), mtx);
     {
         const auto updates = getUpdates(state, 0).value();
         ASSERT_FALSE(updates->canTakeFastPath);
@@ -277,7 +272,7 @@ TEST(LSPPreprocessor, ClonesTypecheckingGSAtCorrectLogicalTime) { // NOLINT
     // Append another edit that will get merged with the existing edit.
     // V3 will take the fast path relative to V2, forcing a situation in which a new global state will need to be
     // created.
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fileV3), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fileV3, 3), mtx);
     {
         // Should have the newest version of the update.
         const auto updates = getUpdates(state, 0).value();
@@ -287,7 +282,7 @@ TEST(LSPPreprocessor, ClonesTypecheckingGSAtCorrectLogicalTime) { // NOLINT
 
     // Append another edit that will get merged with the existing edit.
     // V4 will take the slow path relative to V3, and the global state created for it should be re-used.
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 4, fileV4), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fileV4, 4), mtx);
     {
         const auto updates = getUpdates(state, 0).value();
         ASSERT_FALSE(updates->canTakeFastPath);
@@ -326,17 +321,30 @@ TEST(LSPPreprocessor, Initialized) { // NOLINT
     QueueState state;
     absl::Mutex mtx;
     auto options = makeOptions("");
-    auto config = makeConfig(options);
-    config.enableOperationNotifications = true;
+    auto config = makeConfig(options, true, false);
     auto preprocessor = makePreprocessor(config);
+    auto output = dynamic_pointer_cast<LSPOutputToVector>(config->output);
+
+    // Sending a request prior to initialization should cause an error.
+    EXPECT_FALSE(config->isInitialized());
+    preprocessor.preprocessAndEnqueue(state, makeHoverReq(1, "foo.rb", 1, 1), mtx);
+    auto errorMsgs = output->getOutput();
+    ASSERT_EQ(1, errorMsgs.size());
+    ASSERT_TRUE(errorMsgs[0]->isResponse());
+    ASSERT_TRUE(errorMsgs[0]->asResponse().error.has_value());
+
     auto msg = make_unique<LSPMessage>(
         make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>()));
     preprocessor.preprocessAndEnqueue(state, move(msg), mtx);
+    EXPECT_TRUE(config->isInitialized());
 
-    ASSERT_EQ(3, state.pendingRequests.size());
-    EXPECT_EQ(state.pendingRequests[0]->method(), LSPMethod::SorbetShowOperation);
-    EXPECT_EQ(state.pendingRequests[1]->method(), LSPMethod::SorbetShowOperation);
-    EXPECT_EQ(state.pendingRequests[2]->method(), LSPMethod::Initialized);
+    ASSERT_EQ(1, state.pendingRequests.size());
+    EXPECT_EQ(state.pendingRequests[0]->method(), LSPMethod::Initialized);
+
+    auto outputMsgs = output->getOutput();
+    ASSERT_EQ(2, outputMsgs.size());
+    EXPECT_EQ(outputMsgs[0]->method(), LSPMethod::SorbetShowOperation);
+    EXPECT_EQ(outputMsgs[1]->method(), LSPMethod::SorbetShowOperation);
 }
 
 // When a request in the queue is canceled, the preprocessor should merge any edits that happen immediately before and
@@ -358,16 +366,16 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
     int id = 0;
     string barV1 = "2+3+4";
 
-    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", 1, fileV1), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", fileV1, 1), mtx);
     preprocessor.preprocessAndEnqueue(state, makeHoverReq(id++, "foo.rb", 0, 0), mtx);
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fileV2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fileV2, 2), mtx);
     preprocessor.preprocessAndEnqueue(state, makeHoverReq(id++, "foo.rb", 0, 0), mtx);
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fileV3), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fileV3, 3), mtx);
     preprocessor.preprocessAndEnqueue(state, makeHoverReq(id++, "foo.rb", 0, 0), mtx);
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 4, fileV4), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fileV4, 4), mtx);
     preprocessor.preprocessAndEnqueue(state, makeHoverReq(id++, "foo.rb", 0, 0), mtx);
     // New file. Should not be present in any cloned global states for earlier edits.
-    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", 1, barV1), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", barV1, 1), mtx);
 
     vector<pair<int, bool>> fastPathDecisions = {{0, false}, {2, true}, {4, true}, {6, true}};
     for (auto &[messageId, canTakeFastPath] : fastPathDecisions) {
@@ -398,7 +406,7 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
     }
 
     // Push a new edit that takes the slow path.
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 5, fileV5), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fileV5, 5), mtx);
     {
         // Ensure GS for new edit has all previous edits, including the contents of bar.rb.
         const auto updates = getUpdates(state, state.pendingRequests.size() - 1).value();
@@ -420,8 +428,8 @@ TEST(LSPPreprocessor, MakesCorrectFastPathDecisionsOnSimultaneousEdits) { // NOL
     string barV1 = "# typed: true\ndef bar; end";
 
     // Commit new files first. The 'new file flag' is handled specially.
-    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", 1, fooV1), mtx);
-    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", 1, barV1), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", fooV1, 1), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", barV1, 1), mtx);
     // Clear out of queue to emulate typechecking thread 'processing' it.
     state.pendingRequests.clear();
 
@@ -434,12 +442,12 @@ TEST(LSPPreprocessor, MakesCorrectFastPathDecisionsOnSimultaneousEdits) { // NOL
     // fooV3 => V4: Fast path
     string fooV4 = "# typed: true\ndef foo; 1 + 4; end";
 
-    preprocessor.preprocessAndEnqueue(state, makeChange("bar.rb", 2, barV2), mtx);
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fooV2), mtx);
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("bar.rb", barV2, 2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV2, 2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
     // With old buggy logic, preprocessor will 'forget' about the barV2 update, causing it to mistakenly think these
     // four edits can take fast path.
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 4, fooV4), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV4, 4), mtx);
 
     const auto updates = getUpdates(state, 0).value();
     EXPECT_FALSE(updates->canTakeFastPath);
@@ -450,7 +458,7 @@ unique_ptr<core::GlobalState> initCancelSlowPathTest(LSPPreprocessor &preprocess
                                                      absl::Mutex &mtx) {
     // New file, slow path. Can't avoid, so emulate processing it.
     string fooV1 = "# typed: true\ndef foo; end";
-    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", 1, fooV1), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeOpen("foo.rb", fooV1, 1), mtx);
 
     // Grab GS.
     unique_ptr<core::GlobalState> gs;
@@ -479,12 +487,12 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathWhenFastPathEditComesIn) { // NO
 
     // Introduce a syntax error, which causes a slow path.
     string fooV2 = "# typed: true\n{def foo; end";
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fooV2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV2, 2), mtx);
     u4 epoch = emulateProcessEditAtHeadOfQueue(state, *gs);
 
     // Introduce a fix to syntax error. Should course-correct to a fast path.
     string fooV3 = "# typed: true\ndef foo; end";
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
     EXPECT_TRUE(gs->wasTypecheckingCanceled());
 
     // Processor thread: Try to typecheck. Should cancel.
@@ -494,7 +502,7 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathWhenFastPathEditComesIn) { // NO
     EXPECT_FALSE(gs->wasTypecheckingCanceled());
 }
 
-TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenSlowPathEditComesIn) { // NOLINT
+TEST(SlowPathCancelation, CancelsRunningSlowPathWhenSlowPathEditComesIn) { // NOLINT
     auto preprocessor = makePreprocessor();
     QueueState state;
     absl::Mutex mtx;
@@ -502,15 +510,41 @@ TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenSlowPathEditComesIn) {
 
     // Introduce a syntax error, which causes a slow path.
     string fooV2 = "# typed: true\n{def foo; end";
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fooV2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV2, 2), mtx);
     u4 epoch = emulateProcessEditAtHeadOfQueue(state, *gs);
 
     // Introduce another slow path here: new method
     string fooV3 = "# typed: true\ndef foo; end\ndef bar;end";
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
+    EXPECT_TRUE(gs->wasTypecheckingCanceled());
+
+    // Processor thread: Try to typecheck. Should return false because it has been canceled.
+    EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
+
+    // Ensure that new update has a new global state defined.
+    auto maybeUpdates = getUpdates(state, 0);
+    ASSERT_TRUE(maybeUpdates.has_value());
+    auto &updates = maybeUpdates.value();
+    EXPECT_TRUE(updates->updatedGS.has_value());
+}
+
+TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenFastPathEditComesIn) { // NOLINT
+    auto preprocessor = makePreprocessor();
+    QueueState state;
+    absl::Mutex mtx;
+    unique_ptr<core::GlobalState> gs = initCancelSlowPathTest(preprocessor, state, mtx);
+
+    // Introduce a new method, which causes a slow path.
+    string fooV2 = "# typed: true\ndef foo; end\ndef bar; end";
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV2, 2), mtx);
+    u4 epoch = emulateProcessEditAtHeadOfQueue(state, *gs);
+
+    // Edit the body of the new method which should take the fast path.
+    string fooV3 = "# typed: true\ndef foo; end\ndef bar; 1 + 1; end";
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
     EXPECT_FALSE(gs->wasTypecheckingCanceled());
 
-    // Processor thread: Try to typecheck. Should return true.
+    // Processor thread: Try to typecheck. Should return true because typechecking hasn't been canceled.
     EXPECT_TRUE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
 }
 
@@ -522,7 +556,7 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathAfterBlockingRequestGetsCanceled
 
     // Introduce a syntax error, which causes a slow path.
     string fooV2 = "# typed: true\n{def foo; end";
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fooV2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV2, 2), mtx);
     u4 epoch = emulateProcessEditAtHeadOfQueue(state, *gs);
 
     // Blocking hover.
@@ -530,7 +564,7 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathAfterBlockingRequestGetsCanceled
 
     // Fixes parse error, but blocked by hover.
     string fooV3 = "# typed: true\ndef foo; end";
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
     EXPECT_FALSE(gs->wasTypecheckingCanceled());
 
     // Cancel hover, which should cause the slow path to be canceled.
@@ -552,7 +586,7 @@ TEST(SlowPathCancelation, PruneDuringVersionRollover) { // NOLINT
 
     // Edit 0xFFFFFFFF-2 introduces barV1.
     string barV1 = "# typed: true\ndef foo; end";
-    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", 1, barV1), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", barV1, 1), mtx);
 
     // Emulate typechecker thread: 'process' changes
     emulateProcessEditAtHeadOfQueue(state, *gs);
@@ -563,15 +597,15 @@ TEST(SlowPathCancelation, PruneDuringVersionRollover) { // NOLINT
     string fooV2 = "# typed: true\ndef { foo; end";
     // Edit 0xFFFFFFFF introduces fast path update to bar
     string barV2 = "# typed: true\ndef foo; 1; end";
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 2, fooV2), mtx);
-    preprocessor.preprocessAndEnqueue(state, makeChange("bar.rb", 2, barV2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV2, 2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("bar.rb", barV2, 2), mtx);
 
     // Emulate typechecker thread: claim that we are actively and concurrently typechecking these changes.
     emulateProcessEditAtHeadOfQueue(state, *gs);
 
     // Edit 0 fixes parse error and cancels slow path from previous bundle.
     string fooV3 = "# typed: true\ndef foo; end";
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
 
     EXPECT_TRUE(gs->wasTypecheckingCanceled());
 
@@ -600,19 +634,19 @@ TEST(SlowPathCancelation, DoesNotIncludeOldEditsInCombinedEdit) { // NOLINT
     // Defines foo.rb.
     unique_ptr<core::GlobalState> gs = initCancelSlowPathTest(preprocessor, state, mtx);
     // Define bar.rb.
-    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", 1, "# typed: true\ndef bar; 99999; end"), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeOpen("bar.rb", "# typed: true\ndef bar; 99999; end", 1), mtx);
     // 'process' those messages.
     state.pendingRequests.clear();
 
     // Fast path bar.rb update.
     string barV2 = "# typed: true\ndef bar; end";
-    preprocessor.preprocessAndEnqueue(state, makeChange("bar.rb", 2, barV2), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("bar.rb", barV2, 2), mtx);
     // Hover request: Blocking.
     preprocessor.preprocessAndEnqueue(state, makeHoverReq(10, "foo.rb"), mtx);
 
     // Slow path foo.rb update (parse error)
     string fooV3 = "# typed: true\ndef {foo; 1; end";
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 3, fooV3), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
 
     // 'process' first two messages
     state.pendingRequests.pop_front();
@@ -622,7 +656,7 @@ TEST(SlowPathCancelation, DoesNotIncludeOldEditsInCombinedEdit) { // NOLINT
 
     // New edit: Fixes parse error, and cancels running slow path.
     string fooV4 = "# typed: true\ndef foo; 1; end";
-    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", 4, fooV4), mtx);
+    preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV4, 4), mtx);
 
     EXPECT_TRUE(gs->wasTypecheckingCanceled());
 

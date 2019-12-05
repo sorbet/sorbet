@@ -1,7 +1,0 @@
-Kwbegin {
-  stmts = [
-    Integer {
-      val = "2"
-    }
-  ]
-}

@@ -1,6 +1,7 @@
 #include "absl/base/casts.h"
 #include "absl/strings/escaping.h"
 #include "common/common.h"
+#include "common/formatting.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
@@ -364,7 +365,11 @@ string AppliedType::show(const GlobalState &gs) const {
                 fmt::format_to(buf, ")");
             }
 
-            fmt::format_to(buf, ".returns({})", return_type->show(gs));
+            if (return_type == core::Types::void_()) {
+                fmt::format_to(buf, ".void");
+            } else {
+                fmt::format_to(buf, ".returns({})", return_type->show(gs));
+            }
             return to_string(buf);
         } else {
             fmt::format_to(buf, "{}", this->klass.data(gs)->show(gs));
@@ -378,6 +383,8 @@ string AppliedType::show(const GlobalState &gs) const {
     auto it = targs.begin();
     for (auto typeMember : typeMembers) {
         if (typeMember.data(gs)->isFixed()) {
+            it = targs.erase(it);
+        } else if (typeMember.data(gs)->name == core::Names::Constants::AttachedClass()) {
             it = targs.erase(it);
         } else if (this->klass == Symbols::Hash() && typeMember == typeMembers.back()) {
             it = targs.erase(it);

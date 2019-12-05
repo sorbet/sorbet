@@ -1,0 +1,7 @@
+s(:send,
+  s(:regexp,
+    s(:begin,
+      s(:int, "1")),
+    s(:str, "(?<match>bar)"),
+    s(:regopt, "")), :=~,
+  s(:str, "bar"))

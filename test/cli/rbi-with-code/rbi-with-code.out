@@ -2,7 +2,7 @@ test/cli/rbi-with-code/rbi-with-code.rbi:2: RBI methods must not have code https
      2 |  1
           ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/rbi-with-code/rbi-with-code.rbi:2: Replace with ``
+    test/cli/rbi-with-code/rbi-with-code.rbi:2: Delete
      2 |  1
           ^
 
@@ -10,7 +10,7 @@ test/cli/rbi-with-code/rbi-with-code.rbi:6: RBI methods must not have code https
      6 |  1
           ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/rbi-with-code/rbi-with-code.rbi:6: Replace with ``
+    test/cli/rbi-with-code/rbi-with-code.rbi:6: Delete
      6 |  1
      7 |  2
 
@@ -18,7 +18,7 @@ test/cli/rbi-with-code/rbi-with-code.rbi:7: RBI methods must not have code https
      7 |  2
           ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/rbi-with-code/rbi-with-code.rbi:6: Replace with ``
+    test/cli/rbi-with-code/rbi-with-code.rbi:6: Delete
      6 |  1
      7 |  2
 Errors: 3

@@ -7,8 +7,10 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-constexpr string_view sorbetScheme = "sorbet:";
-constexpr string_view httpsScheme = "https";
+namespace {
+constexpr string_view sorbetScheme = "sorbet:"sv;
+constexpr string_view httpsScheme = "https"sv;
+} // namespace
 
 namespace {
 
@@ -29,12 +31,20 @@ MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
 }
 } // namespace
 
-LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<spdlog::logger> &logger,
-                                   bool skipConfigatron, bool disableFastPath)
-    : opts(opts), logger(logger), skipConfigatron(skipConfigatron), disableFastPath(disableFastPath),
-      rootPath(getRootPath(opts, logger)) {}
+LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<LSPOutput> &output,
+                                   WorkerPool &workers, const shared_ptr<spdlog::logger> &logger, bool skipConfigatron,
+                                   bool disableFastPath)
+    : initialized(atomic<bool>(false)), opts(opts), output(output), workers(workers), logger(logger),
+      skipConfigatron(skipConfigatron), disableFastPath(disableFastPath), rootPath(getRootPath(opts, logger)) {}
 
-void LSPConfiguration::configure(const InitializeParams &params) {
+void LSPConfiguration::assertHasClientConfig() const {
+    if (!clientConfig) {
+        Exception::raise("clientConfig is not initialized.");
+    }
+}
+
+LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
+    // Note: Default values for fields are set in class definition.
     if (auto rootUriString = get_if<string>(&params.rootUri)) {
         if (absl::EndsWith(*rootUriString, "/")) {
             rootUri = rootUriString->substr(0, rootUriString->length() - 1);
@@ -42,9 +52,7 @@ void LSPConfiguration::configure(const InitializeParams &params) {
             rootUri = *rootUriString;
         }
     }
-    clientCompletionItemSnippetSupport = false;
-    clientHoverMarkupKind = MarkupKind::Plaintext;
-    clientCompletionItemMarkupKind = MarkupKind::Plaintext;
+
     if (params.capabilities->textDocument) {
         auto &textDocument = *params.capabilities->textDocument;
         if (textDocument->completion) {
@@ -75,6 +83,13 @@ void LSPConfiguration::configure(const InitializeParams &params) {
     }
 }
 
+void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfiguration> &clientConfig) {
+    if (this->clientConfig) {
+        Exception::raise("Cannot call setClientConfig twice in one session!");
+    }
+    this->clientConfig = clientConfig;
+}
+
 // LSP Spec: line / col in Position are 0-based
 // Sorbet:   line / col in core::Loc are 1-based (like most editors)
 // LSP Spec: distinguishes Position (zero-width) and Range (start & end)
@@ -86,37 +101,44 @@ core::Loc LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position 
     core::Loc::Detail reqPos;
     reqPos.line = pos.line + 1;
     reqPos.column = pos.character + 1;
-    auto offset = core::Loc::pos2Offset(fref.data(gs), reqPos);
-    return core::Loc{fref, offset, offset};
+    if (auto maybeOffset = core::Loc::pos2Offset(fref.data(gs), reqPos)) {
+        auto offset = maybeOffset.value();
+        return core::Loc{fref, offset, offset};
+    } else {
+        return core::Loc::none(fref);
+    }
 }
 
 string LSPConfiguration::localName2Remote(string_view filePath) const {
     ENFORCE(absl::StartsWith(filePath, rootPath));
+    assertHasClientConfig();
     string_view relativeUri = filePath.substr(rootPath.length());
     if (relativeUri.at(0) == '/') {
         relativeUri = relativeUri.substr(1);
     }
 
     // Special case: Root uri is '' (happens in Monaco)
-    if (rootUri.length() == 0) {
+    if (clientConfig->rootUri.length() == 0) {
         return string(relativeUri);
     }
 
     // Use a sorbet: URI if the file is not present on the client AND the client supports sorbet: URIs
-    if (enableSorbetURIs && FileOps::isFileIgnored(rootPath, filePath, opts.lspDirsMissingFromClient, {})) {
+    if (clientConfig->enableSorbetURIs &&
+        FileOps::isFileIgnored(rootPath, filePath, opts.lspDirsMissingFromClient, {})) {
         return absl::StrCat(sorbetScheme, relativeUri);
     }
-    return absl::StrCat(rootUri, "/", relativeUri);
+    return absl::StrCat(clientConfig->rootUri, "/", relativeUri);
 }
 
 string LSPConfiguration::remoteName2Local(string_view uri) const {
-    const bool isSorbetURI = absl::StartsWith(uri, sorbetScheme);
-    if (!absl::StartsWith(uri, rootUri) && !enableSorbetURIs && !isSorbetURI) {
+    assertHasClientConfig();
+    if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
         logger->error("Unrecognized URI received from client: {}", uri);
         return string(uri);
     }
 
-    const string_view root = isSorbetURI ? sorbetScheme : rootUri;
+    const bool isSorbetURI = this->isSorbetUri(uri);
+    const string_view root = isSorbetURI ? sorbetScheme : clientConfig->rootUri;
     const char *start = uri.data() + root.length();
     if (*start == '/') {
         ++start;
@@ -138,7 +160,8 @@ string LSPConfiguration::remoteName2Local(string_view uri) const {
 }
 
 core::FileRef LSPConfiguration::uri2FileRef(const core::GlobalState &gs, string_view uri) const {
-    if (!absl::StartsWith(uri, rootUri) && !absl::StartsWith(uri, sorbetScheme)) {
+    assertHasClientConfig();
+    if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
         return core::FileRef();
     }
     auto needle = remoteName2Local(uri);
@@ -146,31 +169,33 @@ core::FileRef LSPConfiguration::uri2FileRef(const core::GlobalState &gs, string_
 }
 
 string LSPConfiguration::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) const {
+    assertHasClientConfig();
     string uri;
     if (!file.exists()) {
         uri = "???";
     } else {
         auto &messageFile = file.data(gs);
         if (messageFile.isPayload()) {
-            if (enableSorbetURIs) {
+            if (clientConfig->enableSorbetURIs) {
                 uri = absl::StrCat(sorbetScheme, messageFile.path());
             } else {
                 uri = string(messageFile.path());
             }
         } else {
-            uri = localName2Remote(file.data(gs).path());
+            uri = localName2Remote(messageFile.path());
         }
     }
     return uri;
 }
 
 unique_ptr<Location> LSPConfiguration::loc2Location(const core::GlobalState &gs, core::Loc loc) const {
+    assertHasClientConfig();
     auto range = Range::fromLoc(gs, loc);
     if (range == nullptr) {
         return nullptr;
     }
     string uri = fileRef2Uri(gs, loc.file());
-    if (loc.file().exists() && loc.file().data(gs).isPayload() && !enableSorbetURIs) {
+    if (loc.file().exists() && loc.file().data(gs).isPayload() && !clientConfig->enableSorbetURIs) {
         // This is hacky because VSCode appends #4,3 (or whatever the position is of the
         // error) to the uri before it shows it in the UI since this is the format that
         // VSCode uses to denote which location to jump to. However, if you append #L4
@@ -189,8 +214,31 @@ unique_ptr<Location> LSPConfiguration::loc2Location(const core::GlobalState &gs,
     return make_unique<Location>(uri, std::move(range));
 }
 
-bool LSPConfiguration::isFileIgnored(std::string_view filePath) const {
+bool LSPConfiguration::isFileIgnored(string_view filePath) const {
     return FileOps::isFileIgnored(rootPath, filePath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+}
+
+bool LSPConfiguration::isSorbetUri(string_view uri) const {
+    assertHasClientConfig();
+    return clientConfig->enableSorbetURIs && absl::StartsWith(uri, sorbetScheme);
+}
+
+bool LSPConfiguration::isUriInWorkspace(string_view uri) const {
+    assertHasClientConfig();
+    return absl::StartsWith(uri, clientConfig->rootUri);
+}
+
+void LSPConfiguration::markInitialized() {
+    initialized.store(true);
+}
+
+bool LSPConfiguration::isInitialized() const {
+    return initialized.load();
+}
+
+const LSPClientConfiguration &LSPConfiguration::getClientConfig() const {
+    assertHasClientConfig();
+    return *clientConfig;
 }
 
 } // namespace sorbet::realmain::lsp

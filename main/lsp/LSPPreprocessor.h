@@ -32,9 +32,10 @@ struct QueueState {
  * - Determines if edits should take the fast or slow path.
  * - Is the source-of-truth for the latest file updates.
  * - Clones initialGS so that the typechecking thread can perform typechecking on the clone.
+ * - Early rejects messages that are sent prior to initialization completion.
+ * - Determines if a running slow path should be canceled, and undertakes canceling if so.
  */
 class LSPPreprocessor final {
-private:
     /**
      * This global state is used for indexing. It accumulates a huge nametable of all global things,
      * and is updated as global things are added/removed/updated. It is never discarded.
@@ -43,9 +44,7 @@ private:
      * it to the processing thread for use during typechecking.
      */
     TimeTravelingGlobalState ttgs;
-    LSPConfiguration config;
-    WorkerPool &workers;
-    std::shared_ptr<spdlog::logger> logger;
+    std::shared_ptr<LSPConfiguration> config;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     /** ID of the thread that owns the preprocessor and is allowed to invoke methods on it. */
     std::thread::id owner;
@@ -53,10 +52,6 @@ private:
     // The current set of open files as of the latest edit preprocessed. Used to canonicalize file edits into a
     // standard format.
     UnorderedSet<std::string> openFiles;
-
-    // ErrorQueue used for finalGS. Separate from initialGS's ErrorQueue to prevent indexing errors from making it to
-    // the client.
-    std::shared_ptr<core::ErrorQueue> finalGSErrorQueue;
 
     // Indicates the next version to use on an incoming edit. Used to refer to edits by ID.
     u4 nextVersion = 1;
@@ -90,9 +85,11 @@ private:
      */
     std::unique_ptr<core::GlobalState> getTypecheckingGS() const;
 
+    bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg) const;
+
 public:
-    LSPPreprocessor(std::unique_ptr<core::GlobalState> initialGS, LSPConfiguration config, WorkerPool &workers,
-                    const std::shared_ptr<spdlog::logger> &logger, u4 initialVersion = 0);
+    LSPPreprocessor(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config,
+                    u4 initialVersion = 0);
 
     /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.

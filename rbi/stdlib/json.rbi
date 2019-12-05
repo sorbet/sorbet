@@ -265,7 +265,7 @@ module JSON
 
   sig do
     params(
-      json: ::T.untyped,
+      json: String,
       args: ::T.untyped,
     )
     .returns(::T.untyped)
@@ -673,7 +673,7 @@ module JSON::Ext::Generator::GeneratorMethods::String
   # [`JSON`](https://docs.ruby-lang.org/en/2.6.0/JSON.html) instead of UTF-8
   # strings, e. g. binary data.
   sig do
-    returns(::Hash)
+    returns(::T::Hash[T.untyped, T.untyped])
   end
   def to_json_raw_object; end
 
@@ -694,7 +694,7 @@ module JSON::Ext::Generator::GeneratorMethods::String::Extend
   # can be created by this module method.
   sig do
     params(
-      _: ::Hash
+      _: ::T::Hash[T.untyped, T.untyped]
     )
     .returns(::String)
   end

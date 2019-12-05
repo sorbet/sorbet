@@ -1,5 +1,6 @@
 #include "absl/strings/match.h"
 #include "common/common.h"
+#include "common/sort.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
@@ -326,9 +327,9 @@ TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
     }
 
     if (auto *classType = cast_type<ClassType>(tp.get())) {
-        if (classType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::OpusEnum())) {
-            // Opus::Enum instances are allowed to stand for themselves in type syntax positions.
-            // See the note in type_syntax.cc regarding Opus::Enum.
+        if (classType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
+            // T::Enum instances are allowed to stand for themselves in type syntax positions.
+            // See the note in type_syntax.cc regarding T::Enum.
             return tp;
         }
 
@@ -436,19 +437,22 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context c
     auto [classStart, classEnd] = classLoc->position(ctx);
 
     core::Loc::Detail thisLineStart = {classStart.line, 1};
-    core::Loc thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
-    auto [_, thisLinePadding] = thisLineLoc.findStartOfLine(ctx);
+    auto thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
+    ENFORCE(thisLineLoc.has_value());
+    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(ctx);
 
-    ENFORCE(classStart.line + 1 <= classLoc->file().data(ctx).lineBreaks().size());
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
-    core::Loc nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
-    auto [replacementLoc, nextLinePadding] = nextLineLoc.findStartOfLine(ctx);
+    auto nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
+    if (!nextLineLoc.has_value()) {
+        return nullopt;
+    }
+    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(ctx);
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
     return core::AutocorrectSuggestion{
         "Add `extend T::Helpers`",
-        {core::AutocorrectSuggestion::Edit{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)}}};
+        {core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Helpers\n", prefix)}}};
 }
 
 // This implements Ruby's argument matching logic (assigning values passed to a
@@ -490,9 +494,6 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             }
             return result;
         } else if (args.name == core::Names::super()) {
-            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::untyped());
-        } else if (args.name == Names::missingFun()) {
-            // We already emitted an error for this in the parser
             return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::untyped());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
@@ -1611,7 +1612,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(ctx, args.args[2]->type, args.locs.call, args.locs.args[2]);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
+        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
@@ -1676,7 +1677,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(ctx, args.args[3]->type, args.locs.call, args.locs.args[3]);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
+        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
@@ -1703,6 +1704,68 @@ public:
         res.returnType = move(ty);
     }
 } Magic_suggestUntypedConstantType;
+
+/**
+ * This is a special version of `new` that will return `T.attached_class`
+ * instead.
+ */
+class Magic_selfNew : public IntrinsicMethod {
+public:
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        // args[0] is the Class to create an instance of
+        // args[1..] are the arguments to the constructor
+
+        if (args.args.empty()) {
+            res.returnType = core::Types::untypedUntracked();
+            return;
+        }
+
+        auto selfTy = args.args[0]->type;
+        SymbolRef self = unwrapSymbol(selfTy.get());
+
+        InlinedVector<const TypeAndOrigins *, 2> sendArgStore;
+        InlinedVector<Loc, 2> sendArgLocs;
+        for (int i = 1; i < args.args.size(); ++i) {
+            sendArgStore.emplace_back(args.args[i]);
+            sendArgLocs.emplace_back(args.locs.args[i]);
+        }
+        CallLocs sendLocs{args.locs.call, args.locs.args[0], sendArgLocs};
+
+        TypePtr returnTy;
+        DispatchResult dispatched;
+        if (!self.data(ctx)->isSingletonClass(ctx)) {
+            // In the case that `self` is not a singleton class, we know that
+            // this was a call to `new` outside of a self context. Dispatch to
+            // an instance method named new, and see what happens.
+            DispatchArgs innerArgs{Names::new_(), sendLocs, sendArgStore, selfTy, selfTy, args.block};
+            dispatched = selfTy->dispatchCall(ctx, innerArgs);
+            returnTy = dispatched.returnType;
+        } else {
+            // Otherwise, we know that this is the proper new intrinsic, and we
+            // should be returning something of type `T.attached_class`
+            auto attachedClass = self.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+
+            // AttachedClass will only be missing on `T.untyped`
+            ENFORCE(attachedClass.exists());
+
+            auto instanceTy = self.data(ctx)->attachedClass(ctx).data(ctx)->externalType(ctx);
+            DispatchArgs innerArgs{Names::initialize(), sendLocs, sendArgStore, instanceTy, instanceTy, args.block};
+            dispatched = instanceTy->dispatchCall(ctx, innerArgs);
+
+            // The return type from dispatched is ignored, and we return
+            // `T.attached_class` instead.
+            returnTy = make_type<SelfTypeParam>(attachedClass);
+        }
+
+        for (auto &err : res.main.errors) {
+            dispatched.main.errors.emplace_back(std::move(err));
+        }
+        res.main.errors.clear();
+        res.main = move(dispatched.main);
+        res.returnType = returnTy;
+        res.main.sendTp = returnTy;
+    }
+} Magic_selfNew;
 
 class DeclBuilderForProcs_void : public IntrinsicMethod {
 public:
@@ -2117,6 +2180,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfNew(), &Magic_selfNew},
 
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::void_(), &DeclBuilderForProcs_void},
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::returns(),

@@ -11,9 +11,9 @@
 # [`GC::Profiler`](https://docs.ruby-lang.org/en/2.6.0/GC/Profiler.html).
 module GC
   # internal constants
-  INTERNAL_CONSTANTS = T.let(T.unsafe(nil), Hash)
+  INTERNAL_CONSTANTS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) build options
-  OPTS = T.let(T.unsafe(nil), Array)
+  OPTS = T.let(T.unsafe(nil), T::Array[T.untyped])
 
   # The number of times [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html)
   # occurred.

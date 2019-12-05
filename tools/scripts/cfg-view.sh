@@ -10,7 +10,7 @@ if [ "${RAW:-}" != "" ]; then
 else
   print="cfg"
 fi
-"$dir"/../../bazel-bin/main/sorbet --silence-dev-message --suppress-non-critical --print "$print" "$@" > "$dot"
+"$dir"/../../bazel-bin/main/sorbet --silence-dev-message --suppress-non-critical --typed=true --print "$print" "$@" > "$dot"
 dot -Tsvg "$dot" > "$svg"
 if command -v open &> /dev/null; then
   open -a "Google Chrome" "$svg"

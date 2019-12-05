@@ -9,12 +9,12 @@ Integer {
   "val" : "1"
 }
 --- parse-tree-json end ---
---- ast start ---
+--- desugar-tree start ---
 class <emptyTree><<C <root>>> < ()
   1
 end
---- ast end ---
---- ast-raw start ---
+--- desugar-tree end ---
+--- desugar-tree-raw start ---
 ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
@@ -23,13 +23,13 @@ ClassDef{
     Literal{ value = 1 }
   ]
 }
---- ast-raw end ---
---- dsl-tree start ---
+--- desugar-tree-raw end ---
+--- rewrite-tree start ---
 class <emptyTree><<C <root>>> < ()
   1
 end
---- dsl-tree end ---
---- dsl-tree-raw start ---
+--- rewrite-tree end ---
+--- rewrite-tree-raw start ---
 ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
@@ -38,7 +38,7 @@ ClassDef{
     Literal{ value = 1 }
   ]
 }
---- dsl-tree-raw end ---
+--- rewrite-tree-raw end ---
 --- index-tree start ---
 class <emptyTree><<C <root>>> < ()
   1
@@ -54,50 +54,120 @@ ClassDef{
   ]
 }
 --- index-tree-raw end ---
---- symbol-table start ---
-class ::<root> < ::Object () @ (... removed core rbi locs ..., -e:1, https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1)
-  class ::<Class:<root>> < ::<Class:Object> ()
-    method ::<Class:<root>>#<static-init> (<blk>) @ -e:1
-      argument <blk><block> @ Loc {file=-e start=??? end=???}
-
---- symbol-table end ---
---- symbol-table-raw start ---
-class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=-e start=1:1 end=1:2}, Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4})
-  class <S <C <U <root>>> $1> < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=-e start=1:1 end=1:2}
-      argument <blk><block> @ Loc {file=-e start=??? end=???}
-
---- symbol-table-raw end ---
 --- name-tree start ---
-class <emptyTree><<C <root>>> < ()
-  1
+begin
+  class <emptyTree><<C <root>>> < ()
+    1
+  end
+  <emptyTree>
 end
 --- name-tree end ---
 --- name-tree-raw start ---
-ClassDef{
-  kind = class
-  name = EmptyTree<<C <U <root>>>>
-  ancestors = []
-  rhs = [
-    Literal{ value = 1 }
-  ]
+InsSeq{
+  stats = [
+    ClassDef{
+      kind = class
+      name = EmptyTree<<C <U <root>>>>
+      ancestors = []
+      rhs = [
+        Literal{ value = 1 }
+      ]
+    }
+  ],
+  expr = EmptyTree
 }
 --- name-tree-raw end ---
 --- resolve-tree start ---
-class <emptyTree><<C <root>>> < ()
-  1
+begin
+  class <emptyTree><<C <root>>> < ()
+    1
+  end
+  <emptyTree>
 end
 --- resolve-tree end ---
 --- resolve-tree-raw start ---
-ClassDef{
-  kind = class
-  name = EmptyTree<<C <U <root>>>>
-  ancestors = []
-  rhs = [
-    Literal{ value = 1 }
-  ]
+InsSeq{
+  stats = [
+    ClassDef{
+      kind = class
+      name = EmptyTree<<C <U <root>>>>
+      ancestors = []
+      rhs = [
+        Literal{ value = 1 }
+      ]
+    }
+  ],
+  expr = EmptyTree
 }
 --- resolve-tree-raw end ---
+--- flatten-tree start ---
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      1
+    end
+  end
+  <emptyTree>
+end
+--- flatten-tree end ---
+--- flatten-tree-raw start ---
+InsSeq{
+  stats = [
+    EmptyTree
+    ClassDef{
+      kind = class
+      name = EmptyTree<<C <U <root>>>>
+      ancestors = []
+      rhs = [
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = Literal{ value = 1 }
+        }
+      ]
+    }
+  ],
+  expr = EmptyTree
+}
+--- flatten-tree-raw end ---
+--- ast start ---
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      1
+    end
+  end
+  <emptyTree>
+end
+--- ast end ---
+--- ast-raw start ---
+InsSeq{
+  stats = [
+    EmptyTree
+    ClassDef{
+      kind = class
+      name = EmptyTree<<C <U <root>>>>
+      ancestors = []
+      rhs = [
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = Literal{ value = 1 }
+        }
+      ]
+    }
+  ],
+  expr = EmptyTree
+}
+--- ast-raw end ---
 --- cfg start ---
 digraph "-e" {
 subgraph "cluster_::<Class:<root>>#<static-init>" {
@@ -107,12 +177,12 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -149,6 +219,54 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 --- cfg-raw end ---
 --- cfg-json start ---
 --- cfg-json end ---
+--- symbol-table start ---
+class ::<root> < ::Object () @ (... removed core rbi locs ..., -e:1, https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1)
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ -e:1
+      argument <blk><block> @ Loc {file=-e start=??? end=???}
+
+--- symbol-table end ---
+--- symbol-table-raw start ---
+class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=-e start=1:1 end=1:2}, Loc {file=https://github.com/sorbet/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi start=1:1 end=252:4})
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=-e start=1:1 end=1:2}
+      argument <blk><block> @ Loc {file=-e start=??? end=???}
+
+--- symbol-table-raw end ---
 --- checking diff ---
+1,21d0
+1,9d0
+<               localVariable = <U <blk>>
+<             }]
+<           args = [Local{
+<           flags = self
+<           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
+<           rhs = Literal{ value = 1 }
+<         MethodDef{
+<         }
+<       1
+<       ]
+<       ancestors = []
+<       kind = class
+<       name = EmptyTree<<C <U <root>>>>
+<       rhs = [
+<     ClassDef{
+<     EmptyTree
+<     def self.<static-init><<static-init>$CENSORED>(<blk>)
+<     end
+<     }
+<   <emptyTree>
+<   <emptyTree>
+<   ],
+<   class <emptyTree><<C <root>>> < ()
+<   end
+<   expr = EmptyTree
+<   stats = [
+< InsSeq{
+< begin
+< end
+< }
+diff -r out/ast fileout/ast
+diff -r out/ast-raw fileout/ast-raw
 --- checking crashes ---
 --- checking crashes end ---

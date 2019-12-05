@@ -64,8 +64,8 @@ public:
 
         // --- Applies to all types of Symbols ---
 
-        // Synthesized by C++ code in a DSL pass
-        static constexpr u4 DSL_SYNTHESIZED = 0x0000'0001;
+        // Synthesized by C++ code in a Rewriter pass
+        static constexpr u4 REWRITER_SYNTHESIZED = 0x0000'0001;
 
         // --- For our current symbol type, what flags does it have?
 
@@ -84,7 +84,7 @@ public:
         static constexpr u4 METHOD_OVERLOADED = 0x0000'0040;
         static constexpr u4 METHOD_ABSTRACT = 0x0000'0080;
         static constexpr u4 METHOD_GENERIC = 0x0000'0100;
-        static constexpr u4 METHOD_GENERATED_SIG = 0x0000'0200;
+        [[deprecated]] static constexpr u4 METHOD_GENERATED_SIG = 0x0000'0200;
         static constexpr u4 METHOD_OVERRIDABLE = 0x0000'0400;
         static constexpr u4 METHOD_FINAL = 0x0000'0800;
         static constexpr u4 METHOD_OVERRIDE = 0x0000'1000;
@@ -217,11 +217,6 @@ public:
     inline bool isOverride() const {
         ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_OVERRIDE) != 0;
-    }
-
-    inline bool hasGeneratedSig() const {
-        ENFORCE(isMethod());
-        return (flags & Symbol::Flags::METHOD_GENERATED_SIG) != 0;
     }
 
     inline bool isCovariant() const {
@@ -416,16 +411,6 @@ public:
         return (flags & Symbol::Flags::METHOD_FINAL) != 0;
     }
 
-    inline void setHasGeneratedSig() {
-        ENFORCE(isMethod());
-        flags |= Symbol::Flags::METHOD_GENERATED_SIG;
-    }
-
-    inline void unsetHasGeneratedSig() {
-        ENFORCE(isMethod());
-        flags &= ~Symbol::Flags::METHOD_GENERATED_SIG;
-    }
-
     inline void setPublic() {
         ENFORCE(isMethod());
         flags &= ~Symbol::Flags::METHOD_PRIVATE;
@@ -479,11 +464,11 @@ public:
         return isStaticField() && (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
     }
 
-    inline void setDSLSynthesized() {
-        flags |= Symbol::Flags::DSL_SYNTHESIZED;
+    inline void setRewriterSynthesized() {
+        flags |= Symbol::Flags::REWRITER_SYNTHESIZED;
     }
-    inline bool isDSLSynthesized() const {
-        return (flags & Symbol::Flags::DSL_SYNTHESIZED) != 0;
+    inline bool isRewriterSynthesized() const {
+        return (flags & Symbol::Flags::REWRITER_SYNTHESIZED) != 0;
     }
 
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
@@ -594,10 +579,12 @@ public:
     };
 
     std::vector<ArgInfo> &arguments() {
+        ENFORCE(isMethod());
         return arguments_;
     }
 
     const std::vector<ArgInfo> &arguments() const {
+        ENFORCE(isMethod());
         return arguments_;
     }
 

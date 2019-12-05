@@ -17,10 +17,10 @@ end
 module A
   puts StringAlias
 end
-StringAlias = T.type_alias(String)
+StringAlias = T.type_alias {String}
 
 
-IntegerAlias = T.type_alias(Integer)
+IntegerAlias = T.type_alias {Integer}
 module B
   puts IntegerAlias
 end
@@ -35,7 +35,7 @@ class Outside
       puts InsideAlias
     end
 
-    InsideAlias = T.type_alias(Symbol)
+    InsideAlias = T.type_alias {Symbol}
   end
 
   def outside
@@ -44,7 +44,7 @@ class Outside
     puts InsideAlias # error: Unable to resolve constant `InsideAlias`
   end
 
-  OutsideAlias = T.type_alias(String)
+  OutsideAlias = T.type_alias {String}
 end
 
 def main
@@ -53,4 +53,4 @@ def main
   puts InsideAlias # error: Unable to resolve constant `InsideAlias`
 end
 
-RootAlias = T.type_alias(Integer)
+RootAlias = T.type_alias {Integer}

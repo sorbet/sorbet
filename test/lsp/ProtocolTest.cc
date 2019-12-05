@@ -10,32 +10,33 @@ void ProtocolTest::SetUp() {
     rootPath = "/Users/jvilk/stripe/pay-server";
     rootUri = fmt::format("file://{}", rootPath);
     fs = make_shared<MockFileSystem>(rootPath);
-    // Always use fast path
-    // TODO: Make toggleable so we can run slow path tests?
-    bool disableFastPath = false;
-    lspWrapper = make_unique<LSPWrapper>(rootPath, disableFastPath);
-    lspWrapper->opts.fs = fs;
+    bool useMultithreading = GetParam();
+    auto opts = make_shared<realmain::options::Options>();
+    opts->disableWatchman = true;
+    if (useMultithreading) {
+        lspWrapper = MultiThreadedLSPWrapper::create(rootPath, opts);
+    } else {
+        lspWrapper = SingleThreadedLSPWrapper::create(rootPath, opts);
+    }
+    lspWrapper->opts->fs = fs;
     lspWrapper->enableAllExperimentalFeatures();
 }
 
-vector<unique_ptr<LSPMessage>> ProtocolTest::initializeLSP() {
-    auto responses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId);
+vector<unique_ptr<LSPMessage>> ProtocolTest::initializeLSP(bool supportsMarkdown,
+                                                           optional<unique_ptr<SorbetInitializationOptions>> opts) {
+    auto responses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown, move(opts));
     updateDiagnostics(responses);
     return responses;
 }
 
 string ProtocolTest::getUri(string_view filePath) {
-    return filePathToUri(rootUri, filePath);
+    return filePathToUri(lspWrapper->config(), filePath);
 }
 
 unique_ptr<LSPMessage> ProtocolTest::openFile(string_view path, string_view contents) {
     sourceFileContents[string(path)] =
         make_shared<core::File>(string(path), string(contents), core::File::Type::Normal);
-    auto uri = getUri(path);
-    auto didOpenParams =
-        make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(uri, "ruby", 1, string(contents)));
-    auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
-    return make_unique<LSPMessage>(move(didOpenNotif));
+    return makeOpen(getUri(path), contents, 1);
 }
 
 unique_ptr<LSPMessage> ProtocolTest::closeFile(string_view path) {
@@ -49,24 +50,13 @@ unique_ptr<LSPMessage> ProtocolTest::closeFile(string_view path) {
             sourceFileContents.erase(it);
         }
     }
-
-    auto uri = getUri(path);
-    auto didCloseParams = make_unique<DidCloseTextDocumentParams>(make_unique<TextDocumentIdentifier>(uri));
-    auto didCloseNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidClose, move(didCloseParams));
-    return make_unique<LSPMessage>(move(didCloseNotif));
+    return makeClose(getUri(path));
 }
 
 unique_ptr<LSPMessage> ProtocolTest::changeFile(string_view path, string_view newContents, int version) {
     sourceFileContents[string(path)] =
         make_shared<core::File>(string(path), string(newContents), core::File::Type::Normal);
-    auto uri = getUri(path);
-    auto textDocIdent = make_unique<VersionedTextDocumentIdentifier>(uri, version);
-    vector<unique_ptr<TextDocumentContentChangeEvent>> changeEvents;
-    changeEvents.push_back(make_unique<TextDocumentContentChangeEvent>(string(newContents)));
-    auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDocIdent), move(changeEvents));
-    auto didChangeNotif =
-        make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
-    return make_unique<LSPMessage>(move(didChangeNotif));
+    return makeChange(getUri(path), newContents, version);
 }
 
 unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {
@@ -76,9 +66,7 @@ unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {
 }
 
 unique_ptr<LSPMessage> ProtocolTest::workspaceSymbol(string_view query) {
-    auto wsSymParams = make_unique<WorkspaceSymbolParams>(string(query));
-    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::WorkspaceSymbol, move(wsSymParams));
-    return make_unique<LSPMessage>(move(req));
+    return makeWorkspaceSymbolRequest(nextId++, query);
 }
 
 unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, int character) {
@@ -122,7 +110,7 @@ vector<unique_ptr<LSPMessage>> verify(const vector<unique_ptr<LSPMessage>> &msgs
 }
 
 std::vector<std::unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const std::string &json) {
-    auto responses = verify(lspWrapper->getLSPResponsesFor(json));
+    auto responses = verify(getLSPResponsesFor(*lspWrapper, LSPMessage::fromClient(json)));
     updateDiagnostics(responses);
     return responses;
 }
@@ -134,7 +122,7 @@ vector<unique_ptr<LSPMessage>> ProtocolTest::send(const LSPMessage &message) {
 
 vector<unique_ptr<LSPMessage>> ProtocolTest::send(vector<unique_ptr<LSPMessage>> messages) {
     vector<unique_ptr<LSPMessage>> reparsedMessages = verify(messages);
-    auto responses = verify(lspWrapper->getLSPResponsesFor(reparsedMessages));
+    auto responses = verify(getLSPResponsesFor(*lspWrapper, move(reparsedMessages)));
     updateDiagnostics(responses);
     return responses;
 }
@@ -146,7 +134,7 @@ void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messa
                 // Will explicitly overwrite older diagnostics that are irrelevant.
                 // TODO: Have a better way of copying.
                 rapidjson::MemoryPoolAllocator<> alloc;
-                diagnostics[uriToFilePath(rootUri, (*diagnosticParams)->uri)] = move(
+                diagnostics[uriToFilePath(lspWrapper->config(), (*diagnosticParams)->uri)] = move(
                     PublishDiagnosticsParams::fromJSONValue(*(*diagnosticParams)->toJSONValue(alloc))->diagnostics);
             }
         }

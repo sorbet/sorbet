@@ -101,7 +101,7 @@
 # -The RubyGems Team
 module Gem
   DEFAULT_HOST = T.let(T.unsafe(nil), String)
-  GEM_DEP_FILES = T.let(T.unsafe(nil), Array)
+  GEM_DEP_FILES = T.let(T.unsafe(nil), T::Array[T.untyped])
   GEM_PRELUDE_SUCKAGE = T.let(T.unsafe(nil), NilClass)
   LOADED_SPECS_MUTEX = T.let(T.unsafe(nil), Thread::Mutex)
   # Location of [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html)
@@ -112,21 +112,21 @@ module Gem
   # [`Gem.read_binary`](https://docs.ruby-lang.org/en/2.6.0/Gem.html#method-c-read_binary)
   # `rescue` statement. Not all of these are defined in Ruby 1.8.7, hence the
   # need for this convoluted setup.
-  READ_BINARY_ERRORS = T.let(T.unsafe(nil), Array)
+  READ_BINARY_ERRORS = T.let(T.unsafe(nil), T::Array[T.untyped])
   # Subdirectories in a gem repository for default gems
-  REPOSITORY_DEFAULT_GEM_SUBDIRECTORIES = T.let(T.unsafe(nil), Array)
+  REPOSITORY_DEFAULT_GEM_SUBDIRECTORIES = T.let(T.unsafe(nil), T::Array[T.untyped])
   # Subdirectories in a gem repository
-  REPOSITORY_SUBDIRECTORIES = T.let(T.unsafe(nil), Array)
+  REPOSITORY_SUBDIRECTORIES = T.let(T.unsafe(nil), T::Array[T.untyped])
   RUBYGEMS_DIR = T.let(T.unsafe(nil), String)
   VERSION = T.let(T.unsafe(nil), String)
   # An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Regexps that
   # match windows Ruby platforms.
-  WIN_PATTERNS = T.let(T.unsafe(nil), Array)
+  WIN_PATTERNS = T.let(T.unsafe(nil), T::Array[T.untyped])
   # [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) classes
   # used in
   # [`Gem.write_binary`](https://docs.ruby-lang.org/en/2.6.0/Gem.html#method-c-write_binary)
   # `rescue` statement. Not all of these are defined in Ruby 1.8.7.
-  WRITE_BINARY_ERRORS = T.let(T.unsafe(nil), Array)
+  WRITE_BINARY_ERRORS = T.let(T.unsafe(nil), T::Array[T.untyped])
 
   # [`Find`](https://docs.ruby-lang.org/en/2.6.0/Find.html) the full path to the
   # executable for gem `name`. If the `exec_name` is not given, an exception
@@ -156,7 +156,7 @@ module Gem
   def self.bindir(install_dir=T.unsafe(nil)); end
 
   # Clear default gem related variables. It is for test
-  sig {returns(Hash)}
+  sig {returns(T::Hash[T.untyped, T.untyped])}
   def self.clear_default_specs(); end
 
   # Reset the `dir` and `path` values. The next time `dir` or `path` is
@@ -243,7 +243,7 @@ end
 
 class Gem::Dependency < Object
   # Valid dependency types.
-  TYPES = T.let(T.unsafe(nil), Array)
+  TYPES = T.let(T.unsafe(nil), T::Array[T.untyped])
 end
 
 class Gem::DependencyError < Gem::Exception
@@ -415,7 +415,7 @@ end
 # See [`Gem::Version`](https://docs.ruby-lang.org/en/2.6.0/Gem/Version.html) for
 # a description on how versions and requirements work together in RubyGems.
 class Gem::Requirement < Object
-  OPS = T.let(T.unsafe(nil), Hash)
+  OPS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   # A regular expression that matches a requirement
   PATTERN = T.let(T.unsafe(nil), Regexp)
   PATTERN_RAW = T.let(T.unsafe(nil), String)
@@ -463,14 +463,16 @@ end
 # for restrictions on the format and size of metadata items you may add to a
 # specification.
 class Gem::Specification < Gem::BasicSpecification
+  Elem = type_template(fixed: T.untyped)
+
   CURRENT_SPECIFICATION_VERSION = T.let(T.unsafe(nil), Integer)
-  EMPTY = T.let(T.unsafe(nil), Array)
-  MARSHAL_FIELDS = T.let(T.unsafe(nil), Hash)
+  EMPTY = T.let(T.unsafe(nil), T::Array[T.untyped])
+  MARSHAL_FIELDS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   # The version number of a specification that does not specify one (i.e.
   # RubyGems 0.7 or earlier).
   NONEXISTENT_SPECIFICATION_VERSION = T.let(T.unsafe(nil), Integer)
   NOT_FOUND = T.let(T.unsafe(nil), Object)
-  SPECIFICATION_VERSION_HISTORY = T.let(T.unsafe(nil), Hash)
+  SPECIFICATION_VERSION_HISTORY = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   TODAY = T.let(T.unsafe(nil), Time)
   VALID_NAME_PATTERN = T.let(T.unsafe(nil), Regexp)
 end
@@ -488,9 +490,9 @@ class Gem::StubSpecification < Gem::BasicSpecification
 end
 
 class Gem::StubSpecification::StubLine < Object
-  NO_EXTENSIONS = T.let(T.unsafe(nil), Array)
-  REQUIRE_PATHS = T.let(T.unsafe(nil), Hash)
-  REQUIRE_PATH_LIST = T.let(T.unsafe(nil), Hash)
+  NO_EXTENSIONS = T.let(T.unsafe(nil), T::Array[T.untyped])
+  REQUIRE_PATHS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+  REQUIRE_PATH_LIST = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 end
 
 # Raised to indicate that a system exit should occur with the specified

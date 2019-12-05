@@ -49,6 +49,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
             parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable())
                 ? core::errors::Resolver::EnumerableParentTypeNotDeclared
                 : core::errors::Resolver::ParentTypeNotDeclared;
+
         if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
             e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs),
                         parent.data(gs)->show(gs), sym.data(gs)->show(gs));
@@ -83,7 +84,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     }
     typeAliases[sym._id].emplace_back(parentTypeMember, my);
     return true;
-}
+} // namespace
 
 void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
                         vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases, vector<bool> &resolved) {
@@ -137,6 +138,11 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
 
     if (sym.data(gs)->isClassOrModuleClass()) {
         for (core::SymbolRef tp : sym.data(gs)->typeMembers()) {
+            // AttachedClass is covariant, but not controlled by the user.
+            if (tp.data(gs)->name == core::Names::Constants::AttachedClass()) {
+                continue;
+            }
+
             auto myVariance = tp.data(gs)->variance();
             if (myVariance != core::Variance::Invariant) {
                 auto loc = tp.data(gs)->loc();
@@ -149,12 +155,29 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
             }
         }
     }
+
+    // If this class has no type members, fix attached class early.
+    if (sym.data(gs)->typeMembers().empty()) {
+        auto singleton = sym.data(gs)->lookupSingletonClass(gs);
+        if (singleton.exists()) {
+            // AttachedClass doesn't exist on `T.untyped`, which is a problem
+            // with RuntimeProfiled.
+            auto attachedClass = singleton.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
+            if (attachedClass.exists()) {
+                auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(gs)->resultType.get());
+                ENFORCE(lambdaParam != nullptr);
+
+                lambdaParam->lowerBound = core::Types::bottom();
+                lambdaParam->upperBound = sym.data(gs)->externalType(gs);
+            }
+        }
+    }
 }
 
 }; // namespace
 
 void Resolver::finalizeAncestors(core::GlobalState &gs) {
-    Timer timer(gs.errorQueue->logger, "resolver.finalize_ancestors");
+    Timer timer(gs.tracer(), "resolver.finalize_ancestors");
     int methodCount = 0;
     int classCount = 0;
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
@@ -328,7 +351,7 @@ InlinedVector<core::SymbolRef, 4> ParentLinearizationInformation::fullLinearizat
 }
 
 void Resolver::computeLinearization(core::GlobalState &gs) {
-    Timer timer(gs.errorQueue->logger, "resolver.compute_linearization");
+    Timer timer(gs.tracer(), "resolver.compute_linearization");
 
     // TODO: this does not support `prepend`
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
@@ -341,7 +364,7 @@ void Resolver::computeLinearization(core::GlobalState &gs) {
 }
 
 void Resolver::finalizeSymbols(core::GlobalState &gs) {
-    Timer timer(gs.errorQueue->logger, "resolver.finalize_resolution");
+    Timer timer(gs.tracer(), "resolver.finalize_resolution");
     // TODO(nelhage): Properly this first loop should go in finalizeAncestors,
     // but we currently compute mixes_in_class_methods during the same AST walk
     // that resolves types and we don't want to introduce additional passes if

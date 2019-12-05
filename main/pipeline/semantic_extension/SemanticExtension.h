@@ -12,6 +12,7 @@ namespace core {
 class GlobalState;
 class GlobalSubstitution;
 class MutableContext;
+class FileRef;
 } // namespace core
 
 namespace ast {
@@ -26,8 +27,10 @@ class CFG;
 namespace pipeline::semantic_extension {
 class SemanticExtension {
 public:
+    virtual void finishTypecheckFile(const core::GlobalState &, const core::FileRef &) const = 0;
+    virtual void finishTypecheck(const core::GlobalState &) const = 0;
     virtual void typecheck(const core::GlobalState &, cfg::CFG &, std::unique_ptr<ast::MethodDef> &) const = 0;
-    virtual void patchDSL(core::MutableContext &, ast::ClassDef *) const = 0;
+    virtual void run(core::MutableContext &, ast::ClassDef *) const = 0;
     virtual ~SemanticExtension() = default;
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) = 0;
     virtual void merge(const core::GlobalState &from, core::GlobalState &to, core::GlobalSubstitution &subst) = 0;

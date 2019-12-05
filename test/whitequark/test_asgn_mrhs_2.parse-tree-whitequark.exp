@@ -1,0 +1,6 @@
+s(:assign,
+  s(:lvasgn, :foo),
+  s(:array,
+    s(:lvar, :baz),
+    s(:splat,
+      s(:lvar, :bar))))

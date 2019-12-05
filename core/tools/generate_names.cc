@@ -52,7 +52,6 @@ NameDef names[] = {
     {"defined_p", "defined?"},
     {"undef"},
     {"each"},
-    {"missingFun", "<missing-fun>"},
 
     // used in CFG for temporaries
     {"whileTemp", "<whileTemp>"},
@@ -106,7 +105,6 @@ NameDef names[] = {
     {"void_", "void"},
     {"checked"},
     {"on_failure"},
-    {"generated"},
 
     {"all"},
     {"any"},
@@ -120,6 +118,7 @@ NameDef names[] = {
     {"class_", "class"},
     {"classOf", "class_of"},
     {"selfType", "self_type"},
+    {"attachedClass", "experimental_attached_class"},
     {"coerce"},
 
     {"assertType", "assert_type!"},
@@ -146,6 +145,13 @@ NameDef names[] = {
     {"privateClassMethod", "private_class_method"},
     {"moduleFunction", "module_function"},
     {"aliasMethod", "alias_method"},
+
+    {"flatfile"},
+    {"from"},
+    {"field"},
+    {"pattern"},
+
+    // type alias names
     {"typeAlias", "type_alias"},
     {"typeMember", "type_member"},
     {"typeTemplate", "type_template"},
@@ -202,6 +208,8 @@ NameDef names[] = {
     {"describe"},
     {"it"},
     {"before"},
+    {"after"},
+    {"afterAngles", "<after>"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
@@ -297,6 +305,7 @@ NameDef names[] = {
     {"Elem", "Elem", true},
     {"keepForIde", "keep_for_ide"},
     {"keepForTypechecking", "keep_for_typechecking"},
+    {"unresolvedAncestors", "<unresolved-ancestors>"},
 
     {"is_a_p", "is_a?"},
     {"kind_of", "kind_of?"},
@@ -328,6 +337,7 @@ NameDef names[] = {
     {"callWithBlock", "<call-with-block>"},
     {"callWithSplatAndBlock", "<call-with-splat-and-block>"},
     {"enumerable_to_h"},
+    {"selfNew", "<self-new>"},
 
     // GlobalState initEmpty()
     {"Top", "<any>", true},
@@ -366,6 +376,7 @@ NameDef names[] = {
     {"DeclBuilderForProcs", "<DeclBuilderForProcs>", true},
     {"Enumerable", "Enumerable", true},
     {"Enumerator", "Enumerator", true},
+    {"Lazy", "Lazy", true},
     {"Set", "Set", true},
     {"Struct", "Struct", true},
     {"File", "File", true},
@@ -404,6 +415,7 @@ NameDef names[] = {
     {"CFGExport", "CFGExport", true},
     {"WithoutRuntime", "WithoutRuntime", true},
     {"Singleton", "Singleton", true},
+    {"AttachedClass", "<AttachedClass>", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

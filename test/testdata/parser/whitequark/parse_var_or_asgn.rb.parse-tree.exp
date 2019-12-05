@@ -1,8 +1,0 @@
-OrAsgn {
-  left = LVarLhs {
-    name = <U a>
-  }
-  right = Integer {
-    val = "1"
-  }
-}

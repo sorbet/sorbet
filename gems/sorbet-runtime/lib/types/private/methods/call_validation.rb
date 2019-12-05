@@ -51,10 +51,6 @@ module T::Private::Methods::CallValidation
     # This method is called for every `sig`. It's critical to keep it fast and
     # reduce number of allocations that happen here.
 
-    if method_sig.ever_failed && method_sig.generated
-      return original_method.bind(instance).call(*args, &blk)
-    end
-
     T::Profile.typecheck_sample_attempts -= 1
     should_sample = T::Profile.typecheck_sample_attempts == 0
     if should_sample
@@ -252,10 +248,6 @@ module T::Private::Methods::CallValidation
         T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
       end
 
-      if method_sig.ever_failed && method_sig.generated
-        return original_method.bind(self).call(&blk)
-      end
-
       # The following line breaks are intentional to show nice pry message
 
 
@@ -302,10 +294,6 @@ module T::Private::Methods::CallValidation
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
-
-      if method_sig.ever_failed && method_sig.generated
-        return original_method.bind(self).call(arg0, &blk)
-      end
 
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -391,10 +379,6 @@ module T::Private::Methods::CallValidation
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
-
-      if method_sig.ever_failed && method_sig.generated
-        return original_method.bind(self).call(arg0, arg1, &blk)
-      end
 
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -492,10 +476,6 @@ module T::Private::Methods::CallValidation
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
-
-      if method_sig.ever_failed && method_sig.generated
-        return original_method.bind(self).call(arg0, arg1, arg2, &blk)
-      end
 
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -606,10 +586,6 @@ module T::Private::Methods::CallValidation
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
-
-      if method_sig.ever_failed && method_sig.generated
-        return original_method.bind(self).call(arg0, arg1, arg2, arg3, &blk)
-      end
 
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -760,10 +736,6 @@ module T::Private::Methods::CallValidation
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
 
-      if method_sig.ever_failed && method_sig.generated
-        return original_method.bind(self).call(&blk)
-      end
-
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
       if should_sample
@@ -816,10 +788,6 @@ module T::Private::Methods::CallValidation
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
-
-      if method_sig.ever_failed && method_sig.generated
-        return original_method.bind(self).call(arg0, &blk)
-      end
 
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -883,10 +851,6 @@ module T::Private::Methods::CallValidation
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
-
-      if method_sig.ever_failed && method_sig.generated
-        return original_method.bind(self).call(arg0, arg1, &blk)
-      end
 
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -963,10 +927,6 @@ module T::Private::Methods::CallValidation
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
-
-      if method_sig.ever_failed && method_sig.generated
-        return original_method.bind(self).call(arg0, arg1, arg2, &blk)
-      end
 
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -1056,10 +1016,6 @@ module T::Private::Methods::CallValidation
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
-
-      if method_sig.ever_failed && method_sig.generated
-        return original_method.bind(self).call(arg0, arg1, arg2, arg3, &blk)
-      end
 
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -1156,7 +1112,6 @@ module T::Private::Methods::CallValidation
   end
 
   def self.report_error(method_sig, error_message, kind, name, type, value, caller_offset: 0)
-    method_sig.mark_failed
     caller_loc = T.must(caller_locations(3 + caller_offset, 1))[0]
     definition_file, definition_line = method_sig.method.source_location
 

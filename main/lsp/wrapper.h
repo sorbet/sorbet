@@ -3,56 +3,89 @@
 
 #include "spdlog/spdlog.h"
 // has to come before the next spdlog include. This comment stops formatter from reordering them
-#include "lsp.h"
 #include "main/lsp/LSPMessage.h"
+#include "main/lsp/lsp.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
-#include <sstream>
 #include <string_view>
 namespace sorbet::realmain::lsp {
 
+class LSPOutputToVector;
+class LSPProgrammaticInput;
+class LSPConfiguration;
+
 class LSPWrapper {
-private:
-    static const std::string EMPTY_STRING;
-
-    /** If true, then LSPLoop is initialized and is ready to receive requests. */
-    bool initialized = false;
-
-    /** The LSP 'server', which runs in the same thread as LSPWrapper. */
-    std::unique_ptr<LSPLoop> lspLoop;
-
-    /** The global state of type checking, as calculated by LSP. */
-    std::unique_ptr<core::GlobalState> gs;
-
+    // Bugfix: WorkerPool destructor assumes that logger is alive when it runs, so keep around logger until it finishes.
+    const std::shared_ptr<spd::logger> logger;
     /**
-     * Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
+     * Sorbet assumes we 'own' the following three objects; keep them alive to avoid memory errors.
      */
-    std::unique_ptr<WorkerPool> workers;
-    std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
-    std::shared_ptr<spd::logger> typeErrorsConsole;
+    const std::unique_ptr<WorkerPool> workers;
+    const std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
+    const std::shared_ptr<spd::logger> typeErrorsConsole;
 
-    /** The output stream used by LSP. Completely unused, but for legacy reasons LSP requires it. */
-    std::stringstream lspOstream;
+protected:
+    const std::shared_ptr<LSPOutputToVector> output;
+    const std::shared_ptr<LSPConfiguration> config_;
+    /** The LSP 'server', which runs in the same thread as LSPWrapper (unless multithreading is enabled) */
+    const std::shared_ptr<LSPLoop> lspLoop;
 
-    /** Contains shared constructor logic. */
-    void instantiate(std::unique_ptr<core::GlobalState> gs, const std::shared_ptr<spdlog::logger> &logger,
-                     bool disableFastPath);
+    /** Raw constructor. Note: Constructor is unwieldy so we can make class fields `const`. */
+    LSPWrapper(std::unique_ptr<core::GlobalState> gs, std::shared_ptr<options::Options> opts,
+               std::shared_ptr<spd::logger> logger,
+               std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
+               std::shared_ptr<spd::logger> typeErrorsConsole, bool disableFastPath);
 
 public:
     enum class LSPExperimentalFeature {
         Autocomplete = 4,
-        WorkspaceSymbols = 5,
         DocumentSymbol = 6,
         SignatureHelp = 7,
         QuickFix = 8,
+        DocumentHighlight = 9,
     };
 
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
-    options::Options opts;
+    const std::shared_ptr<options::Options> opts;
 
-    LSPWrapper(std::string_view rootPath = EMPTY_STRING, bool disableFastPath = false);
-    LSPWrapper(options::Options &&options, std::string_view rootPath = EMPTY_STRING, bool disableFastPath = false);
-    LSPWrapper(std::unique_ptr<core::GlobalState> gs, options::Options &&options,
-               const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath);
+    virtual ~LSPWrapper() = default;
+
+    const LSPConfiguration &config() const;
+
+    /**
+     * Enable an experimental LSP feature.
+     * Note: Use this method *before* the client performs initialization with the server.
+     */
+    void enableExperimentalFeature(LSPExperimentalFeature feature);
+
+    /**
+     * Enable all experimental LSP features.
+     * Note: Use this method *before* the client performs initialization with the server.
+     */
+    void enableAllExperimentalFeatures();
+
+    /**
+     * (For tests only) Retrieve the number of times typechecking has run.
+     */
+    int getTypecheckCount();
+};
+
+class SingleThreadedLSPWrapper final : public LSPWrapper {
+    /** Raw constructor. Note: Constructor is unwieldy so we can make class fields `const`. */
+    SingleThreadedLSPWrapper(std::unique_ptr<core::GlobalState> gs, std::shared_ptr<options::Options> opts,
+                             std::shared_ptr<spd::logger> logger,
+                             std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
+                             std::shared_ptr<spd::logger> typeErrorsConsole, bool disableFastPath);
+
+public:
+    static std::unique_ptr<SingleThreadedLSPWrapper> createWithGlobalState(std::unique_ptr<core::GlobalState> gs,
+                                                                           std::shared_ptr<options::Options> options,
+                                                                           std::shared_ptr<spdlog::logger> logger,
+                                                                           bool disableFastPath = false);
+
+    static std::unique_ptr<SingleThreadedLSPWrapper>
+    create(std::string_view rootPath = std::string_view(),
+           std::shared_ptr<options::Options> options = std::make_shared<options::Options>(),
+           bool disableFastPath = false);
 
     /**
      * Send a message to LSP, and returns any responses.
@@ -67,24 +100,50 @@ public:
     /**
      * Sends multiple messages to LSP, and returns any responses.
      */
-    std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(std::vector<std::unique_ptr<LSPMessage>> &messages);
+    std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(std::vector<std::unique_ptr<LSPMessage>> messages);
+};
+
+class MultiThreadedLSPWrapper final : public LSPWrapper {
+    /** Contains the input object used to feed messages to lspThread. */
+    const std::shared_ptr<LSPProgrammaticInput> input;
+    /** Contains the thread running LSPLoop. */
+    const std::unique_ptr<Joinable> lspThread;
+
+    /** Raw constructor. Note: Constructor is unwieldy so we can make class fields `const`. */
+    MultiThreadedLSPWrapper(std::unique_ptr<core::GlobalState> gs, std::shared_ptr<options::Options> opts,
+                            std::shared_ptr<spd::logger> logger,
+                            std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
+                            std::shared_ptr<spd::logger> typeErrorsConsole, bool disableFastPath);
+
+public:
+    static std::unique_ptr<MultiThreadedLSPWrapper>
+    create(std::string_view rootPath = std::string_view(),
+           std::shared_ptr<options::Options> options = std::make_shared<options::Options>(), int numWorkerThreads = 2,
+           bool disableFastPath = false);
+
+    ~MultiThreadedLSPWrapper() override;
 
     /**
-     * (For tests only) Retrieve the number of times typechecking has run.
+     * Sends one message to LSP. Responses can be read asynchronously via `read()`.
      */
-    int getTypecheckCount() const;
+    void send(std::unique_ptr<LSPMessage> message);
 
     /**
-     * Enable an experimental LSP feature.
-     * Note: Use this method *before* the client performs initialization with the server.
+     * Sends one message to LSP. Responses can be read asynchronously via `read()`.
      */
-    void enableExperimentalFeature(LSPExperimentalFeature feature);
+    void send(std::vector<std::unique_ptr<LSPMessage>> &messages);
 
     /**
-     * Enable all experimental LSP features.
-     * Note: Use this method *before* the client performs initialization with the server.
+     * Sends one message to LSP. Responses can be read asynchronously via `read()`.
      */
-    void enableAllExperimentalFeatures();
+    void send(const std::string &json);
+
+    /**
+     * Blocking read function. Blocks until a read() occurs, or a timeout occurs.
+     *
+     * A return value of `nullptr` indicates that a timeout has occurred.
+     */
+    std::unique_ptr<LSPMessage> read(int timeoutMs = 100);
 };
 
 } // namespace sorbet::realmain::lsp

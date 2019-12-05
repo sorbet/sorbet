@@ -8,6 +8,10 @@
 namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
+std::string filePathToUri(const LSPConfiguration &config, std::string_view filePath);
+
+std::string uriToFilePath(const LSPConfiguration &config, std::string_view uri);
+
 /** Creates the parameters to the `initialize` message, which advertises the client's capabilities. */
 std::unique_ptr<InitializeParams>
 makeInitializeParams(std::variant<std::string, JSONNullObject> rootPath,
@@ -17,8 +21,17 @@ makeInitializeParams(std::variant<std::string, JSONNullObject> rootPath,
 /** Create an LSPMessage containing a textDocument/definition request. */
 std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character);
 
-/** Create an LSPMessage containing a textDocument/didChange request. */
-std::unique_ptr<LSPMessage> makeDidChange(std::string_view uri, std::string_view contents, int version);
+/** Create an LSPMessage containing a WorkspaceSymbol request. */
+std::unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query);
+
+/** Create an LSPMessage containing a textDocument/didOpen notification. */
+std::unique_ptr<LSPMessage> makeOpen(std::string_view uri, std::string_view contents, int version);
+
+/** Create an LSPMessage containing a textDocument/didChange notification. */
+std::unique_ptr<LSPMessage> makeChange(std::string_view uri, std::string_view contents, int version);
+
+/** Create an LSPMessage containing a textDocument/didClose notification. */
+std::unique_ptr<LSPMessage> makeClose(std::string_view uri);
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities);
@@ -31,17 +44,28 @@ void assertResponseMessage(int expectedId, const LSPMessage &response);
 void assertResponseError(int code, std::string_view msg, const LSPMessage &response);
 
 /** Asserts that the LSPMessage is a NotificationMessage with the given method. */
-void assertNotificationMessage(const LSPMethod expectedMethod, const LSPMessage &response);
+void assertNotificationMessage(LSPMethod expectedMethod, const LSPMessage &response);
 
 /** Retrieves the PublishDiagnosticsParam from a publishDiagnostics message, if applicable. Non-fatal fails and returns
  * an empty optional if it cannot be found. */
 std::optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMessage &notifMsg);
+
+/** Use the LSPWrapper to make a textDocument/completion request.
+ */
+std::unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, const Range &range, int &nextId,
+                                                         std::string_view filename);
 
 /** Sends boilerplate initialization / initialized messages to start a new LSP session. */
 std::vector<std::unique_ptr<LSPMessage>>
 initializeLSP(std::string_view rootPath, std::string_view rootUri, LSPWrapper &lspWrapper, int &nextId,
               bool supportsMarkdown = true,
               std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions = std::nullopt);
+
+/** Sends the given messages to LSPWrapper, and returns all responses to those messages. Works with single and
+ * multithreaded LSP wrappers. */
+std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, std::unique_ptr<LSPMessage> message);
+std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper,
+                                                            std::vector<std::unique_ptr<LSPMessage>> messages);
 
 } // namespace sorbet::test
 #endif // TEST_HELPERS_LSP_H

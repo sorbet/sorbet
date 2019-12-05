@@ -1,7 +1,7 @@
 # typed: __STDLIB_INTERNAL
 module DidYouMean
-  IGNORED_CALLERS = T.let(T.unsafe(nil), Array)
-  SPELL_CHECKERS = T.let(T.unsafe(nil), Hash)
+  IGNORED_CALLERS = T.let(T.unsafe(nil), T::Array[T.untyped])
+  SPELL_CHECKERS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   VERSION = T.let(T.unsafe(nil), String)
 end
 
@@ -27,11 +27,11 @@ module DidYouMean::JaroWinkler
 end
 
 class DidYouMean::MethodNameChecker < Object
-  NAMES_TO_EXCLUDE = T.let(T.unsafe(nil), Hash)
+  NAMES_TO_EXCLUDE = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 end
 
 class DidYouMean::VariableNameChecker < Object
-  NAMES_TO_EXCLUDE = T.let(T.unsafe(nil), Hash)
+  NAMES_TO_EXCLUDE = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 end
 
 module DidYouMean::Levenshtein

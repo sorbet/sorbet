@@ -31,3 +31,6 @@ gems/sorbet-runtime/Gemfile.lock
 
 # To distribute sorbet, we copy the built C++ binary here.
 /gems/sorbet-static/libexec/sorbet
+
+# clangd caches data in this folder.
+/.clangd

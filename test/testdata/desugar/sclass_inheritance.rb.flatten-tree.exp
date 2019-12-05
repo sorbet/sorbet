@@ -1,0 +1,106 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    <emptyTree>
+
+    <emptyTree>
+
+    def main(<blk>)
+      begin
+        <self>.puts(::A.newer())
+        <self>.puts(::B.newer())
+        <self>.puts(::C.newerer())
+      end
+    end
+
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::MM)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::B)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::C)
+          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <emptyTree>
+        end
+        <self>.main()
+        <emptyTree>
+      end
+    end
+  end
+  module ::MM<<C MM>> < ()
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  class ::A<<C A>> < (::<todo sym>)
+    def self.<static-init>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::MM)
+        <emptyTree>
+      end
+    end
+  end
+  class <singleton class><<Class:A>> < (::MM)
+    <emptyTree>
+
+    <emptyTree>
+
+    def newer(<blk>)
+      ::<Magic>.<self-new>(<self>)
+    end
+
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  class ::B<<C B>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    def self.newer(<blk>)
+      ::<Magic>.<self-new>(<self>)
+    end
+
+    def self.<static-init>(<blk>)
+      ::Sorbet::Private::Static.keep_for_ide(::MM)
+    end
+  end
+  class ::C<<C C>> < (::A)
+    def self.<static-init>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+      end
+    end
+  end
+  class <singleton class><<Class:C>> < ()
+    <emptyTree>
+
+    <emptyTree>
+
+    def newerer(<blk>)
+      <self>.newer()
+    end
+
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

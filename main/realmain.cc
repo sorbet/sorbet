@@ -10,13 +10,17 @@
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
 #include "main/autogen/subclasses.h"
+#include "main/lsp/LSPInput.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/lsp.h"
 #endif
 
 #include "absl/strings/str_cat.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
+#include "common/sort.h"
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
@@ -401,7 +405,7 @@ int realmain(int argc, char *argv[]) {
     unique_ptr<KeyValueStore> kvstore;
     if (!opts.cacheDir.empty()) {
         kvstore = make_unique<KeyValueStore>(Version::full_version_string, opts.cacheDir,
-                                             opts.skipDSLPasses ? "nodsl" : "default");
+                                             opts.skipRewriterPasses ? "nodsl" : "default");
     }
     payload::createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {
@@ -418,6 +422,9 @@ int realmain(int argc, char *argv[]) {
     }
     if (opts.censorForSnapshotTests) {
         gs->censorForSnapshotTests = true;
+    }
+    if (opts.sleepInSlowPath) {
+        gs->sleepInSlowPath = true;
     }
     if (opts.reserveMemKiB > 0) {
         gs->reserveMemory(opts.reserveMemKiB);
@@ -451,8 +458,9 @@ int realmain(int argc, char *argv[]) {
                       "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag,"
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       Version::full_version_string);
-        lsp::LSPLoop loop(move(gs), lsp::LSPConfiguration(opts, logger), logger, *workers, STDIN_FILENO, cout);
-        gs = loop.runLSP().value_or(nullptr);
+        auto output = make_shared<lsp::LSPStdout>(logger);
+        lsp::LSPLoop loop(move(gs), make_shared<lsp::LSPConfiguration>(opts, output, *workers, logger));
+        gs = loop.runLSP(make_shared<lsp::LSPFDInput>(logger, STDIN_FILENO)).value_or(nullptr);
 #endif
     } else {
         Timer timeall(logger, "wall_time");

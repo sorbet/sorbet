@@ -13,6 +13,7 @@
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
+#include "core/ErrorQueue.h"
 #include "core/errors/infer.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 
@@ -284,9 +285,25 @@ void GlobalState::initEmpty() {
     id = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
     ENFORCE(id == Symbols::Singleton());
 
-    id = enterClassSymbol(Loc::none(), Symbols::Opus(), core::Names::Constants::Enum());
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum());
     id.data(*this)->setIsModule(false);
-    ENFORCE(id == Symbols::OpusEnum());
+    ENFORCE(id == Symbols::T_Enum());
+
+    // T::Sig#sig
+    id = enterMethodSymbol(Loc::none(), Symbols::T_Sig(), Names::sig());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        arg.flags.isDefault = true;
+    }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    ENFORCE(id == Symbols::sig());
+
+    // Enumerable::Lazy
+    id = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
+    ENFORCE(id == Symbols::Enumerator_Lazy());
 
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
@@ -294,7 +311,7 @@ void GlobalState::initEmpty() {
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Bottom()] = Symbols::bottom();
     Context ctx(*this, Symbols::root());
 
-    // Synthesize <Magic>#build_hash(*vs : T.untyped) => Hash
+    // Synthesize <Magic>#<build-hash>(*vs : T.untyped) => Hash
     SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildHash());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
@@ -306,7 +323,7 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
-    // Synthesize <Magic>#build_array(*vs : T.untyped) => Array
+    // Synthesize <Magic>#<build-array>(*vs : T.untyped) => Array
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildArray());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
@@ -331,11 +348,12 @@ void GlobalState::initEmpty() {
         arg.flags.isBlock = true;
     }
 
-    // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
+    // Synthesize <Magic>#<defined>(*arg0: String) => Boolean
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::defined_p());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::Object();
+        arg.flags.isRepeated = true;
+        arg.type = Types::String();
     }
     method.data(*this)->resultType = Types::any(ctx, Types::nilClass(), Types::String());
     {
@@ -403,6 +421,18 @@ void GlobalState::initEmpty() {
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.type = Types::untyped(*this, method);
+    }
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    // Synthesize <Magic>#<self-new>(arg: *T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::selfNew());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+        arg.flags.isRepeated = true;
     }
     method.data(*this)->resultType = Types::untyped(*this, method);
     {
@@ -638,7 +668,7 @@ SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 f
     return Symbols::noSymbol();
 }
 
-SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) {
+SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     // This method works by knowing how to replicate the logic of renaming in order to find whatever
     // the previous name was: for `x$n` where `n` is larger than 2, it'll be `x$(n-1)`, for bare `x`,
     // it'll be whatever the largest `x$n` that exists is, if any; otherwise, there will be none.
@@ -648,13 +678,21 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) {
     SymbolData ownerScope = owner.dataAllowingNone(*this);
 
     if (nameData->kind == NameKind::UNIQUE) {
+        if (nameData->unique.uniqueNameKind != UniqueNameKind::MangleRename) {
+            return Symbols::noSymbol();
+        }
         if (nameData->unique.num == 1) {
             return Symbols::noSymbol();
         } else {
             ENFORCE(nameData->unique.num > 1);
             auto nm =
                 lookupNameUnique(UniqueNameKind::MangleRename, nameData->unique.original, nameData->unique.num - 1);
-            return nm.exists() ? ownerScope->members()[nm] : Symbols::noSymbol();
+            if (!nm.exists()) {
+                return Symbols::noSymbol();
+            }
+            auto res = ownerScope->members()[nm];
+            ENFORCE(res.exists());
+            return res;
         }
     } else {
         u2 unique = 1;
@@ -860,6 +898,32 @@ string_view GlobalState::enterString(string_view nm) {
     return string_view(from, nm.size());
 }
 
+NameRef GlobalState::lookupNameUTF8(string_view nm) const {
+    const auto hs = _hash(nm);
+    unsigned int hashTableSize = namesByHash.size();
+    unsigned int mask = hashTableSize - 1;
+    auto bucketId = hs & mask;
+    unsigned int probeCount = 1;
+
+    while (namesByHash[bucketId].second != 0u) {
+        auto &bucket = namesByHash[bucketId];
+        if (bucket.first == hs) {
+            auto nameId = bucket.second;
+            auto &nm2 = names[nameId];
+            if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
+                counterInc("names.utf8.hit");
+                return nm2.ref(*this);
+            } else {
+                counterInc("names.hash_collision.utf8");
+            }
+        }
+        bucketId = (bucketId + probeCount) & mask;
+        probeCount++;
+    }
+
+    return core::NameRef::noName();
+}
+
 NameRef GlobalState::enterNameUTF8(string_view nm) {
     const auto hs = _hash(nm);
     unsigned int hashTableSize = namesByHash.size();
@@ -918,7 +982,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.data(*this)->kind == NameKind::UTF8 ||
                 (original.data(*this)->kind == NameKind::UNIQUE &&
                  (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
-                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::OpusEnum)),
+                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::TEnum)),
             "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());
@@ -1261,6 +1325,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
+    result->sleepInSlowPath = this->sleepInSlowPath;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;
@@ -1402,8 +1467,9 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
                 return false;
             }
         } else if (level == StrictLevel::Stdlib) {
-            level = StrictLevel::True;
-            if (what == errors::Resolver::OverloadNotAllowed || what == errors::Resolver::VariantTypeMemberInClass) {
+            level = StrictLevel::Strict;
+            if (what == errors::Resolver::OverloadNotAllowed || what == errors::Resolver::VariantTypeMemberInClass ||
+                what == errors::Infer::UntypedMethod) {
                 return false;
             }
         }
@@ -1595,8 +1661,8 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto prevCount = this->symbolsUsed();
     auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
-    auto blkLoc = core::Loc::none(loc.file());
     if (prevCount != this->symbolsUsed()) {
+        auto blkLoc = core::Loc::none(loc.file());
         auto &blkSym = this->enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
         blkSym.flags.isBlock = true;
     }

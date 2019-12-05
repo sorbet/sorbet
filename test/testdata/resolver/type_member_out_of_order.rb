@@ -1,7 +1,7 @@
 # typed: true
 
-Alias1 = T.type_alias(A)
-Alias2 = T.type_alias(B)
+Alias1 = T.type_alias {A}
+Alias2 = T.type_alias {B}
 
 class A
   extend T::Generic

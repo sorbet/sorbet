@@ -34,29 +34,29 @@
                     "kind": 14,
                     "range": {
                         "start": {
-                            "line": 3,
-                            "character": 2
+                            "line": 1,
+                            "character": 10
                         },
                         "end": {
-                            "line": 3,
-                            "character": 7
+                            "line": 1,
+                            "character": 15
                         }
                     },
                     "selectionRange": {
                         "start": {
-                            "line": 3,
-                            "character": 2
+                            "line": 1,
+                            "character": 10
                         },
                         "end": {
-                            "line": 3,
-                            "character": 7
+                            "line": 1,
+                            "character": 15
                         }
                     },
                     "children": []
                 },
                 {
                     "name": "bar",
-                    "detail": "sig {returns(T.untyped)}",
+                    "detail": "sig {returns(T.untyped)}\ndef bar; end",
                     "kind": 6,
                     "range": {
                         "start": {

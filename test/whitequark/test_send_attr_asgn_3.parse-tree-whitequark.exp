@@ -1,0 +1,4 @@
+s(:assign,
+  s(:casgn,
+    s(:lvar, :foo), :A),
+  s(:int, "1"))

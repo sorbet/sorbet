@@ -2,6 +2,8 @@
 #include "absl/strings/match.h"
 #include "common/JSON.h"
 #include "common/Levenstein.h"
+#include "common/formatting.h"
+#include "common/sort.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
 #include "core/Hashing.h"
@@ -623,7 +625,14 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                 }
 
                 bool first = true;
+                vector<Loc> sortedLocs;
+                sortedLocs.reserve(locs_.size());
                 for (const auto loc : locs_) {
+                    sortedLocs.emplace_back(loc);
+                }
+                fast_sort(sortedLocs,
+                          [&](const Loc &lhs, const Loc &rhs) { return lhs.showRaw(gs) < rhs.showRaw(gs); });
+                for (const auto loc : sortedLocs) {
                     if (absl::StartsWith(loc.file().data(gs).path(), payloadPathPrefix)) {
                         continue;
                     }
@@ -658,36 +667,35 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
     }
 
     fmt::format_to(buf, "\n");
-    if (!isMethod()) {
-        for (auto pair : membersStableOrderSlow(gs)) {
-            if (!pair.second.exists()) {
-                ENFORCE(ref(gs) == core::Symbols::root());
-                continue;
-            }
-
-            if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-                pair.first == Names::classMethods()) {
-                continue;
-            }
-
-            if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
-                bool hadPrintableChild = false;
-                for (auto childPair : pair.second.data(gs)->members()) {
-                    if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
-                        hadPrintableChild = true;
-                        break;
-                    }
-                }
-                if (!hadPrintableChild) {
-                    continue;
-                }
-            }
-
-            auto str = pair.second.data(gs)->toStringWithOptions(gs, tabs + 1, showFull, showRaw);
-            ENFORCE(!str.empty());
-            fmt::format_to(buf, "{}", move(str));
+    for (auto pair : membersStableOrderSlow(gs)) {
+        if (!pair.second.exists()) {
+            ENFORCE(ref(gs) == core::Symbols::root());
+            continue;
         }
-    } else {
+
+        if (pair.first == Names::singleton() || pair.first == Names::attached() ||
+            pair.first == Names::classMethods()) {
+            continue;
+        }
+
+        if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
+            bool hadPrintableChild = false;
+            for (auto childPair : pair.second.data(gs)->members()) {
+                if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
+                    hadPrintableChild = true;
+                    break;
+                }
+            }
+            if (!hadPrintableChild) {
+                continue;
+            }
+        }
+
+        auto str = pair.second.data(gs)->toStringWithOptions(gs, tabs + 1, showFull, showRaw);
+        ENFORCE(!str.empty());
+        fmt::format_to(buf, "{}", move(str));
+    }
+    if (isMethod()) {
         for (auto &arg : arguments()) {
             auto str = arg.toString(gs);
             ENFORCE(!str.empty());
@@ -803,6 +811,9 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     }
     SymbolRef selfRef = this->ref(gs);
 
+    // avoid using `this` after the call to gs.enterTypeMember
+    auto selfLoc = this->loc();
+
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
     singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
     SymbolData singletonInfo = singleton.data(gs);
@@ -811,6 +822,14 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singletonInfo->members()[Names::attached()] = selfRef;
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
+
+    auto tp = gs.enterTypeMember(selfLoc, singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+
+    // Initialize the bounds of AttachedClass as todo, as they will be updated
+    // to the externalType of the attached class for the upper bound, and bottom
+    // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
+    auto todo = make_type<ClassType>(Symbols::todo());
+    tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
 
     selfRef.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;
@@ -1043,8 +1062,9 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
             const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
         ENFORCE(current == current2);
         for (auto &e : members()) {
-            ENFORCE(e.first.exists(), "symbol without a name in scope");
-            ENFORCE(e.second.exists(), "name corresponding to a <none> in scope");
+            ENFORCE(e.first.exists(), name.toString(gs) + " has a member symbol without a name");
+            ENFORCE(e.second.exists(),
+                    name.toString(gs) + "." + e.first.toString(gs) + " corresponds to a core::Symbols::noSymbol()");
         }
     }
     if (this->isMethod()) {
@@ -1114,20 +1134,23 @@ u4 Symbol::hash(const GlobalState &gs) const {
     return result;
 }
 
-// Bitmask for all method flags ignored when calculating the shape hash of a method symbol.
-constexpr u4 METHOD_FLAGS_IGNORED_IN_SHAPE_HASH = Symbol::Flags::METHOD_GENERATED_SIG;
-
 u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     ENFORCE(isMethod());
 
     u4 result = _hash(name.data(gs)->shortName(gs));
-    // Mark ignored flags to ON for shape hash.
-    result = mix(result, this->flags | METHOD_FLAGS_IGNORED_IN_SHAPE_HASH);
+    result = mix(result, this->flags);
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
     result = mix(result, this->hasSig());
     for (auto &arg : this->methodArgumentHash(gs)) {
         result = mix(result, arg);
+    }
+
+    if (name == core::Names::unresolvedAncestors()) {
+        // This is a synthetic method that encodes the superclasses of its owning class in its return type.
+        // If the return type changes, we must take the slow path.
+        ENFORCE(resultType);
+        result = mix(result, resultType->hash(gs));
     }
 
     return result;
@@ -1194,8 +1217,24 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
     fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
         auto lhsShort = lhs.first.data(gs)->shortName(gs);
         auto rhsShort = rhs.first.data(gs)->shortName(gs);
-        return lhsShort < rhsShort ||
-               (lhsShort == rhsShort && lhs.first.data(gs)->showRaw(gs) < rhs.first.data(gs)->showRaw(gs));
+        auto compareShort = lhsShort.compare(rhsShort);
+        if (compareShort != 0) {
+            return compareShort < 0;
+        }
+        auto lhsRaw = lhs.first.data(gs)->showRaw(gs);
+        auto rhsRaw = rhs.first.data(gs)->showRaw(gs);
+        auto compareRaw = lhsRaw.compare(rhsRaw);
+        if (compareRaw != 0) {
+            return compareRaw < 0;
+        }
+        auto lhsSym = lhs.second.data(gs)->showRaw(gs);
+        auto rhsSym = rhs.second.data(gs)->showRaw(gs);
+        auto compareSym = lhsSym.compare(rhsSym);
+        if (compareSym != 0) {
+            return compareSym < 0;
+        }
+        ENFORCE(false, "no stable sort");
+        return 0;
     });
     return result;
 }

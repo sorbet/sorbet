@@ -1,0 +1,6 @@
+s(:def, :f,
+  s(:args,
+    s(:optarg, :foo,
+      s(:int, "1")),
+    s(:optarg, :bar,
+      s(:int, "2"))), nil)

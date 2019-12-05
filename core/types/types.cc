@@ -782,7 +782,8 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags) : argFlags(argFlags), fun(fun) {}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags, int rubyBlockId)
+    : argFlags(argFlags), fun(fun), rubyBlockId(rubyBlockId) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;
@@ -855,6 +856,70 @@ TypePtr Types::widen(Context ctx, const TypePtr &type) {
         },
         [&](Type *tp) { ret = type; });
     ENFORCE(ret);
+    return ret;
+}
+
+TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
+    ENFORCE(type != nullptr);
+
+    TypePtr ret;
+
+    typecase(
+        type.get(), [&](ClassType *klass) { ret = type; }, [&](TypeVar *tv) { ret = type; },
+        [&](LambdaParam *tv) { ret = type; }, [&](SelfType *self) { ret = type; },
+        [&](LiteralType *lit) { ret = type; },
+        [&](AndType *andType) {
+            ret =
+                AndType::make_shared(unwrapSelfTypeParam(ctx, andType->left), unwrapSelfTypeParam(ctx, andType->right));
+        },
+        [&](OrType *orType) {
+            ret = OrType::make_shared(unwrapSelfTypeParam(ctx, orType->left), unwrapSelfTypeParam(ctx, orType->right));
+        },
+        [&](ShapeType *shape) {
+            std::vector<TypePtr> values;
+            values.reserve(shape->values.size());
+
+            for (auto &value : shape->values) {
+                values.emplace_back(unwrapSelfTypeParam(ctx, value));
+            }
+
+            ret = make_type<ShapeType>(unwrapSelfTypeParam(ctx, shape->underlying_), shape->keys, std::move(values));
+        },
+        [&](TupleType *tuple) {
+            std::vector<TypePtr> elems;
+            elems.reserve(tuple->elems.size());
+
+            for (auto &value : tuple->elems) {
+                elems.emplace_back(unwrapSelfTypeParam(ctx, value));
+            }
+
+            ret = make_type<TupleType>(unwrapSelfTypeParam(ctx, tuple->underlying_), std::move(elems));
+        },
+        [&](MetaType *meta) { ret = make_type<MetaType>(unwrapSelfTypeParam(ctx, meta->wrapped)); },
+        [&](AppliedType *appliedType) {
+            vector<TypePtr> newTargs;
+            newTargs.reserve(appliedType->targs.size());
+            for (const auto &t : appliedType->targs) {
+                newTargs.emplace_back(unwrapSelfTypeParam(ctx, t));
+            }
+            ret = make_type<AppliedType>(appliedType->klass, newTargs);
+        },
+        [&](SelfTypeParam *param) {
+            auto sym = param->definition;
+            if (sym.data(ctx)->owner == ctx.owner) {
+                ENFORCE(cast_type<LambdaParam>(sym.data(ctx)->resultType.get()) != nullptr);
+                ret = sym.data(ctx)->resultType;
+            } else {
+                ret = type;
+            }
+        },
+        [&](Type *tp) {
+            ENFORCE(false, "Unhandled case: {}", type->toString(ctx));
+            Exception::notImplemented();
+        });
+
+    ENFORCE(ret != nullptr);
+
     return ret;
 }
 

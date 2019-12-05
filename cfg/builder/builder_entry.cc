@@ -1,5 +1,6 @@
 #include "ast/Helpers.h"
 #include "cfg/builder/builder.h"
+#include "common/sort.h"
 #include "core/Names.h"
 
 using namespace std;
@@ -20,7 +21,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     u4 temporaryCounter = 1;
     UnorderedMap<core::SymbolRef, core::LocalVariable> aliases;
     UnorderedMap<core::NameRef, core::LocalVariable> discoveredUndeclaredFields;
-    CFGContext cctx(ctx, *res.get(), core::LocalVariable(), 0, nullptr, nullptr, nullptr, aliases,
+    CFGContext cctx(ctx, *res.get(), core::LocalVariable(), 0, 0, nullptr, nullptr, nullptr, aliases,
                     discoveredUndeclaredFields, temporaryCounter);
 
     core::LocalVariable retSym = cctx.newTemporary(core::Names::returnMethodTemp());
@@ -123,6 +124,12 @@ void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
 CFGContext CFGContext::withTarget(core::LocalVariable target) {
     auto ret = CFGContext(*this);
     ret.target = target;
+    return ret;
+}
+
+CFGContext CFGContext::withRubyBlockId(int blockId) {
+    auto ret = CFGContext(*this);
+    ret.rubyBlockId = blockId;
     return ret;
 }
 

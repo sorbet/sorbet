@@ -1,0 +1,16 @@
+# typed: true
+
+de # error: does not exist
+# ^ apply-completion: [A] item: 0
+
+clas # error: does not exist
+#   ^ apply-completion: [B] item: 0
+
+modul # error: does not exist
+#    ^ apply-completion: [C] item: 0
+
+i # error: does not exist
+#^ apply-completion: [D] item: 0
+
+cas # error: does not exist
+#  ^ apply-completion: [E] item: 0

@@ -51,7 +51,7 @@
 # A library like
 # [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) can be
 # used to process command-line arguments.
-::ARGV = T.let(T.unsafe(nil), Array)
+::ARGV = T.let(T.unsafe(nil), T::Array[T.untyped])
 ::CROSS_COMPILING = T.let(T.unsafe(nil), NilClass)
 # An obsolete alias of `false`
 ::FALSE = T.let(T.unsafe(nil), FalseClass)

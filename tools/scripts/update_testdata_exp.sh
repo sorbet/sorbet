@@ -17,21 +17,23 @@ trap 'rm -f "$COMMAND_FILE"' EXIT
 passes=(
   parse-tree
   parse-tree-json
-  ast
-  ast-raw
-  dsl-tree
-  dsl-tree-raw
+  desugar-tree
+  desugar-tree-raw
+  rewrite-tree
+  rewrite-tree-raw
   symbol-table
   symbol-table-raw
   name-tree
   name-tree-raw
   resolve-tree
   resolve-tree-raw
+  flatten-tree
+  flatten-tree-raw
+  ast
+  ast-raw
   cfg
   cfg-raw
   cfg-json
-  flattened-tree
-  flattened-tree-raw
   autogen
   document-symbols
 )
@@ -64,7 +66,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
       candidate="$basename.$pass.exp"
       args=()
       if [ "$pass" = "autogen" ]; then
-        args=("--stop-after=namer --skip-dsl-passes")
+        args=("--stop-after=namer --skip-rewriter-passes")
       fi
       if ! [ -e "$candidate" ]; then
         continue

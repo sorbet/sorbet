@@ -135,7 +135,7 @@ lexer::lexer(diagnostics_t &diag, ruby_version version, const std::string& sourc
   , sharp_s(nullptr)
   , newline_s(nullptr)
   , paren_nest(0)
-  , command_state(false)
+  , command_start(true)
   , num_base(0)
   , num_digits_s(nullptr)
   , num_suffix_s(nullptr)
@@ -149,6 +149,8 @@ lexer::lexer(diagnostics_t &diag, ruby_version version, const std::string& sourc
   stack.resize(16);
 
   static_env.push(environment());
+
+  cs_before_block_comment = lex_en_line_begin;
 }
 
 void lexer::check_stack_capacity() {
@@ -161,8 +163,8 @@ int lexer::stack_pop() {
   return stack[--top];
 }
 
-int lexer::arg_or_cmdarg() {
-  if (command_state) {
+int lexer::arg_or_cmdarg(int cmd_state) {
+  if (cmd_state) {
     return lex_en_expr_cmdarg;
   } else {
     return lex_en_expr_arg;
@@ -324,6 +326,8 @@ static const lexer::token_table_entry KEYWORDS_BEGIN[] = {
   { "until", token_type::kUNTIL },
   { "rescue", token_type::kRESCUE },
   { "defined?", token_type::kDEFINED },
+  { "BEGIN", token_type::klBEGIN },
+  { "END", token_type::klEND },
   { "class", token_type::kCLASS },
   { "module", token_type::kMODULE },
   { "def", token_type::kDEF },
@@ -435,7 +439,8 @@ token_t lexer::advance_() {
     return token;
   }
 
-  command_state = (cs == lex_en_expr_value || cs == lex_en_line_begin);
+  int cmd_state = command_start;
+  command_start = false;
 
   const char* p = _p;
   const char* pe = _pe;
@@ -444,6 +449,10 @@ token_t lexer::advance_() {
   const char* tm = NULL;
   const char* heredoc_e = NULL;
   const char* new_herebody_s = NULL;
+
+  const char* ident_ts = NULL;
+  const char* ident_te = NULL;
+  std::string ident_tok;
 
   %% write exec;
 
@@ -563,26 +572,30 @@ int lexer::push_literal(Args&&... args) {
 
   auto& literal = literal_stack.top();
 
-  if (literal.words() && literal.backslash_delimited()) {
-    if (literal.interpolate()) {
+  return next_state_for_literal(literal);
+}
+
+int lexer::next_state_for_literal(literal &lit) {
+  if (lit.words() && lit.backslash_delimited()) {
+    if (lit.interpolate()) {
       return lex_en_interp_backslash_delimited_words;
     } else {
       return lex_en_plain_backslash_delimited_words;
     }
-  } else if (literal.words() && !literal.backslash_delimited()) {
-    if (literal.interpolate()) {
+  } else if (lit.words() && !lit.backslash_delimited()) {
+    if (lit.interpolate()) {
       return lex_en_interp_words;
     } else {
       return lex_en_plain_words;
     }
-  } else if (!literal.words() && literal.backslash_delimited()) {
-    if (literal.interpolate()) {
+  } else if (!lit.words() && lit.backslash_delimited()) {
+    if (lit.interpolate()) {
       return lex_en_interp_backslash_delimited;
     } else {
       return lex_en_plain_backslash_delimited;
     }
   } else {
-    if (literal.interpolate()) {
+    if (lit.interpolate()) {
       return lex_en_interp_string;
     } else {
       return lex_en_plain_string;
@@ -615,6 +628,10 @@ int lexer::pop_literal() {
 
 void lexer::set_state_expr_beg() {
   cs = lex_en_expr_beg;
+}
+
+void lexer::set_state_expr_end() {
+  cs = lex_en_expr_end;
 }
 
 void lexer::set_state_expr_endarg() {
@@ -1202,7 +1219,7 @@ void lexer::set_state_expr_value() {
         }
 
         fhold;
-        fnext *stack_pop();
+        fnext *next_state_for_literal(current_literal);
         fbreak;
       }
     }
@@ -1221,7 +1238,9 @@ void lexer::set_state_expr_value() {
     }
 
     current_literal.start_interp_brace();
-    fcall expr_value;
+    command_start = true;
+    fnext expr_value;
+    fbreak;
   }
 
   # Actual string parsers are simply combined from the primitives defined
@@ -1312,13 +1331,15 @@ void lexer::set_state_expr_value() {
         }
 
         emit(token_type::tREGEXP_OPT, options);
-        fnext expr_end; fbreak;
+        fnext expr_end;
+        fbreak;
       };
 
       any
       => {
         emit(token_type::tREGEXP_OPT, tok(ts, te - 1), ts, te - 1);
-        fhold; fgoto expr_end;
+        fhold;
+        fgoto expr_end;
       };
   *|;
 
@@ -1437,7 +1458,7 @@ void lexer::set_state_expr_value() {
     if (is_declared(ident)) {
       fnext expr_endfn; fbreak;
     } else {
-      fnext *arg_or_cmdarg(); fbreak;
+      fnext *arg_or_cmdarg(cmd_state); fbreak;
     }
   }
 
@@ -1560,18 +1581,84 @@ void lexer::set_state_expr_value() {
   #
   # Transitions to `expr_arg` afterwards.
   #
+  # KEEP IN SYNC WITH expr_dot_after_newline!
+  #
   expr_dot := |*
       constant
       => { emit(token_type::tCONSTANT);
-           fnext *arg_or_cmdarg(); fbreak; };
+           fnext *arg_or_cmdarg(cmd_state); fbreak; };
 
       call_or_var
       => { emit(token_type::tIDENTIFIER);
-           fnext *arg_or_cmdarg(); fbreak; };
+           fnext *arg_or_cmdarg(cmd_state); fbreak; };
 
       bareword ambiguous_fid_suffix
       => { emit(token_type::tFID, tok(ts, tm), ts, tm);
-           fnext *arg_or_cmdarg(); p = tm - 1; fbreak; };
+           fnext *arg_or_cmdarg(cmd_state); p = tm - 1; fbreak; };
+
+      # See the comment in `expr_fname`.
+      operator_fname      |
+      operator_arithmetic |
+      operator_rest
+      => { emit_table(PUNCTUATION);
+           fnext expr_arg; fbreak; };
+
+      # This breaks compatibility with Ruby for better partial parses (useful
+      # for LSP especially). See comment for expr_dot_after_newline below.
+      w_newline
+      => { fhold; fgoto expr_dot_after_newline; };
+
+      w_any;
+
+      c_any
+      => { fhold; fgoto expr_end; };
+
+      c_eof => do_eof;
+  *|;
+
+  # KEEP IN SYNC WITH expr_dot!
+  #
+  # This state breaks from valid Ruby syntax, but in a way that enables Sorbet
+  # to recover better from parse errors. Recovering from parse errors is
+  # important because it lets us service LSP queries faster.
+  #
+  # Specifically, this state makes is so that any keyword seen after w_newline
+  # is emitted as a keyword (like kEND) instead of a tIDENTIFIER. Examples:
+  #
+  #   # Valid Ruby, valid in Sorbet (no newline between '.' and 'end')
+  #   def foo
+  #     x.end
+  #   end
+  #
+  #   # Parse error in Ruby and Sorbet, but Sorbet at least sees the method def
+  #   # with an empty body (Ruby wouldn't even see an empty method def)
+  #   def foo
+  #     x.
+  #   end
+  #
+  #   # Valid Ruby, not valid in Sorbet (newline between '.' and 'end')
+  #   def foo
+  #     x.
+  #       end
+  #   end
+  #
+  expr_dot_after_newline := |*
+      constant
+      => { emit(token_type::tCONSTANT);
+           fnext *arg_or_cmdarg(cmd_state); fbreak; };
+
+      # This is different from expr_dot. Here, keywords are NOT identifiers.
+      keyword
+      => { emit_table(KEYWORDS);
+           fnext expr_end; fbreak; };
+
+      call_or_var
+      => { emit(token_type::tIDENTIFIER);
+           fnext *arg_or_cmdarg(cmd_state); fbreak; };
+
+      bareword ambiguous_fid_suffix
+      => { emit(token_type::tFID, tok(ts, tm), ts, tm);
+           fnext *arg_or_cmdarg(cmd_state); p = tm - 1; fbreak; };
 
       # See the comment in `expr_fname`.
       operator_fname      |
@@ -1626,12 +1713,13 @@ void lexer::set_state_expr_value() {
       w_space* e_lbrace
       => {
         if (!lambda_stack.empty() && lambda_stack.top() == paren_nest) {
-          p = ts - 1;
-          fgoto expr_end;
+          lambda_stack.pop();
+          emit(token_type::tLAMBEG, "{", te - 1, te);
         } else {
           emit(token_type::tLCURLY, "{", te - 1, te);
-          fnext expr_value; fbreak;
         }
+        command_start = true;
+        fnext expr_value; fbreak;
       };
 
       #
@@ -1791,7 +1879,8 @@ void lexer::set_state_expr_value() {
         } else {
           emit(token_type::tLBRACE_ARG, "{");
         }
-        fnext expr_value;
+        command_start = true;
+        fnext expr_value; fbreak;
       };
 
       'do'
@@ -1838,10 +1927,10 @@ void lexer::set_state_expr_value() {
   # explodes.
   #
   expr_beg := |*
-      # +5, -5
-      [+\-][0-9]
+      # +5, -5, - 5
+      [+\-] w_any* [0-9]
       => {
-        emit(token_type::tUNARY_OP, tok(ts, ts + 1), ts, ts + 1);
+        emit(token_type::tUNARY_NUM, tok(ts, ts + 1), ts, ts + 1);
         fhold; fnext expr_end; fbreak;
       };
 
@@ -1976,6 +2065,13 @@ void lexer::set_state_expr_value() {
       # SYMBOL LITERALS
       #
 
+      # :&&, :||
+      ':' ('&&' | '||') => {
+        fhold; fhold;
+        emit(token_type::tSYMBEG, tok(ts, ts + 1), ts, ts + 1);
+        fgoto expr_fname;
+      };
+
       # :"bar", :'baz'
       ':' ['"] # '
       => {
@@ -1988,6 +2084,14 @@ void lexer::set_state_expr_value() {
         }
 
         fgoto *push_literal(type, std::string(ts + 1, 1), ts);
+      };
+
+      # :!@ is :!
+      # :~@ is :~
+      ':' [!~] '@'
+      => {
+        emit(token_type::tSYMBEG, tok(ts + 1, ts + 2), ts, te);
+        fnext expr_end; fbreak;
       };
 
       ':' bareword ambiguous_symbol_suffix
@@ -2067,6 +2171,7 @@ void lexer::set_state_expr_value() {
       => {
         if (!lambda_stack.empty() && lambda_stack.top() == paren_nest) {
           lambda_stack.pop();
+          command_start = true;
           emit(token_type::tLAMBEG, "{");
         } else {
           emit(token_type::tLBRACE, "{");
@@ -2099,6 +2204,7 @@ void lexer::set_state_expr_value() {
       # if a: Statement if.
       keyword_modifier
       => { emit_table(KEYWORDS_BEGIN);
+           command_start = true;
            fnext expr_value; fbreak; };
 
       #
@@ -2122,7 +2228,7 @@ void lexer::set_state_expr_value() {
           if (is_declared(ident)) {
             fnext expr_end;
           } else {
-            fnext *arg_or_cmdarg();
+            fnext *arg_or_cmdarg(cmd_state);
           }
         } else {
           emit(token_type::tLABEL, tok(ts, te - 2), ts, te - 1);
@@ -2148,6 +2254,17 @@ void lexer::set_state_expr_value() {
       call_or_var
       => local_ident;
 
+      (call_or_var - keyword)
+        % { ident_tok = tok(ts, te); ident_ts = ts; ident_te = te; }
+      w_space+ '('
+      => {
+        emit(token_type::tIDENTIFIER, ident_tok, ident_ts, ident_te);
+        p = ident_te - 1;
+
+        fnext expr_cmdarg;
+        fbreak;
+      };
+
       #
       # WHITESPACE
       #
@@ -2156,6 +2273,7 @@ void lexer::set_state_expr_value() {
 
       e_heredoc_nl '=begin' ( c_space | c_nl_zlen )
       => { p = ts - 1;
+           cs_before_block_comment = cs;
            fgoto line_begin; };
 
       #
@@ -2256,6 +2374,7 @@ void lexer::set_state_expr_value() {
             emit_do();
           }
         }
+        command_start = true;
 
         fnext expr_value; fbreak;
       };
@@ -2281,6 +2400,7 @@ void lexer::set_state_expr_value() {
       # elsif b:c: elsif b(:c)
       keyword_with_value
       => { emit_table(KEYWORDS);
+           command_start = true;
            fnext expr_value; fbreak; };
 
       keyword_with_mid
@@ -2306,7 +2426,7 @@ void lexer::set_state_expr_value() {
           emit(token_type::tIDENTIFIER, ident);
 
           if (!is_declared(ident)) {
-            fnext *arg_or_cmdarg();
+            fnext *arg_or_cmdarg(cmd_state);
           }
         } else {
           emit(token_type::k__ENCODING__, "__ENCODING__");
@@ -2423,7 +2543,7 @@ void lexer::set_state_expr_value() {
 
       constant
       => { emit(token_type::tCONSTANT);
-           fnext *arg_or_cmdarg(); fbreak; };
+           fnext *arg_or_cmdarg(cmd_state); fbreak; };
 
       constant ambiguous_const_suffix
       => { emit(token_type::tCONSTANT, tok(ts, tm), ts, tm);
@@ -2460,20 +2580,34 @@ void lexer::set_state_expr_value() {
       # OPERATORS
       #
 
-      ( e_lparen
-      | operator_arithmetic
-      | operator_rest
-      )
+      '*' | '=>'
+      => {
+        emit_table(PUNCTUATION);
+        fgoto expr_value;
+      };
+
+      # When '|', '~', '!', '=>' are used as operators
+      # they do not accept any symbols (or quoted labels) after.
+      # Other binary operators accept it.
+      ( operator_arithmetic | operator_rest ) - ( '|' | '~' | '!' | '*' )
+      => {
+        emit_table(PUNCTUATION);
+        fnext expr_value; fbreak;
+      };
+
+      ( e_lparen | '|' | '~' | '!' )
       => { emit_table(PUNCTUATION);
            fnext expr_beg; fbreak; };
 
       e_rbrace | e_rparen | ']'
       => {
         emit_table(PUNCTUATION);
-        cond.lexpop(); cmdarg.lexpop();
+
+        cond.pop();
+        cmdarg.pop();
 
         if (ts[0] == '}' || ts[0] == ']') {
-          fnext expr_endarg;
+          fnext expr_end;
         } else { // ')'
           // this was commented out in the original lexer.rl:
           // fnext expr_endfn; ?
@@ -2509,6 +2643,7 @@ void lexer::set_state_expr_value() {
 
       ';'
       => { emit(token_type::tSEMI, ";");
+           command_start = true;
            fnext expr_value; fbreak; };
 
       '\\' c_line {
@@ -2544,7 +2679,7 @@ void lexer::set_state_expr_value() {
       '=end' c_line* c_nl_zlen
       => {
         emit_comment(eq_begin_s, te);
-        fgoto line_begin;
+        fgoto *cs_before_block_comment;
       };
 
       c_line* c_nl;
@@ -2567,7 +2702,7 @@ void lexer::set_state_expr_value() {
       => { p = pe - 3; };
 
       c_any
-      => { fhold; fgoto expr_value; };
+      => { cmd_state = true; fhold; fgoto expr_value; };
 
       c_eof => do_eof;
   *|;
@@ -2576,6 +2711,7 @@ void lexer::set_state_expr_value() {
 
 token_t lexer::advance() {
   auto tok = advance_();
+
   last_token_s = tok->start();
   last_token_e = tok->end();
   return tok;
