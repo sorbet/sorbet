@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# exit on the first error
+# this makes sure we don't create a java gem missing
+# either linux or mac
+set -o errexit
+
 # Based on the output of build-static-release.sh
 # _out_/gems/ should have the Linux & Mac sorbet-static gem
 mkdir -p gems/sorbet-static/libexec
