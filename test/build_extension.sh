@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
+shopt -s nullglob
 
 # --- begin runfiles.bash initialization ---
 # Copy-pasted from Bazel's Bash runfiles library https://github.com/bazelbuild/bazel/blob/defd737761be2b154908646121de47c30434ed51/tools/bash/runfiles/runfiles.bash
@@ -27,6 +28,7 @@ fi
 # --- end runfiles.bash initialization ---
 
 # Find logging with rlocation, as this script is run from a genrule
+# shellcheck disable=SC1090
 source "$(rlocation com_stripe_sorbet_llvm/test/logging.sh)"
 
 # Positional arguments
@@ -34,24 +36,24 @@ output_archive=$1
 shift 1
 
 # Sources make up the remaining input
-ruby_source=$@
+ruby_source=( "$@" )
 
 sorbet="$(rlocation com_stripe_sorbet_llvm/main/sorbet)"
 
 info "--- Build Config ---"
 info "* Archive: ${output_archive}"
-info "* Source:  ${ruby_source}"
+info "* Source:  ${ruby_source[*]}"
 info "* Sorbet:  ${sorbet}"
 
 info "--- Building Extension ---"
 mkdir target
 if ! $sorbet --silence-dev-message --no-error-count --llvm-ir-folder=target \
-  --force-compiled ${ruby_source}; then
+  --force-compiled "${ruby_source[@]}"; then
   fatal "* Failed to build extension!"
 fi
 
 found=
-for image in $(find target/ -maxdepth 1 -name "*.so" -o -name "*.bundle"); do
+for image in target/*.{so,bundle}; do
   found=1
   attn "* ${image}"
 done
@@ -62,4 +64,4 @@ fi
 info "--- Archiving Output ---"
 tar -czv -f "$output_archive" target
 
-success "* Built ${ruby_source}"
+success "* Built ${ruby_source[*]}"

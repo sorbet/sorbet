@@ -11,6 +11,6 @@ rb=$1
 
 llvmir="$PWD/llvmir"
 
-pushd $base > /dev/null
+pushd "$base" > /dev/null
 tools/scripts/lldb.sh "$llvmir" "$rb"
 popd > /dev/null

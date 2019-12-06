@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+# This script is always run from the repo root, so `logging.sh` doesn't exist
+# where shellcheck thinks it does.
+# shellcheck disable=SC1091
 source "test/logging.sh"
 
 root="$PWD"
@@ -14,26 +17,26 @@ shift 4
 
 # sources make up the remaining argumenets
 rbmain=$1
-rb=$@
+rb=( "$@" )
 
 info "--- Debugging ---"
 info "* Run ruby locally"
-for source in $rb; do
+for source in "${rb[@]}"; do
   attn "    test/run_test.sh $source"
 done
 
 info "* Run sorbet"
-for source in $rb; do
+for source in "${rb[@]}"; do
   attn "    test/run_sorbet.sh $source"
 done
 
 info "* Debug compiled code"
-for source in $rb; do
+for source in "${rb[@]}"; do
   attn "    test/debug_compiled.sh $source"
 done
 
 info "--- Test Config ---"
-info "* Source: ${rb}"
+info "* Source: ${rb[*]}"
 info "* Oracle: ${rbout}"
 info "* Exit:   ${rbexit}"
 info "* Build:  ${build_archive}"
@@ -101,7 +104,7 @@ if [[ "$code" != "$rbcode" ]]; then
 fi
 
 info "--- Checking Stdout ---"
-if ! diff -au "$rbout" stdout.log > stdout.diff; then
+if ! diff -au stdout.log "$rbout" > stdout.diff; then
   error "* Stdout diff"
   cat stdout.diff
   info  "* Stderr"

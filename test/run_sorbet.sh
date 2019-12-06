@@ -15,7 +15,7 @@ fi
 mkdir -p llvmir
 output=$PWD/llvmir
 
-pushd $base > /dev/null
+pushd "$base" > /dev/null
 if [ ! -f ./bazel-bin/main/sorbet ]; then
   bazel build //main:sorbet
 fi

@@ -11,7 +11,7 @@ if [ -z "$rb" ]; then
   exit 1
 fi
 
-pushd $base > /dev/null
+pushd "$base" > /dev/null
 
 if [ ! -f ./bazel-bin/external/ruby_2_6_3/ruby ]; then
   bazel build @ruby_2_6_3//:ruby
