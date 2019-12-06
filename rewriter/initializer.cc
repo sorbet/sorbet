@@ -31,6 +31,9 @@ bool isSig(const ast::Send *send) {
     return true;
 }
 
+// We can't actually use a T.type_parameter type in the body of a method, so this prevents us from copying those.
+//
+// TODO: remove once https://github.com/sorbet/sorbet/issues/1715 is fixed
 bool isCopyableType(const ast::Expression *typeExpr) {
     auto send = ast::cast_tree_const<ast::Send>(typeExpr);
     if (send && send->fun == core::Names::typeParameter()) {
