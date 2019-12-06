@@ -18,7 +18,9 @@ git_commit_count=$(git rev-list --count HEAD)
 prefix="0.4"
 release_version="$prefix.${git_commit_count}"
 
-for platform in universal-darwin x86_64-linux
+# we pin to universal-darwin-18 but it shouldn't matter
+# the specific version; we just want one mac binary
+for platform in universal-darwin-18 x86_64-linux
 do
   gem unpack _out_/gems/sorbet-static-"${release_version}"-${platform}*.gem
 
@@ -27,7 +29,7 @@ do
         mv sorbet-static-"${release_version}"-${platform}/libexec/sorbet  gems/sorbet-static/libexec/linux.sorbet
     ;;
 
-    universal-darwin)
+    universal-darwin-18)
         mv sorbet-static-"${release_version}"-${platform}*/libexec/sorbet gems/sorbet-static/libexec/mac.sorbet
     ;;
   esac
