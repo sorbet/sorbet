@@ -473,7 +473,6 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
 
 TypecheckRun LSPTypechecker::retypecheck(vector<core::FileRef> frefs) const {
     LSPFileUpdates updates = getNoopUpdate(move(frefs));
-    auto workers = WorkerPool::create(0, *config->logger);
     return runTypechecking(move(updates));
 }
 
