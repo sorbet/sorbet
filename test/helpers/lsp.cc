@@ -242,10 +242,12 @@ void assertResponseError(int code, string_view msg, const LSPMessage &response) 
 void assertNotificationMessage(LSPMethod expectedMethod, const LSPMessage &response) {
     ASSERT_TRUE(response.isNotification()) << fmt::format(
         "Expected a notification, but received the following response message instead: {}", response.toJSON());
-    ASSERT_EQ(expectedMethod, response.method()) << "Unexpected method on notification message.";
+    ASSERT_EQ(expectedMethod, response.method())
+        << fmt::format("Unexpected method on notification message: expected {} but received {}.",
+                       convertLSPMethodToString(expectedMethod), convertLSPMethodToString(response.method()));
 }
 
-optional<PublishDiagnosticsParams *> getPublishDiagnosticParams(NotificationMessage &notifMsg) {
+optional<const PublishDiagnosticsParams *> getPublishDiagnosticParams(const NotificationMessage &notifMsg) {
     auto publishDiagnosticParams = get_if<unique_ptr<PublishDiagnosticsParams>>(&notifMsg.params);
     if (!publishDiagnosticParams || !*publishDiagnosticParams) {
         ADD_FAILURE() << "textDocument/publishDiagnostics message is missing parameters.";
@@ -335,13 +337,14 @@ unique_ptr<LSPMessage> makeOpen(string_view uri, string_view contents, int versi
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params)));
 }
 
-unique_ptr<LSPMessage> makeChange(string_view uri, string_view contents, int version) {
+unique_ptr<LSPMessage> makeChange(string_view uri, string_view contents, int version, bool cancellationExpected) {
     auto textDoc = make_unique<VersionedTextDocumentIdentifier>(string(uri), static_cast<double>(version));
     auto textDocChange = make_unique<TextDocumentContentChangeEvent>(string(contents));
     vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;
     textChanges.push_back(move(textDocChange));
 
     auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
+    didChangeParams->sorbetCancellationExpected = cancellationExpected;
     auto didChangeNotif =
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
     return make_unique<LSPMessage>(move(didChangeNotif));

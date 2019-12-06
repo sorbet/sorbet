@@ -481,6 +481,7 @@ TEST_P(ProtocolTest, DoesNotCrashOnNonWorkspaceURIs) {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
 
+    // Manually invoke to customize rootURI and rootPath.
     auto initializeResponses = sorbet::test::initializeLSP(
         "/Users/jvilk/stripe/areallybigfoldername", "file://Users/jvilk/stripe/areallybigfoldername", *lspWrapper,
         nextId, supportsMarkdown, make_optional(move(initOptions)));

@@ -30,6 +30,8 @@ struct LSPFileUpdates {
     std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
     // (Optional) Updated global state object to use to typecheck this update.
     std::optional<std::unique_ptr<core::GlobalState>> updatedGS;
+    // (Used in tests) Ensures that a slow path typecheck on these updates waits until it gets cancelled.
+    bool cancellationExpected = false;
 };
 
 class DeserializationError : public std::runtime_error {

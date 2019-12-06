@@ -640,7 +640,11 @@ void updateDiagnostics(const LSPConfiguration &config, UnorderedMap<string, stri
             << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
 
         // Will explicitly overwrite older diagnostics that are irrelevant.
-        diagnostics[filename] = move(diagnosticParams->diagnostics);
+        vector<unique_ptr<Diagnostic>> copiedDiagnostics;
+        for (const auto &d : diagnosticParams->diagnostics) {
+            copiedDiagnostics.push_back(d->copy());
+        }
+        diagnostics[filename] = move(copiedDiagnostics);
     }
 }
 
@@ -1030,14 +1034,18 @@ TEST_P(LSPTest, All) {
             for (auto &r : responses) {
                 if (r->isNotification()) {
                     if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
-                        foundTypecheckRunInfo = true;
                         auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
-                        if (assertSlowPath.value_or(false)) {
-                            EXPECT_EQ(params->tookFastPath, false)
-                                << errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.";
-                        }
-                        if (assertFastPath.has_value()) {
-                            (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                        // Ignore started messages. Note that cancelation messages cannot occur in test_corpus since
+                        // test_corpus only runs LSP in single-threaded mode.
+                        if (params->status == SorbetTypecheckRunStatus::Ended) {
+                            foundTypecheckRunInfo = true;
+                            if (assertSlowPath.value_or(false)) {
+                                EXPECT_EQ(params->fastPath, false)
+                                    << errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.";
+                            }
+                            if (assertFastPath.has_value()) {
+                                (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                            }
                         }
                     } else if (r->method() != LSPMethod::TextDocumentPublishDiagnostics) {
                         ADD_FAILURE() << errorPrefix

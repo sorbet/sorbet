@@ -156,4 +156,23 @@ unique_ptr<Position> Position::copy() const {
     return make_unique<Position>(line, character);
 }
 
+unique_ptr<DiagnosticRelatedInformation> DiagnosticRelatedInformation::copy() const {
+    return make_unique<DiagnosticRelatedInformation>(location->copy(), message);
+}
+
+unique_ptr<Diagnostic> Diagnostic::copy() const {
+    auto d = make_unique<Diagnostic>(range->copy(), message);
+    d->code = code;
+    d->severity = severity;
+    d->source = source;
+    if (relatedInformation.has_value()) {
+        vector<unique_ptr<DiagnosticRelatedInformation>> cloneRelatedInformation;
+        for (const auto &ri : *relatedInformation) {
+            cloneRelatedInformation.push_back(ri->copy());
+        }
+        d->relatedInformation = move(cloneRelatedInformation);
+    }
+    return d;
+}
+
 } // namespace sorbet::realmain::lsp
