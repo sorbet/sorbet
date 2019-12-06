@@ -47,17 +47,17 @@ bool isCopyableType(const ast::Expression *typeExpr) {
 void maybeAddLet(core::MutableContext ctx, ast::Expression *expr,
                  const UnorderedMap<core::NameRef, ast::Expression *> &argTypeMap) {
     auto assn = ast::cast_tree<ast::Assign>(expr);
-    if (!assn) {
+    if (assn == nullptr) {
         return;
     }
 
     auto lhs = ast::cast_tree<ast::UnresolvedIdent>(assn->lhs.get());
-    if (!lhs || lhs->kind != ast::UnresolvedIdent::Instance) {
+    if (lhs == nullptr || lhs->kind != ast::UnresolvedIdent::Instance) {
         return;
     }
 
     auto rhs = ast::cast_tree<ast::UnresolvedIdent>(assn->rhs.get());
-    if (!rhs || rhs->kind != ast::UnresolvedIdent::Local) {
+    if (rhs == nullptr || rhs->kind != ast::UnresolvedIdent::Local) {
         return;
     }
 
@@ -91,17 +91,17 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
     }
     // make sure that the `sig` block looks like a valid sig block
     auto sig = ast::cast_tree_const<ast::Send>(prevStat);
-    if (!sig || !isSig(sig)) {
+    if (sig == nullptr || !isSig(sig)) {
         return;
     }
     auto block = ast::cast_tree_const<ast::Block>(sig->block.get());
-    if (!block) {
+    if (block == nullptr) {
         return;
     }
 
     // walk through, find the `params()` invocation, and get its hash
     auto argHash = findParamHash(ast::cast_tree_const<ast::Send>(block->body.get()));
-    if (!argHash) {
+    if (argHash == nullptr) {
         return;
     }
 
