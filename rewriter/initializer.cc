@@ -2,34 +2,10 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/core.h"
+#include "rewriter/util.h"
 
 using namespace std;
 namespace sorbet::rewriter {
-
-// this only looks for sigs of the 'correct' shape (i.e. sigs with blocks that contain a send that also end with `void`)
-bool isSig(const ast::Send *send) {
-    if (send->fun != core::Names::sig()) {
-        return false;
-    }
-    if (send->block.get() == nullptr) {
-        return false;
-    }
-    auto nargs = send->args.size();
-    if (nargs != 0 && nargs != 1) {
-        return false;
-    }
-    auto block = ast::cast_tree<ast::Block>(send->block.get());
-    ENFORCE(block);
-    auto body = ast::cast_tree<ast::Send>(block->body.get());
-    if (!body) {
-        return false;
-    }
-    if (body->fun != core::Names::void_()) {
-        return false;
-    }
-
-    return true;
-}
 
 // We can't actually use a T.type_parameter type in the body of a method, so this prevents us from copying those.
 //
@@ -90,8 +66,8 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
         return;
     }
     // make sure that the `sig` block looks like a valid sig block
-    auto sig = ast::cast_tree_const<ast::Send>(prevStat);
-    if (sig == nullptr || !isSig(sig)) {
+    auto sig = ASTUtil::castSig(prevStat, core::Names::void_());
+    if (sig == nullptr) {
         return;
     }
     auto block = ast::cast_tree_const<ast::Block>(sig->block.get());
