@@ -29,15 +29,8 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCodeAction(LSPTypechecker
         return response;
     }
 
-    LSPFileUpdates updates;
-    updates.canTakeFastPath = true;
-    const auto &globalStateHashes = typechecker.getFileHashes();
-    ENFORCE(file.id() < globalStateHashes.size());
-    updates.updatedFileHashes = {globalStateHashes[file.id()]};
-    updates.updatedFiles.push_back(make_shared<core::File>(string(file.data(gs).path()), string(file.data(gs).source()),
-                                                           core::File::Type::Normal));
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
-    auto run = typechecker.retypecheck(move(updates));
+    auto run = typechecker.retypecheck({file});
     auto loc = params.range->toLoc(gs, file);
     for (auto &error : run.errors) {
         if (!error->isSilenced && !error->autocorrects.empty()) {
