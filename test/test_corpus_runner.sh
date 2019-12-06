@@ -48,7 +48,6 @@ tar -xvf "${build_archive}"
 # NOTE: exp file validation could be its own test, which would allow it to
 # execute in parallel with the oracle verification.
 info "--- Checking Build ---"
-ls test/testdata/compiler
 for ext in "llo"; do
   exp=${source%.rb}.$ext.exp
   if [ -f "$exp" ]; then

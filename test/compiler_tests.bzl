@@ -58,7 +58,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             exp_sources = []
             test_sources = native.glob(["{}*.rb".format(prefix)])
         else:
-            exp_sources = native.glob(["{}.*.exp".format(path)])
+            exp_sources = native.glob(["{}.*.exp".format(prefix)])
             test_sources = [sentinel]
 
         # All of the test sources
