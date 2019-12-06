@@ -236,6 +236,15 @@ string prettyTypeForMethod(const core::GlobalState &gs, core::SymbolRef method, 
                        prettyDefForMethod(gs, method));
 }
 
+string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant, core::TypePtr type) {
+    core::TypePtr result = type;
+    if (constant.data(gs)->isTypeAlias()) {
+        // By wrapping the type in `MetaType`, it displays as `<Type: Foo>` rather than `Foo`.
+        result = core::make_type<core::MetaType>(type);
+    }
+    return result->showWithMoreInfo(gs);
+}
+
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const core::TypeConstraint *constr) {
     core::Context ctx(gs, inWhat);
