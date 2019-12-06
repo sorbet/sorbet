@@ -46,4 +46,7 @@ gem build sorbet-static.gemspec
 
 popd
 
+rm -rf _out_
+mkdir -p _out_/gems
+
 mv gems/sorbet-static/sorbet-static-"${release_version}"-java.gem _out_/gems
