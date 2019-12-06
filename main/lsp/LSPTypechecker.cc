@@ -463,7 +463,9 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
     noop.versionStart = 0;
     noop.versionEnd = 0;
     for (auto fref : frefs) {
-        auto &index = getIndexed(fref);
+        ENFORCE(fref.exists());
+        ENFORCE(fref.id() < indexed.size());
+        auto &index = indexed[fref.id()];
         noop.updatedFileIndexes.push_back({index.tree->deepCopy(), index.file});
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
         noop.updatedFileHashes.push_back(globalStateHashes[fref.id()]);
