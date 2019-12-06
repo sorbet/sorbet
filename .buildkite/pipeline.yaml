@@ -55,7 +55,7 @@ steps:
 
   - label: ":mac: build-static-release.sh (master only)"
     command: .buildkite/build-static-release.sh
-    #branches: master
+    branches: master
     artifact_paths: _out_/**/*
     agents:
       os: mac
@@ -79,7 +79,7 @@ steps:
     command: .buildkite/build-static-release-java.sh
     # this needs to be run when both linux & mac build-static-release
     # are done. at the moment, mac is only done on master branch
-    #branches: master
+    branches: master
     artifact_paths: _out_/**/*
     <<: *elastic
   - wait: ~
