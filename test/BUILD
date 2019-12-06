@@ -42,6 +42,6 @@ sh_binary(
     data = ["//main:sorbet"],
     deps = [
         ":logging",
-        "@bazel_tools//tools/bash/runfiles"
+        "@bazel_tools//tools/bash/runfiles",
     ],
 )
