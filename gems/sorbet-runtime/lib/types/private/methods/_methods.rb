@@ -2,6 +2,9 @@
 # typed: false
 
 module T::Private::Methods
+  
+  SEMAPHORE = Mutex.new
+
   @installed_hooks = Set.new
   @signatures_by_method = {}
   @sig_wrappers = {}
@@ -205,39 +208,43 @@ module T::Private::Methods
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
     new_method = nil
-    T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
-      if !T::Private::Methods.has_sig_block_for_method(new_method)
-        # This should only happen if the user used alias_method to grab a handle
-        # to the original pre-unwound `sig` method. I guess we'll just proxy the
-        # call forever since we don't know who is holding onto this handle to
-        # replace it.
-        new_new_method = mod.instance_method(method_name)
-        if new_method == new_new_method
-          raise "`sig` not present for method `#{method_name}` but you're trying to run it anyways. " \
-          "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
-          "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method. " \
-          "Contact #dev-productivity if you're really stuck."
+    SEMAPHORE.synchronize do
+      T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
+        if !T::Private::Methods.has_sig_block_for_method(new_method)
+          # This should only happen if the user used alias_method to grab a handle
+          # to the original pre-unwound `sig` method. I guess we'll just proxy the
+          # call forever since we don't know who is holding onto this handle to
+          # replace it.
+          new_new_method = mod.instance_method(method_name)
+          if new_method == new_new_method
+            raise "`sig` not present for method `#{method_name}` but you're trying to run it anyways. " \
+            "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
+            "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method. " \
+            "Contact #dev-productivity if you're really stuck."
+          end
+          return new_new_method.bind(self).call(*args, &blk)
         end
-        return new_new_method.bind(self).call(*args, &blk)
-      end
-
-      method_sig = T::Private::Methods.run_sig_block_for_method(new_method)
-
-      # Should be the same logic as CallValidation.wrap_method_if_needed but we
-      # don't want that extra layer of indirection in the callstack
-      if method_sig.mode == T::Private::Methods::Modes.abstract
-        # We're in an interface method, keep going up the chain
-        if defined?(super)
-          super(*args, &blk)
+  
+        method_sig = SEMAPHORE.synchronize do
+          T::Private::Methods.run_sig_block_for_method(new_method)
+       end
+  
+        # Should be the same logic as CallValidation.wrap_method_if_needed but we
+        # don't want that extra layer of indirection in the callstack
+        if method_sig.mode == T::Private::Methods::Modes.abstract
+          # We're in an interface method, keep going up the chain
+          if defined?(super)
+            super(*args, &blk)
+          else
+            raise NotImplementedError.new("The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation.")
+          end
+        # Note, this logic is duplicated (intentionally, for micro-perf) at `CallValidation.wrap_method_if_needed`,
+        # make sure to keep changes in sync.
+        elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
+          CallValidation.validate_call(self, original_method, method_sig, args, blk)
         else
-          raise NotImplementedError.new("The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation.")
+          original_method.bind(self).call(*args, &blk)
         end
-      # Note, this logic is duplicated (intentionally, for micro-perf) at `CallValidation.wrap_method_if_needed`,
-      # make sure to keep changes in sync.
-      elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
-        CallValidation.validate_call(self, original_method, method_sig, args, blk)
-      else
-        original_method.bind(self).call(*args, &blk)
       end
     end
 
