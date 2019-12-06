@@ -81,7 +81,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
         return;
     }
 
-    // build a lookup table that maps from names to the expressions they have
+    // build a lookup table that maps from names to the types they have
     UnorderedMap<core::NameRef, ast::Expression *> argTypeMap;
     for (int i = 0; i < argHash->keys.size(); i++) {
         auto argName = ast::cast_tree<ast::Literal>(argHash->keys[i].get());
