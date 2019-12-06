@@ -57,9 +57,13 @@ if ! gem fetch sorbet-static --platform x86_64-linux --version "$release_version
 fi
 
 # Push the mac gem
-if ! gem fetch sorbet-static --platform universal-darwin --version "$release_version" | grep -q "ERROR"; then
-  with_backoff gem push --verbose "_out_/gems/sorbet-static-$release_version-universal-darwin-"*.gem
-fi
+# we push 14..19 which is defined in build-static-release.sh
+for i in {14..19}; do
+  if ! gem fetch sorbet-static --platform "universal-darwin-$i" --version "$release_version" | grep -q "ERROR"; then
+    with_backoff gem push --verbose "_out_/gems/sorbet-static-$release_version-universal-darwin-$i.gem"
+  fi
+done
+
 
 # Push the java gem
 if ! gem fetch sorbet-static --platform java --version "$release_version" | grep -q "ERROR"; then
