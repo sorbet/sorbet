@@ -16,6 +16,26 @@
 namespace sorbet::realmain::lsp {
 using namespace std;
 
+namespace {
+vector<string> frefsToPaths(const core::GlobalState &gs, const vector<core::FileRef> &refs) {
+    vector<string> paths;
+    paths.resize(refs.size());
+    std::transform(refs.begin(), refs.end(), paths.begin(),
+                   [&gs](const auto &ref) -> string { return string(ref.data(gs).path()); });
+    return paths;
+}
+
+void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &gs, SorbetTypecheckRunStatus status,
+                       bool isFastPath, std::vector<core::FileRef> filesTypechecked) {
+    if (config.getClientConfig().enableTypecheckInfo) {
+        auto sorbetTypecheckInfo =
+            make_unique<SorbetTypecheckRunInfo>(status, isFastPath, frefsToPaths(gs, filesTypechecked));
+        config.output->write(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
+    }
+}
+} // namespace
+
 LSPTypechecker::LSPTypechecker(const std::shared_ptr<const LSPConfiguration> &config)
     : typecheckerThreadId(this_thread::get_id()), config(config) {}
 
@@ -31,36 +51,14 @@ void LSPTypechecker::initialize(LSPFileUpdates updates) {
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates) {
-    if (config->getClientConfig().enableTypecheckInfo) {
-        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(SorbetTypecheckRunStatus::Started,
-                                                                       updates.canTakeFastPath, vector<string>());
-        config->output->write(make_unique<LSPMessage>(
-            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
-    }
+    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates.canTakeFastPath, {});
     auto run = runTypechecking(move(updates));
     auto committed = !run.canceled;
-
-    unique_ptr<LSPMessage> typecheckInfoEndedMsg;
-    if (config->getClientConfig().enableTypecheckInfo) {
-        vector<string> pathsTypechecked;
-        core::GlobalState *gsToUse = gs.get();
-        if (run.newGS.has_value()) {
-            gsToUse = run.newGS->get();
-        }
-        for (auto &f : run.filesTypechecked) {
-            pathsTypechecked.emplace_back(f.data(*gsToUse).path());
-        }
-        auto status = committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled;
-        auto sorbetTypecheckInfo =
-            make_unique<SorbetTypecheckRunInfo>(status, run.tookFastPath, move(pathsTypechecked));
-        typecheckInfoEndedMsg = make_unique<LSPMessage>(
-            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo)));
-    }
+    vector<core::FileRef> filesTypechecked = run.filesTypechecked;
+    const bool isFastPath = run.updates.canTakeFastPath;
     commitTypecheckRun(move(run));
-    // Send *after* diagnostics are sent back.
-    if (typecheckInfoEndedMsg) {
-        config->output->write(move(typecheckInfoEndedMsg));
-    }
+    sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
+                      isFastPath, move(filesTypechecked));
     return committed;
 }
 
