@@ -383,14 +383,28 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         resultType = core::Types::untypedUntracked();
     }
 
-    if (what.data(gs)->isStaticField()) {
-        // TODO(jez) Handle isStaticFieldTypeAlias (hover has special handling to show the type for these)
-        item->kind = CompletionItemKind::Constant;
-        item->detail = resultType->show(gs);
+    if (what.data(gs)->isClassOrModule()) {
+        if (what.data(gs)->isClassOrModuleClass()) {
+            if (what.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
+                item->kind = CompletionItemKind::Enum;
+            } else {
+                item->kind = CompletionItemKind::Class;
+            }
+        } else {
+            if (what.data(gs)->isClassOrModuleAbstract() || what.data(gs)->isClassOrModuleInterface()) {
+                item->kind = CompletionItemKind::Interface;
+            } else {
+                item->kind = CompletionItemKind::Module;
+            }
+        }
     } else if (what.data(gs)->isTypeMember()) {
-        item->kind = CompletionItemKind::Constant;
-    } else if (what.data(gs)->isClassOrModule()) {
-        item->kind = CompletionItemKind::Class;
+        item->kind = CompletionItemKind::TypeParameter;
+    } else if (what.data(gs)->isStaticField()) {
+        if (what.data(gs)->isTypeAlias()) {
+            item->kind = CompletionItemKind::TypeParameter;
+        } else {
+            item->kind = CompletionItemKind::Field;
+        }
     } else {
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
     }
