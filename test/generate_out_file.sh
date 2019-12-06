@@ -2,7 +2,8 @@
 set -euo pipefail
 
 rbout=${1}
-rb=${2}
+rbexit=${2}
+rb=${3}
 
 
 # --- begin runfiles.bash initialization ---
@@ -49,4 +50,7 @@ if [ "${patch_require:0:1}" != "/" ]; then
 fi
 
 echo "require './$rb';" > "$rbrunfile"
-llvmir=/tmp $ruby --disable=gems --disable=did_you_mean  -r "$preamble" -r "$patch_require" "$rbrunfile" > "$rbout"
+set +e
+llvmir=/tmp $ruby --disable=gems --disable=did_you_mean  -r "$preamble" -r "$patch_require" "$rbrunfile" > "$rbout" 2>/dev/null
+echo "$?" > "$rbexit"
+set -e

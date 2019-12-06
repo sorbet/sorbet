@@ -41,6 +41,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
         sentinel = tests[name]["sentinel"]
         filegroup_name = "test_{}/{}_rb_file".format(test_name_prefix, name)
         expected_outfile = "{}.out".format(prefix)
+        expected_exitfile = "{}.exit".format(prefix)
 
         # determine if we need to mark this as a manual test
         extra_tags = []
@@ -53,9 +54,9 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
         data = ["test_corpus_runner"]
         if tests[name]["isMultiFile"]:
             data += native.glob(["{}*".format(prefix)])
-            data += [expected_outfile]
+            data += [expected_outfile, expected_exitfile]
         else:
-            data += [sentinel, expected_outfile]
+            data += [sentinel, expected_outfile, expected_exitfile]
             data += native.glob(["{}.*.exp".format(prefix)])
 
         native.filegroup(
@@ -66,17 +67,21 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
 
         native.genrule(
             name = "test_{}/{}_gen_output".format(test_name_prefix, name),
-            outs = [expected_outfile],
+            outs = [expected_outfile, expected_exitfile],
             srcs = [filegroup_name],
             tools = [":generate_out_file"],
-            cmd = "$(location :generate_out_file) $(location {}) $(locations {})".format(expected_outfile, filegroup_name),
+            cmd = "$(location :generate_out_file) $(location {}) $(location {}) $(locations {})".format(expected_outfile, expected_exitfile, filegroup_name),
             tags = tags + extra_tags,
         )
 
         native.sh_test(
             name = "test_{}/{}".format(test_name_prefix, name),
             srcs = ["test_corpus_forwarder.sh"],
-            args = ["--single_test=$(location {})".format(sentinel), "--expected_output=$(location {})".format(expected_outfile)] + extra_args,
+            args = [
+                "--single_test=$(location {})".format(sentinel),
+                "--expected_output=$(location {})".format(expected_outfile),
+                "--expected_exit_code=$(location {})".format(expected_exitfile),
+            ] + extra_args,
             data = data,
             size = "large",
             tags = tags + extra_tags,

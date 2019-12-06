@@ -1,16 +1,18 @@
 #!/bin/bash
-set -eo pipefail
+set -euo pipefail
 
 rb=${1/--single_test=/}
 rbout=${2/--expected_output=/}
+rbexit=${3/--expected_exit_code=/}
 
 llvmir=$(mktemp -d)
 rbrunfile=$(mktemp)
 srbout=$(mktemp)
 srberr=$(mktemp)
+diffout=$(mktemp)
 
 cleanup() {
-    rm -r "$llvmir" "$rbrunfile" "$srbout" "$srberr"
+    rm -r "$llvmir" "$rbrunfile" "$srbout" "$srberr" "$diffout"
 }
 
 # trap cleanup EXIT
@@ -57,17 +59,32 @@ force_compile=1 llvmir=$llvmir run/ruby "$rb" --disable=gems --disable=did_you_m
 code=$?
 set -e
 
-if [ $code -ne 0 ]; then
-    stderr="${rb%.rb}.stderr.exp"
-    if [ -f "$stderr" ]; then
-        diff "${rb%.rb}.stderr.exp" "$srberr"
-    else
-        cat "$srberr"
-        exit $code
-    fi
+rbcode=$(cat "$rbexit")
+if [[ "$code" != "$rbcode" ]]; then
+    echo "Exit codes did not match:"
+    echo "-------------------------"
+    echo "Ruby:   $rbcode"
+    echo "Sorbet: $code"
+    echo
+    cat "$srberr"
+    exit 1
 fi
 
-diff -a "$rbout" "$srbout"
+stderr="${rb%.rb}.stderr.exp"
+if [ -f "$stderr" ]; then
+    diff "${rb%.rb}.stderr.exp" "$srberr"
+fi
+
+if ! diff -au "$rbout" "$srbout" > "$diffout"; then
+    echo "Interpreted/Compiled stdout mismatch:"
+    echo "------------------------------------"
+    echo "Diff:"
+    cat "$diffout"
+    echo
+    echo "Stderr:"
+    cat "$srberr"
+    exit 1
+fi
 
 for ext in "llo"; do
     exp=${rb%.rb}.$ext.exp
