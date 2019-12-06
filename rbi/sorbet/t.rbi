@@ -109,9 +109,6 @@ module T::Enumerator
   def self.[](type); end
 end
 
-module T::CFGExport
-end
-
 T::Boolean = T.type_alias {T.any(TrueClass, FalseClass)}
 
 module T::Configuration

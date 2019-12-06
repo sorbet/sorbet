@@ -155,11 +155,13 @@ extend T::Sig
 # (1) Use `.bind(String)` to say "will be run in the context of a String":
 sig {params(blk: T.proc.bind(String).returns(String)).returns(String)}
 def foo(&blk)
-  "hello".instance_exec(&blk)
+  "hello".instance_eval(&blk)
 end
 
-puts foo do
+upcased = foo do
   # (2) Sorbet knows that `self.upcase` is available because of the `.bind`
-  self.upcase # => "HELLO"
+  self.upcase
 end
+
+puts(upcased) # => "HELLO"
 ```
