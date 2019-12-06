@@ -367,11 +367,16 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
 }
 
 unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const LSPConfiguration &config,
-                                                        const core::SymbolRef what, const core::Loc queryLoc,
-                                                        string_view prefix, size_t sortIdx) {
+                                                        const core::SymbolRef what, const core::TypePtr type,
+                                                        const core::Loc queryLoc, string_view prefix, size_t sortIdx) {
     ENFORCE(what.exists());
-    auto supportSnippets = config.getClientConfig().clientCompletionItemSnippetSupport;
+
+    auto clientConfig = config.getClientConfig();
+    auto supportsSnippets = clientConfig.clientCompletionItemSnippetSupport;
+    auto markupKind = clientConfig.clientCompletionItemMarkupKind;
+
     auto label = string(what.data(gs)->name.data(gs)->shortName(gs));
+
     auto item = make_unique<CompletionItem>(label);
 
     // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
@@ -409,8 +414,10 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
     }
 
+    item->detail = what.data(gs)->show(gs);
+
     string replacementText;
-    if (supportSnippets) {
+    if (supportsSnippets) {
         item->insertTextFormat = InsertTextFormat::Snippet;
         replacementText = fmt::format("{}${{0}}", label);
     } else {
@@ -424,7 +431,14 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         item->insertText = replacementText;
     }
 
-    // TODO(jez) Find documentation for constants
+    optional<string> documentation = nullopt;
+    auto whatFile = what.data(gs)->loc().file();
+    if (whatFile.exists()) {
+        documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
+    }
+
+    auto prettyType = prettyTypeForConstant(gs, what, type);
+    item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
 
     return item;
 }
@@ -661,9 +675,9 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
     }
 
     optional<string> documentation = nullopt;
-    if (what.data(gs)->loc().file().exists()) {
-        documentation =
-            findDocumentation(what.data(gs)->loc().file().data(gs).source(), what.data(gs)->loc().beginPos());
+    auto whatFile = what.data(gs)->loc().file();
+    if (whatFile.exists()) {
+        documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
     }
 
     auto prettyType = prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint);
@@ -689,7 +703,19 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
                 sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                 // hide singletons
                 hasSimilarName(gs, sym.data(gs)->name, prefix)) {
-                items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
+                core::TypePtr type;
+                if (sym.data(gs)->isClassOrModule()) {
+                    auto targetClass = sym;
+                    if (!targetClass.data(gs)->attachedClass(gs).exists()) {
+                        targetClass = targetClass.data(gs)->lookupSingletonClass(gs);
+                    }
+                    type = targetClass.data(gs)->externalType(gs);
+                } else {
+                    auto resultType = sym.data(gs)->resultType;
+                    type = resultType == nullptr ? core::Types::untyped(gs, sym) : resultType;
+                }
+
+                items.push_back(getCompletionItemForConstant(gs, *config, sym, type, queryLoc, prefix, items.size()));
             }
         }
         scope = scope.data(gs)->owner;
