@@ -1035,7 +1035,8 @@ TEST_P(LSPTest, All) {
                 if (r->isNotification()) {
                     if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
                         auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
-                        // Ignore started messages.
+                        // Ignore started messages. Note that cancelation messages cannot occur in test_corpus since
+                        // test_corpus only runs LSP in single-threaded mode.
                         if (params->status == SorbetTypecheckRunStatus::Ended) {
                             foundTypecheckRunInfo = true;
                             if (assertSlowPath.value_or(false)) {
