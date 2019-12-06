@@ -1,10 +1,6 @@
 #!/bin/bash
+
 set -euo pipefail
-
-rbout=${1}
-rbexit=${2}
-rb=${3}
-
 
 # --- begin runfiles.bash initialization ---
 # Copy-pasted from Bazel's Bash runfiles library https://github.com/bazelbuild/bazel/blob/defd737761be2b154908646121de47c30434ed51/tools/bash/runfiles/runfiles.bash
@@ -30,31 +26,40 @@ else
 fi
 # --- end runfiles.bash initialization ---
 
+# Find logging with rlocation, as this script is run from a genrule
+source "$(rlocation com_stripe_sorbet_llvm/test/logging.sh)"
 
-# NOTE: using a temp file here, as that will cause ruby to not print the name of
-# the main file in a stack trace.
-rbrunfile=$(mktemp)
+# Positional arguments
+output_archive=$1
+shift 1
 
-cleanup() {
-    rm -r "$rbrunfile"
-}
+# Sources make up the remaining input
+ruby_source=$@
 
-# trap cleanup EXIT
+sorbet="$(rlocation com_stripe_sorbet_llvm/main/sorbet)"
 
-ruby="$(rlocation ruby_2_6_3/ruby)"
-preamble="$(rlocation com_stripe_sorbet_llvm/run/tools/preamble.rb)"
-patch_require="$(rlocation com_stripe_sorbet_llvm/run/tools/patch_require.rb)"
-if [ "${preamble:0:1}" != "/" ]; then
-    preamble="./$preamble"
+info "--- Build Config ---"
+info "* Archive: ${output_archive}"
+info "* Source:  ${ruby_source}"
+info "* Sorbet:  ${sorbet}"
+
+info "--- Building Extension ---"
+mkdir target
+if ! $sorbet --silence-dev-message --no-error-count --llvm-ir-folder=target \
+  --force-compiled ${ruby_source}; then
+  fatal "* Failed to build extension!"
 fi
-if [ "${patch_require:0:1}" != "/" ]; then
-    patch_require="./$patch_require"
+
+found=
+for image in $(find target/ -maxdepth 1 -name "*.so" -o -name "*.bundle"); do
+  found=1
+  attn "* ${image}"
+done
+if [ -z "$found" ]; then
+  fatal "* No images produced"
 fi
 
-echo "require './$rb';" > "$rbrunfile"
-set +e
-# NOTE: we run with patch_require incluced so that the stack trace looks similar
-# to what we'll see in the compiled version
-llvmir=/tmp $ruby --disable=gems --disable=did_you_mean  -r "$preamble" -r "$patch_require" "$rbrunfile" > "$rbout" 2>/dev/null
-echo "$?" > "$rbexit"
-set -e
+info "--- Archiving Output ---"
+tar -czv -f "$output_archive" target
+
+success "* Built ${ruby_source}"

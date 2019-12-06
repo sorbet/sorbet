@@ -21,13 +21,9 @@ compiler_tests(
     ]),
 )
 
-sh_binary(
-    name = "test_corpus_runner",
-    srcs = ["test_corpus_runner.sh"],
-    data = [
-        "//run",
-        "@ruby_2_6_3//:ruby",
-    ],
+sh_library(
+    name = "logging",
+    srcs = ["logging.sh"],
 )
 
 sh_binary(
@@ -38,4 +34,14 @@ sh_binary(
         "@ruby_2_6_3//:ruby",
     ],
     deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
+sh_binary(
+    name = "build_extension",
+    srcs = ["build_extension.sh"],
+    data = ["//main:sorbet"],
+    deps = [
+        ":logging",
+        "@bazel_tools//tools/bash/runfiles"
+    ],
 )

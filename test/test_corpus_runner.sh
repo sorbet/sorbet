@@ -1,108 +1,122 @@
 #!/bin/bash
 set -euo pipefail
 
-rb=${1/--single_test=/}
-rbout=${2/--expected_output=/}
-rbexit=${3/--expected_exit_code=/}
+source "test/logging.sh"
 
-llvmir=$(mktemp -d)
-rbrunfile=$(mktemp)
-srbout=$(mktemp)
-srberr=$(mktemp)
-diffout=$(mktemp)
+root="$PWD"
 
-cleanup() {
-    rm -r "$llvmir" "$rbrunfile" "$srbout" "$srberr" "$diffout"
-}
+# Positional arguments
+rbout=${1/--expected_output=/}
+rbexit=${2/--expected_exit_code=/}
+build_archive=${3/--build_archive=/}
+ruby=${4/--ruby=/}
+shift 4
 
-# trap cleanup EXIT
+# sources make up the remaining argumenets
+rbmain=$1
+rb=$@
 
-
-cyan=$'\x1b[0;36m'
-cnone=$'\x1b[0m'
-in_color() {
-    local color="$1"
-    shift
-    echo "$color$*$cnone"
-}
-debug() {
-    echo "(Debug) $1:"
-    in_color $cyan "$2"
-}
-
-ruby="./external/ruby_2_6_3/ruby"
-
-echo "Source: $rb"
-echo "require './run/tools/preamble.rb'; require './$rb';" > "$rbrunfile"
-debug "To run Ruby locally" "bazel-bin/$ruby $rbrunfile"
-
-debug "To run Sorbet locally" "bazel-bin/main/sorbet --llvm-ir-folder=$llvmir --force-compiled ${rb/__*/__*}"
-echo "Running Sorbet Compiler..."
-# shellcheck disable=SC2086
-run/compile "$llvmir" ${rb/__*/__*}
-
-echo "Run LLDB: lldb bazel-bin/$ruby -- $rb"
-for i in "$llvmir"/*.llo; do
-    echo "LLVM IR: $i"
-done
-for i in "$llvmir"/*.ll; do
-    echo "LLVM IR (unoptimized): $i"
-done
-for i in "$llvmir"/*.bundle; do
-    echo "Bundle: $i"
+info "--- Debugging ---"
+info "* Run ruby locally"
+for source in $rb; do
+  attn "    test/run_test.sh $source"
 done
 
-debug "To debug your compiled ruby locally" "tools/scripts/lldb.sh $llvmir $rb"
-echo "Running Sorbet Compiled Ruby..."
+info "* Run sorbet"
+for source in $rb; do
+  attn "    test/run_sorbet.sh $source"
+done
+
+info "* Debug compiled code"
+for source in $rb; do
+  attn "    test/debug_compiled.sh $source"
+done
+
+info "--- Test Config ---"
+info "* Source: ${rb}"
+info "* Oracle: ${rbout}"
+info "* Exit:   ${rbexit}"
+info "* Build:  ${build_archive}"
+info "* Ruby:   ${ruby}"
+
+info "--- Testing ruby ---"
+$ruby -e 'puts (require "set")' > /dev/null || fatal "No functioning ruby"
+
+info "--- Unpacking Build ---"
+tar -xvf "${build_archive}"
+
+# NOTE: exp file validation could be its own test, which would allow it to
+# execute in parallel with the oracle verification.
+info "--- Checking Build ---"
+ls test/testdata/compiler
+for ext in "llo"; do
+  exp=${source%.rb}.$ext.exp
+  if [ -f "$exp" ]; then
+    actual=("target/"*".$ext")
+    if [ ! -f "${actual[0]}" ]; then
+      fatal "No LLVMIR found at" "${actual[@]}"
+    fi
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      if diff -u <(grep -v '^target triple =' < "${actual[@]}") "$exp" > exp.diff; then
+        success "* $exp"
+      else
+        cat exp.diff
+        fatal "* $exp"
+      fi
+    fi
+  fi
+done
+
+# NOTE: running the test could be split out into its own genrule, the test just
+# needs to validate that the output matches.
+info "--- Running Compiled Test ---"
+
+# NOTE: using a temp file here, as that will cause ruby to not print the name of
+# the main file in a stack trace.
+runfile=$(mktemp)
+echo "require './$rbmain'" > "$runfile"
+
+cat "$runfile"
+
 set +e
-force_compile=1 llvmir=$llvmir run/ruby "$rb" --disable=gems --disable=did_you_mean 2> "$srberr" | tee "$srbout"
+# NOTE: the llvmir environment variable must have a leading `./`, otherwise the
+# require will trigger path search.
+force_compile=1 llvmir="./target" $ruby \
+  -I "${root}/run/tools" \
+  -rpatch_require.rb -rpreamble.rb "$runfile" \
+  2> stderr.log | tee stdout.log
 code=$?
 set -e
 
+info "--- Checking Return Code ---"
 rbcode=$(cat "$rbexit")
 if [[ "$code" != "$rbcode" ]]; then
-    echo "Exit codes did not match:"
-    echo "-------------------------"
-    echo "Ruby:   $rbcode"
-    echo "Sorbet: $code"
-    echo
-    cat "$srberr"
-    exit 1
+  info "* Stdout"
+  cat stdout.log
+  info "* Stderr"
+  cat stderr.log
+
+  error "Return codes don't match"
+  error "  * Ruby:     ${rbcode}"
+  fatal "  * Compiled: ${code}"
 fi
 
-stderr="${rb%.rb}.stderr.exp"
-if [ -f "$stderr" ]; then
-    diff "${rb%.rb}.stderr.exp" "$srberr"
+info "--- Checking Stdout ---"
+if ! diff -au "$rbout" stdout.log > stdout.diff; then
+  error "* Stdout diff"
+  cat stdout.diff
+  info  "* Stderr"
+  cat  stderr.log
+  fatal
 fi
 
-if ! diff -au "$rbout" "$srbout" > "$diffout"; then
-    echo "Interpreted/Compiled stdout mismatch:"
-    echo "------------------------------------"
-    echo "Diff:"
-    cat "$diffout"
-    echo
-    echo "Stderr:"
-    cat "$srberr"
-    exit 1
-fi
+# info "--- Checking Stderr ---"
+# if ! diff -au stderr.log "$rberr" > stderr.diff; then
+#   error "* Stderr diff"
+#   cat stderr.diff
+#   info  "* Stderr"
+#   cat  stderr.log
+#   fatal
+# fi
 
-for ext in "llo"; do
-    exp=${rb%.rb}.$ext.exp
-    if [ -f "$exp" ]; then
-        actual=("$llvmir/"*".$ext")
-        if [ ! -f "${actual[0]}" ]; then
-            echo "No LLVMIR found at" "${actual[@]}"
-            exit 1
-        fi
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-          diff \
-            <(grep -v '^target triple =' < "${actual[@]}") \
-            "$exp"
-        fi
-    fi
-done
-
-grep "SorbetLLVM using compiled" "$srberr"
-grep -v "SorbetLLVM interpreting" "$srberr"
-
-cleanup
+success "Test passed"
