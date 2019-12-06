@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
-if [ "schedule" == "${BUILDKITE_SOURCE}" ]; then
+if [ "${CLEAN_BUILD:-}" != "" ] || [ "${PUBLISH_TO_RUBYGEMS:-}" != "" ]; then
   echo "Skipping publish, because this is a scheduled build."
   exit 0
 fi
