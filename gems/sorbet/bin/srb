@@ -70,6 +70,7 @@ typecheck() {
     version_suffix="${without_bin_srb##*/sorbet}"
     # /path/to/gems
     gems_path="${without_bin_srb%/sorbet*}"
+
     # /path/to/gems/sorbet-static-0.0.1-darwin-17/libexec/sorbet
     # (assumes people only have one platform-depdendent gem installed per version)
     guess_sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/sorbet)
@@ -81,6 +82,27 @@ typecheck() {
       version="${version_suffix#-}"
       # Resort to locating using the GEM_PATH, this takes ~200ms
       sorbet="$(VISUAL=echo gem open sorbet-static -v "${version}")/libexec/sorbet"
+    fi
+
+    # if we still don't know the sorbet binary
+    # perhaps this is the java platform
+    if ! [[ -f "${sorbet}" ]]; then
+      if gem env platform | grep -q "java"; then
+        # certain platforms (i.e. java) include multiple binaries 
+        # mac.sorbet & linux.sorbet -- since they can't use the host platform (i.e. darwin or linux)
+        # to collect the correct sorbet binary
+        case "$(uname -s)" in
+        Linux*)     prefix="linux.";;
+        Darwin*)    prefix="mac.";;
+        *)          prefix=""
+        esac
+        
+        guess_sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/"${prefix}sorbet")
+        if [[ -f "${guess_sorbet[0]}" ]]; then
+          sorbet="${guess_sorbet[0]}"
+        fi
+
+      fi
     fi
 
     # shellcheck disable=SC2086
