@@ -45,3 +45,86 @@ class Baz
     T.reveal_type(@x) # error: Revealed type: `T.untyped`
   end
 end
+
+
+# Some miscellaneous weirder cases
+class InterspersedExprs
+  extend T::Sig
+
+  sig { params(x: Integer).void }
+  def initialize(x)
+    ["hello", "world"].each do |w|
+      puts w
+    end
+    @x = x
+    puts "goodbye"
+  end
+
+  sig { void }
+  def foo
+    T.reveal_type(@x) # error: Revealed type: `Integer`
+  end
+end
+
+# Some miscellaneous other cases
+class InterspersedStmts
+  extend T::Sig
+
+  sig { params(x: Integer).void }
+  def initialize(x)
+    ["hello", "world"].each do |w|
+      puts w
+    end
+    @x = x
+    puts "goodbye"
+  end
+
+  sig { void }
+  def foo
+    T.reveal_type(@x) # error: Revealed type: `Integer`
+  end
+end
+
+# Some less straightforward situations with arguments
+class DifferentArgs
+  extend T::Sig
+
+  sig { params(x: Integer, y: T.nilable(String), z: T.any(T::Array[T::Boolean], T.proc.void)).void }
+  def initialize(x, y, z)
+    @a = y  # it works out-of-order
+    r = x
+    @b = r  # it does NOT work with a variable that's not explicitly a param
+    @c = y  # a single param can be used with multiple instance variables
+    [1, 2].each do
+      @d = z  # it does NOT work within blocks
+    end
+    if true
+      @e = z  # it does NOT work within other control flow
+    end
+
+    @f = z  # it does work with more sophisticated types
+  end
+
+  sig { void }
+  def foo
+    T.reveal_type(@a)  # error: Revealed type: `T.nilable(String)`
+    T.reveal_type(@b)  # error: Revealed type: `T.untyped`
+    T.reveal_type(@c)  # error: Revealed type: `T.nilable(String)
+    T.reveal_type(@d)  # error: Revealed type: `T.untyped`
+    T.reveal_type(@e)  # error: Revealed type: `T.untyped`
+    T.reveal_type(@f)  # error: Revealed type: `T.any(T::Array[T::Boolean], T.proc.void)`
+  end
+end
+
+class ClassVar
+  extend T::Sig
+  sig { params(x: Integer).void }
+  def initialize(x)
+    @@a = x  # it does NOT currently work with class variables
+  end
+
+  sig { void }
+  def foo
+    T.reveal_type(@@a)  # error: Revealed type: `T.untyped`
+  end
+end
