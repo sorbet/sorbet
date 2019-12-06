@@ -3,8 +3,6 @@
 #include "ast/ast.h"
 #include "core/core.h"
 
-#include <utility>
-
 using namespace std;
 namespace sorbet::rewriter {
 
