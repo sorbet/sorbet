@@ -124,7 +124,7 @@ void ASTUtil::putBackHashValue(core::MutableContext ctx, ast::Hash &hash, unique
 // or 1 arguments, that in turn contains a block that contains a send) and it also checks the final method of the send
 // against the provided `returns` (so that some uses can specifically look for `void` sigs while others can specifically
 // look for non-void sigs).
-const ast::Send* ASTUtil::castSig(const ast::Expression *expr, core::NameRef returns) {
+const ast::Send *ASTUtil::castSig(const ast::Expression *expr, core::NameRef returns) {
     auto send = ast::cast_tree_const<ast::Send>(expr);
     if (send == nullptr) {
         return nullptr;

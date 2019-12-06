@@ -70,7 +70,8 @@ bool isTNilable(const unique_ptr<ast::Expression> &expr) {
 }
 
 bool hasNilableReturns(core::MutableContext ctx, const ast::Send *sharedSig) {
-    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()), "We weren't given a send node that's a valid signature");
+    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
+            "We weren't given a send node that's a valid signature");
 
     auto block = ast::cast_tree<ast::Block>(sharedSig->block.get());
     auto body = ast::cast_tree<ast::Send>(block->body.get());
@@ -83,7 +84,8 @@ bool hasNilableReturns(core::MutableContext ctx, const ast::Send *sharedSig) {
 }
 
 unique_ptr<ast::Expression> dupReturnsType(core::MutableContext ctx, const ast::Send *sharedSig) {
-    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()), "We weren't given a send node that's a valid signature");
+    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
+            "We weren't given a send node that's a valid signature");
 
     auto block = ast::cast_tree<ast::Block>(sharedSig->block.get());
     auto body = ast::cast_tree<ast::Send>(block->body.get());
@@ -116,7 +118,8 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, const 
 // value into the `sig {params(...)}` using whatever name we have for the setter.
 unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const ast::Send *sharedSig,
                                                const core::NameRef name, core::Loc nameLoc) {
-    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()), "We weren't given a send node that's a valid signature");
+    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
+            "We weren't given a send node that's a valid signature");
 
     // There's a bit of work here because deepCopy gives us back an Expression when we know it's a Send.
     unique_ptr<ast::Expression> sigExp = sharedSig->deepCopy();

@@ -18,7 +18,7 @@ public:
 
     static void putBackHashValue(core::MutableContext ctx, ast::Hash &hash, std::unique_ptr<ast::Expression> key,
                                  std::unique_ptr<ast::Expression> value);
-    static const ast::Send* castSig(const ast::Expression *expr, core::NameRef returns);
+    static const ast::Send *castSig(const ast::Expression *expr, core::NameRef returns);
 
     ASTUtil() = delete;
 };
