@@ -76,6 +76,12 @@ class LSPTypechecker final {
      * sending diagnostics to the editor. */
     void commitTypecheckRun(TypecheckRun run);
 
+    /**
+     * Get an LSPFileUpdates containing the latest versions of the given files. It's a "no-op" file update because it
+     * doesn't actually change anything.
+     */
+    LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
+
 public:
     LSPTypechecker(const std::shared_ptr<const LSPConfiguration> &config);
     ~LSPTypechecker() = default;
@@ -95,10 +101,9 @@ public:
     bool typecheck(LSPFileUpdates updates);
 
     /**
-     * Re-typechecks the provided input to re-produce error messages. Input *must* match already committed state!
-     * Provided to facilitate code actions.
+     * Re-typechecks the provided files to re-produce error messages.
      */
-    TypecheckRun retypecheck(LSPFileUpdates updates) const;
+    TypecheckRun retypecheck(std::vector<core::FileRef> frefs) const;
 
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;

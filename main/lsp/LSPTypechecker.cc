@@ -456,21 +456,25 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     return LSPQueryResult{move(out.second)};
 }
 
-TypecheckRun LSPTypechecker::retypecheck(LSPFileUpdates updates) const {
-    if (!updates.canTakeFastPath) {
-        Exception::raise("Tried to typecheck slow path updates with retypecheck. Retypecheck can only typecheck the "
-                         "previously typechecked version of a file.");
+LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
+    LSPFileUpdates noop;
+    noop.canTakeFastPath = true;
+    // Epoch isn't important for this update.
+    noop.versionStart = 0;
+    noop.versionEnd = 0;
+    for (auto fref : frefs) {
+        ENFORCE(fref.exists());
+        ENFORCE(fref.id() < indexed.size());
+        auto &index = indexed[fref.id()];
+        noop.updatedFileIndexes.push_back({index.tree->deepCopy(), index.file});
+        noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
+        noop.updatedFileHashes.push_back(globalStateHashes[fref.id()]);
     }
+    return noop;
+}
 
-    for (const auto &file : updates.updatedFiles) {
-        auto path = file->path();
-        auto source = file->source();
-        auto fref = gs->findFileByPath(path);
-        if (!fref.exists() || fref.data(*gs).source() != source) {
-            Exception::raise("Retypecheck can only typecheck the previously typechecked version of a file.");
-        }
-    }
-
+TypecheckRun LSPTypechecker::retypecheck(vector<core::FileRef> frefs) const {
+    LSPFileUpdates updates = getNoopUpdate(move(frefs));
     return runTypechecking(move(updates));
 }
 
