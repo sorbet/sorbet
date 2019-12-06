@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
+
+set -euo pipefail
+
 echo "--- Pre-setup :bazel:"
 
-if [[ -n "${CLEAN_BUILD-}" ]]; then
+if [ "${CLEAN_BUILD:-}" != "" ]; then
   echo "--- cleanup"
   rm -rf /usr/local/var/bazelcache/*
 fi
