@@ -2,9 +2,8 @@
 # typed: false
 
 module T::Private::Methods
-  
-  SEMAPHORE = Mutex.new
 
+  @semaphore = Mutex.new
   @installed_hooks = Set.new
   @signatures_by_method = {}
   @sig_wrappers = {}
@@ -208,7 +207,9 @@ module T::Private::Methods
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
     new_method = nil
-    SEMAPHORE.synchronize do
+
+    semaphore = @semaphore # grab a reference
+    @semaphore.synchronize do
       T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
         if !T::Private::Methods.has_sig_block_for_method(new_method)
           # This should only happen if the user used alias_method to grab a handle
@@ -225,9 +226,9 @@ module T::Private::Methods
           return new_new_method.bind(self).call(*args, &blk)
         end
   
-        method_sig = SEMAPHORE.synchronize do
+        method_sig = semaphore.synchronize do
           T::Private::Methods.run_sig_block_for_method(new_method)
-       end
+        end
   
         # Should be the same logic as CallValidation.wrap_method_if_needed but we
         # don't want that extra layer of indirection in the callstack
