@@ -582,8 +582,8 @@ struct iseq_insn_info_entry {
 void rb_iseq_insns_info_encode_positions(const rb_iseq_t *iseq);
 /* End from inseq.h */
 
-const rb_iseq_t *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath,
-                                                int startline, int endline) {
+unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath,
+                                              int startline, int endline) {
     // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
     // this function should be retained (for GC purposes) by something else.
 
@@ -606,10 +606,11 @@ const rb_iseq_t *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID f
     rb_iseq_insns_info_encode_positions(iseq);
     iseq->body->iseq_encoded = 0x0;
 
-    return iseq;
+    return (unsigned char *)iseq;
 }
 
-const VALUE **sorbet_setRubyStackFrame(const rb_iseq_t *iseq) {
+const VALUE **sorbet_setRubyStackFrame(unsigned char *iseqvoid) {
+    const rb_iseq_t *iseq = (const rb_iseq_t *)iseqvoid;
     rb_execution_context_t *ec = GET_EC();
     ec->cfp->iseq = iseq;
     return &ec->cfp->pc;
