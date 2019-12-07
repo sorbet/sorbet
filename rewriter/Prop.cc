@@ -67,22 +67,22 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         case core::Names::const_()._id:
             isImmutable = true;
             break;
-        case core::Names::token_prop()._id:
-        case core::Names::timestamped_token_prop()._id:
+        case core::Names::tokenProp()._id:
+        case core::Names::timestampedTokenProp()._id:
             name = core::Names::token();
             nameLoc =
                 core::Loc(send->loc.file(),
-                          send->loc.beginPos() + (send->fun._id == core::Names::timestamped_token_prop()._id ? 12 : 0),
+                          send->loc.beginPos() + (send->fun._id == core::Names::timestampedTokenProp()._id ? 12 : 0),
                           send->loc.endPos() - 5); // get the 'token' part of it
             type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
-        case core::Names::created_prop()._id:
+        case core::Names::createdProp()._id:
             name = core::Names::created();
             nameLoc = core::Loc(send->loc.file(), send->loc.beginPos(),
                                 send->loc.endPos() - 5); // 5 is the difference between `created_prop` and `created`
             type = ast::MK::Constant(send->loc, core::Symbols::Float());
             break;
-        case core::Names::merchant_prop()._id:
+        case core::Names::merchantProp()._id:
             isImmutable = true;
             name = core::Names::merchant();
             nameLoc = core::Loc(send->loc.file(), send->loc.beginPos(),

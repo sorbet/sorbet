@@ -118,7 +118,7 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
         allStringsSoFar = true;
     } else {
         auto pieceLoc = first->loc;
-        res = MK::Send0(pieceLoc, std::move(first), core::Names::to_s());
+        res = MK::Send0(pieceLoc, std::move(first), core::Names::toS());
         allStringsSoFar = false;
     }
     ++it;
@@ -128,7 +128,7 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
         unique_ptr<Expression> narg = node2TreeImpl(dctx, std::move(stat));
         if (!isStringLit(dctx, narg) && !isa_tree<EmptyTree>(narg.get())) {
             auto pieceLoc = narg->loc;
-            narg = MK::Send0(pieceLoc, std::move(narg), core::Names::to_s());
+            narg = MK::Send0(pieceLoc, std::move(narg), core::Names::toS());
         }
         if (allStringsSoFar && isStringLit(dctx, narg)) {
             stringsAccumulated.emplace_back(std::move(narg));
@@ -825,14 +825,14 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 if (isStringLit(dctx, first)) {
                     res = std::move(first);
                 } else {
-                    res = MK::Send0(loc, std::move(first), core::Names::to_s());
+                    res = MK::Send0(loc, std::move(first), core::Names::toS());
                 }
                 ++it;
                 for (; it != end; ++it) {
                     auto &stat = *it;
                     unique_ptr<Expression> narg = node2TreeImpl(dctx, std::move(stat));
                     if (!isStringLit(dctx, narg)) {
-                        narg = MK::Send0(loc, std::move(narg), core::Names::to_s());
+                        narg = MK::Send0(loc, std::move(narg), core::Names::toS());
                     }
                     auto n = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
                     res.reset(n.release());
@@ -1206,7 +1206,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         //   [a, **x, remaining}
                         // into
                         //   a.concat(x.to_a).concat(remaining)
-                        auto var = MK::Send0(loc, node2TreeImpl(dctx, std::move(splat->var)), core::Names::to_a());
+                        auto var = MK::Send0(loc, node2TreeImpl(dctx, std::move(splat->var)), core::Names::toA());
                         if (elems.empty()) {
                             if (lastMerge != nullptr) {
                                 lastMerge = MK::Send1(loc, std::move(lastMerge), core::Names::concat(), std::move(var));
@@ -1268,7 +1268,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         //   {a: 'a', **x, remaining}
                         // into
                         //   {a: 'a'}.merge(x.to_h).merge(remaining)
-                        auto expr = MK::Send0(loc, node2TreeImpl(dctx, std::move(splat->expr)), core::Names::to_hash());
+                        auto expr = MK::Send0(loc, node2TreeImpl(dctx, std::move(splat->expr)), core::Names::toHash());
                         if (keys.empty()) {
                             if (lastMerge != nullptr) {
                                 lastMerge = MK::Send1(loc, std::move(lastMerge), core::Names::merge(), std::move(expr));
@@ -1519,7 +1519,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                         exceptions.emplace_back(std::move(elem));
                     }
                 } else if (auto exceptionsSend = cast_tree<Send>(exceptionsExpr.get())) {
-                    ENFORCE(exceptionsSend->fun == core::Names::splat() || exceptionsSend->fun == core::Names::to_a() ||
+                    ENFORCE(exceptionsSend->fun == core::Names::splat() || exceptionsSend->fun == core::Names::toA() ||
                                 exceptionsSend->fun == core::Names::concat(),
                             "Unknown exceptionSend function");
                     exceptions.emplace_back(std::move(exceptionsExpr));
