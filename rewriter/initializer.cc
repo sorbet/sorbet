@@ -7,6 +7,8 @@
 using namespace std;
 namespace sorbet::rewriter {
 
+namespace {
+
 // We can't actually use a T.type_parameter type in the body of a method, so this prevents us from copying those.
 //
 // TODO: remove once https://github.com/sorbet/sorbet/issues/1715 is fixed
@@ -56,6 +58,8 @@ const ast::Hash *findParamHash(const ast::Send *send) {
     }
     return ast::cast_tree_const<ast::Hash>(send->args.front().get());
 }
+
+} // namespace
 
 void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const ast::Expression *prevStat) {
     // this should only run in an `initialize` that has a sig
