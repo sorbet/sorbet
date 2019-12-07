@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -euo pipefail
-shopt -s nullglob
 
 # --- begin runfiles.bash initialization ---
 # Copy-pasted from Bazel's Bash runfiles library https://github.com/bazelbuild/bazel/blob/defd737761be2b154908646121de47c30434ed51/tools/bash/runfiles/runfiles.bash
@@ -52,11 +51,14 @@ if ! $sorbet --silence-dev-message --no-error-count --llvm-ir-folder=target \
   fatal "* Failed to build extension!"
 fi
 
+shopt -s nullglob
 found=
 for image in target/*.{so,bundle}; do
   found=1
   attn "* ${image}"
 done
+shopt -u nullglob
+
 if [ -z "$found" ]; then
   fatal "* No images produced"
 fi
