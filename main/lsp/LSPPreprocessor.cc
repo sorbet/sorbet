@@ -125,7 +125,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
             // Merge updates and tracers, and cancel its timer to avoid a distorted latency metric.
             auto &mergeableParams = get<unique_ptr<SorbetWorkspaceEditParams>>(mergeMsg.asNotification().params);
             mergeEdits(msgParams->updates, mergeableParams->updates);
-            cancelTimer(msg.timer);
+            cancelTimer(mergeMsg.timer);
             msg.startTracers.insert(msg.startTracers.end(), mergeMsg.startTracers.begin(), mergeMsg.startTracers.end());
             // Delete the update we just merged and move on to next item.
             it = pendingRequests.erase(it);
