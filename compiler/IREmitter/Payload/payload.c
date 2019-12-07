@@ -609,13 +609,9 @@ const rb_iseq_t *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID f
     return iseq;
 }
 
-const VALUE **sorbet_setRubyStackFrame(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath,
-                                       int startline, int endline) {
+const VALUE **sorbet_setRubyStackFrame(const rb_iseq_t *iseq) {
     rb_execution_context_t *ec = GET_EC();
-    rb_control_frame_t *cfp = ec->cfp;
-    const rb_iseq_t *iseq =
-        sorbet_allocateRubyStackFrames(recv, funcName, func, filename, realpath, startline, endline);
-    cfp->iseq = iseq;
+    ec->cfp->iseq = iseq;
     return &ec->cfp->pc;
 }
 

@@ -260,7 +260,8 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
     return ret;
 }
 
-void Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build, unique_ptr<ast::MethodDef> &md) {
+llvm::Value *Payload::allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &build,
+                                              unique_ptr<ast::MethodDef> &md) {
     auto &builder = builderCast(build);
     auto loc = md->loc;
     auto sym = md->symbol;
@@ -275,10 +276,18 @@ void Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build, u
     auto realpath = fmt::format("{}", filename);
     auto realpathValue = Payload::cPtrToRubyString(cs, builder, realpath);
     auto pos = loc.position(cs);
-    builder.CreateCall(cs.module->getFunction("sorbet_setRubyStackFrame"),
-                       {recv, funcNameValue, funcNameId, filenameValue, realpathValue,
-                        llvm::ConstantInt::get(cs, llvm::APInt(32, pos.first.line)),
-                        llvm::ConstantInt::get(cs, llvm::APInt(32, pos.second.line))});
+    auto ret = builder.CreateCall(cs.module->getFunction("sorbet_allocateRubyStackFrames"),
+                                  {recv, funcNameValue, funcNameId, filenameValue, realpathValue,
+                                   llvm::ConstantInt::get(cs, llvm::APInt(32, pos.first.line)),
+                                   llvm::ConstantInt::get(cs, llvm::APInt(32, pos.second.line))});
+    return ret;
+}
+
+llvm::Value *Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build, unique_ptr<ast::MethodDef> &md) {
+    auto &builder = builderCast(build);
+    auto stackFrame = Payload::allocateRubyStackFrames(cs, builder, md);
+    auto ret = builder.CreateCall(cs.module->getFunction("sorbet_setRubyStackFrame"), {stackFrame});
+    return ret;
 }
 
 void Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::SymbolRef sym) {

@@ -33,7 +33,10 @@ public:
     static llvm::Value *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
     static llvm::Value *typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                  const core::TypePtr &type);
-    static void setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder, std::unique_ptr<ast::MethodDef> &md);
+    static llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                                std::unique_ptr<ast::MethodDef> &md);
+    static llvm::Value *setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                          std::unique_ptr<ast::MethodDef> &md);
     static void setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc, core::SymbolRef sym);
 
     static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
