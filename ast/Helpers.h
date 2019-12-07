@@ -188,7 +188,7 @@ public:
     }
 
     static std::unique_ptr<Expression> Splat(core::Loc loc, std::unique_ptr<Expression> arg) {
-        auto to_a = Send0(loc, std::move(arg), core::Names::to_a());
+        auto to_a = Send0(loc, std::move(arg), core::Names::toA());
         return Send1(loc, Constant(loc, core::Symbols::Magic()), core::Names::splat(), std::move(to_a));
     }
 

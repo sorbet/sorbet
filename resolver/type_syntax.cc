@@ -323,7 +323,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                             auto &value = hash->values[i++];
                             auto lit = ast::cast_tree<ast::Literal>(key.get());
                             if (lit && lit->isSymbol(ctx)) {
-                                if (lit->asSymbol(ctx) == core::Names::allow_incompatible()) {
+                                if (lit->asSymbol(ctx) == core::Names::allowIncompatible()) {
                                     auto val = ast::cast_tree<ast::Literal>(value.get());
                                     if (val && val->isTrue(ctx)) {
                                         sig.seen.incompatibleOverride = true;
@@ -381,7 +381,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                 case core::Names::checked()._id:
                     sig.seen.checked = true;
                     break;
-                case core::Names::on_failure()._id:
+                case core::Names::onFailure()._id:
                     break;
                 case core::Names::final_()._id:
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
