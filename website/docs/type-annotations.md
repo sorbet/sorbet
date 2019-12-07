@@ -86,29 +86,42 @@ def current_user
 end
 ```
 
-## Why do I need to repeat types from the constructor?
+## Why can't Sorbet infer the types my instance variables?
 
-A current shortcoming of Sorbet is it cannot reuse static type knowledge in
-order to automatically determine the type of an instance or class variable. In
-the following example, despite the fact that Sorbet knows that `x` has type
-`Integer`, it still treats `@x` as `T.untyped` without an explicit type
-annotation:
+A current shortcoming of Sorbet is in many cases it cannot reuse static type
+knowledge in order to automatically determine the type of an instance or class
+variable. In the following example, Sorbet will naturally understand that `@x`
+is of type `Integer`, but it cannot determine the static type of `@y` without a
+`T.let` and therefore treats it as `T.untyped`:
 
 ```ruby
 class Foo
   sig {params(x: Integer, y: Integer).void}
   def initialize(x, y)
     @x = x
-    @y = T.let(y, Integer)
+    @y = y + 0
 
-    T.reveal_type(@x)  # T.untyped
-    T.reveal_type(@y)  # Integer
+    T.reveal_type(@x)  # Integer
+    T.reveal_type(@y)  # T.untyped
   end
 end
 ```
 
-This is a known limitation of Sorbet, and we're considering ways to make it less
-verbose in the future.
+Sorbet can only infer the types of instance variables in a relatively specific
+context: in particular, only when that instance variable is initialized to the
+exact value of a parameter to the constructor in the body of the constructor. In
+other cases, you will need to use `T.let` to explicitly give the types of
+instance variables.
+
+> **Note**: This particular limitation is because of how Sorbet performs
+> typechecking: it needs to know the types of instance variables _before_ it
+> typechecks method definitions, but even a simple expression like `y + 0` will
+> require a typechecking pass to determine what its resulting type is, which
+> means Sorbet won't be able to tell what type to infer for an instance variable
+> until _after_ it has already started typechecking the method where instance
+> variables are defined. Sorbet resolves this cyclical dependency by either
+> using types that you have explicitly defined with `T.let`, or by relying on
+> simple code patterns like the one described above.
 
 ## Type annotations and strictness levels
 
