@@ -30,6 +30,8 @@ fi
 # shellcheck disable=SC1090
 source "$(rlocation com_stripe_sorbet_llvm/test/logging.sh)"
 
+# Argument Parsing #############################################################
+
 # Positional arguments
 output_archive=$1
 shift 1
@@ -37,33 +39,39 @@ shift 1
 # Sources make up the remaining input
 ruby_source=( "$@" )
 
+# Environment Setup ############################################################
+
 sorbet="$(rlocation com_stripe_sorbet_llvm/main/sorbet)"
+
+# The script is always run from the repo root
+root="$PWD"
+
+# Temporary directory for llvm output
+target="$(mktemp -d)"
+
+cleanup() {
+  rm -r "$target"
+}
+
+trap cleanup EXIT
+
+# Main #########################################################################
 
 info "--- Build Config ---"
 info "* Archive: ${output_archive}"
 info "* Source:  ${ruby_source[*]}"
 info "* Sorbet:  ${sorbet}"
+info "* Target:  ${target}"
 
 info "--- Building Extension ---"
-mkdir target
-if ! $sorbet --silence-dev-message --no-error-count --llvm-ir-folder=target \
+if ! $sorbet --silence-dev-message --no-error-count --llvm-ir-folder="$target" \
   --force-compiled "${ruby_source[@]}"; then
   fatal "* Failed to build extension!"
 fi
 
-shopt -s nullglob
-found=
-for image in target/*.{so,bundle}; do
-  found=1
-  attn "* ${image}"
-done
-shopt -u nullglob
-
-if [ -z "$found" ]; then
-  fatal "* No images produced"
-fi
-
-info "--- Archiving Output ---"
-tar -czv -f "$output_archive" target
+info "--- Building Archive ---"
+pushd "$target" > /dev/null
+tar -czvf "$root/$output_archive" ./*
+popd > /dev/null
 
 success "* Built ${ruby_source[*]}"
