@@ -70,6 +70,20 @@ end
 class FloatDomainError < RangeError
 end
 
+# Raised when there is an attempt to modify a frozen object.
+#
+# ```ruby
+# [1, 2, 3].freeze << 4
+# ```
+#
+# raises the exception
+#
+# ```
+# FrozenError: can't modify frozen Array
+# ```
+class FrozenError < RuntimeError
+end
+
 # Raised when the given index is invalid.
 #
 # ```ruby
