@@ -2328,14 +2328,14 @@ class Array < Object
   # ```
   sig do
     type_parameters(:U).params(
-        arg: T::Array[T.type_parameter(:U)],
+        arg: T::Enumerable[T.type_parameter(:U)],
         blk: NilClass
     )
     .returns(T::Array[[Elem, T.nilable(T.type_parameter(:U))]])
   end
   sig do
     type_parameters(:U).params(
-        arg: T::Array[T.type_parameter(:U)],
+        arg: T::Enumerable[T.type_parameter(:U)],
         blk: T.proc.params(x: Elem, y: T.nilable(T.type_parameter(:U))).void
     ).void
   end
