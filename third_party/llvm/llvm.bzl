@@ -157,6 +157,7 @@ cmake_vars = {
     "LLVM_ENABLE_ABI_BREAKING_CHECKS": 0,
     "LLVM_ENABLE_THREADS": 1,
     "LLVM_ENABLE_ZLIB": 1,
+    "LLVM_ENABLE_DUMP": 1,
     "LLVM_HAS_ATOMICS": 1,
     "LLVM_INCLUDEDIR": "/dev/null",
     "LLVM_INFODIR": "/dev/null",
