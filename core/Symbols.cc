@@ -756,6 +756,12 @@ string Symbol::show(const GlobalState &gs) const {
         return this->name.data(gs)->show(gs);
     }
 
+    if (this->name == core::Names::Constants::AttachedClass()) {
+        auto attached = this->owner.data(gs)->attachedClass(gs);
+        ENFORCE(attached.exists());
+        return fmt::format("T.attached_class (of {})", attached.data(gs)->show(gs));
+    }
+
     if (this->isMethod() && this->owner.data(gs)->isClassOrModule() && this->owner.data(gs)->isSingletonClass(gs)) {
         return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs),
                            this->name.data(gs)->show(gs));
