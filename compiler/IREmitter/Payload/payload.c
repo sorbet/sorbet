@@ -606,6 +606,7 @@ unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID fun
     rb_iseq_insns_info_encode_positions(iseq);
     iseq->body->iseq_encoded = 0x0;
 
+    // Cast it to something easy since teaching LLVM about structs is a huge PITA
     return (unsigned char *)iseq;
 }
 
