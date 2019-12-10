@@ -112,18 +112,20 @@ unique_ptr<ast::Expression> addSigVoid(unique_ptr<ast::Expression> expr) {
 }
 } // namespace
 
-unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body);
+unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body,
+                                    optional<ast::Expression *> context);
 
-unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
-    body = recurse(ctx, std::move(body));
+unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast::Expression> body,
+                                        optional<ast::Expression *> context) {
+    body = recurse(ctx, std::move(body), context);
 
     auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get());
     if (bodySeq) {
         for (auto &exp : bodySeq->stats) {
-            exp = recurse(ctx, std::move(exp));
+            exp = recurse(ctx, std::move(exp), context);
         }
 
-        bodySeq->expr = recurse(ctx, std::move(bodySeq->expr));
+        bodySeq->expr = recurse(ctx, std::move(bodySeq->expr), context);
     }
     return body;
 }
@@ -145,12 +147,41 @@ string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
     return arg->toString(ctx);
 }
 
-unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send) {
+unique_ptr<ast::Expression> makeContext(core::MutableContext ctx, unique_ptr<ast::Expression> blockArg,
+                                        unique_ptr<ast::Expression> &as, optional<ast::Expression *> context) {
+    ENFORCE(ast::isa_tree<ast::Array>(as.get()));
+    auto collect = ctx.state.enterNameUTF8("collect");
+    auto enumToList = ast::MK::Send0(as->loc, as->deepCopy(), collect);
+    auto firstOfList = ast::MK::Send0(as->loc, move(enumToList), core::Names::first());
+    auto mustOfList =
+        ast::MK::Send1(as->loc, ast::MK::UnresolvedConstant(as->loc, ast::MK::EmptyTree(), core::Names::Constants::T()),
+                       core::Names::must(), move(firstOfList));
+    auto assn = ast::MK::Assign(as->loc, move(blockArg), move(mustOfList));
+    if (auto &c = context) {
+        ast::InsSeq::STATS_store ins;
+        ins.emplace_back((*c)->deepCopy());
+        assn = ast::MK::InsSeq(as->loc, std::move(ins), std::move(assn));
+    }
+
+    return assn;
+}
+
+unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send, optional<ast::Expression *> context) {
     if (send->block == nullptr) {
         return nullptr;
     }
 
     if (!send->recv->isSelfReference()) {
+        if (send->fun == core::Names::each() && send->args.empty() && ast::isa_tree<ast::Array>(send->recv.get()) &&
+            send->block != nullptr && send->block->args.size() == 1) {
+            auto assn = makeContext(ctx, send->block->args.front()->deepCopy(), send->recv, context);
+
+            ast::Send::ARGS_store noArgs;
+            return ast::MK::Send(send->loc, std::move(send->recv), send->fun, std::move(noArgs), send->flags,
+                                 ast::MK::Block(send->block->loc,
+                                                prepareBody(ctx, std::move(send->block->body), assn.get()),
+                                                std::move(send->block->args)));
+        }
         return nullptr;
     }
 
@@ -158,8 +189,14 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
         ConstantMover constantMover;
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
+        unique_ptr<ast::Expression> body = std::move(send->block->body);
+        if (auto &c = context) {
+            ast::InsSeq::STATS_store ins;
+            ins.emplace_back((*c)->deepCopy());
+            body = ast::MK::InsSeq(send->loc, std::move(ins), std::move(body));
+        }
         auto method =
-            addSigVoid(ast::MK::Method0(send->loc, send->loc, name, prepareBody(ctx, std::move(send->block->body)),
+            addSigVoid(ast::MK::Method0(send->loc, send->loc, name, prepareBody(ctx, std::move(body), context),
                                         ast::MethodDef::RewriterSynthesized));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
@@ -174,7 +211,22 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         ast::ClassDef::ANCESTORS_store ancestors;
         ancestors.emplace_back(ast::MK::Self(arg->loc));
         ast::ClassDef::RHS_store rhs;
-        rhs.emplace_back(prepareBody(ctx, std::move(send->block->body)));
+
+        unique_ptr<ast::Expression> body = std::move(send->block->body);
+        if (auto &c = context) {
+            ast::InsSeq::STATS_store ins;
+            ins.emplace_back((*c)->deepCopy());
+            if (const auto &other_ins = ast::cast_tree<ast::InsSeq>(body.get())) {
+                for (auto &i : other_ins->stats) {
+                    ins.emplace_back(move(i));
+                }
+                body = ast::MK::InsSeq(body->loc, std::move(ins), std::move(other_ins->expr));
+            } else {
+                body = ast::MK::InsSeq(send->loc, std::move(ins), std::move(body));
+            }
+        }
+
+        rhs.emplace_back(prepareBody(ctx, std::move(body), context));
         auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
         return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs));
@@ -182,8 +234,14 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         ConstantMover constantMover;
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+        unique_ptr<ast::Expression> body = std::move(send->block->body);
+        if (auto &c = context) {
+            ast::InsSeq::STATS_store ins;
+            ins.emplace_back((*c)->deepCopy());
+            body = ast::MK::InsSeq(send->loc, std::move(ins), std::move(body));
+        }
         auto method = addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
-                                                  prepareBody(ctx, std::move(send->block->body)),
+                                                  prepareBody(ctx, std::move(body), context),
                                                   ast::MethodDef::RewriterSynthesized));
         method = ast::MK::InsSeq1(send->loc, send->args.front()->deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
@@ -192,10 +250,11 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
     return nullptr;
 }
 
-unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
+unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body,
+                                    optional<ast::Expression *> context) {
     auto bodySend = ast::cast_tree<ast::Send>(body.get());
     if (bodySend) {
-        auto change = runSingle(ctx, bodySend);
+        auto change = runSingle(ctx, bodySend, context);
         if (change) {
             return change;
         }
@@ -209,7 +268,7 @@ vector<unique_ptr<ast::Expression>> Minitest::run(core::MutableContext ctx, ast:
         return stats;
     }
 
-    auto exp = runSingle(ctx, send);
+    auto exp = runSingle(ctx, send, nullopt);
     if (exp != nullptr) {
         stats.emplace_back(std::move(exp));
     }
