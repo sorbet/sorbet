@@ -614,6 +614,7 @@ const VALUE **sorbet_setRubyStackFrame(unsigned char *iseqchar) {
     const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
     rb_execution_context_t *ec = GET_EC();
     ec->cfp->iseq = iseq;
+    VM_ENV_FLAGS_UNSET(ec->cfp->ep, VM_FRAME_FLAG_CFRAME);
     return &ec->cfp->pc;
 }
 
