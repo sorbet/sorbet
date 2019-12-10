@@ -43,7 +43,7 @@ vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blo
 }
 
 void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const BasicBlockMap &blockMap,
-                    UnorderedMap<core::LocalVariable, Alias> &aliases, bool disableBacktrace) {
+                    UnorderedMap<core::LocalVariable, Alias> &aliases) {
     // this function effectively generate an optimized build of
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(cs);
@@ -262,9 +262,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         }
         {
             // Switch the current control frame from a C frame to a Ruby-esque one
-            if (!disableBacktrace) {
-                Payload::setRubyStackFrame(cs, builder, md);
-            }
+            Payload::setRubyStackFrame(cs, builder, md);
         }
 
         if (!isBlock) {
@@ -281,7 +279,7 @@ core::LocalVariable returnValue(CompilerState &cs) {
 }
 
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
-                  UnorderedMap<core::LocalVariable, Alias> &aliases, bool disableBacktrace) {
+                  UnorderedMap<core::LocalVariable, Alias> &aliases) {
     llvm::IRBuilder<> builder(cs);
     UnorderedSet<core::LocalVariable> loadYieldParamsResults; // methods calls on these are ignored
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
@@ -292,9 +290,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
         builder.SetInsertPoint(block);
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
-                if (!disableBacktrace) {
-                    Payload::setLineNumber(cs, builder, bind.loc, cfg.symbol);
-                }
+                Payload::setLineNumber(cs, builder, bind.loc, cfg.symbol);
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
@@ -535,7 +531,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     setupArguments(cs, cfg, md, blockMap, aliases);
     emitSigVerification(cs, cfg, md, blockMap, aliases);
 
-    emitUserBody(cs, cfg, blockMap, aliases, disableBacktrace);
+    emitUserBody(cs, cfg, blockMap, aliases);
     emitPostProcess(cs, cfg, blockMap, aliases);
     for (int funId = 0; funId < blockMap.functionInitializersByFunction.size(); funId++) {
         builder.SetInsertPoint(blockMap.functionInitializersByFunction[funId]);
