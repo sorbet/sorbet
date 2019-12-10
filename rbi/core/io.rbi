@@ -731,6 +731,33 @@ class IO < Object
   end
   def lineno=(arg0); end
 
+  # With no associated block, `IO.open` is a synonym for
+  # [`::new`](https://ruby-doc.org/core-2.6.5/IO.html#method-c-new).
+  # If the optional code block is given, it will be passed io as an argument,
+  # and the [IO](https://ruby-doc.org/core-2.6.5/IO.html) object will
+  # automatically be closed when the block terminates. In this instance,
+  # [`::open`](https://ruby-doc.org/core-2.6.5/IO.html#method-c-open)
+  # returns the value of the block.
+  #
+  # See [`::new`](https://ruby-doc.org/core-2.6.5/IO.html#method-c-new) for a
+  # description of the `fd`, `mode` and `opt` parameters.
+  sig do
+    params(
+      fd: T.any(String, Integer),
+      mode: String,
+      opt: T.nilable(T::Hash[Symbol, T.untyped]),
+    ).returns(IO)
+  end
+  sig do
+    type_parameters(:U).params(
+      fd: T.any(String, Integer),
+      mode: String,
+      opt: T.nilable(T::Hash[Symbol, T.untyped]),
+      blk: T.proc.params(io: IO).returns(T.type_parameter(:U))
+    ).returns(T.type_parameter(:U))
+  end
+  def self.open(fd, mode='r', opt=nil, &blk); end
+
   # Returns the process ID of a child process associated with *ios*. This will
   # be set by `IO.popen`.
   #

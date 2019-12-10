@@ -662,6 +662,39 @@ class File < IO
   end
   def self.mtime(file); end
 
+  # With no associated block, `File.open` is a synonym for
+  # [`::new`](https://ruby-doc.org/core-2.1.4/File.html#method-c-new).
+  # If the optional code block is given, it will be passed the opened `file` as
+  # an argument and the [`File`](https://ruby-doc.org/core-2.1.4/File.html)
+  # object will automatically be closed when the block terminates.
+  # The value of the block will be returned from `File.open`.
+  #
+  # If a file is being created, its initial permissions may be set using the
+  # `perm` parameter.
+  # See [`::new`](https://ruby-doc.org/core-2.1.4/File.html#method-c-new) for
+  # further discussion.
+  #
+  # See [`IO::new`](https://ruby-doc.org/core-2.6.5/IO.html#method-c-new) for a
+  # description of the `mode` and `opt` parameters.
+  sig do
+    params(
+      filename: String,
+      mode: String,
+      perm: T.nilable(Integer),
+      opt: T.nilable(T::Hash[Symbol, T.untyped]),
+    ).returns(File)
+  end
+  sig do
+    type_parameters(:U).params(
+      filename: String,
+      mode: String,
+      perm: T.nilable(Integer),
+      opt: T.nilable(T::Hash[Symbol, T.untyped]),
+      blk: T.proc.params(file: File).returns(T.type_parameter(:U))
+    ).returns(T.type_parameter(:U))
+  end
+  def self.open(filename, mode='r', perm=nil, opt=nil, &blk); end
+
   # Returns `true` if the named file exists and the effective used id of the
   # calling process is the owner of the file.
   #
