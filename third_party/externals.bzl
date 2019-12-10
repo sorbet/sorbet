@@ -139,13 +139,10 @@ package(default_visibility = ["//visibility:public"])
         shallow_since = "1541620420 -0800",
     )
 
-    # NOTE: using this branch:
-    # https://github.com/DarkDimius/bazel-toolchain/tree/dp-srb-now
     git_repository(
         name = "com_grail_bazel_toolchain",
-        remote = "https://github.com/DarkDimius/bazel-toolchain.git",
-        commit = "4db2af1249fa1c20f5f12830e4ad209e56c870a4",
-        shallow_since = "1571938947 -0700",
+        remote = "https://github.com/grailbio/bazel-toolchain.git",
+        commit = "8570c4ccb39f750452b0b5607c9f54a093214f26",
     )
 
     git_repository(

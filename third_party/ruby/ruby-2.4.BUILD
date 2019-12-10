@@ -48,6 +48,8 @@ INC_PREFIX = "lib/ruby/include"
 
 # configuration ################################################################
 
+load("@bazel_tools//tools/cpp:cc_flags_supplier.bzl", "cc_flags_supplier")
+
 genrule(
     name = "run_configure",
     outs = [
@@ -68,6 +70,10 @@ CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) --enable-
 find .ext -name config.h -type f -exec cp {} $(location include/ruby/config.h) \;
 cp config.status $(location config.status)
 """,
+    toolchains = [
+        "@bazel_tools//tools/cpp:cc_flags",
+        "@bazel_tools//tools/cpp:current_cc_toolchain"
+    ],
 )
 
 # shared headers ###############################################################
