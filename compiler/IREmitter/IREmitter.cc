@@ -513,8 +513,7 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
 
 } // namespace
 
-void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName,
-                    bool disableBacktrace) {
+void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const string &functionName) {
     Timer timer(cs.gs.tracer(), "IREmitter::run");
     UnorderedMap<core::LocalVariable, Alias> aliases;
     auto func = IREmitterHelpers::cleanFunctionBody(cs, IREmitterHelpers::getOrCreateFunction(cs, md->symbol));
@@ -533,7 +532,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
-    setupArguments(cs, cfg, md, blockMap, aliases, disableBacktrace);
+    setupArguments(cs, cfg, md, blockMap, aliases);
     emitSigVerification(cs, cfg, md, blockMap, aliases);
 
     emitUserBody(cs, cfg, blockMap, aliases, disableBacktrace);

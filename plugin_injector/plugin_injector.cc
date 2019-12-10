@@ -43,7 +43,6 @@ public:
 class LLVMSemanticExtension : public SemanticExtension {
     optional<string> irOutputDir;
     bool forceCompiled;
-    bool disableBacktrace;
     mutable struct {
         UnorderedMap<std::thread::id, shared_ptr<ThreadState>> states;
         absl::Mutex mtx;
@@ -74,10 +73,9 @@ class LLVMSemanticExtension : public SemanticExtension {
     }
 
 public:
-    LLVMSemanticExtension(optional<string> irOutputDir, bool forceCompiled, bool disableBacktrace) {
+    LLVMSemanticExtension(optional<string> irOutputDir, bool forceCompiled) {
         this->irOutputDir = move(irOutputDir);
         this->forceCompiled = forceCompiled;
-        this->disableBacktrace = disableBacktrace;
     }
 
     virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override {
@@ -121,7 +119,7 @@ public:
         ENFORCE(threadState->file.exists());
         compiler::CompilerState state(gs, lctx, module.get());
         try {
-            sorbet::compiler::IREmitter::run(state, cfg, md, functionName, this->disableBacktrace);
+            sorbet::compiler::IREmitter::run(state, cfg, md, functionName);
             string fileName = objectFileName(gs, cfg.symbol.data(gs)->loc().file());
             sorbet::compiler::IREmitter::buildInitFor(state, cfg.symbol, fileName);
         } catch (sorbet::compiler::AbortCompilation &) {
@@ -164,7 +162,7 @@ public:
 
     virtual ~LLVMSemanticExtension(){};
     virtual std::unique_ptr<SemanticExtension> deepCopy(const core::GlobalState &from, core::GlobalState &to) override {
-        return make_unique<LLVMSemanticExtension>(this->irOutputDir, this->forceCompiled, this->disableBacktrace);
+        return make_unique<LLVMSemanticExtension>(this->irOutputDir, this->forceCompiled);
     };
     virtual void merge(const core::GlobalState &from, core::GlobalState &to, core::GlobalSubstitution &subst) override {
     }
@@ -176,24 +174,17 @@ public:
         optsBuilder.add_options("compiler")("llvm-ir-folder", "Output LLVM IR to directory", cxxopts::value<string>());
         optsBuilder.add_options("compiler")("force-compiled", "Force all files to this compiled level",
                                             cxxopts::value<bool>());
-        optsBuilder.add_options("compiler")("disable-backtrace",
-                                            "Don't push backtrace frames. Useful until they are performant",
-                                            cxxopts::value<bool>());
     };
     virtual std::unique_ptr<SemanticExtension> readOptions(cxxopts::ParseResult &providedOptions) const override {
         optional<string> irOutputDir;
         bool forceCompiled = false;
-        bool disableBacktrace = false;
         if (providedOptions.count("llvm-ir-folder") > 0) {
             irOutputDir = providedOptions["llvm-ir-folder"].as<string>();
         }
         if (providedOptions.count("force-compiled") > 0) {
             forceCompiled = providedOptions["force-compiled"].as<bool>();
         }
-        if (providedOptions.count("disable-backtrace") > 0) {
-            disableBacktrace = providedOptions["disable-backtrace"].as<bool>();
-        }
-        return make_unique<LLVMSemanticExtension>(irOutputDir, forceCompiled, disableBacktrace);
+        return make_unique<LLVMSemanticExtension>(irOutputDir, forceCompiled);
     };
     virtual ~LLVMSemanticExtensionProvider(){};
 };
