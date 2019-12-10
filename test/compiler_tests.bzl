@@ -118,7 +118,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
                 "$(locations {})".format(sources_name),
             ] + extra_args,
             data = data,
-            size = "medium",
+            size = "small",
             tags = tags + extra_tags,
         )
 
