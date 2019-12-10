@@ -221,23 +221,23 @@ package(default_visibility = ["//visibility:public"])
     )
 
     git_repository(
-        name = "io_bazel_rules_ragel",
+        name = "rules_ragel",
         remote = "https://github.com/jmillikin/rules_ragel.git",
-        commit = "5723d752a53dd8e25eb4509f3ed869196a06cb2a",
+        commit = "f99f17fcad2e155646745f4827ac636a3b5d4d15",
         shallow_since = "1547960305 -0800",
     )
 
     git_repository(
-        name = "io_bazel_rules_bison",
+        name = "rules_bison",
         remote = "https://github.com/jmillikin/rules_bison.git",
-        commit = "3809da0cea172c320f1fb7cd94bcb9be97897b14",
+        commit = "85e9bab3028aa26efbdafcba01ca8902c93c367d",
         shallow_since = "1549513081 -0800",
     )
 
     git_repository(
-        name = "io_bazel_rules_m4",
+        name = "rules_m4",
         remote = "https://github.com/jmillikin/rules_m4",
-        commit = "ae19f8df57f680c6dbad4887e162ca17ee97a13e",
+        commit = "c2d2ca9bdcc3e9498fdf187eb92b29830a893b1d",
         shallow_since = "1549512390 -0800",
     )
 

@@ -1,7 +1,7 @@
 licenses(["notice"])
 
-load("@io_bazel_rules_ragel//ragel:ragel.bzl", "ragel")
-load("@io_bazel_rules_bison//bison:bison.bzl", "bison")
+load("@rules_ragel//ragel:ragel.bzl", "ragel")
+load("@rules_bison//bison:bison.bzl", "bison")
 
 ragel(
     name = "ragel_lexer",

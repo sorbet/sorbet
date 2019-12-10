@@ -4,7 +4,6 @@
 
 try-import .bazelrc.local
 startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the default is to use 1/4 of memory, which makes flaky on 8G boxes
-common  --incompatible_package_name_is_a_function=false # https://github.com/protocolbuffers/protobuf/issues/5547
 
 # enable https://github.com/google/googletest/pull/1653
 common:build --define absl=1
@@ -127,7 +126,7 @@ build:buildfarm-ruby --define jemalloc=false
 build:buildfarm-ruby --copt=-O2
 # this includes --spawn_strategy=standalone --genrule_strategy=standalone, which
 # seems to break the snapshot tests
-# build:buildfarm-ruby --config=dbg 
+# build:buildfarm-ruby --config=dbg
 build:buildfarm-ruby --nostamp
 build:buildfarm-ruby --define release=false
 build:buildfarm-ruby --config=forcedebug

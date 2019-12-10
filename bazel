@@ -1,5 +1,4 @@
 #!/bin/bash
-
 if [ ! -z "$LOCAL_BAZEL_OVERRIDE" ]; then
     exec $LOCAL_BAZEL_OVERRIDE "$@"
 fi
@@ -207,4 +206,5 @@ mkdir -p $BUILD_DIR
 rm -rf $BUILD_DIR
 
 cd $ORIGINAL_PWD
+
 exec $BAZEL_EXEC_PATH --bazelrc $BAZEL_RC_PATH "$@"
