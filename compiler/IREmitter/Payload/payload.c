@@ -609,8 +609,8 @@ unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID fun
     return (unsigned char *)iseq;
 }
 
-const VALUE **sorbet_setRubyStackFrame(unsigned char *iseqvoid) {
-    const rb_iseq_t *iseq = (const rb_iseq_t *)iseqvoid;
+const VALUE **sorbet_setRubyStackFrame(unsigned char *iseqchar) {
+    const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
     rb_execution_context_t *ec = GET_EC();
     ec->cfp->iseq = iseq;
     return &ec->cfp->pc;
