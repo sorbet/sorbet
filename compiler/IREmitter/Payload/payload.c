@@ -612,10 +612,10 @@ unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID fun
 
 const VALUE **sorbet_setRubyStackFrame(unsigned char *iseqchar) {
     const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
-    rb_execution_context_t *ec = GET_EC();
-    ec->cfp->iseq = iseq;
-    VM_ENV_FLAGS_UNSET(ec->cfp->ep, VM_FRAME_FLAG_CFRAME);
-    return &ec->cfp->pc;
+    rb_control_frame_t *cfp = GET_EC()->cfp;
+    cfp->iseq = iseq;
+    VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME);
+    return &cfp->pc;
 }
 
 void sorbet_setLineNumber(int offset) {
