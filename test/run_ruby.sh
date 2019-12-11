@@ -38,7 +38,7 @@ command=("${command[@]}" \
   -W0 \
   -I "${ruby_lib}" -I "${ruby_lib}/x86_64-darwin18" \
   -I "$base/run/tools" -rpreamble.rb \
-  "$base/$1" \
+  "$base/$rb" \
   )
 
 "${command[@]}"

@@ -35,28 +35,33 @@ runfile="$(mktemp)"
 
 # Main #########################################################################
 
+info "--- Running ---"
+info "* Ruby interpreted"
+attn "    test/run_ruby.sh ${rb[0]}"
+
+info "* Sorbet compiler"
+attn "    test/run_sorbet.sh ${rb[0]}"
+
+info "* Compiled code"
+attn "    test/run_compiled.sh ${rb[0]}"
+
 info "--- Debugging ---"
-info "* Run ruby locally"
-for source in "${rb[@]}"; do
-  attn "    test/run_ruby.sh $source"
-done
+info "* Ruby interpreted"
+attn "    test/run_ruby.sh -d ${rb[0]}"
 
-info "* Run sorbet"
-for source in "${rb[@]}"; do
-  attn "    test/run_sorbet.sh $source"
-done
+info "* Sorbet compiler"
+attn "    test/run_sorbet.sh -d ${rb[0]}"
 
-info "* Run compiled code"
-for source in "${rb[@]}"; do
-  attn "    test/run_compiled.sh $source"
-done
+info "* Compiled code"
+attn "    test/run_compiled.sh -d ${rb[0]}"
+
 
 info "--- Test Config ---"
 info "* Source: ${rb[*]}"
-info "* Oracle: ${rbout}"
-info "* Exit:   ${rbexit}"
-info "* Build:  ${build_archive}"
-info "* Ruby:   ${ruby}"
+info "* Oracle: bazel-genfiles/${rbout}"
+info "* Exit:   bazel-genfiles/${rbexit}"
+info "* Build:  bazel-genfiles/${build_archive}"
+info "* Ruby:   bazel-bin/${ruby}"
 info "* Target: ${target}"
 info "* Runfile:${runfile}"
 info "* Stderr: ${stderr}"

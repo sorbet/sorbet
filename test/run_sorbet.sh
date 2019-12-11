@@ -21,7 +21,9 @@ if [ -z "$rb" ]; then
   exit 1
 fi
 
-llvmir=$(mktemp -d)
+if [ -z "${llvmir:-}" ]; then
+  llvmir=$(mktemp -d)
+fi
 
 if [ ! -f ./bazel-bin/main/sorbet ]; then
   bazel build //main:sorbet
@@ -47,7 +49,3 @@ command=( "${command[@]}" \
 "${command[@]}"
 
 popd > /dev/null
-
-if [ -z "$DEBUG" ]; then
-  rm -r "$llvmir"
-fi
