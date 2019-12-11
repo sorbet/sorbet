@@ -207,6 +207,7 @@ NameDef names[] = {
 
     {"describe"},
     {"it"},
+    {"eachIt", "each_it"},
     {"before"},
     {"after"},
     {"afterAngles", "<after>"},

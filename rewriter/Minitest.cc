@@ -164,6 +164,23 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
+    if (send->args.size() == 2 && send->fun == core::Names::eachIt() && send->block->args.size() == 1) {
+        auto &arg = send->args[1];
+        auto argString = to_s(ctx, arg);
+
+        ConstantMover constantMover;
+        auto body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
+
+        auto blk = ast::MK::Block1(send->block->loc, move(body), move(send->block->args.front()));
+        auto each = ast::MK::Send0Block(send->loc, move(send->args.front()), core::Names::each(), move(blk));
+
+        auto name = ctx.state.enterNameUTF8("<each_it '" + argString + "'>");
+        auto method =
+            addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name), prepareBody(ctx, std::move(each)),
+                                        ast::MethodDef::RewriterSynthesized));
+        return constantMover.addConstantsToExpression(send->loc, move(method));
+    }
+
     if (send->args.size() != 1) {
         return nullptr;
     }
