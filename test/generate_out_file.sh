@@ -60,10 +60,19 @@ info "    test/run_test.sh -d ${rb}"
 
 info "--- Building output ---"
 echo "require './$rb';" > "$rbrunfile"
+
+# Use a temp directory for LLVMIR so we don't accidentally pick up changes from
+# the environment
+llvmir=$(mktemp -d)
+cleanup() {
+    rm -r "$llvmir"
+}
+trap cleanup EXIT
+
 set +e
 # NOTE: we run with patch_require incluced so that the stack trace looks similar
 # to what we'll see in the compiled version
-llvmir=/tmp $ruby \
+llvmir="$llvmir" $ruby \
   --disable=gems --disable=did_you_mean \
   -I "$run_tools" -rpreamble.rb -rpatch_require.rb \
   "$rbrunfile" > "$rbout" 2>/dev/null
