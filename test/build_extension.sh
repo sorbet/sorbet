@@ -96,9 +96,3 @@ info "--- Cleaning up ---"
 rm -r "$target"
 
 success "* Built ${ruby_source[*]}"
-
-if echo "$ruby_source" | fgrep hello; then
-  exit 1
-fi
-
-
