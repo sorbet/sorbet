@@ -64,7 +64,7 @@ info "* Stderr:  ${stderr}"
 
 info "--- Building Extension ---"
 if ! $sorbet --silence-dev-message --no-error-count --llvm-ir-folder="$target" \
-  --force-compiled "${ruby_source[@]}" 2> "$stdout" > "$stderr" ; then
+  --force-compiled "${ruby_source[@]}" 2> "$stderr" > "$stdout" ; then
 
   info "--- Stdout ---"
   cat "$stdout"
@@ -73,6 +73,18 @@ if ! $sorbet --silence-dev-message --no-error-count --llvm-ir-folder="$target" \
   cat "$stderr"
 
   fatal "* Failed to build extension!"
+fi
+
+if [ -z "$(ls -A "$target")" ]; then
+
+  info "--- Stdout ---"
+  cat "$stdout"
+
+  info "--- Stderr ---"
+  cat "$stderr"
+
+  attn "Is "${ruby_source[*]}" marked '# typed: true'?"
+  fatal "No output produced by sorbet"
 fi
 
 info "--- Building Archive ---"
