@@ -38,7 +38,7 @@ runfile="$(mktemp)"
 info "--- Debugging ---"
 info "* Run ruby locally"
 for source in "${rb[@]}"; do
-  attn "    test/run_test.sh $source"
+  attn "    test/run_ruby.sh $source"
 done
 
 info "* Run sorbet"

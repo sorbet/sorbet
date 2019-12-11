@@ -56,7 +56,7 @@ info "* Rbexit: ${rbexit}"
 info "* Runner: ${rbrunfile}"
 
 info "--- Debugging ---"
-info "    test/run_test.sh -d ${rb}"
+info "    test/run_ruby.sh -d ${rb}"
 
 info "--- Building output ---"
 echo "require './$rb';" > "$rbrunfile"

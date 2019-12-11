@@ -13,7 +13,7 @@ fi
 rb=$1
 
 if [ -z "$rb" ]; then
-  echo "Usage: test/run_test.sh <test_file>"
+  echo "Usage: test/run_ruby.sh <test_file>"
   exit 1
 fi
 
