@@ -19,10 +19,6 @@ fi
 
 pushd "$base" > /dev/null
 
-if [ ! -f ./bazel-bin/external/ruby_2_6_3/ruby ]; then
-  bazel build @ruby_2_6_3//:ruby
-fi
-
 ruby="./bazel-bin/external/ruby_2_6_3/ruby.runfiles/ruby_2_6_3"
 ruby_bin="${ruby}/bin"
 ruby_lib="${ruby}/lib/ruby/2.6.0"
@@ -32,6 +28,10 @@ if [ -z "$DEBUG" ]; then
   command=( "${ruby_bin}/ruby" )
 else
   command=("lldb" "--" "${ruby_bin}/ruby")
+fi
+
+if [ ! -f "${ruby_bin}/ruby" ]; then
+  bazel build @ruby_2_6_3//:ruby
 fi
 
 command=("${command[@]}" \
