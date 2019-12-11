@@ -49,6 +49,9 @@ root="$PWD"
 # Temporary directory for llvm output
 target="$(mktemp -d)"
 
+stdout=$(mktemp)
+stderr=$(mktemp)
+
 # Main #########################################################################
 
 info "--- Build Config ---"
@@ -56,10 +59,19 @@ info "* Archive: ${output_archive}"
 info "* Source:  ${ruby_source[*]}"
 info "* Sorbet:  ${sorbet}"
 info "* Target:  ${target}"
+info "* Stdout:  ${stdout}"
+info "* Stderr:  ${stderr}"
 
 info "--- Building Extension ---"
 if ! $sorbet --silence-dev-message --no-error-count --llvm-ir-folder="$target" \
-  --force-compiled "${ruby_source[@]}"; then
+  --force-compiled "${ruby_source[@]}" 2> "$stdout" > "$stderr" ; then
+
+  info "--- Stdout ---"
+  cat "$stdout"
+
+  info "--- Stderr ---"
+  cat "$stderr"
+
   fatal "* Failed to build extension!"
 fi
 
