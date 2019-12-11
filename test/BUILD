@@ -33,7 +33,10 @@ sh_binary(
         "//run:runtimeoverrides",
         "@ruby_2_6_3//:ruby",
     ],
-    deps = ["@bazel_tools//tools/bash/runfiles"],
+    deps = [
+        ":logging",
+        "@bazel_tools//tools/bash/runfiles"
+    ],
 )
 
 sh_binary(

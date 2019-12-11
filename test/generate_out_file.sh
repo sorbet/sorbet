@@ -1,11 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-rbout=${1}
-rbexit=${2}
-rb=${3}
-
-
 # --- begin runfiles.bash initialization ---
 # Copy-pasted from Bazel's Bash runfiles library https://github.com/bazelbuild/bazel/blob/defd737761be2b154908646121de47c30434ed51/tools/bash/runfiles/runfiles.bash
 if [[ ! -d "${RUNFILES_DIR:-/dev/null}" && ! -f "${RUNFILES_MANIFEST_FILE:-/dev/null}" ]]; then
@@ -30,31 +25,52 @@ else
 fi
 # --- end runfiles.bash initialization ---
 
+# Find logging with rlocation, as this script is run from a genrule
+# shellcheck disable=SC1090
+source "$(rlocation com_stripe_sorbet_llvm/test/logging.sh)"
+
+# Argument Parsing #############################################################
+
+rbout=${1}
+rbexit=${2}
+rb=${3}
+
+# Environment Setup ############################################################
 
 # NOTE: using a temp file here, as that will cause ruby to not print the name of
 # the main file in a stack trace.
 rbrunfile=$(mktemp)
 
-cleanup() {
-    rm -r "$rbrunfile"
-}
-
-# trap cleanup EXIT
-
+# Find ruby
 ruby="$(rlocation ruby_2_6_3/ruby)"
-preamble="$(rlocation com_stripe_sorbet_llvm/run/tools/preamble.rb)"
-patch_require="$(rlocation com_stripe_sorbet_llvm/run/tools/patch_require.rb)"
-if [ "${preamble:0:1}" != "/" ]; then
-    preamble="./$preamble"
-fi
-if [ "${patch_require:0:1}" != "/" ]; then
-    patch_require="./$patch_require"
-fi
 
+# Determine the location of run/tools
+run_tools=$(dirname "$(rlocation com_stripe_sorbet_llvm/run/tools/preamble.rb)")
+
+# Main #########################################################################
+
+info "--- Build Config ---"
+info "* Test:   ${rb}"
+info "* Rbout:  ${rbout}"
+info "* Rbexit: ${rbexit}"
+info "* Runner: ${rbrunfile}"
+
+info "--- Debugging ---"
+info "    test/run_test.sh -d ${rb}"
+
+info "--- Building output ---"
 echo "require './$rb';" > "$rbrunfile"
 set +e
 # NOTE: we run with patch_require incluced so that the stack trace looks similar
 # to what we'll see in the compiled version
-llvmir=/tmp $ruby --disable=gems --disable=did_you_mean  -r "$preamble" -r "$patch_require" "$rbrunfile" > "$rbout" 2>/dev/null
+llvmir=/tmp $ruby \
+  --disable=gems --disable=did_you_mean \
+  -I "$run_tools" -rpreamble.rb -rpatch_require.rb \
+  "$rbrunfile" > "$rbout" 2>/dev/null
 echo "$?" > "$rbexit"
 set -e
+
+info "Cleaning up"
+rm "$rbrunfile"
+
+success "* Captured output for ${rb}"

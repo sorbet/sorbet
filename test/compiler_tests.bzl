@@ -79,7 +79,11 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             outs = [expected_outfile, expected_exitfile],
             srcs = [sources_name],
             tools = [":generate_out_file"],
-            cmd = "$(location :generate_out_file) $(location {}) $(location {}) $(locations {})".format(expected_outfile, expected_exitfile, sources_name),
+            cmd =
+                """
+                $(location :generate_out_file) $(location {}) $(location {}) $(locations {}) &> genrule.log \
+                    || (cat genrule.log && exit 1)
+                """.format(expected_outfile, expected_exitfile, sources_name),
             tags = tags + extra_tags,
         )
 

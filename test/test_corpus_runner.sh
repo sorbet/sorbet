@@ -33,12 +33,6 @@ stderr="$(mktemp)"
 # Test wrapper
 runfile="$(mktemp)"
 
-cleanup() {
-  rm -r "$target" "$stdout" "$stderr" "$runfile"
-}
-
-trap cleanup EXIT
-
 # Main #########################################################################
 
 info "--- Debugging ---"
@@ -52,9 +46,9 @@ for source in "${rb[@]}"; do
   attn "    test/run_sorbet.sh $source"
 done
 
-info "* Debug compiled code"
+info "* Run compiled code"
 for source in "${rb[@]}"; do
-  attn "    test/debug_compiled.sh $source"
+  attn "    test/run_compiled.sh $source"
 done
 
 info "--- Test Config ---"
@@ -64,6 +58,9 @@ info "* Exit:   ${rbexit}"
 info "* Build:  ${build_archive}"
 info "* Ruby:   ${ruby}"
 info "* Target: ${target}"
+info "* Runfile:${runfile}"
+info "* Stderr: ${stderr}"
+info "* Stdout: ${stderr}"
 
 info "--- Testing ruby ---"
 $ruby -e 'puts (require "set")' > /dev/null || fatal "No functioning ruby"
@@ -92,7 +89,7 @@ for ext in "llo"; do
     fi
   fi
 done
-popd
+popd > /dev/null
 
 # NOTE: running the test could be split out into its own genrule, the test just
 # needs to validate that the output matches.
@@ -101,8 +98,6 @@ info "--- Running Compiled Test ---"
 # NOTE: using a temp file here, as that will cause ruby to not print the name of
 # the main file in a stack trace.
 echo "require './$rbmain'" > "$runfile"
-
-cat "$runfile"
 
 set +e
 # NOTE: the llvmir environment variable must have a leading `./`, otherwise the
@@ -144,5 +139,8 @@ fi
 #   cat  stderr.log
 #   fatal
 # fi
+
+info "Cleaning up temp files"
+rm -r "$target" "$stdout" "$stderr" "$runfile"
 
 success "Test passed"

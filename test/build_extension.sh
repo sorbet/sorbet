@@ -49,12 +49,6 @@ root="$PWD"
 # Temporary directory for llvm output
 target="$(mktemp -d)"
 
-cleanup() {
-  rm -r "$target"
-}
-
-trap cleanup EXIT
-
 # Main #########################################################################
 
 info "--- Build Config ---"
@@ -73,5 +67,8 @@ info "--- Building Archive ---"
 pushd "$target" > /dev/null
 tar -czvf "$root/$output_archive" ./*
 popd > /dev/null
+
+info "--- Cleaning up ---"
+rm -r "$target"
 
 success "* Built ${ruby_source[*]}"
