@@ -604,6 +604,7 @@ unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID fun
     iseq->body->iseq_size = insn_num;
     iseq->body->insns_info.size = insn_num;
     rb_iseq_insns_info_encode_positions(iseq);
+    // Just an offset that has to be consistent with what we use in sorbet_setLineNumber
     iseq->body->iseq_encoded = 0x0;
 
     // Cast it to something easy since teaching LLVM about structs is a huge PITA
@@ -619,6 +620,9 @@ const VALUE **sorbet_setRubyStackFrame(unsigned char *iseqchar) {
 }
 
 void sorbet_setLineNumber(int offset) {
+    // TODO(perf): Pass in the return of sorbet_setRubyStackFrame instead of looking up
+    // the pc location every time
+
     // use pos+1 because PC should point at the next instruction
     GET_EC()->cfp->pc = ((VALUE *)0x0) + offset + 1;
 }
