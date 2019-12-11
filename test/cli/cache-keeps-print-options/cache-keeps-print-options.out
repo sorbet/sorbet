@@ -4,7 +4,7 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., https://github.co
       argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
   class ::CCCCCCCCC < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
   class ::<Class:CCCCCCCCC>[<AttachedClass>] < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-    type-member(+) ::<Class:CCCCCCCCC>::<AttachedClass> -> T.class_of(CCCCCCCCC)::<AttachedClass> @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
+    type-member(+) ::<Class:CCCCCCCCC>::<AttachedClass> -> T.attached_class (of CCCCCCCCC) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
     method ::<Class:CCCCCCCCC>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
       argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
 
@@ -14,7 +14,7 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., https://github.co
       argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
   class ::CCCCCCCCC < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
   class ::<Class:CCCCCCCCC>[<AttachedClass>] < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-    type-member(+) ::<Class:CCCCCCCCC>::<AttachedClass> -> T.class_of(CCCCCCCCC)::<AttachedClass> @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
+    type-member(+) ::<Class:CCCCCCCCC>::<AttachedClass> -> T.attached_class (of CCCCCCCCC) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
     method ::<Class:CCCCCCCCC>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
       argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
 

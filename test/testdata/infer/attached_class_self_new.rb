@@ -5,12 +5,12 @@ class NoArgs
 
   sig {returns(T.experimental_attached_class)}
   def self.make
-    T.reveal_type(self.new) # error: Revealed type: `T.class_of(NoArgs)::<AttachedClass>`
+    T.reveal_type(self.new) # error: Revealed type: `T.attached_class (of NoArgs)`
   end
 
   sig {returns(T.experimental_attached_class)}
   def self.make_implicit_new
-    T.reveal_type(new) # error: Revealed type: `T.class_of(NoArgs)::<AttachedClass>`
+    T.reveal_type(new) # error: Revealed type: `T.attached_class (of NoArgs)`
   end
 
 end
@@ -23,12 +23,12 @@ class PosArgs
 
   sig {returns(T.experimental_attached_class)}
   def self.make
-    T.reveal_type(self.new(10, "foo")) # error: Revealed type: `T.class_of(PosArgs)::<AttachedClass>`
+    T.reveal_type(self.new(10, "foo")) # error: Revealed type: `T.attached_class (of PosArgs)`
 
     # Not matching initialize
     T.reveal_type(self.new())
                 # ^^^^^^^^^^ error: Not enough arguments provided
-  # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.class_of(PosArgs)::<AttachedClass>`
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.attached_class (of PosArgs)`
   end
 end
 
@@ -40,12 +40,12 @@ class NamedArgs
 
   sig {returns(T.experimental_attached_class)}
   def self.make
-    T.reveal_type(self.new(x: 10, y: "foo")) # error: Revealed type: `T.class_of(NamedArgs)::<AttachedClass>`
+    T.reveal_type(self.new(x: 10, y: "foo")) # error: Revealed type: `T.attached_class (of NamedArgs)`
 
     # Not matching initialize
     T.reveal_type(self.new(x: 10))
                 # ^^^^^^^^^^^^^^^ error: Missing required keyword argument `y`
-  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.class_of(NamedArgs)::<AttachedClass>`
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.attached_class (of NamedArgs)`
   end
 end
 
@@ -57,11 +57,11 @@ class BlockArg
 
   sig {returns(T.experimental_attached_class)}
   def self.make
-    T.reveal_type(self.new {|x| x + 1}) # error: Revealed type: `T.class_of(BlockArg)::<AttachedClass>`
+    T.reveal_type(self.new {|x| x + 1}) # error: Revealed type: `T.attached_class (of BlockArg)`
 
     T.reveal_type(self.new)
                 # ^^^^^^^^ error: `initialize` requires a block parameter
-  # ^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.class_of(BlockArg)::<AttachedClass>`
+  # ^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.attached_class (of BlockArg)`
   end
 end
 
