@@ -75,6 +75,10 @@ class MyTest
         end
       end
     end
+
+    each_it([1, 2, 3], "handles each_it") do |x|
+      T.reveal_type(x)  # error: Revealed type: `Integer`
+    end
 end
 
 def junk

@@ -160,6 +160,17 @@ class <emptyTree><<C <root>>> < ()
         end
       end
     end
+
+    begin
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+      def <each_it 'handles each_it'><<C <todo sym>>>(&<blk>)
+        [1, 2, 3].each() do |x|
+          <emptyTree>::<C T>.reveal_type(x)
+        end
+      end
+    end
   end
 
   def junk<<C <todo sym>>>(&<blk>)
