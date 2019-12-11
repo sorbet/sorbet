@@ -35,7 +35,7 @@ sh_binary(
     ],
     deps = [
         ":logging",
-        "@bazel_tools//tools/bash/runfiles"
+        "@bazel_tools//tools/bash/runfiles",
     ],
 )
 
