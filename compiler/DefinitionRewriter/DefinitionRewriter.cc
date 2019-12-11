@@ -19,6 +19,7 @@ public:
             if (classDef) {
                 auto magic = ast::MK::Send1(loc, ast::MK::Unsafe(loc, ast::MK::Constant(loc, core::Symbols::root())),
                                             Names::defineTopClassOrModule(ctx), classDef->name->deepCopy());
+                ast::cast_tree<ast::Send>(magic.get())->flags |= ast::Send::REWRITER_SYNTHESIZED;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
                 i++;
                 continue;
@@ -29,6 +30,7 @@ public:
                 auto method = methodDef->isSelf() ? Names::defineMethodSingleton(ctx) : Names::defineMethod(ctx);
                 auto magic = ast::MK::Send2(loc, ast::MK::Unsafe(loc, ast::MK::Constant(loc, core::Symbols::root())),
                                             method, ast::MK::Self(loc), ast::MK::Symbol(loc, methodDef->name));
+                ast::cast_tree<ast::Send>(magic.get())->flags |= ast::Send::REWRITER_SYNTHESIZED;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
                 i++;
                 continue;
