@@ -83,7 +83,7 @@ if [ -z "$(ls -A "$target")" ]; then
   info "--- Stderr ---"
   cat "$stderr"
 
-  attn "Is "${ruby_source[*]}" marked '# typed: true'?"
+  attn "Is ${ruby_source[*]} marked '# typed: true'?"
   fatal "No output produced by sorbet"
 fi
 
@@ -96,3 +96,9 @@ info "--- Cleaning up ---"
 rm -r "$target"
 
 success "* Built ${ruby_source[*]}"
+
+if echo "$ruby_source" | fgrep hello; then
+  exit 1
+fi
+
+
