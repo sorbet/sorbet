@@ -25,6 +25,8 @@ if [ -z "${llvmir:-}" ]; then
   llvmir=$(mktemp -d)
 fi
 
+attn "Writing output to '$llvmir'"
+
 if [ ! -f ./bazel-bin/main/sorbet ]; then
   bazel build //main:sorbet
 fi
@@ -33,7 +35,6 @@ if [ -z "$DEBUG" ]; then
   info "Running sorbet"
   command=( "./bazel-bin/main/sorbet" )
 else
-  attn "Writing output to '$llvmir'"
   info "Running sorbet (under lldb)"
 
   command=( "lldb" "--" "./bazel-bin/main/sorbet" )
