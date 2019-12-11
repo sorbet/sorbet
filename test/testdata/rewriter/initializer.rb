@@ -128,3 +128,22 @@ class ClassVar
     T.reveal_type(@@a)  # error: Revealed type: `T.untyped`
   end
 end
+
+class NestedConstructor
+  extend T::Sig
+
+  sig {void}
+  def self.foo
+    sig {params(x: Integer).void}
+    def initialize(x)
+      # it does not work if the constructor is not declared as a
+      # top-level method of the class (i.e. if it is nested inside
+      # something else) due to limitations about how we associate sigs
+      @x = x
+    end
+  end
+
+  def foo
+    T.reveal_type(@x)  # error: Revealed type: `T.untyped`
+  end
+end
