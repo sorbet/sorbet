@@ -10,15 +10,58 @@ annotations as [untyped](untyped.md). This means that Sorbet can only use static
 types for methods, constants, instance variables, and class variables if they
 are accompanied with explicit static types.
 
-The exception to the above list is that Sorbet does not need type annotations
-for local variables. In the absence of a type annotation, Sorbet will infer the
-type of a local variable based on how the variable is initialized. It is still
-possible to provide type annotations for local variables.
+The exceptions to the above list are that Sorbet does not need type annotations
+for local variables or in some simple cases for instance variables. In the
+absence of a type annotation, Sorbet will infer the type of a local variable
+based on how the variable is initialized. It is still possible to provide type
+annotations in these instances.
 
 Type annotations for methods are provided using a `sig` before the method
 definition. Method type annotations are
 [described in great detail on the Method Signatures](sigs.md). Other type
 annotations are provided using the `T.let` [type assertion](type-assertions.md).
+
+## When Are Type Annotations Optional?
+
+Sorbet does not need type annotations for local variables, as it can infer the
+type of the local variable based on how it is initialized. For example, in the
+following program, Sorbet can tell `x` is an `Integer` based on the fact that it
+is initialized with an expression that evaluates to an `Integer`:
+
+```ruby
+x = 2 + 3
+```
+
+You may still provide a wider type annotation if you would like. This can
+occasionally be helpful if you want the type of a variable to be broader than
+Sorbet's inferred type, such as in situations where you are changing the value
+of a variable in a loop to something that is broader than the expression that
+you use to initialize the variable:
+
+```ruby
+# without this T.let, x would have the inferred type NilClass
+x = T.let(nil, T.nilable(Integer))
+(0..10).each do |n|
+  x = n if n % 3 == 0
+end
+```
+
+Sorbet can also infer the types of instance variables in some limited
+situations, specifically when the instance variable is initialized with the
+value of a parameter of the constructor:
+
+```ruby
+class MyObj
+  sig {params(x: Integer).void}
+  def initialize(x)
+    @y = x  # y has the inferred type Integer
+  end
+end
+```
+
+For more details on why Sorbet can only infer the types of instance variables in
+relatively narrow situations, see the section below about the
+[limitations of instance variable inference](#limitations-of-instance-variable-inference).
 
 ## Annotating constants
 
@@ -86,13 +129,13 @@ def current_user
 end
 ```
 
-## Why can't Sorbet infer the types my instance variables?
+## Limitations on instance variable inference
 
-A current shortcoming of Sorbet is in many cases it cannot reuse static type
-knowledge in order to automatically determine the type of an instance or class
-variable. In the following example, Sorbet will naturally understand that `@x`
-is of type `Integer`, but it cannot determine the static type of `@y` without a
-`T.let` and therefore treats it as `T.untyped`:
+A current shortcoming of Sorbet is that in many cases it cannot reuse static
+type knowledge in order to automatically determine the type of an instance or
+class variable. In the following example, Sorbet will naturally understand that
+`@x` is of type `Integer`, but it cannot determine the static type of `@y`
+without a `T.let` and therefore treats it as `T.untyped`:
 
 ```ruby
 class Foo
