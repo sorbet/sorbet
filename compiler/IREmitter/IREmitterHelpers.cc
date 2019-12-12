@@ -425,7 +425,6 @@ llvm::Function *IREmitterHelpers::getInitFunction(CompilerState &cs, core::Symbo
 }
 
 llvm::Function *IREmitterHelpers::cleanFunctionBody(CompilerState &cs, llvm::Function *func) {
-    func->getBasicBlockList().clear();
     return func;
 }
 
