@@ -10,7 +10,10 @@ source "test/logging.sh"
 
 # Positional arguments
 rbout=${1/--expected_output=/}
-rberr=${2/--expected_output=/}
+
+# TODO(trevor): Remove this once stderr is being checked
+# shellcheck disable=SC2034
+rberr=${2/--expected_err=/}
 rbexit=${3/--expected_exit_code=/}
 build_archive=${4/--build_archive=/}
 ruby=${5/--ruby=/}
