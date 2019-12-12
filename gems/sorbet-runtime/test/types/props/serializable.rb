@@ -18,6 +18,14 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :foo, T.nilable(T::Hash[T.any(String, Symbol), Object])
   end
 
+  class MyNestingSerializable
+    include T::Props::Serializable
+    prop :nested, T.nilable(MySerializable)
+    prop :nested_array, T::Array[MySerializable], default: []
+    prop :nested_hash, T::Hash[String, MySerializable], default: {}
+    prop :nested_set, T::Set[MySerializable], default: Set.new
+  end
+
   def a_serializable
     m = MySerializable.new
     m.name = "Bob"
@@ -101,6 +109,39 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       MySerializable.any_instance.expects(:new).never
       MySerializable.from_hash({})
     end
+
+    it 'round-trips extra props by default' do
+      result = MySerializable.from_hash('this_is_not_a_prop' => true)
+      assert_equal({'this_is_not_a_prop' => true}, result.serialize)
+    end
+
+    it 'raises on extra props when strict' do
+      err = assert_raises do
+        MySerializable.from_hash({'this_is_not_a_prop' => true}, true)
+      end
+      assert_match(/Unknown properties.*this_is_not_a_prop/, err.message)
+    end
+
+    it 'round-trips with nesting' do
+      obj = MyNestingSerializable.new
+      obj.nested = a_serializable
+      obj.nested_array = [a_serializable]
+      obj.nested_hash = {'key'=>a_serializable}
+      obj.nested_set = [a_serializable].to_set
+      assert_equal(obj.serialize, obj.class.from_hash(obj.serialize).serialize)
+    end
+
+    it 'round-trips nested extra props by default' do
+      obj = MyNestingSerializable.from_hash('nested' => {'this_is_not_a_prop' => true})
+      assert_equal({'this_is_not_a_prop' => true}, obj.serialize['nested'])
+    end
+
+    it 'raises on nested extra props when strict' do
+      err = assert_raises do
+        MyNestingSerializable.from_hash({'nested' => {'this_is_not_a_prop' => true}}, true)
+      end
+      assert_match(/Unknown properties.*this_is_not_a_prop/, err.message)
+    end
   end
 
   describe 'hash props' do
@@ -121,6 +162,16 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       m = MySerializable.from_hash(h)
       refute_equal(m.foo.object_id, h['foo'].object_id, "`foo` is the same object")
       refute_equal(m.foo['hello'].object_id, h['foo']['hello'].object_id, "`foo.hello` is the same object")
+    end
+
+    it 'does share structure on deserialize if clone is false' do
+      h = {
+        'name' => 'hi',
+        'foo' => {'hello' => {'world' => 1}},
+      }
+      m = MySerializable.from_hash(h, true, false)
+      assert_equal(m.foo.object_id, h['foo'].object_id, "`foo` is not the same object")
+      assert_equal(m.foo['hello'].object_id, h['foo']['hello'].object_id, "`foo.hello` is not the same object")
     end
   end
 

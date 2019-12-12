@@ -289,11 +289,11 @@ module T::Props::Serializable::DecoratorMethods
   def prop_dont_store?(prop); prop_rules(prop)[:dont_store]; end
   def prop_by_serialized_forms; @class.prop_by_serialized_forms; end
 
-  def from_hash(hash, strict=false)
+  def from_hash(hash, strict=false, clone=true)
     raise ArgumentError.new("#{hash.inspect} provided to from_hash") if !(hash && hash.is_a?(Hash))
 
     i = @class.allocate
-    i.deserialize(hash, strict)
+    i.deserialize(hash, strict, clone)
 
     i
   end
