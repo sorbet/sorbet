@@ -32,8 +32,9 @@ source "$(rlocation com_stripe_sorbet_llvm/test/logging.sh)"
 # Argument Parsing #############################################################
 
 rbout=${1}
-rbexit=${2}
-rb=${3}
+rberr=${2}
+rbexit=${3}
+rb=${4}
 
 # Environment Setup ############################################################
 
@@ -52,6 +53,7 @@ run_tools=$(dirname "$(rlocation com_stripe_sorbet_llvm/run/tools/preamble.rb)")
 info "--- Build Config ---"
 info "* Test:   ${rb}"
 info "* Rbout:  ${rbout}"
+info "* Rberr:  ${rberr}"
 info "* Rbexit: ${rbexit}"
 info "* Runner: ${rbrunfile}"
 
@@ -75,7 +77,7 @@ set +e
 llvmir="$llvmir" $ruby \
   --disable=gems --disable=did_you_mean \
   -I "$run_tools" -rpreamble.rb -rpatch_require.rb \
-  "$rbrunfile" > "$rbout" 2>/dev/null
+  "$rbrunfile" > "$rbout" 2> "$rberr"
 echo "$?" > "$rbexit"
 set -e
 

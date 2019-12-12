@@ -10,10 +10,11 @@ source "test/logging.sh"
 
 # Positional arguments
 rbout=${1/--expected_output=/}
-rbexit=${2/--expected_exit_code=/}
-build_archive=${3/--build_archive=/}
-ruby=${4/--ruby=/}
-shift 4
+rberr=${2/--expected_output=/}
+rbexit=${3/--expected_exit_code=/}
+build_archive=${4/--build_archive=/}
+ruby=${5/--ruby=/}
+shift 5
 
 # sources make up the remaining argumenets
 rbmain=$1

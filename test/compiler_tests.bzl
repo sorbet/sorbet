@@ -42,6 +42,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
         sources_name = "test_{}/{}_rb_source".format(test_name_prefix, name)
         exps_name = "test_{}/{}_exp".format(test_name_prefix, name)
         expected_outfile = "{}.out".format(prefix)
+        expected_errfile = "{}.err".format(prefix)
         expected_exitfile = "{}.exit".format(prefix)
         build_archive = "{}.tar.gz".format(prefix)
 
@@ -74,16 +75,22 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             visibility = ["//visibility:public"],
         )
 
+        ruby_genrule = "test_{}/{}_gen_output".format(test_name_prefix, name)
         native.genrule(
-            name = "test_{}/{}_gen_output".format(test_name_prefix, name),
-            outs = [expected_outfile, expected_exitfile],
+            name = ruby_genrule,
+            outs = [expected_outfile, expected_errfile, expected_exitfile],
             srcs = [sources_name],
             tools = [":generate_out_file"],
             cmd =
                 """
-                $(location :generate_out_file) $(location {}) $(location {}) $(locations {}) &> genrule.log \
+                $(location :generate_out_file) \
+                        $(location {}) \
+                        $(location {}) \
+                        $(location {}) \
+                        $(locations {}) \
+                        &> genrule.log \
                     || (cat genrule.log && exit 1)
-                """.format(expected_outfile, expected_exitfile, sources_name),
+                """.format(expected_outfile, expected_errfile, expected_exitfile, sources_name),
             tags = tags + extra_tags,
         )
 
@@ -105,6 +112,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             "@ruby_2_6_3//:ruby",
             build_archive,
             expected_outfile,
+            expected_errfile,
             expected_exitfile,
             sources_name,
             exps_name,
@@ -116,6 +124,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             deps = [":logging"],
             args = [
                 "--expected_output=$(location {})".format(expected_outfile),
+                "--expected_err=$(location {})".format(expected_errfile),
                 "--expected_exit_code=$(location {})".format(expected_exitfile),
                 "--build_archive=$(location {})".format(build_archive),
                 "--ruby=$(location @ruby_2_6_3//:ruby)",
