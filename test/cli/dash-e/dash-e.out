@@ -5,7 +5,7 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., -e:1, https://git
       argument <blk><block> @ Loc {file=-e start=??? end=???}
   class ::Foo < ::Object () @ -e:1
   class ::<Class:Foo>[<AttachedClass>] < ::<Class:Object> () @ -e:1
-    type-member(+) ::<Class:Foo>::<AttachedClass> -> T.class_of(Foo)::<AttachedClass> @ -e:1
+    type-member(+) ::<Class:Foo>::<AttachedClass> -> T.attached_class (of Foo) @ -e:1
     method ::<Class:Foo>#<static-init> (<blk>) @ -e:1
       argument <blk><block> @ Loc {file=-e start=??? end=???}
 

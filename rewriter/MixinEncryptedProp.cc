@@ -35,7 +35,7 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
     core::NameRef name = core::NameRef::noName();
     core::NameRef enc_name = core::NameRef::noName();
 
-    if (send->fun._id != core::Names::encrypted_prop()._id) {
+    if (send->fun._id != core::Names::encryptedProp()._id) {
         return empty;
     }
     if (send->args.empty()) {

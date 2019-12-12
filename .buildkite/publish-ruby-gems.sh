@@ -51,15 +51,29 @@ with_backoff() {
 # sorbet-static, but the sorbet-static gem push failed.
 #
 # (By failure here, we mean that RubyGems.org 502'd for some reason.)
-for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
-  if ! gem list --remote rubygems.org --exact 'sorbet-static' | grep -q "$release_version"; then
-    with_backoff gem push --verbose "$gem_archive"
+# Push the linux gem
+if ! gem fetch sorbet-static --platform x86_64-linux --version "$release_version" | grep -q "ERROR"; then
+  with_backoff gem push --verbose "_out_/gems/sorbet-static-$release_version-x86_64-linux.gem"
+fi
+
+# Push the mac gem
+# we push 14..19 which is defined in build-static-release.sh
+for i in {14..19}; do
+  if ! gem fetch sorbet-static --platform "universal-darwin-$i" --version "$release_version" | grep -q "ERROR"; then
+    with_backoff gem push --verbose "_out_/gems/sorbet-static-$release_version-universal-darwin-$i.gem"
   fi
 done
+
+
+# Push the java gem
+if ! gem fetch sorbet-static --platform java --version "$release_version" | grep -q "ERROR"; then
+  with_backoff gem push --verbose "_out_/gems/sorbet-static-$release_version-java.gem"
+fi
 
 if ! gem list --remote rubygems.org --exact 'sorbet-runtime' | grep -q "$release_version"; then
   with_backoff gem push --verbose "_out_/gems/sorbet-runtime-$release_version.gem"
 fi
+
 if ! gem list --remote rubygems.org --exact 'sorbet' | grep -q "$release_version"; then
   with_backoff gem push --verbose "_out_/gems/sorbet-$release_version.gem"
 fi

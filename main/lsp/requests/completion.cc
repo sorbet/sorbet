@@ -366,10 +366,13 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
     return item;
 }
 
-unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const core::SymbolRef what,
-                                                        size_t sortIdx) {
+unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const LSPConfiguration &config,
+                                                        const core::SymbolRef what, const core::Loc queryLoc,
+                                                        string_view prefix, size_t sortIdx) {
     ENFORCE(what.exists());
-    auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
+    auto supportSnippets = config.getClientConfig().clientCompletionItemSnippetSupport;
+    auto label = string(what.data(gs)->name.data(gs)->shortName(gs));
+    auto item = make_unique<CompletionItem>(label);
 
     // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
     // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
@@ -380,15 +383,48 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         resultType = core::Types::untypedUntracked();
     }
 
-    if (what.data(gs)->isStaticField()) {
-        // TODO(jez) Handle isStaticFieldTypeAlias (hover has special handling to show the type for these)
-        item->kind = CompletionItemKind::Constant;
-        item->detail = resultType->show(gs);
-    } else if (what.data(gs)->isClassOrModule()) {
-        item->kind = CompletionItemKind::Class;
+    if (what.data(gs)->isClassOrModule()) {
+        if (what.data(gs)->isClassOrModuleClass()) {
+            if (what.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
+                item->kind = CompletionItemKind::Enum;
+            } else {
+                item->kind = CompletionItemKind::Class;
+            }
+        } else {
+            if (what.data(gs)->isClassOrModuleAbstract() || what.data(gs)->isClassOrModuleInterface()) {
+                item->kind = CompletionItemKind::Interface;
+            } else {
+                item->kind = CompletionItemKind::Module;
+            }
+        }
+    } else if (what.data(gs)->isTypeMember()) {
+        item->kind = CompletionItemKind::TypeParameter;
+    } else if (what.data(gs)->isStaticField()) {
+        if (what.data(gs)->isTypeAlias()) {
+            item->kind = CompletionItemKind::TypeParameter;
+        } else {
+            item->kind = CompletionItemKind::Field;
+        }
     } else {
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
     }
+
+    string replacementText;
+    if (supportSnippets) {
+        item->insertTextFormat = InsertTextFormat::Snippet;
+        replacementText = fmt::format("{}${{0}}", label);
+    } else {
+        item->insertTextFormat = InsertTextFormat::PlainText;
+        replacementText = label;
+    }
+
+    if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
+        item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
+    } else {
+        item->insertText = replacementText;
+    }
+
+    // TODO(jez) Find documentation for constants
 
     return item;
 }
@@ -640,25 +676,24 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
     return item;
 }
 
-void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::TypePtr receiverType,
+void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::ConstantResponse &resp,
                                   const core::Loc queryLoc, vector<unique_ptr<CompletionItem>> &items) const {
-    if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
-        auto pattern = c->symbol.data(gs)->name.data(gs)->shortName(gs);
-        config->logger->debug("Looking for constant similar to {}", pattern);
-        core::SymbolRef owner = c->symbol;
-        do {
-            owner = owner.data(gs)->owner;
-            for (auto member : owner.data(gs)->membersStableOrderSlow(gs)) {
-                auto sym = member.second;
-                if (sym.exists() && (sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField()) &&
-                    sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
-                    // hide singletons
-                    hasSimilarName(gs, sym.data(gs)->name, pattern)) {
-                    items.push_back(getCompletionItemForConstant(gs, sym, items.size()));
-                }
+    auto prefix = resp.name.data(gs)->shortName(gs);
+    config->logger->debug("Looking for constant similar to {}", prefix);
+    auto scope = resp.scope;
+    do {
+        for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
+            auto sym = member.second;
+            if (sym.exists() &&
+                (sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField() || sym.data(gs)->isTypeMember()) &&
+                sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
+                // hide singletons
+                hasSimilarName(gs, sym.data(gs)->name, prefix)) {
+                items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
             }
-        } while (owner != core::Symbols::root());
-    }
+        }
+        scope = scope.data(gs)->owner;
+    } while (scope != core::Symbols::root());
 }
 
 unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker &typechecker, const MessageId &id,
@@ -777,7 +812,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
             response->result = std::move(emptyResult);
             return response;
         }
-        findSimilarConstant(gs, constantResp->retType.type, queryLoc, items);
+        findSimilarConstant(gs, *constantResp, queryLoc, items);
     }
 
     response->result = make_unique<CompletionList>(false, move(items));

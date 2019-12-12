@@ -75,6 +75,15 @@ steps:
     <<: *elastic
   - wait: ~
 
+  - label: ":linux: build-static-release-java.sh (master only)"
+    command: .buildkite/build-static-release-java.sh
+    # this needs to be run when both linux & mac build-static-release
+    # are done. at the moment, mac is only done on master branch
+    branches: master
+    artifact_paths: _out_/**/*
+    <<: *elastic
+  - wait: ~
+
 # Deploy Phase - Send the artifacts to the world
   - label: ":linux: publish.sh"
     command: .buildkite/publish.sh

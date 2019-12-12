@@ -16,6 +16,26 @@
 namespace sorbet::realmain::lsp {
 using namespace std;
 
+namespace {
+vector<string> frefsToPaths(const core::GlobalState &gs, const vector<core::FileRef> &refs) {
+    vector<string> paths;
+    paths.resize(refs.size());
+    std::transform(refs.begin(), refs.end(), paths.begin(),
+                   [&gs](const auto &ref) -> string { return string(ref.data(gs).path()); });
+    return paths;
+}
+
+void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &gs, SorbetTypecheckRunStatus status,
+                       bool isFastPath, std::vector<core::FileRef> filesTypechecked) {
+    if (config.getClientConfig().enableTypecheckInfo) {
+        auto sorbetTypecheckInfo =
+            make_unique<SorbetTypecheckRunInfo>(status, isFastPath, frefsToPaths(gs, filesTypechecked));
+        config.output->write(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
+    }
+}
+} // namespace
+
 LSPTypechecker::LSPTypechecker(const std::shared_ptr<const LSPConfiguration> &config)
     : typecheckerThreadId(this_thread::get_id()), config(config) {}
 
@@ -31,9 +51,14 @@ void LSPTypechecker::initialize(LSPFileUpdates updates) {
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates) {
+    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates.canTakeFastPath, {});
     auto run = runTypechecking(move(updates));
     auto committed = !run.canceled;
+    vector<core::FileRef> filesTypechecked = run.filesTypechecked;
+    const bool isFastPath = run.updates.canTakeFastPath;
     commitTypecheckRun(move(run));
+    sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
+                      isFastPath, move(filesTypechecked));
     return committed;
 }
 
@@ -47,6 +72,8 @@ TypecheckRun LSPTypechecker::runTypechecking(LSPFileUpdates updates) const {
     if (!updates.canTakeFastPath) {
         return runSlowPath(move(updates), true);
     }
+    // This property is set to 'true' in tests only if the update is expected to take the slow path and get cancelled.
+    ENFORCE(!updates.cancellationExpected);
 
     Timer timeit(config->logger, "fast_path");
     vector<core::FileRef> subset;
@@ -202,6 +229,15 @@ TypecheckRun LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool isCancelab
         if (finalGS->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.typecheck.sleep");
         }
+
+        // [Test only] Wait for a cancellation if one is expected.
+        if (updates.cancellationExpected) {
+            while (!gs->wasTypecheckingCanceled()) {
+                Timer::timedSleep(1ms, *logger, "slow_path.expected_cancellation.sleep");
+            }
+            return;
+        }
+
         pipeline::typecheck(finalGS, move(resolved), config->opts, config->workers);
     });
 
@@ -225,16 +261,6 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     const auto &filesTypechecked = run.filesTypechecked;
     vector<core::FileRef> errorFilesInNewRun;
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
-
-    if (config->getClientConfig().enableTypecheckInfo) {
-        vector<string> pathsTypechecked;
-        for (auto &f : filesTypechecked) {
-            pathsTypechecked.emplace_back(f.data(*gs).path());
-        }
-        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(run.tookFastPath, move(pathsTypechecked));
-        config->output->write(make_unique<LSPMessage>(
-            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
-    }
 
     for (auto &e : run.errors) {
         if (e->isSilenced) {
@@ -340,6 +366,7 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
 
 void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
     auto &logger = config->logger;
+
     if (run.canceled) {
         logger->debug("[Typechecker] Typecheck run for edits {} thru {} was canceled.", run.updates.versionStart,
                       run.updates.versionEnd);
@@ -429,21 +456,25 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     return LSPQueryResult{move(out.second)};
 }
 
-TypecheckRun LSPTypechecker::retypecheck(LSPFileUpdates updates) const {
-    if (!updates.canTakeFastPath) {
-        Exception::raise("Tried to typecheck slow path updates with retypecheck. Retypecheck can only typecheck the "
-                         "previously typechecked version of a file.");
+LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
+    LSPFileUpdates noop;
+    noop.canTakeFastPath = true;
+    // Epoch isn't important for this update.
+    noop.versionStart = 0;
+    noop.versionEnd = 0;
+    for (auto fref : frefs) {
+        ENFORCE(fref.exists());
+        ENFORCE(fref.id() < indexed.size());
+        auto &index = indexed[fref.id()];
+        noop.updatedFileIndexes.push_back({index.tree->deepCopy(), index.file});
+        noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
+        noop.updatedFileHashes.push_back(globalStateHashes[fref.id()]);
     }
+    return noop;
+}
 
-    for (const auto &file : updates.updatedFiles) {
-        auto path = file->path();
-        auto source = file->source();
-        auto fref = gs->findFileByPath(path);
-        if (!fref.exists() || fref.data(*gs).source() != source) {
-            Exception::raise("Retypecheck can only typecheck the previously typechecked version of a file.");
-        }
-    }
-
+TypecheckRun LSPTypechecker::retypecheck(vector<core::FileRef> frefs) const {
+    LSPFileUpdates updates = getNoopUpdate(move(frefs));
     return runTypechecking(move(updates));
 }
 

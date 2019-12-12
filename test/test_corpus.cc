@@ -12,7 +12,6 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
-#include "cfg/proto/proto.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/formatting.h"
@@ -118,8 +117,8 @@ public:
 UnorderedSet<string> knownExpectations = {
     "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
     "rewrite-tree-raw", "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
-    "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",          "cfg-raw",          "cfg-json",
-    "autogen",          "document-symbols"};
+    "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",          "cfg-raw",          "autogen",
+    "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -364,8 +363,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         };
 
         // CFG
-        if (test.expectations.contains("cfg") || test.expectations.contains("cfg-raw") ||
-            test.expectations.contains("cfg-json")) {
+        if (test.expectations.contains("cfg") || test.expectations.contains("cfg-raw")) {
             checkTree();
             checkPragma("cfg");
             CFGCollectorAndTyper collector;
@@ -394,20 +392,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                 dot << "}" << '\n';
                 return dot.str();
             });
-
-            handler.addObserved(
-                "cfg-json",
-                [&]() {
-                    stringstream payload;
-                    for (auto &cfg : collector.cfgs) {
-                        if (cfg->shouldExport(ctx)) {
-                            auto proto = cfg::Proto::toProto(ctx.state, *cfg);
-                            payload << core::Proto::toJSON(proto);
-                        }
-                    }
-                    return payload.str();
-                },
-                false);
         }
 
         // If there is a tree left with a typed: pragma, run the inferencer
@@ -656,7 +640,11 @@ void updateDiagnostics(const LSPConfiguration &config, UnorderedMap<string, stri
             << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
 
         // Will explicitly overwrite older diagnostics that are irrelevant.
-        diagnostics[filename] = move(diagnosticParams->diagnostics);
+        vector<unique_ptr<Diagnostic>> copiedDiagnostics;
+        for (const auto &d : diagnosticParams->diagnostics) {
+            copiedDiagnostics.push_back(d->copy());
+        }
+        diagnostics[filename] = move(copiedDiagnostics);
     }
 }
 
@@ -1046,14 +1034,18 @@ TEST_P(LSPTest, All) {
             for (auto &r : responses) {
                 if (r->isNotification()) {
                     if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
-                        foundTypecheckRunInfo = true;
                         auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
-                        if (assertSlowPath.value_or(false)) {
-                            EXPECT_EQ(params->tookFastPath, false)
-                                << errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.";
-                        }
-                        if (assertFastPath.has_value()) {
-                            (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                        // Ignore started messages. Note that cancelation messages cannot occur in test_corpus since
+                        // test_corpus only runs LSP in single-threaded mode.
+                        if (params->status == SorbetTypecheckRunStatus::Ended) {
+                            foundTypecheckRunInfo = true;
+                            if (assertSlowPath.value_or(false)) {
+                                EXPECT_EQ(params->fastPath, false)
+                                    << errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.";
+                            }
+                            if (assertFastPath.has_value()) {
+                                (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                            }
                         }
                     } else if (r->method() != LSPMethod::TextDocumentPublishDiagnostics) {
                         ADD_FAILURE() << errorPrefix

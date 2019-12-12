@@ -17,7 +17,6 @@ cc_binary(
         "//ast/treemap",
         "//cfg",
         "//cfg/builder",
-        "//cfg/proto",
         "//core",
         "//definition_validator",
         "//flattener",

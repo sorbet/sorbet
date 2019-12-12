@@ -1426,7 +1426,7 @@ private:
             }
         }
 
-        NameRef to_proc = core::Names::to_proc();
+        NameRef to_proc = core::Names::toProc();
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<Loc, 2> sendArgLocs;
         CallLocs sendLocs{callLoc, receiverLoc, sendArgLocs};
@@ -2089,7 +2089,7 @@ public:
     }
 } Kernel_proc;
 
-class enumerable_to_h : public IntrinsicMethod {
+class Enumerable_toH : public IntrinsicMethod {
 public:
     // Forward Enumerable.to_h to RubyType.enumerable_to_h[self]
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
@@ -2104,7 +2104,7 @@ public:
         InlinedVector<const TypeAndOrigins *, 2> innerArgs{&myType};
 
         DispatchArgs dispatch{
-            core::Names::enumerable_to_h(), locs, innerArgs, hash, hash, nullptr,
+            core::Names::enumerableToH(), locs, innerArgs, hash, hash, nullptr,
         };
         auto dispatched = hash->dispatchCall(ctx, dispatch);
         for (auto &err : dispatched.main.errors) {
@@ -2113,7 +2113,7 @@ public:
         dispatched.main.errors.clear();
         res.returnType = move(dispatched.returnType);
     }
-} enumerable_to_h;
+} Enumerable_toH;
 
 // statically determine things like `Integer === 3` to be true
 class Module_tripleEq : public IntrinsicMethod {
@@ -2193,7 +2193,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::last(), &Tuple_last},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::min(), &Tuple_minMax},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::max(), &Tuple_minMax},
-    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::to_a(), &Tuple_to_a},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::toA(), &Tuple_to_a},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
 
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
@@ -2205,7 +2205,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
 
-    {Symbols::Enumerable(), Intrinsic::Kind::Instance, Names::to_h(), &enumerable_to_h},
+    {Symbols::Enumerable(), Intrinsic::Kind::Instance, Names::toH(), &Enumerable_toH},
 
     {Symbols::Module(), Intrinsic::Kind::Instance, Names::tripleEq(), &Module_tripleEq},
 };

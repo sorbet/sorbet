@@ -48,8 +48,6 @@ const vector<PrintOptions> print_options({
     {"ast-raw", &Printers::ASTRaw, true},
     {"cfg", &Printers::CFG, true},
     {"cfg-raw", &Printers::CFGRaw, true},
-    {"cfg-json", &Printers::CFGJson, true},
-    {"cfg-proto", &Printers::CFGProto, true},
     {"symbol-table", &Printers::SymbolTable, true},
     {"symbol-table-raw", &Printers::SymbolTableRaw, true},
     {"symbol-table-json", &Printers::SymbolTableJson, true},
@@ -107,8 +105,6 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         ASTRaw,
         CFG,
         CFGRaw,
-        CFGJson,
-        CFGProto,
         SymbolTable,
         SymbolTableRaw,
         SymbolTableJson,
@@ -596,12 +592,21 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
     return true;
 }
 
-void addFilesFromDir(Options &opts, string_view dir) {
+void addFilesFromDir(Options &opts, string_view dir, shared_ptr<spdlog::logger> logger) {
     auto fileNormalized = stripTrailingSlashes(dir);
     opts.rawInputDirNames.emplace_back(fileNormalized);
     // Expand directory into list of files.
-    auto containedFiles = opts.fs->listFilesInDir(fileNormalized, {".rb", ".rbi"}, true, opts.absoluteIgnorePatterns,
-                                                  opts.relativeIgnorePatterns);
+    vector<string> containedFiles;
+    try {
+        containedFiles = opts.fs->listFilesInDir(fileNormalized, {".rb", ".rbi"}, true, opts.absoluteIgnorePatterns,
+                                                 opts.relativeIgnorePatterns);
+    } catch (sorbet::FileNotFoundException) {
+        logger->error("Directory `{}` not found", dir);
+        throw EarlyReturnWithCode(1);
+    } catch (sorbet::FileNotDirException) {
+        logger->error("Path `{}` is not a directory", dir);
+        throw EarlyReturnWithCode(1);
+    }
     opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
     opts.inputFileNames.insert(opts.inputFileNames.end(), std::make_move_iterator(containedFiles.begin()),
                                std::make_move_iterator(containedFiles.end()));
@@ -631,7 +636,7 @@ void readOptions(Options &opts,
             struct stat s;
             for (auto &file : rawFiles) {
                 if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
-                    addFilesFromDir(opts, file);
+                    addFilesFromDir(opts, file, logger);
                 } else {
                     opts.rawInputFileNames.push_back(file);
                     opts.inputFileNames.push_back(file);
@@ -649,15 +654,7 @@ void readOptions(Options &opts,
             auto rawDirs = raw["dir"].as<vector<string>>();
             for (auto &dir : rawDirs) {
                 // Since we don't stat here, we're unsure if the directory exists / is a directory.
-                try {
-                    addFilesFromDir(opts, dir);
-                } catch (sorbet::FileNotFoundException) {
-                    logger->error("Directory `{}` not found", dir);
-                    throw EarlyReturnWithCode(1);
-                } catch (sorbet::FileNotDirException) {
-                    logger->error("Path `{}` is not a directory", dir);
-                    throw EarlyReturnWithCode(1);
-                }
+                addFilesFromDir(opts, dir, logger);
             }
         }
 
@@ -673,7 +670,7 @@ void readOptions(Options &opts,
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
         opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
-        opts.lspQuickFixEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-quick-fix"].as<bool>();
+        opts.lspQuickFixEnabled = opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-quick-fix"].as<bool>();
         opts.lspDocumentSymbolEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
         opts.lspDocumentHighlightEnabled =

@@ -17,7 +17,6 @@ cc_library(
         "//ast/treemap",
         "//cfg",
         "//cfg/builder",
-        "//cfg/proto",
         "//common/concurrency",
         "//common/crypto_hashing",
         "//common/kvstore",

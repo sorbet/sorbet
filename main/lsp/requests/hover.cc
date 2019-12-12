@@ -84,19 +84,13 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypechecker &typ
             string typeString = prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr);
             response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, documentation));
         } else if (auto constResp = resp->isConstant()) {
-            const auto &data = constResp->symbol.data(gs);
-            auto type = constResp->retType.type;
-            if (data->isClassOrModule()) {
-                auto singletonClass = data->lookupSingletonClass(gs);
-                ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
-                type = singletonClass.data(gs)->externalType(gs);
-            } else if (data->isStaticField() && data->isTypeAlias()) {
-                // By wrapping the type in `MetaType`, we display a type alias of `Foo` as `<Type: Foo>` rather than
-                // `Foo`.
+            auto type = resp->getRetType();
+            if (constResp->symbol.data(gs)->isTypeAlias()) {
+                // By wrapping the type in `MetaType`, it displays as `<Type: Foo>` rather than `Foo`.
                 type = core::make_type<core::MetaType>(type);
             }
-            response->result =
-                make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, type->showWithMoreInfo(gs), documentation));
+            auto prettyType = type->showWithMoreInfo(gs);
+            response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, prettyType, documentation));
         } else {
             core::TypePtr retType = resp->getRetType();
             // Some untyped arguments have null types.

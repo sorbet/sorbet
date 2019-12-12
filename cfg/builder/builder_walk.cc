@@ -554,7 +554,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         auto isPrivateOk = false;
                         rescueHandlersBlock->exprs.emplace_back(isaCheck, loc,
                                                                 make_unique<Send>(local->localVariable,
-                                                                                  core::Names::is_a_p(), loc, args,
+                                                                                  core::Names::isA_p(), loc, args,
                                                                                   argLocs, isPrivateOk));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);

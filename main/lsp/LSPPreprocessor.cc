@@ -125,7 +125,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
             // Merge updates and tracers, and cancel its timer to avoid a distorted latency metric.
             auto &mergeableParams = get<unique_ptr<SorbetWorkspaceEditParams>>(mergeMsg.asNotification().params);
             mergeEdits(msgParams->updates, mergeableParams->updates);
-            cancelTimer(msg.timer);
+            cancelTimer(mergeMsg.timer);
             msg.startTracers.insert(msg.startTracers.end(), mergeMsg.startTracers.begin(), mergeMsg.startTracers.end());
             // Delete the update we just merged and move on to next item.
             it = pendingRequests.erase(it);
@@ -164,6 +164,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
                                 params->updates.versionStart, params->updates.versionEnd);
                             combinedUpdates.updatedGS = getTypecheckingGS();
                         }
+                        combinedUpdates.cancellationExpected = params->updates.cancellationExpected;
                         params->updates = move(combinedUpdates);
                     }
                     break;
@@ -355,6 +356,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentPa
                                         LSPFileUpdates &updates) const {
     updates.versionStart = v;
     updates.versionEnd = v;
+    updates.cancellationExpected = changeParams->sorbetCancellationExpected.value_or(false);
     string_view uri = changeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
@@ -474,6 +476,7 @@ void LSPPreprocessor::mergeEdits(LSPFileUpdates &to, LSPFileUpdates &from) {
         ttgs.travel(from.versionEnd);
         to.updatedGS = getTypecheckingGS();
     }
+    to.cancellationExpected = to.cancellationExpected || from.cancellationExpected;
     ENFORCE(sanityCheckUpdate(ttgs.getGlobalState(), to));
 }
 
