@@ -280,6 +280,10 @@ TypePtr Types::hashOf(Context ctx, const TypePtr &elem) {
     return make_type<AppliedType>(Symbols::Hash(), targs);
 }
 
+TypePtr Types::dropNil(Context ctx, const TypePtr &from) {
+  return Types::dropSubtypesOf(ctx, from, Symbols::NilClass());
+}
+
 std::optional<int> Types::getProcArity(const AppliedType &type) {
     for (int i = 0; i <= Symbols::MAX_PROC_ARITY; i++) {
         if (type.klass == Symbols::Proc(i)) {
@@ -614,12 +618,10 @@ TypePtr Types::resultTypeAsSeenFrom(Context ctx, TypePtr what, SymbolRef fromWha
 }
 
 TypePtr Types::getProcReturnType(Context ctx, const TypePtr &procType) {
-    auto procType_ = Types::dropSubtypesOf(ctx, procType, Symbols::NilClass());
-
-    if (!procType_->derivesFrom(ctx, Symbols::Proc())) {
+    if (!procType->derivesFrom(ctx, Symbols::Proc())) {
         return Types::untypedUntracked();
     }
-    auto *applied = cast_type<AppliedType>(procType_.get());
+    auto *applied = cast_type<AppliedType>(procType.get());
     if (applied == nullptr || applied->targs.empty()) {
         return Types::untypedUntracked();
     }

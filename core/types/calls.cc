@@ -836,7 +836,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             blockType = Types::untyped(ctx, method);
         }
 
-        component.blockReturnType = Types::getProcReturnType(ctx, blockType);
+        component.blockReturnType = Types::getProcReturnType(ctx, Types::dropNil(ctx, blockType));
         blockType = constr->isSolved() ? Types::instantiate(ctx, blockType, *constr)
                                        : Types::approximate(ctx, blockType, *constr);
         component.blockPreType = blockType;
@@ -1418,7 +1418,7 @@ private:
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
         if (Types::isSubType(ctx, Types::nilClass(), blockType)) {
-            nonNilBlockType = Types::dropSubtypesOf(ctx, blockType, Symbols::NilClass());
+            nonNilBlockType = Types::dropNil(ctx, blockType);
             typeIsNilable = true;
 
             if (nonNilBlockType->isBottom()) {
@@ -1498,7 +1498,7 @@ private:
         if (blockPreType && !Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, blockPreType,
                                                              UntypedMode::AlwaysCompatible)) {
             ClassType *passedInProcClass = cast_type<ClassType>(passedInBlockType.get());
-            auto nonNilableBlockType = Types::dropSubtypesOf(ctx, blockPreType, Symbols::NilClass());
+            auto nonNilableBlockType = Types::dropNil(ctx, blockPreType);
             if (passedInProcClass && passedInProcClass->symbol == Symbols::Proc() &&
                 Types::isSubType(ctx, nonNilableBlockType, passedInBlockType)) {
                 // If a block of unknown arity is passed in, but the function was declared with a known arity,
