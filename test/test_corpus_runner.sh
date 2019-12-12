@@ -78,7 +78,7 @@ tar -xvf "${build_archive}" -C "${target}"
 info "--- Checking Build ---"
 pushd "$target" > /dev/null
 for ext in "llo"; do
-  exp="$root/${source%.rb}.$ext.exp"
+  exp="$root/${rb[0]%.rb}.$ext.exp"
   if [ -f "$exp" ]; then
     actual=(*".$ext")
     if [ ! -f "${actual[0]}" ]; then
