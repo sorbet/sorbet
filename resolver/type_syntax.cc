@@ -835,7 +835,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             if (recvi->symbol == core::Symbols::Magic() && s->fun == core::Names::callWithSplat()) {
                 // TODO(pay-server) remove this block
                 if (auto e = ctx.state.beginError(recvi->loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
-                    e.setHeader("Splats are unsupported by the static checker and banned in typed code");
+                    e.setHeader("Malformed type declaration: splats cannot be used in types");
                 }
                 result.type = core::Types::untypedUntracked();
                 return;
