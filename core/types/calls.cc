@@ -269,7 +269,8 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
             SymbolRef candidate = *it;
             const auto &args = candidate.data(ctx)->arguments();
             ENFORCE(!args.empty(), "Should at least have a block argument.");
-            auto mentionsBlockArg = !args.back().isSyntheticBlockArgument();
+            auto mentionsBlockArg = !args.back().isSyntheticBlockArgument() &&
+                                    !core::Types::isSubType(ctx, args.back().type, core::Types::nilClass());
             if (mentionsBlockArg != hasBlock) {
                 it = leftCandidates.erase(it);
                 continue;
