@@ -53,7 +53,7 @@ command=("${command[@]}" \
   -W0 \
   -I "${ruby_lib}" -I "${ruby_lib}/x86_64-darwin18" \
   -I "$base/run/tools" -rpreamble.rb -rpatch_require.rb \
-  "$base/$1" \
+  -e "require '$base/$1'" \
   )
 
 # Use force_compile to make patch_require.rb fail if the compiled extension
