@@ -57,6 +57,13 @@ class HasOverloads
     #                        ^^ error: Bad parameter ordering for `b`, expected `a` instead
     make_untyped
   end
+
+  sig {params(blk: NilClass).returns(Integer)}
+  sig {params(blk: T.proc.void).returns(Symbol)}
+  def maybe_block(&blk)
+    make_untyped
+  end
+
 end
 
 class OverloadAndGenerics
@@ -82,6 +89,8 @@ class Foo
                     # should ask for string
     h.overloaded("1", 2) # error: Expected `Class` but found `String("1")` for argument `_`
   # ^^^^^^^^^^^^^^^^^^^^ error: Expected `String` but found `Integer(2)` for argument `_1`
+    T.assert_type!(h.maybe_block(), Integer)
+    T.assert_type!(h.maybe_block() {}, Symbol)
 
     g = OverloadAndGenerics[Integer].new
     T.assert_type!(g.overloaded("hi"), String)
