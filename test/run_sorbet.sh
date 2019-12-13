@@ -2,9 +2,7 @@
 
 set -euo pipefail
 
-base="$( cd "$(dirname "$0")" ; pwd -P )"/..
-
-pushd "$base" > /dev/null
+pushd "$(dirname "$0")/.." > /dev/null
 
 source "test/logging.sh"
 

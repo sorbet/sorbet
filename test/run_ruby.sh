@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-base="$( cd "$(dirname "$0")" ; pwd -P )"/..
+pushd "$(dirname "$0")/.." > /dev/null
 
 DEBUG=
 if [ "$1" == "-d" ]; then
@@ -16,8 +16,6 @@ if [ -z "$rb" ]; then
   echo "Usage: test/run_ruby.sh <test_file>"
   exit 1
 fi
-
-pushd "$base" > /dev/null
 
 ruby="./bazel-bin/external/ruby_2_6_3/ruby.runfiles/ruby_2_6_3"
 ruby_bin="${ruby}/bin"
@@ -37,8 +35,8 @@ fi
 command=("${command[@]}" \
   -W0 \
   -I "${ruby_lib}" -I "${ruby_lib}/x86_64-darwin18" \
-  -I "$base/run/tools" -rpreamble.rb \
-  "$base/$rb" \
+  -I "run/tools" -rpreamble.rb \
+  -e "require './$rb'" \
   )
 
 "${command[@]}"

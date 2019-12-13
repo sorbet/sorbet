@@ -2,9 +2,7 @@
 
 set -euo pipefail
 
-base="$( cd "$(dirname "$0")" ; pwd -P )"/..
-
-pushd "$base" > /dev/null
+pushd "$(dirname "$0")/.." > /dev/null
 
 source "test/logging.sh"
 
@@ -30,9 +28,7 @@ llvmir="$(mktemp -d)"
 export llvmir
 
 # ensure that the extension is built
-"$base/test/run_sorbet.sh" "$rb"
-
-pushd "$base" > /dev/null
+"test/run_sorbet.sh" "$rb"
 
 ruby="./bazel-bin/external/ruby_2_6_3/ruby.runfiles/ruby_2_6_3"
 ruby_bin="${ruby}/bin"
@@ -52,12 +48,12 @@ fi
 command=("${command[@]}" \
   -W0 \
   -I "${ruby_lib}" -I "${ruby_lib}/x86_64-darwin18" \
-  -I "$base/run/tools" -rpreamble.rb -rpatch_require.rb \
-  -e "require '$base/$1'" \
+  -I "run/tools" -rpreamble.rb -rpatch_require.rb \
+  -e "require './$rb'" \
   )
 
 # Use force_compile to make patch_require.rb fail if the compiled extension
 # isn't found.
-force_compile=1 "${command[@]}"
+llvmir="$llvmir" force_compile=1 "${command[@]}"
 
 popd > /dev/null
