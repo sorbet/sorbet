@@ -154,24 +154,92 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       refute_equal(m.foo['hello'].object_id, h['foo']['hello'].object_id, "`foo.hello` is the same object")
     end
 
-    it 'does not share structure on deserialize' do
+    it 'does not share structure and is not frozen on deserialize by default' do
       h = {
         'name' => 'hi',
         'foo' => {'hello' => {'world' => 1}},
       }
       m = MySerializable.from_hash(h)
       refute_equal(m.foo.object_id, h['foo'].object_id, "`foo` is the same object")
+      refute(m.foo.frozen?)
       refute_equal(m.foo['hello'].object_id, h['foo']['hello'].object_id, "`foo.hello` is the same object")
+      refute(m.foo['hello'].frozen?)
     end
 
-    it 'does share structure on deserialize if clone is false' do
+    it 'does not share structure and is not frozen on deserialize if mutation_safety is :clone' do
       h = {
         'name' => 'hi',
         'foo' => {'hello' => {'world' => 1}},
       }
-      m = MySerializable.from_hash(h, true, false)
+      m = MySerializable.from_hash(h, true, :clone)
+      refute_equal(m.foo.object_id, h['foo'].object_id, "`foo` is the same object")
+      refute(m.foo.frozen?)
+      refute_equal(m.foo['hello'].object_id, h['foo']['hello'].object_id, "`foo.hello` is the same object")
+      refute(m.foo['hello'].frozen?)
+    end
+
+    it 'is frozen on deserialize if mutation_safety is :freeze' do
+      h = {
+        'name' => 'hi',
+        'foo' => {'hello' => {'world' => 1}},
+      }
+      m = MySerializable.from_hash(h, true, :freeze)
+      assert(m.foo.frozen?)
+      assert(m.foo['hello'].frozen?)
+
+      # Note: we do not care very much if the object is the same; ideally
+      # we wouldn't allocate here, but it doesn't seem worth making T::Props::Utils
+      # more complex to support that to start.
+      #
+      # assert_equal(m.foo['hello'].object_id, h['foo']['hello'].object_id, "`foo.hello` is not the same object")
+      # assert_equal(m.foo.object_id, h['foo'].object_id, "`foo` is not the same object")
+    end
+
+    it 'does share structure and is not frozen on deserialize if mutation_safety is :unsafe' do
+      h = {
+        'name' => 'hi',
+        'foo' => {'hello' => {'world' => 1}},
+      }
+      m = MySerializable.from_hash(h, true, :unsafe)
       assert_equal(m.foo.object_id, h['foo'].object_id, "`foo` is not the same object")
+      refute(m.foo.frozen?)
       assert_equal(m.foo['hello'].object_id, h['foo']['hello'].object_id, "`foo.hello` is not the same object")
+      refute(m.foo['hello'].frozen?)
+    end
+  end
+
+  class MyArraySerializable
+    include T::Props::Serializable
+    prop :array, T::Array[Integer]
+  end
+
+  describe 'simple array prop' do
+    it 'is not same object and is not frozen on deserialize by default' do
+      array = []
+      m = MyArraySerializable.from_hash('array' => array)
+      refute_equal(array.object_id, m.array.object_id)
+      refute(array.frozen?)
+    end
+
+    it 'is not same object and is not frozen on deserialize when mutation_safety is :clone' do
+      array = []
+      m = MyArraySerializable.from_hash({'array' => array}, true, :clone)
+      refute_equal(array.object_id, m.array.object_id)
+      refute(array.frozen?)
+    end
+
+    it 'is same object and is frozen on deserialize when mutation_safety is :freeze' do
+      array = []
+      m = MyArraySerializable.from_hash({'array' => array}, true, :freeze)
+      assert_equal(array.object_id, m.array.object_id)
+      assert(array.frozen?)
+    end
+
+    it 'is same object and is not frozen on deserialize when mutation_safety is :unsafe' do
+      array = []
+      m = MyArraySerializable.from_hash({'array' => array}, true, :unsafe)
+      assert_equal(array.object_id, m.array.object_id)
+      refute(array.frozen?)
     end
   end
 
