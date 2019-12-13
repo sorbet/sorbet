@@ -9,7 +9,7 @@ class Parent
   # This should fail, as `T.attached_class` doesn't make sense in an instance
   # method context.
   sig {returns(T.nilable(T.attached_class))}
-                       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be
+                       # ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be
   def bad_sig
     nil
   end
