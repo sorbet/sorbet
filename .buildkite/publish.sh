@@ -19,7 +19,7 @@ if [ "$BUILDKITE_BRANCH" == 'master' ]; then
 fi
 
 git_commit_count=$(git rev-list --count HEAD)
-prefix="0.5"
+prefix="0.4"
 release_version="$prefix.${git_commit_count}"
 long_release_version="${release_version}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
 
