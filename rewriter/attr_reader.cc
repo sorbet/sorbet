@@ -7,6 +7,7 @@
 #include "core/core.h"
 #include "core/errors/rewriter.h"
 #include "rewriter/rewriter.h"
+#include "rewriter/util.h"
 
 using namespace std;
 
@@ -68,36 +69,9 @@ bool isTNilable(const unique_ptr<ast::Expression> &expr) {
     return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
 }
 
-// Slightly modified from TypeSyntax::isSig.
-// We don't want to depend on resolver so that one day everything in the Rewriter pass can be standalone.
-//
-// There must be both a `sig` and a `returns` in order for isSig to be true.
-bool isSig(const ast::Send *send) {
-    if (send->fun != core::Names::sig()) {
-        return false;
-    }
-    if (send->block.get() == nullptr) {
-        return false;
-    }
-    auto nargs = send->args.size();
-    if (nargs != 0 && nargs != 1) {
-        return false;
-    }
-    auto block = ast::cast_tree<ast::Block>(send->block.get());
-    ENFORCE(block);
-    auto body = ast::cast_tree<ast::Send>(block->body.get());
-    if (!body) {
-        return false;
-    }
-    if (body->fun != core::Names::returns()) {
-        return false;
-    }
-
-    return true;
-}
-
 bool hasNilableReturns(core::MutableContext ctx, const ast::Send *sharedSig) {
-    ENFORCE(isSig(sharedSig), "We weren't given a send node that's a valid signature");
+    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
+            "We weren't given a send node that's a valid signature");
 
     auto block = ast::cast_tree<ast::Block>(sharedSig->block.get());
     auto body = ast::cast_tree<ast::Send>(block->body.get());
@@ -110,7 +84,8 @@ bool hasNilableReturns(core::MutableContext ctx, const ast::Send *sharedSig) {
 }
 
 unique_ptr<ast::Expression> dupReturnsType(core::MutableContext ctx, const ast::Send *sharedSig) {
-    ENFORCE(isSig(sharedSig), "We weren't given a send node that's a valid signature");
+    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
+            "We weren't given a send node that's a valid signature");
 
     auto block = ast::cast_tree<ast::Block>(sharedSig->block.get());
     auto body = ast::cast_tree<ast::Send>(block->body.get());
@@ -143,7 +118,8 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, const 
 // value into the `sig {params(...)}` using whatever name we have for the setter.
 unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const ast::Send *sharedSig,
                                                const core::NameRef name, core::Loc nameLoc) {
-    ENFORCE(isSig(sharedSig), "We weren't given a send node that's a valid signature");
+    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
+            "We weren't given a send node that's a valid signature");
 
     // There's a bit of work here because deepCopy gives us back an Expression when we know it's a Send.
     unique_ptr<ast::Expression> sigExp = sharedSig->deepCopy();
@@ -229,14 +205,13 @@ vector<unique_ptr<ast::Expression>> AttrReader::run(core::MutableContext ctx, as
     auto loc = send->loc;
     vector<unique_ptr<ast::Expression>> stats;
 
-    auto sig = ast::cast_tree_const<ast::Send>(prevStat);
-    bool hasSig = sig && isSig(sig);
-    if (hasSig) {
+    auto sig = ASTUtil::castSig(prevStat, core::Names::returns());
+    if (sig != nullptr) {
         ensureSafeSig(ctx, send->fun, sig);
     }
 
     bool declareIvars = false;
-    if (hasSig && hasNilableReturns(ctx, sig)) {
+    if (sig != nullptr && hasNilableReturns(ctx, sig)) {
         declareIvars = true;
     }
 
@@ -250,9 +225,7 @@ vector<unique_ptr<ast::Expression>> AttrReader::run(core::MutableContext ctx, as
             }
             core::NameRef varName = name.addAt(ctx);
 
-            if (hasSig) {
-                ENFORCE(sig != nullptr);
-
+            if (sig != nullptr) {
                 if (usedPrevSig) {
                     stats.emplace_back(sig->deepCopy());
                 } else {
@@ -275,9 +248,7 @@ vector<unique_ptr<ast::Expression>> AttrReader::run(core::MutableContext ctx, as
             core::NameRef varName = name.addAt(ctx);
             core::NameRef setName = name.addEq(ctx);
 
-            if (hasSig) {
-                ENFORCE(sig != nullptr);
-
+            if (sig != nullptr) {
                 if (usedPrevSig) {
                     auto writerSig = toWriterSigForName(ctx, sig, name, argLoc);
                     if (!writerSig) {

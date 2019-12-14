@@ -120,4 +120,37 @@ void ASTUtil::putBackHashValue(core::MutableContext ctx, ast::Hash &hash, unique
     hash.values.emplace_back(move(value));
 }
 
+// This will return nullptr if the argument is not the right shape as a sig (i.e. a send to a method called `sig` with 0
+// or 1 arguments, that in turn contains a block that contains a send) and it also checks the final method of the send
+// against the provided `returns` (so that some uses can specifically look for `void` sigs while others can specifically
+// look for non-void sigs).
+const ast::Send *ASTUtil::castSig(const ast::Expression *expr, core::NameRef returns) {
+    auto send = ast::cast_tree_const<ast::Send>(expr);
+    if (send == nullptr) {
+        return nullptr;
+    }
+
+    if (send->fun != core::Names::sig()) {
+        return nullptr;
+    }
+    if (send->block.get() == nullptr) {
+        return nullptr;
+    }
+    auto nargs = send->args.size();
+    if (nargs != 0 && nargs != 1) {
+        return nullptr;
+    }
+    auto block = ast::cast_tree_const<ast::Block>(send->block.get());
+    ENFORCE(block);
+    auto body = ast::cast_tree_const<ast::Send>(block->body.get());
+    if (!body) {
+        return nullptr;
+    }
+    if (body->fun != returns) {
+        return nullptr;
+    }
+
+    return send;
+}
+
 } // namespace sorbet::rewriter
