@@ -9,6 +9,6 @@ class Box
   sig {params(val: Ele).void} # error: Unable to resolve
   #                   ^ completion: Elem
   def initialize(val)
-    @val = val
+    @val = T.unsafe(val)
   end
 end
