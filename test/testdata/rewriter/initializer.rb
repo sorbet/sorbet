@@ -66,25 +66,6 @@ class InterspersedExprs
   end
 end
 
-# Some miscellaneous other cases
-class InterspersedStmts
-  extend T::Sig
-
-  sig { params(x: Integer).void }
-  def initialize(x)
-    ["hello", "world"].each do |w|
-      puts w
-    end
-    @x = x
-    puts "goodbye"
-  end
-
-  sig { void }
-  def foo
-    T.reveal_type(@x) # error: Revealed type: `Integer`
-  end
-end
-
 # Some less straightforward situations with arguments
 class DifferentArgs
   extend T::Sig
