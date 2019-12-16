@@ -20,12 +20,27 @@ T.assert_type!(
 # defaulting to something of different type should be cool
 my_hash = T.let({}, T::Hash[String, String])
 T.assert_type!(
+  my_hash.fetch("exist"), # will raise if doesn't exist, otherwise return a String
+  String
+)
+
+T.assert_type!(
   my_hash.fetch("doesnt_exist", 5),
   T.any(String, Integer)
 )
 T.assert_type!(
+  my_hash.fetch(nil, 1),
+  T.any(String, Integer)
+)
+
+T.assert_type!(
   my_hash.fetch("doesnt_exist", "foo"),
   String
 )
+T.assert_type!(
+  my_hash.fetch(nil, "foo"),
+  String
+)
+
 
 {a: 1}.merge({b: 2}, {c: 3})

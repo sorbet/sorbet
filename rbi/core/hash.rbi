@@ -520,14 +520,14 @@ class Hash < Object
   end
   sig do
    type_parameters(:X).params(
-      arg0: K,
+      arg0: T.nilable(K),
       arg1: T.type_parameter(:X),
     )
     .returns(T.any(V, T.type_parameter(:X)))
   end
   sig do
    type_parameters(:X).params(
-        arg0: K,
+        arg0: T.nilable(K),
         blk: T.proc.params(arg0: K).returns(T.type_parameter(:X)),
     )
     .returns(T.any(V, T.type_parameter(:X)))
