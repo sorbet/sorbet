@@ -3,7 +3,7 @@
 #include "ast/ast.h"
 #include "core/Context.h"
 #include "core/core.h"
-#include "rewriter/util.h"
+#include "rewriter/Util.h"
 
 using namespace std;
 
