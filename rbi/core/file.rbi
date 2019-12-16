@@ -679,7 +679,7 @@ class File < IO
   sig do
     params(
       filename: String,
-      mode: String,
+      mode: T.any(Integer, String),
       perm: T.nilable(Integer),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
     ).returns(File)
@@ -687,7 +687,7 @@ class File < IO
   sig do
     type_parameters(:U).params(
       filename: String,
-      mode: String,
+      mode: T.any(Integer, String),
       perm: T.nilable(Integer),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
       blk: T.proc.params(file: File).returns(T.type_parameter(:U))

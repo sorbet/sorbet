@@ -1644,7 +1644,7 @@ module Kernel
   sig do
     params(
       path: String,
-      mode: String,
+      mode: T.any(Integer, String),
       perm: T.nilable(Integer),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
     ).returns(T.nilable(IO))
@@ -1652,7 +1652,7 @@ module Kernel
   sig do
     type_parameters(:U).params(
       path: String,
-      mode: String,
+      mode: T.any(Integer, String),
       perm: T.nilable(Integer),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
       blk: T.proc.params(io: IO).returns(T.type_parameter(:U))

@@ -744,14 +744,14 @@ class IO < Object
   sig do
     params(
       fd: T.any(String, Integer),
-      mode: String,
+      mode: T.any(Integer, String),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
     ).returns(IO)
   end
   sig do
     type_parameters(:U).params(
       fd: T.any(String, Integer),
-      mode: String,
+      mode: T.any(Integer, String),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
       blk: T.proc.params(io: IO).returns(T.type_parameter(:U))
     ).returns(T.type_parameter(:U))
