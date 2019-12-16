@@ -1,4 +1,4 @@
-#include "rewriter/attr_reader.h"
+#include "rewriter/AttrReader.h"
 #include "absl/strings/escaping.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
