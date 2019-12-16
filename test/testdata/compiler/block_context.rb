@@ -2,4 +2,4 @@
 class Foo
 end
 
-# Foo.new.instance_exec {puts self.class}
+Foo.new.instance_exec {puts self.class}
