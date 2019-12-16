@@ -29,9 +29,9 @@ else
 fi
 
 if [ -n "$DEBUG" ]; then
-  bazel build @ruby_2_6_3//:ruby --config dbg --config static-libs
+  bazel build @ruby_2_6_3//:ruby --config dbg --config static-libs 2>/dev/null
 else
-  bazel build @ruby_2_6_3//:ruby
+  bazel build @ruby_2_6_3//:ruby 2>/dev/null
 fi
 
 command=("${command[@]}" \
