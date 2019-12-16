@@ -10,6 +10,7 @@
 #include "rewriter/DefaultArgs.h"
 #include "rewriter/Delegate.h"
 #include "rewriter/Flatfiles.h"
+#include "rewriter/Flatten.h"
 #include "rewriter/InterfaceWrapper.h"
 #include "rewriter/Mattr.h"
 #include "rewriter/Minitest.h"
@@ -25,7 +26,6 @@
 #include "rewriter/TEnum.h"
 #include "rewriter/TypeMembers.h"
 #include "rewriter/cleanup.h"
-#include "rewriter/flatten.h"
 #include "rewriter/initializer.h"
 
 using namespace std;

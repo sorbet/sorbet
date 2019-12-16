@@ -1,4 +1,4 @@
-#include "rewriter/flatten.h"
+#include "rewriter/Flatten.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
