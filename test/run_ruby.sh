@@ -28,7 +28,9 @@ else
   command=("lldb" "--" "${ruby_bin}/ruby")
 fi
 
-if [ ! -f "${ruby_bin}/ruby" ]; then
+if [ -n "$DEBUG" ]; then
+  bazel build @ruby_2_6_3//:ruby --config dbg --config static-libs
+else
   bazel build @ruby_2_6_3//:ruby
 fi
 
