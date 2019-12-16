@@ -14,6 +14,7 @@
 #include "rewriter/Mattr.h"
 #include "rewriter/Minitest.h"
 #include "rewriter/MixinEncryptedProp.h"
+#include "rewriter/ModuleFunction.h"
 #include "rewriter/Private.h"
 #include "rewriter/Prop.h"
 #include "rewriter/ProtobufDescriptorPool.h"
@@ -26,7 +27,6 @@
 #include "rewriter/cleanup.h"
 #include "rewriter/flatten.h"
 #include "rewriter/initializer.h"
-#include "rewriter/module_function.h"
 
 using namespace std;
 
