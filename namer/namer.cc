@@ -131,7 +131,8 @@ class NameInserter {
         return move(localExpr);
     }
 
-    void addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &node) {
+    void addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass,
+                     const unique_ptr<ast::Expression> &node) {
         auto send = ast::cast_tree<ast::Send>(node.get());
         if (send == nullptr) {
             ENFORCE(node.get() != nullptr);
