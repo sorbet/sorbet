@@ -2,7 +2,7 @@
 #include "ast/ast.h"
 #include "core/Context.h"
 #include "core/core.h"
-#include "rewriter/helpers.h"
+#include "rewriter/Helpers.h"
 #include "rewriter/util.h"
 
 using namespace std;
