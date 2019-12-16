@@ -1,8 +1,8 @@
-#include "rewriter/initializer.h"
+#include "rewriter/Initializer.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/core.h"
-#include "rewriter/util.h"
+#include "rewriter/Util.h"
 
 using namespace std;
 namespace sorbet::rewriter {
