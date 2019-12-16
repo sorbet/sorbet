@@ -3,7 +3,6 @@
 #include "ast/ast.h"
 #include "core/Context.h"
 #include "core/core.h"
-#include "rewriter/Helpers.h"
 #include "rewriter/util.h"
 
 using namespace std;
@@ -17,11 +16,11 @@ unique_ptr<ast::Expression> mkNilableEncryptedValue(core::MutableContext ctx, co
     auto mixins = ast::MK::UnresolvedConstant(loc, move(model), core::Names::Constants::Mixins());
     auto enc = ast::MK::UnresolvedConstant(loc, move(mixins), core::Names::Constants::Encryptable());
     auto ev = ast::MK::UnresolvedConstant(loc, move(enc), core::Names::Constants::EncryptedValue());
-    return mkNilable(loc, move(ev));
+    return ASTUtil::mkNilable(loc, move(ev));
 }
 
 unique_ptr<ast::Expression> mkNilableString(core::Loc loc) {
-    return mkNilable(loc, ast::MK::Constant(loc, core::Symbols::String()));
+    return ASTUtil::mkNilable(loc, ast::MK::Constant(loc, core::Symbols::String()));
 }
 
 vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send *send) {
@@ -68,10 +67,10 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
     // Compute the getters
 
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), mkNilableString(loc)));
-    stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, mkNilableString(loc))));
+    stats.emplace_back(ASTUtil::mkGet(loc, name, ast::MK::Cast(loc, mkNilableString(loc))));
 
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), mkNilableEncryptedValue(ctx, loc)));
-    stats.emplace_back(mkGet(loc, enc_name, ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
+    stats.emplace_back(ASTUtil::mkGet(loc, enc_name, ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
     core::NameRef setName = name.addEq(ctx);
     core::NameRef setEncName = enc_name.addEq(ctx);
 
@@ -80,12 +79,13 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
         stats.emplace_back(
             ast::MK::Sig(loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableString(loc)),
                          mkNilableString(loc)));
-        stats.emplace_back(mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, mkNilableString(loc))));
+        stats.emplace_back(ASTUtil::mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, mkNilableString(loc))));
 
         stats.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableEncryptedValue(ctx, loc)),
             mkNilableEncryptedValue(ctx, loc)));
-        stats.emplace_back(mkSet(loc, setEncName, nameLoc, ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
+        stats.emplace_back(
+            ASTUtil::mkSet(loc, setEncName, nameLoc, ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
     }
 
     // Compute the Mutator
@@ -95,12 +95,13 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
         rhs.emplace_back(
             ast::MK::Sig(loc, ast::MK::Hash1(nameLoc, ast::MK::Symbol(loc, core::Names::arg0()), mkNilableString(loc)),
                          mkNilableString(loc)));
-        rhs.emplace_back(mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, mkNilableString(loc))));
+        rhs.emplace_back(ASTUtil::mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, mkNilableString(loc))));
 
         rhs.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableEncryptedValue(ctx, loc)),
             mkNilableEncryptedValue(ctx, loc)));
-        rhs.emplace_back(mkSet(loc, setEncName, nameLoc, ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
+        rhs.emplace_back(
+            ASTUtil::mkSet(loc, setEncName, nameLoc, ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
     }
 
     return stats;
