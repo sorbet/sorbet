@@ -48,8 +48,8 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::Test::Other)
           <emptyTree>
         end
-        ::Sorbet::Private::Static.keep_for_ide(::Test::Mixin)
-        ::Sorbet::Private::Static.keep_for_ide(::Test::Other)
+        <self>.include(::Test::Mixin)
+        <self>.include(::Test::Other)
         <emptyTree>
       end
     end
