@@ -70,14 +70,46 @@ static types. However, because Sorbet implements a
 annotations as <a href="/docs/untyped">untyped</a>. This means that Sorbet can only use static
 types for methods, constants, instance variables, and class variables if they
 are accompanied with explicit static types.</p>
-<p>The exception to the above list is that Sorbet does not need type annotations
-for local variables. In the absence of a type annotation, Sorbet will infer the
-type of a local variable based on how the variable is initialized. It is still
-possible to provide type annotations for local variables.</p>
+<p>The exceptions to the above list are that Sorbet does not need type annotations
+for local variables or in some simple cases for instance variables. In the
+absence of a type annotation, Sorbet will infer the type of a local variable
+based on how the variable is initialized. It is still possible to provide type
+annotations in these instances.</p>
 <p>Type annotations for methods are provided using a <code>sig</code> before the method
 definition. Method type annotations are
 <a href="/docs/sigs">described in great detail on the Method Signatures</a>. Other type
 annotations are provided using the <code>T.let</code> <a href="/docs/type-assertions">type assertion</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="when-are-type-annotations-optional"></a><a href="#when-are-type-annotations-optional" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>When Are Type Annotations Optional?</h2>
+<p>Sorbet does not need type annotations for local variables, as it can infer the
+type of the local variable based on how it is initialized. For example, in the
+following program, Sorbet can tell <code>x</code> is an <code>Integer</code> based on the fact that it
+is initialized with an expression that evaluates to an <code>Integer</code>:</p>
+<pre><code class="hljs css language-ruby">x = <span class="hljs-number">2</span> + <span class="hljs-number">3</span>
+</code></pre>
+<p>You may still provide a wider type annotation if you would like. This can
+occasionally be helpful if you want the type of a variable to be broader than
+Sorbet’s inferred type, such as in situations where you are changing the value
+of a variable in a loop to something that is broader than the expression that
+you use to initialize the variable:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># without this T.let, x would have the inferred type NilClass</span>
+x = T.let(<span class="hljs-literal">nil</span>, T.nilable(Integer))
+(<span class="hljs-number">0</span>..<span class="hljs-number">10</span>).each <span class="hljs-keyword">do</span> <span class="hljs-params">|n|</span>
+  x = n <span class="hljs-keyword">if</span> n % <span class="hljs-number">3</span> == <span class="hljs-number">0</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Sorbet can also infer the types of instance variables in some limited
+situations, specifically when the instance variable is initialized with the
+value of a parameter of the constructor:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyObj</span></span>
+  sig {params(<span class="hljs-symbol">x:</span> Integer).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(x)</span></span>
+    @y = x  <span class="hljs-comment"># y has the inferred type Integer</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>For more details on why Sorbet can only infer the types of instance variables in
+relatively narrow situations, see the section below about the
+<a href="#limitations-of-instance-variable-inference">limitations of instance variable inference</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="annotating-constants"></a><a href="#annotating-constants" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Annotating constants</h2>
 <p>Sorbet does not, by default, infer the types of constants, but they can be
 specified using <code>T.let</code>:</p>
@@ -130,25 +162,39 @@ variables:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<h2><a class="anchor" aria-hidden="true" id="why-do-i-need-to-repeat-types-from-the-constructor"></a><a href="#why-do-i-need-to-repeat-types-from-the-constructor" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why do I need to repeat types from the constructor?</h2>
-<p>A current shortcoming of Sorbet is it cannot reuse static type knowledge in
-order to automatically determine the type of an instance or class variable. In
-the following example, despite the fact that Sorbet knows that <code>x</code> has type
-<code>Integer</code>, it still treats <code>@x</code> as <code>T.untyped</code> without an explicit type
-annotation:</p>
+<h2><a class="anchor" aria-hidden="true" id="limitations-on-instance-variable-inference"></a><a href="#limitations-on-instance-variable-inference" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Limitations on instance variable inference</h2>
+<p>A current shortcoming of Sorbet is that in many cases it cannot reuse static
+type knowledge in order to automatically determine the type of an instance or
+class variable. In the following example, Sorbet will naturally understand that
+<code>@x</code> is of type <code>Integer</code>, but it cannot determine the static type of <code>@y</code>
+without a <code>T.let</code> and therefore treats it as <code>T.untyped</code>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
   sig {params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> Integer).void}
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(x, y)</span></span>
     @x = x
-    @y = T.let(y, Integer)
+    @y = y + <span class="hljs-number">0</span>
 
-    T.reveal_type(@x)  <span class="hljs-comment"># T.untyped</span>
-    T.reveal_type(@y)  <span class="hljs-comment"># Integer</span>
+    T.reveal_type(@x)  <span class="hljs-comment"># Integer</span>
+    T.reveal_type(@y)  <span class="hljs-comment"># T.untyped</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>This is a known limitation of Sorbet, and we’re considering ways to make it less
-verbose in the future.</p>
+<p>Sorbet can only infer the types of instance variables in a relatively specific
+context: in particular, only when that instance variable is initialized to the
+exact value of a parameter to the constructor in the body of the constructor. In
+other cases, you will need to use <code>T.let</code> to explicitly give the types of
+instance variables.</p>
+<blockquote>
+<p><strong>Note</strong>: This particular limitation is because of how Sorbet performs
+typechecking: it needs to know the types of instance variables <em>before</em> it
+typechecks method definitions, but even a simple expression like <code>y + 0</code> will
+require a typechecking pass to determine what its resulting type is, which
+means Sorbet won’t be able to tell what type to infer for an instance variable
+until <em>after</em> it has already started typechecking the method where instance
+variables are defined. Sorbet resolves this cyclical dependency by either
+using types that you have explicitly defined with <code>T.let</code>, or by relying on
+simple code patterns like the one described above.</p>
+</blockquote>
 <h2><a class="anchor" aria-hidden="true" id="type-annotations-and-strictness-levels"></a><a href="#type-annotations-and-strictness-levels" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type annotations and strictness levels</h2>
 <p>Sorbet allows the programmer to opt-in to greater levels of static type rigor.
 At lower <a href="/docs/static">strictness modes</a>, Sorbet allows definitions to be untyped,
@@ -169,7 +215,7 @@ strictness level, unannotated methods, instance variables, and constants are
 assumed to be <code>T.untyped</code>. This allows a programmer to write untyped or
 partially-typed definitions while still benefiting from type checking when
 static type information is present.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/sigs"><span class="arrow-prev">← </span><span>Signatures</span></a><a class="docs-next button" href="/docs/type-assertions"><span>Type Assertions</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#annotating-constants">Annotating constants</a></li><li><a href="#declaring-class-and-instance-variables">Declaring class and instance variables</a></li><li><a href="#why-do-i-need-to-repeat-types-from-the-constructor">Why do I need to repeat types from the constructor?</a></li><li><a href="#type-annotations-and-strictness-levels">Type annotations and strictness levels</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/sigs"><span class="arrow-prev">← </span><span>Signatures</span></a><a class="docs-next button" href="/docs/type-assertions"><span>Type Assertions</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#when-are-type-annotations-optional">When Are Type Annotations Optional?</a></li><li><a href="#annotating-constants">Annotating constants</a></li><li><a href="#declaring-class-and-instance-variables">Declaring class and instance variables</a></li><li><a href="#limitations-on-instance-variable-inference">Limitations on instance variable inference</a></li><li><a href="#type-annotations-and-strictness-levels">Type annotations and strictness levels</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
