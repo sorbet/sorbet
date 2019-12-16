@@ -5,6 +5,7 @@
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "rewriter/AttrReader.h"
 #include "rewriter/ClassNew.h"
+#include "rewriter/Cleanup.h"
 #include "rewriter/Command.h"
 #include "rewriter/DSLBuilder.h"
 #include "rewriter/DefaultArgs.h"
@@ -26,7 +27,6 @@
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TypeMembers.h"
-#include "rewriter/cleanup.h"
 
 using namespace std;
 
