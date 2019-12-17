@@ -57,10 +57,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates) {
         filesTypechecked = run.filesTypechecked;
         commitTypecheckRun(move(run));
     } else {
-        // No need to add any files to typecheck, as it'll retypecheck all files.
-        // TODO: In future, have it prioritize old files with errors.
         committed = runSlowPath(move(updates), /* cancelable */ true);
-        // Note: filesTypechecked isn't important for slow path typecheck info; the slow path typechecks everything.
     }
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
                       isFastPath, move(filesTypechecked));
