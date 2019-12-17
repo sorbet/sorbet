@@ -84,12 +84,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypechecker &typ
             string typeString = prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr);
             response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, documentation));
         } else if (auto constResp = resp->isConstant()) {
-            auto type = resp->getRetType();
-            if (constResp->symbol.data(gs)->isTypeAlias()) {
-                // By wrapping the type in `MetaType`, it displays as `<Type: Foo>` rather than `Foo`.
-                type = core::make_type<core::MetaType>(type);
-            }
-            auto prettyType = type->showWithMoreInfo(gs);
+            auto prettyType = prettyTypeForConstant(gs, constResp->symbol, resp->getRetType());
             response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, prettyType, documentation));
         } else {
             core::TypePtr retType = resp->getRetType();

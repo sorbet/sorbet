@@ -44,7 +44,8 @@ const UnorderedMap<
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
-const UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "linearization", "commented-out-error"};
+const UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "linearization", "commented-out-error",
+                                                     "Note",  "See"};
 
 constexpr string_view NOTHING_LABEL = "(nothing)"sv;
 constexpr string_view NULL_LABEL = "null"sv;
