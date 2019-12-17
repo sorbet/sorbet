@@ -8776,6 +8776,8 @@ module Sorbet::Private::RealStdlib
 
   def self.real_is_a?(o, klass); end
 
+  def self.real_method(obj, sym); end
+
   def self.real_name(o); end
 
   def self.real_object_id(o); end
