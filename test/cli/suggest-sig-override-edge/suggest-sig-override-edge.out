@@ -52,16 +52,16 @@ class ChildNeedsOverride < ParentIsAbstract
   sig {override.returns(NilClass)}
   def just_returns; end
 
-  sig {params(x: Integer).override.void}
+  sig {override.params(x: Integer).void}
   def x_to_void(x); end
 
-  sig {params(x: Integer).override.returns(NilClass)}
+  sig {override.params(x: Integer).returns(NilClass)}
   def x_to_returns(x); end
 
-  sig {params(x: Integer).override.void}
+  sig {override.params(x: Integer).void}
   def multiline_x_to_void(x); end
 
-  sig {params(x: Integer).override.returns(NilClass)}
+  sig {override.params(x: Integer).returns(NilClass)}
   def multiline_x_to_returns(x); end
 end
 
