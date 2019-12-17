@@ -131,11 +131,12 @@ class NameInserter {
         return move(localExpr);
     }
 
-    bool addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &node) {
+    void addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass,
+                     const unique_ptr<ast::Expression> &node) {
         auto send = ast::cast_tree<ast::Send>(node.get());
         if (send == nullptr) {
             ENFORCE(node.get() != nullptr);
-            return false;
+            return;
         }
 
         ast::ClassDef::ANCESTORS_store *dest;
@@ -144,25 +145,25 @@ class NameInserter {
         } else if (send->fun == core::Names::extend()) {
             dest = &klass->singletonAncestors;
         } else {
-            return false;
+            return;
         }
         if (!send->recv->isSelfReference()) {
             // ignore `something.include`
-            return false;
+            return;
         }
 
         if (send->args.empty()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
                 e.setHeader("`{}` requires at least one argument", send->fun.data(ctx)->show(ctx));
             }
-            return false;
+            return;
         }
 
         if (send->block != nullptr) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
                 e.setHeader("`{}` can not be passed a block", send->fun.data(ctx)->show(ctx));
             }
-            return false;
+            return;
         }
 
         for (auto it = send->args.rbegin(); it != send->args.rend(); it++) {
@@ -172,11 +173,11 @@ class NameInserter {
                 continue;
             }
             if (arg->isSelfReference()) {
-                dest->emplace_back(std::move(arg));
+                dest->emplace_back(arg->deepCopy());
                 continue;
             }
             if (isValidAncestor(arg.get())) {
-                dest->emplace_back(std::move(arg));
+                dest->emplace_back(arg->deepCopy());
             } else {
                 if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::AncestorNotConstant)) {
                     e.setHeader("`{}` must only contain constant literals", send->fun.data(ctx)->show(ctx));
@@ -184,8 +185,6 @@ class NameInserter {
                 arg = ast::MK::EmptyTree();
             }
         }
-
-        return true;
     }
 
     void aliasMethod(core::MutableContext ctx, core::Loc loc, core::SymbolRef owner, core::NameRef newName,
@@ -271,14 +270,12 @@ public:
         return klass;
     }
 
-    bool handleNamerDSL(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &line) {
-        if (addAncestor(ctx, klass, line)) {
-            return true;
-        }
+    void handleNamerDSL(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &line) {
+        addAncestor(ctx, klass, line);
 
         auto *send = ast::cast_tree<ast::Send>(line.get());
         if (send == nullptr) {
-            return false;
+            return;
         }
         if (send->fun == core::Names::declareFinal()) {
             klass->symbol.data(ctx)->setClassFinal();
@@ -311,9 +308,6 @@ public:
                 }
             }
         }
-
-        // explicitly keep the namer dsl functions present
-        return false;
     }
 
     // This decides if we need to keep a node around incase the current LSP query needs type information for it
@@ -345,9 +339,9 @@ public:
         klass->symbol.data(ctx)->addLoc(ctx, klass->declLoc);
         klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
-        auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
-                                  [&](unique_ptr<ast::Expression> &line) { return handleNamerDSL(ctx, klass, line); });
-        klass->rhs.erase(toRemove, klass->rhs.end());
+        for (auto &exp : klass->rhs) {
+            handleNamerDSL(ctx, klass, exp);
+        }
 
         if (!klass->ancestors.empty()) {
             /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
@@ -357,16 +351,6 @@ public:
                         e.setHeader("Superclasses must only contain constant literals");
                     }
                     anc = ast::MK::EmptyTree();
-                } else if (shouldLeaveAncestorForIDE(anc) &&
-                           (klass->kind == ast::Module || anc != klass->ancestors.front())) {
-                    klass->rhs.emplace_back(ast::MK::KeepForIDE(anc->deepCopy()));
-                }
-            }
-        }
-        if (!klass->singletonAncestors.empty()) {
-            for (auto &sanc : klass->singletonAncestors) {
-                if (shouldLeaveAncestorForIDE(sanc)) {
-                    klass->rhs.emplace_back(ast::MK::KeepForIDE(sanc->deepCopy()));
                 }
             }
         }
