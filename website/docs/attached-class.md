@@ -25,7 +25,7 @@ T.reveal_type(User.load_by_id(15)) # User
 T.reveal_type(Administrator.load_by_id(20)) # Administrator
 ```
 
-## Typing Factory Methods
+## Typing factory methods
 
 Consider the following example of a class hierarchy with a factory method:
 
