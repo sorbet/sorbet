@@ -361,11 +361,11 @@ module Kernel
 
   sig do
     params(
-        arg0: Module,
+        mod: Module,
     )
-    .returns(T.self_type)
+    .returns(NilClass)
   end
-  def extend(*arg0); end
+  def extend(mod); end
 
   # Creates a subprocess. If a block is specified, that block is run in the
   # subprocess, and the subprocess terminates with a status of zero. Otherwise,

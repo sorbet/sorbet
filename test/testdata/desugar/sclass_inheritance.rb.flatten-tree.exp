@@ -65,7 +65,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      <self>.include(::MM)
+      <emptyTree>
     end
   end
   class ::B<<C B>> < (::<todo sym>)
@@ -78,7 +78,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      <self>.extend(::MM)
+      ::Sorbet::Private::Static.keep_for_ide(::MM)
     end
   end
   class ::C<<C C>> < (::A)

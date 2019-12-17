@@ -316,9 +316,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                 return payload.str();
             },
             false);
-        // Autogen forces you to to put --stop-after=namer so lets not run
-        // anything else
-        return;
     } else {
         core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
         core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
@@ -443,7 +440,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     auto disableStressIncremental =
         BooleanPropertyAssertion::getValue("disable-stress-incremental", assertions).value_or(false);
-    if (disableStressIncremental) {
+    auto isAutogenTest = test.expectations.contains("autogen");
+    if (disableStressIncremental || isAutogenTest) {
         TEST_COUT << "errors OK" << '\n';
         return;
     }
