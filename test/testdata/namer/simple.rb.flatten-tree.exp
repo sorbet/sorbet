@@ -121,11 +121,12 @@ begin
   class ::Child<<C Child>> < (::Parent, ::Mixin)
     def self.<static-init>(<blk>)
       begin
+        <self>.include(::Mixin)
+        <self>.include(<emptyTree>)
         <self>.include(::Mixin) do ||
           <emptyTree>
         end
         <self>.whatever().include(::OtherMixin)
-        ::Sorbet::Private::Static.keep_for_ide(::Mixin)
         <emptyTree>
       end
     end

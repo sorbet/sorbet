@@ -70,7 +70,10 @@ bool BehaviorHelpers::checkEmptyDeep(const unique_ptr<ast::Expression> &expr) {
     typecase(
         expr.get(),
 
-        [&](ast::Send *send) { result = (send->fun == core::Names::keepForIde()); },
+        [&](ast::Send *send) {
+            result = (send->fun == core::Names::keepForIde()) || send->fun == core::Names::include() ||
+                     send->fun == core::Names::extend();
+        },
 
         [&](ast::EmptyTree *) { result = true; },
 
