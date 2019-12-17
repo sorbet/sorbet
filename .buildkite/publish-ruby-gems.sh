@@ -56,6 +56,8 @@ for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
     platform="${BASH_REMATCH[2]}"
     if ! gem list --remote rubygems.org --exact 'sorbet-static' | grep "$release_version" | grep -q "$platform"; then
       with_backoff gem push --verbose "$gem_archive"
+    else
+      echo "$gem_archive already published."
     fi
   else
     echo "Regex match failed. This should never happen."
@@ -63,10 +65,16 @@ for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
   fi
 done
 
+gem_archive="_out_/gems/sorbet-runtime-$release_version.gem"
 if ! gem list --remote rubygems.org --exact 'sorbet-runtime' | grep -q "$release_version"; then
-  with_backoff gem push --verbose "_out_/gems/sorbet-runtime-$release_version.gem"
+  with_backoff gem push --verbose "$gem_archive"
+else
+  echo "$gem_archive already published."
 fi
 
+gem_archive="_out_/gems/sorbet-$release_version.gem"
 if ! gem list --remote rubygems.org --exact 'sorbet' | grep -q "$release_version"; then
-  with_backoff gem push --verbose "_out_/gems/sorbet-$release_version.gem"
+  with_backoff gem push --verbose "$gem_archive"
+else
+  echo "$gem_archive already published."
 fi
