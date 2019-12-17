@@ -11,37 +11,40 @@ class ChildInitialize < ParentInitialize
 end
 
 # Weird edge cases in string parsing for adding 'overridable.'
-class ParentNeedsOverridable
+class ParentIsAbstract
   # Every sig here should have `generated.overridable.` added to it.
   extend T::Sig
+  extend T::Helpers
 
-  sig {implementation.void}
+  abstract!
+
+  sig {abstract.void}
   def just_void; end
 
-  sig {implementation.returns(NilClass)}
+  sig {abstract.returns(NilClass)}
   def just_returns; end
 
-  sig {implementation.params(x: Integer).void}
+  sig {abstract.params(x: Integer).void}
   def x_to_void(x); end
 
-  sig {implementation.params(x: Integer).returns(NilClass)}
+  sig {abstract.params(x: Integer).returns(NilClass)}
   def x_to_returns(x); end
 
   sig do
-    implementation
+    abstract
     .params(x: Integer)
     .void
   end
   def multiline_x_to_void(x); end
 
   sig do
-    implementation
+    abstract
     .params(x: Integer)
     .returns(NilClass)
   end
   def multiline_x_to_returns(x); end
 end
-class ChildForcesOverridable < ParentNeedsOverridable
+class ChildNeedsOverride < ParentIsAbstract
   def just_void; end
 
   def just_returns; end
@@ -69,7 +72,7 @@ end
 
 # Doesn't need generated because parent already has overridable
 class DoesntNeedGenerated
-  sig {implementation.overridable.void}
+  sig {override.overridable.void}
   def already_overridable; end
 end
 
