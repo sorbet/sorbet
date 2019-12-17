@@ -30,10 +30,3 @@ requires: []
  resolved=[B]
  loc=test/testdata/autogen/hidden_include.rb:5
  is_defining_ref=1
-[ref id=2]
- scope=[B]
- name=[A]
- nesting=[[B]]
- resolved=[A]
- loc=test/testdata/autogen/hidden_include.rb:7
- is_defining_ref=0
