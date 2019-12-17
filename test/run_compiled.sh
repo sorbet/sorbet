@@ -13,6 +13,7 @@ if [ "$1" == "-d" ]; then
 fi
 
 rb=$1
+shift
 
 if [ -z "$rb" ]; then
   echo "Usage: test/run_compiled.sh [-d] <test_file>"
@@ -52,6 +53,7 @@ command=("${command[@]}" \
   -I "${ruby_lib}" -I "${ruby_lib}/x86_64-darwin18" \
   -I "run/tools" -rpreamble.rb -rpatch_require.rb \
   -e "require './$rb'" \
+  "$@" \
   )
 
 # Use force_compile to make patch_require.rb fail if the compiled extension

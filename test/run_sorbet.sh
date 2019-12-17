@@ -12,8 +12,6 @@ if [ "$1" == "-d" ]; then
   shift 1
 fi
 
-rb=$1
-
 if [ -z "$rb" ]; then
   echo "Usage: test/run_sorbet.sh [-d] <test_file>"
   exit 1
@@ -44,7 +42,7 @@ command=( "${command[@]}" \
   --silence-dev-message \
   "--llvm-ir-folder=$llvmir" \
   --force-compiled \
-  "$rb"  \
+  "$@"  \
 )
 
 "${command[@]}"

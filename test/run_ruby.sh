@@ -11,6 +11,7 @@ if [ "$1" == "-d" ]; then
 fi
 
 rb=$1
+shift
 
 if [ -z "$rb" ]; then
   echo "Usage: test/run_ruby.sh <test_file>"
@@ -39,6 +40,7 @@ command=("${command[@]}" \
   -I "${ruby_lib}" -I "${ruby_lib}/x86_64-darwin18" \
   -I "run/tools" -rpreamble.rb \
   -e "require './$rb'" \
+  "$@" \
   )
 
 "${command[@]}"
