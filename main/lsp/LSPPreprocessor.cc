@@ -385,7 +385,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentPa
             }
         }
         updates.updatedFiles.push_back(
-            make_shared<core::File>(move(localPath), move(fileContents), core::File::Type::Normal));
+            make_shared<core::File>(move(localPath), move(fileContents), core::File::Type::Normal, v));
     }
 }
 
@@ -398,7 +398,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentPara
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
             updates.updatedFiles.push_back(make_shared<core::File>(
-                move(localPath), move(openParams->textDocument->text), core::File::Type::Normal));
+                move(localPath), move(openParams->textDocument->text), core::File::Type::Normal, v));
         }
     }
 }
@@ -413,7 +413,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentPar
         if (!config->isFileIgnored(localPath)) {
             // Use contents of file on disk.
             updates.updatedFiles.push_back(make_shared<core::File>(
-                move(localPath), readFile(localPath, *config->opts.fs), core::File::Type::Normal));
+                move(localPath), readFile(localPath, *config->opts.fs), core::File::Type::Normal, v));
         }
     }
 }
@@ -428,7 +428,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<WatchmanQueryResponse> 
         // Editor contents supercede file system updates.
         if (!config->isFileIgnored(localPath) && !openFiles.contains(localPath)) {
             updates.updatedFiles.push_back(make_shared<core::File>(
-                move(localPath), readFile(localPath, *config->opts.fs), core::File::Type::Normal));
+                move(localPath), readFile(localPath, *config->opts.fs), core::File::Type::Normal, v));
         }
     }
 }
