@@ -164,7 +164,7 @@ module T::Props::Serializable
               if subtype.is_a?(T::Props::CustomType)
                 val.map {|el| el && subtype.deserialize(el)}
               else
-                val.map {|el| el && subtype.from_hash(el, strict, mutation_safety)}
+                val.map {|el| el && subtype.decorator.from_hash(el, strict, mutation_safety)}
               end
             elsif rules[:type_is_hash_of_serializable_values] && rules[:type_is_hash_of_custom_type_keys]
               key_subtype = subtype[:keys]
@@ -175,21 +175,21 @@ module T::Props::Serializable
                 end
               else
                 val.each_with_object({}) do |(key, value), result|
-                  result[key_subtype.deserialize(key)] = value && values_subtype.from_hash(value, strict, mutation_safety)
+                  result[key_subtype.deserialize(key)] = value && values_subtype.decorator.from_hash(value, strict, mutation_safety)
                 end
               end
             elsif rules[:type_is_hash_of_serializable_values]
               if subtype.is_a?(T::Props::CustomType)
                 val.transform_values {|v| v && subtype.deserialize(v)}
               else
-                val.transform_values {|v| v && subtype.from_hash(v, strict, mutation_safety)}
+                val.transform_values {|v| v && subtype.decorator.from_hash(v, strict, mutation_safety)}
               end
             elsif rules[:type_is_hash_of_custom_type_keys]
               val.map do |key, value|
                 [subtype.deserialize(key), value]
               end.to_h
             else
-              subtype.from_hash(val, strict, mutation_safety)
+              subtype.decorator.from_hash(val, strict, mutation_safety)
             end
         elsif needs_clone = rules[:type_needs_clone]
           val =
@@ -395,8 +395,8 @@ module T::Props::Serializable::ClassMethods
   # Allocate a new instance and call {#deserialize} to load a new
   # object from a hash.
   # @return [Serializable]
-  def from_hash(hash, strict=false, mutation_safety=:clone)
-    self.decorator.from_hash(hash, strict, mutation_safety)
+  def from_hash(hash, strict=false)
+    self.decorator.from_hash(hash, strict)
   end
 
   # Equivalent to {.from_hash} with `strict` set to true.

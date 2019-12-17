@@ -171,7 +171,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         'name' => 'hi',
         'foo' => {'hello' => {'world' => 1}},
       }
-      m = MySerializable.from_hash(h, true, :clone)
+      m = MySerializable.decorator.from_hash(h, true, :clone)
       refute_equal(m.foo.object_id, h['foo'].object_id, "`foo` is the same object")
       refute(m.foo.frozen?)
       refute_equal(m.foo['hello'].object_id, h['foo']['hello'].object_id, "`foo.hello` is the same object")
@@ -183,7 +183,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         'name' => 'hi',
         'foo' => {'hello' => {'world' => 1}},
       }
-      m = MySerializable.from_hash(h, true, :freeze)
+      m = MySerializable.decorator.from_hash(h, true, :freeze)
       assert(m.foo.frozen?)
       assert(m.foo['hello'].frozen?)
 
@@ -200,7 +200,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         'name' => 'hi',
         'foo' => {'hello' => {'world' => 1}},
       }
-      m = MySerializable.from_hash(h, true, :unsafe)
+      m = MySerializable.decorator.from_hash(h, true, :unsafe)
       assert_equal(m.foo.object_id, h['foo'].object_id, "`foo` is not the same object")
       refute(m.foo.frozen?)
       assert_equal(m.foo['hello'].object_id, h['foo']['hello'].object_id, "`foo.hello` is not the same object")
@@ -223,21 +223,21 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     it 'is not same object and is not frozen on deserialize when mutation_safety is :clone' do
       array = []
-      m = MyArraySerializable.from_hash({'array' => array}, true, :clone)
+      m = MyArraySerializable.decorator.from_hash({'array' => array}, true, :clone)
       refute_equal(array.object_id, m.array.object_id)
       refute(array.frozen?)
     end
 
     it 'is same object and is frozen on deserialize when mutation_safety is :freeze' do
       array = []
-      m = MyArraySerializable.from_hash({'array' => array}, true, :freeze)
+      m = MyArraySerializable.decorator.from_hash({'array' => array}, true, :freeze)
       assert_equal(array.object_id, m.array.object_id)
       assert(array.frozen?)
     end
 
     it 'is same object and is not frozen on deserialize when mutation_safety is :unsafe' do
       array = []
-      m = MyArraySerializable.from_hash({'array' => array}, true, :unsafe)
+      m = MyArraySerializable.decorator.from_hash({'array' => array}, true, :unsafe)
       assert_equal(array.object_id, m.array.object_id)
       refute(array.frozen?)
     end
