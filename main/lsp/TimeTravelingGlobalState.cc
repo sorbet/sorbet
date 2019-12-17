@@ -208,7 +208,8 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
         } else {
             update.hasNewFiles = true;
             // Reversal of a new file is... an empty file...
-            auto emptyFile = make_shared<core::File>(string(file->path()), "", core::File::Type::Normal);
+            auto emptyFile =
+                make_shared<core::File>(string(file->path()), "", core::File::Type::Normal, update.versionStart - 1);
             newUpdate.undoUpdate.hashUpdates.push_back(pipeline::computeFileHash(emptyFile, *config->logger));
             newUpdate.undoUpdate.fileUpdates.push_back(move(emptyFile));
         }

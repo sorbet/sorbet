@@ -101,7 +101,8 @@ LSPFileUpdates makeUpdates(u4 &version, vector<pair<string, string>> files) {
     updates.versionStart = version++;
     updates.versionEnd = updates.versionStart;
     for (auto &[path, contents] : files) {
-        updates.updatedFiles.push_back(make_shared<core::File>(move(path), move(contents), core::File::Type::Normal));
+        updates.updatedFiles.push_back(
+            make_shared<core::File>(move(path), move(contents), core::File::Type::Normal, version));
     }
     return updates;
 }

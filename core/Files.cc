@@ -97,14 +97,14 @@ StrictLevel File::fileSigil(string_view source) {
     }
 }
 
-File::File(string &&path_, string &&source_, Type sourceType)
-    : sourceType(sourceType), path_(path_), source_(source_), originalSigil(fileSigil(this->source_)),
+File::File(string &&path_, string &&source_, Type sourceType, u4 epoch)
+    : epoch(epoch), sourceType(sourceType), path_(path_), source_(source_), originalSigil(fileSigil(this->source_)),
       strictLevel(originalSigil) {}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
     string pathCopy = path_;
-    auto ret = make_unique<File>(move(pathCopy), move(sourceCopy), sourceType);
+    auto ret = make_unique<File>(move(pathCopy), move(sourceCopy), sourceType, epoch);
     ret->lineBreaks_ = lineBreaks_;
     ret->minErrorLevel_ = minErrorLevel_;
     ret->strictLevel = strictLevel;
