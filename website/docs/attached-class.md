@@ -4,8 +4,29 @@ title: T.attached_class
 ---
 
 `T.attached_class` can be used to refer to the type of instances from a
-singleton-context, in a way that is friendly to inheritance. Consider the
-following example:
+singleton-context, in a way that is friendly to inheritance.
+
+```ruby
+class AbstractData
+  extend T::Sig
+
+  sig {params(id: Integer).returns(T.attached_class)}
+  def self.load(id)
+    new
+  end
+end
+
+class Article < AbstractData; end
+class User < AbstractData; end
+class Administrator < User; end
+
+T.reveal_type(Article.load(10)) # Article
+T.reveal_type(Administrator.load(20)) # Administrator
+```
+
+# Typing Factory Methods
+
+Consider the following example of a class hierarchy with a factory method:
 
 ```ruby
 class Parent
@@ -23,12 +44,13 @@ T.reveal_type(Parent.make) # Parent
 T.reveal_type(Child.make) # Parent
 ```
 
-Here we have two classes: a base class `Parent`, and a single subclass `Child`.
 `Parent` defines a single factory method `self.make`, which will create an
 instance of the `Parent` class. When this method is called off of the `Parent`
 class, it returns a new instance of type `Parent`. When it is called on `Child`
 it creates an instance of `Child` but the signature of `Parent.make` will cause
-the return value to be up-cast to `Parent`.
+the return value to be up-cast to `Parent`. This is fine if it's convenient to
+use constructed `Child` values as though they were `Parent`, but becomes
+problematic if we need to call methods that are unique to `Child` instances.
 
 This is where `T.attached_class` comes in: changing the return type of
 `Parent.make` to `T.attached_class` indicates that it returns instances of the
