@@ -6,6 +6,7 @@
 <url> <loc>https://sorbet.org/blog/2019/05/16/state-of-sorbet-spring-2019</loc> <changefreq>weekly</changefreq> <priority>0.3</priority> </url>
 <url> <loc>https://sorbet.org/docs/abstract</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/abstract" /> </url>
 <url> <loc>https://sorbet.org/docs/adopting</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/adopting" /> </url>
+<url> <loc>https://sorbet.org/docs/attached-class</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/attached-class" /> </url>
 <url> <loc>https://sorbet.org/docs/class-of</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/class-of" /> </url>
 <url> <loc>https://sorbet.org/docs/class-types</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/class-types" /> </url>
 <url> <loc>https://sorbet.org/docs/cli</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/cli" /> </url>
