@@ -26,6 +26,6 @@ class BBB # right
   # ^ hover: Docs for AAA
 
   # Docs for EEE
-  EEE = type_member # wrong
-  # ^ hover: Docs for XXX
+  EEE = type_member
+  # ^ hover: Docs for EEE
 end
