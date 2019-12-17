@@ -368,6 +368,15 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments().size() == 1 &&
                                 methodSymbol.data(ctx)->arguments()[0].isSyntheticBlockArgument();
 
+    if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
+        // Only need override / implementation if the parent has a sig
+        if (closestMethod.exists() && closestMethod.data(ctx)->resultType != nullptr) {
+            if (closestMethod.data(ctx)->isAbstract() || childNeedsOverride(ctx, methodSymbol, closestMethod)) {
+                fmt::format_to(ss, "override.");
+            }
+        }
+    }
+
     if (!onlyArgumentIsBlkArg) {
         fmt::format_to(ss, "params(");
 
@@ -411,15 +420,6 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     }
     if (!guessedSomethingUseful) {
         return nullopt;
-    }
-
-    if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
-        // Only need override / implementation if the parent has a sig
-        if (closestMethod.exists() && closestMethod.data(ctx)->resultType != nullptr) {
-            if (closestMethod.data(ctx)->isAbstract() || childNeedsOverride(ctx, methodSymbol, closestMethod)) {
-                fmt::format_to(ss, "override.");
-            }
-        }
     }
 
     bool suggestsVoid = methodSymbol.data(ctx)->name == core::Names::initialize() ||
