@@ -92,10 +92,10 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        <self>.include(::Mixin)
         @@class_var
         @@mixin_cvar
         @@undefined_cvar
+        ::Sorbet::Private::Static.keep_for_ide(::Mixin)
         <emptyTree>
       end
     end
