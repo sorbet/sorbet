@@ -67,7 +67,7 @@ This is where `T.attached_class` comes in: changing the return type of
 class the singleton method was called on. When called from `Parent`, it will
 return values of type `Parent`, and when called from `Child` it will return
 values of type `Child`. This resolves the type errors in the previous example
-with `Child.make.say_hi`, 
+with `Child.make.say_hi`,
 
 ```ruby
 class Parent
