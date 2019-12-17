@@ -46,20 +46,27 @@ with_backoff() {
   done
 }
 
-# push the sorbet-static gems first, in case they fail. We don't want to end
+# Push the sorbet-static gems first, in case they fail. We don't want to end
 # up in a weird state where 'sorbet' requires a pinned version of
 # sorbet-static, but the sorbet-static gem push failed.
 #
 # (By failure here, we mean that RubyGems.org 502'd for some reason.)
 for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
-  if ! gem list --remote rubygems.org --exact 'sorbet-static' | grep -q "$release_version"; then
-    with_backoff gem push --verbose "$gem_archive"
+  if [[ "$gem_archive" =~ _out_/gems/sorbet-static-([^-]*)-([^.]*).gem ]]; then
+    platform="${BASH_REMATCH[2]}"
+    if ! gem list --remote rubygems.org --exact 'sorbet-static' | grep "$release_version" | grep -q "$platform"; then
+      with_backoff gem push --verbose "$gem_archive"
+    fi
+  else
+    echo "Regex match failed. This should never happen."
+    exit 1
   fi
 done
 
 if ! gem list --remote rubygems.org --exact 'sorbet-runtime' | grep -q "$release_version"; then
   with_backoff gem push --verbose "_out_/gems/sorbet-runtime-$release_version.gem"
 fi
+
 if ! gem list --remote rubygems.org --exact 'sorbet' | grep -q "$release_version"; then
   with_backoff gem push --verbose "_out_/gems/sorbet-$release_version.gem"
 fi
