@@ -3,12 +3,29 @@ require_relative '../test_helper'
 
 module Opus::Types::Test
   class AttachedClassTest < Critic::Unit::UnitTest
-    it 'can type self methods' do
+    it 'can type self methods (experimental)' do
 
       class Base
         extend T::Sig
 
         sig {returns(T.experimental_attached_class)}
+        def self.make
+          new
+        end
+      end
+
+      class A < Base; end
+
+      assert_equal(Base.make.class, Base)
+      assert_equal(A.make.class, A)
+    end
+
+    it 'can type self methods' do
+
+      class Base
+        extend T::Sig
+
+        sig {returns(T.attached_class)}
         def self.make
           new
         end

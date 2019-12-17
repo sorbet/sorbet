@@ -562,6 +562,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             }
             return core::Types::untypedUntracked();
         case core::Names::attachedClass()._id:
+        case core::Names::experimentalAttachedClass()._id:
             if (!ctx.owner.data(ctx)->isSingletonClass(ctx)) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("`T.{}` may only be used in a singleton class method context",
@@ -835,7 +836,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             if (recvi->symbol == core::Symbols::Magic() && s->fun == core::Names::callWithSplat()) {
                 // TODO(pay-server) remove this block
                 if (auto e = ctx.state.beginError(recvi->loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
-                    e.setHeader("Splats are unsupported by the static checker and banned in typed code");
+                    e.setHeader("Malformed type declaration: splats cannot be used in types");
                 }
                 result.type = core::Types::untypedUntracked();
                 return;

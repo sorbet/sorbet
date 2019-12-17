@@ -46,34 +46,35 @@ with_backoff() {
   done
 }
 
-# push the sorbet-static gems first, in case they fail. We don't want to end
+# Push the sorbet-static gems first, in case they fail. We don't want to end
 # up in a weird state where 'sorbet' requires a pinned version of
 # sorbet-static, but the sorbet-static gem push failed.
 #
 # (By failure here, we mean that RubyGems.org 502'd for some reason.)
-# Push the linux gem
-if ! gem fetch sorbet-static --platform x86_64-linux --version "$release_version" | grep -q "ERROR"; then
-  with_backoff gem push --verbose "_out_/gems/sorbet-static-$release_version-x86_64-linux.gem"
-fi
-
-# Push the mac gem
-# we push 14..19 which is defined in build-static-release.sh
-for i in {14..19}; do
-  if ! gem fetch sorbet-static --platform "universal-darwin-$i" --version "$release_version" | grep -q "ERROR"; then
-    with_backoff gem push --verbose "_out_/gems/sorbet-static-$release_version-universal-darwin-$i.gem"
+for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
+  if [[ "$gem_archive" =~ _out_/gems/sorbet-static-([^-]*)-([^.]*).gem ]]; then
+    platform="${BASH_REMATCH[2]}"
+    if ! gem list --remote rubygems.org --exact 'sorbet-static' | grep "$release_version" | grep -q "$platform"; then
+      with_backoff gem push --verbose "$gem_archive"
+    else
+      echo "$gem_archive already published."
+    fi
+  else
+    echo "Regex match failed. This should never happen."
+    exit 1
   fi
 done
 
-
-# Push the java gem
-if ! gem fetch sorbet-static --platform java --version "$release_version" | grep -q "ERROR"; then
-  with_backoff gem push --verbose "_out_/gems/sorbet-static-$release_version-java.gem"
-fi
-
+gem_archive="_out_/gems/sorbet-runtime-$release_version.gem"
 if ! gem list --remote rubygems.org --exact 'sorbet-runtime' | grep -q "$release_version"; then
-  with_backoff gem push --verbose "_out_/gems/sorbet-runtime-$release_version.gem"
+  with_backoff gem push --verbose "$gem_archive"
+else
+  echo "$gem_archive already published."
 fi
 
+gem_archive="_out_/gems/sorbet-$release_version.gem"
 if ! gem list --remote rubygems.org --exact 'sorbet' | grep -q "$release_version"; then
-  with_backoff gem push --verbose "_out_/gems/sorbet-$release_version.gem"
+  with_backoff gem push --verbose "$gem_archive"
+else
+  echo "$gem_archive already published."
 fi

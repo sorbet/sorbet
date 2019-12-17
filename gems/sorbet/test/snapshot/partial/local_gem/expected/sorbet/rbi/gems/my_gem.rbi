@@ -10,4 +10,5 @@
 # my_gem-0.0.0
 class MyGem
   def my_gem_thing; end
+  def self.method; end
 end

@@ -8,13 +8,13 @@ class Parent
 
   # This should fail, as `T.attached_class` doesn't make sense in an instance
   # method context.
-  sig {returns(T.nilable(T.experimental_attached_class))}
-                       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `T.experimental_attached_class` may only be
+  sig {returns(T.nilable(T.attached_class))}
+                       # ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be
   def bad_sig
     nil
   end
 
-  sig {returns(T.nilable(T.experimental_attached_class))}
+  sig {returns(T.nilable(T.attached_class))}
   def self.make()
     # TODO(trevor): It would be nice if this could be `new`, but that's running
     # into problems when checking the concrete type returned by `Class#new`

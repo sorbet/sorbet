@@ -31,12 +31,22 @@
 - Don't e.g. use `foo` to mean a local variable, or `f` to mean an arbitrary
   method, or `A` mean an module.
 
-- All non-title headings should be sentence case, always.
+- All headings (but not the page title) should be sentence case, always.
+
   - ❌ Some Non-Title Heading
   - ✅ Some non-title heading
-- All non-doc titles should be sentence case
-  - see above
-  - this includes blog posts
+
 - All doc titles should be title case
+
   - ❌ Some page title
   - ✅ Some Page Title
+
+- All non-doc titles should be sentence case
+
+  - see above
+  - this includes blog posts
+
+- Never use `#` for headings. Start with `##` and go down.
+  - Prefer only two-levels of nesting (`##` and `###`)
+  - This means avoid `####` except in rare circumstances. Usually `####` can be
+    avoided by using more `###` levels.

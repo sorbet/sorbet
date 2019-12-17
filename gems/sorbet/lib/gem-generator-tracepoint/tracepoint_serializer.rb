@@ -74,7 +74,8 @@ module Sorbet::Private
                     next
                   end
                   begin
-                    method = item[:singleton] ? klass.method(item[:method]) : klass.instance_method(item[:method])
+                    method = item[:singleton] ? Sorbet::Private::RealStdlib.real_method(klass, item[:method]) : klass.instance_method(item[:method])
+
                     "#{generate_method(method, !item[:singleton])}"
                   rescue NameError
                   end

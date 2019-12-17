@@ -18,6 +18,21 @@ public:
 
     static void putBackHashValue(core::MutableContext ctx, ast::Hash &hash, std::unique_ptr<ast::Expression> key,
                                  std::unique_ptr<ast::Expression> value);
+    static const ast::Send *castSig(const ast::Expression *expr, core::NameRef returns);
+
+    static std::unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name,
+                                                  std::unique_ptr<ast::Expression> rhs);
+
+    static std::unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, core::Loc argLoc,
+                                                  std::unique_ptr<ast::Expression> rhs);
+
+    static std::unique_ptr<ast::Expression> mkNilable(core::Loc loc, std::unique_ptr<ast::Expression> type);
+
+    static std::unique_ptr<ast::Expression> mkMutator(core::MutableContext ctx, core::Loc loc, core::NameRef className);
+
+    static std::unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression *node);
+
+    static bool isProbablySymbol(core::MutableContext ctx, ast::Expression *type, core::SymbolRef sym);
 
     ASTUtil() = delete;
 };
