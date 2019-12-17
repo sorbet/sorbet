@@ -217,6 +217,15 @@ module T::Props::Serializable
         end
 
         if mutation_safety == :freeze
+          case val
+          when Hash
+            val.each do |k,v|
+              k.freeze
+              v.freeze
+            end
+          when Enumerable
+            val.each(&:freeze)
+          end
           val.freeze
         end
 
