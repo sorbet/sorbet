@@ -570,16 +570,11 @@ class Hash < Object
   end
   def has_value?(arg0); end
 
-  sig {returns(T::Hash[T.untyped, T.untyped])}
+  sig {void}
+  sig {params(default: V).void}
   sig do
     params(
-        default: BasicObject,
-    )
-    .returns(T::Hash[T.untyped, T.untyped])
-  end
-  sig do
-    params(
-        blk: T.proc.params(hash: T::Hash[T.untyped, T.untyped], key: BasicObject).returns(BasicObject)
+        blk: T.proc.params(hash: T::Hash[K, V], key: K).returns(V)
     )
     .void
   end
