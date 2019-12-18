@@ -574,7 +574,7 @@ class Hash < Object
   sig {params(default: V).void}
   sig do
     params(
-        blk: T.proc.params(hash: T::Hash[K, V], key: K).returns(V)
+        blk: T.proc.params(hash: T::Hash[K, V], key: K).void
     )
     .void
   end
