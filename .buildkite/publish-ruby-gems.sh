@@ -54,7 +54,7 @@ with_backoff() {
 for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
   if [[ "$gem_archive" =~ _out_/gems/sorbet-static-([^-]*)-([^.]*).gem ]]; then
     platform="${BASH_REMATCH[2]}"
-    if ! gem fetch --platform "$platform" --version "$release_version" 'sorbet-static' | grep -q "ERROR"; then
+    if gem fetch --platform "$platform" --version "$release_version" 'sorbet-static' | grep -q "ERROR"; then
       with_backoff gem push --verbose "$gem_archive"
     else
       echo "$gem_archive already published."
@@ -66,14 +66,14 @@ for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
 done
 
 gem_archive="_out_/gems/sorbet-runtime-$release_version.gem"
-if ! gem fetch --version "$release_version" 'sorbet-runtime' | grep -q "ERROR"; then
+if gem fetch --version "$release_version" 'sorbet-runtime' | grep -q "ERROR"; then
   with_backoff gem push --verbose "$gem_archive"
 else
   echo "$gem_archive already published."
 fi
 
 gem_archive="_out_/gems/sorbet-$release_version.gem"
-if ! gem fetch --version "$release_version" 'sorbet' | grep -q "ERROR"; then
+if gem fetch --version "$release_version" 'sorbet' | grep -q "ERROR"; then
   with_backoff gem push --verbose "$gem_archive"
 else
   echo "$gem_archive already published."
