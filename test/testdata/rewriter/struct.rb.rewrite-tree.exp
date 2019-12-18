@@ -17,16 +17,16 @@ class <emptyTree><<C <root>>> < ()
         <emptyTree>
       end
 
-      def foo=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
+      def foo=<<C <todo sym>>>(foo, &<blk>)
+        foo
       end
 
       def bar<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def bar=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
+      def bar=<<C <todo sym>>>(bar, &<blk>)
+        bar
       end
 
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
@@ -45,16 +45,16 @@ class <emptyTree><<C <root>>> < ()
         <emptyTree>
       end
 
-      def foo=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
+      def foo=<<C <todo sym>>>(foo, &<blk>)
+        foo
       end
 
       def bar<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def bar=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
+      def bar=<<C <todo sym>>>(bar, &<blk>)
+        bar
       end
 
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
@@ -121,8 +121,8 @@ class <emptyTree><<C <root>>> < ()
         <emptyTree>
       end
 
-      def foo=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
+      def foo=<<C <todo sym>>>(foo, &<blk>)
+        foo
       end
 
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
@@ -141,8 +141,8 @@ class <emptyTree><<C <root>>> < ()
         <emptyTree>
       end
 
-      def foo=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
+      def foo=<<C <todo sym>>>(foo, &<blk>)
+        foo
       end
 
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
@@ -165,16 +165,16 @@ class <emptyTree><<C <root>>> < ()
         <emptyTree>
       end
 
-      def foo=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
+      def foo=<<C <todo sym>>>(foo, &<blk>)
+        foo
       end
 
       def bar<<C <todo sym>>>(&<blk>)
         <emptyTree>
       end
 
-      def bar=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
+      def bar=<<C <todo sym>>>(bar, &<blk>)
+        bar
       end
 
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
@@ -201,8 +201,8 @@ class <emptyTree><<C <root>>> < ()
         <emptyTree>
       end
 
-      def x=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
+      def x=<<C <todo sym>>>(x, &<blk>)
+        x
       end
 
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
@@ -227,8 +227,8 @@ class <emptyTree><<C <root>>> < ()
         <emptyTree>
       end
 
-      def x=<<C <todo sym>>>(arg0, &<blk>)
-        arg0
+      def x=<<C <todo sym>>>(x, &<blk>)
+        x
       end
 
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})

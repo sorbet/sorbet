@@ -271,19 +271,19 @@ suggest-sig-garbage.rb:43: This function does not have a `sig` https://srb.help/
 
 suggest-sig-garbage.rb:102: This function does not have a `sig` https://srb.help/7017
      102 |Foo = Struct.new(:a, :b)
-          ^^^^^^^^^^^^^^^^^^^^^^^^
+                            ^
 
 suggest-sig-garbage.rb:102: This function does not have a `sig` https://srb.help/7017
      102 |Foo = Struct.new(:a, :b)
-          ^^^^^^^^^^^^^^^^^^^^^^^^
+                            ^
 
 suggest-sig-garbage.rb:102: This function does not have a `sig` https://srb.help/7017
      102 |Foo = Struct.new(:a, :b)
-          ^^^^^^^^^^^^^^^^^^^^^^^^
+                                ^
 
 suggest-sig-garbage.rb:102: This function does not have a `sig` https://srb.help/7017
      102 |Foo = Struct.new(:a, :b)
-          ^^^^^^^^^^^^^^^^^^^^^^^^
+                                ^
 
 suggest-sig-garbage.rb:112: This function does not have a `sig` https://srb.help/7017
      112 |  def self.load_account_business_profile(merchant)

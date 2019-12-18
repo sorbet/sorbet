@@ -1,4 +1,5 @@
 #include "rewriter/Struct.h"
+#include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
@@ -102,19 +103,23 @@ vector<unique_ptr<ast::Expression>> Struct::run(core::MutableContext ctx, ast::A
             return empty;
         }
         core::NameRef name = sym->asSymbol(ctx);
-
-        sigKeys.emplace_back(ast::MK::Symbol(loc, name));
-        sigValues.emplace_back(ast::MK::Constant(loc, core::Symbols::BasicObject()));
-        auto argName = ast::MK::Local(loc, name);
-        if (keywordInit) {
-            argName = ast::MK::KeywordArg(loc, move(argName));
+        auto symLoc = sym->loc;
+        if (symLoc.exists() && absl::StartsWith(symLoc.source(ctx), ":")) {
+            symLoc = core::Loc{symLoc.file(), symLoc.beginPos() + 1, symLoc.endPos()};
         }
-        newArgs.emplace_back(ast::MK::OptionalArg(loc, move(argName), ast::MK::Nil(loc)));
 
-        body.emplace_back(ast::MK::Method0(loc, loc, name, ast::MK::EmptyTree(), ast::MethodDef::RewriterSynthesized));
-        body.emplace_back(ast::MK::Method1(loc, loc, name.addEq(ctx), ast::MK::Local(loc, core::Names::arg0()),
-                                           ast::MK::Local(loc, core::Names::arg0()),
-                                           ast::MethodDef::RewriterSynthesized));
+        sigKeys.emplace_back(ast::MK::Symbol(symLoc, name));
+        sigValues.emplace_back(ast::MK::Constant(symLoc, core::Symbols::BasicObject()));
+        auto argName = ast::MK::Local(symLoc, name);
+        if (keywordInit) {
+            argName = ast::MK::KeywordArg(symLoc, move(argName));
+        }
+        newArgs.emplace_back(ast::MK::OptionalArg(symLoc, move(argName), ast::MK::Nil(symLoc)));
+
+        body.emplace_back(
+            ast::MK::Method0(symLoc, symLoc, name, ast::MK::EmptyTree(), ast::MethodDef::RewriterSynthesized));
+        body.emplace_back(ast::MK::Method1(symLoc, symLoc, name.addEq(ctx), ast::MK::Local(symLoc, name),
+                                           ast::MK::Local(symLoc, name), ast::MethodDef::RewriterSynthesized));
     }
 
     // Elem = type_member(fixed: T.untyped)
