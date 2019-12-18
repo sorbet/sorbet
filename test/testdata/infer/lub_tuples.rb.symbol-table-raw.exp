@@ -6,16 +6,10 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     module <C <U Opus>><C <U CIBot>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:18}
       module <C <U Opus>><C <U CIBot>><C <U Tasks>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:25}
         class <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>> < <C <U Object>> () @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:1 end=2:51}
-          field <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U @determined_build_group_status_and_which> -> NilClass | TupleType {
-                0 = TrueClass | FalseClass
-                1 = String | NilClass
-              } @ Loc {file=test/testdata/infer/lub_tuples.rb start=6:5 end=6:45}
+          field <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U @determined_build_group_status_and_which> -> NilClass | TupleType {                 0 = TrueClass | FalseClass                 1 = String | NilClass               } @ Loc {file=test/testdata/infer/lub_tuples.rb start=6:5 end=6:45}
           method <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U cond> (<blk>) @ Loc {file=test/testdata/infer/lub_tuples.rb start=10:3 end=10:11}
             argument <blk><block> @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
-          method <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U determined_build_group_status_and_which> : private (<blk>) -> TupleType {
-            0 = TrueClass | FalseClass
-            1 = String | NilClass
-          } @ Loc {file=test/testdata/infer/lub_tuples.rb start=13:11 end=13:54}
+          method <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U determined_build_group_status_and_which> : private (<blk>) -> TupleType {             0 = TrueClass | FalseClass             1 = String | NilClass           } @ Loc {file=test/testdata/infer/lub_tuples.rb start=13:11 end=13:54}
             argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
           method <C <U Opus>><C <U CIBot>><C <U Tasks>><C <U NotifySlackBuildComplete>><U initialize> (<blk>) @ Loc {file=test/testdata/infer/lub_tuples.rb start=5:3 end=5:19}
             argument <blk><block> @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
