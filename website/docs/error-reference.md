@@ -731,8 +731,9 @@ with `T.unsafe(...)`. T.unsafe is one of a handful of
 ## 7014
 
 Sorbet has a special method called `T.reveal_type` which can be useful for
-debugging. `T.reveal_type(expr)` will report an error that shows what the static
-component of Sorbet thinks the result type of `expr` is.
+debugging. `T.reveal_type(expr)` will report an error in the output of `srb tc`
+that shows what the static component of Sorbet thinks the result type of `expr`
+is.
 
 Making this an error is nice for two reasons:
 
