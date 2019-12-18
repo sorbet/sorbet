@@ -1,0 +1,5 @@
+class <emptyTree><<C <root>>> < ()
+  x = "A\n\tZ\n"
+
+  <self>.p(x)
+end
