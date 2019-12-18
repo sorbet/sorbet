@@ -15,7 +15,7 @@ class Net::BufferedIO
     )
     .returns(::T.untyped)
   end
-  def <<(str); end
+  def <<(*str); end
 
   sig {returns(::T.untyped)}
   def close(); end
@@ -54,10 +54,11 @@ class Net::BufferedIO
       read_timeout: ::T.untyped,
       continue_timeout: ::T.untyped,
       debug_output: ::T.untyped,
+      write_timeout: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def initialize(io, read_timeout: T.unsafe(nil), continue_timeout: T.unsafe(nil), debug_output: T.unsafe(nil)); end
+  def initialize(io, read_timeout: T.unsafe(nil), continue_timeout: T.unsafe(nil), debug_output: T.unsafe(nil), write_timeout: T.unsafe(nil)); end
 
   sig {returns(::T.untyped)}
   def inspect(); end
@@ -112,7 +113,7 @@ class Net::BufferedIO
     )
     .returns(::T.untyped)
   end
-  def write(str); end
+  def write(*str); end
 
   sig do
     params(
@@ -2631,10 +2632,11 @@ class Net::HTTP < Net::Protocol
       p_port: ::T.untyped,
       p_user: ::T.untyped,
       p_pass: ::T.untyped,
+      p_no_proxy: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.new(address, port=T.unsafe(nil), p_addr=T.unsafe(nil), p_port=T.unsafe(nil), p_user=T.unsafe(nil), p_pass=T.unsafe(nil)); end
+  def self.new(address, port=T.unsafe(nil), p_addr=T.unsafe(nil), p_port=T.unsafe(nil), p_user=T.unsafe(nil), p_pass=T.unsafe(nil), p_no_proxy=T.unsafe(nil)); end
 
   # Alias for:
   # [`new`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-c-new)
@@ -5064,10 +5066,11 @@ class Net::IMAP < Net::Protocol
     params(
       set: ::T.untyped,
       attr: ::T.untyped,
+      mod: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def fetch(set, attr); end
+  def fetch(set, attr, mod=T.unsafe(nil)); end
 
   # Send the GETACL command along with a specified `mailbox`. If this mailbox
   # exists, an array containing objects of
@@ -5550,10 +5553,11 @@ class Net::IMAP < Net::Protocol
     params(
       set: ::T.untyped,
       attr: ::T.untyped,
+      mod: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def uid_fetch(set, attr); end
+  def uid_fetch(set, attr, mod); end
 
   # Similar to
   # [`move()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-move),
@@ -5890,10 +5894,11 @@ class Net::IMAP::Atom
   sig do
     params(
       imap: ::T.untyped,
+      tag: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def send_data(imap); end
+  def send_data(imap, tag); end
 
   sig {returns(::T.untyped)}
   def validate(); end
@@ -7131,10 +7136,11 @@ class Net::IMAP::Literal
   sig do
     params(
       imap: ::T.untyped,
+      tag: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def send_data(imap); end
+  def send_data(imap, tag); end
 
   sig {returns(::T.untyped)}
   def validate(); end
@@ -7467,10 +7473,11 @@ class Net::IMAP::MessageSet
   sig do
     params(
       imap: ::T.untyped,
+      tag: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def send_data(imap); end
+  def send_data(imap, tag); end
 
   sig {returns(::T.untyped)}
   def validate(); end
@@ -7552,10 +7559,11 @@ class Net::IMAP::QuotedString
   sig do
     params(
       imap: ::T.untyped,
+      tag: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def send_data(imap); end
+  def send_data(imap, tag); end
 
   sig {returns(::T.untyped)}
   def validate(); end
@@ -7573,10 +7581,11 @@ class Net::IMAP::RawData
   sig do
     params(
       imap: ::T.untyped,
+      tag: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def send_data(imap); end
+  def send_data(imap, tag); end
 
   sig {returns(::T.untyped)}
   def validate(); end
