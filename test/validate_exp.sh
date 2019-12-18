@@ -10,7 +10,7 @@ source "test/logging.sh"
 # Argument Parsing #############################################################
 
 # Positional arguments
-build_archive=${4/--build_archive=/}
+build_archive=${1/--build_archive=/}
 shift 1
 
 # sources make up the remaining argumenets
