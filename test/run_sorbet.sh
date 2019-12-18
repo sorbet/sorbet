@@ -12,7 +12,7 @@ if [ "$1" == "-d" ]; then
   shift 1
 fi
 
-if [ -z "$rb" ]; then
+if [ -z "$*" ]; then
   echo "Usage: test/run_sorbet.sh [-d] <test_file>"
   exit 1
 fi
