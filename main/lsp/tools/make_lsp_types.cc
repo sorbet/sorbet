@@ -811,7 +811,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                          makeField("rangeLength", makeOptional(JSONInt)),
                                                          makeField("text", JSONString),
                                                      },
-                                                     classTypes);
+                                                     classTypes, {"std::string apply(std::string oldContents) const;"});
 
     auto DidChangeTextDocumentParams =
         makeObject("DidChangeTextDocumentParams",
@@ -821,7 +821,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        // Used in tests only.
                        makeField("sorbetCancellationExpected", makeOptional(JSONBool)),
                    },
-                   classTypes);
+                   classTypes, {"std::string getSource(std::string_view oldFileContents) const;"});
 
     auto TextDocumentChangeRegistrationOptions =
         makeObject("TextDocumentChangeRegistrationOptions",
