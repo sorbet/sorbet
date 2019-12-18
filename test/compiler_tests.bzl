@@ -36,6 +36,8 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
     disabled_tests = []
     for name in tests.keys():
         test_name = "test_{}/{}".format(test_name_prefix, name)
+        validate_exp = "validate_exp_{}/{}".format(test_name_prefix, name)
+
         path = tests[name]["path"]
         prefix = tests[name]["prefix"]
         sentinel = tests[name]["sentinel"]
@@ -50,9 +52,9 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
         extra_tags = []
         if tests[name]["disabled"]:
             extra_tags = ["manual"]
-            disabled_tests.append(test_name)
+            disabled_tests.extend([test_name, validate_exp])
         else:
-            enabled_tests.append(test_name)
+            enabled_tests.extend([test_name, validate_exp])
 
         # All of the expectations (if this test is a single file)
         if tests[name]["isMultiFile"]:
@@ -107,19 +109,8 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             tags = tags + extra_tags,
         )
 
-        data = [
-            "//run:runtimeoverrides",
-            "@ruby_2_6_3//:ruby",
-            build_archive,
-            expected_outfile,
-            expected_errfile,
-            expected_exitfile,
-            sources_name,
-            exps_name,
-        ]
-
         native.sh_test(
-            name = "test_{}/{}".format(test_name_prefix, name),
+            name = test_name,
             srcs = ["test_corpus_runner.sh"],
             deps = [":logging"],
             args = [
@@ -130,7 +121,32 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
                 "--ruby=$(location @ruby_2_6_3//:ruby)",
                 "$(locations {})".format(sources_name),
             ] + extra_args,
-            data = data,
+            data = [
+                "//run:runtimeoverrides",
+                "@ruby_2_6_3//:ruby",
+                build_archive,
+                expected_outfile,
+                expected_errfile,
+                expected_exitfile,
+                sources_name,
+            ],
+            size = "small",
+            tags = tags + extra_tags,
+        )
+
+        native.sh_test(
+            name = validate_exp,
+            srcs = ["validate_exp.sh"],
+            deps = [":logging"],
+            args = [
+                "--build_archive=$(location {})".format(build_archive),
+                "$(locations {})".format(sources_name),
+            ] + extra_args,
+            data = [
+                build_archive,
+                sources_name,
+                exps_name,
+            ],
             size = "small",
             tags = tags + extra_tags,
         )

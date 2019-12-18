@@ -77,29 +77,6 @@ $ruby -e 'puts (require "set")' > /dev/null || fatal "No functioning ruby"
 info "--- Unpacking Build ---"
 tar -xvf "${build_archive}" -C "${target}"
 
-# NOTE: exp file validation could be its own test, which would allow it to
-# execute in parallel with the oracle verification.
-info "--- Checking Build ---"
-pushd "$target" > /dev/null
-for ext in "llo"; do
-  exp="$root/${rb[0]%.rb}.$ext.exp"
-  if [ -f "$exp" ]; then
-    actual=(*".$ext")
-    if [ ! -f "${actual[0]}" ]; then
-      fatal "No LLVMIR found at" "${actual[@]}"
-    fi
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-      if diff -u <(grep -v '^target triple =' < "${actual[@]}") "$exp" > exp.diff; then
-        success "* $(basename "$exp")"
-      else
-        cat exp.diff
-        fatal "* $(basename "$exp")"
-      fi
-    fi
-  fi
-done
-popd > /dev/null
-
 # NOTE: running the test could be split out into its own genrule, the test just
 # needs to validate that the output matches.
 info "--- Running Compiled Test ---"
