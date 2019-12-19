@@ -26,7 +26,7 @@ public:
     // The edit applied to `gs`.
     LSPFileUpdates updates;
     // Specifies if the typecheck run took the fast or slow path.
-    bool tookFastPath;
+    bool tookFastPath = false;
     // Specifies if the typecheck run was canceled.
     bool canceled = false;
     // If update took the slow path, contains a new global state that should be used moving forward.
@@ -61,19 +61,20 @@ class LSPTypechecker final {
 
     std::shared_ptr<const LSPConfiguration> config;
 
-    /** Conservatively reruns entire pipeline without caching any trees. If canceled, returns a TypecheckRun containing
-     * the previous global state. */
-    TypecheckRun runSlowPath(LSPFileUpdates updates, bool cancelable) const;
-    /** Runs typechecking on the provided updates. */
-    TypecheckRun runTypechecking(LSPFileUpdates updates) const;
+    /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
+     * canceled. */
+    bool runSlowPath(LSPFileUpdates updates, bool cancelable);
+
+    /** Runs incremental typechecking on the provided updates. */
+    TypecheckRun runFastPath(LSPFileUpdates updates) const;
 
     /**
      * Sends diagnostics from a typecheck run to the client.
      */
     void pushDiagnostics(TypecheckRun run);
 
-    /** Officially 'commits' the output of a `TypecheckRun` by updating the relevant state on LSPLoop and, if specified,
-     * sending diagnostics to the editor. */
+    /** Officially 'commits' the output of a `TypecheckRun` by updating the relevant state on LSPTypechecker and sending
+     * diagnostics to the editor. */
     void commitTypecheckRun(TypecheckRun run);
 
     /**
@@ -83,7 +84,7 @@ class LSPTypechecker final {
     LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
 
 public:
-    LSPTypechecker(const std::shared_ptr<const LSPConfiguration> &config);
+    LSPTypechecker(std::shared_ptr<const LSPConfiguration> config);
     ~LSPTypechecker() = default;
 
     /**
@@ -99,6 +100,11 @@ public:
      * canceled.
      */
     bool typecheck(LSPFileUpdates updates);
+
+    /**
+     * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
+     */
+    void typecheckOnFastPath(LSPFileUpdates updates);
 
     /**
      * Re-typechecks the provided files to re-produce error messages.
