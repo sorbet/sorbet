@@ -433,10 +433,6 @@ void sorbet_defineMethodSingleton(VALUE klass, const char *name, VALUE (*methodP
 // ****                       Calls
 // ****
 
-VALUE sorbet_callSuper(int argc, const VALUE *argv) __attribute__((always_inline)) {
-    return rb_call_super(argc, argv);
-}
-
 VALUE sorbet_callBlock(VALUE array) __attribute__((always_inline)) {
     // TODO: one day we should use rb_yield_values, as it saves an allocation, but
     // for now, do the easy thing
@@ -446,6 +442,29 @@ VALUE sorbet_callBlock(VALUE array) __attribute__((always_inline)) {
 VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv)
     __attribute__((always_inline)) {
     return rb_funcallv(recv, func, argc, argv);
+}
+
+VALUE sorbet_callSuper(int argc, __attribute__((noescape)) const VALUE *const restrict argv)
+    __attribute__((always_inline)) {
+    // Mostly an implementation of return rb_call_super(argc, argv);
+    rb_execution_context_t *ec = GET_EC();
+    VALUE recv = ec->cfp->self;
+    VALUE klass;
+    ID id;
+    rb_control_frame_t *cfp = ec->cfp;
+    const rb_callable_method_entry_t *me = rb_vm_frame_method_entry(cfp);
+
+    klass = RCLASS_ORIGIN(me->defined_class);
+    klass = RCLASS_SUPER(klass);
+    id = me->def->original_id;
+    me = rb_callable_method_entry(klass, id);
+
+    if (!me) {
+        // TODO do something here
+        // return rb_method_missing(recv, id, argc, argv, MISSING_SUPER);
+    } else {
+        return rb_vm_call(ec, recv, id, argc, argv, me);
+    }
 }
 
 VALUE sorbet_callFuncProc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv,

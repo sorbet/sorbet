@@ -199,6 +199,11 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::
                                       blockMap.escapedClosure[rubyBlockId]},
                                      "rawSendResult");
 
+    } else if (i->fun == core::Names::super()) {
+        rawCall = builder.CreateCall(cs.module->getFunction("sorbet_callSuper"),
+                                     {llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                                      builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices)},
+                                     "rawSendResult");
     } else {
         rawCall = builder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
                                      {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
