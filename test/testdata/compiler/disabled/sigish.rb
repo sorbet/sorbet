@@ -1,24 +1,14 @@
 # typed: true
 
-class DeclBuilder
-  def params(params)
-    self
-  end
-
-  def void
-    self
-  end
-end
-
 module Sigish
-  T::Sig::WithoutRuntime.sig {params(blk: T.proc.bind(DeclBuilder).params(arg0: T.untyped).void).void}
-  def sig(&blk)
-    DeclBuilder.new.instance_exec(&blk)
+  T::Sig::WithoutRuntime.sig {params(blk: T.proc.void).void}
+  def self.sigish(&blk)
+    yield
   end
-end
 
-class A
-  extend Sigish
+  def self.params
+    91
+  end
 
-  sig {params(a: Integer).void}
+  puts sigish {params}
 end
