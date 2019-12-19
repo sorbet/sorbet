@@ -76,8 +76,13 @@ class MyTest
       end
     end
 
-    each_it([1, 2, 3], "handles each_it") do |x|
-      T.reveal_type(x)  # error: Revealed type: `Integer`
+    each_it("handles each_it",{
+      "case one" => 2,
+      "case two" => 3,
+    }) do |x|
+      # we want this to be `Integer` but right now it's not because of reasons
+      # related to our inferred types for hashes
+      T.reveal_type(x)  # error: Revealed type: `T.untyped`
     end
 end
 

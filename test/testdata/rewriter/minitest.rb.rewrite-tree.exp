@@ -166,7 +166,7 @@ class <emptyTree><<C <root>>> < ()
         <self>.params({}).void()
       end
       def <each_it 'handles each_it'><<C <todo sym>>>(&<blk>)
-        [1, 2, 3].each() do |x|
+        {"case one" => 2, "case two" => 3}.each_value() do |x|
           <emptyTree>::<C T>.reveal_type(x)
         end
       end
