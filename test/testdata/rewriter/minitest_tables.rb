@@ -22,7 +22,16 @@ class MyTest
 
   CONST_LIST = [A.new, B.new]
   test_each CONST_LIST do |value|
-    puts value
+    it "succeeds with a constant list" do
+      puts value.foo
+    end
+  end
+
+  local = [A.new, B.new]
+  test_each local do |value| # error: `test_each` can only be used with constants or array literals
+    it "fails with a local variable" do
+      puts value.foo
+    end
   end
 
   test_each [A.new, B.new] do |x|
