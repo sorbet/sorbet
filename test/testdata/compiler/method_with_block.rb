@@ -6,9 +6,15 @@ end
 
 def boo(&blk)
   yield
-#  blk.call("boo1")
 end
 
+def bar(&blk)
+  foo(&blk)
+end
+
+def baz(&blk)
+  blk.call("baz")
+end
 
 foo do
   puts "heey"
@@ -18,3 +24,9 @@ boo do
   puts "boohey"
 end
 
+bar do
+  puts "bar"
+end
+
+baz do
+end
