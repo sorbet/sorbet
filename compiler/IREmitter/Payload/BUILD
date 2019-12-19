@@ -24,6 +24,8 @@ clang_tool("llvm-dis")
 
 clang_tool("llvm-ar")
 
+clang_tool("llvm-link")
+
 cc_binary(
     name = "generate_load_payload",
     srcs = [
@@ -71,10 +73,11 @@ genrule(
     outs = [
         "payload.bc.orig",
     ],
-    cmd = "$(location :generate_payload_bc_orig_generator) $(location :llvm-ar) $(location payload.bc.orig) $(location //third_party/xxd) $(locations :pseudo_lib)",
+    cmd = "$(location :generate_payload_bc_orig_generator) $(location :llvm-ar) $(location :llvm-link) $(location payload.bc.orig) $(location //third_party/xxd) $(locations :pseudo_lib)",
     tools = [
         ":generate_payload_bc_orig_generator",
         ":llvm-ar",
+        ":llvm-link",
         ":pseudo_lib",
         "//third_party/xxd",
     ],
