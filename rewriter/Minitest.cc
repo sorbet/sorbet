@@ -165,14 +165,15 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
     }
 
     if (send->args.size() == 2 && send->fun == core::Names::eachIt() && send->block->args.size() == 1) {
-        auto &arg = send->args[1];
+        auto &arg = send->args.front();
         auto argString = to_s(ctx, arg);
 
         ConstantMover constantMover;
         auto body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
 
         auto blk = ast::MK::Block1(send->block->loc, move(body), move(send->block->args.front()));
-        auto each = ast::MK::Send0Block(send->loc, move(send->args.front()), core::Names::each(), move(blk));
+        auto each =
+            ast::MK::Send0Block(send->loc, move(send->args[1]), ctx.state.enterNameUTF8("each_value"), move(blk));
 
         auto name = ctx.state.enterNameUTF8("<each_it '" + argString + "'>");
         auto method =
