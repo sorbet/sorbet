@@ -14,10 +14,15 @@ class MyTest
   def self.it(name, &blk); end
 
   test_each [A.new, B.new] do |value|
-    it "works outside" do
+    it "works with instance methods" do
       puts value.foo
       outside_method
     end
+  end
+
+  CONST_LIST = [A.new, B.new]
+  test_each CONST_LIST do |value|
+    puts value
   end
 
   test_each [A.new, B.new] do |x|

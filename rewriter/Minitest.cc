@@ -180,7 +180,7 @@ string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
 
 unique_ptr<ast::Expression> makeContext(core::MutableContext ctx, unique_ptr<ast::Expression> blockArg,
                                         unique_ptr<ast::Expression> &as, optional<ast::Expression *> context) {
-    ENFORCE(ast::isa_tree<ast::Array>(as.get()));
+    ENFORCE(ast::isa_tree<ast::Array>(as.get()) || ast::isa_tree<ast::UnresolvedConstantLit>(as.get()));
     auto collect = ctx.state.enterNameUTF8("collect");
     auto enumToList = ast::MK::Send0(as->loc, as->deepCopy(), collect);
     auto firstOfList = ast::MK::Send0(as->loc, move(enumToList), core::Names::first());
@@ -206,12 +206,20 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
         return nullptr;
     }
 
-    if (send->fun == core::Names::testEach() && send->args.size() == 1 &&
-        ast::isa_tree<ast::Array>(send->args.front().get()) && send->block != nullptr) {
-        auto assn = makeContext(ctx, send->block->args.front()->deepCopy(), send->args.front(), context);
+    if (send->fun == core::Names::testEach() && send->args.size() == 1 && send->block != nullptr) {
+        auto &expr = send->args.front();
+        if (!ast::isa_tree<ast::Array>(expr.get()) && !ast::isa_tree<ast::UnresolvedConstantLit>(expr.get())) {
+            if (auto e = ctx.state.beginError(expr->loc, core::errors::Rewriter::NonConstantTestEach)) {
+                e.setHeader("`{}` can only be used with constants or array literals", "test_each");
+            }
+
+            return nullptr;
+        }
+
+        auto assn = makeContext(ctx, send->block->args.front()->deepCopy(), expr, context);
 
         ast::Send::ARGS_store args;
-        args.emplace_back(move(send->args.front()));
+        args.emplace_back(move(expr));
         return ast::MK::Send(send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
                              ast::MK::Block(send->block->loc,
                                             prepareTestEachBody(ctx, std::move(send->block->body), assn.get()),
