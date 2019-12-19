@@ -48,14 +48,6 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
         expected_exitfile = "{}.exit".format(prefix)
         build_archive = "{}.tar.gz".format(prefix)
 
-        # determine if we need to mark this as a manual test
-        extra_tags = []
-        if tests[name]["disabled"]:
-            extra_tags = ["manual"]
-            disabled_tests.extend([test_name, validate_exp])
-        else:
-            enabled_tests.extend([test_name, validate_exp])
-
         # All of the expectations (if this test is a single file)
         if tests[name]["isMultiFile"]:
             exp_sources = []
@@ -76,6 +68,11 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             srcs = exp_sources,
             visibility = ["//visibility:public"],
         )
+
+        # Mark all rules as manual if the test is disabled
+        extra_tags = []
+        if tests[name]["disabled"]:
+            extra_tags = ["manual"]
 
         ruby_genrule = "test_{}/{}_gen_output".format(test_name_prefix, name)
         native.genrule(
@@ -109,6 +106,8 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             tags = tags + extra_tags,
         )
 
+        defined_tests = [test_name]
+
         native.sh_test(
             name = test_name,
             srcs = ["test_corpus_runner.sh"],
@@ -134,22 +133,31 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             tags = tags + extra_tags,
         )
 
-        native.sh_test(
-            name = validate_exp,
-            srcs = ["validate_exp.sh"],
-            deps = [":logging"],
-            args = [
-                "--build_archive=$(location {})".format(build_archive),
-                "$(locations {})".format(sources_name),
-            ] + extra_args,
-            data = [
-                build_archive,
-                sources_name,
-                exps_name,
-            ],
-            size = "small",
-            tags = tags + extra_tags,
-        )
+        if len(exp_sources) > 0:
+            native.sh_test(
+                name = validate_exp,
+                srcs = ["validate_exp.sh"],
+                deps = [":logging"],
+                args = [
+                    "--build_archive=$(location {})".format(build_archive),
+                    "$(locations {})".format(sources_name),
+                ] + extra_args,
+                data = [
+                    build_archive,
+                    sources_name,
+                    exps_name,
+                ],
+                size = "small",
+                tags = tags + extra_tags,
+            )
+
+            defined_tests.append(validate_exp)
+
+        # determine if we need to mark this as a manual test
+        if tests[name]["disabled"]:
+            disabled_tests.extend(defined_tests)
+        else:
+            enabled_tests.extend(defined_tests)
 
     native.test_suite(
         name = suite_name,
