@@ -130,6 +130,37 @@ unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast
     return body;
 }
 
+void checkItBlock(core::MutableContext ctx, ast::Expression *exp) {
+    auto send = ast::cast_tree<ast::Send>(exp);
+    if (send) {
+        if (send->fun == core::Names::it() && send->args.size() == 1 && send->block != nullptr) {
+            return;
+        }
+    }
+
+    if (auto e = ctx.state.beginError(exp->loc, core::errors::Rewriter::NonItInTestEach)) {
+        e.setHeader("Only `{}` blocks are allowed inside `{}`", "it", "test_each");
+    }
+}
+
+unique_ptr<ast::Expression> prepareTestEachBody(core::MutableContext ctx, unique_ptr<ast::Expression> body,
+                                                optional<ast::Expression *> context) {
+    auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get());
+    if (bodySeq) {
+        for (auto &exp : bodySeq->stats) {
+            checkItBlock(ctx, exp.get());
+            exp = recurse(ctx, std::move(exp), context);
+        }
+
+        checkItBlock(ctx, bodySeq->expr.get());
+        bodySeq->expr = recurse(ctx, std::move(bodySeq->expr), context);
+    } else {
+        checkItBlock(ctx, body.get());
+        body = recurse(ctx, std::move(body), context);
+    }
+    return body;
+}
+
 string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg.get());
     string argString;
@@ -172,17 +203,19 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
     }
 
     if (!send->recv->isSelfReference()) {
-        if (send->fun == core::Names::each() && send->args.empty() && ast::isa_tree<ast::Array>(send->recv.get()) &&
-            send->block != nullptr && send->block->args.size() == 1) {
-            auto assn = makeContext(ctx, send->block->args.front()->deepCopy(), send->recv, context);
-
-            ast::Send::ARGS_store noArgs;
-            return ast::MK::Send(send->loc, std::move(send->recv), send->fun, std::move(noArgs), send->flags,
-                                 ast::MK::Block(send->block->loc,
-                                                prepareBody(ctx, std::move(send->block->body), assn.get()),
-                                                std::move(send->block->args)));
-        }
         return nullptr;
+    }
+
+    if (send->fun == core::Names::testEach() && send->args.size() == 1 &&
+        ast::isa_tree<ast::Array>(send->args.front().get()) && send->block != nullptr) {
+        auto assn = makeContext(ctx, send->block->args.front()->deepCopy(), send->args.front(), context);
+
+        ast::Send::ARGS_store args;
+        args.emplace_back(move(send->args.front()));
+        return ast::MK::Send(send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
+                             ast::MK::Block(send->block->loc,
+                                            prepareTestEachBody(ctx, std::move(send->block->body), assn.get()),
+                                            std::move(send->block->args)));
     }
 
     if (send->args.empty() && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
