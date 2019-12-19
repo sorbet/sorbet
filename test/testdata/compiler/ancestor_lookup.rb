@@ -9,4 +9,4 @@ class A
   include M
 end
 
-puts A.ancestors.inspect
+puts A.new.foo
