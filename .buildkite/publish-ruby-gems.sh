@@ -55,7 +55,8 @@ for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
   echo "Attempting to publish $gem_archive"
   if [[ "$gem_archive" =~ _out_/gems/sorbet-static-([^-]*)-([^.]*).gem ]]; then
     platform="${BASH_REMATCH[2]}"
-    if gem fetch --platform "$platform" --version "$release_version" 'sorbet-static' 2>&1 | grep -q "ERROR"; then
+    echo "Attempting to publish $gem_archive"
+    if ! gem list --remote rubygems.org --exact 'sorbet-static' | grep -q "${release_version}[^,]*${platform}"; then
       with_backoff gem push --verbose "$gem_archive"
     else
       echo "$gem_archive already published."
@@ -68,7 +69,7 @@ done
 
 gem_archive="_out_/gems/sorbet-runtime-$release_version.gem"
 echo "Attempting to publish $gem_archive"
-if gem fetch --version "$release_version" 'sorbet-runtime' 2>&1 | grep -q "ERROR"; then
+if ! gem list --remote rubygems.org --exact 'sorbet-runtime' | grep -q "$release_version"; then
   with_backoff gem push --verbose "$gem_archive"
 else
   echo "$gem_archive already published."
@@ -76,7 +77,7 @@ fi
 
 gem_archive="_out_/gems/sorbet-$release_version.gem"
 echo "Attempting to publish $gem_archive"
-if gem fetch --version "$release_version" 'sorbet' 2>&1 | grep -q "ERROR"; then
+if ! gem list --remote rubygems.org --exact 'sorbet' | grep -q "$release_version"; then
   with_backoff gem push --verbose "$gem_archive"
 else
   echo "$gem_archive already published."
