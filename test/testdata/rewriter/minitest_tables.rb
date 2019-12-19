@@ -10,40 +10,30 @@ class MyTest
   def outside_method
   end
 
-  [A.new, B.new].each do |value|
-    puts value.foo
+  def self.test_each(arg, &blk); end
+  def self.it(name, &blk); end
+
+  test_each [A.new, B.new] do |value|
     it "works outside" do
       puts value.foo
       outside_method
     end
   end
 
-  [A.new, B.new].each do |value|
-    puts value.foo
-    describe "some inner tests" do
-      def inside_method
-      end
+  test_each [A.new, B.new] do |x|
+    y = x # error: Only `it` blocks are allowed inside `test_each`
+  end
 
-      it "works inside" do
-        T.reveal_type(value) # error: Revealed type: A
-        puts value.foo
-        outside_method
-        inside_method
-      end
+  test_each [A.new, B.new] do |value|
+    x = value.foo  # error: Only `it` blocks are allowed inside `test_each`
+    it "fails with non-it statements" do
+      puts x
     end
   end
 
-  ["foo", 5, {x: false}].each do |v|
+  test_each ["foo", 5, {x: false}] do |v|
     it "handles lists with several types" do
-      T.reveal_type(v) # error: Revealed type: T.any(String, Integer, T::Hash[T.untyped, T.untyped])
-    end
-  end
-
-  [1, 2].each do |x|
-    [3, 4].each do |y|
-      it "handles nested eaches" do
-        puts (x + y)
-      end
+      T.reveal_type(v) # error: Revealed type: `T.any(String, Integer, T::Hash[T.untyped, T.untyped])`
     end
   end
 end
