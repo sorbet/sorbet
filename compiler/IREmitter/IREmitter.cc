@@ -344,7 +344,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         builder.CreateRet(var);
                     },
                     [&](cfg::LoadSelf *i) {
-                        auto var = Payload::varGet(cs, i->fallback, builder, blockMap, aliases, bb->rubyBlockId);
+                        auto var = Payload::loadSelf(cs, builder);
                         Payload::varSet(cs, bind.bind.variable, var, builder, blockMap, aliases, bb->rubyBlockId);
                     },
                     [&](cfg::Literal *i) {
