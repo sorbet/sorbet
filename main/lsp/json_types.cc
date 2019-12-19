@@ -175,7 +175,7 @@ unique_ptr<Diagnostic> Diagnostic::copy() const {
     return d;
 }
 
-string TextDocumentContentChangeEvent::apply(string oldSource) const {
+string TextDocumentContentChangeEvent::apply(string_view oldSource) const {
     if (range) {
         auto &r = *range;
         // incremental update
@@ -188,7 +188,7 @@ string TextDocumentContentChangeEvent::apply(string oldSource) const {
         // These offsets are non-nullopt assuming the input range is a valid range.
         auto startOffset = core::Loc::pos2Offset(old, start).value();
         auto endOffset = core::Loc::pos2Offset(old, end).value();
-        return oldSource.replace(startOffset, endOffset - startOffset, text);
+        return string(oldSource).replace(startOffset, endOffset - startOffset, text);
     } else {
         return text;
     }
@@ -197,7 +197,7 @@ string TextDocumentContentChangeEvent::apply(string oldSource) const {
 string DidChangeTextDocumentParams::getSource(string_view oldFileContents) const {
     string rv = string(oldFileContents);
     for (auto &change : contentChanges) {
-        rv = change->apply(move(rv));
+        rv = change->apply(rv);
     }
     return rv;
 }
