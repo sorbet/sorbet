@@ -55,7 +55,6 @@ for gem_archive in "_out_/gems/sorbet-static-$release_version"-*.gem; do
   echo "Attempting to publish $gem_archive"
   if [[ "$gem_archive" =~ _out_/gems/sorbet-static-([^-]*)-([^.]*).gem ]]; then
     platform="${BASH_REMATCH[2]}"
-    echo "Attempting to publish $gem_archive"
     if ! gem list --remote rubygems.org --exact 'sorbet-static' | grep -q "${release_version}[^,]*${platform}"; then
       with_backoff gem push --verbose "$gem_archive"
     else
