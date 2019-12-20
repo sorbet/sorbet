@@ -1,4 +1,4 @@
-build-out/
 intrinsic-report.md
 PayloadIntrinsics.c
 WrappedIntrinsics.h
+*-formatted
