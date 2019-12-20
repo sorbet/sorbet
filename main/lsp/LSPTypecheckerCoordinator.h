@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_LSP_LSPTYPECHECKERCOORDINATOR_H
 #define RUBY_TYPER_LSP_LSPTYPECHECKERCOORDINATOR_H
 
+#include "core/lsp/Task.h"
 #include "main/lsp/LSPTypechecker.h"
 
 namespace sorbet::realmain::lsp {
@@ -10,8 +11,8 @@ namespace sorbet::realmain::lsp {
  * thread).
  */
 class LSPTypecheckerCoordinator final {
-    /** Contains a queue of functions to run on the typechecking thread. */
-    BlockingUnBoundedQueue<std::function<void()>> lambdas;
+    /** Contains a queue of tasks to run on the typechecking thread. */
+    BlockingUnBoundedQueue<std::shared_ptr<core::lsp::Task>> tasks;
     /** If 'true', the coordinator should terminate immediately. */
     bool shouldTerminate;
     /** LSPTypecheckerCoordinator delegates typechecking operations to LSPTypechecker. */
@@ -21,9 +22,9 @@ class LSPTypecheckerCoordinator final {
     bool hasDedicatedThread;
 
     /**
-     * Runs the provided function on the typechecker thread.
+     * Runs the provided task on the typechecker thread.
      */
-    void asyncRunInternal(std::function<void()> &&lambda);
+    void asyncRunInternal(std::shared_ptr<core::lsp::Task> task);
 
 public:
     LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config);
