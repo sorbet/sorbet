@@ -23,6 +23,8 @@ root=$PWD
 # The directory to unpack the build archive to
 target="$(mktemp -d)"
 
+diff_dir="$(mktemp -d)"
+
 # Main #########################################################################
 
 info "--- Unpacking Build ---"
@@ -38,10 +40,11 @@ for ext in "llo"; do
       fatal "No LLVMIR found at" "${actual[@]}"
     fi
     if [[ "$OSTYPE" == "darwin"* ]]; then
-      if diff -u <(grep -v '^target triple =' < "${actual[@]}") "$exp" > exp.diff; then
+      diff_out="${diff_dir}/${ext}.diff"
+      if diff -u "$exp" <(grep -v '^target triple =' < "${actual[@]}") > "$diff_out"; then
         success "* $(basename "$exp")"
       else
-        cat exp.diff
+        cat "$diff_out"
         fatal "* $(basename "$exp")"
       fi
     fi
@@ -50,6 +53,6 @@ done
 popd > /dev/null
 
 info "Cleaning up temp files"
-rm -r "$target"
+rm -r "$target" "$diff_dir"
 
 success "Test passed"
