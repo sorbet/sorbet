@@ -2954,11 +2954,10 @@ class Net::HTTP::Persistent
   sig do
     params(
       req: ::T.untyped,
-      retried_on_ruby_2: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def can_retry?(req, retried_on_ruby_2=T.unsafe(nil)); end
+  def can_retry?(req); end
 
   sig {returns(::T.untyped)}
   def cert(); end
@@ -3065,11 +3064,10 @@ class Net::HTTP::Persistent
   sig do
     params(
       connection: ::T.untyped,
-      thread: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def finish(connection, thread=T.unsafe(nil)); end
+  def finish(connection); end
 
   sig {returns(::T.untyped)}
   def generation(); end
@@ -3308,13 +3306,8 @@ class Net::HTTP::Persistent
   end
   def reuse_ssl_sessions=(reuse_ssl_sessions); end
 
-  sig do
-    params(
-      thread: ::T.untyped,
-    )
-    .returns(::T.untyped)
-  end
-  def shutdown(thread=T.unsafe(nil)); end
+  sig {returns(::T.untyped)}
+  def shutdown(); end
 
   sig {returns(::T.untyped)}
   def shutdown_in_all_threads(); end
