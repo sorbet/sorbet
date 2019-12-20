@@ -61,12 +61,15 @@ class LSPTypechecker final {
 
     std::shared_ptr<const LSPConfiguration> config;
 
+    // An empty worker pool. Used to provide common single-threaded and multi-threaded abstractions.
+    std::unique_ptr<WorkerPool> emptyWorkers;
+
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
-    bool runSlowPath(LSPFileUpdates updates, bool cancelable);
+    bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable);
 
     /** Runs incremental typechecking on the provided updates. */
-    TypecheckRun runFastPath(LSPFileUpdates updates) const;
+    TypecheckRun runFastPath(LSPFileUpdates updates, WorkerPool &workers) const;
 
     /**
      * Sends diagnostics from a typecheck run to the client.
@@ -93,13 +96,13 @@ public:
      *
      * Writes all diagnostic messages to LSPOutput.
      */
-    void initialize(LSPFileUpdates updates);
+    void initialize(LSPFileUpdates updates, WorkerPool &workers);
 
     /**
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
-     * canceled.
+     * canceled. Distributes work across the given worker pool.
      */
-    bool typecheck(LSPFileUpdates updates);
+    bool typecheck(LSPFileUpdates updates, WorkerPool &workers);
 
     /**
      * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
@@ -113,6 +116,11 @@ public:
 
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
+
+    /** Runs the provided query against the given files, and returns matches. Distributes work among the threads in
+     * WorkerPool. */
+    LSPQueryResult queryMultithreaded(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
+                                      WorkerPool &workers) const;
 
     /**
      * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).

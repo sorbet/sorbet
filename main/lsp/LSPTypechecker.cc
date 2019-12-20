@@ -37,27 +37,28 @@ void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &
 } // namespace
 
 LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config)
-    : typecheckerThreadId(this_thread::get_id()), config(move(config)) {}
+    : typecheckerThreadId(this_thread::get_id()), config(move(config)),
+      emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 
-void LSPTypechecker::initialize(LSPFileUpdates updates) {
+void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
     globalStateHashes = move(updates.updatedFileHashes);
     indexed = move(updates.updatedFileIndexes);
     // Initialization typecheck is not cancelable.
-    auto committed = runSlowPath(move(updates), /* cancelable */ false);
+    auto committed = runSlowPath(move(updates), workers, /* cancelable */ false);
     ENFORCE(committed);
 }
 
-bool LSPTypechecker::typecheck(LSPFileUpdates updates) {
+bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
     vector<core::FileRef> filesTypechecked;
     bool committed = true;
     const bool isFastPath = updates.canTakeFastPath;
     sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, isFastPath, {});
     if (isFastPath) {
-        auto run = runFastPath(move(updates));
+        auto run = runFastPath(move(updates), workers);
         filesTypechecked = run.filesTypechecked;
         commitTypecheckRun(move(run));
     } else {
-        committed = runSlowPath(move(updates), /* cancelable */ true);
+        committed = runSlowPath(move(updates), workers, /* cancelable */ true);
     }
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
                       isFastPath, move(filesTypechecked));
@@ -68,13 +69,12 @@ void LSPTypechecker::typecheckOnFastPath(LSPFileUpdates updates) {
     if (!updates.canTakeFastPath) {
         Exception::raise("Tried to typecheck a slow path edit on the fast path.");
     }
-    auto workers = WorkerPool::create(0, *config->logger);
-    auto committed = typecheck(move(updates));
+    auto committed = typecheck(move(updates), *emptyWorkers);
     // Fast path edits can't be canceled.
     ENFORCE(committed);
 }
 
-TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates) const {
+TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &workers) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runTypechecking can only be called from the typechecker thread.");
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
@@ -150,7 +150,7 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates) const {
 
     ENFORCE(gs->lspQuery.isEmpty());
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
-    pipeline::typecheck(gs, move(resolved), config->opts, config->workers);
+    pipeline::typecheck(gs, move(resolved), config->opts, workers);
     auto out = gs->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
     return TypecheckRun(move(out.first), move(subset), move(updates), true);
@@ -171,7 +171,7 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
 }
 } // namespace
 
-bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelable) {
+bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
 
@@ -227,7 +227,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelable) {
             Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
         }
         auto maybeResolved =
-            pipeline::resolve(finalGS, move(indexedCopies), config->opts, config->workers, config->skipConfigatron);
+            pipeline::resolve(finalGS, move(indexedCopies), config->opts, workers, config->skipConfigatron);
         if (!maybeResolved.hasResult()) {
             return;
         }
@@ -249,7 +249,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelable) {
             return;
         }
 
-        pipeline::typecheck(finalGS, move(resolved), config->opts, config->workers);
+        pipeline::typecheck(finalGS, move(resolved), config->opts, workers);
     });
 
     // Note: This is important to do even if the slow path was canceled. It clears out any typechecking errors from the
@@ -448,7 +448,9 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
 }
 } // namespace
 
-LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const {
+LSPQueryResult LSPTypechecker::queryMultithreaded(const core::lsp::Query &q,
+                                                  const std::vector<core::FileRef> &filesForQuery,
+                                                  WorkerPool &workers) const {
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
     ENFORCE(gs->lspTypecheckCount > 0,
             "Tried to run a query with a GlobalState object that never had inferencer and resolver runs.");
@@ -461,11 +463,15 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     auto resolved = getResolved(filesForQuery);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
-    pipeline::typecheck(gs, move(resolved), config->opts, config->workers);
+    pipeline::typecheck(gs, move(resolved), config->opts, workers);
     auto out = gs->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{move(out.second)};
+}
+
+LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const {
+    return queryMultithreaded(q, filesForQuery, *emptyWorkers);
 }
 
 LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
@@ -487,7 +493,7 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
 
 TypecheckRun LSPTypechecker::retypecheck(vector<core::FileRef> frefs) const {
     LSPFileUpdates updates = getNoopUpdate(move(frefs));
-    return runFastPath(move(updates));
+    return runFastPath(move(updates), *emptyWorkers);
 }
 
 const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {

@@ -61,8 +61,9 @@ class LSPLoop {
 
     LSPQueryResult queryByLoc(LSPTypechecker &typechecker, std::string_view uri, const Position &pos,
                               const LSPMethod forMethod, bool errorIfFileIsUntyped = true) const;
-    LSPQueryResult queryBySymbol(LSPTypechecker &typechecker, core::SymbolRef symbol,
-                                 const std::optional<std::string_view> uri = std::nullopt) const;
+    LSPQueryResult queryBySymbolInFiles(LSPTypechecker &typechecker, core::SymbolRef symbol,
+                                        std::vector<core::FileRef> frefs) const;
+    LSPQueryResult queryBySymbol(LSPTypechecker &typechecker, WorkerPool &workers, core::SymbolRef symbol) const;
 
     std::unique_ptr<ResponseMessage>
     handleTextDocumentDocumentHighlight(LSPTypechecker &typechecker, const MessageId &id,
@@ -74,12 +75,13 @@ class LSPLoop {
     std::unique_ptr<ResponseMessage> handleWorkspaceSymbols(LSPTypechecker &typechecker, const MessageId &id,
                                                             const WorkspaceSymbolParams &params) const;
     std::vector<std::unique_ptr<Location>>
-    getReferencesToSymbol(LSPTypechecker &typechecker, core::SymbolRef symbol,
+    getReferencesToSymbol(LSPTypechecker &typechecker, WorkerPool &workers, core::SymbolRef symbol,
                           std::vector<std::unique_ptr<Location>> locations = {}) const;
     std::vector<std::unique_ptr<DocumentHighlight>>
     getHighlightsToSymbolInFile(LSPTypechecker &typechecker, std::string_view uri, core::SymbolRef symbol,
                                 std::vector<std::unique_ptr<DocumentHighlight>> highlights = {}) const;
-    std::unique_ptr<ResponseMessage> handleTextDocumentReferences(LSPTypechecker &typechecker, const MessageId &id,
+    std::unique_ptr<ResponseMessage> handleTextDocumentReferences(LSPTypechecker &typechecker, WorkerPool &workers,
+                                                                  const MessageId &id,
                                                                   const ReferenceParams &params) const;
     std::unique_ptr<ResponseMessage> handleTextDocumentDefinition(LSPTypechecker &typechecker, const MessageId &id,
                                                                   const TextDocumentPositionParams &params) const;
@@ -110,7 +112,8 @@ class LSPLoop {
     void maybeStartCommitSlowPathEdit(const LSPMessage &msg) const;
 
 public:
-    LSPLoop(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config);
+    LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
+            const std::shared_ptr<LSPConfiguration> &config);
     /**
      * Runs the language server on a dedicated thread. Returns the final global state if it exits cleanly, or nullopt
      * on error.

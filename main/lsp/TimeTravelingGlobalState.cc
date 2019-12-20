@@ -7,8 +7,9 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 TimeTravelingGlobalState::TimeTravelingGlobalState(const shared_ptr<LSPConfiguration> &config,
-                                                   unique_ptr<core::GlobalState> gs, u4 initialVersion)
-    : config(config), gs(move(gs)), activeVersion(initialVersion), latestVersion(initialVersion) {
+                                                   unique_ptr<core::GlobalState> gs, WorkerPool &workers,
+                                                   u4 initialVersion)
+    : config(config), gs(move(gs)), workers(workers), activeVersion(initialVersion), latestVersion(initialVersion) {
     auto errorQueue = dynamic_pointer_cast<core::ErrorQueue>(this->gs->errorQueue);
     ENFORCE(errorQueue, "TimeTravelingGlobalState got an unexpected error queue");
     ENFORCE(errorQueue->ignoreFlushes, "TimeTravelingGlobalState's error queue is not ignoring flushes, which will "
@@ -106,7 +107,7 @@ vector<ast::ParsedFile> TimeTravelingGlobalState::indexFromFileSystem() {
     {
         Timer timeit(config->logger, "reIndexFromFileSystem");
         vector<core::FileRef> inputFiles = pipeline::reserveFiles(gs, config->opts.inputFileNames);
-        for (auto &t : pipeline::index(gs, inputFiles, config->opts, config->workers, kvstore)) {
+        for (auto &t : pipeline::index(gs, inputFiles, config->opts, workers, kvstore)) {
             int id = t.file.id();
             if (id >= indexed.size()) {
                 indexed.resize(id + 1);
@@ -137,7 +138,7 @@ vector<core::FileHash> TimeTravelingGlobalState::computeStateHashes(const vector
 
     shared_ptr<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>> resultq =
         make_shared<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>>(files.size());
-    config->workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
+    workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
         vector<pair<int, core::FileHash>> threadResult;
         int processedByThread = 0;
         int job;
@@ -228,7 +229,7 @@ void TimeTravelingGlobalState::commitEdits(LSPFileUpdates &update) {
         fileToPos[fref.id()] = i;
     }
 
-    auto trees = pipeline::index(gs, frefs, config->opts, config->workers, kvstore);
+    auto trees = pipeline::index(gs, frefs, config->opts, workers, kvstore);
     update.updatedFileIndexes.resize(trees.size());
     newUpdate.update.updatedFileIndexes.resize(trees.size());
     for (auto &ast : trees) {

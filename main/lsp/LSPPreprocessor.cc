@@ -86,8 +86,8 @@ string_view getFileContents(LSPFileUpdates &updates, const core::GlobalState &in
 } // namespace
 
 LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, const shared_ptr<LSPConfiguration> &config,
-                                 u4 initialVersion)
-    : ttgs(TimeTravelingGlobalState(config, move(initialGS), initialVersion)), config(config),
+                                 WorkerPool &workers, u4 initialVersion)
+    : ttgs(TimeTravelingGlobalState(config, move(initialGS), workers, initialVersion)), config(config),
       owner(this_thread::get_id()), nextVersion(initialVersion + 1) {}
 
 void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {

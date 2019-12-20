@@ -32,10 +32,9 @@ MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
 } // namespace
 
 LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<LSPOutput> &output,
-                                   WorkerPool &workers, const shared_ptr<spdlog::logger> &logger, bool skipConfigatron,
-                                   bool disableFastPath)
-    : initialized(atomic<bool>(false)), opts(opts), output(output), workers(workers), logger(logger),
-      skipConfigatron(skipConfigatron), disableFastPath(disableFastPath), rootPath(getRootPath(opts, logger)) {}
+                                   const shared_ptr<spdlog::logger> &logger, bool skipConfigatron, bool disableFastPath)
+    : initialized(atomic<bool>(false)), opts(opts), output(output), logger(logger), skipConfigatron(skipConfigatron),
+      disableFastPath(disableFastPath), rootPath(getRootPath(opts, logger)) {}
 
 void LSPConfiguration::assertHasClientConfig() const {
     if (!clientConfig) {

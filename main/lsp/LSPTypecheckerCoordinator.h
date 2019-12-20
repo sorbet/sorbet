@@ -21,23 +21,29 @@ class LSPTypecheckerCoordinator final {
     /** If 'true', then the typechecker is running on a dedicated thread. */
     bool hasDedicatedThread;
 
+    // A worker pool with typically as many threads as cores. Can only be used during synchronous blocking operations.
+    WorkerPool &workers;
+
     /**
      * Runs the provided task on the typechecker thread.
      */
     void asyncRunInternal(std::shared_ptr<core::lsp::Task> task);
 
 public:
-    LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config);
+    LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config, WorkerPool &workers);
 
     /**
-     * Runs lambda with exclusive access to GlobalState. lambda runs on typechecker thread.
-     */
-    void asyncRun(std::function<void(LSPTypechecker &)> &&lambda);
-
-    /**
-     * Like asyncRun, but blocks until `lambda` completes.
+     * Schedules a task on the typechecker thread, and blocks until `lambda` completes.
+     * TODO(jvilk): Make tasks scheduled this way preempt the slow path.
      */
     void syncRun(std::function<void(LSPTypechecker &)> &&lambda);
+
+    /**
+     * syncRun, except the function receives direct access to WorkerPool and can perform multithreaded operations.
+     * TODO(jvilk): This method will _wait_ for a running slow path before running, as workers cannot be used
+     * concurrently with a typechecking operation.
+     */
+    void syncRunMultithreaded(std::function<void(LSPTypechecker &, WorkerPool &)> &&lambda);
 
     /**
      * Safely shuts down the typechecker and returns the final GlobalState object. Blocks until typechecker completes

@@ -34,7 +34,7 @@ auto workers = WorkerPool::create(0, *logger);
 
 shared_ptr<LSPConfiguration> makeConfig(const options::Options &opts = nullOpts, bool enableShowOpNotifs = false,
                                         bool initialize = true) {
-    auto config = make_shared<LSPConfiguration>(opts, make_shared<LSPOutputToVector>(), *workers, logger, true, false);
+    auto config = make_shared<LSPConfiguration>(opts, make_shared<LSPOutputToVector>(), logger, true, false);
     InitializeParams initParams("", "", make_unique<ClientCapabilities>());
     initParams.initializationOptions = make_unique<SorbetInitializationOptions>();
     initParams.initializationOptions.value()->supportsOperationNotifications = enableShowOpNotifs;
@@ -56,11 +56,11 @@ unique_ptr<core::GlobalState> makeGS(const options::Options &opts = nullOpts) {
 auto nullConfig = makeConfig();
 
 TimeTravelingGlobalState makeTTGS(const shared_ptr<LSPConfiguration> &config = nullConfig, u4 initialVersion = 0) {
-    return TimeTravelingGlobalState(config, makeGS(config->opts), initialVersion);
+    return TimeTravelingGlobalState(config, makeGS(config->opts), *workers, initialVersion);
 }
 
 LSPPreprocessor makePreprocessor(const shared_ptr<LSPConfiguration> &config = nullConfig, u4 initialVersion = 0) {
-    return LSPPreprocessor(makeGS(config->opts), config, initialVersion);
+    return LSPPreprocessor(makeGS(config->opts), config, *workers, initialVersion);
 }
 
 bool comesBeforeSymmetric(const TimeTravelingGlobalState &ttgs, u4 a, u4 b) {

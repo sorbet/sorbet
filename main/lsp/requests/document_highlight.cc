@@ -11,11 +11,14 @@ vector<unique_ptr<DocumentHighlight>>
 LSPLoop::getHighlightsToSymbolInFile(LSPTypechecker &typechecker, string_view const uri, core::SymbolRef symbol,
                                      vector<unique_ptr<DocumentHighlight>> highlights) const {
     if (symbol.exists()) {
-        auto run2 = queryBySymbol(typechecker, symbol, uri);
-        auto locations = extractLocations(typechecker.state(), run2.responses);
-        for (auto const &location : locations) {
-            auto highlight = make_unique<DocumentHighlight>(move(location->range));
-            highlights.push_back(move(highlight));
+        auto fref = config->uri2FileRef(typechecker.state(), uri);
+        if (fref.exists()) {
+            auto run2 = queryBySymbolInFiles(typechecker, symbol, {fref});
+            auto locations = extractLocations(typechecker.state(), run2.responses);
+            for (auto const &location : locations) {
+                auto highlight = make_unique<DocumentHighlight>(move(location->range));
+                highlights.push_back(move(highlight));
+            }
         }
     }
     return highlights;

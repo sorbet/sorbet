@@ -19,8 +19,9 @@ public:
 };
 }; // namespace
 
-LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPConfiguration> &config)
-    : shouldTerminate(false), typechecker(config), config(config), hasDedicatedThread(false) {}
+LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPConfiguration> &config,
+                                                     WorkerPool &workers)
+    : shouldTerminate(false), typechecker(config), config(config), hasDedicatedThread(false), workers(workers) {}
 
 void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<core::lsp::Task> task) {
     if (hasDedicatedThread) {
@@ -28,11 +29,6 @@ void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<core::lsp::Task> tas
     } else {
         task->run();
     }
-}
-
-void LSPTypecheckerCoordinator::asyncRun(function<void(LSPTypechecker &)> &&lambda) {
-    asyncRunInternal(
-        make_shared<LambdaTask>([&typechecker = this->typechecker, lambda]() -> void { lambda(typechecker); }));
 }
 
 void LSPTypecheckerCoordinator::syncRun(function<void(LSPTypechecker &)> &&lambda) {
@@ -46,6 +42,28 @@ void LSPTypecheckerCoordinator::syncRun(function<void(LSPTypechecker &)> &&lambd
         make_shared<LambdaTask>([&typechecker = this->typechecker, lambda, &notification, &typecheckerCounters,
                                  hasDedicatedThread = this->hasDedicatedThread]() -> void {
             lambda(typechecker);
+            if (hasDedicatedThread) {
+                typecheckerCounters = getAndClearThreadCounters();
+            }
+            notification.Notify();
+        }));
+    notification.WaitForNotification();
+    if (hasDedicatedThread) {
+        counterConsume(move(typecheckerCounters));
+    }
+}
+
+void LSPTypecheckerCoordinator::syncRunMultithreaded(std::function<void(LSPTypechecker &, WorkerPool &)> &&lambda) {
+    absl::Notification notification;
+    CounterState typecheckerCounters;
+    // If typechecker is running on a dedicated thread, then we need to merge its metrics w/ coordinator thread's so we
+    // report them.
+    // Note: Capturing notification by reference is safe here, we we wait for the notification to happen prior to
+    // returning.
+    asyncRunInternal(
+        make_shared<LambdaTask>([&typechecker = this->typechecker, lambda, &notification, &typecheckerCounters,
+                                 hasDedicatedThread = this->hasDedicatedThread, &workers = this->workers]() -> void {
+            lambda(typechecker, workers);
             if (hasDedicatedThread) {
                 typecheckerCounters = getAndClearThreadCounters();
             }
