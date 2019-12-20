@@ -178,6 +178,22 @@ string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
     return arg->toString(ctx);
 }
 
+// The 'context' here is any expressions which are put at the top of the 'it' blocks. If we've looked at an instance of
+// `test_each`, then we need to somehow pull the variable being introduced by the `each` into the body of the method. We
+// do that by taking
+//
+//   test_each(expr) do |var|
+//
+// and turning it into an assignment like
+//
+//   var = T.must(expr.collect.first)
+//
+// which will have both the correct type and the correct name. (The reason for the `collect` is that if `expr` is an
+// array literal, then Sorbet would treat it as a tuple type, and `first` would be the first thing in the tuple,
+// i.e. `[1,true].first` has the type `Integer`, but we're using this to stand in for an arbitrary member of the
+// collection, not actually the first one: what we want is something with the type `T.any(Integer,TrueClass)` here. The
+// `.collect` will give us an array instead of a tuple, then `first` will give us a nilable element, and then the `must`
+// will remove the nilable.
 unique_ptr<ast::Expression> makeContext(core::MutableContext ctx, unique_ptr<ast::Expression> blockArg,
                                         unique_ptr<ast::Expression> &as, optional<ast::Expression *> context) {
     ENFORCE(ast::isa_tree<ast::Array>(as.get()) || ast::isa_tree<ast::UnresolvedConstantLit>(as.get()));
@@ -216,10 +232,12 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
             return nullptr;
         }
 
+        // if this is a test_each, build a binding for the variable used in iteration
         auto assn = makeContext(ctx, send->block->args.front()->deepCopy(), expr, context);
 
         ast::Send::ARGS_store args;
         args.emplace_back(move(expr));
+        // reconstruct the send but with a modified body, making sure we pass the constructed assignment in
         return ast::MK::Send(send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
                              ast::MK::Block(send->block->loc,
                                             prepareTestEachBody(ctx, std::move(send->block->body), assn.get()),
@@ -231,11 +249,6 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
         ConstantMover constantMover;
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
         unique_ptr<ast::Expression> body = std::move(send->block->body);
-        if (auto &c = context) {
-            ast::InsSeq::STATS_store ins;
-            ins.emplace_back((*c)->deepCopy());
-            body = ast::MK::InsSeq(send->loc, std::move(ins), std::move(body));
-        }
         auto method =
             addSigVoid(ast::MK::Method0(send->loc, send->loc, name, prepareBody(ctx, std::move(body), context),
                                         ast::MethodDef::RewriterSynthesized));
@@ -254,19 +267,6 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
         ast::ClassDef::RHS_store rhs;
 
         unique_ptr<ast::Expression> body = std::move(send->block->body);
-        if (auto &c = context) {
-            ast::InsSeq::STATS_store ins;
-            ins.emplace_back((*c)->deepCopy());
-            if (const auto &other_ins = ast::cast_tree<ast::InsSeq>(body.get())) {
-                for (auto &i : other_ins->stats) {
-                    ins.emplace_back(move(i));
-                }
-                body = ast::MK::InsSeq(body->loc, std::move(ins), std::move(other_ins->expr));
-            } else {
-                body = ast::MK::InsSeq(send->loc, std::move(ins), std::move(body));
-            }
-        }
-
         rhs.emplace_back(prepareBody(ctx, std::move(body), context));
         auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
@@ -276,6 +276,8 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
         unique_ptr<ast::Expression> body = std::move(send->block->body);
+        // if we have context, then it means we've got a binding to add to the top of 'it'-blocks here: add it to the
+        // front of the body so we re-introduce that variable into scope
         if (auto &c = context) {
             ast::InsSeq::STATS_store ins;
             ins.emplace_back((*c)->deepCopy());
