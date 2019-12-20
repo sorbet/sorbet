@@ -39,7 +39,10 @@ cc_binary(
 
 cc_library(
     name = "pseudo_lib",
-    srcs = ["payload.c"],
+    srcs = [
+        "PayloadIntrinsics.c",
+        "payload.c",
+    ],
     copts = [
         "-Wno-gcc-compat",
         "-fembed-bitcode",

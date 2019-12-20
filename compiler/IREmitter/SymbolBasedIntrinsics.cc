@@ -101,6 +101,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Integer(), "to_s", "sorbet_rb_int_to_s"},
     {core::Symbols::Integer(), "==", "sorbet_rb_int_equal"},
     {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq"},
+#include "WrappedIntrinsics.h"
 };
 
 static const vector<CallCMethodSingleton> knownCMethodsSingleton{
