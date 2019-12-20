@@ -1,0 +1,493 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Announcing Sorbet 0.5 · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Today we&#x27;re excited to celebrate six months since Sorbet&#x27;s open source release!"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Announcing Sorbet 0.5 · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/blog/2019/12/20/announcing-sorbet-0.5"/><meta property="og:description" content="Today we&#x27;re excited to celebrate six months since Sorbet&#x27;s open source release!"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class=""><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class="siteNavGroupActive"><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Recent Posts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Recent Posts</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/blog/2019/12/20/announcing-sorbet-0.5">Announcing Sorbet 0.5</a></li><li class="navListItem"><a class="navItem" href="/blog/2019/06/20/open-sourcing-sorbet">Open-sourcing Sorbet: a fast, powerful type checker for Ruby</a></li><li class="navListItem"><a class="navItem" href="/blog/2019/05/16/state-of-sorbet-spring-2019">State of Sorbet Spring 2019</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer postContainer blogContainer"><div class="wrapper"><div class="lonePost"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle"><a href="/blog/2019/12/20/announcing-sorbet-0.5">Announcing Sorbet 0.5</a></h1><p class="post-meta">December 20, 2019</p><div class="authorBlock"><p class="post-authorName"><a href="https://twitter.com/jez_io" target="_blank" rel="noreferrer noopener">Jake Zimmerman</a></p><div class="authorPhoto"><a href="https://twitter.com/jez_io" target="_blank" rel="noreferrer noopener"><img src="https://avatars0.githubusercontent.com/u/5544532?s=460&amp;v=4" alt="Jake Zimmerman"/></a></div></div></header><div><span><p>Today we’re excited to celebrate six months since Sorbet’s open source release!</p>
+<p>Sorbet is a fast, powerful type checker for Ruby developed by Stripe and an
+ever-growing community of contributors. You can <a href="https://sorbet.run">try it online</a> or
+<a href="https://sorbet.org/docs/adopting">set it up in your project</a> today. Sorbet gradually integrates into
+existing Ruby projects. With Sorbet, people writing Ruby gain more confidence in
+their changes and get faster feedback while iterating.</p>
+<p>At this milestone, we’d like to take a look back on what’s happened since the
+first public release of Sorbet, and what’s coming in the future.</p>
+<!--truncate-->
+<h2><a class="anchor" aria-hidden="true" id="community-involvement"></a><a href="#community-involvement" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Community involvement</h2>
+<p>The most exciting development since open-sourcing Sorbet has been watching the
+community grow. After more than two years developing Sorbet, we’ve known that
+teams within Stripe find Sorbet valuable. But outside of Stripe, we couldn’t be
+sure until other people tried it for themselves and told us how it went.</p>
+<p>Six months later, it’s clear Sorbet is finding success outside of Stripe too.
+Rather than take our word for it, you can watch these talks by Sorbet users:</p>
+<ul>
+<li>Ufuk Kayserilioglu from Shopify spoke about <a href="https://www.youtube.com/watch?v=v9oYeSZGkUw">Adopting Sorbet at
+Scale</a> at RubyConf 2019</li>
+<li>Harry Doan hosted an event at the Chan Zuckerberg Initiative to talk about
+<a href="https://chanzuckerberg.wistia.com/medias/mypzu8ie86">Using Sorbet with Rails</a></li>
+</ul>
+<p>On top of that, we’ve had the pleasure to chat with users of Sorbet every day in
+our <a href="https://sorbet.org/slack">Sorbet Slack community</a>. These conversations let us know what works,
+what can be improved, and what use cases people are finding for Sorbet. Many of
+the features we’ve implemented since open-sourcing Sorbet were direct asks from
+users! (More on those features in the sections below.)</p>
+<p>If you’re using Sorbet already or thinking about giving it a try, you can find
+us here:</p>
+<p><a href="https://sorbet.org/slack">→ Join the Sorbet Slack community</a></p>
+<p>The Sorbet team staffs a rotation with at least one person reading and
+responding to new messages, and questions frequently get answered by our
+friendly community.</p>
+<h2><a class="anchor" aria-hidden="true" id="community-contributions"></a><a href="#community-contributions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Community contributions</h2>
+<p>We’ve also seen this community actively contribute back:</p>
+<ul>
+<li><p>The main Sorbet repo has more than <strong>140 contributors</strong>.</p></li>
+<li><p>These contributors have collectively landed <strong>nearly 1000 pull requests</strong>,
+with about 25% of those contributions coming from our open-source community.</p></li>
+<li><p>Of these contributions, 25% of them add or improve type definitions for the
+standard library or third-party gems in the form of <a href="https://sorbet.org/docs/rbi">RBI files</a>.</p>
+<p>RBI files for the standard library ship with Sorbet, while RBI files for
+third-party gems are hosted in a central repository called <a href="https://github.com/sorbet/sorbet-typed">sorbet-typed</a>.
+Sorbet automatically fetches these definitions when they exist, or creates
+untyped skeleton definitions if they don’t.</p></li>
+</ul>
+<p>We couldn’t have gotten this far without such a great community, and we look
+forward to what happens next. Thanks so much!</p>
+<h2><a class="anchor" aria-hidden="true" id="new-features"></a><a href="#new-features" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>New features</h2>
+<p>As you might imagine, those thousand pull requests have changed <strong>a lot</strong> of
+things in Sorbet. Let’s take a look at some of the most exciting new features.</p>
+<h3><a class="anchor" aria-hidden="true" id="exhaustiveness-checking"></a><a href="#exhaustiveness-checking" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Exhaustiveness checking</h3>
+<p>Sorbet has always supported <a href="https://sorbet.org/docs/union-types">union types</a>, which declare that a
+value can be one of a finite set of types:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) T.any(Integer, String) is a union type</span>
+sig {params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
+  <span class="hljs-keyword">case</span> x
+  <span class="hljs-keyword">when</span> Integer <span class="hljs-keyword">then</span> <span class="hljs-comment"># (2) x must be an Integer here</span>
+  <span class="hljs-keyword">when</span> String  <span class="hljs-keyword">then</span> <span class="hljs-comment"># (3) x must be a String here</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Union types are a must-have for type checking real-world Ruby code bases. Sorbet
+supports union types by tracking the way control flows through a program to
+update its knowledge of what type each variable has at different points. In the
+<code>case</code> statement above, Sorbet knows that within each <code>when</code> branch, the
+variable <code>x</code> has a more specific type than it does outside the <code>case</code> statement.</p>
+<p>In the last six months, Sorbet gained the ability to guarantee that <strong>all cases
+must be handled</strong> (exhaustively). For example:</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
+  <span class="hljs-keyword">case</span> x
+  <span class="hljs-keyword">when</span> Integer <span class="hljs-keyword">then</span> <span class="hljs-comment"># x ...</span>
+  <span class="hljs-comment"># (1) Whoops! The case for String isn't handled.</span>
+  <span class="hljs-keyword">else</span>
+    <span class="hljs-comment"># (2) Ask Sorbet to guarantee that all cases are handled:</span>
+    T.absurd(x) <span class="hljs-comment"># error: the type `String` wasn't handled</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this example, we’ve forgotten to handle the case when <code>x</code> is a <code>String</code>, but
+in the <code>else</code> branch there’s a call to <code>T.absurd(x)</code>. This line asks Sorbet to
+report an error when control flow could reach that point, which happens when one
+or more cases aren’t handled.</p>
+<p>Exhaustiveness checks are a powerful feature. They make code easier to change,
+because when adding or removing a case Sorbet will report all places that need
+to be updated to handle that case. You can learn more about exhaustiveness
+checking in <a href="https://sorbet.org/docs/exhaustiveness">our documentation</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="typed-enums"></a><a href="#typed-enums" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Typed enums</h3>
+<p>After adding <a href="https://sorbet.org/docs/exhaustiveness">exhaustiveness checks</a>, we built more
+features to make them easier to use and more powerful. First, we built support
+for <a href="https://sorbet.org/docs/tenum">typed enums</a>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suit</span> &lt; T::Enum</span>
+  enums <span class="hljs-keyword">do</span>
+    Spades = new
+    Hearts = new
+    Clubs = new
+    Diamonds = new
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>This declares an enum representing the suits of a standard deck of playing
+cards. As seen in the snippet, enums in Sorbet are normal Ruby classes: they’re
+created by subclassing <code>T::Enum</code>, and individual values are instances of that
+class, created by calling <code>new</code>. Because of this, <strong>enums in Sorbet are
+naturally type-safe</strong>: one enum value cannot be used where some other enum is
+expected, and vice versa. (By comparison, existing Ruby code often uses symbols
+like <code>:spades</code> or <code>:hearts</code> for enums, but all symbols are interchangable at the
+type-level, so they provide no type safety.)</p>
+<p>Enums work hand-in-hand with exhaustiveness checks by design:</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">suit:</span> Suit).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">color_of_suit</span><span class="hljs-params">(suit)</span></span>
+  <span class="hljs-keyword">case</span> suit
+  <span class="hljs-keyword">when</span> Suit::Spades, Suit::Clubs <span class="hljs-keyword">then</span> puts <span class="hljs-string">'Black!'</span>
+  <span class="hljs-keyword">when</span> Suit::Hearts, Suit::Diamonds <span class="hljs-keyword">then</span> puts <span class="hljs-string">'Red!'</span>
+  <span class="hljs-keyword">else</span> T.absurd(suit) <span class="hljs-comment"># &lt;- guarantees that we handled all suits</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Curious about enums? <a href="https://sorbet.org/docs/tenum">Read more in the documentation</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="sealed-classes-and-modules"></a><a href="#sealed-classes-and-modules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sealed classes and modules</h3>
+<p>In addition to typed enums, we also built <a href="https://sorbet.org/docs/sealed">sealed classes and
+modules</a> to power up exhaustiveness checks:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Result</span></span>
+  <span class="hljs-keyword">include</span> T::Helpers
+  sealed!
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Found</span> &lt; T::Struct</span>
+  <span class="hljs-keyword">include</span> Result
+  prop <span class="hljs-symbol">:id</span>, String
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NotFound</span> &lt; T::Struct</span>
+  <span class="hljs-keyword">include</span> Result
+  prop <span class="hljs-symbol">:error_message</span>, String
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Sealing a class prevents it from being subclassed in other files. (Sealed
+modules are the same, but with <code>include</code> / <code>extend</code> instead of subclassing.) By
+restricting where inheritance happens, Sorbet can treat sealed classes and
+modules <strong>as if they were union types</strong> for the sake of exhaustiveness. For
+example:</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">result:</span> Result).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handle_result</span><span class="hljs-params">(result)</span></span>
+  <span class="hljs-keyword">case</span> result
+  <span class="hljs-keyword">when</span> Found <span class="hljs-keyword">then</span> puts <span class="hljs-string">"Found object with ID <span class="hljs-subst">#{result.id}</span>"</span>
+  <span class="hljs-comment"># (uncommenting fixes the error)</span>
+  <span class="hljs-comment"># when NotFound then puts found.error_message</span>
+  <span class="hljs-keyword">else</span> T.absurd(result) <span class="hljs-comment"># error: the type `NotFound` wasn't handled</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Because the sealed module <code>Result</code> behaves almost identically to a union type,
+when we call <code>T.absurd(result)</code> in the <code>else</code> branch of this snippet Sorbet can
+tell us that we forgot to handle the <code>NotFound</code> case.</p>
+<p>Sealed classes are powerful, but maybe a little bit confusing at first glance!
+Be sure to <a href="https://sorbet.org/docs/sealed">check out the documentation</a> for more examples and
+in-depth explanations. Many teams at Stripe have met with great success using
+sealed classes to simplify their code, especially around error handling.</p>
+<h3><a class="anchor" aria-hidden="true" id="easier-typed-strict-adoption"></a><a href="#easier-typed-strict-adoption" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Easier <code>typed: strict</code> adoption</h3>
+<p>Our experience has shown us that after the initial adoption period, there comes
+a point when people working with Sorbet switch from relative skepticism about
+types to earnest adoption. When this switch happens, one of the easiest ways to
+spread its usage is to upgrade files to <code>typed: strict</code>.</p>
+<p>Sorbet has an <a href="https://sorbet.org/docs/static">assortment of typedness levels</a>. <code>typed: strict</code>
+is the one where Sorbet requires type annotations for methods, instance
+variables, and constants. (Types for local variables are always inferred.) When
+these definitions lack explicit types, Sorbet implicitly treats them as
+<code>T.untyped</code>, which is a sort of &quot;<a href="https://sorbet.org/docs/untyped">anything goes</a>&quot; type. So
+<code>typed: strict</code> is a way to guarantee that all new code is explicitly annotated,
+while the types are fresh in the author’s mind.</p>
+<p>In the months since open-sourcing, we’ve heard from our users that they wanted
+an easier adoption path for <code>typed: strict</code>. Previously this involved writing a
+lot of type annotations, many of which were annoying to write or cluttered the
+code. Multiple improvements have made adoption easier, which we’ll call out
+individually across the next three sections.</p>
+<h3><a class="anchor" aria-hidden="true" id="suggesting-types-for-constants"></a><a href="#suggesting-types-for-constants" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Suggesting types for constants</h3>
+<p>The first feature we built to ease <code>typed: strict</code> adoption is to automatically
+suggest type annotations for constants. Like we mentioned in the last section,
+<code>typed: strict</code> requires type annotations for constants, and in lower typedness
+levels, constants lacking annotations are implicitly treated as untyped. For
+example, this constant is untyped and needs a type annotation:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
+A = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>] <span class="hljs-comment"># error: Constants must have type annotations</span>
+</code></pre>
+<p>We changed Sorbet so that while it still reports the error, it will also suggest
+a potential type annotation:</p>
+<pre><code class="hljs css language-console">editor.rb:2: Constants must have type annotations with `T.let` when specifying `# typed: strict` https://srb.help/7027
+     2 |A = [1, 2, 3]
+            ^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    editor.rb:2: Replace with `T.let([1, 2, 3], T::Array[Integer])`
+     2 |A = [1, 2, 3]
+            ^^^^^^^^^
+Errors: 1
+</code></pre>
+<p>Note the <code>Autocorrect:</code> suggestion: Sorbet guessed what type annotation would
+work and presented it to the user. We can even ask Sorbet to edit the file in
+place to accept this suggestion by re-running sorbet with the <code>-a</code> /
+<code>--autocorrect</code> flag, resulting in this file:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
+A = T.let([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], T::Array[Integer])
+</code></pre>
+<p>Automation like this is the primary way the Sorbet team and other teams at
+Stripe have driven such high adoption in such a short time. For example, Sorbet
+has had suggested annotations <a href="https://sorbet.run/#%23%20typed%3A%20strict%0Adef%20hello%0A%20%20'Hello%2C%20world!'%0Aend">for methods</a> (not constants)
+since the open source release. (It even works via the same <code>--autocorrect</code>
+mechanism.)</p>
+<h3><a class="anchor" aria-hidden="true" id="trivial-instance-variable-declarations"></a><a href="#trivial-instance-variable-declarations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Trivial instance variable declarations</h3>
+<p>Second, Sorbet relaxed the need for certain instance variable declarations. Like
+constants, instance variables required type annotations at <code>typed: strict</code> or
+else were treated as untyped. To understand which annotations aren’t required
+anymore, let’s first recap how things used to work:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
+sig {params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> String).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(x, y)</span></span>
+  @x = T.let(x, Integer) <span class="hljs-comment"># ok</span>
+  @y = y <span class="hljs-comment"># error: Use of undeclared variable `<span class="hljs-doctag">@y</span>`</span>
+  puts @z <span class="hljs-comment"># error: Use of undeclared variable `<span class="hljs-doctag">@z</span>`</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this example, only <code>@x</code> has been declared with a type annotation (the
+<code>T.let</code>). Both <code>@y</code> and <code>@z</code> are undeclared to Sorbet, and thus both reported
+errors in <code>typed: strict</code>. Many people didn’t like this. They wanted Sorbet to
+treat <code>@y = y</code> as declaring the instance variable <code>@y</code>, and that’s exactly how
+it works now:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
+sig {params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> String).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(x, y)</span></span>
+  @x = T.let(x, Integer) <span class="hljs-comment"># still ok</span>
+  @y = y <span class="hljs-comment"># ok (new!)</span>
+  puts @z <span class="hljs-comment"># still an error</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>This applies when assigning an argument into an instance variable directly. As a
+result, it’s frequently enough to only add a signature when upgrading to
+<code>typed: strict</code>: the instance variable type comes for free.</p>
+<h3><a class="anchor" aria-hidden="true" id="nilable-instance-variables"></a><a href="#nilable-instance-variables" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Nilable instance variables</h3>
+<p>The third <code>typed: strict</code> feature we added also made it easier to work with
+instance variables. Again, to understand what changed and why, let’s take a look
+at the previous state of things.</p>
+<p>Sorbet previously required instance variables to be declared in <code>initialize</code>.
+What if this weren’t the case? Consider this example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">set_x_to_0</span></span>
+    <span class="hljs-comment"># Declare <span class="hljs-doctag">@x</span> as type Integer</span>
+    @x = T.let(<span class="hljs-number">0</span>, Integer)
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">x_plus_1</span></span>
+    <span class="hljs-comment"># Is <span class="hljs-doctag">@x</span> really an Integer here?</span>
+    @x + <span class="hljs-number">1</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>If Sorbet were to allow this code, its correctness would depend on whether
+<code>set_x_to_0</code> was called first, before <code>x_plus_1</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># This is ok:</span>
+A.new.set_x_to_<span class="hljs-number">0</span>.x_plus_1
+
+<span class="hljs-comment"># This explodes at runtime:</span>
+A.new.x_plus_1  <span class="hljs-comment"># undefined method `+` for NilClass</span>
+</code></pre>
+<p>By requiring instance variables to be declared in <code>initialize</code>, Sorbet ensures
+they actually have the type they’re annotated with. Sadly this ruled out using
+<code>typed: strict</code> to type common Ruby idioms. For example, this module doesn’t
+have an <code>initialize</code> method (nor should it!) but still uses an instance
+variable:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span></span>
+  sig {returns(String)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">current_user</span></span>
+    <span class="hljs-comment"># error: Use of undeclared variable `<span class="hljs-doctag">@current</span>_user`</span>
+    @current_user <span class="hljs-params">||</span>= ENV.fetch(<span class="hljs-string">'USER'</span>)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>The change we made is to allow instance variables to be declared <strong>anywhere</strong>,
+as long as they’re declared nilable. Sorbet still guarantees that <strong>if</strong> these
+instance variables are initialized they have the right type, but doesn’t make a
+promise about whether or not they’re initialized at all.</p>
+<p>Using <code>typed: strict</code> with our <code>current_user</code> example from before now involves
+just a single line to declare the type of the <code>@current_user</code> variable:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span></span>
+  sig {returns(String)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">current_user</span></span>
+    <span class="hljs-comment"># Declare <span class="hljs-doctag">@current</span>_user as either String or nil:</span>
+    @current_user = T.let(@current_user, T.nilable(String))
+    @current_user <span class="hljs-params">||</span>= ENV.fetch(<span class="hljs-string">'USER'</span>)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Collectively, these three features have made <code>typed: strict</code> adoption much
+smoother, and we have the numbers to back it up. In Stripe’s multi-million-line
+Ruby codebase, over 85% of files are <code>typed: true</code> or above, and over 40% of all
+files are <code>typed: strict</code> or above.</p>
+<p>That’s pretty much it for the <code>typed: strict</code> features, so with the next section
+we’re back to normal type system features.</p>
+<h3><a class="anchor" aria-hidden="true" id="type-checking-database-code-with-tattached_class"></a><a href="#type-checking-database-code-with-tattached_class" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type checking database code with <code>T.attached_class</code></h3>
+<p>Sorbet has had <code>T.class_of(MyClass)</code> <a href="https://sorbet.org/docs/class-of">since it was open sourced</a>,
+which allows passing class objects around as a values. But Sorbet lacked the
+opposite feature: to refer to “an instance of the current singleton class.” This
+pattern is super common in real-world Ruby: it’s how basically every ORM’s API
+is structured:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># ActiveRecord:</span>
+Person.find(<span class="hljs-number">1</span>) <span class="hljs-comment"># =&gt; returns an *instance* of Person</span>
+
+<span class="hljs-comment"># Stripe's internal ORM:</span>
+Charge.load_one(<span class="hljs-string">'ch_some_id'</span>) <span class="hljs-comment"># =&gt; returns an *instance* of Charge</span>
+</code></pre>
+<p>It wasn’t previously possible to write a return type for these methods, but it’s
+simple now, via a feature we call <code>T.attached_class</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AbstractModel</span></span>
+  <span class="hljs-comment"># Returns `T.attached_class`, or "an instance of</span>
+  <span class="hljs-comment"># whatever the current singleton class is"</span>
+  sig {params(<span class="hljs-symbol">id:</span> String).returns(T.attached_class)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">load_one</span><span class="hljs-params">(id)</span></span>
+    <span class="hljs-comment"># ... calls self.new somewhere ...</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>It’s interesting to think about <strong>why</strong> typing these methods (<code>find</code>,
+<code>load_one</code>, …) wasn’t possible before. At first glance, it almost seems like
+these methods need a different type annotation depending on the call site. Call
+<code>find</code> on the <code>Person</code> class to get back a <code>Person</code> instance, but call it on the
+<code>Charge</code> class to get back a <code>Charge</code> instance. And while it looks like the type
+needs to be different each time, these methods are only written once (inside the
+framework itself) which means there can only be one sig that captures all these
+different behaviors.</p>
+<p>This problem—defining something once, but using it polymorphically at many
+types—is a textbook use case for generics, and that’s exactly how this feature
+is implemented under the hood. Sorbet has had support for generics since we
+open-sourced it, but they were mostly designed with the goal of typing the
+standard library (like Array and Hash).</p>
+<p>Usage of generics in application code is far more rare, and thus largely
+untested by real-world code. A large part of implementing this feature involved
+stabilizing the foundations on which generics in Sorbet are built, so that they
+interact predictably with other features like subtyping and <a href="https://sorbet.org/docs/flow-sensitive">control-flow
+sensitivity</a>. Important stabilizations that landed to
+support <code>T.attached_class</code> include:</p>
+<ul>
+<li>Static variance checking for generic type members</li>
+<li>Upper and lower bounds on generic type members</li>
+<li>Exhaustiveness checks that work with generics the same ways as non-generics</li>
+<li>Many other subtle and important bug fixes</li>
+</ul>
+<p>We expect that <code>T.attached_class</code> will be primarily useful for maintainers of
+libraries and frameworks and is largely designed to be invisible to consumers of
+those frameworks, so don’t feel like you need to dive into this feature super
+far. But if you’re still curious, there’s <a href="https://sorbet.org/docs/attached_class">more written in the
+documentation</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="what-s-next-editor-support"></a><a href="#what-s-next-editor-support" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next: editor support</h2>
+<p>We could go on all day about what’s happened the past six months, but instead
+let’s switch to what the Sorbet team plans to focus on next: Sorbet-powered IDE
+features.</p>
+<p>It’s no secret that the Sorbet team has been working on editor tooling: we
+mention it in nearly <a href="https://www.youtube.com/watch?v=jielBIZ40mw">all our talks</a>, and people can already play
+around with the editor features we’ve built so far in the <a href="https://sorbet.run">online Sorbet
+playground</a>. Hundreds of developers use features like Go to
+Definition, Hover to see types and docs, and in-line type errors every week at
+Stripe, all powered by Sorbet.</p>
+<p>Sorbet is building on top of the <a href="https://microsoft.github.io/language-server-protocol/">Language Server Protocol</a> (LSP), which
+means the features it provides are editor-agnostic. Any editor with an LSP
+client that supports all the features Sorbet implements will be able to benefit.
+We’re building LSP support <a href="https://github.com/sorbet/sorbet/blob/master/main/lsp/lsp.h">in the open</a> so it’s technically possible to
+try it out already, but the experience isn’t up to our high standards just yet.
+To get there, these claims should be true:</p>
+<ul>
+<li>It never raises an unhandled exception or otherwise crashes. This is almost
+true already, and we plan to make sure that we thoroughly test the
+implementation so that it stays that way. It’s a terrible user experience to
+have a bug in Sorbet prevent you from using editor features.</li>
+</ul>
+<ul>
+<li>It works out of the box with at least one editor’s LSP client implementation.
+We’re currently targeting VS Code because we find its LSP support to be great
+and it’s popular with a wide audience of developers. Out of the box support
+means we plan to open source a VS Code extension that people can install with
+a single click.</li>
+</ul>
+<ul>
+<li>It’s blazingly fast. By most standards, Sorbet’s editor support is already
+pretty fast (which you can see for yourself in <a href="https://sorbet.run">sorbet.run</a>). But
+at Stripe, even small inefficiencies add up when multiplied across our
+multi-million-line Ruby codebase. As we put Sorbet’s LSP implementation
+through the paces, we’re making sure that it’s as fast as it is correct.</li>
+</ul>
+<p>There are a handful of other things left to do, which are mostly finishing
+touches. And just like we mentioned in the community section above, we plan to
+have at least one member of the Sorbet team answering editor-related questions
+from the community, like we already do for Sorbet itself. All that said, we’re
+currently targeting early 2020 to release the VS Code extension publicly and
+declare Sorbet’s editor support ready for everyone.</p>
+<p>From our experience, having a Sorbet-powered editor integration is a complete
+game changer. The way people work and interact with Ruby code changes when they
+get instant feedback from their editor about potential errors, about where
+things are defined, and about what types various expressions have. Suffice it to
+say, we’re excited to share this with the rest of the community! Thanks for your
+patience in the mean time.</p>
+<h2><a class="anchor" aria-hidden="true" id="wrap-up"></a><a href="#wrap-up" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Wrap up</h2>
+<p>Thanks for reading! If you’re interested in learning more:</p>
+<ul>
+<li>Check out the <a href="https://sorbet.org">Sorbet docs</a></li>
+<li>Come ask us questions <a href="https://sorbet.org/slack">on Slack</a></li>
+<li>Watch our <a href="https://www.youtube.com/watch?v=jielBIZ40mw">most recent talk</a> at RubyConf 2019</li>
+</ul>
+<p>Thanks again,<br>
+— Jake “jez” Zimmerman, on behalf of the Sorbet team</p>
+</span></div></div><div class="blogSocialSection"></div></div><div class="blog-recent"><a class="button" href="/blog">Recent Posts</a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#community-involvement">Community involvement</a></li><li><a href="#community-contributions">Community contributions</a></li><li><a href="#new-features">New features</a><ul class="toc-headings"><li><a href="#exhaustiveness-checking">Exhaustiveness checking</a></li><li><a href="#typed-enums">Typed enums</a></li><li><a href="#sealed-classes-and-modules">Sealed classes and modules</a></li><li><a href="#easier-typed-strict-adoption">Easier <code>typed: strict</code> adoption</a></li><li><a href="#suggesting-types-for-constants">Suggesting types for constants</a></li><li><a href="#trivial-instance-variable-declarations">Trivial instance variable declarations</a></li><li><a href="#nilable-instance-variables">Nilable instance variables</a></li><li><a href="#type-checking-database-code-with-tattached_class">Type checking database code with <code>T.attached_class</code></a></li></ul></li><li><a href="#what-s-next-editor-support">What's next: editor support</a></li><li><a href="#wrap-up">Wrap up</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'fa1ec885ab70787d636759b88e509b92',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
