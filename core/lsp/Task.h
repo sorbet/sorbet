@@ -11,6 +11,12 @@ public:
     virtual ~Task() = default;
 
     virtual void run() = 0;
+
+    // Delete copy constructor / assignment.
+    Task(Task &) = delete;
+    Task(const Task &) = delete;
+    Task &operator=(Task &&) = delete;
+    Task &operator=(const Task &) = delete;
 };
 } // namespace sorbet::core::lsp
 
