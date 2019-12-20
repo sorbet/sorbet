@@ -194,6 +194,11 @@ const vector<pair<core::SymbolRef, string>> optimizedTypeTests = {
 };
 }
 
+static bool isProc(core::SymbolRef sym) {
+    auto id = sym._id;
+    return id >= core::Symbols::Proc0()._id && id <= core::Symbols::last_proc()._id;
+}
+
 llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val, const core::TypePtr &type) {
     auto &builder = builderCast(b);
     llvm::Value *ret = nullptr;
@@ -213,8 +218,9 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
                                          {val, Payload::getRubyConstant(cs, attachedClass, builder)});
                 return;
             }
+            auto sym = isProc(ct->symbol) ? core::Symbols::Proc() : ct->symbol;
             ret = builder.CreateCall(cs.module->getFunction("sorbet_isa"),
-                                     {val, Payload::getRubyConstant(cs, ct->symbol, builder)});
+                                     {val, Payload::getRubyConstant(cs, sym, builder)});
         },
         [&](core::AppliedType *at) {
             auto base = typeTest(cs, builder, val, core::make_type<core::ClassType>(at->klass));
