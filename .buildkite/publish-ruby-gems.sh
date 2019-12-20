@@ -8,7 +8,7 @@ if [ "${PUBLISH_TO_RUBYGEMS:-}" == "" ]; then
 fi
 
 git_commit_count=$(git rev-list --count HEAD)
-prefix="0.4"
+prefix="0.5"
 release_version="$prefix.${git_commit_count}"
 
 echo "--- Dowloading artifacts"
