@@ -476,10 +476,10 @@ We're building LSP support [in the open][lsp.h] so it's technically possible to
 try it out already, but the experience isn't up to our high standards just yet.
 To get there, these claims should be true:
 
-- It never raises an unhandled exception or otherwise crashes. This almost true
-  already, and we plan to make sure that we thoroughly test the implementation
-  so that it stays that way. It's a terrible user experience to have a bug in
-  Sorbet prevent you from using editor features.
+- It never raises an unhandled exception or otherwise crashes. This is almost
+  true already, and we plan to make sure that we thoroughly test the
+  implementation so that it stays that way. It's a terrible user experience to
+  have a bug in Sorbet prevent you from using editor features.
 
 * It works out of the box with at least one editor's LSP client implementation.
   We're currently targeting VS Code because we find its LSP support to be great
