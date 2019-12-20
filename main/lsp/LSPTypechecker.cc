@@ -331,60 +331,61 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     this->filesThatHaveErrors = errorFilesInNewRun;
 
     for (auto file : filesToUpdateErrorListFor) {
-        if (file.exists()) {
-            ENFORCE(diagnosticEpochs[file.id()] <= epoch);
-            string uri;
-            { // uri
-                if (file.data(*gs).sourceType == core::File::Type::Payload) {
-                    uri = string(file.data(*gs).path());
-                } else {
-                    uri = config->fileRef2Uri(*gs, file);
-                }
+        if (!file.exists()) {
+            continue;
+        }
+        ENFORCE(diagnosticEpochs[file.id()] <= epoch);
+        string uri;
+        { // uri
+            if (file.data(*gs).sourceType == core::File::Type::Payload) {
+                uri = string(file.data(*gs).path());
+            } else {
+                uri = config->fileRef2Uri(*gs, file);
             }
+        }
 
-            vector<unique_ptr<Diagnostic>> diagnostics;
-            {
-                // diagnostics
-                if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
-                    for (auto &e : errorsAccumulated[file]) {
-                        auto range = Range::fromLoc(*gs, e->loc);
-                        if (range == nullptr) {
-                            continue;
-                        }
-                        auto diagnostic = make_unique<Diagnostic>(std::move(range), e->header);
-                        diagnostic->code = e->what.code;
-                        diagnostic->severity = DiagnosticSeverity::Error;
-
-                        typecase(e.get(), [&](core::Error *ce) {
-                            vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
-                            for (auto &section : ce->sections) {
-                                string sectionHeader = section.header;
-
-                                for (auto &errorLine : section.messages) {
-                                    string message;
-                                    if (errorLine.formattedMessage.length() > 0) {
-                                        message = errorLine.formattedMessage;
-                                    } else {
-                                        message = sectionHeader;
-                                    }
-                                    auto location = config->loc2Location(*gs, errorLine.loc);
-                                    if (location == nullptr) {
-                                        continue;
-                                    }
-                                    relatedInformation.push_back(
-                                        make_unique<DiagnosticRelatedInformation>(std::move(location), message));
-                                }
-                            }
-                            // Add link to error documentation.
-                            relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
-                                make_unique<Location>(
-                                    absl::StrCat(config->opts.errorUrlBase, e->what.code),
-                                    make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
-                                "Click for more information on this error."));
-                            diagnostic->relatedInformation = move(relatedInformation);
-                        });
-                        diagnostics.push_back(move(diagnostic));
+        vector<unique_ptr<Diagnostic>> diagnostics;
+        {
+            // diagnostics
+            if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
+                for (auto &e : errorsAccumulated[file]) {
+                    auto range = Range::fromLoc(*gs, e->loc);
+                    if (range == nullptr) {
+                        continue;
                     }
+                    auto diagnostic = make_unique<Diagnostic>(std::move(range), e->header);
+                    diagnostic->code = e->what.code;
+                    diagnostic->severity = DiagnosticSeverity::Error;
+
+                    typecase(e.get(), [&](core::Error *ce) {
+                        vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
+                        for (auto &section : ce->sections) {
+                            string sectionHeader = section.header;
+
+                            for (auto &errorLine : section.messages) {
+                                string message;
+                                if (errorLine.formattedMessage.length() > 0) {
+                                    message = errorLine.formattedMessage;
+                                } else {
+                                    message = sectionHeader;
+                                }
+                                auto location = config->loc2Location(*gs, errorLine.loc);
+                                if (location == nullptr) {
+                                    continue;
+                                }
+                                relatedInformation.push_back(
+                                    make_unique<DiagnosticRelatedInformation>(std::move(location), message));
+                            }
+                        }
+                        // Add link to error documentation.
+                        relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
+                            make_unique<Location>(
+                                absl::StrCat(config->opts.errorUrlBase, e->what.code),
+                                make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
+                            "Click for more information on this error."));
+                        diagnostic->relatedInformation = move(relatedInformation);
+                    });
+                    diagnostics.push_back(move(diagnostic));
                 }
             }
 
