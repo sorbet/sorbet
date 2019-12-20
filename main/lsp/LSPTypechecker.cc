@@ -45,6 +45,9 @@ void LSPTypechecker::initialize(LSPFileUpdates updates) {
     // Initialization typecheck is not cancelable.
     auto committed = runSlowPath(move(updates), /* cancelable */ false);
     ENFORCE(committed);
+    // Initialize to all zeroes.
+    diagnosticEpochs = vector<u4>(globalStateHashes.size(), 0);
+    ENFORCE(globalStateHashes.size() == indexed.size());
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates) {
@@ -272,8 +275,19 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelable) {
 void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     ENFORCE(!run.canceled);
     const auto &filesTypechecked = run.filesTypechecked;
+    const u4 epoch = run.updates.versionEnd;
     vector<core::FileRef> errorFilesInNewRun;
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
+
+    // Update epochs of all files that were typechecked, since we've recalculated the set of diagnostics in these files.
+    for (auto f : filesTypechecked) {
+        // N.B.: Overflow could theoretically happen. It would take an absurdly long time for someone to make
+        // 4294967295 edits in one session. One way to handle that case: Have a special overflow request that blocks
+        // preemption and resets all versions to 0.
+        if (diagnosticEpochs[f.id()] < epoch) {
+            diagnosticEpochs[f.id()] = epoch;
+        }
+    }
 
     for (auto &e : run.errors) {
         if (e->isSilenced) {
@@ -284,6 +298,10 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     }
 
     for (auto &accumulated : errorsAccumulated) {
+        // TODO(jvilk): When we land preemption, this code will ignore errors from files that have been typechecked on
+        // newer versions (e.g. because they preempted the slow path) N.B.: See overflow comment above.
+        // Assert that we don't have a weird epoch bug here. We should only have errors for files we typechecked.
+        ENFORCE(diagnosticEpochs[accumulated.first.id()] == epoch);
         errorFilesInNewRun.push_back(accumulated.first);
     }
 
@@ -314,6 +332,7 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
 
     for (auto file : filesToUpdateErrorListFor) {
         if (file.exists()) {
+            ENFORCE(diagnosticEpochs[file.id()] <= epoch);
             string uri;
             { // uri
                 if (file.data(*gs).sourceType == core::File::Type::Payload) {
@@ -396,14 +415,14 @@ void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
     int i = -1;
     ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFileHashes.size() &&
             updates.updatedFileHashes.size() == updates.updatedFiles.size());
+    ENFORCE(globalStateHashes.size() == indexed.size() && globalStateHashes.size() == diagnosticEpochs.size());
     for (auto &ast : updates.updatedFileIndexes) {
         i++;
         const int id = ast.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
-        }
-        if (id >= globalStateHashes.size()) {
             globalStateHashes.resize(id + 1);
+            diagnosticEpochs.resize(id + 1);
         }
         indexed[id] = move(ast);
         globalStateHashes[id] = move(updates.updatedFileHashes[i]);
