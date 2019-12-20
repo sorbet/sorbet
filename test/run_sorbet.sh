@@ -26,7 +26,7 @@ attn "Writing output to '$llvmir'"
 if [ -n "$DEBUG" ]; then
   bazel build //main:sorbet --config dbg --config static-libs 2>/dev/null
 else
-  bazel build //main:sorbet 2>/dev/null
+  bazel build //main:sorbet -c opt 2>/dev/null
 fi
 
 if [ -z "$DEBUG" ]; then
