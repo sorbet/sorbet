@@ -2346,7 +2346,7 @@ module OpenSSL::Buffering
     )
     .returns(::T.untyped)
   end
-  def write(s); end
+  def write(*s); end
 
   # Writes *s* in the non-blocking manner.
   #
@@ -6674,11 +6674,11 @@ class OpenSSL::PKey::EC::Point
   # for more information.
   sig do
     params(
-      _: ::T.untyped,
+      conversion_form: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def to_bn(*_); end
+  def to_bn(conversion_form=T.unsafe(nil)); end
 end
 
 class OpenSSL::PKey::EC::Point::Error < OpenSSL::OpenSSLError
