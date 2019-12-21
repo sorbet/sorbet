@@ -11,6 +11,6 @@ constexpr ErrorClass BadModuleFunction{3505, StrictLevel::True};
 constexpr ErrorClass TEnumOutsideEnumsDo{3506, StrictLevel::False};
 constexpr ErrorClass TEnumConstNotEnumValue{3506, StrictLevel::False};
 constexpr ErrorClass NonItInTestEach{3507, StrictLevel::True};
-constexpr ErrorClass NonConstantTestEach{3507, StrictLevel::True};
+constexpr ErrorClass NonConstantTestEach{3508, StrictLevel::True};
 } // namespace sorbet::core::errors::Rewriter
 #endif
