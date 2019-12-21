@@ -109,7 +109,7 @@ if [[ "$code" != "$rbcode" ]]; then
 fi
 
 info "--- Checking Stdout ---"
-if ! diff -au "$stdout" "$rbout" > stdout.diff; then
+if ! diff -au "$rbout" "$stdout" > stdout.diff; then
   error "* Stdout diff"
   cat stdout.diff
   info  "* Stderr"
