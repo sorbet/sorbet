@@ -196,8 +196,7 @@ string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
 unique_ptr<ast::Expression> makeContext(core::MutableContext ctx, unique_ptr<ast::Expression> blockArg,
                                         unique_ptr<ast::Expression> &as, optional<ast::Expression *> context) {
     ENFORCE(ast::isa_tree<ast::Array>(as.get()) || ast::isa_tree<ast::UnresolvedConstantLit>(as.get()));
-    auto collect = ctx.state.enterNameUTF8("collect");
-    auto enumToList = ast::MK::Send0(as->loc, as->deepCopy(), collect);
+    auto enumToList = ast::MK::Send0(as->loc, as->deepCopy(), core::Names::collect());
     auto firstOfList = ast::MK::Send0(as->loc, move(enumToList), core::Names::first());
     auto mustOfList =
         ast::MK::Send1(as->loc, ast::MK::UnresolvedConstant(as->loc, ast::MK::EmptyTree(), core::Names::Constants::T()),

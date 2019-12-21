@@ -212,6 +212,7 @@ NameDef names[] = {
     {"after"},
     {"afterAngles", "<after>"},
     {"testEach", "test_each"},
+    {"collect"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
