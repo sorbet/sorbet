@@ -1,14 +1,10 @@
 # typed: true
 
-def foo(a, b=1, c:, d:2, **e)
+def foo(a, b=1, *c, d:, e:2, **f)
 end
 
-def bar(*args)
-end
-
-def baz(*)
+def bar(*)
 end
 
 puts method(:foo).parameters
 puts method(:bar).parameters
-puts method(:baz).parameters
