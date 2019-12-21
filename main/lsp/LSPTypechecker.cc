@@ -42,11 +42,11 @@ LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config)
 void LSPTypechecker::initialize(LSPFileUpdates updates) {
     globalStateHashes = move(updates.updatedFileHashes);
     indexed = move(updates.updatedFileIndexes);
+    // Initialize to all zeroes.
+    diagnosticEpochs = vector<u4>(globalStateHashes.size(), 0);
     // Initialization typecheck is not cancelable.
     auto committed = runSlowPath(move(updates), /* cancelable */ false);
     ENFORCE(committed);
-    // Initialize to all zeroes.
-    diagnosticEpochs = vector<u4>(globalStateHashes.size(), 0);
     ENFORCE(globalStateHashes.size() == indexed.size());
 }
 
