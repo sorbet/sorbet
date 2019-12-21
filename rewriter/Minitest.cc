@@ -119,8 +119,7 @@ unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast
                                         optional<ast::Expression *> context) {
     body = recurse(ctx, std::move(body), context);
 
-    auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get());
-    if (bodySeq) {
+    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get())) {
         for (auto &exp : bodySeq->stats) {
             exp = recurse(ctx, std::move(exp), context);
         }
@@ -204,9 +203,9 @@ unique_ptr<ast::Expression> makeContext(core::MutableContext ctx, unique_ptr<ast
         ast::MK::Send1(as->loc, ast::MK::UnresolvedConstant(as->loc, ast::MK::EmptyTree(), core::Names::Constants::T()),
                        core::Names::must(), move(firstOfList));
     auto assn = ast::MK::Assign(as->loc, move(blockArg), move(mustOfList));
-    if (auto &c = context) {
+    if (context.has_value()) {
         ast::InsSeq::STATS_store ins;
-        ins.emplace_back((*c)->deepCopy());
+        ins.emplace_back(context.value()->deepCopy());
         assn = ast::MK::InsSeq(as->loc, std::move(ins), std::move(assn));
     }
 
@@ -266,8 +265,7 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
         ancestors.emplace_back(ast::MK::Self(arg->loc));
         ast::ClassDef::RHS_store rhs;
 
-        unique_ptr<ast::Expression> body = std::move(send->block->body);
-        rhs.emplace_back(prepareBody(ctx, std::move(body), context));
+        rhs.emplace_back(prepareBody(ctx, std::move(send->block->body), context));
         auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
         return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs));
@@ -278,9 +276,9 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
         unique_ptr<ast::Expression> body = std::move(send->block->body);
         // if we have context, then it means we've got a binding to add to the top of 'it'-blocks here: add it to the
         // front of the body so we re-introduce that variable into scope
-        if (auto &c = context) {
+        if (context.has_value()) {
             ast::InsSeq::STATS_store ins;
-            ins.emplace_back((*c)->deepCopy());
+            ins.emplace_back(context.value()->deepCopy());
             body = ast::MK::InsSeq(send->loc, std::move(ins), std::move(body));
         }
         auto method = addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
