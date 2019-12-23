@@ -43,8 +43,7 @@ public:
             movedConstants.emplace_back(createConstAssign(*asgn));
 
             auto module = ast::MK::Constant(asgn->loc, core::Symbols::Module());
-            auto const_set = ctx.state.enterNameUTF8("const_set");
-            return ast::MK::Send2(asgn->loc, move(module), const_set, move(name), move(asgn->rhs));
+            return ast::MK::Send2(asgn->loc, move(module), core::Names::const_set(), move(name), move(asgn->rhs));
         }
 
         return asgn;
