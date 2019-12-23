@@ -47,12 +47,15 @@ llvm::Value *IREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilder
 
                         auto typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(c));
 
-                        auto afterSend = llvm::BasicBlock::Create(cs, llvm::Twine("afterSymCallIntrinsic_") + methodNameRef,
-                                                                  builder.GetInsertBlock()->getParent());
-                        auto slowPath = llvm::BasicBlock::Create(cs, llvm::Twine("slowSymCallIntrinsic_") + methodNameRef,
-                                                                 builder.GetInsertBlock()->getParent());
-                        auto fastPath = llvm::BasicBlock::Create(cs, llvm::Twine("fastSymCallIntrinsic_") + methodNameRef,
-                                                                 builder.GetInsertBlock()->getParent());
+                        auto afterSend =
+                            llvm::BasicBlock::Create(cs, llvm::Twine("afterSymCallIntrinsic_") + methodNameRef,
+                                                     builder.GetInsertBlock()->getParent());
+                        auto slowPath =
+                            llvm::BasicBlock::Create(cs, llvm::Twine("slowSymCallIntrinsic_") + methodNameRef,
+                                                     builder.GetInsertBlock()->getParent());
+                        auto fastPath =
+                            llvm::BasicBlock::Create(cs, llvm::Twine("fastSymCallIntrinsic_") + methodNameRef,
+                                                     builder.GetInsertBlock()->getParent());
                         builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
                         builder.SetInsertPoint(fastPath);
                         auto fastPathRes = symbolBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, rubyBlockId);
@@ -64,8 +67,8 @@ llvm::Value *IREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilder
                         auto slowPathEnd = builder.GetInsertBlock();
                         builder.CreateBr(afterSend);
                         builder.SetInsertPoint(afterSend);
-                        auto phi =
-                            builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("symIntrinsicRawPhi_") + methodNameRef);
+                        auto phi = builder.CreatePHI(builder.getInt64Ty(), 2,
+                                                     llvm::Twine("symIntrinsicRawPhi_") + methodNameRef);
                         phi->addIncoming(fastPathRes, fastPathEnd);
                         phi->addIncoming(slowPathRes, slowPathEnd);
                         return phi;
