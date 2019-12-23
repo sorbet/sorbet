@@ -11,7 +11,8 @@ void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Loca
     }
 }
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentDefinition(LSPTypechecker &typechecker, const MessageId &id,
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentDefinition(LSPTypecheckerDelegate &typechecker,
+                                                                  const MessageId &id,
                                                                   const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDefinition);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.definition");

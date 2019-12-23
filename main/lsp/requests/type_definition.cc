@@ -35,7 +35,8 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, core::TypePtr type) {
 }
 } // namespace
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentTypeDefinition(LSPTypechecker &typechecker, const MessageId &id,
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentTypeDefinition(LSPTypecheckerDelegate &typechecker,
+                                                                      const MessageId &id,
                                                                       const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentTypeDefinition);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.typeDefinition");

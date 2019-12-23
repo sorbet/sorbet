@@ -46,31 +46,12 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
                 method != LSPMethod::TextDocumentDidClose && method != LSPMethod::SorbetWatchmanFileChange);
         auto &params = msg.asNotification().params;
         if (method == LSPMethod::SorbetWorkspaceEdit) {
-            // Note: We increment `lsp.messages.processed` when the original requests were merged into this one.
-            shared_ptr<SorbetWorkspaceEditParams> editParams = move(get<unique_ptr<SorbetWorkspaceEditParams>>(params));
-            // Since std::function is copyable, we have to promote captured unique_ptrs into shared_ptrs.
-            // TODO(jvilk): Switch to asyncRun once I sort out how this interplays with cancelable slow path.
-            typecheckerCoord.syncRunMultithreaded(
-                [editParams](LSPTypechecker &typechecker, WorkerPool &workers) -> void {
-                    const u4 end = editParams->updates.versionEnd;
-                    const u4 start = editParams->updates.versionStart;
-                    // Versions are sequential and wrap around. Use them to figure out how many edits are contained
-                    // within this update.
-                    const u4 merged = min(end - start, 0xFFFFFFFF - start + end);
-                    // Only report stats if the edit was committed.
-                    if (!typechecker.typecheck(move(editParams->updates), workers)) {
-                        prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
-                        prodCategoryCounterAdd("lsp.messages.processed", "sorbet/mergedEdits", merged);
-                    }
-                });
+            auto &editParams = get<unique_ptr<SorbetWorkspaceEditParams>>(params);
+            typecheckerCoord.typecheckOnSlowPath(move(editParams->updates));
         } else if (method == LSPMethod::Initialized) {
             prodCategoryCounterInc("lsp.messages.processed", "initialized");
             auto &initParams = get<unique_ptr<InitializedParams>>(params);
-            // TODO: Can we make this asynchronous?
-            typecheckerCoord.syncRunMultithreaded([&](LSPTypechecker &typechecker, WorkerPool &workers) -> void {
-                auto &updates = initParams->updates;
-                typechecker.initialize(move(updates), workers);
-            });
+            typecheckerCoord.initialize(move(initParams));
         } else if (method == LSPMethod::Exit) {
             prodCategoryCounterInc("lsp.messages.processed", "exit");
         } else if (method == LSPMethod::SorbetError) {
@@ -179,9 +160,9 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
                 [&](auto &tc) -> void { config->output->write(handleTextSignatureHelp(tc, id, *params)); });
         } else if (method == LSPMethod::TextDocumentReferences) {
             auto &params = get<unique_ptr<ReferenceParams>>(rawParams);
-            typecheckerCoord.syncRunMultithreaded([&](auto &tc, auto &workers) -> void {
-                config->output->write(handleTextDocumentReferences(tc, workers, id, *params));
-            });
+            typecheckerCoord.syncRun(
+                [&](auto &tc) -> void { config->output->write(handleTextDocumentReferences(tc, id, *params)); },
+                /* multithreaded */ true);
         } else if (method == LSPMethod::SorbetReadFile) {
             auto &params = get<unique_ptr<TextDocumentIdentifier>>(rawParams);
             typecheckerCoord.syncRun([&](auto &tc) -> void {

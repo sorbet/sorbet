@@ -16,7 +16,7 @@ LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &worke
     : config(config), preprocessor(move(initialGS), config, workers), typecheckerCoord(config, workers),
       lastMetricUpdateTime(chrono::steady_clock::now()) {}
 
-LSPQueryResult LSPLoop::queryByLoc(LSPTypechecker &typechecker, string_view uri, const Position &pos,
+LSPQueryResult LSPLoop::queryByLoc(LSPTypecheckerDelegate &typechecker, string_view uri, const Position &pos,
                                    const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
     Timer timeit(config->logger, "setupLSPQueryByLoc");
     const core::GlobalState &gs = typechecker.state();
@@ -38,14 +38,14 @@ LSPQueryResult LSPLoop::queryByLoc(LSPTypechecker &typechecker, string_view uri,
     return typechecker.query(core::lsp::Query::createLocQuery(loc), {fref});
 }
 
-LSPQueryResult LSPLoop::queryBySymbolInFiles(LSPTypechecker &typechecker, core::SymbolRef sym,
+LSPQueryResult LSPLoop::queryBySymbolInFiles(LSPTypecheckerDelegate &typechecker, core::SymbolRef sym,
                                              vector<core::FileRef> frefs) const {
     Timer timeit(config->logger, "setupLSPQueryBySymbolInFiles");
     ENFORCE(sym.exists());
     return typechecker.query(core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
-LSPQueryResult LSPLoop::queryBySymbol(LSPTypechecker &typechecker, WorkerPool &workers, core::SymbolRef sym) const {
+LSPQueryResult LSPLoop::queryBySymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef sym) const {
     Timer timeit(config->logger, "setupLSPQueryBySymbol");
     ENFORCE(sym.exists());
     vector<core::FileRef> frefs;
@@ -67,7 +67,7 @@ LSPQueryResult LSPLoop::queryBySymbol(LSPTypechecker &typechecker, WorkerPool &w
         }
     }
 
-    return typechecker.queryMultithreaded(core::lsp::Query::createSymbolQuery(sym), frefs, workers);
+    return typechecker.query(core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);

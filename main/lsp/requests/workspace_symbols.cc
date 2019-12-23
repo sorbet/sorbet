@@ -268,7 +268,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     return results;
 } // namespace sorbet::realmain::lsp
 
-unique_ptr<ResponseMessage> LSPLoop::handleWorkspaceSymbols(LSPTypechecker &typechecker, const MessageId &id,
+unique_ptr<ResponseMessage> LSPLoop::handleWorkspaceSymbols(LSPTypecheckerDelegate &typechecker, const MessageId &id,
                                                             const WorkspaceSymbolParams &params) const {
     Timer timeit(typechecker.state().tracer(), "LSPLoop::handleWorkspaceSymbols");
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::WorkspaceSymbol);

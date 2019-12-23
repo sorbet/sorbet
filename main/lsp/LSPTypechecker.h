@@ -41,7 +41,7 @@ public:
 };
 
 /**
- * Provides lambdas with a set of operations that they are allowed to do with the LSPTypechecker.
+ * Encapsulates typechecker operations and enforces that they happen on a single thread.
  */
 class LSPTypechecker final {
     /** Contains the ID of the thread responsible for typechecking. */
@@ -60,9 +60,6 @@ class LSPTypechecker final {
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
 
     std::shared_ptr<const LSPConfiguration> config;
-
-    // An empty worker pool. Used to provide common single-threaded and multi-threaded abstractions.
-    std::unique_ptr<WorkerPool> emptyWorkers;
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
@@ -105,22 +102,13 @@ public:
     bool typecheck(LSPFileUpdates updates, WorkerPool &workers);
 
     /**
-     * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
-     */
-    void typecheckOnFastPath(LSPFileUpdates updates);
-
-    /**
      * Re-typechecks the provided files to re-produce error messages.
      */
-    TypecheckRun retypecheck(std::vector<core::FileRef> frefs) const;
+    TypecheckRun retypecheck(std::vector<core::FileRef> frefs, WorkerPool &workers) const;
 
     /** Runs the provided query against the given files, and returns matches. */
-    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
-
-    /** Runs the provided query against the given files, and returns matches. Distributes work among the threads in
-     * WorkerPool. */
-    LSPQueryResult queryMultithreaded(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
-                                      WorkerPool &workers) const;
+    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
+                         WorkerPool &workers) const;
 
     /**
      * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
@@ -151,6 +139,59 @@ public:
      * Returns the typechecker's internal global state, which effectively destroys the typechecker for further use.
      */
     std::unique_ptr<core::GlobalState> destroy();
+};
+
+/**
+ * Provides lambdas with a set of operations that they are allowed to do with the LSPTypechecker.
+ */
+class LSPTypecheckerDelegate {
+    WorkerPool &workers;
+    LSPTypechecker &typechecker;
+
+public:
+    /**
+     * Creates a new delegate that runs LSPTypechecker operations on the WorkerPool threads.
+     */
+    LSPTypecheckerDelegate(WorkerPool &workers, LSPTypechecker &typechecker);
+
+    // Delete copy constructor / assignment.
+    LSPTypecheckerDelegate(LSPTypecheckerDelegate &) = delete;
+    LSPTypecheckerDelegate(const LSPTypecheckerDelegate &) = delete;
+    LSPTypecheckerDelegate &operator=(LSPTypecheckerDelegate &&) = delete;
+    LSPTypecheckerDelegate &operator=(const LSPTypecheckerDelegate &) = delete;
+
+    /**
+     * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
+     */
+    void typecheckOnFastPath(LSPFileUpdates updates);
+
+    /**
+     * Re-typechecks the provided files to re-produce error messages.
+     */
+    TypecheckRun retypecheck(std::vector<core::FileRef> frefs) const;
+
+    /** Runs the provided query against the given files, and returns matches. */
+    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
+
+    /**
+     * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
+     */
+    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
+
+    /**
+     * Returns the parsed files for the given files, including resolver.
+     */
+    std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const;
+
+    /**
+     * Returns the hashes of all committed files.
+     */
+    const std::vector<core::FileHash> &getFileHashes() const;
+
+    /**
+     * Returns the currently active GlobalState.
+     */
+    const core::GlobalState &state() const;
 };
 
 } // namespace sorbet::realmain::lsp

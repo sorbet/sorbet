@@ -27,7 +27,7 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
     return contents;
 }
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypechecker &typechecker, const MessageId &id,
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypecheckerDelegate &typechecker, const MessageId &id,
                                                              const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.hover");

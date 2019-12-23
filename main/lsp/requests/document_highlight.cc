@@ -8,7 +8,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 vector<unique_ptr<DocumentHighlight>>
-LSPLoop::getHighlightsToSymbolInFile(LSPTypechecker &typechecker, string_view const uri, core::SymbolRef symbol,
+LSPLoop::getHighlightsToSymbolInFile(LSPTypecheckerDelegate &typechecker, string_view const uri, core::SymbolRef symbol,
                                      vector<unique_ptr<DocumentHighlight>> highlights) const {
     if (symbol.exists()) {
         auto fref = config->uri2FileRef(typechecker.state(), uri);
@@ -34,7 +34,7 @@ vector<unique_ptr<DocumentHighlight>> locationsToDocumentHighlights(vector<uniqu
 }
 
 unique_ptr<ResponseMessage>
-LSPLoop::handleTextDocumentDocumentHighlight(LSPTypechecker &typechecker, const MessageId &id,
+LSPLoop::handleTextDocumentDocumentHighlight(LSPTypecheckerDelegate &typechecker, const MessageId &id,
                                              const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentHighlight);
     if (!config->opts.lspDocumentHighlightEnabled) {

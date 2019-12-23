@@ -7,17 +7,16 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-vector<unique_ptr<Location>> LSPLoop::getReferencesToSymbol(LSPTypechecker &typechecker, WorkerPool &workers,
-                                                            core::SymbolRef symbol,
+vector<unique_ptr<Location>> LSPLoop::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
                                                             vector<unique_ptr<Location>> locations) const {
     if (symbol.exists()) {
-        auto run2 = queryBySymbol(typechecker, workers, symbol);
+        auto run2 = queryBySymbol(typechecker, symbol);
         locations = extractLocations(typechecker.state(), run2.responses, move(locations));
     }
     return locations;
 }
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentReferences(LSPTypechecker &typechecker, WorkerPool &workers,
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentReferences(LSPTypecheckerDelegate &typechecker,
                                                                   const MessageId &id,
                                                                   const ReferenceParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
@@ -42,12 +41,12 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentReferences(LSPTypechecker
             // N.B.: Ignores literals.
             // If file is untyped, only supports find reference requests from constants and class definitions.
             if (auto constResp = resp->isConstant()) {
-                response->result = getReferencesToSymbol(typechecker, workers, constResp->symbol);
+                response->result = getReferencesToSymbol(typechecker, constResp->symbol);
             } else if (auto fieldResp = resp->isField()) {
-                response->result = getReferencesToSymbol(typechecker, workers, fieldResp->symbol);
+                response->result = getReferencesToSymbol(typechecker, fieldResp->symbol);
             } else if (auto defResp = resp->isDefinition()) {
                 if (fileIsTyped || defResp->symbol.data(gs)->isClassOrModule()) {
-                    response->result = getReferencesToSymbol(typechecker, workers, defResp->symbol);
+                    response->result = getReferencesToSymbol(typechecker, defResp->symbol);
                 }
             } else if (fileIsTyped && resp->isIdent()) {
                 auto identResp = resp->isIdent();
@@ -64,7 +63,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentReferences(LSPTypechecker
                 vector<unique_ptr<Location>> locations;
                 while (start != nullptr) {
                     if (start->main.method.exists() && !start->main.receiver->isUntyped()) {
-                        locations = getReferencesToSymbol(typechecker, workers, start->main.method, move(locations));
+                        locations = getReferencesToSymbol(typechecker, start->main.method, move(locations));
                     }
                     start = start->secondary.get();
                 }
