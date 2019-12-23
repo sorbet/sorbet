@@ -42,9 +42,12 @@ LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config)
 void LSPTypechecker::initialize(LSPFileUpdates updates) {
     globalStateHashes = move(updates.updatedFileHashes);
     indexed = move(updates.updatedFileIndexes);
+    // Initialize to all zeroes.
+    diagnosticEpochs = vector<u4>(globalStateHashes.size(), 0);
     // Initialization typecheck is not cancelable.
     auto committed = runSlowPath(move(updates), /* cancelable */ false);
     ENFORCE(committed);
+    ENFORCE(globalStateHashes.size() == indexed.size());
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates) {
@@ -272,8 +275,19 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool cancelable) {
 void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     ENFORCE(!run.canceled);
     const auto &filesTypechecked = run.filesTypechecked;
+    const u4 epoch = run.updates.versionEnd;
     vector<core::FileRef> errorFilesInNewRun;
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
+
+    // Update epochs of all files that were typechecked, since we've recalculated the set of diagnostics in these files.
+    for (auto f : filesTypechecked) {
+        // N.B.: Overflow could theoretically happen. It would take an absurdly long time for someone to make
+        // 4294967295 edits in one session. One way to handle that case: Have a special overflow request that blocks
+        // preemption and resets all versions to 0.
+        if (diagnosticEpochs[f.id()] < epoch) {
+            diagnosticEpochs[f.id()] = epoch;
+        }
+    }
 
     for (auto &e : run.errors) {
         if (e->isSilenced) {
@@ -284,6 +298,11 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     }
 
     for (auto &accumulated : errorsAccumulated) {
+        // TODO(jvilk): When we land preemption, this code will ignore errors from files that have been typechecked on
+        // newer versions (e.g. because they preempted the slow path) N.B.: See overflow comment above.
+        // Assert that we don't have a weird epoch bug here. We should only have errors for files we typechecked.
+        // Note: We can get errors on files that don't exist, and those don't have epochs associated with them.
+        ENFORCE(!accumulated.first.exists() || diagnosticEpochs[accumulated.first.id()] == epoch);
         errorFilesInNewRun.push_back(accumulated.first);
     }
 
@@ -313,59 +332,61 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     this->filesThatHaveErrors = errorFilesInNewRun;
 
     for (auto file : filesToUpdateErrorListFor) {
-        if (file.exists()) {
-            string uri;
-            { // uri
-                if (file.data(*gs).sourceType == core::File::Type::Payload) {
-                    uri = string(file.data(*gs).path());
-                } else {
-                    uri = config->fileRef2Uri(*gs, file);
-                }
+        if (!file.exists()) {
+            continue;
+        }
+        ENFORCE(diagnosticEpochs[file.id()] <= epoch);
+        string uri;
+        { // uri
+            if (file.data(*gs).sourceType == core::File::Type::Payload) {
+                uri = string(file.data(*gs).path());
+            } else {
+                uri = config->fileRef2Uri(*gs, file);
             }
+        }
 
-            vector<unique_ptr<Diagnostic>> diagnostics;
-            {
-                // diagnostics
-                if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
-                    for (auto &e : errorsAccumulated[file]) {
-                        auto range = Range::fromLoc(*gs, e->loc);
-                        if (range == nullptr) {
-                            continue;
-                        }
-                        auto diagnostic = make_unique<Diagnostic>(std::move(range), e->header);
-                        diagnostic->code = e->what.code;
-                        diagnostic->severity = DiagnosticSeverity::Error;
-
-                        typecase(e.get(), [&](core::Error *ce) {
-                            vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
-                            for (auto &section : ce->sections) {
-                                string sectionHeader = section.header;
-
-                                for (auto &errorLine : section.messages) {
-                                    string message;
-                                    if (errorLine.formattedMessage.length() > 0) {
-                                        message = errorLine.formattedMessage;
-                                    } else {
-                                        message = sectionHeader;
-                                    }
-                                    auto location = config->loc2Location(*gs, errorLine.loc);
-                                    if (location == nullptr) {
-                                        continue;
-                                    }
-                                    relatedInformation.push_back(
-                                        make_unique<DiagnosticRelatedInformation>(std::move(location), message));
-                                }
-                            }
-                            // Add link to error documentation.
-                            relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
-                                make_unique<Location>(
-                                    absl::StrCat(config->opts.errorUrlBase, e->what.code),
-                                    make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
-                                "Click for more information on this error."));
-                            diagnostic->relatedInformation = move(relatedInformation);
-                        });
-                        diagnostics.push_back(move(diagnostic));
+        vector<unique_ptr<Diagnostic>> diagnostics;
+        {
+            // diagnostics
+            if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
+                for (auto &e : errorsAccumulated[file]) {
+                    auto range = Range::fromLoc(*gs, e->loc);
+                    if (range == nullptr) {
+                        continue;
                     }
+                    auto diagnostic = make_unique<Diagnostic>(std::move(range), e->header);
+                    diagnostic->code = e->what.code;
+                    diagnostic->severity = DiagnosticSeverity::Error;
+
+                    typecase(e.get(), [&](core::Error *ce) {
+                        vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
+                        for (auto &section : ce->sections) {
+                            string sectionHeader = section.header;
+
+                            for (auto &errorLine : section.messages) {
+                                string message;
+                                if (errorLine.formattedMessage.length() > 0) {
+                                    message = errorLine.formattedMessage;
+                                } else {
+                                    message = sectionHeader;
+                                }
+                                auto location = config->loc2Location(*gs, errorLine.loc);
+                                if (location == nullptr) {
+                                    continue;
+                                }
+                                relatedInformation.push_back(
+                                    make_unique<DiagnosticRelatedInformation>(std::move(location), message));
+                            }
+                        }
+                        // Add link to error documentation.
+                        relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
+                            make_unique<Location>(
+                                absl::StrCat(config->opts.errorUrlBase, e->what.code),
+                                make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
+                            "Click for more information on this error."));
+                        diagnostic->relatedInformation = move(relatedInformation);
+                    });
+                    diagnostics.push_back(move(diagnostic));
                 }
             }
 
@@ -396,14 +417,14 @@ void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
     int i = -1;
     ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFileHashes.size() &&
             updates.updatedFileHashes.size() == updates.updatedFiles.size());
+    ENFORCE(globalStateHashes.size() == indexed.size() && globalStateHashes.size() == diagnosticEpochs.size());
     for (auto &ast : updates.updatedFileIndexes) {
         i++;
         const int id = ast.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
-        }
-        if (id >= globalStateHashes.size()) {
             globalStateHashes.resize(id + 1);
+            diagnosticEpochs.resize(id + 1);
         }
         indexed[id] = move(ast);
         globalStateHashes[id] = move(updates.updatedFileHashes[i]);

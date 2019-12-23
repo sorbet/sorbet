@@ -118,6 +118,14 @@ vector<ast::ParsedFile> TimeTravelingGlobalState::indexFromFileSystem() {
         gs->errorQueue->drainWithQueryResponses();
     }
     globalStateHashes = computeStateHashes(gs->getFiles());
+
+    // When inputFileNames is 0 (as in tests), indexed ends up being size 0 because we don't index payload files.
+    // At the same time, we expect indexed to be the same size as GlobalStateHash, which _does_ have payload files.
+    // Resize the indexed array accordingly.
+    if (indexed.size() < gs->getFiles().size()) {
+        indexed.resize(gs->getFiles().size());
+    }
+    ENFORCE(indexed.size() == globalStateHashes.size());
     return indexed;
 }
 

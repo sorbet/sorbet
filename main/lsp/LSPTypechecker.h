@@ -55,6 +55,9 @@ class LSPTypechecker final {
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
     /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
     std::vector<core::FileHash> globalStateHashes;
+    /** Stores the epoch in which we last sent diagnostics to the client for each file. Should be the same length as
+     * globalStateHashes. */
+    std::vector<u4> diagnosticEpochs;
     /** List of files that have had errors in last run*/
     std::vector<core::FileRef> filesThatHaveErrors;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
