@@ -19,8 +19,10 @@ public:
 };
 }; // namespace
 
-LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPConfiguration> &config)
-    : shouldTerminate(false), typechecker(config), config(config), hasDedicatedThread(false) {}
+LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPConfiguration> &config,
+                                                     WorkerPool &workers)
+    : shouldTerminate(false), typechecker(config), config(config), hasDedicatedThread(false), workers(workers),
+      emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 
 void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<core::lsp::Task> task) {
     if (hasDedicatedThread) {
@@ -30,22 +32,18 @@ void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<core::lsp::Task> tas
     }
 }
 
-void LSPTypecheckerCoordinator::asyncRun(function<void(LSPTypechecker &)> &&lambda) {
-    asyncRunInternal(
-        make_shared<LambdaTask>([&typechecker = this->typechecker, lambda]() -> void { lambda(typechecker); }));
-}
-
-void LSPTypecheckerCoordinator::syncRun(function<void(LSPTypechecker &)> &&lambda) {
+void LSPTypecheckerCoordinator::syncRun(function<void(LSPTypecheckerDelegate &)> &&lambda, bool multithreaded) {
     absl::Notification notification;
     CounterState typecheckerCounters;
     // If typechecker is running on a dedicated thread, then we need to merge its metrics w/ coordinator thread's so we
     // report them.
     // Note: Capturing notification by reference is safe here, we we wait for the notification to happen prior to
     // returning.
-    asyncRunInternal(
-        make_shared<LambdaTask>([&typechecker = this->typechecker, lambda, &notification, &typecheckerCounters,
-                                 hasDedicatedThread = this->hasDedicatedThread]() -> void {
-            lambda(typechecker);
+    asyncRunInternal(make_shared<LambdaTask>(
+        [&typechecker = this->typechecker, &workers = multithreaded ? workers : *emptyWorkers, lambda, &notification,
+         &typecheckerCounters, hasDedicatedThread = this->hasDedicatedThread]() -> void {
+            LSPTypecheckerDelegate d(workers, typechecker);
+            lambda(d);
             if (hasDedicatedThread) {
                 typecheckerCounters = getAndClearThreadCounters();
             }
@@ -57,9 +55,33 @@ void LSPTypecheckerCoordinator::syncRun(function<void(LSPTypechecker &)> &&lambd
     }
 }
 
+void LSPTypecheckerCoordinator::initialize(unique_ptr<InitializedParams> params) {
+    // TODO: Make async when we land preemptible slow path.
+    syncRun([&typechecker = this->typechecker, &workers = workers, &params = params](auto &tcd) -> void {
+        auto &updates = params->updates;
+        typechecker.initialize(move(updates), workers);
+    });
+}
+
+void LSPTypecheckerCoordinator::typecheckOnSlowPath(LSPFileUpdates updates) {
+    // TODO: Make async when we land preemptible slow path.
+    syncRun([&typechecker = this->typechecker, &workers = workers, &updates = updates](auto &tcd) -> void {
+        const u4 end = updates.versionEnd;
+        const u4 start = updates.versionStart;
+        // Versions are sequential and wrap around. Use them to figure out how many edits are contained
+        // within this update.
+        const u4 merged = min(end - start, 0xFFFFFFFF - start + end);
+        // Only report stats if the edit was committed.
+        if (!typechecker.typecheck(move(updates), workers)) {
+            prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
+            prodCategoryCounterAdd("lsp.messages.processed", "sorbet/mergedEdits", merged);
+        }
+    });
+}
+
 unique_ptr<core::GlobalState> LSPTypecheckerCoordinator::shutdown() {
     unique_ptr<core::GlobalState> gs;
-    syncRun([&](auto &typechecker) -> void {
+    syncRun([&](auto &tcd) -> void {
         shouldTerminate = true;
         gs = typechecker.destroy();
     });

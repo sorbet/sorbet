@@ -43,6 +43,9 @@ private:
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     std::unique_ptr<core::GlobalState> gs;
 
+    // TODO(jvilk): Delurk when landing preemptible slow path.
+    WorkerPool &workers;
+
     // Indicates the current version of `gs`. May be a version that comes before `latestVersion` if `gs` has traveled
     // back in time.
     u4 activeVersion = 0;
@@ -66,7 +69,7 @@ private:
 
 public:
     TimeTravelingGlobalState(const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<core::GlobalState> gs,
-                             u4 initialVersion);
+                             WorkerPool &workers, u4 initialVersion);
 
     /**
      * Travels GlobalState forwards and backwards in time. No-op if version == current version.

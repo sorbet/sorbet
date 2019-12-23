@@ -463,7 +463,7 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
     return item;
 }
 
-vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPTypechecker &typechecker,
+vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPTypecheckerDelegate &typechecker,
                                             const core::SymbolRef method) {
     auto files = vector<core::FileRef>{};
     for (auto loc : method.data(gs)->locs()) {
@@ -494,7 +494,7 @@ vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPType
     return result;
 }
 
-core::SymbolRef firstMethodAfterQuery(LSPTypechecker &typechecker, const core::Loc queryLoc) {
+core::SymbolRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{queryLoc.file()};
     auto resolved = typechecker.getResolved(files);
@@ -535,9 +535,10 @@ constexpr string_view suggestSigDocs =
     "Sorbet suggests this signature given the method below. Sorbet's suggested sigs are imperfect. It doesn't always "
     "guess the correct types (or any types at all), but they're usually a good starting point."sv;
 
-unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const LSPClientConfiguration &clientConfig,
-                                         core::SymbolRef what, core::TypePtr receiverType, const core::Loc queryLoc,
-                                         string_view prefix, size_t sortIdx) {
+unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
+                                         const LSPClientConfiguration &clientConfig, core::SymbolRef what,
+                                         core::TypePtr receiverType, const core::Loc queryLoc, string_view prefix,
+                                         size_t sortIdx) {
     ENFORCE(receiverType != nullptr);
 
     const auto &gs = typechecker.state();
@@ -621,8 +622,8 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const LSPC
 
 } // namespace
 
-unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &typechecker, core::SymbolRef maybeAlias,
-                                                               core::TypePtr receiverType,
+unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
+                                                               core::SymbolRef maybeAlias, core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                const core::Loc queryLoc, string_view prefix,
                                                                size_t sortIdx) const {
@@ -722,7 +723,8 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
     } while (scope != core::Symbols::root());
 }
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker &typechecker, const MessageId &id,
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypecheckerDelegate &typechecker,
+                                                                  const MessageId &id,
                                                                   const CompletionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});

@@ -41,7 +41,7 @@ public:
 };
 
 /**
- * Provides lambdas with a set of operations that they are allowed to do with the LSPTypechecker.
+ * Encapsulates typechecker operations and enforces that they happen on a single thread.
  */
 class LSPTypechecker final {
     /** Contains the ID of the thread responsible for typechecking. */
@@ -66,10 +66,10 @@ class LSPTypechecker final {
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
-    bool runSlowPath(LSPFileUpdates updates, bool cancelable);
+    bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable);
 
     /** Runs incremental typechecking on the provided updates. */
-    TypecheckRun runFastPath(LSPFileUpdates updates) const;
+    TypecheckRun runFastPath(LSPFileUpdates updates, WorkerPool &workers) const;
 
     /**
      * Sends diagnostics from a typecheck run to the client.
@@ -96,13 +96,72 @@ public:
      *
      * Writes all diagnostic messages to LSPOutput.
      */
-    void initialize(LSPFileUpdates updates);
+    void initialize(LSPFileUpdates updates, WorkerPool &workers);
 
     /**
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
-     * canceled.
+     * canceled. Distributes work across the given worker pool.
      */
-    bool typecheck(LSPFileUpdates updates);
+    bool typecheck(LSPFileUpdates updates, WorkerPool &workers);
+
+    /**
+     * Re-typechecks the provided files to re-produce error messages.
+     */
+    TypecheckRun retypecheck(std::vector<core::FileRef> frefs, WorkerPool &workers) const;
+
+    /** Runs the provided query against the given files, and returns matches. */
+    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
+                         WorkerPool &workers) const;
+
+    /**
+     * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
+     */
+    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
+
+    /**
+     * Returns the parsed files for the given files, including resolver.
+     */
+    std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const;
+
+    /**
+     * Returns the hashes of all committed files.
+     */
+    const std::vector<core::FileHash> &getFileHashes() const;
+
+    /**
+     * Returns the currently active GlobalState.
+     */
+    const core::GlobalState &state() const;
+
+    /**
+     * Called by LSPTypecheckerCoordinator to indicate that typechecking will occur on the current thread.
+     */
+    void changeThread();
+
+    /**
+     * Returns the typechecker's internal global state, which effectively destroys the typechecker for further use.
+     */
+    std::unique_ptr<core::GlobalState> destroy();
+};
+
+/**
+ * Provides lambdas with a set of operations that they are allowed to do with the LSPTypechecker.
+ */
+class LSPTypecheckerDelegate {
+    WorkerPool &workers;
+    LSPTypechecker &typechecker;
+
+public:
+    /**
+     * Creates a new delegate that runs LSPTypechecker operations on the WorkerPool threads.
+     */
+    LSPTypecheckerDelegate(WorkerPool &workers, LSPTypechecker &typechecker);
+
+    // Delete copy constructor / assignment.
+    LSPTypecheckerDelegate(LSPTypecheckerDelegate &) = delete;
+    LSPTypecheckerDelegate(const LSPTypecheckerDelegate &) = delete;
+    LSPTypecheckerDelegate &operator=(LSPTypecheckerDelegate &&) = delete;
+    LSPTypecheckerDelegate &operator=(const LSPTypecheckerDelegate &) = delete;
 
     /**
      * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
@@ -136,16 +195,6 @@ public:
      * Returns the currently active GlobalState.
      */
     const core::GlobalState &state() const;
-
-    /**
-     * Called by LSPTypecheckerCoordinator to indicate that typechecking will occur on the current thread.
-     */
-    void changeThread();
-
-    /**
-     * Returns the typechecker's internal global state, which effectively destroys the typechecker for further use.
-     */
-    std::unique_ptr<core::GlobalState> destroy();
 };
 
 } // namespace sorbet::realmain::lsp

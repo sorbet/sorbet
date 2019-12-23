@@ -21,23 +21,38 @@ class LSPTypecheckerCoordinator final {
     /** If 'true', then the typechecker is running on a dedicated thread. */
     bool hasDedicatedThread;
 
+    // A worker pool with typically as many threads as cores. Can only be used during synchronous blocking operations.
+    WorkerPool &workers;
+
+    // An empty workerpool with 0 threads. Runs all work on the thread using it.
+    std::unique_ptr<WorkerPool> emptyWorkers;
+
     /**
      * Runs the provided task on the typechecker thread.
      */
     void asyncRunInternal(std::shared_ptr<core::lsp::Task> task);
 
 public:
-    LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config);
+    LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config, WorkerPool &workers);
 
     /**
-     * Runs lambda with exclusive access to GlobalState. lambda runs on typechecker thread.
+     * Initializes typechecker and runs typechecking for the first time.
+     * TODO(jvilk): Make the typechecking portion of initialization non-blocking when we implement preemption.
      */
-    void asyncRun(std::function<void(LSPTypechecker &)> &&lambda);
+    void initialize(std::unique_ptr<InitializedParams> params);
 
     /**
-     * Like asyncRun, but blocks until `lambda` completes.
+     * Typechecks the given updates on the slow path.
+     * TODO(jvilk): Make this method non-blocking when we implement preemption.
      */
-    void syncRun(std::function<void(LSPTypechecker &)> &&lambda);
+    void typecheckOnSlowPath(LSPFileUpdates updates);
+
+    /**
+     * Schedules a task on the typechecker thread, and blocks until `lambda` completes. If "multithreaded" is "true",
+     * then the given task is allowed to use the full threadpool at the cost of not being able to preempt slow paths.
+     * TODO(jvilk): Make single-threaded tasks scheduled this way preempt the slow path.
+     */
+    void syncRun(std::function<void(LSPTypecheckerDelegate &)> &&lambda, bool multithreaded = false);
 
     /**
      * Safely shuts down the typechecker and returns the final GlobalState object. Blocks until typechecker completes
