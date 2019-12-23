@@ -533,7 +533,7 @@ Thanks again,\
   https://sorbet.run/#%23%20typed%3A%20strict%0Adef%20hello%0A%20%20'Hello%2C%20world!'%0Aend
 [class-of-docs]: https://sorbet.org/docs/class-of
 [flow-sensitive-docs]: https://sorbet.org/docs/flow-sensitive
-[attached-class-docs]: https://sorbet.org/docs/attached_class
+[attached-class-docs]: https://sorbet.org/docs/attached-class
 [rubyconf2019]: https://www.youtube.com/watch?v=jielBIZ40mw
 [lsp]: https://microsoft.github.io/language-server-protocol/
 [lsp.h]: https://github.com/sorbet/sorbet/blob/master/main/lsp/lsp.h
