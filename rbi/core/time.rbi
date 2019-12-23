@@ -426,6 +426,40 @@ class Time < Object
   sig {returns(String)}
   def asctime(); end
 
+  # Ceils sub seconds to a given precision in decimal digits (0 digits by default).
+  # It returns a new Time object.
+  # `ndigits` should be zero or a positive integer.
+  #
+  # ```ruby
+  # require 'time'
+  #
+  # t = Time.utc(2010,3,30, 5,43,"25.0123456789".to_r)
+  # t.iso8601(10)          #=> "2010-03-30T05:43:25.0123456789Z"
+  # t.ceil.iso8601(10)     #=> "2010-03-30T05:43:26.0000000000Z"
+  # t.ceil(0).iso8601(10)  #=> "2010-03-30T05:43:26.0000000000Z"
+  # t.ceil(1).iso8601(10)  #=> "2010-03-30T05:43:25.1000000000Z"
+  # t.ceil(2).iso8601(10)  #=> "2010-03-30T05:43:25.0200000000Z"
+  # t.ceil(3).iso8601(10)  #=> "2010-03-30T05:43:25.0130000000Z"
+  # t.ceil(4).iso8601(10)  #=> "2010-03-30T05:43:25.0124000000Z"
+  #
+  # t = Time.utc(1999,12,31, 23,59,59)
+  # (t + 0.4).ceil.iso8601(3)    #=> "2000-01-01T00:00:00.000Z"
+  # (t + 0.9).ceil.iso8601(3)    #=> "2000-01-01T00:00:00.000Z"
+  # (t + 1.4).ceil.iso8601(3)    #=> "2000-01-01T00:00:01.000Z"
+  # (t + 1.9).ceil.iso8601(3)    #=> "2000-01-01T00:00:01.000Z"
+  #
+  # t = Time.utc(1999,12,31, 23,59,59)
+  # (t + 0.123456789).ceil(4).iso8601(6)  #=> "1999-12-31T23:59:59.123500Z"
+  # ```
+  sig {returns(Time)}
+  sig do
+    params(
+      ndigits: Integer
+    )
+    .returns(Time)
+  end
+  def ceil(ndigits=0); end
+
   # Returns a canonical string representation of *time*.
   #
   # ```ruby
@@ -478,6 +512,48 @@ class Time < Object
     .returns(T::Boolean)
   end
   def eql?(arg0); end
+
+  # Floors sub seconds to a given precision in decimal digits (0 digits by default).
+  # It returns a new Time object.
+  # `ndigits` should be zero or a positive integer.
+  #
+  # ```ruby
+  # require 'time'
+  #
+  # t = Time.utc(2010,3,30, 5,43,"25.123456789".to_r)
+  # t.iso8601(10)           #=> "2010-03-30T05:43:25.1234567890Z"
+  # t.floor.iso8601(10)     #=> "2010-03-30T05:43:25.0000000000Z"
+  # t.floor(0).iso8601(10)  #=> "2010-03-30T05:43:25.0000000000Z"
+  # t.floor(1).iso8601(10)  #=> "2010-03-30T05:43:25.1000000000Z"
+  # t.floor(2).iso8601(10)  #=> "2010-03-30T05:43:25.1200000000Z"
+  # t.floor(3).iso8601(10)  #=> "2010-03-30T05:43:25.1230000000Z"
+  # t.floor(4).iso8601(10)  #=> "2010-03-30T05:43:25.1234000000Z"
+  # t.floor(5).iso8601(10)  #=> "2010-03-30T05:43:25.1234500000Z"
+  # t.floor(6).iso8601(10)  #=> "2010-03-30T05:43:25.1234560000Z"
+  # t.floor(7).iso8601(10)  #=> "2010-03-30T05:43:25.1234567000Z"
+  # t.floor(8).iso8601(10)  #=> "2010-03-30T05:43:25.1234567800Z"
+  # t.floor(9).iso8601(10)  #=> "2010-03-30T05:43:25.1234567890Z"
+  # t.floor(10).iso8601(10) #=> "2010-03-30T05:43:25.1234567890Z"
+  #
+  # t = Time.utc(1999,12,31, 23,59,59)
+  # (t + 0.4).floor.iso8601(3)    #=> "1999-12-31T23:59:59.000Z"
+  # (t + 0.49).floor.iso8601(3)   #=> "1999-12-31T23:59:59.000Z"
+  # (t + 0.5).floor.iso8601(3)    #=> "1999-12-31T23:59:59.000Z"
+  # (t + 1.4).floor.iso8601(3)    #=> "2000-01-01T00:00:00.000Z"
+  # (t + 1.49).floor.iso8601(3)   #=> "2000-01-01T00:00:00.000Z"
+  # (t + 1.5).floor.iso8601(3)    #=> "2000-01-01T00:00:00.000Z"
+  #
+  # t = Time.utc(1999,12,31, 23,59,59)
+  # (t + 0.123456789).floor(4).iso8601(6)  #=> "1999-12-31T23:59:59.123400Z"
+  # ```
+  sig {returns(Time)}
+  sig do
+    params(
+      ndigits: Integer
+    )
+    .returns(Time)
+  end
+  def floor(ndigits=0); end
 
   # Returns `true` if *time* represents Friday.
   #
