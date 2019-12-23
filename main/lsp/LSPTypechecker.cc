@@ -301,7 +301,8 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
         // TODO(jvilk): When we land preemption, this code will ignore errors from files that have been typechecked on
         // newer versions (e.g. because they preempted the slow path) N.B.: See overflow comment above.
         // Assert that we don't have a weird epoch bug here. We should only have errors for files we typechecked.
-        ENFORCE(diagnosticEpochs[accumulated.first.id()] == epoch);
+        // Note: We can get errors on files that don't exist, and those don't have epochs associated with them.
+        ENFORCE(!accumulated.first.exists() || diagnosticEpochs[accumulated.first.id()] == epoch);
         errorFilesInNewRun.push_back(accumulated.first);
     }
 
