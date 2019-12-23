@@ -3,6 +3,150 @@
 
 #include "ruby.h"
 
+// Array#initialize_copy
+// Array#replace
+// Calling convention: 1
+extern VALUE rb_ary_replace(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_ary_replace(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_ary_replace(recv, arg_0);
+}
+
+// Array#[]
+// Array#slice
+// Calling convention: -1
+extern VALUE rb_ary_aref(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_ary_aref(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_ary_aref(argc, args, recv);
+}
+
+// Array#at
+// Calling convention: 1
+extern VALUE rb_ary_at(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_ary_at(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_ary_at(recv, arg_0);
+}
+
+// Array#last
+// Calling convention: -1
+extern VALUE rb_ary_last(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_ary_last(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_ary_last(argc, args, recv);
+}
+
+// Array#<<
+// Calling convention: 1
+extern VALUE rb_ary_push(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_ary_push(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_ary_push(recv, arg_0);
+}
+
+// Array#each
+// Calling convention: 0
+extern VALUE rb_ary_each(VALUE obj);
+
+VALUE sorbet_int_rb_ary_each(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_ary_each(recv);
+}
+
+// Array#sort
+// Calling convention: 0
+extern VALUE rb_ary_sort(VALUE obj);
+
+VALUE sorbet_int_rb_ary_sort(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_ary_sort(recv);
+}
+
+// Array#sort!
+// Calling convention: 0
+extern VALUE rb_ary_sort_bang(VALUE obj);
+
+VALUE sorbet_int_rb_ary_sort_bang(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_ary_sort_bang(recv);
+}
+
+// Array#delete
+// Calling convention: 1
+extern VALUE rb_ary_delete(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_ary_delete(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_ary_delete(recv, arg_0);
+}
+
+// Array#clear
+// Calling convention: 0
+extern VALUE rb_ary_clear(VALUE obj);
+
+VALUE sorbet_int_rb_ary_clear(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_ary_clear(recv);
+}
+
+// Array#include?
+// Calling convention: 1
+extern VALUE rb_ary_includes(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_ary_includes(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_ary_includes(recv, arg_0);
+}
+
+// Array#<=>
+// Calling convention: 1
+extern VALUE rb_ary_cmp(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_ary_cmp(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_ary_cmp(recv, arg_0);
+}
+
+// Array#assoc
+// Calling convention: 1
+extern VALUE rb_ary_assoc(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_ary_assoc(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_ary_assoc(recv, arg_0);
+}
+
+// Array#rassoc
+// Calling convention: 1
+extern VALUE rb_ary_rassoc(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_ary_rassoc(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_ary_rassoc(recv, arg_0);
+}
+
+// Array#+
+// Calling convention: 1
+extern VALUE rb_ary_plus(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_ary_plus(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_ary_plus(recv, arg_0);
+}
+
 // Complex#real
 // Calling convention: 0
 extern VALUE rb_complex_real(VALUE obj);
@@ -110,6 +254,198 @@ extern VALUE rb_complex_conjugate(VALUE obj);
 VALUE sorbet_int_rb_complex_conjugate(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 0, 0);
     return rb_complex_conjugate(recv);
+}
+
+// Hash#rehash
+// Calling convention: 0
+extern VALUE rb_hash_rehash(VALUE obj);
+
+VALUE sorbet_int_rb_hash_rehash(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_rehash(recv);
+}
+
+// Hash#[]
+// Calling convention: 1
+extern VALUE rb_hash_aref(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_hash_aref(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_hash_aref(recv, arg_0);
+}
+
+// Hash#[]=
+// Hash#store
+// Calling convention: 2
+extern VALUE rb_hash_aset(VALUE obj, VALUE arg_0, VALUE arg_1);
+
+VALUE sorbet_int_rb_hash_aset(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 2, 2);
+    VALUE arg_0 = args[0];
+    VALUE arg_1 = args[1];
+    return rb_hash_aset(recv, arg_0, arg_1);
+}
+
+// Hash#default_proc=
+// Calling convention: 1
+extern VALUE rb_hash_set_default_proc(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_hash_set_default_proc(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_hash_set_default_proc(recv, arg_0);
+}
+
+// Hash#size
+// Hash#length
+// Calling convention: 0
+extern VALUE rb_hash_size(VALUE obj);
+
+VALUE sorbet_int_rb_hash_size(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_size(recv);
+}
+
+// Hash#keys
+// Calling convention: 0
+extern VALUE rb_hash_keys(VALUE obj);
+
+VALUE sorbet_int_rb_hash_keys(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_keys(recv);
+}
+
+// Hash#values
+// Calling convention: 0
+extern VALUE rb_hash_values(VALUE obj);
+
+VALUE sorbet_int_rb_hash_values(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_values(recv);
+}
+
+// Hash#values_at
+// Calling convention: -1
+extern VALUE rb_hash_values_at(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_hash_values_at(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_hash_values_at(argc, args, recv);
+}
+
+// Hash#fetch_values
+// Calling convention: -1
+extern VALUE rb_hash_fetch_values(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_hash_fetch_values(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_hash_fetch_values(argc, args, recv);
+}
+
+// Hash#delete_if
+// Calling convention: 0
+extern VALUE rb_hash_delete_if(VALUE obj);
+
+VALUE sorbet_int_rb_hash_delete_if(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_delete_if(recv);
+}
+
+// Hash#keep_if
+// Calling convention: 0
+extern VALUE rb_hash_keep_if(VALUE obj);
+
+VALUE sorbet_int_rb_hash_keep_if(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_keep_if(recv);
+}
+
+// Hash#select
+// Hash#filter
+// Calling convention: 0
+extern VALUE rb_hash_select(VALUE obj);
+
+VALUE sorbet_int_rb_hash_select(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_select(recv);
+}
+
+// Hash#select!
+// Hash#filter!
+// Calling convention: 0
+extern VALUE rb_hash_select_bang(VALUE obj);
+
+VALUE sorbet_int_rb_hash_select_bang(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_select_bang(recv);
+}
+
+// Hash#reject
+// Calling convention: 0
+extern VALUE rb_hash_reject(VALUE obj);
+
+VALUE sorbet_int_rb_hash_reject(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_reject(recv);
+}
+
+// Hash#reject!
+// Calling convention: 0
+extern VALUE rb_hash_reject_bang(VALUE obj);
+
+VALUE sorbet_int_rb_hash_reject_bang(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_reject_bang(recv);
+}
+
+// Hash#clear
+// Calling convention: 0
+extern VALUE rb_hash_clear(VALUE obj);
+
+VALUE sorbet_int_rb_hash_clear(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_clear(recv);
+}
+
+// Hash#assoc
+// Calling convention: 1
+extern VALUE rb_hash_assoc(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_hash_assoc(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_hash_assoc(recv, arg_0);
+}
+
+// Hash#rassoc
+// Calling convention: 1
+extern VALUE rb_hash_rassoc(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_hash_rassoc(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_hash_rassoc(recv, arg_0);
+}
+
+// Hash#include?
+// Hash#member?
+// Hash#has_key?
+// Hash#key?
+// Calling convention: 1
+extern VALUE rb_hash_has_key(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_hash_has_key(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_hash_has_key(recv, arg_0);
+}
+
+// Hash#compare_by_identity?
+// Calling convention: 0
+extern VALUE rb_hash_compare_by_id_p(VALUE obj);
+
+VALUE sorbet_int_rb_hash_compare_by_id_p(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_hash_compare_by_id_p(recv);
 }
 
 // Integer#odd?

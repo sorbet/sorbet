@@ -11,8 +11,8 @@ module Intrinsics
 
     SORBET_CLASSES = Set[
       # These two need block handling with intrinsics
-      # "Array",
-      # "Hash",
+      "Array",
+      "Hash",
       "Complex",
       "Integer",
       "Float",
