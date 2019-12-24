@@ -12,10 +12,17 @@ module Intrinsics
     SORBET_CLASSES = Set[
       # These two need block handling with intrinsics
       "Array",
-      "Hash",
+      "BasicObject",
       "Complex",
-      "Integer",
+      "Enumerable",
+      "File",
       "Float",
+      "Hash",
+      "Integer",
+      "Kernel",
+      "NilClass",
+      "Range",
+      "String",
     ]
 
     def self.run(ruby:, ruby_source:)
@@ -95,6 +102,13 @@ module Intrinsics
       defined
     end
 
+    RB_DEFINE_CLASS = /([^\s]+)\s+=\s*rb_define_class\("([^"]+)/
+    RB_DEFINE_MODULE = /([^\s]+)\s+=\s*rb_define_module\("([^"]+)/
+    RB_DEFINE_CLASS_UNDER = /([^\s]+)\s+=\s*rb_define_class_under\([^,]+,\s*"([^"]+)/
+    RB_DEFINE_MODULE_UNDER = /([^\s]+)\s+=\s*rb_define_module_under\([^,]+,\s*"([^"]+)/
+
+    RB_DEFINE_METHOD = /rb_define_method\(([^,]+),\s*\"([^,]+)\",([^,]+),(.*)/
+
     # Collect methods defined in a single file.
     def self.methods_from(exported:, file:)
       methods = []
@@ -122,21 +136,21 @@ module Intrinsics
           "rb_mKernel" => "Kernel",
         }
 
-        # This is a heuristic, but Init functions usually define a class as a
-        # symbol, and thread that through the method definitions.
         io.each_line do |line|
 
+          # This is a heuristic, but Init functions usually define a class as a
+          # symbol, and thread that through the method definitions.
           klass_match =
-            line.match(/([^\s]+)\s+=\s*rb_define_class_under\([^,]+,\s*"([^"]+)/) ||
-            line.match(/([^\s]+)\s+=\s*rb_define_method_under\([^,]+,\s*"([^"]+)/) ||
-            line.match(/([^\s]+)\s+=\s*rb_define_module\("([^"]+)/) ||
-            line.match(/([^\s]+)\s+=\s*rb_define_class\("([^"]+)/)
+            RB_DEFINE_CLASS.match(line) ||
+            RB_DEFINE_MODULE.match(line) ||
+            RB_DEFINE_CLASS_UNDER.match(line) ||
+            RB_DEFINE_MODULE_UNDER.match(line) ||
 
           if klass_match
             klasses[klass_match[1].chomp] = klass_match[2]
           end
 
-          line.match(/rb_define_method\(([^,]+),\s*\"([^,]+)\",([^,]+),(.*)/) do |m|
+          RB_DEFINE_METHOD.match(line) do |m|
             klass = m[1].chomp
 
             # It would be nice to log a message here if the class can't be

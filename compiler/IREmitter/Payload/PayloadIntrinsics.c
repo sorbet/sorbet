@@ -3,6 +3,257 @@
 
 #include "ruby.h"
 
+// BasicObject#==
+// BasicObject#equal?
+// Kernel#eql?
+// Module#==
+// Calling convention: 1
+extern VALUE rb_obj_equal(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_obj_equal(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_obj_equal(recv, arg_0);
+}
+
+// BasicObject#!
+// Calling convention: 0
+extern VALUE rb_obj_not(VALUE obj);
+
+VALUE sorbet_int_rb_obj_not(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_not(recv);
+}
+
+// BasicObject#!=
+// Calling convention: 1
+extern VALUE rb_obj_not_equal(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_obj_not_equal(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_obj_not_equal(recv, arg_0);
+}
+
+// Kernel#===
+// NilClass#===
+// Calling convention: 1
+extern VALUE rb_equal(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_equal(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_equal(recv, arg_0);
+}
+
+// Kernel#hash
+// Calling convention: 0
+extern VALUE rb_obj_hash(VALUE obj);
+
+VALUE sorbet_int_rb_obj_hash(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_hash(recv);
+}
+
+// Kernel#class
+// Calling convention: 0
+extern VALUE rb_obj_class(VALUE obj);
+
+VALUE sorbet_int_rb_obj_class(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_class(recv);
+}
+
+// Kernel#dup
+// Calling convention: 0
+extern VALUE rb_obj_dup(VALUE obj);
+
+VALUE sorbet_int_rb_obj_dup(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_dup(recv);
+}
+
+// Kernel#initialize_copy
+// Calling convention: 1
+extern VALUE rb_obj_init_copy(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_obj_init_copy(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_obj_init_copy(recv, arg_0);
+}
+
+// Kernel#initialize_dup
+// Kernel#initialize_clone
+// Calling convention: 1
+extern VALUE rb_obj_init_dup_clone(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_obj_init_dup_clone(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_obj_init_dup_clone(recv, arg_0);
+}
+
+// Kernel#taint
+// Calling convention: 0
+extern VALUE rb_obj_taint(VALUE obj);
+
+VALUE sorbet_int_rb_obj_taint(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_taint(recv);
+}
+
+// Kernel#tainted?
+// Calling convention: 0
+extern VALUE rb_obj_tainted(VALUE obj);
+
+VALUE sorbet_int_rb_obj_tainted(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_tainted(recv);
+}
+
+// Kernel#untaint
+// Calling convention: 0
+extern VALUE rb_obj_untaint(VALUE obj);
+
+VALUE sorbet_int_rb_obj_untaint(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_untaint(recv);
+}
+
+// Kernel#untrust
+// Calling convention: 0
+extern VALUE rb_obj_untrust(VALUE obj);
+
+VALUE sorbet_int_rb_obj_untrust(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_untrust(recv);
+}
+
+// Kernel#untrusted?
+// Calling convention: 0
+extern VALUE rb_obj_untrusted(VALUE obj);
+
+VALUE sorbet_int_rb_obj_untrusted(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_untrusted(recv);
+}
+
+// Kernel#trust
+// Calling convention: 0
+extern VALUE rb_obj_trust(VALUE obj);
+
+VALUE sorbet_int_rb_obj_trust(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_trust(recv);
+}
+
+// Kernel#freeze
+// Calling convention: 0
+extern VALUE rb_obj_freeze(VALUE obj);
+
+VALUE sorbet_int_rb_obj_freeze(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_freeze(recv);
+}
+
+// Kernel#frozen?
+// Calling convention: 0
+extern VALUE rb_obj_frozen_p(VALUE obj);
+
+VALUE sorbet_int_rb_obj_frozen_p(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_frozen_p(recv);
+}
+
+// Kernel#to_s
+// Calling convention: 0
+extern VALUE rb_any_to_s(VALUE obj);
+
+VALUE sorbet_int_rb_any_to_s(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_any_to_s(recv);
+}
+
+// Kernel#methods
+// Calling convention: -1
+extern VALUE rb_obj_methods(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_obj_methods(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_obj_methods(argc, args, recv);
+}
+
+// Kernel#singleton_methods
+// Calling convention: -1
+extern VALUE rb_obj_singleton_methods(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_obj_singleton_methods(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_obj_singleton_methods(argc, args, recv);
+}
+
+// Kernel#protected_methods
+// Calling convention: -1
+extern VALUE rb_obj_protected_methods(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_obj_protected_methods(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_obj_protected_methods(argc, args, recv);
+}
+
+// Kernel#private_methods
+// Calling convention: -1
+extern VALUE rb_obj_private_methods(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_obj_private_methods(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_obj_private_methods(argc, args, recv);
+}
+
+// Kernel#public_methods
+// Calling convention: -1
+extern VALUE rb_obj_public_methods(int argc, const VALUE *args, VALUE obj);
+
+VALUE sorbet_int_rb_obj_public_methods(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_obj_public_methods(argc, args, recv);
+}
+
+// Kernel#instance_variables
+// Calling convention: 0
+extern VALUE rb_obj_instance_variables(VALUE obj);
+
+VALUE sorbet_int_rb_obj_instance_variables(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_instance_variables(recv);
+}
+
+// Kernel#instance_of?
+// Calling convention: 1
+extern VALUE rb_obj_is_instance_of(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_obj_is_instance_of(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_obj_is_instance_of(recv, arg_0);
+}
+
+// Kernel#kind_of?
+// Kernel#is_a?
+// Calling convention: 1
+extern VALUE rb_obj_is_kind_of(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_obj_is_kind_of(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_obj_is_kind_of(recv, arg_0);
+}
+
+// Kernel#tap
+// Calling convention: 0
+extern VALUE rb_obj_tap(VALUE obj);
+
+VALUE sorbet_int_rb_obj_tap(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_tap(recv);
+}
+
 // Array#initialize_copy
 // Array#replace
 // Calling convention: 1
@@ -147,305 +398,166 @@ VALUE sorbet_int_rb_ary_plus(VALUE recv, int argc, VALUE *const restrict args) {
     return rb_ary_plus(recv, arg_0);
 }
 
-// Complex#real
-// Calling convention: 0
-extern VALUE rb_complex_real(VALUE obj);
-
-VALUE sorbet_int_rb_complex_real(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_complex_real(recv);
-}
-
-// Complex#imaginary
-// Complex#imag
-// Calling convention: 0
-extern VALUE rb_complex_imag(VALUE obj);
-
-VALUE sorbet_int_rb_complex_imag(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_complex_imag(recv);
-}
-
-// Complex#-@
-// Calling convention: 0
-extern VALUE rb_complex_uminus(VALUE obj);
-
-VALUE sorbet_int_rb_complex_uminus(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_complex_uminus(recv);
-}
-
-// Complex#+
+// String#initialize_copy
+// String#replace
 // Calling convention: 1
-extern VALUE rb_complex_plus(VALUE obj, VALUE arg_0);
+extern VALUE rb_str_replace(VALUE obj, VALUE arg_0);
 
-VALUE sorbet_int_rb_complex_plus(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_replace(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 1, 1);
     VALUE arg_0 = args[0];
-    return rb_complex_plus(recv, arg_0);
+    return rb_str_replace(recv, arg_0);
 }
 
-// Complex#-
+// String#==
+// String#===
 // Calling convention: 1
-extern VALUE rb_complex_minus(VALUE obj, VALUE arg_0);
+extern VALUE rb_str_equal(VALUE obj, VALUE arg_0);
 
-VALUE sorbet_int_rb_complex_minus(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_equal(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 1, 1);
     VALUE arg_0 = args[0];
-    return rb_complex_minus(recv, arg_0);
+    return rb_str_equal(recv, arg_0);
 }
 
-// Complex#*
+// String#eql?
 // Calling convention: 1
-extern VALUE rb_complex_mul(VALUE obj, VALUE arg_0);
+extern VALUE rb_str_eql(VALUE obj, VALUE arg_0);
 
-VALUE sorbet_int_rb_complex_mul(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_eql(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 1, 1);
     VALUE arg_0 = args[0];
-    return rb_complex_mul(recv, arg_0);
+    return rb_str_eql(recv, arg_0);
 }
 
-// Complex#/
+// String#+
 // Calling convention: 1
-extern VALUE rb_complex_div(VALUE obj, VALUE arg_0);
+extern VALUE rb_str_plus(VALUE obj, VALUE arg_0);
 
-VALUE sorbet_int_rb_complex_div(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_plus(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 1, 1);
     VALUE arg_0 = args[0];
-    return rb_complex_div(recv, arg_0);
+    return rb_str_plus(recv, arg_0);
 }
 
-// Complex#**
+// String#*
 // Calling convention: 1
-extern VALUE rb_complex_pow(VALUE obj, VALUE arg_0);
+extern VALUE rb_str_times(VALUE obj, VALUE arg_0);
 
-VALUE sorbet_int_rb_complex_pow(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_times(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 1, 1);
     VALUE arg_0 = args[0];
-    return rb_complex_pow(recv, arg_0);
+    return rb_str_times(recv, arg_0);
 }
 
-// Complex#abs
-// Complex#magnitude
+// String#length
+// String#size
 // Calling convention: 0
-extern VALUE rb_complex_abs(VALUE obj);
+extern VALUE rb_str_length(VALUE obj);
 
-VALUE sorbet_int_rb_complex_abs(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_length(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 0, 0);
-    return rb_complex_abs(recv);
+    return rb_str_length(recv);
 }
 
-// Complex#arg
-// Complex#angle
-// Complex#phase
+// String#succ
+// String#next
 // Calling convention: 0
-extern VALUE rb_complex_arg(VALUE obj);
+extern VALUE rb_str_succ(VALUE obj);
 
-VALUE sorbet_int_rb_complex_arg(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_succ(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 0, 0);
-    return rb_complex_arg(recv);
+    return rb_str_succ(recv);
 }
 
-// Complex#conjugate
-// Complex#conj
+// String#freeze
 // Calling convention: 0
-extern VALUE rb_complex_conjugate(VALUE obj);
+extern VALUE rb_str_freeze(VALUE obj);
 
-VALUE sorbet_int_rb_complex_conjugate(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_freeze(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 0, 0);
-    return rb_complex_conjugate(recv);
+    return rb_str_freeze(recv);
 }
 
-// Hash#rehash
+// String#inspect
 // Calling convention: 0
-extern VALUE rb_hash_rehash(VALUE obj);
+extern VALUE rb_str_inspect(VALUE obj);
 
-VALUE sorbet_int_rb_hash_rehash(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_inspect(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 0, 0);
-    return rb_hash_rehash(recv);
+    return rb_str_inspect(recv);
 }
 
-// Hash#[]
+// String#dump
+// Calling convention: 0
+extern VALUE rb_str_dump(VALUE obj);
+
+VALUE sorbet_int_rb_str_dump(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_str_dump(recv);
+}
+
+// String#<<
 // Calling convention: 1
-extern VALUE rb_hash_aref(VALUE obj, VALUE arg_0);
+extern VALUE rb_str_concat(VALUE obj, VALUE arg_0);
 
-VALUE sorbet_int_rb_hash_aref(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_concat(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 1, 1);
     VALUE arg_0 = args[0];
-    return rb_hash_aref(recv, arg_0);
+    return rb_str_concat(recv, arg_0);
 }
 
-// Hash#[]=
-// Hash#store
-// Calling convention: 2
-extern VALUE rb_hash_aset(VALUE obj, VALUE arg_0, VALUE arg_1);
-
-VALUE sorbet_int_rb_hash_aset(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 2, 2);
-    VALUE arg_0 = args[0];
-    VALUE arg_1 = args[1];
-    return rb_hash_aset(recv, arg_0, arg_1);
-}
-
-// Hash#default_proc=
-// Calling convention: 1
-extern VALUE rb_hash_set_default_proc(VALUE obj, VALUE arg_0);
-
-VALUE sorbet_int_rb_hash_set_default_proc(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 1, 1);
-    VALUE arg_0 = args[0];
-    return rb_hash_set_default_proc(recv, arg_0);
-}
-
-// Hash#size
-// Hash#length
+// String#intern
+// String#to_sym
 // Calling convention: 0
-extern VALUE rb_hash_size(VALUE obj);
+extern VALUE rb_str_intern(VALUE obj);
 
-VALUE sorbet_int_rb_hash_size(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_intern(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 0, 0);
-    return rb_hash_size(recv);
+    return rb_str_intern(recv);
 }
 
-// Hash#keys
+// String#ord
 // Calling convention: 0
-extern VALUE rb_hash_keys(VALUE obj);
+extern VALUE rb_str_ord(VALUE obj);
 
-VALUE sorbet_int_rb_hash_keys(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_str_ord(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 0, 0);
-    return rb_hash_keys(recv);
+    return rb_str_ord(recv);
 }
 
-// Hash#values
+// String#encoding
 // Calling convention: 0
-extern VALUE rb_hash_values(VALUE obj);
+extern VALUE rb_obj_encoding(VALUE obj);
 
-VALUE sorbet_int_rb_hash_values(VALUE recv, int argc, VALUE *const restrict args) {
+VALUE sorbet_int_rb_obj_encoding(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 0, 0);
-    return rb_hash_values(recv);
+    return rb_obj_encoding(recv);
 }
 
-// Hash#values_at
+// BasicObject#instance_eval
 // Calling convention: -1
-extern VALUE rb_hash_values_at(int argc, const VALUE *args, VALUE obj);
+extern VALUE rb_obj_instance_eval(int argc, const VALUE *args, VALUE obj);
 
-VALUE sorbet_int_rb_hash_values_at(VALUE recv, int argc, VALUE *const restrict args) {
-    return rb_hash_values_at(argc, args, recv);
+VALUE sorbet_int_rb_obj_instance_eval(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_obj_instance_eval(argc, args, recv);
 }
 
-// Hash#fetch_values
+// BasicObject#instance_exec
 // Calling convention: -1
-extern VALUE rb_hash_fetch_values(int argc, const VALUE *args, VALUE obj);
+extern VALUE rb_obj_instance_exec(int argc, const VALUE *args, VALUE obj);
 
-VALUE sorbet_int_rb_hash_fetch_values(VALUE recv, int argc, VALUE *const restrict args) {
-    return rb_hash_fetch_values(argc, args, recv);
+VALUE sorbet_int_rb_obj_instance_exec(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_obj_instance_exec(argc, args, recv);
 }
 
-// Hash#delete_if
-// Calling convention: 0
-extern VALUE rb_hash_delete_if(VALUE obj);
+// BasicObject#__send__
+// Kernel#send
+// Calling convention: -1
+extern VALUE rb_f_send(int argc, const VALUE *args, VALUE obj);
 
-VALUE sorbet_int_rb_hash_delete_if(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_hash_delete_if(recv);
-}
-
-// Hash#keep_if
-// Calling convention: 0
-extern VALUE rb_hash_keep_if(VALUE obj);
-
-VALUE sorbet_int_rb_hash_keep_if(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_hash_keep_if(recv);
-}
-
-// Hash#select
-// Hash#filter
-// Calling convention: 0
-extern VALUE rb_hash_select(VALUE obj);
-
-VALUE sorbet_int_rb_hash_select(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_hash_select(recv);
-}
-
-// Hash#select!
-// Hash#filter!
-// Calling convention: 0
-extern VALUE rb_hash_select_bang(VALUE obj);
-
-VALUE sorbet_int_rb_hash_select_bang(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_hash_select_bang(recv);
-}
-
-// Hash#reject
-// Calling convention: 0
-extern VALUE rb_hash_reject(VALUE obj);
-
-VALUE sorbet_int_rb_hash_reject(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_hash_reject(recv);
-}
-
-// Hash#reject!
-// Calling convention: 0
-extern VALUE rb_hash_reject_bang(VALUE obj);
-
-VALUE sorbet_int_rb_hash_reject_bang(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_hash_reject_bang(recv);
-}
-
-// Hash#clear
-// Calling convention: 0
-extern VALUE rb_hash_clear(VALUE obj);
-
-VALUE sorbet_int_rb_hash_clear(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_hash_clear(recv);
-}
-
-// Hash#assoc
-// Calling convention: 1
-extern VALUE rb_hash_assoc(VALUE obj, VALUE arg_0);
-
-VALUE sorbet_int_rb_hash_assoc(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 1, 1);
-    VALUE arg_0 = args[0];
-    return rb_hash_assoc(recv, arg_0);
-}
-
-// Hash#rassoc
-// Calling convention: 1
-extern VALUE rb_hash_rassoc(VALUE obj, VALUE arg_0);
-
-VALUE sorbet_int_rb_hash_rassoc(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 1, 1);
-    VALUE arg_0 = args[0];
-    return rb_hash_rassoc(recv, arg_0);
-}
-
-// Hash#include?
-// Hash#member?
-// Hash#has_key?
-// Hash#key?
-// Calling convention: 1
-extern VALUE rb_hash_has_key(VALUE obj, VALUE arg_0);
-
-VALUE sorbet_int_rb_hash_has_key(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 1, 1);
-    VALUE arg_0 = args[0];
-    return rb_hash_has_key(recv, arg_0);
-}
-
-// Hash#compare_by_identity?
-// Calling convention: 0
-extern VALUE rb_hash_compare_by_id_p(VALUE obj);
-
-VALUE sorbet_int_rb_hash_compare_by_id_p(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_hash_compare_by_id_p(recv);
+VALUE sorbet_int_rb_f_send(VALUE recv, int argc, VALUE *const restrict args) {
+    return rb_f_send(argc, args, recv);
 }
 
 // Integer#odd?
@@ -741,5 +853,45 @@ VALUE sorbet_int_rb_gcdlcm(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 1, 1);
     VALUE arg_0 = args[0];
     return rb_gcdlcm(recv, arg_0);
+}
+
+// Kernel#method
+// Calling convention: 1
+extern VALUE rb_obj_method(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_obj_method(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_obj_method(recv, arg_0);
+}
+
+// Kernel#public_method
+// Calling convention: 1
+extern VALUE rb_obj_public_method(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_obj_public_method(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_obj_public_method(recv, arg_0);
+}
+
+// Kernel#singleton_method
+// Calling convention: 1
+extern VALUE rb_obj_singleton_method(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_rb_obj_singleton_method(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return rb_obj_singleton_method(recv, arg_0);
+}
+
+// BasicObject#__id__
+// Kernel#object_id
+// Calling convention: 0
+extern VALUE rb_obj_id(VALUE obj);
+
+VALUE sorbet_int_rb_obj_id(VALUE recv, int argc, VALUE *const restrict args) {
+    rb_check_arity(argc, 0, 0);
+    return rb_obj_id(recv);
 }
 #endif /* SORBET_LLVM_IMPORTED_INTRINSICS_H */
