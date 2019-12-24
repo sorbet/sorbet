@@ -109,16 +109,18 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
     }
     auto it = nodes.begin();
     auto end = nodes.end();
-    unique_ptr<Expression> res;
     unique_ptr<Expression> first = node2TreeImpl(dctx, std::move(*it));
     InlinedVector<unique_ptr<Expression>, 4> stringsAccumulated;
+
+    Send::ARGS_store concatArgs;
+
     bool allStringsSoFar;
     if (isStringLit(dctx, first) || isa_tree<EmptyTree>(first.get())) {
         stringsAccumulated.emplace_back(std::move(first));
         allStringsSoFar = true;
     } else {
         auto pieceLoc = first->loc;
-        res = MK::Send0(pieceLoc, std::move(first), core::Names::toS());
+        concatArgs.emplace_back(MK::Send0(pieceLoc, std::move(first), core::Names::toS()));
         allStringsSoFar = false;
     }
     ++it;
@@ -137,15 +139,17 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
         } else {
             if (allStringsSoFar) {
                 allStringsSoFar = false;
-                res = mergeStrings(dctx, loc, std::move(stringsAccumulated));
+                concatArgs.emplace_back(mergeStrings(dctx, loc, std::move(stringsAccumulated)));
             }
-            res = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
+            concatArgs.emplace_back(std::move(narg));
         }
     };
     if (allStringsSoFar) {
-        res = mergeStrings(dctx, loc, std::move(stringsAccumulated));
+        return mergeStrings(dctx, loc, std::move(stringsAccumulated));
+    } else {
+        auto recv = MK::Constant(loc, core::Symbols::Magic());
+        return MK::Send(loc, std::move(recv), core::Names::concatStrings(), std::move(concatArgs));
     }
-    return res;
 }
 
 bool isIVarAssign(Expression *stat) {
