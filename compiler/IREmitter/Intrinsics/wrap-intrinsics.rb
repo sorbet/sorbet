@@ -7,10 +7,11 @@ require 'optparse'
 module Intrinsics
   Method = Struct.new(:exported, :file, :klass, :rb_name, :c_name, :argc)
 
+  Edit = Struct.new(:orig, :edited, :line)
+
   class Main
 
     SORBET_CLASSES = Set[
-      # These two need block handling with intrinsics
       "Array",
       "BasicObject",
       "Complex",
@@ -25,6 +26,11 @@ module Intrinsics
       "String",
     ]
 
+    DIFF_WHITELIST = Set[
+      'string.c',
+      'numeric.c',
+    ]
+
     def self.run(ruby:, ruby_source:)
       puts "ruby binary: #{ruby}"
       puts "ruby source: #{ruby_source}"
@@ -33,17 +39,25 @@ module Intrinsics
       methods = methods_defined(ruby_source: ruby_source, exported: exported)
 
       File.open('intrinsic-report.md', mode: 'w') do |report|
+        puts 'Writing intrinsic-report.md'
         write_report(report, methods)
+      end
+
+      File.open('export-hidden-intrinsics.diff', mode: 'w') do |diff|
+        puts 'Writing export-hidden-intrinsics.diff'
+        write_diff(ruby_source, diff, methods.filter {|k,_| DIFF_WHITELIST.include?(k)})
       end
 
       # group methods together
       grouped_methods = methods.values.flatten.group_by(&:c_name).values
 
       File.open('WrappedIntrinsics.h', mode: 'w') do |header|
+        puts 'Writing WrappedIntrinsics.h'
         write_header(header, grouped_methods)
       end
 
       File.open('PayloadIntrinsics.c', mode: 'w') do |wrapper|
+        puts 'Writing PayloadIntrinsics.c'
         write_wrapper(wrapper, grouped_methods)
       end
     end
@@ -201,6 +215,78 @@ module Intrinsics
       report << "* Total:   #{total_intrinsics}\n"
       report << "* Visible: #{exported_intrinsics}\n"
     end
+
+    def self.write_diff(ruby_source, diff, methods)
+      Dir.chdir(ruby_source) do
+        methods.each do |file,methods|
+          hidden = methods.filter {|m| !m.exported}
+          if !hidden.empty?
+            edits = File.open(file, mode: 'r') do |io|
+              expose_methods(hidden, io)
+            end
+
+            if !edits.empty?
+              diff_header(diff, file)
+              edits.each do |edit|
+                diff_chunk(diff, edit)
+              end
+            end
+          end
+        end
+      end
+    end
+
+    def self.diff_header(io, file)
+      atime = File.atime(file).to_s
+      now = Time.now.to_s
+      io << "--- a/#{file} #{atime}\n"
+      io << "+++ b/#{file} #{now}\n"
+    end
+
+    def self.diff_chunk(io, edit)
+      io << "@@ -#{edit.line} +#{edit.line} @@\n"
+      io << "-#{edit.orig}"
+      io << "+#{edit.edited}"
+    end
+
+    def self.expose_methods(hidden, io)
+      edits = []
+
+      previous = ''
+      io.each_line.each_with_index do |line,idx|
+        hidden.each_with_index do |method|
+          # idx is 0-based
+          edit = generate_edit(previous, line, idx+1, method)
+          if !edit.nil?
+            edits << edit
+            break
+          end
+        end
+
+        previous = line
+      end
+
+      edits
+    end
+
+    # Heuristic for finding a method definition given a line and the previous
+    # line for context.
+    def self.generate_edit(previous, line, idx, method)
+      if !line.match?(method.c_name)
+        return nil
+      end
+
+      if previous.match?('static VALUE')
+        return Edit.new(previous, previous.sub('static ', ''), idx - 1)
+      end
+
+      if line.match?('static VALUE')
+        return Edit.new(line, line.sub('static ', ''), idx)
+      end
+
+      nil
+    end
+
 
     def self.should_wrap?(method)
       method.exported && SORBET_CLASSES.include?(method.klass)
