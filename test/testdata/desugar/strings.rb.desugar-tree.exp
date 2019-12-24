@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < ()
     begin
       ""
       "foo"
-      "foo".concat(1.to_s())
+      ::<Magic>.<concat-strings>("foo", 1.to_s())
     end
   end
 end
