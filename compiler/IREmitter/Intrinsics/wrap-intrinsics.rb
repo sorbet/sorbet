@@ -43,8 +43,8 @@ module Intrinsics
         write_report(report, methods)
       end
 
-      File.open('export-hidden-intrinsics.diff', mode: 'w') do |diff|
-        puts 'Writing export-hidden-intrinsics.diff'
+      File.open('export-intrinsics.patch', mode: 'w') do |diff|
+        puts 'Writing export-intrinsics.patch'
         write_diff(ruby_source, diff, methods.filter {|k,_| DIFF_WHITELIST.include?(k)})
       end
 

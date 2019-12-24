@@ -1,4 +1,5 @@
 intrinsic-report.md
 PayloadIntrinsics.c
 WrappedIntrinsics.h
+export-intrinsics.patch
 *-formatted

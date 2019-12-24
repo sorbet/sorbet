@@ -10,9 +10,10 @@ all: intrinsic-report.md ../WrappedIntrinsics.h ../Payload/PayloadIntrinsics.c
 %-formatted: %
 	bazel run @com_stripe_ruby_typer//tools:clang-format "$(PWD)/$<" > "$(PWD)/$@"
 
-intrinsics-report.md WrappedIntrinsics.h PayloadIntrinsics.c: wrap-intrinsics.rb
+intrinsics-report.md WrappedIntrinsics.h PayloadIntrinsics.c export-intrinsics.patch: wrap-intrinsics.rb
 	./wrap-intrinsics.rb
 
 clean:
 	$(RM) WrappedIntrinsics.h WrappedIntrinsics.h-formatted
 	$(RM) PayloadIntrinsics.c PayloadIntrinsics.c-formatted
+	$(RM) export-intrinsics.patch
