@@ -1445,19 +1445,13 @@ end
 # consumer.join
 # ```
 class Thread::Queue < Object
-  extend T::Generic
-  Elem = type_member(:out)
-
   # Alias for:
   # [`push`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-push)
-  sig do
-    params(obj: Elem)
-    .returns(T.self_type)
-  end
+  sig {params(obj: T.untyped).returns(T.untyped)}
   def <<(obj); end
 
   # Removes all objects from the queue.
-  sig {returns(T.self_type)}
+  sig {returns(T.untyped)}
   def clear; end
 
   # Closes the queue. A closed queue cannot be re-opened.
@@ -1492,7 +1486,7 @@ class Thread::Queue < Object
   #     }
   #     q.close
   # ```
-  sig {returns(T.self_type)}
+  sig {returns(T.untyped)}
   def close; end
 
   # Returns `true` if the queue is closed.
@@ -1501,8 +1495,8 @@ class Thread::Queue < Object
 
   # Alias for:
   # [`pop`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-pop)
-  sig {params(non_block: T::Boolean).returns(Elem)}
-  def deq(non_block=false); end
+  sig {params(args: T.untyped).returns(T.untyped)}
+  def deq(*args); end
 
   # Returns `true` if the queue is empty.
   sig {returns(T::Boolean)}
@@ -1510,10 +1504,7 @@ class Thread::Queue < Object
 
   # Alias for:
   # [`push`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-push)
-  sig do
-    params(obj: Elem)
-    .returns(T.self_type)
-  end
+  sig {params(obj: T.untyped).returns(T.untyped)}
   def enq(obj); end
 
   # Returns the length of the queue.
@@ -1527,7 +1518,7 @@ class Thread::Queue < Object
   def marshal_dump; end
 
   # Returns the number of threads waiting on the queue.
-  sig {returns(Integer)}
+  sig {returns(T.untyped)}
   def num_waiting; end
 
   # Retrieves data from the queue.
@@ -1539,24 +1530,21 @@ class Thread::Queue < Object
   # Also aliased as:
   # [`deq`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-deq),
   # [`shift`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-shift)
-  sig {params(non_block: T::Boolean).returns(Elem)}
-  def pop(non_block=false); end
+  sig {params(args: T.untyped).returns(T.untyped)}
+  def pop(*args); end
 
   # Pushes the given `object` to the queue.
   #
   # Also aliased as:
   # [`enq`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-enq),
   # [`<<`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-3C-3C)
-  sig do
-    params(obj: Elem)
-    .returns(T.self_type)
-  end
+  sig {params(obj: T.untyped).returns(T.untyped)}
   def push(obj); end
 
   # Alias for:
   # [`pop`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-pop)
-  sig {params(non_block: T::Boolean).returns(Elem)}
-  def shift(non_block=false); end
+  sig {params(args: T.untyped).returns(T.untyped)}
+  def shift(*args); end
 
   # Alias for:
   # [`length`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-length)
@@ -1571,26 +1559,17 @@ end
 # of how a [`SizedQueue`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html)
 # works.
 class Thread::SizedQueue < Thread::Queue
-  extend T::Generic
-  Elem = type_member(:out)
+  # Alias for:
+  # [`push`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html#method-i-push)
+  sig {params(args: T.untyped).returns(T.untyped)}
+  def <<(*args); end
 
   # Alias for:
   # [`push`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html#method-i-push)
-  sig do
-    params(obj: Elem)
-    .returns(T.self_type)
-  end
-  def <<(obj); end
+  sig {params(args: T.untyped).returns(T.untyped)}
+  def enq(*args); end
 
-  # Alias for:
-  # [`push`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html#method-i-push)
-  sig do
-    params(obj: Elem)
-    .returns(T.self_type)
-  end
-  def enq(obj); end
-
-  sig {params(max: Integer).returns(T.self_type)}
+  sig {params(max: T.untyped).returns(SizedQueue)}
   def initialize(max); end
 
   # Returns the maximum size of the queue.
@@ -1598,7 +1577,7 @@ class Thread::SizedQueue < Thread::Queue
   def max; end
 
   # Sets the maximum size of the queue to the given `number`.
-  sig {params(max: Integer).returns(Integer)}
+  sig {params(max: Integer).returns(T.untyped)}
   def max=(max); end
 
   # Pushes `object` to the queue.
@@ -1610,11 +1589,8 @@ class Thread::SizedQueue < Thread::Queue
   # Also aliased as:
   # [`enq`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html#method-i-enq),
   # [`<<`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html#method-i-3C-3C)
-  sig do
-    params(obj: Elem)
-    .returns(T.self_type)
-  end
-  def push(obj); end
+  sig {params(args: T.untyped).returns(T.untyped)}
+  def push(*args); end
 end
 
 # [`ConditionVariable`](https://docs.ruby-lang.org/en/2.6.0/ConditionVariable.html)
