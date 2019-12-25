@@ -186,6 +186,7 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         auto method = addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
                                                   prepareBody(ctx, std::move(send->block->body)),
                                                   ast::MethodDef::RewriterSynthesized));
+        method = ast::MK::InsSeq1(send->loc, send->args.front()->deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 

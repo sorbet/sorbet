@@ -20,6 +20,9 @@ class MyTest
       C3.new
     end
 
+    it "finds errors in the test name: #{bad_variable}" do # error: Method `bad_variable` does not exist on `T.class_of(MyTest)`
+    end
+
     describe "some inner tests" do
         def inside_method
         end
