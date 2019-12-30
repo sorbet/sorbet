@@ -29,7 +29,7 @@ where what the phases of Sorbet actually do are documented.
 │    │ ast::Expression │    │    │ ast::Expression │    │   │ ast::Expression │    │
 │    └─────────────────┘    │    └─────────────────┘    │   └─────────────────┘    │
 │             │             │             │             │            │             │
-│             │ rewriter         │             │ rewriter         │            │ rewriter         │
+│             │ rewriter    │             │ rewriter    │            │ rewriter    │
 │             ▼             │             ▼             │            ▼             │
 │    ┌─────────────────┐    │    ┌─────────────────┐    │   ┌─────────────────┐    │
 │    │ ast::Expression │    │    │ ast::Expression │    │   │ ast::Expression │    │
@@ -73,30 +73,36 @@ where what the phases of Sorbet actually do are documented.
                                           │
                                           │  freeze GlobalState
                                           ▼
- ┌────────────────────────────────────────────────────────────────────────────────┐
- │  ┌───────────────────┐                                                         │
- │  │    GlobalState    │            typecheck                                    │
- │  └───────────────────┘                                                         │
- ├──────────────────────────┬──────────────────────────┬──────────────────────────┤
- │                          │                          │                          │
- │  ┌───────────────────┐   │   ┌───────────────────┐  │   ┌───────────────────┐  │
- │  │  ast::Expression  │   │   │  ast::Expression  │  │   │  ast::Expression  │  │
- │  └───────────────────┘   │   └───────────────────┘  │   └───────────────────┘  │
- │            │             │             │            │             │            │
- │            │ cfg         │             │ cfg        │             │ cfg        │
- │            ▼             │             ▼            │             ▼            │
- │      ┌──────────┐        │       ┌──────────┐       │       ┌──────────┐       │
- │      │ cfg::CFG │        │       │ cfg::CFG │       │       │ cfg::CFG │       │
- │      └──────────┘        │       └──────────┘       │       └──────────┘       │
- │            │             │             │            │             │            │
- │            │ infer       │             │ infer      │             │ infer      │
- │            ▼             │             ▼            │             ▼            │
- │   ┌─────────────────┐    │    ┌─────────────────┐   │    ┌─────────────────┐   │
- │   │    cfg::CFG     │    │    │    cfg::CFG     │   │    │    cfg::CFG     │   │
- │   │  (with types)   │    │    │  (with types)   │   │    │  (with types)   │   │
- │   └─────────────────┘    │    └─────────────────┘   │    └─────────────────┘   │
- │                          │                          │                          │
- └──────────────────────────┴──────────────────────────┴──────────────────────────┘
+ ┌──────────────────────────────────────────────────────────────────────────────────┐
+ │  ┌───────────────────┐                                                           │
+ │  │    GlobalState    │            typecheck                                      │
+ │  └───────────────────┘                                                           │
+ ├──────────────────────────┬───────────────────────────┬───────────────────────────┤
+ │                          │                           │                           │
+ │  ┌───────────────────┐   │   ┌───────────────────┐   │   ┌───────────────────┐   │
+ │  │  ast::Expression  │   │   │  ast::Expression  │   │   │  ast::Expression  │   │
+ │  └───────────────────┘   │   └───────────────────┘   │   └───────────────────┘   │
+ │   │                      │    │                      │    │                      │
+ │   │ definition_validator │    │ definition_validator │    │ definition_validator │
+ │   ▼                      │    ▼                      │    ▼                      │
+ │  ┌───────────────────┐   │   ┌───────────────────┐   │   ┌───────────────────┐   │
+ │  │  ast::Expression  │   │   │  ast::Expression  │   │   │  ast::Expression  │   │
+ │  └───────────────────┘   │   └───────────────────┘   │   └───────────────────┘   │
+ │            │             │             │             │             │             │
+ │            │ cfg         │             │ cfg         │             │ cfg         │
+ │            ▼             │             ▼             │             ▼             │
+ │      ┌──────────┐        │       ┌──────────┐        │       ┌──────────┐        │
+ │      │ cfg::CFG │        │       │ cfg::CFG │        │       │ cfg::CFG │        │
+ │      └──────────┘        │       └──────────┘        │       └──────────┘        │
+ │            │             │             │             │             │             │
+ │            │ infer       │             │ infer       │             │ infer       │
+ │            ▼             │             ▼             │             ▼             │
+ │   ┌─────────────────┐    │    ┌─────────────────┐    │    ┌─────────────────┐    │
+ │   │    cfg::CFG     │    │    │    cfg::CFG     │    │    │    cfg::CFG     │    │
+ │   │  (with types)   │    │    │  (with types)   │    │    │  (with types)   │    │
+ │   └─────────────────┘    │    └─────────────────┘    │    └─────────────────┘    │
+ │                          │                           │                           │
+ └──────────────────────────┴───────────────────────────┴───────────────────────────┘
 ```
 
 Some notes:
@@ -122,14 +128,15 @@ Some notes:
   up and arrive at one GlobalState, we merge all indexing results.
 
 - The "resolve" chunk is a misleading name because it's composed of both Namer
-  and Resolver. It's largely sequential, though there is a little bit of
-  parallelism (see the implementation of Resolver).
+  and Resolver. Resolver is also misleading because it does 5 or 6 different
+  things, only one of which is constant resolution.
 
   Whereas indexing is largely concerned with syntax transformations (entering
   some information into GlobalState), it's the opposite for the "resolve" chunk:
-  Namer and Resolver are largely concerned with populating GlobalState,
-  specifically the symbol table, but they also do some light syntax
-  modifications.
+  this phase is largely concerned with populating GlobalState (specifically the
+  symbol table), but they also do some light syntax modifications. It's largely
+  sequential, though there is a little bit of parallelism (see the
+  implementation of Resolver).
 
   This chunk is a little trickier to be made incremental—sometimes we can, but
   sometimes respond to an update we have to re-do this chunk entirely. We call
