@@ -344,7 +344,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
             auto name = core::Names::Constants::Mutator();
             ret.nodes.emplace_back(ast::MK::Class(loc, loc,
                                                   ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), name),
-                                                  std::move(ancestors), std::move(rhs), ast::ClassDef::Kind::Class));
+                                                  std::move(ancestors), std::move(rhs)));
         }
     }
 

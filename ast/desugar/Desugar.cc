@@ -863,8 +863,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 ClassDef::RHS_store body = scopeNodeToBody(dctx, std::move(module->body));
                 ClassDef::ANCESTORS_store ancestors;
                 unique_ptr<Expression> res =
-                    MK::Class(module->loc, module->declLoc, node2TreeImpl(dctx, std::move(module->name)),
-                              std::move(ancestors), std::move(body), ClassDef::Kind::Module);
+                    MK::Module(module->loc, module->declLoc, node2TreeImpl(dctx, std::move(module->name)),
+                               std::move(ancestors), std::move(body));
                 result.swap(res);
             },
             [&](parser::Class *claz) {
@@ -877,7 +877,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 }
                 unique_ptr<Expression> res =
                     MK::Class(claz->loc, claz->declLoc, node2TreeImpl(dctx, std::move(claz->name)),
-                              std::move(ancestors), std::move(body), ClassDef::Kind::Class);
+                              std::move(ancestors), std::move(body));
                 result.swap(res);
             },
             [&](parser::Arg *arg) {
