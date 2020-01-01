@@ -847,7 +847,7 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
         [&](ast::ClassDef *c) {
             pickleAstHeader(p, 21, c);
             pickle(p, c->declLoc);
-            p.putU1(c->kind);
+            p.putU1(static_cast<u2>(c->kind));
             p.putU4(c->symbol._id);
             p.putU4(c->ancestors.size());
             p.putU4(c->singletonAncestors.size());
