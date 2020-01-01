@@ -67,7 +67,7 @@ build:versioned --workspace_status_command=tools/buildstamp/get_workspace_status
 build:release-common --define release=true
 build:release-common --define jemalloc=true
 build:release-common --compilation_mode=opt
-build:release-common --config=debugsymbols
+build:release-common --config=backtracesymbols
 build:release-common --config=static-libs
 build:release-common --config=versioned
 
@@ -208,6 +208,12 @@ build:debugsymbols --copt=-g3 --copt=-fstandalone-debug --copt=-DDEBUG_SYMBOLS -
 build:debugsymbols --linkopt=-g3 --linkopt=-fstandalone-debug --linkopt=-DDEBUG_SYMBOLS --linkopt=-glldb
 build:debugsymbols --spawn_strategy=standalone
 build:debugsymbols --genrule_strategy=standalone
+
+# simpler & smaller debug symbols. Good enough for backtraces, but not for debugging.
+build:backtracesymbols --copt=-DDEBUG_SYMBOLS --copt=-gline-tables-only
+build:backtracesymbols --linkopt=-DDEBUG_SYMBOLS --linkopt=-gline-tables-only
+build:backtracesymbols --spawn_strategy=standalone
+build:backtracesymbols --genrule_strategy=standalone
 
 build --strip=never
 
