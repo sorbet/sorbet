@@ -259,11 +259,23 @@ public:
         return Method(loc, declLoc, name, std::move(args), std::move(rhs), flags);
     }
 
-    static std::unique_ptr<ClassDef> Class(core::Loc loc, core::Loc declLoc, std::unique_ptr<Expression> name,
-                                           ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs,
-                                           ClassDef::Kind kind) {
+    static std::unique_ptr<ClassDef> ClassOrModule(core::Loc loc, core::Loc declLoc, std::unique_ptr<Expression> name,
+                                                   ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs,
+                                                   ClassDef::Kind kind) {
         return std::make_unique<ClassDef>(loc, declLoc, core::Symbols::todo(), std::move(name), std::move(ancestors),
                                           std::move(rhs), kind);
+    }
+
+    static std::unique_ptr<ClassDef> Class(core::Loc loc, core::Loc declLoc, std::unique_ptr<Expression> name,
+                                           ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
+        return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
+                                 ClassDef::Kind::Class);
+    }
+
+    static std::unique_ptr<ClassDef> Module(core::Loc loc, core::Loc declLoc, std::unique_ptr<Expression> name,
+                                            ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
+        return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
+                                 ClassDef::Kind::Module);
     }
 
     static std::unique_ptr<Expression> Array(core::Loc loc, Array::ENTRY_store entries) {
