@@ -26,6 +26,18 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     assert_equal('red', m.foo['color'])
   end
 
+  it 'can validate prop value' do
+    MyProps.validate_prop_value :foo, {}
+
+    assert_raises(TypeError) do
+      MyProps.validate_prop_value :foo, 'nope'
+    end
+
+    assert_raises(RuntimeError) do
+      MyProps.validate_prop_value :nope, 'does not matter'
+    end
+  end
+
   module BaseProps
     include T::Props
 
@@ -56,6 +68,30 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
   class InheritedOverrideSubProps < OverrideSubProps
   end
 
+  class HasPropGetOverride < T::Props::Decorator
+    attr_reader :field_accesses
+
+    def prop_get(instance, prop, *)
+      @field_accesses ||= []
+      @field_accesses << prop
+      super
+    end
+  end
+
+  class UsesPropGetOverride
+    include T::Props
+
+    def self.decorator_class
+      HasPropGetOverride
+    end
+
+    prop :foo, T.nilable(String)
+  end
+
+  class AddsPropsToClassWithPropGetOverride < UsesPropGetOverride
+    include BaseProps
+  end
+
   describe 'when subclassing' do
     it 'inherits properties' do
       d = SubProps.new
@@ -80,6 +116,27 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
 
     it 'allows inheriting overridden props' do
       assert(InheritedOverrideSubProps.props.include?(:prop2))
+    end
+
+    it 'allows hooking prop_get' do
+      d = UsesPropGetOverride.new
+      d.foo = 'bar'
+      d.foo
+
+      assert_equal(
+        [:foo],
+        UsesPropGetOverride.decorator.field_accesses,
+      )
+
+      d = AddsPropsToClassWithPropGetOverride.new
+      d.prop1 = 'bar'
+      d.prop1
+      assert_equal("I can't let you see that", d.shadowed)
+
+      assert_equal(
+        [:prop1],
+        AddsPropsToClassWithPropGetOverride.decorator.field_accesses,
+      )
     end
   end
 
@@ -153,4 +210,74 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       assert_equal(obj.foreign2, test_model.id)
     end
   end
+
+  class MyCustomType
+    extend T::Props::CustomType
+
+    def self.instance?(value)
+      value.is_a?(String)
+    end
+
+    def self.deserialize(value)
+      value.clone.freeze
+    end
+
+    def self.serialize(instance)
+      instance
+    end
+  end
+
+  class TestCustomProps
+    include T::Props
+
+    prop :custom, MyCustomType
+    prop :nilable_custom, T.nilable(MyCustomType)
+    prop :collection_custom, T::Array[MyCustomType]
+  end
+
+  describe 'custom types' do
+    before do
+      @obj = TestCustomProps.new
+    end
+
+    it 'work when plain' do
+      @obj.custom = "foo"
+      assert_equal("foo", @obj.custom)
+    end
+
+    it 'work when nilable' do
+      @obj.nilable_custom = nil
+      assert_nil(@obj.nilable_custom)
+
+      @obj.nilable_custom = "foo"
+      assert_equal("foo", @obj.nilable_custom)
+    end
+
+    it 'work as collection element' do
+      skip "this isn't supported"
+
+      @obj.collection_custom = []
+      assert_empty(@obj.collection_custom)
+
+      @obj.collection_custom = ["foo"]
+      assert_equal(["foo"], @obj.collection_custom)
+    end
+  end
+
+  class TestUntyped
+    include T::Props
+
+    prop :untyped, T.untyped
+  end
+
+  describe 'untyped' do
+    it 'has working accessors' do
+      obj = TestUntyped.new
+      obj.untyped = nil
+      assert_nil(obj.untyped)
+      obj.untyped = 'foo'
+      assert_equal('foo', obj.untyped)
+    end
+  end
+
 end
