@@ -80,7 +80,7 @@ Expression::Expression(core::Loc loc) : loc(loc) {}
 Reference::Reference(core::Loc loc) : Expression(loc) {}
 
 ClassDef::ClassDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, unique_ptr<Expression> name,
-                   ANCESTORS_store ancestors, RHS_store rhs, ClassDefKind kind)
+                   ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind)
     : Declaration(loc, declLoc, symbol), kind(kind), rhs(std::move(rhs)), name(std::move(name)),
       ancestors(std::move(ancestors)) {
     categoryCounterInc("trees", "classdef");
@@ -308,7 +308,7 @@ template <class T> void printArgs(const core::GlobalState &gs, stringstream &buf
 
 string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     stringstream buf;
-    if (kind == ClassDefKind::Module) {
+    if (kind == ClassDef::Kind::Module) {
         buf << "module ";
     } else {
         buf << "class ";
@@ -332,7 +332,7 @@ string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
-    buf << "kind = " << (kind == ClassDefKind::Module ? "module" : "class") << '\n';
+    buf << "kind = " << (kind == ClassDef::Kind::Module ? "module" : "class") << '\n';
     printTabs(buf, tabs + 1);
     buf << "name = " << name->showRaw(gs, tabs + 1) << "<"
         << this->symbol.dataAllowingNone(gs)->name.data(gs)->showRaw(gs) << ">" << '\n';

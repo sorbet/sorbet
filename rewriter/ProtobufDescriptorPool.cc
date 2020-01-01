@@ -16,7 +16,7 @@ vector<unique_ptr<ast::Expression>> ProtobufDescriptorPool::run(core::MutableCon
     if (sendMsgclass->fun != core::Names::msgclass() && sendMsgclass->fun != core::Names::enummodule()) {
         return empty;
     }
-    auto kind = sendMsgclass->fun == core::Names::msgclass() ? ast::ClassDefKind::Class : ast::ClassDefKind::Module;
+    auto kind = sendMsgclass->fun == core::Names::msgclass() ? ast::ClassDef::Kind::Class : ast::ClassDef::Kind::Module;
 
     auto sendLookup = ast::cast_tree<ast::Send>(sendMsgclass->recv.get());
     if (sendLookup == nullptr || sendLookup->fun != core::Names::lookup()) {

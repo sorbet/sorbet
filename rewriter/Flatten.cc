@@ -276,7 +276,7 @@ class FlattenWalk {
                 ast::MK::Class(loc, loc,
                                make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
                                                                  core::Names::singleton()),
-                               {}, std::move(body), ast::ClassDefKind::Class);
+                               {}, std::move(body), ast::ClassDef::Kind::Class);
             rhs.emplace_back(std::move(classDef));
         }
 

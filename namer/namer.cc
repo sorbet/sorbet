@@ -226,7 +226,7 @@ public:
                 // Nothing else should have been typeAlias by now.
                 ENFORCE(klass->symbol == core::Symbols::root());
             }
-            bool isModule = klass->kind == ast::ClassDefKind::Module;
+            bool isModule = klass->kind == ast::ClassDef::Kind::Module;
             if (!klass->symbol.data(ctx)->isClassOrModule()) {
                 // we might have already mangled the class symbol, so see if we have a symbol that is a class already
                 auto klassSymbol =

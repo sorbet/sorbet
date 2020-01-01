@@ -126,7 +126,7 @@ public:
     ANCESTORS_store singletonAncestors;
 
     ClassDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, std::unique_ptr<Expression> name,
-             ANCESTORS_store ancestors, RHS_store rhs, ClassDefKind kind);
+             ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind);
 
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);

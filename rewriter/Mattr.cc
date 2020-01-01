@@ -30,7 +30,7 @@ static void addInstanceCounterPart(vector<unique_ptr<ast::Expression>> &sink, co
 }
 
 vector<unique_ptr<ast::Expression>> Mattr::run(core::MutableContext ctx, const ast::Send *send,
-                                               ast::ClassDefKind classDefKind) {
+                                               ast::ClassDef::Kind classDefKind) {
     vector<unique_ptr<ast::Expression>> empty;
     bool doReaders = false;
     bool doWriters = false;
