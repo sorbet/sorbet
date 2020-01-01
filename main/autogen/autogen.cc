@@ -73,7 +73,7 @@ public:
 
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
-        if (original->kind == ast::Class) {
+        if (original->kind == ast::ClassDef::Kind::Class) {
             def.type = Definition::Class;
         } else {
             def.type = Definition::Module;
@@ -92,7 +92,7 @@ public:
         refs[it->second.id()].definitionLoc = original->loc;
 
         auto ait = original->ancestors.begin();
-        if (original->kind == ast::Class && !original->ancestors.empty()) {
+        if (original->kind == ast::ClassDef::Kind::Class && !original->ancestors.empty()) {
             // Handle the superclass at outer scope
             *ait = ast::TreeMap::apply(ctx, *this, move(*ait));
             ++ait;
@@ -118,7 +118,7 @@ public:
             if (it == refMap.end()) {
                 continue;
             }
-            if (original->kind == ast::Class && &ancst == &original->ancestors.front()) {
+            if (original->kind == ast::ClassDef::Kind::Class && &ancst == &original->ancestors.front()) {
                 // superclass
                 def.parent_ref = it->second;
             }

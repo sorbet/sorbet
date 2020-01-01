@@ -19,7 +19,7 @@ enum class FromWhere {
 };
 
 bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
-    if (klass->kind != ast::Class || klass->ancestors.empty()) {
+    if (klass->kind != ast::ClassDef::Kind::Class || klass->ancestors.empty()) {
         return false;
     }
     auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(klass->ancestors.front().get());

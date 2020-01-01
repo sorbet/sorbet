@@ -42,7 +42,7 @@ vector<unique_ptr<ast::Expression>> Mattr::run(core::MutableContext ctx, const a
     } else if (send->fun == core::Names::mattrAccessor() || send->fun == core::Names::cattrAccessor()) {
         doReaders = true;
         doWriters = true;
-    } else if (classDefKind == ast::Class && send->fun == core::Names::classAttribute()) {
+    } else if (classDefKind == ast::ClassDef::Kind::Class && send->fun == core::Names::classAttribute()) {
         doReaders = true;
         doWriters = true;
         doPredicates = true;

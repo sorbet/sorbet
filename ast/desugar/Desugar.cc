@@ -1747,7 +1747,7 @@ unique_ptr<Expression> liftTopLevel(DesugarContext dctx, core::Loc loc, unique_p
         rhs.emplace_back(std::move(what));
     }
     return make_unique<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(), ClassDef::ANCESTORS_store(),
-                                 std::move(rhs), Class);
+                                 std::move(rhs), ClassDef::Kind::Class);
 }
 } // namespace
 
