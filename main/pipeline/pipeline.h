@@ -31,8 +31,11 @@ std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vect
 std::vector<ast::ParsedFile> name(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                   const options::Options &opts, bool skipConfigatron = false);
 
+// Note: `epoch` parameter is only used in LSP mode when preemptible is true. Do not use it elsewhere.
+// TODO(jvilk): Make this interface cleaner.
 ast::ParsedFilesOrCancelled typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-                                      const options::Options &opts, WorkerPool &workers);
+                                      const options::Options &opts, WorkerPool &workers, bool cancelable = false,
+                                      bool preemptible = false, u4 epoch = 0);
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts);
 
