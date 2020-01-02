@@ -8,6 +8,35 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
+namespace {
+
+// Handle duplication of arguments to type functions.
+unique_ptr<ast::Expression> dupTypeArg(const ast::Expression *orig) {
+    // shape types, or hash args to a send
+    if (auto hash = ast::cast_tree_const<ast::Hash>(orig)) {
+        ast::Hash::ENTRY_store values;
+        for (auto &value : hash->values) {
+            auto dupedValue = ASTUtil::dupType(value.get());
+            if (!dupedValue) {
+                return nullptr;
+            }
+
+            values.emplace_back(std::move(dupedValue));
+        }
+
+        ast::Hash::ENTRY_store keys;
+        for (auto &key : hash->keys) {
+            keys.emplace_back(key->deepCopy());
+        }
+
+        return ast::MK::Hash(hash->loc, std::move(keys), std::move(values));
+    }
+
+    return ASTUtil::dupType(orig);
+}
+
+} // namespace
+
 unique_ptr<ast::Expression> ASTUtil::dupType(const ast::Expression *orig) {
     auto send = ast::cast_tree_const<ast::Send>(orig);
     if (send) {
@@ -22,7 +51,7 @@ unique_ptr<ast::Expression> ASTUtil::dupType(const ast::Expression *orig) {
             return send->deepCopy();
         }
         for (auto &arg : send->args) {
-            auto dupArg = dupType(arg.get());
+            auto dupArg = dupTypeArg(arg.get());
             if (!dupArg) {
                 // This isn't a Type signature, bail out
                 return nullptr;
