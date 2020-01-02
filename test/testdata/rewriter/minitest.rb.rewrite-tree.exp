@@ -62,12 +62,12 @@ class <emptyTree><<C <root>>> < ()
     end
 
     begin
-      "finds errors in the test name: ".concat(<self>.bad_variable().to_s())
+      ::<Magic>.<concat-strings>("finds errors in the test name: ", <self>.bad_variable().to_s())
       begin
         ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({}).void()
         end
-        def <it '"finds errors in the test name: ".concat(<self>.bad_variable().to_s())'><<C <todo sym>>>(&<blk>)
+        def <it '::<Magic>.<concat-strings>("finds errors in the test name: ", <self>.bad_variable().to_s())'><<C <todo sym>>>(&<blk>)
           <emptyTree>
         end
       end
