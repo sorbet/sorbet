@@ -202,4 +202,49 @@ string DidChangeTextDocumentParams::getSource(string_view oldFileContents) const
     return rv;
 }
 
+void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
+    versionStart = older.versionStart;
+    hasNewFiles = hasNewFiles || older.hasNewFiles;
+    cancellationExpected = cancellationExpected || older.cancellationExpected;
+
+    ENFORCE(updatedFiles.size() == updatedFileHashes.size());
+    ENFORCE(updatedFiles.size() == updatedFileIndexes.size());
+    ENFORCE(older.updatedFiles.size() == older.updatedFileHashes.size());
+    ENFORCE(older.updatedFiles.size() == older.updatedFileIndexes.size());
+
+    // For updates, we prioritize _newer_ updates.
+    UnorderedSet<string> encountered;
+    for (auto &f : updatedFiles) {
+        encountered.emplace(f->path());
+    }
+
+    int i = -1;
+    for (auto &f : older.updatedFiles) {
+        i++;
+        if (encountered.contains(f->path())) {
+            continue;
+        }
+        encountered.emplace(f->path());
+        updatedFiles.push_back(f);
+        updatedFileHashes.push_back(older.updatedFileHashes[i]);
+        auto &ast = older.updatedFileIndexes[i];
+        updatedFileIndexes.push_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
+    }
+}
+
+LSPFileUpdates LSPFileUpdates::copy() const {
+    LSPFileUpdates copy;
+    copy.versionStart = versionStart;
+    copy.versionEnd = versionEnd;
+    copy.canTakeFastPath = canTakeFastPath;
+    copy.hasNewFiles = hasNewFiles;
+    copy.updatedFiles = updatedFiles;
+    copy.updatedFileHashes = updatedFileHashes;
+    copy.cancellationExpected = cancellationExpected;
+    for (auto &ast : updatedFileIndexes) {
+        copy.updatedFileIndexes.push_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
+    }
+    return copy;
+}
+
 } // namespace sorbet::realmain::lsp

@@ -16,7 +16,8 @@ namespace sorbet::realmain::lsp {
  * Encapsulates an update to LSP's file state in a compact form.
  * Placed into json_types.h because it is referenced from InitializedParams.
  */
-struct LSPFileUpdates {
+class LSPFileUpdates final {
+public:
     // This specific update contains versions [versionStart, versionEnd].
     u4 versionEnd = 0;
     u4 versionStart = 0;
@@ -32,6 +33,18 @@ struct LSPFileUpdates {
     std::optional<std::unique_ptr<core::GlobalState>> updatedGS;
     // (Used in tests) Ensures that a slow path typecheck on these updates waits until it gets cancelled.
     bool cancellationExpected = false;
+
+    /**
+     * Merges the given (and older) LSPFileUpdates object into this LSPFileUpdates object.
+     *
+     * Does not handle updating `canTakeFastPath`.
+     */
+    void mergeOlder(const LSPFileUpdates &older);
+
+    /**
+     * Returns a copy of this LSPFileUpdates object. Does not handle deepCopying `updatedGS`.
+     */
+    LSPFileUpdates copy() const;
 };
 
 class DeserializationError : public std::runtime_error {
