@@ -3,28 +3,49 @@
 
 module T::Props::WeakConstructor
   include T::Props::Optional
+  extend T::Sig
 
+  # checked(:never) - O(runtime object construction)
+  sig {params(hash: T::Hash[Symbol, T.untyped]).void.checked(:never)}
   def initialize(hash={})
-    expected_keys = {}
-    hash.each_key {|key| expected_keys[key] = true}
-
     decorator = self.class.decorator
 
-    decorator.props.each do |p, rules|
+    hash_keys_matching_props = decorator.construct_props_with_defaults(self, hash) +
+      decorator.construct_props_without_defaults(self, hash)
+
+    if hash_keys_matching_props < hash.size
+      raise ArgumentError.new("#{self.class}: Unrecognized properties: #{(hash.keys - decorator.props.keys).join(', ')}")
+    end
+  end
+end
+
+module T::Props::WeakConstructor::DecoratorMethods
+  extend T::Sig
+
+  # checked(:never) - O(runtime object construction)
+  sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
+  def construct_props_without_defaults(instance, hash)
+    @props_without_defaults&.count do |p, setter_proc|
       if hash.key?(p)
-        expected_keys.delete(p)
-        val = hash[p]
-      elsif decorator.has_default?(rules)
-        val = decorator.get_default(rules, self.class)
+        instance.instance_exec(hash[p], &setter_proc)
+        true
       else
-        next
+        false
       end
+    end || 0
+  end
 
-      decorator.prop_set(self, p, val, rules)
-    end
-
-    unless expected_keys.empty?
-      raise ArgumentError.new("#{@class}: Unrecognized properties in #with_props: #{expected_keys.keys.join(', ')}")
-    end
+  # checked(:never) - O(runtime object construction)
+  sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
+  def construct_props_with_defaults(instance, hash)
+    @props_with_defaults&.count do |p, default_struct|
+      if hash.key?(p)
+        instance.instance_exec(hash[p], &default_struct.setter_proc)
+        true
+      else
+        default_struct.set_default(instance)
+        false
+      end
+    end || 0
   end
 end

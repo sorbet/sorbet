@@ -78,6 +78,18 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     )
   end
 
+  class ParentWithNoDefault < T::InexactStruct
+    prop :prop, String
+  end
+
+  class ChildWithDefault < ParentWithNoDefault
+    prop :prop, String, default: '', override: true
+  end
+
+  it 'uses default set on child in constructor' do
+    assert_equal('', ChildWithDefault.new.prop)
+  end
+
   it 'serializes' do
     m = a_serializable
 
@@ -209,13 +221,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(ex.message, "Can't set Opus::Types::Test::Props::SerializableTest::NilFieldStruct.bar to nil (instance of NilClass) - need a String")
     end
 
-    # Is this intended? It seems like the behavior you'd want with T::Props::WeakConstructor,
-    # or perhaps with `default: nil`, but not T::Props::Constructor / T::Struct
-    it 'allows implicit but forbids explicit nil in constructor' do
-      struct = NilFieldStruct.new
-      assert_nil(struct.foo)
-      assert_nil(struct.bar)
-      assert_raises(TypeError) do
+    it 'forbids nil in constructor' do
+      assert_raises(ArgumentError) do
+        NilFieldStruct.new
+      end
+      assert_raises(ArgumentError) do
         NilFieldStruct.new(foo: nil, bar: nil)
       end
     end

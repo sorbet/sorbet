@@ -92,8 +92,10 @@ require_relative 'types/props/decorator'
 require_relative 'types/props/errors'
 require_relative 'types/props/plugin'
 require_relative 'types/props/utils'
+require_relative 'types/enum'
 # Props that run sigs statically so have to be after all the others :(
 require_relative 'types/props/private/setter_factory'
+require_relative 'types/props/private/apply_default'
 require_relative 'types/props/optional'
 require_relative 'types/props/weak_constructor'
 require_relative 'types/props/constructor'
@@ -102,6 +104,5 @@ require_relative 'types/props/serializable'
 require_relative 'types/props/type_validation'
 
 require_relative 'types/struct'
-require_relative 'types/enum'
 
 require_relative 'types/compatibility_patches'
