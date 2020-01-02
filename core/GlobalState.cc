@@ -435,6 +435,18 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
+    // Synthesize <Magic>#<concat-strings>(arg: *String) => String
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::concatStrings());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::String();
+        arg.flags.isRepeated = true;
+    }
+    method.data(*this)->resultType = Types::String();
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
     // Synthesize <DeclBuilderForProcs>#<params>(args: Hash) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {

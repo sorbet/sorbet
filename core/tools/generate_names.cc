@@ -339,6 +339,7 @@ NameDef names[] = {
     {"callWithSplatAndBlock", "<call-with-splat-and-block>"},
     {"enumerableToH", "enumerable_to_h"},
     {"selfNew", "<self-new>"},
+    {"concatStrings", "<concat-strings>"},
 
     // GlobalState initEmpty()
     {"Top", "<any>", true},
