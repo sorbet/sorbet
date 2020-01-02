@@ -1014,6 +1014,12 @@ VALUE sorbet_rb_int_to_s(VALUE x, int argc, const VALUE *const restrict argv) {
 
     return rb_any_to_s(x);
 }
+
+extern VALUE rb_str_concat_literals(int, const VALUE *const restrict);
+
+VALUE sorbet_concatStrings(VALUE recv, int argc, const VALUE *const restrict argv) {
+    return rb_str_concat_literals(argc, argv);
+}
 // ****
 // ****                       Compile-time only intrinsics. These should be eliminated by passes.
 // ****
