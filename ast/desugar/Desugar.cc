@@ -822,26 +822,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     return;
                 }
 
-                auto it = dsymbol->nodes.begin();
-                auto end = dsymbol->nodes.end();
-                unique_ptr<Expression> res;
-                unique_ptr<Expression> first = node2TreeImpl(dctx, std::move(*it));
-                if (isStringLit(dctx, first)) {
-                    res = std::move(first);
-                } else {
-                    res = MK::Send0(loc, std::move(first), core::Names::toS());
-                }
-                ++it;
-                for (; it != end; ++it) {
-                    auto &stat = *it;
-                    unique_ptr<Expression> narg = node2TreeImpl(dctx, std::move(stat));
-                    if (!isStringLit(dctx, narg)) {
-                        narg = MK::Send0(loc, std::move(narg), core::Names::toS());
-                    }
-                    auto n = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
-                    res.reset(n.release());
-                };
-                res = MK::Send0(loc, std::move(res), core::Names::intern());
+                auto str = desugarDString(dctx, loc, std::move(dsymbol->nodes));
+                unique_ptr<Expression> res = MK::Send0(loc, std::move(str), core::Names::intern());
 
                 result.swap(res);
             },
