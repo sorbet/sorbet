@@ -104,14 +104,13 @@ public:
             return;
         }
         llvm::LLVMContext &lctx = threadState->lctx;
-        string functionName = cfg.symbol.data(gs)->toStringFullName(gs);
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
         // TODO: Figure out why this isn't true
         // ENFORCE(absl::c_find(cfg.symbol.data(gs)->locs(), md->loc) != cfg.symbol.data(gs)->locs().end(),
         // md->loc.toString(gs));
         ENFORCE(md->loc.file().exists());
         if (!module) {
-            module = sorbet::compiler::PayloadLoader::readDefaultModule(functionName.data(), lctx);
+            module = sorbet::compiler::PayloadLoader::readDefaultModule(lctx);
             threadState->file = md->loc.file();
         } else {
             ENFORCE(threadState->file == md->loc.file());
@@ -119,7 +118,7 @@ public:
         ENFORCE(threadState->file.exists());
         compiler::CompilerState state(gs, lctx, module.get());
         try {
-            sorbet::compiler::IREmitter::run(state, cfg, md, functionName);
+            sorbet::compiler::IREmitter::run(state, cfg, md);
             string fileName = objectFileName(gs, cfg.symbol.data(gs)->loc().file());
             sorbet::compiler::IREmitter::buildInitFor(state, cfg.symbol, fileName);
         } catch (sorbet::compiler::AbortCompilation &) {

@@ -7,8 +7,7 @@ namespace sorbet::compiler {
 class CompilerState;
 class IREmitter {
 public:
-    static void run(CompilerState &, cfg::CFG &cfg, std::unique_ptr<ast::MethodDef> &md,
-                    const std::string &functionName);
+    static void run(CompilerState &, cfg::CFG &cfg, std::unique_ptr<ast::MethodDef> &md);
     static void buildInitFor(CompilerState &gs, const core::SymbolRef &sym, std::string_view objectName);
 };
 } // namespace sorbet::compiler
