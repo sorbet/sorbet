@@ -107,7 +107,8 @@ struct SpawningWalker {
 
                 auto path = fmt::format("{}//plugin-generated|{}.rbi", klass->loc.file().data(ctx).path(),
                                         subprocessResults.size());
-                auto file = make_shared<core::File>(move(path), fmt::to_string(generatedSource), core::File::Normal);
+                auto file =
+                    make_shared<core::File>(move(path), fmt::to_string(generatedSource), core::File::Type::Normal);
                 file->pluginGenerated = true;
                 subprocessResults.emplace_back(move(file));
             } else {

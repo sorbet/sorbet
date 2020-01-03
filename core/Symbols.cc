@@ -519,7 +519,7 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
         return true;
     }
     for (auto loc : locs_) {
-        if (loc.file().data(gs).sourceType == File::Payload) {
+        if (loc.file().data(gs).sourceType == File::Type::Payload) {
             return true;
         }
     }

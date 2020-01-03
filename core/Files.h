@@ -59,7 +59,7 @@ CheckSize(FileRef, 2, 2);
 
 class File final {
 public:
-    enum Type {
+    enum class Type {
         NotYetRead,
         PayloadGeneration, // Files marked during --store-state
         Payload,           // Files loaded from the binary payload

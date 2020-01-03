@@ -74,13 +74,13 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
         int fileIdx = 0; // Skip file 0
         while (fileIdx + 1 < from.filesUsed()) {
             fileIdx++;
-            if (from.files[fileIdx]->sourceType == File::NotYetRead) {
+            if (from.files[fileIdx]->sourceType == File::Type::NotYetRead) {
                 continue;
             }
             if (fileIdx < to.filesUsed() && from.files[fileIdx].get() == to.files[fileIdx].get()) {
                 continue;
             }
-            ENFORCE(fileIdx >= to.filesUsed() || to.files[fileIdx]->sourceType == File::NotYetRead);
+            ENFORCE(fileIdx >= to.filesUsed() || to.files[fileIdx]->sourceType == File::Type::NotYetRead);
             to.enterNewFileAt(from.files[fileIdx], fileIdx);
         }
     }
