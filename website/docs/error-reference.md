@@ -47,6 +47,8 @@ There was a Ruby syntax error. Sorbet was unable to parse the source code. If
 you encounter this error but your code is accepted by Ruby itself, this is a bug
 in our parser; please [report an issue] to us so we can address it.
 
+The only intentional break with Ruby compatiblity is that method names that are keywords have some limitations with multi-line code, as explained in https://github.com/sorbet/sorbet/pull/1993, and should not be reported.
+
 ## 4002
 
 Sorbet requires that every `include` references a constant literal. For example,
