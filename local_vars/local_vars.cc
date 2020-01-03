@@ -246,7 +246,7 @@ public:
 
     unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
                                                              unique_ptr<ast::UnresolvedIdent> nm) {
-        if (nm->kind == ast::UnresolvedIdent::Local) {
+        if (nm->kind == ast::UnresolvedIdent::Kind::Local) {
             auto &frame = scopeStack.back();
             core::LocalVariable &cur = frame.locals[nm->name];
             if (!cur.exists()) {

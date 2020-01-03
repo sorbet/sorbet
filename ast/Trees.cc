@@ -636,16 +636,16 @@ string UnresolvedIdent::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "kind = ";
     switch (this->kind) {
-        case Local:
+        case Kind::Local:
             buf << "Local";
             break;
-        case Instance:
+        case Kind::Instance:
             buf << "Instance";
             break;
-        case Class:
+        case Kind::Class:
             buf << "Class";
             break;
-        case Global:
+        case Kind::Global:
             buf << "Global";
             break;
     }
