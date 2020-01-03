@@ -919,7 +919,7 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
         [&](ast::ZSuperArgs *a) { pickleAstHeader(p, 30, a); },
         [&](ast::UnresolvedIdent *a) {
             pickleAstHeader(p, 31, a);
-            p.putU1((int)a->kind);
+            p.putU1(static_cast<u1>(a->kind));
             p.putU4(a->name._id);
         },
         [&](ast::ConstantLit *a) {
