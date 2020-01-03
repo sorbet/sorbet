@@ -171,9 +171,19 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
-  class MigratingNilFieldModel2 < T::Struct
+  class NilFieldStruct < T::Struct
     prop :foo, T.nilable(Integer), raise_on_nil_write: true
     prop :bar, T.nilable(String), raise_on_nil_write: true
+  end
+
+  class NilFieldWeakConstructor
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+    prop :prop, T.nilable(String), raise_on_nil_write: true
+  end
+
+  class NilDefaultStruct < T::Struct
+    prop :prop, T.nilable(String), raise_on_nil_write: true, default: nil
   end
 
   describe 'raise_on_nil_write' do
@@ -187,17 +197,90 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       end
     end
 
-    it 'throw exception on nil writes' do
-      foo = MigratingNilFieldModel2.new
-      ex = assert_raises do
+    it 'forbids nil in setter' do
+      struct = NilFieldStruct.new(foo: 1, bar: 'something')
+      ex = assert_raises(TypeError) do
+        struct.foo = nil
+      end
+      assert_includes(ex.message, "Can't set Opus::Types::Test::Props::SerializableTest::NilFieldStruct.foo to nil (instance of NilClass) - need a Integer")
+      ex = assert_raises(TypeError) do
+        struct.bar = nil
+      end
+      assert_includes(ex.message, "Can't set Opus::Types::Test::Props::SerializableTest::NilFieldStruct.bar to nil (instance of NilClass) - need a String")
+    end
+
+    # Is this intended? It seems like the behavior you'd want with T::Props::WeakConstructor,
+    # or perhaps with `default: nil`, but not T::Props::Constructor / T::Struct
+    it 'allows implicit but forbids explicit nil in constructor' do
+      struct = NilFieldStruct.new
+      assert_nil(struct.foo)
+      assert_nil(struct.bar)
+      assert_raises(TypeError) do
+        NilFieldStruct.new(foo: nil, bar: nil)
+      end
+    end
+
+    it 'throws exception on nil serialize' do
+      foo = NilFieldStruct.allocate
+      ex = assert_raises(T::Props::InvalidValueError) do
         foo.serialize
       end
-      assert_includes(ex.message, 'Opus::Types::Test::Props::SerializableTest::MigratingNilFieldModel2.foo not set for non-optional prop')
+      assert_includes(ex.message, 'Opus::Types::Test::Props::SerializableTest::NilFieldStruct.foo not set for non-optional prop')
     end
 
     it 'does not assert when strict=false' do
-      foo = MigratingNilFieldModel2.new
+      foo = NilFieldStruct.allocate
       foo.serialize(false)
+    end
+
+    describe 'with weak constructor' do
+      it 'forbids nil in setter' do
+        struct = NilFieldWeakConstructor.new(prop: 'something')
+        assert_raises(TypeError) do
+          struct.prop = nil
+        end
+      end
+
+      it 'allows implicit but forbids explicit nil in constructor' do
+        struct = NilFieldWeakConstructor.new
+        assert_nil(struct.prop)
+        assert_raises(TypeError) do
+          NilFieldWeakConstructor.new(prop: nil)
+        end
+      end
+
+      it 'throws exception on nil serialize' do
+        struct = NilFieldWeakConstructor.new
+        assert_raises(T::Props::InvalidValueError) do
+          struct.serialize
+        end
+      end
+    end
+
+    describe 'when default is nil' do
+      # Is this intended? It seems like the behavior you'd want with T::Props::WeakConstructor,
+      # not T::Props::Constructor / T::Struct
+      it 'allows nil in constructor' do
+        struct = NilDefaultStruct.new
+        assert_nil(struct.prop)
+        struct = NilDefaultStruct.new(prop: nil)
+        assert_nil(struct.prop)
+      end
+
+      # Is this intended? It doesn't seem like the default should affect the behavior
+      # of the setter
+      it 'allows nil in setter' do
+        struct = NilDefaultStruct.new(prop: 'something')
+        struct.prop = nil
+        assert_nil(struct.prop)
+      end
+
+      it 'throws exception on nil serialize' do
+        struct = NilDefaultStruct.new
+        assert_raises(T::Props::InvalidValueError) do
+          struct.serialize
+        end
+      end
     end
   end
 
