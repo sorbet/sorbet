@@ -1015,9 +1015,19 @@ VALUE sorbet_rb_int_to_s(VALUE x, int argc, const VALUE *const restrict argv) {
     return rb_any_to_s(x);
 }
 
+extern VALUE rb_obj_as_string_result(VALUE, VALUE);
+
 extern VALUE rb_str_concat_literals(int, const VALUE *const restrict);
 
-VALUE sorbet_concatStrings(VALUE recv, int argc, const VALUE *const restrict argv) {
+VALUE sorbet_stringInterpolate(VALUE recv, int argc, VALUE *argv) {
+
+    for (int i=0; i < argc; ++i) {
+        if (!RB_TYPE_P(argv[i], T_STRING)) {
+            VALUE str = rb_funcall(argv[i], idTo_s, 0);
+            argv[i] = rb_obj_as_string_result(str, argv[i]);
+        }
+    }
+
     return rb_str_concat_literals(argc, argv);
 }
 // ****
