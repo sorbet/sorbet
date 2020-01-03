@@ -425,6 +425,15 @@ llvm::Function *IREmitterHelpers::getInitFunction(CompilerState &cs, core::Symbo
 }
 
 llvm::Function *IREmitterHelpers::cleanFunctionBody(CompilerState &cs, llvm::Function *func) {
+    for (auto &bb : *func) {
+        bb.dropAllReferences();
+    }
+
+    // Delete all basic blocks. They are now unused, except possibly by
+    // blockaddresses, but BasicBlock's destructor takes care of those.
+    while (!func->empty()) {
+        func->begin()->eraseFromParent();
+    }
     return func;
 }
 
