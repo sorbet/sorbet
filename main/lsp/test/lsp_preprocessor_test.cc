@@ -107,6 +107,20 @@ LSPFileUpdates makeUpdates(u4 &version, vector<pair<string, string>> files) {
     return updates;
 }
 
+class CountingTask final : public core::lsp::Task {
+public:
+    int runCount = 0;
+    core::GlobalState &gs;
+
+    CountingTask(core::GlobalState &gs) : gs(gs) {}
+
+    void run() override {
+        // The task should run with typecheck mutex held with a write lock.
+        gs.typecheckMutex->AssertHeld();
+        runCount++;
+    }
+};
+
 } // namespace
 
 TEST(TimeTravelingGlobalState, ComesBefore) { // NOLINT
@@ -666,6 +680,44 @@ TEST(SlowPathCancelation, DoesNotIncludeOldEditsInCombinedEdit) { // NOLINT
     // Mega update should *not* contain `bar.rb` update.
     ASSERT_EQ(1, updates->updatedFiles.size());
     ASSERT_EQ(updates->updatedFiles[0]->source(), fooV4);
+}
+
+TEST(PreemptionTasks, PreemptionTasksWorkAsExpected) {
+    auto gs = makeGS();
+    // Note: needs to be > 0 otherwise an enforce triggers.
+    gs->lspTypecheckCount++;
+
+    // No preemption task registered.
+    EXPECT_FALSE(gs->tryRunPreemptionTask());
+
+    auto task = make_shared<CountingTask>(*gs);
+    // Should fail because a slow path is not running, so there's nothing to preempt.
+    EXPECT_FALSE(gs->tryPreempt(task));
+    // No slow path running, so we cannot cancel it.
+    EXPECT_FALSE(gs->tryCancelSlowPath(3));
+
+    // Signify to GlobalState that a slow path is beginning.
+    gs->startCommitEpoch(1, 2);
+    EXPECT_FALSE(gs->wasTypecheckingCanceled());
+
+    // Preempting should work now.
+    EXPECT_TRUE(gs->tryPreempt(task));
+
+    // We should be able to cancel a slow path even if a preemption task is scheduled.
+    EXPECT_TRUE(gs->tryCancelSlowPath(3));
+
+    // However, GlobalState shouldn't trigger cancelation until the preemption task runs.
+    EXPECT_FALSE(gs->wasTypecheckingCanceled());
+
+    // This should run + clear the scheduled task.
+    EXPECT_TRUE(gs->tryRunPreemptionTask());
+    EXPECT_EQ(1, task->runCount);
+
+    // GlobalState should now allow cancelation to proceed.
+    EXPECT_TRUE(gs->wasTypecheckingCanceled());
+
+    // We should not be able to schedule further tasks after cancelation.
+    EXPECT_FALSE(gs->tryPreempt(task));
 }
 
 } // namespace sorbet::realmain::lsp::test
