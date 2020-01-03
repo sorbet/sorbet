@@ -20,7 +20,6 @@ module Intrinsics
       "Float",
       "Hash",
       "Integer",
-      "Kernel",
       "NilClass",
       "Range",
       "String",
