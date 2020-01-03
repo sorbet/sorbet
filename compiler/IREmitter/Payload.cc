@@ -269,16 +269,30 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
     return ret;
 }
 
-llvm::Value *allocateRubyStackFramesImpl(CompilerState &cs, llvm::IRBuilderBase &build,
-                                         unique_ptr<ast::MethodDef> &md) {
-    auto &builder = builderCast(build);
+llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, unique_ptr<ast::MethodDef> &md,
+                                            llvm::GlobalVariable *store) {
+    std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
+    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
+    auto constr =
+        llvm::Function::Create(ft, llvm::Function::InternalLinkage, {"Constr_", store->getName()}, *cs.module);
+
+    auto bei = llvm::BasicBlock::Create(cs, "entryInitializers", constr);
+    auto bb = llvm::BasicBlock::Create(cs, "constr", constr);
+
+    llvm::IRBuilder<> builder(cs);
+    builder.SetInsertPoint(bb);
+
+    // We are building a new function. We should redefine where do function initializers go
+    auto cs1 = cs;
+    cs1.functionEntryInitializers = bei;
+
     auto loc = md->loc;
     auto sym = md->symbol;
     auto funcName =
-        IREmitterHelpers::isStaticInit(cs, sym) ? "<top (required)>" : sym.data(cs)->name.data(cs)->shortName(cs);
-    auto funcNameId = Payload::idIntern(cs, builder, funcName);
+        IREmitterHelpers::isStaticInit(cs, sym) ? "<top (required)>"sv : sym.data(cs)->name.data(cs)->shortName(cs);
+    auto funcNameId = Payload::idIntern(cs1, builder, funcName);
     auto funcNameValue = Payload::cPtrToRubyString(cs, builder, funcName);
-    auto recv = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
+    auto recv = Payload::getRubyConstant(cs1, sym.data(cs)->owner, builder);
     auto filename = loc.file().data(cs).path();
     auto filenameValue = Payload::cPtrToRubyString(cs, builder, filename);
     // TODO make this a real absoluate path
@@ -289,32 +303,30 @@ llvm::Value *allocateRubyStackFramesImpl(CompilerState &cs, llvm::IRBuilderBase 
                                   {recv, funcNameValue, funcNameId, filenameValue, realpathValue,
                                    llvm::ConstantInt::get(cs, llvm::APInt(32, pos.first.line)),
                                    llvm::ConstantInt::get(cs, llvm::APInt(32, pos.second.line))});
-    return ret;
+    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
+    llvm::Constant *indices[] = {zero};
+    builder.CreateStore(ret, llvm::ConstantExpr::getInBoundsGetElementPtr(store->getValueType(), store, indices));
+    builder.CreateRetVoid();
+    builder.SetInsertPoint(bei);
+    builder.CreateBr(bb);
+    return constr;
 }
 
 llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &build, unique_ptr<ast::MethodDef> &md) {
     auto tp = llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(cs));
-    auto zero = llvm::ConstantPointerNull::get(tp);
+    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     auto name = IREmitterHelpers::getFunctionName(cs, md->symbol);
     llvm::Constant *indices[] = {zero};
     string rawName = "stackFramePrecomputed_" + name;
     llvm::IRBuilder<> globalInitBuilder(cs);
     auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
+        auto nullv = llvm::ConstantPointerNull::get(tp);
         auto ret =
-            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
+            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, nullv, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
         ret->setAlignment(llvm::MaybeAlign(8));
         // create constructor
-        std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
-        auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
-        auto constr = llvm::Function::Create(ft, llvm::Function::InternalLinkage, {"Constr_", rawName}, *cs.module);
-
-        auto bb = llvm::BasicBlock::Create(cs, "constr", constr);
-        globalInitBuilder.SetInsertPoint(bb);
-        auto rawID = allocateRubyStackFramesImpl(cs, globalInitBuilder, md);
-        globalInitBuilder.CreateStore(rawID,
-                                      llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
-        globalInitBuilder.CreateRetVoid();
+        auto constr = allocateRubyStackFramesImpl(cs, md, ret);
         llvm::appendToGlobalCtors(*cs.module, constr, 0, ret);
 
         return ret;
