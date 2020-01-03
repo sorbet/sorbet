@@ -1143,7 +1143,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             return make_unique<ast::ZSuperArgs>(loc);
         }
         case 31: {
-            auto kind = (ast::UnresolvedIdent::VarKind)p.getU1();
+            auto kind = (ast::UnresolvedIdent::Kind)p.getU1();
             NameRef name = unpickleNameRef(p, gs);
             return make_unique<ast::UnresolvedIdent>(loc, kind, name);
         }

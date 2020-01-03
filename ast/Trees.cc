@@ -154,7 +154,7 @@ Local::Local(core::Loc loc, core::LocalVariable localVariable1) : Reference(loc)
     _sanityCheck();
 }
 
-UnresolvedIdent::UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name)
+UnresolvedIdent::UnresolvedIdent(core::Loc loc, Kind kind, core::NameRef name)
     : Reference(loc), name(name), kind(kind) {
     categoryCounterInc("trees", "unresolvedident");
     _sanityCheck();
