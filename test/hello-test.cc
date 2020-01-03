@@ -165,7 +165,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     classrhs.emplace_back(std::move(methodDef));
     unique_ptr<ast::Expression> tree =
         make_unique<ast::ClassDef>(loc, loc, classSym, std::move(cnst), ast::ClassDef::ANCESTORS_store(),
-                                   std::move(classrhs), ast::ClassDefKind::Class);
+                                   std::move(classrhs), ast::ClassDef::Kind::Class);
     Counter c;
 
     auto r = ast::TreeMap::apply(ctx, c, std::move(tree));

@@ -226,7 +226,7 @@ public:
                 // Nothing else should have been typeAlias by now.
                 ENFORCE(klass->symbol == core::Symbols::root());
             }
-            bool isModule = klass->kind == ast::ClassDefKind::Module;
+            bool isModule = klass->kind == ast::ClassDef::Kind::Module;
             if (!klass->symbol.data(ctx)->isClassOrModule()) {
                 // we might have already mangled the class symbol, so see if we have a symbol that is a class already
                 auto klassSymbol =
@@ -301,7 +301,7 @@ public:
         }
         if (send->fun == core::Names::declareInterface()) {
             klass->symbol.data(ctx)->setClassInterface();
-            if (klass->kind == ast::Class) {
+            if (klass->kind == ast::ClassDef::Kind::Class) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
                     e.replaceWith("Change `interface!` to `abstract!`", send->loc, "abstract!");
@@ -324,7 +324,7 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
-        if (klass->kind == ast::Class && !klass->symbol.data(ctx)->superClass().exists() &&
+        if (klass->kind == ast::ClassDef::Kind::Class && !klass->symbol.data(ctx)->superClass().exists() &&
             klass->symbol != core::Symbols::BasicObject()) {
             klass->symbol.data(ctx)->setSuperClass(core::Symbols::todo());
         }
@@ -358,7 +358,7 @@ public:
         if (ast::isa_tree<ast::ConstantLit>(klass->name.get())) {
             ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->name->deepCopy()));
         }
-        if (klass->kind == ast::Class && !klass->ancestors.empty() &&
+        if (klass->kind == ast::ClassDef::Kind::Class && !klass->ancestors.empty() &&
             shouldLeaveAncestorForIDE(klass->ancestors.front())) {
             ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()));
         }

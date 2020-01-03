@@ -105,11 +105,13 @@ public:
 };
 // CheckSize(Declaration, 24, 8);
 
-enum ClassDefKind : u1 { Module, Class };
-
 class ClassDef final : public Declaration {
 public:
-    ClassDefKind kind;
+    enum class Kind : u1 {
+        Module,
+        Class,
+    };
+    Kind kind;
     static constexpr int EXPECTED_RHS_COUNT = 4;
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_RHS_COUNT> RHS_store;
 
@@ -124,7 +126,7 @@ public:
     ANCESTORS_store singletonAncestors;
 
     ClassDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, std::unique_ptr<Expression> name,
-             ANCESTORS_store ancestors, RHS_store rhs, ClassDefKind kind);
+             ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind);
 
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);

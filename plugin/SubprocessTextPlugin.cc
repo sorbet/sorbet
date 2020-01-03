@@ -14,7 +14,7 @@ struct Namespace {
     InlinedVector<core::NameRef, 3> components;
 
     Namespace(const unique_ptr<ast::ClassDef> &klass) {
-        type = (klass->kind == ast::ClassDefKind::Module ? Module : Class);
+        type = (klass->kind == ast::ClassDef::Kind::Module ? Module : Class);
         fillComponents(klass->name.get());
     }
     ~Namespace() = default;

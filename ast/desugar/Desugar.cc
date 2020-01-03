@@ -864,7 +864,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 ClassDef::ANCESTORS_store ancestors;
                 unique_ptr<Expression> res =
                     MK::Class(module->loc, module->declLoc, node2TreeImpl(dctx, std::move(module->name)),
-                              std::move(ancestors), std::move(body), ClassDefKind::Module);
+                              std::move(ancestors), std::move(body), ClassDef::Kind::Module);
                 result.swap(res);
             },
             [&](parser::Class *claz) {
@@ -877,7 +877,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 }
                 unique_ptr<Expression> res =
                     MK::Class(claz->loc, claz->declLoc, node2TreeImpl(dctx, std::move(claz->name)),
-                              std::move(ancestors), std::move(body), ClassDefKind::Class);
+                              std::move(ancestors), std::move(body), ClassDef::Kind::Class);
                 result.swap(res);
             },
             [&](parser::Arg *arg) {
@@ -956,7 +956,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 unique_ptr<Expression> res = make_unique<ClassDef>(
                     sclass->loc, sclass->declLoc, core::Symbols::todo(),
                     make_unique<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Class, core::Names::singleton()),
-                    std::move(emptyAncestors), std::move(body), ClassDefKind::Class);
+                    std::move(emptyAncestors), std::move(body), ClassDef::Kind::Class);
                 result.swap(res);
             },
             [&](parser::Block *block) {
@@ -1733,7 +1733,7 @@ unique_ptr<Expression> liftTopLevel(DesugarContext dctx, core::Loc loc, unique_p
         rhs.emplace_back(std::move(what));
     }
     return make_unique<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(), ClassDef::ANCESTORS_store(),
-                                 std::move(rhs), Class);
+                                 std::move(rhs), ClassDef::Kind::Class);
 }
 } // namespace
 
