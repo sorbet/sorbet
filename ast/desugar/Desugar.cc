@@ -112,15 +112,14 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
     unique_ptr<Expression> first = node2TreeImpl(dctx, std::move(*it));
     InlinedVector<unique_ptr<Expression>, 4> stringsAccumulated;
 
-    Send::ARGS_store concatArgs;
+    Send::ARGS_store interpArgs;
 
     bool allStringsSoFar;
     if (isStringLit(dctx, first) || isa_tree<EmptyTree>(first.get())) {
         stringsAccumulated.emplace_back(std::move(first));
         allStringsSoFar = true;
     } else {
-        auto pieceLoc = first->loc;
-        concatArgs.emplace_back(MK::Send0(pieceLoc, std::move(first), core::Names::toS()));
+        interpArgs.emplace_back(std::move(first));
         allStringsSoFar = false;
     }
     ++it;
@@ -128,10 +127,6 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
     for (; it != end; ++it) {
         auto &stat = *it;
         unique_ptr<Expression> narg = node2TreeImpl(dctx, std::move(stat));
-        if (!isStringLit(dctx, narg) && !isa_tree<EmptyTree>(narg.get())) {
-            auto pieceLoc = narg->loc;
-            narg = MK::Send0(pieceLoc, std::move(narg), core::Names::toS());
-        }
         if (allStringsSoFar && isStringLit(dctx, narg)) {
             stringsAccumulated.emplace_back(std::move(narg));
         } else if (isa_tree<EmptyTree>(narg.get())) {
@@ -139,16 +134,16 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
         } else {
             if (allStringsSoFar) {
                 allStringsSoFar = false;
-                concatArgs.emplace_back(mergeStrings(dctx, loc, std::move(stringsAccumulated)));
+                interpArgs.emplace_back(mergeStrings(dctx, loc, std::move(stringsAccumulated)));
             }
-            concatArgs.emplace_back(std::move(narg));
+            interpArgs.emplace_back(std::move(narg));
         }
     };
     if (allStringsSoFar) {
         return mergeStrings(dctx, loc, std::move(stringsAccumulated));
     } else {
         auto recv = MK::Constant(loc, core::Symbols::Magic());
-        return MK::Send(loc, std::move(recv), core::Names::concatStrings(), std::move(concatArgs));
+        return MK::Send(loc, std::move(recv), core::Names::stringInterpolate(), std::move(interpArgs));
     }
 }
 

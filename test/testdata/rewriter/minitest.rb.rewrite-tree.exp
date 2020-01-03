@@ -62,12 +62,12 @@ class <emptyTree><<C <root>>> < ()
     end
 
     begin
-      ::<Magic>.<concat-strings>("finds errors in the test name: ", <self>.bad_variable().to_s())
+      ::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())
       begin
         ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({}).void()
         end
-        def <it '::<Magic>.<concat-strings>("finds errors in the test name: ", <self>.bad_variable().to_s())'><<C <todo sym>>>(&<blk>)
+        def <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'><<C <todo sym>>>(&<blk>)
           <emptyTree>
         end
       end
