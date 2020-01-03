@@ -108,6 +108,9 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, 
         return ret;
     }));
 
+    ENFORCE(cs.functionEntryInitializers->getParent() == builder.GetInsertBlock()->getParent(),
+            "you're calling this function from something low-level that passed a IRBuilder that points outside of "
+            "function currently being generated");
     globalInitBuilder.SetInsertPoint(cs.functionEntryInitializers);
     auto global = globalInitBuilder.CreateLoad(
         llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
