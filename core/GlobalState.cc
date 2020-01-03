@@ -435,11 +435,11 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
-    // Synthesize <Magic>#<concat-strings>(arg: *String) => String
-    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::concatStrings());
+    // Synthesize <Magic>#<string-interpolate>(arg: *T.untyped) => String
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::stringInterpolate());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::String();
+        arg.type = Types::untyped(*this, method);
         arg.flags.isRepeated = true;
     }
     method.data(*this)->resultType = Types::String();

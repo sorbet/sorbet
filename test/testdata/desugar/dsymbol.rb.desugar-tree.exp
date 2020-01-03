@@ -5,5 +5,5 @@ class <emptyTree><<C <root>>> < ()
 
   :""
 
-  ::<Magic>.<concat-strings>("hello_", <self>.name().to_s(), "!").intern()
+  ::<Magic>.<string-interpolate>("hello_", <self>.name(), "!").intern()
 end
