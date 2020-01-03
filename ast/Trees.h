@@ -337,7 +337,7 @@ private:
 
 class UnresolvedIdent final : public Reference {
 public:
-    enum Kind {
+    enum class Kind : u1 {
         Local,
         Instance,
         Class,
