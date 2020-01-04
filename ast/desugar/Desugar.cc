@@ -1078,7 +1078,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(res);
             },
             [&](parser::For *for_) {
-                ast::MethodDef::ARGS_store args;
+                MethodDef::ARGS_store args;
                 bool canProvideNiceDesugar = true;
                 auto mlhsNode = std::move(for_->vars);
                 if (auto *mlhs = parser::cast_node<parser::Mlhs>(mlhsNode.get())) {
@@ -1107,7 +1107,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
 
                 auto body = node2TreeImpl(dctx, std::move(for_->body));
 
-                unique_ptr<ast::Block> block;
+                unique_ptr<Block> block;
                 if (canProvideNiceDesugar) {
                     block = MK::Block(loc, std::move(body), std::move(args));
                 } else {
