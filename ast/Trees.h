@@ -149,6 +149,7 @@ public:
     core::NameRef name;
     u4 flags;
 
+    // TODO(jez) This uses enum instead of enum class. We should not cargo cult this in new code.
     enum Flags {
         SelfMethod = 1,
         RewriterSynthesized = 2,
