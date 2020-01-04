@@ -15,7 +15,6 @@ enum class FieldType {
     Loc,
 };
 
-
 struct FieldDef {
     string name;
     FieldType type;
@@ -121,7 +120,10 @@ NodeDef nodes[] = {
     {
         "Class",
         "class",
-        vector<FieldDef>({{"declLoc", FieldType::Loc}, {"name", FieldType::Node}, {"superclass", FieldType::Node}, {"body", FieldType::Node}}),
+        vector<FieldDef>({{"declLoc", FieldType::Loc},
+                          {"name", FieldType::Node},
+                          {"superclass", FieldType::Node},
+                          {"body", FieldType::Node}}),
     },
     // complex number literal like "42i"
     {
@@ -163,7 +165,10 @@ NodeDef nodes[] = {
     {
         "DefMethod",
         "def",
-        vector<FieldDef>({{"declLoc", FieldType::Loc}, {"name", FieldType::Name}, {"args", FieldType::Node}, {"body", FieldType::Node}}),
+        vector<FieldDef>({{"declLoc", FieldType::Loc},
+                          {"name", FieldType::Name},
+                          {"args", FieldType::Node},
+                          {"body", FieldType::Node}}),
     },
     // defined?() built-in pseudo-function
     {
@@ -175,7 +180,11 @@ NodeDef nodes[] = {
     {
         "DefS",
         "defs",
-        vector<FieldDef>({{"declLoc", FieldType::Loc}, {"singleton", FieldType::Node}, {"name", FieldType::Name}, {"args", FieldType::Node}, {"body", FieldType::Node}}),
+        vector<FieldDef>({{"declLoc", FieldType::Loc},
+                          {"singleton", FieldType::Node},
+                          {"name", FieldType::Name},
+                          {"args", FieldType::Node},
+                          {"body", FieldType::Node}}),
     },
     // string with an interpolation, all nodes are concatenated in a single string
     {
