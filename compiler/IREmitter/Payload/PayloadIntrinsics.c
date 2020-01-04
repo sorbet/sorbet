@@ -3,38 +3,6 @@
 
 #include "ruby.h"
 
-// BasicObject#==
-// BasicObject#equal?
-// Kernel#eql?
-// Module#==
-// Calling convention: 1
-extern VALUE rb_obj_equal(VALUE obj, VALUE arg_0);
-
-VALUE sorbet_int_rb_obj_equal(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 1, 1);
-    VALUE arg_0 = args[0];
-    return rb_obj_equal(recv, arg_0);
-}
-
-// BasicObject#!
-// Calling convention: 0
-extern VALUE rb_obj_not(VALUE obj);
-
-VALUE sorbet_int_rb_obj_not(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_obj_not(recv);
-}
-
-// BasicObject#!=
-// Calling convention: 1
-extern VALUE rb_obj_not_equal(VALUE obj, VALUE arg_0);
-
-VALUE sorbet_int_rb_obj_not_equal(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 1, 1);
-    VALUE arg_0 = args[0];
-    return rb_obj_not_equal(recv, arg_0);
-}
-
 // Array#initialize_copy
 // Array#replace
 // Calling convention: 1
@@ -314,31 +282,6 @@ extern VALUE rb_obj_encoding(VALUE obj);
 VALUE sorbet_int_rb_obj_encoding(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 0, 0);
     return rb_obj_encoding(recv);
-}
-
-// BasicObject#instance_eval
-// Calling convention: -1
-extern VALUE rb_obj_instance_eval(int argc, const VALUE *args, VALUE obj);
-
-VALUE sorbet_int_rb_obj_instance_eval(VALUE recv, int argc, VALUE *const restrict args) {
-    return rb_obj_instance_eval(argc, args, recv);
-}
-
-// BasicObject#instance_exec
-// Calling convention: -1
-extern VALUE rb_obj_instance_exec(int argc, const VALUE *args, VALUE obj);
-
-VALUE sorbet_int_rb_obj_instance_exec(VALUE recv, int argc, VALUE *const restrict args) {
-    return rb_obj_instance_exec(argc, args, recv);
-}
-
-// BasicObject#__send__
-// Kernel#send
-// Calling convention: -1
-extern VALUE rb_f_send(int argc, const VALUE *args, VALUE obj);
-
-VALUE sorbet_int_rb_f_send(VALUE recv, int argc, VALUE *const restrict args) {
-    return rb_f_send(argc, args, recv);
 }
 
 // Integer#odd?
@@ -634,15 +577,5 @@ VALUE sorbet_int_rb_gcdlcm(VALUE recv, int argc, VALUE *const restrict args) {
     rb_check_arity(argc, 1, 1);
     VALUE arg_0 = args[0];
     return rb_gcdlcm(recv, arg_0);
-}
-
-// BasicObject#__id__
-// Kernel#object_id
-// Calling convention: 0
-extern VALUE rb_obj_id(VALUE obj);
-
-VALUE sorbet_int_rb_obj_id(VALUE recv, int argc, VALUE *const restrict args) {
-    rb_check_arity(argc, 0, 0);
-    return rb_obj_id(recv);
 }
 #endif /* SORBET_LLVM_IMPORTED_INTRINSICS_H */

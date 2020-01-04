@@ -13,7 +13,6 @@ module Intrinsics
 
     SORBET_CLASSES = Set[
       "Array",
-      "BasicObject",
       "Complex",
       "Enumerable",
       "File",
