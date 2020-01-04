@@ -47,7 +47,7 @@ template <class To> bool isa_node(Node *what) {
     return cast_node<To>(what) != nullptr;
 }
 
-typedef InlinedVector<std::unique_ptr<Node>, 4> NodeVec;
+using NodeVec = InlinedVector<std::unique_ptr<Node>, 4>;
 
 #include "parser/Node_gen.h"
 }; // namespace sorbet::parser

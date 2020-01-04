@@ -100,16 +100,16 @@ template <typename ToCheck, std::size_t ExpectedAlign, std::size_t RealAlign = a
 /**
  * Shorter aliases for unsigned ints of specified byte widths.
  */
-typedef uint8_t u1;
+using u1 = uint8_t;
 CheckSize(u1, 1, 1);
 
-typedef uint16_t u2;
+using u2 = uint16_t;
 CheckSize(u2, 2, 2);
 
-typedef uint32_t u4;
+using u4 = uint32_t;
 CheckSize(u4, 4, 4);
 
-typedef uint64_t u8;
+using u8 = uint64_t;
 CheckSize(u8, 8, 8);
 
 template <class From, class To> To *fast_cast(From *what) {

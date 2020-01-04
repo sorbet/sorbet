@@ -1,7 +1,7 @@
 #include <ruby_parser/context.hh>
 
 using namespace ruby_parser;
-typedef Context::State State;
+using State = Context::State;
 
 std::optional<int> Context::firstIndexOfState(State state) {
     for (int i = 0; i < stack.size(); i++) {

@@ -7,9 +7,9 @@ namespace sorbet::autogen {
 
 class Subclasses final {
 public:
-    typedef std::pair<std::string, Definition::Type> Entry;
-    typedef UnorderedSet<Entry> Entries;
-    typedef UnorderedMap<std::string, Entries> Map;
+    using Entry = std::pair<std::string, Definition::Type>;
+    using Entries = UnorderedSet<Entry>;
+    using Map = UnorderedMap<std::string, Entries>;
 
     static std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx, ParsedFile &pf,
                                                             const std::vector<std::string> &absoluteIgnorePatterns,

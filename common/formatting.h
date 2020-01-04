@@ -20,7 +20,7 @@ struct formatter<arg_map_join<It, Char, UnaryOp, UnaryOpResult>, Char> : formatt
     template <typename FormatContext>
     auto format(const arg_map_join<It, Char, UnaryOp, UnaryOpResult> &value, FormatContext &ctx)
         -> decltype(ctx.out()) {
-        typedef formatter<UnaryOpResult, Char> base;
+        using base = formatter<UnaryOpResult, Char>;
 
         auto it = value.begin;
         auto out = ctx.out();

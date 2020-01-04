@@ -35,9 +35,8 @@ public:
  */
 class LSPMessage final {
 public:
-    typedef std::variant<std::unique_ptr<RequestMessage>, std::unique_ptr<NotificationMessage>,
-                         std::unique_ptr<ResponseMessage>>
-        RawLSPMessage;
+    using RawLSPMessage = std::variant<std::unique_ptr<RequestMessage>, std::unique_ptr<NotificationMessage>,
+                                       std::unique_ptr<ResponseMessage>>;
 
 private:
     RawLSPMessage msg;
