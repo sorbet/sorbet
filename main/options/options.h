@@ -83,7 +83,7 @@ struct Printers {
     bool isAutogen() const;
 };
 
-enum Phase {
+enum class Phase {
     INIT,
     PARSER,
     DESUGARER,
