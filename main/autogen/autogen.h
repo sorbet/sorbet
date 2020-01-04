@@ -50,7 +50,7 @@ struct ReferenceRef {
 };
 
 struct Definition {
-    enum Type { Module, Class, Casgn, Alias };
+    enum class Type { Module, Class, Casgn, Alias };
 
     DefinitionRef id;
 
