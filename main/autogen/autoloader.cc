@@ -186,7 +186,7 @@ string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alC
 
     string fullName = "nil";
     auto type = definitionType(ctx);
-    if (type == Definition::Module || type == Definition::Class) {
+    if (type == Definition::Type::Module || type == Definition::Type::Class) {
         fullName = root() ? "Object" : fmt::format("{}", fmt::map_join(nameParts, "::", [&](const auto &nr) -> string {
                                                        return nr.show(ctx);
                                                    }));
@@ -235,7 +235,7 @@ void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::me
 }
 
 void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_buffer &buf) const {
-    if (hasDef() && definitionType(ctx) == Definition::Class) {
+    if (hasDef() && definitionType(ctx) == Definition::Type::Class) {
         fmt::format_to(buf, "\nclass {}", fullName);
         auto &def = definition(ctx);
         if (!def.parentName.empty()) {
@@ -256,7 +256,7 @@ string DefTree::path(core::Context ctx) const {
 
 Definition::Type DefTree::definitionType(core::Context ctx) const {
     if (!hasDef()) {
-        return Definition::Module;
+        return Definition::Type::Module;
     }
     return definition(ctx).def.type;
 }
