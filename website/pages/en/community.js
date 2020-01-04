@@ -107,6 +107,11 @@ class Index extends React.Component {
                   link: '/docs/talks/jvm-ls-2019',
                   venue: 'JVM Language Summit 2019',
                 },
+                {
+                  title: 'Sorbet: A type checker for Ruby 3 you can use today!',
+                  link: '/docs/talks/ruby-conf-2019',
+                  venue: 'RubyConf 2019',
+                },
               ]}
             />
           </div>
