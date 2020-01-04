@@ -407,7 +407,7 @@ private:
         packNames(raw_full_name);
 
         // type
-        packer.pack_uint8(def.type);
+        packer.pack_uint8(static_cast<u8>(def.type));
 
         // defines_behavior
         packBool(def.defines_behavior);
@@ -508,7 +508,7 @@ public:
         for (auto sym : symbols) {
             ++i;
             string str;
-            switch (i) {
+            switch ((Definition::Type)i) {
                 case Definition::Type::Module:
                     str = "module";
                     break;
