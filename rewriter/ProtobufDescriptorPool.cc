@@ -60,7 +60,7 @@ vector<unique_ptr<ast::Expression>> ProtobufDescriptorPool::run(core::MutableCon
     }
 
     vector<unique_ptr<ast::Expression>> res;
-    res.emplace_back(ast::MK::Class(asgn->loc, asgn->loc, asgn->lhs->deepCopy(), {}, std::move(rhs), kind));
+    res.emplace_back(ast::MK::ClassOrModule(asgn->loc, asgn->loc, asgn->lhs->deepCopy(), {}, std::move(rhs), kind));
     return res;
 }
 

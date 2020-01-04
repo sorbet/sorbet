@@ -77,8 +77,7 @@ vector<unique_ptr<ast::Expression>> ClassNew::run(core::MutableContext ctx, ast:
     }
 
     vector<unique_ptr<ast::Expression>> stats;
-    stats.emplace_back(make_unique<ast::ClassDef>(loc, loc, core::Symbols::todo(), std::move(asgn->lhs),
-                                                  std::move(ancestors), std::move(body), ast::ClassDef::Kind::Class));
+    stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
     return stats;
 }
 

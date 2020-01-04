@@ -177,8 +177,7 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         rhs.emplace_back(prepareBody(ctx, std::move(send->block->body)));
         auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
-        return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs),
-                              ast::ClassDef::Kind::Class);
+        return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs));
     } else if (send->fun == core::Names::it()) {
         ConstantMover constantMover;
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));

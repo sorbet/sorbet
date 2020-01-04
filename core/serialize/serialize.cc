@@ -1068,8 +1068,8 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             for (auto &r : rhs) {
                 r = unpickleExpr(p, gs, file);
             }
-            auto ret = ast::MK::Class(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
-                                      (ast::ClassDef::Kind)kind);
+            auto ret = ast::MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
+                                              (ast::ClassDef::Kind)kind);
             ret->singletonAncestors = std::move(singletonAncestors);
             ret->symbol = symbol;
             return ret;
