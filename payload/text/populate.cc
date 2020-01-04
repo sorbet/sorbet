@@ -15,7 +15,7 @@ void polulateRBIsInto(unique_ptr<core::GlobalState> &gs) {
         core::UnfreezeFileTable fileTableAccess(*gs);
         for (auto &p : rbi::all()) {
             auto file = gs->enterFile(p.first, p.second);
-            file.data(*gs).sourceType = core::File::PayloadGeneration;
+            file.data(*gs).sourceType = core::File::Type::PayloadGeneration;
             payloadFiles.emplace_back(move(file));
         }
     }

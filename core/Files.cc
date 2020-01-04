@@ -117,15 +117,15 @@ FileRef::FileRef(unsigned int id) : _id(id) {
 
 const File &FileRef::data(const GlobalState &gs) const {
     ENFORCE(gs.files[_id]);
-    ENFORCE(gs.files[_id]->sourceType != File::TombStone);
-    ENFORCE(gs.files[_id]->sourceType != File::NotYetRead);
+    ENFORCE(gs.files[_id]->sourceType != File::Type::TombStone);
+    ENFORCE(gs.files[_id]->sourceType != File::Type::NotYetRead);
     return dataAllowingUnsafe(gs);
 }
 
 File &FileRef::data(GlobalState &gs) const {
     ENFORCE(gs.files[_id]);
-    ENFORCE(gs.files[_id]->sourceType != File::TombStone);
-    ENFORCE(gs.files[_id]->sourceType != File::NotYetRead);
+    ENFORCE(gs.files[_id]->sourceType != File::Type::TombStone);
+    ENFORCE(gs.files[_id]->sourceType != File::Type::NotYetRead);
     return dataAllowingUnsafe(gs);
 }
 
@@ -144,8 +144,8 @@ string_view File::path() const {
 }
 
 string_view File::source() const {
-    ENFORCE(this->sourceType != Type::TombStone);
-    ENFORCE(this->sourceType != File::NotYetRead);
+    ENFORCE(this->sourceType != File::Type::TombStone);
+    ENFORCE(this->sourceType != File::Type::NotYetRead);
     return this->source_;
 }
 
@@ -154,7 +154,7 @@ StrictLevel File::minErrorLevel() const {
 }
 
 bool File::isPayload() const {
-    return sourceType == Type::PayloadGeneration || sourceType == Type::Payload;
+    return sourceType == File::Type::PayloadGeneration || sourceType == File::Type::Payload;
 }
 
 bool File::isRBI() const {
@@ -166,8 +166,8 @@ bool File::isStdlib() const {
 }
 
 vector<int> &File::lineBreaks() const {
-    ENFORCE(this->sourceType != Type::TombStone);
-    ENFORCE(this->sourceType != File::NotYetRead);
+    ENFORCE(this->sourceType != File::Type::TombStone);
+    ENFORCE(this->sourceType != File::Type::NotYetRead);
     auto ptr = atomic_load(&lineBreaks_);
     if (ptr) {
         return *ptr;
