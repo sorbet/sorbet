@@ -1826,14 +1826,14 @@ class Array < Object
   # a.sample(random: Random.new(1))     #=> 6
   # a.sample(4, random: Random.new(1))  #=> [6, 10, 9, 2]
   # ```
-  sig {returns(T.nilable(Elem))}
   sig do
     params(
         arg0: Integer,
+        random: Random,
     )
-    .returns(T::Array[Elem])
+    .returns(T.any(T.nilable(Elem), T::Array[Elem]))
   end
-  def sample(arg0=T.unsafe(nil)); end
+  def sample(arg0=T.unsafe(nil), random: T.unsafe(nil)); end
 
   # Returns a new array containing all elements of `ary` for which the given
   # `block` returns a true value.
