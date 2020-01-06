@@ -9,10 +9,10 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//compiler/Rewriters",
         "//compiler/Errors",
         "//compiler/IREmitter",
         "//compiler/ObjectFileEmitter",
+        "//compiler/Rewriters",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",
         "@com_stripe_ruby_typer//main/pipeline/semantic_extension:interface",
