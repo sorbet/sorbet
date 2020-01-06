@@ -51,9 +51,9 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
         builder.SetInsertPoint(blockMap.functionInitializersByFunction[0]);
         auto escapedVariablesCount = blockMap.escapedVariableIndeces.size();
         for (auto i = 0; i < escapedVariablesCount; i++) {
-            auto store =
-                builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
-                                   {blockMap.escapedClosure[0], llvm::ConstantInt::get(cs, llvm::APInt(32, i))}, "nillingOutClosureVars");
+            auto store = builder.CreateCall(
+                cs.module->getFunction("sorbet_getClosureElem"),
+                {blockMap.escapedClosure[0], llvm::ConstantInt::get(cs, llvm::APInt(32, i))}, "nillingOutClosureVars");
             builder.CreateStore(Payload::rubyNil(cs, builder), store);
         }
     }
@@ -231,9 +231,9 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
         llvm::Value *localClosure = nullptr;
         if (i == 0) {
             if (!escapedVariableIndices.empty())
-                localClosure =
-                    builder.CreateCall(cs.module->getFunction("sorbet_allocClosureAsValue"),
-                                       {llvm::ConstantInt::get(cs, llvm::APInt(32, escapedVariableIndices.size()))}, "captures");
+                localClosure = builder.CreateCall(
+                    cs.module->getFunction("sorbet_allocClosureAsValue"),
+                    {llvm::ConstantInt::get(cs, llvm::APInt(32, escapedVariableIndices.size()))}, "captures");
             else {
                 localClosure = Payload::rubyNil(cs, builder);
             }
