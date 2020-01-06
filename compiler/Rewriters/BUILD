@@ -1,5 +1,5 @@
 cc_library(
-    name = "DefinitionRewriter",
+    name = "Rewriters",
     srcs = [
         "DefinitionRewriter.cc",
         "DefinitionRewriter.h",
