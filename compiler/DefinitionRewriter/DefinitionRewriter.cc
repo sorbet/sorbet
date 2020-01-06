@@ -1,4 +1,4 @@
-#include "compiler/DefinitionRewriter/DefinitionRewriter.h"
+#include "compiler/Rewriters/DefinitionRewriter.h"
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "compiler/Names/Names.h"

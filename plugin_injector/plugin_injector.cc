@@ -7,7 +7,7 @@
 #include "cfg/CFG.h"
 #include "compiler/Core/AbortCompilation.h"
 #include "compiler/Core/CompilerState.h"
-#include "compiler/DefinitionRewriter/DefinitionRewriter.h"
+#include "compiler/Rewriters/DefinitionRewriter.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/Payload/PayloadLoader.h"

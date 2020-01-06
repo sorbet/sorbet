@@ -20,7 +20,7 @@ compilation_database(
         "//compiler/IREmitter/Payload:generate_load_payload",
         "//compiler/IREmitter:IREmitter",
         "//compiler/IREmitter/Payload:Payload",
-        "//compiler/DefinitionRewriter:DefinitionRewriter",
+        "//compiler/Rewriters:DefinitionRewriter",
         "//compiler/Names:Names",
         "//compiler/Core:Core",
         "//compiler/Errors:Errors",

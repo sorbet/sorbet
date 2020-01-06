@@ -9,7 +9,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//compiler/DefinitionRewriter",
+        "//compiler/Rewriters",
         "//compiler/Errors",
         "//compiler/IREmitter",
         "//compiler/ObjectFileEmitter",
