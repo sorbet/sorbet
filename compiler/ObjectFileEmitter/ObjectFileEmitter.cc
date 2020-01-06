@@ -370,7 +370,7 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
 
         fnPasses.doInitialization();
         for (llvm::Function &func : *module) {
-            // ENFORCE(!llvm::verifyFunction(func, &llvm::dbgs()));
+            ENFORCE(!llvm::verifyFunction(func, &llvm::dbgs()), (string)func.getName());
             fnPasses.run(func);
         }
         fnPasses.doFinalization();
