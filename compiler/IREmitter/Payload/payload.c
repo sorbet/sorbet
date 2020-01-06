@@ -1033,7 +1033,7 @@ VALUE sorbet_stringInterpolate(VALUE recv, int argc, VALUE *argv) {
 VALUE sorbet_selfNew(VALUE recv, int argc, VALUE *argv) {
     rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
     VALUE obj = argv[0];
-    return rb_funcallv(obj, rb_intern("new"), argc-1, argv+1);
+    return rb_funcallv(obj, rb_intern("new"), argc - 1, argv + 1);
 }
 
 // ****
