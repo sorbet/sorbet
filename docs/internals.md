@@ -120,11 +120,11 @@ another or make modifications within the IR they were given.
 | 1   | [Parser], `-p parse-tree`        |                     |                                   |
 |     |                                  | [`parser::Node`]    |                                   |
 | 2   | [Desugar], `-p desugar-tree`     |                     |                                   |
-| 3   |                                  | [`ast::Expression`] | [Rewriter]                             |
-| 4   |                                  | [`ast::Expression`] | [LocalVars], `-p rewrite-tree`        |
+| 3   |                                  | [`ast::Expression`] | [Rewriter]                        |
+| 4   |                                  | [`ast::Expression`] | [LocalVars], `-p rewrite-tree`    |
 | 5   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
 | 6   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
-| 6   |                                  | [`ast::Expression`] | [Flattener], `-p flatten-tree`    |
+| 6   |                                  | [`ast::Expression`] | [Flattener], `-p ast`             |
 | 7   | [CFG], `-p cfg --stop-after cfg` |                     |                                   |
 | 8   |                                  | [`cfg::CFG`]        | [Infer], `-p cfg`                 |
 
@@ -208,10 +208,10 @@ In the future, we anticipate rewriting the DSL phase with a plugin architecture.
 This will allow for a wider audience of Rubyists to teach Sorbet about DSLs
 they've written.
 
-We artificially limit what code we call from Rewriter passes. Sometimes it would be
-convenient to call into other phases of Sorbet, but instead we've reimplemented
-functionality in the Rewriter pass. This keeps the surface area of the API we'll have
-to present to plugins in the future small.
+We artificially limit what code we call from Rewriter passes. Sometimes it would
+be convenient to call into other phases of Sorbet, but instead we've
+reimplemented functionality in the Rewriter pass. This keeps the surface area of
+the API we'll have to present to plugins in the future small.
 
 
 ### LocalVars
@@ -298,10 +298,10 @@ but none of these `Symbol`s carried knowledge of their types.
 These are the two main jobs of the Resolver: resolve constants and fill in sigs.
 We'll discuss each in turn.
 
-**Resolve constants**: After Namer, constants literals (like `A::B`) in our tree
-manifest as `UnresolvedConstantLit` nodes. An `ast::UnresolvedConstantLit` node
-wraps `NameRef` while an `ast::ConstantLit` wraps a `SymbolRef`. In these terms,
-the process of resolving constants is to convert `Name`s into `Symbol`s
+**Resolve constants**: After Namer, constants literals (like `A::B`) in our
+trees manifest as `UnresolvedConstantLit` nodes. An `ast::UnresolvedConstantLit`
+node wraps a `NameRef` while an `ast::ConstantLit` wraps a `SymbolRef`. In these
+terms, the process of resolving constants is to convert `Name`s into `Symbol`s
 (`UnresolvedConstantLit`s into `ConstantLit`s).
 
 **Resolve sigs**: Once constants have been resolved to proper `Symbol`s, we can
@@ -311,10 +311,10 @@ nodes corresponding to sig builder methods, uses this to create `core::Type`s,
 and stores those types on the `Symbol`s corresponding to the method and
 arguments of that method.
 
-There are a handful of other things that the Resolver does (it makes sure all
-code is in a method, and that methods don't contain other methods, enters
-`Symbol`s for certain kinds of fields, etc.) There are pretty good comments at
-the top of [resolver/resolver.cc] which say more.
+There are a handful of other things that the Resolver does (it computes and
+records a linearization of the ancestor hierarchy so `derivesFrom` checks are
+fast, it computes bounds for generic type members, etc.) There are pretty good
+comments at the top of [resolver/resolver.cc] which say more.
 
 To give you an idea, this is what our Namer example looks like after the
 Resolver pass:
@@ -346,6 +346,8 @@ constants and then resolve constants before entering `Symbol`s for methods and
 resolving sigs.
 
 ### Flattener
+
+<!-- TODO(jez) This is out of date; where should flatten be discussed? -->
 
 The flattener is (currently) the final pass that processes the ast. The goal
 here is to move around all the nodes so that the final result only had top level
