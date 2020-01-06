@@ -1020,8 +1020,7 @@ extern VALUE rb_obj_as_string_result(VALUE, VALUE);
 extern VALUE rb_str_concat_literals(int, const VALUE *const restrict);
 
 VALUE sorbet_stringInterpolate(VALUE recv, int argc, VALUE *argv) {
-
-    for (int i=0; i < argc; ++i) {
+    for (int i = 0; i < argc; ++i) {
         if (!RB_TYPE_P(argv[i], T_STRING)) {
             VALUE str = rb_funcall(argv[i], idTo_s, 0);
             argv[i] = rb_obj_as_string_result(str, argv[i]);
