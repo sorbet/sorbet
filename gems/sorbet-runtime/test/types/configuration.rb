@@ -197,18 +197,6 @@ module Opus::Types::Test
 
     describe 'scalar_types' do
       describe 'when overridden' do
-        before do
-          T::Configuration.scalar_types = T::Configuration.scalar_types.dup << 'foo'
-        end
-
-        after do
-          T::Configuration.scalar_types = nil
-        end
-
-        it 'contains the correct values' do
-          assert_includes(T::Configuration.scalar_types, 'foo')
-        end
-
         it 'requires string values' do
           ex = assert_raises(ArgumentError) do
             T::Configuration.scalar_types = [1, 2, 3]
