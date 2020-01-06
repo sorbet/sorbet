@@ -53,7 +53,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
         for (auto i = 0; i < escapedVariablesCount; i++) {
             auto store =
                 builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
-                                   {blockMap.escapedClosure[0], llvm::ConstantInt::get(cs, llvm::APInt(32, i))});
+                                   {blockMap.escapedClosure[0], llvm::ConstantInt::get(cs, llvm::APInt(32, i))}, "nillingOutClosureVars");
             builder.CreateStore(Payload::rubyNil(cs, builder), store);
         }
     }
