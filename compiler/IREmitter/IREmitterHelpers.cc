@@ -233,7 +233,7 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
             if (!escapedVariableIndices.empty())
                 localClosure =
                     builder.CreateCall(cs.module->getFunction("sorbet_allocClosureAsValue"),
-                                       {llvm::ConstantInt::get(cs, llvm::APInt(32, escapedVariableIndices.size()))});
+                                       {llvm::ConstantInt::get(cs, llvm::APInt(32, escapedVariableIndices.size()))}, "captures");
             else {
                 localClosure = Payload::rubyNil(cs, builder);
             }
