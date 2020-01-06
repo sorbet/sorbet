@@ -86,14 +86,14 @@ public:
                                                                                         \
         template <typename U, U> struct Check;                                          \
                                                                                         \
-        typedef char ArrayOfOne[1];                                                     \
-        typedef char ArrayOfTwo[2];                                                     \
+        using ArrayOfOne = char[1];                                                     \
+        using ArrayOfTwo = char[2];                                                     \
                                                                                         \
         template <typename U> static ArrayOfOne &func(Check<int Fallback::*, &U::X> *); \
         template <typename U> static ArrayOfTwo &func(...);                             \
                                                                                         \
     public:                                                                             \
-        typedef HAS_MEMBER_##X type;                                                    \
+        using type = HAS_MEMBER_##X;                                                    \
         enum { value = sizeof(func<Derived>(0)) == 2 };                                 \
     };
 

@@ -40,8 +40,8 @@ struct argtype_extractor<ReturnType (ClassType::*)(ArgType *) const>
 };
 
 template <typename Base, typename FUNC> bool typecaseHelper(Base *base, FUNC &&func) {
-    typedef argtype_extractor<std::function<get_signature<FUNC>>> traits;
-    typedef typename traits::arg_type ArgType;
+    using traits = argtype_extractor<std::function<get_signature<FUNC>>>;
+    using ArgType = typename traits::arg_type;
     if (ArgType *first = fast_cast<Base, ArgType>(base)) {
         func(first);
         return true;

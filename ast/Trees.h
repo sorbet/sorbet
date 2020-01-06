@@ -113,14 +113,14 @@ public:
     };
     Kind kind;
     static constexpr int EXPECTED_RHS_COUNT = 4;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_RHS_COUNT> RHS_store;
+    using RHS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_RHS_COUNT>;
 
     RHS_store rhs;
     std::unique_ptr<Expression> name;
     // For unresolved names. Once they are typeAlias to Symbols they go into the Symbol
 
     static constexpr int EXPECTED_ANCESTORS_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ANCESTORS_COUNT> ANCESTORS_store;
+    using ANCESTORS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ANCESTORS_COUNT>;
 
     ANCESTORS_store ancestors;
     ANCESTORS_store singletonAncestors;
@@ -143,7 +143,7 @@ public:
     std::unique_ptr<Expression> rhs;
 
     static constexpr int EXPECTED_ARGS_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT> ARGS_store;
+    using ARGS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT>;
     ARGS_store args;
 
     core::NameRef name;
@@ -277,7 +277,7 @@ private:
 class RescueCase final : public Expression {
 public:
     static constexpr int EXPECTED_EXCEPTION_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_EXCEPTION_COUNT> EXCEPTION_store;
+    using EXCEPTION_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_EXCEPTION_COUNT>;
 
     EXCEPTION_store exceptions;
 
@@ -301,7 +301,7 @@ private:
 class Rescue final : public Expression {
 public:
     static constexpr int EXPECTED_RESCUE_CASE_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<RescueCase>, EXPECTED_RESCUE_CASE_COUNT> RESCUE_CASE_store;
+    using RESCUE_CASE_store = InlinedVector<std::unique_ptr<RescueCase>, EXPECTED_RESCUE_CASE_COUNT>;
 
     std::unique_ptr<Expression> body;
     RESCUE_CASE_store rescueCases;
@@ -462,7 +462,7 @@ public:
     std::unique_ptr<Expression> recv;
 
     static constexpr int EXPECTED_ARGS_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT> ARGS_store;
+    using ARGS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT>;
     ARGS_store args;
     std::unique_ptr<Block> block; // null if no block passed
 
@@ -508,7 +508,7 @@ private:
 class Hash final : public Expression {
 public:
     static constexpr int EXPECTED_ENTRY_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT> ENTRY_store;
+    using ENTRY_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT>;
 
     ENTRY_store keys;
     ENTRY_store values;
@@ -528,7 +528,7 @@ private:
 class Array final : public Expression {
 public:
     static constexpr int EXPECTED_ENTRY_COUNT = 4;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT> ENTRY_store;
+    using ENTRY_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT>;
 
     ENTRY_store elems;
 
@@ -634,7 +634,7 @@ public:
 class InsSeq final : public Expression {
 public:
     static constexpr int EXPECTED_STATS_COUNT = 4;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_STATS_COUNT> STATS_store;
+    using STATS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_STATS_COUNT>;
     // Statements
     STATS_store stats;
 

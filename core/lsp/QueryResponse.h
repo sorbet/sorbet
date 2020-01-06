@@ -78,9 +78,8 @@ public:
     const std::string replacement;
 };
 
-typedef std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, FieldResponse, DefinitionResponse,
-                     EditResponse>
-    QueryResponseVariant;
+using QueryResponseVariant = std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, FieldResponse,
+                                          DefinitionResponse, EditResponse>;
 
 /**
  * Represents a response to a LSP query. Wraps a variant that contains one of several response types.
