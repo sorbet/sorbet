@@ -12,6 +12,7 @@
 #include "compiler/IREmitter/Payload/PayloadLoader.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "compiler/Rewriters/DefinitionRewriter.h"
+#include "compiler/Rewriters/SigRewriter.h"
 #include "core/ErrorQueue.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
@@ -92,6 +93,7 @@ public:
         }
 
         sorbet::compiler::DefinitionRewriter::run(ctx, klass);
+        sorbet::compiler::SigRewriter::run(ctx, klass);
     };
 
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,

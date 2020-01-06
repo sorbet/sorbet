@@ -1,10 +1,10 @@
-#ifndef SORBET_COMPILER_DEFINITION_REWRITER_H
-#define SORBET_COMPILER_DEFINITION_REWRITER_H
+#ifndef SORBET_COMPILER_SIG_REWRITER_H
+#define SORBET_COMPILER_SIG_REWRITER_H
 
 #include "compiler/Core/ForwardDeclarations.h"
 
 namespace sorbet::compiler {
-class DefinitionRewriter {
+class SigRewriter {
 public:
     static void run(core::MutableContext &ctx, ast::ClassDef *klass);
 };
