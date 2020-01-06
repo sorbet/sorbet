@@ -249,7 +249,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                     auto argIndex = i + minArgCount;
                     auto a = blockMap.rubyBlockArgs[funcId][argIndex];
 
-                    Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, 0);
+                    Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, funcId);
                 }
                 builder.CreateBr(fillFromDefaultBlocks[i + 1]);
             }
