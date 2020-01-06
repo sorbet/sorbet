@@ -287,6 +287,7 @@ static const vector<CallCMethod> knownCMethods{
     {"<build-hash>", "sorbet_buildHashIntrinsic", NoReciever},
     {"<build-array>", "sorbet_buildArrayIntrinsic", NoReciever},
     {"<string-interpolate>", "sorbet_stringInterpolate", NoReciever},
+    {"<self-new>", "sorbet_selfNew", NoReciever},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
