@@ -1,9 +1,9 @@
 cc_library(
     name = "Rewriters",
-    srcs = [
-        "DefinitionRewriter.cc",
-        "DefinitionRewriter.h",
-    ],
+    srcs = glob([
+        "*.cc",
+        "*.h",
+    ]),
     linkstatic = select({
         "@com_stripe_ruby_typer//tools/config:linkshared": 0,
         "//conditions:default": 1,
