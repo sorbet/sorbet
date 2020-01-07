@@ -85,7 +85,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                 tp.type = symbol.data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType(ctx);
             } else {
                 auto resultType = symbol.data(ctx)->resultType;
-                tp.type = !symbol.data(ctx)->hasSig() ? core::Types::untyped(ctx, symbol) : resultType;
+                tp.type = resultType == nullptr ? core::Types::untyped(ctx, symbol) : resultType;
             }
 
             core::SymbolRef scope;
