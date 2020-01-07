@@ -251,7 +251,7 @@ define void @Init_test_testdata_compiler_hello() local_unnamed_addr #5 {
   %10 = and i64 %9, -129
   store i64 %10, i64* %8, align 8, !tbaa !17
   %11 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %4, i64 0, i32 0
-  store i64* inttoptr (i64 8 to i64*), i64** %11, align 8, !tbaa !35
+  store i64* inttoptr (i64 8 to i64*), i64** %11, align 8, !tbaa !9
   %12 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"str_hello world", i64 0, i64 0), i64 11) #7
   %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %12, i64* %callArgsAddr.i, align 8
@@ -310,4 +310,3 @@ attributes #7 = { nounwind }
 !32 = !{!23, !1, i64 4}
 !33 = !{!23, !1, i64 136}
 !34 = !{!23, !10, i64 8}
-!35 = !{!15, !10, i64 0}

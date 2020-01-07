@@ -304,24 +304,20 @@ define void @Init_test_testdata_compiler_send_with_block_param() local_unnamed_a
   %10 = and i64 %9, -129
   store i64 %10, i64* %8, align 8, !tbaa !17
   %11 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %4, i64 0, i32 0
-  store i64* inttoptr (i64 8 to i64*), i64** %11, align 8, !tbaa !35
+  store i64* inttoptr (i64 8 to i64*), i64** %11, align 8, !tbaa !9
   %callArgsAddr.i = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0
   %12 = bitcast [3 x i64]* %callArgs.i to <2 x i64>*
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %12, align 16
-  %13 = tail call i64 @rb_hash_new() #7, !noalias !36
+  %13 = tail call i64 @rb_hash_new() #7, !noalias !35
   call void @rb_hash_bulk_insert(i64 2, i64* nonnull %callArgsAddr.i, i64 %13) #7
-  %14 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !9
-  %15 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %14, i64 0, i32 2
-  %16 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %15, align 8, !tbaa !11
-  %17 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %16, i64 0, i32 0
-  store i64* inttoptr (i64 24 to i64*), i64** %17, align 8, !tbaa !35
+  store i64* inttoptr (i64 24 to i64*), i64** %11, align 8, !tbaa !9
   store i64 3, i64* %callArgsAddr.i, align 16
-  %18 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgsAddr.i) #7
+  %14 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgsAddr.i) #7
   %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_map.i) #7
-  %19 = call i64 @rb_funcallv(i64 %13, i64 %rubyId_to_proc.i, i32 0, i64* null) #7
-  %20 = call i64 @rb_funcall_with_block(i64 %18, i64 %rubyId_map.i, i32 0, i64* nonnull %callArgsAddr.i, i64 %19) #7
-  store i64 %20, i64* %callArgsAddr.i, align 16
-  %21 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #7
+  %15 = call i64 @rb_funcallv(i64 %13, i64 %rubyId_to_proc.i, i32 0, i64* null) #7
+  %16 = call i64 @rb_funcall_with_block(i64 %14, i64 %rubyId_map.i, i32 0, i64* nonnull %callArgsAddr.i, i64 %15) #7
+  store i64 %16, i64* %callArgsAddr.i, align 16
+  %17 = call i64 @rb_funcallv(i64 %0, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i) #7
   call void @llvm.lifetime.end.p0i8(i64 24, i8* nonnull %1)
   ret void
 }
@@ -376,7 +372,6 @@ attributes #7 = { nounwind }
 !32 = !{!23, !1, i64 4}
 !33 = !{!23, !1, i64 136}
 !34 = !{!23, !10, i64 8}
-!35 = !{!15, !10, i64 0}
-!36 = !{!37}
-!37 = distinct !{!37, !38, !"sorbet_buildHashIntrinsic: argument 0"}
-!38 = distinct !{!38, !"sorbet_buildHashIntrinsic"}
+!35 = !{!36}
+!36 = distinct !{!36, !37, !"sorbet_buildHashIntrinsic: argument 0"}
+!37 = distinct !{!37, !"sorbet_buildHashIntrinsic"}
