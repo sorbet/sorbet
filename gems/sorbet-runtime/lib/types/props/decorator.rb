@@ -18,7 +18,7 @@ class T::Props::Decorator
 
   class NoRulesError < StandardError; end
 
-  T::Sig::WithoutRuntime.sig {params(klass: DecoratedClass).void}
+  sig {params(klass: DecoratedClass).void.checked(:never)}
   def initialize(klass)
     @class = klass
     klass.plugins.each do |mod|
@@ -26,7 +26,7 @@ class T::Props::Decorator
     end
   end
 
-  # prop stuff
+  # checked(:never) - O(prop accesses)
   sig {returns(T::Hash[Symbol, Rules]).checked(:never)}
   def props
     @props ||= {}.freeze
@@ -44,12 +44,13 @@ class T::Props::Decorator
   sig {returns(T::Array[Symbol])}
   def all_props; props.keys; end
 
+  # checked(:never) - O(prop accesses)
   sig {params(prop: T.any(Symbol, String)).returns(Rules).checked(:never)}
   def prop_rules(prop); props[prop.to_sym] || raise("No such prop: #{prop.inspect}"); end
 
-  sig {params(prop: Symbol, rules: Rules).void}
+  # checked(:never) - Rules hash is expensive to check
+  sig {params(prop: Symbol, rules: Rules).void.checked(:never)}
   def add_prop_definition(prop, rules)
-    prop = prop.to_sym
     override = rules.delete(:override)
 
     if props.include?(prop) && !override
@@ -80,6 +81,7 @@ class T::Props::Decorator
     }
   end
 
+  # checked(:never) - O(prop accesses)
   sig {returns(DecoratedClass).checked(:never)}
   def decorated_class; @class; end
 
@@ -87,6 +89,8 @@ class T::Props::Decorator
 
   # For performance, don't use named params here.
   # Passing in rules here is purely a performance optimization.
+  #
+  # checked(:never) - O(prop accesses)
   sig do
     params(
       instance: DecoratedInstance,
@@ -104,6 +108,8 @@ class T::Props::Decorator
 
   # For performance, don't use named params here.
   # Passing in rules here is purely a performance optimization.
+  #
+  # checked(:never) - O(prop accesses)
   sig do
     params(
       instance: DecoratedInstance,
@@ -121,6 +127,8 @@ class T::Props::Decorator
   end
 
   # Use this to validate that a value will validate for a given prop. Useful for knowing whether a value can be set on a model without setting it.
+  #
+  # checked(:never) - potentially O(prop accesses) depending on usage pattern
   sig {params(prop: Symbol, val: T.untyped).void.checked(:never)}
   def validate_prop_value(prop, val)
     # This implements a 'public api' on document so that we don't allow callers to pass in rules
@@ -129,6 +137,8 @@ class T::Props::Decorator
   end
 
   # Passing in rules here is purely a performance optimization.
+  #
+  # checked(:never) - O(prop accesses)
   sig {params(prop: Symbol, val: T.untyped, rules: Rules).void.checked(:never)}
   private def check_prop_type(prop, val, rules=prop_rules(prop))
     type_object = rules.fetch(:type_object)
@@ -184,6 +194,8 @@ class T::Props::Decorator
   # Unlike the other methods that take rules, this one calls prop_rules for
   # the default, which raises if the prop doesn't exist (this maintains
   # preexisting behavior).
+  #
+  # checked(:never) - O(prop accesses)
   sig do
     params(
       instance: DecoratedInstance,
@@ -204,6 +216,8 @@ class T::Props::Decorator
   #
   # Note this path is NOT used by generated getters on instances,
   # unless `ifunset` is used on the prop, or `prop_get` is overridden.
+  #
+  # checked(:never) - O(prop accesses)
   sig do
     params(
       instance: DecoratedInstance,
@@ -229,6 +243,7 @@ class T::Props::Decorator
     end
   end
 
+  # checked(:never) - O(prop accesses)
   sig do
     params(
       instance: DecoratedInstance,
@@ -245,6 +260,7 @@ class T::Props::Decorator
     foreign_class.load(value, {}, opts)
   end
 
+  # checked(:never) - Rules hash is expensive to check
   sig do
     params(
       name: Symbol,
@@ -253,6 +269,7 @@ class T::Props::Decorator
       type: PropTypeOrClass
     )
     .void
+    .checked(:never)
   end
   def prop_validate_definition!(name, cls, rules, type)
     validate_prop_name(name)
@@ -298,13 +315,6 @@ class T::Props::Decorator
     end
   end
 
-  # Check if this cls represents a T.nilable(type)
-  sig {params(type: PropTypeOrClass).returns(T::Boolean)}
-  private def is_nilable?(type)
-    return false if !type.is_a?(T::Types::Union)
-    type.types.any? {|t| t == T::Utils.coerce(NilClass)}
-  end
-
   # This converts the type from a T::Type to a regular old ruby class.
   sig {params(type: T::Types::Base).returns(Module)}
   private def convert_type_to_class(type)
@@ -333,6 +343,7 @@ class T::Props::Decorator
     end
   end
 
+  # checked(:never) - Rules hash is expensive to check
   sig do
     params(
       name: T.any(Symbol, String),
@@ -340,6 +351,7 @@ class T::Props::Decorator
       rules: Rules,
     )
     .void
+    .checked(:never)
   end
   def prop_defined(name, cls, rules={})
     cls = T::Utils.resolve_alias(cls)
@@ -496,7 +508,8 @@ class T::Props::Decorator
     handle_redaction_option(name, rules[:redaction]) if rules[:redaction]
   end
 
-  sig {params(name: Symbol, rules: Rules).void}
+  # checked(:never) - Rules hash is expensive to check
+  sig {params(name: Symbol, rules: Rules).void.checked(:never)}
   private def define_getter_and_setter(name, rules)
     T::Configuration.without_ruby_warnings do
       if !rules[:immutable]
@@ -517,9 +530,12 @@ class T::Props::Decorator
   end
 
   # returns the subdoc of the array type, or nil if it's not a Document type
+  #
+  # checked(:never) - Typechecks internally
   sig do
     params(type: PropType)
     .returns(T.nilable(Module))
+    .checked(:never)
   end
   private def array_subdoc_type(type)
     if type.is_a?(T::Types::TypedArray)
@@ -535,9 +551,12 @@ class T::Props::Decorator
   end
 
   # returns the subdoc of the hash value type, or nil if it's not a Document type
+  #
+  # checked(:never) - Typechecks internally
   sig do
     params(type: PropType)
     .returns(T.nilable(Module))
+    .checked(:never)
   end
   private def hash_value_subdoc_type(type)
     if type.is_a?(T::Types::TypedHash)
@@ -553,9 +572,12 @@ class T::Props::Decorator
   end
 
   # returns the type of the hash key, or nil. Any CustomType could be a key, but we only expect T::Enum right now.
+  #
+  # checked(:never) - Typechecks internally
   sig do
     params(type: PropType)
     .returns(T.nilable(Module))
+    .checked(:never)
   end
   private def hash_key_custom_type(type)
     if type.is_a?(T::Types::TypedHash)
@@ -572,7 +594,8 @@ class T::Props::Decorator
   # From T::Props::Utils.deep_clone_object, plus String
   TYPES_NOT_NEEDING_CLONE = [TrueClass, FalseClass, NilClass, Symbol, String, Numeric]
 
-  sig {params(type: PropType).returns(T::Boolean)}
+  # checked(:never) - Typechecks internally
+  sig {params(type: PropType).returns(T::Boolean).checked(:never)}
   private def shallow_clone_ok(type)
     inner_type =
       if type.is_a?(T::Types::TypedArray)
@@ -613,7 +636,8 @@ class T::Props::Decorator
     end
   end
 
-  sig {params(prop_name: Symbol, rules: Hash).void}
+  # checked(:never) - Rules hash is expensive to check
+  sig {params(prop_name: Symbol, rules: Hash).void.checked(:never)}
   private def validate_not_missing_sensitivity(prop_name, rules)
     if rules[:sensitivity].nil?
       if rules[:redaction]
@@ -700,6 +724,7 @@ class T::Props::Decorator
     )
   end
 
+  # checked(:never) - Rules hash is expensive to check
   sig do
     params(
       prop_name: T.any(String, Symbol),
@@ -707,6 +732,7 @@ class T::Props::Decorator
       foreign: T.untyped,
     )
     .void
+    .checked(:never)
   end
   private def define_foreign_method(prop_name, rules, foreign)
     fk_method = "#{prop_name}_"
@@ -758,6 +784,7 @@ class T::Props::Decorator
     end
   end
 
+  # checked(:never) - Rules hash is expensive to check
   sig do
     params(
       prop_name: Symbol,
@@ -766,6 +793,7 @@ class T::Props::Decorator
       foreign: T.untyped,
     )
     .void
+    .checked(:never)
   end
   private def handle_foreign_option(prop_name, prop_cls, rules, foreign)
     validate_foreign_option(
@@ -793,7 +821,7 @@ class T::Props::Decorator
   #
   # This gets called when a module or class that extends T::Props gets included, extended,
   # prepended, or inherited.
-  T::Sig::WithoutRuntime.sig {params(child: DecoratedClass).void}
+  sig {params(child: DecoratedClass).void.checked(:never)}
   def model_inherited(child)
     child.extend(T::Props::ClassMethods)
     child.plugins.concat(decorated_class.plugins)
@@ -831,7 +859,7 @@ class T::Props::Decorator
     end
   end
 
-  T::Sig::WithoutRuntime.sig {params(mod: Module).void}
+  sig {params(mod: Module).void.checked(:never)}
   def plugin(mod)
     decorated_class.plugins << mod
     Private.apply_class_methods(mod, decorated_class)

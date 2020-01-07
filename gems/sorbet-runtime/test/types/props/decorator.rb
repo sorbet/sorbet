@@ -99,7 +99,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
 
   describe 'When validating prop definitions' do
     it 'Validates prop options are symbols' do
-      assert_prop_error(error: TypeError) do
+      assert_prop_error(error: ArgumentError) do
         prop :foo, String, 'name' => 'mongoprop'
       end
     end

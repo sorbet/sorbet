@@ -53,7 +53,9 @@ module T::Props::TypeValidation
     # a subtype like the type of the values of a typed hash.
     #
     # If the type is fully valid, returns nil.
-    sig {params(type: T::Types::Base).returns(T.nilable(T::Types::Base))}
+    #
+    # checked(:never) - called potentially many times recursively
+    sig {params(type: T::Types::Base).returns(T.nilable(T::Types::Base)).checked(:never)}
     private def find_invalid_subtype(type)
       case type
       when T::Types::TypedEnumerable
