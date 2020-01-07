@@ -276,6 +276,7 @@ end
 module T::Props::Serializable::DecoratorMethods
 
   VALID_RULE_KEYS = Set[:dont_store, :name, :raise_on_nil_write].freeze
+  private_constant :VALID_RULE_KEYS
 
   def valid_rule_key?(key)
     super || VALID_RULE_KEYS.include?(key)

@@ -26,6 +26,7 @@ module T::Props::Optional::DecoratorMethods
     :factory,
     :optional,
   ].freeze
+  private_constant :VALID_RULE_KEYS
 
   def valid_rule_key?(key)
     super || VALID_RULE_KEYS.include?(key)

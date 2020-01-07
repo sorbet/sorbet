@@ -76,6 +76,7 @@ class T::Props::Decorator
     optional
     _tnilable
   }.to_set.freeze
+  private_constant :VALID_RULE_KEYS
 
   sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
   def valid_rule_key?(key)
