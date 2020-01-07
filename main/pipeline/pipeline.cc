@@ -1090,7 +1090,7 @@ public:
 
     unique_ptr<ast::UnresolvedIdent> postTransformUnresolvedIdent(core::Context ctx,
                                                                   unique_ptr<ast::UnresolvedIdent> id) {
-        if (id->kind != ast::UnresolvedIdent::Local) {
+        if (id->kind != ast::UnresolvedIdent::Kind::Local) {
             acc.constants.emplace_back(ctx.state, id->name.data(ctx));
         }
         return id;

@@ -149,6 +149,7 @@ public:
     core::NameRef name;
     u4 flags;
 
+    // TODO(jez) This uses enum instead of enum class. We should not cargo cult this in new code.
     enum Flags {
         SelfMethod = 1,
         RewriterSynthesized = 2,
@@ -337,16 +338,16 @@ private:
 
 class UnresolvedIdent final : public Reference {
 public:
-    enum VarKind {
+    enum class Kind : u1 {
         Local,
         Instance,
         Class,
         Global,
     };
     core::NameRef name;
-    VarKind kind;
+    Kind kind;
 
-    UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name);
+    UnresolvedIdent(core::Loc loc, Kind kind, core::NameRef name);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

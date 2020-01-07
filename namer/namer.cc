@@ -31,7 +31,7 @@ class NameInserter {
                 return id->symbol.data(ctx)->dealias(ctx);
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node.get())) {
-                if (uid->kind != ast::UnresolvedIdent::Class || uid->name != core::Names::singleton()) {
+                if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
                     if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
                         e.setHeader("Unsupported constant scope");
                     }
@@ -216,7 +216,7 @@ public:
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
 
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
-            ENFORCE(ident->kind == ast::UnresolvedIdent::Class);
+            ENFORCE(ident->kind == ast::UnresolvedIdent::Kind::Class);
             klass->symbol = ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx);
         } else {
             if (klass->symbol == core::Symbols::todo()) {

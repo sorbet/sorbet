@@ -154,7 +154,7 @@ Local::Local(core::Loc loc, core::LocalVariable localVariable1) : Reference(loc)
     _sanityCheck();
 }
 
-UnresolvedIdent::UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name)
+UnresolvedIdent::UnresolvedIdent(core::Loc loc, Kind kind, core::NameRef name)
     : Reference(loc), name(name), kind(kind) {
     categoryCounterInc("trees", "unresolvedident");
     _sanityCheck();
@@ -636,16 +636,16 @@ string UnresolvedIdent::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "kind = ";
     switch (this->kind) {
-        case Local:
+        case Kind::Local:
             buf << "Local";
             break;
-        case Instance:
+        case Kind::Instance:
             buf << "Instance";
             break;
-        case Class:
+        case Kind::Class:
             buf << "Class";
             break;
-        case Global:
+        case Kind::Global:
             buf << "Global";
             break;
     }
