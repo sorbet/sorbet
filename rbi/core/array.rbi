@@ -1432,6 +1432,20 @@ class Array < Object
   end
   def member?(arg0); end
 
+  # Returns a two element array which contains the minimum and the
+  # maximum value in the array.
+  #
+  # Can be given an optional block to override the default comparison
+  # method `a <=> b`.
+  sig {returns([T.nilable(Elem), T.nilable(Elem)])}
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Integer),
+    )
+    .returns([T.nilable(Elem), T.nilable(Elem)])
+  end
+  def minmax(&blk); end
+
   # When invoked with a block, yield all permutations of length `n` of the
   # elements of the array, then return the array itself.
   #
