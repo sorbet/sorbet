@@ -352,7 +352,7 @@ llvm::Value *Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &
 }
 
 core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::SymbolRef sym,
-                                 core::Loc lastLoc) {
+                                 core::Loc lastLoc, llvm::AllocaInst *lineNumberPtr) {
     if (!loc.exists()) {
         return lastLoc;
     }
@@ -363,7 +363,7 @@ core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, 
     }
     auto offset = lineno - sym.data(cs)->loc().position(cs).first.line;
     builder.CreateCall(cs.module->getFunction("sorbet_setLineNumber"),
-                       {llvm::ConstantInt::get(cs, llvm::APInt(32, offset))});
+                       {llvm::ConstantInt::get(cs, llvm::APInt(32, offset)), builder.CreateLoad(lineNumberPtr)});
     return loc;
 }
 
