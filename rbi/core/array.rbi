@@ -2328,11 +2328,17 @@ class Array < Object
   # ```
   sig do
     type_parameters(:U).params(
-        arg0: T::Array[T.type_parameter(:U)],
+        arg: T::Enumerable[T.type_parameter(:U)]
     )
     .returns(T::Array[[Elem, T.nilable(T.type_parameter(:U))]])
   end
-  def zip(*arg0); end
+  sig do
+    type_parameters(:U).params(
+        arg: T::Enumerable[T.type_parameter(:U)],
+        blk: T.proc.params(x: Elem, y: T.nilable(T.type_parameter(:U))).void
+    ).void
+  end
+  def zip(*arg, &blk); end
 
   # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) Union --- Returns a
   # new array by joining `ary` with `other_ary`, excluding any duplicates and
