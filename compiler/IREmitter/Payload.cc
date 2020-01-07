@@ -77,14 +77,15 @@ llvm::Value *Payload::testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &build
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_testIsTruthy"), {val}, "cond");
 }
 
-llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName) {
+llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &build, std::string_view idName) {
+    auto &builder = builderCast(build);
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     auto name = llvm::StringRef(idName.data(), idName.length());
     llvm::Constant *indices[] = {zero};
     string rawName = "rubyIdPrecomputed_" + (string)idName;
     auto tp = llvm::Type::getInt64Ty(cs);
-    llvm::IRBuilder<> globalInitBuilder(cs);
     auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
+        llvm::IRBuilder<> globalInitBuilder(cs);
         auto ret =
             new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
@@ -96,7 +97,7 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, 
 
         auto bb = llvm::BasicBlock::Create(cs, "constr", constr);
         globalInitBuilder.SetInsertPoint(bb);
-        auto rawCString = Payload::toCString(cs, idName, builder);
+        auto rawCString = Payload::toCString(cs, idName, globalInitBuilder);
         auto rawID = globalInitBuilder.CreateCall(
             cs.module->getFunction("sorbet_idIntern"),
             {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, idName.length()))}, "rawId");
@@ -111,10 +112,12 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, 
     ENFORCE(cs.functionEntryInitializers->getParent() == builder.GetInsertBlock()->getParent(),
             "you're calling this function from something low-level that passed a IRBuilder that points outside of "
             "function currently being generated");
-    globalInitBuilder.SetInsertPoint(cs.functionEntryInitializers);
-    auto global = globalInitBuilder.CreateLoad(
+    auto oldInsertPoint = builder.saveIP();
+    builder.SetInsertPoint(cs.functionEntryInitializers);
+    auto global = builder.CreateLoad(
         llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
         {"rubyId_", name});
+    builder.restoreIP(oldInsertPoint);
 
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     return global;
