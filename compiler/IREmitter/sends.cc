@@ -94,37 +94,60 @@ llvm::Value *IREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilder
             auto funSym = recvClass.data(cs)->findMember(cs, i->fun);
             if (funSym.exists() && funSym.data(cs)->isFinalMethod()) {
                 auto llvmFunc = IREmitterHelpers::lookupFunction(cs, funSym);
-                if (llvmFunc != nullptr) {
-                    auto methodName = i->fun.data(cs)->shortName(cs);
-                    llvm::StringRef methodNameRef(methodName.data(), methodName.size());
-                    auto &builder = builderCast(build);
-                    auto recv = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+                if (llvmFunc == nullptr) {
+                    // here we create a dymmy _weak_ forwarder for the function.
+                    // if the target function is compiled in the same llvm module, it will take
+                    // priority as we wipe method bodies first.
+                    // If it's compiled in a different module, runtime linker will chose the
+                    // non-weak symbol.
+                    // If it will never be compiled, the forwarder will stay
+                    llvmFunc = IREmitterHelpers::getOrCreateFunctionWeak(cs, funSym);
+                    llvm::IRBuilder funcBuilder(cs);
+                    auto bb1 = llvm::BasicBlock::Create(cs, "fwd2interpreted", llvmFunc);
+                    auto bb2 = llvm::BasicBlock::Create(cs, "fwd", llvmFunc);
+                    funcBuilder.SetInsertPoint(bb2);
 
-                    auto typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(recvClass));
-
-                    auto afterSend = llvm::BasicBlock::Create(cs, llvm::Twine("afterCallFinal_") + methodNameRef,
-                                                              builder.GetInsertBlock()->getParent());
-                    auto slowPath = llvm::BasicBlock::Create(cs, llvm::Twine("slowCallFinal_") + methodNameRef,
-                                                             builder.GetInsertBlock()->getParent());
-                    auto fastPath = llvm::BasicBlock::Create(cs, llvm::Twine("fastCallFinal_") + methodNameRef,
-                                                             builder.GetInsertBlock()->getParent());
-                    builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
-                    builder.SetInsertPoint(fastPath);
-                    auto fastPathRes =
-                        IREmitterHelpers::emitMethodCallDirrect(cs, build, funSym, i, blockMap, aliases, rubyBlockId);
-                    auto fastPathEnd = builder.GetInsertBlock();
-                    builder.CreateBr(afterSend);
-                    builder.SetInsertPoint(slowPath);
-                    auto slowPathRes =
-                        IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, rubyBlockId);
-                    auto slowPathEnd = builder.GetInsertBlock();
-                    builder.CreateBr(afterSend);
-                    builder.SetInsertPoint(afterSend);
-                    auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("finalCallPhi_") + methodNameRef);
-                    phi->addIncoming(fastPathRes, fastPathEnd);
-                    phi->addIncoming(slowPathRes, slowPathEnd);
-                    return phi;
+                    auto selfVar = llvmFunc->getArg(2);
+                    auto argsCount = llvmFunc->getArg(0);
+                    auto argsArray = llvmFunc->getArg(1);
+                    auto cs2 = cs;
+                    cs2.functionEntryInitializers = bb1;
+                    auto rubyId = Payload::idIntern(cs2, funcBuilder, i->fun.data(cs)->shortName(cs));
+                    funcBuilder.CreateRet(funcBuilder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
+                                                                 {selfVar, rubyId, argsCount, argsArray}));
+                    funcBuilder.SetInsertPoint(bb1);
+                    funcBuilder.CreateBr(bb2);
+                    ENFORCE(!llvm::verifyFunction(*llvmFunc, &llvm::dbgs()));
                 }
+                auto methodName = i->fun.data(cs)->shortName(cs);
+                llvm::StringRef methodNameRef(methodName.data(), methodName.size());
+                auto &builder = builderCast(build);
+                auto recv = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+
+                auto typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(recvClass));
+
+                auto afterSend = llvm::BasicBlock::Create(cs, llvm::Twine("afterCallFinal_") + methodNameRef,
+                                                          builder.GetInsertBlock()->getParent());
+                auto slowPath = llvm::BasicBlock::Create(cs, llvm::Twine("slowCallFinal_") + methodNameRef,
+                                                         builder.GetInsertBlock()->getParent());
+                auto fastPath = llvm::BasicBlock::Create(cs, llvm::Twine("fastCallFinal_") + methodNameRef,
+                                                         builder.GetInsertBlock()->getParent());
+                builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
+                builder.SetInsertPoint(fastPath);
+                auto fastPathRes =
+                    IREmitterHelpers::emitMethodCallDirrect(cs, build, funSym, i, blockMap, aliases, rubyBlockId);
+                auto fastPathEnd = builder.GetInsertBlock();
+                builder.CreateBr(afterSend);
+                builder.SetInsertPoint(slowPath);
+                auto slowPathRes =
+                    IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, rubyBlockId);
+                auto slowPathEnd = builder.GetInsertBlock();
+                builder.CreateBr(afterSend);
+                builder.SetInsertPoint(afterSend);
+                auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("finalCallPhi_") + methodNameRef);
+                phi->addIncoming(fastPathRes, fastPathEnd);
+                phi->addIncoming(slowPathRes, slowPathEnd);
+                return phi;
             }
         }
     }
