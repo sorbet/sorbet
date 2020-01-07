@@ -288,9 +288,10 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
         cs.functionEntryInitializers = blockMap.functionInitializersByFunction[bb->rubyBlockId];
         bool isTerminated = false;
         builder.SetInsertPoint(block);
+        core::Loc lastLoc;
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
-                Payload::setLineNumber(cs, builder, bind.loc, cfg.symbol);
+                lastLoc = Payload::setLineNumber(cs, builder, bind.loc, cfg.symbol, lastLoc);
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
