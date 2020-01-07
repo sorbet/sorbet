@@ -201,6 +201,9 @@ class T::Props::Decorator
 
   # For performance, don't use named params here.
   # Passing in rules here is purely a performance optimization.
+  #
+  # Note this path is NOT used by generated getters on instances,
+  # unless `ifunset` is used on the prop, or `prop_get` is overridden.
   sig do
     params(
       instance: DecoratedInstance,
@@ -213,15 +216,7 @@ class T::Props::Decorator
   def prop_get(instance, prop, rules=props[prop.to_sym])
     val = get(instance, prop, rules)
 
-    # NB: Do NOT change this to check `val.nil?` instead. BSON::ByteBuffer overrides `==` such
-    # that `== nil` can return true while `.nil?` returns false. Tests will break in mysterious
-    # ways. A special thanks to Ruby for enabling this type of bug.
-    #
-    # One side effect here is that _if_ a class (like BSON::ByteBuffer) defines ==
-    # in such a way that instances which are not `nil`, ie are not NilClass, nevertheless
-    # are `== nil`, then we will transparently convert such instances to `nil` on read.
-    # Yes, our code relies on this behavior (as of writing). :thisisfine:
-    if val != nil # rubocop:disable Style/NonNilCheck
+    if !val.nil?
       val
     else
       raise NoRulesError.new if !rules
@@ -510,8 +505,13 @@ class T::Props::Decorator
         end
       end
 
-      @class.send(:define_method, name) do
-        self.class.decorator.prop_get(self, name, rules)
+      if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
+        @class.send(:define_method, name) do
+          self.class.decorator.prop_get(self, name, rules)
+        end
+      else
+        # Fast path (~30x faster as of Ruby 2.6)
+        @class.attr_reader(name)
       end
     end
   end
@@ -811,6 +811,23 @@ class T::Props::Decorator
       # time. Any class that defines props and also overrides the `decorator_class` method is going
       # to reach this line before its override take effect, turning it into a no-op.
       child.decorator.add_prop_definition(name, copied_rules)
+
+      # It's a bit tricky to support `prop_get` hooks added by plugins without
+      # sacrificing the `attr_reader` fast path or clobbering customized getters
+      # defined manually on a child.
+      #
+      # To make this work, we _do_ clobber getters defined on the child, but only if:
+      # (a) it's needed in order to support a `prop_get` hook, and
+      # (b) it's safe because the getter was defined by this file.
+      #
+      unless rules[:without_accessors]
+        if child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
+            child.instance_method(name).source_location.first == __FILE__
+          child.send(:define_method, name) do
+            self.class.decorator.prop_get(self, name, rules)
+          end
+        end
+      end
     end
   end
 
