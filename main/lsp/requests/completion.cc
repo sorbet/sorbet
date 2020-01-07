@@ -712,7 +712,7 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
                     type = targetClass.data(gs)->externalType(gs);
                 } else {
                     auto resultType = sym.data(gs)->resultType;
-                    type = resultType == nullptr ? core::Types::untyped(gs, sym) : resultType;
+                    type = !sym.data(gs)->hasSig() ? core::Types::untyped(gs, sym) : resultType;
                 }
 
                 items.push_back(getCompletionItemForConstant(gs, *config, sym, type, queryLoc, prefix, items.size()));

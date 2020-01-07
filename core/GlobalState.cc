@@ -625,7 +625,7 @@ SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name,
         auto resData = res->second.data(*this);
         if ((resData->flags & Symbol::Flags::METHOD) == Symbol::Flags::METHOD &&
             (resData->methodArgumentHash(*this) == methodHash ||
-             (resData->intrinsic != nullptr && resData->resultType == nullptr))) {
+             (resData->intrinsic != nullptr && !resData->hasSig()))) {
             return res->second;
         }
         lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
