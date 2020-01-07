@@ -61,23 +61,32 @@ class T::Props::Decorator
     @props = @props.merge(prop => rules.freeze).freeze
   end
 
-  sig {returns(T::Array[Symbol])}
+  VALID_RULE_KEYS = %i{
+    enum
+    foreign
+    foreign_hint_only
+    ifunset
+    immutable
+    override
+    redaction
+    sensitivity
+    without_accessors
+    clobber_existing_method!
+    extra
+    optional
+    _tnilable
+  }.to_set.freeze
+
+  sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
+  def valid_rule_key?(key)
+    valid_props.include?(key)
+  end
+
+  # Deprecated, kept temporarily to support overrides in pay-server
+  # during the transition to `valid_rule_key?`
+  sig {returns(T::Set[Symbol]).checked(:never)}
   def valid_props
-    %i{
-      enum
-      foreign
-      foreign_hint_only
-      ifunset
-      immutable
-      override
-      redaction
-      sensitivity
-      without_accessors
-      clobber_existing_method!
-      extra
-      optional
-      _tnilable
-    }
+    VALID_RULE_KEYS
   end
 
   sig {returns(DecoratedClass).checked(:never)}
@@ -262,7 +271,7 @@ class T::Props::Decorator
         "to 'sensitivity:' (in prop #{@class.name}.#{name})")
     end
 
-    if !(rules.keys - valid_props).empty?
+    if rules.keys.any? {|k| !valid_rule_key?(k)}
       raise ArgumentError.new("At least one invalid prop arg supplied in #{self}: #{rules.keys.inspect}")
     end
 

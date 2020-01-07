@@ -18,9 +18,9 @@ module T::Props::PrettyPrintable
   module DecoratorMethods
     extend T::Sig
 
-    sig {returns(T::Array[Symbol])}
-    def valid_props
-      super + [:inspect]
+    sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
+    def valid_rule_key?(key)
+      super || key == :inspect
     end
 
     sig do
