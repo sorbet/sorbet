@@ -61,7 +61,7 @@ genrule(
             "**/install-sh",
         ],
         exclude = [
-        "include/jemalloc/jemalloc.h",
+            "include/jemalloc/jemalloc.h",
         ],
     ),
     outs = [
@@ -69,7 +69,10 @@ genrule(
         "include/jemalloc/jemalloc.h",
     ],
     cmd = JEMALLOC_BUILD_COMMAND,
-    toolchains = ["@bazel_tools//tools/cpp:current_cc_toolchain"],
+    toolchains = [
+        "@bazel_tools//tools/cpp:cc_flags",
+        "@bazel_tools//tools/cpp:current_cc_toolchain",
+    ],
 )
 
 cc_library(

@@ -4,7 +4,6 @@
 
 try-import .bazelrc.local
 startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the default is to use 1/4 of memory, which makes flaky on 8G boxes
-common  --incompatible_package_name_is_a_function=false # https://github.com/protocolbuffers/protobuf/issues/5547
 
 # enable https://github.com/google/googletest/pull/1653
 common:build --define absl=1
@@ -107,15 +106,13 @@ test:test-sanitized-mac --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 build:reduce-intermediate-file-size-base --copt=-g0 --linkopt=-g0 # used by buildfarm to have less debug information on disk
 build:reduce-intermediate-file-size-base --strip=always
 build:reduce-intermediate-file-size-base --copt=-fno-standalone-debug --linkopt=-fno-standalone-debug # used by buildfarm to have less debug information on disk
-build:reduce-intermediate-file-size-base --config=shared-libs
 
 # extend reduce-intermediate-file-size with -Os
-build:reduce-intermediate-file-size --copt=-Os --linkopt=-Os --config=reduce-intermediate-file-size-base
-
-build:buildfarm --config=reduce-intermediate-file-size
+build:buildfarm --copt=-Os --linkopt=-Os --config=reduce-intermediate-file-size-base
 test:buildfarm --test_output=errors
+
 build:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
-build:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm
+build:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm --config=shared-libs
 
 build:travis --config=test-sanitized-linux
 test:travis --ram_utilization_factor=10
@@ -154,12 +151,9 @@ build:lto-linux --config=lto
 # By default, we make static builds, but we can also use dynamic linking if asked to.
 # Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
 build --define=linkshared=false
+
 build:shared-libs --define=linkshared=true --copt=-fPIC --linkopt=-fPIC
 
-# By default, we make dynamicly linked builds, while release builds are statically linked.
-# Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
-# Still, we try to use it by default as it has lower iteration time in dev
-build --define=linkshared=true --copt=-fPIC --linkopt=-fPIC
 build:static-libs --define=linkshared=false --copt=-fno-PIC --linkopt=-fno-PIC
 build:static-libs --linkopt=-fno-pie --copt=-fno-pie
 
@@ -213,10 +207,6 @@ build:backtracesymbols --spawn_strategy=standalone
 build:backtracesymbols --genrule_strategy=standalone
 
 build --strip=never
-
-# Enable nice UIs. Taken from bazel.rc of Bazel itself.
-common --experimental_ui --experimental_ui_actions_shown 8
-common --show_progress_rate_limit=0.25
 
 ##
 ## Fuzzing

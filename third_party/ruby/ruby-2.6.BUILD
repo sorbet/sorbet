@@ -19,13 +19,14 @@ config_setting(
     values = {"host_cpu": "k8"},
 )
 
-
 # configuration variables ######################################################
 
 RUBY_VERSION = "2.6.3"
+
 RUBY_CORE_VERSION = "2.6.0"
 
 ARCH_LINUX = "x86_64-unknown-linux"
+
 ARCH_DARWIN = "x86_64-darwin18"
 
 ARCH = select({
@@ -50,10 +51,6 @@ INC_PREFIX = "lib/ruby/include"
 
 genrule(
     name = "run_configure",
-    outs = [
-        "include/ruby/config.h",
-        "config.status",
-    ],
     srcs = glob([
         "configure",
         "tool/*",
@@ -63,11 +60,19 @@ genrule(
         "**/Makefile.in",
         "template/*",
     ]),
+    outs = [
+        "include/ruby/config.h",
+        "config.status",
+    ],
     cmd = """
 CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) --enable-load-relative --without-gmp --disable-jit-support > /dev/null
 find .ext -name config.h -type f -exec cp {} $(location include/ruby/config.h) \;
 cp config.status $(location config.status)
 """,
+    toolchains = [
+        "@bazel_tools//tools/cpp:cc_flags",
+        "@bazel_tools//tools/cpp:current_cc_toolchain",
+    ],
 )
 
 # shared headers ###############################################################
@@ -80,8 +85,8 @@ cc_library(
     hdrs = [
         "include/ruby/config.h",
     ],
-    includes = [ "include" ],
-    visibility = [ "//visibility:public" ],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -105,21 +110,21 @@ cc_library(
         "enc/trans",
         "enc/unicode/12.1.0",
     ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
-  name = "ruby_crypt",
-  hdrs = [
-    "missing/crypt.h",
-    "missing/des_tables.c",
-  ],
-  srcs = select({
-    ":linux": ["missing/crypt.c"],
-    ":darwin": [],
-  }),
-  deps = [ ":ruby_headers" ],
-  visibility = [ "//visibility:public" ],
+    name = "ruby_crypt",
+    srcs = select({
+        ":linux": ["missing/crypt.c"],
+        ":darwin": [],
+    }),
+    hdrs = [
+        "missing/crypt.h",
+        "missing/des_tables.c",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [":ruby_headers"],
 )
 
 RUBY_COPTS = [
@@ -128,7 +133,7 @@ RUBY_COPTS = [
     "-Wno-parentheses",
     "-D_REENTRANT",
     "-DNO_INITIAL_LOAD_PATH",
-    "-Wno-macro-redefined", # they redefine NDEBUG
+    "-Wno-macro-redefined",  # they redefine NDEBUG
 
     # TODO: is this really necessary?
     "-Wno-string-plus-int",
@@ -136,7 +141,6 @@ RUBY_COPTS = [
     ":linux": [],
     ":darwin": ["-D_DARWIN_C_SOURCE"],
 })
-
 
 # coroutine ####################################################################
 
@@ -149,42 +153,38 @@ cc_library(
     hdrs = [
         "coroutine/amd64/Context.h",
     ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
 )
-
 
 # miniruby #####################################################################
 
 filegroup(
     name = "miniruby_lib",
-    srcs = glob([ "lib/**/*.rb" ]),
+    srcs = glob(["lib/**/*.rb"]),
 )
 
 cc_library(
     name = "miniruby_private_headers",
     hdrs = [
+        "eval_error.c",
+        "eval_jump.c",
+        "id.c",
+        "id_table.c",
         "lex.c",
+        "siphash.c",
         "thread_pthread.c",
         "thread_sync.c",
-        "id.c",
-        "eval_error.c",
-        "vsnprintf.c",
-        "vm_insnhelper.c",
         "vm_args.c",
-        "vm_exec.c",
         "vm_eval.c",
+        "vm_exec.c",
+        "vm_insnhelper.c",
         "vm_method.c",
-        "id_table.c",
-        "eval_jump.c",
-        "siphash.c",
+        "vsnprintf.c",
     ],
 )
 
 cc_binary(
     name = "bin/miniruby",
-
-    data = [ ":miniruby_lib" ],
-
     srcs = [
         "ast.c",
         "addr2line.c",
@@ -262,48 +262,56 @@ cc_binary(
         "missing/explicit_bzero.c",
         "missing/setproctitle.c",
     ] + select({
-      ":linux": [
-          "missing/strlcpy.c",
-          "missing/strlcat.c",
-      ],
-      ":darwin": [],
+        ":linux": [
+            "missing/strlcpy.c",
+            "missing/strlcat.c",
+        ],
+        ":darwin": [],
     }),
-
+    copts = RUBY_COPTS + ["-DRUBY_EXPORT"],
+    data = [":miniruby_lib"],
+    includes = [
+        "include",
+        "enc/unicode/12.1.0",
+    ] + select({
+        ":linux": ["missing"],
+        ":darwin": [],
+    }),
+    linkopts = select({
+        ":linux": [
+            "-lpthread",
+            "-lcrypt",
+            "-lrt",
+        ],
+        ":darwin": [
+            "-framework",
+            "Foundation",
+            "-lpthread",
+        ],
+    }),
+    visibility = ["//visibility:public"],
     deps = [
+        ":coroutine/amd64",
         ":miniruby_private_headers",
         ":ruby_headers",
         ":ruby_private_headers",
-        ":coroutine/amd64",
-        "@zlib//:zlib",
+        "@zlib",
     ],
-
-    copts = RUBY_COPTS + [ "-DRUBY_EXPORT" ],
-
-    linkopts = select({
-      ":linux": [
-        "-lpthread",
-        "-lcrypt",
-        "-lrt",
-      ],
-      ":darwin": [
-        "-framework",
-        "Foundation",
-        "-lpthread",
-      ],
-    }),
-
-    includes = [ "include", "enc/unicode/12.1.0" ] + select({
-      ":linux": ["missing"],
-      ":darwin": []
-    }),
-
-    visibility = ["//visibility:public"],
 )
 
 # full ruby ####################################################################
 
-RBCONFIG_LINUX = "/".join([LIB_PREFIX, ARCH_LINUX, "rbconfig.rb"])
-RBCONFIG_DARWIN = "/".join([LIB_PREFIX, ARCH_DARWIN, "rbconfig.rb"])
+RBCONFIG_LINUX = "/".join([
+    LIB_PREFIX,
+    ARCH_LINUX,
+    "rbconfig.rb",
+])
+
+RBCONFIG_DARWIN = "/".join([
+    LIB_PREFIX,
+    ARCH_DARWIN,
+    "rbconfig.rb",
+])
 
 RBCONFIG = select({
     ":linux": [RBCONFIG_LINUX],
@@ -375,7 +383,7 @@ genrule(
         "prelude.rb",
         "gem_prelude.rb",
     ],
-    outs = [ "prelude.c" ],
+    outs = ["prelude.c"],
     cmd = """
 $(location bin/miniruby) \
     -I $$(dirname $(location lib/erb.rb)) \
@@ -391,8 +399,8 @@ $(location bin/miniruby) \
 
 genrule(
     name = "verconf",
-    srcs = [ "bin/miniruby" ],
-    outs = [ "verconf.h" ],
+    srcs = ["bin/miniruby"],
+    outs = ["verconf.h"],
     cmd = """
 prefix="/ruby.runfiles/ruby_2_6_3"
 cat > $(location verconf.h) <<EOF
@@ -410,38 +418,34 @@ cat > $(location verconf.h) <<EOF
 #define RUBY_VENDOR_LIB                 RUBY_LIB_PREFIX"/vendor_ruby"
 #define RUBY_VENDOR_ARCH_LIB_FOR(arch)  RUBY_VENDOR_LIB2"/"arch
 EOF
-"""
+""",
 )
 
 cc_binary(
     name = "bin/ruby",
+    srcs = [
+        "main.c",
+    ],
     linkstatic = select({
         ":linux": False,
         ":darwin": True,
     }),
-    srcs = [
-        "main.c",
-    ],
     deps = [
-            ":libruby"
-    ]
+        ":libruby",
+    ],
 )
 
 cc_library(
     name = "libruby",
-
     srcs = [
         "prelude.c",
         "verconf.h",
-
         "ext/extinit.c",
-
         "enc/encinit.c",
         "enc/ascii.c",
         "enc/us_ascii.c",
         "enc/unicode.c",
         "enc/utf_8.c",
-
         "addr2line.c",
         "ast.c",
         "dln.c",
@@ -517,7 +521,22 @@ cc_library(
         ],
         ":darwin": [],
     }),
-
+    copts = RUBY_COPTS + [
+        "-DRUBY_EXPORT",
+        "-DRUBY",
+    ],
+    linkopts = select({
+        ":linux": [
+            "-lpthread",
+            "-lrt",
+        ],
+        ":darwin": [
+            "-framework",
+            "Foundation",
+            "-lpthread",
+        ],
+    }),
+    visibility = ["//visibility:public"],
     deps = [
         ":miniruby_private_headers",
         ":coroutine/amd64",
@@ -542,18 +561,6 @@ cc_library(
         ":linux": [":ruby_crypt"],
         ":darwin": [],
     }),
-
-    linkopts = select({
-        ":linux": ["-lpthread", "-lrt"],
-        ":darwin": [
-            "-framework",
-            "Foundation",
-            "-lpthread",
-        ],
-    }),
-    copts = RUBY_COPTS + ["-DRUBY_EXPORT","-DRUBY"],
-
-    visibility = ["//visibility:public"],
 )
 
 genrule(
@@ -574,7 +581,10 @@ genrule(
     ] +
     # NOTE: this glob determines the encodings that are available in encdb.h, as
     # encdb.h.tmpl reads this directory to determine encodings to use
-    glob([ "enc/**/*.h", "enc/**/*.c" ]),
+    glob([
+        "enc/**/*.h",
+        "enc/**/*.c",
+    ]),
     outs = [
         "encdb.h",
         "transdb.h",
@@ -624,10 +634,6 @@ cc_library(
     hdrs = [
         "transdb.h",
     ],
-    deps = [
-        ":ruby_headers",
-        ":ruby_private_headers",
-    ],
     copts = RUBY_COPTS + [
         "-DRUBY_EXPORT",
         # IMPORTANT: without this no Init functions are generated
@@ -636,6 +642,10 @@ cc_library(
         "-Wno-implicit-function-declaration",
     ],
     linkstatic = 1,
+    deps = [
+        ":ruby_headers",
+        ":ruby_private_headers",
+    ],
 )
 
 cc_library(
@@ -684,27 +694,27 @@ cc_library(
     hdrs = [
         "encdb.h",
     ],
-    deps = [
-        ":ruby_headers",
-        ":ruby_private_headers",
-    ],
     copts = RUBY_COPTS + [
         # IMPORTANT: without this no Init functions are generated
-        "-DRUBY", "-DONIG_ENC_REGISTER=rb_enc_register",
+        "-DRUBY",
+        "-DONIG_ENC_REGISTER=rb_enc_register",
 
         # for r "enc/gb2312.c"
         "-Wno-implicit-function-declaration",
     ],
     linkstatic = 1,
+    deps = [
+        ":ruby_headers",
+        ":ruby_private_headers",
+    ],
 )
-
 
 # extensions ###################################################################
 
 # NOTE: update `Init_ext` below if you add a new extension.
 genrule(
     name = "ext/extinit",
-    outs = [ "ext/extinit.c" ],
+    outs = ["ext/extinit.c"],
     cmd = """
 cat > $(location ext/extinit.c) <<EOF
 #include "ruby/ruby.h"
@@ -742,16 +752,16 @@ EOF
 
 cc_library(
     name = "ext/pathname",
-    srcs = [ "ext/pathname/pathname.c" ],
-    deps = [ ":ruby_headers" ],
+    srcs = ["ext/pathname/pathname.c"],
     linkstatic = 1,
+    deps = [":ruby_headers"],
 )
 
 cc_library(
     name = "ext/stringio",
-    srcs = [ "ext/stringio/stringio.c" ],
-    deps = [ ":ruby_headers" ],
+    srcs = ["ext/stringio/stringio.c"],
     linkstatic = 1,
+    deps = [":ruby_headers"],
 )
 
 cc_library(
@@ -772,34 +782,34 @@ cc_library(
         "-DHAVE_RB_SYM2STR",
         "'-DRUBY_BIGDECIMAL_VERSION=\"1.4.1\"'",
     ],
-    deps = [ ":ruby_headers" ],
     linkstatic = 1,
+    deps = [":ruby_headers"],
 )
 
 cc_library(
     name = "ext/json/generator",
     srcs = [
+        "ext/json/fbuffer/fbuffer.h",
         "ext/json/generator/generator.c",
         "ext/json/generator/generator.h",
-        "ext/json/fbuffer/fbuffer.h",
     ],
-    copts = [ "-DJSON_GENERATOR" ],
-    deps = [ ":ruby_headers" ],
+    copts = ["-DJSON_GENERATOR"],
     linkstatic = 1,
+    deps = [":ruby_headers"],
 )
 
 cc_library(
     name = "ext/json/parser",
     srcs = [
+        "ext/json/fbuffer/fbuffer.h",
         "ext/json/parser/parser.c",
         "ext/json/parser/parser.h",
-        "ext/json/fbuffer/fbuffer.h",
     ],
     copts = [
         "-DHAVE_RB_ENC_RAISE",
     ],
-    deps = [ ":ruby_headers" ],
     linkstatic = 1,
+    deps = [":ruby_headers"],
 )
 
 genrule(
@@ -825,16 +835,6 @@ $(location bin/miniruby) \
 
 cc_library(
     name = "ext/socket",
-    includes = [
-        "ext/socket"
-    ],
-    hdrs = [
-        "ext/socket/constdefs.h",
-        "ext/socket/constdefs.c",
-        "ext/socket/sockport.h",
-        "ext/socket/rubysocket.h",
-        "ext/socket/addrinfo.h",
-    ],
     srcs = [
         "ext/socket/ancdata.c",
         "ext/socket/basicsocket.c",
@@ -853,6 +853,13 @@ cc_library(
         "ext/socket/udpsocket.c",
         "ext/socket/unixserver.c",
         "ext/socket/unixsocket.c",
+    ],
+    hdrs = [
+        "ext/socket/addrinfo.h",
+        "ext/socket/constdefs.c",
+        "ext/socket/constdefs.h",
+        "ext/socket/rubysocket.h",
+        "ext/socket/sockport.h",
     ],
     copts = [
         "-DENABLE_IPV6",
@@ -1001,30 +1008,32 @@ cc_library(
             "-DHAVE_SYS_UIO_H",
             "-DHAVE_TYPE_STRUCT_SOCKADDR_DL",
             "-DINET6",
-        ]
+        ],
     }),
-    deps = [ ":ruby_headers", ":ruby_private_headers" ],
+    includes = [
+        "ext/socket",
+    ],
     linkstatic = 1,
+    deps = [
+        ":ruby_headers",
+        ":ruby_private_headers",
+    ],
 )
 
 cc_library(
     name = "ext/io/wait",
-    srcs = [ "ext/io/wait/wait.c" ],
-    deps = [ ":ruby_headers" ],
+    srcs = ["ext/io/wait/wait.c"],
     copts = [
-        '-DHAVE_SYS_IOCTL_H',
+        "-DHAVE_SYS_IOCTL_H",
         '-DFIONREAD_HEADER="<sys/ioctl.h>"',
     ],
     linkstatic = 1,
+    deps = [":ruby_headers"],
 )
 
 cc_library(
     name = "ext/zlib",
-    srcs = [ "ext/zlib/zlib.c" ],
-    deps = [
-        ":ruby_headers",
-        "@zlib//:zlib",
-    ],
+    srcs = ["ext/zlib/zlib.c"],
     copts = [
         "-DHAVE_ZLIB_H",
         "-DOS_CODE=OS_UNIX",
@@ -1033,6 +1042,10 @@ cc_library(
         "-DHAVE_TYPE_Z_CRC_T",
     ],
     linkstatic = 1,
+    deps = [
+        ":ruby_headers",
+        "@zlib",
+    ],
 )
 
 cc_library(
@@ -1047,40 +1060,37 @@ cc_library(
         "ext/date/date_tmx.h",
         "ext/date/zonetab.h",
     ],
+    copts = RUBY_COPTS,
+    linkstatic = 1,
     deps = [
         ":ruby_headers",
     ],
-    copts = RUBY_COPTS,
-    linkstatic = 1,
 )
 
 cc_library(
     name = "ext/digest",
     srcs = [
-        "ext/digest/digest.c",
         "ext/digest/bubblebabble/bubblebabble.c",
+        "ext/digest/digest.c",
+        "ext/digest/md5/md5.c",
+        "ext/digest/md5/md5init.c",
+        "ext/digest/rmd160/rmd160.c",
+        "ext/digest/rmd160/rmd160init.c",
         "ext/digest/sha1/sha1.c",
         "ext/digest/sha1/sha1init.c",
         "ext/digest/sha2/sha2.c",
         "ext/digest/sha2/sha2init.c",
-        "ext/digest/rmd160/rmd160.c",
-        "ext/digest/rmd160/rmd160init.c",
-        "ext/digest/md5/md5.c",
-        "ext/digest/md5/md5init.c",
     ],
     hdrs = [
         "ext/digest/defs.h",
         "ext/digest/digest.h",
+        "ext/digest/md5/md5.h",
+        "ext/digest/md5/md5cc.h",
+        "ext/digest/rmd160/rmd160.h",
         "ext/digest/sha1/sha1.h",
         "ext/digest/sha1/sha1cc.h",
         "ext/digest/sha2/sha2.h",
         "ext/digest/sha2/sha2cc.h",
-        "ext/digest/rmd160/rmd160.h",
-        "ext/digest/md5/md5.h",
-        "ext/digest/md5/md5cc.h",
-    ],
-    deps = [
-        ":ruby_headers",
     ],
     copts = [
         "-DHAVE_CONFIG_H",
@@ -1091,6 +1101,9 @@ cc_library(
         "-DHAVE_SYS_CDEFS_H",
     ],
     linkstatic = 1,
+    deps = [
+        ":ruby_headers",
+    ],
 )
 
 cc_library(
@@ -1109,12 +1122,7 @@ cc_library(
         "ext/psych/yaml/reader.c",
         "ext/psych/yaml/scanner.c",
         "ext/psych/yaml/writer.c",
-    ] + glob([ "ext/psych/**/*.h" ]),
-    includes = [
-        "ext/psych",
-        "ext/psych/yaml",
-        "include/ruby",
-    ],
+    ] + glob(["ext/psych/**/*.h"]),
     copts = [
         "-DHAVE_DLFCN_H",
         "-DHAVE_INTTYPES_H",
@@ -1128,10 +1136,15 @@ cc_library(
         "-DHAVE_UNISTD_H",
         "-DHAVE_CONFIG_H",
     ],
+    includes = [
+        "ext/psych",
+        "ext/psych/yaml",
+        "include/ruby",
+    ],
+    linkstatic = 1,
     deps = [
         ":ruby_headers",
     ],
-    linkstatic = 1,
 )
 
 cc_library(
@@ -1139,77 +1152,65 @@ cc_library(
     srcs = [
         "ext/strscan/strscan.c",
     ],
+    linkstatic = 1,
     deps = [
         ":ruby_headers",
         ":ruby_private_headers",
     ],
-    linkstatic = 1,
 )
-
 
 # core library #################################################################
 
-load("@com_stripe_ruby_typer//third_party/ruby:utils.bzl", "install_file", "install_dir")
+load("@com_stripe_ruby_typer//third_party/ruby:utils.bzl", "install_dir", "install_file")
 
 filegroup(
     name = "ruby_lib",
     srcs =
         install_dir(
+            out_prefix = LIB_PREFIX,
             src_prefix = "ext/pathname/lib",
-            out_prefix = LIB_PREFIX,
         ) +
-
         install_dir(
+            out_prefix = LIB_PREFIX,
             src_prefix = "ext/bigdecimal/lib",
-            out_prefix = LIB_PREFIX,
         ) +
-
         install_dir(
+            out_prefix = LIB_PREFIX,
             src_prefix = "ext/json/lib",
-            out_prefix = LIB_PREFIX,
         ) +
-
         install_dir(
+            out_prefix = LIB_PREFIX,
             src_prefix = "ext/socket/lib",
-            out_prefix = LIB_PREFIX,
         ) +
-
         install_dir(
+            out_prefix = LIB_PREFIX,
             src_prefix = "ext/date/lib",
-            out_prefix = LIB_PREFIX,
         ) +
-
         install_dir(
+            out_prefix = LIB_PREFIX,
             src_prefix = "ext/digest/lib",
-            out_prefix = LIB_PREFIX,
         ) +
-
         install_dir(
-            src_prefix = "ext/digest/sha2/lib",
             out_prefix = LIB_PREFIX + "/digest",
+            src_prefix = "ext/digest/sha2/lib",
         ) +
-
         install_dir(
+            out_prefix = LIB_PREFIX,
             src_prefix = "ext/psych/lib",
-            out_prefix = LIB_PREFIX,
         ) +
-
         install_dir(
-            src_prefix = "lib",
             out_prefix = LIB_PREFIX,
+            src_prefix = "lib",
         ) +
-
         RBCONFIG,
-
     visibility = ["//visibility:public"],
 )
-
 
 # wrapper script ###############################################################
 
 genrule(
     name = "generate-ruby.sh",
-    outs = [ "ruby.sh" ],
+    outs = ["ruby.sh"],
     cmd = """
 cat >> $(location ruby.sh) <<EOF
 #!/bin/bash
@@ -1239,32 +1240,31 @@ filegroup(
     name = "ruby_runtime_env",
     srcs =
         install_dir(
-            src_prefix = "include",
             out_prefix = INC_PREFIX,
+            src_prefix = "include",
         ) + [
-        ":bin/ruby",
-        ":ruby_lib",
-        install_file(
-            name = "install-ruby-config.h",
-            src = "include/ruby/config.h",
-            out = INC_PREFIX + "/ruby/config.h",
-        ),
-    ],
+            ":bin/ruby",
+            ":ruby_lib",
+            install_file(
+                name = "install-ruby-config.h",
+                src = "include/ruby/config.h",
+                out = INC_PREFIX + "/ruby/config.h",
+            ),
+        ],
 )
 
 sh_binary(
     name = "ruby",
-    data = [ ":ruby_runtime_env" ],
-    srcs = [ "ruby.sh" ],
+    srcs = ["ruby.sh"],
+    data = [":ruby_runtime_env"],
     visibility = ["//visibility:public"],
 )
-
 
 # tests ########################################################################
 
 genrule(
     name = "generate_smoke_test.sh",
-    outs = [ "smoke_test.sh" ],
+    outs = ["smoke_test.sh"],
     cmd = """
 cat > $(location smoke_test.sh) <<EOF
 #!/bin/bash
@@ -1283,13 +1283,13 @@ EOF
 
 sh_test(
     name = "smoke_test",
-    deps = [ "@bazel_tools//tools/bash/runfiles" ],
-    data = [ ":ruby" ],
-    srcs = [ "smoke_test.sh" ],
-    args = [ "$(location :ruby)" ],
+    srcs = ["smoke_test.sh"],
+    args = ["$(location :ruby)"],
+    data = [":ruby"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
 )
 
 test_suite(
     name = "ruby-2.6",
-    tests = [ ":smoke_test" ],
+    tests = [":smoke_test"],
 )

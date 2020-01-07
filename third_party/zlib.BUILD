@@ -21,6 +21,8 @@ cc_library(
     copts = [
         "-w",
         "-Dverbose=-1",
+        # zlib is not c99, and uses `write` without including a header
+        "-Wno-implicit-function-declaration",
     ],
     includes = ["."],
     visibility = ["//visibility:public"],
