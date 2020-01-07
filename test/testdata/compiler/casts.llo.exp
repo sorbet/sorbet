@@ -1080,14 +1080,14 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %"stackFrame_func_Object#fooInt51" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooInt" to i64*), align 8
+  %"stackFrame_func_Object#fooInt49" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooInt" to i64*), align 8
   %rawArg_arg = load i64, i64* %argArray, align 8
   %1 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %2 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %1, i64 0, i32 2
   %3 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %2, align 8, !tbaa !13
   %4 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 2
   %5 = bitcast %struct.rb_iseq_struct** %4 to i64*
-  store i64 %"stackFrame_func_Object#fooInt51", i64* %5, align 8, !tbaa !16
+  store i64 %"stackFrame_func_Object#fooInt49", i64* %5, align 8, !tbaa !16
   %6 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 4
   %7 = load i64*, i64** %6, align 8, !tbaa !18
   %8 = load i64, i64* %7, align 8, !tbaa !9
@@ -1098,7 +1098,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %11 = load i64, i64* @rb_cObject, align 8
   %12 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %11) #6
   %13 = icmp eq i64 %12, 20
-  br i1 %13, label %typeTestSuccess, label %codeRepl52, !prof !22, !misexpect !23
+  br i1 %13, label %typeTestSuccess, label %codeRepl50, !prof !22, !misexpect !23
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %14 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
@@ -1125,7 +1125,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %31 = icmp eq i64 %30, 0
   br i1 %31, label %codeRepl, label %32, !prof !45, !misexpect !23
 
-codeRepl52:                                       ; preds = %fillRequiredArgs
+codeRepl50:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #18
   unreachable
 

@@ -230,7 +230,7 @@ declare i64 @rb_int2big(i64) local_unnamed_addr #2
 ; Function Attrs: nounwind ssp
 define internal i64 @"func_<root>.<static-init>$111$block_1"(i64 %firstYieldArgRaw, i64 %captures, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #8 {
 functionEntryInitializers:
-  %"stackFrame_func_<root>.<static-init>$11156" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$111" to i64*), align 8
+  %"stackFrame_func_<root>.<static-init>$11154" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$111" to i64*), align 8
   %arrayExpansionSizeGuard = icmp eq i32 %argc, 1
   br i1 %arrayExpansionSizeGuard, label %argArrayExpandArrayTest, label %fillRequiredArgs
 
@@ -304,7 +304,7 @@ fillFromDefaultBlockDone:                         ; preds = %sorbet_isa_Array.ex
   %33 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %32, align 8, !tbaa !12
   %34 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %33, i64 0, i32 2
   %35 = bitcast %struct.rb_iseq_struct** %34 to i64*
-  store i64 %"stackFrame_func_<root>.<static-init>$11156", i64* %35, align 8, !tbaa !15
+  store i64 %"stackFrame_func_<root>.<static-init>$11154", i64* %35, align 8, !tbaa !15
   %36 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %33, i64 0, i32 4
   %37 = load i64*, i64** %36, align 8, !tbaa !17
   %38 = load i64, i64* %37, align 8, !tbaa !9
@@ -389,7 +389,7 @@ typeTestSuccess:                                  ; preds = %fillFromDefaultBloc
   store i64* inttoptr (i64 24 to i64*), i64** %94, align 8, !tbaa !20
   %95 = and i64 %el2.sroa.0.0, 1
   %96 = icmp eq i64 %95, 0
-  br i1 %96, label %codeRepl57, label %97, !prof !18, !misexpect !24
+  br i1 %96, label %codeRepl55, label %97, !prof !18, !misexpect !24
 
 codeRepl:                                         ; preds = %fillFromDefaultBlockDone
   tail call fastcc void @"func_<root>.<static-init>$111$block_1.cold.1"(i64 %el1.sroa.0.1) #15
@@ -422,7 +422,7 @@ sorbet_rb_int_plus.exit:                          ; preds = %97, %106
   store i64* inttoptr (i64 8 to i64*), i64** %114, align 8, !tbaa !20
   ret i64 %110
 
-codeRepl57:                                       ; preds = %typeTestSuccess
+codeRepl55:                                       ; preds = %typeTestSuccess
   tail call fastcc void @sorbet_cast_failure(i64 %el2.sroa.0.0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0)) #13
   unreachable
 }

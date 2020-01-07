@@ -313,14 +313,14 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %"stackFrame_func_Object#hello73" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#hello" to i64*), align 8
+  %"stackFrame_func_Object#hello69" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#hello" to i64*), align 8
   %rawArg_name = load i64, i64* %argArray, align 8
   %30 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10
   %31 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %30, i64 0, i32 2
   %32 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %31, align 8, !tbaa !12
   %33 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %32, i64 0, i32 2
   %34 = bitcast %struct.rb_iseq_struct** %33 to i64*
-  store i64 %"stackFrame_func_Object#hello73", i64* %34, align 8, !tbaa !15
+  store i64 %"stackFrame_func_Object#hello69", i64* %34, align 8, !tbaa !15
   %35 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %32, i64 0, i32 4
   %36 = load i64*, i64** %35, align 8, !tbaa !17
   %37 = load i64, i64* %36, align 8, !tbaa !9

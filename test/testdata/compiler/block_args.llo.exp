@@ -228,7 +228,7 @@ declare i64 @rb_int2big(i64) local_unnamed_addr #2
 define internal i64 @"func_<root>.<static-init>$111$block_1"(i64 %firstYieldArgRaw, i64 %captures, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #8 {
 functionEntryInitializers:
   %callArgs = alloca [2 x i64], align 8
-  %"stackFrame_func_<root>.<static-init>$11120" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$111" to i64*), align 8
+  %"stackFrame_func_<root>.<static-init>$11118" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$111" to i64*), align 8
   %"rubyId_+" = load i64, i64* @"rubyIdPrecomputed_+", align 8
   %default0 = icmp eq i32 %argc, 0
   br i1 %default0, label %fillFromDefaultBlockDone, label %fillFromArgBlock0, !prof !18, !misexpect !19
@@ -244,7 +244,7 @@ fillFromDefaultBlockDone:                         ; preds = %functionEntryInitia
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !12
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   %4 = bitcast %struct.rb_iseq_struct** %3 to i64*
-  store i64 %"stackFrame_func_<root>.<static-init>$11120", i64* %4, align 8, !tbaa !15
+  store i64 %"stackFrame_func_<root>.<static-init>$11118", i64* %4, align 8, !tbaa !15
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
   %6 = load i64*, i64** %5, align 8, !tbaa !17
   %7 = load i64, i64* %6, align 8, !tbaa !9
