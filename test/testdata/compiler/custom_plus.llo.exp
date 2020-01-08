@@ -854,14 +854,14 @@ define void @Init_test_testdata_compiler_custom_plus() local_unnamed_addr #12 {
   %19 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !40
   %guardUpdated = icmp eq i64 %18, %19
   tail call void @llvm.assume(i1 %guardUpdated)
-  %"rubyId_+.i.i.i" = load i64, i64* @"rubyIdPrecomputed_+", align 8
-  %"stackFrame_func_A.<static-init>2.i.i.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_A.<static-init>" to i64*), align 8
+  %"rubyId_+.i.i" = load i64, i64* @"rubyIdPrecomputed_+", align 8
+  %"stackFrame_func_A.<static-init>2.i.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_A.<static-init>" to i64*), align 8
   %20 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %21 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %20, i64 0, i32 2
   %22 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %21, align 8, !tbaa !13
   %23 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %22, i64 0, i32 2
   %24 = bitcast %struct.rb_iseq_struct** %23 to i64*
-  store i64 %"stackFrame_func_A.<static-init>2.i.i.i", i64* %24, align 8, !tbaa !16
+  store i64 %"stackFrame_func_A.<static-init>2.i.i", i64* %24, align 8, !tbaa !16
   %25 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %22, i64 0, i32 4
   %26 = load i64*, i64** %25, align 8, !tbaa !18
   %27 = load i64, i64* %26, align 8, !tbaa !9
@@ -869,7 +869,7 @@ define void @Init_test_testdata_compiler_custom_plus() local_unnamed_addr #12 {
   store i64 %28, i64* %26, align 8, !tbaa !9
   %29 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %22, i64 0, i32 0
   store i64* inttoptr (i64 16 to i64*), i64** %29, align 8, !tbaa !11
-  %rawSym.i.i.i = tail call i64 @rb_id2sym(i64 %"rubyId_+.i.i.i") #17
+  %rawSym.i.i = tail call i64 @rb_id2sym(i64 %"rubyId_+.i.i") #17
   tail call void @rb_define_method(i64 %17, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+", i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#+" to i64 (...)*), i32 -1) #17
   store i64* inttoptr (i64 56 to i64*), i64** %11, align 8, !tbaa !11
   %30 = call i64 @rb_funcallv(i64 %17, i64 %rubyId_new.i, i32 0, i64* nonnull %callArgsAddr.i) #17

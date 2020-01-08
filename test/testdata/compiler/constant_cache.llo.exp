@@ -751,13 +751,13 @@ define void @Init_test_testdata_compiler_constant_cache() local_unnamed_addr #12
   %callArgsAddr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %0, i64* %callArgsAddr.i, align 8
   %12 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A, i64 0, i64 0), i64 %0) #17
-  %"stackFrame_func_A.<static-init>2.i.i.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_A.<static-init>" to i64*), align 8
+  %"stackFrame_func_A.<static-init>2.i.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_A.<static-init>" to i64*), align 8
   %13 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %14 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %13, i64 0, i32 2
   %15 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %14, align 8, !tbaa !13
   %16 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %15, i64 0, i32 2
   %17 = bitcast %struct.rb_iseq_struct** %16 to i64*
-  store i64 %"stackFrame_func_A.<static-init>2.i.i.i", i64* %17, align 8, !tbaa !16
+  store i64 %"stackFrame_func_A.<static-init>2.i.i", i64* %17, align 8, !tbaa !16
   %18 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %15, i64 0, i32 4
   %19 = load i64*, i64** %18, align 8, !tbaa !18
   %20 = load i64, i64* %19, align 8, !tbaa !9

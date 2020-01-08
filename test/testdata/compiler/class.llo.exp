@@ -526,13 +526,13 @@ constr:
 define void @Init_test_testdata_compiler_class() local_unnamed_addr #9 {
 "func_<root>.<static-init>$111.exit":
   %0 = load i64, i64* @rb_cObject, align 8
-  %"stackFrame_func_<root>.<static-init>$1112.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$111" to i64*), align 8
+  %"stackFrame_func_<root>.<static-init>$1114.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$111" to i64*), align 8
   %1 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %2 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %1, i64 0, i32 2
   %3 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %2, align 8, !tbaa !13
   %4 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 2
   %5 = bitcast %struct.rb_iseq_struct** %4 to i64*
-  store i64 %"stackFrame_func_<root>.<static-init>$1112.i", i64* %5, align 8, !tbaa !16
+  store i64 %"stackFrame_func_<root>.<static-init>$1114.i", i64* %5, align 8, !tbaa !16
   %6 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 4
   %7 = load i64*, i64** %6, align 8, !tbaa !18
   %8 = load i64, i64* %7, align 8, !tbaa !9
@@ -556,13 +556,13 @@ define void @Init_test_testdata_compiler_class() local_unnamed_addr #9 {
   %18 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !36
   %guardUpdated = icmp eq i64 %17, %18
   tail call void @llvm.assume(i1 %guardUpdated)
-  %"stackFrame_func_Foo.<static-init>2.i.i.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Foo.<static-init>" to i64*), align 8
+  %"stackFrame_func_Foo.<static-init>2.i.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Foo.<static-init>" to i64*), align 8
   %19 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %20 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %19, i64 0, i32 2
   %21 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %20, align 8, !tbaa !13
   %22 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %21, i64 0, i32 2
   %23 = bitcast %struct.rb_iseq_struct** %22 to i64*
-  store i64 %"stackFrame_func_Foo.<static-init>2.i.i.i", i64* %23, align 8, !tbaa !16
+  store i64 %"stackFrame_func_Foo.<static-init>2.i.i", i64* %23, align 8, !tbaa !16
   %24 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %21, i64 0, i32 4
   %25 = load i64*, i64** %24, align 8, !tbaa !18
   %26 = load i64, i64* %25, align 8, !tbaa !9
@@ -571,13 +571,13 @@ define void @Init_test_testdata_compiler_class() local_unnamed_addr #9 {
   %28 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %21, i64 0, i32 0
   store i64* inttoptr (i64 16 to i64*), i64** %28, align 8, !tbaa !11
   %29 = tail call i64 @rb_define_class_under(i64 %16, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Bar, i64 0, i64 0), i64 %0) #12
-  %"stackFrame_func_Foo::Bar.<static-init>2.i.i.i.i.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Foo::Bar.<static-init>" to i64*), align 8
+  %"stackFrame_func_Foo::Bar.<static-init>2.i.i.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Foo::Bar.<static-init>" to i64*), align 8
   %30 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %31 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %30, i64 0, i32 2
   %32 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %31, align 8, !tbaa !13
   %33 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %32, i64 0, i32 2
   %34 = bitcast %struct.rb_iseq_struct** %33 to i64*
-  store i64 %"stackFrame_func_Foo::Bar.<static-init>2.i.i.i.i.i", i64* %34, align 8, !tbaa !16
+  store i64 %"stackFrame_func_Foo::Bar.<static-init>2.i.i.i", i64* %34, align 8, !tbaa !16
   %35 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %32, i64 0, i32 4
   %36 = load i64*, i64** %35, align 8, !tbaa !18
   %37 = load i64, i64* %36, align 8, !tbaa !9
@@ -587,13 +587,13 @@ define void @Init_test_testdata_compiler_class() local_unnamed_addr #9 {
   store i64* inttoptr (i64 8 to i64*), i64** %39, align 8, !tbaa !11
   store i64* inttoptr (i64 40 to i64*), i64** %10, align 8, !tbaa !11
   %40 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Baz, i64 0, i64 0), i64 %0) #12
-  %"stackFrame_func_Baz.<static-init>2.i.i.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Baz.<static-init>" to i64*), align 8
+  %"stackFrame_func_Baz.<static-init>2.i.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Baz.<static-init>" to i64*), align 8
   %41 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %42 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %41, i64 0, i32 2
   %43 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %42, align 8, !tbaa !13
   %44 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %43, i64 0, i32 2
   %45 = bitcast %struct.rb_iseq_struct** %44 to i64*
-  store i64 %"stackFrame_func_Baz.<static-init>2.i.i.i", i64* %45, align 8, !tbaa !16
+  store i64 %"stackFrame_func_Baz.<static-init>2.i.i", i64* %45, align 8, !tbaa !16
   %46 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %43, i64 0, i32 4
   %47 = load i64*, i64** %46, align 8, !tbaa !18
   %48 = load i64, i64* %47, align 8, !tbaa !9
