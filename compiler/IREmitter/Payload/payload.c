@@ -648,7 +648,7 @@ const VALUE **sorbet_setRubyStackFrame(unsigned char *iseqchar) {
     return &cfp->pc;
 }
 
-void sorbet_setLineNumber(int offset, VALUE** storeLocation) {
+void sorbet_setLineNumber(int offset, VALUE **storeLocation) {
     // use pos+1 because PC should point at the next instruction
     (*storeLocation) = ((VALUE *)0x0) + offset + 1;
 }
