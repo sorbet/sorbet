@@ -1687,7 +1687,7 @@ private:
             return false;
         }
 
-        if (uid->kind != ast::UnresolvedIdent::Instance && uid->kind != ast::UnresolvedIdent::Class) {
+        if (uid->kind != ast::UnresolvedIdent::Kind::Instance && uid->kind != ast::UnresolvedIdent::Kind::Class) {
             return false;
         }
         ast::Expression *recur = asgn->rhs.get();
@@ -1705,7 +1705,7 @@ private:
         }
 
         core::SymbolRef scope;
-        if (uid->kind == ast::UnresolvedIdent::Class) {
+        if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             if (!ctx.owner.data(ctx)->isClassOrModule()) {
                 if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("The class variable `{}` must be declared at class scope", uid->name.show(ctx));
@@ -1767,7 +1767,7 @@ private:
         }
         core::SymbolRef var;
 
-        if (uid->kind == ast::UnresolvedIdent::Class) {
+        if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             var = ctx.state.enterStaticFieldSymbol(uid->loc, scope, uid->name);
         } else {
             var = ctx.state.enterFieldSymbol(uid->loc, scope, uid->name);
@@ -2069,7 +2069,7 @@ public:
     }
     unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
                                                              unique_ptr<ast::UnresolvedIdent> original) {
-        ENFORCE(original->kind != ast::UnresolvedIdent::Local, "{} should have been removed by local_vars",
+        ENFORCE(original->kind != ast::UnresolvedIdent::Kind::Local, "{} should have been removed by local_vars",
                 original->toString(ctx));
         return original;
     }

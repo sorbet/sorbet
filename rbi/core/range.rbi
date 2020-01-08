@@ -443,6 +443,20 @@ class Range < Object
   end
   def min(n=T.unsafe(nil), &blk); end
 
+  # Returns a two element array which contains the minimum and the
+  # maximum value in the range.
+  #
+  # Can be given an optional block to override the default comparison
+  # method `a <=> b`.
+  sig {returns([T.nilable(Elem), T.nilable(Elem)])}
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Integer),
+    )
+    .returns([T.nilable(Elem), T.nilable(Elem)])
+  end
+  def minmax(&blk); end
+
   # Returns the number of elements in the range. Both the begin and the end of
   # the [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) must be
   # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html), otherwise nil

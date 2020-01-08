@@ -30,12 +30,12 @@ void maybeAddLet(core::MutableContext ctx, ast::Expression *expr,
     }
 
     auto lhs = ast::cast_tree<ast::UnresolvedIdent>(assn->lhs.get());
-    if (lhs == nullptr || lhs->kind != ast::UnresolvedIdent::Instance) {
+    if (lhs == nullptr || lhs->kind != ast::UnresolvedIdent::Kind::Instance) {
         return;
     }
 
     auto rhs = ast::cast_tree<ast::UnresolvedIdent>(assn->rhs.get());
-    if (rhs == nullptr || rhs->kind != ast::UnresolvedIdent::Local) {
+    if (rhs == nullptr || rhs->kind != ast::UnresolvedIdent::Kind::Local) {
         return;
     }
 

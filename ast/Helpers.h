@@ -100,7 +100,7 @@ public:
     }
 
     static std::unique_ptr<Reference> Local(core::Loc loc, core::NameRef name) {
-        return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, name);
+        return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Local, name);
     }
 
     static std::unique_ptr<Reference> OptionalArg(core::Loc loc, std::unique_ptr<Reference> inner,
@@ -125,7 +125,7 @@ public:
     }
 
     static std::unique_ptr<Reference> Instance(core::Loc loc, core::NameRef name) {
-        return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Instance, name);
+        return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, name);
     }
 
     static std::unique_ptr<Expression> cpRef(Reference &name) {
