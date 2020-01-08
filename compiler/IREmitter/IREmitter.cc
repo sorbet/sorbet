@@ -291,7 +291,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
         core::Loc lastLoc;
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
-                lastLoc = Payload::setLineNumber(cs, builder, bind.loc, cfg.symbol, lastLoc, blockMap.lineNumberPtrsByFunction[bb->rubyBlockId]);
+                lastLoc = Payload::setLineNumber(cs, builder, bind.loc, cfg.symbol, lastLoc,
+                                                 blockMap.lineNumberPtrsByFunction[bb->rubyBlockId]);
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
