@@ -561,8 +561,16 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 e.setHeader("Only top-level T.self_type is supported");
             }
             return core::Types::untypedUntracked();
-        case core::Names::attachedClass()._id:
         case core::Names::experimentalAttachedClass()._id:
+        case core::Names::attachedClass()._id:
+            if (send->fun == core::Names::experimentalAttachedClass()) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ExperimentalAttachedClass)) {
+                    e.setHeader("`{}` has been stabilized and is no longer experimental",
+                                "T.experimental_attached_class");
+                    e.replaceWith("Replace with `T.attached_class`", send->loc, "T.attached_class");
+                }
+            }
+
             if (!ctx.owner.data(ctx)->isSingletonClass(ctx)) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("`T.{}` may only be used in a singleton class method context",

@@ -1,4 +1,19 @@
-No errors! Great job.
+autocorrect-attached-class.rb:7: `T.experimental_attached_class` has been stabilized and is no longer experimental https://srb.help/5056
+     7 |  sig {returns(T.experimental_attached_class)}
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-attached-class.rb:7: Replaced with `T.attached_class`
+     7 |  sig {returns(T.experimental_attached_class)}
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-attached-class.rb:18: `T.experimental_attached_class` has been stabilized and is no longer experimental https://srb.help/5056
+    18 |  sig {returns(::T.experimental_attached_class())}
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-attached-class.rb:18: Replaced with `T.attached_class`
+    18 |  sig {returns(::T.experimental_attached_class())}
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 2
 
 --------------------------------------------------------------------------
 
@@ -8,7 +23,7 @@ No errors! Great job.
 
 class A
   extend T::Sig
-  sig {returns(T.experimental_attached_class)}
+  sig {returns(T.attached_class)}
   def self.foo
     new
   end
@@ -19,7 +34,7 @@ class B
 
   # Note that the autocorrect strips the :: and the () to avoid writing code
   # that reads the source file and see what was actually written originally.
-  sig {returns(::T.experimental_attached_class())}
+  sig {returns(T.attached_class)}
   def self.foo
     new
   end
