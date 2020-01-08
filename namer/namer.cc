@@ -481,7 +481,7 @@ public:
     // with real types from code
     bool isIntrinsic(core::Context ctx, core::SymbolRef sym) {
         auto data = sym.data(ctx);
-        return data->intrinsic != nullptr && data->resultType == nullptr;
+        return data->intrinsic != nullptr && !data->hasSig();
     }
 
     bool paramsMatch(core::MutableContext ctx, core::SymbolRef method, const vector<ast::ParsedArg> &parsedArgs) {
