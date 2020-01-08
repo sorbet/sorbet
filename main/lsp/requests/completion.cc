@@ -367,15 +367,19 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
 }
 
 unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const LSPConfiguration &config,
-                                                        const core::SymbolRef what, const core::TypePtr type,
+                                                        const core::SymbolRef maybeAlias, const core::TypePtr type,
                                                         const core::Loc queryLoc, string_view prefix, size_t sortIdx) {
-    ENFORCE(what.exists());
+    ENFORCE(maybeAlias.exists());
 
     auto clientConfig = config.getClientConfig();
     auto supportsSnippets = clientConfig.clientCompletionItemSnippetSupport;
     auto markupKind = clientConfig.clientCompletionItemMarkupKind;
 
-    auto label = string(what.data(gs)->name.data(gs)->shortName(gs));
+    auto label = string(maybeAlias.data(gs)->name.data(gs)->shortName(gs));
+
+    // Intuition for when to use maybeAlias vs what: if it needs to know the original name: maybeAlias.
+    // If it needs to know the types / arity: what. Default to `what` if you don't know.
+    auto what = maybeAlias.data(gs)->dealias(gs);
 
     auto item = make_unique<CompletionItem>(label);
 
@@ -414,7 +418,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
     }
 
-    item->detail = what.data(gs)->show(gs);
+    item->detail = maybeAlias.data(gs)->show(gs);
 
     string replacementText;
     if (supportsSnippets) {
@@ -437,7 +441,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
     }
 
-    auto prettyType = prettyTypeForConstant(gs, what, type);
+    auto prettyType = prettyTypeForConstant(gs, maybeAlias, type);
     item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
 
     return item;
