@@ -367,26 +367,25 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
 }
 
 unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const LSPConfiguration &config,
-                                                        const core::SymbolRef what, const core::TypePtr type,
-                                                        const core::Loc queryLoc, string_view prefix, size_t sortIdx) {
-    ENFORCE(what.exists());
+                                                        const core::SymbolRef maybeAlias, const core::Loc queryLoc,
+                                                        string_view prefix, size_t sortIdx) {
+    ENFORCE(maybeAlias.exists());
 
     auto clientConfig = config.getClientConfig();
     auto supportsSnippets = clientConfig.clientCompletionItemSnippetSupport;
     auto markupKind = clientConfig.clientCompletionItemMarkupKind;
 
-    auto label = string(what.data(gs)->name.data(gs)->shortName(gs));
+    auto label = string(maybeAlias.data(gs)->name.data(gs)->shortName(gs));
+
+    // Intuition for when to use maybeAlias vs what: if it needs to know the original name: maybeAlias.
+    // If it needs to know the types / arity: what. Default to `what` if you don't know.
+    auto what = maybeAlias.data(gs)->dealias(gs);
 
     auto item = make_unique<CompletionItem>(label);
 
     // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
     // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
     item->sortText = fmt::format("{:06d}", sortIdx);
-
-    auto resultType = what.data(gs)->resultType;
-    if (!resultType) {
-        resultType = core::Types::untypedUntracked();
-    }
 
     if (what.data(gs)->isClassOrModule()) {
         if (what.data(gs)->isClassOrModuleClass()) {
@@ -414,7 +413,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
     }
 
-    item->detail = what.data(gs)->show(gs);
+    item->detail = maybeAlias.data(gs)->show(gs);
 
     string replacementText;
     if (supportsSnippets) {
@@ -437,7 +436,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
     }
 
-    auto prettyType = prettyTypeForConstant(gs, what, type);
+    auto prettyType = prettyTypeForConstant(gs, what);
     item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
 
     return item;
@@ -704,19 +703,7 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
                 sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                 // hide singletons
                 hasSimilarName(gs, sym.data(gs)->name, prefix)) {
-                core::TypePtr type;
-                if (sym.data(gs)->isClassOrModule()) {
-                    auto targetClass = sym;
-                    if (!targetClass.data(gs)->attachedClass(gs).exists()) {
-                        targetClass = targetClass.data(gs)->lookupSingletonClass(gs);
-                    }
-                    type = targetClass.data(gs)->externalType(gs);
-                } else {
-                    auto resultType = sym.data(gs)->resultType;
-                    type = resultType == nullptr ? core::Types::untyped(gs, sym) : resultType;
-                }
-
-                items.push_back(getCompletionItemForConstant(gs, *config, sym, type, queryLoc, prefix, items.size()));
+                items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
             }
         }
         scope = scope.data(gs)->owner;
