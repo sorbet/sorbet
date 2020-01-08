@@ -260,6 +260,9 @@ class T::Props::Decorator
     foreign_class.load(value, {}, opts)
   end
 
+  # TODO: we should really be checking all the methods on `cls`, not just Object
+  BANNED_METHOD_NAMES = Object.instance_methods.to_set.freeze
+
   # checked(:never) - Rules hash is expensive to check
   sig do
     params(
@@ -290,8 +293,7 @@ class T::Props::Decorator
     end
 
     if !(rules[:clobber_existing_method!]) && !(rules[:without_accessors])
-      # TODO: we should really be checking all the methods on `cls`, not just Object
-      if Object.instance_methods.include?(name.to_sym)
+      if BANNED_METHOD_NAMES.include?(name.to_sym)
         raise ArgumentError.new(
           "#{name} can't be used as a prop in #{@class} because a method with " \
           "that name already exists (defined by #{@class.instance_method(name).owner} " \
