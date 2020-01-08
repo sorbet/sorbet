@@ -50,6 +50,7 @@ public:
     static llvm::Function *lookupFunction(CompilerState &cs, core::SymbolRef sym);
     static llvm::Function *getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym);
     static llvm::Function *cleanFunctionBody(CompilerState &cs, llvm::Function *func);
+    static llvm::Function *getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::Loc loc);
     static llvm::Function *getOrCreateFunction(CompilerState &cs, core::SymbolRef sym);
 
     static llvm::Function *getInitFunction(CompilerState &cs, core::SymbolRef sym);

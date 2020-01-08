@@ -514,7 +514,14 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
 void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md) {
     Timer timer(cs.gs.tracer(), "IREmitter::run");
     UnorderedMap<core::LocalVariable, Alias> aliases;
-    auto func = IREmitterHelpers::cleanFunctionBody(cs, IREmitterHelpers::getOrCreateFunction(cs, md->symbol));
+    llvm::Function *func;
+
+    if (md->symbol.data(cs)->name != core::Names::staticInit()) {
+        func = IREmitterHelpers::getOrCreateFunction(cs, md->symbol);
+    } else {
+        func = IREmitterHelpers::getOrCreateStaticInit(cs, md->symbol, md->loc);
+    }
+    func = IREmitterHelpers::cleanFunctionBody(cs, func);
     {
         // setup function argument names
         func->arg_begin()->setName("argc");
@@ -556,7 +563,10 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
     auto isRoot = owner == core::Symbols::rootSingleton();
     llvm::Function *entryFunc;
 
-    if (IREmitterHelpers::isStaticInit(cs, sym) && isRoot) {
+    if (IREmitterHelpers::isStaticInit(cs, sym)) {
+        if (!isRoot) {
+            return;
+        }
         auto baseName = objectName.substr(0, objectName.rfind(".rb"));
         auto linkageType = llvm::Function::ExternalLinkage;
         std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
@@ -570,13 +580,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
     builder.SetInsertPoint(bb);
 
     if (IREmitterHelpers::isStaticInit(cs, sym)) {
-        core::SymbolRef staticInit;
-        auto attachedClass = owner.data(cs)->attachedClass(cs);
-        if (isRoot) {
-            staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());
-        } else {
-            staticInit = cs.gs.lookupStaticInitForClass(attachedClass);
-        }
+        core::SymbolRef staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());
 
         // Call the LLVM method that was made by run() from this Init_ method
         auto staticInitName = IREmitterHelpers::getFunctionName(cs, staticInit);

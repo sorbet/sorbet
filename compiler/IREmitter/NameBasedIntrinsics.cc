@@ -124,6 +124,7 @@ public:
         // this is wrong and will not work for `class <<self`
         auto classNameCStr = Payload::toCString(cs, showClassNameWithoutOwner(cs, sym), builder);
         auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
+        auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
 
         if (sym.data(cs)->owner != core::Symbols::root()) {
             auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
@@ -142,9 +143,10 @@ public:
                 builder.CreateCall(cs.module->getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
             }
         }
-
-        auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
-        builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
+        builder.CreateCall(IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, i->receiverLoc),
+                           {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+                            llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
+                            Payload::getRubyConstant(cs, sym, builder)});
         return Payload::rubyNil(cs, builder);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {

@@ -407,19 +407,27 @@ getOrCreateFunctionWithName(CompilerState &cs, std::string name, llvm::FunctionT
 }; // namespace
 
 llvm::Function *IREmitterHelpers::lookupFunction(CompilerState &cs, core::SymbolRef sym) {
+    ENFORCE(sym.data(cs)->name != core::Names::staticInit(), "use special helper instead");
     auto func = cs.module->getFunction(IREmitterHelpers::getFunctionName(cs, sym));
     return func;
 }
 llvm::Function *IREmitterHelpers::getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym) {
+    ENFORCE(sym.data(cs)->name != core::Names::staticInit(), "use special helper instead");
     return getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
                                        llvm::Function::WeakAnyLinkage);
 }
 
 llvm::Function *IREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
+    ENFORCE(sym.data(cs)->name != core::Names::staticInit(), "use special helper instead");
     return getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
                                        getFunctionLinkageType(cs, sym), true);
 }
 
+llvm::Function *IREmitterHelpers::getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::Loc loc) {
+    ENFORCE(sym.data(cs)->name == core::Names::staticInit(), "use general helper instead");
+    auto name = IREmitterHelpers::getFunctionName(cs, sym) + "L" + to_string(loc.beginPos());
+    return getOrCreateFunctionWithName(cs, name, cs.getRubyFFIType(), getFunctionLinkageType(cs, sym), true);
+}
 llvm::Function *IREmitterHelpers::getInitFunction(CompilerState &cs, core::SymbolRef sym) {
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
     auto linkageType = llvm::Function::InternalLinkage;
