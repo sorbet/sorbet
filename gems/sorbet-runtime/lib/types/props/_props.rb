@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: false
+# typed: true
 
 # A mixin for defining typed properties (attributes).
 # To get serialization methods (to/from JSON-style hashes), add T::Props::Serializable.
@@ -131,7 +131,7 @@ module T::Props
     sig {params(name: T.any(Symbol, String), cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
     def const(name, cls_or_args, args={})
       if (cls_or_args.is_a?(Hash) && cls_or_args.key?(:immutable)) || args.key?(:immutable)
-        raise ArgumentError.new("Cannot pass 'immutable' argument when using 'const' keyword to define a prop")
+        Kernel.raise ArgumentError.new("Cannot pass 'immutable' argument when using 'const' keyword to define a prop")
       end
 
       if cls_or_args.is_a?(Hash)
