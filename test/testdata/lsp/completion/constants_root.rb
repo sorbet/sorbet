@@ -6,7 +6,7 @@
 class A
   extend T::Sig
   sig {returns(Int)} # error: Unable to resolve
-  #               ^ completion: (nothing)
+  #               ^ completion: Integer, Interrupt
   def foo
     0
   end

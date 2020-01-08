@@ -696,7 +696,7 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
     auto prefix = resp.name.data(gs)->shortName(gs);
     config->logger->debug("Looking for constant similar to {}", prefix);
     auto scope = resp.scope;
-    do {
+    while (true) {
         for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
             auto sym = member.second;
             if (sym.exists() &&
@@ -719,8 +719,13 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
                 items.push_back(getCompletionItemForConstant(gs, *config, sym, type, queryLoc, prefix, items.size()));
             }
         }
+
+        if (scope == core::Symbols::root()) {
+            break;
+        }
+
         scope = scope.data(gs)->owner;
-    } while (scope != core::Symbols::root());
+    }
 }
 
 unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypecheckerDelegate &typechecker,
