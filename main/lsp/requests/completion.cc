@@ -367,8 +367,8 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
 }
 
 unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const LSPConfiguration &config,
-                                                        const core::SymbolRef maybeAlias, const core::TypePtr type,
-                                                        const core::Loc queryLoc, string_view prefix, size_t sortIdx) {
+                                                        const core::SymbolRef maybeAlias, const core::Loc queryLoc,
+                                                        string_view prefix, size_t sortIdx) {
     ENFORCE(maybeAlias.exists());
 
     auto clientConfig = config.getClientConfig();
@@ -386,11 +386,6 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
     // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
     // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
     item->sortText = fmt::format("{:06d}", sortIdx);
-
-    auto resultType = what.data(gs)->resultType;
-    if (!resultType) {
-        resultType = core::Types::untypedUntracked();
-    }
 
     if (what.data(gs)->isClassOrModule()) {
         if (what.data(gs)->isClassOrModuleClass()) {
@@ -441,7 +436,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
     }
 
-    auto prettyType = prettyTypeForConstant(gs, maybeAlias, type);
+    auto prettyType = prettyTypeForConstant(gs, what);
     item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
 
     return item;
@@ -708,19 +703,7 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
                 sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
                 // hide singletons
                 hasSimilarName(gs, sym.data(gs)->name, prefix)) {
-                core::TypePtr type;
-                if (sym.data(gs)->isClassOrModule()) {
-                    auto targetClass = sym;
-                    if (!targetClass.data(gs)->attachedClass(gs).exists()) {
-                        targetClass = targetClass.data(gs)->lookupSingletonClass(gs);
-                    }
-                    type = targetClass.data(gs)->externalType(gs);
-                } else {
-                    auto resultType = sym.data(gs)->resultType;
-                    type = resultType == nullptr ? core::Types::untyped(gs, sym) : resultType;
-                }
-
-                items.push_back(getCompletionItemForConstant(gs, *config, sym, type, queryLoc, prefix, items.size()));
+                items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
             }
         }
         scope = scope.data(gs)->owner;

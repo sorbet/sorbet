@@ -84,7 +84,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypecheckerDeleg
             string typeString = prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr);
             response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, documentation));
         } else if (auto constResp = resp->isConstant()) {
-            auto prettyType = prettyTypeForConstant(gs, constResp->symbol, resp->getRetType());
+            auto prettyType = prettyTypeForConstant(gs, constResp->symbol);
             response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, prettyType, documentation));
         } else {
             core::TypePtr retType = resp->getRetType();
