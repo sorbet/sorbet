@@ -56,7 +56,6 @@ ast::Send *asEnumsDo(ast::Expression *stat) {
     }
 }
 
-// TODO(jez) Change this error message after making everything T::Enum
 vector<unique_ptr<ast::Expression>> badConst(core::MutableContext ctx, core::Loc headerLoc, core::Loc line1Loc) {
     if (auto e = ctx.state.beginError(headerLoc, core::errors::Rewriter::TEnumConstNotEnumValue)) {
         e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "T::Enum");
@@ -178,7 +177,6 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareAbstract()));
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed()));
     for (auto &stat : oldRHS) {
-        // TODO(jez) Clean this up when there is only one way to define enum variants
         if (auto enumsDo = asEnumsDo(stat.get())) {
             if (auto insSeq = ast::cast_tree<ast::InsSeq>(enumsDo->block->body.get())) {
                 for (auto &stat : insSeq->stats) {
