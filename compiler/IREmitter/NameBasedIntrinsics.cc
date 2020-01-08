@@ -85,7 +85,6 @@ public:
         auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
         ENFORCE(funcSym.exists());
         ENFORCE(funcSym.data(cs)->isMethod());
-        auto llvmFuncName = IREmitterHelpers::getFunctionName(cs, funcSym);
         auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
         auto universalSignature =
             llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
@@ -145,7 +144,6 @@ public:
         }
 
         auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
-        auto llvmFuncName = IREmitterHelpers::getFunctionName(cs, funcSym);
         builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
         return Payload::rubyNil(cs, builder);
     }
