@@ -51,8 +51,8 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         auto func = blockMap.rubyBlocks2Functions[funcId];
         cs.functionEntryInitializers = blockMap.functionInitializersByFunction[funcId];
         builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[funcId]);
-        auto maxArgCount = 0;
-        auto minArgCount = 0;
+        auto maxPositionalArgCount = 0;
+        auto minPositionalArgCount = 0;
         auto isBlock = funcId != 0;
         llvm::Value *argCountRaw = !isBlock ? func->arg_begin() : func->arg_begin() + 2;
         llvm::Value *argArrayRaw = !isBlock ? func->arg_begin() + 1 : func->arg_begin() + 3;
@@ -65,19 +65,19 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             for (auto &argFlags : args) {
                 argId += 1;
                 if (argFlags.isDefault) {
-                    maxArgCount += 1;
+                    maxPositionalArgCount += 1;
                     continue;
                 }
                 if (argFlags.isBlock) {
                     blkArgName = blockMap.rubyBlockArgs[funcId][argId];
                     continue;
                 }
-                maxArgCount += 1;
-                minArgCount += 1;
+                maxPositionalArgCount += 1;
+                minPositionalArgCount += 1;
             }
         }
         if (isBlock) {
-            if (minArgCount != 1) {
+            if (minPositionalArgCount != 1) {
                 // blocks can expand their first argument in arg array
                 auto arrayTestBlock = llvm::BasicBlock::Create(cs, "argArrayExpandArrayTest", func);
                 auto argExpandBlock = llvm::BasicBlock::Create(cs, "argArrayExpand", func);
@@ -115,11 +115,11 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
                 argArrayRaw = argArrayPhi;
             }
-            minArgCount = 0;
+            minPositionalArgCount = 0;
             // blocks Can have 0 args always
         }
 
-        auto numOptionalArgs = maxArgCount - minArgCount;
+        auto numOptionalArgs = maxPositionalArgCount - minPositionalArgCount;
         if (!isBlock) {
             // validate arg count
             auto argCountFailBlock = llvm::BasicBlock::Create(cs, "argCountFailBlock", func);
@@ -127,18 +127,18 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             auto argCountSuccessBlock = llvm::BasicBlock::Create(cs, "argCountSuccess", func);
 
             auto tooManyArgs = builder.CreateICmpUGT(
-                argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxArgCount)), "tooManyArgs");
+                argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxPositionalArgCount)), "tooManyArgs");
             auto expected1 = Payload::setExpectedBool(cs, builder, tooManyArgs, false);
             builder.CreateCondBr(expected1, argCountFailBlock, argCountSecondCheckBlock);
 
             builder.SetInsertPoint(argCountSecondCheckBlock);
             auto tooFewArgs = builder.CreateICmpULT(
-                argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, minArgCount)), "tooFewArgs");
+                argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, minPositionalArgCount)), "tooFewArgs");
             auto expected2 = Payload::setExpectedBool(cs, builder, tooFewArgs, false);
             builder.CreateCondBr(expected2, argCountFailBlock, argCountSuccessBlock);
 
             builder.SetInsertPoint(argCountFailBlock);
-            Payload::raiseArity(cs, builder, argCountRaw, minArgCount, maxArgCount);
+            Payload::raiseArity(cs, builder, argCountRaw, minPositionalArgCount, maxPositionalArgCount);
 
             builder.SetInsertPoint(argCountSuccessBlock);
         }
@@ -172,11 +172,11 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                                 funcId);
             }
 
-            for (auto i = 0; i < maxArgCount; i++) {
-                if (i >= minArgCount) {
+            for (auto i = 0; i < maxPositionalArgCount; i++) {
+                if (i >= minPositionalArgCount) {
                     // if these are optional, put them in their own BasicBlock
                     // because we might not run it
-                    auto &block = fillFromArgBlocks[i - minArgCount];
+                    auto &block = fillFromArgBlocks[i - minPositionalArgCount];
                     builder.SetInsertPoint(block);
                 }
                 const auto a = blockMap.rubyBlockArgs[funcId][i];
@@ -189,9 +189,9 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 llvm::StringRef nameRef(name.data(), name.length());
                 auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
                 Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, funcId);
-                if (i >= minArgCount) {
+                if (i >= minPositionalArgCount) {
                     // check if we need to fill in the next variable from the arg
-                    builder.CreateBr(checkBlocks[i - minArgCount + 1]);
+                    builder.CreateBr(checkBlocks[i - minPositionalArgCount + 1]);
                 }
             }
 
@@ -212,7 +212,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 auto &block = checkBlocks[i];
                 builder.SetInsertPoint(block);
                 auto argCount =
-                    builder.CreateICmpEQ(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, i + minArgCount)),
+                    builder.CreateICmpEQ(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, i + minPositionalArgCount)),
                                          llvm::Twine("default") + llvm::Twine(i));
                 auto expected = Payload::setExpectedBool(cs, builder, argCount, false);
                 builder.CreateCondBr(expected, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
@@ -246,7 +246,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                     } else {
                         rawValue = Payload::rubyNil(cs, builder);
                     }
-                    auto argIndex = i + minArgCount;
+                    auto argIndex = i + minPositionalArgCount;
                     auto a = blockMap.rubyBlockArgs[funcId][argIndex];
 
                     Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, funcId);
