@@ -1843,7 +1843,7 @@ class Array < Object
   sig do
     params(
         arg0: Integer,
-        random: Random,
+        random: Random::Formatter,
     )
     .returns(T.any(T.nilable(Elem), T::Array[Elem]))
   end
